@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.109 — Target Produksi Fleksibel pada Mockup Rutinitas (01/11/2026)
+- Tambahkan pemilihan jalur, simpan, edit, dan hapus target produksi dinamis
+- Pisahkan penyimpanan draf rutinitas dari penjadwalan simulasi
+- Produksi simulasi mengikuti target yang dipilih termasuk beberapa sumber pada jalur yang sama
+
 ## V2.32.108 — Mockup Rutinitas Brand dan Review Harian (01/11/2026)
 - Tambahkan mockup HTML interaktif rutinitas brand dengan semantic theme tokens light/dark
 - Simulasikan produksi konten, Telegram, persetujuan review, dan penjadwalan Repliz tanpa layanan eksternal
