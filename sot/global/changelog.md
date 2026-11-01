@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.112 — Dual-Realm 3D Bio-Cellular di Organic Pillar Campaigns (02/11/2026)
+- Integrasi Dual-Realm Orchestration ke buildOrganicPillarPrompt
+- Pendaftaran style key 3d_bio_cellular di Visual Language Catalog
+- Pembaruan preset Dapur Botani dan perbaikan negatif CGI prompt
+
 ## V2.32.111 — CEP Otomatis pada Mockup Product Campaign (01/11/2026)
 - Hapus input dan validasi CEP manual pada target Product Campaign
 - Tampilkan CEP otomatis oleh Content Planner dan contoh hasil pada review simulasi

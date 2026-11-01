@@ -18,7 +18,7 @@ test('1. Validasi Dapur Botani Contract V2 & 3D Bio-Cellular Routing', () => {
   assert.equal(norm.lighting.color_temperature, 'warm');
   assert.equal(norm.camera.lens_look, 'macro_closeup');
   assert.equal(norm.guardrails.face_visibility, 'prohibited');
-  assert.equal(norm.mode_routing.mechanism, 'symbolic_surrealism');
+  assert.equal(norm.mode_routing.mechanism, '3d_bio_cellular');
   assert.ok(norm.guardrails.required_negative_prompts.includes('human face'));
   assert.ok(norm.guardrails.required_negative_prompts.includes('syari dress'));
   assert.ok(norm.guardrails.required_negative_prompts.includes('white marble veining'));

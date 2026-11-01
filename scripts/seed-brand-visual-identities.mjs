@@ -22,13 +22,13 @@ export const DAPUR_BOTANI_CONFIG = {
   },
   visual_language: {
     primary_style: 'culinary_cinematic',
-    supporting_styles: ['cinematic_realistic', 'symbolic_surrealism'],
+    supporting_styles: ['cinematic_realistic', 'symbolic_surrealism', '3d_bio_cellular'],
     disabled_styles: ['editorial_graphic_novel', 'isometric_society', 'clay_political_theater', 'cozy_claymation']
   },
   mode_routing: {
     hook: 'culinary_cinematic',
     context: 'culinary_cinematic',
-    mechanism: 'symbolic_surrealism',
+    mechanism: '3d_bio_cellular',
     consequence: 'cinematic_realistic',
     evidence_reveal: 'culinary_cinematic',
     conclusion: 'culinary_cinematic'
