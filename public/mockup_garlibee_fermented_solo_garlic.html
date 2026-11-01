@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Visual: GarliBee Fermented Solo Garlic (Bawang Lanang 3 Bulan)</title>
+  <link rel="stylesheet" href="/app/theme.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --surface: #0b0f19;
+      --surface-raised: #111827;
+      --surface-interactive: #1f2937;
+      --surface-subtle: #1e293b;
+      --border-subtle: #374151;
+      --border-strong: #4b5563;
+      --text-primary: #f9fafb;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --action-primary: #d97706;
+      --action-primary-hover: #b45309;
+      --on-action-primary: #ffffff;
+      --status-success: #10b981;
+      --status-success-soft: rgba(16, 185, 129, 0.15);
+      --status-warning: #f59e0b;
+      --status-warning-soft: rgba(245, 158, 11, 0.15);
+      --status-danger: #ef4444;
+      --status-danger-soft: rgba(239, 68, 68, 0.15);
+      --amber-glow: rgba(217, 119, 6, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--surface);
+      color: var(--text-primary);
+      line-height: 1.6;
+      padding: 32px 24px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 32px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 24px;
+    }
+
+    .badge-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .badge-amber {
+      background: var(--status-warning-soft);
+      color: #fbbf24;
+      border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    .badge-green {
+      background: var(--status-success-soft);
+      color: #34d399;
+      border: 1px solid rgba(52, 211, 153, 0.3);
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #ffffff 40%, #fbbf24 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p.subtitle {
+      font-size: 15px;
+      color: var(--text-secondary);
+      max-width: 860px;
+    }
+
+    /* Grid Gallery */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 980px) {
+      .gallery-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.25s ease;
+      position: relative;
+    }
+
+    .card:hover {
+      border-color: var(--action-primary);
+      box-shadow: 0 12px 30px -10px var(--amber-glow);
+      transform: translateY(-2px);
+    }
+
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0,0,0,0.2);
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      color: var(--text-primary);
+    }
+
+    .image-frame {
+      position: relative;
+      width: 100%;
+      background: #000000;
+      aspect-ratio: 9/16;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .image-frame.product-ref {
+      aspect-ratio: 3/4;
+    }
+
+    .image-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s ease;
+    }
+
+    .card:hover .image-frame img {
+      transform: scale(1.02);
+    }
+
+    .card-body {
+      padding: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--surface-subtle);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .pill-highlight {
+      background: rgba(217, 119, 6, 0.15);
+      color: #f59e0b;
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .feature-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .feature-list li strong {
+      color: var(--text-primary);
+    }
+
+    .feature-icon {
+      font-size: 14px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* Comparison Table Section */
+    .section-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    table.spec-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    table.spec-table th, table.spec-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    table.spec-table th {
+      background: var(--surface-subtle);
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+    }
+
+    table.spec-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .status-badge-forbidden {
+      color: #f87171;
+      font-weight: 700;
+    }
+
+    .status-badge-required {
+      color: #34d399;
+      font-weight: 700;
+    }
+
+    /* Code & Prompt Inspection */
+    .prompt-box {
+      background: #050811;
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: #e2e8f0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin-top: 12px;
+    }
+
+    .prompt-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #fbbf24;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-copy {
+      background: var(--surface-subtle);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      transition: all 0.2s;
+    }
+
+    .btn-copy:hover {
+      background: var(--action-primary);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge-bar">
+        <span class="badge badge-amber">🍯 Product Visual Truth v2</span>
+        <span class="badge badge-green">✨ 3-Month Fermentation Mandate</span>
+        <span class="badge" style="background: rgba(139, 92, 246, 0.15); color: #c084fc; border: 1px solid rgba(192, 132, 252, 0.3);">🧄 Monoclove Pearl Architecture</span>
+      </div>
+      <h1>GarliBee — Fermented Solo Garlic (Bawang Lanang 3 Bulan)</h1>
+      <p class="subtitle">
+        Simulasi visual morfologi biologi <strong>Solo Garlic (Bawang Putih Tunggal / Bawang Lanang)</strong> yang telah terfermentasi lebih dari 3 bulan di dalam madu mentah. Menjamin wujud 100% <strong>1 siung tunggal bulat mutiara</strong> dengan warna <strong>amber-brown kecokelatan</strong> dan tekstur lembut berkilau madu, bebas dari kesalahan bentuk bawang dapur majemuk biasa.
+      </p>
+    </header>
+
+    <!-- 3-Card Visual Showcase -->
+    <div class="gallery-grid">
+      <!-- Card 1: Official Product Packaging Reference -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">1. Foto Produk Asli (Input Referensi)</span>
+          <span class="pill pill-highlight">Official Clean Ref</span>
+        </div>
+        <div class="image-frame product-ref">
+          <img src="/uploads/products/garlibee_clean_official.jpg" alt="GarliBee Official Jar Reference">
+        </div>
+        <div class="card-body">
+          <div class="tag-row">
+            <span class="pill">Squircle Glass Jar</span>
+            <span class="pill">Ribbed Silver Lid</span>
+            <span class="pill">Matte Black Label</span>
+            <span class="pill">Dark Amber Honey</span>
+          </div>
+          <ul class="feature-list">
+            <li><span class="feature-icon">🍯</span><span><strong>Wadah Fisik:</strong> Jar kaca sudut membulat dengan tutup logam ulir silver perak bergaris.</span></li>
+            <li><span class="feature-icon">🏷️</span><span><strong>Branding:</strong> Logo tetesan emas GarliBee dengan naskah "Madu Mentah & Bawang Putih Tunggal".</span></li>
+            <li><span class="feature-icon">🫧</span><span><strong>Status Cairan:</strong> Madu hutan gelap dengan buih mikro fermentasi di bawah bahu jar.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Card 2: Fermented Solo Garlic on Wooden Spoon -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">2. Sendok Kayu: 1 Butir Bawang Tunggal Utuh</span>
+          <span class="pill" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border-color: rgba(52, 211, 153, 0.3);">Whole Monoclove</span>
+        </div>
+        <div class="image-frame">
+          <img src="/uploads/products/garlibee_fermented_spoon.jpg" alt="GarliBee Fermented Solo Garlic on Wooden Spoon">
+        </div>
+        <div class="card-body">
+          <div class="tag-row">
+            <span class="pill pill-highlight">Amber-Brown Hue</span>
+            <span class="pill">1 Solid Clove</span>
+            <span class="pill">Spoon-Tender</span>
+            <span class="pill">Micro-Bubbles</span>
+          </div>
+          <ul class="feature-list">
+            <li><span class="feature-icon">🧄</span><span><strong>Morfologi:</strong> 100% Satu butir bulat mutiara monolitik, tanpa ruas atau sekat siung sama sekali.</span></li>
+            <li><span class="feature-icon">🍂</span><span><strong>Warna Kecokelatan:</strong> Translucent caramelized amber-brown hasil fermentasi madu > 3 bulan.</span></li>
+            <li><span class="feature-icon">🥄</span><span><strong>Tekstur Lembut:</strong> Mengilap basah berlumur madu kental, empuk dan tidak pedas mentah.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Card 3: Cross-Section Anatomy -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">3. Belahan Melintang: Daging Padat Tanpa Sekat</span>
+          <span class="pill" style="background: rgba(139, 92, 246, 0.15); color: #c084fc; border-color: rgba(192, 132, 252, 0.3);">Cross-Section Truth</span>
+        </div>
+        <div class="image-frame">
+          <img src="/uploads/products/garlibee_fermented_cross_section.jpg" alt="GarliBee Fermented Solo Garlic Cross Section">
+        </div>
+        <div class="card-body">
+          <div class="tag-row">
+            <span class="pill pill-highlight">Zero Clove Dividers</span>
+            <span class="pill">Jelly-Like Core</span>
+            <span class="pill">Honey Soaked</span>
+            <span class="pill">Slate Stone</span>
+          </div>
+          <ul class="feature-list">
+            <li><span class="feature-icon">🔪</span><span><strong>Anatomi Belahan:</strong> Saat dibelah, memperlihatkan inti padat homogen lingkaran bulat utuh (zero dividers).</span></li>
+            <li><span class="feature-icon">✨</span><span><strong>Tekstur Jelly Kenyal:</strong> Daging bawang telah menyerap nektar madu hutan secara merata hingga ke inti sel.</span></li>
+            <li><span class="feature-icon">🌿</span><span><strong>Apothecary Setting:</strong> Terletak di atas workstation batu slate hitam kasar khas Dapur Botani.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Morphology Truth Comparison Table -->
+    <div class="section-card">
+      <div class="section-title">
+        <span>🔬 Matriks Kebenaran Fisik Biologis: Bawang Biasa vs GarliBee Solo Garlic Fermentasi</span>
+      </div>
+      <table class="spec-table">
+        <thead>
+          <tr>
+            <th>Parameter Visual</th>
+            <th>Bawang Putih Biasa (❌ DILARANG KERAS)</th>
+            <th>GarliBee Solo Garlic 3-Bulan (✅ KONTRAK WAJIB)</th>
+            <th>Status Engine</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Bentuk Geometri</strong></td>
+            <td>Bonggol bergerombol, terbelah banyak ruas siung melengkung</td>
+            <td><strong>Bulat telur/mutiara tunggal monolitik (Round monoclove marble, 2.5–3.5cm)</strong></td>
+            <td><span class="status-badge-required">ENFORCED</span></td>
+          </tr>
+          <tr>
+            <td><strong>Jumlah Siung</strong></td>
+            <td>8–12 siung dalam satu ikatan</td>
+            <td><strong>Hanya 1 siung tunggal padat utuh (Single solid clove, zero segments)</strong></td>
+            <td><span class="status-badge-required">ENFORCED</span></td>
+          </tr>
+          <tr>
+            <td><strong>Warna Daging</strong></td>
+            <td>Putih kapur mentah, pucat bergetah</td>
+            <td><strong>Cokelat karamel mengilap tembus pandang (Translucent amber-brown)</strong></td>
+            <td><span class="status-badge-required">ENFORCED</span></td>
+          </tr>
+          <tr>
+            <td><strong>Tekstur & Rasa</strong></td>
+            <td>Keras, renyah getas, aroma tajam menyengat</td>
+            <td><strong>Sangat lembut, empuk lunak (spoon-tender), rasa legit madu</strong></td>
+            <td><span class="status-badge-required">ENFORCED</span></td>
+          </tr>
+          <tr>
+            <td><strong>Interaksi Cairan</strong></td>
+            <td>Kering di keranjang bambu dapur</td>
+            <td><strong>Terendam madu hutan keemasan kental dengan gelembung mikro fermentasi</strong></td>
+            <td><span class="status-badge-required">ENFORCED</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Active Prompt Contract Section -->
+    <div class="section-card">
+      <div class="section-title">
+        <span>📜 Kontrak Prompt Deterministic yang Diinjeksi ke Engine Generator</span>
+      </div>
+      <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">
+        Blok prompt di bawah ini adalah rumusan presisi yang diintegrasikan ke <code>lib/prompts.js</code> untuk mengunci visual Gemini AI & Imagen 3 di setiap scene GarliBee:
+      </p>
+
+      <div class="prompt-label">
+        <span>T2I Positive Morphology Anchor (Product & Action Clips)</span>
+        <button class="btn-copy" onclick="copyPrompt('t2i-pos')">Copy Prompt</button>
+      </div>
+      <div class="prompt-box" id="t2i-pos">Macro cinematic culinary photography of GarliBee honey-infused solo garlic on rough black slate stone. In focus is a single authentic 3-month naturally fermented Solo Garlic (Bawang Lanang / monobulb pearl garlic): a solitary, perfectly round marble-shaped single clove completely solid and seamless without internal segments or clove dividers. The fermented solo garlic displays a rich, translucent caramelized amber-brown hue, glistening with viscous golden-amber raw forest honey syrup and tiny fermentation micro-bubbles. Visually soft, supple, and spoon-tender from 3 months of extended honey fermentation. Next to the authentic GarliBee squircle glass jar with matte black label and ribbed silver metal lid. Directional 3500K golden window chiaroscuro daylight.</div>
+
+      <div class="prompt-label" style="margin-top: 16px; color: #f87171;">
+        <span>Negative Blocker Constraint (Wajib di Setiap Scene)</span>
+        <button class="btn-copy" onclick="copyPrompt('t2i-neg')">Copy Negative</button>
+      </div>
+      <div class="prompt-box" id="t2i-neg" style="border-color: rgba(239, 68, 68, 0.3);">chalky white raw garlic, fresh pungent white garlic, hard crispy garlic, multi-clove garlic bulb, segmented garlic head, clustered garlic cloves, traditional culinary multi-segment garlic, divided cloves, sliced garlic chips, burnt black garlic.</div>
+    </div>
+  </div>
+
+  <script>
+    function copyPrompt(id) {
+      const text = document.getElementById(id).innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Prompt berhasil disalin ke clipboard!');
+      });
+    }
+  </script>
+</body>
+</html>

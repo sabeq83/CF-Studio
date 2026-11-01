@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.114 — GarliBee Fermented Solo Garlic Botanical Truth dan Anti Multi-Clove (02/11/2026)
+- Injeksi otomatis Botanical Truth Bawang Lanang fermentasi 3 bulan ke lib/prompts.js
+- Negative blocker anti multi-clove dan anti raw white garlic di setiap klip
+- Update database PostgreSQL produk GarliBee squircle glass jar
+- Unit test dan mockup interaktif visual
+
 ## V2.32.113 — Dapur Botani Dual Visual Identity Male dan Female Syari (02/11/2026)
 - Penambahan preset Dapur Botani Female Syari Classic wrists covered
 - Penambahan preset Dapur Botani Male Botanist forearms exposed
