@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.32.108 — Mockup Rutinitas Brand dan Review Harian (01/11/2026)
+- Tambahkan mockup HTML interaktif rutinitas brand dengan semantic theme tokens light/dark
+- Simulasikan produksi konten, Telegram, persetujuan review, dan penjadwalan Repliz tanpa layanan eksternal
+
 ## V2.32.107 — Dual-Realm Dynamic Visual Identity Orchestration di Multiplier Lab (31/10/2026)
 - Ekstraksi visual_signature dan mechanism mode di Multiplier Worker
 - Dual-Realm Narrative Orchestration di buildMultiplierPhase2Prompt untuk 3D bio-cellular cutaways
