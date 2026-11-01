@@ -1,6 +1,6 @@
 {
   "name": "maknaflow",
-  "version": "2.32.112",
+  "version": "2.32.113",
   "private": true,
   "scripts": {
     "dev": "next dev --webpack -p 3005",

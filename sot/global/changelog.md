@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.113 — Dapur Botani Dual Visual Identity Male dan Female Syari (02/11/2026)
+- Penambahan preset Dapur Botani Female Syari Classic wrists covered
+- Penambahan preset Dapur Botani Male Botanist forearms exposed
+- Update seeder PostgreSQL dan unit test
+
 ## V2.32.112 — Dual-Realm 3D Bio-Cellular di Organic Pillar Campaigns (02/11/2026)
 - Integrasi Dual-Realm Orchestration ke buildOrganicPillarPrompt
 - Pendaftaran style key 3d_bio_cellular di Visual Language Catalog

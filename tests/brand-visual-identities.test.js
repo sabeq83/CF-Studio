@@ -3,25 +3,49 @@ import assert from 'node:assert/strict';
 import { validateAndNormalizeVisualIdentity } from '../lib/visual-identity-contract.js';
 import {
   DAPUR_BOTANI_CONFIG,
+  DAPUR_BOTANI_FEMALE_CONFIG,
+  DAPUR_BOTANI_MALE_CONFIG,
   NUTRIBAKE_CONFIG,
   SIASAT_SEHAT_CONFIG
 } from '../scripts/seed-brand-visual-identities.mjs';
 
-test('1. Validasi Dapur Botani Contract V2 & 3D Bio-Cellular Routing', () => {
-  const norm = validateAndNormalizeVisualIdentity(DAPUR_BOTANI_CONFIG);
-  assert.equal(norm.schema_version, '2');
-  assert.equal(norm.label, 'Dapur Botani — Earthy Botanical Apothecary & 3D Bio-Cellular');
-  assert.equal(norm.subject.kind, 'human');
-  assert.equal(norm.subject.faceless_mode, 'hands_only');
-  assert.ok(norm.environment.material_palette.includes('rough black slate stone'));
-  assert.ok(norm.environment.props.includes('rustic granite pestle'));
-  assert.equal(norm.lighting.color_temperature, 'warm');
-  assert.equal(norm.camera.lens_look, 'macro_closeup');
-  assert.equal(norm.guardrails.face_visibility, 'prohibited');
-  assert.equal(norm.mode_routing.mechanism, '3d_bio_cellular');
-  assert.ok(norm.guardrails.required_negative_prompts.includes('human face'));
-  assert.ok(norm.guardrails.required_negative_prompts.includes('syari dress'));
-  assert.ok(norm.guardrails.required_negative_prompts.includes('white marble veining'));
+test('1. Validasi Dapur Botani Female & Male Contract V2 & 3D Bio-Cellular Routing', () => {
+  // Test Female Preset (Default Syar'i Classic)
+  const female = validateAndNormalizeVisualIdentity(DAPUR_BOTANI_FEMALE_CONFIG);
+  assert.equal(female.schema_version, '2');
+  assert.equal(female.label, 'Dapur Botani — Earthy Botanical Apothecary & 3D Bio-Cellular Female');
+  assert.equal(female.subject.kind, 'human');
+  assert.equal(female.subject.faceless_mode, 'hands_only');
+  assert.equal(female.subject.demographic_key, 'syari_classic');
+  assert.equal(female.wardrobe.sleeve_policy, 'wrists_covered');
+  assert.ok(female.environment.material_palette.includes('rough black slate stone'));
+  assert.equal(female.lighting.color_temperature, 'warm');
+  assert.equal(female.camera.lens_look, 'macro_closeup');
+  assert.equal(female.guardrails.face_visibility, 'prohibited');
+  assert.equal(female.mode_routing.mechanism, '3d_bio_cellular');
+  assert.ok(female.guardrails.required_negative_prompts.includes('human face'));
+  assert.ok(female.guardrails.required_negative_prompts.includes('male hands'));
+  assert.ok(female.guardrails.required_negative_prompts.includes('bare arms'));
+  assert.ok(female.guardrails.required_negative_prompts.includes('white marble veining'));
+  assert.ok(!female.guardrails.required_negative_prompts.includes('syari dress'), 'Female syari must NOT forbid syari dress');
+
+  // Test Male Preset (Caucasian Male Botanist)
+  const male = validateAndNormalizeVisualIdentity(DAPUR_BOTANI_MALE_CONFIG);
+  assert.equal(male.schema_version, '2');
+  assert.equal(male.label, 'Dapur Botani — Earthy Botanical Apothecary & 3D Bio-Cellular Male');
+  assert.equal(male.subject.kind, 'human');
+  assert.equal(male.subject.faceless_mode, 'hands_only');
+  assert.equal(male.subject.demographic_key, 'caucasian_male');
+  assert.equal(male.wardrobe.sleeve_policy, 'forearms_exposed');
+  assert.ok(male.environment.material_palette.includes('rough black slate stone'));
+  assert.equal(male.lighting.color_temperature, 'warm');
+  assert.equal(male.mode_routing.mechanism, '3d_bio_cellular');
+  assert.ok(male.guardrails.required_negative_prompts.includes('human face'));
+  assert.ok(male.guardrails.required_negative_prompts.includes('female hands'));
+  assert.ok(male.guardrails.required_negative_prompts.includes('syari dress'), 'Male botanist must forbid syari dress');
+
+  // Legacy alias must point to female
+  assert.equal(DAPUR_BOTANI_CONFIG.subject.demographic_key, 'syari_classic');
 });
 
 test('2. Validasi Nutribake Contract V2 (Strict Anti-Marble & Modern Baking Guarantee)', () => {

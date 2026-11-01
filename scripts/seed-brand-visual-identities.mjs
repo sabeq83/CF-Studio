@@ -4,15 +4,16 @@ import { validateAndNormalizeVisualIdentity } from '../lib/visual-identity-contr
 // ============================================================================
 // 1. DAPUR BOTANI — FULL SCHEMA V2 (15/15 DOMAINS)
 // ============================================================================
-export const DAPUR_BOTANI_CONFIG = {
+// 1A. DAPUR BOTANI FEMALE (SYAR'IY CLASSIC — MUSLIMAH BUNDA)
+export const DAPUR_BOTANI_FEMALE_CONFIG = {
   schema_version: '2',
-  label: 'Dapur Botani — Earthy Botanical Apothecary & 3D Bio-Cellular',
-  description: 'Earthy Eastern botanical apothecary and 3D bio-cellular organ healing. 100% object-first faceless cinematography on rough black slate stone and amber glass dropper bottles.',
+  label: "Dapur Botani — Earthy Botanical Apothecary & 3D Bio-Cellular Female",
+  description: 'Earthy Eastern botanical apothecary and 3D bio-cellular organ healing with modest syari female hands (wrists covered). 100% object-first faceless cinematography on rough black slate stone and amber glass dropper bottles.',
   subject: {
     kind: 'human',
     faceless_mode: 'hands_only',
-    demographic_key: 'custom',
-    custom_description: 'Faceless natural hands handling roots and botanicals, 100% focus on ingredients, slate stone, and 3D organ CGI, zero visible face or body.',
+    demographic_key: 'syari_classic',
+    custom_description: 'POV close-up culinary framing focusing strictly on delicate female forearms and hands covered in modest flowing sleeves down to the wrists (strictly no bare arms, strictly no rolled-up sleeves), smooth light Southeast Asian skin tone, slender fingers, natural neat fingernails, hands actively manipulating botanicals on the tabletop',
     character_count: 1,
     population_mode: 'single',
     universe_profile_id: null,
@@ -52,11 +53,11 @@ export const DAPUR_BOTANI_CONFIG = {
   wardrobe: {
     mode: 'fixed',
     preset_key: 'custom',
-    custom_description: 'Earthy unbleached raw linen rolled sleeves, soft-blurred in creamy bokeh background',
+    custom_description: 'Modest loose-fitting flowing linen fabric in earthy raw linen, soft mocca, or muted sage green, wrists fully covered',
     primary_color: 'earthy_raw_linen',
     secondary_color: 'olive_muted',
     material: 'natural_linen',
-    sleeve_policy: 'forearms_exposed',
+    sleeve_policy: 'wrists_covered',
     accessories: []
   },
   environment: {
@@ -94,7 +95,9 @@ export const DAPUR_BOTANI_CONFIG = {
     wardrobe_drift: 'prohibited',
     required_negative_prompts: [
       'human face',
-      'syari dress',
+      'male hands',
+      'bare arms',
+      'exposed forearms',
       'human standing',
       'messy kitchen',
       'white marble veining',
@@ -102,6 +105,111 @@ export const DAPUR_BOTANI_CONFIG = {
     ]
   }
 };
+
+// 1B. DAPUR BOTANI MALE (ARTISAN MASTER BOTANIST — CAUCASIAN/WARM MALE)
+export const DAPUR_BOTANI_MALE_CONFIG = {
+  schema_version: '2',
+  label: 'Dapur Botani — Earthy Botanical Apothecary & 3D Bio-Cellular Male',
+  description: 'Earthy Eastern botanical apothecary and 3D bio-cellular organ healing with clean artisan male hands (rolled linen sleeves). 100% object-first faceless cinematography on rough black slate stone and amber glass dropper bottles.',
+  subject: {
+    kind: 'human',
+    faceless_mode: 'hands_only',
+    demographic_key: 'caucasian_male',
+    custom_description: 'POV close-up culinary framing focusing strictly on clean male forearms and hands (fair Caucasian skin tone, clean neat fingernails, casual unbleached linen sleeves rolled up past the forearms), hands actively manipulating botanicals and artisanal mortar on the tabletop',
+    character_count: 1,
+    population_mode: 'single',
+    universe_profile_id: null,
+    universe_slug: null,
+    universe_name: null,
+    character_keys: []
+  },
+  visual_language: {
+    primary_style: 'culinary_cinematic',
+    supporting_styles: ['cinematic_realistic', 'symbolic_surrealism', '3d_bio_cellular'],
+    disabled_styles: ['editorial_graphic_novel', 'isometric_society', 'clay_political_theater', 'cozy_claymation']
+  },
+  mode_routing: {
+    hook: 'culinary_cinematic',
+    context: 'culinary_cinematic',
+    mechanism: '3d_bio_cellular',
+    consequence: 'cinematic_realistic',
+    evidence_reveal: 'culinary_cinematic',
+    conclusion: 'culinary_cinematic'
+  },
+  rendering: {
+    geometry: 'simplified_semi_realistic',
+    textures: ['rough_black_slate_stone', 'dark_amber_glass_refraction', 'herbal_dew_droplets', '3d_cellular_translucency'],
+    shadow_style: 'soft_ambient',
+    finish: 'soft_matte'
+  },
+  composition: {
+    primary_idea_count: 1,
+    primary_subject_count: 1,
+    negative_space: 'moderate',
+    safe_zone: 'vertical_social_ui'
+  },
+  metaphor_engine: {
+    enabled: true,
+    pattern: 'concept_to_object_to_action'
+  },
+  wardrobe: {
+    mode: 'fixed',
+    preset_key: 'custom',
+    custom_description: 'Unbleached earthy raw linen shirt with sleeves rolled up past forearms, soft-blurred creamy bokeh background',
+    primary_color: 'earthy_raw_linen',
+    secondary_color: 'olive_muted',
+    material: 'natural_linen',
+    sleeve_policy: 'forearms_exposed',
+    accessories: []
+  },
+  environment: {
+    preset_key: 'custom',
+    custom_description: 'Artisanal apothecary studio, rough black slate stone workstation with glistening natural dew droplets, rustic granite mortar and pestle',
+    material_palette: ['rough black slate stone', 'dark granite mortar and pestle', 'vintage amber glass dropper bottles', 'clear ribbed glass'],
+    props: ['dark granite mortar and pestle', 'vintage amber dropper bottles', 'botanical extraction glassware'],
+    background_density: 'minimal'
+  },
+  lighting: {
+    preset_key: 'window_daylight',
+    custom_description: 'Moody organic directional golden morning window light (3500K) with soft chiaroscuro shadows and warm amber reflections',
+    color_temperature: 'warm',
+    contrast: 'soft'
+  },
+  camera: {
+    framing: 'hands_closeup',
+    perspective: 'third_person',
+    lens_look: 'macro_closeup',
+    depth_of_field: 'shallow',
+    movement: 'subtle_handheld'
+  },
+  style: {
+    preset_key: 'culinary_cinematic',
+    custom_description: 'Tactile macro botanical extraction combined with cinematic 3D medical CGI organ healing simulations when pathologies are discussed',
+    aspect_ratio: '9:16'
+  },
+  guardrails: {
+    face_visibility: 'prohibited',
+    reflection_face: 'prohibited',
+    unintended_people: 'prohibited',
+    extra_people: 'prohibited',
+    intentional_crowd: 'prohibited',
+    identity_drift: 'prohibited',
+    wardrobe_drift: 'prohibited',
+    required_negative_prompts: [
+      'human face',
+      'female hands',
+      'syari dress',
+      'bare torso',
+      'human standing',
+      'messy kitchen',
+      'white marble veining',
+      'bright synthetic colors'
+    ]
+  }
+};
+
+// Aliased legacy export for backward compatibility
+export const DAPUR_BOTANI_CONFIG = DAPUR_BOTANI_FEMALE_CONFIG;
 
 // ============================================================================
 // 2. NUTRIBAKE — FULL SCHEMA V2 (15/15 DOMAINS)
@@ -310,14 +418,26 @@ export const SIASAT_SEHAT_CONFIG = {
 
 export const PRESET_DEFINITIONS = [
   {
+    id: 'vi_dapurbotani_apothecary_3d_female',
+    preset_key: 'dapurbotani_apothecary_3d_female',
+    config: DAPUR_BOTANI_FEMALE_CONFIG,
+    brandQuery: null
+  },
+  {
+    id: 'vi_dapurbotani_apothecary_3d_male',
+    preset_key: 'dapurbotani_apothecary_3d_male',
+    config: DAPUR_BOTANI_MALE_CONFIG,
+    brandQuery: null
+  },
+  {
     id: 'vi_dapurbotani_apothecary_3d',
     preset_key: 'dapurbotani_apothecary_3d',
     config: DAPUR_BOTANI_CONFIG,
     brandQuery: `
       UPDATE brand_profiles
       SET 
-        visual_signature = 'Tactile macro botanical extraction on rough black slate stone with vintage amber dropper bottles and rustic granite mortar. Directional 3500K golden window chiaroscuro daylight. High-end 3D bio-cellular CGI simulations of soft organ tissue healing during pathology mechanisms. 100% faceless object-first cinematography.',
-        forbidden_elements = 'Human face, syari dress, human body standing, messy kitchen, white marble veining, bright synthetic colors.'
+        visual_signature = 'Tactile macro botanical extraction on rough black slate stone with vintage amber dropper bottles and rustic granite mortar. Directional 3500K golden window chiaroscuro daylight. High-end 3D bio-cellular CGI simulations of soft organ tissue healing during pathology mechanisms. 100% faceless object-first cinematography with modest Indonesian Muslimah syar''i hands (wrists covered).',
+        forbidden_elements = 'Human face, male hands, bare arms, exposed forearms, bare torso, human body standing, messy kitchen, white marble veining, bright synthetic colors.'
       WHERE tenant_id = $1 AND (brand_name ILIKE '%botani%' OR id = 'df382ce8-2145-4464-ae63-79375ff3aff2')
       RETURNING id, brand_name, visual_signature;
     `

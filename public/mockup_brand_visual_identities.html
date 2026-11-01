@@ -353,7 +353,8 @@
     <!-- Filter Tabs -->
     <nav class="tab-bar">
       <button class="tab-btn active" onclick="filterBrand('all')">Semua Brand (Berdampingan)</button>
-      <button class="tab-btn" onclick="filterBrand('dapurbotani')">🌿 Dapur Botani</button>
+      <button class="tab-btn" onclick="filterBrand('dapurbotani_female')">🌿 Dapur Botani (Female Syar'iy)</button>
+      <button class="tab-btn" onclick="filterBrand('dapurbotani_male')">🌿 Dapur Botani (Male Botanist)</button>
       <button class="tab-btn" onclick="filterBrand('nutribake')">🥐 Nutribake</button>
       <button class="tab-btn" onclick="filterBrand('siasatsehat')">🔬 Siasat Sehat</button>
       <button class="tab-btn" onclick="filterBrand('habitfolk')">🎯 HabitFolk (Benchmark)</button>
@@ -361,14 +362,14 @@
 
     <!-- Side-by-Side Cards -->
     <section class="grid-cards" id="cardsGrid">
-      <!-- Dapur Botani -->
-      <article class="card" data-brand="dapurbotani">
+      <!-- Dapur Botani FEMALE (Syar'iy Classic) -->
+      <article class="card" data-brand="dapurbotani_female" style="border: 2px solid var(--status-success);">
         <div class="card-header">
           <div>
-            <div class="card-title">🌿 Dapur Botani</div>
-            <div class="card-subtitle">Earthy Botanical Apothecary & 3D Bio-Cellular</div>
+            <div class="card-title">🌿 Dapur Botani — Female (Syar'iy)</div>
+            <div class="card-subtitle">Earthy Botanical Apothecary & 3D Bio-Cellular Female</div>
           </div>
-          <span class="badge badge-success">Schema V2</span>
+          <span class="badge badge-success">Syar'iy Classic</span>
         </div>
 
         <div class="surface-banner">
@@ -383,19 +384,82 @@
         </div>
 
         <div>
-          <div class="section-title">Mode Routing & 3D Cellular Integration</div>
-          <div class="routing-box">
-            <div class="routing-title">🧬 Dynamic Phase Mechanism</div>
+          <div class="section-title">Subject Demographic & Sleeve Policy</div>
+          <div class="routing-box" style="border-left-color: var(--status-success);">
+            <div class="routing-title">🧕 Muslimah Syar'i (Wrists Covered)</div>
             <p class="card-body-text">
-              Saat membahas penyakit, dialihkan ke <strong>3D Bio-Cellular CGI</strong>: simulasi jaringan organ lunak, penetrasi senyawa herbal ke mukosa lambung dan dinding usus.
+              Tangan wanita halus khas Asia Tenggara/Indonesia, jari lentik terawat. <strong>Lengan tertutup rapat (wrists covered)</strong> dengan kain linen/katun earthy longgar (mocca, sage, earthy raw linen). 100% faceless & syariat-compliant. Sapaan hangat: <em>"Bunda / Moms"</em>.
             </p>
           </div>
         </div>
 
         <div>
-          <div class="section-title">Strict Guardrails (Anti-Persona Syar'i)</div>
+          <div class="section-title">Mode Routing & 3D Cellular Integration</div>
+          <div class="routing-box">
+            <div class="routing-title">🧬 Dual-Realm: Apothecary + 3D Bio-Cellular</div>
+            <p class="card-body-text">
+              Saat membahas khasiat/penyakit, dialihkan ke <strong>3D Bio-Cellular CGI</strong>: simulasi penampang jaringan organ lunak, penetrasi enzim madu & kurkuminoid herbal ke dinding sel.
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-title">Strict Guardrails (Anti-Male / Anti-Bare Arms)</div>
           <div class="pill-list">
             <span class="pill pill-danger">prohibited: human face</span>
+            <span class="pill pill-danger">prohibited: male hands</span>
+            <span class="pill pill-danger">prohibited: bare arms / exposed forearms</span>
+            <span class="pill pill-danger">prohibited: white marble</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Dapur Botani MALE (Caucasian / Artisan Botanist) -->
+      <article class="card" data-brand="dapurbotani_male" style="border: 2px solid var(--status-info);">
+        <div class="card-header">
+          <div>
+            <div class="card-title">🌿 Dapur Botani — Male (Botanist)</div>
+            <div class="card-subtitle">Earthy Botanical Apothecary & 3D Bio-Cellular Male</div>
+          </div>
+          <span class="badge badge-info">Artisan Male</span>
+        </div>
+
+        <div class="surface-banner">
+          <div class="section-title">Surface & Environment Anchor</div>
+          <div class="surface-name">🪨 Rough Black Slate Stone</div>
+          <div class="pill-list">
+            <span class="pill pill-accent">Mortar Granit Kasar</span>
+            <span class="pill pill-accent">Vintage Amber Droppers</span>
+            <span class="pill pill-accent">Embun Alami Berkilau</span>
+            <span class="pill pill-accent">3500K Warm Golden Light</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-title">Subject Demographic & Sleeve Policy</div>
+          <div class="routing-box" style="border-left-color: var(--status-info);">
+            <div class="routing-title">🧔 Artisan Botanist (Forearms Exposed)</div>
+            <p class="card-body-text">
+              Tangan pria bersih terawat (fair Caucasian / warm light tone), kuku rapi, pergelangan tangan maskulin. <strong>Lengan tergulung (forearms exposed)</strong> dengan kemeja linen unbleached raw linen / charcoal. Persona master peracik botani. Sapaan netral/edukatif: <em>"Anda / Kamu"</em>.
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-title">Mode Routing & 3D Cellular Integration</div>
+          <div class="routing-box">
+            <div class="routing-title">🧬 Dual-Realm: Apothecary + 3D Bio-Cellular</div>
+            <p class="card-body-text">
+              Saat membahas khasiat/penyakit, dialihkan ke <strong>3D Bio-Cellular CGI</strong>: simulasi penampang jaringan organ lunak, penetrasi enzim madu & kurkuminoid herbal ke dinding sel.
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-title">Strict Guardrails (Anti-Female / Anti-Syar'i)</div>
+          <div class="pill-list">
+            <span class="pill pill-danger">prohibited: human face</span>
+            <span class="pill pill-danger">prohibited: female hands</span>
             <span class="pill pill-danger">prohibited: syari dress</span>
             <span class="pill pill-danger">prohibited: white marble</span>
           </div>
@@ -532,17 +596,18 @@
         ⚡ Simulator Dynamic Prompt DNA
       </div>
       <p class="card-body-text">
-        Uji simulasi pembentukan prompt generasi video/gambar dengan injeksi anchor Schema V2 otomatis berdasarkan brand terpilih.
+        Uji simulasi pembentukan prompt generasi video/gambar dengan injeksi anchor Schema V2 otomatis berdasarkan brand terpilih. Bandingkan langsung varian <strong>Female Syar'iy</strong> vs <strong>Male Botanist</strong>!
       </p>
 
       <div class="form-row">
         <select id="brandSelect" onchange="simulatePrompt()">
-          <option value="dapurbotani">🌿 Dapur Botani</option>
+          <option value="dapurbotani_female">🌿 Dapur Botani — Female (Syar'iy Classic)</option>
+          <option value="dapurbotani_male">🌿 Dapur Botani — Male (Caucasian / Artisan Botanist)</option>
           <option value="nutribake">🥐 Nutribake</option>
           <option value="siasatsehat">🔬 Siasat Sehat</option>
           <option value="habitfolk">🎯 HabitFolk</option>
         </select>
-        <input type="text" id="topicInput" value="Khasiat Temulawak untuk Radang Lambung Kronis" placeholder="Masukkan topik / judul konten..." onkeyup="simulatePrompt()">
+        <input type="text" id="topicInput" value="Fermentasi Madu & Bawang Lanang untuk Perlindungan Mukosa Lambung" placeholder="Masukkan topik / judul konten..." onkeyup="simulatePrompt()">
         <button class="submit-btn" onclick="simulatePrompt()">Generate Prompt DNA</button>
       </div>
 
@@ -555,7 +620,7 @@
     <section class="spec-viewer">
       <div class="spec-header">
         <h2 style="font-size: 1rem; font-weight: 600;">📋 Raw Schema V2 Preset Definition</h2>
-        <span class="pill pill-accent" id="activeSpecLabel">dapurbotani_apothecary_3d</span>
+        <span class="pill pill-accent" id="activeSpecLabel">vi_dapurbotani_apothecary_3d_female</span>
       </div>
       <pre id="jsonSpecOutput">Memuat konfigurasi JSON...</pre>
     </section>
@@ -563,18 +628,42 @@
 
   <script>
     const SPECS = {
-      dapurbotani: {
-        preset_key: "dapurbotani_apothecary_3d",
-        label: "Dapur Botani — Earthy Botanical Apothecary & 3D Bio-Cellular",
-        surface: "rough black slate stone workstation with natural dew droplets",
-        props: ["rustic granite mortar and pestle", "vintage amber glass dropper bottles", "medicinal botanicals"],
+      dapurbotani_female: {
+        preset_key: "dapurbotani_apothecary_3d_female",
+        label: "Dapur Botani — Earthy Botanical Apothecary & 3D Bio-Cellular Female",
+        persona_target: "Bunda / Ibu Muslimah Cerdas & Telaten",
+        subject_demographic: "syari_classic",
+        subject_prompt: "POV close-up culinary framing focusing strictly on delicate female forearms and hands covered in modest flowing sleeves down to the wrists (strictly no bare arms, strictly no rolled-up sleeves), smooth light Southeast Asian skin tone, slender fingers, natural neat fingernails, hands actively manipulating botanicals on the tabletop",
+        sleeve_policy: "wrists_covered",
+        wardrobe: "Modest loose-fitting flowing linen fabric in earthy raw linen, soft mocca, or muted sage green, wrists fully covered",
+        surface: "rough black slate stone workstation with natural dew droplets and rustic granite mortar",
+        props: ["rustic granite mortar and pestle", "vintage amber glass dropper bottles", "dried medicinal roots and herbs"],
         lighting: "3500K warm golden directional morning window light chiaroscuro",
-        mechanism: "cinematic 3D biomedical cellular organ visualization showing active curcuminoids penetrating soft gastric lining mucosal tissue",
-        negatives: "human face, syari dress, human standing, messy kitchen, white marble veining, bright synthetic colors"
+        mechanism: "high-end 3D bio-cellular CGI simulation of soft gastric mucosal tissue absorbing active allicin and honey flavonoids, warm golden bio-luminescent cellular recovery pulse",
+        negatives: "human face, male hands, bare arms, exposed forearms, syari drift, human standing, messy kitchen, white marble veining, bright synthetic colors"
+      },
+      dapurbotani_male: {
+        preset_key: "dapurbotani_apothecary_3d_male",
+        label: "Dapur Botani — Earthy Botanical Apothecary & 3D Bio-Cellular Male",
+        persona_target: "Artisan Master Botanist / Herbal Researcher",
+        subject_demographic: "caucasian_male",
+        subject_prompt: "POV close-up culinary framing focusing strictly on clean male forearms and hands (fair Caucasian skin tone, clean neat fingernails, casual unbleached linen sleeves rolled up past the forearms), hands actively manipulating botanicals and artisanal mortar on the tabletop",
+        sleeve_policy: "forearms_exposed",
+        wardrobe: "Unbleached earthy raw linen shirt with sleeves rolled up past forearms, soft-blurred creamy bokeh background",
+        surface: "rough black slate stone workstation with natural dew droplets and dark granite pestle",
+        props: ["dark granite mortar and pestle", "vintage amber dropper bottles", "botanical extraction glassware"],
+        lighting: "3500K moody directional golden morning window light chiaroscuro",
+        mechanism: "high-end 3D bio-cellular CGI simulation of soft gastric mucosal tissue absorbing active allicin and honey flavonoids, warm golden bio-luminescent cellular recovery pulse",
+        negatives: "human face, female hands, syari dress, bare torso, human standing, messy kitchen, white marble veining, bright synthetic colors"
       },
       nutribake: {
         preset_key: "nutribake_modern_pastry",
         label: "Nutribake — Clean Modern Kitchen & Sensory Baking",
+        persona_target: "Clean Modern Baker",
+        subject_demographic: "faceless_hands_only",
+        subject_prompt: "POV close-up framing focusing strictly on hands working on clean modern pastry craft, zero visible body",
+        sleeve_policy: "forearms_exposed",
+        wardrobe: "Everyday minimalist baking attire in neutral warm grey",
         surface: "seamless flat matte warm-grey quartz countertop strictly zero marble veining",
         props: ["copper fluted tart pans", "matte stoneware ceramic bowls", "gold dessert fork", "silicone spatula"],
         lighting: "bright clean neutral modern architectural daylight",
@@ -584,6 +673,11 @@
       siasatsehat: {
         preset_key: "siasatsehat_clinical_biohack_3d",
         label: "Siasat Sehat — Clinical Biohacking & 3D High-Tech Anatomy",
+        persona_target: "Evidence-Based Health Biohacker",
+        subject_demographic: "asian_male_clinical",
+        subject_prompt: "POV close-up focusing strictly on clinical gloved or bare Asian hands interacting with laboratory precision beakers",
+        sleeve_policy: "wrists_covered",
+        wardrobe: "Matte dark grey lab coat or charcoal technical shirt",
         surface: "matte charcoal micro-cement countertop",
         props: ["borosilicate glass beakers", "magnetic vortex stirrer", "clinical micropipette", "brushed titanium gear"],
         lighting: "crisp neutral 5500K clinical daylight with subtle cyan bioluminescence accents",
@@ -593,6 +687,11 @@
       habitfolk: {
         preset_key: "habitfolk_satisfying_macro_craft",
         label: "HabitFolk — Satisfying Macro Craft",
+        persona_target: "Aesthetic Macro Chef",
+        subject_demographic: "neutral_hands",
+        subject_prompt: "POV close-up macro hands handling fresh ingredients cleanly",
+        sleeve_policy: "forearms_exposed",
+        wardrobe: "Minimalist cotton apron over neutral shirt",
         surface: "polished white Carrara marble island countertop with delicate grey veining",
         props: ["Damascus steel chef knife", "clear glass blender jar", "fresh produce", "cutting board"],
         lighting: "warm neutral directional morning window daylight catching reflections",
@@ -632,7 +731,10 @@
       const topic = document.getElementById('topicInput').value.trim() || 'Health & Recipe Feature';
       const spec = SPECS[brandKey];
 
+      const isRealm2Active = spec.preset_key.includes('3d') || spec.preset_key.includes('biohack');
+
       const prompt = `[SCENE PROMPT DNA: ${spec.label.toUpperCase()}]
+TARGET PERSONA: ${spec.persona_target}
 TOPIC: "${topic}"
 
 CINEMATOGRAPHY: Extreme macro closeup (9:16 vertical), shallow depth of field (f/1.4), subtle handheld motion.
@@ -640,12 +742,18 @@ ENVIRONMENT SURFACE: ${spec.surface}.
 KEY PROPS: ${spec.props.join(', ')}.
 LIGHTING: ${spec.lighting}.
 
-ACTION SEQUENCE:
-- Phase 1 (Hook): Extreme knife-edge macro focus on raw active ingredients on ${spec.surface}.
-- Phase 2 (Mechanism): ${spec.mechanism}.
-- Phase 3 (Reward): Pristine hero presentation, satisfying sensory reward, faceless natural hands in background bokeh.
+SUBJECT DEMOGRAPHIC & WARDROBE LOCK:
+- Anchor: ${spec.subject_prompt}
+- Sleeve Policy: ${spec.sleeve_policy.toUpperCase()}
+- Wardrobe Fabric: ${spec.wardrobe}
 
-STRICT NEGATIVE PROMPT:
+ACTION SEQUENCE & DUAL-REALM ORCHESTRATION:
+- Klip 1 (Hook / Realm 1 Workspace): Extreme macro focus on raw botanicals on ${spec.surface}, (${spec.subject_prompt}).
+- Klip 2 (Preparation / Realm 1): Tactile handling of ingredients with ${spec.props[0]}, natural liquid dew droplets.
+- Klip 3-4 (Mechanism / Realm 2 Simulation): ${spec.mechanism}. (Volumetric lighting, micro-cellular translucency, dark charcoal background).
+- Klip 5-6 (Resolution & Application / Realm 1): Returning to physical workstation, pouring herbal infusion, satisfying tactile reward.
+
+STRICT NEGATIVE GUARDRAILS (PROHIBITED):
 ${spec.negatives}.`;
 
       document.getElementById('promptResult').innerText = prompt;
