@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.32.111 — CEP Otomatis pada Mockup Product Campaign (01/11/2026)
+- Hapus input dan validasi CEP manual pada target Product Campaign
+- Tampilkan CEP otomatis oleh Content Planner dan contoh hasil pada review simulasi
+
 ## V2.32.110 — Mockup Jalur Brand Editorial dan Product Campaign (01/11/2026)
 - Tambahkan jalur Content Planner Brand Editorial ke Pillar Campaign
 - Tambahkan jalur Product Campaign berbasis CEP dengan produk wajib pada target
