@@ -421,18 +421,6 @@ export const PRESET_DEFINITIONS = [
     id: 'vi_dapurbotani_apothecary_3d_female',
     preset_key: 'dapurbotani_apothecary_3d_female',
     config: DAPUR_BOTANI_FEMALE_CONFIG,
-    brandQuery: null
-  },
-  {
-    id: 'vi_dapurbotani_apothecary_3d_male',
-    preset_key: 'dapurbotani_apothecary_3d_male',
-    config: DAPUR_BOTANI_MALE_CONFIG,
-    brandQuery: null
-  },
-  {
-    id: 'vi_dapurbotani_apothecary_3d',
-    preset_key: 'dapurbotani_apothecary_3d',
-    config: DAPUR_BOTANI_CONFIG,
     brandQuery: `
       UPDATE brand_profiles
       SET 
@@ -441,6 +429,12 @@ export const PRESET_DEFINITIONS = [
       WHERE tenant_id = $1 AND (brand_name ILIKE '%botani%' OR id = 'df382ce8-2145-4464-ae63-79375ff3aff2')
       RETURNING id, brand_name, visual_signature;
     `
+  },
+  {
+    id: 'vi_dapurbotani_apothecary_3d_male',
+    preset_key: 'dapurbotani_apothecary_3d_male',
+    config: DAPUR_BOTANI_MALE_CONFIG,
+    brandQuery: null
   },
   {
     id: 'vi_nutribake_modern_pastry',

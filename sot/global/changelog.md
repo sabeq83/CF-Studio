@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.115 — Konsolidasi Dual Preset Dapur Botani Female dan Male (02/11/2026)
+- Hapus duplikat preset lama vi_dapurbotani_apothecary_3d di database staging dan dev
+- Migrasi kampanye opc_261101_xpmvb1 ke vi_dapurbotani_apothecary_3d_female
+- Konsolidasi seeder ke dua preset resmi Dapur Botani Female dan Male
+
 ## V2.32.114 — GarliBee Fermented Solo Garlic Botanical Truth dan Anti Multi-Clove (02/11/2026)
 - Injeksi otomatis Botanical Truth Bawang Lanang fermentasi 3 bulan ke lib/prompts.js
 - Negative blocker anti multi-clove dan anti raw white garlic di setiap klip
