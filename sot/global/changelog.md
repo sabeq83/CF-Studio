@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.110 — Mockup Jalur Brand Editorial dan Product Campaign (01/11/2026)
+- Tambahkan jalur Content Planner Brand Editorial ke Pillar Campaign
+- Tambahkan jalur Product Campaign berbasis CEP dengan produk wajib pada target
+- Perluas simulasi batch dan review untuk lima jalur produksi
+
 ## V2.32.109 — Target Produksi Fleksibel pada Mockup Rutinitas (01/11/2026)
 - Tambahkan pemilihan jalur, simpan, edit, dan hapus target produksi dinamis
 - Pisahkan penyimpanan draf rutinitas dari penjadwalan simulasi
