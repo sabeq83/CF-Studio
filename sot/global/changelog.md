@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.124 — Fix Clip 1 Visual Diversity and Dynamic Placeholders (02/11/2026)
+- Ganti literal template prompt Klip 1 menjadi dynamic placeholder
+- Prioritaskan visual_action_guideline per baris planner
+- Terapkan deteksi metafora row-first
+
 ## V2.32.123 — Strict Pure Object Only for Metaphoric Clip 1 (02/11/2026)
 - Cabut biometric anchor dan kitchen table di Klip 1 mode metafor
 - Tegaskan 100% pure isolated object only tanpa tangan manusia
