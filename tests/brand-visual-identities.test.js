@@ -18,6 +18,8 @@ test('1. Validasi Dapur Botani Female & Male Contract V2 & 3D Bio-Cellular Routi
   assert.equal(female.subject.faceless_mode, 'hands_only');
   assert.equal(female.subject.demographic_key, 'syari_classic');
   assert.equal(female.wardrobe.sleeve_policy, 'wrists_covered');
+  assert.equal(female.wardrobe.primary_color, 'soft_mocca');
+  assert.equal(female.wardrobe.secondary_color, null);
   assert.ok(female.environment.material_palette.includes('rough black slate stone'));
   assert.equal(female.lighting.color_temperature, 'warm');
   assert.equal(female.camera.lens_look, 'macro_closeup');
@@ -26,6 +28,7 @@ test('1. Validasi Dapur Botani Female & Male Contract V2 & 3D Bio-Cellular Routi
   assert.ok(female.guardrails.required_negative_prompts.includes('human face'));
   assert.ok(female.guardrails.required_negative_prompts.includes('male hands'));
   assert.ok(female.guardrails.required_negative_prompts.includes('bare arms'));
+  assert.ok(female.guardrails.required_negative_prompts.includes('wardrobe color change'));
   assert.ok(female.guardrails.required_negative_prompts.includes('white marble veining'));
   assert.ok(!female.guardrails.required_negative_prompts.includes('syari dress'), 'Female syari must NOT forbid syari dress');
 
@@ -37,11 +40,14 @@ test('1. Validasi Dapur Botani Female & Male Contract V2 & 3D Bio-Cellular Routi
   assert.equal(male.subject.faceless_mode, 'hands_only');
   assert.equal(male.subject.demographic_key, 'caucasian_male');
   assert.equal(male.wardrobe.sleeve_policy, 'forearms_exposed');
+  assert.equal(male.wardrobe.primary_color, 'earthy_raw_linen');
+  assert.equal(male.wardrobe.secondary_color, null);
   assert.ok(male.environment.material_palette.includes('rough black slate stone'));
   assert.equal(male.lighting.color_temperature, 'warm');
   assert.equal(male.mode_routing.mechanism, '3d_bio_cellular');
   assert.ok(male.guardrails.required_negative_prompts.includes('human face'));
   assert.ok(male.guardrails.required_negative_prompts.includes('female hands'));
+  assert.ok(male.guardrails.required_negative_prompts.includes('wardrobe color change'));
   assert.ok(male.guardrails.required_negative_prompts.includes('syari dress'), 'Male botanist must forbid syari dress');
 
   // Legacy alias must point to female

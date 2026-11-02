@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.116 — Kunci Warna Wardrobe Dapur Botani Female Soft Mocca dan Male Raw Linen (02/11/2026)
+- Kunci 1 warna wardrobe tunggal Soft Mocca untuk Dapur Botani Female
+- Kunci 1 warna wardrobe tunggal Unbleached Raw Linen untuk Dapur Botani Male
+- Tambahkan negative prompt anti wardrobe color change antar scene
+- Update database PostgreSQL staging dan dev serta unit test
+
 ## V2.32.115 — Konsolidasi Dual Preset Dapur Botani Female dan Male (02/11/2026)
 - Hapus duplikat preset lama vi_dapurbotani_apothecary_3d di database staging dan dev
 - Migrasi kampanye opc_261101_xpmvb1 ke vi_dapurbotani_apothecary_3d_female

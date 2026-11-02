@@ -53,9 +53,9 @@ export const DAPUR_BOTANI_FEMALE_CONFIG = {
   wardrobe: {
     mode: 'fixed',
     preset_key: 'custom',
-    custom_description: 'Modest loose-fitting flowing linen fabric in earthy raw linen, soft mocca, or muted sage green, wrists fully covered',
-    primary_color: 'earthy_raw_linen',
-    secondary_color: 'olive_muted',
+    custom_description: 'Strictly uniform single solid warm soft mocca modest loose-fitting linen sleeves fully covering wrists down to the hands (consistent identical soft mocca color across all scenes, strictly no color change)',
+    primary_color: 'soft_mocca',
+    secondary_color: null,
     material: 'natural_linen',
     sleeve_policy: 'wrists_covered',
     accessories: []
@@ -99,6 +99,9 @@ export const DAPUR_BOTANI_FEMALE_CONFIG = {
       'bare arms',
       'exposed forearms',
       'human standing',
+      'wardrobe color change',
+      'changing outfit color between scenes',
+      'multicolored clothes',
       'messy kitchen',
       'white marble veining',
       'bright synthetic colors'
@@ -155,9 +158,9 @@ export const DAPUR_BOTANI_MALE_CONFIG = {
   wardrobe: {
     mode: 'fixed',
     preset_key: 'custom',
-    custom_description: 'Unbleached earthy raw linen shirt with sleeves rolled up past forearms, soft-blurred creamy bokeh background',
+    custom_description: 'Strictly uniform single solid unbleached raw linen shirt with sleeves neatly rolled up past forearms (consistent identical raw linen color across all scenes, strictly no color change)',
     primary_color: 'earthy_raw_linen',
-    secondary_color: 'olive_muted',
+    secondary_color: null,
     material: 'natural_linen',
     sleeve_policy: 'forearms_exposed',
     accessories: []
@@ -201,6 +204,9 @@ export const DAPUR_BOTANI_MALE_CONFIG = {
       'syari dress',
       'bare torso',
       'human standing',
+      'wardrobe color change',
+      'changing outfit color between scenes',
+      'multicolored clothes',
       'messy kitchen',
       'white marble veining',
       'bright synthetic colors'
