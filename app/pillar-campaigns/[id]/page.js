@@ -2216,7 +2216,44 @@ export default function PillarCampaignDetailPage() {
 
         {activeTab === 'storyboard' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginBottom: '24px' }}>
-            <h4 style={{ margin: 0, fontWeight: '700', fontSize: '0.9rem', color: 'var(--text-primary)' }}>📖 Storyboard & Rencana Visual Baru</h4>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+              <h4 style={{ margin: 0, fontWeight: '700', fontSize: '0.9rem', color: 'var(--text-primary)' }}>📖 Storyboard & Rencana Visual Baru</h4>
+              {(() => {
+                let parsedRes = {};
+                try { parsedRes = JSON.parse(item.result_json || '{}'); } catch {}
+                const meta = parsedRes.resolved_health_metaphor;
+                if (!meta) return null;
+                return (
+                  <span style={{ fontSize: '0.72rem', fontWeight: 600, padding: '4px 10px', borderRadius: '6px', background: 'var(--surface-interactive)', border: '1px solid var(--accent)', color: 'var(--accent-light)' }}>
+                    🎭 Metafora Objek: {meta.label} ({meta.archetype_label})
+                  </span>
+                );
+              })()}
+            </div>
+
+            {/* Metaphor Detail Banner if exists */}
+            {(() => {
+              let parsedRes = {};
+              try { parsedRes = JSON.parse(item.result_json || '{}'); } catch {}
+              const meta = parsedRes.resolved_health_metaphor;
+              if (!meta) return null;
+              return (
+                <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border-subtle)', borderRadius: '8px', padding: '14px 18px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                  <span style={{ fontSize: '1.4rem' }}>🎬</span>
+                  <div style={{ flex: 1, fontSize: '0.78rem' }}>
+                    <div style={{ fontWeight: 700, color: 'var(--accent-light)', marginBottom: '3px' }}>
+                      Analogi Objek Faceless: {meta.label}
+                    </div>
+                    <div style={{ color: 'var(--text-secondary)', lineHeight: 1.4, marginBottom: '4px' }}>
+                      {meta.hook_metaphor}
+                    </div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                      <strong>Setting & Pencahayaan:</strong> {meta.environment}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Start Frame Grid */}
             {campaign?.visual_mode === 'hybrid_lock' && (

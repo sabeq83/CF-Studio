@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.120 — Integrasi Metafora Objek Faceless untuk 22 Topik Kesehatan (02/11/2026)
+- Kamus 22 topik metafora kesehatan di lib/health-metaphors.js
+- Injeksi mandat object-centric faceless di lib/prompts.js
+- Penyelarasan strategic processor di lib/scheduler-processors.js
+- Opsi visual_style dan badge info metafora di UI Workbench
+
 ## V2.32.119 — Fix V2 Workbench Default Tab dan Auto-Hydration Klip 1-N (02/11/2026)
 - Auto-hydration video plan dari result_json jika new_video_plan_json kosong
 - Set default activeTab ke storyboard untuk item ready_for_review
