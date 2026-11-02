@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.125 — Integrate Living Analogy Metaphor KB and Botanical Kinetics VI (02/11/2026)
+- Injeksi OBJECT_METAPHOR_STORYTELLING_KB dan hapus REALIST_VIRAL_NARRATIVE pada mode metafora
+- Prioritas mutlak 100 persen pada visual_action_guideline pipa kaca transparan tanpa kamus statis
+- Alur narasi adaptif N-Beat dinamis tanpa hardcoded 6 beat
+- Daftarkan visual identity preset cinematic_botanical_kinetics
+
 ## V2.32.124 — Fix Clip 1 Visual Diversity and Dynamic Placeholders (02/11/2026)
 - Ganti literal template prompt Klip 1 menjadi dynamic placeholder
 - Prioritaskan visual_action_guideline per baris planner
