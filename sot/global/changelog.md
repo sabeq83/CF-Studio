@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.32.126 — Fix Metaphor Faceless Scope and Preset Key Prefix Resolution (02/11/2026)
+- Hoist isMetaphoricFaceless ke outer function scope agar terakses di seluruh generator
+- Support prefix vi_ pada getSystemVisualIdentity
+
 ## V2.32.125 — Integrate Living Analogy Metaphor KB and Botanical Kinetics VI (02/11/2026)
 - Injeksi OBJECT_METAPHOR_STORYTELLING_KB dan hapus REALIST_VIRAL_NARRATIVE pada mode metafora
 - Prioritas mutlak 100 persen pada visual_action_guideline pipa kaca transparan tanpa kamus statis
