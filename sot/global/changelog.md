@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.118 — Restorasi Mandat Tuple Kaya dan Anti Prompt Singkat Schema V2 (02/11/2026)
+- Injeksi Mandat Struktur Tuple Wajib pada Schema V2
+- Perkaya template JSON dynamicPromptFields di mode hibrida
+- Restorasi prompt baris 1-6 opc_261102_nat6jl ke panjang sinematik > 1.900 karakter
+
 ## V2.32.117 — Live Preset Resolution dan Fix Wardrobe Split Color opc_261102_nat6jl (02/11/2026)
 - Live preset auto-refresh pada scheduler untuk mencegah stale snapshot
 - Migrasi snapshot opc_261102_nat6jl ke Soft Mocca murni
