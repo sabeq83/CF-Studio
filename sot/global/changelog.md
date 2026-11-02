@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.32.127 — Enforce Dynamic Living Analogy Script on Metaphor Hook (02/11/2026)
+- Ganti kewajiban custom_hook statis dengan Living Analogy Hook pada mode metafor
+- Cegah negative leakage naskah medis klise di KB
+
 ## V2.32.126 — Fix Metaphor Faceless Scope and Preset Key Prefix Resolution (02/11/2026)
 - Hoist isMetaphoricFaceless ke outer function scope agar terakses di seluruh generator
 - Support prefix vi_ pada getSystemVisualIdentity

@@ -11,11 +11,11 @@ Video metafora bukan sekadar video produk, melainkan karya visual kontemplatif d
 ## II. ATURAN INTEGRITAS NARASI (STRICT SCRIPTWRITING MANDATE)
 
 ### 1. DILARANG KERAS HOOK KLISE MEDIS / RUMAH TANGGA
-- **DILARANG** membuka video dengan kalimat medis klise, keluhan panik, atau situasi domestik yang terputus dari visual:
-  - ❌ *"Angka kolesterol di kertas lab tiba-tiba bikin kaget?"*
-  - ❌ *"Hasil cek darah kemarin bikin kepikiran?"*
-  - ❌ *"Lagi santai di rumah atau di dapur..."*
-  - ❌ *"Capek minum obat kimia setiap hari?"*
+- **DILARANG** membuka video dengan kalimat medis klise, keluhan panik, diagnosa dokter, kertas lab, atau situasi domestik yang terputus dari visual:
+  - ❌ DILARANG bertanya tentang angka/hasil cek lab atau tes darah dokter.
+  - ❌ DILARANG menyebut kertas hasil lab atau vonis medis yang mengejutkan.
+  - ❌ DILARANG menyebut suasana dapur rumah tangga biasa, talenan, atau meja makan.
+  - ❌ DILARANG mengeluh soal obat-obatan kimia atau penyakit secara vulgar.
 - Kalimat-kalimat di atas merusak ilusi sinematik dan memutuskan kaitan antara apa yang dilihat mata di layar dengan apa yang didengar telinga.
 
 ### 2. WAJIB LIVING ANALOGY HOOK (KLIP 1)
