@@ -91,6 +91,7 @@ export default function ContentPlannerDashboard({ mode = 'direct', onCapture, on
   const [productSearchQuery, setProductSearchQuery] = useState('');
   const [brandProfiles, setBrandProfiles] = useState([]);
   const [selectedBrandId, setSelectedBrandId] = useState('');
+  const [useBrandPillars, setUseBrandPillars] = useState(true);
   const [executingIds, setExecutingIds] = useState({});
   const [isAffiliateLinkLocked, setIsAffiliateLinkLocked] = useState(false);
   const [isNonAffiliate, setIsNonAffiliate] = useState(false);
@@ -375,6 +376,7 @@ export default function ContentPlannerDashboard({ mode = 'direct', onCapture, on
           target_audience: effectiveTargetAudience,
           promotion_context: promotionContext.trim() || null,
           custom_instructions: customInstructions.trim() || null,
+          use_brand_pillars: useBrandPillars,
           // Recipe Campaign payload
           recipe_config: plannerFocus === 'recipe_campaign' ? {
             category: recipeCategory,
@@ -952,6 +954,109 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleGenerate}>
                       </option>
                     ))}
                   </select>
+
+                  {/* Toggle Opsionalitas Pilar Brand untuk Product Campaign */}
+                  {plannerFocus === 'product_campaign' && selectedBrandId && (
+                    <div style={{
+                      marginTop: '10px',
+                      padding: '12px 14px',
+                      background: 'var(--surface-subtle)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: '8px',
+                      transition: 'all 0.2s ease'
+                    }}>
+                      <div
+                        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', gap: '12px' }}
+                        onClick={() => setUseBrandPillars(prev => !prev)}
+                      >
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span>🏛️ Gunakan Pilar Konten dari Brand Profile</span>
+                            <span style={{ fontSize: '11px', color: useBrandPillars ? 'var(--action-primary)' : 'var(--text-muted)', fontWeight: 700 }}>
+                              {useBrandPillars ? '(Aktif)' : '(Non-Aktif)'}
+                            </span>
+                          </div>
+                          <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '3px', lineHeight: 1.4 }}>
+                            {useBrandPillars
+                              ? 'Baris planner akan dibagi rata ke dalam pilar-pilar editorial brand profile.'
+                              : 'Pilar brand diabaikan. AI fokus bebas pada variasi masalah produk (Konteks brand & affiliate tetap terhubung).'}
+                          </div>
+                        </div>
+
+                        {/* Switch Toggle */}
+                        <div
+                          style={{
+                            width: '44px',
+                            height: '24px',
+                            borderRadius: '12px',
+                            background: useBrandPillars ? 'var(--action-primary)' : 'var(--surface-interactive)',
+                            border: '1px solid var(--border-strong)',
+                            position: 'relative',
+                            flexShrink: 0,
+                            transition: 'background 0.2s ease'
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setUseBrandPillars(prev => !prev);
+                          }}
+                        >
+                          <div style={{
+                            width: '18px',
+                            height: '18px',
+                            borderRadius: '50%',
+                            background: '#ffffff',
+                            position: 'absolute',
+                            top: '2px',
+                            left: useBrandPillars ? '22px' : '2px',
+                            transition: 'left 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+                          }} />
+                        </div>
+                      </div>
+
+                      {/* Preview Chips Pilar Brand */}
+                      {(() => {
+                        const brand = brandProfiles.find(b => b.id === selectedBrandId);
+                        let bPillars = [];
+                        if (brand?.editorial_content_pillars_json) {
+                          try {
+                            const parsed = typeof brand.editorial_content_pillars_json === 'string'
+                              ? JSON.parse(brand.editorial_content_pillars_json)
+                              : brand.editorial_content_pillars_json;
+                            if (Array.isArray(parsed)) bPillars = parsed;
+                          } catch (_) {}
+                        }
+                        if (bPillars.length === 0) return null;
+                        return (
+                          <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px dashed var(--border-subtle)' }}>
+                            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '6px', display: 'flex', justifyContent: 'space-between' }}>
+                              <span>{useBrandPillars ? 'Pilar Brand yang Diadopsi:' : 'Pilar Brand Diabaikan (Mode Bebas):'}</span>
+                              <span>{bPillars.length} Pilar</span>
+                            </div>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                              {bPillars.map((p, idx) => (
+                                <span
+                                  key={idx}
+                                  style={{
+                                    fontSize: '11px',
+                                    padding: '3px 8px',
+                                    borderRadius: '9999px',
+                                    background: 'var(--surface-raised)',
+                                    border: `1px solid ${useBrandPillars ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
+                                    color: useBrandPillars ? 'var(--text-primary)' : 'var(--text-muted)',
+                                    opacity: useBrandPillars ? 1 : 0.45,
+                                    textDecoration: useBrandPillars ? 'none' : 'line-through'
+                                  }}
+                                >
+                                  {p}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  )}
                 </div>)}
 
                 {/* Recipe Campaign Specific Inputs */}

@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.129 — Make brand profile content pillars optional for product campaigns (03/11/2026)
+- Add use_brand_pillars option to content planners
+- Allow product campaigns to bypass brand pillars while preserving brand context and affiliate binding
+- Add interactive toggle switch and pillar preview chips in PlannerConfigurationForm
+
 ## V2.32.128 — Register artisanal_apothecary_metaphor Visual Identity Preset (03/11/2026)
 - Daftarkan preset visual identity artisanal_apothecary_metaphor dengan palet dark walnut dan amber apothecary
 - Validasi schema v2 dan kompatibilitas vi_ prefix

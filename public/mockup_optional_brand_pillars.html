@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Opsional Pilar Brand di Product Campaign — MAKNA Flow</title>
+  <link rel="stylesheet" href="/theme.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* Inline Fallback Variables jika dibuka langsung via file:// */
+    :root {
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --surface-subtle: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --border-color: #26354a;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.15);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.15);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.15);
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--surface);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      margin: 0;
+      padding: 2.5rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 860px;
+      width: 100%;
+    }
+
+    header {
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .badge-pill {
+      display: inline-block;
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      background-color: var(--status-info-soft);
+      color: var(--status-info);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+      border: 1px solid var(--border-subtle);
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem 0;
+      letter-spacing: -0.02em;
+    }
+
+    p.subtitle {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      max-width: 680px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    /* Form Container */
+    .form-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-color);
+      border-radius: 1rem;
+      padding: 2rem;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .form-select, .form-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.5rem;
+      color: var(--text-primary);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .form-select:focus, .form-input:focus {
+      border-color: var(--action-primary);
+    }
+
+    /* Brand Sync Box */
+    .brand-sync-box {
+      background: var(--surface-subtle);
+      border: 1.5px solid var(--border-strong);
+      border-radius: 0.85rem;
+      padding: 1.25rem 1.5rem;
+      margin-top: 1rem;
+      transition: all 0.25s ease;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      cursor: pointer;
+    }
+
+    .toggle-info {
+      flex: 1;
+    }
+
+    .toggle-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .toggle-desc {
+      font-size: 0.825rem;
+      color: var(--text-secondary);
+      margin-top: 0.35rem;
+      line-height: 1.45;
+    }
+
+    /* Modern Switch UI - Super Explicit Sizing & High Contrast */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 56px;
+      height: 30px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--surface-interactive);
+      border: 2px solid var(--border-strong);
+      transition: all 0.25s ease;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      background-color: #94a3b8;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 50%;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+    }
+
+    input:checked + .slider {
+      background-color: #0d9488;
+      border-color: #2dd4bf;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(26px);
+      background-color: #ffffff;
+    }
+
+    /* Pillars Chips Section */
+    .pillars-preview-panel {
+      margin-top: 1.25rem;
+      padding-top: 1.25rem;
+      border-top: 1px dashed var(--border-subtle);
+      transition: all 0.25s ease;
+    }
+
+    .pillars-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.65rem;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .chip-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .pillar-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.4rem 0.8rem;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      transition: all 0.2s ease;
+    }
+
+    .pillar-chip.active {
+      border-color: var(--action-primary);
+      color: var(--text-primary);
+      background: rgba(45, 212, 191, 0.08);
+    }
+
+    .pillar-chip.disabled {
+      opacity: 0.35;
+      text-decoration: line-through;
+      border-color: var(--border-subtle);
+    }
+
+    /* Simulation Results Banner */
+    .simulation-result {
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      margin-top: 1.5rem;
+      border: 1.5px solid var(--border-subtle);
+      font-size: 0.875rem;
+      line-height: 1.55;
+    }
+
+    .mode-active-badge {
+      font-weight: 700;
+      padding: 0.25rem 0.6rem;
+      border-radius: 0.35rem;
+      font-size: 0.75rem;
+      display: inline-block;
+      margin-bottom: 0.65rem;
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge-pill">Interactive UI Simulation</div>
+      <h1>Opsionalitas Pilar Brand pada Product Campaign</h1>
+      <p class="subtitle">
+        Simulasi alur kontrol saat pengguna memilih Brand Profile pada tab Product Campaign. Pengguna dapat memilih apakah baris planner produk akan dipaksa mengikuti pilar editorial brand atau fokus murni pada variasi produk.
+      </p>
+    </header>
+
+    <div class="form-card">
+      <!-- 1. Product Selection -->
+      <div class="form-group">
+        <label class="form-label">📦 Produk Target</label>
+        <select class="form-select" id="productSelect">
+          <option value="garlibee" selected>GarliBee (Madu Mentah & Bawang Putih Tunggal)</option>
+        </select>
+      </div>
+
+      <!-- 2. Brand Selection -->
+      <div class="form-group">
+        <label class="form-label">🧬 Brand Profile Terkait</label>
+        <select class="form-select" id="brandSelect">
+          <option value="none">-- Tanpa Brand Profile (Mandiri) --</option>
+          <option value="makna_health" selected>Makna Health & Wellness (Akun Brand Sehat)</option>
+        </select>
+      </div>
+
+      <!-- 3. New Toggle Feature -->
+      <div class="brand-sync-box" id="brandSyncBox">
+        <div class="toggle-row" onclick="document.getElementById('toggleUsePillars').click()">
+          <div class="toggle-info">
+            <div class="toggle-title">
+              <span>🏛️ Gunakan Pilar Konten dari Brand Profile</span>
+              <span id="statusIndicator" style="font-size: 0.8rem; color: #2dd4bf; font-weight: 700;">(Aktif)</span>
+            </div>
+            <div class="toggle-desc" id="toggleDescription">
+              AI akan membagi baris planner secara merata ke dalam pilar-pilar editorial brand.
+            </div>
+          </div>
+          <label class="switch" onclick="event.stopPropagation()">
+            <input type="checkbox" id="toggleUsePillars" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <!-- Pillar Preview Chips -->
+        <div class="pillars-preview-panel" id="pillarsPanel">
+          <div class="pillars-label">
+            <span id="pillarsSourceLabel">Pilar Editorial Brand yang Akan Digunakan:</span>
+            <span id="pillarsCountBadge">4 Pilar</span>
+          </div>
+          <div class="chip-container" id="chipContainer">
+            <span class="pillar-chip active">🌿 Edukasi & Problem Solving</span>
+            <span class="pillar-chip active">⏱️ Routine & Habit Building</span>
+            <span class="pillar-chip active">🔬 Review & Honest Comparison</span>
+            <span class="pillar-chip active">✨ Behind the Scene & Lifestyle</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Simulation Outcome Banner -->
+      <div class="simulation-result" id="simulationResultBox" style="background: var(--status-info-soft); border-color: var(--status-info); color: var(--text-primary);">
+        <div class="mode-active-badge" id="badgeIndicator" style="background: var(--status-info); color: #080c14;">MODE: BRAND-ALIGNED PILLARS</div>
+        <div id="simulationExplanation">
+          <strong>Hasil Distribusi Baris Planner (12 Baris):</strong><br>
+          Setiap pilar brand di atas akan mendapatkan tepat <strong>3 baris</strong> secara merata (12 baris / 4 pilar). Narasi produk GarliBee akan dipadukan dengan sudut pandang masing-masing pilar editorial brand.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const brandSelect = document.getElementById('brandSelect');
+    const toggleUsePillars = document.getElementById('toggleUsePillars');
+    const brandSyncBox = document.getElementById('brandSyncBox');
+    const statusIndicator = document.getElementById('statusIndicator');
+    const toggleDescription = document.getElementById('toggleDescription');
+    const pillarsPanel = document.getElementById('pillarsPanel');
+    const pillarsSourceLabel = document.getElementById('pillarsSourceLabel');
+    const pillarsCountBadge = document.getElementById('pillarsCountBadge');
+    const chipContainer = document.getElementById('chipContainer');
+    const simulationResultBox = document.getElementById('simulationResultBox');
+    const simulationExplanation = document.getElementById('simulationExplanation');
+    const badgeIndicator = document.getElementById('badgeIndicator');
+
+    function updateSimulation() {
+      const brandId = brandSelect.value;
+      const usePillars = toggleUsePillars.checked;
+
+      if (brandId === 'none') {
+        brandSyncBox.style.display = 'none';
+        simulationResultBox.style.background = 'var(--surface-subtle)';
+        simulationResultBox.style.borderColor = 'var(--border-subtle)';
+        badgeIndicator.style.background = 'var(--status-warning)';
+        badgeIndicator.style.color = '#080c14';
+        badgeIndicator.innerText = 'MODE: PURE PRODUCT CAMPAIGN';
+        simulationExplanation.innerHTML = `
+          <strong>Hasil Distribusi Baris Planner (12 Baris):</strong><br>
+          AI sepenuhnya bebas mengeksplorasi sudut pandang seputar masalah & manfaat produk GarliBee (kolesterol, stamina, asam lambung, daya tahan tubuh) berdasarkan framework CEP alami tanpa terikat pilar brand.
+        `;
+        return;
+      }
+
+      brandSyncBox.style.display = 'block';
+
+      if (usePillars) {
+        statusIndicator.innerText = '(Aktif)';
+        statusIndicator.style.color = '#2dd4bf';
+        toggleDescription.innerText = 'AI akan membagi baris planner secara merata ke dalam pilar-pilar editorial brand profile.';
+        pillarsSourceLabel.innerText = 'Pilar Editorial Brand yang Akan Digunakan:';
+        pillarsCountBadge.innerText = '4 Pilar Terpilih';
+        
+        chipContainer.innerHTML = `
+          <span class="pillar-chip active">🌿 Edukasi & Problem Solving</span>
+          <span class="pillar-chip active">⏱️ Routine & Habit Building</span>
+          <span class="pillar-chip active">🔬 Review & Honest Comparison</span>
+          <span class="pillar-chip active">✨ Behind the Scene & Lifestyle</span>
+        `;
+
+        simulationResultBox.style.background = 'var(--status-info-soft)';
+        simulationResultBox.style.borderColor = 'var(--status-info)';
+        badgeIndicator.style.background = 'var(--status-info)';
+        badgeIndicator.style.color = '#080c14';
+        badgeIndicator.innerText = 'MODE: BRAND-ALIGNED PILLARS (ON)';
+        simulationExplanation.innerHTML = `
+          <strong>Hasil Distribusi Baris Planner (12 Baris):</strong><br>
+          Setiap baris diatur secara merata per pilar brand (masing-masing 3 ide). Sudut pandang produk GarliBee difilter agar selaras dengan pilar editorial akun brand Anda.
+        `;
+      } else {
+        statusIndicator.innerText = '(Non-Aktif / Opsional)';
+        statusIndicator.style.color = 'var(--text-muted)';
+        toggleDescription.innerText = 'Pilar brand diabaikan. Akun brand hanya digunakan untuk menarik Brand Context, Voice Tone, dan Affiliate Link binding.';
+        pillarsSourceLabel.innerText = 'Pilar Editorial Brand Diabaikan (Fokus Bebas Produk):';
+        pillarsCountBadge.innerText = 'Bebas / Standar Produk';
+
+        chipContainer.innerHTML = `
+          <span class="pillar-chip disabled">🌿 Edukasi & Problem Solving</span>
+          <span class="pillar-chip disabled">⏱️ Routine & Habit Building</span>
+          <span class="pillar-chip disabled">🔬 Review & Honest Comparison</span>
+          <span class="pillar-chip disabled">✨ Behind the Scene & Lifestyle</span>
+        `;
+
+        simulationResultBox.style.background = 'var(--status-success-soft)';
+        simulationResultBox.style.borderColor = 'var(--status-success)';
+        badgeIndicator.style.background = 'var(--status-success)';
+        badgeIndicator.style.color = '#080c14';
+        badgeIndicator.innerText = 'MODE: PRODUCT FREEDOM WITH BRAND CONTEXT (OFF)';
+        simulationExplanation.innerHTML = `
+          <strong>Hasil Distribusi Baris Planner (12 Baris):</strong><br>
+          AI tidak terkunci oleh pilar brand, melainkan bebas membuat variasi 12 ide yang murni berakar pada variasi masalah konsumen & khasiat GarliBee (12 sudut pandang CEP). Namun filosofi brand dan link affiliate tetap terhubung secara otomatis!
+        `;
+      }
+    }
+
+    brandSelect.addEventListener('change', updateSimulation);
+    toggleUsePillars.addEventListener('change', updateSimulation);
+  </script>
+</body>
+</html>
