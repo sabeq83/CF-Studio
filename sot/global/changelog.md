@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.122 — Fix OPC Health Metaphor Context & Disable 3D Bio-Cellular in Metaphoric Mode (02/11/2026)
+- Agregasi konteks lengkap untuk deteksi health metaphor di scheduler dan prompt builder
+- Otomatis menonaktifkan 3D bio-cellular saat mode metaphoric_faceless aktif
+- Penguncian visual_action_guideline hasil planner ke Klip 1
+
 ## V2.32.121 — Visual Style & Metafora Objek Faceless Content Planner (02/11/2026)
 - Penambahan dropdown Visual Style pada form Content Planner dan modal ingest Pillar Campaign
 - Penyelarasan AI Call 2 dan regeneratePlannerRow dengan mandat metafora objek faceless dan studio botani estetik
