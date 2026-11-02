@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.32.123 — Strict Pure Object Only for Metaphoric Clip 1 (02/11/2026)
+- Cabut biometric anchor dan kitchen table di Klip 1 mode metafor
+- Tegaskan 100% pure isolated object only tanpa tangan manusia
+
 ## V2.32.122 — Fix OPC Health Metaphor Context & Disable 3D Bio-Cellular in Metaphoric Mode (02/11/2026)
 - Agregasi konteks lengkap untuk deteksi health metaphor di scheduler dan prompt builder
 - Otomatis menonaktifkan 3D bio-cellular saat mode metaphoric_faceless aktif
