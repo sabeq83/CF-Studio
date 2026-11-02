@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup — Visual Style & Metafora Objek Faceless (Content Planner & Ingest)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --surface: #0b0f17;
+      --surface-raised: #131b26;
+      --surface-interactive: #1a2434;
+      --surface-subtle: #0f1622;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.16);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --action-primary: #10b981;
+      --action-primary-hover: #059669;
+      --on-action-primary: #ffffff;
+      --input-bg: rgba(255, 255, 255, 0.04);
+      --status-info-soft: rgba(56, 189, 248, 0.12);
+      --status-info: #38bdf8;
+      --status-success-soft: rgba(16, 185, 129, 0.12);
+      --status-success: #10b981;
+      --status-warning-soft: rgba(245, 158, 11, 0.12);
+      --status-warning: #f59e0b;
+      --status-danger-soft: rgba(239, 68, 68, 0.12);
+      --status-danger: #ef4444;
+      --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    [data-theme="light"] {
+      --surface: #f8fafc;
+      --surface-raised: #ffffff;
+      --surface-interactive: #f1f5f9;
+      --surface-subtle: #e2e8f0;
+      --border-subtle: rgba(0, 0, 0, 0.08);
+      --border-strong: rgba(0, 0, 0, 0.16);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --action-primary: #059669;
+      --action-primary-hover: #047857;
+      --on-action-primary: #ffffff;
+      --input-bg: rgba(0, 0, 0, 0.03);
+      --status-info-soft: rgba(14, 165, 233, 0.12);
+      --status-info: #0284c7;
+      --status-success-soft: rgba(16, 185, 129, 0.12);
+      --status-success: #059669;
+      --status-warning-soft: rgba(217, 119, 6, 0.12);
+      --status-warning: #d97706;
+      --status-danger-soft: rgba(220, 38, 38, 0.12);
+      --status-danger: #dc2626;
+      --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--surface);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      padding: 32px 20px;
+      min-height: 100vh;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      background: var(--status-info-soft);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      color: var(--status-info);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: 1.85rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    p.subtitle {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-top: 4px;
+    }
+
+    .theme-toggle-btn {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+    .theme-toggle-btn:hover {
+      background: var(--surface-interactive);
+      border-color: var(--border-strong);
+    }
+
+    /* Tab Navigation */
+    .tab-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 8px;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 10px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .tab-btn:hover {
+      color: var(--text-primary);
+      background: var(--surface-interactive);
+    }
+    .tab-btn.active {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-strong);
+      color: var(--action-primary);
+    }
+
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Cards */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 900px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--action-primary);
+    }
+
+    .hint-box {
+      margin-top: 8px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      line-height: 1.45;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      transition: all 0.25s ease;
+    }
+    .hint-box.info {
+      background: var(--status-info-soft);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      color: var(--text-primary);
+    }
+    .hint-box.warning {
+      background: var(--status-warning-soft);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      color: var(--text-primary);
+    }
+
+    .story-box {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: var(--surface-subtle);
+      border: 1px dashed var(--border-strong);
+      font-size: 12px;
+    }
+
+    .story-box-title {
+      font-weight: 700;
+      color: var(--status-success);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Comparison rows */
+    .compare-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 16px;
+    }
+    @media (max-width: 800px) {
+      .compare-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .compare-card {
+      border-radius: 10px;
+      padding: 18px;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+    }
+    .compare-card.bad {
+      border-color: var(--status-danger);
+      background: var(--status-danger-soft);
+    }
+    .compare-card.good {
+      border-color: var(--status-success);
+      background: var(--status-success-soft);
+    }
+
+    .code-preview {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      line-height: 1.5;
+      background: var(--surface);
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+      margin-top: 8px;
+      color: var(--text-secondary);
+      white-space: pre-wrap;
+    }
+
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s ease;
+    }
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+    }
+  </style>
+</head>
+<body data-theme="dark">
+
+<div class="container">
+  <header>
+    <div>
+      <div class="badge">🚀 Interactive UI Mockup</div>
+      <h1>Visual Style & Metafora Objek Faceless</h1>
+      <p class="subtitle">Simulasi Alur Pengaturan Gaya Visual pada Form Content Planner & Modal Ingest Pillar Campaign</p>
+    </div>
+    <div>
+      <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeBtn">
+        ☀️ Light Mode
+      </button>
+    </div>
+  </header>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('tab1', this)">
+      <span>📝</span> 1. Form Content Planner
+    </button>
+    <button class="tab-btn" onclick="switchTab('tab2', this)">
+      <span>📥</span> 2. Modal Ingest (OPC Wizard)
+    </button>
+    <button class="tab-btn" onclick="switchTab('tab3', this)">
+      <span>🔬</span> 3. Simulasi Output AI (Sebelum vs Sesudah)
+    </button>
+  </div>
+
+  <!-- TAB 1: FORM CONTENT PLANNER -->
+  <div id="tab1" class="tab-content active">
+    <div class="grid-2">
+      <!-- Left: Form Input -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>✨</span> Form Pembuatan Content Planner
+          </div>
+          <span style="font-size: 11px; color: var(--text-muted);">PlannerConfigurationForm.js</span>
+        </div>
+
+        <div class="form-group">
+          <label>Judul / Nama Planner:</label>
+          <input type="text" id="plannerTitle" value="DapurBotani - 20261102 - Garlibee Honey - Kolesterol">
+        </div>
+
+        <div class="form-group">
+          <label>Topik Edukasi / Masalah Kesehatan:</label>
+          <select id="topicSelector" onchange="updateTopicDemo()">
+            <option value="kolesterol">🩸 Kolesterol &amp; Sirkulasi Darah</option>
+            <option value="maag">🔥 Maag &amp; Asam Lambung</option>
+            <option value="gula_darah">🍯 Gula Darah &amp; Diabetes</option>
+            <option value="jantung">💓 Kesehatan Jantung &amp; Vitalitas</option>
+            <option value="sendi">🦴 Sakit Sendi &amp; Tulang</option>
+            <option value="detox">🌿 Detoksifikasi Liver &amp; Tubuh</option>
+          </select>
+        </div>
+
+        <!-- NEW FIELD: VISUAL STYLE -->
+        <div class="form-group" style="padding: 14px; background: var(--surface-interactive); border: 1px solid var(--border-strong); border-radius: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label style="margin: 0; font-weight: 700; color: var(--text-primary); font-size: 13px;">
+              🎨 Visual Style (Gaya Visual):
+            </label>
+            <span style="font-size: 10px; background: var(--status-success); color: var(--on-action-primary); padding: 2px 6px; border-radius: 4px; font-weight: 700;">FITUR BARU</span>
+          </div>
+
+          <select id="plannerVisualStyle" onchange="updatePlannerVisualGuide()">
+            <option value="Cinematic">Cinematic (Sinematik Standar)</option>
+            <option value="metaphoric_faceless" selected>🎭 Metafora Objek Faceless (Sinematik)</option>
+            <option value="UGC">UGC (User-Generated Content)</option>
+            <option value="Macrophotography">Macrophotography (Makro &amp; Tekstur Bahan)</option>
+          </select>
+
+          <!-- Dynamic Guide Notice -->
+          <div id="plannerGuideBox" class="hint-box info">
+            <span style="font-size: 16px;">🎭</span>
+            <div>
+              <strong>Mode Metafora Objek Faceless:</strong><br>
+              <span id="plannerGuideText">
+                AI akan merancang <strong>Visual Hook (detik awal)</strong> menggunakan analogi fisika benda nyata (faceless tanpa wajah). Adegan solusi/edukasi tetap dapat menampilkan <strong>studio botani estetik</strong> secara proporsional.
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label>Platform Target:</label>
+            <select>
+              <option>TikTok (Short Form)</option>
+              <option>Instagram Reels</option>
+              <option>YouTube Shorts</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Jumlah Baris Planner:</label>
+            <input type="number" value="6" readonly style="opacity: 0.8;">
+          </div>
+        </div>
+
+        <button class="btn-primary" style="width: 100%; justify-content: center; margin-top: 8px;" onclick="simulatePlannerGeneration()">
+          🚀 Generate Strategic Planner (AI Call 1 &amp; Call 2)
+        </button>
+      </div>
+
+      <!-- Right: Real-time Payload & Visual Engine Preview -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📦</span> Payload Data &amp; Arsitektur Storytelling
+          </div>
+          <span style="font-size: 11px; color: var(--status-info);">Engine Preview</span>
+        </div>
+
+        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">
+          JSON Payload yang dikirim ke <code style="font-family: var(--font-mono); color: var(--status-info);">POST /api/content-planner</code>:
+        </div>
+
+        <div class="code-preview" id="payloadPreview">
+{
+  "title": "DapurBotani - 20261102 - Garlibee Honey - Kolesterol",
+  "account_name": "DapurBotani",
+  "planner_focus": "product_campaign",
+  "visual_style": "metaphoric_faceless",
+  "product_name": "Garlibee Honey",
+  "target_audience": "ibu_rumah_tangga"
+}
+        </div>
+
+        <!-- Proporsionalitas Story Arc Preview -->
+        <div class="story-box">
+          <div class="story-box-title">
+            <span>🎬</span> Arsitektur Storytelling 2 Fase (Harmonis &amp; Proporsional)
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+            <div style="padding: 8px; background: var(--surface); border-radius: 6px; border-left: 3px solid var(--status-warning);">
+              <strong style="color: var(--status-warning);">Fase 1 (Detik 0 - 3): Visual Hook Masalah</strong><br>
+              <span id="storyPhase1">Extreme close-up saluran pipa berkerak tebal dan aliran cairan keruh melambat dramatis (analogi visual penyumbatan sirkulasi).</span>
+            </div>
+            <div style="padding: 8px; background: var(--surface); border-radius: 6px; border-left: 3px solid var(--status-success);">
+              <strong style="color: var(--status-success);">Fase 2 (Detik 4 - Selesai): Studio Dapur Botani &amp; Solusi</strong><br>
+              <span id="storyPhase2">Studio herbal botani estetik dengan cawan keramik; sendok kayu mengambil madu fermentasi bawang tunggal keemasan yang jernih, tangan POV melarutkan ke seduhan hangat.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: MODAL INGEST PILLAR CAMPAIGN -->
+  <div id="tab2" class="tab-content">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📥</span> Modal Ingest Content Planner ke OPC
+          </div>
+          <span style="font-size: 11px; color: var(--text-muted);">PillarConfigurationForm.js</span>
+        </div>
+
+        <div class="form-group">
+          <label>Pilih Content Planner Tersedia:</label>
+          <select id="ingestPlannerSelect" onchange="simulateIngestPlannerSelect()">
+            <option value="pln_metafor" selected>pln_8532b5af — DapurBotani - Kolesterol (Visual: metaphoric_faceless)</option>
+            <option value="pln_cinematic">pln_4190c12d — Garlibee Resep Madu Hangat (Visual: Cinematic)</option>
+            <option value="pln_ugc">pln_1102a99e — Testimoni Edukasi Alami (Visual: UGC)</option>
+          </select>
+        </div>
+
+        <div style="padding: 16px; background: var(--surface-interactive); border: 1px solid var(--border-subtle); border-radius: 8px; margin-bottom: 16px;">
+          <div style="font-weight: 700; font-size: 13px; margin-bottom: 10px; color: var(--text-primary);">
+            2. Aesthetics &amp; Visual Engine Settings (Auto-Populated)
+          </div>
+
+          <div class="form-group">
+            <label>Visual Style (Gaya Visual):</label>
+            <select id="ingestVisualStyle">
+              <option value="Cinematic">Cinematic</option>
+              <option value="metaphoric_faceless" selected>🎭 Metafora Objek Faceless (Sinematik)</option>
+              <option value="UGC">UGC</option>
+              <option value="Macrophotography">Macrophotography</option>
+            </select>
+            <div style="font-size: 11px; color: var(--status-success); margin-top: 5px;">
+              ✓ Otomatis sinkron dari Content Planner terpilih (<code style="font-family: var(--font-mono);" id="ingestSyncBadge">planner.visual_style = "metaphoric_faceless"</code>)
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label>Visual Mode (Metode Generasi):</label>
+            <select>
+              <option>Pure T2V (Text-to-Video Engine)</option>
+              <option>Start Frame + I2V</option>
+              <option>3D Hybrid Lock</option>
+            </select>
+          </div>
+        </div>
+
+        <button class="btn-primary" style="width: 100%; justify-content: center;">
+          ⚡ Buat Kampanye Pilar &amp; Ingest 6 Baris
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🔗</span> Keselarasan Rantai Hulu ke Hilir
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px; font-size: 12.5px;">
+          <div style="padding: 12px; border-radius: 8px; background: var(--surface); border: 1px solid var(--border-subtle);">
+            <div style="font-weight: 700; color: var(--status-info); margin-bottom: 4px;">1. Content Planner Hulu</div>
+            User memilih <code>metaphoric_faceless</code> di form planner. Disimpan di PostgreSQL <code>content_planners.visual_style</code>.
+          </div>
+
+          <div style="padding: 12px; border-radius: 8px; background: var(--surface); border: 1px solid var(--border-subtle);">
+            <div style="font-weight: 700; color: var(--status-warning); margin-bottom: 4px;">2. Modal Ingest Tengah</div>
+            Saat planner dibuka di modal ingest, dropdown otomatis mengunci ke <code>metaphoric_faceless</code> tanpa perlu diset ulang secara manual.
+          </div>
+
+          <div style="padding: 12px; border-radius: 8px; background: var(--surface); border: 1px solid var(--border-subtle);">
+            <div style="font-weight: 700; color: var(--status-success); margin-bottom: 4px;">3. Scheduler &amp; Klip Prompt Hilir</div>
+            Engine <code>lib/prompts.js</code> membaca <code>campaign.visual_style = 'metaphoric_faceless'</code> dan otomatis mengaktifkan direktif fisika fluida/makro faceless!
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: SIMULASI OUTPUT AI -->
+  <div id="tab3" class="tab-content">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span>🔬</span> Perbandingan Output Visual Action AI Gemini
+        </div>
+        <span style="font-size: 11px; color: var(--text-muted);">Topik: Kolesterol &amp; Sirkulasi Darah</span>
+      </div>
+
+      <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 14px;">
+        Berikut adalah simulasi perbedaan deskripsi aksi visual yang dihasilkan oleh AI Call 2 antara versi lama (terjebak bias dapur) dengan versi baru (Metafora Objek Faceless + Studio Botani Estetik):
+      </p>
+
+      <div class="compare-container">
+        <!-- Bad Example -->
+        <div class="compare-card bad">
+          <div style="font-weight: 700; color: var(--status-danger); margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+            <span>❌</span> Versi Lama (Bias Meja Dapur Klise)
+          </div>
+          <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 8px;">
+            Tanpa dropdown Visual Style — AI dipaksa "Perlihatkan aksi produk secara fisik":
+          </div>
+          <div class="code-preview" style="border-color: rgba(239, 68, 68, 0.3);">
+<strong>Hook:</strong>
+"Banyak orang ga sadar, tumpukan botol di dapur ini penolong sirkulasi darah!"
+
+<strong>Visual Action:</strong>
+"Kamera slow pan di atas meja dapur kayu yang berantakan, seorang ibu rumah tangga menaruh sendok di meja sarapan dekat rak bumbu dapur, lalu mengambil botol madu."
+          </div>
+          <div style="font-size: 11px; color: var(--status-danger); margin-top: 8px;">
+            ⚠️ <em>Monoton, klise, tidak ada analogi visual yang menghentak audiens untuk masalah kolesterol.</em>
+          </div>
+        </div>
+
+        <!-- Good Example -->
+        <div class="compare-card good">
+          <div style="font-weight: 700; color: var(--status-success); margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+            <span>✅</span> Versi Baru (Metafora Objek Faceless + Studio Botani)
+          </div>
+          <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 8px;">
+            Dengan <code>metaphoric_faceless</code> — 2 Fase Proporsional:
+          </div>
+          <div class="code-preview" style="border-color: rgba(16, 185, 129, 0.3);">
+<strong>Hook:</strong>
+"Ibarat saluran pipa yang menyempit karena kerak, begini rasanya aliran tubuh yang tersumbat."
+
+<strong>Visual Action:</strong>
+"Detik 0-3: Extreme macro shot pipa kaca dengan aliran fluida keruh mengental lambat.
+Detik 4-8: Transisi estetik ke studio botani herbal; sendok kayu POV melarutkan madu fermentasi bawang tunggal keemasan ke dalam air bening yang seketika berkilau jernih."
+          </div>
+          <div style="font-size: 11px; color: var(--status-success); margin-top: 8px;">
+            ✨ <em>Dramatis, menghentak di detik awal, tetap harmonis saat beralih ke peracikan bahan herbal di dapur botani estetik.</em>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const topicData = {
+    kolesterol: {
+      title: "DapurBotani - 20261102 - Garlibee Honey - Kolesterol",
+      phase1: "Extreme close-up saluran pipa berkerak tebal dan aliran cairan keruh melambat dramatis (analogi visual penyumbatan sirkulasi).",
+      phase2: "Studio herbal botani estetik dengan cawan keramik; sendok kayu mengambil madu fermentasi bawang tunggal keemasan yang jernih, tangan POV melarutkan ke seduhan hangat."
+    },
+    maag: {
+      title: "DapurBotani - 20261102 - Garlibee Honey - Asam Lambung",
+      phase1: "Macro shot reaksi effervescent desis buih panas asam di atas lempeng batu vulkanik hitam yang mendidih.",
+      phase2: "Cawan batu estetik di meja kayu rustic botani; madu pekat dituang perlahan melapisi permukaan cawan, menenangkan gejolak buih."
+    },
+    gula_darah: {
+      title: "DapurBotani - 20261102 - Garlibee Honey - Gula Darah",
+      phase1: "Kristal gula karamel pekat yang mengental memperlambat putaran roda gigi mekanik jam kuningan.",
+      phase2: "Studio herbal minimalis; tetesan madu murni encer keemasan mengalir bebas tanpa endapan kristal pada sendok kayu halus."
+    },
+    jantung: {
+      title: "DapurBotani - 20261102 - Garlibee Honey - Jantung",
+      phase1: "Dinamo mekanik miniatur kuningan berdenyut ritmis dengan pendulum logam yang berayun stabil di atas lempeng slate hitam.",
+      phase2: "Meja kayu botani pencahayaan moody; botol Garlibee berbalut label rustic bersanding dengan cangkir seduhan herbal hangat mengepul."
+    },
+    sendi: {
+      title: "DapurBotani - 20261102 - Garlibee Honey - Kesehatan Sendi",
+      phase1: "Engsel logam presisi yang kering berdecit, seketika bergerak mulus tanpa hambatan saat dilumasi minyak keemasan murni.",
+      phase2: "Suasana studio herbal alami; tangan POV meracik ramuan herbal hangat di atas talenan marmer travertine putih."
+    },
+    detox: {
+      title: "DapurBotani - 20261102 - Garlibee Honey - Detoks Liver",
+      phase1: "Lapisan filter bertingkat menyaring cairan keruh pekat menjadi tetesan air bening berkilau kristal.",
+      phase2: "Studio botani estetik; seduhan herbal bawang hitam fermentasi keemasan dalam cangkir kaca jernih."
+    }
+  };
+
+  function updateTopicDemo() {
+    const topic = document.getElementById('topicSelector').value;
+    const data = topicData[topic];
+    if (data) {
+      document.getElementById('plannerTitle').value = data.title;
+      document.getElementById('storyPhase1').innerText = data.phase1;
+      document.getElementById('storyPhase2').innerText = data.phase2;
+      updatePayloadPreview();
+    }
+  }
+
+  function updatePlannerVisualGuide() {
+    const val = document.getElementById('plannerVisualStyle').value;
+    const box = document.getElementById('plannerGuideBox');
+    const text = document.getElementById('plannerGuideText');
+
+    if (val === 'metaphoric_faceless') {
+      box.className = 'hint-box info';
+      box.innerHTML = `<span style="font-size: 16px;">🎭</span><div><strong>Mode Metafora Objek Faceless:</strong><br><span id="plannerGuideText">AI akan merancang <strong>Visual Hook (detik awal)</strong> menggunakan analogi fisika benda nyata (faceless tanpa wajah). Adegan solusi/edukasi tetap dapat menampilkan <strong>studio botani estetik</strong> secara proporsional.</span></div>`;
+    } else if (val === 'Cinematic') {
+      box.className = 'hint-box info';
+      box.innerHTML = `<span style="font-size: 16px;">🎬</span><div><strong>Mode Sinematik Standar:</strong><br>Pencahayaan film dramatis, sudut pandang kamera bervariasi dengan fokus produk dan suasana umum.</div>`;
+    } else if (val === 'UGC') {
+      box.className = 'hint-box warning';
+      box.innerHTML = `<span style="font-size: 16px;">📱</span><div><strong>Mode UGC (User Generated Content):</strong><br>Gaya handheld kasual vertikal, sudut pandang orang pertama (POV), terasa natural seperti konten kreator harian.</div>`;
+    } else if (val === 'Macrophotography') {
+      box.className = 'hint-box info';
+      box.innerHTML = `<span style="font-size: 16px;">🔍</span><div><strong>Mode Macrophotography:</strong><br>Fokus pada tekstur mikro bahan mentah (tekstur bawang hitam, tetesan kental madu, pori-pori bahan alami).</div>`;
+    }
+    updatePayloadPreview();
+  }
+
+  function updatePayloadPreview() {
+    const title = document.getElementById('plannerTitle').value;
+    const style = document.getElementById('plannerVisualStyle').value;
+    const payload = {
+      title: title,
+      account_name: "DapurBotani",
+      planner_focus: "product_campaign",
+      visual_style: style,
+      product_name: "Garlibee Honey",
+      target_audience: "ibu_rumah_tangga"
+    };
+    document.getElementById('payloadPreview').innerText = JSON.stringify(payload, null, 2);
+  }
+
+  function simulateIngestPlannerSelect() {
+    const sel = document.getElementById('ingestPlannerSelect').value;
+    const styleSelect = document.getElementById('ingestVisualStyle');
+    const badge = document.getElementById('ingestSyncBadge');
+
+    if (sel === 'pln_metafor') {
+      styleSelect.value = 'metaphoric_faceless';
+      badge.innerText = 'planner.visual_style = "metaphoric_faceless"';
+    } else if (sel === 'pln_cinematic') {
+      styleSelect.value = 'Cinematic';
+      badge.innerText = 'planner.visual_style = "Cinematic"';
+    } else if (sel === 'pln_ugc') {
+      styleSelect.value = 'UGC';
+      badge.innerText = 'planner.visual_style = "UGC"';
+    }
+  }
+
+  function switchTab(tabId, el) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+  }
+
+  function toggleTheme() {
+    const body = document.body;
+    const btn = document.getElementById('themeBtn');
+    if (body.getAttribute('data-theme') === 'dark') {
+      body.setAttribute('data-theme', 'light');
+      btn.innerText = '🌙 Dark Mode';
+    } else {
+      body.setAttribute('data-theme', 'dark');
+      btn.innerText = '☀️ Light Mode';
+    }
+  }
+
+  function simulatePlannerGeneration() {
+    alert("Simulasi Berhasil: Planner dibuat dengan visual_style: " + document.getElementById('plannerVisualStyle').value);
+  }
+</script>
+
+</body>
+</html>

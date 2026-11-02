@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.121 — Visual Style & Metafora Objek Faceless Content Planner (02/11/2026)
+- Penambahan dropdown Visual Style pada form Content Planner dan modal ingest Pillar Campaign
+- Penyelarasan AI Call 2 dan regeneratePlannerRow dengan mandat metafora objek faceless dan studio botani estetik
+- Perbaikan evaluasi boolean is_locked pada PostgreSQL dan migrasi kolom visual_style
+
 ## V2.32.120 — Integrasi Metafora Objek Faceless untuk 22 Topik Kesehatan (02/11/2026)
 - Kamus 22 topik metafora kesehatan di lib/health-metaphors.js
 - Injeksi mandat object-centric faceless di lib/prompts.js

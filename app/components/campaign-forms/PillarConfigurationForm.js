@@ -490,6 +490,8 @@ export default function PillarConfigurationForm({
         if (isRecipe) {
           setVisualStyle('photorealistic_culinary');
           setNarrativeMode('Storytelling');
+        } else if (p.visual_style || p.metadata_json?.visual_style) {
+          setVisualStyle(p.visual_style || p.metadata_json.visual_style);
         }
         setCustomInstruction('');
         setAiDirective(isRecipe ? 'Konten edukasi resep & kreasi kuliner autentik.' : 'Konten edukasi brand; jangan mengarang atau membahas produk tertentu.');
@@ -1205,6 +1207,7 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit}>
                       <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Visual Style (Gaya Visual):</label>
                       <select value={visualStyle} onChange={e => setVisualStyle(e.target.value)} style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}>
                         <option value="Cinematic">Cinematic</option>
+                        <option value="metaphoric_faceless">🎭 Metafora Objek Faceless (Sinematik)</option>
                         <option value="UGC">UGC</option>
                         <option value="Macrophotography">Macrophotography</option>
                       </select>

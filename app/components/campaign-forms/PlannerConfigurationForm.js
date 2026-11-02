@@ -62,6 +62,7 @@ export default function ContentPlannerDashboard({ mode = 'direct', onCapture, on
   const [universeProfile, setUniverseProfile] = useState(null);
   const [availableUniverses, setAvailableUniverses] = useState([]);
   const [selectedUniverseInfo, setSelectedUniverseInfo] = useState(null);
+  const [visualStyle, setVisualStyle] = useState('Cinematic');
 
   function generateAutofillTitle(accName, prodName) {
     const now = new Date();
@@ -368,6 +369,7 @@ export default function ContentPlannerDashboard({ mode = 'direct', onCapture, on
           product_photo_url: plannerFocus === 'product_campaign' ? productPhotoUrl.trim() : null,
           platform,
           objective,
+          visual_style: visualStyle,
           planner_count: effectivePlannerCount,
           target_language: targetLanguage,
           target_audience: effectiveTargetAudience,
@@ -1415,6 +1417,29 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleGenerate}>
                     />
                   )}
                 </div>)}
+
+                {(!captureMode || studioStep === 2) && (
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 600 }}>
+                      🎨 Visual Style (Gaya Visual):
+                    </label>
+                    <select
+                      value={visualStyle}
+                      onChange={e => setVisualStyle(e.target.value)}
+                      style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                    >
+                      <option value="Cinematic">Cinematic (Sinematik Standar)</option>
+                      <option value="metaphoric_faceless">🎭 Metafora Objek Faceless (Sinematik)</option>
+                      <option value="UGC">UGC (User-Generated Content)</option>
+                      <option value="Macrophotography">Macrophotography (Makro &amp; Tekstur Bahan)</option>
+                    </select>
+                    {visualStyle === 'metaphoric_faceless' && (
+                      <div style={{ marginTop: '6px', fontSize: '11px', color: 'var(--status-info)', lineHeight: 1.4 }}>
+                        ✨ <em>Opening hook akan menggunakan metafora fisik benda nyata (faceless). Adegan solusi/edukasi tetap dapat menampilkan studio dapur botani estetik secara proporsional.</em>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {(!captureMode || studioStep === 2) && (<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
                   <div>
