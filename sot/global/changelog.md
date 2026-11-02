@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.117 — Live Preset Resolution dan Fix Wardrobe Split Color opc_261102_nat6jl (02/11/2026)
+- Live preset auto-refresh pada scheduler untuk mencegah stale snapshot
+- Migrasi snapshot opc_261102_nat6jl ke Soft Mocca murni
+- Fix prompt t2i_prompts items 1976-1981 dari split color mocca-hijau
+
 ## V2.32.116 — Kunci Warna Wardrobe Dapur Botani Female Soft Mocca dan Male Raw Linen (02/11/2026)
 - Kunci 1 warna wardrobe tunggal Soft Mocca untuk Dapur Botani Female
 - Kunci 1 warna wardrobe tunggal Unbleached Raw Linen untuk Dapur Botani Male
