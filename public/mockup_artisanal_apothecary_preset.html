@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Visual Identity — Artisanal Botanical Apothecary</title>
+  <link rel="stylesheet" href="/theme.css">
+  <style>
+    body {
+      background-color: var(--surface);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 2.5rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1100px;
+      width: 100%;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      text-align: center;
+    }
+
+    .badge-pill {
+      display: inline-block;
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      background-color: var(--status-success-soft);
+      color: var(--status-success);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+      border: 1px solid var(--border-subtle);
+    }
+
+    h1 {
+      font-size: 2.25rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem 0;
+      letter-spacing: -0.02em;
+    }
+
+    p.subtitle {
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      max-width: 760px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    /* Preset Showcase Card */
+    .preset-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-color);
+      border-radius: 1.25rem;
+      padding: 2rem;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 2.5rem;
+    }
+
+    .preset-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 1.25rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .preset-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .preset-key-tag {
+      font-family: monospace;
+      font-size: 0.85rem;
+      background: var(--surface-interactive);
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.35rem;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .meta-box {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.75rem;
+      padding: 1rem 1.25rem;
+    }
+
+    .meta-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+    }
+
+    .meta-value {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    /* Chips Palette */
+    .chip-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .chip {
+      font-size: 0.8rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+    }
+
+    /* Storyboard 6-Beat Grid */
+    .storyboard-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .clips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .clip-card {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .clip-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .clip-number {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--text-primary);
+    }
+
+    .clip-badge {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.35rem;
+      font-weight: 600;
+    }
+
+    .badge-pure {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+    }
+
+    .badge-reveal {
+      background: var(--status-warning);
+      color: var(--surface);
+    }
+
+    .clip-desc {
+      font-size: 0.85rem;
+      line-height: 1.45;
+      color: var(--text-secondary);
+    }
+
+    .prompt-snippet {
+      font-family: monospace;
+      font-size: 0.75rem;
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.5rem;
+      padding: 0.65rem;
+      color: var(--text-muted);
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge-pill">Visual Identity Registered</div>
+      <h1>Artisanal Botanical Apothecary</h1>
+      <p class="subtitle">
+        Visual Identity Preset khusus untuk produk fermentasi alami dan kesehatan herbal (GarliBee). Menggabungkan kehangatan kayu dark walnut, botol kaca amber fluted, fitting kuningan antik, dan pencahayaan golden hour 3200K.
+      </p>
+    </header>
+
+    <div class="preset-card">
+      <div class="preset-header">
+        <div>
+          <div class="preset-title">
+            <span>Artisanal Botanical Apothecary</span>
+            <span class="preset-key-tag">key: artisanal_apothecary_metaphor</span>
+          </div>
+          <p style="margin: 0.5rem 0 0 0; color: var(--text-secondary); font-size: 0.9rem;">
+            Schema Version: 2.0 &bull; Object-Centric Faceless &bull; 9:16 Aspect Ratio
+          </p>
+        </div>
+      </div>
+
+      <div class="meta-grid">
+        <div class="meta-box">
+          <div class="meta-label">Environment & Materials</div>
+          <div class="meta-value">Aged Dark Walnut Wood, Fluted Amber Glass, Antique Brass</div>
+          <div class="chip-group">
+            <span class="chip">dark walnut slab</span>
+            <span class="chip">fluted amber glass</span>
+            <span class="chip">antique brass fittings</span>
+          </div>
+        </div>
+
+        <div class="meta-box">
+          <div class="meta-label">Lighting & Atmosphere</div>
+          <div class="meta-value">Warm Golden Hour 3200K</div>
+          <div class="chip-group">
+            <span class="chip">afternoon sunlight</span>
+            <span class="chip">deep amber refractions</span>
+            <span class="chip">chiaroscuro shadows</span>
+          </div>
+        </div>
+
+        <div class="meta-box">
+          <div class="meta-label">Props & Artifacts</div>
+          <div class="meta-value">Olive-wood Dipper, Brass Balance Scale, Fermented Garlic</div>
+          <div class="chip-group">
+            <span class="chip">carved honey dipper</span>
+            <span class="chip">brass scale dish</span>
+            <span class="chip">graduated beaker</span>
+          </div>
+        </div>
+
+        <div class="meta-box">
+          <div class="meta-label">Human Presence & Wardrobe</div>
+          <div class="meta-value">Hands-Only (Faceless POV), Espresso Linen Cuffs</div>
+          <div class="chip-group">
+            <span class="chip">100% pure object clips 1-4</span>
+            <span class="chip">espresso-brown linen</span>
+            <span class="chip">wrists covered</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="storyboard-title">
+        <span>Struktur Alur Storyboard (Living Analogy — 6 Klip)</span>
+      </div>
+
+      <div class="clips-grid">
+        <div class="clip-card">
+          <div class="clip-header">
+            <span class="clip-number">Klip 1: Living Metaphor Hook</span>
+            <span class="clip-badge badge-pure">100% Pure Object</span>
+          </div>
+          <div class="clip-desc">
+            Spiral infus kaca berfitting kuningan: cairan kental sticky sirup gula terurai seketika saat tetesan madu fermentasi meluncur melalui koil.
+          </div>
+          <div class="prompt-snippet">[LAYER 2: PURE OBJECT TRUTH] Strictly 100% Pure Isolated Object Only — ZERO HANDS, NO BODY. Vintage brass-collared laboratory glass infusion coil with clear flowing tonic current.</div>
+        </div>
+
+        <div class="clip-card">
+          <div class="clip-header">
+            <span class="clip-number">Klip 2: Kinetic Breakdown</span>
+            <span class="clip-badge badge-pure">100% Pure Object</span>
+          </div>
+          <div class="clip-desc">
+            Beaker amber bergradasi vintage: endapan glukosa pekat di dasar tabung terpecah oleh gelembung fermentasi alami yang bangkit naik.
+          </div>
+          <div class="prompt-snippet">[LAYER 2: PURE OBJECT TRUTH] Vertical vintage amber glass graduated beaker; active fermentation bubbles effervesce upwards, unlocking dense precipitate.</div>
+        </div>
+
+        <div class="clip-card">
+          <div class="clip-header">
+            <span class="clip-number">Klip 3: Botanical Alchemy</span>
+            <span class="clip-badge badge-pure">100% Pure Object</span>
+          </div>
+          <div class="clip-desc">
+            Siung tunggal bawang lanang di cawan timbang kuningan antik: diselimuti madu hutan gelap yang berkilau dalam cahaya sore 3200K.
+          </div>
+          <div class="prompt-snippet">[LAYER 2: PURE OBJECT TRUTH] Whole solo garlic bulb on hand-hammered antique brass apothecary scale dish; dark wildflower honey glazes over the garlic.</div>
+        </div>
+
+        <div class="clip-card">
+          <div class="clip-header">
+            <span class="clip-number">Klip 4: Active Enzyme Infusion</span>
+            <span class="clip-badge badge-pure">100% Pure Object</span>
+          </div>
+          <div class="clip-desc">
+            Sendok kayu zaitun meregangkan pita madu mentah kental yang melipat perlahan di atas mangkuk kaca amber berulir.
+          </div>
+          <div class="prompt-snippet">[LAYER 2: PURE OBJECT TRUTH] Olive-wood honey dipper; thick elastic ribbon of raw fermented dark honey stretches and folds in luxurious slow motion.</div>
+        </div>
+
+        <div class="clip-card">
+          <div class="clip-header">
+            <span class="clip-number">Klip 5: Official Product Reveal</span>
+            <span class="clip-badge badge-reveal">GarliBee Product</span>
+          </div>
+          <div class="clip-desc">
+            Toples kaca squircle GarliBee dengan label matte-black dan aksen emas berdiri megah di atas meja kayu solid walnut gelap.
+          </div>
+          <div class="prompt-snippet">[LAYER 2: PRODUCT TRUTH] Authentic GarliBee product jar: squircle glass jar, threaded silver lid, matte-black label with gold droplet logo on dark solid walnut slab.</div>
+        </div>
+
+        <div class="clip-card">
+          <div class="clip-header">
+            <span class="clip-number">Klip 6: Ritual Harian & Outro</span>
+            <span class="clip-badge badge-reveal">Ritual & Hero</span>
+          </div>
+          <div class="clip-desc">
+            Sendok kuningan antik mengangkat siung bawang lanang berlumur madu berkilau di samping toples GarliBee yang heroik.
+          </div>
+          <div class="prompt-snippet">[LAYER 2: PRODUCT TRUTH] Antique brass teaspoon lifts glazed fermented solo garlic bulb; faceless hand with espresso-brown linen cuff; GarliBee jar sharp in frame.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

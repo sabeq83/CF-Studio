@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.128 — Register artisanal_apothecary_metaphor Visual Identity Preset (03/11/2026)
+- Daftarkan preset visual identity artisanal_apothecary_metaphor dengan palet dark walnut dan amber apothecary
+- Validasi schema v2 dan kompatibilitas vi_ prefix
+- Sediakan mockup interaktif simulasi di public/mockup_artisanal_apothecary_preset.html
+
 ## V2.32.127 — Enforce Dynamic Living Analogy Script on Metaphor Hook (02/11/2026)
 - Ganti kewajiban custom_hook statis dengan Living Analogy Hook pada mode metafor
 - Cegah negative leakage naskah medis klise di KB
