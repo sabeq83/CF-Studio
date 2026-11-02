@@ -236,12 +236,12 @@ export default function PillarCampaignDetailPage() {
       setStorageProvider(data.storage_provider || 'gdrive');
       setNextcloudUrl(data.nextcloud_url || '');
 
-      // Initialize tab values for items
+      // Initialize tab values for items: Utamakan 'storyboard' jika item siap direview agar Klip 1-N langsung terlihat
       setActiveTabs(prevTabs => {
         const nextTabs = { ...prevTabs };
         (data.items || []).forEach(item => {
           if (!nextTabs[item.id]) {
-            nextTabs[item.id] = 'concept';
+            nextTabs[item.id] = (item.workflow_status === 'ready_for_review' || item.workflow_status === 'production_processing' || item.workflow_status === 'completed') ? 'storyboard' : 'concept';
           }
         });
         return nextTabs;
@@ -329,6 +329,30 @@ export default function PillarCampaignDetailPage() {
       confirmation = `Apakah Anda yakin ingin memicu proses ${step.toUpperCase()} secara manual?`;
     }
     if (!confirm(confirmation)) return;
+
+    // Bersihkan cache client saat re-generate agar tidak mengunci state kosong
+    if (step === 'generate') {
+      setEditedVideoPlans(prev => {
+        const next = { ...prev };
+        delete next[itemId];
+        return next;
+      });
+      setEditedVideoDnas(prev => {
+        const next = { ...prev };
+        delete next[itemId];
+        return next;
+      });
+      setSocialCaptions(prev => {
+        const next = { ...prev };
+        delete next[itemId];
+        return next;
+      });
+      setActiveTabs(prev => ({
+        ...prev,
+        [itemId]: 'storyboard'
+      }));
+    }
+
     setTriggering(prev => ({ ...prev, [`${itemId}-${step}`]: true }));
     try {
       const res = await fetch(`/api/v2/pillar-campaigns/items/${itemId}/trigger`, {
@@ -1504,13 +1528,46 @@ export default function PillarCampaignDetailPage() {
   }
 
   const renderV2Workbench = (item) => {
-    if (!editedVideoPlans.hasOwnProperty(item.id)) {
+    // Fungsi pembantu auto-hydration plan dari new_video_plan_json atau result_json
+    const extractPlan = () => {
       let plan = [];
       try { plan = JSON.parse(item.new_video_plan_json || '[]'); } catch {}
+      if (!Array.isArray(plan) || plan.length === 0) {
+        // Fallback auto-hydration dari result_json jika new_video_plan_json kosong
+        try {
+          const parsedRes = JSON.parse(item.result_json || '{}');
+          const sb = parsedRes.storyboard || [];
+          const vo = parsedRes.voiceover || [];
+          const t2i = parsedRes.t2i_prompts || [];
+          if (Array.isArray(sb) && sb.length > 0) {
+            plan = sb.map((s, idx) => {
+              const cNum = s.scene || (idx + 1);
+              const voMatch = vo.find(v => Number(v.scene) === Number(cNum));
+              const t2iMatch = t2i.find(p => p && typeof p === 'object' && Number(p.clip) === Number(cNum));
+              return {
+                clip_index: cNum,
+                product_visible: s.product_visible === true,
+                requires_product_reference: s.requires_product_reference === true,
+                visual_action: s.visual_description || s.action || '',
+                new_vo: voMatch ? voMatch.narration : (s.voiceover || ''),
+                t2i_prompt: t2iMatch ? (t2iMatch.prompt || '') : (typeof t2i[idx] === 'string' ? t2i[idx] : ''),
+                i2v_prompt: ''
+              };
+            });
+          }
+        } catch (_) {}
+      }
+      return plan;
+    };
+
+    const currentPlanInState = editedVideoPlans[item.id];
+    const serverPlan = extractPlan();
+
+    if (!editedVideoPlans.hasOwnProperty(item.id) || (Array.isArray(currentPlanInState) && currentPlanInState.length === 0 && serverPlan.length > 0)) {
       setTimeout(() => {
-        setEditedVideoPlans(prev => ({ ...prev, [item.id]: plan }));
+        setEditedVideoPlans(prev => ({ ...prev, [item.id]: serverPlan }));
       }, 0);
-      return <div style={{ padding: '20px', color: 'var(--text-muted)' }}>Memuat Workbench...</div>;
+      return <div style={{ padding: '20px', color: 'var(--text-muted)' }}>Memuat Workbench ({serverPlan.length} Klip)...</div>;
     }
 
     if (!editedVideoDnas.hasOwnProperty(item.id)) {

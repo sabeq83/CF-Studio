@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.119 — Fix V2 Workbench Default Tab dan Auto-Hydration Klip 1-N (02/11/2026)
+- Auto-hydration video plan dari result_json jika new_video_plan_json kosong
+- Set default activeTab ke storyboard untuk item ready_for_review
+- Bersihkan client cache saat trigger regenerate
+
 ## V2.32.118 — Restorasi Mandat Tuple Kaya dan Anti Prompt Singkat Schema V2 (02/11/2026)
 - Injeksi Mandat Struktur Tuple Wajib pada Schema V2
 - Perkaya template JSON dynamicPromptFields di mode hibrida
