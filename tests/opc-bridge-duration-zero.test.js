@@ -111,17 +111,20 @@ test('OPC Bridge Duration Zero (Remaining Clips) Tests', async (t) => {
     };
     const item = { id: 'item_1', new_video_plan_json: JSON.stringify([]) };
 
-    // Clip 4 should not have product reference
+    // Clip 4 should not have product reference and must be sanitized by gateway
     const req4 = await buildOpcStartFrameRequest({
       campaign,
       item,
       clipIndex: 4,
-      prompt: 'Scene 4 prompt',
+      prompt: 'Scene 4 prompt with authentic GarliBee jar and (Product Reference File: "foo.jpg")',
       productLoader,
       cwd: temp
     });
     assert.equal(req4.providerRequest.reference_images, undefined);
     assert.equal(req4.audit.requires_product_reference, false);
+    assert.ok(!req4.providerRequest.prompt.toLowerCase().includes('garlibee'), 'Prompt must be sanitized of garlibee brand name');
+    assert.ok(!req4.providerRequest.prompt.includes('Product Reference File'), 'Prompt must be sanitized of Product Reference File');
+    assert.ok(req4.providerRequest.prompt.includes('glass conduit'), 'Product jar keyword must be sanitized to glass conduit');
 
     // Clip 6 MUST have product reference
     const req6 = await buildOpcStartFrameRequest({

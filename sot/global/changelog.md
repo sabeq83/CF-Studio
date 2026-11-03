@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.137 — Fix Start Frame Product Isolation on Pre-Bridging Clips (04/11/2026)
+- Clean visual identity presets from hardcoded brand and clip sequencing
+- Enforce strict pre-bridge tuple isolation in prompt builder
+- Make scheduler regex replacements clip-aware
+- Add gateway prompt sanitizer in opc-start-frame-request
+
 ## V2.32.136 — Eliminasi Hardcoded Klip 3 & Isolasi Solusi Produk Pra-Bridging (03/11/2026)
 - Dinamisasi aturan tangan POV dan alur cerita solusi agar adaptif mengikuti bridge_at_clip
 - Pembersihan instruksi hardcoded bahan spesifik GarliBee pada fase sebelum bridging di KB Objek Metafora

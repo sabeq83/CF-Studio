@@ -28,7 +28,16 @@ test('Dynamic Bridge Isolation: Prompts correctly respect bridge_at_clip = 5 and
     i2v_action_prompt: 'Macro spoon dipping into amber fluid'
   };
 
-  const prompt = buildOrganicPillarPrompt([], campaignData, productData, {}, {});
+  const visualOverrides = {
+    schema_version: 'visual_identity_snapshot_v1',
+    structured: {
+      visual_language: {
+        primary_style: 'commercial_product_cinematic'
+      }
+    }
+  };
+
+  const prompt = buildOrganicPillarPrompt([], campaignData, productData, {}, visualOverrides);
 
   // 1. Hand POV rule must be dynamic to Clip 5, not hardcoded Clip 3
   assert.ok(
@@ -74,6 +83,28 @@ test('Dynamic Bridge Isolation: Prompts correctly respect bridge_at_clip = 5 and
   assert.ok(
     !prompt.includes('* Klip Solusi (Klip 3 s/d N-1):'),
     'Must not hardcode Klip Solusi (Klip 3 s/d N-1)'
+  );
+
+  // 6. Tuple prompt expansion mandate must strictly isolate Clips 1 to 4 as Pure Object
+  assert.ok(
+    prompt.includes('🚨 KHUSUS KLIP 1 s/d 4 (METAFORA OBJEK PRE-BRIDGING — 100% PURE ISOLATED OBJECT ONLY):'),
+    'Tuple notice must isolate Clips 1 to 4 for metaphoric faceless'
+  );
+  assert.ok(
+    prompt.includes('- PADA KLIP 1 s/d 4 (PRE-BRIDGING ISOLATION):'),
+    'Tuple expansion mandate must have explicit pre-bridging zone for Clips 1 to 4'
+  );
+  assert.ok(
+    prompt.includes('1. (Presence Truth: Strictly 100% Pure Isolated Object Only — ABSOLUTELY ZERO HANDS, NO ARMS, NO FINGERS, ZERO HUMAN PRESENCE)'),
+    'Clips 1 to 4 must mandate Pure Isolated Object tuple'
+  );
+  assert.ok(
+    prompt.includes('- PADA KLIP 5 s/d 6 (PRODUCT BRIDGING & PAYOFF):'),
+    'Product bridging zone must start at Clip 5'
+  );
+  assert.ok(
+    !prompt.includes('🚨 KHUSUS KLIP 1 (METAFORA OBJEK — 100% PURE OBJECT ONLY):'),
+    'Must not limit pure object isolation to Clip 1 only'
   );
 });
 

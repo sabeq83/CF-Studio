@@ -32,3 +32,14 @@ test('2. listSystemVisualIdentities memuat semua preset metafor', () => {
   assert.ok(keys.includes('luxury_rheology_metaphor'));
 });
 
+test('3. Preset Visual Identity bebas dari kebocoran merek GarliBee dan sekuens klip', () => {
+  const all = listSystemVisualIdentities();
+  for (const p of all) {
+    const raw = JSON.stringify(p);
+    assert.ok(!raw.toLowerCase().includes('garlibee'), `Preset ${p.key} tidak boleh memuat merek garlibee`);
+    const customDesc = p.config?.subject?.custom_description || '';
+    assert.ok(!customDesc.includes('Clips 1 to 4'), `Preset ${p.key} subject description tidak boleh memuat meta-rule klip sekuensial`);
+    assert.ok(!customDesc.includes('Clips 5-6'), `Preset ${p.key} subject description tidak boleh memuat meta-rule klip sekuensial`);
+  }
+});
+
