@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.135 — Integrasi Penuh Data Content Planner ke Kampanye Pilar (OPC) (03/11/2026)
+- Meneruskan field Category CEP, Ws Matrix, Context, VFO, Strategic Angle, dan Evidence dari Content Planner ke row_creative_payload kampanye pilar
+- Menyuntikkan seksi STRATEGIC PLANNING CONTEXT ke prompt Gemini AI dan mengunci kepatuhan konteks situasi anti-drift
+- Mengunci naskah hook asli dari Content Planner agar wajib dibacakan persis di voiceover Klip 1 tanpa tertimpa template analogi generik
+- Mempertahankan aksi visual panduan Klip 1 pada storyboard dan t2i_prompts klip awal
+
 ## V2.32.134 — CF Content Planner Skill (03/11/2026)
 - Complete portable CF Content Planner with optional content pillars and three planning modes
 - Add deterministic distribution locked strategy validation and single field regeneration checks
