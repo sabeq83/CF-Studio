@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.132 — Implement 100% CEP-As-Pillar Architecture When Brand Pillars Are Disabled (03/11/2026)
+- Update buildDistributionPlan to mirror category_cep into pillar when pillars are explicitly empty
+- Inject strict 100% CEP-driven prompt directive to Gemini AI in Content Planner
+- Add comprehensive unit tests in tests/content-planner-cep-as-pillar.test.js
+
 ## V2.32.131 — Register 4 GarliBee Metaphor Visual Identity Presets (03/11/2026)
 - Integrasi 4 preset visual identity metafor: hydraulic_pipeline_metaphor, decompression_gauge_metaphor, chrono_restoration_metaphor, luxury_rheology_metaphor
 - Tambahkan unit test otomatis di tests/garlibee-metaphor-visual-identities.test.js
