@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.131 — Register 4 GarliBee Metaphor Visual Identity Presets (03/11/2026)
+- Integrasi 4 preset visual identity metafor: hydraulic_pipeline_metaphor, decompression_gauge_metaphor, chrono_restoration_metaphor, luxury_rheology_metaphor
+- Tambahkan unit test otomatis di tests/garlibee-metaphor-visual-identities.test.js
+- Dokumentasi 5 visual mode dan naskah 6 CEP GarliBee di public/storyboards_5_new_modes_garlibee.md
+
 ## V2.32.130 — Integrate investigative_faceless visual style and presets (03/11/2026)
 - Add investigative_faceless visual style to content planner and pillar campaign forms
 - Register forensic_whistleblower_archive and deductive_pinboard_matrix presets
