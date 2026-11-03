@@ -37,12 +37,12 @@ Total klip ($N$) ditentukan secara dinamis oleh konfigurasi kampanye (`target_cl
 - **Fokus Visual**: 100% Pure Isolated Object (`visual_action_guideline` baris planner). Tanpa tangan, tanpa wajah, tanpa meja dapur biasa.
 - **Fokus Naskah**: Mengaitkan aksi fisik benda di layar dengan metafora kesehatan internal tubuh. Menimbulkan rasa ingin tahu yang tenang (*contemplative curiosity*).
 
-### 2. FASE PERTENGAHAN: THE NATURAL ALCHEMY & PRODUCT BRIDGE (Klip 2 s/d N-1 — ~60-70% Durasi Video)
-- **Fokus Visual**: Transisi halus ke studio botani apoteker mewah di atas meja batu basal hitam/slate yang sama.
+### 2. FASE PERTENGAHAN: THE NATURAL PHENOMENON & PRODUCT BRIDGE (Klip 2 s/d N-1 — ~60-70% Durasi Video)
+- **Fokus Visual**: Transisi halus di atas panggung optik/studio apoteker minimalis yang konsisten.
 - **Dinamika Cerita**:
-  - **Sebelum Klip Produk (Klip 2 hingga sebelum bridge_at_clip)**: Menjelaskan mengapa solusi instan/kimiawi bukan jawaban, dan bagaimana proses fermentasi alami lambat (bawang lanang tunggal dalam madu mentah murni) bekerja mengurai senyawa kompleks menjadi ramah di tubuh.
-  - **Pada Klip Produk (bridge_at_clip)**: Hadirkan produk (GarliBee) secara organik sebagai puncak kurasi dari alkimia alami tersebut. Tampilkan toples kaca resmi dan tekstur madu fermentasi keemasan.
-  - **Setelah Klip Produk**: Jabarkan rasa lembut madu, allicin aktif, dan ritual konsumsi harian yang menenangkan (satu siung dan satu sendok madu setiap hari).
+  - **Sebelum Klip Produk (Klip 2 hingga sebelum bridge_at_clip)**: Menjelaskan dinamika ilmiah fenomena alam atau konteks masalah tubuh secara objektif berdasarkan W's Matrix dan situasi. DILARANG KERAS membocorkan atau menyebut formula, bahan spesifik (seperti madu mentah, fermentasi bawang tunggal), atau nama produk sebelum titik bridging.
+  - **Pada Klip Produk (bridge_at_clip)**: Hadirkan produk target secara organik sebagai perwujudan kurasi atas permasalahan tersebut. Tampilkan kemasan resmi dan tekstur produk.
+  - **Setelah Klip Produk**: Jabarkan rasa/tekstur, keunggulan utama (USP), dan ritual konsumsi harian yang menenangkan.
 
 ### 3. FASE AKHIR: THE ELEVATED PAYOFF & CTA (Klip N — ~15-20% Durasi Video)
 - **Fokus Visual**: Kemasan produk berdiri kokoh dan anggun di bawah sorotan cahaya emas hangat (3500K) di studio apoteker.

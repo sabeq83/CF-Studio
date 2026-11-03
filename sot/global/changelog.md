@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.32.136 — Eliminasi Hardcoded Klip 3 & Isolasi Solusi Produk Pra-Bridging (03/11/2026)
+- Dinamisasi aturan tangan POV dan alur cerita solusi agar adaptif mengikuti bridge_at_clip
+- Pembersihan instruksi hardcoded bahan spesifik GarliBee pada fase sebelum bridging di KB Objek Metafora
+- Perbaikan tipe data bridgeAtClip dari string ke number untuk mencegah bug konkatenasi string Zona 3
+- Penyelarasan dynamic story curve micro-KB dengan titik bridging kampanye
+- Penegasan isolasi ketat terhadap bahan dan formula produk sebelum titik bridging resmi
+
 ## V2.32.135 — Integrasi Penuh Data Content Planner ke Kampanye Pilar (OPC) (03/11/2026)
 - Meneruskan field Category CEP, Ws Matrix, Context, VFO, Strategic Angle, dan Evidence dari Content Planner ke row_creative_payload kampanye pilar
 - Menyuntikkan seksi STRATEGIC PLANNING CONTEXT ke prompt Gemini AI dan mengunci kepatuhan konteks situasi anti-drift
