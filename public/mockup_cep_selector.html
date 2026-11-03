@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup Interaktif: Strategi Pemilihan CEP Content Planner</title>
+  <link rel="stylesheet" href="/theme.css">
+  <style>
+    :root {
+      --surface: #ffffff;
+      --surface-subtle: #f8fafc;
+      --surface-raised: #f1f5f9;
+      --surface-interactive: #e2e8f0;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --border-color: #cbd5e1;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --action-primary: #3b82f6;
+      --action-primary-hover: #2563eb;
+      --on-action-primary: #ffffff;
+      --status-neutral: #64748b;
+      --status-neutral-soft: #f1f5f9;
+      --status-warning: #f59e0b;
+      --status-warning-soft: #fef3c7;
+      --status-success: #10b981;
+      --status-success-soft: #d1fae5;
+      --status-info: #0ea5e9;
+      --status-info-soft: #e0f2fe;
+    }
+
+    [data-theme="dark"] {
+      --surface: #0f172a;
+      --surface-subtle: #1e293b;
+      --surface-raised: #334155;
+      --surface-interactive: #475569;
+      --border-subtle: #334155;
+      --border-strong: #475569;
+      --border-color: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #64748b;
+      --action-primary: #3b82f6;
+      --action-primary-hover: #60a5fa;
+      --on-action-primary: #ffffff;
+      --status-neutral: #94a3b8;
+      --status-neutral-soft: #1e293b;
+      --status-warning: #fbbf24;
+      --status-warning-soft: #451a03;
+      --status-success: #34d399;
+      --status-success-soft: #064e3b;
+      --status-info: #38bdf8;
+      --status-info-soft: #082f49;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--surface-subtle);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .container {
+      max-width: 680px;
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .theme-toggle {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mode-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .mode-card {
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-subtle);
+      border-radius: 10px;
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+
+    .mode-card.active {
+      border-color: var(--action-primary);
+      background: var(--surface-raised);
+      box-shadow: 0 0 0 1px var(--action-primary);
+    }
+
+    .mode-card-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .mode-card-desc {
+      font-size: 11px;
+      color: var(--text-secondary);
+      line-height: 1.35;
+    }
+
+    .cep-panel {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .cep-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .cep-pill {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface);
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+    }
+
+    .cep-pill.selected {
+      border-color: var(--action-primary);
+      background: var(--surface-raised);
+    }
+
+    .cep-checkbox {
+      margin-top: 2px;
+      accent-color: var(--action-primary);
+    }
+
+    .cep-info-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .cep-info-desc {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      line-height: 1.25;
+    }
+
+    .preview-box {
+      background: var(--surface-raised);
+      border: 1px dashed var(--border-strong);
+      border-radius: 10px;
+      padding: 14px;
+      margin-top: 16px;
+    }
+
+    .preview-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .preview-badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header-bar">
+    <div>
+      <h2 style="margin: 0; font-size: 18px; font-weight: 800;">Simulasi Form: Seleksi CEP Product Campaign</h2>
+      <p style="margin: 4px 0 0; font-size: 12px; color: var(--text-secondary);">Eksplorasi UI Pemilihan Category Entry Point (CEP) Fleksibel</p>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓 Ganti Tema</button>
+  </div>
+
+  <!-- CEP Strategy Mode -->
+  <div class="section-title">
+    <span>🎯 Strategi Category Entry Point (CEP):</span>
+  </div>
+
+  <div class="mode-selector">
+    <div id="mode-sequential" class="mode-card active" onclick="setMode('sequential')">
+      <div class="mode-card-title">
+        <span>🔄 6 CEP Lengkap (Sequential)</span>
+        <span style="color: var(--action-primary); font-size: 14px;">●</span>
+      </div>
+      <div class="mode-card-desc">
+        Memutar semua 6 pemicu psikologis secara bergiliran dan seimbang (Default).
+      </div>
+    </div>
+
+    <div id="mode-custom" class="mode-card" onclick="setMode('custom')">
+      <div class="mode-card-title">
+        <span>🎯 Seleksi CEP Kustom</span>
+        <span style="color: var(--text-muted); font-size: 14px;">○</span>
+      </div>
+      <div class="mode-card-desc">
+        Pilih bebas 1 atau beberapa CEP spesifik untuk kampanye tertarget (misal: pure Problem).
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom CEP Multi-Select Panel -->
+  <div id="custom-cep-panel" class="cep-panel" style="display: none;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+      <span style="font-size: 12px; font-weight: 700; color: var(--text-primary);">Pilih Kategori CEP Target (Minimal 1):</span>
+      <span id="selected-count-badge" style="font-size: 11px; color: var(--action-primary); font-weight: 700;">2 / 6 Terpilih</span>
+    </div>
+
+    <div class="cep-grid">
+      <!-- 1 -->
+      <div class="cep-pill selected" onclick="toggleCep('Problem-Solution Based', this)">
+        <input type="checkbox" class="cep-checkbox" checked onclick="event.stopPropagation(); toggleCep('Problem-Solution Based', this.parentElement)">
+        <div>
+          <div class="cep-info-title">🚨 Problem-Solution Based</div>
+          <div class="cep-info-desc">Gejala fisik, keluhan spesifik & solusi instan</div>
+        </div>
+      </div>
+
+      <!-- 2 -->
+      <div class="cep-pill" onclick="toggleCep('Routine Based', this)">
+        <input type="checkbox" class="cep-checkbox" onclick="event.stopPropagation(); toggleCep('Routine Based', this.parentElement)">
+        <div>
+          <div class="cep-info-title">☀️ Routine Based</div>
+          <div class="cep-info-desc">Ritual harian, perawatan rutin & jam konsumsi</div>
+        </div>
+      </div>
+
+      <!-- 3 -->
+      <div class="cep-pill" onclick="toggleCep('Emotional Based', this)">
+        <input type="checkbox" class="cep-checkbox" onclick="event.stopPropagation(); toggleCep('Emotional Based', this.parentElement)">
+        <div>
+          <div class="cep-info-title">💖 Emotional Based</div>
+          <div class="cep-info-desc">Kekhawatiran keluarga, anak, & rasa sayang</div>
+        </div>
+      </div>
+
+      <!-- 4 -->
+      <div class="cep-pill" onclick="toggleCep('Aspirational Based', this)">
+        <input type="checkbox" class="cep-checkbox" onclick="event.stopPropagation(); toggleCep('Aspirational Based', this.parentElement)">
+        <div>
+          <div class="cep-info-title">🚀 Aspirational Based</div>
+          <div class="cep-info-desc">Performa puncak, energi prima & produktivitas</div>
+        </div>
+      </div>
+
+      <!-- 5 -->
+      <div class="cep-pill" onclick="toggleCep('Commitment Based', this)">
+        <input type="checkbox" class="cep-checkbox" onclick="event.stopPropagation(); toggleCep('Commitment Based', this.parentElement)">
+        <div>
+          <div class="cep-info-title">🌿 Commitment Based</div>
+          <div class="cep-info-desc">Pilihan sadar hidup sehat & bebas obat kimia</div>
+        </div>
+      </div>
+
+      <!-- 6 -->
+      <div class="cep-pill selected" onclick="toggleCep('Opportunistic Based', this)">
+        <input type="checkbox" class="cep-checkbox" checked onclick="event.stopPropagation(); toggleCep('Opportunistic Based', this.parentElement)">
+        <div>
+          <div class="cep-info-title">🍖 Opportunistic Based</div>
+          <div class="cep-info-desc">Momen makan santan/lemak, pesta & liburan</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row Count Selector -->
+  <div style="margin-bottom: 20px;">
+    <label class="section-title">📊 Jumlah Baris Content Plan:</label>
+    <select id="row-count-select" onchange="updatePreview()" style="width: 100%; padding: 10px; background: var(--surface-subtle); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); font-size: 13px; font-weight: 600;">
+      <option value="6">6 Baris Plan (Testing Cepat)</option>
+      <option value="12" selected>12 Baris Plan (Standar Kampanye)</option>
+      <option value="18">18 Baris Plan (Eksplorasi Luas)</option>
+      <option value="24">24 Baris Plan (Massal 1 Bulan)</option>
+      <option value="30">30 Baris Plan (Maksimal)</option>
+    </select>
+  </div>
+
+  <!-- Realtime Simulation Preview Box -->
+  <div class="preview-box">
+    <div class="preview-title">⚡ Simulasi Distribusi Baris yang Diterima Gemini AI:</div>
+    <div id="preview-text" style="font-size: 12px; color: var(--text-secondary); line-height: 1.4;">
+      Memuat preview...
+    </div>
+    <div class="preview-badge-row" id="preview-badges"></div>
+  </div>
+</div>
+
+<script>
+  let currentMode = 'sequential';
+  let selectedCeps = ['Problem-Solution Based', 'Opportunistic Based'];
+
+  function toggleTheme() {
+    const isDark = document.body.parentElement.getAttribute('data-theme') === 'dark';
+    document.body.parentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  }
+
+  function setMode(mode) {
+    currentMode = mode;
+    document.getElementById('mode-sequential').className = 'mode-card ' + (mode === 'sequential' ? 'active' : '');
+    document.getElementById('mode-custom').className = 'mode-card ' + (mode === 'custom' ? 'active' : '');
+    
+    document.getElementById('mode-sequential').querySelector('span:last-child').textContent = mode === 'sequential' ? '●' : '○';
+    document.getElementById('mode-sequential').querySelector('span:last-child').style.color = mode === 'sequential' ? 'var(--action-primary)' : 'var(--text-muted)';
+    
+    document.getElementById('mode-custom').querySelector('span:last-child').textContent = mode === 'custom' ? '●' : '○';
+    document.getElementById('mode-custom').querySelector('span:last-child').style.color = mode === 'custom' ? 'var(--action-primary)' : 'var(--text-muted)';
+
+    document.getElementById('custom-cep-panel').style.display = mode === 'custom' ? 'block' : 'none';
+    updatePreview();
+  }
+
+  function toggleCep(cepName, element) {
+    const idx = selectedCeps.indexOf(cepName);
+    if (idx > -1) {
+      if (selectedCeps.length === 1) {
+        alert('Minimal harus memilih 1 Category Entry Point (CEP)!');
+        return;
+      }
+      selectedCeps.splice(idx, 1);
+      element.classList.remove('selected');
+      element.querySelector('input').checked = false;
+    } else {
+      selectedCeps.push(cepName);
+      element.classList.add('selected');
+      element.querySelector('input').checked = true;
+    }
+
+    document.getElementById('selected-count-badge').textContent = `${selectedCeps.length} / 6 Terpilih`;
+    updatePreview();
+  }
+
+  function updatePreview() {
+    const rowCount = parseInt(document.getElementById('row-count-select').value, 10);
+    const previewText = document.getElementById('preview-text');
+    const badgeRow = document.getElementById('preview-badges');
+    badgeRow.innerHTML = '';
+
+    const allCeps = [
+      'Problem-Solution Based',
+      'Routine Based',
+      'Emotional Based',
+      'Aspirational Based',
+      'Commitment Based',
+      'Opportunistic Based'
+    ];
+
+    const activeCeps = currentMode === 'sequential' ? allCeps : selectedCeps;
+
+    if (currentMode === 'sequential') {
+      const cycle = rowCount / 6;
+      previewText.innerHTML = `Mode <strong>Sequential</strong> aktif. Semua 6 CEP berputar rata sebanyak <strong>${cycle} siklus penuh</strong> (${rowCount} baris total). Gemini AI akan mendistribusikan ide secara berimbang.`;
+    } else {
+      const perCep = Math.floor(rowCount / activeCeps.length);
+      const remainder = rowCount % activeCeps.length;
+      previewText.innerHTML = `Mode <strong>Selektif Kustom</strong> aktif dengan <strong>${activeCeps.length} CEP</strong> terpilih. Total <strong>${rowCount} baris</strong> akan didistribusikan secara round-robin ke CEP ini (~${perCep} ide per CEP). <em>Gemini AI dilarang menyentuh CEP lainnya.</em>`;
+    }
+
+    // Generate baris preview
+    for (let i = 0; i < Math.min(rowCount, 8); i++) {
+      const cep = activeCeps[i % activeCeps.length];
+      const badge = document.createElement('div');
+      badge.className = 'badge';
+      badge.textContent = `Baris ${i + 1}: ${cep}`;
+      badgeRow.appendChild(badge);
+    }
+
+    if (rowCount > 8) {
+      const moreBadge = document.createElement('div');
+      moreBadge.className = 'badge';
+      moreBadge.style.opacity = '0.6';
+      moreBadge.textContent = `+ ${rowCount - 8} baris lainnya berotasi selaras...`;
+      badgeRow.appendChild(moreBadge);
+    }
+  }
+
+  // Initial preview
+  updatePreview();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,4 @@
+interface:
+  display_name: "CF Content Planner"
+  short_description: "Susun planner konten dengan strategi ContentFlow"
+  default_prompt: "Gunakan $cf-content-planner untuk menyusun content planner dari brief brand atau produk saya."

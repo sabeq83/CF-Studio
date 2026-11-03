@@ -1,5 +1,13 @@
 # Changelog
 
+## V2.32.133 — Add Flexible Category Entry Point Selector to Content Planner (03/11/2026)
+- Add sequential vs selective CEP strategy modes for product campaigns
+- Support arbitrary subset of 6 CEP triggers with balanced round-robin distribution
+- Harmonize selective CEP with CEP-As-Pillar architecture when brand pillars are disabled
+- Persist CEP selection mode and active CEP array in metadata_json
+- Add interactive segmented mode switch and multi-select badge pills to Content Planner form
+- Add comprehensive unit test suite in tests/content-planner-selective-ceps.test.js
+
 ## V2.32.132 — Implement 100% CEP-As-Pillar Architecture When Brand Pillars Are Disabled (03/11/2026)
 - Update buildDistributionPlan to mirror category_cep into pillar when pillars are explicitly empty
 - Inject strict 100% CEP-driven prompt directive to Gemini AI in Content Planner

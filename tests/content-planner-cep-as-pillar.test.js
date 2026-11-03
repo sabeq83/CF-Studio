@@ -28,3 +28,4 @@ test('4. Locked Structure Validation lulus pada model CEP-As-Pillar', () => {
   const validRows = plan.map(r => ({ ...r, hook: 'Test Hook', visual_action: 'Test Visual' }));
   assert.doesNotThrow(() => validateLockedPlannerStructure(validRows, plan));
 });
+

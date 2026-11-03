@@ -9,6 +9,15 @@ import { useEffect, useState } from 'react';
 import { getBrandEditorialDefaults, shouldHydrateBrandEditorial } from '@/lib/brand-editorial-defaults';
 import { DEFAULT_EDITORIAL_ROWS_PER_PILLAR, getBrandEditorialCountOptions } from '@/lib/content-planner-contract';
 
+const AVAILABLE_CEPS = [
+  { id: 'Problem-Solution Based', icon: '🚨', label: 'Problem-Solution Based', desc: 'Gejala fisik, keluhan spesifik & solusi instan' },
+  { id: 'Routine Based', icon: '☀️', label: 'Routine Based', desc: 'Ritual harian, perawatan rutin & jam konsumsi' },
+  { id: 'Emotional Based', icon: '💖', label: 'Emotional Based', desc: 'Kekhawatiran keluarga, anak, & rasa sayang' },
+  { id: 'Aspirational Based', icon: '🚀', label: 'Aspirational Based', desc: 'Performa puncak, energi prima & produktivitas' },
+  { id: 'Commitment Based', icon: '🌿', label: 'Commitment Based', desc: 'Pilihan sadar hidup sehat & bebas obat kimia' },
+  { id: 'Opportunistic Based', icon: '⚡', label: 'Opportunistic Based', desc: 'Momen situasional, darurat, bepergian & cuaca' }
+];
+
 export default function ContentPlannerDashboard({ mode = 'direct', onCapture, onSuccess, onCancel } = {}) {
   const captureMode = mode === 'capture' || Boolean(onSuccess);
   const [studioStep,setStudioStep] = useState(0);
@@ -46,6 +55,21 @@ export default function ContentPlannerDashboard({ mode = 'direct', onCapture, on
   const [productPlannerCount, setProductPlannerCount] = useState(6);
   const [editorialRowsPerPillar, setEditorialRowsPerPillar] = useState(DEFAULT_EDITORIAL_ROWS_PER_PILLAR);
   const [editorialCountNotice, setEditorialCountNotice] = useState('');
+  const [cepSelectionMode, setCepSelectionMode] = useState('sequential'); // 'sequential' | 'custom'
+  const [selectedCeps, setSelectedCeps] = useState([
+    'Problem-Solution Based', 'Routine Based', 'Emotional Based', 'Aspirational Based', 'Commitment Based', 'Opportunistic Based'
+  ]);
+
+  const toggleCep = (cepId) => {
+    setSelectedCeps(prev => {
+      if (prev.includes(cepId)) {
+        if (prev.length <= 1) return prev; // Minimal 1 CEP
+        return prev.filter(c => c !== cepId);
+      } else {
+        return [...prev, cepId];
+      }
+    });
+  };
   const [targetAudience, setTargetAudience] = useState('ibu_rumah_tangga');
   const [customTargetAudience, setCustomTargetAudience] = useState('');
   const [promotionContext, setPromotionContext] = useState('');
@@ -318,6 +342,10 @@ export default function ContentPlannerDashboard({ mode = 'direct', onCapture, on
         showToast('Nama Produk dan Deskripsi Wajib Diisi', 'error');
         return;
       }
+      if (cepSelectionMode === 'custom' && selectedCeps.length === 0) {
+        showToast('Pilih minimal satu Category Entry Point (CEP)', 'error');
+        return;
+      }
       // Validasi ketat jika bukan kampanye non-affiliate, wajib terikat (locked dari brand_product)
       if (!isNonAffiliate && !isAffiliateLinkLocked) {
         showToast(
@@ -377,6 +405,8 @@ export default function ContentPlannerDashboard({ mode = 'direct', onCapture, on
           promotion_context: promotionContext.trim() || null,
           custom_instructions: customInstructions.trim() || null,
           use_brand_pillars: useBrandPillars,
+          cep_selection_mode: plannerFocus === 'product_campaign' ? cepSelectionMode : 'sequential',
+          selected_ceps: plannerFocus === 'product_campaign' && cepSelectionMode === 'custom' ? selectedCeps : null,
           // Recipe Campaign payload
           recipe_config: plannerFocus === 'recipe_campaign' ? {
             category: recipeCategory,
@@ -1552,6 +1582,123 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleGenerate}>
                   </div>
                 )}
 
+                {plannerFocus === 'product_campaign' && (!captureMode || studioStep === 2) && (
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>
+                      🎯 Strategi Category Entry Point (CEP):
+                    </label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
+                      <div
+                        onClick={() => setCepSelectionMode('sequential')}
+                        style={{
+                          border: `1px solid ${cepSelectionMode === 'sequential' ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
+                          background: cepSelectionMode === 'sequential' ? 'var(--surface-raised)' : 'var(--surface-subtle)',
+                          borderRadius: '10px',
+                          padding: '12px 14px',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          boxShadow: cepSelectionMode === 'sequential' ? '0 0 0 1px var(--action-primary)' : 'none'
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                          <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>🔄 6 CEP Lengkap (Sequential)</span>
+                          <span style={{ color: cepSelectionMode === 'sequential' ? 'var(--action-primary)' : 'var(--text-muted)', fontSize: '14px' }}>
+                            {cepSelectionMode === 'sequential' ? '●' : '○'}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.35 }}>
+                          Memutar semua 6 pemicu psikologis secara bergiliran dan seimbang (Default).
+                        </div>
+                      </div>
+
+                      <div
+                        onClick={() => setCepSelectionMode('custom')}
+                        style={{
+                          border: `1px solid ${cepSelectionMode === 'custom' ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
+                          background: cepSelectionMode === 'custom' ? 'var(--surface-raised)' : 'var(--surface-subtle)',
+                          borderRadius: '10px',
+                          padding: '12px 14px',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          boxShadow: cepSelectionMode === 'custom' ? '0 0 0 1px var(--action-primary)' : 'none'
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                          <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>🎯 Seleksi CEP Kustom</span>
+                          <span style={{ color: cepSelectionMode === 'custom' ? 'var(--action-primary)' : 'var(--text-muted)', fontSize: '14px' }}>
+                            {cepSelectionMode === 'custom' ? '●' : '○'}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.35 }}>
+                          Pilih bebas 1 atau beberapa CEP spesifik untuk kampanye tertarget.
+                        </div>
+                      </div>
+                    </div>
+
+                    {cepSelectionMode === 'custom' && (
+                      <div style={{
+                        background: 'var(--surface-subtle)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: '12px',
+                        padding: '14px',
+                        marginBottom: '16px'
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                          <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)' }}>
+                            Pilih Kategori CEP Target (Minimal 1):
+                          </span>
+                          <span style={{ fontSize: '11px', color: 'var(--action-primary)', fontWeight: 700 }}>
+                            {selectedCeps.length} / {AVAILABLE_CEPS.length} Terpilih
+                          </span>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '8px' }}>
+                          {AVAILABLE_CEPS.map(cep => {
+                            const isChecked = selectedCeps.includes(cep.id);
+                            return (
+                              <div
+                                key={cep.id}
+                                onClick={() => toggleCep(cep.id)}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'flex-start',
+                                  gap: '8px',
+                                  padding: '8px 10px',
+                                  borderRadius: '8px',
+                                  border: `1px solid ${isChecked ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
+                                  background: isChecked ? 'var(--surface-raised)' : 'var(--surface)',
+                                  cursor: 'pointer',
+                                  userSelect: 'none',
+                                  transition: 'all 0.15s ease'
+                                }}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={() => {}}
+                                  onClick={e => e.stopPropagation()}
+                                  style={{ marginTop: '2px', accentColor: 'var(--action-primary)' }}
+                                />
+                                <div>
+                                  <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)' }}>
+                                    {cep.icon} {cep.label}
+                                  </div>
+                                  <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px', lineHeight: 1.25 }}>
+                                    {cep.desc}
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <div style={{ marginTop: '8px', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                          💡 Baris planner ({productPlannerCount} baris) akan didistribusikan merata di antara {selectedCeps.length} CEP terpilih.
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {(!captureMode || studioStep === 2) && (<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px' }}>Platform Target:</label>
@@ -1632,13 +1779,23 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleGenerate}>
                               </option>
                             ))
                         ) : (
-                          <>
-                            <option value="6">6 Baris Plan (1x CEP)</option>
-                            <option value="12">12 Baris Plan (2x CEP - Standar)</option>
-                            <option value="18">18 Baris Plan (3x CEP)</option>
-                            <option value="24">24 Baris Plan (4x CEP - Massal)</option>
-                            <option value="30">30 Baris Plan (5x CEP - Maksimal)</option>
-                          </>
+                          cepSelectionMode === 'custom' ? (
+                            <>
+                              <option value="6">6 Baris Plan (Distribusi Rata)</option>
+                              <option value="12">12 Baris Plan (Distribusi Rata - Standar)</option>
+                              <option value="18">18 Baris Plan (Distribusi Rata)</option>
+                              <option value="24">24 Baris Plan (Distribusi Rata - Massal)</option>
+                              <option value="30">30 Baris Plan (Distribusi Rata - Maksimal)</option>
+                            </>
+                          ) : (
+                            <>
+                              <option value="6">6 Baris Plan (1x CEP)</option>
+                              <option value="12">12 Baris Plan (2x CEP - Standar)</option>
+                              <option value="18">18 Baris Plan (3x CEP)</option>
+                              <option value="24">24 Baris Plan (4x CEP - Massal)</option>
+                              <option value="30">30 Baris Plan (5x CEP - Maksimal)</option>
+                            </>
+                          )
                         )}
                       </select>
                     )}
