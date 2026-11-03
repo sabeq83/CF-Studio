@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.138 — Fix Start Frame Premature Completion and Stale Path Overwrite (04/11/2026)
+- Prevent finalizeStartFrameCheckpoint from overwriting in-flight assets with stale paths
+- Synchronize t2i_images_json to nullify queued clips during revision queueing
+- Keep start frame aggregates strictly truthful
+
 ## V2.32.137 — Fix Start Frame Product Isolation on Pre-Bridging Clips (04/11/2026)
 - Clean visual identity presets from hardcoded brand and clip sequencing
 - Enforce strict pre-bridge tuple isolation in prompt builder
