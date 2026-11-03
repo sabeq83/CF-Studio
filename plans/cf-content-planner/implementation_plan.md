@@ -1,7 +1,7 @@
 # Implementation Plan — CF Content Planner
 
 Tanggal: 3 November 2026
-Status: Implementasi, verifikasi, pemasangan, dan demonstrasi selesai; rilis patch sedang diselesaikan.
+Status: Selesai — skill terpasang, verifikasi lulus, rilis v2.32.134 dan tag terunggah ke main remote.
 
 ## Tujuan
 
@@ -277,7 +277,7 @@ Tidak ada perubahan UI, sehingga mockup HTML dan browser testing tidak diperluka
 - [x] Menjalankan validasi struktur skill dan uji perilaku tiga mode, history, serta regenerasi.
 - [x] Memasang paket tervalidasi ke direktori skill pengguna sesuai izin filesystem yang berlaku.
 - [x] Menyediakan demonstrasi dan panduan pemanggilan singkat untuk pengguna.
-- [ ] Melakukan rilis patch dan sinkronisasi Git sesuai SOP setelah implementasi serta verifikasi berhasil; pisahkan perubahan pengguna.
+- [x] Melakukan rilis patch dan sinkronisasi Git sesuai SOP setelah implementasi serta verifikasi berhasil; pisahkan perubahan pengguna.
 
 Checkbox diperbarui setiap tahap selesai. Implementasi skill sudah selesai dan memicu rilis patch sesuai SOP.
 
@@ -285,7 +285,7 @@ Checkbox diperbarui setiap tahap selesai. Implementasi skill sudah selesai dan m
 
 Setelah implementasi tervalidasi, bandingkan versi repository dengan SOT changelog terbaru yang dirujuk AGENTS.md. Tinjau perilaku release script agar tidak mengikutsertakan perubahan pengguna. Jalankan rilis noninteraktif dengan judul CF Content Planner dan poin perubahan aktual, kemudian verifikasi branch main dan tag versi tersedia di remote target. Jika release script men-stage seluruh working tree, isolasikan perubahan skill lebih dahulu; jangan merilis perubahan pengguna secara tidak sengaja.
 
-Pemasangan ke `~/.codex/skills` mungkin membutuhkan izin tulis di luar workspace; gunakan mekanisme izin yang tersedia pada saat implementasi. Pembuatan rencana ini tidak melakukan pemasangan, push, deploy, ataupun perubahan runtime server. Deployment Dev/Staging/Production tidak dibutuhkan oleh skill mandiri.
+Pemasangan ke `~/.codex/skills` mungkin membutuhkan izin tulis di luar workspace; gunakan mekanisme izin yang tersedia pada saat implementasi. Implementasi memasang skill dan mendorong rilis Git dari checkout terisolasi. Tidak ada deployment atau perubahan runtime server; Dev/Staging/Production tidak dibutuhkan oleh skill mandiri.
 
 ## Catatan Eksekusi
 
@@ -331,3 +331,5 @@ Cuplikan pada tabel disingkat; file aktual berisi envelope lengkap. Paket produk
 - Selama implementasi, proses rilis lain membuat commit `afe273b043bf245c4e069848a705f8de15bb501f` (v2.32.133) yang telah memasukkan plan dan lima file skill sebelum helper selesai. Riwayat tersebut dipertahankan; penyelesaian skill dirilis sebagai patch terpisah berdasarkan HEAD terbaru.
 
 - Paket enam file terpasang dan diverifikasi byte-for-byte di `~/.codex/skills/cf-content-planner/`. Instalasi tidak menimpa skill existing.
+
+- Rilis final: **v2.32.134**, commit `0c62d6482edff8ffb30f58bae34e1145c8ac8884`. `git ls-remote` mengonfirmasi main dan peeled tag v2.32.134 menunjuk commit tersebut setelah rilis. Commit dokumentasi penutup dapat berada sesudah tag tanpa mengubah kode rilis.
