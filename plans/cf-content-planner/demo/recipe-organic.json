@@ -1,0 +1,205 @@
+{
+  "brief": {
+    "planner_focus": "recipe_campaign",
+    "recipe_category": "minuman",
+    "products": [],
+    "platform": "instagram",
+    "planner_count": 3,
+    "language": "id-ID",
+    "use_content_pillars": false,
+    "pillars": [],
+    "history_count": 0,
+    "strategy_mode": "synergy"
+  },
+  "distribution": [
+    {
+      "sequence": 1,
+      "category": "minuman",
+      "pillar": null,
+      "primary_product_id": null,
+      "product_reference": null,
+      "allocated_product_ids": []
+    },
+    {
+      "sequence": 2,
+      "category": "minuman",
+      "pillar": null,
+      "primary_product_id": null,
+      "product_reference": null,
+      "allocated_product_ids": []
+    },
+    {
+      "sequence": 3,
+      "category": "minuman",
+      "pillar": null,
+      "primary_product_id": null,
+      "product_reference": null,
+      "allocated_product_ids": []
+    }
+  ],
+  "assumptions": [
+    "Contoh fiktif untuk demonstrasi; riwayat tidak tersedia, pemeriksaan pengulangan terbatas pada batch.",
+    "Audiens diasumsikan pekerja yang menyiapkan makanan di rumah.",
+    "Porsi dan durasi merupakan estimasi; resep belum diuji di dapur."
+  ],
+  "rows": [
+    {
+      "sequence": 1,
+      "category": "minuman",
+      "pillar": null,
+      "primary_product_id": null,
+      "product_reference": null,
+      "allocated_product_ids": [],
+      "product": null,
+      "commercial_intent": "no_sell",
+      "cta_type": "save",
+      "title": "Air jeruk nipis dingin",
+      "content_subject": "Cara membuat air jeruk nipis dingin",
+      "hook": "Jeruk nipis dan air: racikan sederhana untuk sore ini.",
+      "visual_action": "Macro jeruk nipis diperas ke gelas; tuang air, aduk, lalu masukkan es batu.",
+      "servings": "1 porsi",
+      "prep_time_minutes": 2,
+      "cook_time_minutes": 0,
+      "difficulty": "Mudah",
+      "ingredients": [
+        {
+          "name": "Air minum",
+          "amount": "200",
+          "unit": "ml",
+          "product_id": null
+        },
+        {
+          "name": "Jeruk nipis",
+          "amount": "1/2",
+          "unit": "buah",
+          "product_id": null
+        },
+        {
+          "name": "Es batu",
+          "amount": "3",
+          "unit": "buah",
+          "product_id": null
+        }
+      ],
+      "steps": [
+        {
+          "index": 1,
+          "instruction": "Peras jeruk nipis ke dalam gelas; buang bijinya."
+        },
+        {
+          "index": 2,
+          "instruction": "Tuang air minum dan aduk. Tambahkan es batu."
+        }
+      ],
+      "chef_tips": [
+        "Sesuaikan suhu penyajian dengan selera."
+      ],
+      "featured_products": [],
+      "cta": "Simpan untuk dicoba di rumah."
+    },
+    {
+      "sequence": 2,
+      "category": "minuman",
+      "pillar": null,
+      "primary_product_id": null,
+      "product_reference": null,
+      "allocated_product_ids": [],
+      "product": null,
+      "commercial_intent": "no_sell",
+      "cta_type": "save",
+      "title": "Susu kayu manis hangat",
+      "content_subject": "Cara membuat susu kayu manis hangat",
+      "hook": "Aroma kayu manis dari cangkir hangat buatan sendiri.",
+      "visual_action": "Close-up susu diaduk dengan api rendah, dituang ke cangkir, lalu kayu manis ditabur.",
+      "servings": "1 porsi",
+      "prep_time_minutes": 2,
+      "cook_time_minutes": 5,
+      "difficulty": "Mudah",
+      "ingredients": [
+        {
+          "name": "Susu",
+          "amount": "200",
+          "unit": "ml",
+          "product_id": null
+        },
+        {
+          "name": "Kayu manis bubuk",
+          "amount": "1/4",
+          "unit": "sdt",
+          "product_id": null
+        }
+      ],
+      "steps": [
+        {
+          "index": 1,
+          "instruction": "Hangatkan susu di panci kecil dengan api rendah sambil diaduk."
+        },
+        {
+          "index": 2,
+          "instruction": "Tuangkan ke cangkir dan taburkan kayu manis."
+        }
+      ],
+      "chef_tips": [
+        "Sesuaikan suhu penyajian dengan selera."
+      ],
+      "featured_products": [],
+      "cta": "Simpan untuk dicoba di rumah."
+    },
+    {
+      "sequence": 3,
+      "category": "minuman",
+      "pillar": null,
+      "primary_product_id": null,
+      "product_reference": null,
+      "allocated_product_ids": [],
+      "product": null,
+      "commercial_intent": "no_sell",
+      "cta_type": "save",
+      "title": "Teh jahe sederhana",
+      "content_subject": "Cara membuat teh jahe sederhana",
+      "hook": "Dua iris jahe untuk menemani teh soremu.",
+      "visual_action": "Top view dua iris jahe masuk panci air; cut ke teh yang diseduh di cangkir.",
+      "servings": "1 porsi",
+      "prep_time_minutes": 2,
+      "cook_time_minutes": 5,
+      "difficulty": "Mudah",
+      "ingredients": [
+        {
+          "name": "Air minum",
+          "amount": "250",
+          "unit": "ml",
+          "product_id": null
+        },
+        {
+          "name": "Jahe",
+          "amount": "2",
+          "unit": "iris",
+          "product_id": null
+        },
+        {
+          "name": "Teh celup",
+          "amount": "1",
+          "unit": "kantong",
+          "product_id": null
+        }
+      ],
+      "steps": [
+        {
+          "index": 1,
+          "instruction": "Rebus air dan jahe selama sekitar 3 menit."
+        },
+        {
+          "index": 2,
+          "instruction": "Matikan api, tambahkan teh celup dan seduh mengikuti petunjuk kemasan."
+        }
+      ],
+      "chef_tips": [
+        "Sesuaikan suhu penyajian dengan selera."
+      ],
+      "featured_products": [],
+      "cta": "Simpan untuk dicoba di rumah."
+    }
+  ],
+  "history": [],
+  "evidence": []
+}

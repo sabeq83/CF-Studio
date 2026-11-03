@@ -1,0 +1,194 @@
+{
+  "brief": {
+    "planner_focus": "brand_editorial",
+    "account_name": "Dapur Praktis",
+    "brand_context": "Edukasi kebiasaan dapur untuk pekerja yang menyiapkan bekal.",
+    "content_goal": "Mendorong kebiasaan persiapan dapur yang mudah diikuti.",
+    "platform": "instagram",
+    "language": "id-ID",
+    "planner_count": 6,
+    "use_content_pillars": false,
+    "pillars": [],
+    "history_count": 0,
+    "selected_ceps": [
+      "Problem-Solution Based",
+      "Routine Based",
+      "Emotional Based",
+      "Aspirational Based",
+      "Commitment Based",
+      "Opportunistic Based"
+    ]
+  },
+  "distribution": [
+    {
+      "sequence": 1,
+      "pillar": null,
+      "category_cep": "Emotional Based",
+      "vfo": "Instinctive",
+      "product_reference": null
+    },
+    {
+      "sequence": 2,
+      "pillar": null,
+      "category_cep": "Aspirational Based",
+      "vfo": "Uncharted",
+      "product_reference": null
+    },
+    {
+      "sequence": 3,
+      "pillar": null,
+      "category_cep": "Commitment Based",
+      "vfo": "Aspirational",
+      "product_reference": null
+    },
+    {
+      "sequence": 4,
+      "pillar": null,
+      "category_cep": "Opportunistic Based",
+      "vfo": "Concrete",
+      "product_reference": null
+    },
+    {
+      "sequence": 5,
+      "pillar": null,
+      "category_cep": "Problem-Solution Based",
+      "vfo": "Instinctive",
+      "product_reference": null
+    },
+    {
+      "sequence": 6,
+      "pillar": null,
+      "category_cep": "Routine Based",
+      "vfo": "Uncharted",
+      "product_reference": null
+    }
+  ],
+  "assumptions": [
+    "Contoh fiktif untuk demonstrasi; riwayat tidak tersedia, pemeriksaan pengulangan terbatas pada batch.",
+    "Audiens diasumsikan pekerja yang menyiapkan makanan di rumah."
+  ],
+  "rows": [
+    {
+      "sequence": 1,
+      "pillar": null,
+      "category_cep": "Emotional Based",
+      "vfo": "Instinctive",
+      "product_reference": null,
+      "product": null,
+      "commercial_intent": "no_sell",
+      "cta_type": "save",
+      "ws_matrix": [
+        "When",
+        "While"
+      ],
+      "context": "Pagi sebelum berangkat kerja, merasa terburu-buru saat menyiapkan bekal.",
+      "strategic_angle": "The Pure Relief",
+      "narrative_mode": "Demonstrasi singkat",
+      "content_subject": "Pagi terasa lebih tenang saat alat bekal sudah menunggu",
+      "hook": "Pagi terasa lebih tenang saat alat bekal sudah menunggu.",
+      "visual_action": "Top view tangan menyisihkan wadah dan alat di satu baki; cut ke baki yang diambil keesokan pagi."
+    },
+    {
+      "sequence": 2,
+      "pillar": null,
+      "category_cep": "Aspirational Based",
+      "vfo": "Uncharted",
+      "product_reference": null,
+      "product": null,
+      "commercial_intent": "no_sell",
+      "cta_type": "save",
+      "ws_matrix": [
+        "Where",
+        "How Feeling"
+      ],
+      "context": "Di depan laci dapur saat ingin membuat area masak lebih tertata.",
+      "strategic_angle": "The Intellectual Flex",
+      "narrative_mode": "Demonstrasi singkat",
+      "content_subject": "Ingin dapur tertata? Mulai dari fungsi alat, bukan ukurannya",
+      "hook": "Ingin dapur tertata? Mulai dari fungsi alat, bukan ukurannya.",
+      "visual_action": "Top view laci; tangan mengelompokkan alat sesuai fungsi menakar, mengaduk dan menjepit, lalu memberi label sederhana."
+    },
+    {
+      "sequence": 3,
+      "pillar": null,
+      "category_cep": "Commitment Based",
+      "vfo": "Aspirational",
+      "product_reference": null,
+      "product": null,
+      "commercial_intent": "no_sell",
+      "cta_type": "save",
+      "ws_matrix": [
+        "When",
+        "Why"
+      ],
+      "context": "Minggu sore saat ingin menyiapkan rutinitas bekal yang lebih teratur.",
+      "strategic_angle": "The Second Chance",
+      "narrative_mode": "Demonstrasi singkat",
+      "content_subject": "Rapikan dapur untuk versi dirimu yang suka membawa bekal",
+      "hook": "Rapikan dapur untuk versi dirimu yang suka membawa bekal.",
+      "visual_action": "Kamera mengikuti pekerja menaruh wadah bersih di rak mudah dijangkau, lalu mengambilnya saat bersiap besok."
+    },
+    {
+      "sequence": 4,
+      "pillar": null,
+      "category_cep": "Opportunistic Based",
+      "vfo": "Concrete",
+      "product_reference": null,
+      "product": null,
+      "commercial_intent": "no_sell",
+      "cta_type": "save",
+      "ws_matrix": [
+        "With/For Whom",
+        "While"
+      ],
+      "context": "Setelah makan malam mendapati lauk tersisa dan membaginya untuk bekal pasangan.",
+      "strategic_angle": "The Life Hack",
+      "narrative_mode": "Demonstrasi singkat",
+      "content_subject": "Lauk makan malam masih ada? Pisahkan jatah bekal sebelum meja dibereskan",
+      "hook": "Lauk makan malam masih ada? Pisahkan jatah bekal sebelum meja dibereskan.",
+      "visual_action": "Overhead dua tangan bergantian menyisihkan lauk ke dua wadah, menutupnya, lalu memberi tanda pemilik."
+    },
+    {
+      "sequence": 5,
+      "pillar": null,
+      "category_cep": "Problem-Solution Based",
+      "vfo": "Instinctive",
+      "product_reference": null,
+      "product": null,
+      "commercial_intent": "no_sell",
+      "cta_type": "save",
+      "ws_matrix": [
+        "Where",
+        "With What"
+      ],
+      "context": "Di meja persiapan dengan papan potong yang terus bergeser.",
+      "strategic_angle": "The Pure Relief",
+      "narrative_mode": "Demonstrasi singkat",
+      "content_subject": "Dari bunyi geser ke gerakan stabil: coba alas kain lembap",
+      "hook": "Dari bunyi geser ke gerakan stabil: coba alas kain lembap.",
+      "visual_action": "Close-up kain bersih dilembapkan dan diratakan di bawah papan; tangan menekan papan sebelum mulai mengiris."
+    },
+    {
+      "sequence": 6,
+      "pillar": null,
+      "category_cep": "Routine Based",
+      "vfo": "Uncharted",
+      "product_reference": null,
+      "product": null,
+      "commercial_intent": "no_sell",
+      "cta_type": "save",
+      "ws_matrix": [
+        "How Feeling",
+        "Why"
+      ],
+      "context": "Lelah sepulang kerja dan ingin mulai memasak tanpa mencari alat.",
+      "strategic_angle": "The Intellectual Flex",
+      "narrative_mode": "Demonstrasi singkat",
+      "content_subject": "Kenapa alat ini selalu jauh saat paling dibutuhkan",
+      "hook": "Kenapa alat ini selalu jauh saat paling dibutuhkan?",
+      "visual_action": "POV tangan menjangkau alat di tiga tempat; overlay menandai frekuensi pemakaian, lalu alat harian diletakkan dekat meja kerja."
+    }
+  ],
+  "history": [],
+  "evidence": []
+}

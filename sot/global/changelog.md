@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.134 — CF Content Planner Skill (03/11/2026)
+- Complete portable CF Content Planner with optional content pillars and three planning modes
+- Add deterministic distribution locked strategy validation and single field regeneration checks
+- Add offline tests and realistic planning demonstrations
+
 ## V2.32.133 — Add Flexible Category Entry Point Selector to Content Planner (03/11/2026)
 - Add sequential vs selective CEP strategy modes for product campaigns
 - Support arbitrary subset of 6 CEP triggers with balanced round-robin distribution

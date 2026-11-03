@@ -1,0 +1,88 @@
+{
+  "brief": {
+    "planner_focus": "recipe_campaign",
+    "recipe_category": "minuman",
+    "products": [],
+    "platform": "instagram",
+    "planner_count": 3,
+    "language": "id-ID",
+    "use_content_pillars": false,
+    "pillars": [],
+    "history_count": 0,
+    "strategy_mode": "synergy"
+  },
+  "distribution": [
+    {
+      "sequence": 1,
+      "category": "minuman",
+      "pillar": null,
+      "primary_product_id": null,
+      "product_reference": null,
+      "allocated_product_ids": []
+    },
+    {
+      "sequence": 2,
+      "category": "minuman",
+      "pillar": null,
+      "primary_product_id": null,
+      "product_reference": null,
+      "allocated_product_ids": []
+    },
+    {
+      "sequence": 3,
+      "category": "minuman",
+      "pillar": null,
+      "primary_product_id": null,
+      "product_reference": null,
+      "allocated_product_ids": []
+    }
+  ],
+  "assumptions": [
+    "Contoh fiktif untuk demonstrasi; riwayat tidak tersedia, pemeriksaan pengulangan terbatas pada batch.",
+    "Audiens diasumsikan pekerja yang menyiapkan makanan di rumah.",
+    "Porsi dan durasi merupakan estimasi; resep belum diuji di dapur."
+  ],
+  "rows": [
+    {
+      "sequence": 1,
+      "category": "minuman",
+      "pillar": null,
+      "primary_product_id": null,
+      "product_reference": null,
+      "allocated_product_ids": [],
+      "product": null,
+      "commercial_intent": "no_sell",
+      "cta_type": "save",
+      "title": "Air jeruk nipis dingin",
+      "content_subject": "Cara membuat air jeruk nipis dingin"
+    },
+    {
+      "sequence": 2,
+      "category": "minuman",
+      "pillar": null,
+      "primary_product_id": null,
+      "product_reference": null,
+      "allocated_product_ids": [],
+      "product": null,
+      "commercial_intent": "no_sell",
+      "cta_type": "save",
+      "title": "Susu kayu manis hangat",
+      "content_subject": "Cara membuat susu kayu manis hangat"
+    },
+    {
+      "sequence": 3,
+      "category": "minuman",
+      "pillar": null,
+      "primary_product_id": null,
+      "product_reference": null,
+      "allocated_product_ids": [],
+      "product": null,
+      "commercial_intent": "no_sell",
+      "cta_type": "save",
+      "title": "Teh jahe sederhana",
+      "content_subject": "Cara membuat teh jahe sederhana"
+    }
+  ],
+  "history": [],
+  "evidence": []
+}

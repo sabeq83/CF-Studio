@@ -1,0 +1,196 @@
+{
+  "brief": {
+    "planner_focus": "product_campaign",
+    "product_name": "Kotak Bekal Duo (contoh)",
+    "product_description": "Wadah bekal dengan dua kompartemen. Tidak ada data ketahanan bocor, microwave, atau klaim suhu.",
+    "platform": "tiktok",
+    "planner_count": 6,
+    "use_content_pillars": true,
+    "pillars": [
+      "Persiapan bekal",
+      "Penataan meja"
+    ],
+    "language": "id-ID",
+    "history_count": 0,
+    "selected_ceps": [
+      "Problem-Solution Based",
+      "Routine Based",
+      "Emotional Based",
+      "Aspirational Based",
+      "Commitment Based",
+      "Opportunistic Based"
+    ]
+  },
+  "distribution": [
+    {
+      "sequence": 1,
+      "pillar": "Penataan meja",
+      "category_cep": "Commitment Based",
+      "vfo": "Instinctive",
+      "product_reference": "Kotak Bekal Duo (contoh)"
+    },
+    {
+      "sequence": 2,
+      "pillar": "Persiapan bekal",
+      "category_cep": "Opportunistic Based",
+      "vfo": "Uncharted",
+      "product_reference": "Kotak Bekal Duo (contoh)"
+    },
+    {
+      "sequence": 3,
+      "pillar": "Penataan meja",
+      "category_cep": "Problem-Solution Based",
+      "vfo": "Aspirational",
+      "product_reference": "Kotak Bekal Duo (contoh)"
+    },
+    {
+      "sequence": 4,
+      "pillar": "Persiapan bekal",
+      "category_cep": "Routine Based",
+      "vfo": "Concrete",
+      "product_reference": "Kotak Bekal Duo (contoh)"
+    },
+    {
+      "sequence": 5,
+      "pillar": "Penataan meja",
+      "category_cep": "Emotional Based",
+      "vfo": "Instinctive",
+      "product_reference": "Kotak Bekal Duo (contoh)"
+    },
+    {
+      "sequence": 6,
+      "pillar": "Persiapan bekal",
+      "category_cep": "Aspirational Based",
+      "vfo": "Uncharted",
+      "product_reference": "Kotak Bekal Duo (contoh)"
+    }
+  ],
+  "assumptions": [
+    "Contoh fiktif untuk demonstrasi; riwayat tidak tersedia, pemeriksaan pengulangan terbatas pada batch.",
+    "Audiens diasumsikan pekerja yang menyiapkan makanan di rumah."
+  ],
+  "rows": [
+    {
+      "sequence": 1,
+      "pillar": "Penataan meja",
+      "category_cep": "Commitment Based",
+      "vfo": "Instinctive",
+      "product_reference": "Kotak Bekal Duo (contoh)",
+      "product": "Kotak Bekal Duo (contoh)",
+      "commercial_intent": "soft_sell",
+      "cta_type": "save",
+      "ws_matrix": [
+        "When",
+        "While"
+      ],
+      "context": "Pagi hari saat berusaha menjaga kebiasaan menata dua menu bekal.",
+      "strategic_angle": "The Sensory ASMR",
+      "narrative_mode": "Demonstrasi singkat",
+      "content_subject": "Dengar bunyi kecil rutinitas bekal: isi dua ruang, lalu tutup",
+      "hook": "Dengar bunyi kecil rutinitas bekal: isi dua ruang, lalu tutup.",
+      "visual_action": "Overhead tangan menaruh nasi di satu kompartemen dan lauk di kompartemen kedua; kamera menyorot sekat."
+    },
+    {
+      "sequence": 2,
+      "pillar": "Persiapan bekal",
+      "category_cep": "Opportunistic Based",
+      "vfo": "Uncharted",
+      "product_reference": "Kotak Bekal Duo (contoh)",
+      "product": "Kotak Bekal Duo (contoh)",
+      "commercial_intent": "soft_sell",
+      "cta_type": "save",
+      "ws_matrix": [
+        "Where",
+        "With What"
+      ],
+      "context": "Di meja makan setelah mendapati dua menu tersisa yang ingin dibawa besok.",
+      "strategic_angle": "The Intellectual Flex",
+      "narrative_mode": "Demonstrasi singkat",
+      "content_subject": "Ada dua menu dari makan malam? Sekat ini membantu menatanya terpisah",
+      "hook": "Ada dua menu dari makan malam? Sekat ini membantu menatanya terpisah.",
+      "visual_action": "Macro kamera menyusuri sekat kosong, lalu tangan mengisi kedua sisi dengan menu berbeda."
+    },
+    {
+      "sequence": 3,
+      "pillar": "Penataan meja",
+      "category_cep": "Problem-Solution Based",
+      "vfo": "Aspirational",
+      "product_reference": "Kotak Bekal Duo (contoh)",
+      "product": "Kotak Bekal Duo (contoh)",
+      "commercial_intent": "soft_sell",
+      "cta_type": "save",
+      "ws_matrix": [
+        "How Feeling",
+        "While"
+      ],
+      "context": "Di meja persiapan setelah bingung menata bekal, ingin mencoba kebiasaan ini kembali.",
+      "strategic_angle": "The Second Chance",
+      "narrative_mode": "Demonstrasi singkat",
+      "content_subject": "Bekal sering batal karena bingung menata? Mulai lagi dengan dua ruang sederhana",
+      "hook": "Bekal sering batal karena bingung menata? Mulai lagi dengan dua ruang sederhana.",
+      "visual_action": "Close-up sendok menaruh bekal ke wadah, merekam bunyi sendok dan tutup yang dipasang tanpa klaim rapat."
+    },
+    {
+      "sequence": 4,
+      "pillar": "Persiapan bekal",
+      "category_cep": "Routine Based",
+      "vfo": "Concrete",
+      "product_reference": "Kotak Bekal Duo (contoh)",
+      "product": "Kotak Bekal Duo (contoh)",
+      "commercial_intent": "soft_sell",
+      "cta_type": "save",
+      "ws_matrix": [
+        "When",
+        "Why"
+      ],
+      "context": "Awal minggu saat ingin membangun kebiasaan membawa bekal.",
+      "strategic_angle": "The Life Hack",
+      "narrative_mode": "Demonstrasi singkat",
+      "content_subject": "Sebelum menutup bekal, lihat apakah dua kompartemennya sudah terpakai",
+      "hook": "Sebelum menutup bekal, lihat apakah dua kompartemennya sudah terpakai.",
+      "visual_action": "Medium shot tangan mengambil wadah dari rak, mengisi dua ruang, lalu meletakkannya dekat tas."
+    },
+    {
+      "sequence": 5,
+      "pillar": "Penataan meja",
+      "category_cep": "Emotional Based",
+      "vfo": "Instinctive",
+      "product_reference": "Kotak Bekal Duo (contoh)",
+      "product": "Kotak Bekal Duo (contoh)",
+      "commercial_intent": "soft_sell",
+      "cta_type": "save",
+      "ws_matrix": [
+        "With/For Whom",
+        "While"
+      ],
+      "context": "Merasa ingin memberi perhatian pada diri sendiri sambil menata dua menu bekal.",
+      "strategic_angle": "The Sensory ASMR",
+      "narrative_mode": "Demonstrasi singkat",
+      "content_subject": "Saat ingin menikmati bekal pilihan sendiri, mulai dari menatanya pelan-pelan",
+      "hook": "Saat ingin menikmati bekal pilihan sendiri, mulai dari menatanya pelan-pelan.",
+      "visual_action": "POV memilih dua menu dan menempatkannya pada kompartemen masing-masing sebelum menutup wadah."
+    },
+    {
+      "sequence": 6,
+      "pillar": "Persiapan bekal",
+      "category_cep": "Aspirational Based",
+      "vfo": "Uncharted",
+      "product_reference": "Kotak Bekal Duo (contoh)",
+      "product": "Kotak Bekal Duo (contoh)",
+      "commercial_intent": "soft_sell",
+      "cta_type": "save",
+      "ws_matrix": [
+        "Where",
+        "Why"
+      ],
+      "context": "Di depan rak wadah saat ingin membuat penataan bekal lebih teratur.",
+      "strategic_angle": "The Intellectual Flex",
+      "narrative_mode": "Demonstrasi singkat",
+      "content_subject": "Ingin bekal tampak tertata? Pahami dulu fungsi dua ruangnya",
+      "hook": "Ingin bekal tampak tertata? Pahami dulu fungsi dua ruangnya.",
+      "visual_action": "Split shot wadah kosong dan terisi; pan pelan memperlihatkan fungsi pemisah dua komponen."
+    }
+  ],
+  "history": [],
+  "evidence": []
+}

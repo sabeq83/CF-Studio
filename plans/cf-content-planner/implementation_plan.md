@@ -1,7 +1,7 @@
 # Implementation Plan — CF Content Planner
 
 Tanggal: 3 November 2026
-Status: Rencana siap ditinjau; skill belum dibuat atau dipasang.
+Status: Implementasi, verifikasi, pemasangan, dan demonstrasi selesai; rilis patch sedang diselesaikan.
 
 ## Tujuan
 
@@ -269,20 +269,65 @@ Tidak ada perubahan UI, sehingga mockup HTML dan browser testing tidak diperluka
 - [x] Menetapkan nama CF Content Planner, cakupan mandiri, tiga mode, dan batas integrasi.
 - [x] Menulis rencana, struktur paket, cuplikan sebelum/sesudah, dan acceptance criteria.
 - [x] Menambahkan opsi tanpa pilar, kontrak jumlah, format output, dan acceptance criteria sesuai arahan pengguna.
-- [ ] Memverifikasi baseline Git dan status akhir perubahan lokal CEP; mencatat provenance KB/kontrak.
-- [ ] Membuat scaffold enam file paket di `skills/cf-content-planner/`.
-- [ ] Menulis referensi strategi, kontrak output, dan mode resep dari sumber terverifikasi.
-- [ ] Mengimplementasikan opsi use_content_pillars ON/OFF, helper distribusi, dan validator lokal beserta pemeriksaan invariannya.
-- [ ] Menyelesaikan SKILL.md dan metadata UI CF Content Planner.
-- [ ] Menjalankan validasi struktur skill dan uji perilaku tiga mode, history, serta regenerasi.
-- [ ] Memasang paket tervalidasi ke direktori skill pengguna sesuai izin filesystem yang berlaku.
-- [ ] Menyediakan demonstrasi dan panduan pemanggilan singkat untuk pengguna.
+- [x] Memverifikasi baseline Git dan status akhir perubahan lokal CEP; mencatat provenance KB/kontrak.
+- [x] Membuat scaffold enam file paket di `skills/cf-content-planner/`.
+- [x] Menulis referensi strategi, kontrak output, dan mode resep dari sumber terverifikasi.
+- [x] Mengimplementasikan opsi use_content_pillars ON/OFF, helper distribusi, dan validator lokal beserta pemeriksaan invariannya.
+- [x] Menyelesaikan SKILL.md dan metadata UI CF Content Planner.
+- [x] Menjalankan validasi struktur skill dan uji perilaku tiga mode, history, serta regenerasi.
+- [x] Memasang paket tervalidasi ke direktori skill pengguna sesuai izin filesystem yang berlaku.
+- [x] Menyediakan demonstrasi dan panduan pemanggilan singkat untuk pengguna.
 - [ ] Melakukan rilis patch dan sinkronisasi Git sesuai SOP setelah implementasi serta verifikasi berhasil; pisahkan perubahan pengguna.
 
-Saat implementasi berlangsung, ubah checkbox segera setelah tahap selesai. Pekerjaan pada turn ini hanya membuat rencana; belum ada implementasi fitur yang memicu rilis.
+Checkbox diperbarui setiap tahap selesai. Implementasi skill sudah selesai dan memicu rilis patch sesuai SOP.
 
 ## Rilis, Pemasangan, dan Batas Eksekusi
 
 Setelah implementasi tervalidasi, bandingkan versi repository dengan SOT changelog terbaru yang dirujuk AGENTS.md. Tinjau perilaku release script agar tidak mengikutsertakan perubahan pengguna. Jalankan rilis noninteraktif dengan judul CF Content Planner dan poin perubahan aktual, kemudian verifikasi branch main dan tag versi tersedia di remote target. Jika release script men-stage seluruh working tree, isolasikan perubahan skill lebih dahulu; jangan merilis perubahan pengguna secara tidak sengaja.
 
 Pemasangan ke `~/.codex/skills` mungkin membutuhkan izin tulis di luar workspace; gunakan mekanisme izin yang tersedia pada saat implementasi. Pembuatan rencana ini tidak melakukan pemasangan, push, deploy, ataupun perubahan runtime server. Deployment Dev/Staging/Production tidak dibutuhkan oleh skill mandiri.
+
+## Catatan Eksekusi
+
+- Baseline inspeksi: `0fd0b9268aff2d64f43c5875175398f6848a533c`. Sumber skill dibundel sebagai referensi mandiri. Perubahan aplikasi lain tetap milik pengguna dan tidak diikutsertakan.
+- Source changelog workspace sudah v2.32.132; changelog path legacy `_maknaflow` masih v2.32.28. Rilis harus mengikuti versi workspace/remote terbaru, bukan menurunkan versi ke path legacy.
+- Helper memakai rotasi SHA-256 mandiri dan label VFO ringkas; kontrak menyatakan adaptasi ini secara eksplisit. Recipe menghasilkan rencana resep kanonis, tanpa produksi storyboard/VO.
+
+### Tambahan File Verifikasi — Before/After
+
+`tests/test_cf_content_planner.py`
+
+Code Sebelum (Current/Before): file belum ada.
+
+Code Sesudah (Proposed/After), inti implementasi aktual:
+
+```python
+class ContractTests(unittest.TestCase):
+    def test_editorial_count_boundaries(self):
+        for count in [1, 10, 30]:
+            locked = skeleton(brief(planner_count=count, use_content_pillars=False))
+            self.assertEqual([], cf.validate_output(final(locked), locked))
+```
+
+Artifact demonstrasi berikut merupakan keluaran verifikasi, bukan file runtime skill. Code Sebelum (Current/Before) untuk setiap file: belum ada. Code Sesudah (Proposed/After) berupa JSON envelope tervalidasi atau laporan Markdown berikut:
+
+| File baru di `plans/cf-content-planner/demo/` | Cuplikan Code Sesudah (Proposed/After) |
+|---|---|
+| `brand-editorial-tanpa-pilar.json` | `{"brief":{"planner_focus":"brand_editorial","use_content_pillars":false},"rows":[...]}` |
+| `brand-editorial-tanpa-pilar-skeleton.json` | `{"rows":[{"sequence":1,"pillar":null,"context":"..."}]}` |
+| `product-campaign.json` | `{"brief":{"planner_focus":"product_campaign","use_content_pillars":true},"rows":[...]}` |
+| `product-campaign-skeleton.json` | `{"rows":[{"sequence":1,"product":"Kotak Bekal Duo (contoh)"}]}` |
+| `recipe-organic.json` | `{"brief":{"planner_focus":"recipe_campaign","products":[]},"rows":[...]}` |
+| `recipe-organic-skeleton.json` | `{"rows":[{"sequence":1,"primary_product_id":null,"allocated_product_ids":[]}]}` |
+| `demonstrasi.md` | `# Demonstrasi CF Content Planner` beserta tabel hasil tiga mode, contoh pemanggilan dan batas verifikasi |
+
+Cuplikan pada tabel disingkat; file aktual berisi envelope lengkap. Paket produksi tetap hanya enam file yang direncanakan.
+
+### Hasil Verifikasi
+
+- Sebelas test case `tests/test_cf_content_planner.py` lulus, meliputi seluruh count produk ON/OFF, editorial OFF 1/10/30, invalid types, locked strategy/metadata, history, evidence, revisi satu field, resep organic/synergy/rotation dan CLI dari folder sementara.
+- `quick_validate.py` resmi lulus menggunakan PyYAML sementara di `/private/tmp`; helper skill sendiri hanya membutuhkan standard library Python.
+- Tiga brief demonstrasi realistis beserta frozen skeleton lulus validasi struktur; revisi satu hook editorial lulus tanpa mengganti field lain. Review kreatif tidak mengklaim skor semantik atau riset eksternal.
+- Selama implementasi, proses rilis lain membuat commit `afe273b043bf245c4e069848a705f8de15bb501f` (v2.32.133) yang telah memasukkan plan dan lima file skill sebelum helper selesai. Riwayat tersebut dipertahankan; penyelesaian skill dirilis sebagai patch terpisah berdasarkan HEAD terbaru.
+
+- Paket enam file terpasang dan diverifikasi byte-for-byte di `~/.codex/skills/cf-content-planner/`. Instalasi tidak menimpa skill existing.
