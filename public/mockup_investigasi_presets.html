@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Visual Identity Investigasi Faceless — MAKNA Flow</title>
+  <link rel="stylesheet" href="/theme.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --surface-subtle: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --border-color: #26354a;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.15);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.15);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.15);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.15);
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.28);
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--surface);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      margin: 0;
+      padding: 2.5rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1180px;
+      width: 100%;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      text-align: center;
+    }
+
+    .badge-pill {
+      display: inline-block;
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      background-color: var(--status-warning-soft);
+      color: var(--status-warning);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+      border: 1px solid var(--border-subtle);
+    }
+
+    h1 {
+      font-size: 2.25rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem 0;
+      letter-spacing: -0.02em;
+    }
+
+    p.subtitle {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      max-width: 780px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    /* Tab Switcher */
+    .tab-bar {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+
+    .tab-btn {
+      padding: 0.65rem 1.25rem;
+      border-radius: 0.65rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .tab-btn:hover {
+      border-color: var(--border-strong);
+      color: var(--text-primary);
+    }
+
+    .tab-btn.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border-color: var(--action-primary);
+      box-shadow: 0 4px 12px rgba(45, 212, 191, 0.25);
+    }
+
+    /* Preset Showcase Card */
+    .preset-card {
+      background: var(--surface-raised);
+      border: 1.5px solid var(--border-color);
+      border-radius: 1.25rem;
+      padding: 2.25rem;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 2.5rem;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .preset-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 1.25rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .preset-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .preset-key-tag {
+      font-family: monospace;
+      font-size: 0.85rem;
+      background: var(--surface-interactive);
+      padding: 0.25rem 0.6rem;
+      border-radius: 0.4rem;
+      border: 1px solid var(--border-subtle);
+      color: var(--action-primary);
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .meta-box {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.85rem;
+      padding: 1.15rem;
+    }
+
+    .meta-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+
+    .meta-value {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.4;
+    }
+
+    .chip-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-top: 0.65rem;
+    }
+
+    .chip {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+    }
+
+    /* 6-Clip Storyboard Grid */
+    .storyboard-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .clips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .clip-card {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.85rem;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .clip-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--border-strong);
+    }
+
+    .clip-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .clip-number {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .clip-badge {
+      font-size: 0.72rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.35rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-pure {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid rgba(96, 165, 250, 0.3);
+    }
+
+    .badge-reveal {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    .vo-quote-box {
+      background: var(--surface-interactive);
+      border-left: 3px solid var(--action-primary);
+      padding: 0.65rem 0.85rem;
+      border-radius: 0.4rem;
+      font-size: 0.825rem;
+      color: var(--text-primary);
+      font-style: italic;
+      line-height: 1.45;
+    }
+
+    .clip-desc {
+      font-size: 0.825rem;
+      line-height: 1.45;
+      color: var(--text-secondary);
+    }
+
+    .prompt-snippet {
+      font-family: monospace;
+      font-size: 0.72rem;
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.45rem;
+      padding: 0.6rem;
+      color: var(--text-muted);
+      overflow-x: auto;
+      white-space: pre-wrap;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge-pill">Interactive Visual Identity Simulation</div>
+      <h1>Visual Identity Investigasi Faceless</h1>
+      <p class="subtitle">
+        Dua mode visual investigasi baru untuk kampanye kesehatan MAKNA Flow. Berfokus pada pembongkaran klaim palsu, data forensik, dan pemecahan misteri sebab-akibat kesehatan tanpa menampilkan wajah narator.
+      </p>
+    </header>
+
+    <!-- Tab Switcher -->
+    <div class="tab-bar">
+      <button class="tab-btn active" id="btnMode1" onclick="switchMode('mode1')">
+        <span>🔍 Mode 1: Forensic Evidence Desk</span>
+      </button>
+      <button class="tab-btn" id="btnMode3" onclick="switchMode('mode3')">
+        <span>📌 Mode 3: Fact-Check Pinboard Matrix</span>
+      </button>
+    </div>
+
+    <!-- PRESET 1: FORENSIC EVIDENCE DESK -->
+    <div class="preset-card" id="cardMode1">
+      <div class="preset-header">
+        <div>
+          <div class="preset-title">
+            <span>🔍 Forensic Evidence Desk (Whistleblower Archive)</span>
+            <span class="preset-key-tag">key: forensic_whistleblower_archive</span>
+          </div>
+          <p style="margin: 0.5rem 0 0 0; color: var(--text-secondary); font-size: 0.9rem;">
+            Schema Version: 2.0 &bull; Object-Centric Faceless &bull; 9:16 Aspect Ratio &bull; Whistleblower Noir
+          </p>
+        </div>
+      </div>
+
+      <div class="meta-grid">
+        <div class="meta-box">
+          <div class="meta-label">Environment & Materials</div>
+          <div class="meta-value">Meja Kayu Oak Tua, Map Manila Rahasia, Kaca Pembesar Kuningan</div>
+          <div class="chip-group">
+            <span class="chip">aged scarred oak</span>
+            <span class="chip">manila dossier folder</span>
+            <span class="chip">brass magnifying glass</span>
+            <span class="chip">stamped evidence papers</span>
+          </div>
+        </div>
+
+        <div class="meta-box">
+          <div class="meta-label">Lighting & Atmosphere</div>
+          <div class="meta-value">Warm Banker's Lamp 3000K (Heavy Chiaroscuro)</div>
+          <div class="chip-group">
+            <span class="chip">conical desk beam</span>
+            <span class="chip">dark vignette borders</span>
+            <span class="chip">floating dust motes</span>
+            <span class="chip">high contrast noir</span>
+          </div>
+        </div>
+
+        <div class="meta-box">
+          <div class="meta-label">Props & Artifacts</div>
+          <div class="meta-value">Stempel Merah Audit, Cawan Uji Reagen, Klip Kuningan</div>
+          <div class="chip-group">
+            <span class="chip">red 'FAILED' stamp</span>
+            <span class="chip">reagent test dish</span>
+            <span class="chip">botanical study ledger</span>
+            <span class="chip">glass U-tube clamp</span>
+          </div>
+        </div>
+
+        <div class="meta-box">
+          <div class="meta-label">Human Presence & Wardrobe</div>
+          <div class="meta-value">Hands-Only (Faceless POV), Manset Charcoal Wool / Oxford</div>
+          <div class="chip-group">
+            <span class="chip">100% pure object clips 1-4</span>
+            <span class="chip">charcoal investigator sleeve</span>
+            <span class="chip">wrists covered</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="storyboard-title">
+        <span>Struktur Alur Storyboard (6 Klip Investigasi)</span>
+        <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: normal;">Product Reveal di Klip 5 & 6</span>
+      </div>
+
+      <div class="clips-grid">
+        <!-- Clip 1 -->
+        <div class="clip-card">
+          <div class="clip-header">
+            <span class="clip-number">Klip 1: Hook Investigasi</span>
+            <span class="clip-badge badge-pure">100% Pure Object</span>
+          </div>
+          <div class="vo-quote-box">
+            "Label di depan bilang 'sehat dan alami'... tapi dokumen laboratorium membuktikan hal yang sebaliknya."
+          </div>
+          <div class="clip-desc">
+            Kaca pembesar kuningan di atas map manila stempel merah 'LABORATORY AUDIT: FAILED', menyorot teks kecil kandungan gula tersembunyi.
+          </div>
+          <div class="prompt-snippet">[LAYER 2: PURE OBJECT TRUTH] Strictly 100% Pure Isolated Object Only — ZERO HANDS, NO BODY. Macro top-down aged manila dossier on scarred oak desk; brass magnifying glass distorts stamped document.</div>
+        </div>
+
+        <!-- Clip 2 -->
+        <div class="clip-card">
+          <div class="clip-header">
+            <span class="clip-number">Klip 2: Dekonstruksi Masalah</span>
+            <span class="clip-badge badge-pure">100% Pure Object</span>
+          </div>
+          <div class="vo-quote-box">
+            "Saat diuji dengan reagen sederhana, lemak trans dan gula rafinasi langsung mengendap jadi lendir kental yang menyumbat."
+          </div>
+          <div class="clip-desc">
+            Tetesan zat kimia reagen memicu reaksi koagulasi cairan menjadi gumpalan lendir kuning pekat di cawan petri kaca forensik.
+          </div>
+          <div class="prompt-snippet">[LAYER 2: PURE OBJECT TRUTH] Glass forensic Petri dish on black grid; milky fluid separates into thick coagulated sludge under diagnostic chemical drop.</div>
+        </div>
+
+        <!-- Clip 3 -->
+        <div class="clip-card">
+          <div class="clip-header">
+            <span class="clip-number">Klip 3: Temuan Bahan Alami</span>
+            <span class="clip-badge badge-pure">100% Pure Object</span>
+          </div>
+          <div class="vo-quote-box">
+            "Tapi ada satu bahan kuno yang tercatat dalam riset farmasi ratusan tahun: Bawang putih tunggal yang terfermentasi sempurna."
+          </div>
+          <div class="clip-desc">
+            Siung utuh bawang lanang di atas buku arsip botani kuno, dilapisi lelehan madu mentah berkilau di bawah lampu meja bankir.
+          </div>
+          <div class="prompt-snippet">[LAYER 2: PURE OBJECT TRUTH] Whole solo garlic bulb over vintage botanical ledger; golden raw honey drips onto translucent bulb, activating allicin gloss.</div>
+        </div>
+
+        <!-- Clip 4 -->
+        <div class="clip-card">
+          <div class="clip-header">
+            <span class="clip-number">Klip 4: Mekanisme Reaksi</span>
+            <span class="clip-badge badge-pure">100% Pure Object</span>
+          </div>
+          <div class="vo-quote-box">
+            "Senyawa bioaktifnya bekerja seperti pelarut alami: Mengurai kekentalan darah tanpa merusak dinding pembuluh."
+          </div>
+          <div class="clip-desc">
+            Tabung gelas U berpenjepit kuningan: tetesan madu fermentasi melarutkan gumpalan keruh seketika menjadi aliran jernih keemasan.
+          </div>
+          <div class="prompt-snippet">[LAYER 2: PURE OBJECT TRUTH] Optical glass U-tube held in brass clamp; dense amber drop instantly dissolves cloudy sludge into free-flowing golden stream.</div>
+        </div>
+
+        <!-- Clip 5 -->
+        <div class="clip-card">
+          <div class="clip-header">
+            <span class="clip-number">Klip 5: Product Reveal</span>
+            <span class="clip-badge badge-reveal">GarliBee Reveal</span>
+          </div>
+          <div class="vo-quote-box">
+            "Inilah GarliBee. Formulasi murni madu mentah dan bawang putih tunggal yang difermentasikan secara presisi."
+          </div>
+          <div class="clip-desc">
+            Toples squircle GarliBee dengan label matte-black dan logo emas diletakkan di atas map kasus di bawah sorotan lampu bankir.
+          </div>
+          <div class="prompt-snippet">[LAYER 2: PRODUCT TRUTH] Authentic GarliBee jar: squircle glass, threaded silver lid, matte-black label with gold droplet logo centered on open confidential case file folder.</div>
+        </div>
+
+        <!-- Clip 6 -->
+        <div class="clip-card">
+          <div class="clip-header">
+            <span class="clip-number">Klip 6: Ritual Harian & Outro</span>
+            <span class="clip-badge badge-reveal">Ritual & Hero</span>
+          </div>
+          <div class="vo-quote-box">
+            "Satu sendok setiap hari sebelum tidur. Kembalikan aliran darah bersih tanpa obat kimia sintetis. Dapatkan GarliBee sekarang."
+          </div>
+          <div class="clip-desc">
+            Sendok kuningan antik mengangkat siung bawang lanang berlumur madu berkilau di samping toples GarliBee; tangan bermanset charcoal wool.
+          </div>
+          <div class="prompt-snippet">[LAYER 2: PRODUCT TRUTH] Antique brushed brass spoon lifts glistening fermented solo garlic bulb; faceless hand in charcoal wool investigator sleeve; GarliBee jar sharp beside it.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRESET 2: FACT-CHECK PINBOARD MATRIX -->
+    <div class="preset-card" id="cardMode3" style="display: none;">
+      <div class="preset-header">
+        <div>
+          <div class="preset-title">
+            <span>📌 Fact-Check Pinboard (Cold Case Matrix)</span>
+            <span class="preset-key-tag">key: deductive_pinboard_matrix</span>
+          </div>
+          <p style="margin: 0.5rem 0 0 0; color: var(--text-secondary); font-size: 0.9rem;">
+            Schema Version: 2.0 &bull; Object-Centric Faceless &bull; 9:16 Aspect Ratio &bull; Deductive Mystery Noir
+          </p>
+        </div>
+      </div>
+
+      <div class="meta-grid">
+        <div class="meta-box">
+          <div class="meta-label">Environment & Materials</div>
+          <div class="meta-value">Papan Gabus Kasar, Benang Merah Papan Bukti, Pin Logam</div>
+          <div class="chip-group">
+            <span class="chip">dense natural corkboard</span>
+            <span class="chip">taut red woolen string</span>
+            <span class="chip">metallic pushpins</span>
+            <span class="chip">printed newspaper clippings</span>
+          </div>
+        </div>
+
+        <div class="meta-box">
+          <div class="meta-label">Lighting & Atmosphere</div>
+          <div class="meta-value">Side Raking Light 3800K (David Fincher Noir)</div>
+          <div class="chip-group">
+            <span class="chip">hard lateral raking light</span>
+            <span class="chip">deep pinhead shadows</span>
+            <span class="chip">tactile paper grain</span>
+            <span class="chip">cinematic suspense</span>
+          </div>
+        </div>
+
+        <div class="meta-box">
+          <div class="meta-label">Props & Artifacts</div>
+          <div class="meta-value">Diagram Anatomi Pembuluh, Teks Highlight Kuning, Prisma Optik</div>
+          <div class="chip-group">
+            <span class="chip">arterial anatomy chart</span>
+            <span class="chip">yellow highlighter mark</span>
+            <span class="chip">refraction prism node</span>
+            <span class="chip">handwritten note cards</span>
+          </div>
+        </div>
+
+        <div class="meta-box">
+          <div class="meta-label">Human Presence & Wardrobe</div>
+          <div class="meta-value">Hands-Only (Faceless POV), Lengan Trench Coat / Rajut Wol Gelap</div>
+          <div class="chip-group">
+            <span class="chip">100% pure object clips 1-4</span>
+            <span class="chip">dark trench coat sleeve</span>
+            <span class="chip">wrists covered</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="storyboard-title">
+        <span>Struktur Alur Storyboard (6 Klip Investigasi)</span>
+        <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: normal;">Product Reveal di Klip 5 & 6</span>
+      </div>
+
+      <div class="clips-grid">
+        <!-- Clip 1 -->
+        <div class="clip-card">
+          <div class="clip-header">
+            <span class="clip-number">Klip 1: Hook Investigasi</span>
+            <span class="clip-badge badge-pure">100% Pure Object</span>
+          </div>
+          <div class="vo-quote-box">
+            "Sering pusing leher belakang, gampang lelah, dan ngantuk setelah makan... Anda kira cuma kebetulan biasa?"
+          </div>
+          <div class="clip-desc">
+            Kamera macro meluncur menyusuri benang merah tegang dari foto orang memegangi leher langsung menancap ke kartu peringatan hipertensi.
+          </div>
+          <div class="prompt-snippet">[LAYER 2: PURE OBJECT TRUTH] Strictly 100% Pure Isolated Object Only — ZERO HANDS, NO BODY. Macro tracking along taut red investigation string pinned to dense corkboard toward hypertension card.</div>
+        </div>
+
+        <!-- Clip 2 -->
+        <div class="clip-card">
+          <div class="clip-header">
+            <span class="clip-number">Klip 2: Dekonstruksi Masalah</span>
+            <span class="clip-badge badge-pure">100% Pure Object</span>
+          </div>
+          <div class="vo-quote-box">
+            "Ternyata ada benang merahnya: Kolesterol jahat dan lonjakan gula darah diam-diam menyempitkan aliran pembuluh setiap hari."
+          </div>
+          <div class="clip-desc">
+            Diagram anatomi pembuluh darah vintage dilingkari spidol merah tebal pada titik penyempitan plak, dengan beberapa benang merah bersilangan.
+          </div>
+          <div class="prompt-snippet">[LAYER 2: PURE OBJECT TRUTH] Vintage medical anatomical chart of artery pinned to corkboard; bold red marker circle highlights severe constriction with intersecting strings.</div>
+        </div>
+
+        <!-- Clip 3 -->
+        <div class="clip-card">
+          <div class="clip-header">
+            <span class="clip-number">Klip 3: Temuan Bahan Alami</span>
+            <span class="clip-badge badge-pure">100% Pure Object</span>
+          </div>
+          <div class="vo-quote-box">
+            "Fakta medis mengungkap solusinya: Fermentasi bawang putih tunggal mengandung antioksidan 10 kali lipat dibanding bawang biasa."
+          </div>
+          <div class="clip-desc">
+            Kliping cetak jurnal medis dengan foto siung bawang lanang berlumur madu; teks stabilo kuning 'SAC & ALLICIN: 10X BIOACTIVITY'.
+          </div>
+          <div class="prompt-snippet">[LAYER 2: PURE OBJECT TRUTH] Printed scientific study clipping on corkboard with photo of solo garlic soaking in honey; yellow highlighted text '10X BIOACTIVITY'.</div>
+        </div>
+
+        <!-- Clip 4 -->
+        <div class="clip-card">
+          <div class="clip-header">
+            <span class="clip-number">Klip 4: Mekanisme Reaksi</span>
+            <span class="clip-badge badge-pure">100% Pure Object</span>
+          </div>
+          <div class="vo-quote-box">
+            "Mengencerkan plak kental secara alami, melancarkan sirkulasi, dan mengembalikan energi tubuh yang hilang."
+          </div>
+          <div class="clip-desc">
+            Prisma optik membiaskan seberkas cahaya emas hangat ke kartu indeks solusi: 'Plak Kolesterol Rontok' dan 'Aliran Darah Lancar'.
+          </div>
+          <div class="prompt-snippet">[LAYER 2: PURE OBJECT TRUTH] Optical prism on board refracts light into radiant golden beam illuminating interconnected index cards reading 'Plak Kolesterol Rontok'.</div>
+        </div>
+
+        <!-- Clip 5 -->
+        <div class="clip-card">
+          <div class="clip-header">
+            <span class="clip-number">Klip 5: Product Reveal</span>
+            <span class="clip-badge badge-reveal">GarliBee Reveal</span>
+          </div>
+          <div class="vo-quote-box">
+            "Jawaban dari seluruh teka-teki kesehatan Anda: GarliBee. Madu mentah murni dan bawang putih tunggal terfermentasi."
+          </div>
+          <div class="clip-desc">
+            Toples GarliBee berdiri di rak kayu tepat di depan papan gabus; seluruh benang merah investigasi berkonvergensi di balik toples.
+          </div>
+          <div class="prompt-snippet">[LAYER 2: PRODUCT TRUTH] Authentic GarliBee jar: squircle glass, threaded silver lid, matte-black label on wooden shelf in front of corkboard with red strings converging behind it.</div>
+        </div>
+
+        <!-- Clip 6 -->
+        <div class="clip-card">
+          <div class="clip-header">
+            <span class="clip-number">Klip 6: Ritual Harian & Outro</span>
+            <span class="clip-badge badge-reveal">Ritual & Hero</span>
+          </div>
+          <div class="vo-quote-box">
+            "Hentikan menebak-nebak kesehatan Anda. Mulai satu sendok GarliBee malam ini, dan rasakan perbedaannya besok pagi."
+          </div>
+          <div class="clip-desc">
+            Sendok kayu zaitun mengangkat siung bawang lanang berkilau madu di samping toples GarliBee; tangan bermanset trench-coat wol gelap.
+          </div>
+          <div class="prompt-snippet">[LAYER 2: PRODUCT TRUTH] Minimalist olive-wood spoon lifts glistening fermented solo garlic bulb; faceless hand in dark trench-coat cuff; GarliBee jar crisp in frame.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchMode(mode) {
+      const card1 = document.getElementById('cardMode1');
+      const card3 = document.getElementById('cardMode3');
+      const btn1 = document.getElementById('btnMode1');
+      const btn3 = document.getElementById('btnMode3');
+
+      if (mode === 'mode1') {
+        card1.style.display = 'block';
+        card3.style.display = 'none';
+        btn1.classList.add('active');
+        btn3.classList.remove('active');
+      } else {
+        card1.style.display = 'none';
+        card3.style.display = 'block';
+        btn1.classList.remove('active');
+        btn3.classList.add('active');
+      }
+    }
+  </script>
+</body>
+</html>

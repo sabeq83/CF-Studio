@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.130 — Integrate investigative_faceless visual style and presets (03/11/2026)
+- Add investigative_faceless visual style to content planner and pillar campaign forms
+- Register forensic_whistleblower_archive and deductive_pinboard_matrix presets
+- Inject INVESTIGATION_NARRATIVE_KB into generator pipeline with dynamic N-clip pacing
+
 ## V2.32.129 — Make brand profile content pillars optional for product campaigns (03/11/2026)
 - Add use_brand_pillars option to content planners
 - Allow product campaigns to bypass brand pillars while preserving brand context and affiliate binding

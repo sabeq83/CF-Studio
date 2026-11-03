@@ -1847,6 +1847,7 @@ export default function OrganicPillarPage() {
                         <select className="form-input" value={visualStyle} onChange={e => setVisualStyle(e.target.value)}>
                           <option value="Cinematic">Cinematic</option>
                           <option value="metaphoric_faceless">🎭 Metafora Objek Faceless (Sinematik)</option>
+                          <option value="investigative_faceless">🔍 Investigasi Fakta Faceless (Whistleblower &amp; Cold Case)</option>
                           <option value="UGC">UGC</option>
                           <option value="Macrophotography">Macrophotography</option>
                         </select>

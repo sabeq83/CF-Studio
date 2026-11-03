@@ -1535,12 +1535,18 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleGenerate}>
                     >
                       <option value="Cinematic">Cinematic (Sinematik Standar)</option>
                       <option value="metaphoric_faceless">🎭 Metafora Objek Faceless (Sinematik)</option>
+                      <option value="investigative_faceless">🔍 Investigasi Fakta Faceless (Whistleblower &amp; Cold Case)</option>
                       <option value="UGC">UGC (User-Generated Content)</option>
                       <option value="Macrophotography">Macrophotography (Makro &amp; Tekstur Bahan)</option>
                     </select>
                     {visualStyle === 'metaphoric_faceless' && (
                       <div style={{ marginTop: '6px', fontSize: '11px', color: 'var(--status-info)', lineHeight: 1.4 }}>
                         ✨ <em>Opening hook akan menggunakan metafora fisik benda nyata (faceless). Adegan solusi/edukasi tetap dapat menampilkan studio dapur botani estetik secara proporsional.</em>
+                      </div>
+                    )}
+                    {visualStyle === 'investigative_faceless' && (
+                      <div style={{ marginTop: '6px', fontSize: '11px', color: 'var(--status-info)', lineHeight: 1.4 }}>
+                        🔍 <em>Penyelidikan data lab/arsip berkas kasus tanpa wajah (faceless). Klip 1 s/d N-2 murni bukti dokumen/forensik terisolasi, Klip N-1 Product Reveal (The Primary Evidence), dan Klip N Ritual Sendok POV.</em>
                       </div>
                     )}
                   </div>

@@ -1208,6 +1208,7 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit}>
                       <select value={visualStyle} onChange={e => setVisualStyle(e.target.value)} style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}>
                         <option value="Cinematic">Cinematic</option>
                         <option value="metaphoric_faceless">🎭 Metafora Objek Faceless (Sinematik)</option>
+                        <option value="investigative_faceless">🔍 Investigasi Fakta Faceless (Whistleblower &amp; Cold Case)</option>
                         <option value="UGC">UGC</option>
                         <option value="Macrophotography">Macrophotography</option>
                       </select>
