@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.145 — Integrasi Motion Text Engine & Video Transitions Fase 2 (05/11/2026)
+- Mesin motion text SVG Sharp 3 style (TikTok, CapCut, Clean White)
+- Transisi video FFmpeg XFade multi-klip
+- Kontrol UI Fase 2 di Settings & Quick VO modal
+- Schema migration PostgreSQL dev & public
+
 ## V2.32.144 — Add Quick Edit Voiceover Modal for completed OPC items (04/11/2026)
 - Add Quick Edit Voiceover modal in campaign detail UI
 - Add PATCH endpoint for voiceover revision with auto-remux

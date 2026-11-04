@@ -1,22 +1,26 @@
 import { NextResponse } from 'next/server';
-import { getDb, updatePillarCampaignItem } from '@/lib/db';
+import { getDb, updatePillarCampaignItem, updatePillarCampaign } from '@/lib/db';
 import { withTenantContext } from '@/lib/auth';
 
 export const GET = withTenantContext(async (request, { params }) => {
   try {
     const { itemId } = await params;
     const db = getDb();
-    const item = await db.prepare('SELECT id, result_json, new_video_plan_json, visual_status, visual_clip_paths FROM pillar_campaign_items WHERE id = ?').get(itemId);
+    const item = await db.prepare('SELECT id, campaign_id, result_json, new_video_plan_json, visual_status, visual_clip_paths FROM pillar_campaign_items WHERE id = ?').get(itemId);
     if (!item) {
       return NextResponse.json({ success: false, error: 'Item kampanye tidak ditemukan.' }, { status: 404 });
     }
+    const campaign = await db.prepare('SELECT enable_motion_text, motion_text_style, video_transition FROM pillar_campaigns WHERE id = ?').get(item.campaign_id);
     const resultJson = JSON.parse(item.result_json || '{}');
     const voiceover = resultJson.voiceover || [];
     return NextResponse.json({
       success: true,
       item_id: itemId,
       voiceover,
-      visual_status: item.visual_status
+      visual_status: item.visual_status,
+      enable_motion_text: campaign?.enable_motion_text !== undefined ? campaign.enable_motion_text : 1,
+      motion_text_style: campaign?.motion_text_style || 'floating_white_yellow',
+      video_transition: campaign?.video_transition || 'fade'
     });
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
@@ -27,7 +31,7 @@ export const PATCH = withTenantContext(async (request, { params }) => {
   try {
     const { itemId } = await params;
     const body = await request.json();
-    const { voiceover, auto_trigger_remux } = body;
+    const { voiceover, auto_trigger_remux, motion_text_style, video_transition, enable_motion_text } = body;
 
     if (!Array.isArray(voiceover) || voiceover.length === 0) {
       return NextResponse.json({ success: false, error: 'Array voiceover tidak valid.' }, { status: 400 });
@@ -37,6 +41,15 @@ export const PATCH = withTenantContext(async (request, { params }) => {
     const item = await db.prepare('SELECT * FROM pillar_campaign_items WHERE id = ?').get(itemId);
     if (!item) {
       return NextResponse.json({ success: false, error: 'Item kampanye tidak ditemukan.' }, { status: 404 });
+    }
+
+    // Update motion text & transition on campaign if provided
+    if (motion_text_style || video_transition || enable_motion_text !== undefined) {
+      const campUpdates = {};
+      if (motion_text_style) campUpdates.motion_text_style = motion_text_style;
+      if (video_transition) campUpdates.video_transition = video_transition;
+      if (enable_motion_text !== undefined) campUpdates.enable_motion_text = enable_motion_text ? 1 : 0;
+      await updatePillarCampaign(item.campaign_id, campUpdates);
     }
 
     let resultJson = JSON.parse(item.result_json || '{}');
@@ -98,3 +111,4 @@ export const PATCH = withTenantContext(async (request, { params }) => {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 });
+

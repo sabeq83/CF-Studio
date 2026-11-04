@@ -143,6 +143,9 @@ export default function PillarCampaignDetailPage() {
   const [quickVoAutoRemux, setQuickVoAutoRemux] = useState(true);
   const [quickVoSaving, setQuickVoSaving] = useState(false);
   const [quickVoToast, setQuickVoToast] = useState(null);
+  const [quickVoMotionStyle, setQuickVoMotionStyle] = useState('floating_white_yellow');
+  const [quickVoTransition, setQuickVoTransition] = useState('fade');
+  const [quickVoEnableMotion, setQuickVoEnableMotion] = useState(true);
 
   const handleOpenQuickVoModal = (item) => {
     let scenes = [];
@@ -171,6 +174,9 @@ export default function PillarCampaignDetailPage() {
     setQuickVoItem(item);
     setQuickVoScenes(scenes);
     setQuickVoAutoRemux(true);
+    setQuickVoMotionStyle(campaign?.motion_text_style || 'floating_white_yellow');
+    setQuickVoTransition(campaign?.video_transition || 'fade');
+    setQuickVoEnableMotion(campaign?.enable_motion_text !== 0);
     setQuickVoModalOpen(true);
   };
 
@@ -199,7 +205,10 @@ export default function PillarCampaignDetailPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           voiceover: quickVoScenes,
-          auto_trigger_remux: quickVoAutoRemux
+          auto_trigger_remux: quickVoAutoRemux,
+          enable_motion_text: quickVoEnableMotion ? 1 : 0,
+          motion_text_style: quickVoMotionStyle,
+          video_transition: quickVoTransition
         })
       });
       const data = await res.json();
@@ -1697,6 +1706,14 @@ export default function PillarCampaignDetailPage() {
             ffmpeg_sfx_volume: campaign.ffmpeg_sfx_volume !== undefined ? Number(campaign.ffmpeg_sfx_volume) : 0.0,
             ffmpeg_bgm_volume: campaign.ffmpeg_bgm_volume !== undefined ? Number(campaign.ffmpeg_bgm_volume) : 0.0,
             ffmpeg_sync_option: campaign.ffmpeg_sync_option || 'smart_sync',
+            enable_motion_text: campaign.enable_motion_text !== 0,
+            motion_text_style: campaign.motion_text_style || 'floating_white_yellow',
+            motion_text_position: campaign.motion_text_position || 'bottom',
+            motion_hook_effect: campaign.motion_hook_effect || 'pop_bounce',
+            motion_story_effect: campaign.motion_story_effect || 'typewriter',
+            motion_cta_effect: campaign.motion_cta_effect || 'pop_bounce',
+            video_transition: campaign.video_transition || 'fade',
+            transition_duration: campaign.transition_duration !== undefined ? Number(campaign.transition_duration) : 0.5,
           }
         }));
       }, 0);
@@ -1925,6 +1942,14 @@ export default function PillarCampaignDetailPage() {
             ffmpeg_sfx_volume: settings.ffmpeg_sfx_volume,
             ffmpeg_bgm_volume: settings.ffmpeg_bgm_volume,
             ffmpeg_sync_option: settings.ffmpeg_sync_option,
+            enable_motion_text: settings.enable_motion_text !== undefined ? (settings.enable_motion_text ? 1 : 0) : (campaign.enable_motion_text !== 0 ? 1 : 0),
+            motion_text_style: settings.motion_text_style || campaign.motion_text_style || 'floating_white_yellow',
+            motion_text_position: settings.motion_text_position || campaign.motion_text_position || 'bottom',
+            motion_hook_effect: settings.motion_hook_effect || campaign.motion_hook_effect || 'pop_bounce',
+            motion_story_effect: settings.motion_story_effect || campaign.motion_story_effect || 'typewriter',
+            motion_cta_effect: settings.motion_cta_effect || campaign.motion_cta_effect || 'pop_bounce',
+            video_transition: settings.video_transition || campaign.video_transition || 'fade',
+            transition_duration: settings.transition_duration !== undefined ? Number(settings.transition_duration) : (campaign.transition_duration || 0.5),
             selected_vo_version: activeVoVersion,
             review_revision: item.review_revision
           })
@@ -1975,6 +2000,14 @@ export default function PillarCampaignDetailPage() {
             ffmpeg_sfx_volume: settings.ffmpeg_sfx_volume,
             ffmpeg_bgm_volume: settings.ffmpeg_bgm_volume,
             ffmpeg_sync_option: settings.ffmpeg_sync_option,
+            enable_motion_text: settings.enable_motion_text !== undefined ? (settings.enable_motion_text ? 1 : 0) : (campaign.enable_motion_text !== 0 ? 1 : 0),
+            motion_text_style: settings.motion_text_style || campaign.motion_text_style || 'floating_white_yellow',
+            motion_text_position: settings.motion_text_position || campaign.motion_text_position || 'bottom',
+            motion_hook_effect: settings.motion_hook_effect || campaign.motion_hook_effect || 'pop_bounce',
+            motion_story_effect: settings.motion_story_effect || campaign.motion_story_effect || 'typewriter',
+            motion_cta_effect: settings.motion_cta_effect || campaign.motion_cta_effect || 'pop_bounce',
+            video_transition: settings.video_transition || campaign.video_transition || 'fade',
+            transition_duration: settings.transition_duration !== undefined ? Number(settings.transition_duration) : (campaign.transition_duration || 0.5),
             only_save: true,
             selected_vo_version: activeVoVersion,
             review_revision: item.review_revision
@@ -3083,6 +3116,89 @@ export default function PillarCampaignDetailPage() {
                           <input type="range" min="0.0" max="1.0" step="0.05" disabled={isReadOnly} value={settings.ffmpeg_bgm_volume !== undefined ? settings.ffmpeg_bgm_volume : 0.0} onChange={(e) => updateSettingField('ffmpeg_bgm_volume', Number(e.target.value))} style={{ width: '100%' }} />
                         </div>
                       </div>
+
+                      {/* ✨ Motion Text & Subtitles Overlay */}
+                      <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '10px', marginTop: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-primary)' }}>✨ Motion Text &amp; Subtitle Overlay</span>
+                          <label className="switch">
+                            <input
+                              type="checkbox"
+                              checked={settings.enable_motion_text !== 0 && settings.enable_motion_text !== false}
+                              disabled={isReadOnly}
+                              onChange={(e) => updateSettingField('enable_motion_text', e.target.checked ? 1 : 0)}
+                            />
+                            <span className="slider round"></span>
+                          </label>
+                        </div>
+                        {(settings.enable_motion_text !== 0 && settings.enable_motion_text !== false) && (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                              <div>
+                                <label style={{ display: 'block', fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '3px' }}>Style Teks</label>
+                                <select
+                                  disabled={isReadOnly}
+                                  value={settings.motion_text_style || 'floating_white_yellow'}
+                                  onChange={(e) => updateSettingField('motion_text_style', e.target.value)}
+                                  style={{ width: '100%', padding: '5px 8px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '4px', fontSize: '0.7rem' }}
+                                >
+                                  <option value="floating_white_yellow">🟡 Floating Putih ➔ Kuning (TikTok)</option>
+                                  <option value="floating_black_on_white">🔲 Floating Hitam BG Putih (CapCut)</option>
+                                  <option value="minimal_white">◻️ Minimalist Clean White Card</option>
+                                </select>
+                              </div>
+                              <div>
+                                <label style={{ display: 'block', fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '3px' }}>Posisi di Layar</label>
+                                <select
+                                  disabled={isReadOnly}
+                                  value={settings.motion_text_position || 'bottom'}
+                                  onChange={(e) => updateSettingField('motion_text_position', e.target.value)}
+                                  style={{ width: '100%', padding: '5px 8px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '4px', fontSize: '0.7rem' }}
+                                >
+                                  <option value="bottom">Bawah Layar (Safe Zone TikTok/Reels)</option>
+                                  <option value="center">Tengah Layar (Center Focus)</option>
+                                  <option value="top">Atas Layar (Top Banner)</option>
+                                </select>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* ✂️ Transisi Video FFmpeg XFade */}
+                      <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '10px', marginTop: '6px' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-primary)', display: 'block', marginBottom: '8px' }}>✂️ Transisi Video (FFmpeg XFade)</span>
+                        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '8px' }}>
+                          <div>
+                            <select
+                              disabled={isReadOnly}
+                              value={settings.video_transition || 'fade'}
+                              onChange={(e) => updateSettingField('video_transition', e.target.value)}
+                              style={{ width: '100%', padding: '5px 8px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '4px', fontSize: '0.7rem' }}
+                            >
+                              <option value="fade">Smooth Dissolve (Crossfade)</option>
+                              <option value="fadewhite">White Flash</option>
+                              <option value="fadeblack">Fade to Black</option>
+                              <option value="slideleft">Slide Left</option>
+                              <option value="zoomin">Zoom In</option>
+                              <option value="circleopen">Circle Open</option>
+                              <option value="cut">Hard Cut (Tanpa Efek Transisi)</option>
+                            </select>
+                          </div>
+                          <div>
+                            <select
+                              disabled={isReadOnly}
+                              value={settings.transition_duration !== undefined ? settings.transition_duration : 0.5}
+                              onChange={(e) => updateSettingField('transition_duration', Number(e.target.value))}
+                              style={{ width: '100%', padding: '5px 8px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '4px', fontSize: '0.7rem' }}
+                            >
+                              <option value={0.3}>Cepat (0.3s)</option>
+                              <option value={0.5}>Standar (0.5s)</option>
+                              <option value={0.8}>Halus (0.8s)</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -3881,54 +3997,106 @@ export default function PillarCampaignDetailPage() {
                   padding: '14px 20px',
                   borderTop: '1px solid var(--border-subtle)',
                   display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
+                  flexDirection: 'column',
+                  gap: '12px',
                   background: 'var(--surface-raised)'
                 }}
               >
-                <label
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    fontSize: '0.82rem',
-                    color: 'var(--text-secondary)',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={quickVoAutoRemux}
-                    onChange={(e) => setQuickVoAutoRemux(e.target.checked)}
-                    disabled={quickVoSaving}
-                  />
-                  <span>Langsung trigger <strong>TTS &amp; Re-mux otomatis</strong></span>
-                </label>
+                {/* Re-mux Motion Text & Transitions Settings */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', paddingBottom: '12px', borderBottom: '1px solid var(--border-subtle)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-primary)' }}>✨ Pengaturan Re-mux (Motion Text &amp; Transisi)</span>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={quickVoEnableMotion}
+                        onChange={(e) => setQuickVoEnableMotion(e.target.checked)}
+                        disabled={quickVoSaving}
+                      />
+                      <span>Bakar Motion Text</span>
+                    </label>
+                  </div>
+                  {quickVoEnableMotion && (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: '3px', fontWeight: 600 }}>Style Motion Text</label>
+                        <select
+                          value={quickVoMotionStyle}
+                          onChange={(e) => setQuickVoMotionStyle(e.target.value)}
+                          disabled={quickVoSaving}
+                          style={{ width: '100%', padding: '6px 8px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '4px', fontSize: '0.72rem' }}
+                        >
+                          <option value="floating_white_yellow">🟡 Floating Putih ➔ Kuning (TikTok)</option>
+                          <option value="floating_black_on_white">🔲 Floating Hitam BG Putih (CapCut)</option>
+                          <option value="minimal_white">◻️ Minimalist Clean White Card</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: '3px', fontWeight: 600 }}>Transisi Antar Klip</label>
+                        <select
+                          value={quickVoTransition}
+                          onChange={(e) => setQuickVoTransition(e.target.value)}
+                          disabled={quickVoSaving}
+                          style={{ width: '100%', padding: '6px 8px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '4px', fontSize: '0.72rem' }}
+                        >
+                          <option value="fade">Smooth Dissolve (Crossfade)</option>
+                          <option value="fadewhite">White Flash</option>
+                          <option value="fadeblack">Fade to Black</option>
+                          <option value="slideleft">Slide Left</option>
+                          <option value="zoomin">Zoom In</option>
+                          <option value="circleopen">Circle Open</option>
+                          <option value="cut">Hard Cut (Tanpa Efek Transisi)</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={handleCloseQuickVoModal}
-                    disabled={quickVoSaving}
-                    style={{ padding: '8px 16px' }}
-                  >
-                    Batal
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={handleSaveQuickVo}
-                    disabled={quickVoSaving}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                  <label
                     style={{
-                      padding: '8px 18px',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '6px'
+                      gap: '8px',
+                      fontSize: '0.82rem',
+                      color: 'var(--text-secondary)',
+                      cursor: 'pointer'
                     }}
                   >
-                    {quickVoSaving ? '⏳ Menyimpan...' : '💾 Simpan & Re-mux'}
-                  </button>
+                    <input
+                      type="checkbox"
+                      checked={quickVoAutoRemux}
+                      onChange={(e) => setQuickVoAutoRemux(e.target.checked)}
+                      disabled={quickVoSaving}
+                    />
+                    <span>Langsung trigger <strong>TTS &amp; Re-mux otomatis</strong></span>
+                  </label>
+
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={handleCloseQuickVoModal}
+                      disabled={quickVoSaving}
+                      style={{ padding: '8px 16px' }}
+                    >
+                      Batal
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      onClick={handleSaveQuickVo}
+                      disabled={quickVoSaving}
+                      style={{
+                        padding: '8px 18px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      {quickVoSaving ? '⏳ Menyimpan...' : '💾 Simpan & Re-mux'}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

@@ -121,3 +121,4 @@ test('Quick Edit Voiceover rejects auto-remux when visual clips are missing or i
   const canAutoRemux = itemIncomplete.visual_status === 'completed' && Array.isArray(visualPaths) && visualPaths.length > 0;
   assert.equal(canAutoRemux, false, 'Must disallow auto-remux if visuals are not completed');
 });
+

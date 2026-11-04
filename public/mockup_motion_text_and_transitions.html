@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Interaktif Motion Text &amp; XFade Transitions — MAKNA Flow</title>
+  <link rel="stylesheet" href="recipe-theme.css">
+  <style>
+    /* Semantic CSS Tokens from app/theme.css */
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --surface-subtle: rgba(28, 42, 64, 0.4);
+      --input-bg: #0c1422;
+      --overlay-backdrop: rgba(2, 6, 14, 0.78);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --border-color: #26354a;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+      --focus-ring: #2dd4bf;
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --surface-subtle: rgba(237, 242, 247, 0.6);
+      --input-bg: #ffffff;
+      --overlay-backdrop: rgba(15, 23, 42, 0.54);
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --border-color: #d8e0ea;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --link: #075ea8;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+      --shadow-modal: 0 26px 80px rgba(31, 45, 61, 0.22);
+      --focus-ring: #087f73;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* Container */
+    .app-wrapper {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    /* Header Nav */
+    .app-header {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-card);
+    }
+    .app-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--status-success-soft);
+      border: 1px solid var(--status-success);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0;
+    }
+    .brand-subtitle {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin: 2px 0 0;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 16px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      transition: var(--transition);
+      border: 1px solid transparent;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border-color: var(--action-primary);
+    }
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+    }
+    .btn-secondary {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      border-color: var(--border-subtle);
+    }
+    .btn-secondary:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+
+    /* Main Studio Grid */
+    .studio-grid {
+      display: grid;
+      grid-template-columns: 440px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* Left: Phone Simulator Card */
+    .phone-simulator-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+      position: sticky;
+      top: 24px;
+    }
+    .phone-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .phone-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .phone-badge {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      padding: 2px 8px;
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      border-radius: 9999px;
+      color: var(--action-primary);
+    }
+
+    /* Smartphone Frame (9:16) */
+    .phone-frame {
+      width: 100%;
+      aspect-ratio: 9/16;
+      max-height: 600px;
+      margin: 0 auto;
+      background: #000;
+      border-radius: 28px;
+      border: 6px solid #1e293b;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+    .phone-notch {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90px;
+      height: 18px;
+      background: #1e293b;
+      border-radius: 10px;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .phone-speaker {
+      width: 36px;
+      height: 3px;
+      background: #334155;
+      border-radius: 2px;
+    }
+
+    /* Video Canvas Simulator (Layer A & Layer B) */
+    .phone-video-stage {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    .video-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 24px;
+      transition: none;
+      background-size: cover;
+      background-position: center;
+    }
+    /* Clip A background (Opening Hook / Problem) */
+    .video-layer-a {
+      background-image: linear-gradient(180deg, rgba(15,23,42,0.2) 0%, rgba(15,23,42,0.85) 100%),
+                        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1280" viewBox="0 0 720 1280"><rect width="720" height="1280" fill="%231e293b"/><circle cx="360" cy="500" r="180" fill="%23334155"/><text x="360" y="520" font-family="sans-serif" font-size="32" fill="%2394a3b8" text-anchor="middle">🎬 KLIP 1: OPENING HOOK</text><text x="360" y="570" font-family="sans-serif" font-size="20" fill="%2364748b" text-anchor="middle">Visual: Ruang Meja &amp; Rekam Medis</text></svg>');
+      z-index: 10;
+    }
+    /* Clip B background (Story / Product Reveal) */
+    .video-layer-b {
+      background-image: linear-gradient(180deg, rgba(15,23,42,0.2) 0%, rgba(15,23,42,0.85) 100%),
+                        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1280" viewBox="0 0 720 1280"><rect width="720" height="1280" fill="%230f3a38"/><circle cx="360" cy="500" r="180" fill="%23134e4a"/><text x="360" y="520" font-family="sans-serif" font-size="32" fill="%232dd4bf" text-anchor="middle">🎬 KLIP 2: SOLUSI PRODUK</text><text x="360" y="570" font-family="sans-serif" font-size="20" fill="%235eead4" text-anchor="middle">Visual: Madu Bawang Lanang Garlibee</text></svg>');
+      z-index: 20;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Flash Transition Overlay */
+    .flash-overlay {
+      position: absolute;
+      inset: 0;
+      background: #ffffff;
+      opacity: 0;
+      z-index: 30;
+      pointer-events: none;
+    }
+    .black-overlay {
+      position: absolute;
+      inset: 0;
+      background: #000000;
+      opacity: 0;
+      z-index: 30;
+      pointer-events: none;
+    }
+
+    /* TikTok UI Overlay Mockup (Watermark & Controls) */
+    .phone-tiktok-ui {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 34px 14px 18px;
+    }
+    .phone-top-bar {
+      display: flex;
+      justify-content: space-between;
+      color: rgba(255,255,255,0.7);
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+    .phone-right-actions {
+      align-self: flex-end;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 70px;
+    }
+    .mock-action-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 14px;
+    }
+
+    /* ======================================================== */
+    /* MOTION TEXT BADGE CONTAINER                              */
+    /* ======================================================== */
+    .motion-text-wrapper {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 86%;
+      z-index: 45;
+      transition: top 0.2s, bottom 0.2s, width 0.2s;
+    }
+    .motion-text-wrapper.pos-bottom {
+      bottom: 85px;
+      top: auto;
+    }
+    .motion-text-wrapper.pos-center {
+      top: 50%;
+      bottom: auto;
+      transform: translate(-50%, -50%);
+    }
+    .motion-text-wrapper.pos-top {
+      top: 48px;
+      bottom: auto;
+    }
+
+    /* The Badge Container Box */
+    .motion-badge-box {
+      border-radius: 12px;
+      padding: 12px 14px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      transition: all 0.2s ease;
+    }
+
+    /* ======================================================== */
+    /* 3 SIMPLE STYLES                                          */
+    /* ======================================================== */
+
+    /* Style 1: Floating Text (Capital Font Warna Putih Berubah Kuning ketika diucapkan) */
+    .theme-floating_white_yellow {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      padding: 0 !important;
+      text-align: center;
+    }
+    .theme-floating_white_yellow .badge-header {
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+    .theme-floating_white_yellow .badge-tag {
+      background: #facc15;
+      color: #000000;
+      font-weight: 900;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+    }
+    .theme-floating_white_yellow .badge-brand {
+      color: #ffffff;
+      text-shadow: 0 1px 4px #000;
+    }
+    .theme-floating_white_yellow .badge-narration-text {
+      text-transform: uppercase !important;
+      font-family: var(--font-sans) !important;
+      font-weight: 900 !important;
+      font-size: 1.15rem !important;
+      line-height: 1.35 !important;
+      color: #ffffff !important;
+      text-align: center;
+      text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 0 4px 12px rgba(0,0,0,0.95) !important;
+    }
+    .karaoke-word-wy {
+      display: inline-block;
+      color: #ffffff;
+      margin: 0 3px;
+      transition: color 0.1s, transform 0.1s;
+    }
+    .karaoke-word-wy.active {
+      color: #facc15 !important;
+      transform: scale(1.18);
+      text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 0 0 18px rgba(250, 204, 21, 0.95) !important;
+    }
+
+    /* Style 2: Floating Text (Capital Font warna hitam BG Warna Putih, keluar per kata ketika diucapkan) */
+    .theme-floating_black_on_white {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      padding: 0 !important;
+      text-align: center;
+    }
+    .theme-floating_black_on_white .badge-header {
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+    .theme-floating_black_on_white .badge-tag {
+      background: #ffffff;
+      color: #000000;
+      font-weight: 900;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+    }
+    .theme-floating_black_on_white .badge-brand {
+      color: #ffffff;
+      text-shadow: 0 1px 4px #000;
+    }
+    .theme-floating_black_on_white .badge-narration-text {
+      text-transform: uppercase !important;
+      font-family: var(--font-sans) !important;
+      font-weight: 900 !important;
+      font-size: 1.05rem !important;
+      line-height: 1.8 !important;
+      text-align: center;
+      min-height: 48px;
+    }
+    .pill-word-bw {
+      display: inline-block;
+      background: #ffffff;
+      color: #000000 !important;
+      padding: 3px 8px;
+      margin: 3px 3px;
+      border-radius: 6px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.7);
+      animation: popPillWord 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    @keyframes popPillWord {
+      0% { transform: scale(0.6); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Style 3: Minimalist Clean White (box yang sekarang) */
+    .theme-minimal_white {
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(203, 213, 225, 0.8);
+      color: #0f172a;
+      border-radius: 12px;
+      padding: 12px 14px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    .theme-minimal_white .badge-tag {
+      background: #0f172a;
+      color: #ffffff;
+    }
+    .theme-minimal_white .badge-brand {
+      color: #475569;
+    }
+    .theme-minimal_white .badge-narration-text {
+      color: #0f172a !important;
+      font-weight: 600;
+    }
+
+    /* Badge Inner Elements */
+    .badge-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .badge-tag {
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      padding: 2px 7px;
+      border-radius: 6px;
+      text-transform: uppercase;
+    }
+    .badge-brand {
+      font-size: 0.65rem;
+      font-weight: 600;
+      opacity: 0.85;
+    }
+    .badge-narration-text {
+      font-size: 0.86rem;
+      font-weight: 600;
+      line-height: 1.4;
+      margin: 0;
+      min-height: 38px;
+      color: #ffffff;
+    }
+    .typewriter-cursor {
+      display: inline-block;
+      width: 2px;
+      height: 14px;
+      background: var(--action-primary);
+      vertical-align: middle;
+      margin-left: 2px;
+      animation: blink 0.8s infinite;
+    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    /* Word Highlight (Karaoke) Styling */
+    .karaoke-word {
+      display: inline-block;
+      transition: background 0.15s, color 0.15s, transform 0.15s;
+      padding: 0 2px;
+      border-radius: 3px;
+    }
+    .karaoke-word.active {
+      background: #facc15;
+      color: #0f172a;
+      transform: scale(1.08);
+      font-weight: 800;
+    }
+
+    /* ANIMATION KEYFRAMES */
+    /* 1. Pop-In Bounce */
+    .anim-pop_bounce {
+      animation: popBounce 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    @keyframes popBounce {
+      0% { transform: scale(0.65); opacity: 0; }
+      70% { transform: scale(1.06); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* 2. Smooth Slide-Up */
+    .anim-slide_up {
+      animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes slideUp {
+      0% { transform: translateY(30px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+
+    /* 3. Kinetic Ribbon Slide-In */
+    .anim-ribbon_in {
+      animation: ribbonIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes ribbonIn {
+      0% { transform: translateX(-120%); opacity: 0; }
+      100% { transform: translateX(0); opacity: 1; }
+    }
+
+    /* 4. Blur-to-Focus */
+    .anim-blur_focus {
+      animation: blurFocus 0.4s ease-out forwards;
+    }
+    @keyframes blurFocus {
+      0% { filter: blur(14px); opacity: 0; }
+      100% { filter: blur(0px); opacity: 1; }
+    }
+
+    /* Playback Simulator Controls */
+    .phone-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .playback-button-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .btn-play-anim {
+      background: var(--surface-interactive);
+      color: var(--action-primary);
+      border: 1px solid var(--action-primary);
+      padding: 10px;
+      border-radius: var(--radius-xs);
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-play-anim:hover {
+      background: var(--surface-hover);
+    }
+    .btn-test-transition {
+      background: var(--status-success);
+      color: var(--on-action-primary);
+      border: 1px solid var(--status-success);
+      padding: 10px;
+      border-radius: var(--radius-xs);
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-test-transition:hover {
+      opacity: 0.9;
+    }
+
+    /* Timeline Status Indicator */
+    .timeline-indicator {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      padding: 8px 12px;
+      font-size: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-muted);
+    }
+    .timeline-indicator strong {
+      color: var(--text-primary);
+    }
+
+    /* Right: Control Center Tabs */
+    .control-center-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+    }
+    .tabs-header {
+      display: flex;
+      background: var(--surface-raised);
+      border-bottom: 1px solid var(--border-subtle);
+      overflow-x: auto;
+    }
+    .tab-btn {
+      padding: 14px 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      transition: var(--transition);
+    }
+    .tab-btn:hover {
+      color: var(--text-primary);
+      background: var(--surface-interactive);
+    }
+    .tab-btn.active {
+      color: var(--action-primary);
+      border-bottom-color: var(--action-primary);
+      background: var(--surface);
+    }
+
+    .tab-content {
+      padding: 24px;
+    }
+
+    /* Section Subtitle */
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0 0 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin: 0 0 18px;
+      line-height: 1.5;
+    }
+
+    /* Grid of Interactive Choice Cards */
+    .choices-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .choice-card {
+      background: var(--surface-raised);
+      border: 2px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+    }
+    .choice-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+    }
+    .choice-card.active {
+      border-color: var(--action-primary);
+      background: var(--surface-interactive);
+      box-shadow: 0 0 0 1px var(--action-primary);
+    }
+    .choice-badge {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      margin-bottom: 8px;
+      background: var(--surface);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+    }
+    .choice-card.active .choice-badge {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border-color: var(--status-success);
+    }
+    .choice-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0 0 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .choice-desc {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      margin: 0;
+    }
+
+    /* Form Controls */
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+    .form-control {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      color: var(--text-primary);
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      font-family: inherit;
+      transition: var(--transition);
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: var(--focus-ring);
+    }
+
+    /* Dual Effect Campaign Line Preview (Tab 4) */
+    .campaign-line-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      margin-top: 12px;
+    }
+    .campaign-line-table th, .campaign-line-table td {
+      padding: 10px 14px;
+      border: 1px solid var(--border-subtle);
+      text-align: left;
+    }
+    .campaign-line-table th {
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+    .campaign-line-table tr:nth-child(even) {
+      background: var(--surface-subtle);
+    }
+    .role-tag {
+      font-weight: 700;
+      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .role-hook { color: var(--status-danger); }
+    .role-story { color: var(--status-info); }
+    .role-cta { color: var(--status-success); }
+  </style>
+</head>
+<body>
+
+  <div class="app-wrapper">
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="app-brand">
+        <div class="brand-icon">🎬</div>
+        <div>
+          <h1 class="brand-title">MAKNA Flow — Motion Text &amp; XFade Transition Studio</h1>
+          <p class="brand-subtitle">Simulasi Interaktif &bull; Uji Visual Nyata Efek Teks, Preset Tema, &amp; Transisi Video Sebelum Produksi Fase 2</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-secondary" onclick="toggleTheme()" id="themeToggleBtn">☀️ Light Mode</button>
+        <button class="btn btn-primary" onclick="simulateFullStoryline()">▶ Simulasikan 1 Baris Kampanye Penuh</button>
+      </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="studio-grid">
+
+      <!-- LEFT: PHONE SIMULATOR -->
+      <div class="phone-simulator-card">
+        <div class="phone-header">
+          <div class="phone-title">
+            <span>📱 Layar Simulasi (Mobile 9:16)</span>
+          </div>
+          <span class="phone-badge" id="liveResolutionBadge">720 x 1280 &bull; 60fps</span>
+        </div>
+
+        <!-- Phone Frame -->
+        <div class="phone-frame" id="phoneScreen">
+          <div class="phone-notch"><div class="phone-speaker"></div></div>
+
+          <!-- Video Stage (Layer A and Layer B) -->
+          <div class="phone-video-stage">
+            <div class="video-layer video-layer-a" id="videoLayerA"></div>
+            <div class="video-layer video-layer-b" id="videoLayerB"></div>
+            <div class="flash-overlay" id="flashOverlay"></div>
+            <div class="black-overlay" id="blackOverlay"></div>
+          </div>
+
+          <!-- TikTok / Reels Mockup UI -->
+          <div class="phone-tiktok-ui">
+            <div class="phone-top-bar">
+              <span>9:41</span>
+              <span>LIVE PREVIEW</span>
+            </div>
+            <div class="phone-right-actions">
+              <div class="mock-action-btn">❤️</div>
+              <div class="mock-action-btn">💬</div>
+              <div class="mock-action-btn">↗️</div>
+            </div>
+          </div>
+
+          <!-- Dynamic Motion Text Box -->
+          <div class="motion-text-wrapper pos-bottom" id="motionTextWrap">
+            <div class="motion-badge-box theme-floating_white_yellow" id="motionBadgeBox">
+              <div class="badge-header" id="badgeHeader">
+                <span class="badge-tag" id="badgeTag">HOOK</span>
+                <span class="badge-brand" id="badgeBrand">@garlibee.id</span>
+              </div>
+              <p class="badge-narration-text" id="badgeText">
+                ANGKA KOLESTEROL SUAMI BIKIN MALAM BUNDA JADI GELISAH?<span class="typewriter-cursor" id="badgeCursor"></span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Simulator Buttons -->
+        <div class="phone-controls">
+          <div class="playback-button-row">
+            <button class="btn-play-anim" onclick="triggerTextAnimation()">
+              <span>▶</span> Putar Animasi Teks
+            </button>
+            <button class="btn-test-transition" onclick="triggerVideoTransition()">
+              <span>✂️</span> Uji Transisi Video
+            </button>
+          </div>
+          <div class="timeline-indicator">
+            <span>Adegan: <strong id="screenStatusText">Klip 1 (Opening Hook)</strong> &bull; Style: <strong id="screenStyleBadge">Floating Putih ➔ Kuning</strong></span>
+            <span>Transisi: <strong id="currentTransitionBadge">Crossfade (0.5s)</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: CONTROL CENTER TABS -->
+      <div class="control-center-card">
+        <!-- Tabs Header -->
+        <div class="tabs-header">
+          <button class="tab-btn active" onclick="switchTab('effects', this)">
+            <span>🎭</span> 1. Pilihan Efek Motion Text
+          </button>
+          <button class="tab-btn" onclick="switchTab('styles', this)">
+            <span>🎨</span> 2. Pilihan Style &amp; Tema Desain
+          </button>
+          <button class="tab-btn" onclick="switchTab('transitions', this)">
+            <span>✂️</span> 3. Pilihan Transisi XFade
+          </button>
+          <button class="tab-btn" onclick="switchTab('pipeline', this)">
+            <span>⚡</span> 4. Simulasi 1 Baris Kampanye (Fase 2)
+          </button>
+        </div>
+
+        <!-- TAB 1: EFEK MOTION TEXT -->
+        <div class="tab-content" id="tab-effects">
+          <h2 class="section-title">🎭 Pilihan Efek Gerakan Teks (Motion Animation)</h2>
+          <p class="section-desc">
+            Klik salah satu efek di bawah ini untuk melihat animasinya bergerak seketika pada layar simulator HP di sebelah kiri.
+          </p>
+
+          <div class="choices-grid">
+            <!-- 1. Typewriter -->
+            <div class="choice-card active" data-effect="typewriter" onclick="selectEffect('typewriter', this)">
+              <span class="choice-badge">Rekomendasi Isi / Story</span>
+              <h3 class="choice-title">⌨️ Typewriter (Mengetik)</h3>
+              <p class="choice-desc">Huruf muncul satu demi satu mengikuti ketukan suara dengan kursor berkedip <code>|</code>.</p>
+            </div>
+
+            <!-- 2. Pop-In Bounce -->
+            <div class="choice-card" data-effect="pop_bounce" onclick="selectEffect('pop_bounce', this)">
+              <span class="choice-badge">Rekomendasi Klip 1 (Hook)</span>
+              <h3 class="choice-title">💥 Pop-In Bounce (CapCut)</h3>
+              <p class="choice-desc">Skala membal elastis 70% ➔ 105% ➔ 100%. Paling efektif menghentikan jempol penonton.</p>
+            </div>
+
+            <!-- 3. Word-by-Word Highlight -->
+            <div class="choice-card" data-effect="karaoke" onclick="selectEffect('karaoke', this)">
+              <span class="choice-badge">Retensi Tertinggi (Hormozi)</span>
+              <h3 class="choice-title">🎙️ Word Karaoke Highlight</h3>
+              <p class="choice-desc">Teks tampil penuh, namun kata aktif menyala kuning kontras tepat saat diucapkan narator.</p>
+            </div>
+
+            <!-- 4. Smooth Slide-Up -->
+            <div class="choice-card" data-effect="slide_up" onclick="selectEffect('slide_up', this)">
+              <span class="choice-badge">Gaya Elegan / Apple</span>
+              <h3 class="choice-title">🌊 Smooth Fade &amp; Slide-Up</h3>
+              <p class="choice-desc">Meluncur naik 30px dari bawah secara lembut dengan pemudaran transparansi (fade-in).</p>
+            </div>
+
+            <!-- 5. Kinetic Ribbon Slide-In -->
+            <div class="choice-card" data-effect="ribbon_in" onclick="selectEffect('ribbon_in', this)">
+              <span class="choice-badge">Investigatif / Fakta</span>
+              <h3 class="choice-title">🎗️ Kinetic Ribbon Slide-In</h3>
+              <p class="choice-desc">Pita judul meluncur cepat dari tepi kiri layar, memberikan kesan breaking news atau temuan ilmiah.</p>
+            </div>
+
+            <!-- 6. Blur-to-Focus -->
+            <div class="choice-card" data-effect="blur_focus" onclick="selectEffect('blur_focus', this)">
+              <span class="choice-badge">Sinematik / Teaser</span>
+              <h3 class="choice-title">🔍 Blur-to-Focus Reveal</h3>
+              <p class="choice-desc">Teks kabur 14px perlahan menjadi tajam dan fokus sempurna dibarengi pendaran cahaya lembut.</p>
+            </div>
+
+            <!-- 7. Static Card -->
+            <div class="choice-card" data-effect="static" onclick="selectEffect('static', this)">
+              <span class="choice-badge">Ultra-Ringan / Cepat</span>
+              <h3 class="choice-title">📄 Static Clean Card</h3>
+              <p class="choice-desc">Teks langsung tampil bersih tanpa pergerakan. Ringan diproses dan keterbacaan 100% instan.</p>
+            </div>
+          </div>
+
+          <!-- Sample Text Live Editor -->
+          <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 16px;">
+            <div class="form-group">
+              <label class="form-label">Ubah Naskah Teks Uji Coba:</label>
+              <input type="text" class="form-control" id="customTextInput" value="Angka kolesterol suami bikin malam Bunda jadi gelisah?" oninput="updateCustomText()">
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button class="btn btn-secondary" onclick="setPresetText('Angka kolesterol suami bikin malam Bunda jadi gelisah?', 'HOOK')">Sample 1: Hook Kolesterol</button>
+              <button class="btn btn-secondary" onclick="setPresetText('Melihat hasil lab yang kurang pas tentu memicu banyak pikiran.', 'KONTEKS')">Sample 2: Cerita Edukasi</button>
+              <button class="btn btn-secondary" onclick="setPresetText('Dukung kebugaran keluarga, produk ori klik link di bawah ya!', 'CTA')">Sample 3: CTA Penutup</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: STYLE & TEMA DESAIN -->
+        <div class="tab-content" id="tab-styles" style="display: none;">
+          <h2 class="section-title">🎨 Pilihan Style Efek (3 Pilihan Simpel)</h2>
+          <p class="section-desc">
+            Sesuai arahan Anda, pilihan style disederhanakan menjadi <strong>3 format utama</strong> (2 gaya teks melayang floating tanpa box, dan 1 gaya kartu Clean White).
+          </p>
+
+          <div class="choices-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+            <!-- 1. Floating text (Capital font Warna Putih Berubah Kuning ketika diucapkan) -->
+            <div class="choice-card active" data-theme="floating_white_yellow" onclick="selectTheme('floating_white_yellow', this)">
+              <span class="choice-badge" style="background: var(--status-warning-soft); color: var(--status-warning); border-color: var(--status-warning);">1. Viral TikTok / Hormozi Style</span>
+              <h3 class="choice-title">🟡 Floating Text (Putih ➔ Kuning)</h3>
+              <p class="choice-desc"><strong>HURUF KAPITAL PUTIH</strong> melayang bebas di atas video. Tiap kata berubah menjadi <strong>KUNING MENYALA</strong> saat diucapkan narator.</p>
+            </div>
+
+            <!-- 2. Floating text (Capital Font warna hitam BG Warna Putih, keluar per kata ketika diucapkan) -->
+            <div class="choice-card" data-theme="floating_black_on_white" onclick="selectTheme('floating_black_on_white', this)">
+              <span class="choice-badge" style="background: var(--status-info-soft); color: var(--status-info); border-color: var(--status-info);">2. CapCut / MrBeast Style</span>
+              <h3 class="choice-title">🔲 Floating Text (Hitam BG Putih)</h3>
+              <p class="choice-desc"><strong>HURUF KAPITAL HITAM</strong> dengan background kotak putih per-kata, muncul satu per satu mengikuti tempo bicara narator.</p>
+            </div>
+
+            <!-- 3. Minimalist Clean White (box yang sekarang) -->
+            <div class="choice-card" data-theme="minimal_white" onclick="selectTheme('minimal_white', this)">
+              <span class="choice-badge">3. Studio Card Box</span>
+              <h3 class="choice-title">◻️ Minimalist Clean White</h3>
+              <p class="choice-desc">Kotak kartu kaca putih bersih elegan dengan border tipis dan tag kapsul hitam (box yang sekarang).</p>
+            </div>
+          </div>
+
+          <!-- Position & Width Proportion Controls -->
+          <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="form-group">
+              <label class="form-label">Posisi Vertikal di Layar:</label>
+              <select class="form-control" id="positionSelect" onchange="updateBadgePosition(this.value)">
+                <option value="bottom" selected>Bawah (Safe Zone TikTok/Reels — Rekomendasi)</option>
+                <option value="center">Tengah Layar (Center Focus)</option>
+                <option value="top">Atas Layar (Top Banner)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Lebar Background (Badge Width):</label>
+              <select class="form-control" id="widthSelect" onchange="updateBadgeWidth(this.value)">
+                <option value="76%">Kompak (76% Lebar Layar)</option>
+                <option value="86%" selected>Proporsional (86% — Symmetrical 50px Margin)</option>
+                <option value="94%">Lebar Penuh (94% Lebar Layar)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: TRANSISI XFADE -->
+        <div class="tab-content" id="tab-transitions" style="display: none;">
+          <h2 class="section-title">✂️ Pilihan Efek Transisi Video (FFmpeg XFade)</h2>
+          <p class="section-desc">
+            Bukan sekadar dibayangkan! Klik salah satu transisi di bawah lalu tekan tombol <strong>"✂️ Uji Transisi Video"</strong> untuk melihat pergantian Klip 1 ke Klip 2 secara langsung.
+          </p>
+
+          <div class="choices-grid">
+            <!-- 1. Smooth Dissolve / Crossfade -->
+            <div class="choice-card active" data-transition="fade" onclick="selectTransition('fade', this)">
+              <span class="choice-badge">Rekomendasi Utama</span>
+              <h3 class="choice-title">🌫️ Smooth Dissolve (Crossfade)</h3>
+              <p class="choice-desc">Peleburan dua klip secara halus. Transisi paling nyaman dan natural untuk semua niche.</p>
+            </div>
+
+            <!-- 2. White Flash -->
+            <div class="choice-card" data-transition="fadewhite" onclick="selectTransition('fadewhite', this)">
+              <span class="choice-badge">Dramatis &amp; Hook</span>
+              <h3 class="choice-title">⚡ White Flash (Kilatan Putih)</h3>
+              <p class="choice-desc">Kilatan cahaya putih sesaat sebelum klip berikutnya terbuka. Memberikan sensasi iklan TV profesional.</p>
+            </div>
+
+            <!-- 3. Fade to Black -->
+            <div class="choice-card" data-transition="fadeblack" onclick="selectTransition('fadeblack', this)">
+              <span class="choice-badge">Sinematik</span>
+              <h3 class="choice-title">🌑 Fade to Black (Celup Hitam)</h3>
+              <p class="choice-desc">Peredupan ke hitam sesaat lalu membuka adegan baru. Sangat cocok untuk transisi babak cerita.</p>
+            </div>
+
+            <!-- 4. Slide Left -->
+            <div class="choice-card" data-transition="slideleft" onclick="selectTransition('slideleft', this)">
+              <span class="choice-badge">Dinamis &amp; Geser</span>
+              <h3 class="choice-title">👉 Slide Left (Dorong ke Kiri)</h3>
+              <p class="choice-desc">Klip 2 mendorong klip 1 ke samping kiri layar. Terasa modern seperti geser kartu cerita.</p>
+            </div>
+
+            <!-- 5. Wipe Left -->
+            <div class="choice-card" data-transition="wipeleft" onclick="selectTransition('wipeleft', this)">
+              <span class="choice-badge">Sapu Layar</span>
+              <h3 class="choice-title">🧹 Wipe Left (Sapu Horizontal)</h3>
+              <p class="choice-desc">Klip 2 menyapu klip 1 dari kanan ke kiri secara presisi dan tegas.</p>
+            </div>
+
+            <!-- 6. Zoom In -->
+            <div class="choice-card" data-transition="zoomin" onclick="selectTransition('zoomin', this)">
+              <span class="choice-badge">Kamera Sinematik</span>
+              <h3 class="choice-title">🔍 Zoom In (Membesar Masuk)</h3>
+              <p class="choice-desc">Klip 2 muncul membesar dari titik pusat layar menutupi klip 1.</p>
+            </div>
+
+            <!-- 7. Circle Crop / Iris -->
+            <div class="choice-card" data-transition="circlecrop" onclick="selectTransition('circlecrop', this)">
+              <span class="choice-badge">Iris / Spotlight</span>
+              <h3 class="choice-title">⭕ Circle Iris (Bukaan Lingkaran)</h3>
+              <p class="choice-desc">Lingkaran membesar dari tengah membuka pemandangan adegan berikutnya.</p>
+            </div>
+
+            <!-- 8. Hard Cut -->
+            <div class="choice-card" data-transition="none" onclick="selectTransition('none', this)">
+              <span class="choice-badge">Potongan Langsung</span>
+              <h3 class="choice-title">✂️ Hard Cut (Tanpa Transisi)</h3>
+              <p class="choice-desc">Pergantian langsung seketika antar frame tanpa efek transisi (standar FFmpeg concat).</p>
+            </div>
+          </div>
+
+          <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 16px; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 2px;">Durasi Transisi (*Crossfade Duration*):</div>
+              <div style="font-size: 0.78rem; color: var(--text-muted);">Durasi peleburan video yang ideal adalah 0.4s – 0.6s.</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <input type="range" min="0.2" max="1.0" step="0.1" value="0.5" id="transDurationSlider" oninput="document.getElementById('transDurationVal').innerText = this.value + 's'" style="width: 140px;">
+              <span id="transDurationVal" style="font-family: var(--font-mono); font-weight: 700; color: var(--action-primary); min-width: 40px;">0.5s</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: SIMULASI 1 BARIS KAMPANYE PENUH -->
+        <div class="tab-content" id="tab-pipeline" style="display: none;">
+          <h2 class="section-title">⚡ Simulasi 1 Baris Kampanye (Pola Kombinasi 2 Efek Teks)</h2>
+          <p class="section-desc">
+            Beginilah cara kerja mesin MAKNA Flow di Fase 2: mendeteksi 6 klip storyboard, lalu memasang <strong>2 efek teks berbeda</strong> (Klip 1 Hook memakai <em>Pop-In Bounce</em>, sedangkan Klip 2–5 memakai <em>Typewriter</em>).
+          </p>
+
+          <table class="campaign-line-table">
+            <thead>
+              <tr>
+                <th style="width: 80px;">Klip #</th>
+                <th style="width: 140px;">Peran Adegan</th>
+                <th>Teks Narasi Storyboard</th>
+                <th style="width: 180px;">Efek Teks yang Dipilih</th>
+                <th style="width: 150px;">Transisi Video</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Klip 1</strong></td>
+                <td><span class="role-tag role-hook">⚡ Opening Hook</span></td>
+                <td>Angka kolesterol suami bikin malam Bunda jadi gelisah?</td>
+                <td>
+                  <span style="font-weight: 700; color: var(--status-warning);">💥 Pop-In Bounce</span>
+                </td>
+                <td><span style="color: var(--action-primary);">🌫️ Crossfade (0.5s)</span></td>
+              </tr>
+              <tr>
+                <td><strong>Klip 2</strong></td>
+                <td><span class="role-tag role-story">📖 Konteks &amp; Empati</span></td>
+                <td>Melihat hasil lab yang kurang pas di malam hari tentu memicu pikiran.</td>
+                <td>
+                  <span style="font-weight: 700; color: var(--link);">⌨️ Typewriter</span>
+                </td>
+                <td><span style="color: var(--action-primary);">🌫️ Crossfade (0.5s)</span></td>
+              </tr>
+              <tr>
+                <td><strong>Klip 3</strong></td>
+                <td><span class="role-tag role-story">📖 Masalah &amp; Edukasi</span></td>
+                <td>Tubuh memerlukan perhatian ekstra untuk menjaga keseimbangan harian.</td>
+                <td>
+                  <span style="font-weight: 700; color: var(--link);">⌨️ Typewriter</span>
+                </td>
+                <td><span style="color: var(--action-primary);">🌫️ Crossfade (0.5s)</span></td>
+              </tr>
+              <tr>
+                <td><strong>Klip 4</strong></td>
+                <td><span class="role-tag role-story">📖 Solusi Alami</span></td>
+                <td>Langkah awal dimulai dari pemilihan asupan harian yang praktis.</td>
+                <td>
+                  <span style="font-weight: 700; color: var(--link);">⌨️ Typewriter</span>
+                </td>
+                <td><span style="color: var(--action-primary);">⚡ White Flash (0.4s)</span></td>
+              </tr>
+              <tr>
+                <td><strong>Klip 5</strong></td>
+                <td><span class="role-tag role-story">✨ Product Reveal</span></td>
+                <td>Hadirkan Garlibee Honey Infused Solo Garlic untuk kebugaran harian.</td>
+                <td>
+                  <span style="font-weight: 700; color: var(--status-success);">🌊 Smooth Slide-Up</span>
+                </td>
+                <td><span style="color: var(--action-primary);">🌫️ Crossfade (0.5s)</span></td>
+              </tr>
+              <tr>
+                <td><strong>Klip 6</strong></td>
+                <td><span class="role-tag role-cta">⭐ Call to Action</span></td>
+                <td>Dukung kebugaran keluarga, produk ori klik link di bawah ya!</td>
+                <td>
+                  <span style="font-weight: 700; color: var(--status-warning);">💥 Pop-In Bounce</span>
+                </td>
+                <td><span style="color: var(--text-muted);">Selesai (End)</span></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+            <button class="btn btn-primary" style="padding: 12px 24px; font-size: 0.9rem;" onclick="simulateFullStoryline()">
+              ▶ Putar Simulasi Alur Penuh (Klip 1 s/d 6 Otomatis)
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // State management
+    let currentEffect = 'typewriter';
+    let currentTheme = 'floating_white_yellow';
+    let currentTransition = 'fade';
+    let currentPosition = 'bottom';
+    let currentWidth = '86%';
+    let isTransitioning = false;
+    let typingTimer = null;
+    let karaokeTimer = null;
+
+    // Switch Tabs
+    function switchTab(tabId, el) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+      el.classList.add('active');
+      document.getElementById('tab-' + tabId).style.display = 'block';
+    }
+
+    // Toggle Theme (Light/Dark)
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      const newTheme = isDark ? 'light' : 'dark';
+      html.setAttribute('data-theme', newTheme);
+      document.getElementById('themeToggleBtn').innerText = isDark ? '🌙 Dark Mode' : '☀️ Light Mode';
+    }
+
+    // Select Effect
+    function selectEffect(effect, el) {
+      currentEffect = effect;
+      document.querySelectorAll('#tab-effects .choice-card').forEach(c => c.classList.remove('active'));
+      if (el) el.classList.add('active');
+      triggerTextAnimation();
+    }
+
+    // Select Style Theme (3 simple styles)
+    function selectTheme(theme, el) {
+      currentTheme = theme;
+      document.querySelectorAll('#tab-styles .choice-card').forEach(c => c.classList.remove('active'));
+      if (el) el.classList.add('active');
+
+      const box = document.getElementById('motionBadgeBox');
+      box.className = 'motion-badge-box theme-' + theme;
+
+      const badgeLabelMap = {
+        floating_white_yellow: 'Floating Putih ➔ Kuning',
+        floating_black_on_white: 'Floating Hitam BG Putih',
+        minimal_white: 'Minimalist Clean White'
+      };
+      const badgeText = badgeLabelMap[theme] || theme;
+      const styleBadgeEl = document.getElementById('screenStyleBadge');
+      if (styleBadgeEl) styleBadgeEl.innerText = badgeText;
+
+      triggerTextAnimation();
+    }
+
+    // Select Transition
+    function selectTransition(trans, el) {
+      currentTransition = trans;
+      document.querySelectorAll('#tab-transitions .choice-card').forEach(c => c.classList.remove('active'));
+      if (el) el.classList.add('active');
+
+      const labelMap = {
+        fade: 'Crossfade (0.5s)',
+        fadewhite: 'White Flash (0.4s)',
+        fadeblack: 'Fade to Black (0.5s)',
+        slideleft: 'Slide Left (0.5s)',
+        wipeleft: 'Wipe Left (0.5s)',
+        zoomin: 'Zoom In (0.5s)',
+        circlecrop: 'Circle Iris (0.5s)',
+        none: 'Hard Cut (0.0s)'
+      };
+      document.getElementById('currentTransitionBadge').innerText = labelMap[trans] || trans;
+      triggerVideoTransition();
+    }
+
+    // Update Position
+    function updateBadgePosition(pos) {
+      currentPosition = pos;
+      const wrap = document.getElementById('motionTextWrap');
+      wrap.className = 'motion-text-wrapper pos-' + pos;
+    }
+
+    // Update Width
+    function updateBadgeWidth(w) {
+      currentWidth = w;
+      document.getElementById('motionTextWrap').style.width = w;
+    }
+
+    // Update Custom Text
+    function updateCustomText() {
+      triggerTextAnimation();
+    }
+    function setPresetText(txt, tag) {
+      document.getElementById('customTextInput').value = txt;
+      document.getElementById('badgeTag').innerText = tag;
+      triggerTextAnimation();
+    }
+
+    // Trigger Text Animation
+    function triggerTextAnimation() {
+      if (typingTimer) clearInterval(typingTimer);
+      if (karaokeTimer) clearInterval(karaokeTimer);
+
+      const box = document.getElementById('motionBadgeBox');
+      const textEl = document.getElementById('badgeText');
+      const cursor = document.getElementById('badgeCursor');
+      const rawText = document.getElementById('customTextInput').value.trim() || 'Tulis teks narasi video di sini.';
+
+      // Reset animation classes & cursor
+      box.classList.remove('anim-pop_bounce', 'anim-slide_up', 'anim-ribbon_in', 'anim-blur_focus');
+      cursor.style.display = 'none';
+
+      if (currentTheme === 'floating_white_yellow') {
+        // ========================================================
+        // STYLE 1: Floating Text (Capital Font Putih ➔ Kuning)
+        // ========================================================
+        const upperWords = rawText.toUpperCase().split(/\s+/);
+        textEl.innerHTML = upperWords.map((w, i) => `<span class="karaoke-word-wy" id="wy-word-${i}">${w}</span> `).join('');
+
+        let activeIdx = 0;
+        karaokeTimer = setInterval(() => {
+          upperWords.forEach((_, idx) => {
+            const el = document.getElementById(`wy-word-${idx}`);
+            if (el) {
+              if (idx === activeIdx) {
+                el.classList.add('active');
+              } else {
+                el.classList.remove('active');
+              }
+            }
+          });
+          activeIdx++;
+          if (activeIdx >= upperWords.length) {
+            clearInterval(karaokeTimer);
+          }
+        }, 220);
+
+      } else if (currentTheme === 'floating_black_on_white') {
+        // ========================================================
+        // STYLE 2: Floating Text (Capital Hitam BG Putih Keluar per Kata)
+        // ========================================================
+        const upperWords = rawText.toUpperCase().split(/\s+/);
+        textEl.innerHTML = '';
+
+        let wordIdx = 0;
+        karaokeTimer = setInterval(() => {
+          if (wordIdx < upperWords.length) {
+            const span = document.createElement('span');
+            span.className = 'pill-word-bw';
+            span.innerText = upperWords[wordIdx];
+            textEl.appendChild(span);
+            textEl.appendChild(document.createTextNode(' '));
+            wordIdx++;
+          } else {
+            clearInterval(karaokeTimer);
+          }
+        }, 220);
+
+      } else {
+        // ========================================================
+        // STYLE 3: Minimalist Clean White (Box Container)
+        // ========================================================
+        if (currentEffect === 'typewriter') {
+          cursor.style.display = 'inline-block';
+          textEl.innerHTML = '';
+          textEl.appendChild(cursor);
+
+          let charIdx = 0;
+          typingTimer = setInterval(() => {
+            if (charIdx < rawText.length) {
+              textEl.innerHTML = rawText.substring(0, charIdx + 1) + '<span class="typewriter-cursor"></span>';
+              charIdx++;
+            } else {
+              clearInterval(typingTimer);
+            }
+          }, 35);
+
+        } else if (currentEffect === 'karaoke') {
+          const words = rawText.split(/\s+/);
+          textEl.innerHTML = words.map((w, i) => `<span class="karaoke-word" id="k-word-${i}">${w}</span> `).join('');
+
+          let activeIdx = 0;
+          karaokeTimer = setInterval(() => {
+            words.forEach((_, idx) => {
+              const el = document.getElementById(`k-word-${idx}`);
+              if (el) {
+                if (idx === activeIdx) {
+                  el.classList.add('active');
+                } else {
+                  el.classList.remove('active');
+                }
+              }
+            });
+            activeIdx++;
+            if (activeIdx >= words.length) {
+              clearInterval(karaokeTimer);
+            }
+          }, 220);
+
+        } else if (currentEffect === 'pop_bounce') {
+          textEl.innerText = rawText;
+          void box.offsetWidth;
+          box.classList.add('anim-pop_bounce');
+
+        } else if (currentEffect === 'slide_up') {
+          textEl.innerText = rawText;
+          void box.offsetWidth;
+          box.classList.add('anim-slide_up');
+
+        } else if (currentEffect === 'ribbon_in') {
+          textEl.innerText = rawText;
+          void box.offsetWidth;
+          box.classList.add('anim-ribbon_in');
+
+        } else if (currentEffect === 'blur_focus') {
+          textEl.innerText = rawText;
+          void box.offsetWidth;
+          box.classList.add('anim-blur_focus');
+
+        } else {
+          textEl.innerText = rawText;
+        }
+      }
+    }
+
+    // Trigger Video Transition (Simulates FFmpeg XFade in Canvas)
+    function triggerVideoTransition() {
+      if (isTransitioning) return;
+      isTransitioning = true;
+
+      const layerA = document.getElementById('videoLayerA');
+      const layerB = document.getElementById('videoLayerB');
+      const flash = document.getElementById('flashOverlay');
+      const black = document.getElementById('blackOverlay');
+      const statusText = document.getElementById('screenStatusText');
+
+      const durSec = parseFloat(document.getElementById('transDurationSlider').value) || 0.5;
+      const durMs = durSec * 1000;
+
+      statusText.innerText = '⚡ Menjalankan Transisi ' + currentTransition.toUpperCase() + '...';
+
+      // Reset layer B
+      layerB.style.transition = 'none';
+      layerB.style.opacity = '0';
+      layerB.style.transform = 'none';
+      layerB.style.clipPath = 'none';
+      layerA.style.transition = 'none';
+      layerA.style.transform = 'none';
+      flash.style.opacity = '0';
+      black.style.opacity = '0';
+
+      setTimeout(() => {
+        if (currentTransition === 'fade') {
+          // Crossfade
+          layerB.style.transition = `opacity ${durSec}s ease-in-out`;
+          layerB.style.opacity = '1';
+
+        } else if (currentTransition === 'fadewhite') {
+          // White Flash
+          flash.style.transition = `opacity ${durSec/2}s ease-in`;
+          flash.style.opacity = '0.9';
+          setTimeout(() => {
+            layerB.style.opacity = '1';
+            flash.style.transition = `opacity ${durSec/2}s ease-out`;
+            flash.style.opacity = '0';
+          }, durMs / 2);
+
+        } else if (currentTransition === 'fadeblack') {
+          // Fade to black
+          black.style.transition = `opacity ${durSec/2}s ease-in`;
+          black.style.opacity = '1';
+          setTimeout(() => {
+            layerB.style.opacity = '1';
+            black.style.transition = `opacity ${durSec/2}s ease-out`;
+            black.style.opacity = '0';
+          }, durMs / 2);
+
+        } else if (currentTransition === 'slideleft') {
+          // Slide Left
+          layerB.style.opacity = '1';
+          layerB.style.transform = 'translateX(100%)';
+          layerB.style.transition = `transform ${durSec}s cubic-bezier(0.16, 1, 0.3, 1)`;
+          layerA.style.transition = `transform ${durSec}s cubic-bezier(0.16, 1, 0.3, 1)`;
+          setTimeout(() => {
+            layerB.style.transform = 'translateX(0)';
+            layerA.style.transform = 'translateX(-100%)';
+          }, 20);
+
+        } else if (currentTransition === 'wipeleft') {
+          // Wipe Left
+          layerB.style.opacity = '1';
+          layerB.style.clipPath = 'polygon(100% 0, 100% 0, 100% 100%, 100% 100%)';
+          layerB.style.transition = `clip-path ${durSec}s ease-in-out`;
+          setTimeout(() => {
+            layerB.style.clipPath = 'polygon(0 0, 100% 0, 100% 100%, 0 100%)';
+          }, 20);
+
+        } else if (currentTransition === 'zoomin') {
+          // Zoom In
+          layerB.style.opacity = '0';
+          layerB.style.transform = 'scale(0.3)';
+          layerB.style.transition = `transform ${durSec}s ease-out, opacity ${durSec}s ease-out`;
+          setTimeout(() => {
+            layerB.style.opacity = '1';
+            layerB.style.transform = 'scale(1)';
+          }, 20);
+
+        } else if (currentTransition === 'circlecrop') {
+          // Circle Iris
+          layerB.style.opacity = '1';
+          layerB.style.clipPath = 'circle(0% at 50% 50%)';
+          layerB.style.transition = `clip-path ${durSec}s cubic-bezier(0.2, 0.8, 0.2, 1)`;
+          setTimeout(() => {
+            layerB.style.clipPath = 'circle(120% at 50% 50%)';
+          }, 20);
+
+        } else {
+          // Hard cut
+          layerB.style.opacity = '1';
+        }
+
+        // After transition settles, trigger text animation on the new scene
+        setTimeout(() => {
+          statusText.innerText = '✅ Klip 2 Aktif (Transisi Berhasil)';
+          isTransitioning = false;
+          triggerTextAnimation();
+        }, durMs + 50);
+
+      }, 50);
+    }
+
+    // Full Storyline Auto Simulation (Tab 4)
+    function simulateFullStoryline() {
+      switchTab('pipeline', document.querySelectorAll('.tab-btn')[3]);
+
+      const steps = [
+        { text: 'Angka kolesterol suami bikin malam Bunda jadi gelisah?', tag: 'HOOK', effect: 'pop_bounce', label: 'Klip 1 (Opening Hook)' },
+        { text: 'Melihat hasil lab yang kurang pas di malam hari tentu memicu banyak pikiran.', tag: 'CERITA', effect: 'typewriter', label: 'Klip 2 (Konteks)' },
+        { text: 'Tubuh memerlukan perhatian ekstra untuk menjaga metabolisme harian.', tag: 'EDUKASI', effect: 'typewriter', label: 'Klip 3 (Edukasi)' },
+        { text: 'Hadirkan Garlibee Honey Infused Solo Garlic untuk kebugaran harian.', tag: 'PRODUK', effect: 'slide_up', label: 'Klip 5 (Reveal)' },
+        { text: 'Dukung kebugaran keluarga, produk ori klik link di bawah ya!', tag: 'CTA', effect: 'pop_bounce', label: 'Klip 6 (CTA)' }
+      ];
+
+      let cur = 0;
+      function runNext() {
+        if (cur >= steps.length) {
+          document.getElementById('screenStatusText').innerText = '🎉 Simulasi 1 Baris Kampanye Selesai!';
+          return;
+        }
+        const s = steps[cur];
+        document.getElementById('screenStatusText').innerText = s.label;
+        document.getElementById('badgeTag').innerText = s.tag;
+        document.getElementById('customTextInput').value = s.text;
+        selectEffect(s.effect, document.querySelector(`[data-effect="${s.effect}"]`));
+
+        if (cur > 0) {
+          triggerVideoTransition();
+        }
+
+        cur++;
+        setTimeout(runNext, 3800);
+      }
+
+      runNext();
+    }
+
+    // Initial setup on load
+    window.addEventListener('DOMContentLoaded', () => {
+      triggerTextAnimation();
+    });
+  </script>
+</body>
+</html>
+
