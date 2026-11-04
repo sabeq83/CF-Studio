@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.32.141 — Fix ReferenceError clipIndex in scheduler applyReplacements (04/11/2026)
+- Add missing clipIndex parameter to applyReplacements in processPillarGenerator and processReAnalyzer
+- Export unified applyPromptReplacements helper with complete unit test coverage
+
 ## V2.32.140 — OPC Grounded Start Frames Queue and Inspection Utilities (04/11/2026)
 - Add apply-grounded-campaign-w-matrix utility script
 - Add check-revision-status monitor script
