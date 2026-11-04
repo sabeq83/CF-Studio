@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.143 — Reactivate Hook Matrix with 8-11 word limit and dynamic environment synchronization (04/11/2026)
+- Enforce strict 8-11 word spoken hook contract in Content Planner
+- Inject dynamic environment mandate in visual identity allocator and prompts engine
+- Sanitize AI tags and prefixes from hook voiceovers
+
 ## V2.32.142 — Fix undeclared campaignData ReferenceError in processPillarGenerator (04/11/2026)
 - Remove undeclared campaignData reference in processPillarGenerator and fallback to tempCampaign/campaign
 - Cleanly support bridge_at_clip and target_clips_count resolution
