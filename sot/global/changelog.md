@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.140 — OPC Grounded Start Frames Queue and Inspection Utilities (04/11/2026)
+- Add apply-grounded-campaign-w-matrix utility script
+- Add check-revision-status monitor script
+- Add queue-campaign-start-frames automation script
+
 ## V2.32.139 — Universal Grounded W'S Matrix Visual Diversity and Anti-Monotony (04/11/2026)
 - Eliminate domestic furniture bans on pre-bridging clips in prompts.js
 - Enforce grounded real-life context from W'S Matrix across all visual styles
