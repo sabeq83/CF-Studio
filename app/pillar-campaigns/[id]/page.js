@@ -136,6 +136,88 @@ export default function PillarCampaignDetailPage() {
   const [syncingItemAssets, setSyncingItemAssets] = useState({});
   const [cacheBuster, setCacheBuster] = useState(Date.now());
 
+  // Quick Edit Voiceover Modal states
+  const [quickVoModalOpen, setQuickVoModalOpen] = useState(false);
+  const [quickVoItem, setQuickVoItem] = useState(null);
+  const [quickVoScenes, setQuickVoScenes] = useState([]);
+  const [quickVoAutoRemux, setQuickVoAutoRemux] = useState(true);
+  const [quickVoSaving, setQuickVoSaving] = useState(false);
+  const [quickVoToast, setQuickVoToast] = useState(null);
+
+  const handleOpenQuickVoModal = (item) => {
+    let scenes = [];
+    try {
+      const parsed = JSON.parse(item.result_json || '{}');
+      if (Array.isArray(parsed.voiceover) && parsed.voiceover.length > 0) {
+        scenes = parsed.voiceover.map((v, i) => ({
+          scene: v.scene || (i + 1),
+          narration: v.narration || ''
+        }));
+      }
+    } catch (_) {}
+
+    if (scenes.length === 0) {
+      try {
+        const plan = JSON.parse(item.new_video_plan_json || '[]');
+        if (Array.isArray(plan) && plan.length > 0) {
+          scenes = plan.map((p, i) => ({
+            scene: p.clip_index || (i + 1),
+            narration: p.new_vo || ''
+          }));
+        }
+      } catch (_) {}
+    }
+
+    setQuickVoItem(item);
+    setQuickVoScenes(scenes);
+    setQuickVoAutoRemux(true);
+    setQuickVoModalOpen(true);
+  };
+
+  const handleCloseQuickVoModal = () => {
+    setQuickVoModalOpen(false);
+    setQuickVoItem(null);
+    setQuickVoScenes([]);
+  };
+
+  const handleUpdateQuickVoScene = (index, text) => {
+    setQuickVoScenes(prev => {
+      const updated = [...prev];
+      if (updated[index]) {
+        updated[index] = { ...updated[index], narration: text };
+      }
+      return updated;
+    });
+  };
+
+  const handleSaveQuickVo = async () => {
+    if (!quickVoItem) return;
+    setQuickVoSaving(true);
+    try {
+      const res = await fetch(`/api/v2/pillar-campaigns/items/${quickVoItem.id}/voiceover`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          voiceover: quickVoScenes,
+          auto_trigger_remux: quickVoAutoRemux
+        })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Gagal menyimpan naskah voiceover.');
+      }
+
+      setQuickVoToast(data.message || 'Naskah voiceover berhasil disimpan!');
+      setTimeout(() => setQuickVoToast(null), 4000);
+      handleCloseQuickVoModal();
+      await fetchDetail();
+    } catch (err) {
+      alert(`Error: ${err.message}`);
+    } finally {
+      setQuickVoSaving(false);
+    }
+  };
+
   // Accordion Clip state
   const [activeClipIndex, setActiveClipIndex] = useState({});
   const toggleClip = (itemId, idx) => {
@@ -3080,6 +3162,18 @@ export default function PillarCampaignDetailPage() {
                     </button>
                   )}
 
+                  {item.visual_status === 'completed' && item.visual_clip_paths && (
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => handleOpenQuickVoModal(item)}
+                      title="Edit naskah voiceover per scene dan langsung generate TTS & Re-mux tanpa merender ulang klip visual"
+                      style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--action-primary)', borderColor: 'var(--action-primary)' }}
+                    >
+                      ✏️ Edit Naskah VO
+                    </button>
+                  )}
+
                   {item.ffmpeg_output_path && (
                     <button
                       type="button"
@@ -3609,6 +3703,264 @@ export default function PillarCampaignDetailPage() {
           )}
 
         </div>
+
+        {/* Quick Edit Voiceover Modal */}
+        {quickVoModalOpen && quickVoItem && (
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="quick-vo-modal-title"
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'var(--overlay-backdrop, rgba(0, 0, 0, 0.65))',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 9999,
+              padding: '20px'
+            }}
+            onClick={(e) => {
+              if (e.target === e.currentTarget && !quickVoSaving) {
+                handleCloseQuickVoModal();
+              }
+            }}
+          >
+            <div
+              style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border-color)',
+                borderRadius: 'var(--radius-lg, 12px)',
+                width: '100%',
+                maxWidth: '680px',
+                maxHeight: '90vh',
+                display: 'flex',
+                flexDirection: 'column',
+                boxShadow: 'var(--shadow-modal, 0 20px 40px rgba(0,0,0,0.5))',
+                overflow: 'hidden'
+              }}
+            >
+              {/* Modal Header */}
+              <div
+                style={{
+                  padding: '16px 20px',
+                  borderBottom: '1px solid var(--border-subtle)',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  background: 'var(--surface-raised)'
+                }}
+              >
+                <div>
+                  <h3 id="quick-vo-modal-title" style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                    ✏️ Quick Edit Voiceover &amp; Auto Re-mux
+                  </h3>
+                  <p style={{ margin: '4px 0 0', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                    Item #{quickVoItem.id} ({quickVoItem.topic || quickVoItem.pillar_angle || 'Video Item'}) &bull; Klip visual tetap utuh
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCloseQuickVoModal}
+                  disabled={quickVoSaving}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '1.3rem',
+                    color: 'var(--text-muted)',
+                    cursor: quickVoSaving ? 'not-allowed' : 'pointer',
+                    padding: '4px 8px',
+                    borderRadius: '4px'
+                  }}
+                >
+                  &times;
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div
+                style={{
+                  padding: '20px',
+                  overflowY: 'auto',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '14px',
+                  flex: 1
+                }}
+              >
+                <div
+                  style={{
+                    background: 'var(--surface-subtle)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-sm, 6px)',
+                    padding: '10px 14px',
+                    fontSize: '0.8rem',
+                    color: 'var(--text-secondary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <span>💡</span>
+                  <span>
+                    Ubah naskah per klip di bawah ini (misal ganti CTA atau kalimat hook). Estimasi durasi klip video adalah 4-6 detik per klip (sekitar 10-18 kata).
+                  </span>
+                </div>
+
+                {quickVoScenes.map((scene, idx) => {
+                  const text = scene.narration || '';
+                  const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+                  const isCta = idx === quickVoScenes.length - 1;
+                  return (
+                    <div
+                      key={idx}
+                      style={{
+                        background: 'var(--surface)',
+                        border: `1px solid ${isCta ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
+                        borderRadius: 'var(--radius-sm, 6px)',
+                        padding: '12px'
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          marginBottom: '8px'
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: '0.8rem',
+                            fontWeight: 700,
+                            color: isCta ? 'var(--action-primary)' : 'var(--text-primary)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px'
+                          }}
+                        >
+                          {isCta ? '⭐' : '🎬'} Klip {scene.scene || idx + 1} {isCta ? '(Call to Action / CTA)' : idx === 0 ? '(Opening Hook)' : ''}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: '0.75rem',
+                            fontFamily: 'var(--font-mono, monospace)',
+                            color: wordCount > 22 ? 'var(--status-danger)' : wordCount > 18 ? 'var(--status-warning)' : 'var(--status-success)',
+                            fontWeight: wordCount > 0 ? 600 : 400
+                          }}
+                        >
+                          {wordCount} kata
+                        </span>
+                      </div>
+                      <textarea
+                        value={scene.narration}
+                        onChange={(e) => handleUpdateQuickVoScene(idx, e.target.value)}
+                        rows={2}
+                        style={{
+                          width: '100%',
+                          background: 'var(--input-bg)',
+                          border: '1px solid var(--border-subtle)',
+                          borderRadius: 'var(--radius-xs, 4px)',
+                          color: 'var(--text-primary)',
+                          padding: '8px 10px',
+                          fontSize: '0.85rem',
+                          lineHeight: 1.45,
+                          resize: 'vertical',
+                          boxSizing: 'border-box'
+                        }}
+                        placeholder={`Tulis naskah untuk Klip ${scene.scene || idx + 1}...`}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Modal Footer */}
+              <div
+                style={{
+                  padding: '14px 20px',
+                  borderTop: '1px solid var(--border-subtle)',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  background: 'var(--surface-raised)'
+                }}
+              >
+                <label
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    fontSize: '0.82rem',
+                    color: 'var(--text-secondary)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={quickVoAutoRemux}
+                    onChange={(e) => setQuickVoAutoRemux(e.target.checked)}
+                    disabled={quickVoSaving}
+                  />
+                  <span>Langsung trigger <strong>TTS &amp; Re-mux otomatis</strong></span>
+                </label>
+
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={handleCloseQuickVoModal}
+                    disabled={quickVoSaving}
+                    style={{ padding: '8px 16px' }}
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleSaveQuickVo}
+                    disabled={quickVoSaving}
+                    style={{
+                      padding: '8px 18px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    {quickVoSaving ? '⏳ Menyimpan...' : '💾 Simpan & Re-mux'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Quick Edit VO Toast */}
+        {quickVoToast && (
+          <div
+            role="status"
+            style={{
+              position: 'fixed',
+              bottom: '24px',
+              right: '24px',
+              background: 'var(--surface-raised)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--status-success)',
+              borderRadius: 'var(--radius-md, 8px)',
+              padding: '12px 18px',
+              boxShadow: 'var(--shadow-card, 0 10px 25px rgba(0,0,0,0.3))',
+              zIndex: 10000,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              fontSize: '0.85rem',
+              fontWeight: 600
+            }}
+          >
+            <span>✅</span>
+            <span>{quickVoToast}</span>
+          </div>
+        )}
       </main>
     </div>
   );

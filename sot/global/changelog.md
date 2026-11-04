@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.144 — Add Quick Edit Voiceover Modal for completed OPC items (04/11/2026)
+- Add Quick Edit Voiceover modal in campaign detail UI
+- Add PATCH endpoint for voiceover revision with auto-remux
+- Retain visual clips during audio-only edits
+
 ## V2.32.143 — Reactivate Hook Matrix with 8-11 word limit and dynamic environment synchronization (04/11/2026)
 - Enforce strict 8-11 word spoken hook contract in Content Planner
 - Inject dynamic environment mandate in visual identity allocator and prompts engine
