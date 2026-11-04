@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.139 — Universal Grounded W'S Matrix Visual Diversity and Anti-Monotony (04/11/2026)
+- Eliminate domestic furniture bans on pre-bridging clips in prompts.js
+- Enforce grounded real-life context from W'S Matrix across all visual styles
+- Forbid monotonous glass tube and floating pedestal repetition
+
 ## V2.32.138 — Fix Start Frame Premature Completion and Stale Path Overwrite (04/11/2026)
 - Prevent finalizeStartFrameCheckpoint from overwriting in-flight assets with stale paths
 - Synchronize t2i_images_json to nullify queued clips during revision queueing
