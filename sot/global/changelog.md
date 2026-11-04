@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.32.142 — Fix undeclared campaignData ReferenceError in processPillarGenerator (04/11/2026)
+- Remove undeclared campaignData reference in processPillarGenerator and fallback to tempCampaign/campaign
+- Cleanly support bridge_at_clip and target_clips_count resolution
+
 ## V2.32.141 — Fix ReferenceError clipIndex in scheduler applyReplacements (04/11/2026)
 - Add missing clipIndex parameter to applyReplacements in processPillarGenerator and processReAnalyzer
 - Export unified applyPromptReplacements helper with complete unit test coverage
