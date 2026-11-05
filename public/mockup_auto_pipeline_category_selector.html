@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup Usulan 1: Category Selector UI & Smart Auto-Detection — MAKNA Flow</title>
+  <style>
+    /* MAKNA Flow Semantic Theme System */
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --link-hover: #a5f3fc;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --input-bg: #ffffff;
+      --overlay-subtle: rgba(30, 41, 59, 0.08);
+      --overlay-backdrop: rgba(15, 23, 42, 0.54);
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --text-disabled: #8794a6;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --link: #075ea8;
+      --link-hover: #064b86;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --status-neutral: #6548bd;
+      --status-neutral-soft: #f0ecfb;
+      --focus-ring: #6d4ed6;
+      --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+      --shadow-modal: 0 26px 80px rgba(31, 45, 61, 0.22);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* Sidebar Simulated */
+    .sidebar {
+      width: 250px;
+      background-color: var(--sidebar);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 1rem;
+      gap: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--text-primary);
+      padding: 0 0.5rem;
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.65rem 0.85rem;
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .nav-item:hover {
+      background-color: var(--surface-interactive);
+      color: var(--text-primary);
+    }
+
+    .nav-item.active {
+      background-color: var(--surface-raised);
+      color: var(--action-primary);
+      font-weight: 600;
+      border-left: 3px solid var(--action-primary);
+    }
+
+    /* Main Container */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      overflow-y: auto;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      border-bottom: 1px solid var(--border-subtle);
+      background-color: var(--surface);
+    }
+
+    .header-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .theme-toggle {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 0.45rem 0.85rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: var(--transition);
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--border-strong);
+    }
+
+    .content-area {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      width: 100%;
+    }
+
+    /* Hero / Explanation Banner */
+    .hero-banner {
+      background: linear-gradient(135deg, var(--surface) 0%, var(--surface-raised) 100%);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem 2rem;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .hero-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .hero-desc {
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      max-width: 820px;
+    }
+
+    .badge-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.35rem;
+    }
+
+    .badge-pill {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      border: 1px solid var(--border-subtle);
+      background-color: var(--surface-interactive);
+      color: var(--text-secondary);
+    }
+
+    .badge-pill.success {
+      border-color: var(--status-success);
+      background-color: var(--status-success-soft);
+      color: var(--status-success);
+    }
+
+    .badge-pill.highlight {
+      border-color: var(--action-primary);
+      background-color: var(--surface-raised);
+      color: var(--action-primary);
+    }
+
+    /* Form Card */
+    .form-card {
+      background-color: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .form-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .form-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .label-hint {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .form-input, .form-select {
+      background-color: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.65rem 0.9rem;
+      font-size: 0.88rem;
+      color: var(--text-primary);
+      outline: none;
+      font-family: inherit;
+      transition: var(--transition);
+    }
+
+    .form-input:focus, .form-select:focus {
+      border-color: var(--focus-ring);
+      box-shadow: 0 0 0 2px var(--status-neutral-soft);
+    }
+
+    /* CATEGORY SELECTOR UI COMPONENT (Usulan 1) */
+    .category-section {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .category-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .category-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .detection-badge {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: var(--transition);
+    }
+
+    .detection-badge.auto {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid var(--status-info);
+    }
+
+    .detection-badge.manual {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border: 1px solid var(--status-warning);
+    }
+
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+    }
+
+    @media (max-width: 860px) {
+      .category-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .category-card {
+      background: var(--input-bg);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 0.9rem;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.4rem;
+      cursor: pointer;
+      position: relative;
+      transition: var(--transition);
+      user-select: none;
+    }
+
+    .category-card:hover {
+      border-color: var(--border-strong);
+      background: var(--surface-interactive);
+      transform: translateY(-1px);
+    }
+
+    .category-card.selected {
+      border-color: var(--action-primary);
+      background: var(--surface-interactive);
+      box-shadow: 0 0 0 1px var(--action-primary), 0 4px 14px rgba(45, 212, 191, 0.16);
+    }
+
+    .category-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    .category-icon {
+      font-size: 1.35rem;
+      line-height: 1;
+    }
+
+    .check-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      color: transparent;
+      transition: var(--transition);
+    }
+
+    .category-card.selected .check-icon {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      font-weight: 900;
+    }
+
+    .category-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-top: 0.1rem;
+    }
+
+    .category-desc {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      line-height: 1.3;
+    }
+
+    /* Quick Topic Pills */
+    .quick-topics {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 0.4rem;
+    }
+
+    .quick-topic-btn {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--link);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .quick-topic-btn:hover {
+      background: var(--surface-interactive);
+      border-color: var(--action-primary);
+      color: var(--action-primary-hover);
+    }
+
+    /* Reset button */
+    .reset-auto-btn {
+      background: none;
+      border: none;
+      color: var(--link);
+      font-size: 0.72rem;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0;
+      margin-left: 0.5rem;
+    }
+
+    .reset-auto-btn:hover {
+      color: var(--link-hover);
+    }
+
+    /* Live Payload Preview */
+    .payload-card {
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      overflow-x: auto;
+    }
+
+    /* Launch Button */
+    .btn-launch {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      padding: 0.85rem 1.75rem;
+      border-radius: var(--radius-md);
+      font-size: 0.95rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(45, 212, 191, 0.28);
+      transition: var(--transition);
+      align-self: flex-start;
+    }
+
+    .btn-launch:hover {
+      background: var(--action-primary-hover);
+      transform: translateY(-1px);
+    }
+
+    /* Toast Notification */
+    .toast-box {
+      padding: 0.85rem 1.25rem;
+      border-radius: var(--radius-md);
+      font-size: 0.88rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      transition: var(--transition);
+    }
+
+    .toast-box.success {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+    }
+
+    .toast-box.info {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid var(--status-info);
+    }
+
+    /* Comparison Box */
+    .diff-box {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .diff-header {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .diff-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .diff-cols {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .diff-col {
+      padding: 1rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+
+    .diff-col.bad {
+      border-left: 4px solid var(--status-danger);
+    }
+
+    .diff-col.good {
+      border-left: 4px solid var(--status-success);
+    }
+
+    .diff-title {
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar Simulated -->
+  <aside class="sidebar">
+    <div class="brand-logo">
+      <span>✨</span>
+      <span>MAKNA Flow</span>
+    </div>
+    <ul class="nav-list">
+      <li><a class="nav-item" href="#">📊 Dashboard</a></li>
+      <li><a class="nav-item" href="#">💡 Content Planner</a></li>
+      <li><a class="nav-item" href="#">🎬 Pillar Campaigns</a></li>
+      <li><a class="nav-item active" href="#">⚡ Auto Pipeline</a></li>
+      <li><a class="nav-item" href="#">📺 YouTube Studio</a></li>
+      <li><a class="nav-item" href="#">⚙️ Settings</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    <header>
+      <div class="header-title">
+        <span>⚡</span>
+        <span>Auto Pipeline — Recipe Video Automation</span>
+      </div>
+      <div class="header-actions">
+        <button class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()">
+          <span id="themeIcon">☀️</span>
+          <span id="themeLabel">Light Mode</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="content-area">
+
+      <!-- Toast Notification -->
+      <div class="toast-box info" id="toastMessage">
+        <span>💡</span>
+        <span><strong>Interactive Simulation:</strong> Ketik topik di bawah atau klik tombol saran resep untuk menguji Smart Auto-Detection kategori kuliner secara real-time!</span>
+      </div>
+
+      <!-- Hero Banner -->
+      <section class="hero-banner">
+        <h1 class="hero-title">
+          <span>⚡ Auto Pipeline</span>
+          <span style="font-size: 0.88rem; font-weight: 500; color: var(--text-muted);">(1-Click Planner-to-Video Engine)</span>
+        </h1>
+        <p class="hero-desc">
+          Solusi <strong>Usulan 1 (Category Selector UI & Smart Auto-Detection)</strong>: Mencegah bug resep ganjil (seperti "Sipping Soup" pada baked potato) dengan memberikan kontrol kategori yang eksplisit kepada pengguna dan didukung auto-detection pintar berbasis keyword.
+        </p>
+        <div class="badge-bar">
+          <span class="badge-pill highlight">Usulan 1: Category Selector UI</span>
+          <span class="badge-pill success">✓ Smart Auto-Detection Real-Time</span>
+          <span class="badge-pill">4 Kategori Kuliner Sesuai SOT</span>
+          <span class="badge-pill">100% Semantic CSS Tokens</span>
+        </div>
+      </section>
+
+      <!-- Before vs After Comparison Card -->
+      <section class="diff-box">
+        <div class="diff-header">🔍 Analisis Masalah vs Solusi Usulan 1</div>
+        <div class="diff-cols">
+          <div class="diff-col bad">
+            <div class="diff-title" style="color: var(--status-danger);">
+              <span>❌</span> Kondisi Sebelumnya (Bug #308)
+            </div>
+            <p>• Form Auto Pipeline tidak memiliki input kategori.</p>
+            <p>• Request dikirim tanpa <code>recipe_config.category</code>.</p>
+            <p>• Fallback hardcoded otomatis memaksa kategori = <code>'minuman'</code>.</p>
+            <p>• <strong>Hasil</strong>: Topik <em>"air fryer baked potato"</em> dipaksa AI menjadi <em>"Sipping Soup"</em> dalam gelas mug.</p>
+          </div>
+          <div class="diff-col good">
+            <div class="diff-title" style="color: var(--status-success);">
+              <span>✅</span> Solusi Usulan 1 (Pill Selector & Smart Auto-Detect)
+            </div>
+            <p>• Terdapat 4 kartu kategori kuliner interaktif yang jelas dan elegan.</p>
+            <p>• Smart Auto-Detection membaca kata kunci topik secara otomatis saat pengguna mengetik.</p>
+            <p>• Kategori diteruskan secara presisi ke Content Planner & Gemini AI.</p>
+            <p>• <strong>Hasil</strong>: Resep <em>"air fryer baked potato"</em> 100% diproses sebagai <strong>Makanan Utama / Camilan</strong>.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Form Konfigurasi Auto Pipeline -->
+      <section class="form-card">
+        <div class="form-title">
+          <span>⚙️</span>
+          <span>Konfigurasi Auto Pipeline</span>
+        </div>
+
+        <form id="pipelineForm" onsubmit="handleSimulateLaunch(event)" style="display: flex; flex-direction: column; gap: 1.5rem;">
+          
+          <!-- Grid 1: Brand & Settings -->
+          <div class="form-grid">
+            <!-- 1. Brand Profile -->
+            <div class="form-group">
+              <label class="form-label">
+                <span>Brand Profile</span>
+                <span class="label-hint">Persona & Bahasa</span>
+              </label>
+              <select class="form-select" id="brandSelect">
+                <option value="brand_habitfolk">Habitfolk (@habitfolk) — English</option>
+                <option value="brand_makna">MAKNA Culinary Studio (@maknacooking) — Indonesian</option>
+              </select>
+            </div>
+
+            <!-- 2. Visual Identity Preset -->
+            <div class="form-group">
+              <label class="form-label">
+                <span>Visual Identity Preset</span>
+                <span class="label-hint">Dinamis per brand</span>
+              </label>
+              <select class="form-select" id="presetSelect">
+                <option value="habitfolk_default">Habitfolk Moody Warm & Tone (Cinematic Minimalist)</option>
+                <option value="crisp_bright">Bright & Crisp Modern Kitchen</option>
+              </select>
+            </div>
+
+            <!-- 3. Target Resep -->
+            <div class="form-group">
+              <label class="form-label">
+                <span>Target Video Resep</span>
+                <span class="label-hint">Default: 7 video</span>
+              </label>
+              <input type="number" class="form-input" id="recipeCount" value="7" min="1" max="14">
+            </div>
+
+            <!-- 4. Mode Eksekusi -->
+            <div class="form-group">
+              <label class="form-label">
+                <span>Mode Eksekusi</span>
+                <span class="label-hint">Storyboard Approval</span>
+              </label>
+              <select class="form-select" id="executionMode">
+                <option value="full_autopilot">Full Autopilot (Auto-Approve & Langsung Produksi Video)</option>
+                <option value="manual_review">Manual Review (Jeda di Storyboard Approval)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- USULAN 1: CATEGORY SELECTOR UI COMPONENT -->
+          <div class="category-section">
+            <div class="category-header">
+              <div class="category-title">
+                <span>🍽️</span>
+                <span>Kategori Resep Kuliner</span>
+                <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: normal;">(Menentukan jenis olahan & instruksi AI)</span>
+              </div>
+              <div style="display: flex; align-items: center;">
+                <span class="detection-badge auto" id="detectionBadge">
+                  <span>✨</span>
+                  <span id="badgeText">Auto-Terdeteksi dari Topik</span>
+                </span>
+                <button type="button" class="reset-auto-btn" id="resetAutoBtn" style="display: none;" onclick="resetToAutoDetect()">
+                  Reset ke Deteksi Otomatis
+                </button>
+              </div>
+            </div>
+
+            <div class="category-grid">
+              <!-- Kategori 1: Makanan Utama -->
+              <div class="category-card selected" id="card_makanan_utama" onclick="selectCategory('makanan_utama', true)">
+                <div class="category-card-top">
+                  <span class="category-icon">🍗</span>
+                  <div class="check-icon">✓</div>
+                </div>
+                <div class="category-name">Makanan Utama</div>
+                <div class="category-desc">Main course, ayam, daging, ikan, pasta, rice bowl</div>
+              </div>
+
+              <!-- Kategori 2: Camilan -->
+              <div class="category-card" id="card_camilan" onclick="selectCategory('camilan', true)">
+                <div class="category-card-top">
+                  <span class="category-icon">🍟</span>
+                  <div class="check-icon">✓</div>
+                </div>
+                <div class="category-name">Camilan / Side Dish</div>
+                <div class="category-desc">Snacks, fries, finger food, crispy bites, gorengan</div>
+              </div>
+
+              <!-- Kategori 3: Dessert / Baking -->
+              <div class="category-card" id="card_dessert" onclick="selectCategory('dessert', true)">
+                <div class="category-card-top">
+                  <span class="category-icon">🍰</span>
+                  <div class="check-icon">✓</div>
+                </div>
+                <div class="category-name">Baking / Dessert</div>
+                <div class="category-desc">Cake, cookies, pastry, waffle, puding, sweets</div>
+              </div>
+
+              <!-- Kategori 4: Minuman -->
+              <div class="category-card" id="card_minuman" onclick="selectCategory('minuman', true)">
+                <div class="category-card-top">
+                  <span class="category-icon">🥤</span>
+                  <div class="check-icon">✓</div>
+                </div>
+                <div class="category-name">Minuman</div>
+                <div class="category-desc">Coffee, latte, matcha, smoothie, tea, mocktail</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Topik Resep Input with Live Detection -->
+          <div class="form-group">
+            <label class="form-label">
+              <span>Topik / Arahan Resep AI</span>
+              <span class="label-hint">Ketik ide resep untuk memicu Smart Auto-Detection</span>
+            </label>
+            <input 
+              type="text" 
+              class="form-input" 
+              id="topicInput" 
+              value="air fryer baked potato" 
+              oninput="handleTopicInput(this.value)"
+              placeholder="Contoh: air fryer salmon bites, garlic parmesan wings, matcha latte, brownies"
+            >
+
+            <!-- Quick Topic Pills (Testing Triggers) -->
+            <div class="quick-topics">
+              <span style="font-size: 0.72rem; color: var(--text-muted);">Uji Coba Cepat:</span>
+              <button type="button" class="quick-topic-btn" onclick="applyQuickTopic('air fryer baked potato')">
+                🥔 air fryer baked potato
+              </button>
+              <button type="button" class="quick-topic-btn" onclick="applyQuickTopic('crispy parmesan zucchini fries')">
+                🍟 zucchini fries
+              </button>
+              <button type="button" class="quick-topic-btn" onclick="applyQuickTopic('fudgy chocolate lava cake')">
+                🍰 chocolate lava cake
+              </button>
+              <button type="button" class="quick-topic-btn" onclick="applyQuickTopic('iced matcha espresso latte')">
+                🥤 matcha latte
+              </button>
+              <button type="button" class="quick-topic-btn" onclick="applyQuickTopic('garlic butter chicken steak')">
+                🍗 chicken steak
+              </button>
+            </div>
+          </div>
+
+          <!-- Live API Request Payload Preview -->
+          <div class="form-group">
+            <label class="form-label">
+              <span>Simulasi Payload API (dikirim ke /api/v2/recipes/autonomous-pipeline)</span>
+              <span class="label-hint">JSON Live Preview</span>
+            </label>
+            <div class="payload-card" id="payloadPreview">
+              { ... }
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="btn-launch" id="launchBtn">
+            <span>🚀</span>
+            <span>Luncurkan Auto Pipeline (Simulasi)</span>
+          </button>
+        </form>
+      </section>
+
+    </div>
+  </main>
+
+  <script>
+    // State
+    let currentCategory = 'makanan_utama';
+    let isManualOverride = false;
+
+    // Theme Switcher Logic
+    function toggleTheme() {
+      const html = document.documentElement;
+      const currentTheme = html.getAttribute('data-theme');
+      const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', nextTheme);
+
+      const icon = document.getElementById('themeIcon');
+      const label = document.getElementById('themeLabel');
+      if (nextTheme === 'light') {
+        icon.textContent = '🌙';
+        label.textContent = 'Dark Mode';
+      } else {
+        icon.textContent = '☀️';
+        label.textContent = 'Light Mode';
+      }
+    }
+
+    // Smart Auto-Detection Rule Engine
+    function detectCategoryFromTopic(text) {
+      if (!text || !text.trim()) return 'makanan_utama';
+      const t = text.toLowerCase();
+
+      // 1. Minuman (Beverages)
+      const beverageKeywords = [
+        'kopi', 'coffee', 'latte', 'cappuccino', 'tea', 'teh', 'matcha', 
+        'smoothie', 'juice', 'jus', 'boba', 'drink', 'mojito', 'mocktail', 
+        'shake', 'milkshake', 'espresso', 'brew', 'soda', 'cocktail', 'infusion'
+      ];
+      if (beverageKeywords.some(k => t.includes(k))) {
+        return 'minuman';
+      }
+
+      // 2. Dessert / Baking
+      const dessertKeywords = [
+        'cake', 'kue', 'cookie', 'cookies', 'baking', 'brownie', 'pancake', 
+        'waffle', 'donut', 'donat', 'muffin', 'pudding', 'puding', 'pie', 
+        'pastry', 'croissant', 'tart', 'cheesecake', 'cupcake', 'ice cream', 
+        'es krim', 'dessert', 'bolu', 'churro', 'lava cake'
+      ];
+      if (dessertKeywords.some(k => t.includes(k))) {
+        return 'dessert';
+      }
+
+      // 3. Camilan / Side Dish
+      const snackKeywords = [
+        'fries', 'kentang goreng', 'chips', 'snack', 'camilan', 'nugget', 
+        'finger food', 'popcorn', 'bites', 'zucchini fries', 'dimsum', 
+        'siomay', 'risol', 'spring roll', 'lumpia', 'tahu crispy', 'tempe mendoan', 
+        'wings', 'onion rings', 'edamame', 'crispy'
+      ];
+      if (snackKeywords.some(k => t.includes(k))) {
+        return 'camilan';
+      }
+
+      // 4. Makanan Utama (Main Course) & Default
+      return 'makanan_utama';
+    }
+
+    // Category Select Handler
+    function selectCategory(cat, manual = false) {
+      currentCategory = cat;
+      if (manual) {
+        isManualOverride = true;
+      }
+
+      // Update Card Visuals
+      const categories = ['makanan_utama', 'camilan', 'dessert', 'minuman'];
+      categories.forEach(c => {
+        const card = document.getElementById(`card_${c}`);
+        if (c === cat) {
+          card.classList.add('selected');
+        } else {
+          card.classList.remove('selected');
+        }
+      });
+
+      // Update Badge Visual
+      const badge = document.getElementById('detectionBadge');
+      const badgeText = document.getElementById('badgeText');
+      const resetBtn = document.getElementById('resetAutoBtn');
+
+      if (isManualOverride) {
+        badge.className = 'detection-badge manual';
+        badgeText.textContent = 'Pilihan Manual Pengguna';
+        resetBtn.style.display = 'inline';
+      } else {
+        badge.className = 'detection-badge auto';
+        badgeText.textContent = 'Auto-Terdeteksi dari Topik';
+        resetBtn.style.display = 'none';
+      }
+
+      updatePayloadPreview();
+    }
+
+    // Live Topic Input Handler
+    function handleTopicInput(val) {
+      if (!isManualOverride) {
+        const detected = detectCategoryFromTopic(val);
+        selectCategory(detected, false);
+      }
+      updatePayloadPreview();
+    }
+
+    // Apply Quick Topic
+    function applyQuickTopic(topic) {
+      document.getElementById('topicInput').value = topic;
+      isManualOverride = false;
+      const detected = detectCategoryFromTopic(topic);
+      selectCategory(detected, false);
+      showToast(`Topik diubah ke "${topic}" ➔ Kategori otomatis terdeteksi: "${formatCatLabel(detected)}"`);
+    }
+
+    // Reset to Auto Detect
+    function resetToAutoDetect() {
+      isManualOverride = false;
+      const val = document.getElementById('topicInput').value;
+      const detected = detectCategoryFromTopic(val);
+      selectCategory(detected, false);
+      showToast(`Kategori dikembalikan ke Auto-Detection berdasarkan topik.`);
+    }
+
+    function formatCatLabel(cat) {
+      switch (cat) {
+        case 'makanan_utama': return 'Makanan Utama';
+        case 'camilan': return 'Camilan / Side Dish';
+        case 'dessert': return 'Baking / Dessert';
+        case 'minuman': return 'Minuman';
+        default: return cat;
+      }
+    }
+
+    // Update Live Payload Preview
+    function updatePayloadPreview() {
+      const payload = {
+        brand_id: document.getElementById('brandSelect').value,
+        topic: document.getElementById('topicInput').value,
+        category: currentCategory,
+        recipe_count: Number(document.getElementById('recipeCount').value || 7),
+        execution_mode: document.getElementById('executionMode').value,
+        visual_identity_preset_id: document.getElementById('presetSelect').value,
+        auto_sync_contentflow: 1
+      };
+      document.getElementById('payloadPreview').textContent = JSON.stringify(payload, null, 2);
+    }
+
+    // Toast Helper
+    function showToast(msg) {
+      const toast = document.getElementById('toastMessage');
+      toast.innerHTML = `<span>⚡</span> <span>${msg}</span>`;
+      toast.className = 'toast-box success';
+    }
+
+    // Simulate Launch
+    function handleSimulateLaunch(e) {
+      e.preventDefault();
+      const topic = document.getElementById('topicInput').value;
+      const cat = formatCatLabel(currentCategory);
+      alert(`[SIMULASI BERHASIL] 🚀\nPipeline diluncurkan dengan data:\n- Topik: "${topic}"\n- Kategori: ${cat} (${currentCategory})\n\nResep akan digenerate sebagai ${cat} murni oleh Gemini AI, tanpa risiko salah kategori!`);
+    }
+
+    // Initial setup
+    window.addEventListener('DOMContentLoaded', () => {
+      const initialTopic = document.getElementById('topicInput').value;
+      const detected = detectCategoryFromTopic(initialTopic);
+      selectCategory(detected, false);
+      updatePayloadPreview();
+    });
+  </script>
+</body>
+</html>
+

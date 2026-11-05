@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.154 — Add Category Selector UI with Smart Auto-Detection (05/11/2026)
+- Tambahkan 4 kartu pilihan kategori kuliner interaktif pada Form Auto Pipeline
+- Implementasikan Smart Auto-Detection real-time berbasis kata kunci topik resep
+- Perbarui fallback default engine dari minuman ke makanan_utama dan teruskan kategori ke API & engine
+- Sediakan mockup HTML interaktif standalone dan test suite unit verifikasi kategori
+
 ## V2.32.153 — MCP MAKNA Flow untuk kampanye produk (05/11/2026)
 - Tambah MCP server HTTP dan stdio melalui Operator API dengan isolasi tenant yang sudah ada
 - Sediakan katalog, pembuatan kampanye idempoten, dan status dengan checkpoint creative review

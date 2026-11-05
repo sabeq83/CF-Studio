@@ -25,6 +25,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
       brand_id,
       brandId,
       topic,
+      category,
       recipe_count,
       recipeCount,
       execution_mode,
@@ -37,6 +38,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
     const result = await executeAutonomousRecipePipeline({
       brandId: brand_id || brandId,
       topic,
+      category: category || 'makanan_utama',
       recipeCount: recipe_count || recipeCount || 7,
       executionMode: execution_mode || executionMode || 'full_autopilot',
       visualIdentityPresetId: visual_identity_preset_id || visualIdentityPresetId || null,

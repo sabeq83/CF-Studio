@@ -11,8 +11,62 @@ export default function AutoPipelinePage() {
   const [selectedPresetId, setSelectedPresetId] = useState('');
   const [presetHint, setPresetHint] = useState('');
   const [topic, setTopic] = useState('air fryer chicken thighs');
+  const [category, setCategory] = useState('makanan_utama');
+  const [isCategoryManuallySelected, setIsCategoryManuallySelected] = useState(false);
   const [recipeCount, setRecipeCount] = useState(7);
   const [executionMode, setExecutionMode] = useState('full_autopilot');
+
+  // Smart Auto-Detection dari kata kunci topik
+  function detectCategoryFromTopic(text) {
+    if (!text || !text.trim()) return 'makanan_utama';
+    const t = text.toLowerCase();
+
+    // 1. Minuman (Beverages)
+    const beverageKeywords = [
+      'kopi', 'coffee', 'latte', 'cappuccino', 'tea', 'teh', 'matcha',
+      'smoothie', 'juice', 'jus', 'boba', 'drink', 'mojito', 'mocktail',
+      'shake', 'milkshake', 'espresso', 'brew', 'soda', 'cocktail', 'infusion'
+    ];
+    if (beverageKeywords.some(k => t.includes(k))) return 'minuman';
+
+    // 2. Dessert / Baking
+    const dessertKeywords = [
+      'cake', 'kue', 'cookie', 'cookies', 'baking', 'brownie', 'pancake',
+      'waffle', 'donut', 'donat', 'muffin', 'pudding', 'puding', 'pie',
+      'pastry', 'croissant', 'tart', 'cheesecake', 'cupcake', 'ice cream',
+      'es krim', 'dessert', 'bolu', 'churro', 'lava cake'
+    ];
+    if (dessertKeywords.some(k => t.includes(k))) return 'dessert';
+
+    // 3. Camilan / Side Dish
+    const snackKeywords = [
+      'fries', 'kentang goreng', 'chips', 'snack', 'camilan', 'nugget',
+      'finger food', 'popcorn', 'bites', 'zucchini fries', 'dimsum',
+      'siomay', 'risol', 'spring roll', 'lumpia', 'tahu crispy', 'tempe mendoan',
+      'wings', 'onion rings', 'edamame', 'crispy'
+    ];
+    if (snackKeywords.some(k => t.includes(k))) return 'camilan';
+
+    // 4. Makanan Utama (Main Course) & Default
+    return 'makanan_utama';
+  }
+
+  function handleTopicChange(newTopic) {
+    setTopic(newTopic);
+    if (!isCategoryManuallySelected) {
+      setCategory(detectCategoryFromTopic(newTopic));
+    }
+  }
+
+  function handleCategorySelect(catKey) {
+    setCategory(catKey);
+    setIsCategoryManuallySelected(true);
+  }
+
+  function resetCategoryToAuto() {
+    setIsCategoryManuallySelected(false);
+    setCategory(detectCategoryFromTopic(topic));
+  }
 
   const [isLaunching, setIsLaunching] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
@@ -124,6 +178,7 @@ export default function AutoPipelinePage() {
         body: JSON.stringify({
           brand_id: selectedBrandId,
           topic: topic.trim(),
+          category: category || 'makanan_utama',
           recipe_count: Number(recipeCount || 7),
           execution_mode: executionMode,
           visual_identity_preset_id: selectedPresetId,
@@ -378,7 +433,158 @@ export default function AutoPipelinePage() {
                   </select>
                 </div>
 
-                {/* 5. Topik Resep (Full Width) */}
+                {/* 5. Kategori Resep Kuliner (Usulan 1 - Category Selector UI) */}
+                <div style={{
+                  gridColumn: '1 / -1',
+                  background: 'var(--surface-raised)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '1.25rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.85rem'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '0.5rem'
+                  }}>
+                    <div style={{
+                      fontSize: '0.88rem',
+                      fontWeight: 700,
+                      color: 'var(--text-primary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.4rem'
+                    }}>
+                      <span>🍽️</span>
+                      <span>Kategori Resep Kuliner</span>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 400 }}>
+                        (Menentukan jenis olahan & instruksi AI)
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span style={{
+                        fontSize: '0.72rem',
+                        fontWeight: 600,
+                        padding: '0.25rem 0.65rem',
+                        borderRadius: 9999,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.35rem',
+                        background: isCategoryManuallySelected ? 'var(--status-warning-soft)' : 'var(--status-info-soft)',
+                        color: isCategoryManuallySelected ? 'var(--status-warning)' : 'var(--status-info)',
+                        border: `1px solid ${isCategoryManuallySelected ? 'var(--status-warning)' : 'var(--status-info)'}`
+                      }}>
+                        <span>{isCategoryManuallySelected ? '✏️ Pilihan Manual' : '✨ Auto-Terdeteksi dari Topik'}</span>
+                      </span>
+
+                      {isCategoryManuallySelected && (
+                        <button
+                          type="button"
+                          onClick={resetCategoryToAuto}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: 'var(--link)',
+                            fontSize: '0.72rem',
+                            cursor: 'pointer',
+                            textDecoration: 'underline',
+                            padding: 0
+                          }}
+                        >
+                          Reset ke Otomatis
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 4 Cards Grid */}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                    gap: '0.75rem'
+                  }}>
+                    {[
+                      {
+                        key: 'makanan_utama',
+                        icon: '🍗',
+                        name: 'Makanan Utama',
+                        desc: 'Main course, ayam, daging, ikan, pasta, rice bowl'
+                      },
+                      {
+                        key: 'camilan',
+                        icon: '🍟',
+                        name: 'Camilan / Side Dish',
+                        desc: 'Snacks, fries, finger food, crispy bites, gorengan'
+                      },
+                      {
+                        key: 'dessert',
+                        icon: '🍰',
+                        name: 'Baking / Dessert',
+                        desc: 'Cake, cookies, pastry, waffle, puding, sweets'
+                      },
+                      {
+                        key: 'minuman',
+                        icon: '🥤',
+                        name: 'Minuman',
+                        desc: 'Coffee, latte, matcha, smoothie, tea, mocktail'
+                      }
+                    ].map(cat => {
+                      const isSelected = category === cat.key;
+                      return (
+                        <button
+                          type="button"
+                          key={cat.key}
+                          onClick={() => handleCategorySelect(cat.key)}
+                          style={{
+                            background: isSelected ? 'var(--surface-interactive)' : 'var(--input-bg)',
+                            border: `1.5px solid ${isSelected ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
+                            borderRadius: 'var(--radius-md)',
+                            padding: '0.9rem',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'flex-start',
+                            gap: '0.4rem',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                            boxShadow: isSelected ? '0 0 0 1px var(--action-primary), 0 4px 14px rgba(45, 212, 191, 0.16)' : 'none',
+                            transition: 'var(--transition)'
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                            <span style={{ fontSize: '1.35rem', lineHeight: 1 }}>{cat.icon}</span>
+                            <div style={{
+                              width: '18px',
+                              height: '18px',
+                              borderRadius: '50%',
+                              background: isSelected ? 'var(--action-primary)' : 'var(--border-subtle)',
+                              color: isSelected ? 'var(--on-action-primary)' : 'transparent',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '0.65rem',
+                              fontWeight: 900
+                            }}>
+                              ✓
+                            </div>
+                          </div>
+                          <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '0.1rem' }}>
+                            {cat.name}
+                          </div>
+                          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1.3 }}>
+                            {cat.desc}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 6. Topik Resep (Full Width) */}
                 <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                   <label style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
                     <span>Topik / Arahan Resep AI</span>
@@ -387,7 +593,7 @@ export default function AutoPipelinePage() {
                   <input
                     type="text"
                     value={topic}
-                    onChange={(e) => setTopic(e.target.value)}
+                    onChange={(e) => handleTopicChange(e.target.value)}
                     placeholder="Contoh: air fryer salmon bites, garlic parmesan wings, keto smoothie"
                     style={{
                       background: 'var(--input-bg)',
@@ -411,7 +617,7 @@ export default function AutoPipelinePage() {
                       <button
                         type="button"
                         key={pill}
-                        onClick={() => setTopic(pill)}
+                        onClick={() => handleTopicChange(pill)}
                         style={{
                           fontSize: '0.74rem',
                           padding: '0.25rem 0.65rem',
