@@ -7,6 +7,7 @@ import ThemeToggle from './ThemeToggle';
 import ContentFlowLogo from './ContentFlowLogo';
 
 const menuKeyMap = {
+  '/auto-pipeline': 'pillar_campaign',
   '/youtube-studio': 'youtube_studio',
   '/affiliate-studio': 'affiliate_studio',
   '/contentflow-studio': 'content_flow',
@@ -50,6 +51,7 @@ const navItems = [
   { label: 'Universe Manager', href: '/settings/universes', icon: '🏰' },
 
   { section: 'WORKFLOW' },
+  { label: 'Auto Pipeline', href: '/auto-pipeline', icon: '⚡' },
   { label: 'YouTube Studio', href: '/youtube-studio', icon: '▶️' },
   { label: 'Affiliate Studio', href: '/affiliate-studio', icon: '◆' },
   { label: 'RE Campaign', href: '/re-campaigns', icon: '🎬' },

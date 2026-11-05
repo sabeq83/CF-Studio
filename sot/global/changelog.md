@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.147 — Dedicated Auto Pipeline Menu and ContentFlow Hub Sync (05/11/2026)
+- Add dedicated Auto Pipeline menu at top of WORKFLOW above YouTube Studio
+- Create page app/auto-pipeline/page.js with dynamic brand preset filtering
+- Enable auto_sync_contentflow to automatically synchronize completed videos to ContentFlow Hub
+
 ## V2.32.146 — Autonomous Recipe Pipeline Engine (05/11/2026)
 - Add autonomous 1-click recipe engine and brand-filtered VI preset dropdown
 - Support auto-approval and dynamic outro CTA on full autopilot

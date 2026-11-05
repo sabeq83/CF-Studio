@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup Usulan: Halaman Menu "Auto Pipeline" — MAKNA Flow</title>
+  <style>
+    /* MAKNA Flow Semantic Theme System */
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --link-hover: #a5f3fc;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --input-bg: #ffffff;
+      --overlay-subtle: rgba(30, 41, 59, 0.08);
+      --overlay-backdrop: rgba(15, 23, 42, 0.54);
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --text-disabled: #8794a6;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --link: #075ea8;
+      --link-hover: #064b86;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --status-neutral: #6548bd;
+      --status-neutral-soft: #f0ecfb;
+      --focus-ring: #6d4ed6;
+      --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+      --shadow-modal: 0 26px 80px rgba(31, 45, 61, 0.22);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Layout: Sidebar + Main Content */
+    .app-sidebar {
+      width: 250px;
+      background: var(--sidebar);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      padding: 1.25rem 0.75rem;
+      gap: 1.5rem;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0 0.5rem;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+    }
+
+    .brand-badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 0.15rem 0.45rem;
+      border-radius: var(--radius-xs);
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      text-transform: uppercase;
+    }
+
+    .nav-section-title {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      padding: 0.5rem 0.6rem 0.25rem;
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.55rem 0.75rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.86rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .nav-item:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+
+    .nav-item.active {
+      background: var(--surface-interactive);
+      color: var(--action-primary);
+      font-weight: 600;
+      border-left: 3px solid var(--action-primary);
+    }
+
+    .nav-item-badge {
+      margin-left: auto;
+      font-size: 0.62rem;
+      font-weight: 700;
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+      padding: 0.1rem 0.4rem;
+      border-radius: var(--radius-xs);
+    }
+
+    .app-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      background: var(--canvas);
+    }
+
+    .top-header {
+      height: 60px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+    }
+
+    .breadcrumbs {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .breadcrumbs span.current {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .theme-toggle-btn {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 0.4rem 0.8rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .content-container {
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    /* Page Hero Banner */
+    .hero-banner {
+      background: linear-gradient(135deg, var(--surface) 0%, var(--surface-raised) 100%);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow-card);
+    }
+
+    .hero-text h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .hero-text p {
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      margin-top: 0.35rem;
+      max-width: 650px;
+      line-height: 1.45;
+    }
+
+    .hero-pills {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+
+    .pill-tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-interactive);
+      color: var(--text-secondary);
+    }
+
+    .pill-tag.accent {
+      background: var(--status-success-soft);
+      border-color: var(--status-success);
+      color: var(--status-success);
+    }
+
+    /* SECTION 1: Form Konfigurasi */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .card-title {
+      font-size: 1.12rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .form-hint {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .form-control {
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.65rem 0.9rem;
+      font-size: 0.88rem;
+      color: var(--text-primary);
+      font-family: inherit;
+      transition: var(--transition);
+      outline: none;
+    }
+
+    .form-control:focus {
+      border-color: var(--action-primary);
+      box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.18);
+    }
+
+    .quick-topic-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.4rem;
+    }
+
+    .quick-topic-pill {
+      font-size: 0.74rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--link);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .quick-topic-pill:hover {
+      background: var(--surface-interactive);
+      border-color: var(--link);
+    }
+
+    .btn-launch {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      padding: 0.85rem 1.75rem;
+      border-radius: var(--radius-md);
+      font-size: 0.95rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 4px 14px rgba(45, 212, 191, 0.28);
+      margin-top: 0.5rem;
+    }
+
+    .btn-launch:hover {
+      background: var(--action-primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-launch:active {
+      transform: translateY(0);
+    }
+
+    /* SECTION 2: Visualizer */
+    .steps-container {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+
+    .step-box {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1rem 0.8rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      position: relative;
+      transition: var(--transition);
+    }
+
+    .step-box.active {
+      border-color: var(--action-primary);
+      background: var(--surface-interactive);
+      box-shadow: 0 0 16px rgba(45, 212, 191, 0.15);
+    }
+
+    .step-box.completed {
+      border-color: var(--status-success);
+      background: var(--surface-raised);
+    }
+
+    .step-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-strong);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .step-box.completed .step-num {
+      background: var(--status-success);
+      color: #042f2e;
+      border-color: var(--status-success);
+    }
+
+    .step-title {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.25;
+    }
+
+    .step-desc {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      line-height: 1.3;
+    }
+
+    /* SECTION 3: History Table */
+    .table-container {
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      text-align: left;
+    }
+
+    th {
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+      font-weight: 600;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      vertical-align: middle;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: var(--surface-interactive);
+    }
+
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.2rem 0.55rem;
+      border-radius: var(--radius-xs);
+    }
+
+    .badge-running {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border: 1px solid var(--status-warning);
+    }
+
+    .badge-success {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+    }
+
+    .action-link {
+      color: var(--link);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.82rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .action-link:hover {
+      color: var(--link-hover);
+      text-decoration: underline;
+    }
+
+    @media (max-width: 900px) {
+      .app-sidebar {
+        display: none;
+      }
+      .steps-container {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- APP SIDEBAR -->
+  <aside class="app-sidebar">
+    <div class="brand-logo">
+      <span>◈ MAKNA Flow</span>
+      <span class="brand-badge">Grid v2</span>
+    </div>
+
+    <div>
+      <div class="nav-section-title">PLANNING</div>
+      <ul class="nav-list">
+        <li class="nav-item">🗓️ Content Planner</li>
+        <li class="nav-item">📦 Product Database</li>
+        <li class="nav-item">🎨 Visual Identity</li>
+        <li class="nav-item">🧬 Brand Profile Manager</li>
+      </ul>
+    </div>
+
+    <div>
+      <div class="nav-section-title">WORKFLOW</div>
+      <ul class="nav-list">
+        <!-- NEW MENU: AUTO PIPELINE (DI ATAS YOUTUBE STUDIO) -->
+        <li class="nav-item active">
+          <span>⚡ Auto Pipeline</span>
+          <span class="nav-item-badge">NEW</span>
+        </li>
+        <li class="nav-item">▶️ YouTube Studio</li>
+        <li class="nav-item">◆ Affiliate Studio</li>
+        <li class="nav-item">🌱 Pillar Campaign</li>
+        <li class="nav-item">🍳 Recipe Labs</li>
+        <li class="nav-item">🤖 Sheets Autopilot</li>
+      </ul>
+    </div>
+
+    <div>
+      <div class="nav-section-title">PUBLISHING</div>
+      <ul class="nav-list">
+        <li class="nav-item">📊 ContentFlow Hub</li>
+        <li class="nav-item">📱 Recipe Exporter</li>
+      </ul>
+    </div>
+
+    <div>
+      <div class="nav-section-title">SYSTEM</div>
+      <ul class="nav-list">
+        <li class="nav-item">🩺 System Health</li>
+        <li class="nav-item">⚙ Settings</li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- MAIN APP AREA -->
+  <main class="app-main">
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="breadcrumbs">
+        <span>MAKNA Flow</span>
+        <span>/</span>
+        <span>Workflow</span>
+        <span>/</span>
+        <span class="current">Auto Pipeline</span>
+      </div>
+      <div class="header-actions">
+        <button class="theme-toggle-btn" onclick="toggleTheme()">
+          <span id="theme-icon">☀️</span>
+          <span id="theme-text">Light Mode</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Content Single Column -->
+    <div class="content-container">
+
+      <!-- Hero Banner -->
+      <section class="hero-banner">
+        <div class="hero-text">
+          <h1>⚡ Auto Pipeline <span style="font-size: 0.9rem; font-weight: 500; color: var(--text-muted);">(1-Click Planner-to-Video Engine)</span></h1>
+          <p>Otomatisasi end-to-end produksi konten resep: dari ideasi Gemini AI, auto-hydration profil brand & preset visual dinamis, pembuatan kampanye OPC 8-klip, hingga video final di Nextcloud dalam 1 kali klik.</p>
+          <div class="hero-pills">
+            <span class="pill-tag accent">● Cluster Health 100%</span>
+            <span class="pill-tag">Single-Pass 1-Call AI</span>
+            <span class="pill-tag">Veo Omni Flash (8 Klip @ 4s)</span>
+            <span class="pill-tag">Minimax Expressive TTS</span>
+            <span class="pill-tag">Auto-Sync ContentFlow Hub</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- BARIS 1: Konfigurasi 1-Klik -->
+      <section class="card">
+        <div class="card-title">
+          <span>⚙️</span>
+          <span>Konfigurasi Auto Pipeline</span>
+        </div>
+
+        <div class="form-grid">
+          <!-- 1. Brand Selector -->
+          <div class="form-group">
+            <label class="form-label" for="brandSelect">
+              <span>Brand Profile</span>
+              <span class="form-hint">Menentukan persona & target bahasa</span>
+            </label>
+            <select class="form-control" id="brandSelect" onchange="onBrandChange()">
+              <option value="habitfolk" selected>HabitFolk (Air Fryer & Culinary Hardware)</option>
+              <option value="dapurbotani">Dapur Botani (Herbal & Organic Kitchen)</option>
+              <option value="nutribake">NutriBake (High-Protein Bakery & Diet)</option>
+            </select>
+          </div>
+
+          <!-- 2. Visual Identity Preset Dropdown (Dinamis Berbasis Brand) -->
+          <div class="form-group">
+            <label class="form-label" for="presetSelect">
+              <span>Visual Identity Preset</span>
+              <span class="form-hint" id="presetHint">Terfilter untuk HabitFolk</span>
+            </label>
+            <select class="form-control" id="presetSelect">
+              <!-- Diisi dinamis oleh JavaScript -->
+            </select>
+          </div>
+
+          <!-- 3. Target Jumlah Resep -->
+          <div class="form-group">
+            <label class="form-label" for="recipeCount">
+              <span>Target Jumlah Video Resep</span>
+              <span class="form-hint">Rekomendasi: 7 video / batch</span>
+            </label>
+            <input type="number" class="form-control" id="recipeCount" value="7" min="1" max="14">
+          </div>
+
+          <!-- 4. Mode Eksekusi -->
+          <div class="form-group">
+            <label class="form-label" for="executionMode">
+              <span>Mode Eksekusi</span>
+              <span class="form-hint">Auto-approvalStoryboard</span>
+            </label>
+            <select class="form-control" id="executionMode">
+              <option value="full_autopilot" selected>Full Autopilot (Auto-Approve & Langsung Produksi Video)</option>
+              <option value="manual_review">Manual Review (Jeda di Storyboard Approval)</option>
+            </select>
+          </div>
+
+          <!-- 5. Topik Resep (Full Width) -->
+          <div class="form-group full-width">
+            <label class="form-label" for="topicInput">
+              <span>Topik / Arahan Resep AI</span>
+              <span class="form-hint">Ide tema resep yang akan diolah oleh Gemini AI</span>
+            </label>
+            <input type="text" class="form-control" id="topicInput" value="air fryer chicken thighs" placeholder="Contoh: air fryer salmon bites, herbal tea detox, keto muffin">
+            <div class="quick-topic-pills">
+              <span style="font-size: 0.72rem; color: var(--text-muted); align-self: center;">Saran Cepat:</span>
+              <span class="quick-topic-pill" onclick="setTopic('air fryer salmon bites')">salmon bites</span>
+              <span class="quick-topic-pill" onclick="setTopic('crispy parmesan zucchini fries')">zucchini fries</span>
+              <span class="quick-topic-pill" onclick="setTopic('garlic butter chicken bites')">garlic butter chicken</span>
+              <span class="quick-topic-pill" onclick="setTopic('smoothie mangga yogurt protein')">smoothie mangga yogurt</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <button class="btn-launch" id="btnLaunch" onclick="triggerPipeline()">
+            <span>⚡ Luncurkan Auto Pipeline (1-Klik)</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- BARIS 2: Visualizer 6 Tahap Eksekusi -->
+      <section class="card" id="visualizerCard">
+        <div class="card-title">
+          <span>📡</span>
+          <span>Live Execution Visualizer (Alur Otomatis)</span>
+        </div>
+
+        <div class="steps-container">
+          <div class="step-box" id="step1">
+            <div class="step-num">1</div>
+            <div class="step-title">Draft Planner</div>
+            <div class="step-desc">Pembuatan container batch</div>
+          </div>
+
+          <div class="step-box" id="step2">
+            <div class="step-num">2</div>
+            <div class="step-title">Gemini 1-Pass</div>
+            <div class="step-desc">Generate 7 ide & naskah resep</div>
+          </div>
+
+          <div class="step-box" id="step3">
+            <div class="step-num">3</div>
+            <div class="step-title">Preset Hydration</div>
+            <div class="step-desc">Injeksi VI preset & persona brand</div>
+          </div>
+
+          <div class="step-box" id="step4">
+            <div class="step-num">4</div>
+            <div class="step-title">OPC Ingestion</div>
+            <div class="step-desc">Struktur 8 klip @ 4s Omni Flash</div>
+          </div>
+
+          <div class="step-box" id="step5">
+            <div class="step-num">5</div>
+            <div class="step-title">Auto-Approval</div>
+            <div class="step-desc">Persetujuan storyboard otomatis</div>
+          </div>
+
+          <div class="step-box" id="step6">
+            <div class="step-num">6</div>
+            <div class="step-title">Video, Cloud & Hub</div>
+            <div class="step-desc">Upload Nextcloud & Sync ContentFlow Hub</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- BARIS 3: Riwayat Batch Kampanye Auto Pipeline -->
+      <section class="card">
+        <div class="card-title">
+          <span>📋</span>
+          <span>Riwayat Batch Kampanye Auto Pipeline</span>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Campaign ID</th>
+                <th>Brand & Judul Batch</th>
+                <th>VI Preset Terpilih</th>
+                <th>Model & Klip</th>
+                <th>Status Produksi</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="batchTableBody">
+              <tr>
+                <td><strong style="font-family: var(--font-mono); font-size: 0.8rem;">opc_261101_z5xynj</strong></td>
+                <td>
+                  <div><strong>HabitFolk — Air Fryer Chicken Thighs</strong></div>
+                  <div style="font-size: 0.74rem; color: var(--text-muted);">Asal: pln_37ca8d57 (7 Items)</div>
+                </td>
+                <td><span style="font-family: var(--font-mono); font-size: 0.76rem;">vi_habitfolk_macro_craft</span></td>
+                <td>8 Klip @ 4s (Omni Flash)</td>
+                <td><span class="badge-status badge-success">● Ready di Nextcloud</span></td>
+                <td><a href="#" class="action-link">Buka di OPC ↗</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script>
+    // Data Preset per Brand
+    const BRAND_PRESETS = {
+      habitfolk: [
+        { id: 'vi_habitfolk_macro_craft', label: 'HabitFolk — Satisfying Macro Craft (v2 Rekomendasi)' },
+        { id: 'vi_minimalist_scandinavian_bright', label: 'Minimalist Scandinavian Bright (Clean Wood)' }
+      ],
+      dapurbotani: [
+        { id: 'vi_dapurbotani_apothecary_3d_female', label: 'Dapur Botani — Apothecary 3D Female (v2)' },
+        { id: 'vi_dapurbotani_apothecary_3d_male', label: 'Dapur Botani — Apothecary 3D Male (v2)' },
+        { id: 'vi_cinematic_botanical_kinetics', label: 'Cinematic Botanical Kinetics (Herbal Fresh)' }
+      ],
+      nutribake: [
+        { id: 'vi_nutribake_modern_pastry', label: 'NutriBake — Modern Pastry Studio (v2)' },
+        { id: 'vi_nutribake_cozy_rustic', label: 'NutriBake — Cozy Rustic Bakery (Warm Wheat)' }
+      ]
+    };
+
+    function onBrandChange() {
+      const brand = document.getElementById('brandSelect').value;
+      const select = document.getElementById('presetSelect');
+      const hint = document.getElementById('presetHint');
+      select.innerHTML = '';
+
+      const presets = BRAND_PRESETS[brand] || [];
+      presets.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = p.label;
+        select.appendChild(opt);
+      });
+
+      const brandLabels = { habitfolk: 'HabitFolk', dapurbotani: 'Dapur Botani', nutribake: 'NutriBake' };
+      hint.textContent = 'Terfilter khusus ' + (brandLabels[brand] || brand);
+    }
+
+    function setTopic(val) {
+      document.getElementById('topicInput').value = val;
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+      document.getElementById('theme-text').textContent = next === 'dark' ? 'Light Mode' : 'Dark Mode';
+    }
+
+    function triggerPipeline() {
+      const btn = document.getElementById('btnLaunch');
+      const brand = document.getElementById('brandSelect').value;
+      const topic = document.getElementById('topicInput').value;
+      const preset = document.getElementById('presetSelect').value;
+      const count = document.getElementById('recipeCount').value;
+
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳ Memproses Auto Pipeline...</span>';
+
+      const steps = ['step1', 'step2', 'step3', 'step4', 'step5', 'step6'];
+      steps.forEach(id => {
+        const el = document.getElementById(id);
+        el.className = 'step-box';
+      });
+
+      let currentStep = 0;
+      const interval = setInterval(() => {
+        if (currentStep < steps.length) {
+          if (currentStep > 0) {
+            document.getElementById(steps[currentStep - 1]).className = 'step-box completed';
+          }
+          document.getElementById(steps[currentStep]).className = 'step-box active';
+          currentStep++;
+        } else {
+          clearInterval(interval);
+          document.getElementById(steps[steps.length - 1]).className = 'step-box completed';
+          btn.disabled = false;
+          btn.innerHTML = '<span>⚡ Luncurkan Auto Pipeline (1-Klik)</span>';
+
+          // Tambahkan ke baris tabel
+          const now = new Date();
+          const dateStr = now.getFullYear().toString().slice(-2) + 
+                          String(now.getMonth()+1).padStart(2,'0') + 
+                          String(now.getDate()).padStart(2,'0');
+          const randomHex = Math.random().toString(36).substring(2, 8);
+          const newCampId = `opc_${dateStr}_${randomHex}`;
+          const brandNames = { habitfolk: 'HabitFolk', dapurbotani: 'Dapur Botani', nutribake: 'NutriBake' };
+
+          const tbody = document.getElementById('batchTableBody');
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong style="font-family: var(--font-mono); font-size: 0.8rem;">${newCampId}</strong></td>
+            <td>
+              <div><strong>${brandNames[brand]} — ${topic}</strong></div>
+              <div style="font-size: 0.74rem; color: var(--text-muted);">Auto Ingest (${count} Items)</div>
+            </td>
+            <td><span style="font-family: var(--font-mono); font-size: 0.76rem;">${preset}</span></td>
+            <td>8 Klip @ 4s (Omni Flash)</td>
+            <td><span class="badge-status badge-running">● Sedang Diproses Scheduler</span></td>
+            <td><a href="#" class="action-link">Buka di OPC ↗</a></td>
+          `;
+          tbody.insertBefore(tr, tbody.firstChild);
+        }
+      }, 700);
+    }
+
+    // Inisialisasi awal
+    onBrandChange();
+  </script>
+</body>
+</html>
+
