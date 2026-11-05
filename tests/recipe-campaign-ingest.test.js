@@ -2,6 +2,15 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { ingestRecipePlannerToPillarCampaign } from '../lib/recipe-campaign-ingest.js';
 import { getDb } from '../lib/db.js';
+import { closePgPool } from '../lib/db-pg.js';
+import { stopCampaignScheduler } from '../lib/campaign-scheduler.js';
+
+test.after(async () => {
+  stopCampaignScheduler();
+  await new Promise(resolve => setTimeout(resolve, 800));
+  await closePgPool();
+  process.exit(0);
+});
 
 test('ingestRecipePlannerToPillarCampaign rejects missing planner ID', async () => {
   await assert.rejects(async () => {

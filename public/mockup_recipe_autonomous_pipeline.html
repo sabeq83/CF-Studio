@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup UI: Autonomous Recipe Pipeline (1-Click Planner-to-Video) — MAKNA Flow</title>
+  <style>
+    /* MAKNA Flow Semantic Theme System (Embedded for standalone file:// compatibility) */
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      
+      /* Dark Theme Colors */
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --link-hover: #a5f3fc;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --input-bg: #ffffff;
+      --overlay-subtle: rgba(30, 41, 59, 0.08);
+      --overlay-backdrop: rgba(15, 23, 42, 0.54);
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --text-disabled: #8794a6;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --link: #075ea8;
+      --link-hover: #064b86;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --status-neutral: #6548bd;
+      --status-neutral-soft: #f0ecfb;
+      --focus-ring: #6d4ed6;
+      --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+      --shadow-modal: 0 26px 80px rgba(31, 45, 61, 0.22);
+    }
+
+    /* Reset & Base Single Column Layout */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      background-color: var(--canvas);
+      color: var(--text-primary);
+    }
+
+    body {
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      padding: 32px 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Single Column Container */
+    .single-col-container {
+      max-width: 1080px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Header Bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-badge {
+      background: var(--surface-raised);
+      color: var(--action-primary);
+      border: 1px solid var(--border-subtle);
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      box-shadow: var(--shadow-card);
+    }
+
+    .brand-meta h1 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .badge-pill {
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      padding: 3px 10px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--status-info);
+    }
+
+    .brand-meta p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 18px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      transition: var(--transition);
+      border: 1px solid transparent;
+      text-decoration: none;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .btn-secondary {
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+      border-color: var(--border-subtle);
+    }
+    .btn-secondary:hover {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      border-color: var(--border-strong);
+    }
+
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+    }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .card-header {
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface-raised);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .card-header h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-body {
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Form Layouts in Single Column */
+    .form-row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr 0.9fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 820px) {
+      .form-row-3 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .form-hint {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .form-control {
+      background: var(--input-bg);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      padding: 11px 14px;
+      font-size: 0.88rem;
+      font-family: inherit;
+      outline: none;
+      transition: var(--transition);
+      width: 100%;
+    }
+    .form-control:focus {
+      border-color: var(--focus-ring);
+      box-shadow: 0 0 0 2px var(--status-info-soft);
+    }
+
+    /* Auto-Hydrated Preset 4-Column Grid */
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .preset-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 520px) {
+      .preset-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .preset-item-card {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .preset-item-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .preset-item-value {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      word-break: break-word;
+    }
+
+    /* Autopilot Control Strip */
+    .action-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+    }
+
+    .toggle-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .toggle-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--action-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .toggle-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: var(--surface-interactive);
+      border: 1px solid var(--border-strong);
+      transition: var(--transition);
+      border-radius: 26px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: var(--text-muted);
+      transition: var(--transition);
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: var(--action-primary);
+      border-color: var(--action-primary);
+    }
+    input:checked + .slider:before {
+      transform: translateX(22px);
+      background-color: var(--on-action-primary);
+    }
+
+    .launch-btn-main {
+      padding: 13px 28px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      box-shadow: 0 4px 16px rgba(45, 212, 191, 0.2);
+    }
+
+    /* 2. Visualizer Section (Full Width Pipeline Tracker Bar) */
+    .pipeline-visualizer-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .visualizer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .visualizer-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .visualizer-status {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--status-success);
+      font-family: var(--font-mono);
+      background: var(--status-success-soft);
+      padding: 3px 10px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--status-success);
+    }
+
+    .pipeline-tracker {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .tracker-step {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      min-width: 160px;
+    }
+
+    .tracker-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      transition: var(--transition);
+    }
+
+    .tracker-step.active .tracker-icon {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border-color: var(--status-info);
+      box-shadow: 0 0 12px var(--status-info-soft);
+    }
+
+    .tracker-step.completed .tracker-icon {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border-color: var(--status-success);
+    }
+
+    .tracker-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tracker-title {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .tracker-step.active .tracker-title {
+      color: var(--text-primary);
+    }
+
+    .tracker-desc {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .tracker-divider {
+      color: var(--border-strong);
+      font-size: 0.95rem;
+      flex-shrink: 0;
+    }
+
+    /* 3. Hasil Batch Section (Full Width) */
+    .tabs-bar {
+      display: flex;
+      gap: 6px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 0 20px;
+      background: var(--surface-raised);
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 13px 18px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: inherit;
+    }
+    .tab-btn:hover {
+      color: var(--text-primary);
+    }
+    .tab-btn.active {
+      color: var(--action-primary);
+      border-bottom-color: var(--action-primary);
+    }
+
+    /* Items List Container */
+    .items-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .item-card {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: var(--transition);
+    }
+    .item-card:hover {
+      border-color: var(--border-strong);
+      background: var(--surface-hover);
+    }
+
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .item-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      flex: 1;
+      min-width: 280px;
+    }
+
+    .item-seq {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .item-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .item-hook {
+      font-size: 0.83rem;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    .item-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding-top: 6px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .stages-stepper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+    }
+
+    .stage-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: var(--radius-xs);
+      background: var(--surface-raised);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+      white-space: nowrap;
+    }
+
+    .stage-badge.done {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border-color: var(--status-success);
+    }
+
+    .stage-badge.processing {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border-color: var(--status-info);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .item-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Comparison Box */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .comp-col {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .comp-badge {
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: var(--radius-xs);
+      display: inline-block;
+      width: fit-content;
+    }
+    .comp-badge.manual {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border: 1px solid var(--status-warning);
+    }
+    .comp-badge.auto {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+    }
+
+    .comp-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 0.83rem;
+      color: var(--text-secondary);
+    }
+
+    .comp-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .comp-icon {
+      font-size: 0.9rem;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* Modal Simulation */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--overlay-backdrop);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal-window {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-modal);
+      max-width: 820px;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: modalSlideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalSlideIn {
+      from { transform: translateY(12px) scale(0.98); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface-raised);
+    }
+
+    .modal-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .clips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .clip-box {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .clip-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--action-primary);
+    }
+
+    .clip-vo {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      font-style: italic;
+      line-height: 1.4;
+    }
+
+    .clip-visual {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      border-top: 1px dashed var(--border-subtle);
+      padding-top: 6px;
+      line-height: 1.35;
+    }
+
+    /* Status Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-xs);
+      padding: 12px 20px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      box-shadow: var(--shadow-modal);
+      display: none;
+      align-items: center;
+      gap: 10px;
+      z-index: 1100;
+    }
+    .toast.show {
+      display: flex;
+      animation: toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes toastIn {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="single-col-container">
+
+  <!-- Header Bar -->
+  <div class="top-bar">
+    <div class="brand-section">
+      <div class="logo-badge">⚡</div>
+      <div class="brand-meta">
+        <h1>Autonomous Recipe Pipeline <span class="badge-pill">1-Click Planner-to-Video Engine</span></h1>
+        <p>Solusi otomasi end-to-end terpadu untuk kampanye resep brand (seperti <code>opc_261101_z5xynj</code> / <code>pln_37ca8d57</code>)</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button type="button" class="btn btn-secondary" onclick="toggleTheme()">🌓 Mode Tema (<span id="themeLabel">Dark</span>)</button>
+      <button type="button" class="btn btn-secondary" onclick="openPresetModal()">⚙️ Kelola Preset Brand</button>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- 1. BARIS PALING ATAS: KONFIGURASI PIPELINE (QUICK COCKPIT) -->
+  <!-- ======================================================== -->
+  <div class="card">
+    <div class="card-header">
+      <h2>⚙️ 1. Konfigurasi Produksi Resep (Autopilot Cockpit)</h2>
+      <span style="font-size:0.75rem; color:var(--action-primary); font-weight:600;">Status: Ready to Launch</span>
+    </div>
+    <div class="card-body">
+
+      <!-- Form Inputs Row: Brand + Topic + Count -->
+      <div class="form-row-3">
+        <!-- Brand Selector -->
+        <div class="form-group">
+          <label class="form-label" for="brandSelect">
+            Brand Editorial
+            <span class="form-hint">Pilih entitas brand</span>
+          </label>
+          <select id="brandSelect" class="form-control" onchange="handleBrandChange()">
+            <option value="habitfolk" selected>HabitFolk (Small habits. Better together)</option>
+            <option value="nutribake">NutriBake (Healthy Baking & Diet Kitchen)</option>
+            <option value="dapurbotani">Dapur Botani (Fermented & Herbal Recipes)</option>
+          </select>
+        </div>
+
+        <!-- Recipe Topic Input -->
+        <div class="form-group">
+          <label class="form-label" for="topicInput">
+            Topik Resep / Directive
+            <span class="form-hint">Contoh: air fryer chicken thighs</span>
+          </label>
+          <input type="text" id="topicInput" class="form-control" value="air fryer chicken thighs" placeholder="Masukkan fokus kreasi kuliner...">
+        </div>
+
+        <!-- Number of Recipes -->
+        <div class="form-group">
+          <label class="form-label" for="recipeCount">
+            Target Batch
+            <span class="form-hint">Standar mingguan: 7 resep</span>
+          </label>
+          <select id="recipeCount" class="form-control">
+            <option value="7" selected>7 Resep (1 Pekan Penuh — Standar OPC)</option>
+            <option value="5">5 Resep (Weekday Batch)</option>
+            <option value="3">3 Resep (Mini Spotlight)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Auto-Hydrated Brand Presets (4-Column Strip) -->
+      <div class="form-group">
+        <label class="form-label">
+          Auto-Hydrated Preset Configuration
+          <span class="form-hint">Otomatis terisi dari Brand Profile saat brand dipilih</span>
+        </label>
+        <div class="preset-grid">
+          <div class="preset-item-card">
+            <span class="preset-item-label">Visual Identity Preset (Pilihan Brand)</span>
+            <select id="presetViSelect" class="form-control" style="padding:6px 8px; font-size:0.78rem; font-family:var(--font-mono); margin-top:2px;">
+              <option value="vi_habitfolk_macro_craft" selected>vi_habitfolk_macro_craft (Macro Craft v2)</option>
+            </select>
+          </div>
+          <div class="preset-item-card">
+            <span class="preset-item-label">Voiceover Engine & Persona</span>
+            <span class="preset-item-value" id="presetVoice">Minimax · causual_narrator_vv1</span>
+          </div>
+          <div class="preset-item-card">
+            <span class="preset-item-label">AI Video Model & Durasi</span>
+            <span class="preset-item-value" id="presetAi">Veo Omni Flash (8 Clips @ 4s)</span>
+          </div>
+          <div class="preset-item-card">
+            <span class="preset-item-label">Supporting App CTA (Outro)</span>
+            <span class="preset-item-value" id="presetApp">Airfry Eats App (Link in Bio)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Strip: Toggle + Launch Button -->
+      <div class="action-strip">
+        <div class="toggle-container" onclick="toggleAutopilot()">
+          <label class="switch" onclick="event.stopPropagation()">
+            <input type="checkbox" id="autopilotSwitch" checked onchange="updateAutopilotState()">
+            <span class="slider"></span>
+          </label>
+          <div class="toggle-text">
+            <span class="toggle-title">⚡ Full Autopilot Pipeline (Rekomendasi)</span>
+            <span class="toggle-desc">Sistem langsung generate resep, auto-approve storyboard, proses audio/video, dan unggah ke Nextcloud</span>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-primary launch-btn-main" id="btnLaunch" onclick="runAutonomousSimulation()">
+          ⚡ Eksekusi 1-Click Pipeline (Generate ➔ Video)
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- 2. BARIS KEDUA: VISUALIZER ALUR PROSES (PIPELINE TRACKER) -->
+  <!-- ======================================================== -->
+  <div class="pipeline-visualizer-card">
+    <div class="visualizer-header">
+      <span class="visualizer-title">🔄 2. Visualizer Alur Proses Real-Time</span>
+      <span class="visualizer-status" id="visualizerStatusLabel">Step 5/5: ALL STEPS COMPLETED</span>
+    </div>
+
+    <div class="pipeline-tracker">
+      <div class="tracker-step completed" id="step-track-1">
+        <div class="tracker-icon">1</div>
+        <div class="tracker-info">
+          <span class="tracker-title">Input Ideasi Brand</span>
+          <span class="tracker-desc">Brand & Topik Resep</span>
+        </div>
+      </div>
+      <span class="tracker-divider">➔</span>
+      <div class="tracker-step completed" id="step-track-2">
+        <div class="tracker-icon">2</div>
+        <div class="tracker-info">
+          <span class="tracker-title">AI Recipe Generator</span>
+          <span class="tracker-desc">Gemini 1-Pass (7 Resep)</span>
+        </div>
+      </div>
+      <span class="tracker-divider">➔</span>
+      <div class="tracker-step completed" id="step-track-3">
+        <div class="tracker-icon">3</div>
+        <div class="tracker-info">
+          <span class="tracker-title">Auto-Hydrate Preset</span>
+          <span class="tracker-desc">Macro VI + Minimax + Veo</span>
+        </div>
+      </div>
+      <span class="tracker-divider">➔</span>
+      <div class="tracker-step completed" id="step-track-4">
+        <div class="tracker-icon">4</div>
+        <div class="tracker-info">
+          <span class="tracker-title">Auto-Provision OPC</span>
+          <span class="tracker-desc">Bundling & Auto-Approve</span>
+        </div>
+      </div>
+      <span class="tracker-divider">➔</span>
+      <div class="tracker-step completed active" id="step-track-5">
+        <div class="tracker-icon">5</div>
+        <div class="tracker-info">
+          <span class="tracker-title">Video Final Ready</span>
+          <span class="tracker-desc">7 MP4 di Nextcloud</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- 3. BARIS KETIGA: HASIL BATCH PRODUKSI (HASIL BATCH)      -->
+  <!-- ======================================================== -->
+  <div class="card">
+    <div class="tabs-bar">
+      <button type="button" class="tab-btn active" id="tabItemsBtn" onclick="switchTab('items')">🎬 3. Hasil Batch Produksi (<span id="batchItemCount">7</span> Item Video Final)</button>
+      <button type="button" class="tab-btn" id="tabCompBtn" onclick="switchTab('comp')">⚖️ Perbandingan Alur (Sebelum vs Sesudah)</button>
+      <button type="button" class="tab-btn" id="tabLogBtn" onclick="switchTab('logs')">📜 Real-Time Pipeline Log</button>
+    </div>
+
+    <!-- Tab Content 1: Items List -->
+    <div class="card-body" id="tabContentItems">
+      <!-- Live Status Summary Header -->
+      <div style="display:flex; justify-content:space-between; align-items:center; background:var(--surface-raised); padding:12px 18px; border-radius:var(--radius-xs); border:1px solid var(--border-subtle); flex-wrap:wrap; gap:12px;">
+        <div style="display:flex; flex-direction:column; gap:2px;">
+          <span style="font-size:0.75rem; color:var(--text-muted);">Kampanye OPC Terdaftar:</span>
+          <strong style="font-size:0.92rem; color:var(--text-primary); font-family:var(--font-mono);" id="activeCampaignId">[ Recipe OPC 20261101 ] - habitfolk - 20261101 - air fryer chicken thighs</strong>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span class="stage-badge done" id="badgeAllStatus">STATUS: COMPLETED (7/7 MP4)</span>
+          <button type="button" class="btn btn-secondary" style="font-size:0.75rem; padding:5px 12px;" onclick="resetSimulation()">🔄 Reset Simulasi</button>
+        </div>
+      </div>
+
+      <!-- 7 Video Items List -->
+      <div class="items-container" id="itemsList">
+        <!-- Item 1 -->
+        <div class="item-card">
+          <div class="item-header">
+            <div class="item-meta">
+              <span class="item-seq">Item #1963 · Sequence 1 · Recipe Campaign</span>
+              <span class="item-title">Crispy Honey Garlic Air Fryer Chicken Thighs</span>
+              <span class="item-hook">"Stop ordering takeout. Make these restaurant-quality, ultra-crispy honey garlic chicken thighs in your air fryer in just 20 minutes."</span>
+            </div>
+          </div>
+          <div class="item-footer">
+            <div class="stages-stepper">
+              <span class="stage-badge done">✔ Gemini AI (8 Clips)</span>
+              <span class="stage-badge done">✔ Minimax TTS (en-US)</span>
+              <span class="stage-badge done">✔ Veo Omni Flash</span>
+              <span class="stage-badge done">✔ FFmpeg Smart Sync</span>
+              <span class="stage-badge done">✔ Nextcloud Synced</span>
+            </div>
+            <div class="item-actions">
+              <button type="button" class="btn btn-secondary" style="font-size:0.75rem; padding:5px 10px;" onclick="openDetailModal(1)">👁️ Inspeksi Klip & Storyboard</button>
+              <a href="http://100.78.186.123/index.php/s/N3YwpkdFx6pMQzf" target="_blank" class="btn btn-primary" style="font-size:0.75rem; padding:5px 10px;">📥 Buka File MP4 Nextcloud</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Item 2 -->
+        <div class="item-card">
+          <div class="item-header">
+            <div class="item-meta">
+              <span class="item-seq">Item #1964 · Sequence 2 · Recipe Campaign</span>
+              <span class="item-title">Zesty Lemon Herb Air Fryer Chicken Thighs</span>
+              <span class="item-hook">"Looking for a lighter, zesty dinner? These lemon herb air fryer chicken thighs are bright, juicy, and ready in under 20 minutes."</span>
+            </div>
+          </div>
+          <div class="item-footer">
+            <div class="stages-stepper">
+              <span class="stage-badge done">✔ Gemini AI (8 Clips)</span>
+              <span class="stage-badge done">✔ Minimax TTS (en-US)</span>
+              <span class="stage-badge done">✔ Veo Omni Flash</span>
+              <span class="stage-badge done">✔ FFmpeg Smart Sync</span>
+              <span class="stage-badge done">✔ Nextcloud Synced</span>
+            </div>
+            <div class="item-actions">
+              <button type="button" class="btn btn-secondary" style="font-size:0.75rem; padding:5px 10px;" onclick="openDetailModal(2)">👁️ Inspeksi Klip & Storyboard</button>
+              <a href="http://100.78.186.123/index.php/s/qtzmsC2tcbDigDJ" target="_blank" class="btn btn-primary" style="font-size:0.75rem; padding:5px 10px;">📥 Buka File MP4 Nextcloud</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Item 3 -->
+        <div class="item-card">
+          <div class="item-header">
+            <div class="item-meta">
+              <span class="item-seq">Item #1965 · Sequence 3 · Recipe Campaign</span>
+              <span class="item-title">Smoky BBQ Glazed Air Fryer Chicken Thighs</span>
+              <span class="item-hook">"Craving backyard BBQ flavor without lighting the grill? These smoky BBQ air fryer chicken thighs deliver intense flavor in minutes."</span>
+            </div>
+          </div>
+          <div class="item-footer">
+            <div class="stages-stepper">
+              <span class="stage-badge done">✔ Gemini AI (8 Clips)</span>
+              <span class="stage-badge done">✔ Minimax TTS (en-US)</span>
+              <span class="stage-badge done">✔ Veo Omni Flash</span>
+              <span class="stage-badge done">✔ FFmpeg Smart Sync</span>
+              <span class="stage-badge done">✔ Nextcloud Synced</span>
+            </div>
+            <div class="item-actions">
+              <button type="button" class="btn btn-secondary" style="font-size:0.75rem; padding:5px 10px;" onclick="openDetailModal(3)">👁️ Inspeksi Klip & Storyboard</button>
+              <a href="http://100.78.186.123/index.php/s/ekEZBAoqgnwAoZt" target="_blank" class="btn btn-primary" style="font-size:0.75rem; padding:5px 10px;">📥 Buka File MP4 Nextcloud</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Item 4 -->
+        <div class="item-card">
+          <div class="item-header">
+            <div class="item-meta">
+              <span class="item-seq">Item #1966 · Sequence 4 · Recipe Campaign</span>
+              <span class="item-title">Garlic Parmesan Air Fryer Chicken Thighs</span>
+              <span class="item-hook">"Crispy, cheesy, and packed with garlic flavor. These garlic parmesan air fryer chicken thighs will become your new weeknight favorite."</span>
+            </div>
+          </div>
+          <div class="item-footer">
+            <div class="stages-stepper">
+              <span class="stage-badge done">✔ Gemini AI (8 Clips)</span>
+              <span class="stage-badge done">✔ Minimax TTS (en-US)</span>
+              <span class="stage-badge done">✔ Veo Omni Flash</span>
+              <span class="stage-badge done">✔ FFmpeg Smart Sync</span>
+              <span class="stage-badge done">✔ Nextcloud Synced</span>
+            </div>
+            <div class="item-actions">
+              <button type="button" class="btn btn-secondary" style="font-size:0.75rem; padding:5px 10px;" onclick="openDetailModal(4)">👁️ Inspeksi Klip & Storyboard</button>
+              <a href="http://100.78.186.123/index.php/s/bbraoxXfBxzF8sP" target="_blank" class="btn btn-primary" style="font-size:0.75rem; padding:5px 10px;">📥 Buka File MP4 Nextcloud</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Item 5 -->
+        <div class="item-card">
+          <div class="item-header">
+            <div class="item-meta">
+              <span class="item-seq">Item #1967 · Sequence 5 · Recipe Campaign</span>
+              <span class="item-title">Spicy Cajun Air Fryer Chicken Thighs</span>
+              <span class="item-hook">"Kick your dinner up a notch with these spicy Cajun air fryer chicken thighs. Bold spices, juicy meat, and zero fuss."</span>
+            </div>
+          </div>
+          <div class="item-footer">
+            <div class="stages-stepper">
+              <span class="stage-badge done">✔ Gemini AI (8 Clips)</span>
+              <span class="stage-badge done">✔ Minimax TTS (en-US)</span>
+              <span class="stage-badge done">✔ Veo Omni Flash</span>
+              <span class="stage-badge done">✔ FFmpeg Smart Sync</span>
+              <span class="stage-badge done">✔ Nextcloud Synced</span>
+            </div>
+            <div class="item-actions">
+              <button type="button" class="btn btn-secondary" style="font-size:0.75rem; padding:5px 10px;" onclick="openDetailModal(5)">👁️ Inspeksi Klip & Storyboard</button>
+              <a href="http://100.78.186.123/index.php/s/PpKCYDKxY9SMoma" target="_blank" class="btn btn-primary" style="font-size:0.75rem; padding:5px 10px;">📥 Buka File MP4 Nextcloud</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Item 6 -->
+        <div class="item-card">
+          <div class="item-header">
+            <div class="item-meta">
+              <span class="item-seq">Item #1968 · Sequence 6 · Recipe Campaign</span>
+              <span class="item-title">Maple Mustard Glazed Air Fryer Chicken Thighs</span>
+              <span class="item-hook">"Sweet meets tangy in this incredible maple mustard glaze. These air fryer chicken thighs are juicy on the inside and perfectly glazed."</span>
+            </div>
+          </div>
+          <div class="item-footer">
+            <div class="stages-stepper">
+              <span class="stage-badge done">✔ Gemini AI (8 Clips)</span>
+              <span class="stage-badge done">✔ Minimax TTS (en-US)</span>
+              <span class="stage-badge done">✔ Veo Omni Flash</span>
+              <span class="stage-badge done">✔ FFmpeg Smart Sync</span>
+              <span class="stage-badge done">✔ Nextcloud Synced</span>
+            </div>
+            <div class="item-actions">
+              <button type="button" class="btn btn-secondary" style="font-size:0.75rem; padding:5px 10px;" onclick="openDetailModal(6)">👁️ Inspeksi Klip & Storyboard</button>
+              <a href="http://100.78.186.123/index.php/s/CADr5ZkkQe6LNS6" target="_blank" class="btn btn-primary" style="font-size:0.75rem; padding:5px 10px;">📥 Buka File MP4 Nextcloud</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Item 7 -->
+        <div class="item-card">
+          <div class="item-header">
+            <div class="item-meta">
+              <span class="item-seq">Item #1969 · Sequence 7 · Recipe Campaign</span>
+              <span class="item-title">Herb Butter Air Fryer Chicken Thighs</span>
+              <span class="item-hook">"Melt-in-your-mouth tender with rich garlic herb butter. These air fryer chicken thighs taste like they came from a steakhouse."</span>
+            </div>
+          </div>
+          <div class="item-footer">
+            <div class="stages-stepper">
+              <span class="stage-badge done">✔ Gemini AI (8 Clips)</span>
+              <span class="stage-badge done">✔ Minimax TTS (en-US)</span>
+              <span class="stage-badge done">✔ Veo Omni Flash</span>
+              <span class="stage-badge done">✔ FFmpeg Smart Sync</span>
+              <span class="stage-badge done">✔ Nextcloud Synced</span>
+            </div>
+            <div class="item-actions">
+              <button type="button" class="btn btn-secondary" style="font-size:0.75rem; padding:5px 10px;" onclick="openDetailModal(7)">👁️ Inspeksi Klip & Storyboard</button>
+              <a href="http://100.78.186.123/index.php/s/z4nW6Ww6zaNftKL" target="_blank" class="btn btn-primary" style="font-size:0.75rem; padding:5px 10px;">📥 Buka File MP4 Nextcloud</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab Content 2: Comparison (Before vs After) -->
+    <div class="card-body" id="tabContentComp" style="display:none;">
+      <div class="comparison-grid">
+        <div class="comp-col">
+          <span class="comp-badge manual">Alur Saat Ini (Multi-Step Manual)</span>
+          <ul class="comp-list">
+            <li><span class="comp-icon">🔴</span> Masuk ke Content Planner & isi form draft manual.</li>
+            <li><span class="comp-icon">🔴</span> Tunggu generate & buka satu per satu baris resep.</li>
+            <li><span class="comp-icon">🔴</span> Pindah manual ke menu Pillar Campaigns.</li>
+            <li><span class="comp-icon">🔴</span> Klik "+ Buat Kampanye Baru" & buka Import Modal.</li>
+            <li><span class="comp-icon">🔴</span> Cari dan pilih Planner <code>pln_37ca8d57</code>.</li>
+            <li><span class="comp-icon">🔴</span> Isi ulang VI Preset <code>vi_habitfolk_macro_craft</code>.</li>
+            <li><span class="comp-icon">🔴</span> Pilih ulang model Veo Omni Flash & persona suara Minimax.</li>
+            <li><span class="comp-icon">🔴</span> Salin-tempel kalimat Outro CTA App secara manual.</li>
+            <li><span class="comp-icon">🔴</span> Buka halaman detail kampanye dan klik Approve tiap item.</li>
+            <li><span class="comp-icon">⚠️</span> <strong>Total Waktu Operator: ~15-20 menit per batch</strong></li>
+          </ul>
+        </div>
+
+        <div class="comp-col">
+          <span class="comp-badge auto">Alur Usulan (Autonomous 1-Click Pipeline)</span>
+          <ul class="comp-list">
+            <li><span class="comp-icon">🟢</span> Cukup masukkan brand & topik: <code>air fryer chicken thighs</code>.</li>
+            <li><span class="comp-icon">🟢</span> Aktifkan toggle <strong>⚡ Full Autopilot</strong>.</li>
+            <li><span class="comp-icon">🟢</span> Klik <strong>"Eksekusi 1-Click Pipeline"</strong>.</li>
+            <li><span class="comp-icon">⚡</span> Sistem auto-generate 7 resep via Gemini 1-Pass.</li>
+            <li><span class="comp-icon">⚡</span> Sistem auto-hydrate preset visual identity & suara brand.</li>
+            <li><span class="comp-icon">⚡</span> Sistem auto-inject dynamic CTA outro link aplikasi resep.</li>
+            <li><span class="comp-icon">⚡</span> Sistem auto-provision campaign & auto-approve storyboard.</li>
+            <li><span class="comp-icon">⚡</span> Scheduler background langsung memproses 7 video hingga selesai.</li>
+            <li><span class="comp-icon">✨</span> <strong>Total Waktu Operator: &lt; 30 detik (Zero Re-typing!)</strong></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab Content 3: Pipeline Logs -->
+    <div class="card-body" id="tabContentLogs" style="display:none;">
+      <div style="background:var(--canvas); border:1px solid var(--border-subtle); border-radius:var(--radius-xs); padding:16px; font-family:var(--font-mono); font-size:0.75rem; color:var(--text-secondary); max-height:420px; overflow-y:auto; line-height:1.7;" id="logConsole">
+        <div>[2026-11-01T07:48:27.257Z] 🚀 [Autonomous Pipeline] Initializing batch production for brand: habitfolk</div>
+        <div>[2026-11-01T07:48:27.280Z] 📖 Loaded Brand Profile 'HabitFolk' (ID: 226f835a-1717-4c0f-b1ab-0b276130c839)</div>
+        <div>[2026-11-01T07:48:27.295Z] 🎨 Auto-hydrated VI Preset 'vi_habitfolk_macro_craft' (Macro culinary cinematography)</div>
+        <div>[2026-11-01T07:48:27.310Z] 🎙️ Auto-hydrated Minimax Persona 'English_causual_narrator_vv1' (speed: 1.0, lang: en-US)</div>
+        <div>[2026-11-01T07:48:27.317Z] 📝 Linked to Content Planner 'pln_37ca8d57' -> Marked status as CONSUMED</div>
+        <div>[2026-11-01T07:48:27.350Z] 📦 Generated Campaign 'opc_261101_z5xynj' with 7 Recipe Items</div>
+        <div>[2026-11-01T07:48:27.390Z] ⚡ Full Autopilot: Auto-approving all 7 items (approval_mode: creative / none)</div>
+        <div>[2026-11-01T07:48:28.100Z] 🎬 Campaign Scheduler started for items 1963..1969</div>
+        <div>[2026-11-01T07:52:14.000Z] ✅ All 7 final MP4 videos rendered and uploaded to Nextcloud storage successfully!</div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Modal Detail Inspeksi Klip -->
+<div class="modal-backdrop" id="detailModal">
+  <div class="modal-window">
+    <div class="modal-header">
+      <span class="modal-title" id="modalRecipeTitle">Inspeksi Resep: Crispy Honey Garlic Chicken Thighs</span>
+      <button type="button" class="btn btn-secondary" style="padding:4px 8px; font-size:0.8rem;" onclick="closeDetailModal()">✕ Tutup</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:var(--surface-raised); border:1px solid var(--border-subtle); padding:14px; border-radius:var(--radius-xs);">
+        <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">VERBATIM HOOK (CLIP 1)</div>
+        <div style="font-size:0.9rem; color:var(--text-primary); margin-top:4px;" id="modalHookText">Stop ordering takeout. Make these restaurant-quality, ultra-crispy honey garlic chicken thighs in your air fryer in just 20 minutes.</div>
+      </div>
+
+      <div style="background:var(--surface-raised); border:1px solid var(--border-subtle); padding:14px; border-radius:var(--radius-xs);">
+        <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">MANDATORY OUTRO CTA (CLIP 8)</div>
+        <div style="font-size:0.9rem; color:var(--action-primary); margin-top:4px;">Want more air fryer recipes? Get the app through the link in my bio!</div>
+      </div>
+
+      <div style="font-size:0.88rem; font-weight:700; color:var(--text-primary);">Struktur 8 Klip Video (4 Detik / Klip · Veo Omni Flash)</div>
+      
+      <div class="clips-grid" id="modalClipsGrid">
+        <!-- Will be populated dynamically -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Preset Brand -->
+<div class="modal-backdrop" id="presetModal">
+  <div class="modal-window" style="max-width:580px;">
+    <div class="modal-header">
+      <span class="modal-title">⚙️ Konfigurasi Default Recipe Preset Brand</span>
+      <button type="button" class="btn btn-secondary" style="padding:4px 8px; font-size:0.8rem;" onclick="closePresetModal()">✕ Tutup</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:0.82rem; color:var(--text-muted);">Nilai di bawah ini akan secara otomatis terisi (auto-hydrated) setiap kali pipeline resep brand dijalankan:</p>
+      
+      <div class="form-group">
+        <label class="form-label">Brand</label>
+        <input type="text" class="form-control" value="HabitFolk" readonly style="opacity:0.7;">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Default Visual Identity Preset</label>
+        <select class="form-control">
+          <option selected>vi_habitfolk_macro_craft (HabitFolk — Satisfying Macro Craft)</option>
+          <option>vi_nutribake_cozy_rustic (NutriBake Cozy Rustic Kitchen)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Default Voice Persona</label>
+        <select class="form-control">
+          <option selected>Minimax · English_causual_narrator_vv1 (en-US, 1.0x)</option>
+          <option>Minimax · Indonesian_casual_reporter_vv2 (id-ID, 1.0x)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Default AI Model & Clips</label>
+        <select class="form-control">
+          <option selected>Google Veo Omni Flash · 8 Clips @ 4s (32s)</option>
+          <option>Google Veo 3.1 Lite · 4 Clips @ 8s (32s)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Supporting App Name (CTA)</label>
+        <input type="text" class="form-control" value="Airfry Eats">
+      </div>
+
+      <button type="button" class="btn btn-primary" style="margin-top:10px;" onclick="savePresetSettings()">Simpan Konfigurasi Brand</button>
+    </div>
+  </div>
+</div>
+
+<!-- Status Toast -->
+<div class="toast" id="toastMessage">
+  <span id="toastIcon">🚀</span>
+  <span id="toastText">Pipeline berhasil dieksekusi!</span>
+</div>
+
+<script>
+  // Theme Toggle Functionality
+  function toggleTheme() {
+    const html = document.documentElement;
+    const currentTheme = html.getAttribute('data-theme') || 'dark';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', newTheme);
+    document.getElementById('themeLabel').innerText = newTheme === 'dark' ? 'Dark' : 'Light';
+    showToast(`Tema diganti ke mode ${newTheme.toUpperCase()}`, '🌓');
+  }
+
+  // Toast Function
+  function showToast(text, icon = '🚀') {
+    const toast = document.getElementById('toastMessage');
+    document.getElementById('toastText').innerText = text;
+    document.getElementById('toastIcon').innerText = icon;
+    toast.classList.add('show');
+    setTimeout(() => {
+      toast.classList.remove('show');
+    }, 2800);
+  }
+
+  // Brand Presets Database Mapping
+  const brandPresetsMap = {
+    habitfolk: [
+      { id: 'vi_habitfolk_macro_craft', label: 'vi_habitfolk_macro_craft (HabitFolk — Satisfying Macro Craft v2)' }
+    ],
+    dapurbotani: [
+      { id: 'vi_dapurbotani_apothecary_3d_female', label: 'vi_dapurbotani_apothecary_3d_female (Botanical Female)' },
+      { id: 'vi_dapurbotani_apothecary_3d_male', label: 'vi_dapurbotani_apothecary_3d_male (Botanical Male)' },
+      { id: 'vi_cinematic_botanical_kinetics', label: 'vi_cinematic_botanical_kinetics (Botanical Kinetics)' }
+    ],
+    nutribake: [
+      { id: 'vi_nutribake_modern_pastry', label: 'vi_nutribake_modern_pastry (Clean Modern Pastry)' },
+      { id: 'vi_nutribake_cozy_rustic', label: 'vi_nutribake_cozy_rustic (Cozy Rustic Baking)' }
+    ]
+  };
+
+  // Brand Change Handler
+  function handleBrandChange() {
+    const brand = document.getElementById('brandSelect').value;
+    const viSelect = document.getElementById('presetViSelect');
+    viSelect.innerHTML = '';
+
+    const availablePresets = brandPresetsMap[brand] || brandPresetsMap.habitfolk;
+    availablePresets.forEach(preset => {
+      const opt = document.createElement('option');
+      opt.value = preset.id;
+      opt.innerText = preset.label;
+      viSelect.appendChild(opt);
+    });
+
+    if (brand === 'habitfolk') {
+      document.getElementById('presetVoice').innerText = 'Minimax · causual_narrator_vv1';
+      document.getElementById('presetAi').innerText = 'Veo Omni Flash (8 Clips @ 4s)';
+      document.getElementById('presetApp').innerText = 'Airfry Eats App (Link in Bio)';
+      document.getElementById('topicInput').value = 'air fryer chicken thighs';
+      document.getElementById('activeCampaignId').innerText = '[ Recipe OPC 20261101 ] - habitfolk - 20261101 - air fryer chicken thighs';
+    } else if (brand === 'nutribake') {
+      document.getElementById('presetVoice').innerText = 'Minimax · casual_reporter_vv2';
+      document.getElementById('presetAi').innerText = 'Veo 3.1 Lite (4 Clips @ 8s)';
+      document.getElementById('presetApp').innerText = 'ProteinPrep App (Link in Bio)';
+      document.getElementById('topicInput').value = 'gluten-free banana bread';
+      document.getElementById('activeCampaignId').innerText = '[ Recipe OPC 20261101 ] - nutribake - 20261101 - gluten-free banana bread';
+    } else {
+      document.getElementById('presetVoice').innerText = 'Minimax · warm_motherly_vv1';
+      document.getElementById('presetAi').innerText = 'Veo Omni Flash (8 Clips @ 4s)';
+      document.getElementById('presetApp').innerText = 'GarliBee Health Hub';
+      document.getElementById('topicInput').value = 'fermented solo garlic honey';
+      document.getElementById('activeCampaignId').innerText = '[ Recipe OPC 20261101 ] - dapurbotani - 20261101 - fermented solo garlic';
+    }
+    showToast(`Preset dropdown diperbarui sesuai brand ${brand.toUpperCase()}`, '✨');
+  }
+
+  // Autopilot Toggle
+  function toggleAutopilot() {
+    const checkbox = document.getElementById('autopilotSwitch');
+    checkbox.checked = !checkbox.checked;
+    updateAutopilotState();
+  }
+
+  function updateAutopilotState() {
+    const isChecked = document.getElementById('autopilotSwitch').checked;
+    showToast(`Mode Autopilot: ${isChecked ? 'AKTIF (Otomatis Penuh)' : 'MANUAL (Perlu Review)'}`, isChecked ? '⚡' : '⏸️');
+  }
+
+  // Tab Switcher
+  function switchTab(tab) {
+    document.getElementById('tabItemsBtn').classList.toggle('active', tab === 'items');
+    document.getElementById('tabCompBtn').classList.toggle('active', tab === 'comp');
+    document.getElementById('tabLogBtn').classList.toggle('active', tab === 'logs');
+
+    document.getElementById('tabContentItems').style.display = tab === 'items' ? 'flex' : 'none';
+    document.getElementById('tabContentComp').style.display = tab === 'comp' ? 'block' : 'none';
+    document.getElementById('tabContentLogs').style.display = tab === 'logs' ? 'block' : 'none';
+  }
+
+  // Simulation Runner
+  function runAutonomousSimulation() {
+    const brand = document.getElementById('brandSelect').value;
+    const topic = document.getElementById('topicInput').value;
+    const btn = document.getElementById('btnLaunch');
+
+    btn.disabled = true;
+    btn.innerText = '⏳ Mengorkestrasi Pipeline...';
+
+    // Step animation in tracker
+    document.getElementById('step-track-1').className = 'tracker-step completed';
+    document.getElementById('step-track-2').className = 'tracker-step active';
+    document.getElementById('visualizerStatusLabel').innerText = 'Step 2/5: AI GENERATING 7 RECIPES...';
+
+    showToast(`Memulai pembuatan batch 7 resep: "${topic}"...`, '⚡');
+
+    const selectedVi = document.getElementById('presetViSelect')?.value || 'vi_habitfolk_macro_craft';
+
+    setTimeout(() => {
+      document.getElementById('step-track-2').className = 'tracker-step completed';
+      document.getElementById('step-track-3').className = 'tracker-step active';
+      document.getElementById('visualizerStatusLabel').innerText = 'Step 3/5: AUTO-HYDRATING BRAND PRESETS...';
+      showToast(`Gemini AI selesai! Menghubungkan Visual Preset (${selectedVi}) & Voice...`, '🎨');
+    }, 1200);
+
+    setTimeout(() => {
+      document.getElementById('step-track-3').className = 'tracker-step completed';
+      document.getElementById('step-track-4').className = 'tracker-step active';
+      document.getElementById('visualizerStatusLabel').innerText = 'Step 4/5: AUTO-PROVISIONING OPC & AUTO-APPROVING...';
+      showToast('Auto-provisioning OPC Campaign & auto-approving storyboard...', '📦');
+    }, 2400);
+
+    setTimeout(() => {
+      document.getElementById('step-track-4').className = 'tracker-step completed';
+      document.getElementById('step-track-5').className = 'tracker-step completed active';
+      document.getElementById('visualizerStatusLabel').innerText = 'Step 5/5: ALL 7 MP4 VIDEOS COMPLETED!';
+      btn.disabled = false;
+      btn.innerText = '⚡ Eksekusi 1-Click Pipeline (Generate ➔ Video)';
+      showToast('Selesai! 7 Video final siap ditonton & terunggah di Nextcloud! 🚀', '🎉');
+      switchTab('items');
+    }, 3600);
+  }
+
+  function resetSimulation() {
+    document.getElementById('step-track-1').className = 'tracker-step completed';
+    document.getElementById('step-track-2').className = 'tracker-step active';
+    document.getElementById('step-track-3').className = 'tracker-step';
+    document.getElementById('step-track-4').className = 'tracker-step';
+    document.getElementById('step-track-5').className = 'tracker-step';
+    document.getElementById('visualizerStatusLabel').innerText = 'Step 2/5: READY TO LAUNCH';
+    showToast('Simulasi di-reset.', '🔄');
+  }
+
+  // Modal Detail Inspection
+  const sampleRecipes = {
+    1: {
+      title: "Crispy Honey Garlic Air Fryer Chicken Thighs",
+      hook: "Stop ordering takeout. Make these restaurant-quality, ultra-crispy honey garlic chicken thighs in your air fryer in just 20 minutes.",
+      clips: [
+        { vo: "Stop ordering takeout. Make these ultra-crispy honey garlic chicken thighs right at home!", visual: "Close-up slow-motion shot of a glossy, perfectly caramelized honey garlic chicken thigh being sliced open, revealing juicy meat." },
+        { vo: "Toss your chicken thighs with olive oil and simple pantry spices for an instant flavor boost.", visual: "Overhead shot of 4 boneless skinless chicken thighs in a glass mixing bowl tossed with olive oil and smoked paprika." },
+        { vo: "Pat dry completely with paper towels—this is the secret to maximum crispiness.", visual: "Tactile macro shot of paper towel pressing moisture off raw chicken thighs on a wooden board." },
+        { vo: "Arrange them in a single layer in the air fryer basket at 380 degrees.", visual: "Extreme close-up of chicken placed in matte air fryer basket with space between pieces." },
+        { vo: "Air fry for 14 minutes, flipping halfway for even browning.", visual: "Sizzling exterior of chicken thighs getting golden brown under air fryer heating coil." },
+        { vo: "Now brush on that sweet honey soy glaze generously.", visual: "Culinary macro basting brush coating warm chicken with bubbly golden honey glaze." },
+        { vo: "Give it four more minutes until sticky, bubbly, and deeply caramelized.", visual: "High heat bubbling caramel glaze glistening on crispy chicken surface." },
+        { vo: "Juicy on the inside, sticky on the outside. Want more air fryer recipes? Get the app through the link in my bio!", visual: "Finished plated glazed chicken garnished with chopped scallions alongside recipe title overlay." }
+      ]
+    },
+    2: {
+      title: "Zesty Lemon Herb Air Fryer Chicken Thighs",
+      hook: "Looking for a lighter, zesty dinner? These lemon herb air fryer chicken thighs are bright, juicy, and ready in under 20 minutes.",
+      clips: [
+        { vo: "Looking for a lighter, zesty dinner? These lemon herb air fryer chicken thighs are bright and juicy.", visual: "Close-up macro of fresh squeezed lemon juice and herbs sizzling over chicken." },
+        { vo: "Season with fresh oregano, thyme, garlic, and extra virgin olive oil.", visual: "Herb sprigs and minced garlic tossed in glass ramekin." },
+        { vo: "Rub thoroughly so every inch absorbs the bright citrus marinade.", visual: "Artisanal hand tossing seasoned chicken thighs in clear bowl." },
+        { vo: "Pop into the air fryer basket at 380 degrees.", visual: "Placement in clean non-stick air fryer tray." },
+        { vo: "Listen to that sizzle—cooking evenly with zero heavy frying oil.", visual: "Macro view of hot circulating air browning the herbaceous skin." },
+        { vo: "Flip at minute eight to lock in those aromatic lemon juices.", visual: "Tongs flipping golden chicken thigh showing tender underside." },
+        { vo: "Golden, fragrant, and bursting with Mediterranean herbs.", visual: "Finished chicken thighs resting with fresh lemon slices." },
+        { vo: "Pure flavor with zero guilt. Want more air fryer recipes? Get the app through the link in my bio!", visual: "Plated hero shot with steam rising and clean title CTA card." }
+      ]
+    }
+  };
+
+  function openDetailModal(seq) {
+    const data = sampleRecipes[seq] || sampleRecipes[1];
+    document.getElementById('modalRecipeTitle').innerText = `Inspeksi Resep #${seq}: ${data.title}`;
+    document.getElementById('modalHookText').innerText = data.hook;
+
+    const grid = document.getElementById('modalClipsGrid');
+    grid.innerHTML = '';
+
+    data.clips.forEach((c, idx) => {
+      const box = document.createElement('div');
+      box.className = 'clip-box';
+      box.innerHTML = `
+        <div class="clip-header">
+          <span>KLIP #${idx + 1}</span>
+          <span>4 DETIK</span>
+        </div>
+        <div class="clip-vo">"${c.vo}"</div>
+        <div class="clip-visual"><strong>Visual:</strong> ${c.visual}</div>
+      `;
+      grid.appendChild(box);
+    });
+
+    document.getElementById('detailModal').classList.add('show');
+  }
+
+  function closeDetailModal() {
+    document.getElementById('detailModal').classList.remove('show');
+  }
+
+  function openPresetModal() {
+    document.getElementById('presetModal').classList.add('show');
+  }
+
+  function closePresetModal() {
+    document.getElementById('presetModal').classList.remove('show');
+  }
+
+  function savePresetSettings() {
+    closePresetModal();
+    showToast('Konfigurasi default preset brand tersimpan! 💾', '✅');
+  }
+</script>
+
+</body>
+</html>

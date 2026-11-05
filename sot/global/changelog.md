@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.146 — Autonomous Recipe Pipeline Engine (05/11/2026)
+- Add autonomous 1-click recipe engine and brand-filtered VI preset dropdown
+- Support auto-approval and dynamic outro CTA on full autopilot
+- Hydrate 8-clips @ 4s Omni Flash with Minimax persona
+
 ## V2.32.145 — Integrasi Motion Text Engine & Video Transitions Fase 2 (05/11/2026)
 - Mesin motion text SVG Sharp 3 style (TikTok, CapCut, Clean White)
 - Transisi video FFmpeg XFade multi-klip
