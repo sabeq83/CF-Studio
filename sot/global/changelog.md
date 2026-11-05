@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.32.150 — Fix dynamic import of universe manifests in scheduler (05/11/2026)
+- Use await import for universe manifests in processPillarGlabs
+
 ## V2.32.149 — Enforce sequential recipe workflow and fix TTS voiceover fallback (05/11/2026)
 - Add start frame stage before TTS and video
 - Fix voiceover fallback in processPillarTts
