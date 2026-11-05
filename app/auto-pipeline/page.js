@@ -19,6 +19,29 @@ export default function AutoPipelinePage() {
   const [recipeCount, setRecipeCount] = useState(1);
   const [executionMode, setExecutionMode] = useState('full_autopilot');
 
+  // --- SCHEDULER & REPLIZ PUBLISHING STATE ---
+  const [activeTab, setActiveTab] = useState('pipeline'); // 'pipeline' | 'schedules'
+  const [schedules, setSchedules] = useState([]);
+  const [loadingSchedules, setLoadingSchedules] = useState(false);
+  const [scheduleFilter, setScheduleFilter] = useState('all'); // 'all' | 'active' | 'paused' | 'archived'
+  const [replizAccounts, setReplizAccounts] = useState([]);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [editingSchedule, setEditingSchedule] = useState(null);
+
+  // Form state modal
+  const [schedName, setSchedName] = useState('');
+  const [schedBrandId, setSchedBrandId] = useState('');
+  const [schedPresetKey, setSchedPresetKey] = useState('');
+  const [schedGenTime, setSchedGenTime] = useState('05:00');
+  const [schedPubTime, setSchedPubTime] = useState('09:00');
+  const [schedTopic, setSchedTopic] = useState('');
+  const [schedCategory, setSchedCategory] = useState('makanan_utama');
+  const [schedDays, setSchedDays] = useState([0, 1, 2, 3, 4, 5, 6]);
+  const [schedReplizAccountIds, setSchedReplizAccountIds] = useState([]);
+  const [schedAutoPublish, setSchedAutoPublish] = useState(true);
+  const [modalBrandPresets, setModalBrandPresets] = useState([]);
+  const [savingSchedule, setSavingSchedule] = useState(false);
+
   // Computed preset parameters for Inspector Card
   const targetClipsCount = Number(
     activePresetConfig?.visual_engine?.target_clips_count ||
@@ -218,6 +241,8 @@ export default function AutoPipelinePage() {
     }
     fetchBrands();
     fetchRecentCampaigns();
+    fetchSchedules();
+    fetchReplizAccounts();
   }, []);
 
   // 2. Fetch Presets dynamically when selected brand changes
@@ -333,6 +358,260 @@ export default function AutoPipelinePage() {
     }
   }
 
+  // --- AUTO PIPELINE SCHEDULER & REPLIZ PUBLISHING HANDLERS ---
+  async function fetchSchedules() {
+    setLoadingSchedules(true);
+    try {
+      const res = await fetch('/api/v2/recipes/auto-pipeline-schedules');
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data)) {
+        setSchedules(data.data);
+      }
+    } catch (e) {
+      console.warn('[AutoPipeline] Error fetching schedules:', e);
+    } finally {
+      setLoadingSchedules(false);
+    }
+  }
+
+  async function fetchReplizAccounts() {
+    try {
+      const res = await fetch('/api/v2/publishing/accounts?provider=repliz');
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data)) {
+        setReplizAccounts(data.data.filter(a => a.provider === 'repliz' || a.platform));
+      }
+    } catch (e) {
+      console.warn('[AutoPipeline] Error fetching repliz accounts:', e);
+    }
+  }
+
+  async function fetchPresetsForModalBrand(bId) {
+    if (!bId) return;
+    try {
+      const res = await fetch(`/api/v2/recipes/autonomous-pipeline?brand=${encodeURIComponent(bId)}`);
+      const data = await res.json();
+      if (data.success && Array.isArray(data.operator_presets)) {
+        setModalBrandPresets(data.operator_presets);
+        if (data.operator_presets.length > 0 && !schedPresetKey) {
+          setSchedPresetKey(data.operator_presets[0].key);
+        }
+      }
+    } catch (e) {
+      console.warn('[AutoPipeline] Error fetching modal presets:', e);
+    }
+  }
+
+  function handleModalBrandChange(newBrandId) {
+    setSchedBrandId(newBrandId);
+    const targetBrand = brands.find(b => b.id === newBrandId);
+    const brandName = targetBrand?.brand_name || '';
+    if (brandName) {
+      const brandLower = brandName.toLowerCase();
+      const matched = replizAccounts.filter(a => a.display_name && a.display_name.toLowerCase().includes(brandLower));
+      if (matched.length > 0) {
+        setSchedReplizAccountIds(matched.map(a => a.id));
+      }
+    }
+    fetchPresetsForModalBrand(newBrandId);
+  }
+
+  function toggleDaySelection(dayIndex) {
+    setSchedDays(prev => {
+      if (prev.includes(dayIndex)) {
+        if (prev.length === 1) return prev; // Minimal 1 hari dipilih
+        return prev.filter(d => d !== dayIndex).sort();
+      } else {
+        return [...prev, dayIndex].sort();
+      }
+    });
+  }
+
+  function toggleReplizAccountSelection(accId) {
+    setSchedReplizAccountIds(prev => {
+      if (prev.includes(accId)) {
+        return prev.filter(id => id !== accId);
+      } else {
+        return [...prev, accId];
+      }
+    });
+  }
+
+  function openCreateScheduleModal() {
+    const currentBrand = brands.find(b => b.id === selectedBrandId) || brands[0];
+    const brandName = currentBrand?.brand_name || 'Brand';
+    setEditingSchedule(null);
+    setSchedName(`${brandName} — Daily Morning Reels`);
+    setSchedBrandId(currentBrand?.id || '');
+    setSchedPresetKey(selectedPresetKey || 'habitfolk_6clips_quick');
+    setSchedGenTime('05:00');
+    setSchedPubTime('09:00');
+    setSchedTopic(topic || 'Air fryer crispy snack finger foods');
+    setSchedCategory(category || 'makanan_utama');
+    setSchedDays([0, 1, 2, 3, 4, 5, 6]);
+    setSchedAutoPublish(true);
+
+    const brandLower = brandName.toLowerCase();
+    const matched = replizAccounts.filter(a => a.display_name && a.display_name.toLowerCase().includes(brandLower));
+    setSchedReplizAccountIds(matched.length > 0 ? matched.map(a => a.id) : replizAccounts.slice(0, 4).map(a => a.id));
+
+    fetchPresetsForModalBrand(currentBrand?.id);
+    setIsScheduleModalOpen(true);
+  }
+
+  function openEditScheduleModal(sched) {
+    setEditingSchedule(sched);
+    setSchedName(sched.name || '');
+    setSchedBrandId(sched.brand_id || '');
+    setSchedPresetKey(sched.preset_key || '');
+    setSchedGenTime(sched.generation_time || '05:00');
+    setSchedPubTime(sched.publish_time || '09:00');
+    setSchedTopic(sched.topic || '');
+    setSchedCategory(sched.category || 'makanan_utama');
+    setSchedDays(Array.isArray(sched.days_of_week) ? sched.days_of_week : [0, 1, 2, 3, 4, 5, 6]);
+    setSchedReplizAccountIds(Array.isArray(sched.repliz_account_ids) ? sched.repliz_account_ids : []);
+    setSchedAutoPublish(sched.auto_publish_enabled !== false);
+
+    fetchPresetsForModalBrand(sched.brand_id);
+    setIsScheduleModalOpen(true);
+  }
+
+  async function handleSaveSchedule(e) {
+    e.preventDefault();
+    if (!schedName.trim()) return showToast('Nama jadwal wajib diisi', 'error');
+    if (!schedBrandId) return showToast('Pilih Brand Profile', 'error');
+
+    setSavingSchedule(true);
+    try {
+      const payload = {
+        name: schedName,
+        brand_id: schedBrandId,
+        preset_key: schedPresetKey,
+        topic: schedTopic,
+        category: schedCategory,
+        recipe_count: 1,
+        generation_time: schedGenTime,
+        publish_time: schedPubTime,
+        days_of_week: schedDays,
+        repliz_account_ids: schedReplizAccountIds,
+        auto_publish_enabled: schedAutoPublish,
+        timezone: 'Asia/Jakarta'
+      };
+
+      const url = editingSchedule
+        ? `/api/v2/recipes/auto-pipeline-schedules/${editingSchedule.id}`
+        : '/api/v2/recipes/auto-pipeline-schedules';
+      const method = editingSchedule ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Gagal menyimpan jadwal');
+
+      showToast(editingSchedule ? 'Jadwal berhasil diperbarui! ✅' : 'Jadwal rutin baru berhasil dibuat! ⏰');
+      setIsScheduleModalOpen(false);
+      fetchSchedules();
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setSavingSchedule(false);
+    }
+  }
+
+  async function handleTogglePause(sched) {
+    try {
+      const res = await fetch(`/api/v2/recipes/auto-pipeline-schedules/${sched.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'toggle_pause' })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
+      showToast(`Jadwal "${sched.name}" ${data.data.status === 'paused' ? 'dijeda ⏸️' : 'dilanjutkan ▶️'}`);
+      fetchSchedules();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  }
+
+  async function handleArchiveSchedule(sched) {
+    if (!confirm(`Apakah Anda yakin ingin mengarsipkan jadwal "${sched.name}"?`)) return;
+    try {
+      const res = await fetch(`/api/v2/recipes/auto-pipeline-schedules/${sched.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'archive' })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
+      showToast(`Jadwal "${sched.name}" berhasil diarsipkan 📦`);
+      fetchSchedules();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  }
+
+  async function handleDeleteSchedule(sched) {
+    if (!confirm(`Hapus permanen jadwal "${sched.name}"? Tindakan ini tidak dapat dibatalkan.`)) return;
+    try {
+      const res = await fetch(`/api/v2/recipes/auto-pipeline-schedules/${sched.id}`, {
+        method: 'DELETE'
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
+      showToast(`Jadwal "${sched.name}" berhasil dihapus.`);
+      fetchSchedules();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  }
+
+  async function handleRunNow(sched) {
+    if (!confirm(`Jalankan pipeline instan sekarang untuk menguji jadwal "${sched.name}"?`)) return;
+    try {
+      showToast(`⚡ Memulai eksekusi instan untuk "${sched.name}"...`);
+      const res = await fetch(`/api/v2/recipes/auto-pipeline-schedules/${sched.id}/run-now`, {
+        method: 'POST'
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
+      showToast(`Eksekusi dimulai! Campaign ID: ${data.campaign_id} 🚀`);
+      if (data.campaign_id) {
+        setActiveCampaignId(data.campaign_id);
+        setPollingActive(true);
+        setActiveTab('pipeline');
+      }
+      fetchSchedules();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  }
+
+  function getPlatformIcon(platform) {
+    const p = String(platform).toLowerCase();
+    if (p.includes('instagram')) return { icon: '📸', label: 'Instagram Reels', color: '#e1306c' };
+    if (p.includes('tiktok')) return { icon: '🎵', label: 'TikTok', color: '#00f2fe' };
+    if (p.includes('facebook')) return { icon: '📘', label: 'Facebook Reels', color: '#1877f2' };
+    if (p.includes('youtube')) return { icon: '▶️', label: 'YouTube Shorts', color: '#ff0000' };
+    return { icon: '🌐', label: platform, color: 'var(--action-primary)' };
+  }
+
+  function formatDaysOfWeek(days = []) {
+    if (!Array.isArray(days) || days.length === 0) return 'Tidak aktif';
+    if (days.length === 7) return 'Setiap Hari (Senin – Minggu)';
+    const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+    return days.map(d => dayNames[d]).join(', ');
+  }
+
+  const activeSchedulesCount = schedules.filter(s => s.status === 'active').length;
+  const filteredSchedules = schedules.filter(s => {
+    if (scheduleFilter === 'all') return true;
+    return s.status === scheduleFilter;
+  });
+
   return (
     <div className="app-layout" style={{ display: 'flex', minHeight: '100vh', background: 'var(--canvas)' }}>
       <Sidebar />
@@ -436,6 +715,76 @@ export default function AutoPipelinePage() {
             </div>
           </section>
 
+          {/* Main Navigation Tabs */}
+          <div style={{
+            display: 'flex',
+            gap: '0.5rem',
+            background: 'var(--surface)',
+            border: '1px solid var(--border-subtle)',
+            padding: '0.4rem',
+            borderRadius: 'var(--radius-md)'
+          }}>
+            <button
+              type="button"
+              onClick={() => setActiveTab('pipeline')}
+              style={{
+                flex: 1,
+                padding: '0.75rem 1.25rem',
+                borderRadius: 'var(--radius-sm)',
+                fontSize: '0.88rem',
+                fontWeight: 700,
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                background: activeTab === 'pipeline' ? 'var(--action-primary)' : 'transparent',
+                color: activeTab === 'pipeline' ? 'var(--on-action-primary)' : 'var(--text-secondary)',
+                transition: 'var(--transition)'
+              }}
+            >
+              <span>⚡</span>
+              <span>Eksekusi 1-Klik Instan</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('schedules')}
+              style={{
+                flex: 1,
+                padding: '0.75rem 1.25rem',
+                borderRadius: 'var(--radius-sm)',
+                fontSize: '0.88rem',
+                fontWeight: 700,
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                background: activeTab === 'schedules' ? 'var(--action-primary)' : 'transparent',
+                color: activeTab === 'schedules' ? 'var(--on-action-primary)' : 'var(--text-secondary)',
+                transition: 'var(--transition)'
+              }}
+            >
+              <span>⏰</span>
+              <span>Penjadwal Otomatis & Auto-Publish Repliz</span>
+              <span style={{
+                fontSize: '0.68rem',
+                fontWeight: 800,
+                background: activeTab === 'schedules' ? 'rgba(255,255,255,0.25)' : 'var(--status-info-soft)',
+                color: activeTab === 'schedules' ? '#ffffff' : 'var(--status-info)',
+                padding: '0.1rem 0.45rem',
+                borderRadius: 9999
+              }}>
+                {schedules.length} Jadwal
+              </span>
+            </button>
+          </div>
+
+          {activeTab === 'pipeline' && (
+            <>
           {/* BARIS 1: Form Konfigurasi 1-Klik (Clean UI & Terintegrasi Preset Manager) */}
           <section style={{
             background: 'var(--surface)',
@@ -1405,6 +1754,982 @@ export default function AutoPipelinePage() {
               </table>
             </div>
           </section>
+          </>
+        )}
+
+        {/* ========================================================================= */}
+        {/* TAB 2: PENJADWAL OTOMATIS & REPLIZ MULTI-PLATFORM                         */}
+        {/* ========================================================================= */}
+        {activeTab === 'schedules' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+            {/* Header Card with Add Schedule Button */}
+            <section style={{
+              background: 'var(--surface)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: 'var(--radius-lg)',
+              padding: '1.5rem 1.75rem',
+              boxShadow: 'var(--shadow-card)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '1rem'
+            }}>
+              <div>
+                <div style={{ fontSize: '1.18rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span>⏰</span>
+                  <span>Penjadwal Otomatis & Auto-Publish Repliz</span>
+                </div>
+                <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+                  Atur siklus harian autonomous: pembuatan video otomatis di jam tertentu dan penerusan serempak ke media sosial via Repliz.
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+                <Link
+                  href="/content-flow"
+                  style={{
+                    fontSize: '0.82rem',
+                    fontWeight: 600,
+                    color: 'var(--text-secondary)',
+                    textDecoration: 'none',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    padding: '0.6rem 1rem',
+                    borderRadius: 'var(--radius-sm)',
+                    background: 'var(--surface-raised)',
+                    border: '1px solid var(--border-subtle)'
+                  }}
+                >
+                  <span>📊</span>
+                  <span>ContentFlow Hub</span>
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={openCreateScheduleModal}
+                  style={{
+                    background: 'var(--action-primary)',
+                    color: 'var(--on-action-primary)',
+                    border: 'none',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '0.6rem 1.25rem',
+                    fontSize: '0.86rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    boxShadow: '0 2px 10px rgba(6, 182, 212, 0.25)'
+                  }}
+                >
+                  <span>➕</span>
+                  <span>Buat Jadwal Rutin Baru</span>
+                </button>
+              </div>
+            </section>
+
+            {/* 4 KPI Stat Boxes */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+              gap: '1rem'
+            }}>
+              <div style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-md)',
+                padding: '1.15rem 1.35rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.35rem'
+              }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                  Total Jadwal Rutin
+                </span>
+                <span style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                  {schedules.length}
+                </span>
+                <span style={{ fontSize: '0.74rem', color: 'var(--status-success)' }}>
+                  ● {activeSchedulesCount} aktif berjalan
+                </span>
+              </div>
+
+              <div style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-md)',
+                padding: '1.15rem 1.35rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.35rem'
+              }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                  Akun Repliz Terhubung
+                </span>
+                <span style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                  {replizAccounts.length}
+                </span>
+                <span style={{ fontSize: '0.74rem', color: 'var(--text-secondary)' }}>
+                  IG Reels, TikTok, FB, YouTube
+                </span>
+              </div>
+
+              <div style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-md)',
+                padding: '1.15rem 1.35rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.35rem'
+              }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                  Jam Pembuatan Pertama
+                </span>
+                <span style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--status-info)' }}>
+                  {schedules[0]?.generation_time || '05:00'} WIB
+                </span>
+                <span style={{ fontSize: '0.74rem', color: 'var(--text-secondary)' }}>
+                  Pagi hari otomatis oleh AI
+                </span>
+              </div>
+
+              <div style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-md)',
+                padding: '1.15rem 1.35rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.35rem'
+              }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                  Target Publish Pertama
+                </span>
+                <span style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--status-success)' }}>
+                  {schedules[0]?.publish_time || '09:00'} WIB
+                </span>
+                <span style={{ fontSize: '0.74rem', color: 'var(--text-secondary)' }}>
+                  Disinkron ke ContentFlow Hub
+                </span>
+              </div>
+            </div>
+
+            {/* Filter Pills & Schedule List Container */}
+            <section style={{
+              background: 'var(--surface)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: 'var(--radius-lg)',
+              padding: '1.5rem',
+              boxShadow: 'var(--shadow-card)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1.25rem'
+            }}>
+              {/* Filter Tabs */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                borderBottom: '1px solid var(--border-subtle)',
+                paddingBottom: '0.85rem'
+              }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-muted)', marginRight: '0.5rem' }}>
+                  Filter Status:
+                </span>
+                {[
+                  { key: 'all', label: 'Semua' },
+                  { key: 'active', label: '🟢 Aktif Berjalan' },
+                  { key: 'paused', label: '⏸️ Dijeda' },
+                  { key: 'archived', label: '📦 Diarsipkan' }
+                ].map(tab => (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    onClick={() => setScheduleFilter(tab.key)}
+                    style={{
+                      background: scheduleFilter === tab.key ? 'var(--surface-interactive)' : 'transparent',
+                      color: scheduleFilter === tab.key ? 'var(--action-primary)' : 'var(--text-secondary)',
+                      border: scheduleFilter === tab.key ? '1px solid var(--action-primary)' : '1px solid transparent',
+                      borderRadius: 'var(--radius-sm)',
+                      padding: '0.35rem 0.85rem',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Schedule List */}
+              {loadingSchedules ? (
+                <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                  Memuat daftar jadwal rutin...
+                </div>
+              ) : filteredSchedules.length === 0 ? (
+                <div style={{
+                  textAlign: 'center',
+                  padding: '3.5rem 1rem',
+                  border: '1.5px dashed var(--border-subtle)',
+                  borderRadius: 'var(--radius-md)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '0.75rem'
+                }}>
+                  <span style={{ fontSize: '2.2rem' }}>📭</span>
+                  <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                    Tidak ada jadwal yang cocok dengan filter ({scheduleFilter})
+                  </div>
+                  <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', maxWidth: '460px' }}>
+                    Buat jadwal rutin baru untuk memproduksi video dan mempublikasikannya secara berkala ke Repliz.
+                  </div>
+                  <button
+                    type="button"
+                    onClick={openCreateScheduleModal}
+                    style={{
+                      marginTop: '0.5rem',
+                      background: 'var(--action-primary)',
+                      color: 'var(--on-action-primary)',
+                      border: 'none',
+                      borderRadius: 'var(--radius-sm)',
+                      padding: '0.55rem 1.15rem',
+                      fontSize: '0.84rem',
+                      fontWeight: 700,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    + Buat Jadwal Rutin Sekarang
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {filteredSchedules.map(sched => {
+                    const statusColor = sched.status === 'active'
+                      ? 'var(--status-success)'
+                      : sched.status === 'paused' ? 'var(--status-warning)' : 'var(--text-muted)';
+                    const statusLabel = sched.status === 'active'
+                      ? '🟢 AKTIF BERJALAN'
+                      : sched.status === 'paused' ? '⏸️ DIJEDA' : '📦 DIARSIPKAN';
+
+                    return (
+                      <div
+                        key={sched.id}
+                        style={{
+                          background: 'var(--surface-raised)',
+                          border: '1.5px solid var(--border-subtle)',
+                          borderLeft: `4px solid ${statusColor}`,
+                          borderRadius: 'var(--radius-md)',
+                          padding: '1.25rem 1.45rem',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '1rem',
+                          transition: 'var(--transition)'
+                        }}
+                      >
+                        {/* Top: Name, Status & Double Time Trigger Flow */}
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start',
+                          flexWrap: 'wrap',
+                          gap: '0.85rem'
+                        }}>
+                          <div>
+                            <div style={{
+                              fontSize: '1.05rem',
+                              fontWeight: 700,
+                              color: 'var(--text-primary)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.55rem',
+                              flexWrap: 'wrap'
+                            }}>
+                              <span>🎬</span>
+                              <span>{sched.name}</span>
+                              <span style={{
+                                fontSize: '0.68rem',
+                                fontWeight: 700,
+                                padding: '0.2rem 0.55rem',
+                                borderRadius: 9999,
+                                background: sched.status === 'active' ? 'var(--status-success-soft)' : 'var(--status-warning-soft)',
+                                color: statusColor,
+                                border: `1px solid ${statusColor}`
+                              }}>
+                                {statusLabel}
+                              </span>
+                              <span style={{
+                                fontSize: '0.68rem',
+                                fontWeight: 600,
+                                padding: '0.2rem 0.55rem',
+                                borderRadius: 9999,
+                                background: 'var(--surface-interactive)',
+                                color: 'var(--text-secondary)',
+                                border: '1px solid var(--border-subtle)'
+                              }}>
+                                {sched.brand_name || sched.brand_id}
+                              </span>
+                            </div>
+
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                              Preset Resep: <strong style={{ color: 'var(--text-secondary)' }}>{sched.preset_key}</strong> • Kategori: <strong style={{ color: 'var(--text-secondary)' }}>{sched.category}</strong>
+                            </div>
+                          </div>
+
+                          {/* Double Time Flow Badge: 05:00 Buat -> 09:00 Publish */}
+                          <div style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.65rem',
+                            background: 'var(--surface)',
+                            border: '1px solid var(--border-subtle)',
+                            padding: '0.45rem 0.85rem',
+                            borderRadius: 'var(--radius-sm)'
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.82rem', fontWeight: 700, color: 'var(--status-info)' }}>
+                              <span>⚙️ Buat:</span>
+                              <strong>{sched.generation_time} WIB</strong>
+                            </div>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>➔</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.82rem', fontWeight: 700, color: 'var(--status-success)' }}>
+                              <span>🚀 Publish:</span>
+                              <strong>{sched.publish_time} WIB</strong>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Mid: Topic, Frequency, Repliz Platforms */}
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
+                          gap: '0.85rem',
+                          background: 'var(--surface)',
+                          padding: '0.9rem 1.15rem',
+                          borderRadius: 'var(--radius-sm)',
+                          border: '1px solid var(--border-subtle)'
+                        }}>
+                          <div>
+                            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
+                              Topik / Arahan AI:
+                            </div>
+                            <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: '0.2rem' }}>
+                              "{sched.topic}"
+                            </div>
+                          </div>
+
+                          <div>
+                            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
+                              Hari Rutin:
+                            </div>
+                            <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: '0.2rem' }}>
+                              {formatDaysOfWeek(sched.days_of_week)}
+                            </div>
+                          </div>
+
+                          <div>
+                            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.25rem' }}>
+                              Target Publish Repliz ({sched.repliz_accounts?.length || 0} Akun):
+                            </div>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+                              {sched.repliz_accounts && sched.repliz_accounts.length > 0 ? (
+                                sched.repliz_accounts.map(acc => {
+                                  const pInfo = getPlatformIcon(acc.platform);
+                                  return (
+                                    <span
+                                      key={acc.id}
+                                      style={{
+                                        fontSize: '0.72rem',
+                                        fontWeight: 600,
+                                        padding: '0.2rem 0.55rem',
+                                        borderRadius: 'var(--radius-xs)',
+                                        background: 'var(--surface-raised)',
+                                        border: '1px solid var(--border-subtle)',
+                                        color: 'var(--text-primary)',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '0.3rem'
+                                      }}
+                                    >
+                                      <span>{pInfo.icon}</span>
+                                      <span>{pInfo.label}</span>
+                                    </span>
+                                  );
+                                })
+                              ) : (
+                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                                  Belum ada akun Repliz terpilih
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Bottom: Execution Info & Action Buttons */}
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          flexWrap: 'wrap',
+                          gap: '0.75rem'
+                        }}>
+                          <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                            {sched.last_run_at ? (
+                              <>
+                                ✅ Terakhir dijalankan: <strong style={{ color: 'var(--text-secondary)' }}>{new Date(sched.last_run_at).toLocaleString('id-ID')}</strong>
+                                {sched.last_campaign_id && (
+                                  <span style={{ marginLeft: '0.35rem' }}>({sched.last_campaign_id})</span>
+                                )}
+                              </>
+                            ) : (
+                              <>⏳ Belum pernah dieksekusi</>
+                            )}
+                            {sched.last_publish_at && (
+                              <span style={{ marginLeft: '0.5rem', color: 'var(--status-success)' }}>
+                                &bull; Publish Repliz: {new Date(sched.last_publish_at).toLocaleTimeString('id-ID')}
+                              </span>
+                            )}
+                            {sched.last_error && (
+                              <div style={{ color: 'var(--status-danger)', marginTop: '0.2rem' }}>
+                                ⚠️ Error terakhir: {sched.last_error}
+                              </div>
+                            )}
+                          </div>
+
+                          <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
+                            <button
+                              type="button"
+                              onClick={() => handleRunNow(sched)}
+                              style={{
+                                background: 'var(--surface)',
+                                border: '1px solid var(--border-strong)',
+                                color: 'var(--text-primary)',
+                                borderRadius: 'var(--radius-sm)',
+                                padding: '0.38rem 0.75rem',
+                                fontSize: '0.78rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.35rem'
+                              }}
+                            >
+                              <span>⚡</span>
+                              <span>Run Now (Tes)</span>
+                            </button>
+
+                            {sched.status !== 'archived' && (
+                              <button
+                                type="button"
+                                onClick={() => handleTogglePause(sched)}
+                                style={{
+                                  background: sched.status === 'active' ? 'var(--status-warning-soft)' : 'var(--status-success-soft)',
+                                  border: `1px solid ${sched.status === 'active' ? 'var(--status-warning)' : 'var(--status-success)'}`,
+                                  color: sched.status === 'active' ? 'var(--status-warning)' : 'var(--status-success)',
+                                  borderRadius: 'var(--radius-sm)',
+                                  padding: '0.38rem 0.75rem',
+                                  fontSize: '0.78rem',
+                                  fontWeight: 700,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '0.35rem'
+                                }}
+                              >
+                                <span>{sched.status === 'active' ? '⏸️' : '▶️'}</span>
+                                <span>{sched.status === 'active' ? 'Pause Jadwal' : 'Lanjutkan Jadwal'}</span>
+                              </button>
+                            )}
+
+                            <button
+                              type="button"
+                              onClick={() => openEditScheduleModal(sched)}
+                              style={{
+                                background: 'var(--surface)',
+                                border: '1px solid var(--border-subtle)',
+                                color: 'var(--text-secondary)',
+                                borderRadius: 'var(--radius-sm)',
+                                padding: '0.38rem 0.75rem',
+                                fontSize: '0.78rem',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.35rem'
+                              }}
+                            >
+                              <span>✏️</span>
+                              <span>Edit</span>
+                            </button>
+
+                            {sched.status !== 'archived' ? (
+                              <button
+                                type="button"
+                                onClick={() => handleArchiveSchedule(sched)}
+                                style={{
+                                  background: 'var(--surface)',
+                                  border: '1px solid var(--border-subtle)',
+                                  color: 'var(--text-muted)',
+                                  borderRadius: 'var(--radius-sm)',
+                                  padding: '0.38rem 0.75rem',
+                                  fontSize: '0.78rem',
+                                  fontWeight: 600,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '0.35rem'
+                                }}
+                              >
+                                <span>📦</span>
+                                <span>Arsipkan</span>
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteSchedule(sched)}
+                                style={{
+                                  background: 'var(--status-danger-soft)',
+                                  border: '1px solid var(--status-danger)',
+                                  color: 'var(--status-danger)',
+                                  borderRadius: 'var(--radius-sm)',
+                                  padding: '0.38rem 0.75rem',
+                                  fontSize: '0.78rem',
+                                  fontWeight: 700,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '0.35rem'
+                                }}
+                              >
+                                <span>🗑️</span>
+                                <span>Hapus Permanen</span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* MODAL DIALOG: BUAT / EDIT JADWAL RUTIN AUTO PIPELINE                      */}
+        {/* ========================================================================= */}
+        {isScheduleModalOpen && (
+          <div style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'var(--overlay-backdrop)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: '1.5rem'
+          }}>
+            <div style={{
+              background: 'var(--surface)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: 'var(--radius-lg)',
+              boxShadow: 'var(--shadow-modal)',
+              width: '100%',
+              maxWidth: '680px',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              padding: '1.75rem'
+            }}>
+              {/* Modal Header */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '1.25rem',
+                paddingBottom: '0.75rem',
+                borderBottom: '1px solid var(--border-subtle)'
+              }}>
+                <div style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span>⏰</span>
+                  <span>{editingSchedule ? 'Edit Jadwal Rutin Auto Pipeline' : 'Buat Jadwal Rutin Auto Pipeline Baru'}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsScheduleModalOpen(false)}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    fontSize: '1.25rem',
+                    color: 'var(--text-muted)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveSchedule} style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
+                {/* 1. Nama Jadwal */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                  <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                    Nama Pengenal Jadwal
+                  </label>
+                  <input
+                    type="text"
+                    value={schedName}
+                    onChange={(e) => setSchedName(e.target.value)}
+                    placeholder="Contoh: HabitFolk Daily Morning Snack 05:00"
+                    required
+                    style={{
+                      height: '42px',
+                      background: 'var(--input-bg)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: 'var(--radius-sm)',
+                      padding: '0 0.85rem',
+                      fontSize: '0.88rem',
+                      color: 'var(--text-primary)',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+
+                {/* 2. Brand & Preset */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                      1. Brand Profile
+                    </label>
+                    <select
+                      value={schedBrandId}
+                      onChange={(e) => handleModalBrandChange(e.target.value)}
+                      style={{
+                        height: '42px',
+                        background: 'var(--input-bg)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-sm)',
+                        padding: '0 0.85rem',
+                        fontSize: '0.88rem',
+                        color: 'var(--text-primary)',
+                        outline: 'none'
+                      }}
+                    >
+                      {brands.map(b => (
+                        <option key={b.id} value={b.id}>
+                          {b.brand_name} {b.account_handle ? `(@${b.account_handle})` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
+                      <span>2. Preset Konfigurasi Resep</span>
+                      <span style={{ fontSize: '0.68rem', color: 'var(--status-success)' }}>Preset Manager</span>
+                    </label>
+                    <select
+                      value={schedPresetKey}
+                      onChange={(e) => setSchedPresetKey(e.target.value)}
+                      style={{
+                        height: '42px',
+                        background: 'var(--input-bg)',
+                        border: '1.5px solid var(--action-primary)',
+                        borderRadius: 'var(--radius-sm)',
+                        padding: '0 0.85rem',
+                        fontSize: '0.88rem',
+                        fontWeight: 700,
+                        color: 'var(--text-primary)',
+                        outline: 'none'
+                      }}
+                    >
+                      {(modalBrandPresets.length > 0 ? modalBrandPresets : operatorPresets).map(p => (
+                        <option key={p.key} value={p.key}>
+                          {p.label || p.key}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* 3. Dua Waktu Terpisah (Jam Pembuatan & Jam Publish) */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+                  gap: '1rem',
+                  background: 'var(--surface-raised)',
+                  padding: '1rem',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--border-subtle)'
+                }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--status-info)' }}>
+                      ⚙️ Jam Pembuatan Video (AI Render)
+                    </label>
+                    <input
+                      type="time"
+                      value={schedGenTime}
+                      onChange={(e) => setSchedGenTime(e.target.value)}
+                      required
+                      style={{
+                        height: '42px',
+                        background: 'var(--input-bg)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-sm)',
+                        padding: '0 0.85rem',
+                        fontSize: '1.05rem',
+                        fontWeight: 700,
+                        color: 'var(--text-primary)',
+                        outline: 'none'
+                      }}
+                    />
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                      AI otomatis memproduksi video pada jam ini
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--status-success)' }}>
+                      🚀 Jam Publish Repliz (Live Social Media)
+                    </label>
+                    <input
+                      type="time"
+                      value={schedPubTime}
+                      onChange={(e) => setSchedPubTime(e.target.value)}
+                      required
+                      style={{
+                        height: '42px',
+                        background: 'var(--input-bg)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-sm)',
+                        padding: '0 0.85rem',
+                        fontSize: '1.05rem',
+                        fontWeight: 700,
+                        color: 'var(--text-primary)',
+                        outline: 'none'
+                      }}
+                    />
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                      Video diteruskan ke antrean Repliz untuk jam ini
+                    </span>
+                  </div>
+                </div>
+
+                {/* 4. Topik Resep */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                  <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                    Tema / Arahan Topik Resep Harian
+                  </label>
+                  <input
+                    type="text"
+                    value={schedTopic}
+                    onChange={(e) => setSchedTopic(e.target.value)}
+                    placeholder="Contoh: Air fryer crispy chicken tenders and snack finger foods"
+                    required
+                    style={{
+                      height: '42px',
+                      background: 'var(--input-bg)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: 'var(--radius-sm)',
+                      padding: '0 0.85rem',
+                      fontSize: '0.88rem',
+                      color: 'var(--text-primary)',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+
+                {/* 5. Hari Rutin (Pills) */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                  <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                    Hari Rutin Eksekusi:
+                  </label>
+                  <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
+                    {[
+                      { idx: 1, label: 'Sen' },
+                      { idx: 2, label: 'Sel' },
+                      { idx: 3, label: 'Rab' },
+                      { idx: 4, label: 'Kam' },
+                      { idx: 5, label: 'Jum' },
+                      { idx: 6, label: 'Sab' },
+                      { idx: 0, label: 'Min' }
+                    ].map(day => {
+                      const isSelected = schedDays.includes(day.idx);
+                      return (
+                        <button
+                          key={day.idx}
+                          type="button"
+                          onClick={() => toggleDaySelection(day.idx)}
+                          style={{
+                            padding: '0.45rem 0.85rem',
+                            borderRadius: 'var(--radius-sm)',
+                            border: isSelected ? '1px solid var(--action-primary)' : '1px solid var(--border-subtle)',
+                            background: isSelected ? 'var(--action-primary)' : 'var(--surface-raised)',
+                            color: isSelected ? 'var(--on-action-primary)' : 'var(--text-secondary)',
+                            fontWeight: 700,
+                            fontSize: '0.8rem',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {day.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 6. Multi-Platform Repliz Publishing Selector */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                      Target Multi-Platform Repliz (1 Brand Profile)
+                    </label>
+                    <span style={{
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      color: 'var(--action-primary)',
+                      background: 'var(--surface-interactive)',
+                      padding: '0.1rem 0.5rem',
+                      borderRadius: 9999
+                    }}>
+                      {schedReplizAccountIds.length} Terpilih
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                    Pilih akun media sosial tujuan publikasi otomatis di Repliz:
+                  </div>
+
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                    gap: '0.65rem',
+                    marginTop: '0.25rem'
+                  }}>
+                    {replizAccounts.length > 0 ? (
+                      replizAccounts.map(acc => {
+                        const pInfo = getPlatformIcon(acc.platform);
+                        const isChecked = schedReplizAccountIds.includes(acc.id);
+                        return (
+                          <div
+                            key={acc.id}
+                            onClick={() => toggleReplizAccountSelection(acc.id)}
+                            style={{
+                              background: isChecked ? 'var(--surface-interactive)' : 'var(--surface-raised)',
+                              border: isChecked ? '1.5px solid var(--action-primary)' : '1px solid var(--border-subtle)',
+                              borderRadius: 'var(--radius-sm)',
+                              padding: '0.75rem',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '0.2rem',
+                              transition: 'var(--transition)'
+                            }}
+                          >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <span style={{ fontSize: '1.2rem' }}>{pInfo.icon}</span>
+                              <span style={{
+                                fontSize: '0.8rem',
+                                fontWeight: 900,
+                                color: isChecked ? 'var(--action-primary)' : 'var(--border-strong)'
+                              }}>
+                                {isChecked ? '✓' : '○'}
+                              </span>
+                            </div>
+                            <strong style={{ fontSize: '0.78rem', color: 'var(--text-primary)', marginTop: '0.25rem' }}>
+                              {pInfo.label}
+                            </strong>
+                            <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {acc.display_name}
+                            </span>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div style={{ gridColumn: '1 / -1', padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem', border: '1px dashed var(--border-subtle)', borderRadius: 'var(--radius-sm)' }}>
+                        Belum ada akun Repliz yang terhubung di Content-Flow.
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* 7. Auto-Publish Toggle Checkbox */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.65rem',
+                  background: 'var(--surface-raised)',
+                  padding: '0.75rem 1rem',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--border-subtle)'
+                }}>
+                  <input
+                    type="checkbox"
+                    id="autoPublishCheck"
+                    checked={schedAutoPublish}
+                    onChange={(e) => setSchedAutoPublish(e.target.checked)}
+                    style={{ width: '18px', height: '18px', accentColor: 'var(--action-primary)', cursor: 'pointer' }}
+                  />
+                  <label htmlFor="autoPublishCheck" style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer' }}>
+                    Otomatis teruskan video ke Repliz setelah selesai di-render oleh FFmpeg
+                  </label>
+                </div>
+
+                {/* Modal Action Buttons */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  gap: '0.65rem',
+                  marginTop: '0.75rem',
+                  paddingTop: '0.85rem',
+                  borderTop: '1px solid var(--border-subtle)'
+                }}>
+                  <button
+                    type="button"
+                    onClick={() => setIsScheduleModalOpen(false)}
+                    style={{
+                      background: 'var(--surface)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: 'var(--radius-sm)',
+                      padding: '0.6rem 1.15rem',
+                      fontSize: '0.84rem',
+                      fontWeight: 600,
+                      color: 'var(--text-secondary)',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Batal
+                  </button>
+
+                  <button
+                    type="submit"
+                    disabled={savingSchedule}
+                    style={{
+                      background: 'var(--action-primary)',
+                      border: 'none',
+                      borderRadius: 'var(--radius-sm)',
+                      padding: '0.6rem 1.45rem',
+                      fontSize: '0.84rem',
+                      fontWeight: 700,
+                      color: 'var(--on-action-primary)',
+                      cursor: savingSchedule ? 'not-allowed' : 'pointer',
+                      opacity: savingSchedule ? 0.7 : 1,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.45rem'
+                    }}
+                  >
+                    <span>💾</span>
+                    <span>{savingSchedule ? 'Menyimpan...' : (editingSchedule ? 'Simpan Perubahan' : 'Buat Jadwal')}</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
 
         </div>
       </main>

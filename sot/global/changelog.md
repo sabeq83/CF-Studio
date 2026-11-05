@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.164 — Auto Pipeline Scheduler dan Integrasi Multi-Platform Repliz Publishing (05/11/2026)
+- Menambahkan fitur penjadwalan rutin otomatis dengan pengaturan waktu pembuatan dan waktu publish terpisah
+- Mengintegrasikan auto-publish multi-platform Repliz (Instagram, TikTok, Facebook, YouTube)
+- Menambahkan manajemen siklus hidup jadwal (active, paused, archived, run-now test)
+
 ## V2.32.163 — Integrasi Preset Manager dan Clean UI Auto Pipeline (05/11/2026)
 - Menghubungkan menu Auto Pipeline dengan Preset Manager untuk resolusi klip dinamis 4, 6, dan 8 klip
 - Memindahkan kontrol finishing subtitel dan transisi sepenuhnya ke Preset Manager

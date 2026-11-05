@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup Usulan — Auto Pipeline Scheduler &amp; Repliz Multi-Platform Publishing</title>
+  <style>
+    :root {
+      --canvas: #090d16;
+      --surface: #0f172a;
+      --surface-raised: #1e293b;
+      --surface-interactive: #334155;
+      --surface-subtle: #172033;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.18);
+      --input-bg: #0b1324;
+      --action-primary: #06b6d4;
+      --action-primary-hover: #0891b2;
+      --on-action-primary: #041319;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --status-success: #10b981;
+      --status-success-soft: rgba(16, 185, 129, 0.15);
+      --status-warning: #f59e0b;
+      --status-warning-soft: rgba(245, 158, 11, 0.15);
+      --status-danger: #ef4444;
+      --status-danger-soft: rgba(239, 68, 68, 0.15);
+      --status-info: #38bdf8;
+      --status-info-soft: rgba(56, 189, 248, 0.15);
+      --status-purple: #a855f7;
+      --status-purple-soft: rgba(168, 85, 247, 0.15);
+      --radius-xs: 4px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme="light"] {
+      --canvas: #f8fafc;
+      --surface: #ffffff;
+      --surface-raised: #f1f5f9;
+      --surface-interactive: #e2e8f0;
+      --surface-subtle: #f8fafc;
+      --border-subtle: rgba(0, 0, 0, 0.08);
+      --border-strong: rgba(0, 0, 0, 0.18);
+      --input-bg: #ffffff;
+      --action-primary: #0891b2;
+      --action-primary-hover: #0e7490;
+      --on-action-primary: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --status-success-soft: rgba(16, 185, 129, 0.1);
+      --status-warning-soft: rgba(245, 158, 11, 0.1);
+      --status-danger-soft: rgba(239, 68, 68, 0.1);
+      --status-info-soft: rgba(56, 189, 248, 0.1);
+      --status-purple-soft: rgba(168, 85, 247, 0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--canvas);
+      color: var(--text-primary);
+      line-height: 1.5;
+      padding-bottom: 80px;
+    }
+
+    .top-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border-subtle);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-inner {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .badge-primary { background: var(--surface-interactive); color: var(--action-primary); border: 1px solid var(--action-primary); }
+    .badge-success { background: var(--status-success-soft); color: var(--status-success); border: 1px solid var(--status-success); }
+    .badge-warning { background: var(--status-warning-soft); color: var(--status-warning); border: 1px solid var(--status-warning); }
+    .badge-danger { background: var(--status-danger-soft); color: var(--status-danger); border: 1px solid var(--status-danger); }
+    .badge-info { background: var(--status-info-soft); color: var(--status-info); border: 1px solid var(--status-info); }
+    .badge-purple { background: var(--status-purple-soft); color: var(--status-purple); border: 1px solid var(--status-purple); }
+
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 24px 20px;
+    }
+
+    /* Main Navigation Tabs */
+    .view-tabs {
+      display: flex;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      padding: 6px;
+      border-radius: var(--radius-md);
+      margin-bottom: 24px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 11px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: transparent;
+      color: var(--text-secondary);
+      transition: var(--transition);
+    }
+    .tab-btn:hover { background: var(--surface-interactive); color: var(--text-primary); }
+    .tab-btn.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      box-shadow: 0 2px 10px rgba(6, 182, 212, 0.28);
+    }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    /* KPI Stats Bar */
+    .stats-grid {
+      display: grid;
+      grid-templateColumns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .stat-box {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .stat-label { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+    .stat-val { font-size: 1.45rem; font-weight: 800; color: var(--text-primary); }
+    .stat-desc { font-size: 0.72rem; color: var(--text-secondary); }
+
+    /* Schedule Items Grid */
+    .schedule-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .schedule-item {
+      background: var(--surface-raised);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transition: var(--transition);
+    }
+    .schedule-item:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16);
+    }
+    .schedule-item.active { border-left: 4px solid var(--status-success); }
+    .schedule-item.paused { border-left: 4px solid var(--status-warning); opacity: 0.85; }
+    .schedule-item.archived { border-left: 4px solid var(--text-muted); opacity: 0.6; }
+
+    .schedule-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .schedule-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Double Time Trigger Badge (05:00 Buat -> 09:00 Publish) */
+    .time-trigger-flow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+    }
+    .time-badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    .time-badge-gen { color: var(--status-info); }
+    .time-badge-pub { color: var(--status-success); }
+    .flow-arrow { color: var(--text-muted); font-size: 0.85rem; }
+
+    /* Platform Pills */
+    .platform-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .platform-pill {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: var(--radius-xs);
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Actions Button Bar */
+    .action-btn-bar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .btn {
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: var(--transition);
+    }
+    .btn-primary { background: var(--action-primary); color: var(--on-action-primary); border-color: var(--action-primary); }
+    .btn-secondary { background: var(--surface); color: var(--text-primary); border-color: var(--border-subtle); }
+    .btn-secondary:hover { background: var(--surface-interactive); }
+    .btn-warning { background: var(--status-warning-soft); color: var(--status-warning); border-color: var(--status-warning); }
+    .btn-danger { background: var(--status-danger-soft); color: var(--status-danger); border-color: var(--status-danger); }
+    .btn-success { background: var(--status-success-soft); color: var(--status-success); border-color: var(--status-success); }
+
+    /* Modal Form for Schedule Create / Edit */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      max-width: 680px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .form-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .form-control {
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 9px 12px;
+      font-size: 0.88rem;
+      color: var(--text-primary);
+      outline: none;
+      font-family: inherit;
+    }
+    .form-control:focus { border-color: var(--action-primary); }
+
+    /* Platform Multi-select Cards */
+    .platform-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 8px;
+    }
+    .platform-card-check {
+      background: var(--surface-raised);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: var(--transition);
+      text-align: left;
+    }
+    .platform-card-check.selected {
+      border-color: var(--action-primary);
+      background: var(--surface-interactive);
+      box-shadow: 0 0 0 1px var(--action-primary);
+    }
+    .platform-card-check input { display: none; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header class="top-header">
+    <div class="header-inner">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="font-size: 1.5rem;">🍳</span>
+        <div>
+          <div style="font-size: 0.98rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+            MAKNA Flow Studio
+            <span class="badge badge-primary">MOCKUP USULAN</span>
+            <span class="badge badge-purple">Repliz Publishing Scheduler</span>
+          </div>
+          <div style="font-size: 0.74rem; color: var(--text-muted);">
+            Fitur Penjadwalan Harian Resep (05:00 AI Render ➔ 09:00 Repliz Publish) • Multi-Platform
+          </div>
+        </div>
+      </div>
+
+      <button type="button" onclick="toggleTheme()" class="badge badge-info" style="cursor: pointer; padding: 6px 12px; font-size: 0.75rem;">
+        🌓 Toggle Dark/Light Mode
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- View Tabs -->
+    <div class="view-tabs">
+      <button type="button" class="tab-btn" onclick="alert('Menu 1-Klik Instan yang saat ini sudah aktif di /auto-pipeline')">
+        <span>⚡</span> 1. Eksekusi 1-Klik Instan (Existing)
+      </button>
+      <button type="button" class="tab-btn active">
+        <span>⏰</span> 2. Penjadwal Otomatis &amp; Auto-Publish Repliz (Usulan Baru)
+      </button>
+      <button type="button" class="tab-btn" onclick="alert('Membuka antrean jobs di /content-flow?view=publishing')">
+        <span>📡</span> 3. Antrean Repliz Live (/content-flow)
+      </button>
+    </div>
+
+    <!-- KPI Stats -->
+    <div class="stats-grid">
+      <div class="stat-box">
+        <span class="stat-label">Total Jadwal Aktif</span>
+        <span class="stat-val" style="color: var(--status-success);">3 Jadwal</span>
+        <span class="stat-desc">Berjalan otomatis tiap pagi</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">Akun Repliz Terhubung</span>
+        <span class="stat-val" style="color: var(--action-primary);">8 Akun</span>
+        <span class="stat-desc">IG, TikTok, FB, YouTube terverifikasi</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">Jadwal Produksi Hari Ini</span>
+        <span class="stat-val" style="color: var(--status-info);">05:00 WIB</span>
+        <span class="stat-desc">HabitFolk 6-Klip &amp; DapurBotani 4-Klip</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">Jadwal Publish Hari Ini</span>
+        <span class="stat-val" style="color: var(--status-purple);">09:00 WIB</span>
+        <span class="stat-desc">Terkirim ke 4 platform otomatis</span>
+      </div>
+    </div>
+
+    <!-- Main Card: Scheduler Manager -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">
+            <span>⏰</span> Daftar Jadwal Rutin Auto Pipeline &amp; Repliz Auto-Publish
+          </div>
+          <div class="card-subtitle">
+            Sistem otomatis memproduksi video resep pada jam pembuatan dan meneruskannya ke Repliz pada jam publish.
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-primary" onclick="openScheduleModal()">
+          <span>➕</span> Buat Jadwal Rutin Baru
+        </button>
+      </div>
+
+      <!-- Schedule Filter Filters -->
+      <div style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
+        <button type="button" class="badge badge-success" style="cursor: pointer; padding: 5px 12px;">Semua Aktif (2)</button>
+        <button type="button" class="badge badge-warning" style="cursor: pointer; padding: 5px 12px;">Dijeda (1)</button>
+        <button type="button" class="badge badge-info" style="cursor: pointer; padding: 5px 12px;">Diarsipkan (1)</button>
+      </div>
+
+      <!-- List of Schedules -->
+      <div class="schedule-list">
+
+        <!-- SCHEDULE ITEM 1 (Active HabitFolk) -->
+        <div class="schedule-item active" id="sched-1">
+          <div class="schedule-top">
+            <div>
+              <div class="schedule-name">
+                <span>🍗</span> HabitFolk — Daily Morning Snack &amp; Reels
+                <span class="badge badge-success">🟢 AKTIF BERJALAN</span>
+                <span class="badge badge-primary">HabitFolk</span>
+              </div>
+              <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px;">
+                Preset: <strong>HabitFolk — Quick Snack &amp; Reels (6 Klip @ 4s • SlideLeft • Subtitel Kuning)</strong>
+              </div>
+            </div>
+
+            <!-- Double Time Flow Badge -->
+            <div class="time-trigger-flow">
+              <div class="time-badge time-badge-gen">
+                <span>⚙️ Buat:</span> <strong>05:00 WIB</strong>
+              </div>
+              <span class="flow-arrow">➔</span>
+              <div class="time-badge time-badge-pub">
+                <span>🚀 Publish:</span> <strong>09:00 WIB</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mid: Topic, Frequency & Multi-platform Connected -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; background: var(--surface); padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+            <div>
+              <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700;">TOPIK / ARAHAN AI:</div>
+              <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">
+                "Air fryer crispy snacks, tenders, finger foods" (Ide Dinamis Tiap Hari)
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700;">HARI RUTIN:</div>
+              <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">
+                Setiap Hari (Senin – Minggu)
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700; margin-bottom: 4px;">TARGET PUBLISH REPLIZ (4 PLATFORM):</div>
+              <div class="platform-tags">
+                <span class="platform-pill" style="color: #e1306c;">📸 Instagram Reels</span>
+                <span class="platform-pill" style="color: #00f2fe;">🎵 TikTok</span>
+                <span class="platform-pill" style="color: #1877f2;">📘 Facebook Reels</span>
+                <span class="platform-pill" style="color: #ff0000;">▶️ YouTube Shorts</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom: Status execution info & Actions -->
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div style="font-size: 0.74rem; color: var(--text-muted);">
+              ✅ Terakhir jalan: <strong>Hari ini 05:00 WIB</strong> (opc_20261105_habit_01) &bull; Terjadwal publish di Repliz jam <strong>09:00 WIB</strong>
+            </div>
+
+            <div class="action-btn-bar">
+              <button type="button" class="btn btn-secondary" onclick="alert('Menjalankan pipeline instan untuk tes jadwal ini...')">
+                <span>⚡</span> Run Now (Tes)
+              </button>
+              <button type="button" class="btn btn-warning" onclick="togglePause('sched-1')">
+                <span>⏸️</span> Pause Jadwal
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="openScheduleModal('edit')">
+                <span>✏️</span> Edit
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="archiveSchedule('sched-1')">
+                <span>📦</span> Arsipkan
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SCHEDULE ITEM 2 (Active DapurBotani) -->
+        <div class="schedule-item active" id="sched-2">
+          <div class="schedule-top">
+            <div>
+              <div class="schedule-name">
+                <span>🌿</span> DapurBotani — Resep Herbal &amp; Infused Honey
+                <span class="badge badge-success">🟢 AKTIF BERJALAN</span>
+                <span class="badge badge-primary">Dapur Botani</span>
+              </div>
+              <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px;">
+                Preset: <strong>DapurBotani — Herbal &amp; Wellness Recipe (4 Klip @ 8s • FadeWhite • Subtitel Kuning)</strong>
+              </div>
+            </div>
+
+            <!-- Double Time Flow Badge -->
+            <div class="time-trigger-flow">
+              <div class="time-badge time-badge-gen">
+                <span>⚙️ Buat:</span> <strong>06:00 WIB</strong>
+              </div>
+              <span class="flow-arrow">➔</span>
+              <div class="time-badge time-badge-pub">
+                <span>🚀 Publish:</span> <strong>11:30 WIB</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mid: Topic, Frequency & Multi-platform Connected -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; background: var(--surface); padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+            <div>
+              <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700;">TOPIK / ARAHAN AI:</div>
+              <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">
+                "Minuman herbal hangat, fermented honey garlic, imun booster"
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700;">HARI RUTIN:</div>
+              <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">
+                Senin, Rabu, Jumat, Sabtu
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700; margin-bottom: 4px;">TARGET PUBLISH REPLIZ (2 PLATFORM):</div>
+              <div class="platform-tags">
+                <span class="platform-pill" style="color: #e1306c;">📸 Instagram Reels</span>
+                <span class="platform-pill" style="color: #1877f2;">📘 Facebook Reels</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom: Status execution info & Actions -->
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div style="font-size: 0.74rem; color: var(--text-muted);">
+              ⏳ Eksekusi berikutnya: <strong>Besok 06:00 WIB</strong>
+            </div>
+
+            <div class="action-btn-bar">
+              <button type="button" class="btn btn-secondary" onclick="alert('Menjalankan pipeline instan untuk tes jadwal ini...')">
+                <span>⚡</span> Run Now (Tes)
+              </button>
+              <button type="button" class="btn btn-warning" onclick="togglePause('sched-2')">
+                <span>⏸️</span> Pause Jadwal
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="openScheduleModal('edit')">
+                <span>✏️</span> Edit
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="archiveSchedule('sched-2')">
+                <span>📦</span> Arsipkan
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SCHEDULE ITEM 3 (Paused HabitFolk Weekend) -->
+        <div class="schedule-item paused" id="sched-3">
+          <div class="schedule-top">
+            <div>
+              <div class="schedule-name">
+                <span>🥩</span> HabitFolk — Weekend Comfort Feast (8 Klip Deep)
+                <span class="badge badge-warning">⏸️ DIJEDA</span>
+                <span class="badge badge-primary">HabitFolk</span>
+              </div>
+              <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px;">
+                Preset: <strong>HabitFolk — Full Comfort Feast (8 Klip @ 4s • Fade • Subtitel Putih)</strong>
+              </div>
+            </div>
+
+            <!-- Double Time Flow Badge -->
+            <div class="time-trigger-flow">
+              <div class="time-badge time-badge-gen">
+                <span>⚙️ Buat:</span> <strong>07:00 WIB</strong>
+              </div>
+              <span class="flow-arrow">➔</span>
+              <div class="time-badge time-badge-pub">
+                <span>🚀 Publish:</span> <strong>12:00 WIB</strong>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div style="font-size: 0.74rem; color: var(--text-muted);">
+              Jadwal saat ini dijeda sementara. Tidak akan dieksekusi sampai dilanjutkan.
+            </div>
+
+            <div class="action-btn-bar">
+              <button type="button" class="btn btn-success" onclick="togglePause('sched-3')">
+                <span>▶️</span> Lanjutkan Jadwal
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="openScheduleModal('edit')">
+                <span>✏️</span> Edit
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="archiveSchedule('sched-3')">
+                <span>📦</span> Arsipkan
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL CREATE / EDIT SCHEDULE -->
+  <div class="modal-backdrop" id="scheduleModal" style="display: none;">
+    <div class="modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border-subtle);">
+        <div style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+          <span>⏰</span> <span id="modalTitle">Buat Jadwal Rutin Auto Pipeline Baru</span>
+        </div>
+        <button type="button" onclick="closeScheduleModal()" style="background: none; border: none; font-size: 1.25rem; color: var(--text-muted); cursor: pointer;">✕</button>
+      </div>
+
+      <form onsubmit="handleSaveSchedule(event)">
+        <!-- 1. Nama Jadwal -->
+        <div class="form-group">
+          <label class="form-label">
+            <span>Nama Pengenal Jadwal</span>
+            <span style="font-size: 0.7rem; color: var(--text-muted);">Contoh: HabitFolk Daily Snack 05:00</span>
+          </label>
+          <input type="text" class="form-control" id="schedNameInput" value="HabitFolk Daily Morning Reels" required>
+        </div>
+
+        <!-- 2. Brand & Preset -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">1. Brand Profile</label>
+            <select class="form-control" id="modalBrandSelect" onchange="updateBrandPresets(this.value)">
+              <option value="habitfolk" selected>HabitFolk (Airfry Eats)</option>
+              <option value="dapurbotani">Dapur Botani (GarliBee)</option>
+              <option value="nutribake">NutriBake ID</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <span>2. Preset Konfigurasi</span>
+              <span class="badge badge-success" style="font-size: 0.62rem;">Preset Manager</span>
+            </label>
+            <select class="form-control" id="modalPresetSelect" style="border-color: var(--action-primary); font-weight: 700;">
+              <option value="habitfolk_6clips_quick">HabitFolk 6 Klip @ 4s (SlideLeft • Kuning)</option>
+              <option value="habitfolk_8clips_deep">HabitFolk 8 Klip @ 4s (Fade • Putih)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 3. Dua Pengaturan Waktu (Jam Pembuatan & Jam Publish) -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: var(--surface-raised); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-bottom: 16px;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label">
+              <span style="color: var(--status-info);">⚙️ Jam Pembuatan Video (AI Render)</span>
+            </label>
+            <input type="time" class="form-control" id="genTimeInput" value="05:00" required style="font-size: 1.05rem; font-weight: 700;">
+            <span style="font-size: 0.68rem; color: var(--text-muted);">Pipeline AI otomatis generate video pada jam ini</span>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label">
+              <span style="color: var(--status-success);">🚀 Jam Publish Repliz (Live)</span>
+            </label>
+            <input type="time" class="form-control" id="pubTimeInput" value="09:00" required style="font-size: 1.05rem; font-weight: 700;">
+            <span style="font-size: 0.68rem; color: var(--text-muted);">Video diteruskan ke Repliz untuk tayang pada jam ini</span>
+          </div>
+        </div>
+
+        <!-- 4. Topik & Kategori -->
+        <div class="form-group">
+          <label class="form-label">
+            <span>Tema / Arahan Topik Resep Harian</span>
+            <span style="font-size: 0.7rem; color: var(--text-muted);">AI akan berkreasi variasi resep baru tiap hari</span>
+          </label>
+          <input type="text" class="form-control" id="schedTopicInput" value="Air fryer crispy chicken tenders and easy snack finger foods">
+        </div>
+
+        <!-- 5. Multi-Platform Repliz Publishing Selector -->
+        <div class="form-group">
+          <label class="form-label">
+            <span>Target Multi-Platform Repliz (1 Brand Profile)</span>
+            <span class="badge badge-purple" style="font-size: 0.65rem;">Auto-Sync Content-Flow</span>
+          </label>
+          <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 8px;">
+            Centang akun media sosial yang terhubung dengan brand ini di Repliz:
+          </div>
+
+          <div class="platform-cards-grid">
+            <label class="platform-card-check selected" id="chk-ig" onclick="togglePlatformCard(this)">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 1.2rem;">📸</span>
+                <span style="color: var(--action-primary); font-weight: 900; font-size: 0.8rem;">✓</span>
+              </div>
+              <strong style="font-size: 0.8rem; color: var(--text-primary);">Instagram</strong>
+              <span style="font-size: 0.66rem; color: var(--text-muted);">@habitfolk.eats</span>
+            </label>
+
+            <label class="platform-card-check selected" id="chk-tt" onclick="togglePlatformCard(this)">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 1.2rem;">🎵</span>
+                <span style="color: var(--action-primary); font-weight: 900; font-size: 0.8rem;">✓</span>
+              </div>
+              <strong style="font-size: 0.8rem; color: var(--text-primary);">TikTok</strong>
+              <span style="font-size: 0.66rem; color: var(--text-muted);">@habitfolk</span>
+            </label>
+
+            <label class="platform-card-check selected" id="chk-fb" onclick="togglePlatformCard(this)">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 1.2rem;">📘</span>
+                <span style="color: var(--action-primary); font-weight: 900; font-size: 0.8rem;">✓</span>
+              </div>
+              <strong style="font-size: 0.8rem; color: var(--text-primary);">Facebook</strong>
+              <span style="font-size: 0.66rem; color: var(--text-muted);">HabitFolk Page</span>
+            </label>
+
+            <label class="platform-card-check selected" id="chk-yt" onclick="togglePlatformCard(this)">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 1.2rem;">▶️</span>
+                <span style="color: var(--action-primary); font-weight: 900; font-size: 0.8rem;">✓</span>
+              </div>
+              <strong style="font-size: 0.8rem; color: var(--text-primary);">YouTube</strong>
+              <span style="font-size: 0.66rem; color: var(--text-muted);">HabitFolk Shorts</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 6. Status Jadwal -->
+        <div class="form-group">
+          <label class="form-label">Status Awal</label>
+          <select class="form-control" id="schedStatusSelect">
+            <option value="active" selected>Aktif Berjalan (Active)</option>
+            <option value="paused">Dijeda Sementara (Paused)</option>
+          </select>
+        </div>
+
+        <!-- Modal Action Buttons -->
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
+          <button type="button" class="btn btn-secondary" onclick="closeScheduleModal()">Batal</button>
+          <button type="submit" class="btn btn-primary" style="padding: 9px 20px; font-size: 0.88rem;">
+            💾 Simpan Jadwal ke Database
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      document.documentElement.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
+    }
+
+    function openScheduleModal(mode = 'create') {
+      const modal = document.getElementById('scheduleModal');
+      const title = document.getElementById('modalTitle');
+      if (mode === 'edit') {
+        title.innerText = 'Edit Jadwal Rutin Auto Pipeline';
+      } else {
+        title.innerText = 'Buat Jadwal Rutin Auto Pipeline Baru';
+      }
+      modal.style.display = 'flex';
+    }
+
+    function closeScheduleModal() {
+      document.getElementById('scheduleModal').style.display = 'none';
+    }
+
+    function togglePlatformCard(card) {
+      card.classList.toggle('selected');
+      const checkMark = card.querySelector('span:nth-child(2)');
+      if (card.classList.contains('selected')) {
+        checkMark.innerText = '✓';
+        checkMark.style.color = 'var(--action-primary)';
+      } else {
+        checkMark.innerText = '✕';
+        checkMark.style.color = 'var(--text-muted)';
+      }
+    }
+
+    function togglePause(schedId) {
+      const item = document.getElementById(schedId);
+      if (item.classList.contains('active')) {
+        item.classList.remove('active');
+        item.classList.add('paused');
+        alert(`Jadwal ${schedId} berhasil dijeda (Paused) ⏸️. Tidak akan jalan otomatis hingga dilanjutkan.`);
+      } else {
+        item.classList.remove('paused');
+        item.classList.add('active');
+        alert(`Jadwal ${schedId} berhasil diaktifkan kembali (Active) ▶️.`);
+      }
+    }
+
+    function archiveSchedule(schedId) {
+      if (confirm(`Yakin ingin mengarsipkan jadwal ini? Jadwal akan dipindahkan ke tab Arsip.`)) {
+        const item = document.getElementById(schedId);
+        item.classList.remove('active', 'paused');
+        item.classList.add('archived');
+        alert(`Jadwal ${schedId} berhasil diarsipkan (Archived) 📦.`);
+      }
+    }
+
+    function handleSaveSchedule(e) {
+      e.preventDefault();
+      alert('✅ Jadwal berhasil disimpan ke database (auto_pipeline_schedules)! Background scheduler akan mengeksekusi otomatis pada jam 05:00 WIB dan meneruskannya ke Repliz pada 09:00 WIB.');
+      closeScheduleModal();
+    }
+  </script>
+</body>
+</html>
+
