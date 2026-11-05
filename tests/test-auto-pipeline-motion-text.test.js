@@ -44,7 +44,7 @@ test('ingestRecipePlannerToPillarCampaign stores motion text parameters correctl
     return pId;
   }
 
-  // Test Case A: Custom Style & Center Position (ON)
+  // Test Case A: Custom Style & Center Position (ON) + Transition
   const plannerA = await createPlanner('a');
   const resultA = await ingestRecipePlannerToPillarCampaign({
     plannerId: plannerA,
@@ -53,6 +53,8 @@ test('ingestRecipePlannerToPillarCampaign stores motion text parameters correctl
       enable_motion_text: 1,
       motion_text_style: 'floating_black_on_white',
       motion_text_position: 'center',
+      video_transition: 'fadewhite',
+      transition_duration: 0.8,
       execution_mode: 'manual_review'
     },
     tenantId: 'default_tenant'
@@ -61,13 +63,15 @@ test('ingestRecipePlannerToPillarCampaign stores motion text parameters correctl
   assert.ok(resultA.campaign_id, 'Campaign ID A should be generated');
 
   const campaignA = await db.prepare(
-    'SELECT id, enable_motion_text, motion_text_style, motion_text_position FROM pillar_campaigns WHERE id = ?'
+    'SELECT id, enable_motion_text, motion_text_style, motion_text_position, video_transition, transition_duration FROM pillar_campaigns WHERE id = ?'
   ).get(resultA.campaign_id);
 
   assert.ok(campaignA, 'Campaign A must exist in database');
   assert.equal(campaignA.enable_motion_text, 1, 'enable_motion_text should be 1');
   assert.equal(campaignA.motion_text_style, 'floating_black_on_white', 'motion_text_style should match');
   assert.equal(campaignA.motion_text_position, 'center', 'motion_text_position should match');
+  assert.equal(campaignA.video_transition, 'fadewhite', 'video_transition should be fadewhite');
+  assert.equal(Number(campaignA.transition_duration), 0.8, 'transition_duration should be 0.8');
 
   // Test Case B: Clean Video Mode (OFF)
   const plannerB = await createPlanner('b');
@@ -102,13 +106,15 @@ test('ingestRecipePlannerToPillarCampaign stores motion text parameters correctl
   });
 
   const campaignC = await db.prepare(
-    'SELECT id, enable_motion_text, motion_text_style, motion_text_position FROM pillar_campaigns WHERE id = ?'
+    'SELECT id, enable_motion_text, motion_text_style, motion_text_position, video_transition, transition_duration FROM pillar_campaigns WHERE id = ?'
   ).get(resultC.campaign_id);
 
   assert.ok(campaignC, 'Campaign C must exist in database');
   assert.equal(campaignC.enable_motion_text, 1, 'Default enable_motion_text should be 1');
   assert.equal(campaignC.motion_text_style, 'floating_white_yellow', 'Default motion_text_style should be floating_white_yellow');
   assert.equal(campaignC.motion_text_position, 'bottom', 'Default motion_text_position should be bottom');
+  assert.equal(campaignC.video_transition, 'fade', 'Default video_transition should be fade');
+  assert.equal(Number(campaignC.transition_duration), 0.5, 'Default transition_duration should be 0.5');
 
   setTimeout(() => process.exit(0), 100);
 });

@@ -18,6 +18,8 @@ export default function AutoPipelinePage() {
   const [enableMotionText, setEnableMotionText] = useState(true);
   const [motionTextStyle, setMotionTextStyle] = useState('floating_white_yellow');
   const [motionTextPosition, setMotionTextPosition] = useState('bottom');
+  const [videoTransition, setVideoTransition] = useState('fade');
+  const [transitionDuration, setTransitionDuration] = useState(0.5);
   const [demoWordIndex, setDemoWordIndex] = useState(0);
 
   // Demo loop untuk simulasi preview animasi motion text kata per kata
@@ -235,6 +237,8 @@ export default function AutoPipelinePage() {
           enable_motion_text: enableMotionText,
           motion_text_style: enableMotionText ? motionTextStyle : null,
           motion_text_position: enableMotionText ? motionTextPosition : null,
+          video_transition: videoTransition || 'fade',
+          transition_duration: Number(transitionDuration || 0.5),
           auto_sync_contentflow: 1
         })
       });
@@ -730,7 +734,7 @@ export default function AutoPipelinePage() {
                   </div>
                 </div>
 
-                {/* 7. Kontrol Motion Text & Subtitel Video (FFmpeg) */}
+                {/* 7. Finishing Video & Pascaproduksi FFmpeg (Motion Text + Transisi Antar Klip) */}
                 <div style={{
                   gridColumn: '1 / -1',
                   background: 'var(--surface-raised)',
@@ -739,159 +743,474 @@ export default function AutoPipelinePage() {
                   padding: '1.25rem',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '1rem',
+                  gap: '1.25rem',
                   transition: 'var(--transition)'
                 }}>
-                  {/* Header & Toggle ON/OFF Switch */}
+                  {/* Master Section Header */}
                   <div style={{
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     flexWrap: 'wrap',
-                    gap: '0.75rem'
+                    gap: '0.75rem',
+                    borderBottom: '1px solid var(--border-subtle)',
+                    paddingBottom: '0.85rem'
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                      <span style={{ fontSize: '1.3rem' }}>✨</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                      <span style={{ fontSize: '1.35rem' }}>🎬</span>
                       <div>
-                        <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                          Motion Text & Subtitel Video (FFmpeg)
+                        <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                          Finishing Video & Pascaproduksi FFmpeg
+                          <span style={{
+                            fontSize: '0.68rem',
+                            fontWeight: 700,
+                            background: 'var(--status-success-soft)',
+                            color: 'var(--status-success)',
+                            border: '1px solid var(--status-success)',
+                            padding: '0.15rem 0.5rem',
+                            borderRadius: 9999
+                          }}>
+                            ⚡ 0 Biaya AI Credit
+                          </span>
                         </div>
                         <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                          Animasi teks dinamis per kata yang disinkronkan dengan audio narasi voice-over.
+                          Atur gaya teks dinamis dan efek transisi antar sambungan klip video secara otomatis.
                         </div>
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-                      <span style={{
-                        fontSize: '0.72rem',
-                        fontWeight: 700,
-                        padding: '0.25rem 0.65rem',
-                        borderRadius: 9999,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.35rem',
-                        background: enableMotionText ? 'var(--status-success-soft)' : 'var(--surface-interactive)',
-                        color: enableMotionText ? 'var(--status-success)' : 'var(--text-muted)',
-                        border: `1px solid ${enableMotionText ? 'var(--status-success)' : 'var(--border-strong)'}`
-                      }}>
-                        {enableMotionText ? '🟢 Subtitel Aktif (ON)' : '⚪ Clean Video (OFF)'}
-                      </span>
-
-                      {/* Custom Toggle Switch */}
-                      <button
-                        type="button"
-                        onClick={() => setEnableMotionText(!enableMotionText)}
-                        style={{
-                          width: '46px',
-                          height: '24px',
-                          borderRadius: '9999px',
-                          background: enableMotionText ? 'var(--action-primary)' : 'var(--border-strong)',
-                          border: 'none',
-                          padding: '2px',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: enableMotionText ? 'flex-end' : 'flex-start',
-                          transition: 'var(--transition)'
-                        }}
-                      >
-                        <div style={{
-                          width: '20px',
-                          height: '20px',
-                          borderRadius: '50%',
-                          background: enableMotionText ? 'var(--on-action-primary)' : 'var(--text-primary)',
-                          boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
-                          transition: 'var(--transition)'
-                        }} />
-                      </button>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <span>⚙️</span>
+                      <span>Diterapkan saat proses rendering stitching MP4</span>
                     </div>
                   </div>
 
-                  {/* Konten jika ON */}
-                  {enableMotionText ? (
+                  {/* 2-Column Responsive Finishing Grid */}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+                    gap: '1.25rem',
+                    alignItems: 'stretch'
+                  }}>
+
+                    {/* KOLOM KIRI: Motion Text & Subtitel Video */}
                     <div style={{
+                      background: 'var(--surface)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: 'var(--radius-sm)',
+                      padding: '1rem',
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: '1rem',
-                      borderTop: '1px solid var(--border-subtle)',
-                      paddingTop: '1rem'
+                      gap: '0.85rem'
                     }}>
-                      {/* Pilihan 3 Style Card */}
-                      <div>
-                        <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)', display: 'block', marginBottom: '0.5rem' }}>
-                          PILIH TEMPLATE STYLE MOTION TEXT:
+                      {/* Sub-header Kolom Kiri */}
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        flexWrap: 'wrap',
+                        gap: '0.5rem',
+                        borderBottom: '1px solid var(--border-subtle)',
+                        paddingBottom: '0.65rem'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                          <span style={{ fontSize: '1.1rem' }}>✨</span>
+                          <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                            1. Subtitel / Motion Text
+                          </span>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                          <span style={{
+                            fontSize: '0.68rem',
+                            fontWeight: 700,
+                            padding: '0.15rem 0.5rem',
+                            borderRadius: 9999,
+                            background: enableMotionText ? 'var(--status-success-soft)' : 'var(--surface-interactive)',
+                            color: enableMotionText ? 'var(--status-success)' : 'var(--text-muted)',
+                            border: `1px solid ${enableMotionText ? 'var(--status-success)' : 'var(--border-strong)'}`
+                          }}>
+                            {enableMotionText ? '🟢 ON' : '⚪ OFF'}
+                          </span>
+
+                          {/* Toggle Switch */}
+                          <button
+                            type="button"
+                            onClick={() => setEnableMotionText(!enableMotionText)}
+                            style={{
+                              width: '42px',
+                              height: '22px',
+                              borderRadius: '9999px',
+                              background: enableMotionText ? 'var(--action-primary)' : 'var(--border-strong)',
+                              border: 'none',
+                              padding: '2px',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: enableMotionText ? 'flex-end' : 'flex-start',
+                              transition: 'var(--transition)'
+                            }}
+                          >
+                            <div style={{
+                              width: '18px',
+                              height: '18px',
+                              borderRadius: '50%',
+                              background: enableMotionText ? 'var(--on-action-primary)' : 'var(--text-primary)',
+                              boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                              transition: 'var(--transition)'
+                            }} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {enableMotionText ? (
+                        <>
+                          {/* Pilihan 3 Template */}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                            <label style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                              PILIH TEMPLATE STYLE:
+                            </label>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                              {[
+                                {
+                                  key: 'floating_white_yellow',
+                                  name: '🟡 Floating Putih ➔ Kuning',
+                                  badge: 'TikTok / Reels',
+                                  badgeBg: 'var(--status-warning-soft)',
+                                  badgeColor: 'var(--status-warning)',
+                                  desc: 'Kata muncul bertahap, kata aktif menyala kuning terang.'
+                                },
+                                {
+                                  key: 'floating_black_on_white',
+                                  name: '🔲 Floating Hitam BG Putih',
+                                  badge: 'CapCut Pill',
+                                  badgeBg: 'var(--status-info-soft)',
+                                  badgeColor: 'var(--status-info)',
+                                  desc: 'Teks hitam di atas kapsul pill putih bersih yang melompat ritmis.'
+                                },
+                                {
+                                  key: 'minimal_white',
+                                  name: '◻️ Minimalist Clean Card',
+                                  badge: 'Super Slim',
+                                  badgeBg: 'var(--status-neutral-soft)',
+                                  badgeColor: 'var(--status-neutral)',
+                                  desc: 'Kartu putih ramping auto-fit (~80px), murni teks naskah.'
+                                }
+                              ].map(styleItem => {
+                                const isSelected = motionTextStyle === styleItem.key;
+                                return (
+                                  <button
+                                    type="button"
+                                    key={styleItem.key}
+                                    onClick={() => setMotionTextStyle(styleItem.key)}
+                                    style={{
+                                      background: isSelected ? 'var(--surface-interactive)' : 'var(--input-bg)',
+                                      border: `1.5px solid ${isSelected ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
+                                      borderRadius: 'var(--radius-xs)',
+                                      padding: '0.65rem 0.8rem',
+                                      display: 'flex',
+                                      flexDirection: 'column',
+                                      gap: '0.2rem',
+                                      cursor: 'pointer',
+                                      textAlign: 'left',
+                                      boxShadow: isSelected ? '0 0 0 1px var(--action-primary), 0 2px 8px rgba(45, 212, 191, 0.16)' : 'none',
+                                      transition: 'var(--transition)'
+                                    }}
+                                  >
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                      <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                                        {styleItem.name}
+                                      </span>
+                                      <span style={{
+                                        fontSize: '0.64rem',
+                                        fontWeight: 700,
+                                        padding: '0.12rem 0.4rem',
+                                        borderRadius: 'var(--radius-xs)',
+                                        background: styleItem.badgeBg,
+                                        color: styleItem.badgeColor
+                                      }}>
+                                        {styleItem.badge}
+                                      </span>
+                                    </div>
+                                    <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', lineHeight: 1.3, margin: 0 }}>
+                                      {styleItem.desc}
+                                    </p>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* Posisi Subtitel */}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', borderTop: '1px solid var(--border-subtle)', paddingTop: '0.65rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <label style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                                POSISI DI LAYAR:
+                              </label>
+                              <div style={{ display: 'flex', gap: '0.35rem' }}>
+                                {[
+                                  { key: 'bottom', label: 'Bawah' },
+                                  { key: 'center', label: 'Tengah' },
+                                  { key: 'top', label: 'Atas' }
+                                ].map(p => (
+                                  <button
+                                    type="button"
+                                    key={p.key}
+                                    onClick={() => setMotionTextPosition(p.key)}
+                                    style={{
+                                      background: motionTextPosition === p.key ? 'var(--surface-interactive)' : 'var(--input-bg)',
+                                      border: `1px solid ${motionTextPosition === p.key ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
+                                      color: motionTextPosition === p.key ? 'var(--action-primary)' : 'var(--text-secondary)',
+                                      padding: '0.3rem 0.65rem',
+                                      borderRadius: 'var(--radius-xs)',
+                                      fontSize: '0.72rem',
+                                      fontWeight: 600,
+                                      cursor: 'pointer',
+                                      transition: 'var(--transition)'
+                                    }}
+                                  >
+                                    {p.label}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Mini Live Animation Box (Teks Simulasi) */}
+                          <div style={{
+                            background: 'var(--surface-interactive)',
+                            border: '1px solid var(--border-strong)',
+                            borderRadius: 'var(--radius-xs)',
+                            padding: '0.65rem',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.4rem'
+                          }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                <span>📺</span> SIMULASI KATA:
+                              </span>
+                              <span style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', color: 'var(--action-primary)' }}>
+                                600ms per word
+                              </span>
+                            </div>
+
+                            <div style={{
+                              background: '#0a0a0c',
+                              borderRadius: 'var(--radius-xs)',
+                              padding: '0.75rem 0.5rem',
+                              minHeight: '64px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              justifyContent: motionTextPosition === 'top' ? 'flex-start' : motionTextPosition === 'center' ? 'center' : 'flex-end',
+                              alignItems: 'center',
+                              overflow: 'hidden'
+                            }}>
+                              {motionTextStyle === 'floating_white_yellow' && (
+                                <div style={{
+                                  display: 'flex',
+                                  flexWrap: 'wrap',
+                                  gap: '0.35rem',
+                                  justifyContent: 'center',
+                                  alignItems: 'center'
+                                }}>
+                                  {['MASUKKAN', 'AYAM', 'KE', 'DALAM', 'AIRFRYER'].map((w, idx) => {
+                                    const isCurrent = idx === demoWordIndex;
+                                    const isFuture = idx > demoWordIndex;
+                                    if (isFuture) return null;
+                                    return (
+                                      <span
+                                        key={w}
+                                        style={{
+                                          fontSize: '0.8rem',
+                                          fontWeight: 900,
+                                          fontFamily: 'Impact, Arial Black, sans-serif',
+                                          letterSpacing: '1px',
+                                          color: isCurrent ? '#facc15' : '#ffffff',
+                                          textShadow: '0 0 3px #000, 0 0 6px #000',
+                                          transform: isCurrent ? 'scale(1.1)' : 'scale(1)',
+                                          transition: 'all 0.15s ease-out',
+                                          display: 'inline-block'
+                                        }}
+                                      >
+                                        {w}
+                                      </span>
+                                    );
+                                  })}
+                                </div>
+                              )}
+
+                              {motionTextStyle === 'floating_black_on_white' && (
+                                <div style={{
+                                  display: 'flex',
+                                  flexWrap: 'wrap',
+                                  gap: '0.3rem',
+                                  justifyContent: 'center',
+                                  alignItems: 'center'
+                                }}>
+                                  {['Masukkan', 'Ayam', 'Ke', 'Dalam', 'Airfryer'].map((w, idx) => {
+                                    const isCurrent = idx === demoWordIndex;
+                                    return (
+                                      <span
+                                        key={w}
+                                        style={{
+                                          fontSize: '0.74rem',
+                                          fontWeight: 800,
+                                          fontFamily: 'system-ui, -apple-system, sans-serif',
+                                          padding: '0.15rem 0.45rem',
+                                          borderRadius: '4px',
+                                          background: isCurrent ? '#ffffff' : 'rgba(255, 255, 255, 0.25)',
+                                          color: isCurrent ? '#000000' : '#e2e8f0',
+                                          transform: isCurrent ? 'scale(1.12) translateY(-2px)' : 'scale(1)',
+                                          boxShadow: isCurrent ? '0 2px 6px rgba(0,0,0,0.4)' : 'none',
+                                          transition: 'all 0.15s ease-out',
+                                          display: 'inline-block'
+                                        }}
+                                      >
+                                        {w}
+                                      </span>
+                                    );
+                                  })}
+                                </div>
+                              )}
+
+                              {motionTextStyle === 'minimal_white' && (
+                                <div style={{
+                                  background: 'rgba(255, 255, 255, 0.95)',
+                                  color: '#0f172a',
+                                  padding: '0.45rem 0.85rem',
+                                  borderRadius: '6px',
+                                  boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
+                                  textAlign: 'center',
+                                  maxWidth: '92%'
+                                }}>
+                                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0f172a' }}>
+                                    Crispy outside, tender inside!
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        /* Notice jika OFF */
+                        <div style={{
+                          background: 'var(--input-bg)',
+                          border: '1px solid var(--border-subtle)',
+                          borderRadius: 'var(--radius-xs)',
+                          padding: '0.75rem',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.35rem'
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.78rem' }}>
+                            <span>🚫</span>
+                            <span>Clean Video Aktif (Tanpa Subtitel Grafis FFmpeg)</span>
+                          </div>
+                          <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', lineHeight: 1.35, margin: 0 }}>
+                            Video final MP4 akan diekspor bersih tanpa overlay teks grafis. Narasi audio Minimax dan BGM tetap aktif. Subtitle native dapat ditambahkan di Instagram/TikTok.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* KOLOM KANAN: Transisi Antar Klip Video (XFade) */}
+                    <div style={{
+                      background: 'var(--surface)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: 'var(--radius-sm)',
+                      padding: '1rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.85rem'
+                    }}>
+                      {/* Sub-header Kolom Kanan */}
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        flexWrap: 'wrap',
+                        gap: '0.5rem',
+                        borderBottom: '1px solid var(--border-subtle)',
+                        paddingBottom: '0.65rem'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                          <span style={{ fontSize: '1.1rem' }}>✂️</span>
+                          <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                            2. Efek Transisi Video (XFade)
+                          </span>
+                        </div>
+
+                        <span style={{
+                          fontSize: '0.68rem',
+                          fontWeight: 700,
+                          padding: '0.15rem 0.5rem',
+                          borderRadius: 9999,
+                          background: 'var(--surface-interactive)',
+                          color: 'var(--action-primary)',
+                          border: '1px solid var(--action-primary)'
+                        }}>
+                          Aktif: {videoTransition} ({transitionDuration}s)
+                        </span>
+                      </div>
+
+                      {/* 7 Transition Selector Cards Grid */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                        <label style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                          PILIH EFEK PERGANTIAN ADEGAN:
                         </label>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.75rem' }}>
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+                          gap: '0.5rem'
+                        }}>
                           {[
-                            {
-                              key: 'floating_white_yellow',
-                              name: '🟡 Floating Putih ➔ Kuning',
-                              badge: 'TikTok / Reels',
-                              badgeBg: 'var(--status-warning-soft)',
-                              badgeColor: 'var(--status-warning)',
-                              desc: 'Huruf kapital bold dengan outline tebal. Kata yang diucapkan berubah warna menjadi kuning terang vibran.',
-                              idText: 'floating_white_yellow (Default)'
-                            },
-                            {
-                              key: 'floating_black_on_white',
-                              name: '🔲 Floating Hitam BG Putih',
-                              badge: 'CapCut Style',
-                              badgeBg: 'var(--status-info-soft)',
-                              badgeColor: 'var(--status-info)',
-                              desc: 'Teks hitam di dalam kotak pil putih (word pills) yang melompat ritmis mengikuti audio narasi.',
-                              idText: 'floating_black_on_white'
-                            },
-                            {
-                              key: 'minimal_white',
-                              name: '◻️ Minimalist Clean Card',
-                              badge: 'Studio Dokumenter',
-                              badgeBg: 'var(--status-neutral-soft)',
-                              badgeColor: 'var(--status-neutral)',
-                              desc: 'Kotak studio semi-transparan elegan dengan badge adegan dan tipografi modern yang rapi.',
-                              idText: 'minimal_white'
-                            }
-                          ].map(styleItem => {
-                            const isSelected = motionTextStyle === styleItem.key;
+                            { key: 'fade', name: 'Fade', icon: '🌊', desc: 'Smooth Dissolve', badge: 'Default' },
+                            { key: 'fadewhite', name: 'FadeWhite', icon: '⚡', desc: 'White Flash energik', badge: 'Flash' },
+                            { key: 'fadeblack', name: 'FadeBlack', icon: '🌑', desc: 'Fade gelap sinematik', badge: 'Cinema' },
+                            { key: 'slideleft', name: 'SlideLeft', icon: '👈', desc: 'Geser alur resep', badge: 'Dynamic' },
+                            { key: 'zoomin', name: 'ZoomIn', icon: '🔍', desc: 'Dorongan kamera', badge: 'Action' },
+                            { key: 'circleopen', name: 'CircleOpen', icon: '⭕', desc: 'Lingkaran iris retro', badge: 'Retro' },
+                            { key: 'cut', name: 'Cut', icon: '✂️', desc: 'Hard Cut langsung', badge: 'Direct' }
+                          ].map(t => {
+                            const isSelected = videoTransition === t.key;
                             return (
                               <button
                                 type="button"
-                                key={styleItem.key}
-                                onClick={() => setMotionTextStyle(styleItem.key)}
+                                key={t.key}
+                                onClick={() => setVideoTransition(t.key)}
                                 style={{
                                   background: isSelected ? 'var(--surface-interactive)' : 'var(--input-bg)',
                                   border: `1.5px solid ${isSelected ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
-                                  borderRadius: 'var(--radius-md)',
-                                  padding: '0.9rem',
+                                  borderRadius: 'var(--radius-xs)',
+                                  padding: '0.65rem 0.7rem',
                                   display: 'flex',
                                   flexDirection: 'column',
-                                  gap: '0.35rem',
+                                  gap: '0.25rem',
                                   cursor: 'pointer',
                                   textAlign: 'left',
-                                  boxShadow: isSelected ? '0 0 0 1px var(--action-primary), 0 4px 14px rgba(45, 212, 191, 0.16)' : 'none',
+                                  boxShadow: isSelected ? '0 0 0 1px var(--action-primary), 0 2px 8px rgba(45, 212, 191, 0.16)' : 'none',
                                   transition: 'var(--transition)'
                                 }}
                               >
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                                  <span style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                                    {styleItem.name}
+                                  <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                    <span>{t.icon}</span>
+                                    <span>{t.name}</span>
                                   </span>
                                   <span style={{
-                                    fontSize: '0.66rem',
+                                    fontSize: '0.6rem',
                                     fontWeight: 700,
-                                    padding: '0.15rem 0.45rem',
+                                    padding: '0.1rem 0.35rem',
                                     borderRadius: 'var(--radius-xs)',
-                                    background: styleItem.badgeBg,
-                                    color: styleItem.badgeColor
+                                    background: isSelected ? 'var(--action-primary)' : 'var(--surface-raised)',
+                                    color: isSelected ? 'var(--on-action-primary)' : 'var(--text-muted)'
                                   }}>
-                                    {styleItem.badge}
+                                    {t.badge}
                                   </span>
                                 </div>
-                                <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1.35, margin: 0 }}>
-                                  {styleItem.desc}
-                                </p>
-                                <div style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', color: 'var(--text-disabled)', margin: 0 }}>
-                                  ID: {styleItem.idText}
+                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', lineHeight: 1.25, margin: 0 }}>
+                                  {t.desc}
                                 </div>
                               </button>
                             );
@@ -899,178 +1218,71 @@ export default function AutoPipelinePage() {
                         </div>
                       </div>
 
-                      {/* Posisi & Live Preview Baris */}
+                      {/* Transition Duration Selector Pills */}
                       <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                        gap: '1rem',
-                        alignItems: 'center'
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        flexWrap: 'wrap',
+                        gap: '0.5rem',
+                        borderTop: '1px solid var(--border-subtle)',
+                        paddingTop: '0.65rem'
                       }}>
-                        {/* Posisi di Layar */}
-                        <div style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0.85rem' }}>
-                          <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)', display: 'block', marginBottom: '0.45rem' }}>
-                            POSISI SUBTITEL DI LAYAR:
-                          </label>
-                          <div style={{ display: 'flex', gap: '0.4rem' }}>
-                            {[
-                              { key: 'bottom', label: 'Bawah (Standar)' },
-                              { key: 'center', label: 'Tengah' },
-                              { key: 'top', label: 'Atas' }
-                            ].map(p => (
+                        <label style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                          ⏱️ DURASI TRANSISI:
+                        </label>
+                        <div style={{ display: 'flex', gap: '0.4rem' }}>
+                          {[
+                            { value: 0.3, label: '0.3s (Cepat)' },
+                            { value: 0.5, label: '0.5s (Standar)' },
+                            { value: 0.8, label: '0.8s (Halus)' }
+                          ].map(d => {
+                            const isSelected = transitionDuration === d.value;
+                            return (
                               <button
                                 type="button"
-                                key={p.key}
-                                onClick={() => setMotionTextPosition(p.key)}
+                                key={d.value}
+                                onClick={() => setTransitionDuration(d.value)}
                                 style={{
-                                  background: motionTextPosition === p.key ? 'var(--surface-interactive)' : 'var(--surface-raised)',
-                                  border: `1px solid ${motionTextPosition === p.key ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
-                                  color: motionTextPosition === p.key ? 'var(--action-primary)' : 'var(--text-secondary)',
-                                  padding: '0.4rem 0.75rem',
-                                  borderRadius: 'var(--radius-xs)',
-                                  fontSize: '0.75rem',
-                                  fontWeight: 600,
+                                  background: isSelected ? 'var(--action-primary)' : 'var(--input-bg)',
+                                  border: `1px solid ${isSelected ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
+                                  color: isSelected ? 'var(--on-action-primary)' : 'var(--text-secondary)',
+                                  padding: '0.3rem 0.65rem',
+                                  borderRadius: 9999,
+                                  fontSize: '0.72rem',
+                                  fontWeight: 700,
                                   cursor: 'pointer',
                                   transition: 'var(--transition)'
                                 }}
                               >
-                                {p.label}
+                                {d.label}
                               </button>
-                            ))}
-                          </div>
-                          <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '0.45rem' }}>
-                            *Posisi bawah direkomendasikan untuk Instagram Reels, TikTok, & YouTube Shorts.
-                          </div>
-                        </div>
-
-                        {/* Live Animation Preview Box */}
-                        <div style={{
-                          background: 'var(--surface-interactive)',
-                          border: '1px solid var(--border-strong)',
-                          borderRadius: 'var(--radius-md)',
-                          padding: '0.85rem',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '0.4rem'
-                        }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                              👁️ Live Motion Preview:
-                            </span>
-                            <span style={{ fontSize: '0.68rem', color: 'var(--action-primary)', fontFamily: 'var(--font-mono)' }}>
-                              Loop 2.4s • Word-by-Word
-                            </span>
-                          </div>
-
-                          {/* Preview Screen */}
-                          <div style={{
-                            background: 'var(--input-bg)',
-                            borderRadius: 'var(--radius-sm)',
-                            height: '80px',
-                            display: 'flex',
-                            alignItems: motionTextPosition === 'top' ? 'flex-start' : motionTextPosition === 'center' ? 'center' : 'flex-end',
-                            justifyContent: 'center',
-                            padding: '0.5rem',
-                            border: '1px solid var(--border-subtle)',
-                            overflow: 'hidden'
-                          }}>
-                            {motionTextStyle === 'floating_white_yellow' && (
-                              <div style={{
-                                textTransform: 'uppercase',
-                                fontSize: '0.88rem',
-                                fontWeight: 900,
-                                letterSpacing: '0.5px',
-                                display: 'flex',
-                                gap: '0.35rem'
-                              }}>
-                                {['CRISPY', 'OUTSIDE,', 'TENDER', 'INSIDE!'].map((w, idx) => {
-                                  const isActive = demoWordIndex === idx + 1;
-                                  return (
-                                    <span
-                                      key={w}
-                                      style={{
-                                        color: isActive ? 'var(--status-warning)' : 'var(--text-primary)',
-                                        transform: isActive ? 'scale(1.15)' : 'scale(1)',
-                                        transition: 'var(--transition)'
-                                      }}
-                                    >
-                                      {w}
-                                    </span>
-                                  );
-                                })}
-                              </div>
-                            )}
-
-                            {motionTextStyle === 'floating_black_on_white' && (
-                              <div style={{
-                                textTransform: 'uppercase',
-                                fontSize: '0.78rem',
-                                fontWeight: 800,
-                                display: 'flex',
-                                gap: '0.3rem'
-                              }}>
-                                {['CRISPY', 'OUTSIDE,', 'TENDER', 'INSIDE!'].map((w, idx) => {
-                                  const isActive = demoWordIndex === idx + 1;
-                                  return (
-                                    <span
-                                      key={w}
-                                      style={{
-                                        background: isActive ? 'var(--status-warning)' : 'var(--surface-raised)',
-                                        color: isActive ? 'var(--on-action-primary)' : 'var(--text-primary)',
-                                        padding: '0.15rem 0.4rem',
-                                        borderRadius: 'var(--radius-xs)',
-                                        border: `1px solid ${isActive ? 'var(--status-warning)' : 'var(--border-subtle)'}`,
-                                        transform: isActive ? 'scale(1.12)' : 'scale(1)',
-                                        transition: 'var(--transition)'
-                                      }}
-                                    >
-                                      {w}
-                                    </span>
-                                  );
-                                })}
-                              </div>
-                            )}
-
-                            {motionTextStyle === 'minimal_white' && (
-                              <div style={{
-                                background: 'var(--surface-raised)',
-                                border: '1px solid var(--border-subtle)',
-                                borderRadius: 'var(--radius-xs)',
-                                padding: '0.35rem 0.75rem',
-                                textAlign: 'center'
-                              }}>
-                                <div style={{ fontSize: '0.58rem', fontWeight: 700, color: 'var(--action-primary)', letterSpacing: '1px' }}>
-                                  SCENE 1 • HABITFOLK
-                                </div>
-                                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                                  Crispy outside, tender inside!
-                                </div>
-                              </div>
-                            )}
-                          </div>
+                            );
+                          })}
                         </div>
                       </div>
-                    </div>
-                  ) : (
-                    /* Notice jika OFF */
-                    <div style={{
-                      borderTop: '1px solid var(--border-subtle)',
-                      paddingTop: '0.85rem',
-                      background: 'var(--input-bg)',
-                      padding: '0.85rem',
-                      borderRadius: 'var(--radius-sm)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.35rem'
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.82rem' }}>
-                        <span>🚫</span>
-                        <span>Mode Clean Video Aktif (Tanpa Subtitel Grafis FFmpeg)</span>
+
+                      {/* Explanatory Note (No video preview box as requested) */}
+                      <div style={{
+                        background: 'var(--surface-interactive)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-xs)',
+                        padding: '0.65rem 0.75rem',
+                        fontSize: '0.7rem',
+                        color: 'var(--text-muted)',
+                        lineHeight: 1.4,
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '0.45rem'
+                      }}>
+                        <span>💡</span>
+                        <span>
+                          Transisi antar klip diproses otomatis oleh FFmpeg XFade hardware-accelerated tanpa biaya kredit AI. Efek transisi halus menghubungkan klip resep secara mulus dengan durasi <strong>{transitionDuration} detik</strong>.
+                        </span>
                       </div>
-                      <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)', lineHeight: 1.4, margin: 0 }}>
-                        Video final MP4 akan diekspor bersih tanpa overlay teks grafis. Visual Veo, narasi voice-over Minimax, dan musik latar (BGM) tetap disinkronkan secara penuh. Anda dapat menambahkan subtitle native langsung di aplikasi TikTok atau Instagram.
-                      </p>
                     </div>
-                  )}
+
+                  </div>
                 </div>
               </div>
 

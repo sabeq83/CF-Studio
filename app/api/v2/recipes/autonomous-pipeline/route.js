@@ -38,6 +38,10 @@ export const POST = withTenantContext(async (request, _context, user) => {
       motionTextStyle,
       motion_text_position,
       motionTextPosition,
+      video_transition,
+      videoTransition,
+      transition_duration,
+      transitionDuration,
       overrides
     } = body;
 
@@ -55,6 +59,8 @@ export const POST = withTenantContext(async (request, _context, user) => {
       enableMotionText: isMotionEnabled,
       motionTextStyle: motion_text_style || motionTextStyle || 'floating_white_yellow',
       motionTextPosition: motion_text_position || motionTextPosition || 'bottom',
+      videoTransition: video_transition || videoTransition || 'fade',
+      transitionDuration: Number(transition_duration || transitionDuration || 0.5),
       overrides: overrides || {},
       tenantId: user?.tenantId || 'default_tenant'
     });

@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.162 — Konfigurasi Efek Transisi Video di Menu Auto Pipeline (05/11/2026)
+- Menambahkan selektor efek transisi video (7 opsi FFmpeg XFade) dan durasi di menu Auto Pipeline
+- Mengintegrasikan parameter video_transition dan transition_duration ke API route dan autonomous engine
+- Menyatukan kontrol pascaproduksi subtitel dan transisi dalam panel terpadu berdesain semantic tokens
+
 ## V2.32.161 — Perbaikan Motion Text minimal_white Super Slim & Zero Badge (05/11/2026)
 - Memangkas tinggi kartu minimal_white dari 336px menjadi 75-100px auto-height
 - Menghapus badge header HOOK dan brand pada minimal_white sehingga hanya menampilkan naskah narasi
