@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.32.156 — Fix JSX Syntax in Auto Pipeline Visualizer (05/11/2026)
+- Perbaiki penutupan sintaks ternary dan map JSX pada tabel riwayat kampanye Auto Pipeline
+- Pastikan build produksi Webpack Next.js berhasil 100%
+
 ## V2.32.155 — 7-Stage Factual Live Execution Visualizer Auto Pipeline (05/11/2026)
 - Implementasikan 7 kartu tahapan faktual pada Live Execution Visualizer Auto Pipeline
 - Gantikan timer semu dengan status agregat riil dan polling adaptif 2.5s

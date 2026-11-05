@@ -1090,8 +1090,9 @@ export default function AutoPipelinePage() {
                           </div>
                         </td>
                       </tr>
-                    ))
-                  )}
+                    );
+                  })
+                )}
                 </tbody>
               </table>
             </div>
