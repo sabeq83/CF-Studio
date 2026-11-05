@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.32.166 — Fix Repliz Publishing Payload Mode to Live (05/11/2026)
+- Memperbaiki properti publish_mode menjadi live dengan scheduled_at
+- Membersihkan status last_error secara otomatis saat sukses dispatch ke Repliz
+
 ## V2.32.165 — Multi-Platform Repliz Selector dengan Live Search dan Format Waktu 24 Jam (05/11/2026)
 - Menegaskan format 24 jam WIB dan petunjuk jam pada modal dan scheduler
 - Menyempurnakan selector multi-platform Repliz dengan live search dan filter tabs
