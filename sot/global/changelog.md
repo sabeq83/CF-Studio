@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.163 — Integrasi Preset Manager dan Clean UI Auto Pipeline (05/11/2026)
+- Menghubungkan menu Auto Pipeline dengan Preset Manager untuk resolusi klip dinamis 4, 6, dan 8 klip
+- Memindahkan kontrol finishing subtitel dan transisi sepenuhnya ke Preset Manager
+- Menyederhanakan UI Auto Pipeline menjadi super clean tanpa form override manual
+- Menambahkan seeder preset habitfolk_6clips_quick, habitfolk_8clips_deep, dan dapurbotani_4clips_healthy
+
 ## V2.32.162 — Konfigurasi Efek Transisi Video di Menu Auto Pipeline (05/11/2026)
 - Menambahkan selektor efek transisi video (7 opsi FFmpeg XFade) dan durasi di menu Auto Pipeline
 - Mengintegrasikan parameter video_transition dan transition_duration ke API route dan autonomous engine

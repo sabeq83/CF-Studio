@@ -69,7 +69,14 @@ const initialForm = {
   enable_social_post: false,
   upload_markdown: true,
   upload_spreadsheet: false,
-  auto_sync_contentflow: true
+  auto_sync_contentflow: true,
+
+  // Section 6: finishing video (FFmpeg Motion Text & Transitions)
+  enable_motion_text: true,
+  motion_text_style: 'floating_white_yellow',
+  motion_text_position: 'bottom',
+  video_transition: 'fade',
+  transition_duration: 0.5
 };
 
 function mapPresetToForm(p) {
@@ -143,7 +150,13 @@ function mapPresetToForm(p) {
     enable_social_post: Boolean(wf.enable_social_post),
     upload_markdown: wf.upload_markdown !== undefined ? Boolean(wf.upload_markdown) : true,
     upload_spreadsheet: Boolean(wf.upload_spreadsheet),
-    auto_sync_contentflow: wf.auto_sync_contentflow !== undefined ? Boolean(wf.auto_sync_contentflow) : true
+    auto_sync_contentflow: wf.auto_sync_contentflow !== undefined ? Boolean(wf.auto_sync_contentflow) : true,
+    // finishing video
+    enable_motion_text: wf.enable_motion_text !== undefined ? Boolean(wf.enable_motion_text) : true,
+    motion_text_style: wf.motion_text_style || 'floating_white_yellow',
+    motion_text_position: wf.motion_text_position || 'bottom',
+    video_transition: wf.video_transition || 'fade',
+    transition_duration: Number(wf.transition_duration ?? 0.5)
   };
 }
 
@@ -214,7 +227,12 @@ function mapFormToPayload(f) {
         enable_social_post: Boolean(f.enable_social_post),
         upload_markdown: f.upload_markdown !== undefined ? Boolean(f.upload_markdown) : true,
         upload_spreadsheet: Boolean(f.upload_spreadsheet),
-        auto_sync_contentflow: f.auto_sync_contentflow !== undefined ? Boolean(f.auto_sync_contentflow) : true
+        auto_sync_contentflow: f.auto_sync_contentflow !== undefined ? Boolean(f.auto_sync_contentflow) : true,
+        enable_motion_text: Boolean(f.enable_motion_text),
+        motion_text_style: f.motion_text_style || 'floating_white_yellow',
+        motion_text_position: f.motion_text_position || 'bottom',
+        video_transition: f.video_transition || 'fade',
+        transition_duration: Number(f.transition_duration ?? 0.5)
       }
     }
   };
@@ -368,7 +386,7 @@ export default function PresetsPage() {
                       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
                         Key: <code style={{ color: 'var(--accent-color)' }}>{p.key}</code> · Revision: {p.revision} · Type: {p.is_system ? 'System (Read-only)' : 'Custom'}
                       </div>
-                      <div style={{display:'flex',gap:6,marginTop:7,flexWrap:'wrap'}}>{(p.campaign_kinds||[]).map(kind=><span key={kind} style={{fontSize:11,padding:'3px 7px',borderRadius:12,background:'var(--status-info-soft)'}}>{kind==='product_campaign'?'Product Campaign':'Brand Editorial'}</span>)}{p.campaign_kinds_source==='inferred'&&<span style={{fontSize:11,color:'var(--warning)'}}>⚠ Inferred — Edit & Save untuk konfirmasi</span>}</div>
+                      <div style={{display:'flex',gap:6,marginTop:7,flexWrap:'wrap'}}>{(p.campaign_kinds||[]).map(kind=><span key={kind} style={{fontSize:11,padding:'3px 7px',borderRadius:12,background:'var(--status-info-soft)'}}>{kind==='product_campaign'?'Product Campaign':kind==='recipe_campaign'?'Recipe Campaign':'Brand Editorial'}</span>)}{p.campaign_kinds_source==='inferred'&&<span style={{fontSize:11,color:'var(--warning)'}}>⚠ Inferred — Edit & Save untuk konfirmasi</span>}</div>
                     </div>
                     <div style={{ display: 'flex', gap: 8 }}>
                       {p.is_system ? (
@@ -416,7 +434,7 @@ export default function PresetsPage() {
                   />
                 </label>
               </div>
-              <fieldset style={{marginTop:16,border:'1px solid var(--border-color)',borderRadius:8,padding:12}}><legend>Digunakan untuk Campaign</legend><div style={{display:'flex',gap:18,flexWrap:'wrap'}}>{[['brand_editorial','Brand Editorial'],['product_campaign','Product Campaign']].map(([kind,label])=><label key={kind} style={{display:'flex',gap:7,alignItems:'center'}}><input type="checkbox" checked={form.campaign_kinds.includes(kind)} onChange={event=>setForm({...form,campaign_kinds:event.target.checked?[...new Set([...form.campaign_kinds,kind])]:form.campaign_kinds.filter(value=>value!==kind)})}/>{label}</label>)}</div>{form.campaign_kinds.length===0&&<small style={{color:'var(--status-danger)'}}>Pilih minimal satu jenis campaign.</small>}</fieldset>
+              <fieldset style={{marginTop:16,border:'1px solid var(--border-color)',borderRadius:8,padding:12}}><legend>Digunakan untuk Campaign</legend><div style={{display:'flex',gap:18,flexWrap:'wrap'}}>{[['brand_editorial','Brand Editorial'],['product_campaign','Product Campaign'],['recipe_campaign','Recipe Campaign']].map(([kind,label])=><label key={kind} style={{display:'flex',gap:7,alignItems:'center'}}><input type="checkbox" checked={form.campaign_kinds.includes(kind)} onChange={event=>setForm({...form,campaign_kinds:event.target.checked?[...new Set([...form.campaign_kinds,kind])]:form.campaign_kinds.filter(value=>value!==kind)})}/>{label}</label>)}</div>{form.campaign_kinds.length===0&&<small style={{color:'var(--status-danger)'}}>Pilih minimal satu jenis campaign.</small>}</fieldset>
             </div>
 
             {/* Accordion Panels */}
@@ -800,6 +818,121 @@ export default function PresetsPage() {
                       </fieldset>
                     )}
 
+                  </div>
+                )}
+              </div>
+
+              {/* Accordion 6: Finishing Video & Pascaproduksi FFmpeg */}
+              <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+                <div
+                  onClick={() => setActiveAccordion(activeAccordion === 5 ? -1 : 5)}
+                  style={{ padding: '16px 20px', background: 'var(--surface-interactive)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: activeAccordion === 5 ? '1px solid var(--border-color)' : 'none' }}
+                >
+                  <strong style={{ color: activeAccordion === 5 ? 'var(--accent-color)' : 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span>🎬</span> 6. Finishing Video &amp; Pascaproduksi FFmpeg (Subtitel &amp; Transisi)
+                  </strong>
+                  <span>{activeAccordion === 5 ? '▼' : '▶'}</span>
+                </div>
+                {activeAccordion === 5 && (
+                  <div style={{ padding: 20, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                    {/* Subtitel / Motion Text */}
+                    <div style={{ gridColumn: '1 / -1', borderBottom: '1px solid var(--border-subtle)', paddingBottom: 10, marginBottom: 4 }}>
+                      <h4 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span>✨</span> Subtitel &amp; Motion Text Video
+                      </h4>
+                      <p style={{ margin: '4px 0 0 0', fontSize: 12, color: 'var(--text-muted)' }}>
+                        Animasi teks grafis yang disinkronkan dengan narasi audio voice-over saat render FFmpeg (⚡ 0 Biaya AI).
+                      </p>
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontWeight: 600, fontSize: 13, marginBottom: 8 }}>
+                        <input
+                          type="checkbox"
+                          checked={Boolean(form.enable_motion_text)}
+                          onChange={e => setForm({ ...form, enable_motion_text: e.target.checked })}
+                        />
+                        Aktifkan Subtitel Grafis (Motion Text)
+                      </label>
+                      <small style={{ color: 'var(--text-muted)', fontSize: 11 }}>
+                        Jika dinonaktifkan, video akan diekspor bersih (*clean video* tanpa overlay teks grafis).
+                      </small>
+                    </div>
+
+                    <div>
+                      <label className="form-label">
+                        Template Style Subtitel
+                        <select
+                          className="form-select"
+                          value={form.motion_text_style || 'floating_white_yellow'}
+                          onChange={e => setForm({ ...form, motion_text_style: e.target.value })}
+                          disabled={!form.enable_motion_text}
+                        >
+                          <option value="floating_white_yellow">🟡 Floating Putih ➔ Kuning (Viral Reels/TikTok)</option>
+                          <option value="floating_black_on_white">🔲 Floating Hitam BG Putih (CapCut Pill)</option>
+                          <option value="minimal_white">◻️ Minimalist Clean White Card (Super Slim)</option>
+                        </select>
+                      </label>
+                    </div>
+
+                    <div>
+                      <label className="form-label">
+                        Posisi Subtitel di Layar
+                        <select
+                          className="form-select"
+                          value={form.motion_text_position || 'bottom'}
+                          onChange={e => setForm({ ...form, motion_text_position: e.target.value })}
+                          disabled={!form.enable_motion_text}
+                        >
+                          <option value="bottom">Bawah Layar (Standar Reels / TikTok / Shorts)</option>
+                          <option value="center">Tengah Layar</option>
+                          <option value="top">Atas Layar</option>
+                        </select>
+                      </label>
+                    </div>
+
+                    <div style={{ gridColumn: '1 / -1', borderBottom: '1px solid var(--border-subtle)', paddingBottom: 10, marginTop: 12, marginBottom: 4 }}>
+                      <h4 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span>✂️</span> Efek Sambungan Transisi Antar Klip (FFmpeg XFade)
+                      </h4>
+                      <p style={{ margin: '4px 0 0 0', fontSize: 12, color: 'var(--text-muted)' }}>
+                        Animasi pergantian antar adegan video klip (0 biaya kredit AI, diproses hardware-accelerated).
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="form-label">
+                        Pilihan Efek Transisi Video
+                        <select
+                          className="form-select"
+                          value={form.video_transition || 'fade'}
+                          onChange={e => setForm({ ...form, video_transition: e.target.value })}
+                        >
+                          <option value="fade">Fade — Smooth Dissolve (Default)</option>
+                          <option value="slideleft">SlideLeft — Geser Kiri Alur Resep Dinamis</option>
+                          <option value="fadewhite">FadeWhite — White Flash Energik</option>
+                          <option value="fadeblack">FadeBlack — Fade Gelap Bioskop</option>
+                          <option value="zoomin">ZoomIn — Kamera Mendorong Masuk</option>
+                          <option value="circleopen">CircleOpen — Lingkaran Iris Retro</option>
+                          <option value="cut">Cut — Hard Cut Langsung</option>
+                        </select>
+                      </label>
+                    </div>
+
+                    <div>
+                      <label className="form-label">
+                        Durasi Transisi Antar Klip
+                        <select
+                          className="form-select"
+                          value={form.transition_duration !== undefined ? String(form.transition_duration) : '0.5'}
+                          onChange={e => setForm({ ...form, transition_duration: Number(e.target.value) })}
+                        >
+                          <option value="0.3">0.3 Detik (Cepat &amp; Punchy)</option>
+                          <option value="0.5">0.5 Detik (Standar Mulus)</option>
+                          <option value="0.8">0.8 Detik (Halus Sinematik)</option>
+                        </select>
+                      </label>
+                    </div>
                   </div>
                 )}
               </div>

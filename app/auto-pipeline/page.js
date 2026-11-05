@@ -7,6 +7,9 @@ import Link from 'next/link';
 export default function AutoPipelinePage() {
   const [brands, setBrands] = useState([]);
   const [selectedBrandId, setSelectedBrandId] = useState('');
+  const [operatorPresets, setOperatorPresets] = useState([]);
+  const [selectedPresetKey, setSelectedPresetKey] = useState('');
+  const [activePresetConfig, setActivePresetConfig] = useState(null);
   const [presets, setPresets] = useState([]);
   const [selectedPresetId, setSelectedPresetId] = useState('');
   const [presetHint, setPresetHint] = useState('');
@@ -15,20 +18,67 @@ export default function AutoPipelinePage() {
   const [isCategoryManuallySelected, setIsCategoryManuallySelected] = useState(false);
   const [recipeCount, setRecipeCount] = useState(1);
   const [executionMode, setExecutionMode] = useState('full_autopilot');
-  const [enableMotionText, setEnableMotionText] = useState(true);
-  const [motionTextStyle, setMotionTextStyle] = useState('floating_white_yellow');
-  const [motionTextPosition, setMotionTextPosition] = useState('bottom');
-  const [videoTransition, setVideoTransition] = useState('fade');
-  const [transitionDuration, setTransitionDuration] = useState(0.5);
-  const [demoWordIndex, setDemoWordIndex] = useState(0);
 
-  // Demo loop untuk simulasi preview animasi motion text kata per kata
-  useEffect(() => {
-    const t = setInterval(() => {
-      setDemoWordIndex(prev => (prev + 1) % 5);
-    }, 600);
-    return () => clearInterval(t);
-  }, []);
+  // Computed preset parameters for Inspector Card
+  const targetClipsCount = Number(
+    activePresetConfig?.visual_engine?.target_clips_count ||
+    activePresetConfig?.target_clips_count ||
+    6
+  );
+  const clipDuration = Number(
+    activePresetConfig?.visual_engine?.clip_duration ||
+    activePresetConfig?.clip_duration ||
+    4
+  );
+  const rawVideoModel = activePresetConfig?.visual_engine?.video_model || activePresetConfig?.video_model || 'omni_flash';
+  const videoModelName = rawVideoModel === 'veo_31_lite' ? 'Google Veo (8s)' : 'Veo Omni Flash (4s)';
+  const rawVoicePersona = activePresetConfig?.basic_strategy?.voice_persona || activePresetConfig?.voice_persona || 'English_causual_narrator_vv1';
+  const voicePersonaName = rawVoicePersona.replace(/_/g, ' ');
+  const targetLanguage = activePresetConfig?.basic_strategy?.target_language || activePresetConfig?.target_language || 'en-US';
+
+  const wf = activePresetConfig?.workflow || {};
+  const isMotionTextOn = wf.enable_motion_text !== undefined ? Boolean(wf.enable_motion_text) : (activePresetConfig?.enable_motion_text !== undefined ? Boolean(activePresetConfig.enable_motion_text) : true);
+  const motionStyleKey = wf.motion_text_style || activePresetConfig?.motion_text_style || 'floating_white_yellow';
+  const motionStyleDesc = !isMotionTextOn
+    ? 'Nonaktif'
+    : (motionStyleKey === 'floating_white_yellow'
+        ? 'Floating Putih ➔ Kuning'
+        : (motionStyleKey === 'minimal_white' ? 'Minimal Putih' : 'CapCut Style'));
+
+  const transitionKey = wf.video_transition || activePresetConfig?.video_transition || 'fade';
+  const transitionDur = wf.transition_duration !== undefined ? Number(wf.transition_duration) : (activePresetConfig?.transition_duration !== undefined ? Number(activePresetConfig.transition_duration) : 0.5);
+  const transitionDesc = `${String(transitionKey).toUpperCase()} (${transitionDur}s)`;
+
+  function getStoryArcSteps(count, dur) {
+    if (count <= 4) {
+      return [
+        { seq: 1, title: 'Hook & Visual Action', dur },
+        { seq: 2, title: 'Bahan & Marinasi', dur },
+        { seq: 3, title: 'Proses Memasak', dur },
+        { seq: 4, title: 'Plating & CTA Outro', dur }
+      ];
+    }
+    if (count <= 6) {
+      return [
+        { seq: 1, title: 'Hook Pembuka', dur },
+        { seq: 2, title: 'Persiapan Bahan', dur },
+        { seq: 3, title: 'Proses Memasak', dur },
+        { seq: 4, title: 'Sizzle & Tekstur', dur },
+        { seq: 5, title: 'Plating Sempurna', dur },
+        { seq: 6, title: 'Hasil & Outro Bio', dur }
+      ];
+    }
+    return [
+      { seq: 1, title: 'Hook Sensori', dur },
+      { seq: 2, title: 'Step 1 Bahan', dur },
+      { seq: 3, title: 'Step 2 Campur', dur },
+      { seq: 4, title: 'Step 3 Masak', dur },
+      { seq: 5, title: 'Step 4 Tekstur', dur },
+      { seq: 6, title: 'Step 5 Finishing', dur },
+      { seq: 7, title: 'Step 6 Plating', dur },
+      { seq: 8, title: 'Outro App Link', dur }
+    ];
+  }
 
   // Smart Auto-Detection dari kata kunci topik
   function detectCategoryFromTopic(text) {
@@ -177,10 +227,24 @@ export default function AutoPipelinePage() {
       try {
         const res = await fetch(`/api/v2/recipes/autonomous-pipeline?brand=${encodeURIComponent(selectedBrandId)}`);
         const data = await res.json();
-        if (data.success && Array.isArray(data.presets)) {
-          setPresets(data.presets);
-          const defaultVi = data.default_preset?.visual_identity_preset_id || data.presets[0]?.id || '';
-          setSelectedPresetId(defaultVi);
+        if (data.success) {
+          const opList = data.operator_presets || [];
+          setOperatorPresets(opList);
+
+          const defaultKey = opList[0]?.key || 'recipe_campaign_default';
+          setSelectedPresetKey(defaultKey);
+
+          const initialConfig = opList[0]?.config || opList[0] || data.default_preset || null;
+          setActivePresetConfig(initialConfig);
+
+          if (Array.isArray(data.presets)) {
+            setPresets(data.presets);
+            const defaultVi = initialConfig?.visual_swap?.visual_identity_preset_id ||
+              data.default_preset?.visual_identity_preset_id ||
+              data.presets[0]?.id ||
+              '';
+            setSelectedPresetId(defaultVi);
+          }
 
           const currentBrandObj = brands.find(b => b.id === selectedBrandId);
           setPresetHint(`Terfilter khusus brand ${currentBrandObj?.brand_name || selectedBrandId}`);
@@ -191,6 +255,18 @@ export default function AutoPipelinePage() {
     }
     fetchPresets();
   }, [selectedBrandId, brands]);
+
+  function handlePresetKeyChange(newKey) {
+    setSelectedPresetKey(newKey);
+    const found = operatorPresets.find(p => p.key === newKey);
+    if (found) {
+      const cfg = found.config || found;
+      setActivePresetConfig(cfg);
+      if (cfg.visual_swap?.visual_identity_preset_id) {
+        setSelectedPresetId(cfg.visual_swap.visual_identity_preset_id);
+      }
+    }
+  }
 
   // 3. Fetch Recent OPC Campaigns
   async function fetchRecentCampaigns() {
@@ -213,7 +289,7 @@ export default function AutoPipelinePage() {
     }
   }
 
-  // 4. Trigger 1-Click Pipeline
+  // 4. Trigger 1-Click Pipeline (Clean, Zero Override Manual)
   async function handleLaunchPipeline(e) {
     e.preventDefault();
     if (!topic || !topic.trim()) {
@@ -229,16 +305,12 @@ export default function AutoPipelinePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           brand_id: selectedBrandId,
+          preset_key: selectedPresetKey,
           topic: topic.trim(),
           category: category || 'makanan_utama',
-          recipe_count: Number(recipeCount || 7),
+          recipe_count: Number(recipeCount || 1),
           execution_mode: executionMode,
-          visual_identity_preset_id: selectedPresetId,
-          enable_motion_text: enableMotionText,
-          motion_text_style: enableMotionText ? motionTextStyle : null,
-          motion_text_position: enableMotionText ? motionTextPosition : null,
-          video_transition: videoTransition || 'fade',
-          transition_duration: Number(transitionDuration || 0.5),
+          visual_identity_preset_id: selectedPresetId || activePresetConfig?.visual_swap?.visual_identity_preset_id || null,
           auto_sync_contentflow: 1
         })
       });
@@ -249,7 +321,7 @@ export default function AutoPipelinePage() {
         setActiveCampaignId(data.campaign_id);
         setPollingActive(true);
         fetchFactualStatus(data.campaign_id);
-        showToast(`Kampanye ${data.campaign_id} berhasil diluncurkan! Melacak progres produksi faktual... 🚀`);
+        showToast(`Kampanye ${data.campaign_id} (${targetClipsCount} Klip) berhasil diluncurkan! Melacak progres produksi faktual... 🚀`);
         fetchRecentCampaigns();
       } else {
         showToast('Gagal meluncurkan pipeline: ' + (data.error || 'Terjadi kesalahan sistem'), 'error');
@@ -364,7 +436,7 @@ export default function AutoPipelinePage() {
             </div>
           </section>
 
-          {/* BARIS 1: Form Konfigurasi 1-Klik */}
+          {/* BARIS 1: Form Konfigurasi 1-Klik (Clean UI & Terintegrasi Preset Manager) */}
           <section style={{
             background: 'var(--surface)',
             border: '1px solid var(--border-subtle)',
@@ -375,29 +447,63 @@ export default function AutoPipelinePage() {
             flexDirection: 'column',
             gap: '1.25rem'
           }}>
-            <div style={{ fontSize: '1.12rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span>⚙️</span>
-              <span>Konfigurasi Auto Pipeline</span>
+            {/* Section Header with Preset Manager Direct Link */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '0.75rem'
+            }}>
+              <div>
+                <div style={{ fontSize: '1.12rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span>🚀</span>
+                  <span>Luncurkan Auto Pipeline Resep</span>
+                </div>
+                <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                  Pilih brand & preset konfigurasi resep, tentukan topik, lalu jalankan produksi otomatis dalam 1 klik.
+                </div>
+              </div>
+
+              <Link
+                href="/settings/presets"
+                style={{
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                  color: 'var(--action-primary)',
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  padding: '0.4rem 0.85rem',
+                  borderRadius: 'var(--radius-sm)',
+                  background: 'var(--surface-raised)',
+                  border: '1px solid var(--border-subtle)',
+                  transition: 'var(--transition)'
+                }}
+              >
+                <span>🎛️</span>
+                <span>Kelola di Preset Manager</span>
+              </Link>
             </div>
 
             <form onSubmit={handleLaunchPipeline} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-                gap: '1.25rem'
+                gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
+                gap: '1rem'
               }}>
                 {/* 1. Brand Profile */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
                   <label style={{
-                    height: '22px',
                     fontSize: '0.82rem',
                     fontWeight: 600,
                     color: 'var(--text-secondary)',
                     display: 'flex',
                     alignItems: 'center',
-                    whiteSpace: 'nowrap'
+                    gap: '0.35rem'
                   }}>
-                    Brand Profile
+                    <span>1. Brand Profile</span>
                   </label>
                   <select
                     value={selectedBrandId}
@@ -411,9 +517,7 @@ export default function AutoPipelinePage() {
                       padding: '0 0.85rem',
                       fontSize: '0.88rem',
                       color: 'var(--text-primary)',
-                      outline: 'none',
-                      display: 'flex',
-                      alignItems: 'center'
+                      outline: 'none'
                     }}
                   >
                     {brands.map(b => (
@@ -424,56 +528,60 @@ export default function AutoPipelinePage() {
                   </select>
                 </div>
 
-                {/* 2. Visual Identity Preset Dropdown (Dinamis Berbasis Brand) */}
+                {/* 2. Preset Konfigurasi Resep (Preset Manager) */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
                   <label style={{
-                    height: '22px',
                     fontSize: '0.82rem',
                     fontWeight: 600,
                     color: 'var(--text-secondary)',
                     display: 'flex',
                     alignItems: 'center',
-                    whiteSpace: 'nowrap'
+                    justifyContent: 'space-between'
                   }}>
-                    Visual Identity Preset
+                    <span>2. Preset Konfigurasi Resep</span>
+                    <span style={{
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      color: 'var(--status-success)',
+                      background: 'var(--status-success-soft)',
+                      padding: '0.1rem 0.4rem',
+                      borderRadius: 'var(--radius-xs)'
+                    }}>
+                      Preset Manager
+                    </span>
                   </label>
                   <select
-                    value={selectedPresetId}
-                    onChange={(e) => setSelectedPresetId(e.target.value)}
+                    value={selectedPresetKey}
+                    onChange={(e) => handlePresetKeyChange(e.target.value)}
                     style={{
                       height: '42px',
                       boxSizing: 'border-box',
                       background: 'var(--input-bg)',
-                      border: '1px solid var(--border-subtle)',
+                      border: '1.5px solid var(--action-primary)',
                       borderRadius: 'var(--radius-sm)',
                       padding: '0 0.85rem',
                       fontSize: '0.88rem',
+                      fontWeight: 600,
                       color: 'var(--text-primary)',
-                      outline: 'none',
-                      display: 'flex',
-                      alignItems: 'center'
+                      outline: 'none'
                     }}
                   >
-                    {presets.map(p => (
-                      <option key={p.id} value={p.id}>
-                        {p.label || p.preset_key || p.id}
+                    {operatorPresets.map(op => (
+                      <option key={op.key} value={op.key}>
+                        {op.label || op.key}
                       </option>
                     ))}
                   </select>
                 </div>
 
-                {/* 3. Target Jumlah Resep */}
+                {/* 3. Target Video Resep */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
                   <label style={{
-                    height: '22px',
                     fontSize: '0.82rem',
                     fontWeight: 600,
-                    color: 'var(--text-secondary)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    whiteSpace: 'nowrap'
+                    color: 'var(--text-secondary)'
                   }}>
-                    Target Video Resep
+                    3. Target Video Resep
                   </label>
                   <input
                     type="number"
@@ -490,9 +598,7 @@ export default function AutoPipelinePage() {
                       padding: '0 0.85rem',
                       fontSize: '0.88rem',
                       color: 'var(--text-primary)',
-                      outline: 'none',
-                      display: 'flex',
-                      alignItems: 'center'
+                      outline: 'none'
                     }}
                   />
                 </div>
@@ -500,15 +606,11 @@ export default function AutoPipelinePage() {
                 {/* 4. Mode Eksekusi */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
                   <label style={{
-                    height: '22px',
                     fontSize: '0.82rem',
                     fontWeight: 600,
-                    color: 'var(--text-secondary)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    whiteSpace: 'nowrap'
+                    color: 'var(--text-secondary)'
                   }}>
-                    Mode Eksekusi
+                    4. Mode Eksekusi
                   </label>
                   <select
                     value={executionMode}
@@ -522,15 +624,159 @@ export default function AutoPipelinePage() {
                       padding: '0 0.85rem',
                       fontSize: '0.88rem',
                       color: 'var(--text-primary)',
-                      outline: 'none',
-                      display: 'flex',
-                      alignItems: 'center'
+                      outline: 'none'
                     }}
                   >
-                    <option value="full_autopilot">Full Autopilot (Auto-Approve & Langsung Produksi Video)</option>
+                    <option value="full_autopilot">Full Autopilot (Auto-Approve & Langsung Jadi Video)</option>
                     <option value="manual_review">Manual Review (Jeda di Storyboard Approval)</option>
                   </select>
                 </div>
+              </div>
+
+              {/* READ-ONLY PRESET INSPECTOR CARD */}
+              <div style={{
+                background: 'var(--surface-raised)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-md)',
+                padding: '1.15rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.9rem'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: '0.5rem',
+                  borderBottom: '1px solid var(--border-subtle)',
+                  paddingBottom: '0.65rem'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{ fontSize: '1.1rem' }}>📋</span>
+                    <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                      Rincian Bawaan Preset Terpilih:
+                      <span style={{ color: 'var(--action-primary)', marginLeft: '0.35rem' }}>
+                        {activePresetConfig?.label || selectedPresetKey || 'Default Template'}
+                      </span>
+                    </span>
+                  </div>
+                  <span style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    background: 'var(--status-info-soft)',
+                    color: 'var(--status-info)',
+                    border: '1px solid var(--status-info)',
+                    padding: '0.15rem 0.55rem',
+                    borderRadius: 9999
+                  }}>
+                    🔒 Dikunci & Dikelola oleh Preset Manager
+                  </span>
+                </div>
+
+                {/* 4 Specs Badges */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+                  gap: '0.75rem'
+                }}>
+                  <div style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '0.65rem 0.8rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.2rem'
+                  }}>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                      Format Klip & Durasi
+                    </span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                      🎬 {targetClipsCount} Klip × {clipDuration} detik (~{targetClipsCount * clipDuration}s)
+                    </span>
+                  </div>
+
+                  <div style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '0.65rem 0.8rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.2rem'
+                  }}>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                      Model AI & Voice-Over
+                    </span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                      🤖 {videoModelName} • {voicePersonaName} ({targetLanguage})
+                    </span>
+                  </div>
+
+                  <div style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '0.65rem 0.8rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.2rem'
+                  }}>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                      Finishing Subtitel
+                    </span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                      🟡 {motionStyleDesc}
+                    </span>
+                  </div>
+
+                  <div style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '0.65rem 0.8rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.2rem'
+                  }}>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                      Finishing Transisi FFmpeg
+                    </span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                      ✂️ {transitionDesc}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Mini Story Arc Timeline Preview */}
+                <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '0.65rem' }}>
+                  <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '0.45rem' }}>
+                    ALUR BABAK STORY ARC OTOMATIS:
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
+                    {getStoryArcSteps(targetClipsCount, clipDuration).map((step) => (
+                      <div
+                        key={step.seq}
+                        style={{
+                          background: 'var(--surface)',
+                          border: '1px solid var(--border-subtle)',
+                          borderRadius: 'var(--radius-xs)',
+                          padding: '0.35rem 0.6rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.3rem',
+                          fontSize: '0.72rem'
+                        }}
+                      >
+                        <span style={{ fontWeight: 700, color: 'var(--action-primary)' }}>{step.seq}.</span>
+                        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{step.title}</span>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.66rem' }}>({step.dur}s)</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
 
                 {/* 5. Kategori Resep Kuliner (Usulan 1 - Category Selector UI) */}
                 <div style={{
@@ -734,560 +980,8 @@ export default function AutoPipelinePage() {
                   </div>
                 </div>
 
-                {/* 7. Finishing Video & Pascaproduksi FFmpeg (Motion Text + Transisi Antar Klip) */}
-                <div style={{
-                  gridColumn: '1 / -1',
-                  background: 'var(--surface-raised)',
-                  border: '1.5px solid var(--border-subtle)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '1.25rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '1.25rem',
-                  transition: 'var(--transition)'
-                }}>
-                  {/* Master Section Header */}
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    flexWrap: 'wrap',
-                    gap: '0.75rem',
-                    borderBottom: '1px solid var(--border-subtle)',
-                    paddingBottom: '0.85rem'
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                      <span style={{ fontSize: '1.35rem' }}>🎬</span>
-                      <div>
-                        <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                          Finishing Video & Pascaproduksi FFmpeg
-                          <span style={{
-                            fontSize: '0.68rem',
-                            fontWeight: 700,
-                            background: 'var(--status-success-soft)',
-                            color: 'var(--status-success)',
-                            border: '1px solid var(--status-success)',
-                            padding: '0.15rem 0.5rem',
-                            borderRadius: 9999
-                          }}>
-                            ⚡ 0 Biaya AI Credit
-                          </span>
-                        </div>
-                        <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                          Atur gaya teks dinamis dan efek transisi antar sambungan klip video secara otomatis.
-                        </div>
-                      </div>
-                    </div>
-
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <span>⚙️</span>
-                      <span>Diterapkan saat proses rendering stitching MP4</span>
-                    </div>
-                  </div>
-
-                  {/* 2-Column Responsive Finishing Grid */}
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
-                    gap: '1.25rem',
-                    alignItems: 'stretch'
-                  }}>
-
-                    {/* KOLOM KIRI: Motion Text & Subtitel Video */}
-                    <div style={{
-                      background: 'var(--surface)',
-                      border: '1px solid var(--border-subtle)',
-                      borderRadius: 'var(--radius-sm)',
-                      padding: '1rem',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.85rem'
-                    }}>
-                      {/* Sub-header Kolom Kiri */}
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        flexWrap: 'wrap',
-                        gap: '0.5rem',
-                        borderBottom: '1px solid var(--border-subtle)',
-                        paddingBottom: '0.65rem'
-                      }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                          <span style={{ fontSize: '1.1rem' }}>✨</span>
-                          <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                            1. Subtitel / Motion Text
-                          </span>
-                        </div>
-
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                          <span style={{
-                            fontSize: '0.68rem',
-                            fontWeight: 700,
-                            padding: '0.15rem 0.5rem',
-                            borderRadius: 9999,
-                            background: enableMotionText ? 'var(--status-success-soft)' : 'var(--surface-interactive)',
-                            color: enableMotionText ? 'var(--status-success)' : 'var(--text-muted)',
-                            border: `1px solid ${enableMotionText ? 'var(--status-success)' : 'var(--border-strong)'}`
-                          }}>
-                            {enableMotionText ? '🟢 ON' : '⚪ OFF'}
-                          </span>
-
-                          {/* Toggle Switch */}
-                          <button
-                            type="button"
-                            onClick={() => setEnableMotionText(!enableMotionText)}
-                            style={{
-                              width: '42px',
-                              height: '22px',
-                              borderRadius: '9999px',
-                              background: enableMotionText ? 'var(--action-primary)' : 'var(--border-strong)',
-                              border: 'none',
-                              padding: '2px',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: enableMotionText ? 'flex-end' : 'flex-start',
-                              transition: 'var(--transition)'
-                            }}
-                          >
-                            <div style={{
-                              width: '18px',
-                              height: '18px',
-                              borderRadius: '50%',
-                              background: enableMotionText ? 'var(--on-action-primary)' : 'var(--text-primary)',
-                              boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
-                              transition: 'var(--transition)'
-                            }} />
-                          </button>
-                        </div>
-                      </div>
-
-                      {enableMotionText ? (
-                        <>
-                          {/* Pilihan 3 Template */}
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
-                            <label style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                              PILIH TEMPLATE STYLE:
-                            </label>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
-                              {[
-                                {
-                                  key: 'floating_white_yellow',
-                                  name: '🟡 Floating Putih ➔ Kuning',
-                                  badge: 'TikTok / Reels',
-                                  badgeBg: 'var(--status-warning-soft)',
-                                  badgeColor: 'var(--status-warning)',
-                                  desc: 'Kata muncul bertahap, kata aktif menyala kuning terang.'
-                                },
-                                {
-                                  key: 'floating_black_on_white',
-                                  name: '🔲 Floating Hitam BG Putih',
-                                  badge: 'CapCut Pill',
-                                  badgeBg: 'var(--status-info-soft)',
-                                  badgeColor: 'var(--status-info)',
-                                  desc: 'Teks hitam di atas kapsul pill putih bersih yang melompat ritmis.'
-                                },
-                                {
-                                  key: 'minimal_white',
-                                  name: '◻️ Minimalist Clean Card',
-                                  badge: 'Super Slim',
-                                  badgeBg: 'var(--status-neutral-soft)',
-                                  badgeColor: 'var(--status-neutral)',
-                                  desc: 'Kartu putih ramping auto-fit (~80px), murni teks naskah.'
-                                }
-                              ].map(styleItem => {
-                                const isSelected = motionTextStyle === styleItem.key;
-                                return (
-                                  <button
-                                    type="button"
-                                    key={styleItem.key}
-                                    onClick={() => setMotionTextStyle(styleItem.key)}
-                                    style={{
-                                      background: isSelected ? 'var(--surface-interactive)' : 'var(--input-bg)',
-                                      border: `1.5px solid ${isSelected ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
-                                      borderRadius: 'var(--radius-xs)',
-                                      padding: '0.65rem 0.8rem',
-                                      display: 'flex',
-                                      flexDirection: 'column',
-                                      gap: '0.2rem',
-                                      cursor: 'pointer',
-                                      textAlign: 'left',
-                                      boxShadow: isSelected ? '0 0 0 1px var(--action-primary), 0 2px 8px rgba(45, 212, 191, 0.16)' : 'none',
-                                      transition: 'var(--transition)'
-                                    }}
-                                  >
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                                      <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                                        {styleItem.name}
-                                      </span>
-                                      <span style={{
-                                        fontSize: '0.64rem',
-                                        fontWeight: 700,
-                                        padding: '0.12rem 0.4rem',
-                                        borderRadius: 'var(--radius-xs)',
-                                        background: styleItem.badgeBg,
-                                        color: styleItem.badgeColor
-                                      }}>
-                                        {styleItem.badge}
-                                      </span>
-                                    </div>
-                                    <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', lineHeight: 1.3, margin: 0 }}>
-                                      {styleItem.desc}
-                                    </p>
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </div>
-
-                          {/* Posisi Subtitel */}
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', borderTop: '1px solid var(--border-subtle)', paddingTop: '0.65rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <label style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                                POSISI DI LAYAR:
-                              </label>
-                              <div style={{ display: 'flex', gap: '0.35rem' }}>
-                                {[
-                                  { key: 'bottom', label: 'Bawah' },
-                                  { key: 'center', label: 'Tengah' },
-                                  { key: 'top', label: 'Atas' }
-                                ].map(p => (
-                                  <button
-                                    type="button"
-                                    key={p.key}
-                                    onClick={() => setMotionTextPosition(p.key)}
-                                    style={{
-                                      background: motionTextPosition === p.key ? 'var(--surface-interactive)' : 'var(--input-bg)',
-                                      border: `1px solid ${motionTextPosition === p.key ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
-                                      color: motionTextPosition === p.key ? 'var(--action-primary)' : 'var(--text-secondary)',
-                                      padding: '0.3rem 0.65rem',
-                                      borderRadius: 'var(--radius-xs)',
-                                      fontSize: '0.72rem',
-                                      fontWeight: 600,
-                                      cursor: 'pointer',
-                                      transition: 'var(--transition)'
-                                    }}
-                                  >
-                                    {p.label}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Mini Live Animation Box (Teks Simulasi) */}
-                          <div style={{
-                            background: 'var(--surface-interactive)',
-                            border: '1px solid var(--border-strong)',
-                            borderRadius: 'var(--radius-xs)',
-                            padding: '0.65rem',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '0.4rem'
-                          }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                                <span>📺</span> SIMULASI KATA:
-                              </span>
-                              <span style={{ fontSize: '0.62rem', fontFamily: 'var(--font-mono)', color: 'var(--action-primary)' }}>
-                                600ms per word
-                              </span>
-                            </div>
-
-                            <div style={{
-                              background: '#0a0a0c',
-                              borderRadius: 'var(--radius-xs)',
-                              padding: '0.75rem 0.5rem',
-                              minHeight: '64px',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              justifyContent: motionTextPosition === 'top' ? 'flex-start' : motionTextPosition === 'center' ? 'center' : 'flex-end',
-                              alignItems: 'center',
-                              overflow: 'hidden'
-                            }}>
-                              {motionTextStyle === 'floating_white_yellow' && (
-                                <div style={{
-                                  display: 'flex',
-                                  flexWrap: 'wrap',
-                                  gap: '0.35rem',
-                                  justifyContent: 'center',
-                                  alignItems: 'center'
-                                }}>
-                                  {['MASUKKAN', 'AYAM', 'KE', 'DALAM', 'AIRFRYER'].map((w, idx) => {
-                                    const isCurrent = idx === demoWordIndex;
-                                    const isFuture = idx > demoWordIndex;
-                                    if (isFuture) return null;
-                                    return (
-                                      <span
-                                        key={w}
-                                        style={{
-                                          fontSize: '0.8rem',
-                                          fontWeight: 900,
-                                          fontFamily: 'Impact, Arial Black, sans-serif',
-                                          letterSpacing: '1px',
-                                          color: isCurrent ? '#facc15' : '#ffffff',
-                                          textShadow: '0 0 3px #000, 0 0 6px #000',
-                                          transform: isCurrent ? 'scale(1.1)' : 'scale(1)',
-                                          transition: 'all 0.15s ease-out',
-                                          display: 'inline-block'
-                                        }}
-                                      >
-                                        {w}
-                                      </span>
-                                    );
-                                  })}
-                                </div>
-                              )}
-
-                              {motionTextStyle === 'floating_black_on_white' && (
-                                <div style={{
-                                  display: 'flex',
-                                  flexWrap: 'wrap',
-                                  gap: '0.3rem',
-                                  justifyContent: 'center',
-                                  alignItems: 'center'
-                                }}>
-                                  {['Masukkan', 'Ayam', 'Ke', 'Dalam', 'Airfryer'].map((w, idx) => {
-                                    const isCurrent = idx === demoWordIndex;
-                                    return (
-                                      <span
-                                        key={w}
-                                        style={{
-                                          fontSize: '0.74rem',
-                                          fontWeight: 800,
-                                          fontFamily: 'system-ui, -apple-system, sans-serif',
-                                          padding: '0.15rem 0.45rem',
-                                          borderRadius: '4px',
-                                          background: isCurrent ? '#ffffff' : 'rgba(255, 255, 255, 0.25)',
-                                          color: isCurrent ? '#000000' : '#e2e8f0',
-                                          transform: isCurrent ? 'scale(1.12) translateY(-2px)' : 'scale(1)',
-                                          boxShadow: isCurrent ? '0 2px 6px rgba(0,0,0,0.4)' : 'none',
-                                          transition: 'all 0.15s ease-out',
-                                          display: 'inline-block'
-                                        }}
-                                      >
-                                        {w}
-                                      </span>
-                                    );
-                                  })}
-                                </div>
-                              )}
-
-                              {motionTextStyle === 'minimal_white' && (
-                                <div style={{
-                                  background: 'rgba(255, 255, 255, 0.95)',
-                                  color: '#0f172a',
-                                  padding: '0.45rem 0.85rem',
-                                  borderRadius: '6px',
-                                  boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
-                                  textAlign: 'center',
-                                  maxWidth: '92%'
-                                }}>
-                                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0f172a' }}>
-                                    Crispy outside, tender inside!
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </>
-                      ) : (
-                        /* Notice jika OFF */
-                        <div style={{
-                          background: 'var(--input-bg)',
-                          border: '1px solid var(--border-subtle)',
-                          borderRadius: 'var(--radius-xs)',
-                          padding: '0.75rem',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '0.35rem'
-                        }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.78rem' }}>
-                            <span>🚫</span>
-                            <span>Clean Video Aktif (Tanpa Subtitel Grafis FFmpeg)</span>
-                          </div>
-                          <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', lineHeight: 1.35, margin: 0 }}>
-                            Video final MP4 akan diekspor bersih tanpa overlay teks grafis. Narasi audio Minimax dan BGM tetap aktif. Subtitle native dapat ditambahkan di Instagram/TikTok.
-                          </p>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* KOLOM KANAN: Transisi Antar Klip Video (XFade) */}
-                    <div style={{
-                      background: 'var(--surface)',
-                      border: '1px solid var(--border-subtle)',
-                      borderRadius: 'var(--radius-sm)',
-                      padding: '1rem',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.85rem'
-                    }}>
-                      {/* Sub-header Kolom Kanan */}
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        flexWrap: 'wrap',
-                        gap: '0.5rem',
-                        borderBottom: '1px solid var(--border-subtle)',
-                        paddingBottom: '0.65rem'
-                      }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                          <span style={{ fontSize: '1.1rem' }}>✂️</span>
-                          <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                            2. Efek Transisi Video (XFade)
-                          </span>
-                        </div>
-
-                        <span style={{
-                          fontSize: '0.68rem',
-                          fontWeight: 700,
-                          padding: '0.15rem 0.5rem',
-                          borderRadius: 9999,
-                          background: 'var(--surface-interactive)',
-                          color: 'var(--action-primary)',
-                          border: '1px solid var(--action-primary)'
-                        }}>
-                          Aktif: {videoTransition} ({transitionDuration}s)
-                        </span>
-                      </div>
-
-                      {/* 7 Transition Selector Cards Grid */}
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
-                        <label style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                          PILIH EFEK PERGANTIAN ADEGAN:
-                        </label>
-                        <div style={{
-                          display: 'grid',
-                          gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
-                          gap: '0.5rem'
-                        }}>
-                          {[
-                            { key: 'fade', name: 'Fade', icon: '🌊', desc: 'Smooth Dissolve', badge: 'Default' },
-                            { key: 'fadewhite', name: 'FadeWhite', icon: '⚡', desc: 'White Flash energik', badge: 'Flash' },
-                            { key: 'fadeblack', name: 'FadeBlack', icon: '🌑', desc: 'Fade gelap sinematik', badge: 'Cinema' },
-                            { key: 'slideleft', name: 'SlideLeft', icon: '👈', desc: 'Geser alur resep', badge: 'Dynamic' },
-                            { key: 'zoomin', name: 'ZoomIn', icon: '🔍', desc: 'Dorongan kamera', badge: 'Action' },
-                            { key: 'circleopen', name: 'CircleOpen', icon: '⭕', desc: 'Lingkaran iris retro', badge: 'Retro' },
-                            { key: 'cut', name: 'Cut', icon: '✂️', desc: 'Hard Cut langsung', badge: 'Direct' }
-                          ].map(t => {
-                            const isSelected = videoTransition === t.key;
-                            return (
-                              <button
-                                type="button"
-                                key={t.key}
-                                onClick={() => setVideoTransition(t.key)}
-                                style={{
-                                  background: isSelected ? 'var(--surface-interactive)' : 'var(--input-bg)',
-                                  border: `1.5px solid ${isSelected ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
-                                  borderRadius: 'var(--radius-xs)',
-                                  padding: '0.65rem 0.7rem',
-                                  display: 'flex',
-                                  flexDirection: 'column',
-                                  gap: '0.25rem',
-                                  cursor: 'pointer',
-                                  textAlign: 'left',
-                                  boxShadow: isSelected ? '0 0 0 1px var(--action-primary), 0 2px 8px rgba(45, 212, 191, 0.16)' : 'none',
-                                  transition: 'var(--transition)'
-                                }}
-                              >
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                                  <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                                    <span>{t.icon}</span>
-                                    <span>{t.name}</span>
-                                  </span>
-                                  <span style={{
-                                    fontSize: '0.6rem',
-                                    fontWeight: 700,
-                                    padding: '0.1rem 0.35rem',
-                                    borderRadius: 'var(--radius-xs)',
-                                    background: isSelected ? 'var(--action-primary)' : 'var(--surface-raised)',
-                                    color: isSelected ? 'var(--on-action-primary)' : 'var(--text-muted)'
-                                  }}>
-                                    {t.badge}
-                                  </span>
-                                </div>
-                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', lineHeight: 1.25, margin: 0 }}>
-                                  {t.desc}
-                                </div>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      {/* Transition Duration Selector Pills */}
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        flexWrap: 'wrap',
-                        gap: '0.5rem',
-                        borderTop: '1px solid var(--border-subtle)',
-                        paddingTop: '0.65rem'
-                      }}>
-                        <label style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                          ⏱️ DURASI TRANSISI:
-                        </label>
-                        <div style={{ display: 'flex', gap: '0.4rem' }}>
-                          {[
-                            { value: 0.3, label: '0.3s (Cepat)' },
-                            { value: 0.5, label: '0.5s (Standar)' },
-                            { value: 0.8, label: '0.8s (Halus)' }
-                          ].map(d => {
-                            const isSelected = transitionDuration === d.value;
-                            return (
-                              <button
-                                type="button"
-                                key={d.value}
-                                onClick={() => setTransitionDuration(d.value)}
-                                style={{
-                                  background: isSelected ? 'var(--action-primary)' : 'var(--input-bg)',
-                                  border: `1px solid ${isSelected ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
-                                  color: isSelected ? 'var(--on-action-primary)' : 'var(--text-secondary)',
-                                  padding: '0.3rem 0.65rem',
-                                  borderRadius: 9999,
-                                  fontSize: '0.72rem',
-                                  fontWeight: 700,
-                                  cursor: 'pointer',
-                                  transition: 'var(--transition)'
-                                }}
-                              >
-                                {d.label}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      {/* Explanatory Note (No video preview box as requested) */}
-                      <div style={{
-                        background: 'var(--surface-interactive)',
-                        border: '1px solid var(--border-subtle)',
-                        borderRadius: 'var(--radius-xs)',
-                        padding: '0.65rem 0.75rem',
-                        fontSize: '0.7rem',
-                        color: 'var(--text-muted)',
-                        lineHeight: 1.4,
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        gap: '0.45rem'
-                      }}>
-                        <span>💡</span>
-                        <span>
-                          Transisi antar klip diproses otomatis oleh FFmpeg XFade hardware-accelerated tanpa biaya kredit AI. Efek transisi halus menghubungkan klip resep secara mulus dengan durasi <strong>{transitionDuration} detik</strong>.
-                        </span>
-                      </div>
-                    </div>
-
-                  </div>
-                </div>
-              </div>
-
               {/* Submit Button */}
-              <div>
+              <div style={{ paddingTop: '0.5rem' }}>
                 <button
                   type="submit"
                   disabled={isLaunching}
@@ -1295,7 +989,7 @@ export default function AutoPipelinePage() {
                     background: isLaunching ? 'var(--surface-interactive)' : 'var(--action-primary)',
                     color: isLaunching ? 'var(--text-muted)' : 'var(--on-action-primary)',
                     border: 'none',
-                    padding: '0.85rem 1.75rem',
+                    padding: '0.9rem 1.85rem',
                     borderRadius: 'var(--radius-md)',
                     fontSize: '0.95rem',
                     fontWeight: 700,
@@ -1307,7 +1001,7 @@ export default function AutoPipelinePage() {
                     transition: 'var(--transition)'
                   }}
                 >
-                  <span>{isLaunching ? '⏳ Memproses Auto Pipeline...' : '⚡ Luncurkan Auto Pipeline (1-Klik)'}</span>
+                  <span>{isLaunching ? '⏳ Memproses Auto Pipeline...' : `🚀 Luncurkan Auto Pipeline (${targetClipsCount} Klip Video)`}</span>
                 </button>
               </div>
             </form>

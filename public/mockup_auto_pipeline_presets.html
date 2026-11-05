@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Mockup: Integrasi Preset Manager & Klip Dinamis di Auto Pipeline — MAKNA Flow</title>
+  <link rel="stylesheet" href="/theme.css">
+  <style>
+    /* CSS Tokens fallback & Base Setup */
+    :root {
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-full: 9999px;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme='dark'] {
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --input-bg: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+    }
+
+    [data-theme='light'] {
+      --canvas: #f2f5f8;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --input-bg: #ffffff;
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-neutral: #6548bd;
+      --status-neutral-soft: #f0ecfb;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--canvas);
+      color: var(--text-primary);
+      line-height: 1.5;
+      padding-bottom: 80px;
+    }
+
+    /* Top Nav */
+    .top-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border-subtle);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
+    .header-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .badge-primary {
+      background: var(--surface-interactive);
+      color: var(--action-primary);
+      border: 1px solid var(--action-primary);
+    }
+    .badge-success {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+    }
+    .badge-warning {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border: 1px solid var(--status-warning);
+    }
+    .badge-info {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid var(--status-info);
+    }
+
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    /* View Switcher Tabs */
+    .view-tabs {
+      display: flex;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      padding: 6px;
+      border-radius: var(--radius-md);
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: transparent;
+      color: var(--text-secondary);
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+    .tab-btn:hover {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+    }
+    .tab-btn.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      box-shadow: 0 2px 8px rgba(45, 212, 191, 0.25);
+    }
+
+    /* Cards & Form Components */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 14px;
+      margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-subtitle {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .form-control {
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 9px 12px;
+      font-size: 0.84rem;
+      color: var(--text-primary);
+      font-family: inherit;
+      outline: none;
+      transition: var(--transition);
+      width: 100%;
+    }
+    .form-control:focus {
+      border-color: var(--action-primary);
+      box-shadow: 0 0 0 1px var(--action-primary);
+    }
+
+    /* Preset Highlight Box */
+    .preset-summary-box {
+      background: var(--surface-interactive);
+      border: 1.5px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .preset-badge-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    /* Clip Pills Selector */
+    .clip-pills-wrap {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .clip-pill {
+      flex: 1;
+      min-width: 140px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      background: var(--input-bg);
+      border: 1.5px solid var(--border-subtle);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      text-align: left;
+      transition: var(--transition);
+    }
+    .clip-pill:hover {
+      border-color: var(--border-strong);
+      background: var(--surface-raised);
+    }
+    .clip-pill.active {
+      border-color: var(--action-primary);
+      background: var(--surface-interactive);
+      box-shadow: 0 0 0 1px var(--action-primary), 0 3px 10px rgba(45, 212, 191, 0.15);
+    }
+    .clip-pill-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .clip-pill-desc {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    /* Dynamic Story Arc Timeline */
+    .story-arc-box {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      margin-top: 10px;
+    }
+    .story-arc-header {
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .story-arc-timeline {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .arc-node {
+      flex: 1;
+      min-width: 100px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      padding: 6px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font-size: 0.68rem;
+    }
+    .arc-node-idx {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--action-primary);
+      font-size: 0.62rem;
+    }
+    .arc-node-name {
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .arc-node-time {
+      font-size: 0.6rem;
+      color: var(--text-muted);
+    }
+
+    /* Finishing Video 2-Col Layout */
+    .finishing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 16px;
+    }
+    .finishing-col {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .col-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 10px;
+    }
+    .col-title {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Transition Cards */
+    .trans-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 8px;
+    }
+    .trans-card {
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      padding: 8px 10px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      text-align: left;
+      transition: var(--transition);
+    }
+    .trans-card:hover {
+      border-color: var(--border-strong);
+      background: var(--surface-interactive);
+    }
+    .trans-card.active {
+      border-color: var(--action-primary);
+      background: var(--surface-interactive);
+      box-shadow: 0 0 0 1px var(--action-primary);
+    }
+    .trans-card-name {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .trans-card-desc {
+      font-size: 0.67rem;
+      color: var(--text-muted);
+      line-height: 1.25;
+    }
+
+    /* Duration Pills */
+    .duration-pills {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .duration-pill {
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .duration-pill.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border-color: var(--action-primary);
+    }
+
+    /* Launch Button */
+    .btn-launch {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      padding: 14px 28px;
+      border-radius: var(--radius-sm);
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      box-shadow: 0 4px 18px rgba(45, 212, 191, 0.25);
+      transition: var(--transition);
+    }
+    .btn-launch:hover {
+      background: var(--action-primary-hover);
+      transform: translateY(-1px);
+    }
+
+    /* Architecture Diagram Box */
+    .diagram-box {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      color: var(--text-primary);
+    }
+
+    .alert-banner {
+      background: var(--status-info-soft);
+      border: 1px solid var(--status-info);
+      color: var(--status-info);
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header class="top-header">
+    <div class="header-inner">
+      <div class="brand-title">
+        <span style="font-size: 1.4rem;">🍳</span>
+        <div>
+          <div style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+            MAKNA Flow Studio
+            <span class="badge badge-primary">MOCKUP USULAN</span>
+            <span class="badge badge-success">v2.33 Preset Architecture</span>
+          </div>
+          <div style="font-size: 0.72rem; color: var(--text-muted);">
+            Simulasi Interaktif: Integrasi Preset Manager, Jumlah Klip Fleksibel, & Finishing Video
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <button type="button" onclick="toggleTheme()" class="badge badge-info" style="cursor: pointer; padding: 6px 12px; font-size: 0.75rem;">
+          🌓 Ganti Tema (Dark/Light)
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- View Switcher Tabs -->
+    <div class="view-tabs">
+      <button type="button" class="tab-btn active" id="tabBtn1" onclick="switchView('pipeline')">
+        <span>🚀</span> 1. Menu Auto Pipeline (Eksekusi Resep 1-Klik)
+      </button>
+      <button type="button" class="tab-btn" id="tabBtn2" onclick="switchView('manager')">
+        <span>🎛️</span> 2. Preset Manager Editor (/settings/presets)
+      </button>
+      <button type="button" class="tab-btn" id="tabBtn3" onclick="switchView('arch')">
+        <span>🔄</span> 3. Alur Data & Arsitektur Solusi
+      </button>
+    </div>
+
+    <!-- Alert Penjelasan -->
+    <div class="alert-banner" id="viewBanner">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 1.2rem;">💡</span>
+        <span>
+          <strong>Simulasi Interaktif Aktif:</strong> Pilih preset di bawah ini untuk melihat bagaimana jumlah klip, model video, narasi, subtitle, dan transisi video otomatis terisi tanpa terkunci kaku ke 8 klip!
+        </span>
+      </div>
+      <span class="badge badge-primary" id="currentPresetTag">Preset: HabitFolk 6-Klip Quick Snack</span>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- VIEW 1: AUTO PIPELINE PAGE (PROPOSED)                               -->
+    <!-- =================================================================== -->
+    <div id="viewPipeline">
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">
+              <span>🎯</span> Konfigurasi Utama & Pilihan Preset
+            </div>
+            <div class="card-subtitle">
+              Pilih brand dan template preset konfigurasi dari Preset Manager untuk memuat seluruh parameter teknis secara instan.
+            </div>
+          </div>
+          <button type="button" class="badge badge-primary" style="cursor: pointer; padding: 6px 12px;" onclick="switchView('manager')">
+            ✏️ Buka & Edit di Preset Manager
+          </button>
+        </div>
+
+        <div class="form-grid">
+          <!-- 1. Brand Selector -->
+          <div class="form-group">
+            <label class="form-label">
+              <span>Brand Profile</span>
+              <span style="color: var(--text-muted); font-size: 0.7rem;">Multi-Tenant</span>
+            </label>
+            <select class="form-control" id="brandSelect" onchange="handleBrandChange(this.value)">
+              <option value="habitfolk">HabitFolk (Healthy & Air Fryer Specialist)</option>
+              <option value="dapurbotani">Dapur Botani (Indonesian Herbal & Vegan)</option>
+              <option value="nutribake">NutriBake (High-Protein Bakery)</option>
+            </select>
+          </div>
+
+          <!-- 2. Configuration Preset Selector (BARU) -->
+          <div class="form-group">
+            <label class="form-label">
+              <span style="color: var(--action-primary);">🎛️ Preset Konfigurasi Resep (Preset Manager)</span>
+              <span class="badge badge-success" style="font-size: 0.62rem;">Terhubung Database</span>
+            </label>
+            <select class="form-control" id="presetSelect" onchange="applyConfigurationPreset(this.value)" style="border-color: var(--action-primary); font-weight: 700;">
+              <!-- HabitFolk Options -->
+              <option value="habitfolk_6clips">HabitFolk — Quick Snack & Reels (6 Klip @ 4s • SlideLeft • Kuning)</option>
+              <option value="habitfolk_8clips">HabitFolk — Deep Craft Recipe (8 Klip @ 4s • Fade • Clean White)</option>
+              <option value="habitfolk_4clips">HabitFolk — Ultra Fast Hook (4 Klip @ 4s • ZoomIn • CapCut Pill)</option>
+            </select>
+          </div>
+
+          <!-- 3. Topik Resep -->
+          <div class="form-group">
+            <label class="form-label">Topik Resep Masakan</label>
+            <input type="text" class="form-control" value="air fryer crispy chicken tenders" placeholder="Contoh: air fryer garlic butter salmon">
+          </div>
+        </div>
+
+        <!-- Preset Live Summary Card -->
+        <div class="preset-summary-box">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+              <span>⚡</span> Parameter Bawaan Preset Aktif: <strong id="summaryPresetName" style="color: var(--action-primary);">HabitFolk 6-Klip</strong>
+            </div>
+            <span class="badge badge-success" id="overrideStatusBadge">✓ Sesuai Template Preset</span>
+          </div>
+
+          <div class="preset-badge-row">
+            <span class="badge badge-primary" id="summaryClipsBadge">🎬 6 Klip (~24 detik)</span>
+            <span class="badge badge-info" id="summaryModelBadge">🤖 Veo Omni Flash (4s/klip)</span>
+            <span class="badge badge-primary" id="summaryVoiceBadge">🎙️ Minimax English Casual (1.0x)</span>
+            <span class="badge badge-warning" id="summaryMotionBadge">🟡 Subtitel: Floating Kuning</span>
+            <span class="badge badge-info" id="summaryTransBadge">✂️ Transisi: SlideLeft (0.5s)</span>
+          </div>
+        </div>
+
+        <!-- 4. Jumlah Klip Fleksibel Selector (FITUR BARU YANG MENJAWAB REQUEST USER) -->
+        <div style="border-top: 1px solid var(--border-subtle); padding-top: 16px; margin-top: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <label class="form-label" style="font-size: 0.84rem; font-weight: 800; color: var(--text-primary);">
+              <span>✂️ JUMLAH KLIP PER VIDEO RESEP:</span>
+            </label>
+            <span style="font-size: 0.72rem; color: var(--text-muted);">
+              User bebas menentukan apakah ingin 4, 6, atau 8 klip per video
+            </span>
+          </div>
+
+          <div class="clip-pills-wrap">
+            <!-- 4 Klip -->
+            <button type="button" class="clip-pill" id="clipPill4" onclick="setClipCount(4)">
+              <div class="clip-pill-title">
+                <span>4 Klip</span>
+                <span class="badge badge-info" style="font-size: 0.6rem;">Kilat ~16s</span>
+              </div>
+              <div class="clip-pill-desc">Cocok untuk teaser snack kilat, minuman, & TikTok singkat.</div>
+            </button>
+
+            <!-- 6 Klip (Default for HabitFolk Quick) -->
+            <button type="button" class="clip-pill active" id="clipPill6" onclick="setClipCount(6)">
+              <div class="clip-pill-title">
+                <span>6 Klip (Pilihan User)</span>
+                <span class="badge badge-success" style="font-size: 0.6rem;">Ideal ~24s</span>
+              </div>
+              <div class="clip-pill-desc">Paling ideal untuk resep airfryer tutorial Instagram Reels.</div>
+            </button>
+
+            <!-- 8 Klip -->
+            <button type="button" class="clip-pill" id="clipPill8" onclick="setClipCount(8)">
+              <div class="clip-pill-title">
+                <span>8 Klip</span>
+                <span class="badge badge-primary" style="font-size: 0.6rem;">Lengkap ~32s</span>
+              </div>
+              <div class="clip-pill-desc">Tutorial mendalam dengan langkah persiapan & penyajian utuh.</div>
+            </button>
+          </div>
+
+          <!-- Dynamic Story Arc Visualization -->
+          <div class="story-arc-box">
+            <div class="story-arc-header">
+              <span>📐 STRUKTUR BABAK STORY ARC OTOMATIS OLEH AI DIRECTOR:</span>
+              <span id="storyArcTiming" style="font-family: var(--font-mono); color: var(--action-primary);">Total Durasi: 24 Detik</span>
+            </div>
+            <div class="story-arc-timeline" id="storyTimeline">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- FINISHING VIDEO & PASCAPRODUKSI FFMPEG SECTION -->
+      <div class="card" style="border-color: var(--border-strong);">
+        <div class="card-header">
+          <div>
+            <div class="card-title">
+              <span>🎬</span> Finishing Video &amp; Pascaproduksi FFmpeg
+              <span class="badge badge-success">⚡ 0 Biaya AI Credit</span>
+            </div>
+            <div class="card-subtitle">
+              Otomatis terisi dari Preset Konfigurasi yang dipilih, namun Anda tetap dapat melakukan Quick Override secara langsung.
+            </div>
+          </div>
+
+          <button type="button" class="badge badge-warning" id="resetFinishingBtn" onclick="resetFinishingToPreset()" style="display: none; cursor: pointer; padding: 4px 10px;">
+            ↺ Reset ke Nilai Preset
+          </button>
+        </div>
+
+        <div class="finishing-grid">
+
+          <!-- Kolom 1: Subtitel / Motion Text -->
+          <div class="finishing-col">
+            <div class="col-header">
+              <div class="col-title">
+                <span>✨</span> 1. Subtitel / Motion Text
+              </div>
+              <span class="badge badge-success" id="motionStatusBadge">🟢 ON</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <label class="form-label">Template Style:</label>
+
+              <!-- Style 1 -->
+              <div class="trans-card active" id="styleCardYellow" onclick="selectMotionStyle('floating_white_yellow')">
+                <div class="trans-card-name">
+                  <span>🟡 Floating Putih ➔ Kuning</span>
+                  <span class="badge badge-warning" style="font-size: 0.6rem;">Viral</span>
+                </div>
+                <div class="trans-card-desc">Kata aktif menyala kuning terang mengikuti ritme suara naskah.</div>
+              </div>
+
+              <!-- Style 2 -->
+              <div class="trans-card" id="styleCardPill" onclick="selectMotionStyle('floating_black_on_white')">
+                <div class="trans-card-name">
+                  <span>🔲 Floating Hitam BG Putih</span>
+                  <span class="badge badge-info" style="font-size: 0.6rem;">CapCut</span>
+                </div>
+                <div class="trans-card-desc">Teks hitam di atas kapsul pill putih bersih.</div>
+              </div>
+
+              <!-- Style 3 -->
+              <div class="trans-card" id="styleCardClean" onclick="selectMotionStyle('minimal_white')">
+                <div class="trans-card-name">
+                  <span>◻️ Minimalist Clean Card</span>
+                  <span class="badge badge-primary" style="font-size: 0.6rem;">Slim</span>
+                </div>
+                <div class="trans-card-desc">Kotak kartu studio putih ramping auto-fit (~80px).</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Kolom 2: Transisi Video Antar Klip (XFade) -->
+          <div class="finishing-col">
+            <div class="col-header">
+              <div class="col-title">
+                <span>✂️</span> 2. Efek Transisi Video (XFade)
+              </div>
+              <span class="badge badge-primary" id="transBadgeActive">Aktif: slideleft (0.5s)</span>
+            </div>
+
+            <div>
+              <label class="form-label" style="margin-bottom: 6px;">PILIH EFEK PERGANTIAN ADEGAN:</label>
+              <div class="trans-grid">
+                <div class="trans-card" id="trans_fade" onclick="selectTransition('fade')">
+                  <div class="trans-card-name"><span>Fade</span> <span>🌊</span></div>
+                  <div class="trans-card-desc">Smooth Dissolve</div>
+                </div>
+                <div class="trans-card active" id="trans_slideleft" onclick="selectTransition('slideleft')">
+                  <div class="trans-card-name"><span>SlideLeft</span> <span>👈</span></div>
+                  <div class="trans-card-desc">Geser alur resep</div>
+                </div>
+                <div class="trans-card" id="trans_fadewhite" onclick="selectTransition('fadewhite')">
+                  <div class="trans-card-name"><span>FadeWhite</span> <span>⚡</span></div>
+                  <div class="trans-card-desc">White Flash energik</div>
+                </div>
+                <div class="trans-card" id="trans_fadeblack" onclick="selectTransition('fadeblack')">
+                  <div class="trans-card-name"><span>FadeBlack</span> <span>🌑</span></div>
+                  <div class="trans-card-desc">Fade gelap bioskop</div>
+                </div>
+                <div class="trans-card" id="trans_zoomin" onclick="selectTransition('zoomin')">
+                  <div class="trans-card-name"><span>ZoomIn</span> <span>🔍</span></div>
+                  <div class="trans-card-desc">Dorongan kamera</div>
+                </div>
+                <div class="trans-card" id="trans_circleopen" onclick="selectTransition('circleopen')">
+                  <div class="trans-card-name"><span>CircleOpen</span> <span>⭕</span></div>
+                  <div class="trans-card-desc">Iris retro lingkaran</div>
+                </div>
+                <div class="trans-card" id="trans_cut" onclick="selectTransition('cut')">
+                  <div class="trans-card-name"><span>Cut</span> <span>✂️</span></div>
+                  <div class="trans-card-desc">Hard Cut langsung</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Durasi Transisi Selector -->
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 10px; margin-top: 4px;">
+              <span style="font-size: 0.74rem; font-weight: 700; color: var(--text-secondary);">
+                ⏱️ Durasi Transisi:
+              </span>
+              <div class="duration-pills">
+                <button type="button" class="duration-pill" id="dur_03" onclick="selectDuration(0.3)">0.3s (Cepat)</button>
+                <button type="button" class="duration-pill active" id="dur_05" onclick="selectDuration(0.5)">0.5s (Standar)</button>
+                <button type="button" class="duration-pill" id="dur_08" onclick="selectDuration(0.8)">0.8s (Halus)</button>
+              </div>
+            </div>
+
+            <div style="font-size: 0.7rem; color: var(--text-muted); line-height: 1.4; background: var(--surface); padding: 8px 12px; border-radius: var(--radius-xs); border: 1px solid var(--border-subtle);">
+              💡 <em>Catatan:</em> Transisi diproses otomatis saat perakitan FFmpeg antar <strong id="noteClipText">6 klip adegan</strong> tanpa biaya kredit AI tambahan.
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Tombol Eksekusi -->
+      <button type="button" class="btn-launch" onclick="alert('Simulasi Peluncuran Sukses!\n\nParameter yang Dikirim ke Backend:\n• Brand: HabitFolk\n• Preset: ' + activePreset.key + '\n• Jumlah Klip: ' + activeClips + ' Klip (' + (activeClips * 4) + ' detik)\n• Motion Text: ' + activeMotionStyle + '\n• Transisi: ' + activeTransition + ' (' + activeDuration + 's)\n\nSemua parameter kini dinamis dan tidak lagi terkunci 8 klip!')">
+        <span>🚀</span> Luncurkan Auto Pipeline Resep (<span id="btnClipsLabel">6 Klip Video</span>)
+      </button>
+
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- VIEW 2: PRESET MANAGER EDITOR VIEW (/settings/presets)              -->
+    <!-- =================================================================== -->
+    <div id="viewManager" style="display: none;">
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">
+              <span>🎛️</span> Preset Manager — Editor Template Konfigurasi Resep
+            </div>
+            <div class="card-subtitle">
+              Tempat pengguna membuat, menyimpan, dan mengedit preset konfigurasi resep yang dapat langsung dipanggil di menu Auto Pipeline.
+            </div>
+          </div>
+          <button type="button" class="badge badge-success" style="cursor: pointer; padding: 6px 14px;" onclick="savePresetManagerChanges()">
+            💾 Simpan Preset ke Database
+          </button>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Preset Key (ID Unik)</label>
+            <input type="text" class="form-control" id="pmKey" value="habitfolk_6clips" style="font-family: var(--font-mono);">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Label Preset Tampilan</label>
+            <input type="text" class="form-control" id="pmLabel" value="HabitFolk — Quick Snack & Reels">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Jenis Kampanye (campaign_kinds)</label>
+            <input type="text" class="form-control" value="recipe_campaign" readonly style="color: var(--action-primary); font-weight: 700;">
+          </div>
+        </div>
+
+        <!-- Section Visual Engine di Preset Manager -->
+        <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 16px;">
+          <div style="font-size: 0.88rem; font-weight: 800; color: var(--text-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+            <span>🤖</span> 1. Visual Engine &amp; Konfigurasi Klip Video
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Default Target Clips Count</label>
+              <select class="form-control" id="pmClips" onchange="pmUpdateClips(this.value)">
+                <option value="4">4 Klip (~16s)</option>
+                <option value="6" selected>6 Klip (~24s) — Pilihan HabitFolk Quick</option>
+                <option value="8">8 Klip (~32s) — Resep Mendalam</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Durasi per Klip (clip_duration)</label>
+              <select class="form-control" id="pmDuration">
+                <option value="4" selected>4 Detik (Omni Flash Fast)</option>
+                <option value="8">8 Detik (Google Veo Cinematic)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Video AI Model</label>
+              <select class="form-control">
+                <option selected>Google Veo Omni Flash (9:16)</option>
+                <option>Google Veo 3.1 Lite (9:16)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Default Visual Identity Preset</label>
+              <select class="form-control">
+                <option selected>HabitFolk — Satisfying Macro Cravings (Air Fryer)</option>
+                <option>Hands Only Muslimah — Sage Green Kitchen</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Finishing Video di Preset Manager (FITUR BARU DALAM USULAN) -->
+        <div style="background: var(--surface-raised); border: 1.5px solid var(--action-primary); border-radius: var(--radius-sm); padding: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div style="font-size: 0.88rem; font-weight: 800; color: var(--action-primary); display: flex; align-items: center; gap: 6px;">
+              <span>🎬</span> 2. Finishing Video &amp; Pascaproduksi FFmpeg (FITUR BARU USULAN)
+            </div>
+            <span class="badge badge-primary">Tersimpan di Preset</span>
+          </div>
+
+          <div class="form-grid">
+            <!-- Default Subtitle -->
+            <div class="form-group">
+              <label class="form-label">Default Subtitle Style</label>
+              <select class="form-control" id="pmMotionStyle">
+                <option value="floating_white_yellow" selected>🟡 Floating Putih ➔ Kuning (Viral Reels)</option>
+                <option value="floating_black_on_white">🔲 Floating Hitam BG Putih (CapCut Pill)</option>
+                <option value="minimal_white">◻️ Minimalist Clean Card (Super Slim)</option>
+              </select>
+            </div>
+
+            <!-- Default Subtitle Position -->
+            <div class="form-group">
+              <label class="form-label">Default Posisi Subtitel</label>
+              <select class="form-control">
+                <option selected>Bawah (Direkomendasikan Reels/TikTok)</option>
+                <option>Tengah Layar</option>
+                <option>Atas Layar</option>
+              </select>
+            </div>
+
+            <!-- Default Video Transition -->
+            <div class="form-group">
+              <label class="form-label">Default Efek Transisi Klip (XFade)</label>
+              <select class="form-control" id="pmTransition">
+                <option value="fade">Fade (Smooth Dissolve)</option>
+                <option value="slideleft" selected>SlideLeft (Geser Kiri Alur Resep)</option>
+                <option value="fadewhite">FadeWhite (White Flash)</option>
+                <option value="fadeblack">FadeBlack (Fade Bioskop Gelap)</option>
+                <option value="zoomin">ZoomIn (Dorongan Kamera)</option>
+                <option value="circleopen">CircleOpen (Iris Lingkaran)</option>
+                <option value="cut">Cut (Hard Cut)</option>
+              </select>
+            </div>
+
+            <!-- Default Transition Duration -->
+            <div class="form-group">
+              <label class="form-label">Default Durasi Transisi</label>
+              <select class="form-control" id="pmTransDur">
+                <option value="0.3">0.3s (Cepat)</option>
+                <option value="0.5" selected>0.5s (Standar)</option>
+                <option value="0.8">0.8s (Halus)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- VIEW 3: ARCHITECTURE & DATA FLOW                                    -->
+    <!-- =================================================================== -->
+    <div id="viewArch" style="display: none;">
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🔄</span> Diagram Arsitektur Alur Data: Preset Manager ➔ Auto Pipeline
+          </div>
+          <span class="badge badge-primary">End-to-End Pipeline</span>
+        </div>
+
+        <div class="diagram-box">
+┌─────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 1. PRESET MANAGER (/settings/presets)                                                       │
+│ User membuat/mengedit template: `habitfolk_6clips`                                          │
+│  - target_clips_count: 6                                                                    │
+│  - clip_duration: 4                                                                         │
+│  - visual_identity_preset_id: 'vi_habitfolk_macro_craft'                                    │
+│  - video_transition: 'slideleft'                                                            │
+│  - transition_duration: 0.5                                                                 │
+│  - motion_text_style: 'floating_white_yellow'                                               │
+│ Disimpan di: database `tenant_settings.operator_presets_json`                               │
+└──────────────────────────────────────────────┬──────────────────────────────────────────────┘
+                                               │
+                                               ▼
+┌─────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 2. AUTO PIPELINE PAGE (/auto-pipeline)                                                      │
+│ Frontend memuat `/api/v2/operator-presets?kind=recipe_campaign`                             │
+│ User memilih: "HabitFolk — Quick Snack (6 Klip @ 4s)"                                       │
+│  ➔ UI langsung Auto-Fill nilai default (6 klip, SlideLeft, Subtitel Kuning)                 │
+│  ➔ USER BISA QUICK OVERRIDE: Misal ganti ke 4 Klip atau Fade sebelum Submit                 │
+└──────────────────────────────────────────────┬──────────────────────────────────────────────┘
+                                               │ POST { brand_id, preset_key, target_clips_count: 6, ... }
+                                               ▼
+┌─────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 3. API ROUTE & AUTONOMOUS ENGINE (Server Side)                                              │
+│ - `app/api/v2/recipes/autonomous-pipeline/route.js`                                         │
+│ - `lib/autonomous-recipe-engine.js` (HAPUS PERCABANGAN HARDCODE BRAND STATIS)               │
+│ - Resolve preset dinamis: Ambil dari Operator Preset + gabungkan Overrides dari UI         │
+└──────────────────────────────────────────────┬──────────────────────────────────────────────┘
+                                               │
+                                               ▼
+┌─────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 4. CONTENT PLANNER & RECIPE INGEST ENGINE                                                   │
+│ - `lib/content-planner-engine.js`: Draft dibuat dengan `target_clips_count: 6`              │
+│ - `lib/recipe-campaign-ingest.js`: Simpan ke tabel `pillar_campaigns`:                      │
+│    target_clips_count: 6, clip_duration: 4, video_transition: 'slideleft', ...              │
+└──────────────────────────────────────────────┬──────────────────────────────────────────────┘
+                                               │
+                                               ▼
+┌─────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 5. AI PRODUCTION ADAPTER (`lib/recipe-production-adapter.js`)                               │
+│ - Prompt AI Gemini secara otomatis membagi 6 adegan:                                       │
+│    Scene 1 (Hook) ➔ Scene 2-5 (Cooking Steps 1-4) ➔ Scene 6 (Outro CTA)                     │
+│ - FFmpeg merakit 6 klip dengan transisi SlideLeft (0.5s) dan Motion Text Subtitel           │
+└─────────────────────────────────────────────────────────────────────────────────────────────┘
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    // State Mockup Data
+    const presetsData = {
+      habitfolk_6clips: {
+        key: 'habitfolk_6clips',
+        label: 'HabitFolk — Quick Snack & Reels',
+        clips: 6,
+        duration: 4,
+        model: 'Veo Omni Flash (4s)',
+        voice: 'English_causual_narrator_vv1',
+        voiceLabel: 'Minimax English Casual (1.0x)',
+        motionStyle: 'floating_white_yellow',
+        transition: 'slideleft',
+        transDuration: 0.5
+      },
+      habitfolk_8clips: {
+        key: 'habitfolk_8clips',
+        label: 'HabitFolk — Deep Craft Recipe',
+        clips: 8,
+        duration: 4,
+        model: 'Veo Omni Flash (4s)',
+        voice: 'English_causual_narrator_vv1',
+        voiceLabel: 'Minimax English Casual (1.0x)',
+        motionStyle: 'minimal_white',
+        transition: 'fade',
+        transDuration: 0.5
+      },
+      habitfolk_4clips: {
+        key: 'habitfolk_4clips',
+        label: 'HabitFolk — Ultra Fast Hook',
+        clips: 4,
+        duration: 4,
+        model: 'Veo Omni Flash (4s)',
+        voice: 'English_causual_narrator_vv1',
+        voiceLabel: 'Minimax English Casual (1.0x)',
+        motionStyle: 'floating_black_on_white',
+        transition: 'zoomin',
+        transDuration: 0.3
+      }
+    };
+
+    let activePreset = presetsData.habitfolk_6clips;
+    let activeClips = 6;
+    let activeMotionStyle = 'floating_white_yellow';
+    let activeTransition = 'slideleft';
+    let activeDuration = 0.5;
+    let isOverridden = false;
+
+    function renderStoryArc(clips) {
+      const timeline = document.getElementById('storyTimeline');
+      const timingLabel = document.getElementById('storyArcTiming');
+      timingLabel.textContent = `Total Durasi: ${clips * 4} Detik (${clips} adegan × 4s)`;
+
+      let html = '';
+      // Scene 1: Hook
+      html += `
+        <div class="arc-node" style="border-color: var(--action-primary);">
+          <div class="arc-node-idx">KLIP 1 (0-4s)</div>
+          <div class="arc-node-name">🎣 Hook & Problem</div>
+          <div class="arc-node-time">Visual lezat menggoda</div>
+        </div>
+      `;
+
+      // Cooking Steps
+      for (let i = 1; i <= clips - 2; i++) {
+        html += `
+          <div class="arc-node">
+            <div class="arc-node-idx">KLIP ${i + 1} (${i * 4}-${(i + 1) * 4}s)</div>
+            <div class="arc-node-name">🍳 Step ${i} Masak</div>
+            <div class="arc-node-time">Aksi tangan & alat</div>
+          </div>
+        `;
+      }
+
+      // Scene Last: CTA
+      html += `
+        <div class="arc-node" style="border-color: var(--status-warning);">
+          <div class="arc-node-idx">KLIP ${clips} (${(clips - 1) * 4}-${clips * 4}s)</div>
+          <div class="arc-node-name">🚀 Outro & Call to Action</div>
+          <div class="arc-node-time">Download App di bio</div>
+        </div>
+      `;
+
+      timeline.innerHTML = html;
+      document.getElementById('btnClipsLabel').textContent = `${clips} Klip Video (${clips * 4}s)`;
+      document.getElementById('noteClipText').textContent = `${clips} klip adegan`;
+    }
+
+    function setClipCount(count) {
+      activeClips = count;
+      [4, 6, 8].forEach(n => {
+        const el = document.getElementById('clipPill' + n);
+        if (el) el.classList.toggle('active', n === count);
+      });
+
+      renderStoryArc(count);
+      checkOverrideStatus();
+    }
+
+    function applyConfigurationPreset(key) {
+      if (!presetsData[key]) return;
+      activePreset = presetsData[key];
+      activeClips = activePreset.clips;
+      activeMotionStyle = activePreset.motionStyle;
+      activeTransition = activePreset.transition;
+      activeDuration = activePreset.transDuration;
+
+      // Update UI Pills & Controls
+      setClipCount(activeClips);
+      selectMotionStyle(activeMotionStyle, false);
+      selectTransition(activeTransition, false);
+      selectDuration(activeDuration, false);
+
+      // Update Summaries
+      document.getElementById('summaryPresetName').textContent = activePreset.label;
+      document.getElementById('summaryClipsBadge').textContent = `🎬 ${activePreset.clips} Klip (~${activePreset.clips * 4}s)`;
+      document.getElementById('summaryModelBadge').textContent = `🤖 ${activePreset.model}`;
+      document.getElementById('summaryVoiceBadge').textContent = `🎙️ ${activePreset.voiceLabel}`;
+      document.getElementById('currentPresetTag').textContent = `Preset: ${activePreset.label}`;
+
+      isOverridden = false;
+      updateOverrideUI();
+    }
+
+    function selectMotionStyle(styleKey, markOverride = true) {
+      activeMotionStyle = styleKey;
+      ['Yellow', 'Pill', 'Clean'].forEach(k => {
+        const id = 'styleCard' + k;
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('active');
+      });
+
+      if (styleKey === 'floating_white_yellow') document.getElementById('styleCardYellow').classList.add('active');
+      if (styleKey === 'floating_black_on_white') document.getElementById('styleCardPill').classList.add('active');
+      if (styleKey === 'minimal_white') document.getElementById('styleCardClean').classList.add('active');
+
+      const styleNames = {
+        floating_white_yellow: '🟡 Floating Kuning',
+        floating_black_on_white: '🔲 CapCut Pill',
+        minimal_white: '◻️ Minimal White'
+      };
+      document.getElementById('summaryMotionBadge').textContent = `Subtitel: ${styleNames[styleKey]}`;
+
+      if (markOverride) checkOverrideStatus();
+    }
+
+    function selectTransition(transKey, markOverride = true) {
+      activeTransition = transKey;
+      const transList = ['fade', 'slideleft', 'fadewhite', 'fadeblack', 'zoomin', 'circleopen', 'cut'];
+      transList.forEach(t => {
+        const el = document.getElementById('trans_' + t);
+        if (el) el.classList.toggle('active', t === transKey);
+      });
+
+      document.getElementById('transBadgeActive').textContent = `Aktif: ${transKey} (${activeDuration}s)`;
+      document.getElementById('summaryTransBadge').textContent = `✂️ Transisi: ${transKey} (${activeDuration}s)`;
+
+      if (markOverride) checkOverrideStatus();
+    }
+
+    function selectDuration(dur, markOverride = true) {
+      activeDuration = dur;
+      [0.3, 0.5, 0.8].forEach(d => {
+        const id = 'dur_' + String(d).replace('.', '');
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('active', d === dur);
+      });
+
+      document.getElementById('transBadgeActive').textContent = `Aktif: ${activeTransition} (${dur}s)`;
+      document.getElementById('summaryTransBadge').textContent = `✂️ Transisi: ${activeTransition} (${dur}s)`;
+
+      if (markOverride) checkOverrideStatus();
+    }
+
+    function checkOverrideStatus() {
+      const isDiff = activeClips !== activePreset.clips ||
+                     activeMotionStyle !== activePreset.motionStyle ||
+                     activeTransition !== activePreset.transition ||
+                     activeDuration !== activePreset.transDuration;
+      isOverridden = isDiff;
+      updateOverrideUI();
+    }
+
+    function updateOverrideUI() {
+      const badge = document.getElementById('overrideStatusBadge');
+      const resetBtn = document.getElementById('resetFinishingBtn');
+      if (isOverridden) {
+        badge.className = 'badge badge-warning';
+        badge.textContent = '⚡ Quick Override Aktif';
+        resetBtn.style.display = 'inline-flex';
+      } else {
+        badge.className = 'badge badge-success';
+        badge.textContent = '✓ Sesuai Template Preset';
+        resetBtn.style.display = 'none';
+      }
+    }
+
+    function resetFinishingToPreset() {
+      applyConfigurationPreset(activePreset.key);
+    }
+
+    function switchView(viewName) {
+      document.getElementById('tabBtn1').classList.toggle('active', viewName === 'pipeline');
+      document.getElementById('tabBtn2').classList.toggle('active', viewName === 'manager');
+      document.getElementById('tabBtn3').classList.toggle('active', viewName === 'arch');
+
+      document.getElementById('viewPipeline').style.display = viewName === 'pipeline' ? 'block' : 'none';
+      document.getElementById('viewManager').style.display = viewName === 'manager' ? 'block' : 'none';
+      document.getElementById('viewArch').style.display = viewName === 'arch' ? 'block' : 'none';
+
+      const banner = document.getElementById('viewBanner');
+      if (viewName === 'pipeline') {
+        banner.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 1.2rem;">💡</span>
+            <span><strong>Simulasi Auto Pipeline:</strong> Pilih preset atau ubah jumlah klip ke 4/6/8 klip untuk melihat alur babak otomatis terupdate secara instan.</span>
+          </div>
+          <span class="badge badge-primary">Mode Eksekusi</span>
+        `;
+      } else if (viewName === 'manager') {
+        banner.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 1.2rem;">🎛️</span>
+            <span><strong>Simulasi Preset Manager:</strong> Di halaman ini user dapat mengedit setting bawaan klip, durasi, subtitle, dan transisi video yang tersimpan di database.</span>
+          </div>
+          <span class="badge badge-success">Mode Editor Preset</span>
+        `;
+      } else {
+        banner.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 1.2rem;">🔄</span>
+            <span><strong>Arsitektur Solusi:</strong> Menunjukkan bagaimana parameter diteruskan dari Preset Manager ke Auto Pipeline hingga perakitan AI & FFmpeg.</span>
+          </div>
+          <span class="badge badge-info">Arsitektur</span>
+        `;
+      }
+    }
+
+    function savePresetManagerChanges() {
+      const newLabel = document.getElementById('pmLabel').value;
+      const newClips = Number(document.getElementById('pmClips').value);
+      const newMotion = document.getElementById('pmMotionStyle').value;
+      const newTrans = document.getElementById('pmTransition').value;
+      const newDur = Number(document.getElementById('pmTransDur').value);
+
+      // Simulasikan penyimpanan ke preset habitfolk_6clips
+      presetsData.habitfolk_6clips.label = newLabel;
+      presetsData.habitfolk_6clips.clips = newClips;
+      presetsData.habitfolk_6clips.motionStyle = newMotion;
+      presetsData.habitfolk_6clips.transition = newTrans;
+      presetsData.habitfolk_6clips.transDuration = newDur;
+
+      alert('Preset berhasil disimpan ke database (tenant_settings.operator_presets_json)!\n\nSekarang beralih ke Tab Auto Pipeline untuk melihat perubahan otomatis termuat.');
+      applyConfigurationPreset('habitfolk_6clips');
+      switchView('pipeline');
+    }
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      document.documentElement.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+    }
+
+    // Init default render
+    renderStoryArc(6);
+  </script>
+</body>
+</html>
+

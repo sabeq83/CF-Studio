@@ -5,14 +5,27 @@ import {
   listVisualIdentityPresetsForBrand,
   resolveBrandRecipePreset
 } from '@/lib/autonomous-recipe-engine';
+import { listRecipeOperatorPresetsForBrand } from '@/lib/operator-presets';
 
-export const GET = withTenantContext(async (request) => {
+export const GET = withTenantContext(async (request, _ctx, user) => {
   try {
     const { searchParams } = new URL(request.url);
     const brandId = searchParams.get('brand_id') || searchParams.get('brand');
-    const presets = await listVisualIdentityPresetsForBrand(brandId);
-    const defaultPreset = await resolveBrandRecipePreset(brandId);
-    return NextResponse.json({ success: true, presets, default_preset: defaultPreset });
+    const presetKey = searchParams.get('preset_key') || searchParams.get('presetKey');
+    const tenantId = user?.tenantId || 'default_tenant';
+
+    const operatorPresets = listRecipeOperatorPresetsForBrand(brandId, tenantId);
+    const viPresets = await listVisualIdentityPresetsForBrand(brandId);
+    const targetPresetKey = presetKey || operatorPresets[0]?.key || null;
+    const defaultPreset = await resolveBrandRecipePreset(brandId, targetPresetKey, null, tenantId);
+
+    return NextResponse.json({ 
+      success: true, 
+      operator_presets: operatorPresets,
+      presets: viPresets,
+      vi_presets: viPresets, 
+      default_preset: defaultPreset 
+    });
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 400 });
   }
@@ -24,6 +37,8 @@ export const POST = withTenantContext(async (request, _context, user) => {
     const {
       brand_id,
       brandId,
+      preset_key,
+      presetKey,
       topic,
       category,
       recipe_count,
@@ -51,6 +66,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
 
     const result = await executeAutonomousRecipePipeline({
       brandId: brand_id || brandId,
+      presetKey: preset_key || presetKey || null,
       topic,
       category: category || 'makanan_utama',
       recipeCount: recipe_count || recipeCount || 1,
