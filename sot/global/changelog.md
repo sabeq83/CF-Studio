@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.168 — Fix Planner Not Found pada Auto Pipeline Scheduler & Multi-Tenant Safety (06/11/2026)
+- Sertakan tenant_id pada createDraftContentPlanner dan teruskan di executeContentPlanner
+- Toleransi multi-tenant dan auto-healing record NULL pada withPlannerGenerationLease
+- Auto-migrasi default default_tenant dan backfill database PostgreSQL
+- Unit test isolasi tenant lease pada content planner
+
 ## V2.32.167 — Kategori Resep Kuliner Modal & Integrasi Bahasa Preset AI (05/11/2026)
 - Kategori Resep Kuliner 4 card dengan smart auto-detection & manual override pada modal buat/edit jadwal auto pipeline
 - Visualisasi badge bahasa target preset dan persona suara MiniMax pada modal jadwal
