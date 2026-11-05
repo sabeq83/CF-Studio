@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup Simulasi: Auto Pipeline "Run Now" Non-Blocking & Status Real-Time</title>
+  <link rel="stylesheet" href="/mockup_theme.css">
+  <style>
+    :root {
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #f1f5f9;
+      --surface-subtle: #f8fafc;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --border-color: #e2e8f0;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --action-primary: #2563eb;
+      --action-primary-hover: #1d4ed8;
+      --on-action-primary: #ffffff;
+      --status-info: #0284c7;
+      --status-info-soft: rgba(2, 132, 199, 0.1);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.1);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.1);
+      --status-danger: #dc2626;
+      --status-danger-soft: rgba(220, 38, 38, 0.1);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --surface: #0f172a;
+        --surface-raised: #1e293b;
+        --surface-interactive: #334155;
+        --surface-subtle: #1e293b;
+        --border-subtle: #334155;
+        --border-strong: #475569;
+        --border-color: #334155;
+        --text-primary: #f8fafc;
+        --text-secondary: #94a3b8;
+        --text-muted: #64748b;
+        --action-primary: #3b82f6;
+        --action-primary-hover: #60a5fa;
+        --on-action-primary: #ffffff;
+        --status-info: #38bdf8;
+        --status-info-soft: rgba(56, 189, 248, 0.15);
+        --status-success: #4ade80;
+        --status-success-soft: rgba(74, 222, 128, 0.15);
+        --status-warning: #fbbf24;
+        --status-warning-soft: rgba(251, 191, 36, 0.15);
+        --status-danger: #f87171;
+        --status-danger-soft: rgba(248, 113, 113, 0.15);
+      }
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--surface-subtle);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 2rem;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .header {
+      margin-bottom: 1.5rem;
+    }
+    .header h2 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.4rem;
+    }
+    .header p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .schedule-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+    .schedule-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.2rem 0.5rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+    .badge-active {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+    }
+    .schedule-meta {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    .schedule-actions {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 0.45rem 0.9rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+    .btn-run {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+    }
+    .btn-run:hover:not(:disabled) {
+      background: var(--surface-interactive);
+      border-color: var(--action-primary);
+    }
+    .btn-run:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .status-running-box {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      background: var(--status-info-soft);
+      border: 1px solid var(--status-info);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+      color: var(--text-primary);
+      animation: pulseGlow 2s infinite ease-in-out;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.95; }
+      50% { opacity: 0.75; }
+    }
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--status-info);
+      border-right-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+    }
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+    .status-success-box {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      background: var(--status-success-soft);
+      border: 1px solid var(--status-success);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+      color: var(--status-success);
+    }
+    .interactive-controls {
+      background: var(--surface-raised);
+      border: 1px dashed var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      margin-top: 2rem;
+    }
+    .interactive-controls h4 {
+      margin: 0 0 0.5rem 0;
+      font-size: 0.95rem;
+    }
+    .interactive-controls p {
+      margin: 0 0 1rem 0;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--surface);
+      color: var(--text-primary);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1.25rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      font-size: 0.85rem;
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 9999;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2>Simulasi UX: Tombol "Run Now" Non-Blocking & Indikator Live</h2>
+      <p>Simulasi interaktif sebelum kode Next.js diimplementasikan. Uji alur klik tombol, respon kilat tanpa timeout, dan pemantauan status latar belakang.</p>
+    </div>
+
+    <!-- Schedule Card -->
+    <div class="card" id="scheduleCard">
+      <div class="schedule-header">
+        <div>
+          <div class="schedule-title">
+            <span>HabitFolk - air fryer chicken breast</span>
+            <span class="badge badge-active">Active</span>
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+            Brand: <b>HabitFolk</b> &bull; Preset: <b>habitfolk_8clips_deep</b> &bull; Kategori: <b>Makanan Utama</b>
+          </div>
+        </div>
+      </div>
+
+      <div class="schedule-meta">
+        <div>⏰ Jadwal: Setiap Hari &bull; Generate: <b>04:00</b> &bull; Publish Repliz: <b>07:12</b> (Asia/Jakarta)</div>
+        <div id="lastRunContainer">
+          ✅ Terakhir dijalankan: <span id="lastRunTime">5/11/2026, 18.18.57</span>
+          <span style="color: var(--status-success); margin-left: 0.5rem;">&bull; Publish Repliz: 18.37.20</span>
+        </div>
+        <div id="lastErrorContainer" style="color: var(--status-danger); margin-top: 0.25rem; display: none;">
+          ⚠️ Error terakhir: <span id="lastErrorText"></span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="schedule-actions">
+        <button type="button" class="btn btn-run" id="btnRunNow" onclick="triggerRunNow()">
+          <span id="btnIcon">⚡</span>
+          <span id="btnText">Run Now (Tes)</span>
+        </button>
+        <button type="button" class="btn" style="background: var(--status-warning-soft); border: 1px solid var(--status-warning); color: var(--status-warning);">
+          Pause
+        </button>
+        <button type="button" class="btn" style="background: var(--surface); border: 1px solid var(--border-color); color: var(--text-secondary);">
+          Edit
+        </button>
+      </div>
+
+      <!-- Live Running Status Banner (Dynamically shown during execution) -->
+      <div class="status-running-box" id="runningBanner" style="display: none;">
+        <div class="spinner"></div>
+        <div style="flex: 1;">
+          <div style="font-weight: 700; color: var(--status-info);">Pipeline Sedang Berjalan di Latar Belakang...</div>
+          <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.15rem;">
+            Gemini AI sedang menyusun resep baru, storyboard multi-scene, dan naskah VO (toleransi timeout 180s aktif). Browser tetap responsif!
+          </div>
+        </div>
+      </div>
+
+      <!-- Success Notification Banner -->
+      <div class="status-success-box" id="successBanner" style="display: none;">
+        <div>
+          <b>🎉 Pipeline Berhasil Selesai!</b> Kampanye baru: <code id="createdCampaignId" style="font-weight: 700;">opc_261106_abc123</code>
+        </div>
+        <button class="btn btn-primary" onclick="alert('Membuka tab Pipeline Kampanye...')">
+          Buka Kampanye ➔
+        </button>
+      </div>
+    </div>
+
+    <!-- Simulator Controls for Testing User Scenarios -->
+    <div class="interactive-controls">
+      <h4>🕹️ Kontrol Skenario Simulasi</h4>
+      <p>Gunakan tombol di bawah untuk menguji berbagai kondisi respons latar belakang:</p>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <button class="btn" style="background: var(--surface); border: 1px solid var(--border-strong);" onclick="simulateScenario('success_fast')">
+          Skenario 1: Gemini Sukses (5 Detik)
+        </button>
+        <button class="btn" style="background: var(--surface); border: 1px solid var(--border-strong);" onclick="simulateScenario('success_cascade')">
+          Skenario 2: Model Sibuk ➔ Cascade Berhasil (8 Detik)
+        </button>
+        <button class="btn" style="background: var(--surface); border: 1px solid var(--border-strong);" onclick="simulateScenario('error_reported')">
+          Skenario 3: Error Ditangkap & Dilaporkan Jelas
+        </button>
+        <button class="btn" style="background: var(--surface); border: 1px solid var(--border-strong);" onclick="resetSimulation()">
+          Reset Tampilan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toastBox">
+    <span id="toastIcon">⚡</span>
+    <span id="toastMsg">Notifikasi</span>
+  </div>
+
+  <script>
+    let isRunning = false;
+    let pollInterval = null;
+
+    function showToast(msg, icon = '⚡') {
+      const toast = document.getElementById('toastBox');
+      document.getElementById('toastMsg').innerText = msg;
+      document.getElementById('toastIcon').innerText = icon;
+      toast.style.display = 'flex';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 4000);
+    }
+
+    function triggerRunNow() {
+      if (isRunning) return;
+      isRunning = true;
+
+      // 1. Instant response on click (no blocking)
+      document.getElementById('btnRunNow').disabled = true;
+      document.getElementById('btnIcon').innerHTML = '<div class="spinner" style="width:10px;height:10px;border-width:1.5px;display:inline-block;"></div>';
+      document.getElementById('btnText').innerText = 'Memproses...';
+      
+      document.getElementById('lastErrorContainer').style.display = 'none';
+      document.getElementById('successBanner').style.display = 'none';
+      document.getElementById('runningBanner').style.display = 'flex';
+
+      showToast('⚡ Pipeline instan dimulai di latar belakang! Memantau status pembuatan konten...');
+
+      // Update last run time to now
+      document.getElementById('lastRunTime').innerText = new Date().toLocaleString('id-ID');
+
+      // 2. Simulate polling and server background completion in 6 seconds
+      setTimeout(() => {
+        finishSuccess('opc_' + Math.random().toString(36).substring(2, 8));
+      }, 6000);
+    }
+
+    function finishSuccess(campaignId) {
+      isRunning = false;
+      document.getElementById('runningBanner').style.display = 'none';
+      document.getElementById('btnRunNow').disabled = false;
+      document.getElementById('btnIcon').innerText = '⚡';
+      document.getElementById('btnText').innerText = 'Run Now (Tes)';
+
+      document.getElementById('createdCampaignId').innerText = campaignId;
+      document.getElementById('successBanner').style.display = 'flex';
+      showToast(`✅ Kampanye baru berhasil dibuat (${campaignId})! 🚀`, '✅');
+    }
+
+    function finishError(errorMsg) {
+      isRunning = false;
+      document.getElementById('runningBanner').style.display = 'none';
+      document.getElementById('btnRunNow').disabled = false;
+      document.getElementById('btnIcon').innerText = '⚡';
+      document.getElementById('btnText').innerText = 'Run Now (Tes)';
+
+      document.getElementById('lastErrorText').innerText = errorMsg;
+      document.getElementById('lastErrorContainer').style.display = 'block';
+      showToast(`⚠️ Eksekusi gagal: ${errorMsg}`, '⚠️');
+    }
+
+    function simulateScenario(type) {
+      if (type === 'success_fast') {
+        triggerRunNow();
+      } else if (type === 'success_cascade') {
+        triggerRunNow();
+        setTimeout(() => {
+          showToast('🔄 gemini-3.8-flash antre, otomatis berpindah ke model berikutnya...', 'ℹ️');
+        }, 3000);
+      } else if (type === 'error_reported') {
+        triggerRunNow();
+        setTimeout(() => {
+          finishError('Gagal menghubungkan koneksi database worker.');
+        }, 3500);
+      }
+    }
+
+    function resetSimulation() {
+      isRunning = false;
+      document.getElementById('btnRunNow').disabled = false;
+      document.getElementById('btnIcon').innerText = '⚡';
+      document.getElementById('btnText').innerText = 'Run Now (Tes)';
+      document.getElementById('runningBanner').style.display = 'none';
+      document.getElementById('successBanner').style.display = 'none';
+      document.getElementById('lastErrorContainer').style.display = 'none';
+      document.getElementById('lastRunTime').innerText = '5/11/2026, 18.18.57';
+    }
+  </script>
+</body>
+</html>
+

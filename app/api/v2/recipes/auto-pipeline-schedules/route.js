@@ -4,6 +4,7 @@ import {
   listAutoPipelineSchedules,
   createAutoPipelineSchedule
 } from '@/lib/auto-pipeline-schedules-repository';
+import { isScheduleRunning } from '@/lib/auto-pipeline-scheduler-runner';
 
 export const GET = withTenantContext(async (request, _ctx, user) => {
   try {
@@ -13,10 +14,14 @@ export const GET = withTenantContext(async (request, _ctx, user) => {
     const tenantId = user?.tenantId || 'default_tenant';
 
     const schedules = await listAutoPipelineSchedules(tenantId, { status, brandId });
+    const enriched = (schedules || []).map(s => ({
+      ...s,
+      is_running: isScheduleRunning(s.id)
+    }));
     return NextResponse.json({
       success: true,
-      data: schedules,
-      total: schedules.length
+      data: enriched,
+      total: enriched.length
     });
   } catch (error) {
     console.error('[API Auto-Pipeline-Schedules GET Error]', error);

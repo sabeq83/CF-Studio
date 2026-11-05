@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.169 — Auto Pipeline Run Now Non-Blocking & Smart Gemini Cascade (06/11/2026)
+- Smart Gemini cascade: tangani Timeout 180s dan fast-cascade 503 tanpa membuang gemini-3.8-flash
+- Non-blocking background runner pada Run Now API untuk mencegah timeout proxy
+- Live UI spinner, status banner berjalan, dan auto-polling pada kartu jadwal Auto Pipeline
+
 ## V2.32.168 — Fix Planner Not Found pada Auto Pipeline Scheduler & Multi-Tenant Safety (06/11/2026)
 - Sertakan tenant_id pada createDraftContentPlanner dan teruskan di executeContentPlanner
 - Toleransi multi-tenant dan auto-healing record NULL pada withPlannerGenerationLease

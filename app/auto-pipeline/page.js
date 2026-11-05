@@ -23,6 +23,7 @@ export default function AutoPipelinePage() {
   const [activeTab, setActiveTab] = useState('pipeline'); // 'pipeline' | 'schedules'
   const [schedules, setSchedules] = useState([]);
   const [loadingSchedules, setLoadingSchedules] = useState(false);
+  const [runningScheduleIds, setRunningScheduleIds] = useState({});
   const [scheduleFilter, setScheduleFilter] = useState('all'); // 'all' | 'active' | 'paused' | 'archived'
   const [replizAccounts, setReplizAccounts] = useState([]);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
@@ -365,8 +366,8 @@ export default function AutoPipelinePage() {
   }
 
   // --- AUTO PIPELINE SCHEDULER & REPLIZ PUBLISHING HANDLERS ---
-  async function fetchSchedules() {
-    setLoadingSchedules(true);
+  async function fetchSchedules(silent = false) {
+    if (!silent) setLoadingSchedules(true);
     try {
       const res = await fetch('/api/v2/recipes/auto-pipeline-schedules');
       const data = await res.json();
@@ -376,9 +377,45 @@ export default function AutoPipelinePage() {
     } catch (e) {
       console.warn('[AutoPipeline] Error fetching schedules:', e);
     } finally {
-      setLoadingSchedules(false);
+      if (!silent) setLoadingSchedules(false);
     }
   }
+
+  // Polling loop otomatis saat ada jadwal yang sedang dieksekusi di background
+  useEffect(() => {
+    const hasRunning = Object.keys(runningScheduleIds).length > 0 || schedules.some(s => s.is_running);
+    if (!hasRunning) return;
+
+    const timer = setInterval(async () => {
+      try {
+        const res = await fetch('/api/v2/recipes/auto-pipeline-schedules');
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data)) {
+          setSchedules(data.data);
+          data.data.forEach(s => {
+            if (!s.is_running && runningScheduleIds[s.id]) {
+              setRunningScheduleIds(prev => {
+                const next = { ...prev };
+                delete next[s.id];
+                return next;
+              });
+              if (s.last_campaign_id) {
+                showToast(`✅ Eksekusi selesai! Kampanye baru berhasil dibuat: ${s.last_campaign_id} 🚀`);
+                setActiveCampaignId(s.last_campaign_id);
+                setPollingActive(true);
+              } else if (s.last_error) {
+                showToast(`⚠️ Eksekusi jadwal "${s.name}" gagal: ${s.last_error}`, 'error');
+              }
+            }
+          });
+        }
+      } catch (e) {
+        console.warn('[AutoPipeline] Error polling running schedules:', e);
+      }
+    }, 3000);
+
+    return () => clearInterval(timer);
+  }, [runningScheduleIds, schedules]);
 
   async function fetchReplizAccounts(forceSync = false) {
     if (forceSync) setIsSyncingRepliz(true);
@@ -602,20 +639,21 @@ export default function AutoPipelinePage() {
   async function handleRunNow(sched) {
     if (!confirm(`Jalankan pipeline instan sekarang untuk menguji jadwal "${sched.name}"?`)) return;
     try {
-      showToast(`⚡ Memulai eksekusi instan untuk "${sched.name}"...`);
+      setRunningScheduleIds(prev => ({ ...prev, [sched.id]: true }));
+      showToast(`⚡ Memulai eksekusi instan untuk "${sched.name}" di latar belakang...`);
       const res = await fetch(`/api/v2/recipes/auto-pipeline-schedules/${sched.id}/run-now`, {
         method: 'POST'
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error);
-      showToast(`Eksekusi dimulai! Campaign ID: ${data.campaign_id} 🚀`);
-      if (data.campaign_id) {
-        setActiveCampaignId(data.campaign_id);
-        setPollingActive(true);
-        setActiveTab('pipeline');
-      }
-      fetchSchedules();
+      showToast(`⚡ Pipeline sedang diproses oleh AI di latar belakang! Memantau status...`);
+      fetchSchedules(true);
     } catch (err) {
+      setRunningScheduleIds(prev => {
+        const next = { ...prev };
+        delete next[sched.id];
+        return next;
+      });
       showToast(err.message, 'error');
     }
   }
@@ -2078,6 +2116,7 @@ export default function AutoPipelinePage() {
                     const statusLabel = sched.status === 'active'
                       ? '🟢 AKTIF BERJALAN'
                       : sched.status === 'paused' ? '⏸️ DIJEDA' : '📦 DIARSIPKAN';
+                    const isSchedRunning = Boolean(sched.is_running || runningScheduleIds[sched.id]);
 
                     return (
                       <div
@@ -2244,7 +2283,27 @@ export default function AutoPipelinePage() {
                               <>
                                 ✅ Terakhir dijalankan: <strong style={{ color: 'var(--text-secondary)' }}>{new Date(sched.last_run_at).toLocaleString('id-ID')}</strong>
                                 {sched.last_campaign_id && (
-                                  <span style={{ marginLeft: '0.35rem' }}>({sched.last_campaign_id})</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setActiveCampaignId(sched.last_campaign_id);
+                                      setActiveTab('pipeline');
+                                      setPollingActive(true);
+                                    }}
+                                    style={{
+                                      background: 'none',
+                                      border: 'none',
+                                      color: 'var(--action-primary)',
+                                      cursor: 'pointer',
+                                      padding: 0,
+                                      marginLeft: '0.35rem',
+                                      fontWeight: 600,
+                                      fontSize: '0.74rem',
+                                      textDecoration: 'underline'
+                                    }}
+                                  >
+                                    ({sched.last_campaign_id})
+                                  </button>
                                 )}
                               </>
                             ) : (
@@ -2255,9 +2314,33 @@ export default function AutoPipelinePage() {
                                 &bull; Publish Repliz: {new Date(sched.last_publish_at).toLocaleTimeString('id-ID')}
                               </span>
                             )}
-                            {sched.last_error && (
+                            {sched.last_error && !isSchedRunning && (
                               <div style={{ color: 'var(--status-danger)', marginTop: '0.2rem' }}>
                                 ⚠️ Error terakhir: {sched.last_error}
+                              </div>
+                            )}
+                            {isSchedRunning && (
+                              <div style={{
+                                marginTop: '0.45rem',
+                                padding: '0.4rem 0.65rem',
+                                background: 'var(--status-info-soft)',
+                                border: '1px solid var(--status-info)',
+                                borderRadius: 'var(--radius-sm)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.45rem',
+                                color: 'var(--text-primary)',
+                                fontSize: '0.75rem'
+                              }}>
+                                <span style={{
+                                  width: 8,
+                                  height: 8,
+                                  borderRadius: '50%',
+                                  background: 'var(--status-info)',
+                                  boxShadow: '0 0 6px var(--status-info)',
+                                  flexShrink: 0
+                                }} />
+                                <span><b>Pipeline Sedang Berjalan:</b> AI sedang merancang resep, storyboard &amp; VO di latar belakang...</span>
                               </div>
                             )}
                           </div>
@@ -2265,23 +2348,41 @@ export default function AutoPipelinePage() {
                           <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
                             <button
                               type="button"
+                              disabled={isSchedRunning}
                               onClick={() => handleRunNow(sched)}
                               style={{
-                                background: 'var(--surface)',
-                                border: '1px solid var(--border-strong)',
-                                color: 'var(--text-primary)',
+                                background: isSchedRunning ? 'var(--status-info-soft)' : 'var(--surface)',
+                                border: `1px solid ${isSchedRunning ? 'var(--status-info)' : 'var(--border-strong)'}`,
+                                color: isSchedRunning ? 'var(--status-info)' : 'var(--text-primary)',
                                 borderRadius: 'var(--radius-sm)',
                                 padding: '0.38rem 0.75rem',
                                 fontSize: '0.78rem',
                                 fontWeight: 700,
-                                cursor: 'pointer',
+                                cursor: isSchedRunning ? 'not-allowed' : 'pointer',
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 gap: '0.35rem'
                               }}
                             >
-                              <span>⚡</span>
-                              <span>Run Now (Tes)</span>
+                              {isSchedRunning ? (
+                                <>
+                                  <span style={{
+                                    width: 11,
+                                    height: 11,
+                                    border: '2px solid var(--status-info)',
+                                    borderRightColor: 'transparent',
+                                    borderRadius: '50%',
+                                    display: 'inline-block',
+                                    animation: 'spin 0.75s linear infinite'
+                                  }} />
+                                  <span>Memproses...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <span>⚡</span>
+                                  <span>Run Now (Tes)</span>
+                                </>
+                              )}
                             </button>
 
                             {sched.status !== 'archived' && (
