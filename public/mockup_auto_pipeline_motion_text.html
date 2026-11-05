@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup Usulan: Kontrol Motion Text ON/OFF & Style Selector — MAKNA Flow</title>
+  <style>
+    /* MAKNA Flow Semantic Theme System */
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --link-hover: #a5f3fc;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e2e8f0;
+      --input-bg: #f8fafc;
+      --overlay-subtle: rgba(0, 0, 0, 0.05);
+      --overlay-backdrop: rgba(15, 23, 42, 0.45);
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --text-disabled: #94a3b8;
+      --border-subtle: #cbd5e1;
+      --border-strong: #94a3b8;
+      --action-primary: #0d9488;
+      --action-primary-hover: #0f766e;
+      --on-action-primary: #ffffff;
+      --link: #0284c7;
+      --link-hover: #0369a1;
+      --status-info: #0284c7;
+      --status-info-soft: rgba(2, 132, 199, 0.1);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.1);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.12);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.1);
+      --status-neutral: #7c3aed;
+      --status-neutral-soft: rgba(124, 58, 237, 0.1);
+      --focus-ring: #7c3aed;
+      --shadow-card: 0 4px 20px rgba(15, 23, 42, 0.08);
+      --shadow-modal: 0 20px 48px rgba(15, 23, 42, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      padding: 2rem 1.5rem;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      max-width: 1080px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+    }
+
+    /* Header Nav Bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .theme-toggle-btn {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      padding: 0.45rem 0.9rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: var(--transition);
+    }
+    .theme-toggle-btn:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+
+    /* Simulation Banner */
+    .sim-banner {
+      background: var(--surface-interactive);
+      border: 1px solid var(--action-primary);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    /* Card Wrapper */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* Toggle Switch */
+    .switch-container {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 26px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--border-strong);
+      transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 9999px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    input:checked + .slider {
+      background-color: var(--action-primary);
+    }
+    input:checked + .slider:before {
+      transform: translateX(22px);
+      background-color: var(--on-action-primary);
+    }
+
+    /* Style Selector Cards */
+    .style-card {
+      background: var(--input-bg);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      text-align: left;
+    }
+    .style-card:hover {
+      border-color: var(--border-strong);
+      background: var(--surface-raised);
+    }
+    .style-card.selected {
+      background: var(--surface-interactive);
+      border-color: var(--action-primary);
+      box-shadow: 0 0 0 1px var(--action-primary), 0 4px 14px rgba(45, 212, 191, 0.16);
+    }
+
+    /* Live Preview Box */
+    .preview-stage {
+      background: #000000;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      position: relative;
+      aspect-ratio: 16 / 9;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      border: 1px solid var(--border-strong);
+      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.8);
+      background-size: cover;
+      background-position: center;
+      background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1200&q=80');
+    }
+
+    /* Motion Text CSS Animations for Demo */
+    .floating-text-demo {
+      font-family: 'Impact', 'Arial Black', sans-serif;
+      text-transform: uppercase;
+      font-size: 1.6rem;
+      letter-spacing: 1px;
+      text-align: center;
+      display: inline-flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+    }
+    .floating-text-demo span {
+      color: #ffffff;
+      text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 0 4px 8px rgba(0,0,0,0.8);
+      transition: transform 0.2s, color 0.2s;
+    }
+    .floating-text-demo span.active-word {
+      color: #facc15 !important;
+      transform: scale(1.18);
+    }
+
+    .capcut-pill-demo {
+      font-family: var(--font-sans);
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 1.3rem;
+      display: inline-flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+    }
+    .capcut-pill-demo span {
+      background: #ffffff;
+      color: #000000;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      transition: transform 0.2s, background 0.2s;
+    }
+    .capcut-pill-demo span.active-word {
+      background: #facc15 !important;
+      color: #000000 !important;
+      transform: scale(1.12);
+    }
+
+    .minimal-card-demo {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      padding: 0.6rem 1.2rem;
+      text-align: center;
+      max-width: 80%;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+    }
+    .minimal-card-demo .tag {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--action-primary);
+      letter-spacing: 1.5px;
+      margin-bottom: 0.2rem;
+    }
+    .minimal-card-demo .text {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    /* Position Marker */
+    .pos-btn {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      padding: 0.4rem 0.8rem;
+      border-radius: var(--radius-xs);
+      font-size: 0.76rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .pos-btn.active {
+      background: var(--surface-interactive);
+      border-color: var(--action-primary);
+      color: var(--action-primary);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- Top Navigation -->
+    <div class="top-bar">
+      <div>
+        <h1 style="font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;">
+          <span>⚡</span>
+          <span>Auto Pipeline — Motion Text Control</span>
+        </h1>
+        <p style="font-size: 0.82rem; color: var(--text-muted);">
+          Simulasi Fitur Baru: Kontrol Toggle ON/OFF Subtitle & Pemilihan Style Animasi FFmpeg
+        </p>
+      </div>
+      <button type="button" class="theme-toggle-btn" onclick="toggleTheme()">
+        <span id="themeIcon">☀️</span>
+        <span id="themeLabel">Light Mode</span>
+      </button>
+    </div>
+
+    <!-- Simulation Banner -->
+    <div class="sim-banner">
+      <div>
+        <strong style="color: var(--action-primary); font-size: 0.88rem;">💡 Opsi B Terpilih: Selector UI dengan Toggle ON/OFF</strong>
+        <p style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.2rem;">
+          Pengguna dapat memilih apakah video resep akan dibakar teks subtitle animatif atau diekspor bersih (*clean video*), serta memilih template motion text yang pas dengan identitas brand.
+        </p>
+      </div>
+      <div style="font-family: var(--font-mono); font-size: 0.74rem; background: var(--surface); padding: 0.4rem 0.75rem; border-radius: var(--radius-xs); border: 1px solid var(--border-subtle);">
+        Brand: <span style="color: var(--action-primary); font-weight: 700;">habitfolk</span>
+      </div>
+    </div>
+
+    <!-- MAIN CARD: Auto Pipeline Launch Form Section -->
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 1rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.4rem;">
+          <span>🚀</span>
+          <span>Konfigurasi Peluncuran Auto Pipeline</span>
+        </h2>
+        <span style="font-size: 0.74rem; color: var(--text-muted);">Step 1-Klik Autonomous Recipe</span>
+      </div>
+
+      <!-- Topik Resep Dummy (Existing Context) -->
+      <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 0.85rem 1rem;">
+        <div style="font-size: 0.76rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Topik Arahan Resep:</div>
+        <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary); margin-top: 0.15rem;">
+          🥔 air fryer baked potato with garlic herb butter
+        </div>
+        <div style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.2rem;">
+          Kategori: <strong>Makanan Utama (🍗)</strong> • Target: <strong>8 Klip @ 4s (Google Veo Omni Flash)</strong>
+        </div>
+      </div>
+
+      <!-- SECTION BARU: MOTION TEXT SETTINGS -->
+      <div style="
+        background: var(--surface-raised);
+        border: 1.5px solid var(--border-subtle);
+        border-radius: var(--radius-md);
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        transition: var(--transition);
+      " id="motionSection">
+        
+        <!-- Toggle Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <span style="font-size: 1.3rem;">✨</span>
+            <div>
+              <div style="font-size: 0.92rem; font-weight: 700; color: var(--text-primary);">
+                Motion Text & Subtitel Video (FFmpeg)
+              </div>
+              <div style="font-size: 0.74rem; color: var(--text-muted);">
+                Animasi teks dinamis per kata yang disinkronkan dengan voice-over narasi.
+              </div>
+            </div>
+          </div>
+
+          <!-- Switch & Status Pill -->
+          <div style="display: flex; align-items: center; gap: 0.85rem;">
+            <span id="motionStatusBadge" style="
+              font-size: 0.72rem;
+              font-weight: 700;
+              padding: 0.25rem 0.65rem;
+              border-radius: 9999px;
+              display: inline-flex;
+              align-items: center;
+              gap: 0.35rem;
+              background: var(--status-success-soft);
+              color: var(--status-success);
+              border: 1px solid var(--status-success);
+            ">
+              🟢 Subtitel Aktif (ON)
+            </span>
+
+            <label class="switch-container">
+              <div class="switch">
+                <input type="checkbox" id="motionToggle" checked onchange="handleToggleMotion(this.checked)">
+                <span class="slider"></span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- CONDITIONAL CONTENT: JIKA ON -->
+        <div id="motionOptionsContainer" style="display: flex; flex-direction: column; gap: 1rem; border-top: 1px solid var(--border-subtle); padding-top: 1rem;">
+          
+          <!-- Pilihan 3 Style Motion Text -->
+          <div>
+            <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">
+              PILIH TEMPLATE STYLE MOTION TEXT:
+            </label>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0.75rem;">
+              
+              <!-- Card Style 1: Floating White Yellow -->
+              <div class="style-card selected" id="card-floating_white_yellow" onclick="selectStyle('floating_white_yellow')">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 0.88rem; font-weight: 700; color: var(--text-primary);">
+                    🟡 Floating Putih ➔ Kuning
+                  </span>
+                  <span style="font-size: 0.68rem; font-weight: 700; background: var(--status-warning-soft); color: var(--status-warning); padding: 0.15rem 0.45rem; border-radius: 4px;">
+                    TikTok / Reels
+                  </span>
+                </div>
+                <p style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.35;">
+                  Huruf kapital bold dengan outline hitam tebal. Kata yang diucapkan berubah warna menjadi kuning terang vibran.
+                </p>
+                <div style="font-size: 0.68rem; font-family: var(--font-mono); color: var(--text-disabled); margin-top: 0.2rem;">
+                  ID: floating_white_yellow (Default)
+                </div>
+              </div>
+
+              <!-- Card Style 2: Floating Black on White -->
+              <div class="style-card" id="card-floating_black_on_white" onclick="selectStyle('floating_black_on_white')">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 0.88rem; font-weight: 700; color: var(--text-primary);">
+                    🔲 Floating Hitam BG Putih
+                  </span>
+                  <span style="font-size: 0.68rem; font-weight: 700; background: var(--status-info-soft); color: var(--status-info); padding: 0.15rem 0.45rem; border-radius: 4px;">
+                    CapCut Style
+                  </span>
+                </div>
+                <p style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.35;">
+                  Teks hitam di dalam kotak pil putih (*word pills*) yang melompat secara ritmis mengikuti setiap suku kata audio.
+                </p>
+                <div style="font-size: 0.68rem; font-family: var(--font-mono); color: var(--text-disabled); margin-top: 0.2rem;">
+                  ID: floating_black_on_white
+                </div>
+              </div>
+
+              <!-- Card Style 3: Minimalist Clean White -->
+              <div class="style-card" id="card-minimal_white" onclick="selectStyle('minimal_white')">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 0.88rem; font-weight: 700; color: var(--text-primary);">
+                    ◻️ Minimalist Clean Card
+                  </span>
+                  <span style="font-size: 0.68rem; font-weight: 700; background: var(--status-neutral-soft); color: var(--status-neutral); padding: 0.15rem 0.45rem; border-radius: 4px;">
+                    Studio Dokumenter
+                  </span>
+                </div>
+                <p style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.35;">
+                  Kotak kartu studio semi-transparan elegan dengan badge adegan dan tipografi modern yang rapi.
+                </p>
+                <div style="font-size: 0.68rem; font-family: var(--font-mono); color: var(--text-disabled); margin-top: 0.2rem;">
+                  ID: minimal_white
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Posisi & Live Preview Baris -->
+          <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 1rem; align-items: center;">
+            
+            <!-- Posisi Subtitle di Layar -->
+            <div style="background: var(--input-bg); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.85rem;">
+              <label style="font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 0.45rem;">
+                POSISI SUBTITEL DI LAYAR:
+              </label>
+              <div style="display: flex; gap: 0.4rem;">
+                <button type="button" class="pos-btn active" id="pos-bottom" onclick="selectPosition('bottom')">
+                  Bawah (Standar)
+                </button>
+                <button type="button" class="pos-btn" id="pos-center" onclick="selectPosition('center')">
+                  Tengah
+                </button>
+                <button type="button" class="pos-btn" id="pos-top" onclick="selectPosition('top')">
+                  Atas
+                </button>
+              </div>
+              <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 0.45rem;">
+                *Posisi bawah direkomendasikan untuk Instagram Reels, TikTok, & YouTube Shorts.
+              </div>
+            </div>
+
+            <!-- Interaktif Live Preview Stage -->
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                <span style="font-size: 0.74rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+                  👁️ LIVE MOTION PREVIEW:
+                </span>
+                <span style="font-size: 0.68rem; color: var(--action-primary); font-family: var(--font-mono);">
+                  Loop 2.4s • Word-by-Word
+                </span>
+              </div>
+              
+              <div class="preview-stage" id="previewStage">
+                <!-- Teks Demo di posisi yang dipilih -->
+                <div id="previewTextWrapper" style="transition: all 0.3s; position: absolute; bottom: 15%; width: 90%; display: flex; justify-content: center;">
+                  
+                  <!-- Container Efek Floating -->
+                  <div id="demoFloating" class="floating-text-demo">
+                    <span id="w1">CRISPY</span>
+                    <span id="w2">OUTSIDE,</span>
+                    <span id="w3">TENDER</span>
+                    <span id="w4">INSIDE!</span>
+                  </div>
+
+                  <!-- Container Efek CapCut Pill -->
+                  <div id="demoPill" class="capcut-pill-demo" style="display: none;">
+                    <span id="pw1">CRISPY</span>
+                    <span id="pw2">OUTSIDE,</span>
+                    <span id="pw3">TENDER</span>
+                    <span id="pw4">INSIDE!</span>
+                  </div>
+
+                  <!-- Container Efek Minimal Clean -->
+                  <div id="demoMinimal" class="minimal-card-demo" style="display: none;">
+                    <div class="tag">SCENE 1 • HABITFOLK</div>
+                    <div class="text">Crispy outside, tender inside!</div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- CONDITIONAL CONTENT: JIKA OFF -->
+        <div id="motionDisabledNotice" style="display: none; border-top: 1px solid var(--border-subtle); padding-top: 1rem; color: var(--text-secondary); font-size: 0.8rem; background: var(--input-bg); padding: 0.85rem; border-radius: var(--radius-sm);">
+          <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 700; color: var(--text-muted);">
+            <span>🚫</span>
+            <span>Mode Clean Video Aktif (Tanpa Subtitel Grafis FFmpeg)</span>
+          </div>
+          <p style="font-size: 0.74rem; color: var(--text-muted); margin-top: 0.35rem; line-height: 1.4;">
+            Video final MP4 akan diekspor bersih tanpa overlay teks animasi grafis. Visual Veo, narasi voice-over Minimax, dan musik latar (BGM) tetap disinkronkan secara penuh. Cocok bila Anda ingin menambahkan subtitle secara native melalui aplikasi TikTok/Instagram.
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Action Button -->
+      <div>
+        <button type="button" style="
+          background: var(--action-primary);
+          color: var(--on-action-primary);
+          border: none;
+          padding: 0.85rem 1.75rem;
+          border-radius: var(--radius-md);
+          font-size: 0.95rem;
+          font-weight: 700;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.6rem;
+          cursor: pointer;
+          box-shadow: 0 4px 14px rgba(45, 212, 191, 0.28);
+          transition: var(--transition);
+        ">
+          <span>⚡ Luncurkan Auto Pipeline (1-Klik)</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Payload JSON Debug Inspection -->
+    <div class="card" style="font-family: var(--font-mono); font-size: 0.76rem; background: var(--surface-raised);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+        <strong style="color: var(--text-primary); font-family: var(--font-sans);">📦 Data Payload yang Dikirim ke API:</strong>
+        <span style="color: var(--status-info);">POST /api/v2/recipes/autonomous-pipeline</span>
+      </div>
+      <pre id="jsonPayload" style="color: var(--action-primary); background: var(--input-bg); padding: 0.85rem; border-radius: var(--radius-xs); border: 1px solid var(--border-subtle); overflow-x: auto;"></pre>
+    </div>
+
+  </div>
+
+  <script>
+    // State
+    let isMotionEnabled = true;
+    let selectedStyleKey = 'floating_white_yellow';
+    let selectedPositionKey = 'bottom';
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      document.getElementById('themeIcon').textContent = next === 'dark' ? '☀️' : '🌙';
+      document.getElementById('themeLabel').textContent = next === 'dark' ? 'Light Mode' : 'Dark Mode';
+    }
+
+    function handleToggleMotion(checked) {
+      isMotionEnabled = checked;
+      const container = document.getElementById('motionOptionsContainer');
+      const notice = document.getElementById('motionDisabledNotice');
+      const badge = document.getElementById('motionStatusBadge');
+      const section = document.getElementById('motionSection');
+
+      if (checked) {
+        container.style.display = 'flex';
+        notice.style.display = 'none';
+        badge.innerHTML = '🟢 Subtitel Aktif (ON)';
+        badge.style.background = 'var(--status-success-soft)';
+        badge.style.color = 'var(--status-success)';
+        badge.style.borderColor = 'var(--status-success)';
+        section.style.borderColor = 'var(--border-subtle)';
+      } else {
+        container.style.display = 'none';
+        notice.style.display = 'block';
+        badge.innerHTML = '⚪ Clean Video (OFF)';
+        badge.style.background = 'var(--surface-interactive)';
+        badge.style.color = 'var(--text-muted)';
+        badge.style.borderColor = 'var(--border-strong)';
+        section.style.borderColor = 'var(--border-strong)';
+      }
+      updatePayload();
+    }
+
+    function selectStyle(key) {
+      selectedStyleKey = key;
+      document.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
+      const activeCard = document.getElementById(`card-${key}`);
+      if (activeCard) activeCard.classList.add('selected');
+
+      // Update Preview Elements
+      document.getElementById('demoFloating').style.display = key === 'floating_white_yellow' ? 'inline-flex' : 'none';
+      document.getElementById('demoPill').style.display = key === 'floating_black_on_white' ? 'inline-flex' : 'none';
+      document.getElementById('demoMinimal').style.display = key === 'minimal_white' ? 'block' : 'none';
+
+      updatePayload();
+    }
+
+    function selectPosition(pos) {
+      selectedPositionKey = pos;
+      document.querySelectorAll('.pos-btn').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById(`pos-${pos}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      const wrapper = document.getElementById('previewTextWrapper');
+      if (pos === 'bottom') {
+        wrapper.style.top = 'auto';
+        wrapper.style.bottom = '15%';
+      } else if (pos === 'center') {
+        wrapper.style.top = '45%';
+        wrapper.style.bottom = 'auto';
+      } else if (pos === 'top') {
+        wrapper.style.top = '15%';
+        wrapper.style.bottom = 'auto';
+      }
+      updatePayload();
+    }
+
+    function updatePayload() {
+      const payload = {
+        brand_id: "226f835a-1717-4c0f-b1ab-0b276130c839",
+        brand_name: "habitfolk",
+        topic: "air fryer baked potato with garlic herb butter",
+        category: "makanan_utama",
+        recipe_count: 7,
+        execution_mode: "full_autopilot",
+        enable_motion_text: isMotionEnabled,
+        motion_text_style: isMotionEnabled ? selectedStyleKey : null,
+        motion_text_position: isMotionEnabled ? selectedPositionKey : null
+      };
+      document.getElementById('jsonPayload').textContent = JSON.stringify(payload, null, 2);
+    }
+
+    // Word Animation Demo Loop
+    let wordStep = 0;
+    setInterval(() => {
+      wordStep = (wordStep + 1) % 5;
+      for (let i = 1; i <= 4; i++) {
+        const w = document.getElementById(`w${i}`);
+        const pw = document.getElementById(`pw${i}`);
+        if (w) {
+          if (wordStep === i) w.classList.add('active-word');
+          else w.classList.remove('active-word');
+        }
+        if (pw) {
+          if (wordStep === i) pw.classList.add('active-word');
+          else pw.classList.remove('active-word');
+        }
+      }
+    }, 600);
+
+    // Init
+    updatePayload();
+  </script>
+</body>
+</html>
+

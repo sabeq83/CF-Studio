@@ -32,8 +32,18 @@ export const POST = withTenantContext(async (request, _context, user) => {
       executionMode,
       visual_identity_preset_id,
       visualIdentityPresetId,
+      enable_motion_text,
+      enableMotionText,
+      motion_text_style,
+      motionTextStyle,
+      motion_text_position,
+      motionTextPosition,
       overrides
     } = body;
+
+    const isMotionEnabled = enable_motion_text !== undefined 
+      ? Boolean(enable_motion_text) 
+      : (enableMotionText !== undefined ? Boolean(enableMotionText) : true);
 
     const result = await executeAutonomousRecipePipeline({
       brandId: brand_id || brandId,
@@ -42,6 +52,9 @@ export const POST = withTenantContext(async (request, _context, user) => {
       recipeCount: recipe_count || recipeCount || 7,
       executionMode: execution_mode || executionMode || 'full_autopilot',
       visualIdentityPresetId: visual_identity_preset_id || visualIdentityPresetId || null,
+      enableMotionText: isMotionEnabled,
+      motionTextStyle: motion_text_style || motionTextStyle || 'floating_white_yellow',
+      motionTextPosition: motion_text_position || motionTextPosition || 'bottom',
       overrides: overrides || {},
       tenantId: user?.tenantId || 'default_tenant'
     });

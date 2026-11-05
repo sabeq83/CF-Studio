@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.157 — Auto Pipeline Motion Text Control & Style Selector (05/11/2026)
+- Tambahkan toggle ON/OFF Motion Text dan 3 style cards pada Auto Pipeline
+- Sediakan selector posisi subtitel layar dan live animation preview box
+- Hubungkan parameter motion text dari API ke database pillar_campaigns dan worker FFmpeg
+- Sediakan mockup interaktif standalone dan test suite verifikasi database
+
 ## V2.32.156 — Fix JSX Syntax in Auto Pipeline Visualizer (05/11/2026)
 - Perbaiki penutupan sintaks ternary dan map JSX pada tabel riwayat kampanye Auto Pipeline
 - Pastikan build produksi Webpack Next.js berhasil 100%
