@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.161 — Perbaikan Motion Text minimal_white Super Slim & Zero Badge (05/11/2026)
+- Memangkas tinggi kartu minimal_white dari 336px menjadi 75-100px auto-height
+- Menghapus badge header HOOK dan brand pada minimal_white sehingga hanya menampilkan naskah narasi
+- Update sampel video showcase dan mockup_minimal_white_card.html
+
 ## V2.32.160 — Perbaikan Motion Text floating_white_yellow Word Reveal & Spasi (05/11/2026)
 - Implementasi word-by-word reveal pada floating_white_yellow dengan kata aktif warna kuning dan kata lewat putih
 - Memperbaiki jarak spasi antar kata dengan atribut dx eksplisit dan xml:space=preserve di SVG engine

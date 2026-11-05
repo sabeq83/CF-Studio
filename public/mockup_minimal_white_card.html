@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup Usulan: Minimalist Clean White Card — MAKNA Flow</title>
+  <link rel="stylesheet" href="/theme.css">
+  <style>
+    /* MAKNA Flow Semantic CSS Design Tokens */
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+      --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --border-color: #26354a;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e2e8f0;
+      --input-bg: #f8fafc;
+      --overlay-subtle: rgba(0, 0, 0, 0.05);
+      --overlay-backdrop: rgba(15, 23, 42, 0.5);
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --text-disabled: #94a3b8;
+      --border-subtle: #cbd5e1;
+      --border-strong: #94a3b8;
+      --border-color: #cbd5e1;
+      --action-primary: #0d9488;
+      --action-primary-hover: #0f766e;
+      --on-action-primary: #ffffff;
+      --link: #0284c7;
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.1);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.1);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.1);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.1);
+      --focus-ring: #6366f1;
+      --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.06);
+      --shadow-modal: 0 20px 45px rgba(0, 0, 0, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-sans);
+    }
+
+    body {
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      line-height: 1.5;
+      padding-bottom: 80px;
+    }
+
+    /* Header Nav */
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border-subtle);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-badge {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--action-primary);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      border: 1px solid transparent;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+    }
+    .btn-secondary {
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      border-color: var(--border-subtle);
+    }
+    .btn-secondary:hover {
+      background: var(--surface-interactive);
+      border-color: var(--border-strong);
+    }
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 0.74rem;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    /* Hero Banner */
+    .hero-banner {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      margin-bottom: 28px;
+    }
+    .hero-banner h1 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .hero-banner p {
+      font-size: 0.86rem;
+      color: var(--text-secondary);
+      max-width: 880px;
+      line-height: 1.5;
+    }
+
+    /* Comparison Grid */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      margin-bottom: 32px;
+    }
+    @media (max-width: 860px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .column-box {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-card);
+    }
+    .column-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface-raised);
+    }
+    .column-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .column-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .tag-danger {
+      background: var(--status-danger-soft);
+      color: var(--status-danger);
+      border: 1px solid var(--status-danger);
+    }
+    .tag-success {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+    }
+
+    /* Video Simulator Box (9:16 Vertical) */
+    .phone-simulator {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 9 / 16;
+      max-height: 520px;
+      background: #111827;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* Simulated Recipe Video BG */
+    .simulated-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.9;
+    }
+    .bg-gradient-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.85) 100%);
+      pointer-events: none;
+    }
+
+    /* Card Overlays inside Simulator */
+    .overlay-container {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 60px;
+      display: flex;
+      justify-content: center;
+      padding: 0 20px;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* --- OLD CARD (CURRENT) --- */
+    .old-card {
+      width: 88%;
+      height: 160px; /* Scaled down proportional representation of 336px */
+      background: rgba(255, 255, 255, 0.94);
+      border-radius: 14px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+      border: 1.5px solid rgba(255, 255, 255, 0.4);
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+    .old-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .old-badge {
+      background: #000000;
+      color: #ffffff;
+      font-size: 9px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+    .old-brand {
+      color: #64748b;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .old-text {
+      color: #0f172a;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    /* --- NEW CARD (PROPOSED) --- */
+    .new-card {
+      width: 80%;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(8px);
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+    .new-text {
+      color: #0f172a;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.35;
+      letter-spacing: 0.2px;
+    }
+
+    /* Measure Pill */
+    .dimen-badge {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      padding: 4px 10px;
+      border-radius: var(--radius-xs);
+      z-index: 20;
+    }
+
+    /* Card Details Footer */
+    .column-body {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: var(--surface);
+      border-top: 1px solid var(--border-subtle);
+    }
+    .detail-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+    }
+    .detail-label {
+      color: var(--text-secondary);
+    }
+    .detail-val {
+      font-family: var(--font-mono);
+      font-weight: 700;
+    }
+    .text-danger { color: var(--status-danger); }
+    .text-success { color: var(--status-success); }
+
+    /* Interactive Testing Controls */
+    .control-panel {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .control-header {
+      font-size: 0.95rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .sample-btn {
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      font-size: 0.76rem;
+      font-weight: 600;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .sample-btn:hover {
+      border-color: var(--action-primary);
+      color: var(--text-primary);
+    }
+    .sample-btn.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border-color: var(--action-primary);
+    }
+
+    .slider-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      min-width: 260px;
+    }
+    .slider-wrap input[type="range"] {
+      flex: 1;
+      accent-color: var(--action-primary);
+    }
+
+    /* Comparison Metrics Box */
+    .metrics-summary {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 700px) {
+      .metrics-summary { grid-template-columns: 1fr; }
+    }
+    .metric-card {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .metric-title {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .metric-value {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--status-success);
+    }
+    .metric-desc {
+      font-size: 0.74rem;
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="brand-title">
+        <span style="font-size: 1.25rem;">✨</span>
+        <h2 style="font-size: 1.05rem; font-weight: 800; color: var(--text-primary);">MAKNA Flow</h2>
+        <span class="brand-badge">Mockup Review: Minimalist Card</span>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-secondary btn-sm" id="themeToggleBtn" onclick="toggleTheme()">
+          🌓 Mode Terang/Gelap
+        </button>
+        <a href="/mockup_remux_showcase.html" class="btn btn-secondary btn-sm">
+          📺 Buka Showcase Utama
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Hero Banner -->
+    <section class="hero-banner">
+      <h1>
+        <span>◻️</span> Usulan Desain: Minimalist Clean White Card (Super Slim)
+      </h1>
+      <p>
+        Menjawab permintaan Anda: <strong>background tetap putih bersih</strong>, header <strong>"HOOK" dan brand "@HabitFolk" ditiadakan 100%</strong> sehingga <strong>hanya menampilkan naskah yang diucapkan</strong>. Tinggi kotak dipangkas hingga <strong>~75% lebih ramping</strong> agar tidak menghalangi visual masakan.
+      </p>
+    </section>
+
+    <!-- Interactive Simulator Controls -->
+    <section class="control-panel">
+      <div class="control-header">
+        <span>🎛️</span> Uji Interaktif &amp; Simulasi Naskah
+      </div>
+
+      <div class="control-row">
+        <span style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted);">Pilih Sampel Naskah:</span>
+        <button class="sample-btn active" onclick="setSample(1, this)">Naskah 1 Baris (Ringkas)</button>
+        <button class="sample-btn" onclick="setSample(2, this)">Naskah 2 Baris (Habitfolk Resep)</button>
+        <button class="sample-btn" onclick="setSample(3, this)">Naskah 3 Baris (Panjang)</button>
+      </div>
+
+      <div class="control-row">
+        <button class="btn btn-secondary btn-sm" id="playBtn" onclick="togglePlay()">
+          ▶️ Putar Typewriter
+        </button>
+        <div class="slider-wrap">
+          <span style="font-size: 0.74rem; font-family: var(--font-mono); color: var(--text-muted);" id="timeLabel">Waktu: 100%</span>
+          <input type="range" id="progressSlider" min="0" max="100" value="100" oninput="onSliderChange(this.value)">
+        </div>
+      </div>
+    </section>
+
+    <!-- Side-by-Side Visual Comparison -->
+    <div class="comparison-grid">
+
+      <!-- COLUMN A: CURRENT (SEBELUM) -->
+      <div class="column-box">
+        <div class="column-header">
+          <div class="column-title">
+            <span>❌</span> Desain Saat Ini (Sebelum)
+          </div>
+          <span class="column-tag tag-danger">Kotak Raksasa 336px</span>
+        </div>
+
+        <div class="phone-simulator">
+          <span class="dimen-badge">Tinggi: 336px | Menutupi 28% Layar</span>
+          <video class="simulated-bg" src="/temp/showcase_transition_fade.mp4" autoplay muted loop playsinline></video>
+          <div class="bg-gradient-overlay"></div>
+
+          <!-- Simulated Old Card Overlay -->
+          <div class="overlay-container">
+            <div class="old-card" id="oldCardBox">
+              <div class="old-header">
+                <span class="old-badge">HOOK</span>
+                <span class="old-brand">@HabitFolk</span>
+              </div>
+              <div class="old-text" id="oldCardText">
+                CRISPY GOLDEN CHICKEN WINGS WITH ZERO EXCESS OIL CRUNCH!
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="column-body">
+          <div class="detail-item">
+            <span class="detail-label">Tinggi Kartu:</span>
+            <span class="detail-val text-danger">336px (Statis Raksasa)</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Elemen Tambahan:</span>
+            <span class="detail-val text-danger">Kotak hitam "HOOK" + Tag "@HabitFolk"</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Dampak Visual:</span>
+            <span class="detail-val text-danger">Menutupi 28% area masakan di belakangnya</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- COLUMN B: PROPOSED (SESUDAH) -->
+      <div class="column-box" style="border-color: var(--action-primary);">
+        <div class="column-header" style="background: var(--surface-interactive);">
+          <div class="column-title" style="color: var(--action-primary);">
+            <span>✨</span> Desain Usulan Baru (Sesudah)
+          </div>
+          <span class="column-tag tag-success">Super Slim 65–85px</span>
+        </div>
+
+        <div class="phone-simulator">
+          <span class="dimen-badge" style="border-color: var(--action-primary); color: var(--action-primary);" id="newDimenBadge">
+            Tinggi: 80px | Hemat 76% Ruang
+          </span>
+          <video class="simulated-bg" src="/temp/showcase_transition_fade.mp4" autoplay muted loop playsinline></video>
+          <div class="bg-gradient-overlay"></div>
+
+          <!-- Simulated New Slim Card Overlay -->
+          <div class="overlay-container">
+            <div class="new-card" id="newCardBox">
+              <div class="new-text" id="newCardText">
+                CRISPY GOLDEN CHICKEN WINGS WITH ZERO EXCESS OIL CRUNCH!
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="column-body">
+          <div class="detail-item">
+            <span class="detail-label">Tinggi Kartu:</span>
+            <span class="detail-val text-success" id="newHeightLabel">65px – 85px (Auto-fit naskah)</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Elemen Tambahan:</span>
+            <span class="detail-val text-success">0 Clutter (100% Naskah Saja)</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Dampak Visual:</span>
+            <span class="detail-val text-success">Masakan di belakangnya 100% bebas terlihat</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Metrics Summary -->
+    <section class="metrics-summary">
+      <div class="metric-card">
+        <span class="metric-title">Penghematan Area Layar</span>
+        <span class="metric-value">76.2% Lebih Ramping</span>
+        <span class="metric-desc">Tinggi kartu turun dari 336px menjadi rata-rata 80px</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-title">Kebersihan Konten (Clutter)</span>
+        <span class="metric-value">100% Bebas Badge</span>
+        <span class="metric-desc">Label "HOOK" dan brand ditiadakan, fokus ke teks</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-title">Visibilitas Video Masakan</span>
+        <span class="metric-value">Sangat Lega</span>
+        <span class="metric-desc">Aksi masak &amp; tekstur makanan di tengah tidak terpotong</span>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Theme Toggle
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('makna_theme', next);
+    }
+    (function() {
+      const saved = localStorage.getItem('makna_theme');
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+    })();
+
+    // Samples Data
+    const SAMPLES = {
+      1: "Crispy golden chicken wings with zero oil!",
+      2: "Crispy golden chicken wings with zero excess oil crunch!",
+      3: "Marinated with herbs and garlic, cooked until golden perfection in the air fryer."
+    };
+
+    let currentSampleText = SAMPLES[2];
+    let isPlaying = false;
+    let playInterval = null;
+    let currentProgress = 100;
+
+    function setSample(idx, btn) {
+      document.querySelectorAll('.sample-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentSampleText = SAMPLES[idx];
+
+      const newDimenBadge = document.getElementById('newDimenBadge');
+      const newHeightLabel = document.getElementById('newHeightLabel');
+      if (idx === 1) {
+        newDimenBadge.textContent = "Tinggi: 58px | Hemat 82% Ruang";
+        newHeightLabel.textContent = "~58px (1 Baris Ringkas)";
+      } else if (idx === 2) {
+        newDimenBadge.textContent = "Tinggi: 80px | Hemat 76% Ruang";
+        newHeightLabel.textContent = "~80px (2 Baris Resep)";
+      } else {
+        newDimenBadge.textContent = "Tinggi: 105px | Hemat 68% Ruang";
+        newHeightLabel.textContent = "~105px (3 Baris Panjang)";
+      }
+
+      updateDisplay();
+    }
+
+    function onSliderChange(val) {
+      currentProgress = Number(val);
+      document.getElementById('timeLabel').textContent = `Waktu: ${currentProgress}%`;
+      updateDisplay();
+    }
+
+    function updateDisplay() {
+      const charCount = Math.round((currentProgress / 100) * currentSampleText.length);
+      const visible = currentSampleText.substring(0, Math.max(charCount, 1)).toUpperCase();
+
+      document.getElementById('oldCardText').textContent = visible;
+      document.getElementById('newCardText').textContent = visible;
+    }
+
+    function togglePlay() {
+      const btn = document.getElementById('playBtn');
+      if (isPlaying) {
+        clearInterval(playInterval);
+        isPlaying = false;
+        btn.textContent = "▶️ Putar Typewriter";
+      } else {
+        isPlaying = true;
+        btn.textContent = "⏸️ Pause";
+        currentProgress = 0;
+        playInterval = setInterval(() => {
+          currentProgress += 2;
+          if (currentProgress > 100) currentProgress = 0;
+          document.getElementById('progressSlider').value = currentProgress;
+          document.getElementById('timeLabel').textContent = `Waktu: ${currentProgress}%`;
+          updateDisplay();
+        }, 80);
+      }
+    }
+
+    // Initialize
+    updateDisplay();
+  </script>
+</body>
+</html>
+
