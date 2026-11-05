@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.167 — Kategori Resep Kuliner Modal & Integrasi Bahasa Preset AI (05/11/2026)
+- Kategori Resep Kuliner 4 card dengan smart auto-detection & manual override pada modal buat/edit jadwal auto pipeline
+- Visualisasi badge bahasa target preset dan persona suara MiniMax pada modal jadwal
+- Sinkronisasi otomatis voice persona saat ganti target_language di Preset Manager
+- Mandat bahasa AI eksplisit pada recipe production adapter untuk menghasilkan VO naskah resep dan caption 100% selaras bahasa preset
+
 ## V2.32.166 — Fix Repliz Publishing Payload Mode to Live (05/11/2026)
 - Memperbaiki properti publish_mode menjadi live dengan scheduled_at
 - Membersihkan status last_error secara otomatis saat sukses dispatch ke Repliz

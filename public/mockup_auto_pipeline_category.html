@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup UI — Kategori Resep Kuliner & Bahasa Preset pada Auto Pipeline</title>
+  <link rel="stylesheet" href="/theme.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body {
+      background: var(--canvas, #090d16);
+      color: var(--text-primary, #f1f5f9);
+      padding: 30px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      gap: 24px;
+    }
+    .demo-bar {
+      background: var(--surface, #0f172a);
+      border: 1px solid var(--border-subtle, #1e293b);
+      border-radius: var(--radius-md, 10px);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      max-width: 820px;
+      width: 100%;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .modal-box {
+      background: var(--surface, #0f172a);
+      border: 1px solid var(--border-subtle, #1e293b);
+      border-radius: var(--radius-lg, 14px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      width: 100%;
+      max-width: 820px;
+      padding: 24px;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-subtle, #1e293b);
+      padding-bottom: 14px;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-secondary, #94a3b8);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .form-control {
+      width: 100%;
+      height: 42px;
+      background: var(--input-bg, #131d31);
+      border: 1px solid var(--border-subtle, #1e293b);
+      border-radius: var(--radius-sm, 8px);
+      padding: 0 12px;
+      color: var(--text-primary, #f1f5f9);
+      font-size: 0.88rem;
+      outline: none;
+      transition: var(--transition, all 0.2s ease);
+    }
+    .form-control:focus {
+      border-color: var(--action-primary, #06b6d4);
+      box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.2);
+    }
+
+    /* KATEGORI RESEP KULINER CONTAINER */
+    .category-container {
+      background: var(--surface-raised, #162032);
+      border: 1px solid var(--border-subtle, #1e293b);
+      border-radius: var(--radius-md, 10px);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 6px;
+    }
+    .category-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .category-title {
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: var(--text-primary, #f1f5f9);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .category-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .badge-auto {
+      background: var(--status-info-soft, rgba(6, 182, 212, 0.15));
+      color: var(--status-info, #06b6d4);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+    }
+    .badge-manual {
+      background: var(--status-warning-soft, rgba(234, 179, 8, 0.15));
+      color: var(--status-warning, #eab308);
+      border: 1px solid rgba(234, 179, 8, 0.3);
+    }
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    @media (max-width: 640px) {
+      .category-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    .category-card {
+      background: var(--surface, #0f172a);
+      border: 1.5px solid var(--border-subtle, #1e293b);
+      border-radius: var(--radius-sm, 8px);
+      padding: 12px 10px;
+      cursor: pointer;
+      transition: var(--transition, all 0.2s ease);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      position: relative;
+      user-select: none;
+    }
+    .category-card:hover {
+      border-color: var(--action-primary, #06b6d4);
+      transform: translateY(-2px);
+    }
+    .category-card.selected {
+      border-color: var(--action-primary, #06b6d4);
+      background: rgba(6, 182, 212, 0.08);
+      box-shadow: 0 0 0 1px var(--action-primary, #06b6d4);
+    }
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .cat-icon {
+      font-size: 1.4rem;
+    }
+    .cat-check {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1px solid var(--border-subtle, #334155);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      color: transparent;
+    }
+    .category-card.selected .cat-check {
+      background: var(--action-primary, #06b6d4);
+      border-color: var(--action-primary, #06b6d4);
+      color: #000;
+      font-weight: 800;
+    }
+    .cat-name {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-primary, #f1f5f9);
+      margin-top: 2px;
+    }
+    .cat-desc {
+      font-size: 0.68rem;
+      color: var(--text-muted, #64748b);
+      line-height: 1.25;
+    }
+    .btn-reset {
+      background: none;
+      border: 1px dashed var(--border-subtle, #334155);
+      color: var(--text-muted, #94a3b8);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: var(--transition, all 0.2s ease);
+    }
+    .btn-reset:hover {
+      color: var(--text-primary, #f1f5f9);
+      border-color: var(--action-primary, #06b6d4);
+    }
+
+    /* PRESET LANGUAGE CARD & PIPELINE PREVIEW */
+    .language-info-card {
+      background: var(--surface-raised, #162032);
+      border: 1px solid var(--border-subtle, #1e293b);
+      border-radius: var(--radius-sm, 8px);
+      padding: 10px 14px;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .language-pill {
+      font-size: 0.76rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--status-info-soft, rgba(6, 182, 212, 0.15));
+      color: var(--status-info, #06b6d4);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+    }
+    .ai-pipeline-preview {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--border-subtle, #1e293b);
+      border-radius: var(--radius-md, 10px);
+      padding: 16px;
+      margin-top: 20px;
+    }
+    .pipeline-step {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .step-number {
+      background: var(--action-primary, #06b6d4);
+      color: #000;
+      font-size: 0.72rem;
+      font-weight: 800;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .step-content {
+      font-size: 0.8rem;
+      line-height: 1.4;
+      color: var(--text-secondary, #94a3b8);
+    }
+    .step-content strong {
+      color: var(--text-primary, #f1f5f9);
+    }
+    .sample-box {
+      background: var(--input-bg, #0b1120);
+      border: 1px solid var(--border-subtle, #1e293b);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 0.74rem;
+      color: var(--text-primary, #f1f5f9);
+      margin-top: 6px;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Demo Switcher (Simulasi Modal Baru vs Modal Edit) -->
+  <div class="demo-bar">
+    <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary);">
+      Simulasi Pengujian Auto Pipeline:
+    </div>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+      <button type="button" id="btnModeCreate" onclick="switchMode('create')" style="background: var(--action-primary); color: #000; border: none; padding: 6px 14px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
+        ➕ Modal Pembuatan Jadwal Baru
+      </button>
+      <button type="button" id="btnModeEdit" onclick="switchMode('edit')" style="background: var(--surface-raised); color: var(--text-secondary); border: 1px solid var(--border-subtle); padding: 6px 14px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
+        ✏️ Modal Edit Jadwal (Existing)
+      </button>
+      <button type="button" id="btnPresetConfig" onclick="togglePresetConfigModal()" style="background: var(--surface-raised); color: var(--status-info); border: 1px solid var(--border-subtle); padding: 6px 14px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
+        ⚙️ Preset Manager (Target Language)
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL BOX UTAMA JADWAL AUTO PIPELINE -->
+  <div class="modal-box">
+    <div class="modal-header">
+      <div>
+        <h2 style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);" id="modalTitle">
+          ⏰ Buat Jadwal Rutin Auto Pipeline Baru
+        </h2>
+        <p style="font-size: 0.76rem; color: var(--text-muted); margin-top: 3px;">
+          Konfigurasi otomatisasi resep, kategori kuliner AI, bahasa preset, dan target Repliz
+        </p>
+      </div>
+      <button type="button" style="background: none; border: none; font-size: 1.25rem; color: var(--text-muted); cursor: pointer;">✕</button>
+    </div>
+
+    <!-- 1. Nama Jadwal -->
+    <div class="form-group">
+      <label class="form-label">Nama Pengenal Jadwal</label>
+      <input type="text" class="form-control" id="schedName" value="HabitFolk — Daily Morning Snack">
+    </div>
+
+    <!-- 2. Brand Profile & Preset dengan Pilihan Bahasa Target -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px;">
+      <div>
+        <label class="form-label">1. Brand Profile</label>
+        <select class="form-control" id="brandSelect" onchange="handleBrandChange(this.value)">
+          <option value="habitfolk" selected>HabitFolk (@habitfolk.eats)</option>
+          <option value="dapurbotani">Dapur Botani (@dapurbotani)</option>
+          <option value="nutribake">NutriBake ID (@nutribake_id)</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">
+          <span>2. Preset Konfigurasi Resep</span>
+          <span style="font-size: 0.65rem; color: var(--status-success); cursor: pointer;" onclick="togglePresetConfigModal()">Kelola di Preset Manager ↗</span>
+        </label>
+        <select class="form-control" id="presetSelect" onchange="handlePresetChange(this.value)" style="border-color: var(--action-primary); font-weight: 700;">
+          <option value="habitfolk_6clips_quick" selected>HabitFolk 6 Klip @ 4s (SlideLeft • Kuning)</option>
+          <option value="habitfolk_8clips_fade">HabitFolk 8 Klip @ 4s (Fade • Putih)</option>
+          <option value="dapurbotani_4clips_fade">Dapur Botani 4 Klip @ 4s (Fade • Hangat)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Info Bahasa Target Preset (TERUSKAN KE AI) -->
+    <div class="language-info-card">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span class="language-pill" id="presetLangPill">
+          <span id="langFlag">🇺🇸</span>
+          <span id="langName">English (en-US)</span>
+        </span>
+        <span style="font-size: 0.74rem; color: var(--text-secondary);">
+          TTS: <strong id="voicePersonaLabel" style="color: var(--text-primary);">English_causual_narrator_vv1</strong>
+        </span>
+      </div>
+      <div style="font-size: 0.72rem; color: var(--status-info);">
+        ⚡ AI otomatis menghasilkan VO, naskah, caption, dan CTA dalam bahasa ini
+      </div>
+    </div>
+
+    <!-- 3. Dua Pengaturan Waktu (24 Jam) -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; background: var(--surface-raised); padding: 14px; border-radius: 10px; border: 1px solid var(--border-subtle); margin-top: 14px; margin-bottom: 18px;">
+      <div>
+        <label class="form-label" style="color: var(--status-info);">⚙️ Jam Pembuatan Video (Format 24 Jam WIB)</label>
+        <input type="time" class="form-control" value="05:00" style="font-weight: 800; font-size: 1.05rem;">
+        <span style="font-size: 0.68rem; color: var(--text-muted);">Contoh: 05:00 (Pagi) atau 17:00 (Sore WIB)</span>
+      </div>
+      <div>
+        <label class="form-label" style="color: var(--status-success);">🚀 Jam Publish Repliz (Format 24 Jam WIB)</label>
+        <input type="time" class="form-control" value="09:00" style="font-weight: 800; font-size: 1.05rem;">
+        <span style="font-size: 0.68rem; color: var(--text-muted);">Contoh: 09:00 (Pagi) atau 21:30 (Malam WIB)</span>
+      </div>
+    </div>
+
+    <!-- 4. Tema / Arahan Topik Resep -->
+    <div class="form-group">
+      <label class="form-label">
+        <span>Tema / Arahan Topik Resep Harian</span>
+        <span style="font-size: 0.7rem; color: var(--text-muted);">AI akan berkreasi variasi resep baru tiap hari</span>
+      </label>
+      <input type="text" class="form-control" id="topicInput" value="Air fryer crispy chicken tenders and snack finger foods" oninput="handleTopicInput(this.value)">
+      <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px;">
+        💡 <em>Ketik kata kunci seperti "latte/coffee" untuk Minuman, "brownie/cake" untuk Dessert, "fries/wings" untuk Camilan.</em>
+      </div>
+    </div>
+
+    <!-- 5. KATEGORI RESEP KULINER (4 PILIHAN KARTU + AUTO-DETECT) -->
+    <div class="form-group">
+      <div class="category-container">
+        <div class="category-header">
+          <div class="category-title">
+            <span>🍽️</span>
+            <span>Kategori Resep Kuliner</span>
+            <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: normal;">(Menentukan jenis olahan &amp; instruksi AI)</span>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="category-badge badge-auto" id="categoryBadge">
+              ✨ Auto-Terdeteksi dari Topik
+            </span>
+            <button type="button" class="btn-reset" id="btnResetAuto" onclick="resetToAuto()" style="display: none;">
+              Reset ke Otomatis
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 Pilihan Kategori Kuliner -->
+        <div class="category-grid">
+          <div class="category-card" id="card-makanan_utama" onclick="selectCategory('makanan_utama')">
+            <div class="card-top">
+              <span class="cat-icon">🍗</span>
+              <div class="cat-check">✓</div>
+            </div>
+            <div class="cat-name">Makanan Utama</div>
+            <div class="cat-desc">Ayam, daging, pasta, rice bowl, seafood</div>
+          </div>
+
+          <div class="category-card selected" id="card-camilan" onclick="selectCategory('camilan')">
+            <div class="card-top">
+              <span class="cat-icon">🍟</span>
+              <div class="cat-check">✓</div>
+            </div>
+            <div class="cat-name">Camilan / Side Dish</div>
+            <div class="cat-desc">Finger food, fries, crispy bites, gorengan</div>
+          </div>
+
+          <div class="category-card" id="card-dessert" onclick="selectCategory('dessert')">
+            <div class="card-top">
+              <span class="cat-icon">🍰</span>
+              <div class="cat-check">✓</div>
+            </div>
+            <div class="cat-name">Baking / Dessert</div>
+            <div class="cat-desc">Cake, cookies, pastry, waffle, puding, sweets</div>
+          </div>
+
+          <div class="category-card" id="card-minuman" onclick="selectCategory('minuman')">
+            <div class="card-top">
+              <span class="cat-icon">🥤</span>
+              <div class="cat-check">✓</div>
+            </div>
+            <div class="cat-name">Minuman</div>
+            <div class="cat-desc">Coffee, latte, matcha, smoothie, tea, mocktail</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PREVIEW AI ASSET GENERATION SESUAI BAHASA PRESET -->
+    <div class="ai-pipeline-preview">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">
+        <div style="font-size: 0.84rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+          <span>🤖</span>
+          <span>Simulasi Aset yang Dihasilkan AI Sesuai Bahasa Preset (<span id="previewLangLabel">🇺🇸 English</span>)</span>
+        </div>
+        <span style="font-size: 0.7rem; color: var(--status-success); font-weight: 700;">100% Selaras Otomatis</span>
+      </div>
+
+      <div class="pipeline-step">
+        <div class="step-number">1</div>
+        <div class="step-content" style="width: 100%;">
+          <strong>🎙️ Naskah Voice-Over (TTS MiniMax):</strong>
+          <div class="sample-box" id="sampleVo">
+"The secret to ultra-crispy air fryer tenders without any messy oil! Watch this golden crunch..."
+          </div>
+        </div>
+      </div>
+
+      <div class="pipeline-step">
+        <div class="step-number">2</div>
+        <div class="step-content" style="width: 100%;">
+          <strong>📝 Teks Judul &amp; Resep di Video:</strong>
+          <div class="sample-box" id="sampleRecipe">
+Title: "Crispy Garlic Herb Chicken Tenders"
+Ingredients: 300g Chicken Breast, 1 tsp Garlic Powder, 1 cup Panko Breadcrumbs.
+          </div>
+        </div>
+      </div>
+
+      <div class="pipeline-step">
+        <div class="step-number">3</div>
+        <div class="step-content" style="width: 100%;">
+          <strong>📱 Social Media Package (Caption, Hashtags &amp; CTA Repliz):</strong>
+          <div class="sample-box" id="sampleCaption">
+"Craving that ultimate crunch? 🍗 Try these quick garlic tenders in your air fryer tonight!
+
+👉 Full recipe & tips in bio!
+#AirFryerRecipes #CrispyChicken #QuickMeals #Foodie #HealthySnack"
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Actions -->
+    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
+      <button type="button" style="background: var(--surface); border: 1px solid var(--border-subtle); color: var(--text-secondary); padding: 9px 18px; border-radius: 8px; font-weight: 600; cursor: pointer;">
+        Batal
+      </button>
+      <button type="button" style="background: var(--action-primary); border: none; color: #000; padding: 9px 22px; border-radius: 8px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+        <span>💾</span>
+        <span id="btnSubmitText">Buat Jadwal Rutin</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL SIMULASI PRESET MANAGER (Target Language Config) -->
+  <div id="presetConfigModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: var(--surface, #0f172a); border: 1px solid var(--border-subtle, #1e293b); border-radius: 12px; max-width: 600px; width: 100%; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px; margin-bottom: 16px;">
+        <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--text-primary);">
+          ⚙️ Preset Manager — Konfigurasi Bahasa Target (target_language)
+        </h3>
+        <button type="button" onclick="togglePresetConfigModal()" style="background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer;">✕</button>
+      </div>
+
+      <div style="display: grid; gap: 14px;">
+        <div>
+          <label class="form-label">Nama Preset</label>
+          <input type="text" class="form-control" value="HabitFolk 6 Klip @ 4s" readonly style="opacity: 0.8;">
+        </div>
+
+        <div>
+          <label class="form-label">
+            <span>Target Language (Bahasa AI)</span>
+            <span style="font-size: 0.68rem; color: var(--action-primary);">Menentukan bahasa naskah, VO &amp; caption</span>
+          </label>
+          <select class="form-control" id="presetModalLangSelect" onchange="changePresetTargetLanguage(this.value)" style="border: 2px solid var(--action-primary); font-weight: 700;">
+            <option value="en-US">🇺🇸 English (en-US)</option>
+            <option value="id-ID">🇮🇩 Bahasa Indonesia (id-ID)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="form-label">MiniMax Voice Persona (Otomatis Tersinkronisasi)</label>
+          <select class="form-control" id="presetModalVoiceSelect">
+            <option value="English_causual_narrator_vv1">English_causual_narrator_vv1 (Natural US English)</option>
+            <option value="English_warm_storyteller_vv1">English_warm_storyteller_vv1 (Calm & Friendly)</option>
+          </select>
+        </div>
+
+        <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 12px; font-size: 0.76rem; color: var(--text-secondary); line-height: 1.4;">
+          📌 <strong>SOP Propagasi Bahasa:</strong> Saat preset disimpan dengan target language tertentu, nilai ini langsung diteruskan ke Content Planner AI, Gemini Recipe Creative Engine, MiniMax TTS Audio Generator, dan Social Media Package Formatter tanpa intervensi manual tambahan.
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+        <button type="button" onclick="togglePresetConfigModal()" style="background: var(--action-primary); color: #000; border: none; padding: 8px 18px; border-radius: 6px; font-weight: 700; cursor: pointer;">
+          Tutup &amp; Simulasikan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentCategory = 'camilan';
+    let isManual = false;
+    let mode = 'create'; // 'create' | 'edit'
+    let currentPreset = 'habitfolk_6clips_quick';
+
+    const PRESET_DATA = {
+      'habitfolk_6clips_quick': {
+        lang: 'en-US',
+        langName: 'English (en-US)',
+        flag: '🇺🇸',
+        voice: 'English_causual_narrator_vv1',
+        brand: 'habitfolk',
+        sampleVo: '"The secret to ultra-crispy air fryer tenders without any messy oil! Watch this golden crunch..."',
+        sampleRecipe: 'Title: "Crispy Garlic Herb Chicken Tenders"\nIngredients: 300g Chicken Breast, 1 tsp Garlic Powder, 1 cup Panko Breadcrumbs.',
+        sampleCaption: '"Craving that ultimate crunch? 🍗 Try these quick garlic tenders in your air fryer tonight!\n\n👉 Full recipe & tips in bio!\n#AirFryerRecipes #CrispyChicken #QuickMeals #Foodie #HealthySnack"'
+      },
+      'habitfolk_8clips_fade': {
+        lang: 'en-US',
+        langName: 'English (en-US)',
+        flag: '🇺🇸',
+        voice: 'English_warm_storyteller_vv1',
+        brand: 'habitfolk',
+        sampleVo: '"Juicy on the inside, perfectly crispy on the outside. Let’s make this 10-minute dinner treat..."',
+        sampleRecipe: 'Title: "Air Fryer Golden Potato Wedges"\nIngredients: 2 Large Potatoes, 1 tbsp Olive Oil, Smoked Paprika, Sea Salt.',
+        sampleCaption: '"Golden crispy wedges ready in 15 minutes! ✨ Perfect side dish for movie night.\n\nSave this recipe & tap bio for details! 👇\n#AirFryerWedges #SnackIdeas #CrispyPotatoes"'
+      },
+      'dapurbotani_4clips_fade': {
+        lang: 'id-ID',
+        langName: 'Bahasa Indonesia (id-ID)',
+        flag: '🇮🇩',
+        voice: 'Indonesian_warm_motherly_vv1',
+        brand: 'dapurbotani',
+        sampleVo: '"Rahasia tenggorokan lega dan badan hangat seketika! Cukup seduh ramuan herbal alami ini..."',
+        sampleRecipe: 'Judul: "Teh Madu Jahe Hangat Imun Booster"\nBahan: 2 ruas Jahe Merah geprek, 2 sdm Madu Murni, 1 batang Serai, 250ml Air Panas.',
+        sampleCaption: '"Cuaca lagi dingin? ☕ Yuk seduh ramuan jahe madu hangat ini untuk daya tahan tubuh keluarga!\n\nSimpan resep ini & dapatkan bahan herbal di link bio ya! 👇\n#ResepHerbal #MinumanSehat #ImunBooster #DapurBotani #ResepPraktis"'
+      }
+    };
+
+    function detectCategoryFromText(text) {
+      if (!text || !text.trim()) return 'makanan_utama';
+      const t = text.toLowerCase();
+
+      // Minuman
+      const bev = ['kopi', 'coffee', 'latte', 'cappuccino', 'tea', 'teh', 'matcha', 'smoothie', 'juice', 'jus', 'boba', 'drink', 'shake', 'herbal'];
+      if (bev.some(k => t.includes(k))) return 'minuman';
+
+      // Dessert
+      const des = ['cake', 'kue', 'cookie', 'cookies', 'baking', 'brownie', 'pancake', 'waffle', 'donut', 'muffin', 'pudding', 'tart', 'pie'];
+      if (des.some(k => t.includes(k))) return 'dessert';
+
+      // Camilan
+      const snk = ['fries', 'chips', 'snack', 'camilan', 'nugget', 'finger food', 'popcorn', 'bites', 'tenders', 'crispy', 'dimsum', 'wings'];
+      if (snk.some(k => t.includes(k))) return 'camilan';
+
+      return 'makanan_utama';
+    }
+
+    function renderCategoryUI() {
+      ['makanan_utama', 'camilan', 'dessert', 'minuman'].forEach(key => {
+        const el = document.getElementById(`card-${key}`);
+        if (el) {
+          if (currentCategory === key) {
+            el.classList.add('selected');
+          } else {
+            el.classList.remove('selected');
+          }
+        }
+      });
+
+      const badge = document.getElementById('categoryBadge');
+      const btnReset = document.getElementById('btnResetAuto');
+
+      if (isManual) {
+        badge.className = 'category-badge badge-manual';
+        badge.textContent = '✏️ Pilihan Manual';
+        btnReset.style.display = 'inline-block';
+      } else {
+        badge.className = 'category-badge badge-auto';
+        badge.textContent = '✨ Auto-Terdeteksi dari Topik';
+        btnReset.style.display = 'none';
+      }
+    }
+
+    function selectCategory(catKey) {
+      currentCategory = catKey;
+      isManual = true;
+      renderCategoryUI();
+    }
+
+    function handleTopicInput(val) {
+      if (!isManual) {
+        currentCategory = detectCategoryFromText(val);
+        renderCategoryUI();
+      }
+    }
+
+    function resetToAuto() {
+      isManual = false;
+      const topicVal = document.getElementById('topicInput').value;
+      currentCategory = detectCategoryFromText(topicVal);
+      renderCategoryUI();
+    }
+
+    function updateLanguageAndPresetView(presetKey) {
+      currentPreset = presetKey;
+      const data = PRESET_DATA[presetKey] || PRESET_DATA['habitfolk_6clips_quick'];
+
+      document.getElementById('langFlag').textContent = data.flag;
+      document.getElementById('langName').textContent = data.langName;
+      document.getElementById('voicePersonaLabel').textContent = data.voice;
+      document.getElementById('previewLangLabel').textContent = `${data.flag} ${data.langName}`;
+      document.getElementById('sampleVo').textContent = data.sampleVo;
+      document.getElementById('sampleRecipe').textContent = data.sampleRecipe;
+      document.getElementById('sampleCaption').textContent = data.sampleCaption;
+    }
+
+    function handlePresetChange(val) {
+      updateLanguageAndPresetView(val);
+    }
+
+    function handleBrandChange(brandKey) {
+      const presetSelect = document.getElementById('presetSelect');
+      if (brandKey === 'dapurbotani') {
+        presetSelect.value = 'dapurbotani_4clips_fade';
+        document.getElementById('topicInput').value = 'Minuman jahe hangat imun booster dengan madu murni';
+      } else {
+        presetSelect.value = 'habitfolk_6clips_quick';
+        document.getElementById('topicInput').value = 'Air fryer crispy chicken tenders and snack finger foods';
+      }
+      isManual = false;
+      const topicVal = document.getElementById('topicInput').value;
+      currentCategory = detectCategoryFromText(topicVal);
+      renderCategoryUI();
+      updateLanguageAndPresetView(presetSelect.value);
+    }
+
+    function switchMode(newMode) {
+      mode = newMode;
+      const btnCreate = document.getElementById('btnModeCreate');
+      const btnEdit = document.getElementById('btnModeEdit');
+      const title = document.getElementById('modalTitle');
+      const submitText = document.getElementById('btnSubmitText');
+      const brandSelect = document.getElementById('brandSelect');
+      const presetSelect = document.getElementById('presetSelect');
+
+      if (mode === 'create') {
+        btnCreate.style.background = 'var(--action-primary)';
+        btnCreate.style.color = '#000';
+        btnEdit.style.background = 'var(--surface-raised)';
+        btnEdit.style.color = 'var(--text-secondary)';
+
+        title.textContent = '⏰ Buat Jadwal Rutin Auto Pipeline Baru';
+        submitText.textContent = 'Buat Jadwal Rutin';
+        document.getElementById('schedName').value = 'HabitFolk — Daily Morning Snack';
+        document.getElementById('topicInput').value = 'Air fryer crispy chicken tenders and snack finger foods';
+        brandSelect.value = 'habitfolk';
+        presetSelect.value = 'habitfolk_6clips_quick';
+        isManual = false;
+        currentCategory = 'camilan';
+        updateLanguageAndPresetView('habitfolk_6clips_quick');
+      } else {
+        btnEdit.style.background = 'var(--action-primary)';
+        btnEdit.style.color = '#000';
+        btnCreate.style.background = 'var(--surface-raised)';
+        btnCreate.style.color = 'var(--text-secondary)';
+
+        title.textContent = '⏰ Edit Jadwal Rutin Auto Pipeline';
+        submitText.textContent = 'Simpan Perubahan';
+        document.getElementById('schedName').value = 'Dapur Botani — Resep Herbal Hangat';
+        document.getElementById('topicInput').value = 'Minuman herbal hangat, fermented honey garlic, imun booster';
+        brandSelect.value = 'dapurbotani';
+        presetSelect.value = 'dapurbotani_4clips_fade';
+        isManual = true;
+        currentCategory = 'minuman'; // Terpilih dari database existing
+        updateLanguageAndPresetView('dapurbotani_4clips_fade');
+      }
+      renderCategoryUI();
+    }
+
+    function togglePresetConfigModal() {
+      const modal = document.getElementById('presetConfigModal');
+      const isOpen = modal.style.display === 'flex';
+      modal.style.display = isOpen ? 'none' : 'flex';
+    }
+
+    function changePresetTargetLanguage(newLang) {
+      const voiceSelect = document.getElementById('presetModalVoiceSelect');
+      if (newLang === 'id-ID') {
+        voiceSelect.innerHTML = `
+          <option value="Indonesian_warm_motherly_vv1">Indonesian_warm_motherly_vv1 (Ramah & Hangat)</option>
+          <option value="Indonesian_professional_anchor_vv2">Indonesian_professional_anchor_vv2 (Berwibawa)</option>
+        `;
+        PRESET_DATA[currentPreset].lang = 'id-ID';
+        PRESET_DATA[currentPreset].langName = 'Bahasa Indonesia (id-ID)';
+        PRESET_DATA[currentPreset].flag = '🇮🇩';
+        PRESET_DATA[currentPreset].voice = 'Indonesian_warm_motherly_vv1';
+        PRESET_DATA[currentPreset].sampleVo = '"Rahasia resep lezat dan praktis! Simak langkah memasaknya sampai selesai..."';
+        PRESET_DATA[currentPreset].sampleRecipe = 'Judul: "Ayam Crispy Bumbu Bawang"\nBahan: 300g Dada Ayam, 1 sdt Bawang Putih Bubuk, Tepung Roti.';
+        PRESET_DATA[currentPreset].sampleCaption = '"Mau cemilan gurih renyah? 🍗 Yuk coba resep mudah ini!\n\nCek produk & tips di bio ya! 👇\n#ResepMudah #ResepViral #CamilanPraktis"';
+      } else {
+        voiceSelect.innerHTML = `
+          <option value="English_causual_narrator_vv1">English_causual_narrator_vv1 (Natural US English)</option>
+          <option value="English_warm_storyteller_vv1">English_warm_storyteller_vv1 (Calm & Friendly)</option>
+        `;
+        PRESET_DATA[currentPreset].lang = 'en-US';
+        PRESET_DATA[currentPreset].langName = 'English (en-US)';
+        PRESET_DATA[currentPreset].flag = '🇺🇸';
+        PRESET_DATA[currentPreset].voice = 'English_causual_narrator_vv1';
+        PRESET_DATA[currentPreset].sampleVo = '"The secret to ultra-crispy air fryer tenders without any messy oil! Watch this golden crunch..."';
+        PRESET_DATA[currentPreset].sampleRecipe = 'Title: "Crispy Garlic Herb Chicken Tenders"\nIngredients: 300g Chicken Breast, 1 tsp Garlic Powder, 1 cup Panko Breadcrumbs.';
+        PRESET_DATA[currentPreset].sampleCaption = '"Craving that ultimate crunch? 🍗 Try these quick garlic tenders in your air fryer tonight!\n\n👉 Full recipe & tips in bio!\n#AirFryerRecipes #CrispyChicken #QuickMeals #Foodie #HealthySnack"';
+      }
+      updateLanguageAndPresetView(currentPreset);
+    }
+
+    renderCategoryUI();
+    updateLanguageAndPresetView('habitfolk_6clips_quick');
+  </script>
+
+</body>
+</html>

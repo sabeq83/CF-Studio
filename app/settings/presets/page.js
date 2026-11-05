@@ -463,10 +463,25 @@ export default function PresetsPage() {
                         </select>
                       </label>
                       <label className="form-label">
-                        Target Language
-                        <select className="form-select" value={form.target_language} onChange={e => setForm({ ...form, target_language: e.target.value })}>
-                          <option value="id-ID">Indonesian (id-ID)</option>
-                          <option value="en-US">English (en-US)</option>
+                        Target Language (Bahasa AI)
+                        <select
+                          className="form-select"
+                          value={form.target_language}
+                          onChange={e => {
+                            const newLang = e.target.value;
+                            const isEn = newLang === 'en-US';
+                            const isCurrentVoiceEn = (form.voice_persona || '').startsWith('English');
+                            let nextVoice = form.voice_persona;
+                            if (isEn && !isCurrentVoiceEn) {
+                              nextVoice = 'English_causual_narrator_vv1';
+                            } else if (!isEn && isCurrentVoiceEn) {
+                              nextVoice = 'Indonesian_professional_anchor_vv2';
+                            }
+                            setForm({ ...form, target_language: newLang, voice_persona: nextVoice });
+                          }}
+                        >
+                          <option value="id-ID">🇮🇩 Indonesian (id-ID)</option>
+                          <option value="en-US">🇺🇸 English (en-US)</option>
                         </select>
                       </label>
                       <label className="form-label">

@@ -36,6 +36,7 @@ export default function AutoPipelinePage() {
   const [schedPubTime, setSchedPubTime] = useState('09:00');
   const [schedTopic, setSchedTopic] = useState('');
   const [schedCategory, setSchedCategory] = useState('makanan_utama');
+  const [isSchedCategoryManual, setIsSchedCategoryManual] = useState(false);
   const [schedDays, setSchedDays] = useState([0, 1, 2, 3, 4, 5, 6]);
   const [schedReplizAccountIds, setSchedReplizAccountIds] = useState([]);
   const [schedAutoPublish, setSchedAutoPublish] = useState(true);
@@ -456,14 +457,16 @@ export default function AutoPipelinePage() {
   function openCreateScheduleModal() {
     const currentBrand = brands.find(b => b.id === selectedBrandId) || brands[0];
     const brandName = currentBrand?.brand_name || 'Brand';
+    const initialTopic = topic || 'Air fryer crispy snack finger foods';
     setEditingSchedule(null);
     setSchedName(`${brandName} — Daily Morning Reels`);
     setSchedBrandId(currentBrand?.id || '');
     setSchedPresetKey(selectedPresetKey || 'habitfolk_6clips_quick');
     setSchedGenTime('05:00');
     setSchedPubTime('09:00');
-    setSchedTopic(topic || 'Air fryer crispy snack finger foods');
-    setSchedCategory(category || 'makanan_utama');
+    setSchedTopic(initialTopic);
+    setSchedCategory(detectCategoryFromTopic(initialTopic));
+    setIsSchedCategoryManual(false);
     setSchedDays([0, 1, 2, 3, 4, 5, 6]);
     setSchedAutoPublish(true);
 
@@ -489,6 +492,7 @@ export default function AutoPipelinePage() {
     setSchedPubTime(sched.publish_time || '09:00');
     setSchedTopic(sched.topic || '');
     setSchedCategory(sched.category || 'makanan_utama');
+    setIsSchedCategoryManual(true);
     setSchedDays(Array.isArray(sched.days_of_week) ? sched.days_of_week : [0, 1, 2, 3, 4, 5, 6]);
     setSchedReplizAccountIds(Array.isArray(sched.repliz_account_ids) ? sched.repliz_account_ids : []);
     setSchedAutoPublish(sched.auto_publish_enabled !== false);
@@ -2514,6 +2518,50 @@ export default function AutoPipelinePage() {
                   </div>
                 </div>
 
+                {/* Preset Target Language & Voice Info Banner */}
+                {(() => {
+                  const modalPresetsList = modalBrandPresets.length > 0 ? modalBrandPresets : operatorPresets;
+                  const activePresetItem = modalPresetsList.find(p => p.key === schedPresetKey) || modalPresetsList[0];
+                  const pConfig = activePresetItem?.config || activePresetItem || {};
+                  const pLang = pConfig?.basic_strategy?.target_language || pConfig?.target_language || (schedBrandId?.includes('botani') ? 'id-ID' : 'en-US');
+                  const pVoice = pConfig?.basic_strategy?.voice_persona || pConfig?.voice_persona || (pLang === 'en-US' ? 'English_causual_narrator_vv1' : 'Indonesian_warm_motherly_vv1');
+                  const isEn = pLang === 'en-US';
+
+                  return (
+                    <div style={{
+                      background: 'var(--surface-raised)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: 'var(--radius-sm)',
+                      padding: '0.65rem 0.85rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      flexWrap: 'wrap',
+                      gap: '0.5rem',
+                      fontSize: '0.75rem'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{
+                          padding: '0.2rem 0.55rem',
+                          borderRadius: '999px',
+                          background: 'var(--status-info-soft)',
+                          color: 'var(--status-info)',
+                          border: '1px solid var(--border-subtle)',
+                          fontWeight: 700
+                        }}>
+                          {isEn ? '🇺🇸 English (en-US)' : '🇮🇩 Bahasa Indonesia (id-ID)'}
+                        </span>
+                        <span style={{ color: 'var(--text-secondary)' }}>
+                          TTS: <strong style={{ color: 'var(--text-primary)' }}>{pVoice.replace(/_/g, ' ')}</strong>
+                        </span>
+                      </div>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>
+                        ⚡ AI otomatis menyusun Voice-Over &amp; Caption dalam bahasa ini
+                      </span>
+                    </div>
+                  );
+                })()}
+
                 {/* 3. Dua Waktu Terpisah (Jam Pembuatan & Jam Publish - Format 24 Jam WIB) */}
                 <div style={{
                   display: 'grid',
@@ -2579,13 +2627,20 @@ export default function AutoPipelinePage() {
 
                 {/* 4. Topik Resep */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                  <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                    Tema / Arahan Topik Resep Harian
+                  <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Tema / Arahan Topik Resep Harian</span>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>AI berkreasi variasi resep baru tiap hari</span>
                   </label>
                   <input
                     type="text"
                     value={schedTopic}
-                    onChange={(e) => setSchedTopic(e.target.value)}
+                    onChange={(e) => {
+                      const newTopic = e.target.value;
+                      setSchedTopic(newTopic);
+                      if (!isSchedCategoryManual) {
+                        setSchedCategory(detectCategoryFromTopic(newTopic));
+                      }
+                    }}
                     placeholder="Contoh: Air fryer crispy chicken tenders and snack finger foods"
                     required
                     style={{
@@ -2601,7 +2656,109 @@ export default function AutoPipelinePage() {
                   />
                 </div>
 
-                {/* 5. Hari Rutin (Pills) */}
+                {/* 5. Kategori Resep Kuliner */}
+                <div style={{
+                  background: 'var(--surface-raised)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '0.85rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.65rem'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <span>🍽️</span>
+                      <span>Kategori Resep Kuliner</span>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 400 }}>(Mengarahkan kit wadah &amp; instruksi AI)</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                      <span style={{
+                        fontSize: '0.68rem',
+                        fontWeight: 700,
+                        padding: '0.15rem 0.5rem',
+                        borderRadius: '999px',
+                        background: isSchedCategoryManual ? 'var(--status-warning-soft)' : 'var(--status-info-soft)',
+                        color: isSchedCategoryManual ? 'var(--status-warning)' : 'var(--status-info)',
+                        border: '1px solid var(--border-subtle)'
+                      }}>
+                        {isSchedCategoryManual ? '✏️ Pilihan Manual' : '✨ Auto-Terdeteksi dari Topik'}
+                      </span>
+                      {isSchedCategoryManual && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsSchedCategoryManual(false);
+                            setSchedCategory(detectCategoryFromTopic(schedTopic));
+                          }}
+                          style={{
+                            background: 'none',
+                            border: '1px dashed var(--border-subtle)',
+                            color: 'var(--text-muted)',
+                            borderRadius: '4px',
+                            padding: '0.15rem 0.45rem',
+                            fontSize: '0.68rem',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Reset ke Otomatis
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.55rem' }}>
+                    {[
+                      { key: 'makanan_utama', icon: '🍗', label: 'Makanan Utama', desc: 'Ayam, daging, pasta, rice bowl' },
+                      { key: 'camilan', icon: '🍟', label: 'Camilan / Side Dish', desc: 'Finger food, fries, crispy bites' },
+                      { key: 'dessert', icon: '🍰', label: 'Baking / Dessert', desc: 'Cake, cookies, waffle, pudding' },
+                      { key: 'minuman', icon: '🥤', label: 'Minuman', desc: 'Coffee, latte, smoothie, tea' }
+                    ].map(cat => {
+                      const isSelected = schedCategory === cat.key;
+                      return (
+                        <div
+                          key={cat.key}
+                          onClick={() => {
+                            setSchedCategory(cat.key);
+                            setIsSchedCategoryManual(true);
+                          }}
+                          style={{
+                            background: isSelected ? 'rgba(6, 182, 212, 0.08)' : 'var(--surface)',
+                            border: `1.5px solid ${isSelected ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
+                            borderRadius: 'var(--radius-sm)',
+                            padding: '0.65rem 0.55rem',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.2rem',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '1.2rem' }}>{cat.icon}</span>
+                            <span style={{
+                              width: '16px',
+                              height: '16px',
+                              borderRadius: '50%',
+                              background: isSelected ? 'var(--action-primary)' : 'transparent',
+                              border: `1px solid ${isSelected ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
+                              color: isSelected ? '#000' : 'transparent',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '0.6rem',
+                              fontWeight: 900
+                            }}>✓</span>
+                          </div>
+                          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '2px' }}>{cat.label}</span>
+                          <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', lineHeight: 1.2 }}>{cat.desc}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 6. Hari Rutin (Pills) */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                   <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
                     Hari Rutin Eksekusi:
@@ -2640,7 +2797,7 @@ export default function AutoPipelinePage() {
                   </div>
                 </div>
 
-                {/* 6. Multi-Platform Repliz Publishing Selector (Lengkap dengan Search, Filter Platform & Live Sync) */}
+                {/* 7. Multi-Platform Repliz Publishing Selector (Lengkap dengan Search, Filter Platform & Live Sync) */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
                     <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
@@ -2843,7 +3000,7 @@ export default function AutoPipelinePage() {
                   </div>
                 </div>
 
-                {/* 7. Auto-Publish Toggle Checkbox */}
+                {/* 8. Auto-Publish Toggle Checkbox */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
