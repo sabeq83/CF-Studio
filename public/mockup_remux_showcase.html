@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Showcase Motion Text & Transisi Video — MAKNA Flow</title>
+  <link rel="stylesheet" href="/theme.css">
+  <style>
+    /* MAKNA Flow Semantic CSS Design Tokens */
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+      --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --border-color: #26354a;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e2e8f0;
+      --input-bg: #f8fafc;
+      --overlay-subtle: rgba(0, 0, 0, 0.05);
+      --overlay-backdrop: rgba(15, 23, 42, 0.5);
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --text-disabled: #94a3b8;
+      --border-subtle: #cbd5e1;
+      --border-strong: #94a3b8;
+      --border-color: #cbd5e1;
+      --action-primary: #0d9488;
+      --action-primary-hover: #0f766e;
+      --on-action-primary: #ffffff;
+      --link: #0284c7;
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.1);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.1);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.1);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.1);
+      --focus-ring: #6366f1;
+      --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.06);
+      --shadow-modal: 0 20px 45px rgba(0, 0, 0, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-sans);
+    }
+
+    body {
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      line-height: 1.5;
+      padding-bottom: 80px;
+    }
+
+    /* Header Nav */
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border-subtle);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
+    .header-inner {
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-badge {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--action-primary);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      border: 1px solid transparent;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+    }
+    .btn-secondary {
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      border-color: var(--border-subtle);
+    }
+    .btn-secondary:hover {
+      background: var(--surface-interactive);
+      border-color: var(--border-strong);
+    }
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 0.74rem;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    /* Hero Banner */
+    .hero-banner {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      margin-bottom: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .hero-text h1 {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .hero-text p {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      max-width: 780px;
+    }
+    .meta-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .meta-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      font-size: 0.74rem;
+      font-weight: 600;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+    }
+    .meta-pill.highlight {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border-color: var(--status-success);
+    }
+
+    /* Filter Tabs */
+    .filter-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .tab-group {
+      display: flex;
+      gap: 8px;
+    }
+    .tab-btn {
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 600;
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .tab-btn:hover {
+      color: var(--text-primary);
+      background: var(--surface-raised);
+    }
+    .tab-btn.active {
+      color: var(--on-action-primary);
+      background: var(--action-primary);
+      border-color: var(--action-primary);
+    }
+
+    /* Section Styles */
+    .section-title {
+      font-size: 1.18rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-desc {
+      font-size: 0.84rem;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      margin-top: -10px;
+    }
+
+    /* Grid Video Cards */
+    .video-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+      margin-bottom: 40px;
+    }
+    .video-grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 1100px) {
+      .video-grid-3 { grid-template-columns: repeat(2, 1fr); }
+      .video-grid-4 { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 680px) {
+      .video-grid-3 { grid-template-columns: 1fr; }
+      .video-grid-4 { grid-template-columns: 1fr; }
+    }
+
+    /* Card */
+    .video-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: var(--transition);
+      box-shadow: var(--shadow-card);
+    }
+    .video-card:hover {
+      border-color: var(--action-primary);
+      transform: translateY(-2px);
+    }
+
+    /* Video Player Wrapper (9:16 Aspect Ratio) */
+    .player-wrap {
+      position: relative;
+      width: 100%;
+      background: #000;
+      aspect-ratio: 9 / 16;
+      max-height: 480px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .player-wrap video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .badge-overlay {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: var(--radius-xs);
+      letter-spacing: 0.5px;
+      z-index: 2;
+    }
+    .role-overlay {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: var(--radius-xs);
+      z-index: 2;
+    }
+
+    /* Card Details */
+    .card-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+    .card-title {
+      font-size: 0.96rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-desc {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+      flex: 1;
+    }
+    .card-code {
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      padding: 8px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .code-text {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--action-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface-raised);
+      border: 1px solid var(--action-primary);
+      color: var(--text-primary);
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-modal);
+      font-size: 0.82rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 9999;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Integration Guide Card */
+    .guide-box {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      margin-top: 20px;
+    }
+    .guide-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .guide-steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 16px;
+    }
+    @media (max-width: 900px) {
+      .guide-steps { grid-template-columns: 1fr; }
+    }
+    .guide-step {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+    }
+    .step-num {
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: var(--action-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .step-heading {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+    .step-text {
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="brand-title">
+        <span style="font-size: 1.25rem;">✨</span>
+        <h2 style="font-size: 1.05rem; font-weight: 800; color: var(--text-primary);">MAKNA Flow</h2>
+        <span class="brand-badge">Motion &amp; XFade Showcase</span>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-secondary btn-sm" onclick="syncAllVideos()">
+          🔄 Putar &amp; Sinkron Semua
+        </button>
+        <button class="btn btn-secondary btn-sm" onclick="pauseAllVideos()">
+          ⏸️ Jeda Semua
+        </button>
+        <button class="btn btn-secondary btn-sm" id="themeToggleBtn" onclick="toggleTheme()">
+          🌓 Mode Terang/Gelap
+        </button>
+        <a href="/auto-pipeline" class="btn btn-primary btn-sm">
+          🚀 Buka Auto Pipeline
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Hero Banner -->
+    <section class="hero-banner">
+      <div class="hero-text">
+        <h1>
+          <span>🧪</span> Galeri Showcase Remux FFmpeg Lokal
+        </h1>
+        <p>
+          Uji coba interaktif seluruh <strong>3 Gaya Animasi Motion Text</strong> dan <strong>7 Efek Transisi Video (FFmpeg XFade)</strong>.
+          Semua video di bawah ini dirender secara instan memakai klip autentik Habitfolk tanpa memakan kredit AI (<strong>0 Veo Credit &amp; 0 Token Gemini</strong>).
+        </p>
+      </div>
+      <div class="meta-pills">
+        <div class="meta-pill highlight">
+          <span>⚡</span> 0 AI Credit (FFmpeg Only)
+        </div>
+        <div class="meta-pill">
+          <span>🎯</span> Brand: HabitFolk Recipe
+        </div>
+        <div class="meta-pill">
+          <span>📐</span> Format: 9:16 Vertical
+        </div>
+      </div>
+    </section>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <div class="tab-group">
+        <button class="tab-btn active" onclick="filterSection('all', this)">Semua Efek (10)</button>
+        <button class="tab-btn" onclick="filterSection('motion-text', this)">Gaya Motion Text (3)</button>
+        <button class="tab-btn" onclick="filterSection('transitions', this)">Efek Transisi XFade (7)</button>
+      </div>
+      <div style="font-size: 0.75rem; color: var(--text-muted);">
+        💡 Klik <strong>Salin Setting</strong> untuk langsung menyalin nama value ke alur produksi
+      </div>
+    </div>
+
+    <!-- SECTION 1: 3 GAYA MOTION TEXT -->
+    <div id="section-motion-text">
+      <h2 class="section-title">
+        <span>🎬</span> Bagian 1: 3 Variasi Gaya Motion Text
+      </h2>
+      <p class="section-desc">
+        Teks di-generate per frame transparan (Sharp + SVG) dan dibakar ke video via FFmpeg. Safe margin diatur otomatis agar tidak terpotong tombol interaktif TikTok/Reels.
+      </p>
+
+      <div class="video-grid-3">
+
+        <!-- Style 1: Floating Yellow -->
+        <div class="video-card">
+          <div class="player-wrap">
+            <span class="badge-overlay">TIKTOK / REELS</span>
+            <span class="role-overlay">DEFAULT</span>
+            <video src="/temp/showcase_motion_text_floating_white_yellow.mp4" controls autoplay muted loop playsinline></video>
+          </div>
+          <div class="card-body">
+            <div class="card-title">
+              <span>🟡 Floating Putih ➔ Kuning</span>
+            </div>
+            <p class="card-desc">
+              Teks kapital tebal warna putih dengan outline hitam pekat yang bertransformasi menjadi <strong>kuning menyala</strong> mengikuti kata yang diucapkan. Sangat punchy dan menahan retensi penonton.
+            </p>
+            <div class="card-code">
+              <span class="code-text">floating_white_yellow</span>
+              <button class="btn btn-secondary btn-sm" onclick="copyValue('floating_white_yellow')">📋 Salin</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Style 2: Floating Black on White -->
+        <div class="video-card">
+          <div class="player-wrap">
+            <span class="badge-overlay">CAPCUT / VIRAL PILL</span>
+            <video src="/temp/showcase_motion_text_floating_black_on_white.mp4" controls autoplay muted loop playsinline></video>
+          </div>
+          <div class="card-body">
+            <div class="card-title">
+              <span>🔲 Floating Hitam BG Putih</span>
+            </div>
+            <p class="card-desc">
+              Teks hitam kontras tinggi di dalam pill box putih bersih. Setiap kata muncul satu demi satu (<em>word-by-word reveal</em>) dengan estetika modern ala video podcast dan tutorial populer.
+            </p>
+            <div class="card-code">
+              <span class="code-text">floating_black_on_white</span>
+              <button class="btn btn-secondary btn-sm" onclick="copyValue('floating_black_on_white')">📋 Salin</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Style 3: Minimal White Card -->
+        <div class="video-card">
+          <div class="player-wrap">
+            <span class="badge-overlay">STUDIO DOCUMENTARY</span>
+            <video src="/temp/showcase_motion_text_minimal_white.mp4" controls autoplay muted loop playsinline></video>
+          </div>
+          <div class="card-body">
+            <div class="card-title">
+              <span>◻️ Minimalist Clean White Card</span>
+            </div>
+            <p class="card-desc">
+              Badge kartu semi-transparan elegan di bagian bawah layar dengan label tag "HABITFOLK RECIPE". Tipografi bersih dan tenang, sangat cocok untuk brand bernuansa organik, mewah, atau estetika tenang.
+            </p>
+            <div class="card-code">
+              <span class="code-text">minimal_white</span>
+              <button class="btn btn-secondary btn-sm" onclick="copyValue('minimal_white')">📋 Salin</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SECTION 2: 7 EFEK TRANSISI VIDEO -->
+    <div id="section-transitions">
+      <h2 class="section-title">
+        <span>✂️</span> Bagian 2: 7 Efek Transisi Antar Klip (FFmpeg XFade)
+      </h2>
+      <p class="section-desc">
+        Transisi terjadi tepat pada sambungan Klip 1 ke Klip 2 (durasi transisi 0.6 detik). Audio di-acrossfade secara halus sehingga perpindahan naskah narasi terdengar natural tanpa jeda kaku.
+      </p>
+
+      <div class="video-grid-4">
+
+        <!-- Transition 1: Fade -->
+        <div class="video-card">
+          <div class="player-wrap">
+            <span class="badge-overlay">SMOOTH DISSOLVE</span>
+            <video src="/temp/showcase_transition_fade.mp4" controls autoplay muted loop playsinline></video>
+          </div>
+          <div class="card-body">
+            <div class="card-title">
+              <span>Smooth Dissolve (Fade)</span>
+            </div>
+            <p class="card-desc">
+              Peleburan gambar secara lembut (Crossfade). Memberikan kesan aliran waktu yang mulus, cocok untuk alur memasak dan transisi adegan santai.
+            </p>
+            <div class="card-code">
+              <span class="code-text">fade</span>
+              <button class="btn btn-secondary btn-sm" onclick="copyValue('fade')">📋 Salin</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transition 2: FadeWhite -->
+        <div class="video-card">
+          <div class="player-wrap">
+            <span class="badge-overlay">WHITE FLASH</span>
+            <video src="/temp/showcase_transition_fadewhite.mp4" controls autoplay muted loop playsinline></video>
+          </div>
+          <div class="card-body">
+            <div class="card-title">
+              <span>White Flash (FadeWhite)</span>
+            </div>
+            <p class="card-desc">
+              Kilatan putih terang sesaat yang menyegarkan visual penonton. Sangat efektif untuk adegan klimaks, perubahan sebelum/sesudah, atau beat drop.
+            </p>
+            <div class="card-code">
+              <span class="code-text">fadewhite</span>
+              <button class="btn btn-secondary btn-sm" onclick="copyValue('fadewhite')">📋 Salin</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transition 3: FadeBlack -->
+        <div class="video-card">
+          <div class="player-wrap">
+            <span class="badge-overlay">CINEMATIC DARK</span>
+            <video src="/temp/showcase_transition_fadeblack.mp4" controls autoplay muted loop playsinline></video>
+          </div>
+          <div class="card-body">
+            <div class="card-title">
+              <span>Fade to Black</span>
+            </div>
+            <p class="card-desc">
+              Peredupan ke layar hitam sebelum masuk ke adegan berikutnya. Memberi bobot sinematik dan jeda naratif antar babak cerita.
+            </p>
+            <div class="card-code">
+              <span class="code-text">fadeblack</span>
+              <button class="btn btn-secondary btn-sm" onclick="copyValue('fadeblack')">📋 Salin</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transition 4: SlideLeft -->
+        <div class="video-card">
+          <div class="player-wrap">
+            <span class="badge-overlay">DYNAMIC SLIDE</span>
+            <video src="/temp/showcase_transition_slideleft.mp4" controls autoplay muted loop playsinline></video>
+          </div>
+          <div class="card-body">
+            <div class="card-title">
+              <span>Slide Left</span>
+            </div>
+            <p class="card-desc">
+              Pergeseran horizontal adegan baru yang mendorong adegan lama ke kiri. Ideal untuk menunjukkan progres resep bertahap (Langkah 1 ➔ Langkah 2).
+            </p>
+            <div class="card-code">
+              <span class="code-text">slideleft</span>
+              <button class="btn btn-secondary btn-sm" onclick="copyValue('slideleft')">📋 Salin</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transition 5: ZoomIn -->
+        <div class="video-card">
+          <div class="player-wrap">
+            <span class="badge-overlay">CAMERA PUSH</span>
+            <video src="/temp/showcase_transition_zoomin.mp4" controls autoplay muted loop playsinline></video>
+          </div>
+          <div class="card-body">
+            <div class="card-title">
+              <span>Zoom In</span>
+            </div>
+            <p class="card-desc">
+              Kamera terasa terdorong maju menembus ke dalam adegan kedua. Memberikan sensasi aksi dan mendekatkan fokus penonton ke detail produk/makanan.
+            </p>
+            <div class="card-code">
+              <span class="code-text">zoomin</span>
+              <button class="btn btn-secondary btn-sm" onclick="copyValue('zoomin')">📋 Salin</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transition 6: CircleOpen -->
+        <div class="video-card">
+          <div class="player-wrap">
+            <span class="badge-overlay">RETRO IRIS</span>
+            <video src="/temp/showcase_transition_circleopen.mp4" controls autoplay muted loop playsinline></video>
+          </div>
+          <div class="card-body">
+            <div class="card-title">
+              <span>Circle Open</span>
+            </div>
+            <p class="card-desc">
+              Lingkaran membuka dari tengah membongkar adegan baru. Nuansa retro, playful, dan langsung menarik perhatian mata penonton ke inti adegan.
+            </p>
+            <div class="card-code">
+              <span class="code-text">circleopen</span>
+              <button class="btn btn-secondary btn-sm" onclick="copyValue('circleopen')">📋 Salin</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transition 7: Cut -->
+        <div class="video-card">
+          <div class="player-wrap">
+            <span class="badge-overlay">HARD CUT</span>
+            <video src="/temp/showcase_transition_cut.mp4" controls autoplay muted loop playsinline></video>
+          </div>
+          <div class="card-body">
+            <div class="card-title">
+              <span>Hard Cut (Tanpa Efek)</span>
+            </div>
+            <p class="card-desc">
+              Potongan langsung tanpa filter transisi antar klip. Mempertahankan tempo super cepat dan ringkas khas video resep pendek 15-30 detik.
+            </p>
+            <div class="card-code">
+              <span class="code-text">cut</span>
+              <button class="btn btn-secondary btn-sm" onclick="copyValue('cut')">📋 Salin</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Integration Guide -->
+    <section class="guide-box">
+      <div class="guide-title">
+        <span>📖</span> Cara Menerapkan Style &amp; Transisi Pilihan Anda
+      </div>
+      <p style="font-size: 0.82rem; color: var(--text-secondary);">
+        Setelah menemukan kombinasi favorit dari galeri di atas, Anda dapat menggunakannya di 2 tempat utama di MAKNA Flow:
+      </p>
+
+      <div class="guide-steps">
+        <div class="guide-step">
+          <div class="step-num">Langkah 1 &bull; Auto Pipeline</div>
+          <div class="step-heading">Form Input Auto Pipeline</div>
+          <div class="step-text">
+            Di halaman <code>/auto-pipeline</code>, buka baris opsi resep. Aktifkan toggle <strong>Bakar Motion Text</strong> lalu pilih gaya favorit pada dropdown <strong>Style Motion Text</strong>.
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="step-num">Langkah 2 &bull; Edit Kampanye Berjalan</div>
+          <div class="step-heading">Modal Edit Naskah VO</div>
+          <div class="step-text">
+            Pada halaman kampanye <code>/pillar-campaigns/[id]</code>, klik tombol <strong>✏️ Edit Naskah VO</strong> di item manapun. Anda bisa mengganti style teks &amp; transisi lalu klik <strong>Re-mux Otomatis (0 Kredit)</strong>.
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="step-num">Langkah 3 &bull; Global Workflow</div>
+          <div class="step-heading">Workflow Settings</div>
+          <div class="step-text">
+            Pada tab <strong>Pengaturan Alur Kerja</strong> di detail kampanye, Anda dapat mengubah durasi transisi (0.3s / 0.5s / 0.8s) dan posisi teks (Bawah / Tengah / Atas).
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast Element -->
+  <div id="copyToast" class="toast">
+    <span style="font-size: 1.1rem; color: var(--action-primary);">✓</span>
+    <span id="toastMsg">Value setting berhasil disalin!</span>
+  </div>
+
+  <script>
+    // Theme Toggle
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('makna_theme', next);
+    }
+
+    // Init Theme from LocalStorage or System
+    (function() {
+      const saved = localStorage.getItem('makna_theme');
+      if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+      }
+    })();
+
+    // Filter Sections
+    function filterSection(type, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const secMotion = document.getElementById('section-motion-text');
+      const secTrans = document.getElementById('section-transitions');
+
+      if (type === 'all') {
+        secMotion.style.display = 'block';
+        secTrans.style.display = 'block';
+      } else if (type === 'motion-text') {
+        secMotion.style.display = 'block';
+        secTrans.style.display = 'none';
+      } else if (type === 'transitions') {
+        secMotion.style.display = 'none';
+        secTrans.style.display = 'block';
+      }
+    }
+
+    // Video Sync Controls
+    function syncAllVideos() {
+      const videos = document.querySelectorAll('video');
+      videos.forEach(v => {
+        v.currentTime = 0;
+        v.play().catch(() => {});
+      });
+      showToast('Seluruh video disinkronkan ke detik 0 dan diputar!');
+    }
+
+    function pauseAllVideos() {
+      const videos = document.querySelectorAll('video');
+      videos.forEach(v => v.pause());
+      showToast('Seluruh video dijeda.');
+    }
+
+    // Copy Value with Toast
+    function copyValue(val) {
+      navigator.clipboard.writeText(val).then(() => {
+        showToast('Nilai setting "' + val + '" berhasil disalin ke clipboard!');
+      }).catch(() => {
+        showToast('Value: ' + val);
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('copyToast');
+      const msgElem = document.getElementById('toastMsg');
+      msgElem.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

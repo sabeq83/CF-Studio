@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.159 — Mockup Galeri Showcase Motion Text & Transisi FFmpeg (05/11/2026)
+- Menyediakan skrip generate-remux-showcase.js untuk batch render sampel motion text dan transisi video
+- Membuat public/mockup_remux_showcase.html dengan semantic CSS tokens dan video player interaktif
+- Menambahkan whitelist route mockup di middleware dan dukungan MIME type html pada temp streaming
+
 ## V2.32.158 — Auto Pipeline Form UI Cleanup & Horizontal Pixel Alignment (05/11/2026)
 - Hapus 4 teks helper yang tidak perlu pada baris form Auto Pipeline
 - Setel default Target Video Resep menjadi 1 video

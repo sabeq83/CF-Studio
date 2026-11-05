@@ -85,6 +85,10 @@ export async function GET(request, { params }) {
         contentType = 'image/gif';
       } else if (ext === '.webp') {
         contentType = 'image/webp';
+      } else if (ext === '.html') {
+        contentType = 'text/html; charset=utf-8';
+      } else if (ext === '.json') {
+        contentType = 'application/json';
       }
 
       return new NextResponse(readableWebStream, {
