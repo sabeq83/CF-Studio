@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.153 — MCP MAKNA Flow untuk kampanye produk (05/11/2026)
+- Tambah MCP server HTTP dan stdio melalui Operator API dengan isolasi tenant yang sudah ada
+- Sediakan katalog, pembuatan kampanye idempoten, dan status dengan checkpoint creative review
+- Tambah pengujian protokol dan panduan konfigurasi serta batas integrasi ChatGPT
+
 ## V2.32.152 — Fix brand_profiles column query in recipe scan (05/11/2026)
 - Use bp.brand_name instead of bp.account_name in scanAndSyncExistingCampaigns
 

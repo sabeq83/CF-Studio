@@ -1,6 +1,6 @@
 {
   "name": "maknaflow",
-  "version": "2.32.152",
+  "version": "2.32.153",
   "private": true,
   "scripts": {
     "dev": "next dev --webpack -p 3005",
@@ -69,7 +69,10 @@
     "admin": "node scripts/admin.mjs",
     "operator": "node scripts/makna-operator.mjs",
     "release": "node scripts/release.js",
-    "release-non-interactive": "node scripts/release.js --non-interactive"
+    "release-non-interactive": "node scripts/release.js --non-interactive",
+    "mcp": "node apps/mcp/server.mjs",
+    "mcp:stdio": "node apps/mcp/server.mjs --stdio",
+    "test:mcp": "npm test --prefix apps/mcp"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1157.0",
