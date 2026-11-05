@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.158 — Auto Pipeline Form UI Cleanup & Horizontal Pixel Alignment (05/11/2026)
+- Hapus 4 teks helper yang tidak perlu pada baris form Auto Pipeline
+- Setel default Target Video Resep menjadi 1 video
+- Selaraskan baris dropdown dan input secara horizontal presisi 1 garis
+- Sediakan mockup perbandingan standalone HTML
+
 ## V2.32.157 — Auto Pipeline Motion Text Control & Style Selector (05/11/2026)
 - Tambahkan toggle ON/OFF Motion Text dan 3 style cards pada Auto Pipeline
 - Sediakan selector posisi subtitel layar dan live animation preview box

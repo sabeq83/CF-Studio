@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup Usulan: Penyelarasan Baris Form Auto Pipeline — MAKNA Flow</title>
+  <style>
+    /* MAKNA Flow Semantic Theme System */
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --status-success: #4ade80;
+      --status-warning: #fbbf24;
+      --status-danger: #fb7185;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e2e8f0;
+      --input-bg: #f8fafc;
+      --overlay-subtle: rgba(0, 0, 0, 0.05);
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --text-disabled: #94a3b8;
+      --border-subtle: #cbd5e1;
+      --border-strong: #94a3b8;
+      --action-primary: #0d9488;
+      --action-primary-hover: #0f766e;
+      --on-action-primary: #ffffff;
+      --link: #0284c7;
+      --status-success: #16a34a;
+      --status-warning: #d97706;
+      --status-danger: #e11d48;
+      --shadow-card: 0 4px 20px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      padding: 2.5rem 1.5rem;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      max-width: 1120px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .theme-toggle-btn {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      padding: 0.45rem 0.9rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* Comparison section */
+    .section-tag {
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 0.25rem 0.6rem;
+      border-radius: var(--radius-xs);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      width: fit-content;
+    }
+
+    .tag-before {
+      background: rgba(251, 113, 133, 0.15);
+      color: var(--status-danger);
+      border: 1px solid var(--status-danger);
+    }
+
+    .tag-after {
+      background: rgba(74, 222, 128, 0.15);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+    }
+
+    .guide-line {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      border-top: 1.5px dashed var(--action-primary);
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    /* Standardized Form Input */
+    .form-control {
+      width: 100%;
+      height: 42px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0 0.85rem;
+      font-size: 0.88rem;
+      color: var(--text-primary);
+      outline: none;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+    }
+    .form-control:focus {
+      border-color: var(--action-primary);
+      box-shadow: 0 0 0 1px var(--action-primary);
+    }
+
+    .form-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      height: 20px;
+      display: flex;
+      align-items: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- Header Nav -->
+    <div class="top-bar">
+      <div>
+        <h1 style="font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;">
+          <span>📐</span>
+          <span>Mockup Usulan: Penyelarasan UI Dropdown Auto Pipeline</span>
+        </h1>
+        <p style="font-size: 0.82rem; color: var(--text-muted);">
+          Membersihkan teks pembantu yang tidak perlu, menyelaraskan baris input 1 horizontal line, dan menyetel Default Target Video = 1.
+        </p>
+      </div>
+      <button type="button" class="theme-toggle-btn" onclick="toggleTheme()">
+        <span id="themeIcon">☀️</span>
+        <span id="themeLabel">Light Mode</span>
+      </button>
+    </div>
+
+    <!-- BOX 1: Kondisi Sebelumnya (Sesuai Screenshot User) -->
+    <div class="card" style="border-color: var(--status-danger); position: relative;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span class="section-tag tag-before">❌ SEBELUM (Kondisi Bermasalah di Screenshot)</span>
+        <span style="font-size: 0.75rem; color: var(--status-danger); font-family: var(--font-mono);">
+          Tidak Selaras: Label Kolom 2 Tertekuk 2 Baris ➔ Input Turun ke Bawah
+        </span>
+      </div>
+
+      <!-- Grid Form Sebelum -->
+      <div style="
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.25rem;
+        background: var(--surface-raised);
+        padding: 1.25rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-subtle);
+        position: relative;
+      ">
+        <!-- Kolom 1 -->
+        <div style="display: flex; flexDirection: column; gap: 0.4rem;">
+          <label style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); display: flex; justify-content: space-between;">
+            <span>Brand Profile</span>
+            <span style="font-size: 0.72rem; color: var(--text-muted); background: var(--surface-interactive); padding: 0 4px; border-radius: 3px;">Persona & Bahasa</span>
+          </label>
+          <select class="form-control" style="background: var(--input-bg);">
+            <option>habitfolk</option>
+          </select>
+        </div>
+
+        <!-- Kolom 2 (Bermasalah: Teks Tertekuk 2 Baris) -->
+        <div style="display: flex; flexDirection: column; gap: 0.4rem;">
+          <label style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); display: flex; justify-content: space-between; align-items: flex-start;">
+            <span style="width: 100px; line-height: 1.2;">Visual Identity Preset</span>
+            <span style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.2; text-align: right;">Terfilter khusus brand habitfolk</span>
+          </label>
+          <select class="form-control" style="background: var(--input-bg); border-color: var(--status-danger); box-shadow: 0 0 0 1px var(--status-danger);">
+            <option>HabitFolk — Satisfying Macro Craft</option>
+          </select>
+        </div>
+
+        <!-- Kolom 3 -->
+        <div style="display: flex; flexDirection: column; gap: 0.4rem;">
+          <label style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); display: flex; justify-content: space-between;">
+            <span>Target Video Resep</span>
+            <span style="font-size: 0.72rem; color: var(--text-muted);">Rekomendasi: 7 video</span>
+          </label>
+          <input type="number" class="form-control" value="7" style="background: var(--input-bg);">
+        </div>
+
+        <!-- Kolom 4 -->
+        <div style="display: flex; flexDirection: column; gap: 0.4rem;">
+          <label style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); display: flex; justify-content: space-between;">
+            <span>Mode Eksekusi</span>
+            <span style="font-size: 0.72rem; color: var(--text-muted);">Storyboard Approval</span>
+          </label>
+          <select class="form-control" style="background: var(--input-bg);">
+            <option>Full Autopilot (Auto-Approve &amp; Lanjut)</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="font-size: 0.76rem; color: var(--text-muted); background: var(--input-bg); padding: 0.65rem 0.9rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+        ⚠️ <strong>Penyebab Misalignment:</strong> Kolom 2 memiliki teks pembantu panjang <em>"Terfilter khusus brand habitfolk"</em> di sebelah kanan, sehingga judul label <em>"Visual Identity Preset"</em> kehabisan ruang dan terlipat menjadi 2 baris (tinggi ~36px). Sedangkan kolom 1, 3, dan 4 hanya 1 baris (tinggi ~18px). Hal ini mendesak kotak input kolom 2 turun ~18px ke bawah sehingga baris terlihat berantakan.
+      </div>
+    </div>
+
+
+    <!-- BOX 2: Usulan Setelah Dirapikan (Clean & Pixel-Perfect Alignment) -->
+    <div class="card" style="border-color: var(--action-primary); position: relative;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span class="section-tag tag-after">✨ USULAN SETELAH DIRAPIKAN (100% Selaras & Bersih)</span>
+        <span style="font-size: 0.75rem; color: var(--action-primary); font-family: var(--font-mono); font-weight: 700;">
+          Clean Minimalist • 1 Horizontal Line • Default: 1 Video
+        </span>
+      </div>
+
+      <!-- Grid Form Usulan Sesudah -->
+      <div style="
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.25rem;
+        background: var(--surface-raised);
+        padding: 1.25rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-subtle);
+        position: relative;
+      ">
+        
+        <!-- Garis Bantu Visual Alignment (Biru Toska) -->
+        <div style="
+          position: absolute;
+          top: 60px;
+          left: 1.25rem;
+          right: 1.25rem;
+          border-top: 1.5px dashed var(--action-primary);
+          opacity: 0.35;
+          pointer-events: none;
+        "></div>
+
+        <!-- Kolom 1: Brand Profile -->
+        <div style="display: flex; flex-direction: column; gap: 0.45rem;">
+          <label class="form-label">
+            Brand Profile
+          </label>
+          <select class="form-control">
+            <option value="habitfolk">habitfolk</option>
+            <option value="dapurbotani">Dapur Botani</option>
+            <option value="nutribake">NutriBake</option>
+          </select>
+        </div>
+
+        <!-- Kolom 2: Visual Identity Preset (Sejajar Sempurna!) -->
+        <div style="display: flex; flex-direction: column; gap: 0.45rem;">
+          <label class="form-label" title="Visual Identity Preset">
+            Visual Identity Preset
+          </label>
+          <select class="form-control">
+            <option>HabitFolk — Satisfying Macro Craft</option>
+          </select>
+        </div>
+
+        <!-- Kolom 3: Target Video Resep (Default = 1) -->
+        <div style="display: flex; flex-direction: column; gap: 0.45rem;">
+          <label class="form-label">
+            Target Video Resep
+          </label>
+          <input type="number" min="1" max="14" class="form-control" value="1">
+        </div>
+
+        <!-- Kolom 4: Mode Eksekusi -->
+        <div style="display: flex; flex-direction: column; gap: 0.45rem;">
+          <label class="form-label">
+            Mode Eksekusi
+          </label>
+          <select class="form-control">
+            <option>Full Autopilot (Auto-Approve &amp; Lanjut)</option>
+            <option>Manual Review Storyboard</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- Checklist Perubahan -->
+      <div style="background: var(--input-bg); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.8rem;">
+        <strong style="color: var(--action-primary); font-size: 0.85rem;">📋 Rangkuman Perbaikan yang Diterapkan:</strong>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.2rem;">
+          <div>✅ <strong>Hapus Teks Clutter:</strong> Menghapus teks <em>Persona &amp; Bahasa</em>, <em>Terfilter khusus...</em>, <em>Rekomendasi: 7...</em>, dan <em>Storyboard Approval</em>.</div>
+          <div>✅ <strong>Default Target Video = 1:</strong> Nilai awal input diubah dari 7 menjadi <strong>1 video</strong>.</div>
+          <div>✅ <strong>Tinggi Label Tetap (20px):</strong> Semua label memakai class <code>form-label</code> 1 baris sehingga tidak akan pernah terlipat.</div>
+          <div>✅ <strong>Tinggi Input Seragam (42px):</strong> Semua dropdown select dan input number memiliki tinggi &amp; padding yang identik, sejajar persis pada 1 garis horizontal.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      document.getElementById('themeIcon').textContent = next === 'dark' ? '☀️' : '🌙';
+      document.getElementById('themeLabel').textContent = next === 'dark' ? 'Light Mode' : 'Dark Mode';
+    }
+  </script>
+</body>
+</html>
+

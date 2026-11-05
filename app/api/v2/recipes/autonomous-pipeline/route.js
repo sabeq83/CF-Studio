@@ -49,7 +49,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
       brandId: brand_id || brandId,
       topic,
       category: category || 'makanan_utama',
-      recipeCount: recipe_count || recipeCount || 7,
+      recipeCount: recipe_count || recipeCount || 1,
       executionMode: execution_mode || executionMode || 'full_autopilot',
       visualIdentityPresetId: visual_identity_preset_id || visualIdentityPresetId || null,
       enableMotionText: isMotionEnabled,

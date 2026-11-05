@@ -13,7 +13,7 @@ export default function AutoPipelinePage() {
   const [topic, setTopic] = useState('air fryer chicken thighs');
   const [category, setCategory] = useState('makanan_utama');
   const [isCategoryManuallySelected, setIsCategoryManuallySelected] = useState(false);
-  const [recipeCount, setRecipeCount] = useState(7);
+  const [recipeCount, setRecipeCount] = useState(1);
   const [executionMode, setExecutionMode] = useState('full_autopilot');
   const [enableMotionText, setEnableMotionText] = useState(true);
   const [motionTextStyle, setMotionTextStyle] = useState('floating_white_yellow');
@@ -383,22 +383,33 @@ export default function AutoPipelinePage() {
                 gap: '1.25rem'
               }}>
                 {/* 1. Brand Profile */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                  <label style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Brand Profile</span>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Persona & Bahasa</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                  <label style={{
+                    height: '22px',
+                    fontSize: '0.82rem',
+                    fontWeight: 600,
+                    color: 'var(--text-secondary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    Brand Profile
                   </label>
                   <select
                     value={selectedBrandId}
                     onChange={(e) => setSelectedBrandId(e.target.value)}
                     style={{
+                      height: '42px',
+                      boxSizing: 'border-box',
                       background: 'var(--input-bg)',
                       border: '1px solid var(--border-subtle)',
                       borderRadius: 'var(--radius-sm)',
-                      padding: '0.65rem 0.9rem',
+                      padding: '0 0.85rem',
                       fontSize: '0.88rem',
                       color: 'var(--text-primary)',
-                      outline: 'none'
+                      outline: 'none',
+                      display: 'flex',
+                      alignItems: 'center'
                     }}
                   >
                     {brands.map(b => (
@@ -410,22 +421,33 @@ export default function AutoPipelinePage() {
                 </div>
 
                 {/* 2. Visual Identity Preset Dropdown (Dinamis Berbasis Brand) */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                  <label style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Visual Identity Preset</span>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{presetHint || 'Dinamis per brand'}</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                  <label style={{
+                    height: '22px',
+                    fontSize: '0.82rem',
+                    fontWeight: 600,
+                    color: 'var(--text-secondary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    Visual Identity Preset
                   </label>
                   <select
                     value={selectedPresetId}
                     onChange={(e) => setSelectedPresetId(e.target.value)}
                     style={{
+                      height: '42px',
+                      boxSizing: 'border-box',
                       background: 'var(--input-bg)',
                       border: '1px solid var(--border-subtle)',
                       borderRadius: 'var(--radius-sm)',
-                      padding: '0.65rem 0.9rem',
+                      padding: '0 0.85rem',
                       fontSize: '0.88rem',
                       color: 'var(--text-primary)',
-                      outline: 'none'
+                      outline: 'none',
+                      display: 'flex',
+                      alignItems: 'center'
                     }}
                   >
                     {presets.map(p => (
@@ -437,10 +459,17 @@ export default function AutoPipelinePage() {
                 </div>
 
                 {/* 3. Target Jumlah Resep */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                  <label style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Target Video Resep</span>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Rekomendasi: 7 video</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                  <label style={{
+                    height: '22px',
+                    fontSize: '0.82rem',
+                    fontWeight: 600,
+                    color: 'var(--text-secondary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    Target Video Resep
                   </label>
                   <input
                     type="number"
@@ -449,34 +478,49 @@ export default function AutoPipelinePage() {
                     value={recipeCount}
                     onChange={(e) => setRecipeCount(e.target.value)}
                     style={{
+                      height: '42px',
+                      boxSizing: 'border-box',
                       background: 'var(--input-bg)',
                       border: '1px solid var(--border-subtle)',
                       borderRadius: 'var(--radius-sm)',
-                      padding: '0.65rem 0.9rem',
+                      padding: '0 0.85rem',
                       fontSize: '0.88rem',
                       color: 'var(--text-primary)',
-                      outline: 'none'
+                      outline: 'none',
+                      display: 'flex',
+                      alignItems: 'center'
                     }}
                   />
                 </div>
 
                 {/* 4. Mode Eksekusi */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                  <label style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Mode Eksekusi</span>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Storyboard Approval</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                  <label style={{
+                    height: '22px',
+                    fontSize: '0.82rem',
+                    fontWeight: 600,
+                    color: 'var(--text-secondary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    Mode Eksekusi
                   </label>
                   <select
                     value={executionMode}
                     onChange={(e) => setExecutionMode(e.target.value)}
                     style={{
+                      height: '42px',
+                      boxSizing: 'border-box',
                       background: 'var(--input-bg)',
                       border: '1px solid var(--border-subtle)',
                       borderRadius: 'var(--radius-sm)',
-                      padding: '0.65rem 0.9rem',
+                      padding: '0 0.85rem',
                       fontSize: '0.88rem',
                       color: 'var(--text-primary)',
-                      outline: 'none'
+                      outline: 'none',
+                      display: 'flex',
+                      alignItems: 'center'
                     }}
                   >
                     <option value="full_autopilot">Full Autopilot (Auto-Approve & Langsung Produksi Video)</option>
