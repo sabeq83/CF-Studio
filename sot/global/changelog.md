@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.149 — Enforce sequential recipe workflow and fix TTS voiceover fallback (05/11/2026)
+- Add start frame stage before TTS and video
+- Fix voiceover fallback in processPillarTts
+- Guard visual completion by target_clips_count
+
 ## V2.32.148 — Fix Auto Pipeline approval revision type cast and verify HabitFolk recipe (05/11/2026)
 - Fix PostgreSQL review_revision type casting in autonomous recipe engine
 - Verify end-to-end recipe generation for HabitFolk air fryer baked potato

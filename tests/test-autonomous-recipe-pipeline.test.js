@@ -174,3 +174,61 @@ test('ingestRecipePlannerToPillarCampaign hydrates 8 clips @ 4s, Omni Flash, and
   await db.prepare('DELETE FROM content_planner_rows WHERE planner_id = ?').run(testPlannerId);
   await db.prepare('DELETE FROM content_planners WHERE id = ?').run(testPlannerId);
 });
+
+test('processPillarTts extracts voiceover from scenes or storyboard fallback to avoid no_audio error', async () => {
+  const db = getDb();
+  const { createPillarCampaignBundle } = await import('../lib/db.js');
+  const testCampId = `test_tts_camp_${Date.now()}`;
+
+  // Item result_json with storyboard scenes containing voice_over, but NO top-level voiceover field
+  const mockResultJson = JSON.stringify({
+    recipe: { title: 'Test Potato' },
+    scenes: [
+      { index: 1, voice_over: 'Crispy golden potato in air fryer.', duration_seconds: 4 },
+      { index: 2, voice_over: 'Scoop and season with sea salt.', duration_seconds: 4 }
+    ]
+  });
+
+  await createPillarCampaignBundle({
+    campaign: {
+      id: testCampId,
+      campaign_name: 'Test TTS Campaign',
+      content_pillar: 'Recipe Campaign',
+      custom_hook: 'Crispy golden potato',
+      visual_action_guideline: 'Macro 45',
+      enable_tts: 1,
+      voice_provider: 'minimax',
+      voice_persona: 'English_causual_narrator_vv1',
+      local_scheduler: 0
+    },
+    items: [
+      {
+        campaign_id: testCampId,
+        generation_status: 'completed',
+        start_frame_status: 'completed',
+        tts_status: 'pending',
+        result_json: mockResultJson,
+        new_video_plan_json: JSON.stringify([
+          { clip_index: 1, new_vo: 'Crispy golden potato in air fryer.' },
+          { clip_index: 2, new_vo: 'Scoop and season with sea salt.' }
+        ])
+      }
+    ]
+  });
+
+  const inserted = await db.prepare('SELECT id FROM pillar_campaign_items WHERE campaign_id = ?').all(testCampId);
+  const testItemId = inserted[0].id;
+
+  const { processPillarTts } = await import('../lib/scheduler-processors.js');
+  const res = await processPillarTts({ item_id: testItemId }, { id: -1 });
+
+  assert.ok(res.processed);
+  assert.notEqual(res.tts_batch_id, 'no_audio', 'Must NOT be no_audio when scenes have narration');
+  assert.ok(res.tts_batch_id.startsWith('ttsb_opc_'), 'Must create valid TTS batch');
+
+  // Clean up
+  await db.prepare('DELETE FROM tts_studio_clips WHERE batch_id = ?').run(res.tts_batch_id);
+  await db.prepare('DELETE FROM tts_studio_batches WHERE id = ?').run(res.tts_batch_id);
+  await db.prepare('DELETE FROM pillar_campaign_items WHERE id = ?').run(testItemId);
+  await db.prepare('DELETE FROM pillar_campaigns WHERE id = ?').run(testCampId);
+});
