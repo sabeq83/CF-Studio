@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup Usulan: 7-Stage Factual Live Execution Visualizer — MAKNA Flow</title>
+  <style>
+    /* MAKNA Flow Semantic Theme System */
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --link-hover: #a5f3fc;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --input-bg: #ffffff;
+      --overlay-subtle: rgba(30, 41, 59, 0.08);
+      --overlay-backdrop: rgba(15, 23, 42, 0.54);
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --text-disabled: #8794a6;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --link: #075ea8;
+      --link-hover: #064b86;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --status-neutral: #6548bd;
+      --status-neutral-soft: #f0ecfb;
+      --focus-ring: #6d4ed6;
+      --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+      --shadow-modal: 0 26px 80px rgba(31, 45, 61, 0.22);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* Sidebar Simulated */
+    .sidebar {
+      width: 250px;
+      background-color: var(--sidebar);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 1rem;
+      gap: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--text-primary);
+      padding: 0 0.5rem;
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.65rem 0.85rem;
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .nav-item:hover {
+      background-color: var(--surface-interactive);
+      color: var(--text-primary);
+    }
+
+    .nav-item.active {
+      background-color: var(--surface-raised);
+      color: var(--action-primary);
+      font-weight: 600;
+      border-left: 3px solid var(--action-primary);
+    }
+
+    /* Main Container */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      overflow-y: auto;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      border-bottom: 1px solid var(--border-subtle);
+      background-color: var(--surface);
+    }
+
+    .header-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .theme-toggle {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 0.45rem 0.85rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: var(--transition);
+    }
+
+    .content-area {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+      width: 100%;
+    }
+
+    /* Simulator Control Panel */
+    .simulator-control-panel {
+      background: linear-gradient(135deg, var(--surface) 0%, var(--surface-raised) 100%);
+      border: 1.5px solid var(--action-primary);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      box-shadow: 0 4px 20px rgba(45, 212, 191, 0.12);
+    }
+
+    .sim-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .sim-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--action-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .sim-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .sim-btn {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 0.45rem 0.85rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: var(--transition);
+    }
+
+    .sim-btn:hover {
+      border-color: var(--action-primary);
+      background: var(--surface-hover);
+      color: var(--action-primary);
+    }
+
+    .sim-btn.primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+    }
+
+    .sim-btn.primary:hover {
+      background: var(--action-primary-hover);
+    }
+
+    /* LIVE EXECUTION VISUALIZER (NEW 7-STAGE FACTUAL COMPONENT) */
+    .visualizer-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .vis-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 1rem;
+    }
+
+    .vis-title-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .vis-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .live-pulse-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+    }
+
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--status-success);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.4; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.2); }
+      100% { opacity: 0.4; transform: scale(0.9); }
+    }
+
+    .vis-campaign-pill {
+      font-size: 0.78rem;
+      font-family: var(--font-mono);
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.35rem 0.75rem;
+      color: var(--link);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* 7-STAGE GRID */
+    .stages-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.65rem;
+      position: relative;
+    }
+
+    @media (max-width: 1100px) {
+      .stages-grid {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      }
+    }
+
+    .stage-item {
+      background: var(--surface-raised);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1rem 0.65rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0.5rem;
+      position: relative;
+      transition: var(--transition);
+      min-height: 140px;
+      justify-content: flex-start;
+    }
+
+    /* Status Varients */
+    .stage-item.idle {
+      opacity: 0.65;
+      border-color: var(--border-subtle);
+      background: var(--surface-raised);
+    }
+
+    .stage-item.processing {
+      border-color: var(--action-primary);
+      background: var(--surface-interactive);
+      box-shadow: 0 0 0 1px var(--action-primary), 0 0 18px rgba(45, 212, 191, 0.2);
+    }
+
+    .stage-item.completed {
+      border-color: var(--status-success);
+      background: var(--surface-raised);
+    }
+
+    .stage-item.failed {
+      border-color: var(--status-danger);
+      background: var(--status-danger-soft);
+    }
+
+    .stage-number {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      border: 1px solid var(--border-strong);
+      background: var(--surface-interactive);
+      color: var(--text-muted);
+    }
+
+    .stage-item.processing .stage-number {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border-color: var(--action-primary);
+      animation: spin 3s linear infinite;
+    }
+
+    .stage-item.completed .stage-number {
+      background: var(--status-success);
+      color: var(--on-action-primary);
+      border-color: var(--status-success);
+    }
+
+    .stage-item.failed .stage-number {
+      background: var(--status-danger);
+      color: var(--canvas);
+      border-color: var(--status-danger);
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .stage-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.25;
+    }
+
+    .stage-desc {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      line-height: 1.3;
+    }
+
+    .stage-metric-badge {
+      margin-top: auto;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: 9999px;
+      white-space: nowrap;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .stage-item.idle .stage-metric-badge {
+      background: var(--surface-interactive);
+      color: var(--text-disabled);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .stage-item.processing .stage-metric-badge {
+      background: var(--surface-raised);
+      color: var(--action-primary);
+      border: 1px solid var(--action-primary);
+    }
+
+    .stage-item.completed .stage-metric-badge {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+    }
+
+    .stage-item.failed .stage-metric-badge {
+      background: var(--status-danger-soft);
+      color: var(--status-danger);
+      border: 1px solid var(--status-danger);
+    }
+
+    /* TELEMETRY CONSOLE BAR */
+    .telemetry-bar {
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      color: var(--text-secondary);
+    }
+
+    .telemetry-log {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .telemetry-time {
+      color: var(--text-muted);
+    }
+
+    .telemetry-highlight {
+      color: var(--action-primary);
+      font-weight: 600;
+    }
+
+    .telemetry-refresh-hint {
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      white-space: nowrap;
+    }
+
+    /* CAMPAIGN HISTORY INSPECTOR (SELECTABLE TABLE) */
+    .history-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .history-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .history-hint {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .campaign-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    .campaign-table th {
+      text-align: left;
+      padding: 0.65rem 0.85rem;
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .campaign-table td {
+      padding: 0.75rem 0.85rem;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+    }
+
+    .campaign-table tr {
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .campaign-table tr:hover {
+      background: var(--surface-interactive);
+    }
+
+    .campaign-table tr.active-inspect {
+      background: var(--surface-interactive);
+      border-left: 3px solid var(--action-primary);
+    }
+
+    .badge-status {
+      display: inline-block;
+      padding: 0.2rem 0.55rem;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    .badge-status.completed {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+    }
+
+    .badge-status.running {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid var(--status-info);
+    }
+
+    .inspect-indicator {
+      font-size: 0.72rem;
+      color: var(--action-primary);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar Simulated -->
+  <aside class="sidebar">
+    <div class="brand-logo">
+      <span>✨</span>
+      <span>MAKNA Flow</span>
+    </div>
+    <ul class="nav-list">
+      <li><a class="nav-item" href="#">📊 Dashboard</a></li>
+      <li><a class="nav-item" href="#">💡 Content Planner</a></li>
+      <li><a class="nav-item" href="#">🎬 Pillar Campaigns</a></li>
+      <li><a class="nav-item active" href="#">⚡ Auto Pipeline</a></li>
+      <li><a class="nav-item" href="#">📺 YouTube Studio</a></li>
+      <li><a class="nav-item" href="#">⚙️ Settings</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    <header>
+      <div class="header-title">
+        <span>⚡</span>
+        <span>Auto Pipeline — Recipe Video Automation</span>
+      </div>
+      <div class="header-actions">
+        <button class="theme-toggle" onclick="toggleTheme()">
+          <span id="themeIcon">☀️</span>
+          <span id="themeLabel">Light Mode</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="content-area">
+
+      <!-- SIMULATION CONTROLLER PANEL (Khusus untuk review interaktif pengguna) -->
+      <section class="simulator-control-panel">
+        <div class="sim-header">
+          <div class="sim-title">
+            <span>🎮</span>
+            <span>Panel Pengendali Simulasi Faktual 7-Tahap</span>
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-secondary);">
+            Uji interaksi alur faktual database dari tahap awal hingga Cloud & Sync
+          </span>
+        </div>
+
+        <div class="sim-actions">
+          <button class="sim-btn primary" onclick="runFullAutoSimulation()">
+            <span>▶️</span>
+            <span>Jalankan Simulasi Lengkap (Tahap 1 ➔ 7)</span>
+          </button>
+          
+          <button class="sim-btn" onclick="applyPresetState(1)">
+            <span>1️⃣</span> Planner & Storyboard
+          </button>
+          <button class="sim-btn" onclick="applyPresetState(3)">
+            <span>3️⃣</span> Start Frame In-Progress
+          </button>
+          <button class="sim-btn" onclick="applyPresetState(4)">
+            <span>4️⃣</span> TTS In-Progress
+          </button>
+          <button class="sim-btn" onclick="applyPresetState(5)">
+            <span>5️⃣</span> Video Veo In-Progress
+          </button>
+          <button class="sim-btn" onclick="applyPresetState(6)">
+            <span>6️⃣</span> FFmpeg Processing
+          </button>
+          <button class="sim-btn" onclick="applyPresetState(7)">
+            <span>7️⃣</span> Completed (Cloud & Hub)
+          </button>
+          <button class="sim-btn" onclick="applyPresetState('error')">
+            <span>⚠️</span> Simulasi Error / Paused
+          </button>
+          <button class="sim-btn" onclick="resetToIdle()">
+            <span>🔄</span> Reset
+          </button>
+        </div>
+      </section>
+
+      <!-- BARIS 2: LIVE EXECUTION VISUALIZER (USULAN 7 TAHAPAN FAKTUAL) -->
+      <section class="visualizer-card">
+        <div class="vis-top-bar">
+          <div class="vis-title-group">
+            <div class="vis-title">
+              <span>📡</span>
+              <span>Live Execution Visualizer (Alur Faktual)</span>
+            </div>
+            <div class="live-pulse-badge" id="liveBadge">
+              <div class="pulse-dot"></div>
+              <span id="liveStatusText">Faktual Polling Aktif (2.5s)</span>
+            </div>
+          </div>
+
+          <div class="vis-campaign-pill">
+            <span style="color: var(--text-muted);">Kampanye Terpantau:</span>
+            <strong id="activeCampaignCode">opc_261105_kwi56w</strong>
+            <span id="activeTopicBadge" style="font-size: 0.7rem; color: var(--text-secondary);">(air fryer baked potato)</span>
+          </div>
+        </div>
+
+        <!-- 7-Stage Dynamic Grid -->
+        <div class="stages-grid">
+          
+          <!-- Tahap 1: Planner Creation -->
+          <div class="stage-item completed" id="card_step_1">
+            <div class="stage-number" id="num_step_1">✓</div>
+            <div class="stage-title">Planner Creation</div>
+            <div class="stage-desc">Container & brand kategori</div>
+            <div class="stage-metric-badge" id="metric_step_1">✓ pln_9d821a</div>
+          </div>
+
+          <!-- Tahap 2: Storyboard Creation -->
+          <div class="stage-item completed" id="card_step_2">
+            <div class="stage-number" id="num_step_2">✓</div>
+            <div class="stage-title">Storyboard Creation</div>
+            <div class="stage-desc">Gemini AI 1-Pass & 8 adegan</div>
+            <div class="stage-metric-badge" id="metric_step_2">✓ 8 Klip Siap</div>
+          </div>
+
+          <!-- Tahap 3: Start Frame Generation -->
+          <div class="stage-item completed" id="card_step_3">
+            <div class="stage-number" id="num_step_3">✓</div>
+            <div class="stage-title">Start Frame Generation</div>
+            <div class="stage-desc">Gambar acuan continuity</div>
+            <div class="stage-metric-badge" id="metric_step_3">✓ 8/8 Frame</div>
+          </div>
+
+          <!-- Tahap 4: TTS Generation -->
+          <div class="stage-item completed" id="card_step_4">
+            <div class="stage-number" id="num_step_4">✓</div>
+            <div class="stage-title">TTS Generation</div>
+            <div class="stage-desc">Minimax expressive voice</div>
+            <div class="stage-metric-badge" id="metric_step_4">✓ 8/8 Audio</div>
+          </div>
+
+          <!-- Tahap 5: Video Generation -->
+          <div class="stage-item processing" id="card_step_5">
+            <div class="stage-number" id="num_step_5">⚡</div>
+            <div class="stage-title">Video Generation</div>
+            <div class="stage-desc">Google Veo Omni Flash @ 4s</div>
+            <div class="stage-metric-badge" id="metric_step_5">Rendering 5/8</div>
+          </div>
+
+          <!-- Tahap 6: FFmpeg Processing -->
+          <div class="stage-item idle" id="card_step_6">
+            <div class="stage-number" id="num_step_6">6</div>
+            <div class="stage-title">FFmpeg Processing</div>
+            <div class="stage-desc">Muxing 8 klip + VO + BGM</div>
+            <div class="stage-metric-badge" id="metric_step_6">Menunggu</div>
+          </div>
+
+          <!-- Tahap 7: Cloud & Sync -->
+          <div class="stage-item idle" id="card_step_7">
+            <div class="stage-number" id="num_step_7">7</div>
+            <div class="stage-title">Cloud & Sync</div>
+            <div class="stage-desc">Nextcloud & Hub ContentFlow</div>
+            <div class="stage-metric-badge" id="metric_step_7">Menunggu</div>
+          </div>
+
+        </div>
+
+        <!-- Telemetry Log Bar -->
+        <div class="telemetry-bar">
+          <div class="telemetry-log">
+            <span class="telemetry-time" id="telemetryTime">[11:21:40]</span>
+            <span>📡 Status Faktual Scheduler:</span>
+            <span class="telemetry-highlight" id="telemetryText">Sedang merender klip #5 dari 8 via Google Veo Omni Flash (G-Labs Node 2)...</span>
+          </div>
+          <div class="telemetry-refresh-hint">
+            <span>Interval update: <strong>2.5 detik</strong></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- BARIS 3: RIWAYAT KAMPANYE (INSPEKTOR FLEKSIBEL) -->
+      <section class="history-card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+          <div>
+            <div class="history-title">
+              <span>📋</span>
+              <span>Riwayat Kampanye Auto Pipeline</span>
+            </div>
+            <div class="history-hint">
+              Klik pada baris kampanye mana saja untuk menginspeksi status faktual visualizer di atas secara real-time.
+            </div>
+          </div>
+        </div>
+
+        <table class="campaign-table">
+          <thead>
+            <tr>
+              <th>Kampanye ID</th>
+              <th>Brand / Topik</th>
+              <th>Status Produksi</th>
+              <th>Progres Video</th>
+              <th>Cloud & Hub Sync</th>
+              <th>Aksi Inspeksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="active-inspect" id="row_kwi56w" onclick="selectCampaignRow('opc_261105_kwi56w', 'air fryer baked potato', 5)">
+              <td>
+                <strong>opc_261105_kwi56w</strong>
+                <div style="font-size: 0.7rem; color: var(--text-muted);">Item #308 (Habitfolk)</div>
+              </td>
+              <td>air fryer baked potato</td>
+              <td><span class="badge-status running">Rendering Veo (5/8)</span></td>
+              <td>5 dari 8 klip selesai</td>
+              <td><span style="color: var(--text-muted);">Menunggu Render Selesai</span></td>
+              <td><span class="inspect-indicator">👁️ Terpilih di Visualizer</span></td>
+            </tr>
+            <tr id="row_m8a12b" onclick="selectCampaignRow('opc_261104_m8a12b', 'crispy parmesan zucchini fries', 7)">
+              <td>
+                <strong>opc_261104_m8a12b</strong>
+                <div style="font-size: 0.7rem; color: var(--text-muted);">Item #305 (Dapur Botani)</div>
+              </td>
+              <td>crispy parmesan zucchini fries</td>
+              <td><span class="badge-status completed">Selesai Penuh (Completed)</span></td>
+              <td>8/8 klip lengkap (32s MP4)</td>
+              <td><span style="color: var(--status-success);">✓ Nextcloud + ContentFlow Hub</span></td>
+              <td><span style="color: var(--link); font-size: 0.72rem;">Klik untuk Inspeksi</span></td>
+            </tr>
+            <tr id="row_x99p1c" onclick="selectCampaignRow('opc_261103_x99p1c', 'iced matcha espresso latte', 4)">
+              <td>
+                <strong>opc_261103_x99p1c</strong>
+                <div style="font-size: 0.7rem; color: var(--text-muted);">Item #299 (NutriBake)</div>
+              </td>
+              <td>iced matcha espresso latte</td>
+              <td><span class="badge-status running">Sintesis Minimax TTS</span></td>
+              <td>8 klip naskah, 4/8 audio</td>
+              <td><span style="color: var(--text-muted);">Menunggu TTS & Video</span></td>
+              <td><span style="color: var(--link); font-size: 0.72rem;">Klik untuk Inspeksi</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+    </div>
+  </main>
+
+  <script>
+    // Theme Switcher Logic
+    function toggleTheme() {
+      const html = document.documentElement;
+      const currentTheme = html.getAttribute('data-theme');
+      const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', nextTheme);
+
+      const icon = document.getElementById('themeIcon');
+      const label = document.getElementById('themeLabel');
+      if (nextTheme === 'light') {
+        icon.textContent = '🌙';
+        label.textContent = 'Dark Mode';
+      } else {
+        icon.textContent = '☀️';
+        label.textContent = 'Light Mode';
+      }
+    }
+
+    // SIMULATOR CONTROLLER LOGIC
+    let simTimer = null;
+
+    function resetToIdle() {
+      if (simTimer) clearInterval(simTimer);
+      for (let i = 1; i <= 7; i++) {
+        setStage(i, 'idle', i.toString(), 'Menunggu');
+      }
+      setTelemetry('Menunggu inisiasi pipeline dari form...');
+    }
+
+    function setStage(step, state, numText, metricText) {
+      const card = document.getElementById(`card_step_${step}`);
+      const num = document.getElementById(`num_step_${step}`);
+      const metric = document.getElementById(`metric_step_${step}`);
+
+      card.className = `stage-item ${state}`;
+      num.textContent = numText;
+      metric.textContent = metricText;
+    }
+
+    function setTelemetry(text) {
+      const now = new Date();
+      const timeStr = `[${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}]`;
+      document.getElementById('telemetryTime').textContent = timeStr;
+      document.getElementById('telemetryText').textContent = text;
+    }
+
+    function applyPresetState(target) {
+      if (simTimer) clearInterval(simTimer);
+
+      if (target === 1) {
+        setStage(1, 'completed', '✓', '✓ pln_9d821a');
+        setStage(2, 'completed', '✓', '✓ 8 Klip Siap');
+        setStage(3, 'idle', '3', 'Menunggu');
+        setStage(4, 'idle', '4', 'Menunggu');
+        setStage(5, 'idle', '5', 'Menunggu');
+        setStage(6, 'idle', '6', 'Menunggu');
+        setStage(7, 'idle', '7', 'Menunggu');
+        setTelemetry('Tahap 1 & 2 selesai: Gemini 1-Pass telah menyusun storyboard 8 adegan.');
+      } else if (target === 3) {
+        setStage(1, 'completed', '✓', '✓ Selesai');
+        setStage(2, 'completed', '✓', '✓ Selesai');
+        setStage(3, 'processing', '⚡', 'Memproses 4/8');
+        setStage(4, 'idle', '4', 'Menunggu');
+        setStage(5, 'idle', '5', 'Menunggu');
+        setStage(6, 'idle', '6', 'Menunggu');
+        setStage(7, 'idle', '7', 'Menunggu');
+        setTelemetry('Sedang menghasilkan start-frame image kontinuitas visual klip #4 dari 8...');
+      } else if (target === 4) {
+        setStage(1, 'completed', '✓', '✓ Selesai');
+        setStage(2, 'completed', '✓', '✓ Selesai');
+        setStage(3, 'completed', '✓', '✓ 8/8 Frame');
+        setStage(4, 'processing', '⚡', 'Sintesis 5/8');
+        setStage(5, 'idle', '5', 'Menunggu');
+        setStage(6, 'idle', '6', 'Menunggu');
+        setStage(7, 'idle', '7', 'Menunggu');
+        setTelemetry('Sedang mensintesis audio voice-over Minimax untuk klip #5 dari 8...');
+      } else if (target === 5) {
+        setStage(1, 'completed', '✓', '✓ Selesai');
+        setStage(2, 'completed', '✓', '✓ Selesai');
+        setStage(3, 'completed', '✓', '✓ 8/8 Frame');
+        setStage(4, 'completed', '✓', '✓ 8/8 Audio');
+        setStage(5, 'processing', '⚡', 'Rendering 5/8');
+        setStage(6, 'idle', '6', 'Menunggu');
+        setStage(7, 'idle', '7', 'Menunggu');
+        setTelemetry('Sedang merender klip #5 dari 8 via Google Veo Omni Flash (Node 2 G-Labs)...');
+      } else if (target === 6) {
+        setStage(1, 'completed', '✓', '✓ Selesai');
+        setStage(2, 'completed', '✓', '✓ Selesai');
+        setStage(3, 'completed', '✓', '✓ 8/8 Frame');
+        setStage(4, 'completed', '✓', '✓ 8/8 Audio');
+        setStage(5, 'completed', '✓', '✓ 8/8 Video');
+        setStage(6, 'processing', '⚡', 'Muxing MP4');
+        setStage(7, 'idle', '7', 'Menunggu');
+        setTelemetry('Menjalankan FFmpeg: stitching 8 klip video + audio VO narasi + background music...');
+      } else if (target === 7) {
+        setStage(1, 'completed', '✓', '✓ Selesai');
+        setStage(2, 'completed', '✓', '✓ Selesai');
+        setStage(3, 'completed', '✓', '✓ 8/8 Frame');
+        setStage(4, 'completed', '✓', '✓ 8/8 Audio');
+        setStage(5, 'completed', '✓', '✓ 8/8 Video');
+        setStage(6, 'completed', '✓', '✓ MP4 Final');
+        setStage(7, 'completed', '✓', '✓ Nextcloud + Hub');
+        setTelemetry('Pipeline Selesai! Video final terunggah di Nextcloud dan tercatat aktif di ContentFlow Hub 🚀');
+      } else if (target === 'error') {
+        setStage(1, 'completed', '✓', '✓ Selesai');
+        setStage(2, 'completed', '✓', '✓ Selesai');
+        setStage(3, 'completed', '✓', '✓ 8/8 Frame');
+        setStage(4, 'failed', '✕', 'Gagal / Timeout');
+        setStage(5, 'idle', '5', 'Terhenti');
+        setStage(6, 'idle', '6', 'Terhenti');
+        setStage(7, 'idle', '7', 'Terhenti');
+        setTelemetry('❌ [Scheduler Warning] Sintesis audio TTS klip #4 mengalami timeout. Auto-heal retry dipicu...');
+      }
+    }
+
+    function runFullAutoSimulation() {
+      resetToIdle();
+      let current = 1;
+      applyPresetState(1);
+
+      simTimer = setInterval(() => {
+        current++;
+        if (current === 2) {
+          applyPresetState(3); // Start frame
+        } else if (current === 3) {
+          applyPresetState(4); // TTS
+        } else if (current === 4) {
+          applyPresetState(5); // Video
+        } else if (current === 5) {
+          applyPresetState(6); // FFmpeg
+        } else if (current === 6) {
+          applyPresetState(7); // Cloud & Sync
+          clearInterval(simTimer);
+        }
+      }, 2000);
+    }
+
+    function selectCampaignRow(campaignId, topic, presetStep) {
+      document.querySelectorAll('.campaign-table tr').forEach(r => r.classList.remove('active-inspect'));
+      const activeRow = event.currentTarget;
+      if (activeRow) activeRow.classList.add('active-inspect');
+
+      document.getElementById('activeCampaignCode').textContent = campaignId;
+      document.getElementById('activeTopicBadge').textContent = `(${topic})`;
+      applyPresetState(presetStep);
+    }
+  </script>
+</body>
+</html>
+

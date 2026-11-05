@@ -74,10 +74,58 @@ export default function AutoPipelinePage() {
   const [loadingCampaigns, setLoadingCampaigns] = useState(true);
   const [toast, setToast] = useState(null);
 
+  // Factual Visualizer State
+  const [activeCampaignId, setActiveCampaignId] = useState(null);
+  const [activeCampaignData, setActiveCampaignData] = useState(null);
+  const [pipelineStages, setPipelineStages] = useState(null);
+  const [telemetry, setTelemetry] = useState(null);
+  const [pollingActive, setPollingActive] = useState(false);
+
   function showToast(msg, type = 'success') {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 4500);
   }
+
+  // Factual Pipeline Status Poller
+  async function fetchFactualStatus(targetCampaignId) {
+    try {
+      const url = targetCampaignId
+        ? `/api/v2/recipes/autonomous-pipeline/status?campaign_id=${encodeURIComponent(targetCampaignId)}`
+        : '/api/v2/recipes/autonomous-pipeline/status';
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.success && data.stages) {
+        setPipelineStages(data.stages);
+        setTelemetry(data.telemetry);
+        setActiveCampaignData(data.campaign);
+        if (data.campaign?.id) setActiveCampaignId(data.campaign.id);
+        return data.is_completed;
+      }
+    } catch (e) {
+      console.warn('[AutoPipeline] Error fetching factual status:', e);
+    }
+    return false;
+  }
+
+  // Polling loop
+  useEffect(() => {
+    fetchFactualStatus();
+  }, []);
+
+  useEffect(() => {
+    let timer = null;
+    if (activeCampaignId && pollingActive) {
+      timer = setInterval(async () => {
+        const isCompleted = await fetchFactualStatus(activeCampaignId);
+        if (isCompleted) {
+          setPollingActive(false);
+          fetchRecentCampaigns();
+          showToast('Produksi resep selesai! Video final siap di Nextcloud dan ContentFlow Hub 🚀');
+        }
+      }, 2500);
+    }
+    return () => { if (timer) clearInterval(timer); };
+  }, [activeCampaignId, pollingActive]);
 
   // 1. Fetch Brand Profiles on mount
   useEffect(() => {
@@ -160,16 +208,6 @@ export default function AutoPipelinePage() {
     }
 
     setIsLaunching(true);
-    setActiveStep(1);
-
-    // Step animation interval untuk memberi feedback visual
-    let stepCount = 1;
-    const animInterval = setInterval(() => {
-      stepCount++;
-      if (stepCount <= 4) {
-        setActiveStep(stepCount);
-      }
-    }, 700);
 
     try {
       const res = await fetch('/api/v2/recipes/autonomous-pipeline', {
@@ -186,20 +224,18 @@ export default function AutoPipelinePage() {
         })
       });
 
-      clearInterval(animInterval);
       const data = await res.json();
 
       if (data.success) {
-        setActiveStep(6);
-        showToast(`Kampanye ${data.campaign_id} berhasil diluncurkan! Auto-approval aktif dan otomatis sinkron ke ContentFlow Hub 🚀`);
+        setActiveCampaignId(data.campaign_id);
+        setPollingActive(true);
+        fetchFactualStatus(data.campaign_id);
+        showToast(`Kampanye ${data.campaign_id} berhasil diluncurkan! Melacak progres produksi faktual... 🚀`);
         fetchRecentCampaigns();
       } else {
-        setActiveStep(0);
         showToast('Gagal meluncurkan pipeline: ' + (data.error || 'Terjadi kesalahan sistem'), 'error');
       }
     } catch (err) {
-      clearInterval(animInterval);
-      setActiveStep(0);
       showToast('Error request: ' + err.message, 'error');
     } finally {
       setIsLaunching(false);
@@ -663,7 +699,7 @@ export default function AutoPipelinePage() {
             </form>
           </section>
 
-          {/* BARIS 2: Live Execution Visualizer */}
+          {/* BARIS 2: 7-Stage Factual Live Execution Visualizer */}
           <section style={{
             background: 'var(--surface)',
             border: '1px solid var(--border-subtle)',
@@ -672,69 +708,251 @@ export default function AutoPipelinePage() {
             boxShadow: 'var(--shadow-card)',
             display: 'flex',
             flexDirection: 'column',
-            gap: '1rem'
+            gap: '1.25rem'
           }}>
-            <div style={{ fontSize: '1.12rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span>📡</span>
-              <span>Live Execution Visualizer (Alur Otomatis)</span>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '0.75rem',
+              borderBottom: '1px solid var(--border-subtle)',
+              paddingBottom: '1rem'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span>📡</span>
+                  <span>Live Execution Visualizer (Alur Faktual)</span>
+                </div>
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  padding: '0.25rem 0.65rem',
+                  borderRadius: 9999,
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  background: pollingActive ? 'var(--status-success-soft)' : 'var(--surface-interactive)',
+                  color: pollingActive ? 'var(--status-success)' : 'var(--text-muted)',
+                  border: `1px solid ${pollingActive ? 'var(--status-success)' : 'var(--border-subtle)'}`
+                }}>
+                  <div style={{
+                    width: 7,
+                    height: 7,
+                    borderRadius: '50%',
+                    background: pollingActive ? 'var(--status-success)' : 'var(--text-muted)'
+                  }} />
+                  <span>{pollingActive ? 'Faktual Polling Aktif (2.5s)' : 'Status Real-Time Ready'}</span>
+                </div>
+              </div>
+
+              {activeCampaignData && (
+                <div style={{
+                  fontSize: '0.78rem',
+                  fontFamily: 'var(--font-mono)',
+                  background: 'var(--input-bg)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '0.35rem 0.75rem',
+                  color: 'var(--link)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Kampanye Terpantau:</span>
+                  <strong>{activeCampaignData.id}</strong>
+                  {activeCampaignData.topic && (
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+                      ({activeCampaignData.topic})
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
 
+            {/* 7-Stage Dynamic Grid */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-              gap: '0.75rem'
+              gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+              gap: '0.65rem'
             }}>
               {[
-                { step: 1, title: 'Draft Planner', desc: 'Pembuatan container batch' },
-                { step: 2, title: 'Gemini 1-Pass', desc: 'Generate ide & naskah resep' },
-                { step: 3, title: 'Preset Hydration', desc: 'Injeksi VI preset & persona' },
-                { step: 4, title: 'OPC Ingestion', desc: 'Struktur 8 klip @ 4s Omni' },
-                { step: 5, title: 'Auto-Approval', desc: 'Persetujuan storyboard otomatis' },
-                { step: 6, title: 'Video, Cloud & Hub', desc: 'Nextcloud Upload & Sync Hub' }
-              ].map(s => {
-                const isPassed = activeStep > s.step;
-                const isCurrent = activeStep === s.step;
+                {
+                  key: 's1',
+                  step: 1,
+                  defaultTitle: 'Planner Creation',
+                  defaultDesc: 'Container & brand kategori',
+                  data: pipelineStages?.s1
+                },
+                {
+                  key: 's2',
+                  step: 2,
+                  defaultTitle: 'Storyboard Creation',
+                  defaultDesc: 'Gemini AI 1-Pass & 8 adegan',
+                  data: pipelineStages?.s2
+                },
+                {
+                  key: 's3',
+                  step: 3,
+                  defaultTitle: 'Start Frame Generation',
+                  defaultDesc: 'Gambar acuan continuity',
+                  data: pipelineStages?.s3
+                },
+                {
+                  key: 's4',
+                  step: 4,
+                  defaultTitle: 'TTS Generation',
+                  defaultDesc: 'Minimax expressive audio',
+                  data: pipelineStages?.s4
+                },
+                {
+                  key: 's5',
+                  step: 5,
+                  defaultTitle: 'Video Generation',
+                  defaultDesc: 'Google Veo Omni Flash @ 4s',
+                  data: pipelineStages?.s5
+                },
+                {
+                  key: 's6',
+                  step: 6,
+                  defaultTitle: 'FFmpeg Processing',
+                  defaultDesc: 'Muxing 8 klip + VO + BGM',
+                  data: pipelineStages?.s6
+                },
+                {
+                  key: 's7',
+                  step: 7,
+                  defaultTitle: 'Cloud & Sync',
+                  defaultDesc: 'Nextcloud & Hub ContentFlow',
+                  data: pipelineStages?.s7
+                }
+              ].map(st => {
+                const stageData = st.data || { status: 'idle', badge: 'Menunggu' };
+                const isCompleted = stageData.status === 'completed';
+                const isProcessing = stageData.status === 'processing';
+                const isFailed = stageData.status === 'failed';
+
+                let borderColor = 'var(--border-subtle)';
+                let bgColor = 'var(--surface-raised)';
+                let numBg = 'var(--surface-interactive)';
+                let numColor = 'var(--text-muted)';
+                let badgeBg = 'var(--surface-interactive)';
+                let badgeColor = 'var(--text-disabled)';
+                let badgeBorder = 'var(--border-subtle)';
+
+                if (isCompleted) {
+                  borderColor = 'var(--status-success)';
+                  numBg = 'var(--status-success)';
+                  numColor = 'var(--on-action-primary)';
+                  badgeBg = 'var(--status-success-soft)';
+                  badgeColor = 'var(--status-success)';
+                  badgeBorder = 'var(--status-success)';
+                } else if (isProcessing) {
+                  borderColor = 'var(--action-primary)';
+                  bgColor = 'var(--surface-interactive)';
+                  numBg = 'var(--action-primary)';
+                  numColor = 'var(--on-action-primary)';
+                  badgeBg = 'var(--surface-raised)';
+                  badgeColor = 'var(--action-primary)';
+                  badgeBorder = 'var(--action-primary)';
+                } else if (isFailed) {
+                  borderColor = 'var(--status-danger)';
+                  bgColor = 'var(--status-danger-soft)';
+                  numBg = 'var(--status-danger)';
+                  numColor = 'var(--canvas)';
+                  badgeBg = 'var(--status-danger-soft)';
+                  badgeColor = 'var(--status-danger)';
+                  badgeBorder = 'var(--status-danger)';
+                }
+
                 return (
                   <div
-                    key={s.step}
+                    key={st.key}
                     style={{
-                      background: isCurrent ? 'var(--surface-interactive)' : 'var(--surface-raised)',
-                      border: `1px solid ${isPassed ? 'var(--status-success)' : (isCurrent ? 'var(--action-primary)' : 'var(--border-subtle)')}`,
+                      background: bgColor,
+                      border: `1.5px solid ${borderColor}`,
                       borderRadius: 'var(--radius-md)',
-                      padding: '1rem 0.8rem',
-                      textAlign: 'center',
+                      padding: '1rem 0.65rem',
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
+                      textAlign: 'center',
                       gap: '0.5rem',
-                      transition: 'var(--transition)',
-                      boxShadow: isCurrent ? '0 0 16px rgba(45, 212, 191, 0.15)' : 'none'
+                      position: 'relative',
+                      minHeight: 140,
+                      justifyContent: 'flex-start',
+                      boxShadow: isProcessing ? '0 0 18px rgba(45, 212, 191, 0.16)' : 'none',
+                      transition: 'var(--transition)'
                     }}
                   >
                     <div style={{
-                      width: 26,
-                      height: 26,
+                      width: 24,
+                      height: 24,
                       borderRadius: '50%',
-                      background: isPassed ? 'var(--status-success)' : (isCurrent ? 'var(--action-primary)' : 'var(--surface-interactive)'),
-                      color: (isPassed || isCurrent) ? '#042f2e' : 'var(--text-muted)',
-                      border: `1px solid ${isPassed ? 'var(--status-success)' : (isCurrent ? 'var(--action-primary)' : 'var(--border-strong)')}`,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: '0.74rem',
-                      fontWeight: 700
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      background: numBg,
+                      color: numColor,
+                      border: `1px solid ${borderColor}`
                     }}>
-                      {isPassed ? '✓' : s.step}
+                      {isCompleted ? '✓' : (isProcessing ? '⚡' : (isFailed ? '✕' : st.step))}
                     </div>
-                    <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.25 }}>
-                      {s.title}
+                    <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.25 }}>
+                      {stageData.title || st.defaultTitle}
                     </div>
                     <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', lineHeight: 1.3 }}>
-                      {s.desc}
+                      {stageData.desc || st.defaultDesc}
+                    </div>
+                    <div style={{
+                      marginTop: 'auto',
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      padding: '0.2rem 0.55rem',
+                      borderRadius: 9999,
+                      background: badgeBg,
+                      color: badgeColor,
+                      border: `1px solid ${badgeBorder}`,
+                      whiteSpace: 'nowrap',
+                      maxWidth: '100%',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
+                    }}>
+                      {stageData.badge || 'Menunggu'}
                     </div>
                   </div>
                 );
               })}
+            </div>
+
+            {/* Live Telemetry Console Bar */}
+            <div style={{
+              background: 'var(--input-bg)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: 'var(--radius-sm)',
+              padding: '0.75rem 1rem',
+              fontFamily: 'var(--font-mono)',
+              fontSize: '0.76rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '1rem',
+              color: 'var(--text-secondary)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                <span style={{ color: 'var(--text-muted)' }}>
+                  {telemetry?.timestamp ? `[${telemetry.timestamp}]` : '[Live]'}
+                </span>
+                <span>📡 Status Faktual Scheduler:</span>
+                <span style={{ color: 'var(--action-primary)', fontWeight: 600 }}>
+                  {telemetry?.message || 'Memantau scheduler background cluster...'}
+                </span>
+              </div>
+              <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem', whiteSpace: 'nowrap' }}>
+                Interval: <strong>2.5s</strong>
+              </div>
             </div>
           </section>
 
@@ -797,11 +1015,34 @@ export default function AutoPipelinePage() {
                       </td>
                     </tr>
                   ) : (
-                    recentCampaigns.map(camp => (
-                      <tr key={camp.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                        <td style={{ padding: '0.85rem 1rem' }}>
-                          <strong style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>{camp.id}</strong>
-                        </td>
+                    recentCampaigns.map(camp => {
+                      const isInspected = camp.id === activeCampaignId;
+                      return (
+                        <tr
+                          key={camp.id}
+                          onClick={() => {
+                            setActiveCampaignId(camp.id);
+                            setPollingActive(camp.status !== 'completed');
+                            fetchFactualStatus(camp.id);
+                          }}
+                          style={{
+                            borderBottom: '1px solid var(--border-subtle)',
+                            cursor: 'pointer',
+                            background: isInspected ? 'var(--surface-interactive)' : 'transparent',
+                            borderLeft: isInspected ? '3px solid var(--action-primary)' : '3px solid transparent',
+                            transition: 'var(--transition)'
+                          }}
+                        >
+                          <td style={{ padding: '0.85rem 1rem' }}>
+                            <strong style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: isInspected ? 'var(--action-primary)' : 'inherit' }}>
+                              {camp.id}
+                            </strong>
+                            {isInspected && (
+                              <div style={{ fontSize: '0.68rem', color: 'var(--action-primary)', fontWeight: 700, marginTop: '0.2rem' }}>
+                                👁️ Terpilih di Visualizer
+                              </div>
+                            )}
+                          </td>
                         <td style={{ padding: '0.85rem 1rem' }}>
                           <div style={{ fontWeight: 600 }}>{camp.campaign_name || camp.name || 'Recipe Batch'}</div>
                           <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>

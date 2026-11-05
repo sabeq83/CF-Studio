@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.155 — 7-Stage Factual Live Execution Visualizer Auto Pipeline (05/11/2026)
+- Implementasikan 7 kartu tahapan faktual pada Live Execution Visualizer Auto Pipeline
+- Gantikan timer semu dengan status agregat riil dan polling adaptif 2.5s
+- Tambahkan Live Telemetry Console Bar dan integrasi inspeksi klik riwayat kampanye
+- Sediakan mockup HTML interaktif standalone dan test suite verifikasi status faktual
+
 ## V2.32.154 — Add Category Selector UI with Smart Auto-Detection (05/11/2026)
 - Tambahkan 4 kartu pilihan kategori kuliner interaktif pada Form Auto Pipeline
 - Implementasikan Smart Auto-Detection real-time berbasis kata kunci topik resep
