@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.32.151 — Await updatePillarCampaignItem in G-Labs and FFmpeg stages (05/11/2026)
+- Add await to updatePillarCampaignItem and insertGlabsTask in scheduler processors
+
 ## V2.32.150 — Fix dynamic import of universe manifests in scheduler (05/11/2026)
 - Use await import for universe manifests in processPillarGlabs
 
