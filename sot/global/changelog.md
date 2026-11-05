@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.32.152 — Fix brand_profiles column query in recipe scan (05/11/2026)
+- Use bp.brand_name instead of bp.account_name in scanAndSyncExistingCampaigns
+
 ## V2.32.151 — Await updatePillarCampaignItem in G-Labs and FFmpeg stages (05/11/2026)
 - Add await to updatePillarCampaignItem and insertGlabsTask in scheduler processors
 
