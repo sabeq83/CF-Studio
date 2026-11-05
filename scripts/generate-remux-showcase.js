@@ -264,18 +264,33 @@ async function main() {
     fs.mkdirSync(SHOWCASE_DIR, { recursive: true });
   }
 
-  // Part 1: Render 3 Motion Text Styles
-  console.log('\n--- TAHAP 1: Merender 3 Gaya Motion Text ---');
+  // Part 1: Render Motion Text Styles
+  console.log('\n--- TAHAP 1: Merender Gaya Motion Text ---');
+  const targetOnly = process.argv.find(a => a.startsWith('--only='))?.split('=')[1] || process.argv[2];
+
   for (const style of MOTION_TEXT_STYLES) {
+    if (targetOnly && style.id !== targetOnly && targetOnly !== 'all') continue;
     const outFile = path.join(SHOWCASE_DIR, `motion_text_${style.id}.mp4`);
     await renderMotionTextVariant(style, CLIP_0, outFile);
+    
+    // Also copy to root temp directory for direct /temp/showcase_* streaming
+    const rootTempCopy = path.join(TEMP_DIR, `showcase_motion_text_${style.id}.mp4`);
+    fs.copyFileSync(outFile, rootTempCopy);
+    console.log(`📋 Copied to root temp: ${path.basename(rootTempCopy)}`);
   }
 
-  // Part 2: Render 7 Transition Effects
-  console.log('\n--- TAHAP 2: Merender 7 Efek Transisi Video ---');
-  for (const trans of TRANSITION_STYLES) {
-    const outFile = path.join(SHOWCASE_DIR, `transition_${trans.id}.mp4`);
-    await renderTransitionVariant(trans, CLIP_0, CLIP_1, outFile);
+  // Part 2: Render Transition Effects
+  if (!targetOnly || targetOnly === 'all' || TRANSITION_STYLES.some(t => t.id === targetOnly)) {
+    console.log('\n--- TAHAP 2: Merender Efek Transisi Video ---');
+    for (const trans of TRANSITION_STYLES) {
+      if (targetOnly && trans.id !== targetOnly && targetOnly !== 'all') continue;
+      const outFile = path.join(SHOWCASE_DIR, `transition_${trans.id}.mp4`);
+      await renderTransitionVariant(trans, CLIP_0, CLIP_1, outFile);
+
+      const rootTempCopy = path.join(TEMP_DIR, `showcase_transition_${trans.id}.mp4`);
+      fs.copyFileSync(outFile, rootTempCopy);
+      console.log(`📋 Copied to root temp: ${path.basename(rootTempCopy)}`);
+    }
   }
 
   // Write metadata manifest for frontend HTML showcase

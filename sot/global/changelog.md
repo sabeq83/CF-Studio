@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.160 — Perbaikan Motion Text floating_white_yellow Word Reveal & Spasi (05/11/2026)
+- Implementasi word-by-word reveal pada floating_white_yellow dengan kata aktif warna kuning dan kata lewat putih
+- Memperbaiki jarak spasi antar kata dengan atribut dx eksplisit dan xml:space=preserve di SVG engine
+- Update video sampel showcase dan mockup_remux_showcase.html
+
 ## V2.32.159 — Mockup Galeri Showcase Motion Text & Transisi FFmpeg (05/11/2026)
 - Menyediakan skrip generate-remux-showcase.js untuk batch render sampel motion text dan transisi video
 - Membuat public/mockup_remux_showcase.html dengan semantic CSS tokens dan video player interaktif
