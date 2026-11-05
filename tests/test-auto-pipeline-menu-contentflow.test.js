@@ -112,3 +112,4 @@ test('Recipe Campaign Ingest defaults auto_sync_contentflow to 1 for ContentFlow
   await db.prepare('DELETE FROM content_planner_rows WHERE planner_id = ?').run(testPlannerId);
   await db.prepare('DELETE FROM content_planners WHERE id = ?').run(testPlannerId);
 });
+

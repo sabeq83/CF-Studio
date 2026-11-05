@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.32.148 — Fix Auto Pipeline approval revision type cast and verify HabitFolk recipe (05/11/2026)
+- Fix PostgreSQL review_revision type casting in autonomous recipe engine
+- Verify end-to-end recipe generation for HabitFolk air fryer baked potato
+
 ## V2.32.147 — Dedicated Auto Pipeline Menu and ContentFlow Hub Sync (05/11/2026)
 - Add dedicated Auto Pipeline menu at top of WORKFLOW above YouTube Studio
 - Create page app/auto-pipeline/page.js with dynamic brand preset filtering

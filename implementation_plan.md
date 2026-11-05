@@ -260,7 +260,7 @@ Berikut adalah tahapan pengerjaan kronologis yang akan di-update secara real-tim
   - Memastikan seluruh assertion lulus 100%.
 - [x] **Task 5: SOP Rilis & Git Sync**
   - Menjalankan `npm run release-non-interactive` untuk update versi dan push remote repository.
-- [ ] **Task 6: Deploy ke Server Dev**
+- [x] **Task 6: Deploy ke Server Dev**
   - Menjalankan atomic deployment ke Mac Mini Dev dan memverifikasi HTTP 200 halaman `/auto-pipeline`.
 
 ---
