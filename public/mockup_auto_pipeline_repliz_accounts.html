@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup UI — Multi-Platform Repliz Selector & Search (Auto Pipeline)</title>
+  <link rel="stylesheet" href="/theme.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body {
+      background: var(--canvas, #090d16);
+      color: var(--text-primary, #f1f5f9);
+      padding: 30px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+    .modal-box {
+      background: var(--surface, #0f172a);
+      border: 1px solid var(--border-subtle, #1e293b);
+      border-radius: var(--radius-lg, 14px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      width: 100%;
+      max-width: 760px;
+      padding: 24px;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-subtle, #1e293b);
+      padding-bottom: 14px;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-secondary, #94a3b8);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .form-control {
+      width: 100%;
+      height: 42px;
+      background: var(--input-bg, #131d31);
+      border: 1px solid var(--border-subtle, #1e293b);
+      border-radius: var(--radius-sm, 8px);
+      padding: 0 12px;
+      color: var(--text-primary, #f1f5f9);
+      font-size: 0.88rem;
+      outline: none;
+      transition: var(--transition, all 0.2s ease);
+    }
+    .form-control:focus {
+      border-color: var(--action-primary, #06b6d4);
+      box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.2);
+    }
+
+    /* REPLIZ SELECTOR SECTION */
+    .repliz-box {
+      background: var(--surface-raised, #162032);
+      border: 1px solid var(--border-subtle, #1e293b);
+      border-radius: var(--radius-md, 10px);
+      padding: 16px;
+      margin-top: 8px;
+    }
+    .repliz-toolbar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .search-input-wrap {
+      flex: 1;
+      min-width: 220px;
+      position: relative;
+    }
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted, #64748b);
+      font-size: 0.9rem;
+    }
+    .search-input {
+      width: 100%;
+      height: 38px;
+      background: var(--surface, #0f172a);
+      border: 1px solid var(--border-subtle, #1e293b);
+      border-radius: var(--radius-sm, 6px);
+      padding: 0 12px 0 34px;
+      color: var(--text-primary, #f1f5f9);
+      font-size: 0.82rem;
+      outline: none;
+    }
+    .search-input:focus {
+      border-color: var(--action-primary, #06b6d4);
+    }
+    .btn-sync {
+      background: var(--surface, #0f172a);
+      border: 1px solid var(--border-subtle, #1e293b);
+      border-radius: var(--radius-sm, 6px);
+      padding: 0 14px;
+      height: 38px;
+      color: var(--text-secondary, #94a3b8);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition, all 0.2s ease);
+    }
+    .btn-sync:hover {
+      border-color: var(--action-primary, #06b6d4);
+      color: var(--action-primary, #06b6d4);
+    }
+
+    /* Platform Filter Tabs */
+    .platform-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .platform-tab {
+      background: var(--surface, #0f172a);
+      border: 1px solid var(--border-subtle, #1e293b);
+      border-radius: 9999px;
+      padding: 4px 12px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--text-secondary, #94a3b8);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+      transition: var(--transition, all 0.2s ease);
+    }
+    .platform-tab:hover {
+      border-color: var(--border-strong, #334155);
+      color: var(--text-primary, #f1f5f9);
+    }
+    .platform-tab.active {
+      background: var(--surface-interactive, #1e293b);
+      color: var(--action-primary, #06b6d4);
+      border-color: var(--action-primary, #06b6d4);
+    }
+
+    /* Accounts Scrollable Grid */
+    .accounts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 10px;
+      max-height: 280px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .accounts-grid::-webkit-scrollbar {
+      width: 6px;
+    }
+    .accounts-grid::-webkit-scrollbar-thumb {
+      background: var(--border-strong, #334155);
+      border-radius: 4px;
+    }
+
+    .account-card {
+      background: var(--surface, #0f172a);
+      border: 1.5px solid var(--border-subtle, #1e293b);
+      border-radius: var(--radius-sm, 8px);
+      padding: 10px 12px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: var(--transition, all 0.2s ease);
+      position: relative;
+    }
+    .account-card:hover {
+      border-color: var(--border-strong, #334155);
+      transform: translateY(-1px);
+    }
+    .account-card.selected {
+      border-color: var(--action-primary, #06b6d4);
+      background: var(--surface-interactive, rgba(6, 182, 212, 0.08));
+    }
+    .acc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .acc-platform {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .check-circle {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border-strong, #334155);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 900;
+      color: transparent;
+      transition: var(--transition, all 0.2s ease);
+    }
+    .account-card.selected .check-circle {
+      background: var(--action-primary, #06b6d4);
+      border-color: var(--action-primary, #06b6d4);
+      color: #000;
+    }
+    .acc-name {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-primary, #f1f5f9);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .acc-badge {
+      font-size: 0.65rem;
+      color: var(--status-success, #10b981);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Selected accounts pills bar */
+    .selected-bar {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-subtle, #1e293b);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 0.76rem;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      background: var(--surface-interactive, #1e293b);
+      border: 1px solid var(--border-subtle, #1e293b);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="modal-box">
+    <div class="modal-header">
+      <div>
+        <h2 style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">
+          ⏰ Konfigurasi Waktu 24 Jam &amp; Target Multi-Platform Repliz
+        </h2>
+        <p style="font-size: 0.76rem; color: var(--text-muted); margin-top: 3px;">
+          Format 24 Jam WIB &amp; Live Selector 33 Akun Media Sosial Repliz
+        </p>
+      </div>
+      <span style="font-size: 0.75rem; background: var(--status-success-soft, rgba(16, 185, 129, 0.15)); color: var(--status-success, #10b981); padding: 3px 8px; border-radius: 9999px; font-weight: 700;">
+        ● Repliz API Connected (33 Akun Live)
+      </span>
+    </div>
+
+    <!-- 1. Form Dua Waktu (Format 24 Jam) -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; background: var(--surface-raised); padding: 14px; border-radius: 10px; border: 1px solid var(--border-subtle); margin-bottom: 18px;">
+      <div class="form-group" style="margin-bottom: 0;">
+        <label class="form-label">
+          <span style="color: var(--status-info, #38bdf8);">⚙️ Jam Pembuatan Video (Format 24 Jam)</span>
+        </label>
+        <input type="time" class="form-control" value="05:00" style="font-size: 1.1rem; font-weight: 800; color: var(--text-primary);">
+        <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 4px;">
+          Contoh: <strong>05:00</strong> (Pagi) atau <strong>17:00</strong> (Sore WIB)
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 0;">
+        <label class="form-label">
+          <span style="color: var(--status-success, #10b981);">🚀 Jam Publish Repliz (Format 24 Jam)</span>
+        </label>
+        <input type="time" class="form-control" value="09:00" style="font-size: 1.1rem; font-weight: 800; color: var(--text-primary);">
+        <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 4px;">
+          Contoh: <strong>09:00</strong> (Pagi) atau <strong>21:30</strong> (Malam WIB)
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Target Multi-Platform Repliz (Dengan Search & Filter Lengkap) -->
+    <div class="form-group">
+      <div class="form-label">
+        <span>Target Multi-Platform Repliz (Pilih Akun Tujuan):</span>
+        <span style="color: var(--action-primary); font-weight: 700;" id="selectedCountText">2 Akun Terpilih</span>
+      </div>
+
+      <div class="repliz-box">
+        <!-- Toolbar: Search Input + Sync Button -->
+        <div class="repliz-toolbar">
+          <div class="search-input-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" class="search-input" placeholder="Cari nama akun platform (misal: HabitFolk, Botani, NutriBake, dll)..." oninput="filterAccounts()">
+          </div>
+
+          <button type="button" class="btn-sync" onclick="syncAccounts()" id="btnSync">
+            <span id="syncIcon">🔄</span>
+            <span>Sinkronkan Ulang dari Repliz</span>
+          </button>
+        </div>
+
+        <!-- Platform Filter Tabs -->
+        <div class="platform-tabs">
+          <button type="button" class="platform-tab active" onclick="setPlatformFilter('all', this)">
+            Semua Platform (<span id="countAll">33</span>)
+          </button>
+          <button type="button" class="platform-tab" onclick="setPlatformFilter('instagram', this)">
+            📸 Instagram Reels (<span id="countIg">5</span>)
+          </button>
+          <button type="button" class="platform-tab" onclick="setPlatformFilter('tiktok', this)">
+            🎵 TikTok (<span id="countTt">6</span>)
+          </button>
+          <button type="button" class="platform-tab" onclick="setPlatformFilter('facebook', this)">
+            📘 Facebook Reels (<span id="countFb">12</span>)
+          </button>
+          <button type="button" class="platform-tab" onclick="setPlatformFilter('youtube', this)">
+            ▶️ YouTube Shorts (<span id="countYt">10</span>)
+          </button>
+        </div>
+
+        <!-- Scrollable Accounts Grid -->
+        <div class="accounts-grid" id="accountsGrid">
+          <!-- Sample Items populated by JS -->
+        </div>
+
+        <!-- Selected Accounts Summary Bar -->
+        <div class="selected-bar">
+          <div style="color: var(--text-muted);">
+            Daftar akun yang akan menerima video otomatis secara serempak.
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button type="button" style="background: none; border: none; color: var(--action-primary); font-size: 0.74rem; cursor: pointer; text-decoration: underline;" onclick="selectAllVisible()">Pilih Semua Hasil</button>
+            <span style="color: var(--border-strong);">|</span>
+            <button type="button" style="background: none; border: none; color: var(--text-muted); font-size: 0.74rem; cursor: pointer; text-decoration: underline;" onclick="clearAllSelections()">Hapus Semua Pilihan</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer Actions -->
+    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
+      <button type="button" style="background: var(--surface); border: 1px solid var(--border-subtle); color: var(--text-secondary); padding: 9px 18px; border-radius: 8px; font-weight: 600; cursor: pointer;">
+        Batal
+      </button>
+      <button type="button" style="background: var(--action-primary); border: none; color: #000; padding: 9px 22px; border-radius: 8px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+        <span>💾</span>
+        <span>Simpan Jadwal Rutin</span>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Data 33 akun riil dari API Repliz
+    const LIVE_REPLIZ_ACCOUNTS = [
+      { id: "6adc8ac0fc43f81b783251ac", name: "HabitFolk", platform: "youtube", isConnected: true },
+      { id: "6adc854dfc43f81b78324009", name: "HabitFolk", platform: "facebook", isConnected: true },
+      { id: "6ad2089bfc43f81b7817a17a", name: "Siasat Sehat", platform: "youtube", isConnected: true },
+      { id: "6ad077e262caae1e047c1f27", name: "Dapur Botani", platform: "youtube", isConnected: true },
+      { id: "6ad077c062caae1e047c1ecd", name: "NutriBake ID", platform: "youtube", isConnected: true },
+      { id: "6acc131f62caae1e046b5c85", name: "Solusi Thermal ID", platform: "youtube", isConnected: false },
+      { id: "6acc12dd62caae1e046b5c5e", name: "Ruang Akustik ID", platform: "youtube", isConnected: true },
+      { id: "6acc12cc62caae1e046b5c5b", name: "Ruang Akustik ID", platform: "tiktok", isConnected: true },
+      { id: "6acc12c262caae1e046b5c4f", name: "Ruang Akustik ID", platform: "instagram", isConnected: true },
+      { id: "6acc11ec62caae1e046b5bd9", name: "Cerita Sehat", platform: "facebook", isConnected: true },
+      { id: "6acc11ea62caae1e046b5bd7", name: "Solusi Thermal ID", platform: "facebook", isConnected: true },
+      { id: "6acc11e962caae1e046b5bd5", name: "Ruang Akustik ID", platform: "facebook", isConnected: true },
+      { id: "6acc11e562caae1e046b5bd3", name: "Jasa Insulasi ID", platform: "facebook", isConnected: true },
+      { id: "6acc11a362caae1e046b5bbb", name: "Solusi Thermal ID", platform: "tiktok", isConnected: true },
+      { id: "6acc119962caae1e046b5bb6", name: "Solusi Thermal ID", platform: "instagram", isConnected: true },
+      { id: "6ac371e162caae1e046052fa", name: "WonderQuest Kids", platform: "youtube", isConnected: true },
+      { id: "6ac371ca62caae1e046052d8", name: "Kio Wonders", platform: "youtube", isConnected: true },
+      { id: "6abcb71962caae1e04581096", name: "Global Isolasi Mandiri", platform: "instagram", isConnected: true },
+      { id: "6aba58a462caae1e04551b6f", name: "kost_sasyahouse", platform: "tiktok", isConnected: true },
+      { id: "6aba587762caae1e04551aed", name: "Sasya House", platform: "instagram", isConnected: true },
+      { id: "6ab4584862caae1e044794a3", name: "Wa'y Siyasi", platform: "facebook", isConnected: true },
+      { id: "6a9b6efe62caae1e04116064", name: "SnackLab ID", platform: "tiktok", isConnected: true },
+      { id: "6a9b565962caae1e041146bb", name: "SnackLab ID", platform: "facebook", isConnected: true },
+      { id: "6a9b565762caae1e041146b8", name: "BakeCraft ID", platform: "facebook", isConnected: true },
+      { id: "6a9b560162caae1e04114669", name: "NutriBlend ID", platform: "facebook", isConnected: true },
+      { id: "6a9a1e2762caae1e040fba12", name: "Nutriblend ID", platform: "tiktok", isConnected: true },
+      { id: "6a8640bf62caae1e04ff0fb8", name: "Dapur Botani", platform: "tiktok", isConnected: true },
+      { id: "6a85ad8a62caae1e04fe975e", name: "NutriBake ID", platform: "instagram", isConnected: true },
+      { id: "6a85a5f962caae1e04fe8301", name: "Dapur Botani", platform: "instagram", isConnected: true },
+      { id: "6a85a5dc62caae1e04fe8293", name: "Siasat Sehat", platform: "facebook", isConnected: true },
+      { id: "6a85a5db62caae1e04fe828f", name: "Dapur Botani", platform: "facebook", isConnected: true },
+      { id: "6a85a5d862caae1e04fe8286", name: "NutriBake ID", platform: "facebook", isConnected: true },
+      { id: "6a85a58462caae1e04fe81a0", name: "NutriBake ID", platform: "tiktok", isConnected: true }
+    ];
+
+    let selectedIds = new Set(["6adc8ac0fc43f81b783251ac", "6adc854dfc43f81b78324009"]); // Default HabitFolk
+    let currentPlatformFilter = 'all';
+
+    function getPlatformMeta(platform) {
+      switch(platform) {
+        case 'instagram': return { icon: '📸', label: 'Instagram Reels', color: '#e1306c' };
+        case 'tiktok': return { icon: '🎵', label: 'TikTok', color: '#00f2fe' };
+        case 'facebook': return { icon: '📘', label: 'Facebook Reels', color: '#1877f2' };
+        case 'youtube': return { icon: '▶️', label: 'YouTube Shorts', color: '#ff0000' };
+        default: return { icon: '🌐', label: platform, color: 'var(--action-primary)' };
+      }
+    }
+
+    function renderAccounts() {
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+      const grid = document.getElementById('accountsGrid');
+      grid.innerHTML = '';
+
+      const filtered = LIVE_REPLIZ_ACCOUNTS.filter(acc => {
+        const matchPlatform = currentPlatformFilter === 'all' || acc.platform === currentPlatformFilter;
+        const matchQuery = !query || acc.name.toLowerCase().includes(query) || acc.platform.toLowerCase().includes(query);
+        return matchPlatform && matchQuery;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column: 1 / -1; padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.82rem;">
+            Tidak ditemukan akun yang cocok dengan kata kunci "<strong>${query}</strong>"
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(acc => {
+        const meta = getPlatformMeta(acc.platform);
+        const isSelected = selectedIds.has(acc.id);
+
+        const card = document.createElement('div');
+        card.className = `account-card ${isSelected ? 'selected' : ''}`;
+        card.onclick = () => toggleAccount(acc.id);
+
+        card.innerHTML = `
+          <div class="acc-header">
+            <div class="acc-platform" style="color: ${meta.color}">
+              <span>${meta.icon}</span>
+              <span>${meta.label}</span>
+            </div>
+            <div class="check-circle">${isSelected ? '✓' : ''}</div>
+          </div>
+          <div class="acc-name" title="${acc.name}">${acc.name}</div>
+          <div class="acc-badge">
+            <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: ${acc.isConnected ? 'var(--status-success)' : 'var(--status-danger)'};"></span>
+            <span>${acc.isConnected ? 'Terhubung' : 'Terputus'}</span>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      updateSelectionCount();
+    }
+
+    function toggleAccount(id) {
+      if (selectedIds.has(id)) {
+        selectedIds.delete(id);
+      } else {
+        selectedIds.add(id);
+      }
+      renderAccounts();
+    }
+
+    function updateSelectionCount() {
+      document.getElementById('selectedCountText').textContent = `${selectedIds.size} Akun Terpilih`;
+    }
+
+    function setPlatformFilter(platform, btn) {
+      currentPlatformFilter = platform;
+      document.querySelectorAll('.platform-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      renderAccounts();
+    }
+
+    function filterAccounts() {
+      renderAccounts();
+    }
+
+    function selectAllVisible() {
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+      LIVE_REPLIZ_ACCOUNTS.forEach(acc => {
+        const matchPlatform = currentPlatformFilter === 'all' || acc.platform === currentPlatformFilter;
+        const matchQuery = !query || acc.name.toLowerCase().includes(query) || acc.platform.toLowerCase().includes(query);
+        if (matchPlatform && matchQuery) {
+          selectedIds.add(acc.id);
+        }
+      });
+      renderAccounts();
+    }
+
+    function clearAllSelections() {
+      selectedIds.clear();
+      renderAccounts();
+    }
+
+    function syncAccounts() {
+      const btn = document.getElementById('btnSync');
+      const icon = document.getElementById('syncIcon');
+      btn.disabled = true;
+      icon.style.display = 'inline-block';
+      icon.style.animation = 'spin 1s linear infinite';
+      btn.style.opacity = '0.7';
+
+      setTimeout(() => {
+        btn.disabled = false;
+        icon.style.animation = 'none';
+        btn.style.opacity = '1';
+        alert('Berhasil menyinkronkan 33 akun media sosial live dari Repliz API!');
+      }, 1200);
+    }
+
+    // Inisialisasi awal
+    renderAccounts();
+  </script>
+
+  <style>
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+  </style>
+
+</body>
+</html>
+

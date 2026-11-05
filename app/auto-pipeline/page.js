@@ -42,6 +42,11 @@ export default function AutoPipelinePage() {
   const [modalBrandPresets, setModalBrandPresets] = useState([]);
   const [savingSchedule, setSavingSchedule] = useState(false);
 
+  // Repliz Multi-Platform Search & Filter State
+  const [replizSearchQuery, setReplizSearchQuery] = useState('');
+  const [selectedPlatformFilter, setSelectedPlatformFilter] = useState('all');
+  const [isSyncingRepliz, setIsSyncingRepliz] = useState(false);
+
   // Computed preset parameters for Inspector Card
   const targetClipsCount = Number(
     activePresetConfig?.visual_engine?.target_clips_count ||
@@ -374,15 +379,26 @@ export default function AutoPipelinePage() {
     }
   }
 
-  async function fetchReplizAccounts() {
+  async function fetchReplizAccounts(forceSync = false) {
+    if (forceSync) setIsSyncingRepliz(true);
     try {
-      const res = await fetch('/api/v2/publishing/accounts?provider=repliz');
+      const url = forceSync
+        ? '/api/v2/publishing/accounts?provider=repliz&sync=1'
+        : '/api/v2/publishing/accounts?provider=repliz';
+      const res = await fetch(url);
       const data = await res.json();
       if (data.success && Array.isArray(data.data)) {
-        setReplizAccounts(data.data.filter(a => a.provider === 'repliz' || a.platform));
+        const filtered = data.data.filter(a => a.provider === 'repliz' || a.platform);
+        setReplizAccounts(filtered);
+        if (forceSync) {
+          showToast(`Berhasil menyinkronkan ${filtered.length} akun live dari Repliz! 🚀`);
+        }
       }
     } catch (e) {
       console.warn('[AutoPipeline] Error fetching repliz accounts:', e);
+      if (forceSync) showToast('Gagal sinkronisasi akun Repliz: ' + e.message, 'error');
+    } finally {
+      if (forceSync) setIsSyncingRepliz(false);
     }
   }
 
@@ -456,6 +472,11 @@ export default function AutoPipelinePage() {
     setSchedReplizAccountIds(matched.length > 0 ? matched.map(a => a.id) : replizAccounts.slice(0, 4).map(a => a.id));
 
     fetchPresetsForModalBrand(currentBrand?.id);
+    setReplizSearchQuery('');
+    setSelectedPlatformFilter('all');
+    if (replizAccounts.length < 20) {
+      fetchReplizAccounts(true);
+    }
     setIsScheduleModalOpen(true);
   }
 
@@ -473,6 +494,11 @@ export default function AutoPipelinePage() {
     setSchedAutoPublish(sched.auto_publish_enabled !== false);
 
     fetchPresetsForModalBrand(sched.brand_id);
+    setReplizSearchQuery('');
+    setSelectedPlatformFilter('all');
+    if (replizAccounts.length < 20) {
+      fetchReplizAccounts(true);
+    }
     setIsScheduleModalOpen(true);
   }
 
@@ -611,6 +637,39 @@ export default function AutoPipelinePage() {
     if (scheduleFilter === 'all') return true;
     return s.status === scheduleFilter;
   });
+
+  // Filtered Repliz Accounts computation (Search & Platform tabs)
+  const filteredReplizAccounts = replizAccounts.filter(acc => {
+    const p = String(acc.platform || '').toLowerCase();
+    const matchPlatform = selectedPlatformFilter === 'all' || p === selectedPlatformFilter;
+    const q = replizSearchQuery.toLowerCase().trim();
+    const matchQuery = !q ||
+      (acc.display_name && acc.display_name.toLowerCase().includes(q)) ||
+      (acc.username && acc.username.toLowerCase().includes(q)) ||
+      p.includes(q);
+    return matchPlatform && matchQuery;
+  });
+
+  const platformTabs = [
+    { key: 'all', label: 'Semua Platform', count: replizAccounts.length },
+    { key: 'instagram', label: '📸 Instagram Reels', count: replizAccounts.filter(a => String(a.platform).toLowerCase() === 'instagram').length },
+    { key: 'tiktok', label: '🎵 TikTok', count: replizAccounts.filter(a => String(a.platform).toLowerCase() === 'tiktok').length },
+    { key: 'facebook', label: '📘 Facebook Reels', count: replizAccounts.filter(a => String(a.platform).toLowerCase() === 'facebook').length },
+    { key: 'youtube', label: '▶️ YouTube Shorts', count: replizAccounts.filter(a => String(a.platform).toLowerCase() === 'youtube').length },
+  ];
+
+  function handleSelectAllVisible() {
+    const visibleIds = filteredReplizAccounts.map(a => a.id);
+    setSchedReplizAccountIds(prev => Array.from(new Set([...prev, ...visibleIds])));
+  }
+
+  function handleClearSelections() {
+    setSchedReplizAccountIds([]);
+  }
+
+  function handleSyncReplizAccounts() {
+    fetchReplizAccounts(true);
+  }
 
   return (
     <div className="app-layout" style={{ display: 'flex', minHeight: '100vh', background: 'var(--canvas)' }}>
@@ -2455,7 +2514,7 @@ export default function AutoPipelinePage() {
                   </div>
                 </div>
 
-                {/* 3. Dua Waktu Terpisah (Jam Pembuatan & Jam Publish) */}
+                {/* 3. Dua Waktu Terpisah (Jam Pembuatan & Jam Publish - Format 24 Jam WIB) */}
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
@@ -2467,7 +2526,7 @@ export default function AutoPipelinePage() {
                 }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                     <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--status-info)' }}>
-                      ⚙️ Jam Pembuatan Video (AI Render)
+                      ⚙️ Jam Pembuatan Video (Format 24 Jam WIB)
                     </label>
                     <input
                       type="time"
@@ -2487,13 +2546,13 @@ export default function AutoPipelinePage() {
                       }}
                     />
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                      AI otomatis memproduksi video pada jam ini
+                      Contoh: <strong>05:00</strong> (Pagi) atau <strong>17:00</strong> (Sore WIB). AI otomatis memproduksi video pada jam ini
                     </span>
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                     <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--status-success)' }}>
-                      🚀 Jam Publish Repliz (Live Social Media)
+                      🚀 Jam Publish Repliz (Format 24 Jam WIB)
                     </label>
                     <input
                       type="time"
@@ -2513,7 +2572,7 @@ export default function AutoPipelinePage() {
                       }}
                     />
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                      Video diteruskan ke antrean Repliz untuk jam ini
+                      Contoh: <strong>09:00</strong> (Pagi) atau <strong>21:30</strong> (Malam WIB). Video diteruskan ke antrean Repliz untuk jam ini
                     </span>
                   </div>
                 </div>
@@ -2581,77 +2640,206 @@ export default function AutoPipelinePage() {
                   </div>
                 </div>
 
-                {/* 6. Multi-Platform Repliz Publishing Selector */}
+                {/* 6. Multi-Platform Repliz Publishing Selector (Lengkap dengan Search, Filter Platform & Live Sync) */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
                     <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                      Target Multi-Platform Repliz (1 Brand Profile)
+                      Target Multi-Platform Repliz (Pilih Akun Tujuan):
                     </label>
                     <span style={{
                       fontSize: '0.68rem',
                       fontWeight: 700,
                       color: 'var(--action-primary)',
                       background: 'var(--surface-interactive)',
-                      padding: '0.1rem 0.5rem',
+                      padding: '0.15rem 0.55rem',
                       borderRadius: 9999
                     }}>
-                      {schedReplizAccountIds.length} Terpilih
+                      {schedReplizAccountIds.length} Akun Terpilih
                     </span>
                   </div>
-                  <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                    Pilih akun media sosial tujuan publikasi otomatis di Repliz:
-                  </div>
 
+                  {/* Repliz Container Box */}
                   <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-                    gap: '0.65rem',
-                    marginTop: '0.25rem'
+                    background: 'var(--surface-raised)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '1rem'
                   }}>
-                    {replizAccounts.length > 0 ? (
-                      replizAccounts.map(acc => {
-                        const pInfo = getPlatformIcon(acc.platform);
-                        const isChecked = schedReplizAccountIds.includes(acc.id);
-                        return (
-                          <div
-                            key={acc.id}
-                            onClick={() => toggleReplizAccountSelection(acc.id)}
-                            style={{
-                              background: isChecked ? 'var(--surface-interactive)' : 'var(--surface-raised)',
-                              border: isChecked ? '1.5px solid var(--action-primary)' : '1px solid var(--border-subtle)',
-                              borderRadius: 'var(--radius-sm)',
-                              padding: '0.75rem',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              gap: '0.2rem',
-                              transition: 'var(--transition)'
-                            }}
-                          >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <span style={{ fontSize: '1.2rem' }}>{pInfo.icon}</span>
-                              <span style={{
-                                fontSize: '0.8rem',
-                                fontWeight: 900,
-                                color: isChecked ? 'var(--action-primary)' : 'var(--border-strong)'
-                              }}>
-                                {isChecked ? '✓' : '○'}
-                              </span>
-                            </div>
-                            <strong style={{ fontSize: '0.78rem', color: 'var(--text-primary)', marginTop: '0.25rem' }}>
-                              {pInfo.label}
-                            </strong>
-                            <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                              {acc.display_name}
-                            </span>
-                          </div>
-                        );
-                      })
-                    ) : (
-                      <div style={{ gridColumn: '1 / -1', padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem', border: '1px dashed var(--border-subtle)', borderRadius: 'var(--radius-sm)' }}>
-                        Belum ada akun Repliz yang terhubung di Content-Flow.
+                    {/* Toolbar: Live Search Box & Tombol Sync */}
+                    <div style={{ display: 'flex', gap: '0.65rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
+                      <div style={{ flex: 1, minWidth: '220px', position: 'relative' }}>
+                        <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '0.9rem' }}>🔍</span>
+                        <input
+                          type="text"
+                          value={replizSearchQuery}
+                          onChange={(e) => setReplizSearchQuery(e.target.value)}
+                          placeholder="Cari nama akun platform (misal: HabitFolk, Botani, NutriBake, dll)..."
+                          style={{
+                            width: '100%',
+                            height: '38px',
+                            background: 'var(--surface)',
+                            border: '1px solid var(--border-subtle)',
+                            borderRadius: 'var(--radius-sm)',
+                            padding: '0 12px 0 34px',
+                            color: 'var(--text-primary)',
+                            fontSize: '0.82rem',
+                            outline: 'none'
+                          }}
+                        />
                       </div>
-                    )}
+
+                      <button
+                        type="button"
+                        onClick={handleSyncReplizAccounts}
+                        disabled={isSyncingRepliz}
+                        style={{
+                          background: 'var(--surface)',
+                          border: '1px solid var(--border-subtle)',
+                          borderRadius: 'var(--radius-sm)',
+                          padding: '0 12px',
+                          height: '38px',
+                          color: 'var(--text-secondary)',
+                          fontSize: '0.78rem',
+                          fontWeight: 600,
+                          cursor: isSyncingRepliz ? 'not-allowed' : 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}
+                      >
+                        <span style={{ display: 'inline-block' }}>🔄</span>
+                        <span>{isSyncingRepliz ? 'Menyinkronkan...' : 'Sinkronkan Ulang dari Repliz'}</span>
+                      </button>
+                    </div>
+
+                    {/* Platform Filter Tabs */}
+                    <div style={{
+                      display: 'flex',
+                      gap: '0.45rem',
+                      marginBottom: '0.75rem',
+                      overflowX: 'auto',
+                      paddingBottom: '2px'
+                    }}>
+                      {platformTabs.map(tab => (
+                        <button
+                          key={tab.key}
+                          type="button"
+                          onClick={() => setSelectedPlatformFilter(tab.key)}
+                          style={{
+                            background: selectedPlatformFilter === tab.key ? 'var(--surface-interactive)' : 'var(--surface)',
+                            border: selectedPlatformFilter === tab.key ? '1px solid var(--action-primary)' : '1px solid var(--border-subtle)',
+                            color: selectedPlatformFilter === tab.key ? 'var(--action-primary)' : 'var(--text-secondary)',
+                            borderRadius: 9999,
+                            padding: '4px 12px',
+                            fontSize: '0.74rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          {tab.label} ({tab.count})
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Scrollable Accounts Grid (Menampung 33+ Akun) */}
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))',
+                      gap: '0.65rem',
+                      maxHeight: '280px',
+                      overflowY: 'auto',
+                      paddingRight: '4px'
+                    }}>
+                      {filteredReplizAccounts.length > 0 ? (
+                        filteredReplizAccounts.map(acc => {
+                          const pInfo = getPlatformIcon(acc.platform);
+                          const isChecked = schedReplizAccountIds.includes(acc.id);
+                          return (
+                            <div
+                              key={acc.id}
+                              onClick={() => toggleReplizAccountSelection(acc.id)}
+                              style={{
+                                background: isChecked ? 'var(--surface-interactive)' : 'var(--surface)',
+                                border: isChecked ? '1.5px solid var(--action-primary)' : '1px solid var(--border-subtle)',
+                                borderRadius: 'var(--radius-sm)',
+                                padding: '10px 12px',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '6px',
+                                transition: 'var(--transition)'
+                              }}
+                            >
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', fontWeight: 700, color: pInfo.color }}>
+                                  <span>{pInfo.icon}</span>
+                                  <span>{pInfo.label}</span>
+                                </div>
+                                <div style={{
+                                  width: '18px',
+                                  height: '18px',
+                                  borderRadius: '50%',
+                                  border: isChecked ? '1.5px solid var(--action-primary)' : '1.5px solid var(--border-strong)',
+                                  background: isChecked ? 'var(--action-primary)' : 'transparent',
+                                  color: isChecked ? 'var(--on-action-primary)' : 'transparent',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontSize: '0.68rem',
+                                  fontWeight: 900
+                                }}>
+                                  ✓
+                                </div>
+                              </div>
+                              <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={acc.display_name}>
+                                {acc.display_name}
+                              </div>
+                              <div style={{ fontSize: '0.68rem', color: acc.status === 'disconnected' ? 'var(--status-danger)' : 'var(--status-success)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: acc.status === 'disconnected' ? 'var(--status-danger)' : 'var(--status-success)' }}></span>
+                                <span>{acc.status === 'disconnected' ? 'Terputus' : 'Terhubung di Repliz'}</span>
+                              </div>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <div style={{ gridColumn: '1 / -1', padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem', border: '1px dashed var(--border-subtle)', borderRadius: 'var(--radius-sm)' }}>
+                          {replizSearchQuery ? `Tidak ada akun yang cocok dengan "${replizSearchQuery}"` : 'Belum ada akun Repliz terhubung.'}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Quick Action Footer */}
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginTop: '0.75rem',
+                      paddingTop: '0.65rem',
+                      borderTop: '1px solid var(--border-subtle)',
+                      fontSize: '0.74rem'
+                    }}>
+                      <span style={{ color: 'var(--text-muted)' }}>
+                        Daftar akun yang menerima video serempak
+                      </span>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button
+                          type="button"
+                          onClick={handleSelectAllVisible}
+                          style={{ background: 'none', border: 'none', color: 'var(--action-primary)', cursor: 'pointer', textDecoration: 'underline', fontSize: '0.74rem' }}
+                        >
+                          Pilih Semua Hasil
+                        </button>
+                        <span style={{ color: 'var(--border-strong)' }}>|</span>
+                        <button
+                          type="button"
+                          onClick={handleClearSelections}
+                          style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', textDecoration: 'underline', fontSize: '0.74rem' }}
+                        >
+                          Hapus Semua Pilihan
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
 

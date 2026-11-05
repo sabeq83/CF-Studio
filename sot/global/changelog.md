@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.165 — Multi-Platform Repliz Selector dengan Live Search dan Format Waktu 24 Jam (05/11/2026)
+- Menegaskan format 24 jam WIB dan petunjuk jam pada modal dan scheduler
+- Menyempurnakan selector multi-platform Repliz dengan live search dan filter tabs
+- Menambahkan tombol sinkronisasi live untuk 33+ akun Repliz API
+
 ## V2.32.164 — Auto Pipeline Scheduler dan Integrasi Multi-Platform Repliz Publishing (05/11/2026)
 - Menambahkan fitur penjadwalan rutin otomatis dengan pengaturan waktu pembuatan dan waktu publish terpisah
 - Mengintegrasikan auto-publish multi-platform Repliz (Instagram, TikTok, Facebook, YouTube)
