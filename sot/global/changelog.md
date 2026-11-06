@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.35.2 — Enable End-to-End Autopilot for Scheduled Multiplier Campaigns (06/11/2026)
+- Bypass manual waiting_approval for autopilot multiplier tasks
+- Set enable_glabs in multiplier audio config
+- Auto-transition multiplier scheduled tasks from remaking to audio and visual generation
+
 ## V2.35.1 — Brand Preset Filtering in Auto Pipeline Modal (06/11/2026)
 - Hydrate custom operator presets from tenant_settings
 - Resolve brand UUID to brand name for accurate matching

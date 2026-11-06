@@ -94,3 +94,4 @@ test('listOperatorPresetsForCampaignKind should prioritize brand presets and inc
   assert.equal(productPresets[0].is_brand_match, true);
   assert.ok(productPresets[0].key.includes('dapurbotani'));
 });
+
