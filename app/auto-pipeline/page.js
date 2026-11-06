@@ -676,15 +676,18 @@ export default function AutoPipelinePage() {
     }
   }
 
-  async function fetchPresetsForModalBrand(bId) {
+  async function fetchPresetsForModalBrand(bId, pType = schedCampaignType) {
     if (!bId) return;
     try {
-      const res = await fetch(`/api/v2/recipes/autonomous-pipeline?brand=${encodeURIComponent(bId)}`);
+      const effectiveType = pType || 'recipe_campaign';
+      const res = await fetch(`/api/v2/recipes/autonomous-pipeline?brand=${encodeURIComponent(bId)}&pipeline_type=${encodeURIComponent(effectiveType)}`);
       const data = await res.json();
       if (data.success && Array.isArray(data.operator_presets)) {
         setModalBrandPresets(data.operator_presets);
-        if (data.operator_presets.length > 0 && !schedPresetKey) {
-          setSchedPresetKey(data.operator_presets[0].key);
+        const exists = data.operator_presets.some(p => p.key === schedPresetKey);
+        if (!exists && data.operator_presets.length > 0) {
+          const brandMatch = data.operator_presets.find(p => p.is_brand_match);
+          setSchedPresetKey(brandMatch ? brandMatch.key : data.operator_presets[0].key);
         }
       }
     } catch (e) {
@@ -703,7 +706,7 @@ export default function AutoPipelinePage() {
         setSchedReplizAccountIds(matched.map(a => a.id));
       }
     }
-    fetchPresetsForModalBrand(newBrandId);
+    fetchPresetsForModalBrand(newBrandId, schedCampaignType);
   }
 
   function toggleDaySelection(dayIndex) {
@@ -754,7 +757,7 @@ export default function AutoPipelinePage() {
     const matched = replizAccounts.filter(a => a.display_name && a.display_name.toLowerCase().includes(brandLower));
     setSchedReplizAccountIds(matched.length > 0 ? matched.map(a => a.id) : replizAccounts.slice(0, 4).map(a => a.id));
 
-    fetchPresetsForModalBrand(currentBrand?.id);
+    fetchPresetsForModalBrand(currentBrand?.id, 'recipe_campaign');
     setReplizSearchQuery('');
     setSelectedPlatformFilter('all');
     if (replizAccounts.length < 20) {
@@ -797,7 +800,7 @@ export default function AutoPipelinePage() {
     setProductSearchQuery('');
     setPillarSearchQuery('');
 
-    fetchPresetsForModalBrand(sched.brand_id);
+    fetchPresetsForModalBrand(sched.brand_id, pType);
     setReplizSearchQuery('');
     setSelectedPlatformFilter('all');
     if (replizAccounts.length < 20) {
@@ -4267,6 +4270,7 @@ export default function AutoPipelinePage() {
                               } else {
                                 setSchedName(`${bName} — Daily Morning Reels`);
                               }
+                              fetchPresetsForModalBrand(schedBrandId, t.key);
                             }
                           }}
                           style={{
@@ -4358,11 +4362,42 @@ export default function AutoPipelinePage() {
                         outline: 'none'
                       }}
                     >
-                      {(modalBrandPresets.length > 0 ? modalBrandPresets : operatorPresets).map(p => (
-                        <option key={p.key} value={p.key}>
-                          {p.label || p.key}
-                        </option>
-                      ))}
+                      {(() => {
+                        const presetsList = modalBrandPresets.length > 0 ? modalBrandPresets : operatorPresets;
+                        const brandPresets = presetsList.filter(p => p.is_brand_match);
+                        const generalPresets = presetsList.filter(p => !p.is_brand_match);
+                        const selectedBrandObj = brands.find(b => b.id === schedBrandId);
+                        const brandLabel = selectedBrandObj?.brand_name || 'Brand';
+
+                        if (brandPresets.length > 0) {
+                          return (
+                            <>
+                              <optgroup label={`⭐ Preset Khusus ${brandLabel} (${brandPresets.length})`}>
+                                {brandPresets.map(p => (
+                                  <option key={p.key} value={p.key}>
+                                    {p.label || p.key}
+                                  </option>
+                                ))}
+                              </optgroup>
+                              {generalPresets.length > 0 && (
+                                <optgroup label={`Preset Umum & Alternatif (${generalPresets.length})`}>
+                                  {generalPresets.map(p => (
+                                    <option key={p.key} value={p.key}>
+                                      {p.label || p.key}
+                                    </option>
+                                  ))}
+                                </optgroup>
+                              )}
+                            </>
+                          );
+                        }
+
+                        return presetsList.map(p => (
+                          <option key={p.key} value={p.key}>
+                            {p.label || p.key}
+                          </option>
+                        ));
+                      })()}
                     </select>
                   </div>
                 </div>

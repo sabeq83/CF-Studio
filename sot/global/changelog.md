@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.35.1 — Brand Preset Filtering in Auto Pipeline Modal (06/11/2026)
+- Hydrate custom operator presets from tenant_settings
+- Resolve brand UUID to brand name for accurate matching
+- Synchronize presets on campaign card click and group with optgroup
+
 ## V2.35.0 — Auto Pipeline 5-in-1 Engine (Multiplier & Recipe Labs) (06/11/2026)
 - Multi-campaign 5-in-1 engine support
 - Multiplier viral angle variations with zero-repetition

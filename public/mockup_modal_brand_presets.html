@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup: Preset Video Sesuai Brand di Modal Auto Pipeline</title>
+  <link rel="stylesheet" href="/theme.css">
+  <style>
+    :root {
+      --bg-page: var(--surface-subtle, #0b0f17);
+      --card-bg: var(--surface, #131b2e);
+      --card-raised: var(--surface-raised, #1a243c);
+      --border-color: var(--border-subtle, rgba(255, 255, 255, 0.1));
+      --text-main: var(--text-primary, #f1f5f9);
+      --text-muted: var(--text-muted, #94a3b8);
+      --accent: var(--action-primary, #3b82f6);
+      --accent-hover: var(--action-primary-hover, #2563eb);
+      --badge-success: var(--status-success, #10b981);
+      --badge-success-soft: var(--status-success-soft, rgba(16, 185, 129, 0.15));
+      --badge-info: var(--status-info, #0ea5e9);
+      --badge-info-soft: var(--status-info-soft, rgba(14, 165, 233, 0.15));
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      padding: 2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container { max-width: 900px; width: 100%; }
+    .header-box {
+      margin-bottom: 1.5rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+    }
+    .header-box h1 { font-size: 1.3rem; margin-bottom: 0.5rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem; }
+    .header-box p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; }
+
+    /* Modal Simulation Container */
+    .modal-backdrop {
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 16px;
+      padding: 1.5rem;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+    .modal-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1rem;
+    }
+    .modal-title { font-size: 1.15rem; font-weight: 700; color: var(--text-main); }
+    .close-btn { color: var(--text-muted); cursor: pointer; font-size: 1.2rem; }
+
+    /* Campaign Type Selector */
+    .campaign-tabs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.6rem;
+    }
+    .camp-card {
+      background: var(--card-raised);
+      border: 1.5px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+    .camp-card:hover { border-color: var(--accent); }
+    .camp-card.active {
+      border-color: var(--accent);
+      background: rgba(59, 130, 246, 0.1);
+    }
+    .camp-icon { font-size: 1.2rem; margin-bottom: 0.25rem; }
+    .camp-label { font-size: 0.82rem; font-weight: 700; color: var(--text-main); }
+    .camp-desc { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.2rem; }
+
+    /* 2-Column Brand & Preset Row */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    @media (max-width: 640px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+    .field-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .field-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+    .field-badge {
+      font-size: 0.68rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      font-weight: 700;
+      background: var(--badge-success-soft);
+      color: var(--badge-success);
+    }
+    .input-control {
+      height: 44px;
+      background: var(--card-raised);
+      border: 1.5px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0 0.85rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.2s ease;
+      cursor: pointer;
+    }
+    .input-control:focus { border-color: var(--accent); }
+    select.input-control optgroup {
+      font-weight: 800;
+      background: var(--card-bg);
+      color: var(--accent);
+      padding: 6px 0;
+    }
+    select.input-control option {
+      background: var(--card-raised);
+      color: var(--text-main);
+      padding: 6px 12px;
+      font-weight: 500;
+    }
+
+    /* Preset Preview Banner */
+    .preset-banner {
+      background: var(--card-raised);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      font-size: 0.78rem;
+    }
+    .banner-tags { display: flex; align-items: center; gap: 0.6rem; }
+    .pill {
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: var(--badge-info-soft);
+      color: var(--badge-info);
+      border: 1px solid rgba(14, 165, 233, 0.3);
+    }
+    .banner-note { color: var(--text-muted); font-size: 0.72rem; }
+
+    /* Info Legend */
+    .legend-box {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+    .legend-box strong { color: var(--badge-success); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-box">
+      <h1><span>🎯</span> Simulasi Interaktif: Filter Preset Sesuai Brand</h1>
+      <p>
+        Halaman ini mensimulasikan perbaikan pada modal <strong>Buat Jadwal Rutin Auto Pipeline Baru</strong>. 
+        Ganti Brand atau Tipe Kampanye di bawah untuk melihat bagaimana dropdown <strong>Preset Konfigurasi Video</strong> secara otomatis memuat seluruh preset khusus brand (baik dari database tenant maupun sistem) dan mengelompokkannya di bagian teratas.
+      </p>
+    </div>
+
+    <!-- Modal Mockup -->
+    <div class="modal-backdrop">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title">✨ Buat Jadwal Rutin Auto Pipeline Baru</div>
+          <div class="close-btn">✕</div>
+        </div>
+
+        <!-- 1. Tipe Kampanye Selector -->
+        <div class="field-group">
+          <label class="field-label">Pilih Tipe Kampanye Terjadwal:</label>
+          <div class="campaign-tabs" id="campTabs">
+            <div class="camp-card active" onclick="selectCampaign('recipe_campaign', this)">
+              <div class="camp-icon">🍳</div>
+              <div class="camp-label">Video Resep</div>
+              <div class="camp-desc">Food reel & cooking guide 4-8 klip</div>
+            </div>
+            <div class="camp-card" onclick="selectCampaign('product_campaign', this)">
+              <div class="camp-icon">🛍️</div>
+              <div class="camp-label">Video Produk</div>
+              <div class="camp-desc">Showcase katalog produk & benefit</div>
+            </div>
+            <div class="camp-card" onclick="selectCampaign('editorial_campaign', this)">
+              <div class="camp-icon">📰</div>
+              <div class="camp-label">Editorial Pillar</div>
+              <div class="camp-desc">Edukasi, authority &amp; tips sehat</div>
+            </div>
+            <div class="camp-card" onclick="selectCampaign('multiplier_campaign', this)">
+              <div class="camp-icon">🔀</div>
+              <div class="camp-label">Video Multiplier</div>
+              <div class="camp-desc">Remix hook & angle dari referensi</div>
+            </div>
+            <div class="camp-card" onclick="selectCampaign('recipe_labs', this)">
+              <div class="camp-icon">🖼️</div>
+              <div class="camp-label">Resep Teks & Foto</div>
+              <div class="camp-desc">Naskah FB + Foto grid komposit</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Brand & Preset Row -->
+        <div class="two-col">
+          <!-- Kolom 1: Brand -->
+          <div class="field-group">
+            <label class="field-label">
+              <span>1. Target Brand Profile</span>
+              <span class="field-badge" id="brandBadge">Active</span>
+            </label>
+            <select class="input-control" id="brandSelect" onchange="onBrandChange()">
+              <option value="dapur_botani">Dapur Botani (Herbal & Wellness)</option>
+              <option value="habitfolk">HabitFolk (Snacks & Quick Food)</option>
+              <option value="nutribake">NutriBake (Healthy Bakery)</option>
+              <option value="siasat_sehat">Siasat Sehat (Educational & Lifestyle)</option>
+            </select>
+          </div>
+
+          <!-- Kolom 2: Preset Konfigurasi Video -->
+          <div class="field-group">
+            <label class="field-label">
+              <span>2. Preset Konfigurasi Video</span>
+              <span class="field-badge" style="background: var(--badge-info-soft); color: var(--badge-info);" id="presetBadge">Brand-Matched</span>
+            </label>
+            <select class="input-control" id="presetSelect" onchange="onPresetChange()" style="border-color: var(--accent);">
+              <!-- Will be populated dynamically -->
+            </select>
+          </div>
+        </div>
+
+        <!-- Preset Preview Info Banner -->
+        <div class="preset-banner" id="presetBanner">
+          <div class="banner-tags">
+            <span class="pill" id="langPill">🇮🇩 Bahasa Indonesia (id-ID)</span>
+            <span>TTS: <strong id="voiceText">Indonesian warm motherly vv1</strong></span>
+          </div>
+          <span class="banner-note">⚡ AI otomatis menyusun Voice-Over &amp; Hook dalam bahasa &amp; tone preset ini</span>
+        </div>
+
+        <!-- Legend / Explanation Box -->
+        <div class="legend-box">
+          <strong>Perubahan Kunci yang Diimplementasikan:</strong>
+          <ul style="margin-left: 1.2rem; margin-top: 0.35rem; display: flex; flex-direction: column; gap: 0.25rem;">
+            <li><strong>Hydration Cache Otomatis:</strong> Endpoint API me-load seluruh custom operator preset dari database <code>tenant_settings</code>.</li>
+            <li><strong>Resolusi Brand UUID:</strong> ID brand yang berbentuk UUID otomatis diterjemahkan ke nama brand sebelum pencocokan nama preset.</li>
+            <li><strong>Pengelompokan Dropdown:</strong> Dropdown otomatis memisahkan <code>⭐ Preset Khusus [Brand]</code> di atas, disusul <code>Preset Umum &amp; Alternatif</code>.</li>
+            <li><strong>Sinkronisasi Tipe Kampanye:</strong> Mengganti tipe kampanye di atas secara instan memperbarui daftar preset yang sesuai.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Database Simulasi Preset
+    const allPresets = [
+      // Dapur Botani
+      { key: 'dapurbotani_4clips_healthy', label: 'DapurBotani — Herbal & Wellness Recipe (4 Klip @ 8s)', brand: 'dapur_botani', kinds: ['recipe_campaign'], lang: 'id-ID', voice: 'Indonesian warm motherly vv1' },
+      { key: 'dapurbotani_kampanye_produk_4_klip', label: 'Dapur Botani 4 Klip Product Campaign', brand: 'dapur_botani', kinds: ['product_campaign'], lang: 'id-ID', voice: 'Indonesian professional anchor vv2' },
+      { key: 'dapurbotani_kampanye_produk_4_klip_v2', label: 'Dapur Botani 4 Klip Product Campaign V2', brand: 'dapur_botani', kinds: ['product_campaign'], lang: 'id-ID', voice: 'Indonesian enthusiastic female vv1' },
+      { key: 'dapurbotani_editorial_v1', label: 'Dapurbotani Editorial Pure T2V', brand: 'dapur_botani', kinds: ['editorial_campaign'], lang: 'id-ID', voice: 'Indonesian professional anchor vv2' },
+
+      // HabitFolk
+      { key: 'habitfolk_6clips_quick', label: 'HabitFolk — Quick Snack & Reels (6 Klip @ 4s)', brand: 'habitfolk', kinds: ['recipe_campaign'], lang: 'en-US', voice: 'English causual narrator vv1' },
+      { key: 'habitfolk_8clips_deep', label: 'HabitFolk — Full Comfort Feast (8 Klip @ 4s)', brand: 'habitfolk', kinds: ['recipe_campaign'], lang: 'en-US', voice: 'English energetic male vv2' },
+
+      // NutriBake
+      { key: 'nutribake_kampanye_produk_4_klip_v2', label: 'Nutribake 4 Klip Product Campaign V2', brand: 'nutribake', kinds: ['product_campaign'], lang: 'id-ID', voice: 'Indonesian warm motherly vv1' },
+      { key: 'nutribake_resep_20klip', label: 'Nutribake Resep 20Klip', brand: 'nutribake', kinds: ['recipe_campaign', 'editorial_campaign'], lang: 'id-ID', voice: 'Indonesian enthusiastic female vv1' },
+      { key: 'nutribake_editorial_puret2v', label: 'Nutribake Editorial Pure T2V', brand: 'nutribake', kinds: ['editorial_campaign'], lang: 'id-ID', voice: 'Indonesian professional anchor vv2' },
+
+      // Siasat Sehat
+      { key: 'multiplier_siasatsehat', label: 'Multiplier - Siasat Sehat Remix Hook', brand: 'siasat_sehat', kinds: ['multiplier_campaign', 'editorial_campaign'], lang: 'id-ID', voice: 'Indonesian deep authority vv1' },
+      { key: 'siasatsehat_editorial_v1', label: 'Siasatsehat Editorial Pure T2V', brand: 'siasat_sehat', kinds: ['editorial_campaign'], lang: 'id-ID', voice: 'Indonesian professional anchor vv2' },
+
+      // General / System Presets
+      { key: 'recipe_campaign', label: 'Recipe Campaign Default (Universal 4 Clips)', brand: 'general', kinds: ['recipe_campaign'], lang: 'id-ID', voice: 'Indonesian warm motherly vv1' },
+      { key: 'product_campaign_v1', label: 'Product Showcase Standard', brand: 'general', kinds: ['product_campaign'], lang: 'id-ID', voice: 'Indonesian professional anchor vv2' },
+      { key: 'brand_editorial_campaign', label: 'Brand Editorial Authority Standard', brand: 'general', kinds: ['editorial_campaign'], lang: 'id-ID', voice: 'Indonesian deep authority vv1' },
+      { key: 'multiplier_blueprint_default', label: 'Multiplier Dynamic Angle Default', brand: 'general', kinds: ['multiplier_campaign'], lang: 'id-ID', voice: 'English causual narrator vv1' },
+      { key: 'recipe_labs_composite_grid', label: 'Recipe Labs Composite Grid & Story', brand: 'general', kinds: ['recipe_labs'], lang: 'id-ID', voice: 'Indonesian warm motherly vv1' }
+    ];
+
+    let currentCampaign = 'recipe_campaign';
+
+    function selectCampaign(campaignKey, el) {
+      currentCampaign = campaignKey;
+      document.querySelectorAll('.camp-card').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      renderPresetDropdown();
+    }
+
+    function onBrandChange() {
+      renderPresetDropdown();
+    }
+
+    function onPresetChange() {
+      updateBanner();
+    }
+
+    function renderPresetDropdown() {
+      const brandVal = document.getElementById('brandSelect').value;
+      const brandText = document.getElementById('brandSelect').options[document.getElementById('brandSelect').selectedIndex].text.split(' (')[0];
+      const presetSelect = document.getElementById('presetSelect');
+
+      // Filter presets matching campaign or belonging to brand
+      const matchingPresets = allPresets.filter(p => {
+        const matchesType = p.kinds.includes(currentCampaign);
+        const matchesCurrentBrand = p.brand === brandVal;
+        return matchesType || matchesCurrentBrand;
+      });
+
+      const brandMatched = matchingPresets.filter(p => p.brand === brandVal);
+      const generalMatched = matchingPresets.filter(p => p.brand !== brandVal);
+
+      presetSelect.innerHTML = '';
+
+      if (brandMatched.length > 0) {
+        const brandGroup = document.createElement('optgroup');
+        brandGroup.label = `⭐ Preset Khusus ${brandText} (${brandMatched.length})`;
+        brandMatched.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p.key;
+          opt.textContent = p.label;
+          brandGroup.appendChild(opt);
+        });
+        presetSelect.appendChild(brandGroup);
+      }
+
+      if (generalMatched.length > 0) {
+        const genGroup = document.createElement('optgroup');
+        genGroup.label = `Preset Umum & Alternatif (${generalMatched.length})`;
+        generalMatched.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p.key;
+          opt.textContent = p.label;
+          genGroup.appendChild(opt);
+        });
+        presetSelect.appendChild(genGroup);
+      }
+
+      // Default selection to first brand match if available
+      if (brandMatched.length > 0) {
+        presetSelect.value = brandMatched[0].key;
+      } else if (generalMatched.length > 0) {
+        presetSelect.value = generalMatched[0].key;
+      }
+
+      updateBanner();
+    }
+
+    function updateBanner() {
+      const selectedKey = document.getElementById('presetSelect').value;
+      const p = allPresets.find(item => item.key === selectedKey) || allPresets[0];
+      const langPill = document.getElementById('langPill');
+      const voiceText = document.getElementById('voiceText');
+
+      if (p.lang === 'en-US') {
+        langPill.textContent = '🇺🇸 English (en-US)';
+      } else {
+        langPill.textContent = '🇮🇩 Bahasa Indonesia (id-ID)';
+      }
+      voiceText.textContent = p.voice;
+    }
+
+    // Initial render
+    renderPresetDropdown();
+  </script>
+</body>
+</html>
+

@@ -9,13 +9,16 @@ import {
   hydrateOperatorPresetCache
 } from '../lib/operator-presets.js';
 
-test('Preset System Integrity: Exactly 2 Master Built-in Presets exist with all 5 sections', () => {
+test('Preset System Integrity: Exactly 5 Master Built-in Presets exist with all 5 sections', () => {
   const presets = listOperatorPresets('clean_isolated_tenant');
-  assert.equal(presets.length, 2, 'Must have exactly 2 master built-in presets');
+  assert.equal(presets.length, 5, 'Must have exactly 5 master built-in presets');
 
   const keys = presets.map(p => p.key);
   assert.ok(keys.includes('brand_editorial_campaign'), 'Must include brand_editorial_campaign');
   assert.ok(keys.includes('product_campaign'), 'Must include product_campaign');
+  assert.ok(keys.includes('recipe_campaign'), 'Must include recipe_campaign');
+  assert.ok(keys.includes('multiplier_deconstruct_remix'), 'Must include multiplier_deconstruct_remix');
+  assert.ok(keys.includes('recipe_labs_editorial_food'), 'Must include recipe_labs_editorial_food');
 
   for (const preset of presets) {
     const config = preset.config;
@@ -38,31 +41,37 @@ test('Preset System Integrity: Exactly 2 Master Built-in Presets exist with all 
     assert.ok(config.visual_engine, `Preset ${preset.key} missing visual_engine`);
     assert.ok(config.visual_engine.visual_style, `Preset ${preset.key} missing visual_style`);
     assert.ok(config.visual_engine.visual_mode, `Preset ${preset.key} missing visual_mode`);
-    assert.ok(config.visual_engine.video_model, `Preset ${preset.key} missing video_model`);
     assert.ok(config.visual_engine.aspect_ratio, `Preset ${preset.key} missing aspect_ratio`);
-    assert.equal(typeof config.visual_engine.target_clips_count, 'number', `Preset ${preset.key} target_clips_count must be number`);
-    assert.ok(config.visual_engine.words_per_clip, `Preset ${preset.key} missing words_per_clip`);
-
-    // 3. product_bridging
-    assert.ok(config.product_bridging, `Preset ${preset.key} missing product_bridging`);
-    assert.equal(typeof config.product_bridging.is_bridging_active, 'boolean', `Preset ${preset.key} is_bridging_active must be boolean`);
-    if (config.product_bridging.is_bridging_active) {
-      assert.ok(config.product_bridging.bridging_mode, `Preset ${preset.key} bridging_mode must exist when active`);
-      assert.equal(typeof config.product_bridging.bridge_at_clip, 'number', `Preset ${preset.key} bridge_at_clip must be number`);
-      assert.equal(typeof config.product_bridging.bridge_duration_clips, 'number', `Preset ${preset.key} bridge_duration_clips must be number`);
+    if (config.visual_engine.visual_mode !== 'composite_grid') {
+      assert.ok(config.visual_engine.video_model, `Preset ${preset.key} missing video_model`);
+      assert.equal(typeof config.visual_engine.target_clips_count, 'number', `Preset ${preset.key} target_clips_count must be number`);
+      assert.ok(config.visual_engine.words_per_clip, `Preset ${preset.key} missing words_per_clip`);
     }
 
-    // 4. visual_swap
-    assert.ok(config.visual_swap, `Preset ${preset.key} missing visual_swap`);
-    assert.equal(typeof config.visual_swap.is_vso_active, 'boolean', `Preset ${preset.key} is_vso_active must be boolean`);
+    // 3. product_bridging & visual_swap (for video pipelines)
+    if (config.visual_engine.visual_mode !== 'composite_grid') {
+      assert.ok(config.product_bridging, `Preset ${preset.key} missing product_bridging`);
+      assert.equal(typeof config.product_bridging.is_bridging_active, 'boolean', `Preset ${preset.key} is_bridging_active must be boolean`);
+      if (config.product_bridging.is_bridging_active) {
+        assert.ok(config.product_bridging.bridging_mode, `Preset ${preset.key} bridging_mode must exist when active`);
+        assert.equal(typeof config.product_bridging.bridge_at_clip, 'number', `Preset ${preset.key} bridge_at_clip must be number`);
+        assert.equal(typeof config.product_bridging.bridge_duration_clips, 'number', `Preset ${preset.key} bridge_duration_clips must be number`);
+      }
+
+      // 4. visual_swap
+      assert.ok(config.visual_swap, `Preset ${preset.key} missing visual_swap`);
+      assert.equal(typeof config.visual_swap.is_vso_active, 'boolean', `Preset ${preset.key} is_vso_active must be boolean`);
+    }
 
     // 5. workflow
     assert.ok(config.workflow, `Preset ${preset.key} missing workflow`);
     assert.ok(config.workflow.approval_mode, `Preset ${preset.key} missing approval_mode`);
-    assert.equal(typeof config.workflow.enable_tts, 'boolean', `Preset ${preset.key} enable_tts must be boolean`);
-    assert.equal(typeof config.workflow.enable_glabs, 'boolean', `Preset ${preset.key} enable_glabs must be boolean`);
-    assert.equal(typeof config.workflow.enable_ffmpeg, 'boolean', `Preset ${preset.key} enable_ffmpeg must be boolean`);
     assert.equal(typeof config.workflow.auto_sync_contentflow, 'boolean', `Preset ${preset.key} auto_sync_contentflow must be boolean`);
+    if (config.visual_engine.visual_mode !== 'composite_grid') {
+      assert.equal(typeof config.workflow.enable_tts, 'boolean', `Preset ${preset.key} enable_tts must be boolean`);
+      assert.equal(typeof config.workflow.enable_glabs, 'boolean', `Preset ${preset.key} enable_glabs must be boolean`);
+      assert.equal(typeof config.workflow.enable_ffmpeg, 'boolean', `Preset ${preset.key} enable_ffmpeg must be boolean`);
+    }
   }
 });
 
@@ -124,13 +133,13 @@ test('Multi-Tenant Isolation: Tenant A custom presets are strictly isolated from
   const listA = listOperatorPresets(tenantA);
   const listB = listOperatorPresets(tenantB);
 
-  // Tenant A must have 2 masters + alpha_exclusive_preset = 3
-  assert.equal(listA.length, 3);
+  // Tenant A must have 5 masters + alpha_exclusive_preset = 6
+  assert.equal(listA.length, 6);
   assert.ok(listA.some(p => p.key === 'alpha_exclusive_preset'));
   assert.ok(!listA.some(p => p.key === 'beta_exclusive_preset'), 'Tenant A must NOT see Tenant B preset');
 
-  // Tenant B must have 2 masters + beta_exclusive_preset = 3
-  assert.equal(listB.length, 3);
+  // Tenant B must have 5 masters + beta_exclusive_preset = 6
+  assert.equal(listB.length, 6);
   assert.ok(listB.some(p => p.key === 'beta_exclusive_preset'));
   assert.ok(!listB.some(p => p.key === 'alpha_exclusive_preset'), 'Tenant B must NOT see Tenant A preset');
 });

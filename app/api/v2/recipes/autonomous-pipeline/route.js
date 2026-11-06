@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server.js';
 import { withTenantContext } from '../../../../../lib/auth.js';
-import { getDb } from '../../../../../lib/db.js';
+import { getDb, getSetting } from '../../../../../lib/db.js';
 import { pgQuery } from '../../../../../lib/db-pg.js';
 import {
   executeAutonomousRecipePipeline,
@@ -11,17 +11,48 @@ import {
   listVisualIdentityPresetsForBrand,
   resolveBrandRecipePreset
 } from '../../../../../lib/autonomous-recipe-engine.js';
-import { listOperatorPresetsForCampaignKind } from '../../../../../lib/operator-presets.js';
+import { listOperatorPresetsForCampaignKind, hydrateOperatorPresetCache } from '../../../../../lib/operator-presets.js';
 import { GRID_LAYOUT_COORDINATES } from '../../../../../lib/core/GridCoordinates.js';
 
 export const GET = withTenantContext(async (request, _ctx, user) => {
   try {
     const { searchParams } = new URL(request.url);
-    const brandId = searchParams.get('brand_id') || searchParams.get('brand');
+    const rawBrandId = searchParams.get('brand_id') || searchParams.get('brand');
     const presetKey = searchParams.get('preset_key') || searchParams.get('presetKey');
     const pipelineType = searchParams.get('pipeline_type') || searchParams.get('campaign_type') || 'recipe_campaign';
     const action = searchParams.get('action');
     const tenantId = user?.tenantId || 'default_tenant';
+
+    // 1. Auto-Hydrate operator preset cache dari database tenant_settings
+    try {
+      let tenantPresets = getSetting('operator_presets_json', false);
+      if (!tenantPresets) {
+        const sRes = await pgQuery(
+          'SELECT setting_value FROM tenant_settings WHERE tenant_id = $1 AND setting_key = $2 LIMIT 1',
+          [tenantId, 'operator_presets_json']
+        );
+        tenantPresets = sRes.rows[0]?.setting_value || '{}';
+      }
+      hydrateOperatorPresetCache(tenantId, tenantPresets);
+    } catch (hErr) {
+      console.warn('[Autonomous Pipeline GET] Preset cache hydration notice:', hErr.message);
+    }
+
+    // 2. Resolusi nama brand jika parameter berupa UUID
+    let brandIdentifier = rawBrandId || '';
+    if (rawBrandId) {
+      try {
+        const bpRes = await pgQuery(
+          'SELECT brand_name FROM brand_profiles WHERE id = $1 OR brand_name = $1 LIMIT 1',
+          [rawBrandId]
+        );
+        if (bpRes.rows[0]?.brand_name) {
+          brandIdentifier = bpRes.rows[0].brand_name;
+        }
+      } catch (bpErr) {
+        console.warn('[Autonomous Pipeline GET] Brand name resolution notice:', bpErr.message);
+      }
+    }
 
     // Sub-action: Preview dynamic angles untuk Multiplier Blueprint
     if (action === 'get_multiplier_angles') {
@@ -35,10 +66,10 @@ export const GET = withTenantContext(async (request, _ctx, user) => {
       return NextResponse.json({ success: true, angles });
     }
 
-    const operatorPresets = listOperatorPresetsForCampaignKind(pipelineType, brandId, tenantId);
-    const viPresets = await listVisualIdentityPresetsForBrand(brandId);
+    const operatorPresets = listOperatorPresetsForCampaignKind(pipelineType, brandIdentifier, tenantId);
+    const viPresets = await listVisualIdentityPresetsForBrand(rawBrandId);
     const targetPresetKey = presetKey || operatorPresets[0]?.key || null;
-    const defaultPreset = await resolveBrandRecipePreset(brandId, targetPresetKey, null, tenantId);
+    const defaultPreset = await resolveBrandRecipePreset(rawBrandId, targetPresetKey, null, tenantId);
 
     let blueprints = [];
     if (pipelineType === 'multiplier_campaign' || searchParams.get('include_blueprints') === 'true') {
