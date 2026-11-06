@@ -1,0 +1,1968 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup Interaktif: Auto Pipeline Hub (Multi-Campaign & Dedicated Row Generation)</title>
+  <style>
+    :root {
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #f1f5f9;
+      --surface-subtle: #f8fafc;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --border-color: #e2e8f0;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --input-bg: #ffffff;
+      --focus-ring: rgba(37, 99, 235, 0.25);
+      --action-primary: #2563eb;
+      --action-primary-hover: #1d4ed8;
+      --on-action-primary: #ffffff;
+      --status-info: #0284c7;
+      --status-info-soft: rgba(2, 132, 199, 0.1);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.1);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.1);
+      --status-danger: #dc2626;
+      --status-danger-soft: rgba(220, 38, 38, 0.1);
+      --overlay-backdrop: rgba(15, 23, 42, 0.65);
+      --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    [data-theme="dark"] {
+      --surface: #0f172a;
+      --surface-raised: #1e293b;
+      --surface-interactive: #334155;
+      --surface-subtle: #0f172a;
+      --border-subtle: #334155;
+      --border-strong: #475569;
+      --border-color: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --input-bg: #0f172a;
+      --focus-ring: rgba(59, 130, 246, 0.35);
+      --action-primary: #3b82f6;
+      --action-primary-hover: #60a5fa;
+      --on-action-primary: #ffffff;
+      --status-info: #38bdf8;
+      --status-info-soft: rgba(56, 189, 248, 0.15);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.15);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.15);
+      --status-danger: #f87171;
+      --status-danger-soft: rgba(248, 113, 113, 0.15);
+      --overlay-backdrop: rgba(0, 0, 0, 0.8);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--surface-subtle);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 2rem 1.5rem;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* Top Nav */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .header-title h1 {
+      margin: 0 0 0.35rem 0;
+      font-size: 1.55rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .header-title p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      padding: 0.55rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      border: 1px solid transparent;
+      transition: var(--transition);
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+    }
+    .btn-secondary {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+    }
+    .btn-secondary:hover {
+      background: var(--surface-interactive);
+    }
+    .btn-sm {
+      padding: 0.35rem 0.65rem;
+      font-size: 0.76rem;
+    }
+
+    /* Filter Bars */
+    .filter-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .tabs-bar {
+      display: flex;
+      gap: 0.4rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.5rem;
+      overflow-x: auto;
+    }
+    .tab-item {
+      padding: 0.45rem 0.95rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--text-secondary);
+      background: transparent;
+      border: 1px solid transparent;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      white-space: nowrap;
+    }
+    .tab-item:hover {
+      color: var(--text-primary);
+      background: var(--surface-interactive);
+    }
+    .tab-item.active {
+      color: var(--action-primary);
+      background: var(--surface);
+      border-color: var(--border-subtle);
+      box-shadow: var(--shadow-card);
+    }
+    .tab-count {
+      padding: 0.1rem 0.45rem;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      background: var(--surface-interactive);
+      color: var(--text-muted);
+    }
+    .tab-item.active .tab-count {
+      background: var(--status-info-soft);
+      color: var(--action-primary);
+    }
+
+    .status-filter-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      font-size: 0.8rem;
+    }
+    .status-pill {
+      padding: 0.25rem 0.65rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.76rem;
+    }
+    .status-pill.active {
+      border-color: var(--action-primary);
+      background: var(--surface-interactive);
+      color: var(--action-primary);
+    }
+
+    /* Cards List */
+    .cards-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.35rem;
+      box-shadow: var(--shadow-card);
+      transition: var(--transition);
+      border-left-width: 5px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+    .card-product { border-left-color: #10b981; }
+    .card-editorial { border-left-color: #6366f1; }
+    .card-recipe { border-left-color: #f59e0b; }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 0.85rem;
+    }
+
+    .card-title-area {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      flex-wrap: wrap;
+    }
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .badge-pill {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .badge-product { background: rgba(16, 185, 129, 0.15); color: #059669; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-editorial { background: rgba(99, 102, 241, 0.15); color: #4f46e5; border: 1px solid rgba(99, 102, 241, 0.3); }
+    .badge-recipe { background: rgba(245, 158, 11, 0.15); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.3); }
+
+    .double-time-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      padding: 0.4rem 0.8rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
+    }
+
+    .card-details {
+      background: var(--surface-raised);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 0.75rem;
+      font-size: 0.8rem;
+    }
+    .detail-item strong {
+      color: var(--text-primary);
+    }
+    .detail-item span {
+      color: var(--text-muted);
+      display: block;
+      font-size: 0.72rem;
+      margin-bottom: 0.15rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.85rem;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 0.85rem;
+    }
+    .footer-meta {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+    }
+
+    /* Live Spinner Animation */
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid currentColor;
+      border-right-color: transparent;
+      border-radius: 50%;
+      display: inline-block;
+      animation: spin 0.75s linear infinite;
+    }
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    .running-banner {
+      padding: 0.6rem 0.9rem;
+      background: var(--status-info-soft);
+      border: 1px solid var(--status-info);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-size: 0.78rem;
+      color: var(--text-primary);
+    }
+
+    /* Modal Overlay & Dialog */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--overlay-backdrop);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 1.5rem;
+    }
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-dialog {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 740px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-modal);
+      padding: 1.75rem;
+      position: relative;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 0.75rem;
+    }
+    .modal-header h3 {
+      margin: 0;
+      font-size: 1.18rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.4rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    /* Form Styles */
+    .form-group {
+      margin-bottom: 1.15rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .form-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .form-hint {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      height: 42px;
+      padding: 0 0.85rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--input-bg);
+      color: var(--text-primary);
+      font-size: 0.88rem;
+      transition: var(--transition);
+      outline: none;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--action-primary);
+      box-shadow: 0 0 0 3px var(--focus-ring);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+    }
+
+    /* Step 1: Type Selection Cards */
+    .type-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+    }
+    .type-card {
+      border: 2px solid var(--border-subtle);
+      background: var(--surface-raised);
+      border-radius: var(--radius-md);
+      padding: 0.9rem;
+      cursor: pointer;
+      text-align: center;
+      transition: var(--transition);
+    }
+    .type-card:hover {
+      border-color: var(--action-primary);
+      background: var(--surface-interactive);
+    }
+    .type-card.selected {
+      border-color: var(--action-primary);
+      background: var(--status-info-soft);
+      box-shadow: 0 0 0 1px var(--action-primary);
+    }
+    .type-icon { font-size: 1.6rem; margin-bottom: 0.3rem; }
+    .type-name { font-size: 0.84rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.2rem; }
+    .type-desc { font-size: 0.7rem; color: var(--text-muted); line-height: 1.3; }
+
+    /* Preset Highlight Card (Di Atas Konfigurasi Khusus) */
+    .preset-container-box {
+      background: var(--surface-raised);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.15rem;
+      margin-bottom: 1.15rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .preset-meta-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      flex-wrap: wrap;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      padding: 0.45rem 0.75rem;
+      border-radius: var(--radius-sm);
+    }
+
+    /* Dedicated Section Container (Pilihan Produk / Pilar / Topik) */
+    .dynamic-section {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.15rem;
+      margin-bottom: 1.15rem;
+    }
+    .section-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    /* Notice Banner for 1 Item = 1 Schedule Row */
+    .batch-rule-banner {
+      background: var(--status-info-soft);
+      border: 1px dashed var(--action-primary);
+      border-radius: var(--radius-sm);
+      padding: 0.65rem 0.85rem;
+      margin-bottom: 0.85rem;
+      font-size: 0.78rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    /* Search & Filter Toolbar for Products / Pillars / Repliz */
+    .filter-toolbar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .search-input-box {
+      flex: 1;
+      min-width: 200px;
+      position: relative;
+    }
+    .search-input-box input {
+      width: 100%;
+      height: 38px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0 12px 0 34px;
+      color: var(--text-primary);
+      font-size: 0.82rem;
+      outline: none;
+    }
+    .search-icon {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    /* Scrollable Selectable Grid */
+    .selectable-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
+      gap: 0.65rem;
+      max-height: 250px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .selectable-item {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.65rem 0.85rem;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      transition: var(--transition);
+      user-select: none;
+    }
+    .selectable-item:hover {
+      background: var(--surface-interactive);
+      border-color: var(--border-strong);
+    }
+    .selectable-item.selected {
+      background: var(--surface-interactive);
+      border: 1.5px solid var(--action-primary);
+    }
+
+    .item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    .item-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+    .item-subtitle {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+    .check-circle {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border-strong);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.68rem;
+      font-weight: 900;
+      flex-shrink: 0;
+      color: transparent;
+    }
+    .selectable-item.selected .check-circle {
+      border-color: var(--action-primary);
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    /* Quick Action Footer inside Selectors */
+    .selector-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.65rem;
+      padding-top: 0.55rem;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 0.74rem;
+    }
+
+    /* Day Selector Pills */
+    .day-pills {
+      display: flex;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+    }
+    .day-pill {
+      padding: 0.45rem 0.85rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+      font-weight: 700;
+      font-size: 0.8rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .day-pill.selected {
+      background: var(--action-primary);
+      border-color: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    /* Modal Footer */
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 1rem;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--surface);
+      color: var(--text-primary);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1.25rem;
+      box-shadow: var(--shadow-modal);
+      font-size: 0.85rem;
+      display: none;
+      align-items: center;
+      gap: 0.55rem;
+      z-index: 10000;
+    }
+  </style>
+</head>
+<body data-theme="dark">
+
+  <div class="container">
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="header-title">
+        <h1>⚙️ Auto Pipeline Hub</h1>
+        <p>Jadwal harian otonom untuk Product Campaign, Brand Editorial, dan Resep Kuliner tanpa campur tangan manual.</p>
+      </div>
+      <div class="top-actions">
+        <button type="button" class="btn btn-secondary" onclick="toggleTheme()">
+          <span id="themeIcon">☀️</span>
+          <span id="themeText">Light Mode</span>
+        </button>
+        <button type="button" class="btn btn-primary" onclick="openCreateModal()">
+          <span>➕</span>
+          <span>Buat Jadwal Baru</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+      <!-- Tabs Filter Tipe Kampanye -->
+      <div class="tabs-bar">
+        <button type="button" class="tab-item active" onclick="filterByCampaignType('all', this)">
+          <span>🌐 Semua Kampanye</span>
+          <span class="tab-count" id="countAll">5</span>
+        </button>
+        <button type="button" class="tab-item" onclick="filterByCampaignType('product_campaign', this)">
+          <span>🛍️ Video Produk</span>
+          <span class="tab-count" id="countProduct">3</span>
+        </button>
+        <button type="button" class="tab-item" onclick="filterByCampaignType('editorial_campaign', this)">
+          <span>📖 Video Editorial</span>
+          <span class="tab-count" id="countEditorial">1</span>
+        </button>
+        <button type="button" class="tab-item" onclick="filterByCampaignType('recipe_campaign', this)">
+          <span>🍳 Video Resep</span>
+          <span class="tab-count" id="countRecipe">1</span>
+        </button>
+      </div>
+
+      <!-- Filter Status Jadwal (Berbasis app sekarang) -->
+      <div class="status-filter-row">
+        <span style="color: var(--text-muted); font-size: 0.75rem;">Status:</span>
+        <button type="button" class="status-pill active" onclick="filterByStatus('all', this)">Semua Status</button>
+        <button type="button" class="status-pill" onclick="filterByStatus('active', this)">🟢 Aktif Berjalan</button>
+        <button type="button" class="status-pill" onclick="filterByStatus('paused', this)">⏸️ Dijeda</button>
+      </div>
+    </div>
+
+    <!-- Schedule Cards List (Daftar Jadwal Per Baris Item) -->
+    <div class="cards-list" id="scheduleListContainer">
+      <!-- Di-render oleh JavaScript renderScheduleList() -->
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: BUAT / EDIT JADWAL RUTIN AUTO PIPELINE (BERBASIS HALAMAN SEKARANG)   -->
+  <!-- ========================================================================= -->
+  <div class="modal-overlay" id="scheduleModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="modalTitle">
+          <span>⏰</span>
+          <span>Buat Jadwal Rutin Auto Pipeline Baru</span>
+        </h3>
+        <button type="button" class="close-btn" onclick="closeModal()">&times;</button>
+      </div>
+
+      <form id="pipelineScheduleForm" onsubmit="handleFormSubmit(event)">
+
+        <!-- Step 1: Pilihan Tipe Kampanye Otomatis -->
+        <div class="form-group">
+          <label class="form-label">
+            <span>1. Pilih Tipe Kampanye Otomatis:</span>
+            <span style="font-size: 0.72rem; color: var(--action-primary); font-weight: 600;">Multi-Campaign Architecture</span>
+          </label>
+          <div class="type-grid">
+            <div class="type-card selected" id="typeCard-product" onclick="selectCampaignType('product_campaign')">
+              <div class="type-icon">🛍️</div>
+              <div class="type-name">Product Campaign</div>
+              <div class="type-desc">Showcase katalog produk & keranjang kuning.</div>
+            </div>
+
+            <div class="type-card" id="typeCard-editorial" onclick="selectCampaignType('editorial_campaign')">
+              <div class="type-icon">📖</div>
+              <div class="type-name">Brand Editorial</div>
+              <div class="type-desc">Konten edukasi, hook tension & pilar nilai brand.</div>
+            </div>
+
+            <div class="type-card" id="typeCard-recipe" onclick="selectCampaignType('recipe_campaign')">
+              <div class="type-icon">🍳</div>
+              <div class="type-name">Resep Kuliner</div>
+              <div class="type-desc">Video masak estetik 4-scene & naskah VO.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Nama Pengenal Jadwal -->
+        <div class="form-group">
+          <label class="form-label" for="schedName">Nama Pengenal / Grup Jadwal</label>
+          <input
+            type="text"
+            id="schedName"
+            class="form-input"
+            placeholder="Contoh: HabitFolk Daily Product Showcase 05:00"
+            required
+            value="HabitFolk Daily Product Showcase"
+          >
+          <span class="form-hint">Jika memilih beberapa produk/pilar, nama ini akan dijadikan awalan nama baris jadwal.</span>
+        </div>
+
+        <!-- Step 3: Brand Profile & Target Bahasa -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="schedBrand">1. Brand Profile</label>
+            <select id="schedBrand" class="form-select" onchange="handleBrandChange(this.value)">
+              <option value="habitfolk">HabitFolk (@habitfolk)</option>
+              <option value="dapurbotani">Dapur Botani (@dapurbotani)</option>
+              <option value="nutribake">NutriBake (@nutribake)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="schedLanguage">2. Target Bahasa Voice-Over & Caption</label>
+            <select id="schedLanguage" class="form-select">
+              <option value="en-US">🇺🇸 English (en-US) - Native Narrator</option>
+              <option value="id-ID">🇮🇩 Bahasa Indonesia (id-ID) - Warm Casual</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- PRESET VIDEO CONTAINER: DILETAKKAN DI ATAS KONFIGURASI KHUSUS              -->
+        <!-- (Mode Promosi & Tone of Voice sudah terintegrasi penuh di dalam Preset)    -->
+        <!-- ========================================================================= -->
+        <div class="preset-container-box">
+          <!-- A. Preset Video Produk (Aktif saat Product Campaign dipilih) -->
+          <div class="form-group" id="presetProductGroup" style="margin-bottom: 0;">
+            <label class="form-label" for="schedProductPreset">
+              <span style="font-size: 0.84rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 0.4rem;">
+                <span>🎬</span>
+                <span>Preset Video Produk:</span>
+              </span>
+              <span style="font-size: 0.7rem; color: var(--status-success); font-weight: 700;">Preset Manager</span>
+            </label>
+            <select id="schedProductPreset" class="form-select" style="border: 1.5px solid var(--action-primary); font-weight: 700;" onchange="handleProductPresetChange(this.value)">
+              <option value="product_showcase_6clips">product_showcase_6clips (Soft-Sell: Problem Hook 3s → Demo Produk Solusi → CTA Keranjang)</option>
+              <option value="product_hard_sell_6clips">product_hard_sell_6clips (Hard-Sell: Fitur Unggulan, Promo Harga & Keranjang Kuning)</option>
+              <option value="product_review_8clips">product_review_8clips (Unboxing, Deep Hands-on Demo & Honest Impression)</option>
+            </select>
+            <div class="preset-meta-pill" id="presetProductMeta">
+              <span style="color: var(--status-info); font-weight: 700;">⚡ Strategi Terkandung:</span>
+              <span>Mode: <b>Soft-Sell</b></span> • <span>Durasi: <b>6 Clips (9:16 Vertikal)</b></span> • <span>Target: <b>TikTok Shop & IG Reels</b></span>
+            </div>
+          </div>
+
+          <!-- B. Preset Video Editorial (Aktif saat Brand Editorial dipilih) -->
+          <div class="form-group" id="presetEditorialGroup" style="display: none; margin-bottom: 0;">
+            <label class="form-label" for="schedEditorialPreset">
+              <span style="font-size: 0.84rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 0.4rem;">
+                <span>🎬</span>
+                <span>Preset Video Editorial:</span>
+              </span>
+              <span style="font-size: 0.7rem; color: var(--status-success); font-weight: 700;">Preset Manager</span>
+            </label>
+            <select id="schedEditorialPreset" class="form-select" style="border: 1.5px solid var(--action-primary); font-weight: 700;" onchange="handleEditorialPresetChange(this.value)">
+              <option value="editorial_tension_6clips">editorial_tension_6clips (Warm & Candid • Hook Tension & Diskusi Mitos vs Fakta)</option>
+              <option value="editorial_authority_6clips">editorial_authority_6clips (Expert & Authoritative • Edukasi Sains & Panduan Praktis)</option>
+              <option value="editorial_storytelling_8clips">editorial_storytelling_8clips (Relatable Storytelling • Narasi Emosional & Nilai Brand)</option>
+            </select>
+            <div class="preset-meta-pill" id="presetEditorialMeta">
+              <span style="color: var(--status-info); font-weight: 700;">⚡ Strategi Terkandung:</span>
+              <span>Tone: <b>Warm, Candid & Provocative</b></span> • <span>Format: <b>Hook Tension (6 Clips)</b></span> • <span>Target: <b>Shorts, Reels, TikTok</b></span>
+            </div>
+          </div>
+
+          <!-- C. Preset Resep Kuliner (Aktif saat Resep Kuliner dipilih) -->
+          <div class="form-group" id="presetRecipeGroup" style="display: none; margin-bottom: 0;">
+            <label class="form-label" for="schedRecipePreset">
+              <span style="font-size: 0.84rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 0.4rem;">
+                <span>🎬</span>
+                <span>Preset Konfigurasi Resep:</span>
+              </span>
+              <span style="font-size: 0.7rem; color: var(--status-success); font-weight: 700;">Preset Manager</span>
+            </label>
+            <select id="schedRecipePreset" class="form-select" style="border: 1.5px solid var(--action-primary); font-weight: 700;">
+              <option value="habitfolk_8clips_deep">habitfolk_8clips_deep (4 Scene Lengkap, Takaran Bahan & Naskah VO)</option>
+              <option value="habitfolk_6clips_quick">habitfolk_6clips_quick (Quick 3-Min Video Masak Praktis)</option>
+            </select>
+            <div class="preset-meta-pill">
+              <span style="color: var(--status-info); font-weight: 700;">⚡ Format Terkandung:</span>
+              <span>Struktur: <b>Single-Pass 4-Scene Recipe</b></span> • <span>Audio: <b>Voice-Over Narration Sync</b></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- DYNAMIC SECTION 1: KONFIGURASI KHUSUS PRODUCT CAMPAIGN                    -->
+        <!-- (Fokus Murni pada Filter & Pemilihan Produk Katalog: 1 Produk = 1 Baris)  -->
+        <!-- ========================================================================= -->
+        <div class="dynamic-section" id="sectionProduct">
+          <div class="section-title">
+            <span>🛍️</span>
+            <span>Konfigurasi Khusus Product Campaign</span>
+          </div>
+
+          <!-- Rule Banner: 1 Produk = 1 Baris Jadwal -->
+          <div class="batch-rule-banner">
+            <span style="font-size: 1.1rem; line-height: 1;">💡</span>
+            <div>
+              <strong>Aturan Pembuatan Jadwal Mandiri:</strong>
+              <div>Setiap produk yang dicentang akan otomatis dibuatkan <b>1 baris jadwal mandiri</b> di daftar jadwal. Anda dapat memilih beberapa produk sekaligus untuk membuat jadwal harian masing-masing produk secara instan!</div>
+            </div>
+          </div>
+
+          <!-- Filter Toolbar Nama Produk Katalog -->
+          <div class="form-group" style="margin-bottom: 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+              <label class="form-label" style="margin-bottom: 0;">Pilih Produk dari Katalog:</label>
+              <span id="selectedProductCountBadge" style="font-size: 0.72rem; font-weight: 700; color: var(--action-primary); background: var(--surface-interactive); padding: 0.15rem 0.55rem; border-radius: 9999px;">
+                2 Produk Dipilih &rarr; 2 Baris Jadwal
+              </span>
+            </div>
+
+            <div class="filter-toolbar">
+              <div class="search-input-box">
+                <span class="search-icon">🔍</span>
+                <input
+                  type="text"
+                  id="productSearchInput"
+                  placeholder="Cari nama produk katalog (misal: Air Fryer, Container, Knife)..."
+                  oninput="filterCatalogProducts(this.value)"
+                >
+              </div>
+            </div>
+
+            <!-- Scrollable Catalog Products Grid -->
+            <div class="selectable-grid" id="catalogProductsGrid">
+              <!-- Di-render oleh JavaScript renderCatalogProducts() -->
+            </div>
+
+            <!-- Quick Action Footer -->
+            <div class="selector-footer">
+              <span style="color: var(--text-muted);" id="catalogSummaryText">Menampilkan produk katalog</span>
+              <div style="display: flex; gap: 0.65rem;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="selectAllProducts()">Pilih Semua</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="clearAllProducts()">Bersihkan</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- DYNAMIC SECTION 2: KONFIGURASI KHUSUS BRAND EDITORIAL                     -->
+        <!-- (Fokus Murni pada Filter & Pemilihan Pilar Brand: 1 Pilar = 1 Baris)      -->
+        <!-- ========================================================================= -->
+        <div class="dynamic-section" id="sectionEditorial" style="display: none;">
+          <div class="section-title">
+            <span>📖</span>
+            <span>Konfigurasi Khusus Brand Editorial</span>
+          </div>
+
+          <!-- Rule Banner: 1 Pilar = 1 Baris Jadwal -->
+          <div class="batch-rule-banner">
+            <span style="font-size: 1.1rem; line-height: 1;">💡</span>
+            <div>
+              <strong>Aturan Pembuatan Jadwal Mandiri:</strong>
+              <div>Setiap pilar konten yang dicentang akan otomatis dibuatkan <b>1 baris jadwal mandiri</b>. Konten edukasi untuk pilar tersebut akan diproduksi secara konsisten dan terfokus!</div>
+            </div>
+          </div>
+
+          <!-- Filter Toolbar Pilar Konten Brand -->
+          <div class="form-group" style="margin-bottom: 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+              <label class="form-label" style="margin-bottom: 0;">Pilar Konten Brand yang Dilibatkan:</label>
+              <span id="selectedPillarCountBadge" style="font-size: 0.72rem; font-weight: 700; color: var(--action-primary); background: var(--surface-interactive); padding: 0.15rem 0.55rem; border-radius: 9999px;">
+                1 Pilar Dipilih &rarr; 1 Baris Jadwal
+              </span>
+            </div>
+
+            <div class="filter-toolbar">
+              <div class="search-input-box">
+                <span class="search-icon">🔍</span>
+                <input
+                  type="text"
+                  id="pillarSearchInput"
+                  placeholder="Cari nama pilar konten (misal: Hype Check, Eat Better)..."
+                  oninput="filterEditorialPillars(this.value)"
+                >
+              </div>
+            </div>
+
+            <!-- Scrollable Pillars Grid -->
+            <div class="selectable-grid" id="editorialPillarsGrid">
+              <!-- Di-render oleh JavaScript renderEditorialPillars() -->
+            </div>
+
+            <!-- Quick Action Footer -->
+            <div class="selector-footer">
+              <span style="color: var(--text-muted);" id="pillarSummaryText">Menampilkan pilar brand</span>
+              <div style="display: flex; gap: 0.65rem;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="selectAllPillars()">Pilih Semua</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="clearAllPillars()">Bersihkan</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- DYNAMIC SECTION 3: KONFIGURASI KHUSUS RESEP KULINER (EXISTING)            -->
+        <!-- ========================================================================= -->
+        <div class="dynamic-section" id="sectionRecipe" style="display: none;">
+          <div class="section-title">
+            <span>🍳</span>
+            <span>Konfigurasi Khusus Resep Kuliner</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="schedRecipeTopic">Tema / Arahan Topik Resep Harian</label>
+            <input
+              type="text"
+              id="schedRecipeTopic"
+              class="form-input"
+              placeholder="Contoh: Air fryer crispy chicken tenders and snack finger foods"
+              value="Air fryer healthy high protein meal prep"
+            >
+            <span class="form-hint">AI Gemini berkreasi variasi resep baru setiap hari sesuai tema ini.</span>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="schedRecipeCategory">Kategori Resep Kuliner</label>
+            <select id="schedRecipeCategory" class="form-select">
+              <option value="makanan_utama">🍗 Makanan Utama (Main Course)</option>
+              <option value="camilan">🍟 Camilan / Side Dish</option>
+              <option value="dessert">🍰 Baking / Dessert</option>
+              <option value="minuman">🥤 Minuman Segar / Smoothie</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Step 4: Dua Waktu Terpisah (Pembuatan & Publish) - Format 24 Jam WIB -->
+        <div style="
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+          gap: 1rem;
+          background: var(--surface-raised);
+          padding: 1rem;
+          border-radius: var(--radius-sm);
+          border: 1px solid var(--border-subtle);
+          margin-bottom: 1.15rem;
+        ">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="schedGenTime" style="color: var(--status-info);">
+              ⚙️ Jam Pembuatan Video (24 Jam WIB)
+            </label>
+            <input
+              type="time"
+              id="schedGenTime"
+              class="form-input"
+              value="05:00"
+              required
+              style="font-size: 1.05rem; font-weight: 700;"
+            >
+            <span class="form-hint">Contoh: <b>05:00</b> Pagi. AI otomatis memproduksi video pada jam ini.</span>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="schedPubTime" style="color: var(--status-success);">
+              🚀 Jam Publish Repliz (24 Jam WIB)
+            </label>
+            <input
+              type="time"
+              id="schedPubTime"
+              class="form-input"
+              value="09:15"
+              required
+              style="font-size: 1.05rem; font-weight: 700;"
+            >
+            <span class="form-hint">Contoh: <b>09:15</b> Pagi. Video diteruskan ke antrean publish Repliz.</span>
+          </div>
+        </div>
+
+        <!-- Step 5: Hari Rutin Eksekusi (Pills) -->
+        <div class="form-group">
+          <label class="form-label">Hari Rutin Eksekusi:</label>
+          <div class="day-pills">
+            <div class="day-pill selected" onclick="toggleDay(1, this)">Sen</div>
+            <div class="day-pill selected" onclick="toggleDay(2, this)">Sel</div>
+            <div class="day-pill selected" onclick="toggleDay(3, this)">Rab</div>
+            <div class="day-pill selected" onclick="toggleDay(4, this)">Kam</div>
+            <div class="day-pill selected" onclick="toggleDay(5, this)">Jum</div>
+            <div class="day-pill selected" onclick="toggleDay(6, this)">Sab</div>
+            <div class="day-pill selected" onclick="toggleDay(0, this)">Min</div>
+          </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- STEP 6: TARGET MULTI-PLATFORM REPLIZ (BERBASIS HALAMAN SEKARANG 100%)       -->
+        <!-- DENGAN FILTER NAMA AKUN, TAB PLATFORM, LIVE SYNC & GRID AKUN TERHUBUNG    -->
+        <!-- ========================================================================= -->
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+            <label class="form-label" style="margin-bottom: 0;">
+              Target Multi-Platform Repliz (Pilih Akun Tujuan):
+            </label>
+            <span id="replizSelectedBadge" style="font-size: 0.72rem; font-weight: 700; color: var(--action-primary); background: var(--surface-interactive); padding: 0.15rem 0.55rem; border-radius: 9999px;">
+              2 Akun Terpilih
+            </span>
+          </div>
+
+          <!-- Repliz Container Box -->
+          <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem;">
+            <!-- Toolbar: Live Search Box & Tombol Sync -->
+            <div class="filter-toolbar">
+              <div class="search-input-box">
+                <span class="search-icon">🔍</span>
+                <input
+                  type="text"
+                  id="replizSearchInput"
+                  placeholder="Cari nama akun platform (misal: HabitFolk, Botani, NutriBake, dll)..."
+                  oninput="handleReplizSearch(this.value)"
+                >
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="simulateReplizSync()">
+                <span id="syncIcon">🔄</span>
+                <span id="syncText">Sinkronkan Ulang dari Repliz</span>
+              </button>
+            </div>
+
+            <!-- Platform Filter Tabs -->
+            <div style="display: flex; gap: 0.45rem; margin-bottom: 0.75rem; overflow-x: auto; padding-bottom: 2px;">
+              <button type="button" class="tab-item active btn-sm" onclick="filterReplizPlatform('all', this)">Semua (10)</button>
+              <button type="button" class="tab-item btn-sm" onclick="filterReplizPlatform('tiktok', this)">TikTok (3)</button>
+              <button type="button" class="tab-item btn-sm" onclick="filterReplizPlatform('instagram', this)">Instagram (3)</button>
+              <button type="button" class="tab-item btn-sm" onclick="filterReplizPlatform('youtube', this)">YouTube (2)</button>
+              <button type="button" class="tab-item btn-sm" onclick="filterReplizPlatform('facebook', this)">Facebook (2)</button>
+            </div>
+
+            <!-- Scrollable Accounts Grid -->
+            <div class="selectable-grid" id="replizAccountsGrid">
+              <!-- Di-render oleh JavaScript renderReplizAccounts() -->
+            </div>
+
+            <!-- Quick Action Footer -->
+            <div class="selector-footer">
+              <span style="color: var(--text-muted);" id="replizSummaryText">Menampilkan semua akun Repliz</span>
+              <div style="display: flex; gap: 0.65rem;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="selectAllReplizAccounts()">Pilih Semua Akun</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="clearAllReplizAccounts()">Bersihkan Pilihan</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitForm">
+            <span>💾 Simpan &amp; Buat Jadwal Rutin</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toastNotification">
+    <span id="toastIcon">✅</span>
+    <span id="toastMessage">Pesan notifikasi</span>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC & STATE SIMULATION -->
+  <script>
+    // --- STATE INITIALIZATION ---
+    let currentTheme = 'dark';
+    let currentCampaignType = 'product_campaign'; // 'product_campaign' | 'editorial_campaign' | 'recipe_campaign'
+    let activeCampaignTypeFilter = 'all';
+    let activeStatusFilter = 'all';
+
+    // Mock Catalog Products Data (Untuk Product Campaign)
+    const catalogProducts = [
+      { id: 'prd_01', name: 'Air Fryer Digital 4.5L Multi-Function', category: 'Kitchenware', price: 'Rp 649.000', tag: 'Best Seller', selected: true },
+      { id: 'prd_02', name: 'Glass Meal Prep Containers (Set of 4)', category: 'Food Storage', price: 'Rp 189.000', tag: 'Popular', selected: true },
+      { id: 'prd_03', name: 'Silicone Heat-Resistant Utensils 10-Pcs', category: 'Kitchenware', price: 'Rp 145.000', tag: 'Essential', selected: false },
+      { id: 'prd_04', name: 'Precision Digital Kitchen Scale 0.1g', category: 'Accessories', price: 'Rp 95.000', tag: 'Trending', selected: false },
+      { id: 'prd_05', name: 'Stainless Steel Chef Santoku Knife 8-Inch', category: 'Cutlery', price: 'Rp 220.000', tag: 'Premium', selected: false },
+      { id: 'prd_06', name: 'Insulated Meal Prep Lunch Bag Cooler', category: 'Storage', price: 'Rp 129.000', tag: 'New', selected: false }
+    ];
+
+    // Mock Editorial Pillars Data (Untuk Brand Editorial)
+    const editorialPillars = [
+      { id: 'pil_01', num: 1, name: 'Eat Better, Not Perfect', desc: 'Mindful nutrition & guilt-free balanced eating habits', selected: true },
+      { id: 'pil_02', num: 2, name: 'Hype Check', desc: 'Debunking viral nutrition fads with evidence-based realism', selected: false },
+      { id: 'pil_03', num: 3, name: 'Beyond the Scale', desc: 'Energy, deep sleep, mental clarity & sustainable stamina', selected: false },
+      { id: 'pil_04', num: 4, name: 'Small Habits, Real Life', desc: '5-minute micro actions that compound without exhaustion', selected: false },
+      { id: 'pil_05', num: 5, name: 'Self-Care Without Upsell', desc: 'Empowering wellness using simple whole ingredients & tools', selected: false },
+      { id: 'pil_06', num: 6, name: 'The Everyday Test', desc: 'Real-world kitchen prep tests vs perfectionist aesthetics', selected: false }
+    ];
+
+    // Mock Repliz Connected Accounts Data (Berbasis Halaman Sekarang)
+    const replizAccounts = [
+      { id: 'acc_01', platform: 'tiktok', display_name: 'HabitFolk Official (@habitfolk)', status: 'connected', selected: true },
+      { id: 'acc_02', platform: 'tiktok', display_name: 'HabitFolk Kitchen (@habitfolk.kitchen)', status: 'connected', selected: false },
+      { id: 'acc_03', platform: 'tiktok', display_name: 'Dapur Botani Official (@dapurbotani)', status: 'connected', selected: false },
+      { id: 'acc_04', platform: 'instagram', display_name: 'HabitFolk Lifestyle (@habitfolk)', status: 'connected', selected: true },
+      { id: 'acc_05', platform: 'instagram', display_name: 'HabitFolk Meal Prep (@habitfolk.mealprep)', status: 'connected', selected: false },
+      { id: 'acc_06', platform: 'instagram', display_name: 'Dapur Botani Cooking (@dapur_botani)', status: 'connected', selected: false },
+      { id: 'acc_07', platform: 'youtube', display_name: 'HabitFolk Shorts Channel', status: 'connected', selected: false },
+      { id: 'acc_08', platform: 'youtube', display_name: 'Dapur Botani Cooking TV', status: 'connected', selected: false },
+      { id: 'acc_09', platform: 'facebook', display_name: 'HabitFolk Healthy Living', status: 'connected', selected: false },
+      { id: 'acc_10', platform: 'facebook', display_name: 'Dapur Botani Official Page', status: 'connected', selected: false }
+    ];
+
+    // In-Memory Schedules List (Menampung Baris Jadwal Mandiri 1 Produk/1 Pilar = 1 Baris Jadwal)
+    let schedules = [
+      {
+        id: 'sch_prd_1',
+        type: 'product_campaign',
+        brand: 'HabitFolk',
+        name: 'HabitFolk — Air Fryer Digital 4.5L (Product Showcase)',
+        target_item: 'Air Fryer Digital 4.5L Multi-Function',
+        item_subtitle: 'Kitchenware • Rp 649.000',
+        preset_key: 'product_showcase_6clips',
+        preset_label: 'Soft-Sell Problem & Solution Showcase',
+        gen_time: '05:00',
+        pub_time: '09:15',
+        days: [1, 2, 3, 4, 5, 6, 0],
+        status: 'active',
+        repliz_channels: 'TikTok Shop (@habitfolk), IG Reels (@habitfolk)',
+        last_run: '6/11/2026, 05.00.12',
+        campaign_code: 'opc_261106_prd881',
+        is_running: false
+      },
+      {
+        id: 'sch_prd_2',
+        type: 'product_campaign',
+        brand: 'HabitFolk',
+        name: 'HabitFolk — Glass Meal Prep Containers (Product Showcase)',
+        target_item: 'Glass Meal Prep Containers (Set of 4)',
+        item_subtitle: 'Food Storage • Rp 189.000',
+        preset_key: 'product_showcase_6clips',
+        preset_label: 'Soft-Sell Problem & Solution Showcase',
+        gen_time: '05:00',
+        pub_time: '09:15',
+        days: [1, 2, 3, 4, 5, 6, 0],
+        status: 'active',
+        repliz_channels: 'TikTok Shop (@habitfolk), IG Reels (@habitfolk)',
+        last_run: '6/11/2026, 05.00.15',
+        campaign_code: 'opc_261106_prd882',
+        is_running: false
+      },
+      {
+        id: 'sch_prd_3',
+        type: 'product_campaign',
+        brand: 'HabitFolk',
+        name: 'HabitFolk — Silicone Utensils 10-Pcs (Product Showcase)',
+        target_item: 'Silicone Heat-Resistant Utensils 10-Pcs',
+        item_subtitle: 'Kitchenware • Rp 145.000',
+        preset_key: 'product_hard_sell_6clips',
+        preset_label: 'Hard-Sell Features & Promo CTA',
+        gen_time: '05:30',
+        pub_time: '11:00',
+        days: [1, 3, 5],
+        status: 'active',
+        repliz_channels: 'TikTok Shop (@habitfolk)',
+        last_run: '5/11/2026, 05.30.04',
+        campaign_code: 'opc_261105_prd411',
+        is_running: false
+      },
+      {
+        id: 'sch_edt_1',
+        type: 'editorial_campaign',
+        brand: 'HabitFolk',
+        name: 'HabitFolk — Editorial: Eat Better, Not Perfect',
+        target_item: 'Pilar 1: Eat Better, Not Perfect',
+        item_subtitle: 'Mindful nutrition & guilt-free balanced eating habits',
+        preset_key: 'editorial_tension_6clips',
+        preset_label: 'Warm & Candid Hook Tension',
+        gen_time: '06:00',
+        pub_time: '12:30',
+        days: [1, 2, 3, 4, 5, 6, 0],
+        status: 'active',
+        repliz_channels: 'YouTube Shorts, TikTok (@habitfolk), IG Reels',
+        last_run: '6/11/2026, 06.00.08',
+        campaign_code: 'opc_261106_edt194',
+        is_running: false
+      },
+      {
+        id: 'sch_rcp_1',
+        type: 'recipe_campaign',
+        brand: 'HabitFolk',
+        name: 'HabitFolk — Air Fryer Healthy Meals',
+        target_item: 'Makanan Utama (Dynamic AI Recipes)',
+        item_subtitle: 'Air fryer crispy chicken tenders and high protein finger foods',
+        preset_key: 'habitfolk_8clips_deep',
+        preset_label: 'Single-Pass 4-Scene Recipe & Audio Narration',
+        gen_time: '04:00',
+        pub_time: '07:12',
+        days: [1, 2, 3, 4, 5, 6, 0],
+        status: 'active',
+        repliz_channels: 'Facebook Reels, YouTube Shorts',
+        last_run: '6/11/2026, 04.00.14',
+        campaign_code: 'opc_261106_rcp402',
+        is_running: false
+      }
+    ];
+
+    // --- PRESET DYNAMIC INFO HANDLERS ---
+    function handleProductPresetChange(val) {
+      const meta = document.getElementById('presetProductMeta');
+      if (val === 'product_showcase_6clips') {
+        meta.innerHTML = `
+          <span style="color: var(--status-info); font-weight: 700;">⚡ Strategi Terkandung:</span>
+          <span>Mode: <b>Soft-Sell</b></span> • <span>Durasi: <b>6 Clips (9:16 Vertikal)</b></span> • <span>Target: <b>TikTok Shop & IG Reels</b></span>
+        `;
+      } else if (val === 'product_hard_sell_6clips') {
+        meta.innerHTML = `
+          <span style="color: var(--status-warning); font-weight: 700;">⚡ Strategi Terkandung:</span>
+          <span>Mode: <b>Hard-Sell Promosi</b></span> • <span>Durasi: <b>6 Clips (Diskon & Fitur)</b></span> • <span>Target: <b>Keranjang Kuning</b></span>
+        `;
+      } else {
+        meta.innerHTML = `
+          <span style="color: var(--status-success); font-weight: 700;">⚡ Strategi Terkandung:</span>
+          <span>Mode: <b>Hands-on Review / Unboxing</b></span> • <span>Durasi: <b>8 Clips Deep Demo</b></span> • <span>Target: <b>Multi-Platform</b></span>
+        `;
+      }
+    }
+
+    function handleEditorialPresetChange(val) {
+      const meta = document.getElementById('presetEditorialMeta');
+      if (val === 'editorial_tension_6clips') {
+        meta.innerHTML = `
+          <span style="color: var(--status-info); font-weight: 700;">⚡ Strategi Terkandung:</span>
+          <span>Tone: <b>Warm, Candid & Provocative</b></span> • <span>Format: <b>Hook Tension (6 Clips)</b></span> • <span>Target: <b>Shorts, Reels, TikTok</b></span>
+        `;
+      } else if (val === 'editorial_authority_6clips') {
+        meta.innerHTML = `
+          <span style="color: var(--status-success); font-weight: 700;">⚡ Strategi Terkandung:</span>
+          <span>Tone: <b>Expert & Authoritative</b></span> • <span>Format: <b>Edukasi Sains (6 Clips)</b></span> • <span>Target: <b>Nilai Brand & Authority</b></span>
+        `;
+      } else {
+        meta.innerHTML = `
+          <span style="color: var(--action-primary); font-weight: 700;">⚡ Strategi Terkandung:</span>
+          <span>Tone: <b>Relatable Storytelling</b></span> • <span>Format: <b>Deep Insight (8 Clips)</b></span> • <span>Target: <b>Community Trust</b></span>
+        `;
+      }
+    }
+
+    // --- RENDER FUNCTIONS ---
+
+    // 1. Render Catalog Products Grid (Dengan Search Filter)
+    let productSearchQuery = '';
+    function renderCatalogProducts() {
+      const grid = document.getElementById('catalogProductsGrid');
+      const filtered = catalogProducts.filter(p => {
+        if (!productSearchQuery) return true;
+        const q = productSearchQuery.toLowerCase();
+        return p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q) || p.tag.toLowerCase().includes(q);
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div style="grid-column: 1 / -1; padding: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.8rem; border: 1px dashed var(--border-subtle); border-radius: var(--radius-sm);">Tidak ada produk katalog yang cocok dengan "${productSearchQuery}".</div>`;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(p => `
+        <div class="selectable-item ${p.selected ? 'selected' : ''}" onclick="toggleProductSelection('${p.id}')">
+          <div class="item-top">
+            <div>
+              <div class="item-title">${p.name}</div>
+              <div class="item-subtitle">${p.category} • <strong style="color: var(--action-primary);">${p.price}</strong></div>
+            </div>
+            <div class="check-circle">✓</div>
+          </div>
+          <div style="display: flex; gap: 0.35rem; align-items: center; margin-top: 2px;">
+            <span style="font-size: 0.65rem; padding: 0.1rem 0.45rem; border-radius: 4px; background: var(--surface-interactive); color: var(--text-secondary);">${p.tag}</span>
+          </div>
+        </div>
+      `).join('');
+
+      updateProductSelectionCount();
+    }
+
+    function toggleProductSelection(id) {
+      const p = catalogProducts.find(item => item.id === id);
+      if (p) {
+        p.selected = !p.selected;
+        renderCatalogProducts();
+      }
+    }
+
+    function filterCatalogProducts(query) {
+      productSearchQuery = query.trim();
+      renderCatalogProducts();
+    }
+
+    function selectAllProducts() {
+      catalogProducts.forEach(p => p.selected = true);
+      renderCatalogProducts();
+    }
+
+    function clearAllProducts() {
+      catalogProducts.forEach(p => p.selected = false);
+      renderCatalogProducts();
+    }
+
+    function updateProductSelectionCount() {
+      const selected = catalogProducts.filter(p => p.selected);
+      const badge = document.getElementById('selectedProductCountBadge');
+      const text = document.getElementById('catalogSummaryText');
+      badge.textContent = `${selected.length} Produk Dipilih → ${selected.length} Baris Jadwal`;
+      text.textContent = `${selected.length} dari ${catalogProducts.length} produk katalog dipilih`;
+    }
+
+    // 2. Render Editorial Pillars Grid (Dengan Search Filter)
+    let pillarSearchQuery = '';
+    function renderEditorialPillars() {
+      const grid = document.getElementById('editorialPillarsGrid');
+      const filtered = editorialPillars.filter(p => {
+        if (!pillarSearchQuery) return true;
+        const q = pillarSearchQuery.toLowerCase();
+        return p.name.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q) || String(p.num).includes(q);
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div style="grid-column: 1 / -1; padding: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.8rem; border: 1px dashed var(--border-subtle); border-radius: var(--radius-sm);">Tidak ada pilar brand yang cocok dengan "${pillarSearchQuery}".</div>`;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(p => `
+        <div class="selectable-item ${p.selected ? 'selected' : ''}" onclick="togglePillarSelection('${p.id}')">
+          <div class="item-top">
+            <div>
+              <div class="item-title">Pilar ${p.num}: ${p.name}</div>
+              <div class="item-subtitle" style="line-height: 1.35; margin-top: 0.2rem;">${p.desc}</div>
+            </div>
+            <div class="check-circle">✓</div>
+          </div>
+        </div>
+      `).join('');
+
+      updatePillarSelectionCount();
+    }
+
+    function togglePillarSelection(id) {
+      const p = editorialPillars.find(item => item.id === id);
+      if (p) {
+        p.selected = !p.selected;
+        renderEditorialPillars();
+      }
+    }
+
+    function filterEditorialPillars(query) {
+      pillarSearchQuery = query.trim();
+      renderEditorialPillars();
+    }
+
+    function selectAllPillars() {
+      editorialPillars.forEach(p => p.selected = true);
+      renderEditorialPillars();
+    }
+
+    function clearAllPillars() {
+      editorialPillars.forEach(p => p.selected = false);
+      renderEditorialPillars();
+    }
+
+    function updatePillarSelectionCount() {
+      const selected = editorialPillars.filter(p => p.selected);
+      const badge = document.getElementById('selectedPillarCountBadge');
+      const text = document.getElementById('pillarSummaryText');
+      badge.textContent = `${selected.length} Pilar Dipilih → ${selected.length} Baris Jadwal`;
+      text.textContent = `${selected.length} dari ${editorialPillars.length} pilar brand dipilih`;
+    }
+
+    // 3. Render Repliz Accounts Grid (Lengkap dengan Filter Search & Platform Tab)
+    let replizSearchQuery = '';
+    let replizPlatformFilter = 'all';
+
+    function getPlatformMeta(platform) {
+      switch(platform) {
+        case 'tiktok': return { icon: '🎵', label: 'TikTok', color: '#00f2fe' };
+        case 'instagram': return { icon: '📸', label: 'Instagram', color: '#e1306c' };
+        case 'youtube': return { icon: '▶️', label: 'YouTube Shorts', color: '#ff0000' };
+        case 'facebook': return { icon: '👥', label: 'Facebook Reels', color: '#1877f2' };
+        default: return { icon: '🌐', label: platform, color: 'var(--action-primary)' };
+      }
+    }
+
+    function renderReplizAccounts() {
+      const grid = document.getElementById('replizAccountsGrid');
+      const filtered = replizAccounts.filter(acc => {
+        if (replizPlatformFilter !== 'all' && acc.platform !== replizPlatformFilter) return false;
+        if (replizSearchQuery) {
+          const q = replizSearchQuery.toLowerCase();
+          return acc.display_name.toLowerCase().includes(q) || acc.platform.toLowerCase().includes(q);
+        }
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div style="grid-column: 1 / -1; padding: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.8rem; border: 1px dashed var(--border-subtle); border-radius: var(--radius-sm);">Tidak ada akun Repliz yang cocok dengan kriteria pencarian.</div>`;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(acc => {
+        const pMeta = getPlatformMeta(acc.platform);
+        return `
+          <div class="selectable-item ${acc.selected ? 'selected' : ''}" onclick="toggleReplizAccount('${acc.id}')">
+            <div class="item-top">
+              <div style="display: flex; align-items: center; gap: 5px; font-size: 0.72rem; font-weight: 700; color: ${pMeta.color};">
+                <span>${pMeta.icon}</span>
+                <span>${pMeta.label}</span>
+              </div>
+              <div class="check-circle">✓</div>
+            </div>
+            <div class="item-title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${acc.display_name}">
+              ${acc.display_name}
+            </div>
+            <div style="font-size: 0.68rem; color: var(--status-success); display: flex; align-items: center; gap: 4px;">
+              <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--status-success);"></span>
+              <span>Terhubung di Repliz</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      updateReplizSelectionCount();
+    }
+
+    function toggleReplizAccount(id) {
+      const acc = replizAccounts.find(a => a.id === id);
+      if (acc) {
+        acc.selected = !acc.selected;
+        renderReplizAccounts();
+      }
+    }
+
+    function handleReplizSearch(val) {
+      replizSearchQuery = val.trim();
+      renderReplizAccounts();
+    }
+
+    function filterReplizPlatform(platform, btnEl) {
+      replizPlatformFilter = platform;
+      const tabButtons = btnEl.parentElement.querySelectorAll('.tab-item');
+      tabButtons.forEach(b => b.classList.remove('active'));
+      btnEl.classList.add('active');
+      renderReplizAccounts();
+    }
+
+    function selectAllReplizAccounts() {
+      replizAccounts.forEach(a => a.selected = true);
+      renderReplizAccounts();
+    }
+
+    function clearAllReplizAccounts() {
+      replizAccounts.forEach(a => a.selected = false);
+      renderReplizAccounts();
+    }
+
+    function updateReplizSelectionCount() {
+      const selected = replizAccounts.filter(a => a.selected);
+      const badge = document.getElementById('replizSelectedBadge');
+      const text = document.getElementById('replizSummaryText');
+      badge.textContent = `${selected.length} Akun Terpilih`;
+      text.textContent = `${selected.length} dari ${replizAccounts.length} akun media sosial Repliz terhubung aktif`;
+    }
+
+    function simulateReplizSync() {
+      const icon = document.getElementById('syncIcon');
+      const text = document.getElementById('syncText');
+      icon.classList.add('spinner');
+      text.textContent = 'Menyinkronkan...';
+
+      setTimeout(() => {
+        icon.classList.remove('spinner');
+        text.textContent = 'Sinkronkan Ulang dari Repliz';
+        showToast('Sinkronisasi akun Repliz berhasil! Seluruh 10 akun siap digunakan.', 'success');
+      }, 1000);
+    }
+
+    // 4. Render In-Memory Schedules List
+    function renderScheduleList() {
+      const container = document.getElementById('scheduleListContainer');
+
+      // Filter by Campaign Type & Status
+      const filtered = schedules.filter(s => {
+        if (activeCampaignTypeFilter !== 'all' && s.type !== activeCampaignTypeFilter) return false;
+        if (activeStatusFilter !== 'all' && s.status !== activeStatusFilter) return false;
+        return true;
+      });
+
+      // Update Tab Badges Counters
+      document.getElementById('countAll').textContent = schedules.length;
+      document.getElementById('countProduct').textContent = schedules.filter(s => s.type === 'product_campaign').length;
+      document.getElementById('countEditorial').textContent = schedules.filter(s => s.type === 'editorial_campaign').length;
+      document.getElementById('countRecipe').textContent = schedules.filter(s => s.type === 'recipe_campaign').length;
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 3.5rem 1rem; border: 1.5px dashed var(--border-subtle); border-radius: var(--radius-md); display: flex; flex-direction: column; align-items: center; gap: 0.75rem;">
+            <span style="font-size: 2.2rem;">📭</span>
+            <div style="font-size: 1rem; font-weight: 700; color: var(--text-primary);">Tidak ada jadwal yang cocok dengan filter yang dipilih.</div>
+            <button type="button" class="btn btn-primary" onclick="openCreateModal()">+ Buat Jadwal Rutin Sekarang</button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(s => {
+        let cardTypeClass = 'card-recipe';
+        let badgeClass = 'badge-recipe';
+        let badgeLabel = '🍳 Resep Kuliner';
+        let itemLabelPrefix = 'Topik Resep AI:';
+
+        if (s.type === 'product_campaign') {
+          cardTypeClass = 'card-product';
+          badgeClass = 'badge-product';
+          badgeLabel = '🛍️ Product Campaign';
+          itemLabelPrefix = 'Target Produk Katalog:';
+        } else if (s.type === 'editorial_campaign') {
+          cardTypeClass = 'card-editorial';
+          badgeClass = 'badge-editorial';
+          badgeLabel = '📖 Brand Editorial';
+          itemLabelPrefix = 'Pilar Konten Terdedikasi:';
+        }
+
+        const statusColor = s.status === 'active' ? 'var(--status-success)' : 'var(--status-warning)';
+        const statusText = s.status === 'active' ? '🟢 AKTIF BERJALAN' : '⏸️ DIJEDA';
+
+        return `
+          <div class="card ${cardTypeClass}" id="${s.id}">
+            <div class="card-header">
+              <div>
+                <div class="card-title-area">
+                  <span class="badge-pill ${badgeClass}">${badgeLabel}</span>
+                  <span class="card-title">${s.name}</span>
+                  <span style="font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 9999px; background: ${s.status === 'active' ? 'var(--status-success-soft)' : 'var(--status-warning-soft)'}; color: ${statusColor}; border: 1px solid ${statusColor};">
+                    ${statusText}
+                  </span>
+                  <span style="font-size: 0.68rem; font-weight: 600; padding: 0.15rem 0.5rem; border-radius: 9999px; background: var(--surface-interactive); color: var(--text-secondary); border: 1px solid var(--border-subtle);">
+                    ${s.brand}
+                  </span>
+                </div>
+                <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.35rem;">
+                  Preset Video: <strong style="color: var(--action-primary); font-weight: 700;">${s.preset_key}</strong> • <span style="color: var(--text-secondary);">${s.preset_label}</span>
+                </div>
+              </div>
+
+              <!-- Double Time Flow Badge -->
+              <div class="double-time-badge">
+                <div style="color: var(--status-info); font-weight: 700;">⚙️ Buat: <strong>${s.gen_time} WIB</strong></div>
+                <span style="color: var(--text-muted);">&rarr;</span>
+                <div style="color: var(--status-success); font-weight: 700;">🚀 Publish: <strong>${s.pub_time} WIB</strong></div>
+              </div>
+            </div>
+
+            <!-- Card Details (Dedicated Item Info) -->
+            <div class="card-details">
+              <div class="detail-item">
+                <span>${itemLabelPrefix}</span>
+                <strong>${s.target_item}</strong>
+                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">${s.item_subtitle}</div>
+              </div>
+              <div class="detail-item">
+                <span>Hari Eksekusi Rutin</span>
+                <strong>${formatDays(s.days)}</strong>
+              </div>
+              <div class="detail-item">
+                <span>Kanal Distribusi Repliz</span>
+                <strong>${s.repliz_channels}</strong>
+              </div>
+            </div>
+
+            <!-- Card Footer -->
+            <div class="card-footer">
+              <div class="footer-meta">
+                ✅ Terakhir dijalankan: <strong>${s.last_run}</strong> &bull; Campaign ID: <code style="color: var(--action-primary); font-weight: 700;">${s.campaign_code}</code>
+              </div>
+              <div style="display: flex; gap: 0.45rem; align-items: center;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="runNow('${s.id}')" ${s.is_running ? 'disabled' : ''}>
+                  ${s.is_running ? '<span class="spinner"></span> <span>Memproses...</span>' : '<span>⚡</span> <span>Run Now</span>'}
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="togglePause('${s.id}')">
+                  ${s.status === 'active' ? 'Pause' : 'Resume'}
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="deleteSchedule('${s.id}')" style="color: var(--status-danger);">
+                  Hapus
+                </button>
+              </div>
+            </div>
+
+            <!-- Real-Time Async Spinner Banner -->
+            ${s.is_running ? `
+              <div class="running-banner">
+                <div class="spinner"></div>
+                <div><b>Pipeline Berjalan di Background:</b> AI Gemini sedang memproduksi video & naskah untuk <i>${s.target_item}</i>...</div>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function formatDays(days) {
+      if (!days || days.length === 7) return 'Setiap Hari (Sen - Min)';
+      const dayNames = { 1: 'Sen', 2: 'Sel', 3: 'Rab', 4: 'Kam', 5: 'Jum', 6: 'Sab', 0: 'Min' };
+      return days.map(d => dayNames[d]).join(', ');
+    }
+
+    // --- ACTIONS & HANDLERS ---
+
+    function filterByCampaignType(type, btnEl) {
+      activeCampaignTypeFilter = type;
+      const buttons = btnEl.parentElement.querySelectorAll('.tab-item');
+      buttons.forEach(b => b.classList.remove('active'));
+      btnEl.classList.add('active');
+      renderScheduleList();
+    }
+
+    function filterByStatus(status, btnEl) {
+      activeStatusFilter = status;
+      const pills = btnEl.parentElement.querySelectorAll('.status-pill');
+      pills.forEach(p => p.classList.remove('active'));
+      btnEl.classList.add('active');
+      renderScheduleList();
+    }
+
+    function selectCampaignType(type) {
+      currentCampaignType = type;
+      document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+
+      // Dynamic Section Containers
+      const secProd = document.getElementById('sectionProduct');
+      const secEdit = document.getElementById('sectionEditorial');
+      const secRec = document.getElementById('sectionRecipe');
+
+      // Preset Groups (Di atas Konfigurasi Khusus)
+      const grpProdPreset = document.getElementById('presetProductGroup');
+      const grpEditPreset = document.getElementById('presetEditorialGroup');
+      const grpRecPreset = document.getElementById('presetRecipeGroup');
+
+      secProd.style.display = 'none';
+      secEdit.style.display = 'none';
+      secRec.style.display = 'none';
+
+      grpProdPreset.style.display = 'none';
+      grpEditPreset.style.display = 'none';
+      grpRecPreset.style.display = 'none';
+
+      if (type === 'product_campaign') {
+        document.getElementById('typeCard-product').classList.add('selected');
+        grpProdPreset.style.display = 'block';
+        secProd.style.display = 'block';
+        document.getElementById('schedName').value = 'HabitFolk Daily Product Showcase';
+      } else if (type === 'editorial_campaign') {
+        document.getElementById('typeCard-editorial').classList.add('selected');
+        grpEditPreset.style.display = 'block';
+        secEdit.style.display = 'block';
+        document.getElementById('schedName').value = 'HabitFolk Brand Editorial';
+      } else if (type === 'recipe_campaign') {
+        document.getElementById('typeCard-recipe').classList.add('selected');
+        grpRecPreset.style.display = 'block';
+        secRec.style.display = 'block';
+        document.getElementById('schedName').value = 'HabitFolk Daily Recipe';
+      }
+    }
+
+    function openCreateModal() {
+      document.getElementById('scheduleModal').classList.add('open');
+      selectCampaignType('product_campaign');
+      renderCatalogProducts();
+      renderEditorialPillars();
+      renderReplizAccounts();
+    }
+
+    function closeModal() {
+      document.getElementById('scheduleModal').classList.remove('open');
+    }
+
+    // Menangani Submit Form Modal Sesuai Aturan: 1 Produk/1 Pilar = 1 Baris Jadwal!
+    function handleFormSubmit(e) {
+      e.preventDefault();
+
+      const baseName = document.getElementById('schedName').value.trim() || 'Jadwal Rutin';
+      const brand = document.getElementById('schedBrand').options[document.getElementById('schedBrand').selectedIndex].text.split(' ')[0];
+      const genTime = document.getElementById('schedGenTime').value;
+      const pubTime = document.getElementById('schedPubTime').value;
+
+      // Kumpulkan akun Repliz terpilih
+      const selectedRepliz = replizAccounts.filter(a => a.selected).map(a => a.display_name).join(', ') || 'TikTok, Instagram';
+
+      let newItemsCreatedCount = 0;
+
+      if (currentCampaignType === 'product_campaign') {
+        const selectedProducts = catalogProducts.filter(p => p.selected);
+        if (selectedProducts.length === 0) {
+          alert('Pilih minimal 1 produk dari katalog!');
+          return;
+        }
+
+        const presetKey = document.getElementById('schedProductPreset').value;
+        const presetLabel = presetKey === 'product_showcase_6clips'
+          ? 'Soft-Sell Problem & Solution Showcase'
+          : presetKey === 'product_hard_sell_6clips' ? 'Hard-Sell Features & Promo CTA' : 'Deep Hands-on Review';
+
+        // BATCH INSERTION: 1 Produk = 1 Baris Jadwal Mandiri!
+        selectedProducts.forEach((p, idx) => {
+          const newSchedId = 'sch_prd_' + Date.now() + '_' + idx;
+          schedules.unshift({
+            id: newSchedId,
+            type: 'product_campaign',
+            brand: brand,
+            name: `${brand} — ${p.name} (Product Showcase)`,
+            target_item: p.name,
+            item_subtitle: `${p.category} • ${p.price}`,
+            preset_key: presetKey,
+            preset_label: presetLabel,
+            gen_time: genTime,
+            pub_time: pubTime,
+            days: [1, 2, 3, 4, 5, 6, 0],
+            status: 'active',
+            repliz_channels: selectedRepliz,
+            last_run: 'Belum pernah',
+            campaign_code: 'opc_' + Math.random().toString(36).substr(2, 6),
+            is_running: false
+          });
+          newItemsCreatedCount++;
+        });
+
+        showToast(`Berhasil! ${newItemsCreatedCount} baris jadwal Product Campaign telah dibuat terpisah (1 jadwal per produk).`, 'success');
+
+      } else if (currentCampaignType === 'editorial_campaign') {
+        const selectedPillars = editorialPillars.filter(p => p.selected);
+        if (selectedPillars.length === 0) {
+          alert('Pilih minimal 1 pilar konten brand!');
+          return;
+        }
+
+        const presetKey = document.getElementById('schedEditorialPreset').value;
+        const presetLabel = presetKey === 'editorial_tension_6clips'
+          ? 'Warm & Candid Hook Tension'
+          : presetKey === 'editorial_authority_6clips' ? 'Expert & Authoritative Guidance' : 'Relatable Storytelling';
+
+        // BATCH INSERTION: 1 Pilar = 1 Baris Jadwal Mandiri!
+        selectedPillars.forEach((p, idx) => {
+          const newSchedId = 'sch_edt_' + Date.now() + '_' + idx;
+          schedules.unshift({
+            id: newSchedId,
+            type: 'editorial_campaign',
+            brand: brand,
+            name: `${brand} — Editorial: ${p.name}`,
+            target_item: `Pilar ${p.num}: ${p.name}`,
+            item_subtitle: p.desc,
+            preset_key: presetKey,
+            preset_label: presetLabel,
+            gen_time: genTime,
+            pub_time: pubTime,
+            days: [1, 2, 3, 4, 5, 6, 0],
+            status: 'active',
+            repliz_channels: selectedRepliz,
+            last_run: 'Belum pernah',
+            campaign_code: 'opc_' + Math.random().toString(36).substr(2, 6),
+            is_running: false
+          });
+          newItemsCreatedCount++;
+        });
+
+        showToast(`Berhasil! ${newItemsCreatedCount} baris jadwal Brand Editorial telah dibuat terpisah (1 jadwal per pilar).`, 'success');
+
+      } else if (currentCampaignType === 'recipe_campaign') {
+        const topic = document.getElementById('schedRecipeTopic').value.trim() || 'Healthy Cooking';
+        const category = document.getElementById('schedRecipeCategory').value;
+        const presetKey = document.getElementById('schedRecipePreset').value;
+
+        schedules.unshift({
+          id: 'sch_rcp_' + Date.now(),
+          type: 'recipe_campaign',
+          brand: brand,
+          name: `${brand} — ${baseName}`,
+          target_item: topic,
+          item_subtitle: `Kategori: ${category}`,
+          preset_key: presetKey,
+          preset_label: 'Single-Pass 4-Scene Recipe & Audio Narration',
+          gen_time: genTime,
+          pub_time: pubTime,
+          days: [1, 2, 3, 4, 5, 6, 0],
+          status: 'active',
+          repliz_channels: selectedRepliz,
+          last_run: 'Belum pernah',
+          campaign_code: 'opc_' + Math.random().toString(36).substr(2, 6),
+          is_running: false
+        });
+
+        showToast('Jadwal Resep Kuliner baru berhasil ditambahkan!', 'success');
+      }
+
+      closeModal();
+      renderScheduleList();
+    }
+
+    // Run Now Simulasi Non-Blocking
+    function runNow(id) {
+      const s = schedules.find(item => item.id === id);
+      if (!s) return;
+
+      s.is_running = true;
+      renderScheduleList();
+      showToast(`Jadwal "${s.name}" dimulai di background. Menghasilkan konten...`, 'info');
+
+      setTimeout(() => {
+        s.is_running = false;
+        s.last_run = new Date().toLocaleString('id-ID');
+        renderScheduleList();
+        showToast(`Selesai! Video & Storyboard untuk "${s.name}" siap dipublikasikan ke Repliz 🚀`, 'success');
+      }, 3500);
+    }
+
+    function togglePause(id) {
+      const s = schedules.find(item => item.id === id);
+      if (!s) return;
+      s.status = s.status === 'active' ? 'paused' : 'active';
+      renderScheduleList();
+      showToast(`Jadwal "${s.name}" kini ${s.status === 'active' ? 'diaktifkan kembali' : 'dijeda'}.`, 'info');
+    }
+
+    function deleteSchedule(id) {
+      if (confirm('Yakin ingin menghapus jadwal ini?')) {
+        schedules = schedules.filter(item => item.id !== id);
+        renderScheduleList();
+        showToast('Jadwal berhasil dihapus.', 'info');
+      }
+    }
+
+    function toggleDay(idx, el) {
+      el.classList.toggle('selected');
+    }
+
+    function toggleTheme() {
+      const body = document.body;
+      const themeIcon = document.getElementById('themeIcon');
+      const themeText = document.getElementById('themeText');
+
+      if (body.getAttribute('data-theme') === 'dark') {
+        body.removeAttribute('data-theme');
+        themeIcon.textContent = '🌙';
+        themeText.textContent = 'Dark Mode';
+      } else {
+        body.setAttribute('data-theme', 'dark');
+        themeIcon.textContent = '☀️';
+        themeText.textContent = 'Light Mode';
+      }
+    }
+
+    function showToast(msg, type = 'success') {
+      const t = document.getElementById('toastNotification');
+      const text = document.getElementById('toastMessage');
+      const icon = document.getElementById('toastIcon');
+
+      text.textContent = msg;
+      icon.textContent = type === 'success' ? '✅' : 'ℹ️';
+      t.style.display = 'flex';
+
+      setTimeout(() => {
+        t.style.display = 'none';
+      }, 4500);
+    }
+
+    // --- INITIAL BOOTSTRAP ---
+    renderCatalogProducts();
+    renderEditorialPillars();
+    renderReplizAccounts();
+    renderScheduleList();
+  </script>
+</body>
+</html>

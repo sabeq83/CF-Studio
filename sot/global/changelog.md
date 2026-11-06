@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.170 — Fix Repliz R2 Staging & Tenant Context Isolation (06/11/2026)
+- Dual media staging provider for Repliz (R2 Custom Domain & G-Drive)
+- Fix scheduler tenant isolation and Gemini API key resolution
+- Update staging constraint and settings UI for R2
+
 ## V2.32.169 — Auto Pipeline Run Now Non-Blocking & Smart Gemini Cascade (06/11/2026)
 - Smart Gemini cascade: tangani Timeout 180s dan fast-cascade 503 tanpa membuang gemini-3.8-flash
 - Non-blocking background runner pada Run Now API untuk mencegah timeout proxy

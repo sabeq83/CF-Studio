@@ -121,6 +121,7 @@ export default function SettingsPage() {
   const [replizApiUrl, setReplizApiUrl] = useState('https://api.repliz.com');
   const [replizAccessKey, setReplizAccessKey] = useState('');
   const [replizSecretKey, setReplizSecretKey] = useState('');
+  const [replizMediaStagingProvider, setReplizMediaStagingProvider] = useState('cloudflare_r2');
   const [replizDriveFolderId, setReplizDriveFolderId] = useState('');
   const [hasReplizCredentials, setHasReplizCredentials] = useState(false);
   const [testingRepliz, setTestingRepliz] = useState(false);
@@ -341,6 +342,7 @@ export default function SettingsPage() {
       setReplizApiUrl(data.data.repliz_api_url || 'https://api.repliz.com');
       setReplizAccessKey(data.data.repliz_access_key || '');
       setReplizSecretKey(data.data.repliz_secret_key || '');
+      setReplizMediaStagingProvider(data.data.repliz_media_staging_provider || 'cloudflare_r2');
       setReplizDriveFolderId(data.data.repliz_drive_folder_id || '');
       setHasReplizCredentials(data.data.has_repliz_credentials || false);
     }
@@ -412,6 +414,7 @@ export default function SettingsPage() {
           repliz_api_url: replizApiUrl,
           repliz_access_key: replizAccessKey,
           repliz_secret_key: replizSecretKey,
+          repliz_media_staging_provider: replizMediaStagingProvider,
           repliz_drive_folder_id: replizDriveFolderId
         })
       });
@@ -2747,89 +2750,169 @@ export default function SettingsPage() {
                 />
               </div>
               <div className="form-group" style={{ marginBottom: '16px' }}>
-                <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span>Google Drive Folder ID (Repliz Staging)</span>
-                  <button
-                    type="button"
-                    className="btn btn-sm btn-secondary"
-                    onClick={createOrRepairPublishingFolder}
-                    disabled={!googleStatus.connected || repairingFolder}
-                    style={{ fontSize: '0.72rem', padding: '3px 10px' }}
+                <label className="form-label">Metode Media Staging untuk Repliz</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px', marginTop: '6px' }}>
+                  <div 
+                    onClick={() => setReplizMediaStagingProvider('cloudflare_r2')}
+                    style={{
+                      border: `1.5px solid ${replizMediaStagingProvider === 'cloudflare_r2' ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
+                      borderRadius: 'var(--radius-md)',
+                      padding: '12px',
+                      background: replizMediaStagingProvider === 'cloudflare_r2' ? 'var(--surface-interactive)' : 'var(--surface-raised)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
                   >
-                    {repairingFolder ? '⏳ Menyiapkan Folder...' : '⚡ Buat/Perbaiki Folder REPLIZ Publishing'}
-                  </button>
-                </label>
-                <input
-                  className="form-input"
-                  placeholder="Tempel URL atau Folder ID Google Drive..."
-                  value={replizDriveFolderId}
-                  onChange={e => setReplizDriveFolderId(e.target.value)}
-                />
-                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                  Folder Google Drive tempat media di-stage sebelum Repliz mengunduhnya. Masukkan Folder ID atau URL Google Drive lengkap.
-                </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                      <input 
+                        type="radio" 
+                        name="repliz_staging_provider" 
+                        checked={replizMediaStagingProvider === 'cloudflare_r2'} 
+                        onChange={() => setReplizMediaStagingProvider('cloudflare_r2')}
+                        style={{ cursor: 'pointer' }}
+                      />
+                      <strong style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>☁️ Cloudflare R2 (Rekomendasi)</strong>
+                    </div>
+                    <p style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', margin: 0, paddingLeft: '24px', lineHeight: 1.4 }}>
+                      Menggunakan Custom Domain CDN. Tidak memerlukan Google OAuth / Client ID & Secret yang sering kedaluwarsa.
+                    </p>
+                  </div>
 
-                {googleStatus.publishingDrive && (
-                  <div style={{
-                    marginTop: '10px',
-                    padding: '10px 14px',
-                    borderRadius: 'var(--radius-sm)',
-                    fontSize: '0.78rem',
-                    lineHeight: 1.5,
-                    background: googleStatus.publishingDrive.connected
-                      ? 'rgba(16,185,129,0.1)'
-                      : (googleStatus.publishingDrive.code === 'GOOGLE_DRIVE_FOLDER_NOT_VISIBLE_TO_APP' ? 'rgba(245,158,11,0.12)' : 'rgba(239,68,68,0.1)'),
-                    border: `1px solid ${
-                      googleStatus.publishingDrive.connected
-                        ? 'rgba(16,185,129,0.3)'
-                        : (googleStatus.publishingDrive.code === 'GOOGLE_DRIVE_FOLDER_NOT_VISIBLE_TO_APP' ? 'rgba(245,158,11,0.35)' : 'rgba(239,68,68,0.3)')
-                    }`,
-                    color: googleStatus.publishingDrive.connected
-                      ? 'var(--success)'
-                      : (googleStatus.publishingDrive.code === 'GOOGLE_DRIVE_FOLDER_NOT_VISIBLE_TO_APP' ? 'var(--warning)' : 'var(--danger)')
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                      <span style={{ fontSize: '1rem', marginTop: '-2px' }}>
-                        {googleStatus.publishingDrive.connected ? '✅' : (googleStatus.publishingDrive.code === 'GOOGLE_DRIVE_FOLDER_NOT_VISIBLE_TO_APP' ? '⚠️' : '❌')}
-                      </span>
-                      <div style={{ flex: 1 }}>
-                        {googleStatus.publishingDrive.connected ? (
-                          <div>
-                            <strong>Folder Google Drive Terverifikasi:</strong> "{googleStatus.publishingDrive.folderName}"
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '2px', fontFamily: 'var(--font-mono)' }}>
-                              ID: {googleStatus.publishingDrive.folderId} • Hak Akses Tulis: Aktif (canAddChildren)
-                            </div>
-                          </div>
-                        ) : (
-                          <div>
-                            <strong>Status Folder Staging:</strong> {googleStatus.publishingDrive.error || 'Perlu verifikasi/perbaikan.'}
-                            {googleStatus.publishingDrive.code === 'GOOGLE_DRIVE_FOLDER_NOT_VISIBLE_TO_APP' && (
-                              <div style={{ marginTop: '6px' }}>
-                                <button
-                                  type="button"
-                                  className="btn btn-sm btn-primary"
-                                  onClick={createOrRepairPublishingFolder}
-                                  disabled={repairingFolder}
-                                  style={{ fontSize: '0.72rem', padding: '3px 10px' }}
-                                >
-                                  {repairingFolder ? '⏳ Menyiapkan...' : '⚡ Buat/Perbaiki Folder Otomatis'}
-                                </button>
-                              </div>
-                            )}
-                            {googleStatus.publishingDrive.code === 'GOOGLE_REAUTH_REQUIRED' && (
-                              <div style={{ marginTop: '6px' }}>
-                                <a href="/api/google/auth?returnTo=/settings" className="btn btn-sm btn-warning" style={{ textDecoration: 'none', fontSize: '0.72rem', padding: '3px 10px' }}>
-                                  🔄 Reconnect Akun Google
-                                </a>
-                              </div>
-                            )}
-                          </div>
-                        )}
+                  <div 
+                    onClick={() => setReplizMediaStagingProvider('google_drive')}
+                    style={{
+                      border: `1.5px solid ${replizMediaStagingProvider === 'google_drive' ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
+                      borderRadius: 'var(--radius-md)',
+                      padding: '12px',
+                      background: replizMediaStagingProvider === 'google_drive' ? 'var(--surface-interactive)' : 'var(--surface-raised)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                      <input 
+                        type="radio" 
+                        name="repliz_staging_provider" 
+                        checked={replizMediaStagingProvider === 'google_drive'} 
+                        onChange={() => setReplizMediaStagingProvider('google_drive')}
+                        style={{ cursor: 'pointer' }}
+                      />
+                      <strong style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>📁 Google Drive (Legacy)</strong>
+                    </div>
+                    <p style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', margin: 0, paddingLeft: '24px', lineHeight: 1.4 }}>
+                      Mengunggah media ke folder Google Drive publik melalui izin akun Google yang terhubung.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {replizMediaStagingProvider === 'cloudflare_r2' ? (
+                <div style={{
+                  marginBottom: '16px',
+                  padding: '12px 14px',
+                  borderRadius: 'var(--radius-sm)',
+                  fontSize: '0.78rem',
+                  lineHeight: 1.5,
+                  background: 'var(--surface-raised)',
+                  border: '1px solid var(--border-subtle)',
+                  color: 'var(--text-secondary)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                    <span style={{ fontSize: '1.1rem', marginTop: '-2px' }}>☁️</span>
+                    <div>
+                      <strong style={{ color: 'var(--text-primary)' }}>Cloudflare R2 Custom Domain Staging Aktif</strong>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '3px' }}>
+                        Media video akan otomatis di-stage ke bucket Cloudflare R2 dan diunduh oleh Repliz melalui URL CDN publik. Pastikan kredensial R2 dan Custom Domain sudah diatur di kartu <strong>Cloudflare R2 Storage</strong> di atas.
                       </div>
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
+              ) : (
+                <div className="form-group" style={{ marginBottom: '16px' }}>
+                  <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>Google Drive Folder ID (Repliz Staging)</span>
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-secondary"
+                      onClick={createOrRepairPublishingFolder}
+                      disabled={!googleStatus.connected || repairingFolder}
+                      style={{ fontSize: '0.72rem', padding: '3px 10px' }}
+                    >
+                      {repairingFolder ? '⏳ Menyiapkan Folder...' : '⚡ Buat/Perbaiki Folder REPLIZ Publishing'}
+                    </button>
+                  </label>
+                  <input
+                    className="form-input"
+                    placeholder="Tempel URL atau Folder ID Google Drive..."
+                    value={replizDriveFolderId}
+                    onChange={e => setReplizDriveFolderId(e.target.value)}
+                  />
+                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                    Folder Google Drive tempat media di-stage sebelum Repliz mengunduhnya. Masukkan Folder ID atau URL Google Drive lengkap.
+                  </div>
+
+                  {googleStatus.publishingDrive && (
+                    <div style={{
+                      marginTop: '10px',
+                      padding: '10px 14px',
+                      borderRadius: 'var(--radius-sm)',
+                      fontSize: '0.78rem',
+                      lineHeight: 1.5,
+                      background: googleStatus.publishingDrive.connected
+                        ? 'rgba(16,185,129,0.1)'
+                        : (googleStatus.publishingDrive.code === 'GOOGLE_DRIVE_FOLDER_NOT_VISIBLE_TO_APP' ? 'rgba(245,158,11,0.12)' : 'rgba(239,68,68,0.1)'),
+                      border: `1px solid ${
+                        googleStatus.publishingDrive.connected
+                          ? 'rgba(16,185,129,0.3)'
+                          : (googleStatus.publishingDrive.code === 'GOOGLE_DRIVE_FOLDER_NOT_VISIBLE_TO_APP' ? 'rgba(245,158,11,0.35)' : 'rgba(239,68,68,0.3)')
+                      }`,
+                      color: googleStatus.publishingDrive.connected
+                        ? 'var(--success)'
+                        : (googleStatus.publishingDrive.code === 'GOOGLE_DRIVE_FOLDER_NOT_VISIBLE_TO_APP' ? 'var(--warning)' : 'var(--danger)')
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                        <span style={{ fontSize: '1rem', marginTop: '-2px' }}>
+                          {googleStatus.publishingDrive.connected ? '✅' : (googleStatus.publishingDrive.code === 'GOOGLE_DRIVE_FOLDER_NOT_VISIBLE_TO_APP' ? '⚠️' : '❌')}
+                        </span>
+                        <div style={{ flex: 1 }}>
+                          {googleStatus.publishingDrive.connected ? (
+                            <div>
+                              <strong>Folder Google Drive Terverifikasi:</strong> "{googleStatus.publishingDrive.folderName}"
+                              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '2px', fontFamily: 'var(--font-mono)' }}>
+                                ID: {googleStatus.publishingDrive.folderId} • Hak Akses Tulis: Aktif (canAddChildren)
+                              </div>
+                            </div>
+                          ) : (
+                            <div>
+                              <strong>Status Folder Staging:</strong> {googleStatus.publishingDrive.error || 'Perlu verifikasi/perbaikan.'}
+                              {googleStatus.publishingDrive.code === 'GOOGLE_DRIVE_FOLDER_NOT_VISIBLE_TO_APP' && (
+                                <div style={{ marginTop: '6px' }}>
+                                  <button
+                                    type="button"
+                                    className="btn btn-sm btn-primary"
+                                    onClick={createOrRepairPublishingFolder}
+                                    disabled={repairingFolder}
+                                    style={{ fontSize: '0.72rem', padding: '3px 10px' }}
+                                  >
+                                    {repairingFolder ? '⏳ Menyiapkan...' : '⚡ Buat/Perbaiki Folder Otomatis'}
+                                  </button>
+                                </div>
+                              )}
+                              {googleStatus.publishingDrive.code === 'GOOGLE_REAUTH_REQUIRED' && (
+                                <div style={{ marginTop: '6px' }}>
+                                  <a href="/api/google/auth?returnTo=/settings" className="btn btn-sm btn-warning" style={{ textDecoration: 'none', fontSize: '0.72rem', padding: '3px 10px' }}>
+                                    🔄 Reconnect Akun Google
+                                  </a>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="form-group" style={{ marginBottom: '12px' }}>
                 <label className="form-label">Access Key</label>

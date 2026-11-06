@@ -5,7 +5,7 @@ import { triggerScheduleImmediatelyAsync } from '@/lib/auto-pipeline-scheduler-r
 export const POST = withTenantContext(async (_request, context, user) => {
   try {
     const { id } = await context.params;
-    const tenantId = user?.tenantId || 'default_tenant';
+    const tenantId = (!user?.tenantId || user.tenantId === '__none__') ? 'default_tenant' : user.tenantId;
 
     const result = await triggerScheduleImmediatelyAsync(tenantId, id);
     return NextResponse.json(result, { status: 200 });

@@ -153,18 +153,24 @@ export const POST = withTenantContext(async (request) => {
 
     const replizSelected = validAccounts.some(account => account.provider === 'repliz');
     if (replizSelected && mediaType !== 'text_only') {
-      const { verifyPublishingDriveReady } = await import('@/lib/publishing-drive-staging');
+      const { verifyPublishingStagingReady } = await import('@/lib/publishing-drive-staging');
       try {
-        const driveReady = await verifyPublishingDriveReady();
-        checks.googleDrive = driveReady;
-      } catch (driveErr) {
-        driveStateError = driveErr;
-        errors.push(driveErr.message);
-        checks.googleDrive = {
-          state: driveErr.code || 'drive_error',
+        const stagingReady = await verifyPublishingStagingReady({ tenantId: user?.tenantId });
+        checks.staging = stagingReady;
+        if (stagingReady.provider === 'google_drive') {
+          checks.googleDrive = stagingReady;
+        } else {
+          checks.cloudflareR2 = stagingReady;
+        }
+      } catch (stagingErr) {
+        driveStateError = stagingErr;
+        errors.push(stagingErr.message);
+        checks.staging = {
+          provider: stagingErr.provider || 'unknown',
+          state: stagingErr.code || 'staging_error',
           connected: false,
-          error: driveErr.message,
-          reconnectUrl: driveErr.reconnectUrl || null
+          error: stagingErr.message,
+          reconnectUrl: stagingErr.reconnectUrl || null
         };
       }
     }
