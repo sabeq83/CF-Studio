@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.34.0 — Multi-Campaign Support for Instant 1-Click Pipeline (06/11/2026)
+- Adaptive 1-Click Instant UI for Product, Editorial, and Recipe
+- Dynamic preset routing per campaign kind
+- Single-pass product & editorial instant video generation
+
 ## V2.33.0 — Multi-Campaign Auto Pipeline Engine (Product & Editorial) (06/11/2026)
 - Multi-campaign auto pipeline support (Product, Editorial, Recipe)
 - Dedicated row generation for catalog products & brand pillars

@@ -19,6 +19,13 @@ export default function AutoPipelinePage() {
   const [recipeCount, setRecipeCount] = useState(1);
   const [executionMode, setExecutionMode] = useState('full_autopilot');
 
+  // --- MULTI-CAMPAIGN STATE UNTUK TAB 1 (1-KLIK INSTAN) ---
+  const [instantCampaignType, setInstantCampaignType] = useState('recipe_campaign'); // 'recipe_campaign' | 'product_campaign' | 'editorial_campaign'
+  const [instantProductId, setInstantProductId] = useState('');
+  const [instantPillar, setInstantPillar] = useState('');
+  const [instantProductSearch, setInstantProductSearch] = useState('');
+  const [instantPillarSearch, setInstantPillarSearch] = useState('');
+
   // --- SCHEDULER & REPLIZ PUBLISHING STATE ---
   const [activeTab, setActiveTab] = useState('pipeline'); // 'pipeline' | 'schedules'
   const [schedules, setSchedules] = useState([]);
@@ -295,18 +302,19 @@ export default function AutoPipelinePage() {
     }
   }
 
-  // 2. Fetch Presets dynamically when selected brand changes
+  // 2. Fetch Presets dynamically when selected brand or instantCampaignType changes
   useEffect(() => {
     if (!selectedBrandId) return;
     async function fetchPresets() {
       try {
-        const res = await fetch(`/api/v2/recipes/autonomous-pipeline?brand=${encodeURIComponent(selectedBrandId)}`);
+        const url = `/api/v2/recipes/autonomous-pipeline?brand=${encodeURIComponent(selectedBrandId)}&pipeline_type=${encodeURIComponent(instantCampaignType)}`;
+        const res = await fetch(url);
         const data = await res.json();
         if (data.success) {
           const opList = data.operator_presets || [];
           setOperatorPresets(opList);
 
-          const defaultKey = opList[0]?.key || 'recipe_campaign_default';
+          const defaultKey = opList[0]?.key || (instantCampaignType === 'product_campaign' ? 'product_campaign' : (instantCampaignType === 'editorial_campaign' ? 'brand_editorial_campaign' : 'recipe_campaign_default'));
           setSelectedPresetKey(defaultKey);
 
           const initialConfig = opList[0]?.config || opList[0] || data.default_preset || null;
@@ -329,7 +337,7 @@ export default function AutoPipelinePage() {
       }
     }
     fetchPresets();
-  }, [selectedBrandId, brands]);
+  }, [selectedBrandId, instantCampaignType, brands]);
 
   function handlePresetKeyChange(newKey) {
     setSelectedPresetKey(newKey);
@@ -364,12 +372,40 @@ export default function AutoPipelinePage() {
     }
   }
 
-  // 4. Trigger 1-Click Pipeline (Clean, Zero Override Manual)
+  // 4. Trigger 1-Click Pipeline (Support Product, Editorial, and Recipe Campaigns)
   async function handleLaunchPipeline(e) {
     e.preventDefault();
-    if (!topic || !topic.trim()) {
-      showToast('Topik resep wajib diisi.', 'error');
-      return;
+
+    let targetTopic = topic;
+    let targetCategory = category || 'makanan_utama';
+    let targetProductId = null;
+    let targetPillar = null;
+
+    if (instantCampaignType === 'product_campaign') {
+      const effectiveProdId = instantProductId || (catalogProducts[0]?.id || null);
+      if (!effectiveProdId) {
+        showToast('Pilih produk dari katalog terlebih dahulu.', 'error');
+        return;
+      }
+      const prod = catalogProducts.find(p => p.id === effectiveProdId);
+      targetTopic = prod?.product_name || 'Promosi Produk';
+      targetCategory = prod?.category || 'produk';
+      targetProductId = effectiveProdId;
+    } else if (instantCampaignType === 'editorial_campaign') {
+      const effectivePillar = instantPillar || (modalAvailablePillars[0] || 'Eat Better, Not Perfect');
+      if (!effectivePillar) {
+        showToast('Pilih pilar brand terlebih dahulu.', 'error');
+        return;
+      }
+      targetTopic = effectivePillar;
+      targetCategory = 'editorial';
+      targetPillar = effectivePillar;
+    } else {
+      if (!topic || !topic.trim()) {
+        showToast('Topik resep wajib diisi.', 'error');
+        return;
+      }
+      targetTopic = topic.trim();
     }
 
     setIsLaunching(true);
@@ -379,10 +415,14 @@ export default function AutoPipelinePage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          pipeline_type: instantCampaignType,
           brand_id: selectedBrandId,
           preset_key: selectedPresetKey,
-          topic: topic.trim(),
-          category: category || 'makanan_utama',
+          topic: targetTopic,
+          product_id: targetProductId,
+          product_title: targetTopic,
+          content_pillar: targetPillar,
+          category: targetCategory,
           recipe_count: Number(recipeCount || 1),
           execution_mode: executionMode,
           visual_identity_preset_id: selectedPresetId || activePresetConfig?.visual_swap?.visual_identity_preset_id || null,
@@ -396,7 +436,10 @@ export default function AutoPipelinePage() {
         setActiveCampaignId(data.campaign_id);
         setPollingActive(true);
         fetchFactualStatus(data.campaign_id);
-        showToast(`Kampanye ${data.campaign_id} (${targetClipsCount} Klip) berhasil diluncurkan! Melacak progres produksi faktual... 🚀`);
+        const typeLabel = instantCampaignType === 'product_campaign' 
+          ? 'Video Produk' 
+          : (instantCampaignType === 'editorial_campaign' ? 'Video Editorial' : 'Video Resep');
+        showToast(`Kampanye ${typeLabel} (${data.campaign_id}) berhasil diluncurkan! Melacak progres produksi faktual... 🚀`);
         fetchRecentCampaigns();
       } else {
         showToast('Gagal meluncurkan pipeline: ' + (data.error || 'Terjadi kesalahan sistem'), 'error');
@@ -1035,6 +1078,41 @@ export default function AutoPipelinePage() {
     setSelectedPillars([]);
   }
 
+  // Filtered Products & Pillars computation for Tab 1 (1-Klik Instan)
+  const currentInstantBrandObj = brands.find(b => b.id === selectedBrandId);
+  let instantAvailablePillars = [];
+  if (currentInstantBrandObj?.editorial_content_pillars_json) {
+    try {
+      const parsed = typeof currentInstantBrandObj.editorial_content_pillars_json === 'string'
+        ? JSON.parse(currentInstantBrandObj.editorial_content_pillars_json)
+        : currentInstantBrandObj.editorial_content_pillars_json;
+      if (Array.isArray(parsed) && parsed.length > 0) instantAvailablePillars = parsed;
+    } catch (e) {
+      console.warn('Error parsing instant pillars:', e);
+    }
+  }
+  if (instantAvailablePillars.length === 0) {
+    instantAvailablePillars = [
+      'Eat Better, Not Perfect',
+      'Tips Nutrisi & Gaya Hidup Sehat',
+      'Mitos vs Fakta Keseharian',
+      'Small Habits, Real Life',
+      'Review & Eksperimen Dapur'
+    ];
+  }
+
+  const filteredInstantProducts = catalogProducts.filter(p => {
+    if (!instantProductSearch.trim()) return true;
+    const q = instantProductSearch.toLowerCase().trim();
+    return (p.product_name && p.product_name.toLowerCase().includes(q)) ||
+      (p.category && p.category.toLowerCase().includes(q));
+  });
+
+  const filteredInstantPillars = instantAvailablePillars.filter(p => {
+    if (!instantPillarSearch.trim()) return true;
+    return p.toLowerCase().includes(instantPillarSearch.toLowerCase().trim());
+  });
+
   return (
     <div className="app-layout" style={{ display: 'flex', minHeight: '100vh', background: 'var(--canvas)' }}>
       <Sidebar />
@@ -1228,12 +1306,12 @@ export default function AutoPipelinePage() {
               gap: '0.75rem'
             }}>
               <div>
-                <div style={{ fontSize: '1.12rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span>🚀</span>
-                  <span>Luncurkan Auto Pipeline Resep</span>
+                <div style={{ fontSize: '1.18rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+                  <span>⚡</span>
+                  <span>Eksekusi 1-Klik Instan Multi-Campaign</span>
                 </div>
-                <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-                  Pilih brand & preset konfigurasi resep, tentukan topik, lalu jalankan produksi otomatis dalam 1 klik.
+                <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                  Pilih tipe kampanye, tentukan target (Produk Katalog, Pilar Brand, atau Resep), lalu produksi video final otomatis dalam 1 kali klik.
                 </div>
               </div>
 
@@ -1247,7 +1325,7 @@ export default function AutoPipelinePage() {
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '0.4rem',
-                  padding: '0.4rem 0.85rem',
+                  padding: '0.45rem 0.95rem',
                   borderRadius: 'var(--radius-sm)',
                   background: 'var(--surface-raised)',
                   border: '1px solid var(--border-subtle)',
@@ -1259,7 +1337,64 @@ export default function AutoPipelinePage() {
               </Link>
             </div>
 
-            <form onSubmit={handleLaunchPipeline} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <form onSubmit={handleLaunchPipeline} style={{ display: 'flex', flexDirection: 'column', gap: '1.35rem' }}>
+              {/* STEP 1: CAMPAIGN TYPE SELECTOR CARDS */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                <label style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                  1. Pilih Tipe Kampanye
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.85rem' }}>
+                  {[
+                    { key: 'product_campaign', icon: '🛍️', label: 'Video Produk', desc: 'Promosi produk katalog, showcase USP & unboxing 1-pass', color: 'var(--status-success)' },
+                    { key: 'editorial_campaign', icon: '📖', label: 'Video Editorial', desc: 'Pilar brand, hook tension & storytelling edukatif 1-pass', color: 'var(--status-info)' },
+                    { key: 'recipe_campaign', icon: '🍳', label: 'Video Resep', desc: 'Food reels & cooking guide 4-babak 1-pass', color: 'var(--status-warning)' }
+                  ].map(t => {
+                    const isSelected = instantCampaignType === t.key;
+                    return (
+                      <div
+                        key={t.key}
+                        onClick={() => setInstantCampaignType(t.key)}
+                        style={{
+                          background: isSelected ? 'var(--surface-interactive)' : 'var(--surface-raised)',
+                          border: `1.5px solid ${isSelected ? t.color : 'var(--border-subtle)'}`,
+                          borderRadius: 'var(--radius-md)',
+                          padding: '0.95rem 1.15rem',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.35rem',
+                          transition: 'var(--transition)',
+                          boxShadow: isSelected ? `0 0 0 1px ${t.color}` : 'none'
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span style={{ fontSize: '1.35rem' }}>{t.icon}</span>
+                            <strong style={{ fontSize: '0.92rem', color: isSelected ? t.color : 'var(--text-primary)' }}>
+                              {t.label}
+                            </strong>
+                          </div>
+                          <span style={{
+                            fontSize: '0.68rem',
+                            fontWeight: 800,
+                            padding: '0.15rem 0.55rem',
+                            borderRadius: 9999,
+                            background: isSelected ? t.color : 'var(--border-subtle)',
+                            color: isSelected ? '#ffffff' : 'var(--text-muted)'
+                          }}>
+                            {isSelected ? 'AKTIF' : 'PILIH'}
+                          </span>
+                        </div>
+                        <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', lineHeight: 1.35 }}>
+                          {t.desc}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* STEP 2: BRAND PROFILE, PRESET VIDEO & EXECUTION MODE (DI ATAS) */}
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
@@ -1275,7 +1410,7 @@ export default function AutoPipelinePage() {
                     alignItems: 'center',
                     gap: '0.35rem'
                   }}>
-                    <span>1. Brand Profile</span>
+                    <span>2. Brand Profile</span>
                   </label>
                   <select
                     value={selectedBrandId}
@@ -1300,7 +1435,7 @@ export default function AutoPipelinePage() {
                   </select>
                 </div>
 
-                {/* 2. Preset Konfigurasi Resep (Preset Manager) */}
+                {/* 2. Preset Konfigurasi Video (Preset Manager) */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
                   <label style={{
                     fontSize: '0.82rem',
@@ -1310,7 +1445,7 @@ export default function AutoPipelinePage() {
                     alignItems: 'center',
                     justifyContent: 'space-between'
                   }}>
-                    <span>2. Preset Konfigurasi Resep</span>
+                    <span>3. Preset Video</span>
                     <span style={{
                       fontSize: '0.68rem',
                       fontWeight: 700,
@@ -1319,7 +1454,7 @@ export default function AutoPipelinePage() {
                       padding: '0.1rem 0.4rem',
                       borderRadius: 'var(--radius-xs)'
                     }}>
-                      Preset Manager
+                      Preset-Driven
                     </span>
                   </label>
                   <select
@@ -1333,7 +1468,7 @@ export default function AutoPipelinePage() {
                       borderRadius: 'var(--radius-sm)',
                       padding: '0 0.85rem',
                       fontSize: '0.88rem',
-                      fontWeight: 600,
+                      fontWeight: 700,
                       color: 'var(--text-primary)',
                       outline: 'none'
                     }}
@@ -1346,36 +1481,7 @@ export default function AutoPipelinePage() {
                   </select>
                 </div>
 
-                {/* 3. Target Video Resep */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
-                  <label style={{
-                    fontSize: '0.82rem',
-                    fontWeight: 600,
-                    color: 'var(--text-secondary)'
-                  }}>
-                    3. Target Video Resep
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="14"
-                    value={recipeCount}
-                    onChange={(e) => setRecipeCount(e.target.value)}
-                    style={{
-                      height: '42px',
-                      boxSizing: 'border-box',
-                      background: 'var(--input-bg)',
-                      border: '1px solid var(--border-subtle)',
-                      borderRadius: 'var(--radius-sm)',
-                      padding: '0 0.85rem',
-                      fontSize: '0.88rem',
-                      color: 'var(--text-primary)',
-                      outline: 'none'
-                    }}
-                  />
-                </div>
-
-                {/* 4. Mode Eksekusi */}
+                {/* 3. Mode Eksekusi */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
                   <label style={{
                     fontSize: '0.82rem',
@@ -1399,8 +1505,8 @@ export default function AutoPipelinePage() {
                       outline: 'none'
                     }}
                   >
-                    <option value="full_autopilot">Full Autopilot (Auto-Approve & Langsung Jadi Video)</option>
-                    <option value="manual_review">Manual Review (Jeda di Storyboard Approval)</option>
+                    <option value="full_autopilot">⚡ Full Autopilot (Langsung Produksi Video)</option>
+                    <option value="manual_review">⏸️ Manual Review (Jeda di Storyboard Approval)</option>
                   </select>
                 </div>
               </div>
@@ -1550,207 +1656,483 @@ export default function AutoPipelinePage() {
                 </div>
               </div>
 
-                {/* 5. Kategori Resep Kuliner (Usulan 1 - Category Selector UI) */}
+              {/* STEP 3: ADAPTIVE CAMPAIGN CONTENT FORM */}
+              {/* 3A: VIDEO PRODUK (Katalog Produk Selector) */}
+              {instantCampaignType === 'product_campaign' && (
                 <div style={{
-                  gridColumn: '1 / -1',
                   background: 'var(--surface-raised)',
-                  border: '1px solid var(--border-subtle)',
+                  border: '1.5px solid var(--status-success)',
                   borderRadius: 'var(--radius-md)',
-                  padding: '1.25rem',
+                  padding: '1.15rem',
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '0.85rem'
                 }}>
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    flexWrap: 'wrap',
-                    gap: '0.5rem'
-                  }}>
-                    <div style={{
-                      fontSize: '0.88rem',
-                      fontWeight: 700,
-                      color: 'var(--text-primary)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.4rem'
-                    }}>
-                      <span>🍽️</span>
-                      <span>Kategori Resep Kuliner</span>
-                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 400 }}>
-                        (Menentukan jenis olahan & instruksi AI)
-                      </span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <div style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                      <span>🛍️</span>
+                      <span>Pilih Produk dari Katalog:</span>
                     </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    {instantProductId && (
                       <span style={{
                         fontSize: '0.72rem',
-                        fontWeight: 600,
-                        padding: '0.25rem 0.65rem',
+                        fontWeight: 700,
+                        padding: '0.2rem 0.65rem',
                         borderRadius: 9999,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.35rem',
-                        background: isCategoryManuallySelected ? 'var(--status-warning-soft)' : 'var(--status-info-soft)',
-                        color: isCategoryManuallySelected ? 'var(--status-warning)' : 'var(--status-info)',
-                        border: `1px solid ${isCategoryManuallySelected ? 'var(--status-warning)' : 'var(--status-info)'}`
+                        background: 'var(--status-success-soft)',
+                        color: 'var(--status-success)',
+                        border: '1px solid var(--status-success)'
                       }}>
-                        <span>{isCategoryManuallySelected ? '✏️ Pilihan Manual' : '✨ Auto-Terdeteksi dari Topik'}</span>
+                        Terpilih: {catalogProducts.find(p => p.id === instantProductId)?.product_name || instantProductId}
                       </span>
-
-                      {isCategoryManuallySelected && (
-                        <button
-                          type="button"
-                          onClick={resetCategoryToAuto}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            color: 'var(--link)',
-                            fontSize: '0.72rem',
-                            cursor: 'pointer',
-                            textDecoration: 'underline',
-                            padding: 0
-                          }}
-                        >
-                          Reset ke Otomatis
-                        </button>
-                      )}
-                    </div>
+                    )}
                   </div>
 
-                  {/* 4 Cards Grid */}
+                  {/* Search box */}
+                  <div style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '0.85rem' }}>🔍</span>
+                    <input
+                      type="text"
+                      value={instantProductSearch}
+                      onChange={(e) => setInstantProductSearch(e.target.value)}
+                      placeholder="Cari produk katalog (nama atau kategori)..."
+                      style={{
+                        width: '100%',
+                        height: '38px',
+                        background: 'var(--surface)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-sm)',
+                        padding: '0 10px 0 32px',
+                        color: 'var(--text-primary)',
+                        fontSize: '0.84rem',
+                        outline: 'none'
+                      }}
+                    />
+                  </div>
+
+                  {/* Scrollable Products List */}
                   <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                    gap: '0.75rem'
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+                    gap: '0.65rem',
+                    maxHeight: '260px',
+                    overflowY: 'auto',
+                    paddingRight: '4px'
                   }}>
-                    {[
-                      {
-                        key: 'makanan_utama',
-                        icon: '🍗',
-                        name: 'Makanan Utama',
-                        desc: 'Main course, ayam, daging, ikan, pasta, rice bowl'
-                      },
-                      {
-                        key: 'camilan',
-                        icon: '🍟',
-                        name: 'Camilan / Side Dish',
-                        desc: 'Snacks, fries, finger food, crispy bites, gorengan'
-                      },
-                      {
-                        key: 'dessert',
-                        icon: '🍰',
-                        name: 'Baking / Dessert',
-                        desc: 'Cake, cookies, pastry, waffle, puding, sweets'
-                      },
-                      {
-                        key: 'minuman',
-                        icon: '🥤',
-                        name: 'Minuman',
-                        desc: 'Coffee, latte, matcha, smoothie, tea, mocktail'
-                      }
-                    ].map(cat => {
-                      const isSelected = category === cat.key;
-                      return (
-                        <button
-                          type="button"
-                          key={cat.key}
-                          onClick={() => handleCategorySelect(cat.key)}
-                          style={{
-                            background: isSelected ? 'var(--surface-interactive)' : 'var(--input-bg)',
-                            border: `1.5px solid ${isSelected ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
-                            borderRadius: 'var(--radius-md)',
-                            padding: '0.9rem',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'flex-start',
-                            gap: '0.4rem',
-                            cursor: 'pointer',
-                            textAlign: 'left',
-                            boxShadow: isSelected ? '0 0 0 1px var(--action-primary), 0 4px 14px rgba(45, 212, 191, 0.16)' : 'none',
-                            transition: 'var(--transition)'
-                          }}
-                        >
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                            <span style={{ fontSize: '1.35rem', lineHeight: 1 }}>{cat.icon}</span>
+                    {loadingProducts ? (
+                      <div style={{ gridColumn: '1 / -1', padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
+                        Memuat katalog produk...
+                      </div>
+                    ) : filteredInstantProducts.length === 0 ? (
+                      <div style={{ gridColumn: '1 / -1', padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.82rem', border: '1px dashed var(--border-subtle)', borderRadius: 'var(--radius-sm)' }}>
+                        {instantProductSearch ? `Tidak ada produk yang cocok dengan "${instantProductSearch}"` : 'Belum ada produk di katalog.'}
+                      </div>
+                    ) : (
+                      filteredInstantProducts.map(prod => {
+                        const isSelected = instantProductId === prod.id;
+                        return (
+                          <div
+                            key={prod.id}
+                            onClick={() => setInstantProductId(prod.id)}
+                            style={{
+                              background: isSelected ? 'var(--surface-interactive)' : 'var(--surface)',
+                              border: isSelected ? '1.5px solid var(--status-success)' : '1px solid var(--border-subtle)',
+                              borderRadius: 'var(--radius-sm)',
+                              padding: '0.65rem 0.75rem',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.65rem',
+                              transition: 'var(--transition)'
+                            }}
+                          >
+                            <div style={{
+                              width: '40px',
+                              height: '40px',
+                              borderRadius: 'var(--radius-xs)',
+                              background: 'var(--surface-raised)',
+                              border: '1px solid var(--border-subtle)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flexShrink: 0,
+                              overflow: 'hidden'
+                            }}>
+                              {prod.photo_url ? (
+                                <img
+                                  src={prod.photo_url}
+                                  alt={prod.product_name}
+                                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                  onError={(e) => { e.target.style.display = 'none'; }}
+                                />
+                              ) : (
+                                <span style={{ fontSize: '1.15rem' }}>🛍️</span>
+                              )}
+                            </div>
+
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={prod.product_name}>
+                                {prod.product_name}
+                              </div>
+                              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+                                {prod.category || 'Katalog'}
+                              </div>
+                            </div>
+
                             <div style={{
                               width: '18px',
                               height: '18px',
                               borderRadius: '50%',
-                              background: isSelected ? 'var(--action-primary)' : 'var(--border-subtle)',
-                              color: isSelected ? 'var(--on-action-primary)' : 'transparent',
+                              border: isSelected ? '1.5px solid var(--status-success)' : '1.5px solid var(--border-strong)',
+                              background: isSelected ? 'var(--status-success)' : 'transparent',
+                              color: isSelected ? '#ffffff' : 'transparent',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
                               fontSize: '0.65rem',
-                              fontWeight: 900
+                              fontWeight: 900,
+                              flexShrink: 0
                             }}>
                               ✓
                             </div>
                           </div>
-                          <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '0.1rem' }}>
-                            {cat.name}
-                          </div>
-                          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1.3 }}>
-                            {cat.desc}
-                          </div>
-                        </button>
-                      );
-                    })}
+                        );
+                      })
+                    )}
+                  </div>
+
+                  <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', background: 'var(--surface)', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border-subtle)' }}>
+                    💡 <strong>1-Pass Product Engine:</strong> AI Gemini langsung menyusun skrip hook, unique selling points, dan storyboard video promosi untuk produk terpilih dalam 1 kali eksekusi.
                   </div>
                 </div>
+              )}
 
-                {/* 6. Topik Resep (Full Width) */}
-                <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                  <label style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Topik / Arahan Resep AI</span>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Ide olahan makanan/minuman yang akan digenerate</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={topic}
-                    onChange={(e) => handleTopicChange(e.target.value)}
-                    placeholder="Contoh: air fryer salmon bites, garlic parmesan wings, keto smoothie"
-                    style={{
-                      background: 'var(--input-bg)',
-                      border: '1px solid var(--border-subtle)',
-                      borderRadius: 'var(--radius-sm)',
-                      padding: '0.65rem 0.9rem',
-                      fontSize: '0.88rem',
-                      color: 'var(--text-primary)',
-                      outline: 'none'
-                    }}
-                  />
-                  {/* Quick Topic Pills */}
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.35rem' }}>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', alignSelf: 'center' }}>Saran Cepat:</span>
-                    {[
-                      'air fryer salmon bites',
-                      'crispy parmesan zucchini fries',
-                      'garlic butter chicken bites',
-                      'smoothie alpukat keto'
-                    ].map(pill => (
-                      <button
-                        type="button"
-                        key={pill}
-                        onClick={() => handleTopicChange(pill)}
-                        style={{
-                          fontSize: '0.74rem',
+              {/* 3B: VIDEO EDITORIAL (Pilar Brand Selector) */}
+              {instantCampaignType === 'editorial_campaign' && (
+                <div style={{
+                  background: 'var(--surface-raised)',
+                  border: '1.5px solid var(--status-info)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '1.15rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.85rem'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <div style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                      <span>📖</span>
+                      <span>Pilih Pilar Konten Brand:</span>
+                    </div>
+                    {instantPillar && (
+                      <span style={{
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        padding: '0.2rem 0.65rem',
+                        borderRadius: 9999,
+                        background: 'var(--status-info-soft)',
+                        color: 'var(--status-info)',
+                        border: '1px solid var(--status-info)'
+                      }}>
+                        Terpilih: "{instantPillar}"
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Search box */}
+                  <div style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '0.85rem' }}>🔍</span>
+                    <input
+                      type="text"
+                      value={instantPillarSearch}
+                      onChange={(e) => setInstantPillarSearch(e.target.value)}
+                      placeholder="Cari topik pilar brand..."
+                      style={{
+                        width: '100%',
+                        height: '38px',
+                        background: 'var(--surface)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-sm)',
+                        padding: '0 10px 0 32px',
+                        color: 'var(--text-primary)',
+                        fontSize: '0.84rem',
+                        outline: 'none'
+                      }}
+                    />
+                  </div>
+
+                  {/* Scrollable Pillars List */}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+                    gap: '0.65rem',
+                    maxHeight: '240px',
+                    overflowY: 'auto',
+                    paddingRight: '4px'
+                  }}>
+                    {filteredInstantPillars.length === 0 ? (
+                      <div style={{ gridColumn: '1 / -1', padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.82rem', border: '1px dashed var(--border-subtle)', borderRadius: 'var(--radius-sm)' }}>
+                        Tidak ada pilar yang cocok dengan "{instantPillarSearch}".
+                      </div>
+                    ) : (
+                      filteredInstantPillars.map((pillar, idx) => {
+                        const isSelected = instantPillar === pillar;
+                        return (
+                          <div
+                            key={idx}
+                            onClick={() => setInstantPillar(pillar)}
+                            style={{
+                              background: isSelected ? 'var(--surface-interactive)' : 'var(--surface)',
+                              border: isSelected ? '1.5px solid var(--status-info)' : '1px solid var(--border-subtle)',
+                              borderRadius: 'var(--radius-sm)',
+                              padding: '0.75rem 0.85rem',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: '0.65rem',
+                              transition: 'var(--transition)'
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flex: 1, minWidth: 0 }}>
+                              <span style={{ fontSize: '1.1rem' }}>📌</span>
+                              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={pillar}>
+                                {pillar}
+                              </span>
+                            </div>
+
+                            <div style={{
+                              width: '18px',
+                              height: '18px',
+                              borderRadius: '50%',
+                              border: isSelected ? '1.5px solid var(--status-info)' : '1.5px solid var(--border-strong)',
+                              background: isSelected ? 'var(--status-info)' : 'transparent',
+                              color: isSelected ? '#ffffff' : 'transparent',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '0.65rem',
+                              fontWeight: 900,
+                              flexShrink: 0
+                            }}>
+                              ✓
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+
+                  <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', background: 'var(--surface)', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border-subtle)' }}>
+                    💡 <strong>1-Pass Editorial Engine:</strong> AI Gemini otomatis merancang hook tension kontroversial/fakta, storytelling edukatif, dan format video editorial sesuai pilar brand ini dalam 1-pass.
+                  </div>
+                </div>
+              )}
+
+              {/* 3C: VIDEO RESEP (Kategori Resep Kuliner & Topik AI) */}
+              {instantCampaignType === 'recipe_campaign' && (
+                <>
+                  {/* Kategori Resep Kuliner */}
+                  <div style={{
+                    background: 'var(--surface-raised)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '1.25rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.85rem'
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                      gap: '0.5rem'
+                    }}>
+                      <div style={{
+                        fontSize: '0.88rem',
+                        fontWeight: 700,
+                        color: 'var(--text-primary)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.4rem'
+                      }}>
+                        <span>🍽️</span>
+                        <span>Kategori Resep Kuliner</span>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 400 }}>
+                          (Menentukan jenis olahan & instruksi AI)
+                        </span>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{
+                          fontSize: '0.72rem',
+                          fontWeight: 600,
                           padding: '0.25rem 0.65rem',
                           borderRadius: 9999,
-                          background: 'var(--surface-raised)',
-                          border: '1px solid var(--border-subtle)',
-                          color: 'var(--link)',
-                          cursor: 'pointer',
-                          transition: 'var(--transition)'
-                        }}
-                      >
-                        {pill}
-                      </button>
-                    ))}
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.35rem',
+                          background: isCategoryManuallySelected ? 'var(--status-warning-soft)' : 'var(--status-info-soft)',
+                          color: isCategoryManuallySelected ? 'var(--status-warning)' : 'var(--status-info)',
+                          border: `1px solid ${isCategoryManuallySelected ? 'var(--status-warning)' : 'var(--status-info)'}`
+                        }}>
+                          <span>{isCategoryManuallySelected ? '✏️ Pilihan Manual' : '✨ Auto-Terdeteksi dari Topik'}</span>
+                        </span>
+
+                        {isCategoryManuallySelected && (
+                          <button
+                            type="button"
+                            onClick={resetCategoryToAuto}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: 'var(--link)',
+                              fontSize: '0.72rem',
+                              cursor: 'pointer',
+                              textDecoration: 'underline',
+                              padding: 0
+                            }}
+                          >
+                            Reset ke Otomatis
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* 4 Cards Grid */}
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                      gap: '0.75rem'
+                    }}>
+                      {[
+                        {
+                          key: 'makanan_utama',
+                          icon: '🍗',
+                          name: 'Makanan Utama',
+                          desc: 'Main course, ayam, daging, ikan, pasta, rice bowl'
+                        },
+                        {
+                          key: 'camilan',
+                          icon: '🍟',
+                          name: 'Camilan / Side Dish',
+                          desc: 'Snacks, fries, finger food, crispy bites, gorengan'
+                        },
+                        {
+                          key: 'dessert',
+                          icon: '🍰',
+                          name: 'Baking / Dessert',
+                          desc: 'Cake, cookies, pastry, waffle, puding, sweets'
+                        },
+                        {
+                          key: 'minuman',
+                          icon: '🥤',
+                          name: 'Minuman',
+                          desc: 'Coffee, latte, matcha, smoothie, tea, mocktail'
+                        }
+                      ].map(cat => {
+                        const isSelected = category === cat.key;
+                        return (
+                          <button
+                            type="button"
+                            key={cat.key}
+                            onClick={() => handleCategorySelect(cat.key)}
+                            style={{
+                              background: isSelected ? 'var(--surface-interactive)' : 'var(--input-bg)',
+                              border: `1.5px solid ${isSelected ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
+                              borderRadius: 'var(--radius-md)',
+                              padding: '0.9rem',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'flex-start',
+                              gap: '0.4rem',
+                              cursor: 'pointer',
+                              textAlign: 'left',
+                              boxShadow: isSelected ? '0 0 0 1px var(--action-primary), 0 4px 14px rgba(45, 212, 191, 0.16)' : 'none',
+                              transition: 'var(--transition)'
+                            }}
+                          >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                              <span style={{ fontSize: '1.35rem', lineHeight: 1 }}>{cat.icon}</span>
+                              <div style={{
+                                width: '18px',
+                                height: '18px',
+                                borderRadius: '50%',
+                                background: isSelected ? 'var(--action-primary)' : 'var(--border-subtle)',
+                                color: isSelected ? 'var(--on-action-primary)' : 'transparent',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '0.65rem',
+                                fontWeight: 900
+                              }}>
+                                ✓
+                              </div>
+                            </div>
+                            <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '0.1rem' }}>
+                              {cat.name}
+                            </div>
+                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1.3 }}>
+                              {cat.desc}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
+
+                  {/* Topik Resep (Full Width) */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                    <label style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
+                      <span>Topik / Arahan Resep AI</span>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Ide olahan makanan/minuman yang akan digenerate</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={topic}
+                      onChange={(e) => handleTopicChange(e.target.value)}
+                      placeholder="Contoh: air fryer salmon bites, garlic parmesan wings, keto smoothie"
+                      style={{
+                        background: 'var(--input-bg)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-sm)',
+                        padding: '0.65rem 0.9rem',
+                        fontSize: '0.88rem',
+                        color: 'var(--text-primary)',
+                        outline: 'none'
+                      }}
+                    />
+                    {/* Quick Topic Pills */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.35rem' }}>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', alignSelf: 'center' }}>Saran Cepat:</span>
+                      {[
+                        'air fryer salmon bites',
+                        'crispy parmesan zucchini fries',
+                        'garlic butter chicken bites',
+                        'smoothie alpukat keto'
+                      ].map(pill => (
+                        <button
+                          type="button"
+                          key={pill}
+                          onClick={() => handleTopicChange(pill)}
+                          style={{
+                            fontSize: '0.74rem',
+                            padding: '0.25rem 0.65rem',
+                            borderRadius: 9999,
+                            background: 'var(--surface-raised)',
+                            border: '1px solid var(--border-subtle)',
+                            color: 'var(--link)',
+                            cursor: 'pointer',
+                            transition: 'var(--transition)'
+                          }}
+                        >
+                          {pill}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
 
               {/* Submit Button */}
               <div style={{ paddingTop: '0.5rem' }}>
@@ -1758,7 +2140,10 @@ export default function AutoPipelinePage() {
                   type="submit"
                   disabled={isLaunching}
                   style={{
-                    background: isLaunching ? 'var(--surface-interactive)' : 'var(--action-primary)',
+                    background: isLaunching ? 'var(--surface-interactive)' : (
+                      instantCampaignType === 'product_campaign' ? 'var(--status-success)' :
+                      (instantCampaignType === 'editorial_campaign' ? 'var(--status-info)' : 'var(--action-primary)')
+                    ),
                     color: isLaunching ? 'var(--text-muted)' : 'var(--on-action-primary)',
                     border: 'none',
                     padding: '0.9rem 1.85rem',
@@ -1769,11 +2154,19 @@ export default function AutoPipelinePage() {
                     alignItems: 'center',
                     gap: '0.6rem',
                     cursor: isLaunching ? 'not-allowed' : 'pointer',
-                    boxShadow: isLaunching ? 'none' : '0 4px 14px rgba(45, 212, 191, 0.28)',
+                    boxShadow: isLaunching ? 'none' : '0 4px 14px rgba(37, 99, 235, 0.25)',
                     transition: 'var(--transition)'
                   }}
                 >
-                  <span>{isLaunching ? '⏳ Memproses Auto Pipeline...' : `🚀 Luncurkan Auto Pipeline (${targetClipsCount} Klip Video)`}</span>
+                  <span>
+                    {isLaunching ? '⏳ Memproses Pipeline AI...' : (
+                      instantCampaignType === 'product_campaign'
+                        ? `⚡ Luncurkan Video Produk Sekarang (1-Pass)`
+                        : (instantCampaignType === 'editorial_campaign'
+                            ? `⚡ Luncurkan Video Editorial Sekarang (1-Pass)`
+                            : `🚀 Luncurkan Auto Pipeline Resep (${targetClipsCount} Klip Video)`)
+                    )}
+                  </span>
                 </button>
               </div>
             </form>

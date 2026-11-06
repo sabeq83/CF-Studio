@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup Interaktif: Eksekusi 1-Klik Instan Multi-Campaign</title>
+  <style>
+    :root {
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #f1f5f9;
+      --surface-subtle: #f8fafc;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --border-color: #e2e8f0;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --input-bg: #ffffff;
+      --focus-ring: rgba(37, 99, 235, 0.25);
+      --action-primary: #2563eb;
+      --action-primary-hover: #1d4ed8;
+      --on-action-primary: #ffffff;
+      --status-info: #0284c7;
+      --status-info-soft: rgba(2, 132, 199, 0.1);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.1);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.1);
+      --status-danger: #dc2626;
+      --status-danger-soft: rgba(220, 38, 38, 0.1);
+      --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+      --radius-xs: 4px;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    [data-theme="dark"] {
+      --surface: #0f172a;
+      --surface-raised: #1e293b;
+      --surface-interactive: #334155;
+      --surface-subtle: #0f172a;
+      --border-subtle: #334155;
+      --border-strong: #475569;
+      --border-color: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --input-bg: #0f172a;
+      --focus-ring: rgba(59, 130, 246, 0.35);
+      --action-primary: #3b82f6;
+      --action-primary-hover: #60a5fa;
+      --on-action-primary: #ffffff;
+      --status-info: #38bdf8;
+      --status-info-soft: rgba(56, 189, 248, 0.15);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.15);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.15);
+      --status-danger: #f87171;
+      --status-danger-soft: rgba(248, 113, 113, 0.15);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--surface-subtle);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 2rem 1.5rem;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .title-area h1 {
+      margin: 0 0 0.3rem 0;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .theme-toggle-btn {
+      padding: 0.45rem 0.85rem;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .tabs-nav {
+      display: flex;
+      gap: 0.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      padding: 0.35rem;
+      border-radius: var(--radius-md);
+      margin-bottom: 1.5rem;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 0.75rem 1.25rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justifyContent: center;
+      gap: 0.5rem;
+      background: transparent;
+      color: var(--text-secondary);
+      transition: var(--transition);
+    }
+    .tab-btn.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 1.75rem;
+    }
+
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .section-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+    }
+
+    /* Campaign Type Selector */
+    .type-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 0.85rem;
+      margin-bottom: 1.5rem;
+    }
+    .type-card {
+      background: var(--surface-raised);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.15rem;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      position: relative;
+    }
+    .type-card.selected-product {
+      border-color: var(--status-success);
+      background: var(--status-success-soft);
+    }
+    .type-card.selected-editorial {
+      border-color: var(--status-info);
+      background: var(--status-info-soft);
+    }
+    .type-card.selected-recipe {
+      border-color: var(--status-warning);
+      background: var(--status-warning-soft);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-bottom: 1.15rem;
+    }
+    .form-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .form-control {
+      height: 42px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0 0.85rem;
+      font-size: 0.88rem;
+      color: var(--text-primary);
+      outline: none;
+      width: 100%;
+    }
+    .form-control:focus {
+      border-color: var(--action-primary);
+      box-shadow: 0 0 0 3px var(--focus-ring);
+    }
+
+    /* Product & Pillar Item Selection */
+    .item-search-bar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.85rem;
+    }
+    .items-scroll-box {
+      max-height: 280px;
+      overflow-y: auto;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.5rem;
+      background: var(--surface-raised);
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 0.6rem;
+    }
+    .selectable-item {
+      background: var(--surface);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      transition: var(--transition);
+    }
+    .selectable-item.active {
+      border-color: var(--action-primary);
+      background: var(--surface-interactive);
+    }
+    .item-thumb {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-xs);
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .btn-launch {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      padding: 0.9rem 1.85rem;
+      border-radius: var(--radius-md);
+      font-size: 0.95rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+      transition: var(--transition);
+    }
+    .btn-launch:hover {
+      background: var(--action-primary-hover);
+    }
+
+    /* Live Telemetry Visualizer */
+    .telemetry-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="top-bar">
+    <div class="title-area">
+      <h1><span>⚡</span> Auto Pipeline Hub</h1>
+      <p style="margin:0; font-size: 0.85rem; color: var(--text-muted);">
+        Otomatisasi Produksi Video AI (1-Klik Instan & Penjadwal Rutin Multi-Platform)
+      </p>
+    </div>
+    <button class="theme-toggle-btn" onclick="toggleTheme()">🌓 Ganti Tema</button>
+  </div>
+
+  <!-- Main Tabs -->
+  <div class="tabs-nav">
+    <button class="tab-btn active" onclick="switchMainTab('instant')">
+      <span>⚡</span> Eksekusi 1-Klik Instan (Multi-Campaign)
+    </button>
+    <button class="tab-btn" onclick="switchMainTab('schedules')">
+      <span>⏰</span> Penjadwal Otomatis & Auto-Publish Repliz
+    </button>
+  </div>
+
+  <!-- TAB 1: 1-KLIK INSTAN MULTI-CAMPAIGN -->
+  <div id="instantView" class="card">
+    <div class="section-title">
+      <span>🚀</span>
+      <span id="instantTitle">Luncurkan Eksekusi 1-Klik Instan</span>
+    </div>
+    <div class="section-desc">
+      Pilih tipe kampanye, tentukan target (Produk Katalog, Pilar Brand, atau Resep), lalu produksi video final otomatis dalam 1 kali klik.
+    </div>
+
+    <!-- STEP 1: CAMPAIGN TYPE SELECTION -->
+    <div style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.45rem;">
+      1. Pilih Tipe Kampanye:
+    </div>
+    <div class="type-grid">
+      <div id="typeProduct" class="type-card selected-product" onclick="selectCampaignType('product_campaign')">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 0.45rem;">
+            <span style="font-size: 1.35rem;">🛍️</span>
+            <strong style="color: var(--status-success); font-size: 0.92rem;">Video Produk</strong>
+          </div>
+          <span style="font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 9999px; background: var(--status-success); color: #fff;">AKTIF</span>
+        </div>
+        <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 0.2rem;">
+          Pilih produk katalog, hasilkan video promosi showcase & solusi masalah dalam 1-pass.
+        </div>
+      </div>
+
+      <div id="typeEditorial" class="type-card" onclick="selectCampaignType('editorial_campaign')">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 0.45rem;">
+            <span style="font-size: 1.35rem;">📖</span>
+            <strong style="color: var(--text-primary); font-size: 0.92rem;">Video Editorial</strong>
+          </div>
+          <span id="badgeEditorial" style="display: none; font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 9999px; background: var(--status-info); color: #fff;">AKTIF</span>
+        </div>
+        <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 0.2rem;">
+          Pilih pilar brand (edukasi, habit, mitos vs fakta), susun hook tension & storytelling AI.
+        </div>
+      </div>
+
+      <div id="typeRecipe" class="type-card" onclick="selectCampaignType('recipe_campaign')">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 0.45rem;">
+            <span style="font-size: 1.35rem;">🍳</span>
+            <strong style="color: var(--text-primary); font-size: 0.92rem;">Video Resep</strong>
+          </div>
+          <span id="badgeRecipe" style="display: none; font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 9999px; background: var(--status-warning); color: #fff;">AKTIF</span>
+        </div>
+        <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 0.2rem;">
+          Tulis ide/olahan kuliner, susun 4 babak cooking story arc & resep voice-over.
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: BRAND & PRESET (DI ATAS) -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
+      <div class="form-group">
+        <label class="form-label">2. Brand Profile</label>
+        <select id="brandSelect" class="form-control" onchange="handleBrandChange(this.value)">
+          <option value="habitfolk">HabitFolk (@habitfolk)</option>
+          <option value="dapurbotani">Dapur Botani (@dapurbotani)</option>
+          <option value="nutribake">NutriBake (@nutribake)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">
+          <span>3. Preset Video</span>
+          <span style="font-size: 0.68rem; color: var(--status-success);">Preset-Driven</span>
+        </label>
+        <select id="presetSelect" class="form-control" style="border-color: var(--action-primary); font-weight: 700;">
+          <option value="product_showcase_6clips">🛍️ Product Showcase (6 Klip - Fast Hook & USP)</option>
+          <option value="product_unboxing_8clips">📦 Product Deep Unboxing (8 Klip - Detail Tekstur)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">4. Mode Eksekusi</label>
+        <select class="form-control">
+          <option value="full_autopilot">⚡ Full Autopilot (Langsung Produksi Video)</option>
+          <option value="manual_review">⏸️ Review Storyboard Dulu</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- STEP 3: ADAPTIVE CAMPAIGN CONTENT -->
+    <!-- 3A: PRODUCT SELECTION -->
+    <div id="contentProduct" style="display: block;">
+      <div class="form-group">
+        <div class="form-label">
+          <span>Pilih Produk dari Katalog:</span>
+          <span id="selectedProductInfo" style="font-size: 0.72rem; color: var(--status-success); font-weight: 700;">
+            1 Produk Terpilih: "Loyang Brownies Sekat Anti Lengket"
+          </span>
+        </div>
+
+        <div class="item-search-bar">
+          <input type="text" class="form-control" placeholder="Cari nama atau kategori produk katalog..." oninput="filterMockProducts(this.value)">
+        </div>
+
+        <div class="items-scroll-box" id="productsBox">
+          <div class="selectable-item active" onclick="selectSingleProduct(this, 'Loyang Brownies Sekat Anti Lengket')">
+            <div class="item-thumb">🍰</div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: 0.84rem; font-weight: 700; color: var(--text-primary);">Loyang Brownies Sekat Anti Lengket</div>
+              <div style="font-size: 0.7rem; color: var(--text-muted);">Baking & Pastry • Sekat 18 Pcs</div>
+            </div>
+            <span style="color: var(--status-success); font-weight: 900;">✓</span>
+          </div>
+
+          <div class="selectable-item" onclick="selectSingleProduct(this, 'Spatula Set Silicone Heat Resistant')">
+            <div class="item-thumb">🥄</div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: 0.84rem; font-weight: 700; color: var(--text-primary);">Spatula Set Silicone Heat Resistant</div>
+              <div style="font-size: 0.7rem; color: var(--text-muted);">Peralatan Dapur • Food Grade Silicon</div>
+            </div>
+            <span style="color: var(--text-muted); font-weight: 900;">○</span>
+          </div>
+
+          <div class="selectable-item" onclick="selectSingleProduct(this, 'Termometer Digital Dapur Instant Read')">
+            <div class="item-thumb">🌡️</div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: 0.84rem; font-weight: 700; color: var(--text-primary);">Termometer Digital Dapur Instant Read</div>
+              <div style="font-size: 0.7rem; color: var(--text-muted);">Alat Ukur • Akurasi 0.1 C</div>
+            </div>
+            <span style="color: var(--text-muted); font-weight: 900;">○</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3B: EDITORIAL SELECTION -->
+    <div id="contentEditorial" style="display: none;">
+      <div class="form-group">
+        <div class="form-label">
+          <span>Pilih Pilar Konten Brand:</span>
+          <span id="selectedPillarInfo" style="font-size: 0.72rem; color: var(--status-info); font-weight: 700;">
+            1 Pilar Terpilih: "Eat Better, Not Perfect"
+          </span>
+        </div>
+
+        <div class="item-search-bar">
+          <input type="text" class="form-control" placeholder="Cari topik pilar brand..." oninput="filterMockPillars(this.value)">
+        </div>
+
+        <div class="items-scroll-box" id="pillarsBox">
+          <div class="selectable-item active" onclick="selectSinglePillar(this, 'Eat Better, Not Perfect')">
+            <div class="item-thumb">📌</div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: 0.84rem; font-weight: 700; color: var(--text-primary);">Eat Better, Not Perfect</div>
+              <div style="font-size: 0.7rem; color: var(--text-muted);">Fokus nutrisi realistis tanpa rasa bersalah</div>
+            </div>
+            <span style="color: var(--status-info); font-weight: 900;">✓</span>
+          </div>
+
+          <div class="selectable-item" onclick="selectSinglePillar(this, 'Hype Check')">
+            <div class="item-thumb">📌</div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: 0.84rem; font-weight: 700; color: var(--text-primary);">Hype Check</div>
+              <div style="font-size: 0.7rem; color: var(--text-muted);">Membongkar klaim diet viral & tren kesehatan</div>
+            </div>
+            <span style="color: var(--text-muted); font-weight: 900;">○</span>
+          </div>
+
+          <div class="selectable-item" onclick="selectSinglePillar(this, 'Beyond the Scale and Mirror')">
+            <div class="item-thumb">📌</div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: 0.84rem; font-weight: 700; color: var(--text-primary);">Beyond the Scale and Mirror</div>
+              <div style="font-size: 0.7rem; color: var(--text-muted);">Kesehatan mental, energi harian & wellness holistik</div>
+            </div>
+            <span style="color: var(--text-muted); font-weight: 900;">○</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3C: RECIPE SELECTION -->
+    <div id="contentRecipe" style="display: none;">
+      <div class="form-group">
+        <label class="form-label">Topik / Arahan Resep AI</label>
+        <input type="text" class="form-control" value="air fryer crispy chicken tenders and snack finger foods">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Kategori Kuliner</label>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.55rem;">
+          <div style="padding: 0.6rem; border: 1.5px solid var(--action-primary); background: var(--surface-interactive); border-radius: var(--radius-sm); text-align: center;">
+            🍗 Makanan Utama
+          </div>
+          <div style="padding: 0.6rem; border: 1px solid var(--border-subtle); background: var(--surface); border-radius: var(--radius-sm); text-align: center;">
+            🍟 Camilan
+          </div>
+          <div style="padding: 0.6rem; border: 1px solid var(--border-subtle); background: var(--surface); border-radius: var(--radius-sm); text-align: center;">
+            🍰 Baking / Dessert
+          </div>
+          <div style="padding: 0.6rem; border: 1px solid var(--border-subtle); background: var(--surface); border-radius: var(--radius-sm); text-align: center;">
+            🥤 Minuman
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBMIT BUTTON -->
+    <div style="margin-top: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+      <button class="btn-launch" onclick="simulateLaunch()">
+        <span>⚡</span>
+        <span id="btnLaunchText">Luncurkan Video Produk Sekarang (1-Pass)</span>
+      </button>
+      <span style="font-size: 0.78rem; color: var(--text-muted);">
+        Otomatis menghasilkan Storyboard, Naskah VO, 8 Klip Veo, dan terdaftar di ContentFlow Hub.
+      </span>
+    </div>
+
+    <!-- LIVE TELEMETRY SIMULATION -->
+    <div id="liveTelemetry" class="telemetry-card" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+        <strong style="color: var(--status-success); font-size: 0.95rem;">⚡ Produksi Sedang Berjalan Real-Time:</strong>
+        <span style="font-size: 0.75rem; background: var(--status-info-soft); color: var(--status-info); padding: 0.2rem 0.6rem; border-radius: 9999px;">
+          Campaign ID: opc_prod_1793940120
+        </span>
+      </div>
+      <div style="background: var(--surface-raised); border-radius: 9999px; height: 8px; overflow: hidden; margin-bottom: 0.85rem;">
+        <div id="progressBar" style="width: 35%; height: 100%; background: var(--action-primary); transition: width 0.5s ease;"></div>
+      </div>
+      <div style="font-size: 0.82rem; color: var(--text-secondary);">
+        Tahap: <strong id="stageText">1-Pass Gemini AI Storyboard & Video DNA Generation...</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentType = 'product_campaign';
+
+  function toggleTheme() {
+    const isDark = document.body.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+      document.body.removeAttribute('data-theme');
+    } else {
+      document.body.setAttribute('data-theme', 'dark');
+    }
+  }
+
+  function selectCampaignType(type) {
+    currentType = type;
+    document.getElementById('typeProduct').className = 'type-card ' + (type === 'product_campaign' ? 'selected-product' : '');
+    document.getElementById('typeEditorial').className = 'type-card ' + (type === 'editorial_campaign' ? 'selected-editorial' : '');
+    document.getElementById('typeRecipe').className = 'type-card ' + (type === 'recipe_campaign' ? 'selected-recipe' : '');
+
+    document.getElementById('contentProduct').style.display = type === 'product_campaign' ? 'block' : 'none';
+    document.getElementById('contentEditorial').style.display = type === 'editorial_campaign' ? 'block' : 'none';
+    document.getElementById('contentRecipe').style.display = type === 'recipe_campaign' ? 'block' : 'none';
+
+    const presetSelect = document.getElementById('presetSelect');
+    const btnText = document.getElementById('btnLaunchText');
+
+    if (type === 'product_campaign') {
+      presetSelect.innerHTML = `
+        <option value="product_showcase_6clips">🛍️ Product Showcase (6 Klip - Fast Hook & USP)</option>
+        <option value="product_unboxing_8clips">📦 Product Deep Unboxing (8 Klip - Detail Tekstur)</option>
+      `;
+      btnText.innerText = 'Luncurkan Video Produk Sekarang (1-Pass)';
+    } else if (type === 'editorial_campaign') {
+      presetSelect.innerHTML = `
+        <option value="editorial_tension_6clips">📖 Editorial Tension (6 Klip - Hook Kontroversial/Fakta)</option>
+        <option value="editorial_storytelling_8clips">🎙️ Storytelling Narrative (8 Klip - Transformasi)</option>
+      `;
+      btnText.innerText = 'Luncurkan Video Editorial Sekarang (1-Pass)';
+    } else {
+      presetSelect.innerHTML = `
+        <option value="habitfolk_6clips_quick">🍳 Quick Cooking Recipe (6 Klip @ 4s)</option>
+        <option value="habitfolk_8clips_mastery">🍲 Deep Cooking Masterclass (8 Klip @ 4s)</option>
+      `;
+      btnText.innerText = 'Luncurkan Video Resep Sekarang (1-Pass)';
+    }
+  }
+
+  function selectSingleProduct(el, name) {
+    const items = document.querySelectorAll('#productsBox .selectable-item');
+    items.forEach(i => {
+      i.classList.remove('active');
+      i.querySelector('span:last-child').innerText = '○';
+      i.querySelector('span:last-child').style.color = 'var(--text-muted)';
+    });
+    el.classList.add('active');
+    el.querySelector('span:last-child').innerText = '✓';
+    el.querySelector('span:last-child').style.color = 'var(--status-success)';
+    document.getElementById('selectedProductInfo').innerText = `1 Produk Terpilih: "${name}"`;
+  }
+
+  function selectSinglePillar(el, name) {
+    const items = document.querySelectorAll('#pillarsBox .selectable-item');
+    items.forEach(i => {
+      i.classList.remove('active');
+      i.querySelector('span:last-child').innerText = '○';
+      i.querySelector('span:last-child').style.color = 'var(--text-muted)';
+    });
+    el.classList.add('active');
+    el.querySelector('span:last-child').innerText = '✓';
+    el.querySelector('span:last-child').style.color = 'var(--status-info)';
+    document.getElementById('selectedPillarInfo').innerText = `1 Pilar Terpilih: "${name}"`;
+  }
+
+  function simulateLaunch() {
+    const tel = document.getElementById('liveTelemetry');
+    tel.style.display = 'block';
+    const bar = document.getElementById('progressBar');
+    const stage = document.getElementById('stageText');
+
+    bar.style.width = '25%';
+    stage.innerText = '1-Pass Gemini AI Storyboard & Video DNA Generation...';
+
+    setTimeout(() => {
+      bar.style.width = '60%';
+      stage.innerText = 'Rendering 6 Klip Veo & Minimax Voice-Over...';
+    }, 1500);
+
+    setTimeout(() => {
+      bar.style.width = '100%';
+      stage.innerText = 'Selesai! Video final siap di Nextcloud dan terdaftar di ContentFlow Hub 🚀';
+    }, 3500);
+  }
+</script>
+</body>
+</html>
+
