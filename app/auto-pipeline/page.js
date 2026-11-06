@@ -25,11 +25,13 @@ export default function AutoPipelinePage() {
   const [loadingSchedules, setLoadingSchedules] = useState(false);
   const [runningScheduleIds, setRunningScheduleIds] = useState({});
   const [scheduleFilter, setScheduleFilter] = useState('all'); // 'all' | 'active' | 'paused' | 'archived'
+  const [campaignTypeFilter, setCampaignTypeFilter] = useState('all'); // 'all' | 'product_campaign' | 'editorial_campaign' | 'recipe_campaign'
   const [replizAccounts, setReplizAccounts] = useState([]);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState(null);
 
-  // Form state modal
+  // Form state modal (Multi-Campaign & Dedicated Row Generation)
+  const [schedCampaignType, setSchedCampaignType] = useState('recipe_campaign'); // 'recipe_campaign' | 'product_campaign' | 'editorial_campaign'
   const [schedName, setSchedName] = useState('');
   const [schedBrandId, setSchedBrandId] = useState('');
   const [schedPresetKey, setSchedPresetKey] = useState('');
@@ -43,6 +45,16 @@ export default function AutoPipelinePage() {
   const [schedAutoPublish, setSchedAutoPublish] = useState(true);
   const [modalBrandPresets, setModalBrandPresets] = useState([]);
   const [savingSchedule, setSavingSchedule] = useState(false);
+
+  // Product Catalog Selection State (Product Campaign)
+  const [catalogProducts, setCatalogProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
+  const [productSearchQuery, setProductSearchQuery] = useState('');
+  const [selectedProductIds, setSelectedProductIds] = useState([]);
+
+  // Editorial Pillars Selection State (Editorial Campaign)
+  const [pillarSearchQuery, setPillarSearchQuery] = useState('');
+  const [selectedPillars, setSelectedPillars] = useState([]);
 
   // Repliz Multi-Platform Search & Filter State
   const [replizSearchQuery, setReplizSearchQuery] = useState('');
@@ -246,11 +258,42 @@ export default function AutoPipelinePage() {
         console.warn('[AutoPipeline] Error fetching brands:', e);
       }
     }
+    async function fetchProductsList() {
+      setLoadingProducts(true);
+      try {
+        const res = await fetch('/api/v2/products?limit=100');
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data)) {
+          setCatalogProducts(data.data);
+        }
+      } catch (e) {
+        console.warn('[AutoPipeline] Error fetching products:', e);
+      } finally {
+        setLoadingProducts(false);
+      }
+    }
+
     fetchBrands();
     fetchRecentCampaigns();
     fetchSchedules();
     fetchReplizAccounts();
+    fetchProductsList();
   }, []);
+
+  async function fetchProducts() {
+    setLoadingProducts(true);
+    try {
+      const res = await fetch('/api/v2/products?limit=100');
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data)) {
+        setCatalogProducts(data.data);
+      }
+    } catch (e) {
+      console.warn('[AutoPipeline] Error fetching products:', e);
+    } finally {
+      setLoadingProducts(false);
+    }
+  }
 
   // 2. Fetch Presets dynamically when selected brand changes
   useEffect(() => {
@@ -496,6 +539,7 @@ export default function AutoPipelinePage() {
     const brandName = currentBrand?.brand_name || 'Brand';
     const initialTopic = topic || 'Air fryer crispy snack finger foods';
     setEditingSchedule(null);
+    setSchedCampaignType('recipe_campaign');
     setSchedName(`${brandName} — Daily Morning Reels`);
     setSchedBrandId(currentBrand?.id || '');
     setSchedPresetKey(selectedPresetKey || 'habitfolk_6clips_quick');
@@ -507,6 +551,12 @@ export default function AutoPipelinePage() {
     setSchedDays([0, 1, 2, 3, 4, 5, 6]);
     setSchedAutoPublish(true);
 
+    // Reset item selections
+    setSelectedProductIds([]);
+    setSelectedPillars([]);
+    setProductSearchQuery('');
+    setPillarSearchQuery('');
+
     const brandLower = brandName.toLowerCase();
     const matched = replizAccounts.filter(a => a.display_name && a.display_name.toLowerCase().includes(brandLower));
     setSchedReplizAccountIds(matched.length > 0 ? matched.map(a => a.id) : replizAccounts.slice(0, 4).map(a => a.id));
@@ -517,11 +567,16 @@ export default function AutoPipelinePage() {
     if (replizAccounts.length < 20) {
       fetchReplizAccounts(true);
     }
+    if (catalogProducts.length === 0) {
+      fetchProducts();
+    }
     setIsScheduleModalOpen(true);
   }
 
   function openEditScheduleModal(sched) {
     setEditingSchedule(sched);
+    const pType = sched.pipeline_type || 'recipe_campaign';
+    setSchedCampaignType(pType);
     setSchedName(sched.name || '');
     setSchedBrandId(sched.brand_id || '');
     setSchedPresetKey(sched.preset_key || '');
@@ -534,51 +589,214 @@ export default function AutoPipelinePage() {
     setSchedReplizAccountIds(Array.isArray(sched.repliz_account_ids) ? sched.repliz_account_ids : []);
     setSchedAutoPublish(sched.auto_publish_enabled !== false);
 
+    if (pType === 'product_campaign' && sched.target_item_id) {
+      setSelectedProductIds([sched.target_item_id]);
+    } else {
+      setSelectedProductIds([]);
+    }
+
+    if (pType === 'editorial_campaign' && (sched.target_item_id || sched.target_item_title)) {
+      setSelectedPillars([sched.target_item_id || sched.target_item_title]);
+    } else {
+      setSelectedPillars([]);
+    }
+
+    setProductSearchQuery('');
+    setPillarSearchQuery('');
+
     fetchPresetsForModalBrand(sched.brand_id);
     setReplizSearchQuery('');
     setSelectedPlatformFilter('all');
     if (replizAccounts.length < 20) {
       fetchReplizAccounts(true);
     }
+    if (catalogProducts.length === 0) {
+      fetchProducts();
+    }
     setIsScheduleModalOpen(true);
   }
 
   async function handleSaveSchedule(e) {
     e.preventDefault();
-    if (!schedName.trim()) return showToast('Nama jadwal wajib diisi', 'error');
     if (!schedBrandId) return showToast('Pilih Brand Profile', 'error');
+
+    // Validasi spesifik tipe kampanye
+    if (schedCampaignType === 'product_campaign') {
+      if (!editingSchedule && selectedProductIds.length === 0) {
+        return showToast('Pilih minimal 1 produk dari katalog untuk dijadwalkan.', 'error');
+      }
+    } else if (schedCampaignType === 'editorial_campaign') {
+      if (!editingSchedule && selectedPillars.length === 0) {
+        return showToast('Pilih minimal 1 pilar konten brand untuk dijadwalkan.', 'error');
+      }
+    } else {
+      if (!schedName.trim()) return showToast('Nama jadwal wajib diisi', 'error');
+      if (!schedTopic.trim()) return showToast('Tema / Arahan topik resep wajib diisi', 'error');
+    }
 
     setSavingSchedule(true);
     try {
-      const payload = {
-        name: schedName,
-        brand_id: schedBrandId,
-        preset_key: schedPresetKey,
-        topic: schedTopic,
-        category: schedCategory,
-        recipe_count: 1,
-        generation_time: schedGenTime,
-        publish_time: schedPubTime,
-        days_of_week: schedDays,
-        repliz_account_ids: schedReplizAccountIds,
-        auto_publish_enabled: schedAutoPublish,
-        timezone: 'Asia/Jakarta'
-      };
+      if (editingSchedule) {
+        // Edit mode (single update)
+        let targetId = editingSchedule.target_item_id;
+        let targetTitle = editingSchedule.target_item_title;
+        let schedTopicVal = schedTopic;
+        if (schedCampaignType === 'product_campaign' && selectedProductIds.length > 0) {
+          targetId = selectedProductIds[0];
+          const prodObj = catalogProducts.find(p => p.id === targetId);
+          targetTitle = prodObj?.product_name || targetTitle;
+          schedTopicVal = targetTitle;
+        } else if (schedCampaignType === 'editorial_campaign' && selectedPillars.length > 0) {
+          targetId = selectedPillars[0];
+          targetTitle = selectedPillars[0];
+          schedTopicVal = targetTitle;
+        }
 
-      const url = editingSchedule
-        ? `/api/v2/recipes/auto-pipeline-schedules/${editingSchedule.id}`
-        : '/api/v2/recipes/auto-pipeline-schedules';
-      const method = editingSchedule ? 'PUT' : 'POST';
+        const payload = {
+          name: schedName.trim(),
+          brand_id: schedBrandId,
+          preset_key: schedPresetKey,
+          pipeline_type: schedCampaignType,
+          target_item_id: targetId,
+          target_item_title: targetTitle,
+          topic: schedTopicVal,
+          category: schedCategory,
+          recipe_count: 1,
+          generation_time: schedGenTime,
+          publish_time: schedPubTime,
+          days_of_week: schedDays,
+          repliz_account_ids: schedReplizAccountIds,
+          auto_publish_enabled: schedAutoPublish,
+          timezone: 'Asia/Jakarta'
+        };
 
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error || 'Gagal menyimpan jadwal');
+        const res = await fetch(`/api/v2/recipes/auto-pipeline-schedules/${editingSchedule.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Gagal memperbarui jadwal');
+        showToast('Jadwal berhasil diperbarui! ✅');
+      } else {
+        // Create mode: Cek apakah Batch atau Single
+        if (schedCampaignType === 'product_campaign' && selectedProductIds.length > 1) {
+          // BATCH PRODUK: 1 Produk = 1 Baris Jadwal Mandiri
+          const items = selectedProductIds.map(prodId => {
+            const prod = catalogProducts.find(p => p.id === prodId);
+            const prodName = prod?.product_name || 'Produk Katalog';
+            return {
+              name: `${prodName} — ${schedGenTime} WIB`,
+              brand_id: schedBrandId,
+              preset_key: schedPresetKey,
+              pipeline_type: 'product_campaign',
+              target_item_id: prodId,
+              target_item_title: prodName,
+              topic: prodName,
+              category: prod?.category || 'produk',
+              recipe_count: 1,
+              generation_time: schedGenTime,
+              publish_time: schedPubTime,
+              days_of_week: schedDays,
+              repliz_account_ids: schedReplizAccountIds,
+              auto_publish_enabled: schedAutoPublish,
+              timezone: 'Asia/Jakarta',
+              pipeline_config: { product_id: prodId, product_name: prodName }
+            };
+          });
 
-      showToast(editingSchedule ? 'Jadwal berhasil diperbarui! ✅' : 'Jadwal rutin baru berhasil dibuat! ⏰');
+          const res = await fetch('/api/v2/recipes/auto-pipeline-schedules', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items })
+          });
+          const data = await res.json();
+          if (!data.success) throw new Error(data.error || 'Gagal membuat jadwal batch produk');
+          showToast(`Berhasil membuat ${items.length} baris jadwal video produk independen! 🛍️`);
+        } else if (schedCampaignType === 'editorial_campaign' && selectedPillars.length > 1) {
+          // BATCH EDITORIAL: 1 Pilar = 1 Baris Jadwal Mandiri
+          const items = selectedPillars.map(pillar => ({
+            name: `${pillar} — ${schedGenTime} WIB`,
+            brand_id: schedBrandId,
+            preset_key: schedPresetKey,
+            pipeline_type: 'editorial_campaign',
+            target_item_id: pillar,
+            target_item_title: pillar,
+            topic: pillar,
+            category: 'editorial',
+            recipe_count: 1,
+            generation_time: schedGenTime,
+            publish_time: schedPubTime,
+            days_of_week: schedDays,
+            repliz_account_ids: schedReplizAccountIds,
+            auto_publish_enabled: schedAutoPublish,
+            timezone: 'Asia/Jakarta',
+            pipeline_config: { content_pillar: pillar }
+          }));
+
+          const res = await fetch('/api/v2/recipes/auto-pipeline-schedules', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items })
+          });
+          const data = await res.json();
+          if (!data.success) throw new Error(data.error || 'Gagal membuat jadwal batch editorial');
+          showToast(`Berhasil membuat ${items.length} baris jadwal video editorial independen! 📖`);
+        } else {
+          // Single Creation (1 Produk, 1 Pilar, atau Resep)
+          let finalName = schedName.trim();
+          let targetId = null;
+          let targetTitle = null;
+          let finalTopic = schedTopic;
+          let finalCategory = schedCategory;
+
+          if (schedCampaignType === 'product_campaign') {
+            const prodId = selectedProductIds[0];
+            const prod = catalogProducts.find(p => p.id === prodId);
+            targetId = prodId;
+            targetTitle = prod?.product_name || 'Produk Katalog';
+            finalTopic = targetTitle;
+            finalCategory = prod?.category || 'produk';
+            if (!finalName) finalName = `${targetTitle} — ${schedGenTime} WIB`;
+          } else if (schedCampaignType === 'editorial_campaign') {
+            const pillar = selectedPillars[0];
+            targetId = pillar;
+            targetTitle = pillar;
+            finalTopic = pillar;
+            finalCategory = 'editorial';
+            if (!finalName) finalName = `${pillar} — ${schedGenTime} WIB`;
+          }
+
+          const payload = {
+            name: finalName,
+            brand_id: schedBrandId,
+            preset_key: schedPresetKey,
+            pipeline_type: schedCampaignType,
+            target_item_id: targetId,
+            target_item_title: targetTitle,
+            topic: finalTopic,
+            category: finalCategory,
+            recipe_count: 1,
+            generation_time: schedGenTime,
+            publish_time: schedPubTime,
+            days_of_week: schedDays,
+            repliz_account_ids: schedReplizAccountIds,
+            auto_publish_enabled: schedAutoPublish,
+            timezone: 'Asia/Jakarta',
+            pipeline_config: schedCampaignType === 'product_campaign' ? { product_id: targetId } : (schedCampaignType === 'editorial_campaign' ? { content_pillar: targetTitle } : {})
+          };
+
+          const res = await fetch('/api/v2/recipes/auto-pipeline-schedules', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (!data.success) throw new Error(data.error || 'Gagal membuat jadwal');
+          showToast('Jadwal rutin baru berhasil dibuat! ⏰');
+        }
+      }
+
       setIsScheduleModalOpen(false);
       fetchSchedules();
     } catch (err) {
@@ -675,10 +893,47 @@ export default function AutoPipelinePage() {
   }
 
   const activeSchedulesCount = schedules.filter(s => s.status === 'active').length;
+  const countAllCampaigns = schedules.length;
+  const countProductCampaigns = schedules.filter(s => s.pipeline_type === 'product_campaign').length;
+  const countEditorialCampaigns = schedules.filter(s => s.pipeline_type === 'editorial_campaign').length;
+  const countRecipeCampaigns = schedules.filter(s => (s.pipeline_type || 'recipe_campaign') === 'recipe_campaign').length;
+
   const filteredSchedules = schedules.filter(s => {
-    if (scheduleFilter === 'all') return true;
-    return s.status === scheduleFilter;
+    const pType = s.pipeline_type || 'recipe_campaign';
+    if (campaignTypeFilter !== 'all' && pType !== campaignTypeFilter) return false;
+    if (scheduleFilter !== 'all' && s.status !== scheduleFilter) return false;
+    return true;
   });
+
+  function getCampaignTypeBadge(type) {
+    switch (type) {
+      case 'product_campaign':
+        return {
+          icon: '🛍️',
+          label: 'Video Produk',
+          color: 'var(--status-success)',
+          bg: 'var(--status-success-soft)',
+          border: 'var(--status-success)'
+        };
+      case 'editorial_campaign':
+        return {
+          icon: '📖',
+          label: 'Video Editorial',
+          color: 'var(--status-info)',
+          bg: 'var(--status-info-soft)',
+          border: 'var(--status-info)'
+        };
+      case 'recipe_campaign':
+      default:
+        return {
+          icon: '🍳',
+          label: 'Video Resep',
+          color: 'var(--status-warning)',
+          bg: 'var(--status-warning-soft)',
+          border: 'var(--status-warning)'
+        };
+    }
+  }
 
   // Filtered Repliz Accounts computation (Search & Platform tabs)
   const filteredReplizAccounts = replizAccounts.filter(acc => {
@@ -711,6 +966,73 @@ export default function AutoPipelinePage() {
 
   function handleSyncReplizAccounts() {
     fetchReplizAccounts(true);
+  }
+
+  // Filtered Products computation (Product Campaign)
+  const filteredCatalogProducts = catalogProducts.filter(p => {
+    if (!productSearchQuery.trim()) return true;
+    const q = productSearchQuery.toLowerCase().trim();
+    return (p.product_name && p.product_name.toLowerCase().includes(q)) ||
+      (p.category && p.category.toLowerCase().includes(q));
+  });
+
+  function toggleProductSelection(prodId) {
+    setSelectedProductIds(prev => {
+      if (prev.includes(prodId)) return prev.filter(id => id !== prodId);
+      return [...prev, prodId];
+    });
+  }
+
+  function handleSelectAllProducts() {
+    const visibleIds = filteredCatalogProducts.map(p => p.id);
+    setSelectedProductIds(prev => Array.from(new Set([...prev, ...visibleIds])));
+  }
+
+  function handleClearProducts() {
+    setSelectedProductIds([]);
+  }
+
+  // Filtered Pillars computation (Editorial Campaign)
+  const currentModalBrandObj = brands.find(b => b.id === schedBrandId);
+  let modalAvailablePillars = [];
+  if (currentModalBrandObj?.editorial_content_pillars_json) {
+    try {
+      const parsed = typeof currentModalBrandObj.editorial_content_pillars_json === 'string'
+        ? JSON.parse(currentModalBrandObj.editorial_content_pillars_json)
+        : currentModalBrandObj.editorial_content_pillars_json;
+      if (Array.isArray(parsed) && parsed.length > 0) modalAvailablePillars = parsed;
+    } catch (e) {
+      console.warn('Error parsing pillars:', e);
+    }
+  }
+  if (modalAvailablePillars.length === 0) {
+    modalAvailablePillars = [
+      'Eat Better, Not Perfect',
+      'Tips Nutrisi & Gaya Hidup Sehat',
+      'Mitos vs Fakta Keseharian',
+      'Small Habits, Real Life',
+      'Review & Eksperimen Dapur'
+    ];
+  }
+
+  const filteredPillars = modalAvailablePillars.filter(p => {
+    if (!pillarSearchQuery.trim()) return true;
+    return p.toLowerCase().includes(pillarSearchQuery.toLowerCase().trim());
+  });
+
+  function togglePillarSelection(pillar) {
+    setSelectedPillars(prev => {
+      if (prev.includes(pillar)) return prev.filter(p => p !== pillar);
+      return [...prev, pillar];
+    });
+  }
+
+  function handleSelectAllPillars() {
+    setSelectedPillars(prev => Array.from(new Set([...prev, ...filteredPillars])));
+  }
+
+  function handleClearPillars() {
+    setSelectedPillars([]);
   }
 
   return (
@@ -2029,7 +2351,59 @@ export default function AutoPipelinePage() {
               flexDirection: 'column',
               gap: '1.25rem'
             }}>
-              {/* Filter Tabs */}
+              {/* Campaign Type Filter Tabs (Multi-Campaign Header) */}
+              <div style={{
+                display: 'flex',
+                gap: '0.45rem',
+                borderBottom: '1px solid var(--border-subtle)',
+                paddingBottom: '0.65rem',
+                overflowX: 'auto'
+              }}>
+                {[
+                  { key: 'all', label: '🌐 Semua Kampanye', count: countAllCampaigns },
+                  { key: 'product_campaign', label: '🛍️ Video Produk', count: countProductCampaigns },
+                  { key: 'editorial_campaign', label: '📖 Video Editorial', count: countEditorialCampaigns },
+                  { key: 'recipe_campaign', label: '🍳 Video Resep', count: countRecipeCampaigns }
+                ].map(tab => {
+                  const isSelected = campaignTypeFilter === tab.key;
+                  return (
+                    <button
+                      key={tab.key}
+                      type="button"
+                      onClick={() => setCampaignTypeFilter(tab.key)}
+                      style={{
+                        background: isSelected ? 'var(--surface)' : 'transparent',
+                        color: isSelected ? 'var(--action-primary)' : 'var(--text-secondary)',
+                        border: isSelected ? '1px solid var(--border-subtle)' : '1px solid transparent',
+                        boxShadow: isSelected ? 'var(--shadow-card)' : 'none',
+                        borderRadius: 'var(--radius-sm)',
+                        padding: '0.45rem 0.95rem',
+                        fontSize: '0.82rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.45rem',
+                        whiteSpace: 'nowrap',
+                        transition: 'var(--transition)'
+                      }}
+                    >
+                      <span>{tab.label}</span>
+                      <span style={{
+                        fontSize: '0.7rem',
+                        padding: '0.1rem 0.45rem',
+                        borderRadius: 9999,
+                        background: isSelected ? 'var(--status-info-soft)' : 'var(--surface-interactive)',
+                        color: isSelected ? 'var(--action-primary)' : 'var(--text-muted)'
+                      }}>
+                        {tab.count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Status Filter Tabs */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -2084,7 +2458,7 @@ export default function AutoPipelinePage() {
                 }}>
                   <span style={{ fontSize: '2.2rem' }}>📭</span>
                   <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                    Tidak ada jadwal yang cocok dengan filter ({scheduleFilter})
+                    Tidak ada jadwal yang cocok dengan filter ({campaignTypeFilter !== 'all' ? campaignTypeFilter : ''} {scheduleFilter})
                   </div>
                   <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', maxWidth: '460px' }}>
                     Buat jadwal rutin baru untuk memproduksi video dan mempublikasikannya secara berkala ke Repliz.
@@ -2117,6 +2491,7 @@ export default function AutoPipelinePage() {
                       ? '🟢 AKTIF BERJALAN'
                       : sched.status === 'paused' ? '⏸️ DIJEDA' : '📦 DIARSIPKAN';
                     const isSchedRunning = Boolean(sched.is_running || runningScheduleIds[sched.id]);
+                    const campBadge = getCampaignTypeBadge(sched.pipeline_type);
 
                     return (
                       <div
@@ -2151,8 +2526,19 @@ export default function AutoPipelinePage() {
                               gap: '0.55rem',
                               flexWrap: 'wrap'
                             }}>
-                              <span>🎬</span>
+                              <span>{campBadge.icon}</span>
                               <span>{sched.name}</span>
+                              <span style={{
+                                fontSize: '0.68rem',
+                                fontWeight: 700,
+                                padding: '0.2rem 0.55rem',
+                                borderRadius: 9999,
+                                background: campBadge.bg,
+                                color: campBadge.color,
+                                border: `1px solid ${campBadge.border}`
+                              }}>
+                                {campBadge.label}
+                              </span>
                               <span style={{
                                 fontSize: '0.68rem',
                                 fontWeight: 700,
@@ -2178,7 +2564,13 @@ export default function AutoPipelinePage() {
                             </div>
 
                             <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                              Preset Resep: <strong style={{ color: 'var(--text-secondary)' }}>{sched.preset_key}</strong> • Kategori: <strong style={{ color: 'var(--text-secondary)' }}>{sched.category}</strong>
+                              {sched.pipeline_type === 'product_campaign' ? (
+                                <>Target Produk: <strong style={{ color: 'var(--text-secondary)' }}>{sched.target_item_title || sched.topic}</strong> &bull; Preset: <strong style={{ color: 'var(--text-secondary)' }}>{sched.preset_key}</strong></>
+                              ) : sched.pipeline_type === 'editorial_campaign' ? (
+                                <>Pilar Brand: <strong style={{ color: 'var(--text-secondary)' }}>{sched.target_item_title || sched.topic}</strong> &bull; Preset: <strong style={{ color: 'var(--text-secondary)' }}>{sched.preset_key}</strong></>
+                              ) : (
+                                <>Preset Resep: <strong style={{ color: 'var(--text-secondary)' }}>{sched.preset_key}</strong> &bull; Kategori: <strong style={{ color: 'var(--text-secondary)' }}>{sched.category}</strong></>
+                              )}
                             </div>
                           </div>
 
@@ -2216,10 +2608,10 @@ export default function AutoPipelinePage() {
                         }}>
                           <div>
                             <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
-                              Topik / Arahan AI:
+                              {sched.pipeline_type === 'product_campaign' ? 'Target Produk Katalog:' : (sched.pipeline_type === 'editorial_campaign' ? 'Pilar Konten Editorial:' : 'Topik / Arahan AI:')}
                             </div>
                             <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: '0.2rem' }}>
-                              "{sched.topic}"
+                              "{sched.target_item_title || sched.topic}"
                             </div>
                           </div>
 
@@ -2538,31 +2930,77 @@ export default function AutoPipelinePage() {
               </div>
 
               <form onSubmit={handleSaveSchedule} style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
-                {/* 1. Nama Jadwal */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                {/* STEP 1: Pilihan Tipe Kampanye (Multi-Campaign Selector) */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
                   <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                    Nama Pengenal Jadwal
+                    Pilih Tipe Kampanye
                   </label>
-                  <input
-                    type="text"
-                    value={schedName}
-                    onChange={(e) => setSchedName(e.target.value)}
-                    placeholder="Contoh: HabitFolk Daily Morning Snack 05:00"
-                    required
-                    style={{
-                      height: '42px',
-                      background: 'var(--input-bg)',
-                      border: '1px solid var(--border-subtle)',
-                      borderRadius: 'var(--radius-sm)',
-                      padding: '0 0.85rem',
-                      fontSize: '0.88rem',
-                      color: 'var(--text-primary)',
-                      outline: 'none'
-                    }}
-                  />
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.65rem' }}>
+                    {[
+                      { key: 'product_campaign', icon: '🛍️', label: 'Video Produk', desc: 'Promosi produk katalog & unboxing', color: 'var(--status-success)' },
+                      { key: 'editorial_campaign', icon: '📖', label: 'Video Editorial', desc: 'Pilar konten brand & storytelling', color: 'var(--status-info)' },
+                      { key: 'recipe_campaign', icon: '🍳', label: 'Video Resep', desc: 'Cooking guide & food reel 4-klip', color: 'var(--status-warning)' }
+                    ].map(t => {
+                      const isSelected = schedCampaignType === t.key;
+                      return (
+                        <div
+                          key={t.key}
+                          onClick={() => {
+                            if (!editingSchedule) {
+                              setSchedCampaignType(t.key);
+                              const bObj = brands.find(b => b.id === schedBrandId);
+                              const bName = bObj?.brand_name || 'Brand';
+                              if (t.key === 'product_campaign') {
+                                setSchedName(`${bName} — Product Showcase`);
+                              } else if (t.key === 'editorial_campaign') {
+                                setSchedName(`${bName} — Editorial Pillar`);
+                              } else {
+                                setSchedName(`${bName} — Daily Morning Reels`);
+                              }
+                            }
+                          }}
+                          style={{
+                            background: isSelected ? 'var(--surface-interactive)' : 'var(--surface)',
+                            border: `1.5px solid ${isSelected ? t.color : 'var(--border-subtle)'}`,
+                            borderRadius: 'var(--radius-sm)',
+                            padding: '0.75rem 0.85rem',
+                            cursor: editingSchedule ? 'default' : 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.25rem',
+                            transition: 'var(--transition)',
+                            position: 'relative'
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                              <span style={{ fontSize: '1.25rem' }}>{t.icon}</span>
+                              <strong style={{ fontSize: '0.86rem', color: isSelected ? t.color : 'var(--text-primary)' }}>
+                                {t.label}
+                              </strong>
+                            </div>
+                            <span style={{
+                              width: '16px',
+                              height: '16px',
+                              borderRadius: '50%',
+                              background: isSelected ? t.color : 'transparent',
+                              border: `1.5px solid ${isSelected ? t.color : 'var(--border-strong)'}`,
+                              color: isSelected ? '#ffffff' : 'transparent',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '0.62rem',
+                              fontWeight: 900
+                            }}>✓</span>
+                          </div>
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{t.desc}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
 
-                {/* 2. Brand & Preset */}
+                {/* STEP 2: Brand Profile & Preset Video (DI ATAS KONFIGURASI KHUSUS) */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                     <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
@@ -2592,8 +3030,8 @@ export default function AutoPipelinePage() {
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                     <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
-                      <span>2. Preset Konfigurasi Resep</span>
-                      <span style={{ fontSize: '0.68rem', color: 'var(--status-success)' }}>Preset Manager</span>
+                      <span>2. Preset Konfigurasi Video</span>
+                      <span style={{ fontSize: '0.68rem', color: 'var(--status-success)' }}>Preset-Driven</span>
                     </label>
                     <select
                       value={schedPresetKey}
@@ -2657,13 +3095,483 @@ export default function AutoPipelinePage() {
                         </span>
                       </div>
                       <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>
-                        ⚡ AI otomatis menyusun Voice-Over &amp; Caption dalam bahasa ini
+                        ⚡ AI otomatis menyusun Voice-Over &amp; Hook dalam bahasa &amp; tone preset ini
                       </span>
                     </div>
                   );
                 })()}
 
-                {/* 3. Dua Waktu Terpisah (Jam Pembuatan & Jam Publish - Format 24 Jam WIB) */}
+                {/* STEP 3: Konfigurasi Khusus Kampanye (Adaptive) */}
+                {/* 3A. PRODUK: Multi-Select Produk Katalog */}
+                {schedCampaignType === 'product_campaign' && (
+                  <div style={{
+                    background: 'var(--surface-raised)',
+                    border: '1.5px solid var(--status-success)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '1rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.75rem'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                        <span>🛍️</span>
+                        <span>Pilih Produk dari Katalog:</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          padding: '0.2rem 0.65rem',
+                          borderRadius: 9999,
+                          background: 'var(--status-success-soft)',
+                          color: 'var(--status-success)',
+                          border: '1px solid var(--status-success)'
+                        }}>
+                          {selectedProductIds.length} Produk Dipilih
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Search box & Quick Selection */}
+                    <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                      <div style={{ flex: 1, minWidth: '220px', position: 'relative' }}>
+                        <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '0.85rem' }}>🔍</span>
+                        <input
+                          type="text"
+                          value={productSearchQuery}
+                          onChange={(e) => setProductSearchQuery(e.target.value)}
+                          placeholder="Cari produk katalog (nama atau kategori)..."
+                          style={{
+                            width: '100%',
+                            height: '36px',
+                            background: 'var(--surface)',
+                            border: '1px solid var(--border-subtle)',
+                            borderRadius: 'var(--radius-sm)',
+                            padding: '0 10px 0 32px',
+                            color: 'var(--text-primary)',
+                            fontSize: '0.82rem',
+                            outline: 'none'
+                          }}
+                        />
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.45rem', fontSize: '0.75rem' }}>
+                        <button
+                          type="button"
+                          onClick={handleSelectAllProducts}
+                          style={{ background: 'none', border: 'none', color: 'var(--action-primary)', cursor: 'pointer', textDecoration: 'underline', fontWeight: 600 }}
+                        >
+                          Pilih Semua
+                        </button>
+                        <span style={{ color: 'var(--border-strong)' }}>|</span>
+                        <button
+                          type="button"
+                          onClick={handleClearProducts}
+                          style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', textDecoration: 'underline', fontWeight: 600 }}
+                        >
+                          Hapus Pilihan
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Scrollable Products List */}
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))',
+                      gap: '0.6rem',
+                      maxHeight: '230px',
+                      overflowY: 'auto',
+                      paddingRight: '4px'
+                    }}>
+                      {loadingProducts ? (
+                        <div style={{ gridColumn: '1 / -1', padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
+                          Memuat katalog produk...
+                        </div>
+                      ) : filteredCatalogProducts.length === 0 ? (
+                        <div style={{ gridColumn: '1 / -1', padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.82rem', border: '1px dashed var(--border-subtle)', borderRadius: 'var(--radius-sm)' }}>
+                          {productSearchQuery ? `Tidak ada produk yang cocok dengan "${productSearchQuery}"` : 'Belum ada produk di katalog.'}
+                        </div>
+                      ) : (
+                        filteredCatalogProducts.map(prod => {
+                          const isChecked = selectedProductIds.includes(prod.id);
+                          return (
+                            <div
+                              key={prod.id}
+                              onClick={() => toggleProductSelection(prod.id)}
+                              style={{
+                                background: isChecked ? 'var(--surface-interactive)' : 'var(--surface)',
+                                border: isChecked ? '1.5px solid var(--status-success)' : '1px solid var(--border-subtle)',
+                                borderRadius: 'var(--radius-sm)',
+                                padding: '0.65rem 0.75rem',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.65rem',
+                                transition: 'var(--transition)'
+                              }}
+                            >
+                              {/* Product Thumbnail / Icon */}
+                              <div style={{
+                                width: '38px',
+                                height: '38px',
+                                borderRadius: 'var(--radius-xs)',
+                                background: 'var(--surface-raised)',
+                                border: '1px solid var(--border-subtle)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexShrink: 0,
+                                overflow: 'hidden'
+                              }}>
+                                {prod.photo_url ? (
+                                  <img
+                                    src={prod.photo_url}
+                                    alt={prod.product_name}
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    onError={(e) => { e.target.style.display = 'none'; }}
+                                  />
+                                ) : (
+                                  <span style={{ fontSize: '1.1rem' }}>🛍️</span>
+                                )}
+                              </div>
+
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={prod.product_name}>
+                                  {prod.product_name}
+                                </div>
+                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+                                  {prod.category || 'Katalog'}
+                                </div>
+                              </div>
+
+                              <div style={{
+                                width: '18px',
+                                height: '18px',
+                                borderRadius: '50%',
+                                border: isChecked ? '1.5px solid var(--status-success)' : '1.5px solid var(--border-strong)',
+                                background: isChecked ? 'var(--status-success)' : 'transparent',
+                                color: isChecked ? '#ffffff' : 'transparent',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '0.65rem',
+                                fontWeight: 900,
+                                flexShrink: 0
+                              }}>
+                                ✓
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+
+                    <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', background: 'var(--surface)', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border-subtle)' }}>
+                      💡 <strong>Aturan 1 Produk = 1 Baris Jadwal Mandiri:</strong> Jika Anda memilih {selectedProductIds.length} produk, sistem akan membuat <strong>{selectedProductIds.length} baris jadwal independen</strong> lengkap dengan tombol Run Now dan Pause masing-masing.
+                    </div>
+                  </div>
+                )}
+
+                {/* 3B. EDITORIAL: Multi-Select Pilar Konten Brand */}
+                {schedCampaignType === 'editorial_campaign' && (
+                  <div style={{
+                    background: 'var(--surface-raised)',
+                    border: '1.5px solid var(--status-info)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '1rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.75rem'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                        <span>📖</span>
+                        <span>Pilih Pilar Konten Brand:</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          padding: '0.2rem 0.65rem',
+                          borderRadius: 9999,
+                          background: 'var(--status-info-soft)',
+                          color: 'var(--status-info)',
+                          border: '1px solid var(--status-info)'
+                        }}>
+                          {selectedPillars.length} Pilar Dipilih
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Search box & Quick Selection */}
+                    <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                      <div style={{ flex: 1, minWidth: '220px', position: 'relative' }}>
+                        <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '0.85rem' }}>🔍</span>
+                        <input
+                          type="text"
+                          value={pillarSearchQuery}
+                          onChange={(e) => setPillarSearchQuery(e.target.value)}
+                          placeholder="Cari nama pilar brand..."
+                          style={{
+                            width: '100%',
+                            height: '36px',
+                            background: 'var(--surface)',
+                            border: '1px solid var(--border-subtle)',
+                            borderRadius: 'var(--radius-sm)',
+                            padding: '0 10px 0 32px',
+                            color: 'var(--text-primary)',
+                            fontSize: '0.82rem',
+                            outline: 'none'
+                          }}
+                        />
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.45rem', fontSize: '0.75rem' }}>
+                        <button
+                          type="button"
+                          onClick={handleSelectAllPillars}
+                          style={{ background: 'none', border: 'none', color: 'var(--action-primary)', cursor: 'pointer', textDecoration: 'underline', fontWeight: 600 }}
+                        >
+                          Pilih Semua
+                        </button>
+                        <span style={{ color: 'var(--border-strong)' }}>|</span>
+                        <button
+                          type="button"
+                          onClick={handleClearPillars}
+                          style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', textDecoration: 'underline', fontWeight: 600 }}
+                        >
+                          Hapus Pilihan
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Scrollable Pillars List */}
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))',
+                      gap: '0.6rem',
+                      maxHeight: '220px',
+                      overflowY: 'auto',
+                      paddingRight: '4px'
+                    }}>
+                      {filteredPillars.length === 0 ? (
+                        <div style={{ gridColumn: '1 / -1', padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.82rem', border: '1px dashed var(--border-subtle)', borderRadius: 'var(--radius-sm)' }}>
+                          Tidak ada pilar yang cocok dengan "{pillarSearchQuery}".
+                        </div>
+                      ) : (
+                        filteredPillars.map((pillar, idx) => {
+                          const isChecked = selectedPillars.includes(pillar);
+                          return (
+                            <div
+                              key={idx}
+                              onClick={() => togglePillarSelection(pillar)}
+                              style={{
+                                background: isChecked ? 'var(--surface-interactive)' : 'var(--surface)',
+                                border: isChecked ? '1.5px solid var(--status-info)' : '1px solid var(--border-subtle)',
+                                borderRadius: 'var(--radius-sm)',
+                                padding: '0.65rem 0.75rem',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                gap: '0.65rem',
+                                transition: 'var(--transition)'
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flex: 1, minWidth: 0 }}>
+                                <span style={{ fontSize: '1rem' }}>📌</span>
+                                <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={pillar}>
+                                  {pillar}
+                                </span>
+                              </div>
+
+                              <div style={{
+                                width: '18px',
+                                height: '18px',
+                                borderRadius: '50%',
+                                border: isChecked ? '1.5px solid var(--status-info)' : '1.5px solid var(--border-strong)',
+                                background: isChecked ? 'var(--status-info)' : 'transparent',
+                                color: isChecked ? '#ffffff' : 'transparent',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '0.65rem',
+                                fontWeight: 900,
+                                flexShrink: 0
+                              }}>
+                                ✓
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+
+                    <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', background: 'var(--surface)', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border-subtle)' }}>
+                      💡 <strong>Aturan 1 Pilar = 1 Baris Jadwal Mandiri:</strong> Jika Anda memilih {selectedPillars.length} pilar, sistem akan membuat <strong>{selectedPillars.length} baris jadwal independen</strong> yang memproduksi konten storytelling sesuai topik pilar tersebut.
+                    </div>
+                  </div>
+                )}
+
+                {/* 3C. RESEP: Nama Jadwal, Topik Resep & Kategori Kuliner */}
+                {schedCampaignType === 'recipe_campaign' && (
+                  <>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                      <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                        Nama Pengenal Jadwal
+                      </label>
+                      <input
+                        type="text"
+                        value={schedName}
+                        onChange={(e) => setSchedName(e.target.value)}
+                        placeholder="Contoh: HabitFolk Daily Morning Snack 05:00"
+                        required
+                        style={{
+                          height: '42px',
+                          background: 'var(--input-bg)',
+                          border: '1px solid var(--border-subtle)',
+                          borderRadius: 'var(--radius-sm)',
+                          padding: '0 0.85rem',
+                          fontSize: '0.88rem',
+                          color: 'var(--text-primary)',
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                      <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
+                        <span>Tema / Arahan Topik Resep Harian</span>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>AI berkreasi variasi resep baru tiap hari</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={schedTopic}
+                        onChange={(e) => {
+                          const newTopic = e.target.value;
+                          setSchedTopic(newTopic);
+                          if (!isSchedCategoryManual) {
+                            setSchedCategory(detectCategoryFromTopic(newTopic));
+                          }
+                        }}
+                        placeholder="Contoh: Air fryer crispy chicken tenders and snack finger foods"
+                        required
+                        style={{
+                          height: '42px',
+                          background: 'var(--input-bg)',
+                          border: '1px solid var(--border-subtle)',
+                          borderRadius: 'var(--radius-sm)',
+                          padding: '0 0.85rem',
+                          fontSize: '0.88rem',
+                          color: 'var(--text-primary)',
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+
+                    <div style={{
+                      background: 'var(--surface-raised)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: '0.85rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.65rem'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                          <span>🍽️</span>
+                          <span>Kategori Resep Kuliner</span>
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 400 }}>(Mengarahkan kit wadah &amp; instruksi AI)</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                          <span style={{
+                            fontSize: '0.68rem',
+                            fontWeight: 700,
+                            padding: '0.15rem 0.5rem',
+                            borderRadius: '999px',
+                            background: isSchedCategoryManual ? 'var(--status-warning-soft)' : 'var(--status-info-soft)',
+                            color: isSchedCategoryManual ? 'var(--status-warning)' : 'var(--status-info)',
+                            border: '1px solid var(--border-subtle)'
+                          }}>
+                            {isSchedCategoryManual ? '✏️ Pilihan Manual' : '✨ Auto-Terdeteksi dari Topik'}
+                          </span>
+                          {isSchedCategoryManual && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsSchedCategoryManual(false);
+                                setSchedCategory(detectCategoryFromTopic(schedTopic));
+                              }}
+                              style={{
+                                background: 'none',
+                                border: '1px dashed var(--border-subtle)',
+                                color: 'var(--text-muted)',
+                                borderRadius: '4px',
+                                padding: '0.15rem 0.45rem',
+                                fontSize: '0.68rem',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              Reset ke Otomatis
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.55rem' }}>
+                        {[
+                          { key: 'makanan_utama', icon: '🍗', label: 'Makanan Utama', desc: 'Ayam, daging, pasta, rice bowl' },
+                          { key: 'camilan', icon: '🍟', label: 'Camilan / Side Dish', desc: 'Finger food, fries, crispy bites' },
+                          { key: 'dessert', icon: '🍰', label: 'Baking / Dessert', desc: 'Cake, cookies, waffle, pudding' },
+                          { key: 'minuman', icon: '🥤', label: 'Minuman', desc: 'Coffee, latte, smoothie, tea' }
+                        ].map(cat => {
+                          const isSelected = schedCategory === cat.key;
+                          return (
+                            <div
+                              key={cat.key}
+                              onClick={() => {
+                                setSchedCategory(cat.key);
+                                setIsSchedCategoryManual(true);
+                              }}
+                              style={{
+                                background: isSelected ? 'rgba(6, 182, 212, 0.08)' : 'var(--surface)',
+                                border: `1.5px solid ${isSelected ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
+                                borderRadius: 'var(--radius-sm)',
+                                padding: '0.65rem 0.55rem',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '0.2rem',
+                                transition: 'all 0.15s ease'
+                              }}
+                            >
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: '1.2rem' }}>{cat.icon}</span>
+                                <span style={{
+                                  width: '16px',
+                                  height: '16px',
+                                  borderRadius: '50%',
+                                  background: isSelected ? 'var(--action-primary)' : 'transparent',
+                                  border: `1px solid ${isSelected ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
+                                  color: isSelected ? '#000' : 'transparent',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontSize: '0.6rem',
+                                  fontWeight: 900
+                                }}>✓</span>
+                              </div>
+                              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '2px' }}>{cat.label}</span>
+                              <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', lineHeight: 1.2 }}>{cat.desc}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* STEP 4: Dua Waktu Terpisah (Jam Pembuatan & Jam Publish - Format 24 Jam WIB) */}
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
@@ -2723,139 +3631,6 @@ export default function AutoPipelinePage() {
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
                       Contoh: <strong>09:00</strong> (Pagi) atau <strong>21:30</strong> (Malam WIB). Video diteruskan ke antrean Repliz untuk jam ini
                     </span>
-                  </div>
-                </div>
-
-                {/* 4. Topik Resep */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                  <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Tema / Arahan Topik Resep Harian</span>
-                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>AI berkreasi variasi resep baru tiap hari</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={schedTopic}
-                    onChange={(e) => {
-                      const newTopic = e.target.value;
-                      setSchedTopic(newTopic);
-                      if (!isSchedCategoryManual) {
-                        setSchedCategory(detectCategoryFromTopic(newTopic));
-                      }
-                    }}
-                    placeholder="Contoh: Air fryer crispy chicken tenders and snack finger foods"
-                    required
-                    style={{
-                      height: '42px',
-                      background: 'var(--input-bg)',
-                      border: '1px solid var(--border-subtle)',
-                      borderRadius: 'var(--radius-sm)',
-                      padding: '0 0.85rem',
-                      fontSize: '0.88rem',
-                      color: 'var(--text-primary)',
-                      outline: 'none'
-                    }}
-                  />
-                </div>
-
-                {/* 5. Kategori Resep Kuliner */}
-                <div style={{
-                  background: 'var(--surface-raised)',
-                  border: '1px solid var(--border-subtle)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '0.85rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.65rem'
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <span>🍽️</span>
-                      <span>Kategori Resep Kuliner</span>
-                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 400 }}>(Mengarahkan kit wadah &amp; instruksi AI)</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                      <span style={{
-                        fontSize: '0.68rem',
-                        fontWeight: 700,
-                        padding: '0.15rem 0.5rem',
-                        borderRadius: '999px',
-                        background: isSchedCategoryManual ? 'var(--status-warning-soft)' : 'var(--status-info-soft)',
-                        color: isSchedCategoryManual ? 'var(--status-warning)' : 'var(--status-info)',
-                        border: '1px solid var(--border-subtle)'
-                      }}>
-                        {isSchedCategoryManual ? '✏️ Pilihan Manual' : '✨ Auto-Terdeteksi dari Topik'}
-                      </span>
-                      {isSchedCategoryManual && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsSchedCategoryManual(false);
-                            setSchedCategory(detectCategoryFromTopic(schedTopic));
-                          }}
-                          style={{
-                            background: 'none',
-                            border: '1px dashed var(--border-subtle)',
-                            color: 'var(--text-muted)',
-                            borderRadius: '4px',
-                            padding: '0.15rem 0.45rem',
-                            fontSize: '0.68rem',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          Reset ke Otomatis
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.55rem' }}>
-                    {[
-                      { key: 'makanan_utama', icon: '🍗', label: 'Makanan Utama', desc: 'Ayam, daging, pasta, rice bowl' },
-                      { key: 'camilan', icon: '🍟', label: 'Camilan / Side Dish', desc: 'Finger food, fries, crispy bites' },
-                      { key: 'dessert', icon: '🍰', label: 'Baking / Dessert', desc: 'Cake, cookies, waffle, pudding' },
-                      { key: 'minuman', icon: '🥤', label: 'Minuman', desc: 'Coffee, latte, smoothie, tea' }
-                    ].map(cat => {
-                      const isSelected = schedCategory === cat.key;
-                      return (
-                        <div
-                          key={cat.key}
-                          onClick={() => {
-                            setSchedCategory(cat.key);
-                            setIsSchedCategoryManual(true);
-                          }}
-                          style={{
-                            background: isSelected ? 'rgba(6, 182, 212, 0.08)' : 'var(--surface)',
-                            border: `1.5px solid ${isSelected ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
-                            borderRadius: 'var(--radius-sm)',
-                            padding: '0.65rem 0.55rem',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '0.2rem',
-                            transition: 'all 0.15s ease'
-                          }}
-                        >
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '1.2rem' }}>{cat.icon}</span>
-                            <span style={{
-                              width: '16px',
-                              height: '16px',
-                              borderRadius: '50%',
-                              background: isSelected ? 'var(--action-primary)' : 'transparent',
-                              border: `1px solid ${isSelected ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
-                              color: isSelected ? '#000' : 'transparent',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontSize: '0.6rem',
-                              fontWeight: 900
-                            }}>✓</span>
-                          </div>
-                          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '2px' }}>{cat.label}</span>
-                          <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', lineHeight: 1.2 }}>{cat.desc}</span>
-                        </div>
-                      );
-                    })}
                   </div>
                 </div>
 

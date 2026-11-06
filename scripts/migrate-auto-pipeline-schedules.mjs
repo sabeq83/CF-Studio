@@ -4,9 +4,12 @@ export const CREATE_TABLE_SQL = `
 CREATE TABLE IF NOT EXISTS auto_pipeline_schedules (
   id TEXT PRIMARY KEY,
   tenant_id TEXT NOT NULL DEFAULT 'default_tenant',
+  pipeline_type TEXT NOT NULL DEFAULT 'recipe_campaign',
   name TEXT NOT NULL,
   brand_id TEXT NOT NULL,
   preset_key TEXT NOT NULL,
+  target_item_id TEXT,
+  target_item_title TEXT,
   topic_strategy TEXT NOT NULL DEFAULT 'dynamic_ai',
   topic TEXT NOT NULL,
   category TEXT NOT NULL DEFAULT 'makanan_utama',
@@ -16,6 +19,7 @@ CREATE TABLE IF NOT EXISTS auto_pipeline_schedules (
   days_of_week_json JSONB NOT NULL DEFAULT '[0,1,2,3,4,5,6]',
   timezone TEXT NOT NULL DEFAULT 'Asia/Jakarta',
   repliz_account_ids_json JSONB NOT NULL DEFAULT '[]',
+  pipeline_config_json JSONB NOT NULL DEFAULT '{}',
   auto_publish_enabled BOOLEAN NOT NULL DEFAULT TRUE,
   status TEXT NOT NULL DEFAULT 'active',
   last_run_at TIMESTAMP WITH TIME ZONE,
@@ -26,11 +30,19 @@ CREATE TABLE IF NOT EXISTS auto_pipeline_schedules (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+ALTER TABLE auto_pipeline_schedules ADD COLUMN IF NOT EXISTS pipeline_type TEXT NOT NULL DEFAULT 'recipe_campaign';
+ALTER TABLE auto_pipeline_schedules ADD COLUMN IF NOT EXISTS target_item_id TEXT;
+ALTER TABLE auto_pipeline_schedules ADD COLUMN IF NOT EXISTS target_item_title TEXT;
+ALTER TABLE auto_pipeline_schedules ADD COLUMN IF NOT EXISTS pipeline_config_json JSONB NOT NULL DEFAULT '{}';
+
 CREATE INDEX IF NOT EXISTS auto_pipeline_schedules_tenant_status_idx 
 ON auto_pipeline_schedules(tenant_id, status);
 
 CREATE INDEX IF NOT EXISTS auto_pipeline_schedules_brand_idx 
 ON auto_pipeline_schedules(tenant_id, brand_id);
+
+CREATE INDEX IF NOT EXISTS auto_pipeline_schedules_type_idx 
+ON auto_pipeline_schedules(tenant_id, pipeline_type);
 `;
 
 export async function migrateAutoPipelineSchedules(targetSchema = 'dev') {

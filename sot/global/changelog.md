@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.33.0 — Multi-Campaign Auto Pipeline Engine (Product & Editorial) (06/11/2026)
+- Multi-campaign auto pipeline support (Product, Editorial, Recipe)
+- Dedicated row generation for catalog products & brand pillars
+- Campaign filter tabs & dynamic color-coded cards
+- Integrated with Cloudflare R2 Staging and Tenant Isolation
+
 ## V2.32.170 — Fix Repliz R2 Staging & Tenant Context Isolation (06/11/2026)
 - Dual media staging provider for Repliz (R2 Custom Domain & G-Drive)
 - Fix scheduler tenant isolation and Gemini API key resolution

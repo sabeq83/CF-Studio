@@ -11,7 +11,7 @@ import {
 export const GET = withTenantContext(async (_request, context, user) => {
   try {
     const { id } = await context.params;
-    const tenantId = user?.tenantId || 'default_tenant';
+    const tenantId = (!user?.tenantId || user.tenantId === '__none__') ? 'default_tenant' : user.tenantId;
 
     const schedule = await getAutoPipelineScheduleById(tenantId, id);
     if (!schedule) {
@@ -28,7 +28,7 @@ export const GET = withTenantContext(async (_request, context, user) => {
 export const PUT = withTenantContext(async (request, context, user) => {
   try {
     const { id } = await context.params;
-    const tenantId = user?.tenantId || 'default_tenant';
+    const tenantId = (!user?.tenantId || user.tenantId === '__none__') ? 'default_tenant' : user.tenantId;
     const body = await request.json().catch(() => ({}));
 
     // Tangani aksi cepat: toggle_pause atau archive
@@ -65,7 +65,7 @@ export const PUT = withTenantContext(async (request, context, user) => {
 export const DELETE = withTenantContext(async (_request, context, user) => {
   try {
     const { id } = await context.params;
-    const tenantId = user?.tenantId || 'default_tenant';
+    const tenantId = (!user?.tenantId || user.tenantId === '__none__') ? 'default_tenant' : user.tenantId;
 
     await deleteSchedule(tenantId, id);
     return NextResponse.json({
