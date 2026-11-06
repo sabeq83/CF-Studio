@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.35.0 — Auto Pipeline 5-in-1 Engine (Multiplier & Recipe Labs) (06/11/2026)
+- Multi-campaign 5-in-1 engine support
+- Multiplier viral angle variations with zero-repetition
+- Recipe Labs composite grid 12-slot photo & FB article
+
 ## V2.34.0 — Multi-Campaign Support for Instant 1-Click Pipeline (06/11/2026)
 - Adaptive 1-Click Instant UI for Product, Editorial, and Recipe
 - Dynamic preset routing per campaign kind

@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAKNA Flow: Auto Pipeline Hub (5-in-1 Multi-Campaign Engine)</title>
+  <style>
+    :root {
+      --canvas: #f8fafc;
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #f1f5f9;
+      --surface-hover: #f1f5f9;
+      --surface-subtle: #f8fafc;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --border-color: #e2e8f0;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --input-bg: #ffffff;
+      --focus-ring: rgba(37, 99, 235, 0.25);
+      --action-primary: #2563eb;
+      --action-primary-hover: #1d4ed8;
+      --on-action-primary: #ffffff;
+      --status-info: #0284c7;
+      --status-info-soft: rgba(2, 132, 199, 0.1);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.1);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.1);
+      --status-danger: #dc2626;
+      --status-danger-soft: rgba(220, 38, 38, 0.1);
+      --status-purple: #7c3aed;
+      --status-purple-soft: rgba(124, 58, 237, 0.1);
+      --status-rose: #e11d48;
+      --status-rose-soft: rgba(225, 29, 72, 0.1);
+      --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+      --radius-xs: 4px;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    [data-theme="dark"] {
+      --canvas: #090d16;
+      --surface: #0f172a;
+      --surface-raised: #1e293b;
+      --surface-interactive: #334155;
+      --surface-hover: #334155;
+      --surface-subtle: #0f172a;
+      --border-subtle: #334155;
+      --border-strong: #475569;
+      --border-color: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --input-bg: #0f172a;
+      --focus-ring: rgba(59, 130, 246, 0.35);
+      --action-primary: #3b82f6;
+      --action-primary-hover: #60a5fa;
+      --on-action-primary: #ffffff;
+      --status-info: #38bdf8;
+      --status-info-soft: rgba(56, 189, 248, 0.15);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.15);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.15);
+      --status-danger: #f87171;
+      --status-danger-soft: rgba(248, 113, 113, 0.15);
+      --status-purple: #a78bfa;
+      --status-purple-soft: rgba(167, 139, 250, 0.15);
+      --status-rose: #fb7185;
+      --status-rose-soft: rgba(251, 113, 133, 0.15);
+      --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    body { background: var(--canvas); color: var(--text-primary); min-height: 100vh; transition: var(--transition); }
+    
+    .app-layout { display: flex; min-height: 100vh; }
+
+    /* Left Sidebar (Presisi Identik MAKNA Flow) */
+    .app-sidebar { width: 240px; background: var(--surface); border-right: 1px solid var(--border-subtle); display: flex; flex-direction: column; flex-shrink: 0; height: 100vh; position: sticky; top: 0; }
+    .sidebar-header { height: 60px; display: flex; align-items: center; padding: 0 1.25rem; border-bottom: 1px solid var(--border-subtle); gap: 0.65rem; }
+    .sidebar-logo { width: 28px; height: 28px; background: linear-gradient(135deg, #2563eb, #7c3aed); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 900; font-size: 0.95rem; }
+    .sidebar-brand { font-size: 0.95rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.3px; }
+    .sidebar-nav { flex: 1; overflow-y: auto; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 0.25rem; }
+    .nav-section { font-size: 0.68rem; font-weight: 800; color: var(--text-muted); padding: 0.75rem 0.5rem 0.25rem; letter-spacing: 0.5px; }
+    .nav-item { display: flex; align-items: center; gap: 0.65rem; padding: 0.45rem 0.65rem; border-radius: var(--radius-sm); font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); text-decoration: none; cursor: pointer; transition: var(--transition); }
+    .nav-item:hover { background: var(--surface-interactive); color: var(--text-primary); }
+    .nav-item.active { background: var(--surface-interactive); color: var(--action-primary); font-weight: 700; border-left: 3px solid var(--action-primary); }
+
+    /* Main Area */
+    .main-content { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .top-header { height: 60px; border-bottom: 1px solid var(--border-subtle); background: var(--surface); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; position: sticky; top: 0; z-index: 100; }
+    .breadcrumb { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-muted); }
+    .content-container { max-width: 1200px; margin: 0 auto; padding: 2rem; width: 100%; display: flex; flex-direction: column; gap: 2rem; }
+
+    /* Hero Banner */
+    .hero-banner { background: linear-gradient(135deg, var(--surface) 0%, var(--surface-raised) 100%); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 1.75rem 2rem; box-shadow: var(--shadow-card); display: flex; flex-direction: column; gap: 0.6rem; }
+    
+    /* Navigation Tabs */
+    .main-tab-bar { display: flex; gap: 0.5rem; background: var(--surface); border: 1px solid var(--border-subtle); padding: 0.4rem; border-radius: var(--radius-md); }
+    .main-tab-btn { flex: 1; padding: 0.75rem 1.25rem; border-radius: var(--radius-sm); font-size: 0.88rem; font-weight: 700; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: var(--transition); }
+    .main-tab-btn.active { background: var(--action-primary); color: var(--on-action-primary); }
+    .main-tab-btn:not(.active) { background: transparent; color: var(--text-secondary); }
+
+    /* Form Panel Card */
+    .form-panel { background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 1.75rem; box-shadow: var(--shadow-card); display: flex; flex-direction: column; gap: 1.35rem; }
+
+    /* Step 1: 5 Campaign Cards Grid */
+    .type-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); gap: 0.85rem; }
+    .type-card { background: var(--surface-raised); border: 1.5px solid var(--border-subtle); border-radius: var(--radius-md); padding: 0.95rem 1.15rem; cursor: pointer; display: flex; flex-direction: column; gap: 0.35rem; transition: var(--transition); }
+    .type-card:hover { border-color: var(--border-strong); transform: translateY(-1px); }
+    .type-card.selected { background: var(--surface-interactive); border-width: 1.5px; }
+    .type-header { display: flex; justify-content: space-between; align-items: center; }
+    .type-title { font-size: 0.92rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem; }
+    .type-badge { font-size: 0.68rem; font-weight: 800; padding: 0.15rem 0.55rem; border-radius: 9999px; }
+    .type-desc { font-size: 0.74rem; color: var(--text-muted); line-height: 1.35; }
+
+    /* Step 3: Adaptive Boxes */
+    .adaptive-box { background: var(--surface-raised); border-radius: var(--radius-md); padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
+    .item-scroll-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 0.65rem; max-height: 250px; overflow-y: auto; padding-right: 4px; }
+    .item-card { background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.65rem 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 0.65rem; transition: var(--transition); }
+    .item-card.selected { background: var(--surface-interactive); }
+
+    .angle-chip { background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.75rem 0.9rem; cursor: pointer; display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; transition: var(--transition); }
+    .angle-chip.selected { border-color: var(--status-purple); background: var(--surface-interactive); box-shadow: 0 0 0 1px var(--status-purple); }
+
+    .launch-btn { border: none; padding: 0.9rem 1.85rem; border-radius: var(--radius-sm); font-size: 0.92rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.6rem; cursor: pointer; transition: var(--transition); color: #ffffff; align-self: flex-start; }
+    .launch-btn:hover { opacity: 0.92; transform: translateY(-1px); }
+
+    /* Modal Overlay */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.65); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 9999; padding: 1.5rem; }
+    .modal-box { background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); box-shadow: var(--shadow-modal); width: 100%; max-width: 760px; max-height: 90vh; overflow-y: auto; padding: 1.75rem; display: flex; flex-direction: column; gap: 1.25rem; }
+
+    /* Schedule Table */
+    .schedule-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; text-align: left; }
+    .schedule-table th { background: var(--surface-raised); color: var(--text-secondary); font-weight: 700; padding: 0.75rem 0.85rem; border-bottom: 1px solid var(--border-subtle); }
+    .schedule-table td { padding: 0.75rem 0.85rem; border-bottom: 1px solid var(--border-subtle); color: var(--text-primary); }
+
+    #sim-toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--surface-raised); border: 1.5px solid var(--action-primary); padding: 0.9rem 1.25rem; border-radius: var(--radius-md); box-shadow: var(--shadow-modal); font-size: 0.85rem; font-weight: 600; display: none; z-index: 10000; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  </style>
+</head>
+<body>
+
+<div class="app-layout">
+  <!-- SIDEBAR RESMI MAKNA FLOW (IDENTIK CODEBASE) -->
+  <aside class="app-sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">M</div>
+      <div class="sidebar-brand">MAKNA Flow</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item"><span>◈</span> Dashboard</div>
+
+      <div class="nav-section">PLANNING</div>
+      <div class="nav-item"><span>🗓️</span> Content Planner</div>
+      <div class="nav-item"><span>📦</span> Product Database</div>
+      <div class="nav-item"><span>🔬</span> Deconstruct Lab</div>
+      <div class="nav-item"><span>🎛️</span> Preset Manager</div>
+      <div class="nav-item"><span>🎨</span> Visual Identity</div>
+      <div class="nav-item"><span>🧬</span> Brand Profiles</div>
+
+      <div class="nav-section">WORKFLOW</div>
+      <div class="nav-item active"><span>⚡</span> Auto Pipeline</div>
+      <div class="nav-item"><span>▶️</span> YouTube Studio</div>
+      <div class="nav-item"><span>◆</span> Affiliate Studio</div>
+      <div class="nav-item"><span>🎬</span> RE Campaign</div>
+      <div class="nav-item"><span>🌱</span> Pillar Campaign</div>
+      <div class="nav-item"><span>🔀</span> Multiplier Lab</div>
+      <div class="nav-item"><span>🍳</span> Recipe Labs</div>
+
+      <div class="nav-section">SYSTEM</div>
+      <div class="nav-item"><span>⚙️</span> System Settings</div>
+    </nav>
+  </aside>
+
+  <!-- MAIN WRAPPER -->
+  <main class="main-content">
+    <!-- TOP HEADER (IDENTIK CODEBASE) -->
+    <header class="top-header">
+      <div class="breadcrumb">
+        <span>MAKNA Flow</span>
+        <span>/</span>
+        <span>Workflow</span>
+        <span>/</span>
+        <span style="color: var(--text-primary); font-weight: 700;">⚡ Auto Pipeline</span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 0.85rem;">
+        <span style="font-size: 0.72rem; font-weight: 600; padding: 0.2rem 0.65rem; border-radius: var(--radius-xs); background: var(--status-success-soft); color: var(--status-success); border: 1px solid var(--status-success);">
+          ● Production Cluster Online
+        </span>
+        <button onclick="toggleTheme()" style="background: var(--surface-raised); border: 1px solid var(--border-subtle); color: var(--text-primary); padding: 0.35rem 0.75rem; border-radius: var(--radius-sm); font-size: 0.78rem; font-weight: 600; cursor: pointer;">
+          🌓 Ganti Tema
+        </button>
+      </div>
+    </header>
+
+    <div class="content-container">
+      <!-- HERO BANNER (IDENTIK CODEBASE) -->
+      <section class="hero-banner">
+        <h1 style="font-size: 1.6rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 0.6rem;">
+          <span>⚡ Auto Pipeline</span>
+          <span style="font-size: 0.88rem; font-weight: 500; color: var(--text-muted);">(1-Click Planner-to-Video Engine)</span>
+        </h1>
+        <p style="font-size: 0.92rem; color: var(--text-secondary); max-width: 750px; lineHeight: 1.5;">
+          Otomatisasi end-to-end produksi konten lintas format: dari ideasi Gemini AI, auto-hydration profil brand & preset visual dinamis, pembuatan kampanye OPC 8-klip, hingga publikasi otomatis ke <strong>Repliz & Facebook Pages</strong> dalam 1 kali klik.
+        </p>
+        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.25rem;">
+          <span style="font-size: 0.72rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 9999px; border: 1px solid var(--border-subtle); background: var(--surface-interactive); color: var(--text-secondary);">Single-Pass 1-Call AI</span>
+          <span style="font-size: 0.72rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 9999px; border: 1px solid var(--border-subtle); background: var(--surface-interactive); color: var(--text-secondary);">Google Veo Omni Flash</span>
+          <span style="font-size: 0.72rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 9999px; border: 1px solid var(--border-subtle); background: var(--surface-interactive); color: var(--text-secondary);">Minimax Expressive TTS</span>
+          <span style="font-size: 0.72rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 9999px; border: 1px solid var(--status-success); background: var(--status-success-soft); color: var(--status-success);">✓ Auto-Sync ContentFlow Hub</span>
+        </div>
+      </section>
+
+      <!-- MAIN NAVIGATION TABS (IDENTIK CODEBASE) -->
+      <div class="main-tab-bar">
+        <button type="button" class="main-tab-btn active" id="tab-btn-1" onclick="switchMainTab(1)">
+          <span>⚡</span>
+          <span>Eksekusi 1-Klik Instan</span>
+        </button>
+        <button type="button" class="main-tab-btn" id="tab-btn-2" onclick="switchMainTab(2)">
+          <span>⏰</span>
+          <span>Penjadwal Otomatis & Auto-Publish Repliz</span>
+          <span style="font-size: 0.68rem; font-weight: 800; background: rgba(255,255,255,0.25); color: #ffffff; padding: 0.1rem 0.45rem; border-radius: 9999px;">5 Jadwal</span>
+        </button>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- TAB 1: 1-KLIK INSTAN (MEMPERTAHANKAN STRUKTUR ASLI + 2 KARTU TIPE BARU)     -->
+      <!-- ========================================================================= -->
+      <div id="tab-content-1" style="display: flex; flex-direction: column; gap: 2rem;">
+        <section class="form-panel">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+            <div>
+              <div style="font-size: 1.18rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 0.55rem;">
+                <span>⚡</span>
+                <span>Eksekusi 1-Klik Instan Multi-Campaign</span>
+              </div>
+              <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.25rem;">
+                Pilih tipe kampanye, tentukan target (Produk Katalog, Pilar Brand, Resep, Multiplier, atau Teks & Foto), lalu produksi otomatis dalam 1 klik.
+              </div>
+            </div>
+            <a href="#" style="font-size: 0.78rem; font-weight: 600; color: var(--action-primary); text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.45rem 0.95rem; border-radius: var(--radius-sm); background: var(--surface-raised); border: 1px solid var(--border-subtle);">
+              <span>🎛️</span>
+              <span>Kelola di Preset Manager</span>
+            </a>
+          </div>
+
+          <!-- STEP 1: CAMPAIGN TYPE CARDS (DIPERLUAS MENJADI 5 KARTU) -->
+          <div style="display: flex; flex-direction: column; gap: 0.45rem;">
+            <label style="font-size: 0.84rem; font-weight: 700; color: var(--text-secondary);">
+              1. Pilih Tipe Kampanye
+            </label>
+            <div class="type-grid">
+              <!-- 1. Produk -->
+              <div class="type-card" id="card-product" onclick="selectCampaignType('product_campaign')">
+                <div class="type-header">
+                  <div class="type-title"><span style="font-size: 1.35rem;">🛍️</span><strong>Video Produk</strong></div>
+                  <span class="type-badge" id="badge-product">PILIH</span>
+                </div>
+                <span class="type-desc">Showcase katalog produk & USP promosi 1-pass</span>
+              </div>
+
+              <!-- 2. Editorial -->
+              <div class="type-card" id="card-editorial" onclick="selectCampaignType('editorial_campaign')">
+                <div class="type-header">
+                  <div class="type-title"><span style="font-size: 1.35rem;">📖</span><strong>Video Editorial</strong></div>
+                  <span class="type-badge" id="badge-editorial">PILIH</span>
+                </div>
+                <span class="type-desc">Pilar brand, hook tension & storytelling edukatif</span>
+              </div>
+
+              <!-- 3. Resep Video -->
+              <div class="type-card selected" id="card-recipe" onclick="selectCampaignType('recipe_campaign')">
+                <div class="type-header">
+                  <div class="type-title"><span style="font-size: 1.35rem;">🍳</span><strong>Video Resep</strong></div>
+                  <span class="type-badge" id="badge-recipe" style="background: var(--status-warning); color: #fff;">AKTIF</span>
+                </div>
+                <span class="type-desc">Food reels & cooking guide 4-babak 1-pass</span>
+              </div>
+
+              <!-- 4. Multiplier (BARU!) -->
+              <div class="type-card" id="card-multiplier" onclick="selectCampaignType('multiplier_campaign')">
+                <div class="type-header">
+                  <div class="type-title"><span style="font-size: 1.35rem;">🔀</span><strong>Video Multiplier</strong></div>
+                  <span class="type-badge" id="badge-multiplier" style="background: var(--status-purple-soft); color: var(--status-purple); border: 1px solid var(--status-purple);">BARU</span>
+                </div>
+                <span class="type-desc">Remix angle & hook dari video referensi pemenang</span>
+              </div>
+
+              <!-- 5. Recipe Labs Text & Foto (BARU!) -->
+              <div class="type-card" id="card-recipe-labs" onclick="selectCampaignType('recipe_labs')">
+                <div class="type-header">
+                  <div class="type-title"><span style="font-size: 1.35rem;">🖼️</span><strong>Resep Teks & Foto</strong></div>
+                  <span class="type-badge" id="badge-recipe-labs" style="background: var(--status-rose-soft); color: var(--status-rose); border: 1px solid var(--status-rose);">BARU</span>
+                </div>
+                <span class="type-desc">Naskah resep FB + Foto AI dalam susunan grid komposit</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 2: BRAND & PRESET VIDEO (IDENTIK CODEBASE) -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0.85rem; padding: 1.15rem; background: var(--surface-raised); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+            <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+              <label style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary);">2. Brand Profile</label>
+              <select style="height: 42px; background: var(--input-bg); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0 0.85rem; color: var(--text-primary); font-size: 0.88rem; outline: none;">
+                <option>HabitFolk (Kitchen & Home)</option>
+                <option>Dapur Botani (Healthy Living)</option>
+                <option>Nutribake ID (Pastry & Bread)</option>
+              </select>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+              <label style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); display: flex; justify-content: space-between;">
+                <span>3. Preset Video / Konten</span>
+                <span style="font-size: 0.68rem; font-weight: 700; background: var(--surface-interactive); color: var(--text-muted); padding: 0.1rem 0.4rem; border-radius: var(--radius-xs);">Preset-Driven</span>
+              </label>
+              <select id="preset-select" style="height: 42px; background: var(--input-bg); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0 0.85rem; color: var(--text-primary); font-size: 0.88rem; font-weight: 700; outline: none;">
+                <option>habitfolk_6clips_quick (Omni Flash, 6 Klip @ 4s)</option>
+              </select>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+              <label style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary);">4. Mode Eksekusi</label>
+              <select id="execution-mode-select" onchange="handleExecutionModeChange(this.value)" style="height: 42px; background: var(--input-bg); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0 0.85rem; color: var(--text-primary); font-size: 0.88rem; outline: none;">
+                <option value="full_autopilot">⚡ Full Autopilot (Langsung Produksi Konten)</option>
+                <option value="manual_review">⏸️ Manual Review (Kurasi Angle / Preview Dulu)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- STEP 3: FORM ADAPTIF (MENYESUAIKAN TIPE YANG DIPILIH) -->
+
+          <!-- 3A: VIDEO PRODUK -->
+          <div id="form-product" class="adaptive-box" style="display: none; border: 1.5px solid var(--status-success);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <strong style="font-size: 0.88rem; color: var(--text-primary);">🛍️ Pilih Produk dari Katalog:</strong>
+              <span style="font-size: 0.72rem; font-weight: 700; background: var(--status-success-soft); color: var(--status-success); padding: 0.2rem 0.65rem; border-radius: 9999px; border: 1px solid var(--status-success);">
+                Terpilih: Spatula Set Silicone
+              </span>
+            </div>
+            <div class="search-box">
+              <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%);">🔍</span>
+              <input type="text" placeholder="Cari produk katalog..." style="width: 100%; height: 38px; background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0 10px 0 32px; color: var(--text-primary); font-size: 0.84rem; outline: none;">
+            </div>
+            <div class="item-scroll-grid">
+              <div class="item-card selected">
+                <div style="width: 38px; height: 38px; background: var(--surface-raised); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🍳</div>
+                <div style="flex: 1;"><strong style="font-size: 0.82rem;">Spatula Set Silicone</strong><div style="font-size: 0.68rem; color: var(--text-muted);">Peralatan Masak</div></div>
+                <span style="color: var(--status-success); font-weight: 800;">✓</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3B: VIDEO EDITORIAL -->
+          <div id="form-editorial" class="adaptive-box" style="display: none; border: 1.5px solid var(--status-info);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <strong style="font-size: 0.88rem; color: var(--text-primary);">📖 Pilih Pilar Konten Brand:</strong>
+              <span style="font-size: 0.72rem; font-weight: 700; background: var(--status-info-soft); color: var(--status-info); padding: 0.2rem 0.65rem; border-radius: 9999px; border: 1px solid var(--status-info);">
+                Terpilih: "Eat Better, Not Perfect"
+              </span>
+            </div>
+            <div class="item-scroll-grid">
+              <div class="item-card selected">
+                <span>📌</span><strong style="font-size: 0.82rem; flex: 1;">Eat Better, Not Perfect</strong><span style="color: var(--status-info); font-weight: 800;">✓</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3C: VIDEO RESEP -->
+          <div id="form-recipe" class="adaptive-box" style="border: 1px solid var(--border-subtle);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <strong style="font-size: 0.88rem; color: var(--text-primary);">🍽️ Kategori Resep Kuliner</strong>
+              <span style="font-size: 0.72rem; font-weight: 600; padding: 0.25rem 0.65rem; border-radius: 9999px; background: var(--status-info-soft); color: var(--status-info); border: 1px solid var(--status-info);">
+                ✨ Auto-Terdeteksi dari Topik
+              </span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem;">
+              <div style="background: var(--surface-interactive); border: 1.5px solid var(--action-primary); border-radius: var(--radius-md); padding: 0.9rem; cursor: pointer;">
+                <div style="display: flex; justify-content: space-between;"><span>🍗</span><strong style="color: var(--action-primary);">✓</strong></div>
+                <div style="font-size: 0.88rem; font-weight: 700; color: var(--text-primary); margin-top: 0.1rem;">Makanan Utama</div>
+                <div style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.3;">Main course, ayam, daging, pasta</div>
+              </div>
+              <div style="background: var(--input-bg); border: 1.5px solid var(--border-subtle); border-radius: var(--radius-md); padding: 0.9rem; cursor: pointer;">
+                <span>🍟</span>
+                <div style="font-size: 0.88rem; font-weight: 700; color: var(--text-primary); margin-top: 0.1rem;">Camilan / Side Dish</div>
+                <div style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.3;">Snacks, fries, finger food</div>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.35rem;">
+              <label style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary);">Topik / Arahan Resep AI:</label>
+              <input type="text" value="air fryer salmon bites with garlic butter" style="background: var(--input-bg); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.65rem 0.9rem; font-size: 0.88rem; color: var(--text-primary); outline: none;">
+            </div>
+          </div>
+
+          <!-- 3D: MULTIPLIER CAMPAIGN (BARU!) -->
+          <div id="form-multiplier" class="adaptive-box" style="display: none; border: 1.5px solid var(--status-purple);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <strong style="font-size: 0.88rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.45rem;">
+                <span>🔀</span>
+                <span>Pilih Blueprint Video Pemenang (Deconstruct Lab):</span>
+              </strong>
+              <span style="font-size: 0.72rem; font-weight: 700; background: var(--status-purple-soft); color: var(--status-purple); padding: 0.2rem 0.65rem; border-radius: 9999px; border: 1px solid var(--status-purple);">
+                Winning Hook Engine
+              </span>
+            </div>
+
+            <div class="item-scroll-grid" style="max-height: 160px;">
+              <div class="item-card selected">
+                <div style="width: 44px; height: 44px; background: #000; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.2rem;">🎬</div>
+                <div style="flex: 1; min-width: 0;">
+                  <strong style="font-size: 0.82rem; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Stop Throwing Avocado Seed! (38.4k Likes)</strong>
+                  <span style="font-size: 0.68rem; color: var(--text-muted);">Pola: Myth Busting + Practical Kitchen Hack</span>
+                </div>
+                <span style="color: var(--status-purple); font-weight: 800;">✓</span>
+              </div>
+            </div>
+
+            <!-- Angle Section -->
+            <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.85rem; display: flex; flex-direction: column; gap: 0.65rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size: 0.82rem; font-weight: 700; color: var(--text-primary);" id="angle-scenario-title">
+                  💡 Skenario Angle: AI Auto-Select Rank #1 (Bebas Repetisi)
+                </div>
+                <button type="button" onclick="showToast('AI Gemini meracik 3 variasi angle baru...')" style="background: var(--status-purple-soft); color: var(--status-purple); border: 1px solid var(--status-purple); padding: 0.25rem 0.65rem; border-radius: var(--radius-xs); font-size: 0.72rem; font-weight: 700; cursor: pointer;">
+                  ⚡ Regenerate Opsi Angle Baru
+                </button>
+              </div>
+
+              <div class="angle-chip-list">
+                <div class="angle-chip selected">
+                  <div>
+                    <div style="display: flex; align-items: center; gap: 0.45rem;">
+                      <span style="font-size: 0.68rem; font-weight: 800; background: var(--status-purple); color: #fff; padding: 0.1rem 0.45rem; border-radius: 9999px;">RANK 1</span>
+                      <strong style="font-size: 0.82rem; color: var(--text-primary);">The Vitamin E Oil Secret You're Wasting</strong>
+                    </div>
+                    <p style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                      <strong>Hook (0-3s):</strong> "Jangan buang biji alpukat Anda sebelum tahu fakta minyak alami ini..."
+                    </p>
+                  </div>
+                  <span style="color: var(--status-purple); font-weight: 800;">✓</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3E: RECIPE LABS (100% MENGADOPSI DARI RECIPE LABS ASLI) -->
+          <div id="form-recipe-labs" class="adaptive-box" style="display: none; border: 1.5px solid var(--status-rose);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <strong style="font-size: 0.88rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.45rem;">
+                <span>🖼️</span>
+                <span>Konfigurasi Resep Teks & Foto AI (Recipe Labs Asli)</span>
+              </strong>
+              <span style="font-size: 0.72rem; font-weight: 700; background: var(--status-rose-soft); color: var(--status-rose); padding: 0.2rem 0.65rem; border-radius: 9999px; border: 1px solid var(--status-rose);">
+                Artikel FB + 12-Grid Slot Renderer
+              </span>
+            </div>
+
+            <!-- Topik & Gaya Visual -->
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 0.75rem;">
+              <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+                <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary);">Topik / Nama Menu Resep:</label>
+                <input type="text" value="Ayam Panggang Madu Lemon Teflon" style="height: 38px; background: var(--input-bg); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0 0.85rem; color: var(--text-primary); font-size: 0.85rem; outline: none;">
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+                <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary);">Gaya Visual Fotografi AI:</label>
+                <select style="height: 38px; background: var(--input-bg); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0 0.75rem; color: var(--text-primary); font-size: 0.84rem; outline: none;">
+                  <option>Food Porn & Glossy Commercial</option>
+                  <option>Rustic Countryside & Wooden Texture</option>
+                  <option>Clean Nordic Studio & Bright Sunlight</option>
+                  <option>Dark Moody Contrast & Cinematic Smoke</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Susunan Grid Komposit (Adopted 100% from Recipe Labs) -->
+            <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.15rem; display: flex; flex-direction: column; gap: 1rem;">
+              <!-- Pilihan Jumlah Gambar -->
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                  <label style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary);">
+                    Pilihan Jumlah Gambar dalam Kolase
+                  </label>
+                  <span style="font-size: 0.74rem; color: var(--text-muted);">
+                    Menentukan jumlah variasi foto & template layout
+                  </span>
+                </div>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                  <button type="button" class="img-count-btn" id="btn-count-3" onclick="setImagesPerRecipe(3)" style="padding: 0.45rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); background: var(--surface-raised); color: var(--text-secondary); font-size: 0.82rem; font-weight: 700; cursor: pointer;">3 Gambar</button>
+                  <button type="button" class="img-count-btn active" id="btn-count-4" onclick="setImagesPerRecipe(4)" style="padding: 0.45rem 1rem; border-radius: var(--radius-sm); border: 1.5px solid var(--action-primary); background: var(--surface-interactive); color: var(--action-primary); font-size: 0.82rem; font-weight: 800; cursor: pointer;">4 Gambar (Default)</button>
+                  <button type="button" class="img-count-btn" id="btn-count-5" onclick="setImagesPerRecipe(5)" style="padding: 0.45rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); background: var(--surface-raised); color: var(--text-secondary); font-size: 0.82rem; font-weight: 700; cursor: pointer;">5 Gambar</button>
+                  <button type="button" class="img-count-btn" id="btn-count-6" onclick="setImagesPerRecipe(6)" style="padding: 0.45rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); background: var(--surface-raised); color: var(--text-secondary); font-size: 0.82rem; font-weight: 700; cursor: pointer;">6 Gambar</button>
+                </div>
+              </div>
+
+              <!-- 2 Kolom: Preset Thumbnails & Sliders di Kiri, Live 1:1 Canvas di Kanan -->
+              <div style="display: grid; grid-template-columns: minmax(280px, 1fr) 250px; gap: 1.25rem; align-items: start;">
+                <!-- Kolom Kiri -->
+                <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+                  <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem;">
+                      <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary);">Template Preset Layout Kolase</label>
+                      <span id="selected-layout-name" style="font-size: 0.74rem; color: var(--action-primary); font-weight: 800;">
+                        Editorial Split (Default)
+                      </span>
+                    </div>
+
+                    <div id="layout-cards-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(125px, 1fr)); gap: 0.55rem; margin-bottom: 0.65rem;">
+                      <!-- Populated via JS -->
+                    </div>
+
+                    <select id="layout-dropdown-select" onchange="selectLayoutPreset(this.value)" style="width: 100%; height: 36px; background: var(--input-bg); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.82rem; padding: 0 0.65rem;">
+                      <!-- Populated via JS -->
+                    </select>
+                  </div>
+
+                  <!-- Sliders Box -->
+                  <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.85rem; display: flex; flex-direction: column; gap: 0.65rem;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                      <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.74rem; margin-bottom: 0.25rem;">
+                          <span>Celah (Gap):</span>
+                          <strong id="label-gap">12px</strong>
+                        </div>
+                        <input type="range" min="0" max="32" value="12" id="input-gap" oninput="updateGridDimensions()" style="width: 100%;">
+                      </div>
+                      <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.74rem; margin-bottom: 0.25rem;">
+                          <span>Radius Sudut:</span>
+                          <strong id="label-radius">16px</strong>
+                        </div>
+                        <input type="range" min="0" max="32" value="16" id="input-radius" oninput="updateGridDimensions()" style="width: 100%;">
+                      </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                      <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.74rem; margin-bottom: 0.25rem;">
+                          <span>Padding Luar:</span>
+                          <strong id="label-padding">16px</strong>
+                        </div>
+                        <input type="range" min="0" max="40" value="16" id="input-padding" oninput="updateGridDimensions()" style="width: 100%;">
+                      </div>
+                      <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.74rem; margin-bottom: 0.25rem;">
+                          <span>Warna Kanvas:</span>
+                          <strong id="label-bg">#0d0d12</strong>
+                        </div>
+                        <select id="input-bg" onchange="updateGridDimensions()" style="width: 100%; height: 26px; font-size: 0.74rem; background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-xs); color: var(--text-primary);">
+                          <option value="#0d0d12">Dark Charcoal (#0d0d12)</option>
+                          <option value="#ffffff">Pure White (#ffffff)</option>
+                          <option value="#f8fafc">Light Slate (#f8fafc)</option>
+                          <option value="#18181b">Onyx Dark (#18181b)</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Kolom Kanan: Live 1:1 Canvas Preview -->
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 0.45rem;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-secondary);">Live Canvas Preview</span>
+                    <span id="canvas-slot-badge" style="font-size: 0.68rem; padding: 2px 6px; background: var(--status-info-soft); color: var(--status-info); border-radius: 4px; font-weight: 800;">
+                      4 Slots
+                    </span>
+                  </div>
+
+                  <div id="live-canvas" style="width: 230px; height: 230px; background-color: #0d0d12; border-radius: 10px; padding: 6px; position: relative; box-shadow: 0 8px 24px var(--surface-interactive); overflow: hidden; box-sizing: border-box; border: 1px solid var(--border-subtle);">
+                    <!-- Slots rendered dynamically -->
+                  </div>
+                  <span style="font-size: 0.68rem; color: var(--text-muted); text-align: center;">
+                    Resolusi Render Asli: 2400 x 2400 px
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- LAUNCH BUTTON -->
+          <div style="padding-top: 0.5rem;">
+            <button id="launch-button" class="launch-btn" style="background: var(--status-warning);" onclick="showToast('🚀 Luncurkan pipeline...')">
+              <span>🚀 Luncurkan Auto Pipeline Resep (8 Klip Video)</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- FACTUAL 7-STAGE TRACKER & RECENT CAMPAIGNS (IDENTIK CODEBASE) -->
+        <section style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 1.75rem; box-shadow: var(--shadow-card); display: flex; flex-direction: column; gap: 1rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 1.05rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;">
+              <span>📊</span>
+              <span>Progres Kampanye Aktif (Factual 7-Stage Tracker)</span>
+            </div>
+            <span style="font-size: 0.72rem; color: var(--text-muted);">Tidak ada kampanye aktif yang sedang diproses</span>
+          </div>
+          <div style="padding: 2.5rem 1rem; text-align: center; color: var(--text-muted); font-size: 0.85rem; border: 1px dashed var(--border-subtle); border-radius: var(--radius-md);">
+            Luncurkan salah satu dari 5 tipe kampanye di atas untuk melihat pelacakan progres 7-tahap produksi secara real-time.
+          </div>
+        </section>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- TAB 2: JADWAL RUTIN SCHEDULER                                             -->
+      <!-- ========================================================================= -->
+      <div id="tab-content-2" style="display: none; flex-direction: column; gap: 2rem;">
+        <section class="form-panel">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+            <div>
+              <div style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">🗓️ Kalender Jadwal Rutin Auto Pipeline</div>
+              <p style="font-size: 0.8rem; color: var(--text-muted);">Jadwalkan eksekusi harian otomatis untuk 5 tipe kampanye mandiri.</p>
+            </div>
+            <button onclick="openScheduleModal()" style="background: var(--action-primary); color: #fff; border: none; padding: 0.6rem 1.25rem; border-radius: var(--radius-sm); font-size: 0.84rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 0.45rem;">
+              <span>+</span>
+              <span>Buat Jadwal Rutin Baru (5 Tipe)</span>
+            </button>
+          </div>
+
+          <!-- 5 Filter Tabs -->
+          <div style="display: flex; gap: 0.45rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.65rem; overflow-x: auto;">
+            <button class="tab-btn active" style="font-size: 0.78rem; padding: 0.4rem 0.8rem;">🌐 Semua (5)</button>
+            <button class="tab-btn" style="font-size: 0.78rem; padding: 0.4rem 0.8rem;">🛍️ Video Produk (1)</button>
+            <button class="tab-btn" style="font-size: 0.78rem; padding: 0.4rem 0.8rem;">📖 Video Editorial (1)</button>
+            <button class="tab-btn" style="font-size: 0.78rem; padding: 0.4rem 0.8rem;">🍳 Video Resep (1)</button>
+            <button class="tab-btn" style="font-size: 0.78rem; padding: 0.4rem 0.8rem;">🔀 Video Multiplier (1)</button>
+            <button class="tab-btn" style="font-size: 0.78rem; padding: 0.4rem 0.8rem;">🖼️ Resep Teks & Foto (1)</button>
+          </div>
+
+          <!-- Table of 5 Types -->
+          <div style="overflow-x: auto;">
+            <table class="schedule-table">
+              <thead>
+                <tr>
+                  <th>Tipe Kampanye</th>
+                  <th>Nama Jadwal & Target Konten</th>
+                  <th>Brand</th>
+                  <th>Waktu Produksi</th>
+                  <th>Waktu Rilis</th>
+                  <th>Pola Hari</th>
+                  <th>Target Platform</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span style="padding: 0.2rem 0.55rem; border-radius: 9999px; font-size: 0.72rem; font-weight: 800; background: var(--status-success-soft); color: var(--status-success);">🛍️ Produk</span></td>
+                  <td><strong>Spatula Set Silicone Heat Resistant</strong><div style="font-size: 0.7rem; color: var(--text-muted);">Pola: 1 Produk = 1 Baris Jadwal Mandiri</div></td>
+                  <td>HabitFolk</td>
+                  <td>05:00 WIB</td>
+                  <td>09:00 WIB</td>
+                  <td>Sen–Jum</td>
+                  <td>TikTok, IG Reels</td>
+                  <td><button style="background: none; border: 1px solid var(--border-subtle); padding: 0.25rem 0.55rem; border-radius: 4px; font-size: 0.72rem; cursor: pointer;">⚡ Run Now</button></td>
+                </tr>
+                <tr>
+                  <td><span style="padding: 0.2rem 0.55rem; border-radius: 9999px; font-size: 0.72rem; font-weight: 800; background: var(--status-info-soft); color: var(--status-info);">📖 Editorial</span></td>
+                  <td><strong>Pilar: Eat Better, Not Perfect</strong><div style="font-size: 0.7rem; color: var(--text-muted);">Pola: 1 Pilar = 1 Baris Jadwal Mandiri</div></td>
+                  <td>HabitFolk</td>
+                  <td>06:00 WIB</td>
+                  <td>12:00 WIB</td>
+                  <td>Sen–Ming</td>
+                  <td>YouTube Shorts, Reels</td>
+                  <td><button style="background: none; border: 1px solid var(--border-subtle); padding: 0.25rem 0.55rem; border-radius: 4px; font-size: 0.72rem; cursor: pointer;">⚡ Run Now</button></td>
+                </tr>
+                <tr>
+                  <td><span style="padding: 0.2rem 0.55rem; border-radius: 9999px; font-size: 0.72rem; font-weight: 800; background: var(--status-warning-soft); color: var(--status-warning);">🍳 Resep Video</span></td>
+                  <td><strong>Air Fryer Daily Healthy Reels</strong><div style="font-size: 0.7rem; color: var(--text-muted);">Pola: Dynamic AI Ide Topik Otomatis</div></td>
+                  <td>Dapur Botani</td>
+                  <td>07:00 WIB</td>
+                  <td>16:00 WIB</td>
+                  <td>Sen–Ming</td>
+                  <td>TikTok, Facebook Reels</td>
+                  <td><button style="background: none; border: 1px solid var(--border-subtle); padding: 0.25rem 0.55rem; border-radius: 4px; font-size: 0.72rem; cursor: pointer;">⚡ Run Now</button></td>
+                </tr>
+                <tr style="background: var(--surface-interactive);">
+                  <td><span style="padding: 0.2rem 0.55rem; border-radius: 9999px; font-size: 0.72rem; font-weight: 800; background: var(--status-purple-soft); color: var(--status-purple);">🔀 Multiplier</span></td>
+                  <td><strong>Stop Avocado Seed — Daily Fresh Hook</strong><div style="font-size: 0.7rem; color: var(--text-muted);">Pola: AI Auto-select Rank #1 (Zero-Repetition)</div></td>
+                  <td>HabitFolk</td>
+                  <td>08:00 WIB</td>
+                  <td>19:00 WIB</td>
+                  <td>Sen–Jum</td>
+                  <td>TikTok Ads, IG Reels</td>
+                  <td><button style="background: none; border: 1px solid var(--border-subtle); padding: 0.25rem 0.55rem; border-radius: 4px; font-size: 0.72rem; cursor: pointer;">⚡ Run Now</button></td>
+                </tr>
+                <tr style="background: var(--surface-interactive);">
+                  <td><span style="padding: 0.2rem 0.55rem; border-radius: 9999px; font-size: 0.72rem; font-weight: 800; background: var(--status-rose-soft); color: var(--status-rose);">🖼️ Teks & Foto</span></td>
+                  <td><strong>Resep Masakan Rumahan Sehat (4-Grid)</strong><div style="font-size: 0.7rem; color: var(--text-muted);">Pola: Artikel FB Lengkap + 4 Foto AI Komposit</div></td>
+                  <td>Dapur Botani</td>
+                  <td>09:00 WIB</td>
+                  <td>11:00 WIB</td>
+                  <td>Sen, Rab, Jum</td>
+                  <td>Facebook Page Resep</td>
+                  <td><button style="background: none; border: 1px solid var(--border-subtle); padding: 0.25rem 0.55rem; border-radius: 4px; font-size: 0.72rem; cursor: pointer;">⚡ Run Now</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL: BUAT / EDIT JADWAL RUTIN AUTO PIPELINE                              -->
+<!-- ========================================================================= -->
+<div id="schedule-modal" class="modal-backdrop">
+  <div class="modal-box">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.75rem;">
+      <div style="font-size: 1.12rem; font-weight: 800; display: flex; align-items: center; gap: 0.45rem;">
+        <span>⏰</span>
+        <span>Buat Jadwal Rutin Auto Pipeline Baru (5 Tipe)</span>
+      </div>
+      <button onclick="closeScheduleModal()" style="background: none; border: none; font-size: 1.25rem; color: var(--text-muted); cursor: pointer;">✕</button>
+    </div>
+
+    <!-- Step 1: Modal Campaign Type Selector -->
+    <div style="display: flex; flex-direction: column; gap: 0.45rem;">
+      <label style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary);">1. Pilih Tipe Kampanye Jadwal:</label>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.5rem;">
+        <button type="button" class="modal-type-btn" onclick="selectModalScheduleType('product_campaign', this)" style="padding: 0.55rem; border: 1px solid var(--border-subtle); background: var(--surface); border-radius: var(--radius-sm); font-size: 0.75rem; font-weight: 700; cursor: pointer;">🛍️ Video Produk</button>
+        <button type="button" class="modal-type-btn" onclick="selectModalScheduleType('editorial_campaign', this)" style="padding: 0.55rem; border: 1px solid var(--border-subtle); background: var(--surface); border-radius: var(--radius-sm); font-size: 0.75rem; font-weight: 700; cursor: pointer;">📖 Video Editorial</button>
+        <button type="button" class="modal-type-btn active" onclick="selectModalScheduleType('recipe_campaign', this)" style="padding: 0.55rem; border: 1.5px solid var(--status-warning); background: var(--surface-interactive); color: var(--status-warning); border-radius: var(--radius-sm); font-size: 0.75rem; font-weight: 800; cursor: pointer;">🍳 Video Resep</button>
+        <button type="button" class="modal-type-btn" onclick="selectModalScheduleType('multiplier_campaign', this)" style="padding: 0.55rem; border: 1px solid var(--border-subtle); background: var(--surface); border-radius: var(--radius-sm); font-size: 0.75rem; font-weight: 700; cursor: pointer;">🔀 Video Multiplier</button>
+        <button type="button" class="modal-type-btn" onclick="selectModalScheduleType('recipe_labs', this)" style="padding: 0.55rem; border: 1px solid var(--border-subtle); background: var(--surface); border-radius: var(--radius-sm); font-size: 0.75rem; font-weight: 700; cursor: pointer;">🖼️ Resep Teks & Foto</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Nama Jadwal & Brand -->
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 0.75rem;">
+      <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+        <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary);">Nama Jadwal:</label>
+        <input type="text" id="modal-sched-name" value="Dapur Botani — Daily Morning Reels" style="height: 38px; background: var(--input-bg); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0 0.75rem; color: var(--text-primary); font-size: 0.85rem;">
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+        <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary);">Brand:</label>
+        <select style="height: 38px; background: var(--input-bg); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0 0.75rem; color: var(--text-primary); font-size: 0.84rem;">
+          <option>Dapur Botani</option>
+          <option>HabitFolk</option>
+          <option>Nutribake ID</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Step 3: Dual-Time Schedule -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; background: var(--surface-raised); padding: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+      <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+        <label style="font-size: 0.78rem; font-weight: 700; color: var(--text-secondary);">Waktu Produksi AI (Generate):</label>
+        <input type="time" value="05:00" style="height: 36px; background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0 0.75rem; color: var(--text-primary); font-size: 0.85rem; font-weight: 700;">
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+        <label style="font-size: 0.78rem; font-weight: 700; color: var(--text-secondary);">Waktu Rilis Publikasi (Publish):</label>
+        <input type="time" value="09:00" style="height: 36px; background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0 0.75rem; color: var(--text-primary); font-size: 0.85rem; font-weight: 700;">
+      </div>
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; gap: 0.65rem; border-top: 1px solid var(--border-subtle); padding-top: 0.85rem;">
+      <button onclick="closeScheduleModal()" style="background: none; border: 1px solid var(--border-subtle); padding: 0.55rem 1rem; border-radius: var(--radius-sm); font-size: 0.84rem; cursor: pointer;">Batal</button>
+      <button onclick="closeScheduleModal(); showToast('✅ Jadwal rutin baru berhasil disimpan!')" style="background: var(--action-primary); color: #fff; border: none; padding: 0.55rem 1.35rem; border-radius: var(--radius-sm); font-size: 0.84rem; font-weight: 700; cursor: pointer;">Simpan Jadwal Rutin</button>
+    </div>
+  </div>
+</div>
+
+<div id="sim-toast"></div>
+
+<script>
+  let currentCampaign = 'recipe_campaign';
+
+  // Master Layout Data 100% dari Recipe Labs
+  const GRID_LAYOUT_COORDINATES = {
+    3: {
+      '3_split_left': [{ id: 1, x: 0, y: 0, w: 6, h: 12 }, { id: 2, x: 6, y: 0, w: 6, h: 6 }, { id: 3, x: 6, y: 6, w: 6, h: 6 }],
+      '3_split_right': [{ id: 1, x: 0, y: 0, w: 6, h: 6 }, { id: 2, x: 0, y: 6, w: 6, h: 6 }, { id: 3, x: 6, y: 0, w: 6, h: 12 }],
+      '3_stacked_horizontal': [{ id: 1, x: 0, y: 0, w: 12, h: 3 }, { id: 2, x: 0, y: 3, w: 12, h: 4 }, { id: 3, x: 0, y: 7, w: 12, h: 5 }]
+    },
+    4: {
+      '4_editorial_split': [{ id: 1, x: 0, y: 0, w: 7, h: 8 }, { id: 2, x: 7, y: 0, w: 5, h: 4 }, { id: 3, x: 7, y: 4, w: 5, h: 4 }, { id: 4, x: 0, y: 8, w: 12, h: 4 }],
+      '4_modern_masonry': [{ id: 1, x: 0, y: 0, w: 12, h: 5 }, { id: 2, x: 0, y: 5, w: 6, h: 4 }, { id: 3, x: 6, y: 5, w: 6, h: 7 }, { id: 4, x: 0, y: 9, w: 6, h: 3 }],
+      '4_landscape_cascade': [{ id: 1, x: 0, y: 0, w: 12, h: 3 }, { id: 2, x: 0, y: 3, w: 12, h: 2.5 }, { id: 3, x: 0, y: 5.5, w: 12, h: 3.5 }, { id: 4, x: 0, y: 9, w: 12, h: 3 }]
+    },
+    5: {
+      '5_pentagon_grid': [{ id: 1, x: 0, y: 0, w: 6, h: 4 }, { id: 2, x: 6, y: 0, w: 6, h: 3 }, { id: 3, x: 0, y: 4, w: 7, h: 5 }, { id: 4, x: 7, y: 3, w: 5, h: 6 }, { id: 5, x: 0, y: 9, w: 12, h: 3 }],
+      '5_step_cascade': [{ id: 1, x: 0, y: 0, w: 8, h: 2.4 }, { id: 2, x: 4, y: 2.4, w: 8, h: 2.4 }, { id: 3, x: 0, y: 4.8, w: 7, h: 2.4 }, { id: 4, x: 5, y: 7.2, w: 7, h: 2.4 }, { id: 5, x: 0, y: 9.6, w: 12, h: 2.4 }],
+      '5_magazine_editorial': [{ id: 1, x: 0, y: 0, w: 4, h: 12 }, { id: 2, x: 4, y: 0, w: 4, h: 4 }, { id: 3, x: 8, y: 0, w: 4, h: 4 }, { id: 4, x: 4, y: 4, w: 4, h: 4 }, { id: 5, x: 8, y: 4, w: 4, h: 4 }]
+    },
+    6: {
+      '6_magazine_spread': [{ id: 1, x: 0, y: 0, w: 4, h: 4 }, { id: 2, x: 4, y: 0, w: 8, h: 4 }, { id: 3, x: 0, y: 4, w: 8, h: 4 }, { id: 4, x: 8, y: 4, w: 4, h: 4 }, { id: 5, x: 0, y: 8, w: 6, h: 4 }, { id: 6, x: 6, y: 8, w: 6, h: 4 }],
+      '6_vertical_masonry': [{ id: 1, x: 0, y: 0, w: 6, h: 3 }, { id: 2, x: 6, y: 0, w: 6, h: 4 }, { id: 3, x: 0, y: 3, w: 6, h: 5 }, { id: 4, x: 6, y: 4, w: 6, h: 4 }, { id: 5, x: 6, y: 8, w: 6, h: 4 }, { id: 6, x: 0, y: 8, w: 6, h: 4 }],
+      '6_asymmetric_mosaic': [{ id: 1, x: 0, y: 0, w: 4, h: 3 }, { id: 2, x: 4, y: 0, w: 4, h: 3 }, { id: 3, x: 8, y: 0, w: 4, h: 3 }, { id: 4, x: 0, y: 3, w: 6, h: 5 }, { id: 5, x: 6, y: 3, w: 6, h: 5 }, { id: 6, x: 0, y: 8, w: 12, h: 4 }]
+    }
+  };
+
+  const LAYOUT_PRESET_METADATA = {
+    3: [
+      { id: '3_split_left', name: 'Editorial Tri-Split Left' },
+      { id: '3_split_right', name: 'Tri-Split Right Mirror' },
+      { id: '3_stacked_horizontal', name: 'Landscape Cascade' }
+    ],
+    4: [
+      { id: '4_editorial_split', name: 'Editorial Split (Default)' },
+      { id: '4_modern_masonry', name: 'Modern Masonry' },
+      { id: '4_landscape_cascade', name: 'Vertical Story Cascade 4' }
+    ],
+    5: [
+      { id: '5_pentagon_grid', name: 'Pentagon Asymmetric' },
+      { id: '5_step_cascade', name: 'Story Step-by-Step 5' },
+      { id: '5_magazine_editorial', name: 'Magazine Editorial' }
+    ],
+    6: [
+      { id: '6_magazine_spread', name: 'Magazine Hexa-Grid' },
+      { id: '6_vertical_masonry', name: 'Pinterest Masonry Style' },
+      { id: '6_asymmetric_mosaic', name: 'Modern Asymmetric Mosaic' }
+    ]
+  };
+
+  const SLOT_DEFAULT_ROLES = ['Bahan Mentah', 'Persiapan & Bumbu', 'Proses Memasak', 'Sajian Akhir', 'Detail Garnish', 'Plating Piring'];
+  const SLOT_GRADIENTS = [
+    'linear-gradient(135deg, rgba(245, 158, 11, 0.5) 0%, rgba(217, 119, 6, 0.6) 100%)',
+    'linear-gradient(135deg, rgba(16, 185, 129, 0.5) 0%, rgba(5, 150, 105, 0.6) 100%)',
+    'linear-gradient(135deg, rgba(59, 130, 246, 0.5) 0%, rgba(37, 99, 235, 0.6) 100%)',
+    'linear-gradient(135deg, rgba(236, 72, 153, 0.5) 0%, rgba(219, 39, 119, 0.6) 100%)',
+    'linear-gradient(135deg, rgba(139, 92, 246, 0.5) 0%, rgba(124, 58, 237, 0.6) 100%)',
+    'linear-gradient(135deg, rgba(6, 182, 212, 0.5) 0%, rgba(8, 145, 178, 0.6) 100%)'
+  ];
+
+  let currentImagesCount = 4;
+  let currentLayoutId = '4_editorial_split';
+  let gridGap = 12;
+  let gridRadius = 16;
+  let gridPadding = 16;
+  let gridBg = '#0d0d12';
+
+  function renderRecipeLabsLayoutUI() {
+    const presets = LAYOUT_PRESET_METADATA[currentImagesCount] || [];
+    const container = document.getElementById('layout-cards-container');
+    const dropdown = document.getElementById('layout-dropdown-select');
+    container.innerHTML = '';
+    dropdown.innerHTML = '';
+
+    presets.forEach(p => {
+      const isSelected = p.id === currentLayoutId;
+      const slots = GRID_LAYOUT_COORDINATES[currentImagesCount]?.[p.id] || [];
+
+      const card = document.createElement('div');
+      card.style.cssText = `
+        background: ${isSelected ? 'var(--surface-interactive)' : 'var(--input-bg)'};
+        border: ${isSelected ? '2px solid var(--action-primary)' : '1px solid var(--border-subtle)'};
+        border-radius: var(--radius-sm);
+        padding: 6px;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        transition: all 0.15s ease;
+      `;
+      card.onclick = () => selectLayoutPreset(p.id);
+
+      let slotsHtml = '';
+      slots.forEach((s, idx) => {
+        slotsHtml += `
+          <div style="
+            position: absolute;
+            left: ${(s.x / 12) * 100}%;
+            top: ${(s.y / 12) * 100}%;
+            width: calc(${(s.w / 12) * 100}% - 1px);
+            height: calc(${(s.h / 12) * 100}% - 1px);
+            background: ${SLOT_GRADIENTS[idx % SLOT_GRADIENTS.length]};
+            border-radius: 2px;
+          "></div>
+        `;
+      });
+
+      card.innerHTML = `
+        <div style="width: 100%; height: 50px; background: rgba(0,0,0,0.25); border-radius: 4px; position: relative; overflow: hidden; border: 1px solid var(--border-subtle);">
+          ${slotsHtml}
+        </div>
+        <div style="font-size: 0.72rem; font-weight: ${isSelected ? 800 : 600}; color: ${isSelected ? 'var(--action-primary)' : 'var(--text-primary)'}; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+          ${p.name}
+        </div>
+      `;
+      container.appendChild(card);
+
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.innerText = p.name;
+      if (isSelected) opt.selected = true;
+      dropdown.appendChild(opt);
+    });
+
+    document.getElementById('selected-layout-name').innerText = presets.find(p => p.id === currentLayoutId)?.name || currentLayoutId;
+    document.getElementById('canvas-slot-badge').innerText = `${currentImagesCount} Slots`;
+    renderLiveCanvas();
+  }
+
+  function setImagesPerRecipe(count) {
+    currentImagesCount = count;
+    document.querySelectorAll('.img-count-btn').forEach(btn => {
+      btn.style.border = '1px solid var(--border-subtle)';
+      btn.style.background = 'var(--surface-raised)';
+      btn.style.color = 'var(--text-secondary)';
+      btn.style.fontWeight = '700';
+    });
+
+    const activeBtn = document.getElementById(`btn-count-${count}`);
+    activeBtn.style.border = '1.5px solid var(--action-primary)';
+    activeBtn.style.background = 'var(--surface-interactive)';
+    activeBtn.style.color = 'var(--action-primary)';
+    activeBtn.style.fontWeight = '800';
+
+    if (count === 3) currentLayoutId = '3_split_left';
+    else if (count === 4) currentLayoutId = '4_editorial_split';
+    else if (count === 5) currentLayoutId = '5_pentagon_grid';
+    else if (count === 6) currentLayoutId = '6_magazine_spread';
+
+    renderRecipeLabsLayoutUI();
+  }
+
+  function selectLayoutPreset(presetId) {
+    currentLayoutId = presetId;
+    renderRecipeLabsLayoutUI();
+  }
+
+  function updateGridDimensions() {
+    gridGap = Number(document.getElementById('input-gap').value);
+    gridRadius = Number(document.getElementById('input-radius').value);
+    gridPadding = Number(document.getElementById('input-padding').value);
+    gridBg = document.getElementById('input-bg').value;
+
+    document.getElementById('label-gap').innerText = `${gridGap}px`;
+    document.getElementById('label-radius').innerText = `${gridRadius}px`;
+    document.getElementById('label-padding').innerText = `${gridPadding}px`;
+    document.getElementById('label-bg').innerText = gridBg;
+
+    renderLiveCanvas();
+  }
+
+  function renderLiveCanvas() {
+    const canvas = document.getElementById('live-canvas');
+    canvas.style.backgroundColor = gridBg;
+
+    const slots = GRID_LAYOUT_COORDINATES[currentImagesCount]?.[currentLayoutId] || [];
+    const dispPad = Math.round(gridPadding * 0.4);
+    const dispGap = Math.round(gridGap * 0.4);
+    const dispRad = Math.round(gridRadius * 0.4);
+
+    let html = '';
+    slots.forEach((slot, sIdx) => {
+      const leftPct = (slot.x / 12) * 100;
+      const topPct = (slot.y / 12) * 100;
+      const widthPct = (slot.w / 12) * 100;
+      const heightPct = (slot.h / 12) * 100;
+      const role = SLOT_DEFAULT_ROLES[sIdx % SLOT_DEFAULT_ROLES.length];
+
+      html += `
+        <div style="
+          position: absolute;
+          left: calc(${dispPad}px + ${leftPct}% + ${dispGap / 2}px);
+          top: calc(${dispPad}px + ${topPct}% + ${dispGap / 2}px);
+          width: calc(${widthPct}% - ${dispGap}px);
+          height: calc(${heightPct}% - ${dispGap}px);
+          background: ${SLOT_GRADIENTS[sIdx % SLOT_GRADIENTS.length]};
+          border-radius: ${dispRad}px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 4px;
+          box-shadow: inset 0 0 10px rgba(0,0,0,0.25);
+          box-sizing: border-box;
+          overflow: hidden;
+          transition: all 0.2s ease;
+          border: 1px solid rgba(255,255,255,0.25);
+        ">
+          <span style="font-size: 0.72rem; font-weight: 900; color: #ffffff; text-shadow: 0 1px 2px rgba(0,0,0,0.6);">
+            #${slot.id}
+          </span>
+          <span style="font-size: 0.6rem; color: #ffffff; font-weight: 700; text-align: center; text-shadow: 0 1px 2px rgba(0,0,0,0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90%;">
+            ${role}
+          </span>
+          <span style="font-size: 0.54rem; color: rgba(255,255,255,0.85); font-weight: 600;">
+            ${slot.w}x${slot.h}
+          </span>
+        </div>
+      `;
+    });
+
+    canvas.innerHTML = html;
+  }
+
+  function toggleTheme() {
+    const isDark = document.body.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+      document.body.removeAttribute('data-theme');
+    } else {
+      document.body.setAttribute('data-theme', 'dark');
+    }
+  }
+
+  function switchMainTab(tab) {
+    document.getElementById('tab-btn-1').classList.toggle('active', tab === 1);
+    document.getElementById('tab-btn-2').classList.toggle('active', tab === 2);
+    document.getElementById('tab-content-1').style.display = tab === 1 ? 'flex' : 'none';
+    document.getElementById('tab-content-2').style.display = tab === 2 ? 'flex' : 'none';
+  }
+
+  function selectCampaignType(type) {
+    currentCampaign = type;
+    const types = ['product', 'editorial', 'recipe', 'multiplier', 'recipe-labs'];
+    types.forEach(t => {
+      const card = document.getElementById(`card-${t}`);
+      const badge = document.getElementById(`badge-${t}`);
+      card.classList.remove('selected');
+      card.style.borderColor = 'var(--border-subtle)';
+      if (t === 'multiplier' || t === 'recipe-labs') {
+        badge.innerText = 'BARU';
+        badge.style.background = 'var(--border-subtle)';
+        badge.style.color = 'var(--text-muted)';
+        badge.style.border = 'none';
+      } else {
+        badge.innerText = 'PILIH';
+        badge.style.background = 'var(--border-subtle)';
+        badge.style.color = 'var(--text-muted)';
+        badge.style.border = 'none';
+      }
+    });
+
+    document.getElementById('form-product').style.display = 'none';
+    document.getElementById('form-editorial').style.display = 'none';
+    document.getElementById('form-recipe').style.display = 'none';
+    document.getElementById('form-multiplier').style.display = 'none';
+    document.getElementById('form-recipe-labs').style.display = 'none';
+
+    const targetMap = {
+      product_campaign: { id: 'product', color: 'var(--status-success)', form: 'form-product', btn: '⚡ Luncurkan Video Produk Sekarang (1-Pass)', preset: 'product_showcase_6clips (Omni Flash, 6 Klip)' },
+      editorial_campaign: { id: 'editorial', color: 'var(--status-info)', form: 'form-editorial', btn: '⚡ Luncurkan Video Editorial Sekarang (1-Pass)', preset: 'editorial_tension_6clips (Omni Flash, 6 Klip)' },
+      recipe_campaign: { id: 'recipe', color: 'var(--status-warning)', form: 'form-recipe', btn: '🚀 Luncurkan Auto Pipeline Resep (8 Klip Video)', preset: 'habitfolk_6clips_quick (Omni Flash, 6 Klip @ 4s)' },
+      multiplier_campaign: { id: 'multiplier', color: 'var(--status-purple)', form: 'form-multiplier', btn: '⚡ Luncurkan Video Multiplier Sekarang (1-Pass Multi-Angle)', preset: 'multiplier_deconstruct_remix (5 Klip Angles)' },
+      recipe_labs: { id: 'recipe-labs', color: 'var(--status-rose)', form: 'form-recipe-labs', btn: '⚡ Produksi Naskah Resep & Foto Grid Komposit Sekarang', preset: 'recipe_labs_editorial_food (4 Foto AI + Artikel FB)' }
+    };
+
+    const sel = targetMap[type];
+    const card = document.getElementById(`card-${sel.id}`);
+    const badge = document.getElementById(`badge-${sel.id}`);
+    const form = document.getElementById(sel.form);
+    const btn = document.getElementById('launch-button');
+    const preset = document.getElementById('preset-select');
+
+    card.classList.add('selected');
+    card.style.borderColor = sel.color;
+    badge.innerText = 'AKTIF';
+    badge.style.background = sel.color;
+    badge.style.color = '#ffffff';
+
+    form.style.display = 'flex';
+    btn.style.background = sel.color;
+    btn.innerHTML = `<span>${sel.btn}</span>`;
+    preset.innerHTML = `<option>${sel.preset}</option>`;
+
+    if (type === 'recipe_labs') {
+      renderRecipeLabsLayoutUI();
+    }
+  }
+
+  function handleExecutionModeChange(val) {
+    const scenarioTitle = document.getElementById('angle-scenario-title');
+    if (val === 'manual_review') {
+      scenarioTitle.innerText = '💡 Skenario Angle: Manual Review (Silakan Pilih Salah Satu Chip Angle)';
+    } else {
+      scenarioTitle.innerText = '💡 Skenario Angle: AI Auto-Select Rank #1 (Bebas Repetisi)';
+    }
+  }
+
+  function openScheduleModal() { document.getElementById('schedule-modal').style.display = 'flex'; }
+  function closeScheduleModal() { document.getElementById('schedule-modal').style.display = 'none'; }
+
+  function selectModalScheduleType(type, btn) {
+    document.querySelectorAll('.modal-type-btn').forEach(b => {
+      b.style.border = '1px solid var(--border-subtle)';
+      b.style.background = 'var(--surface)';
+      b.style.color = 'var(--text-primary)';
+      b.style.fontWeight = '700';
+    });
+
+    const colors = {
+      product_campaign: 'var(--status-success)',
+      editorial_campaign: 'var(--status-info)',
+      recipe_campaign: 'var(--status-warning)',
+      multiplier_campaign: 'var(--status-purple)',
+      recipe_labs: 'var(--status-rose)'
+    };
+
+    btn.style.border = `1.5px solid ${colors[type]}`;
+    btn.style.background = 'var(--surface-interactive)';
+    btn.style.color = colors[type];
+    btn.style.fontWeight = '800';
+
+    const names = {
+      product_campaign: 'HabitFolk — Product Showcase',
+      editorial_campaign: 'HabitFolk — Editorial Content Pillar',
+      recipe_campaign: 'Dapur Botani — Daily Morning Reels',
+      multiplier_campaign: 'HabitFolk — Multiplier Angle Variations',
+      recipe_labs: 'Dapur Botani — Resep Teks & Foto Facebook (4-Grid)'
+    };
+    document.getElementById('modal-sched-name').value = names[type] || 'Jadwal Rutin Baru';
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('sim-toast');
+    t.innerText = msg;
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 3500);
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    renderRecipeLabsLayoutUI();
+  });
+</script>
+
+</body>
+</html>

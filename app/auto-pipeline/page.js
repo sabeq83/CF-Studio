@@ -3,6 +3,48 @@
 import Sidebar from '../components/Sidebar';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { GRID_LAYOUT_COORDINATES } from '@/lib/core/GridCoordinates';
+
+const LAYOUT_PRESET_METADATA = {
+  3: [
+    { id: '3_split_left', name: 'Editorial Tri-Split Left', desc: 'Kolom kiri penuh (hero) & 2 blok proses kanan' },
+    { id: '3_split_right', name: 'Tri-Split Right Mirror', desc: '2 blok persiapan kiri & kolom kanan penuh (hero)' },
+    { id: '3_stacked_horizontal', name: 'Landscape Cascade', desc: '3 strip horizontal bertingkat alur waktu' }
+  ],
+  4: [
+    { id: '4_editorial_split', name: 'Editorial Split (Default)', desc: 'Kolom kiri lebar, 2 proses kanan, banner saji bawah' },
+    { id: '4_modern_masonry', name: 'Modern Masonry', desc: 'Banner atas megah diikuti susunan kolom asimetris estetik' },
+    { id: '4_landscape_cascade', name: 'Vertical Story Cascade 4', desc: '4 strip bertumpuk naratif proses sekuensial' }
+  ],
+  5: [
+    { id: '5_pentagon_grid', name: 'Pentagon Asymmetric', desc: 'Susunan dinamis 5 modul foto dengan banner bawah' },
+    { id: '5_step_cascade', name: 'Story Step-by-Step 5', desc: '5 strip bertingkat dramatis step-by-step' },
+    { id: '5_magazine_editorial', name: 'Magazine Editorial', desc: 'Hero banner kolom kiri & 4 grid proses di kanan' }
+  ],
+  6: [
+    { id: '6_magazine_spread', name: 'Magazine Hexa-Grid', desc: 'Tata letak majalah kuliner komprehensif 6 slot' },
+    { id: '6_vertical_masonry', name: 'Pinterest Masonry Style', desc: 'Gaya visual masonry pinterest dinamis 6 slot' },
+    { id: '6_asymmetric_mosaic', name: 'Modern Asymmetric Mosaic', desc: 'Mosaik asimetris modern untuk resep kaya bumbu' }
+  ]
+};
+
+const SLOT_DEFAULT_ROLES = [
+  'Bahan Mentah',
+  'Persiapan & Bumbu',
+  'Proses Memasak',
+  'Sajian Akhir',
+  'Detail Garnish',
+  'Plating Piring'
+];
+
+const SLOT_GRADIENTS = [
+  "linear-gradient(135deg, var(--surface-interactive) 0%, var(--surface-interactive) 100%)",
+  "linear-gradient(135deg, var(--surface-interactive) 0%, var(--surface-interactive) 100%)",
+  "linear-gradient(135deg, var(--surface-interactive) 0%, var(--surface-interactive) 100%)",
+  "linear-gradient(135deg, var(--surface-interactive) 0%, var(--surface-interactive) 100%)",
+  "linear-gradient(135deg, var(--surface-interactive) 0%, var(--surface-interactive) 100%)",
+  "linear-gradient(135deg, var(--surface-interactive) 0%, var(--surface-interactive) 100%)"
+];
 
 export default function AutoPipelinePage() {
   const [brands, setBrands] = useState([]);
@@ -20,11 +62,32 @@ export default function AutoPipelinePage() {
   const [executionMode, setExecutionMode] = useState('full_autopilot');
 
   // --- MULTI-CAMPAIGN STATE UNTUK TAB 1 (1-KLIK INSTAN) ---
-  const [instantCampaignType, setInstantCampaignType] = useState('recipe_campaign'); // 'recipe_campaign' | 'product_campaign' | 'editorial_campaign'
+  const [instantCampaignType, setInstantCampaignType] = useState('recipe_campaign'); // 'recipe_campaign' | 'product_campaign' | 'editorial_campaign' | 'multiplier_campaign' | 'recipe_labs'
   const [instantProductId, setInstantProductId] = useState('');
   const [instantPillar, setInstantPillar] = useState('');
   const [instantProductSearch, setInstantProductSearch] = useState('');
   const [instantPillarSearch, setInstantPillarSearch] = useState('');
+
+  // Multiplier Campaign State (Tab 1)
+  const [blueprints, setBlueprints] = useState([]);
+  const [loadingBlueprints, setLoadingBlueprints] = useState(false);
+  const [instantBlueprintId, setInstantBlueprintId] = useState('');
+  const [multiplierAngles, setMultiplierAngles] = useState([]);
+  const [selectedAngleIndex, setSelectedAngleIndex] = useState(0);
+  const [loadingAngles, setLoadingAngles] = useState(false);
+  const [blueprintSearchQuery, setBlueprintSearchQuery] = useState('');
+
+  // Recipe Labs (Text & Photo Composite Grid) State (Tab 1)
+  const [recipeLabsTopic, setRecipeLabsTopic] = useState('Ayam Panggang Madu Lemon Teflon');
+  const [recipeLabsCategory, setRecipeLabsCategory] = useState('Makanan');
+  const [recipeLabsVisualStyle, setRecipeLabsVisualStyle] = useState('Food Porn');
+  const [imagesPerRecipe, setImagesPerRecipe] = useState(4);
+  const [selectedLayoutId, setSelectedLayoutId] = useState('4_editorial_split');
+  const [gridGapSize, setGridGapSize] = useState(12);
+  const [gridBorderRadius, setGridBorderRadius] = useState(16);
+  const [gridOuterPadding, setGridOuterPadding] = useState(16);
+  const [gridBgColor, setGridBgColor] = useState('#0d0d12');
+  const [postToFacebook, setPostToFacebook] = useState(true);
 
   // --- SCHEDULER & REPLIZ PUBLISHING STATE ---
   const [activeTab, setActiveTab] = useState('pipeline'); // 'pipeline' | 'schedules'
@@ -32,13 +95,13 @@ export default function AutoPipelinePage() {
   const [loadingSchedules, setLoadingSchedules] = useState(false);
   const [runningScheduleIds, setRunningScheduleIds] = useState({});
   const [scheduleFilter, setScheduleFilter] = useState('all'); // 'all' | 'active' | 'paused' | 'archived'
-  const [campaignTypeFilter, setCampaignTypeFilter] = useState('all'); // 'all' | 'product_campaign' | 'editorial_campaign' | 'recipe_campaign'
+  const [campaignTypeFilter, setCampaignTypeFilter] = useState('all'); // 'all' | 'product_campaign' | 'editorial_campaign' | 'recipe_campaign' | 'multiplier_campaign' | 'recipe_labs'
   const [replizAccounts, setReplizAccounts] = useState([]);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState(null);
 
   // Form state modal (Multi-Campaign & Dedicated Row Generation)
-  const [schedCampaignType, setSchedCampaignType] = useState('recipe_campaign'); // 'recipe_campaign' | 'product_campaign' | 'editorial_campaign'
+  const [schedCampaignType, setSchedCampaignType] = useState('recipe_campaign'); // 'recipe_campaign' | 'product_campaign' | 'editorial_campaign' | 'multiplier_campaign' | 'recipe_labs'
   const [schedName, setSchedName] = useState('');
   const [schedBrandId, setSchedBrandId] = useState('');
   const [schedPresetKey, setSchedPresetKey] = useState('');
@@ -52,6 +115,13 @@ export default function AutoPipelinePage() {
   const [schedAutoPublish, setSchedAutoPublish] = useState(true);
   const [modalBrandPresets, setModalBrandPresets] = useState([]);
   const [savingSchedule, setSavingSchedule] = useState(false);
+
+  // Sched Modal State Khusus Multiplier & Recipe Labs
+  const [schedBlueprintId, setSchedBlueprintId] = useState('');
+  const [schedImagesPerRecipe, setSchedImagesPerRecipe] = useState(4);
+  const [schedLayoutId, setSchedLayoutId] = useState('4_editorial_split');
+  const [schedVisualStyle, setSchedVisualStyle] = useState('Food Porn');
+  const [schedPostToFacebook, setSchedPostToFacebook] = useState(true);
 
   // Product Catalog Selection State (Product Campaign)
   const [catalogProducts, setCatalogProducts] = useState([]);
@@ -285,7 +355,52 @@ export default function AutoPipelinePage() {
     fetchSchedules();
     fetchReplizAccounts();
     fetchProductsList();
+    fetchBlueprints();
   }, []);
+
+  async function fetchBlueprints() {
+    setLoadingBlueprints(true);
+    try {
+      const res = await fetch('/api/v2/recipes/autonomous-pipeline?pipeline_type=multiplier_campaign');
+      const data = await res.json();
+      if (data.success && Array.isArray(data.blueprints)) {
+        setBlueprints(data.blueprints);
+        if (data.blueprints.length > 0 && !instantBlueprintId) {
+          setInstantBlueprintId(data.blueprints[0].id);
+        }
+      }
+    } catch (e) {
+      console.warn('[AutoPipeline] Error fetching blueprints:', e);
+    } finally {
+      setLoadingBlueprints(false);
+    }
+  }
+
+  async function generateMultiplierAnglesForBlueprint(bpId) {
+    if (!bpId) return;
+    setLoadingAngles(true);
+    try {
+      const res = await fetch(`/api/v2/recipes/autonomous-pipeline?action=get_multiplier_angles&blueprint_id=${encodeURIComponent(bpId)}`);
+      const data = await res.json();
+      if (data.success && Array.isArray(data.angles) && data.angles.length > 0) {
+        setMultiplierAngles(data.angles);
+        setSelectedAngleIndex(0);
+      }
+    } catch (e) {
+      console.warn('[AutoPipeline] Error generating angles:', e);
+    } finally {
+      setLoadingAngles(false);
+    }
+  }
+
+  // Auto-fetch angles saat user berpindah ke manual_review pada Multiplier
+  useEffect(() => {
+    if (instantCampaignType === 'multiplier_campaign' && executionMode === 'manual_review' && instantBlueprintId) {
+      if (multiplierAngles.length === 0) {
+        generateMultiplierAnglesForBlueprint(instantBlueprintId);
+      }
+    }
+  }, [instantCampaignType, executionMode, instantBlueprintId]);
 
   async function fetchProducts() {
     setLoadingProducts(true);
@@ -380,6 +495,8 @@ export default function AutoPipelinePage() {
     let targetCategory = category || 'makanan_utama';
     let targetProductId = null;
     let targetPillar = null;
+    let targetDeconstructId = null;
+    let targetChosenAngle = null;
 
     if (instantCampaignType === 'product_campaign') {
       const effectiveProdId = instantProductId || (catalogProducts[0]?.id || null);
@@ -400,6 +517,24 @@ export default function AutoPipelinePage() {
       targetTopic = effectivePillar;
       targetCategory = 'editorial';
       targetPillar = effectivePillar;
+    } else if (instantCampaignType === 'multiplier_campaign') {
+      targetDeconstructId = instantBlueprintId || (blueprints[0]?.id || null);
+      if (!targetDeconstructId) {
+        showToast('Pilih Blueprint video referensi Deconstruct Lab terlebih dahulu.', 'error');
+        return;
+      }
+      if (executionMode === 'manual_review' && multiplierAngles.length > 0) {
+        targetChosenAngle = multiplierAngles[selectedAngleIndex] || multiplierAngles[0];
+      }
+      targetTopic = targetChosenAngle?.title || 'Multiplier Remix Hook';
+      targetCategory = 'multiplier';
+    } else if (instantCampaignType === 'recipe_labs') {
+      if (!recipeLabsTopic || !recipeLabsTopic.trim()) {
+        showToast('Topik / Nama menu resep wajib diisi.', 'error');
+        return;
+      }
+      targetTopic = recipeLabsTopic.trim();
+      targetCategory = recipeLabsCategory || 'Makanan';
     } else {
       if (!topic || !topic.trim()) {
         showToast('Topik resep wajib diisi.', 'error');
@@ -422,24 +557,39 @@ export default function AutoPipelinePage() {
           product_id: targetProductId,
           product_title: targetTopic,
           content_pillar: targetPillar,
+          deconstruct_asset_id: targetDeconstructId,
+          selected_angle: targetChosenAngle,
           category: targetCategory,
           recipe_count: Number(recipeCount || 1),
           execution_mode: executionMode,
           visual_identity_preset_id: selectedPresetId || activePresetConfig?.visual_swap?.visual_identity_preset_id || null,
-          auto_sync_contentflow: 1
+          auto_sync_contentflow: 1,
+          // Parameter khusus Recipe Labs Grid Komposit
+          images_per_recipe: imagesPerRecipe,
+          selected_layout_id: selectedLayoutId,
+          grid_gap_size: gridGapSize,
+          grid_border_radius: gridBorderRadius,
+          grid_outer_padding: gridOuterPadding,
+          grid_bg_color: gridBgColor,
+          visual_style: recipeLabsVisualStyle,
+          post_to_facebook: postToFacebook
         })
       });
 
       const data = await res.json();
 
       if (data.success) {
-        setActiveCampaignId(data.campaign_id);
+        setActiveCampaignId(data.campaign_id || data.task_id);
         setPollingActive(true);
-        fetchFactualStatus(data.campaign_id);
+        fetchFactualStatus(data.campaign_id || data.task_id);
         const typeLabel = instantCampaignType === 'product_campaign' 
           ? 'Video Produk' 
-          : (instantCampaignType === 'editorial_campaign' ? 'Video Editorial' : 'Video Resep');
-        showToast(`Kampanye ${typeLabel} (${data.campaign_id}) berhasil diluncurkan! Melacak progres produksi faktual... 🚀`);
+          : (instantCampaignType === 'editorial_campaign'
+              ? 'Video Editorial'
+              : (instantCampaignType === 'multiplier_campaign'
+                  ? 'Video Multiplier'
+                  : (instantCampaignType === 'recipe_labs' ? 'Resep Teks & Foto' : 'Video Resep')));
+        showToast(`Kampanye ${typeLabel} (${data.campaign_id || data.task_id}) berhasil diluncurkan! Melacak progres produksi faktual... 🚀`);
         fetchRecentCampaigns();
       } else {
         showToast('Gagal meluncurkan pipeline: ' + (data.error || 'Terjadi kesalahan sistem'), 'error');
@@ -672,6 +822,8 @@ export default function AutoPipelinePage() {
       if (!editingSchedule && selectedPillars.length === 0) {
         return showToast('Pilih minimal 1 pilar konten brand untuk dijadwalkan.', 'error');
       }
+    } else if (schedCampaignType === 'multiplier_campaign') {
+      if (!schedName.trim()) return showToast('Nama jadwal wajib diisi', 'error');
     } else {
       if (!schedName.trim()) return showToast('Nama jadwal wajib diisi', 'error');
       if (!schedTopic.trim()) return showToast('Tema / Arahan topik resep wajib diisi', 'error');
@@ -693,7 +845,22 @@ export default function AutoPipelinePage() {
           targetId = selectedPillars[0];
           targetTitle = selectedPillars[0];
           schedTopicVal = targetTitle;
+        } else if (schedCampaignType === 'multiplier_campaign') {
+          targetId = schedBlueprintId || editingSchedule.target_item_id || (blueprints[0]?.id || null);
+          const bpObj = blueprints.find(b => b.id === targetId);
+          targetTitle = bpObj?.original_caption || bpObj?.source_url || 'Winning Blueprint';
+          schedTopicVal = targetTitle;
         }
+
+        const editPipelineConfig = schedCampaignType === 'product_campaign'
+          ? { product_id: targetId }
+          : (schedCampaignType === 'editorial_campaign'
+              ? { content_pillar: targetTitle }
+              : (schedCampaignType === 'multiplier_campaign'
+                  ? { blueprint_id: targetId, execution_mode: 'full_autopilot' }
+                  : (schedCampaignType === 'recipe_labs'
+                      ? { images_per_recipe: schedImagesPerRecipe, selected_layout_id: schedLayoutId, visual_style: schedVisualStyle, post_to_facebook: schedPostToFacebook }
+                      : {})));
 
         const payload = {
           name: schedName.trim(),
@@ -710,7 +877,8 @@ export default function AutoPipelinePage() {
           days_of_week: schedDays,
           repliz_account_ids: schedReplizAccountIds,
           auto_publish_enabled: schedAutoPublish,
-          timezone: 'Asia/Jakarta'
+          timezone: 'Asia/Jakarta',
+          pipeline_config: editPipelineConfig
         };
 
         const res = await fetch(`/api/v2/recipes/auto-pipeline-schedules/${editingSchedule.id}`, {
@@ -808,7 +976,27 @@ export default function AutoPipelinePage() {
             finalTopic = pillar;
             finalCategory = 'editorial';
             if (!finalName) finalName = `${pillar} — ${schedGenTime} WIB`;
+          } else if (schedCampaignType === 'multiplier_campaign') {
+            targetId = schedBlueprintId || (blueprints[0]?.id || null);
+            const bpObj = blueprints.find(b => b.id === targetId);
+            targetTitle = bpObj?.original_caption || bpObj?.source_url || 'Winning Blueprint';
+            finalTopic = targetTitle;
+            finalCategory = 'multiplier';
+            if (!finalName) finalName = `${targetTitle} — ${schedGenTime} WIB`;
+          } else if (schedCampaignType === 'recipe_labs') {
+            finalCategory = 'recipe_labs';
+            if (!finalName) finalName = `Resep Foto (${schedImagesPerRecipe}G) — ${schedGenTime} WIB`;
           }
+
+          const pipelineConfigPayload = schedCampaignType === 'product_campaign'
+            ? { product_id: targetId }
+            : (schedCampaignType === 'editorial_campaign'
+                ? { content_pillar: targetTitle }
+                : (schedCampaignType === 'multiplier_campaign'
+                    ? { blueprint_id: targetId, execution_mode: 'full_autopilot' }
+                    : (schedCampaignType === 'recipe_labs'
+                        ? { images_per_recipe: schedImagesPerRecipe, selected_layout_id: schedLayoutId, visual_style: schedVisualStyle, post_to_facebook: schedPostToFacebook }
+                        : {})));
 
           const payload = {
             name: finalName,
@@ -826,7 +1014,7 @@ export default function AutoPipelinePage() {
             repliz_account_ids: schedReplizAccountIds,
             auto_publish_enabled: schedAutoPublish,
             timezone: 'Asia/Jakarta',
-            pipeline_config: schedCampaignType === 'product_campaign' ? { product_id: targetId } : (schedCampaignType === 'editorial_campaign' ? { content_pillar: targetTitle } : {})
+            pipeline_config: pipelineConfigPayload
           };
 
           const res = await fetch('/api/v2/recipes/auto-pipeline-schedules', {
@@ -940,6 +1128,8 @@ export default function AutoPipelinePage() {
   const countProductCampaigns = schedules.filter(s => s.pipeline_type === 'product_campaign').length;
   const countEditorialCampaigns = schedules.filter(s => s.pipeline_type === 'editorial_campaign').length;
   const countRecipeCampaigns = schedules.filter(s => (s.pipeline_type || 'recipe_campaign') === 'recipe_campaign').length;
+  const countMultiplierCampaigns = schedules.filter(s => s.pipeline_type === 'multiplier_campaign').length;
+  const countRecipeLabsCampaigns = schedules.filter(s => s.pipeline_type === 'recipe_labs').length;
 
   const filteredSchedules = schedules.filter(s => {
     const pType = s.pipeline_type || 'recipe_campaign';
@@ -965,6 +1155,22 @@ export default function AutoPipelinePage() {
           color: 'var(--status-info)',
           bg: 'var(--status-info-soft)',
           border: 'var(--status-info)'
+        };
+      case 'multiplier_campaign':
+        return {
+          icon: '🔀',
+          label: 'Video Multiplier',
+          color: 'var(--status-purple)',
+          bg: 'var(--status-purple-soft)',
+          border: 'var(--status-purple)'
+        };
+      case 'recipe_labs':
+        return {
+          icon: '🖼️',
+          label: 'Resep Teks & Foto',
+          color: 'var(--status-rose)',
+          bg: 'var(--status-rose-soft)',
+          border: 'var(--status-rose)'
         };
       case 'recipe_campaign':
       default:
@@ -1343,11 +1549,13 @@ export default function AutoPipelinePage() {
                 <label style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
                   1. Pilih Tipe Kampanye
                 </label>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.85rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem' }}>
                   {[
                     { key: 'product_campaign', icon: '🛍️', label: 'Video Produk', desc: 'Promosi produk katalog, showcase USP & unboxing 1-pass', color: 'var(--status-success)' },
                     { key: 'editorial_campaign', icon: '📖', label: 'Video Editorial', desc: 'Pilar brand, hook tension & storytelling edukatif 1-pass', color: 'var(--status-info)' },
-                    { key: 'recipe_campaign', icon: '🍳', label: 'Video Resep', desc: 'Food reels & cooking guide 4-babak 1-pass', color: 'var(--status-warning)' }
+                    { key: 'recipe_campaign', icon: '🍳', label: 'Video Resep', desc: 'Food reels & cooking guide 4-babak 1-pass', color: 'var(--status-warning)' },
+                    { key: 'multiplier_campaign', icon: '🔀', label: 'Video Multiplier', desc: 'Remix angle & hook dari video referensi pemenang', color: 'var(--status-purple)' },
+                    { key: 'recipe_labs', icon: '🖼️', label: 'Resep Teks & Foto', desc: 'Naskah resep FB + Foto AI dalam susunan grid komposit', color: 'var(--status-rose)' }
                   ].map(t => {
                     const isSelected = instantCampaignType === t.key;
                     return (
@@ -2134,6 +2342,701 @@ export default function AutoPipelinePage() {
                 </>
               )}
 
+              {/* 3D: MULTIPLIER CAMPAIGN (Winning Blueprint Deconstruct Lab) */}
+              {instantCampaignType === 'multiplier_campaign' && (
+                <div style={{
+                  background: 'var(--surface-raised)',
+                  border: '1.5px solid var(--status-purple)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '1.15rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.85rem'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <div style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                      <span>🔀</span>
+                      <span>Pilih Blueprint Video Pemenang (Deconstruct Lab):</span>
+                    </div>
+                    <span style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      padding: '0.2rem 0.65rem',
+                      borderRadius: 9999,
+                      background: 'var(--status-purple-soft)',
+                      color: 'var(--status-purple)',
+                      border: '1px solid var(--status-purple)'
+                    }}>
+                      Winning Hook Engine
+                    </span>
+                  </div>
+
+                  {/* Search Blueprint */}
+                  <div style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '0.85rem' }}>🔍</span>
+                    <input
+                      type="text"
+                      value={blueprintSearchQuery}
+                      onChange={(e) => setBlueprintSearchQuery(e.target.value)}
+                      placeholder="Cari blueprint video dekonstruksi..."
+                      style={{
+                        width: '100%',
+                        height: '38px',
+                        background: 'var(--surface)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-sm)',
+                        padding: '0 10px 0 32px',
+                        color: 'var(--text-primary)',
+                        fontSize: '0.84rem',
+                        outline: 'none'
+                      }}
+                    />
+                  </div>
+
+                  {/* Blueprints Scroll List */}
+                  <div style={{
+                    maxHeight: '160px',
+                    overflowY: 'auto',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.45rem',
+                    paddingRight: '4px'
+                  }}>
+                    {loadingBlueprints ? (
+                      <div style={{ textAlign: 'center', padding: '1.25rem', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
+                        Memuat daftar blueprint video...
+                      </div>
+                    ) : blueprints.length === 0 ? (
+                      <div style={{ textAlign: 'center', padding: '1.25rem', color: 'var(--text-muted)', fontSize: '0.82rem', background: 'var(--surface)', borderRadius: 'var(--radius-sm)', border: '1px dashed var(--border-subtle)' }}>
+                        Belum ada video di Deconstruct Lab. Silakan lakukan dekonstruksi video di menu Deconstruct Lab terlebih dahulu.
+                      </div>
+                    ) : (
+                      blueprints
+                        .filter(bp => {
+                          if (!blueprintSearchQuery.trim()) return true;
+                          const q = blueprintSearchQuery.toLowerCase();
+                          return (bp.original_caption && bp.original_caption.toLowerCase().includes(q)) ||
+                                 (bp.source_url && bp.source_url.toLowerCase().includes(q)) ||
+                                 (bp.viral_pattern_summary && bp.viral_pattern_summary.toLowerCase().includes(q));
+                        })
+                        .map(bp => {
+                          const isSelected = instantBlueprintId === bp.id;
+                          return (
+                            <div
+                              key={bp.id}
+                              onClick={() => {
+                                setInstantBlueprintId(bp.id);
+                                if (executionMode === 'manual_review') {
+                                  generateMultiplierAnglesForBlueprint(bp.id);
+                                }
+                              }}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.75rem',
+                                padding: '0.55rem 0.75rem',
+                                borderRadius: 'var(--radius-sm)',
+                                background: isSelected ? 'var(--surface-interactive)' : 'var(--surface)',
+                                border: isSelected ? '1.5px solid var(--status-purple)' : '1px solid var(--border-subtle)',
+                                cursor: 'pointer',
+                                transition: 'var(--transition)'
+                              }}
+                            >
+                              <div style={{
+                                width: '36px',
+                                height: '36px',
+                                background: '#000000',
+                                color: '#ffffff',
+                                borderRadius: '4px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '1rem',
+                                flexShrink: 0
+                              }}>
+                                🎬
+                              </div>
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{
+                                  fontSize: '0.82rem',
+                                  fontWeight: 700,
+                                  color: 'var(--text-primary)',
+                                  whiteSpace: 'nowrap',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis'
+                                }}>
+                                  {bp.original_caption || bp.source_url || bp.id}
+                                </div>
+                                <div style={{
+                                  fontSize: '0.7rem',
+                                  color: 'var(--text-muted)',
+                                  whiteSpace: 'nowrap',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis'
+                                }}>
+                                  {bp.viral_pattern_summary || 'Formula Hook Teruji'}
+                                </div>
+                              </div>
+                              <span style={{
+                                color: isSelected ? 'var(--status-purple)' : 'var(--text-muted)',
+                                fontWeight: 800,
+                                fontSize: '0.9rem'
+                              }}>
+                                {isSelected ? '✓' : '○'}
+                              </span>
+                            </div>
+                          );
+                        })
+                    )}
+                  </div>
+
+                  {/* Skenario Angle Box */}
+                  <div style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '0.85rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.65rem'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.45rem' }}>
+                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                        {executionMode === 'full_autopilot'
+                          ? '💡 Skenario Angle: AI Auto-Select Rank #1 (Bebas Repetisi)'
+                          : '💡 Skenario Angle: Kurasi 3 Opsi Angle Pilihan Anda'}
+                      </div>
+                      {executionMode === 'manual_review' && (
+                        <button
+                          type="button"
+                          disabled={loadingAngles}
+                          onClick={() => generateMultiplierAnglesForBlueprint(instantBlueprintId || blueprints[0]?.id)}
+                          style={{
+                            background: 'var(--status-purple-soft)',
+                            color: 'var(--status-purple)',
+                            border: '1px solid var(--status-purple)',
+                            padding: '0.25rem 0.65rem',
+                            borderRadius: 'var(--radius-xs)',
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            cursor: loadingAngles ? 'not-allowed' : 'pointer'
+                          }}
+                        >
+                          {loadingAngles ? '⚡ Meracik Angle...' : '⚡ Regenerate Opsi Angle Baru'}
+                        </button>
+                      )}
+                    </div>
+
+                    {executionMode === 'full_autopilot' ? (
+                      <p style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.45 }}>
+                        Mesin akan memeriksa tabel riwayat <code>excluded_history</code> agar hook tidak pernah duplikat, merumuskan variasi sudut pandang secara cerdas, otomatis memilih <strong>Angle Rank #1</strong>, dan langsung memproses produksi video tanpa jeda manual.
+                      </p>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        {loadingAngles ? (
+                          <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+                            Sedang merumuskan 3 angle viral dengan Gemini AI...
+                          </div>
+                        ) : multiplierAngles.length === 0 ? (
+                          <div style={{ textAlign: 'center', padding: '0.85rem', color: 'var(--text-muted)', fontSize: '0.78rem' }}>
+                            Klik tombol <em>Regenerate Opsi Angle Baru</em> untuk memuat preview 3 angle dari blueprint terpilih.
+                          </div>
+                        ) : (
+                          multiplierAngles.map((angle, idx) => {
+                            const isAngleSelected = selectedAngleIndex === idx;
+                            return (
+                              <div
+                                key={idx}
+                                onClick={() => setSelectedAngleIndex(idx)}
+                                style={{
+                                  padding: '0.65rem 0.85rem',
+                                  borderRadius: 'var(--radius-sm)',
+                                  background: isAngleSelected ? 'var(--status-purple-soft)' : 'var(--surface-raised)',
+                                  border: isAngleSelected ? '1.5px solid var(--status-purple)' : '1px solid var(--border-subtle)',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'flex-start',
+                                  gap: '0.65rem',
+                                  transition: 'var(--transition)'
+                                }}
+                              >
+                                <div>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                                    <span style={{
+                                      fontSize: '0.66rem',
+                                      fontWeight: 800,
+                                      background: 'var(--status-purple)',
+                                      color: '#ffffff',
+                                      padding: '0.1rem 0.45rem',
+                                      borderRadius: 9999
+                                    }}>
+                                      RANK {idx + 1}
+                                    </span>
+                                    <strong style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>
+                                      {angle.title}
+                                    </strong>
+                                  </div>
+                                  <p style={{ fontSize: '0.73rem', color: 'var(--text-secondary)', margin: '0.3rem 0 0.15rem 0' }}>
+                                    <strong>Hook (0-3s):</strong> "{angle.hook_text}"
+                                  </p>
+                                  {angle.vo_preview && (
+                                    <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', margin: 0, fontStyle: 'italic' }}>
+                                      Narasi VO: "{angle.vo_preview}"
+                                    </p>
+                                  )}
+                                </div>
+                                <span style={{
+                                  color: isAngleSelected ? 'var(--status-purple)' : 'var(--text-muted)',
+                                  fontWeight: 800,
+                                  fontSize: '0.9rem'
+                                }}>
+                                  {isAngleSelected ? '✓' : '○'}
+                                </span>
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* 3E: RECIPE LABS (100% Mengadopsi Layout Asli dari RecipeLabsConfigurationForm.js) */}
+              {instantCampaignType === 'recipe_labs' && (
+                <div style={{
+                  background: 'var(--surface-raised)',
+                  border: '1.5px solid var(--status-rose)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '1.15rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.95rem'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <div style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                      <span>🖼️</span>
+                      <span>Konfigurasi Resep Teks & Foto AI (Recipe Labs Asli)</span>
+                    </div>
+                    <span style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      padding: '0.2rem 0.65rem',
+                      borderRadius: 9999,
+                      background: 'var(--status-rose-soft)',
+                      color: 'var(--status-rose)',
+                      border: '1px solid var(--status-rose)'
+                    }}>
+                      Artikel FB + 12-Grid Slot Renderer
+                    </span>
+                  </div>
+
+                  {/* Topik Menu & Gaya Visual */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.75rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                        Topik / Nama Menu Resep:
+                      </label>
+                      <input
+                        type="text"
+                        value={recipeLabsTopic}
+                        onChange={(e) => setRecipeLabsTopic(e.target.value)}
+                        placeholder="Contoh: Ayam Panggang Madu Lemon Teflon..."
+                        style={{
+                          height: '38px',
+                          background: 'var(--input-bg)',
+                          border: '1px solid var(--border-subtle)',
+                          borderRadius: 'var(--radius-sm)',
+                          padding: '0 0.85rem',
+                          color: 'var(--text-primary)',
+                          fontSize: '0.85rem',
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                        Gaya Visual Fotografi AI:
+                      </label>
+                      <select
+                        value={recipeLabsVisualStyle}
+                        onChange={(e) => setRecipeLabsVisualStyle(e.target.value)}
+                        style={{
+                          height: '38px',
+                          background: 'var(--input-bg)',
+                          border: '1px solid var(--border-subtle)',
+                          borderRadius: 'var(--radius-sm)',
+                          padding: '0 0.75rem',
+                          color: 'var(--text-primary)',
+                          fontSize: '0.84rem',
+                          outline: 'none'
+                        }}
+                      >
+                        <option value="Food Porn">Food Porn & Glossy Commercial</option>
+                        <option value="Rustic Countryside">Rustic Countryside & Wooden Texture</option>
+                        <option value="Clean Nordic">Clean Nordic Studio & Bright Sunlight</option>
+                        <option value="Dark Moody">Dark Moody Contrast & Cinematic Smoke</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Susunan Grid Komposit (Adopted 100% from Recipe Labs) */}
+                  <div style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '1.15rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1rem'
+                  }}>
+                    {/* Pilihan Jumlah Gambar */}
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                        <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                          Pilihan Jumlah Gambar dalam Kolase
+                        </label>
+                        <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                          Menentukan variasi template layout grid
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        {[3, 4, 5, 6].map(count => {
+                          const isActive = imagesPerRecipe === count;
+                          return (
+                            <button
+                              type="button"
+                              key={count}
+                              onClick={() => {
+                                setImagesPerRecipe(count);
+                                const defaultLayout = LAYOUT_PRESET_METADATA[count]?.[0]?.id || '4_editorial_split';
+                                setSelectedLayoutId(defaultLayout);
+                              }}
+                              style={{
+                                padding: '0.45rem 1rem',
+                                borderRadius: 'var(--radius-sm)',
+                                border: isActive ? '1.5px solid var(--action-primary)' : '1px solid var(--border-subtle)',
+                                background: isActive ? 'var(--surface-interactive)' : 'var(--surface-raised)',
+                                color: isActive ? 'var(--action-primary)' : 'var(--text-secondary)',
+                                fontSize: '0.82rem',
+                                fontWeight: isActive ? 800 : 600,
+                                cursor: 'pointer',
+                                transition: 'var(--transition)'
+                              }}
+                            >
+                              {count} Gambar {count === 4 ? '(Default)' : ''}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* 2 Kolom: Preset Thumbnails & Sliders di Kiri, Live 1:1 Canvas di Kanan */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr)) 250px', gap: '1.25rem', alignItems: 'start' }}>
+                      {/* Kolom Kiri: Thumbnails & Sliders */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                        <div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.45rem' }}>
+                            <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                              Template Preset Layout Kolase
+                            </label>
+                            <span style={{ fontSize: '0.74rem', color: 'var(--action-primary)', fontWeight: 800 }}>
+                              {LAYOUT_PRESET_METADATA[imagesPerRecipe]?.find(p => p.id === selectedLayoutId)?.name || selectedLayoutId}
+                            </span>
+                          </div>
+
+                          {/* Thumbnail Cards Grid */}
+                          <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(115px, 1fr))',
+                            gap: '8px',
+                            marginBottom: '10px'
+                          }}>
+                            {(LAYOUT_PRESET_METADATA[imagesPerRecipe] || []).map(preset => {
+                              const isSelected = selectedLayoutId === preset.id;
+                              const presetSlots = GRID_LAYOUT_COORDINATES[imagesPerRecipe]?.[preset.id] || [];
+
+                              return (
+                                <div
+                                  key={preset.id}
+                                  onClick={() => setSelectedLayoutId(preset.id)}
+                                  style={{
+                                    background: isSelected ? 'var(--surface-interactive)' : 'var(--surface-raised)',
+                                    border: isSelected ? '2px solid var(--action-primary)' : '1px solid var(--border-subtle)',
+                                    borderRadius: 'var(--radius-sm)',
+                                    padding: '6px',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '6px',
+                                    transition: 'all 0.15s ease'
+                                  }}
+                                >
+                                  {/* Miniature 12-grid preview */}
+                                  <div style={{
+                                    width: '100%',
+                                    aspectRatio: '1 / 1',
+                                    background: 'var(--surface-interactive)',
+                                    borderRadius: '3px',
+                                    position: 'relative',
+                                    overflow: 'hidden',
+                                    padding: '2px'
+                                  }}>
+                                    {presetSlots.map((s, idx) => (
+                                      <div
+                                        key={s.id}
+                                        style={{
+                                          position: 'absolute',
+                                          left: `${(s.x / 12) * 100}%`,
+                                          top: `${(s.y / 12) * 100}%`,
+                                          width: `calc(${(s.w / 12) * 100}% - 1px)`,
+                                          height: `calc(${(s.h / 12) * 100}% - 1px)`,
+                                          background: SLOT_GRADIENTS[idx % SLOT_GRADIENTS.length],
+                                          borderRadius: '2px'
+                                        }}
+                                      />
+                                    ))}
+                                  </div>
+                                  <div style={{
+                                    fontSize: '0.72rem',
+                                    fontWeight: isSelected ? 700 : 600,
+                                    color: isSelected ? 'var(--action-primary)' : 'var(--text-primary)',
+                                    textAlign: 'center',
+                                    lineHeight: 1.15
+                                  }}>
+                                    {preset.name}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+
+                          {/* Dropdown Fallback */}
+                          <select
+                            value={selectedLayoutId}
+                            onChange={(e) => setSelectedLayoutId(e.target.value)}
+                            style={{
+                              width: '100%',
+                              padding: '8px 10px',
+                              background: 'var(--input-bg)',
+                              border: '1px solid var(--border-subtle)',
+                              borderRadius: 'var(--radius-sm)',
+                              color: 'var(--text-primary)',
+                              fontSize: '0.82rem'
+                            }}
+                          >
+                            {(LAYOUT_PRESET_METADATA[imagesPerRecipe] || []).map(preset => (
+                              <option key={preset.id} value={preset.id}>{preset.name}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* Sliders Box */}
+                        <div style={{
+                          background: 'var(--surface-raised)',
+                          border: '1px solid var(--border-subtle)',
+                          borderRadius: 'var(--radius-sm)',
+                          padding: '10px 12px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '8px'
+                        }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                            <div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '2px' }}>
+                                <span>Celah (Gap):</span>
+                                <strong style={{ color: 'var(--action-primary)' }}>{gridGapSize}px</strong>
+                              </div>
+                              <input
+                                type="range"
+                                min="0"
+                                max="30"
+                                step="2"
+                                value={gridGapSize}
+                                onChange={(e) => setGridGapSize(Number(e.target.value))}
+                                style={{ width: '100%', accentColor: 'var(--action-primary)' }}
+                              />
+                            </div>
+                            <div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '2px' }}>
+                                <span>Radius:</span>
+                                <strong style={{ color: 'var(--action-primary)' }}>{gridBorderRadius}px</strong>
+                              </div>
+                              <input
+                                type="range"
+                                min="0"
+                                max="40"
+                                step="2"
+                                value={gridBorderRadius}
+                                onChange={(e) => setGridBorderRadius(Number(e.target.value))}
+                                style={{ width: '100%', accentColor: 'var(--action-primary)' }}
+                              />
+                            </div>
+                          </div>
+
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                            <div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '2px' }}>
+                                <span>Padding:</span>
+                                <strong style={{ color: 'var(--action-primary)' }}>{gridOuterPadding}px</strong>
+                              </div>
+                              <input
+                                type="range"
+                                min="0"
+                                max="40"
+                                step="2"
+                                value={gridOuterPadding}
+                                onChange={(e) => setGridOuterPadding(Number(e.target.value))}
+                                style={{ width: '100%', accentColor: 'var(--action-primary)' }}
+                              />
+                            </div>
+                            <div>
+                              <div style={{ fontSize: '0.75rem', marginBottom: '2px' }}>Warna Latar Grid</div>
+                              <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                                <input
+                                  type="color"
+                                  value={gridBgColor}
+                                  onChange={(e) => setGridBgColor(e.target.value)}
+                                  style={{ border: 'none', width: '28px', height: '28px', padding: 0, background: 'none', cursor: 'pointer', borderRadius: '4px' }}
+                                />
+                                <input
+                                  type="text"
+                                  value={gridBgColor}
+                                  onChange={(e) => setGridBgColor(e.target.value)}
+                                  style={{
+                                    height: '28px',
+                                    background: 'var(--input-bg)',
+                                    border: '1px solid var(--border-subtle)',
+                                    borderRadius: 'var(--radius-xs)',
+                                    padding: '0 6px',
+                                    fontSize: '0.75rem',
+                                    color: 'var(--text-primary)',
+                                    flex: 1
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Facebook Auto-Publish Checkbox */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginTop: '0.2rem' }}>
+                          <input
+                            type="checkbox"
+                            id="fb-autopublish-check"
+                            checked={postToFacebook}
+                            onChange={(e) => setPostToFacebook(e.target.checked)}
+                            style={{ width: '16px', height: '16px', accentColor: 'var(--action-primary)', cursor: 'pointer' }}
+                          />
+                          <label htmlFor="fb-autopublish-check" style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 600, cursor: 'pointer' }}>
+                            Posting otomatis naskah resep dan gambar kolase ke Halaman Facebook
+                          </label>
+                        </div>
+                      </div>
+
+                      {/* Kolom Kanan: Live Mockup Preview Box (1:1 Canvas 230px x 230px) */}
+                      <div style={{
+                        background: 'var(--surface-raised)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-md)',
+                        padding: '14px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '10px'
+                      }}>
+                        <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                            📱 Mockup Preview (1:1)
+                          </span>
+                          <span style={{ fontSize: '0.7rem', padding: '2px 6px', background: 'var(--status-rose-soft)', color: 'var(--status-rose)', borderRadius: '4px', fontWeight: 700 }}>
+                            {imagesPerRecipe} Slots
+                          </span>
+                        </div>
+
+                        {/* 1:1 Canvas Container (230px x 230px) */}
+                        <div style={{
+                          width: '230px',
+                          height: '230px',
+                          backgroundColor: gridBgColor,
+                          borderRadius: `${Math.round(gridBorderRadius * 0.4) + 4}px`,
+                          padding: `${Math.round(gridOuterPadding * 0.4)}px`,
+                          position: 'relative',
+                          boxShadow: '0 8px 24px var(--surface-interactive)',
+                          overflow: 'hidden',
+                          boxSizing: 'border-box',
+                          border: '1px solid var(--border-subtle)'
+                        }}>
+                          {(() => {
+                            const activeSlots = (GRID_LAYOUT_COORDINATES[imagesPerRecipe]?.[selectedLayoutId]) ||
+                                                (GRID_LAYOUT_COORDINATES[imagesPerRecipe]?.[(LAYOUT_PRESET_METADATA[imagesPerRecipe]?.[0]?.id)]) || [];
+                            const dispPad = Math.round(gridOuterPadding * 0.4);
+                            const dispGap = Math.round(gridGapSize * 0.4);
+                            const dispRad = Math.round(gridBorderRadius * 0.4);
+
+                            return activeSlots.map((slot, sIdx) => {
+                              const leftPct = (slot.x / 12) * 100;
+                              const topPct = (slot.y / 12) * 100;
+                              const widthPct = (slot.w / 12) * 100;
+                              const heightPct = (slot.h / 12) * 100;
+
+                              return (
+                                <div
+                                  key={slot.id}
+                                  style={{
+                                    position: 'absolute',
+                                    left: `calc(${dispPad}px + ${leftPct}% + ${dispGap / 2}px)`,
+                                    top: `calc(${dispPad}px + ${topPct}% + ${dispGap / 2}px)`,
+                                    width: `calc(${widthPct}% - ${dispGap}px)`,
+                                    height: `calc(${heightPct}% - ${dispGap}px)`,
+                                    background: SLOT_GRADIENTS[sIdx % SLOT_GRADIENTS.length],
+                                    borderRadius: `${dispRad}px`,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    padding: '4px',
+                                    boxShadow: 'inset 0 0 10px var(--surface-interactive)',
+                                    boxSizing: 'border-box',
+                                    overflow: 'hidden'
+                                  }}
+                                >
+                                  <span style={{
+                                    fontSize: '0.62rem',
+                                    fontWeight: 800,
+                                    background: 'var(--surface-interactive)',
+                                    color: 'var(--action-primary)',
+                                    padding: '1px 5px',
+                                    borderRadius: '3px',
+                                    marginBottom: '2px',
+                                    fontFamily: 'monospace'
+                                  }}>
+                                    #{slot.id}
+                                  </span>
+                                  <span style={{
+                                    fontSize: '0.58rem',
+                                    fontWeight: 600,
+                                    color: 'var(--text-primary)',
+                                    textAlign: 'center',
+                                    lineHeight: 1.1
+                                  }}>
+                                    {SLOT_DEFAULT_ROLES[sIdx] || `Foto ${sIdx + 1}`}
+                                  </span>
+                                </div>
+                              );
+                            });
+                          })()}
+                        </div>
+                        <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textAlign: 'center' }}>
+                          Render Output: 2400 x 2400 px
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Submit Button */}
               <div style={{ paddingTop: '0.5rem' }}>
                 <button
@@ -2142,7 +3045,9 @@ export default function AutoPipelinePage() {
                   style={{
                     background: isLaunching ? 'var(--surface-interactive)' : (
                       instantCampaignType === 'product_campaign' ? 'var(--status-success)' :
-                      (instantCampaignType === 'editorial_campaign' ? 'var(--status-info)' : 'var(--action-primary)')
+                      (instantCampaignType === 'editorial_campaign' ? 'var(--status-info)' :
+                      (instantCampaignType === 'multiplier_campaign' ? 'var(--status-purple)' :
+                      (instantCampaignType === 'recipe_labs' ? 'var(--status-rose)' : 'var(--action-primary)')))
                     ),
                     color: isLaunching ? 'var(--text-muted)' : 'var(--on-action-primary)',
                     border: 'none',
@@ -2164,7 +3069,11 @@ export default function AutoPipelinePage() {
                         ? `⚡ Luncurkan Video Produk Sekarang (1-Pass)`
                         : (instantCampaignType === 'editorial_campaign'
                             ? `⚡ Luncurkan Video Editorial Sekarang (1-Pass)`
-                            : `🚀 Luncurkan Auto Pipeline Resep (${targetClipsCount} Klip Video)`)
+                            : (instantCampaignType === 'multiplier_campaign'
+                                ? `🔀 Luncurkan Multiplier Angle Remix (Winning Blueprint)`
+                                : (instantCampaignType === 'recipe_labs'
+                                    ? `🖼️ Luncurkan Resep Teks & Foto AI (Grid Komposit)`
+                                    : `🚀 Luncurkan Auto Pipeline Resep (${targetClipsCount} Klip Video)`)))
                     )}
                   </span>
                 </button>
@@ -2756,7 +3665,9 @@ export default function AutoPipelinePage() {
                   { key: 'all', label: '🌐 Semua Kampanye', count: countAllCampaigns },
                   { key: 'product_campaign', label: '🛍️ Video Produk', count: countProductCampaigns },
                   { key: 'editorial_campaign', label: '📖 Video Editorial', count: countEditorialCampaigns },
-                  { key: 'recipe_campaign', label: '🍳 Video Resep', count: countRecipeCampaigns }
+                  { key: 'recipe_campaign', label: '🍳 Video Resep', count: countRecipeCampaigns },
+                  { key: 'multiplier_campaign', label: '🔀 Video Multiplier', count: countMultiplierCampaigns },
+                  { key: 'recipe_labs', label: '🖼️ Resep Teks & Foto', count: countRecipeLabsCampaigns }
                 ].map(tab => {
                   const isSelected = campaignTypeFilter === tab.key;
                   return (
@@ -3328,11 +4239,13 @@ export default function AutoPipelinePage() {
                   <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
                     Pilih Tipe Kampanye
                   </label>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.65rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.65rem' }}>
                     {[
                       { key: 'product_campaign', icon: '🛍️', label: 'Video Produk', desc: 'Promosi produk katalog & unboxing', color: 'var(--status-success)' },
                       { key: 'editorial_campaign', icon: '📖', label: 'Video Editorial', desc: 'Pilar konten brand & storytelling', color: 'var(--status-info)' },
-                      { key: 'recipe_campaign', icon: '🍳', label: 'Video Resep', desc: 'Cooking guide & food reel 4-klip', color: 'var(--status-warning)' }
+                      { key: 'recipe_campaign', icon: '🍳', label: 'Video Resep', desc: 'Cooking guide & food reel 4-klip', color: 'var(--status-warning)' },
+                      { key: 'multiplier_campaign', icon: '🔀', label: 'Video Multiplier', desc: 'Remix angle hook dari referensi', color: 'var(--status-purple)' },
+                      { key: 'recipe_labs', icon: '🖼️', label: 'Resep Teks & Foto', desc: 'Naskah FB + Foto grid komposit', color: 'var(--status-rose)' }
                     ].map(t => {
                       const isSelected = schedCampaignType === t.key;
                       return (
@@ -3347,6 +4260,10 @@ export default function AutoPipelinePage() {
                                 setSchedName(`${bName} — Product Showcase`);
                               } else if (t.key === 'editorial_campaign') {
                                 setSchedName(`${bName} — Editorial Pillar`);
+                              } else if (t.key === 'multiplier_campaign') {
+                                setSchedName(`${bName} — Multiplier Remix Hook`);
+                              } else if (t.key === 'recipe_labs') {
+                                setSchedName(`${bName} — Resep Teks & Foto FB`);
                               } else {
                                 setSchedName(`${bName} — Daily Morning Reels`);
                               }
@@ -3962,6 +4879,245 @@ export default function AutoPipelinePage() {
                       </div>
                     </div>
                   </>
+                )}
+
+                {/* 3D. MULTIPLIER: Nama Jadwal & Target Blueprint Video */}
+                {schedCampaignType === 'multiplier_campaign' && (
+                  <div style={{
+                    background: 'var(--surface-raised)',
+                    border: '1.5px solid var(--status-purple)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '1rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.85rem'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <strong style={{ fontSize: '0.86rem', color: 'var(--text-primary)' }}>
+                        🔀 Konfigurasi Jadwal Rutin Multiplier
+                      </strong>
+                      <span style={{ fontSize: '0.72rem', padding: '0.15rem 0.5rem', borderRadius: 9999, background: 'var(--status-purple-soft)', color: 'var(--status-purple)', fontWeight: 800 }}>
+                        Autopilot Angle Remix
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                      <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                        Nama Pengenal Jadwal
+                      </label>
+                      <input
+                        type="text"
+                        value={schedName}
+                        onChange={(e) => setSchedName(e.target.value)}
+                        placeholder="Contoh: HabitFolk — Daily Multiplier Hook 08:00"
+                        required
+                        style={{
+                          height: '40px',
+                          background: 'var(--input-bg)',
+                          border: '1px solid var(--border-subtle)',
+                          borderRadius: 'var(--radius-sm)',
+                          padding: '0 0.85rem',
+                          fontSize: '0.86rem',
+                          color: 'var(--text-primary)',
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                      <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                        Pilih Blueprint Video Acuan (Deconstruct Lab)
+                      </label>
+                      <select
+                        value={schedBlueprintId}
+                        onChange={(e) => setSchedBlueprintId(e.target.value)}
+                        style={{
+                          height: '40px',
+                          background: 'var(--input-bg)',
+                          border: '1px solid var(--border-subtle)',
+                          borderRadius: 'var(--radius-sm)',
+                          padding: '0 0.75rem',
+                          fontSize: '0.84rem',
+                          color: 'var(--text-primary)',
+                          outline: 'none'
+                        }}
+                      >
+                        <option value="">⚡ Autopilot: Blueprint Video Paling Viral (Rank #1 Hook)</option>
+                        {blueprints.map(bp => (
+                          <option key={bp.id} value={bp.id}>
+                            {bp.original_caption ? `${bp.original_caption.substring(0, 50)}...` : (bp.source_url || bp.id)}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', background: 'var(--surface)', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border-subtle)' }}>
+                      💡 <strong>Autopilot Bebas Repetisi:</strong> Setiap hari mesin akan membaca riwayat hook yang telah diproduksi (<code>excluded_history</code>), merumuskan variasi sudut pandang baru dengan Gemini AI, memilih Rank #1, dan langsung merender video klip untuk publikasi otomatis.
+                    </div>
+                  </div>
+                )}
+
+                {/* 3E. RECIPE LABS: Nama Jadwal, Topik, Kolase Grid & Facebook Post */}
+                {schedCampaignType === 'recipe_labs' && (
+                  <div style={{
+                    background: 'var(--surface-raised)',
+                    border: '1.5px solid var(--status-rose)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '1rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.85rem'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <strong style={{ fontSize: '0.86rem', color: 'var(--text-primary)' }}>
+                        🖼️ Konfigurasi Jadwal Resep Teks & Foto Komposit
+                      </strong>
+                      <span style={{ fontSize: '0.72rem', padding: '0.15rem 0.5rem', borderRadius: 9999, background: 'var(--status-rose-soft)', color: 'var(--status-rose)', fontWeight: 800 }}>
+                        Artikel FB + Grid Poster
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                      <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                        Nama Pengenal Jadwal
+                      </label>
+                      <input
+                        type="text"
+                        value={schedName}
+                        onChange={(e) => setSchedName(e.target.value)}
+                        placeholder="Contoh: Dapur Botani — Resep Sehat FB 09:00"
+                        required
+                        style={{
+                          height: '40px',
+                          background: 'var(--input-bg)',
+                          border: '1px solid var(--border-subtle)',
+                          borderRadius: 'var(--radius-sm)',
+                          padding: '0 0.85rem',
+                          fontSize: '0.86rem',
+                          color: 'var(--text-primary)',
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                        <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                          Tema / Arahan Resep
+                        </label>
+                        <input
+                          type="text"
+                          value={schedTopic}
+                          onChange={(e) => setSchedTopic(e.target.value)}
+                          placeholder="Contoh: Resep Masakan Rumahan Sehat"
+                          required
+                          style={{
+                            height: '38px',
+                            background: 'var(--input-bg)',
+                            border: '1px solid var(--border-subtle)',
+                            borderRadius: 'var(--radius-sm)',
+                            padding: '0 0.75rem',
+                            fontSize: '0.84rem',
+                            color: 'var(--text-primary)',
+                            outline: 'none'
+                          }}
+                        />
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                        <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                          Gaya Visual Foto AI
+                        </label>
+                        <select
+                          value={schedVisualStyle}
+                          onChange={(e) => setSchedVisualStyle(e.target.value)}
+                          style={{
+                            height: '38px',
+                            background: 'var(--input-bg)',
+                            border: '1px solid var(--border-subtle)',
+                            borderRadius: 'var(--radius-sm)',
+                            padding: '0 0.75rem',
+                            fontSize: '0.84rem',
+                            color: 'var(--text-primary)',
+                            outline: 'none'
+                          }}
+                        >
+                          <option value="Food Porn">Food Porn & Glossy Commercial</option>
+                          <option value="Rustic Countryside">Rustic Countryside & Wooden Texture</option>
+                          <option value="Clean Nordic">Clean Nordic Studio & Bright Sunlight</option>
+                          <option value="Dark Moody">Dark Moody Contrast & Cinematic Smoke</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                        <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                          Jumlah Foto dalam Kolase
+                        </label>
+                        <select
+                          value={schedImagesPerRecipe}
+                          onChange={(e) => {
+                            const val = Number(e.target.value);
+                            setSchedImagesPerRecipe(val);
+                            setSchedLayoutId(LAYOUT_PRESET_METADATA[val]?.[0]?.id || '4_editorial_split');
+                          }}
+                          style={{
+                            height: '38px',
+                            background: 'var(--input-bg)',
+                            border: '1px solid var(--border-subtle)',
+                            borderRadius: 'var(--radius-sm)',
+                            padding: '0 0.75rem',
+                            fontSize: '0.84rem',
+                            color: 'var(--text-primary)',
+                            outline: 'none'
+                          }}
+                        >
+                          <option value={3}>3 Gambar Kolase</option>
+                          <option value={4}>4 Gambar Kolase (Default)</option>
+                          <option value={5}>5 Gambar Kolase</option>
+                          <option value={6}>6 Gambar Kolase</option>
+                        </select>
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                        <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                          Template Susunan Grid
+                        </label>
+                        <select
+                          value={schedLayoutId}
+                          onChange={(e) => setSchedLayoutId(e.target.value)}
+                          style={{
+                            height: '38px',
+                            background: 'var(--input-bg)',
+                            border: '1px solid var(--border-subtle)',
+                            borderRadius: 'var(--radius-sm)',
+                            padding: '0 0.75rem',
+                            fontSize: '0.84rem',
+                            color: 'var(--text-primary)',
+                            outline: 'none'
+                          }}
+                        >
+                          {(LAYOUT_PRESET_METADATA[schedImagesPerRecipe] || []).map(preset => (
+                            <option key={preset.id} value={preset.id}>{preset.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                      <input
+                        type="checkbox"
+                        id="sched-fb-check"
+                        checked={schedPostToFacebook}
+                        onChange={(e) => setSchedPostToFacebook(e.target.checked)}
+                        style={{ width: '16px', height: '16px', accentColor: 'var(--action-primary)', cursor: 'pointer' }}
+                      />
+                      <label htmlFor="sched-fb-check" style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 600, cursor: 'pointer' }}>
+                        Auto-Publish Naskah FB & Kolase Poster ke Facebook Pages
+                      </label>
+                    </div>
+                  </div>
                 )}
 
                 {/* STEP 4: Dua Waktu Terpisah (Jam Pembuatan & Jam Publish - Format 24 Jam WIB) */}
