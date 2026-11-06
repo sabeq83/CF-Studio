@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.35.3 — Autonomous Engine Refactor & Multiplier Preset Clip Count Resolution (06/11/2026)
+- Modernisasi lib/autonomous-recipe-engine.js ke lib/autonomous-engine.js dengan backward-compatible facade
+- Resolusi target_clips_count dan parameter preset pada autonomous multiplier pipeline
+- Pembaruan import path pada 1-click API, cron scheduler runner, dan test suite
+- Perbaikan safe async ALTER TABLE pada createMultiplierTask
+
 ## V2.35.2 — Enable End-to-End Autopilot for Scheduled Multiplier Campaigns (06/11/2026)
 - Bypass manual waiting_approval for autopilot multiplier tasks
 - Set enable_glabs in multiplier audio config

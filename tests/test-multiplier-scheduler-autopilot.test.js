@@ -47,3 +47,4 @@ test('Multiplier Audio Config: enableGlabs flag correctly resolves for video gen
   assert.equal(resolveGlabs(cfgEmpty), true, 'Default empty config should default to true for video pipeline');
   assert.equal(resolveGlabs(cfg4), false, 'Explicitly disabled glabs should resolve to false');
 });
+

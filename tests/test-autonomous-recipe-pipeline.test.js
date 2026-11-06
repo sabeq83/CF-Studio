@@ -7,7 +7,7 @@ import {
   listVisualIdentityPresetsForBrand,
   resolveBrandRecipePreset,
   executeAutonomousRecipePipeline
-} from '../lib/autonomous-recipe-engine.js';
+} from '../lib/autonomous-engine.js';
 import { ingestRecipePlannerToPillarCampaign } from '../lib/recipe-campaign-ingest.js';
 import { approvePillarCampaignItemUnchanged } from '../lib/pillar-campaign-approval.js';
 

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { resolveBrandRecipePreset } from '../lib/autonomous-recipe-engine.js';
+import { resolveBrandRecipePreset } from '../lib/autonomous-engine.js';
 import {
   listRecipeOperatorPresetsForBrand,
   getOperatorPresetConfig,

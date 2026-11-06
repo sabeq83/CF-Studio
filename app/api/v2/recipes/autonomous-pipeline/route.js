@@ -10,7 +10,7 @@ import {
   executeAutonomousRecipeLabsPipeline,
   listVisualIdentityPresetsForBrand,
   resolveBrandRecipePreset
-} from '../../../../../lib/autonomous-recipe-engine.js';
+} from '../../../../../lib/autonomous-engine.js';
 import { listOperatorPresetsForCampaignKind, hydrateOperatorPresetCache } from '../../../../../lib/operator-presets.js';
 import { GRID_LAYOUT_COORDINATES } from '../../../../../lib/core/GridCoordinates.js';
 
