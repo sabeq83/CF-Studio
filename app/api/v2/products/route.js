@@ -19,8 +19,9 @@ export const GET = withTenantContext(async (request) => {
     const { searchParams } = new URL(request.url);
     const search = searchParams.get('search') || '';
     const category = searchParams.get('category') || '';
+    const sort = searchParams.get('sort') || 'newest';
 
-    const catalog = await listProductCatalog({ search, category, cursor: searchParams.get('cursor'), limit: searchParams.get('limit') || 100 });
+    const catalog = await listProductCatalog({ search, category, cursor: searchParams.get('cursor'), limit: searchParams.get('limit') || 100, sort });
     let products = catalog.data;
 
     // Rewrite photo_urls: hanya proxy path lokal, jangan bungkus URL eksternal

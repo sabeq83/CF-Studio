@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup Interaktif: Adaptive Story Arc Engine & Katalog Produk (Garlibee)</title>
+  <style>
+    /* 100% Semantic CSS Tokens sesuai SOP MAKNA Flow dari app/theme.css */
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-purple: #c084fc;
+      --status-purple-soft: rgba(192, 132, 252, 0.14);
+      --status-rose: #f43f5e;
+      --status-rose-soft: rgba(244, 63, 94, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f8fafc;
+      --surface: #ffffff;
+      --surface-raised: #f1f5f9;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --input-bg: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --border-subtle: #e2e8f0;
+      --border-strong: #94a3b8;
+      --action-primary: #0d9488;
+      --action-primary-hover: #14b8a6;
+      --on-action-primary: #ffffff;
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.12);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.12);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.12);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.12);
+      --status-purple: #9333ea;
+      --status-purple-soft: rgba(147, 51, 234, 0.12);
+      --status-rose: #e11d48;
+      --status-rose-soft: rgba(225, 29, 72, 0.12);
+      --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.08);
+      --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.16);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      padding: 1.5rem;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1040px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.25rem;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+    }
+
+    .theme-toggle-btn {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      padding: 0.45rem 0.85rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .theme-toggle-btn:hover {
+      background: var(--surface-interactive);
+    }
+
+    .badge-pill {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .section-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      box-shadow: var(--shadow-card);
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Grid selector pills */
+    .pills-group {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .pill-btn {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      padding: 0.5rem 0.9rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .pill-btn:hover {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      border-color: var(--border-strong);
+    }
+    .pill-btn.active {
+      background: var(--surface-interactive);
+      color: var(--action-primary);
+      border-color: var(--action-primary);
+      box-shadow: 0 0 0 1px var(--action-primary);
+    }
+
+    /* Story arc preview timeline */
+    .arc-timeline-container {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .arc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .arc-steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 0.6rem;
+    }
+
+    .arc-step-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      padding: 0.65rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      position: relative;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+    .arc-step-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--border-strong);
+    }
+    .arc-step-card.is-pivot {
+      border: 1.5px solid var(--status-success);
+      background: var(--surface-interactive);
+    }
+    .arc-step-card.is-hook {
+      border-left: 3px solid var(--status-warning);
+    }
+    .arc-step-card.is-outro {
+      border-left: 3px solid var(--status-info);
+    }
+
+    /* Product catalog grid */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 0.75rem;
+      max-height: 290px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .product-item {
+      background: var(--surface-raised);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+    }
+    .product-item:hover {
+      border-color: var(--border-strong);
+      background: var(--surface-interactive);
+    }
+    .product-item.selected {
+      border-color: var(--status-success);
+      background: var(--surface-interactive);
+      box-shadow: 0 0 0 1px var(--status-success);
+    }
+
+    .search-input {
+      width: 100%;
+      height: 40px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0 12px 0 36px;
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-input:focus {
+      border-color: var(--focus-ring);
+    }
+
+    .info-callout {
+      padding: 0.85rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header & Theme Switcher -->
+  <header class="header-bar">
+    <div>
+      <h1 style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;">
+        <span>⚡</span> MAKNA Flow: Adaptive Story Arc & Catalog Engine
+      </h1>
+      <p style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.2rem;">
+        Simulasi alur babak otomatis adaptif & urutan katalog produk terbaru (Garlibee #1).
+      </p>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.6rem;">
+      <span class="badge-pill" style="background: var(--status-success-soft); color: var(--status-success); border: 1px solid var(--status-success);">
+        ● Mockup Standalone
+      </span>
+      <button class="theme-toggle-btn" onclick="toggleTheme()">🌓 Ganti Tema</button>
+    </div>
+  </header>
+
+  <!-- KONTROL 1: PILIH TIPE KAMPANYE (5 TIPE) -->
+  <section class="section-card">
+    <div class="card-title">
+      <span>1️⃣</span> Pilih Tipe Kampanye (5 Pipeline Varian)
+    </div>
+    <div class="pills-group" id="campaignTypePills">
+      <button class="pill-btn active" data-type="product_campaign" onclick="setCampaignType('product_campaign')">
+        <span>🛍️</span> Video Produk
+      </button>
+      <button class="pill-btn" data-type="recipe_campaign" onclick="setCampaignType('recipe_campaign')">
+        <span>🍳</span> Video Resep
+      </button>
+      <button class="pill-btn" data-type="editorial_campaign" onclick="setCampaignType('editorial_campaign')">
+        <span>📖</span> Video Editorial
+      </button>
+      <button class="pill-btn" data-type="multiplier_campaign" onclick="setCampaignType('multiplier_campaign')">
+        <span>🎬</span> Video Multiplier
+      </button>
+      <button class="pill-btn" data-type="recipe_labs" onclick="setCampaignType('recipe_labs')">
+        <span>📸</span> Resep Teks & Foto
+      </button>
+    </div>
+  </section>
+
+  <!-- KONTROL 2: FORMAT KLIP & DURASI & PIVOT BRIDGING -->
+  <section class="section-card" id="formatControlSection">
+    <div class="card-title">
+      <span>2️⃣</span> Konfigurasi Format Klip & Durasi Video
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+      <!-- Klip Count -->
+      <div>
+        <label style="font-size: 0.74rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.4rem; display: block;">
+          Jumlah Klip / Adegan:
+        </label>
+        <div class="pills-group" id="clipCountPills">
+          <button class="pill-btn" data-count="3" onclick="setClipCount(3)">3 Klip</button>
+          <button class="pill-btn" data-count="4" onclick="setClipCount(4)">4 Klip</button>
+          <button class="pill-btn" data-count="5" onclick="setClipCount(5)">5 Klip</button>
+          <button class="pill-btn active" data-count="6" onclick="setClipCount(6)">⭐ 6 Klip (Standar)</button>
+          <button class="pill-btn" data-count="8" onclick="setClipCount(8)">8 Klip (Deep)</button>
+        </div>
+      </div>
+
+      <!-- Clip Duration -->
+      <div>
+        <label style="font-size: 0.74rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.4rem; display: block;">
+          Durasi Tiap Klip:
+        </label>
+        <div class="pills-group" id="clipDurPills">
+          <button class="pill-btn" data-dur="4" onclick="setClipDuration(4)">4s (Omni Flash / Kinetic)</button>
+          <button class="pill-btn" data-dur="5" onclick="setClipDuration(5)">5s (TikTok / Reels)</button>
+          <button class="pill-btn active" data-dur="8" onclick="setClipDuration(8)">⭐ 8s (Google Veo)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bridging Pivot Selection (Khusus Product & Multiplier) -->
+    <div id="bridgingControlRow" style="padding-top: 0.65rem; border-top: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.6rem;">
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary);">Titik Pivot Produk Target (Bridging Zone):</span>
+        <div class="pills-group" id="pivotClipPills">
+          <button class="pill-btn" data-pivot="2" onclick="setPivotClip(2)">Klip #2</button>
+          <button class="pill-btn active" data-pivot="3" onclick="setPivotClip(3)">Klip #3 (Rekomendasi)</button>
+          <button class="pill-btn" data-pivot="4" onclick="setPivotClip(4)">Klip #4</button>
+        </div>
+      </div>
+      <span style="font-size: 0.74rem; color: var(--text-muted);">
+        Babak pada titik ini otomatis dialihkan mengenalkan solusi produk.
+      </span>
+    </div>
+  </section>
+
+  <!-- LIVE TIMELINE PREVIEW: GENERATE ADAPTIVE STORY ARC -->
+  <section class="section-card">
+    <div class="card-title" style="justify-content: space-between;">
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span>🎯</span>
+        <span>Preview Alur Babak Otomatis (Live Adaptive Story Arc)</span>
+      </div>
+      <span id="runtimeBadge" class="badge-pill" style="background: var(--status-info-soft); color: var(--status-info); border: 1px solid var(--status-info);">
+        Total: 48 Detik
+      </span>
+    </div>
+
+    <div class="arc-timeline-container">
+      <div class="arc-header">
+        <span id="arcHeaderSummary" style="font-size: 0.78rem; font-weight: 800; color: var(--text-primary); text-transform: uppercase;">
+          ALUR BABAK STORY ARC OTOMATIS:
+        </span>
+        <div style="display: flex; gap: 0.4rem; align-items: center;">
+          <span id="pacingBadge" class="badge-pill" style="background: var(--surface-interactive); color: var(--action-primary); border: 1px solid var(--border-subtle);">
+            Pacing Sinematik ~18 kata/klip
+          </span>
+        </div>
+      </div>
+
+      <!-- Dynamic Step Badges -->
+      <div class="arc-steps-grid" id="arcStepsGrid">
+        <!-- Injected via JavaScript -->
+      </div>
+    </div>
+  </section>
+
+  <!-- SIMULASI KATALOG PRODUK: GARLIBEE #1 TERATAS -->
+  <section class="section-card" id="catalogSection">
+    <div class="card-title" style="justify-content: space-between;">
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span>🛍️</span>
+        <span>Katalog Produk (Solusi Sort `created_at DESC` — Garlibee Muncul #1)</span>
+      </div>
+      <span class="badge-pill" style="background: var(--status-success-soft); color: var(--status-success); border: 1px solid var(--status-success);">
+        251 Produk Termuat (Limit 300)
+      </span>
+    </div>
+
+    <!-- Search box -->
+    <div style="position: relative;">
+      <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.9rem;">🔍</span>
+      <input
+        type="text"
+        id="productSearchInput"
+        class="search-input"
+        placeholder="Coba ketik 'Garlibee' untuk menguji pencarian real-time..."
+        oninput="handleSearch(this.value)"
+      />
+    </div>
+
+    <!-- Product list -->
+    <div class="product-grid" id="productGrid">
+      <!-- Injected via JavaScript -->
+    </div>
+  </section>
+
+  <!-- PERBANDINGAN SEBELUM VS SESUDAH -->
+  <section class="section-card" style="background: var(--surface-raised);">
+    <div class="card-title">
+      <span>⚖️</span> Perbandingan UX: Sebelum vs Sesudah Perbaikan
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; font-size: 0.82rem;">
+      <div style="padding: 1rem; background: var(--surface); border: 1px solid var(--status-danger); border-radius: var(--radius-sm);">
+        <div style="font-weight: 800; color: var(--status-danger); margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.3rem;">
+          <span>❌</span> SEBELUM (Hardcoded & Limit 100):
+        </div>
+        <ul style="padding-left: 1.1rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 0.35rem;">
+          <li>Alur babak selalu tertulis: <em>"Bahan & Marinasi"</em>, <em>"Proses Memasak"</em> pada semua jenis video (termasuk Video Produk & Multiplier).</li>
+          <li>Katalog diurutkan <code>ORDER BY id ASC</code> dengan limit 100, sehingga <strong>Garlibee</strong> berada di urutan 178 dan <strong>terpotong/hilang</strong> dari layar.</li>
+          <li>Durasi tiap babak statis dan tidak menghitung total runtime video.</li>
+        </ul>
+      </div>
+
+      <div style="padding: 1rem; background: var(--surface); border: 1px solid var(--status-success); border-radius: var(--radius-sm);">
+        <div style="font-weight: 800; color: var(--status-success); margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.3rem;">
+          <span>✅</span> SESUDAH (Adaptive Engine & Sort Newest):
+        </div>
+        <ul style="padding-left: 1.1rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 0.35rem;">
+          <li>Alur babak otomatis adaptif: Produk (Hook ➔ Pain Point ➔ Pivot Produk ➔ USP ➔ Transformasi ➔ CTA), Resep (Racikan ➔ Masak ➔ Plating), Multiplier (Viral Hook ➔ Pacing ➔ Outro).</li>
+          <li>Katalog diurutkan <code>ORDER BY created_at DESC</code> dengan limit 300, sehingga <strong>Garlibee langsung tampil #1 di baris teratas</strong>.</li>
+          <li>Durasi dan pacing terhitung otomatis (misal: 6 Klip × 8s = 48s, pacing 16-19 kata/klip).</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  // State interaktif
+  let currentCampaignType = 'product_campaign';
+  let currentClipCount = 6;
+  let currentClipDur = 8;
+  let currentPivotClip = 3;
+  let selectedProductId = 'pe_1793545394035_6698'; // Default Garlibee
+  let searchQuery = '';
+
+  // Data katalog simulasi (Termasuk Garlibee sebagai #1 Newest)
+  const simulatedProducts = [
+    {
+      id: 'pe_1793545394035_6698',
+      product_name: 'Garlibee Madu Bawang Lanang',
+      category: 'Makanan & Minuman Kesehatan',
+      unique_selling_point: 'Bawang lanang pilihan & madu mentah fermentasi alami 3 bulan',
+      isNew: true,
+      created_at: '2026-11-06T16:27:17Z'
+    },
+    {
+      id: 'pe_1788318714093_526',
+      product_name: 'FUKUMI Beras Porang Box Sachet',
+      category: 'Diet & Sehat',
+      unique_selling_point: 'Beras porang instan rendah kalori',
+      isNew: false,
+      created_at: '2026-09-01T20:11:54Z'
+    },
+    {
+      id: 'pe_rolled_oat_sahabat',
+      product_name: 'Rolled Oat Premium Sahabat',
+      category: 'Makanan Sehat',
+      unique_selling_point: 'Oat gandum utuh organik kaya serat beta-glukan',
+      isNew: false,
+      created_at: '2026-08-31T21:05:07Z'
+    },
+    {
+      id: 'pe_1786591930657_862',
+      product_name: 'Monggo Dark Chocolate 77%',
+      category: 'Snack Sehat',
+      unique_selling_point: 'Cokelat hitam murni antioksidan tinggi',
+      isNew: false,
+      created_at: '2026-08-12T20:32:10Z'
+    },
+    {
+      id: 'pe_1784449324421_854',
+      product_name: 'AZBO Teh Detox Original',
+      category: 'Teh Herbal',
+      unique_selling_point: 'Detox alami pencernaan dan buang racun tubuh',
+      isNew: false,
+      created_at: '2026-07-19T01:22:04Z'
+    },
+    {
+      id: 'pe_1784449324421_754',
+      product_name: 'Nutrifarm Cuka Apel With Mother',
+      category: 'Minuman Fermentasi',
+      unique_selling_point: 'Raw apple cider vinegar dengan kultur induk probiotik',
+      isNew: false,
+      created_at: '2026-07-19T01:22:04Z'
+    }
+  ];
+
+  /**
+   * CORE FUNCTION: generateAdaptiveStoryArc
+   * Menghitung babak naratif secara proporsional sesuai tipe kampanye, jumlah klip, dan durasi.
+   */
+  function generateAdaptiveStoryArc(type, count = 6, dur = 4, presetConfig = {}) {
+    const c = Math.max(3, Number(count) || 6);
+    const d = Math.max(3, Number(dur) || 4);
+    const totalSeconds = c * d;
+    const pivot = presetConfig?.bridge_at_clip || currentPivotClip || 3;
+    const selectedProd = simulatedProducts.find(p => p.id === selectedProductId);
+    const prodNameShort = selectedProd ? selectedProd.product_name.split(' ')[0] : 'Produk';
+
+    // Rekomendasi pacing
+    let pacingLabel = '11-14 kata/klip';
+    let pacingTag = 'Pacing Standar';
+    if (d <= 4) {
+      pacingLabel = '8-10 kata/klip';
+      pacingTag = 'Kinetic / Fast';
+    } else if (d >= 8) {
+      pacingLabel = '16-19 kata/klip';
+      pacingTag = 'Veo Sinematik';
+    }
+
+    // Kasus Recipe Labs (Statis Foto Grid)
+    if (type === 'recipe_labs') {
+      return {
+        type: 'recipe_labs',
+        isStaticGrid: true,
+        totalSeconds: 0,
+        pacingLabel: 'Format Teks Artikel Panjang FB',
+        pacingTag: 'Facebook Long-Form',
+        headerSummary: `KOMPOSISI FOTO KOMPOSIT & ARTIKEL FB (${c} Slot Layout Grid)`,
+        steps: [
+          { seq: 1, title: 'Hero Shot Utama (Sajian Matang)', dur: null, tag: 'Hero Split 40%', icon: '🌟', note: 'Visual hidangan menggoda selera' },
+          { seq: 2, title: 'Bahan Baku Segar Pilihan', dur: null, tag: 'Macro Texture', icon: '🌿', note: 'Close-up bahan berkualitas' },
+          { seq: 3, title: 'Aksi Peracikan di Dapur', dur: null, tag: 'Action Shot', icon: '🍳', note: 'Proses pengadukan / menumis' },
+          { seq: 4, title: 'Sajian Siap Santap / Plating', dur: null, tag: 'Final Plate', icon: '🍽️', note: 'Garnishing dan sendok siap makan' },
+          ...(c > 4 ? Array.from({ length: c - 4 }, (_, i) => ({
+            seq: 5 + i,
+            title: `Detail Tahap Khusus #${i + 1}`,
+            dur: null,
+            tag: 'Step Photo',
+            icon: '📸',
+            note: 'Dokumentasi detail pelengkap'
+          })) : [])
+        ]
+      };
+    }
+
+    let steps = [];
+
+    // 1. VIDEO PRODUK (product_campaign)
+    if (type === 'product_campaign') {
+      if (c === 3) {
+        steps = [
+          { seq: 1, title: 'Hook Pain Point', tag: 'Hook 0-3s', icon: '🎯', note: 'Pertanyaan keluhan penonton' },
+          { seq: 2, title: `Pivot Solusi: ${prodNameShort}`, tag: '🛍️ PIVOT PRODUK', icon: '💡', note: 'Solusi hadir mengatasi masalah' },
+          { seq: 3, title: 'Hasil & Outro CTA', tag: 'CTA Link Bio', icon: '🚀', note: 'Penawaran dan ajakan klik bio' }
+        ];
+      } else if (c === 4) {
+        steps = [
+          { seq: 1, title: 'Hook Masalah Penonton', tag: 'Hook 0-3s', icon: '🎯', note: 'Pain point relatable' },
+          { seq: 2, title: 'Eskalasi Kebutuhan', tag: 'Pain Point', icon: '⚡', note: 'Mengapa cara lama tidak efektif' },
+          { seq: 3, title: `Pivot Solusi: ${prodNameShort}`, tag: '🛍️ PIVOT PRODUK', icon: '💡', note: 'Pengenalan produk sebagai solusi' },
+          { seq: 4, title: 'Transformasi & Outro CTA', tag: 'CTA Link Bio', icon: '🚀', note: 'Hasil nyata & link pemesanan' }
+        ];
+      } else if (c === 5) {
+        steps = [
+          { seq: 1, title: 'Hook Relatable', tag: 'Hook 0-3s', icon: '🎯', note: 'Keluhan sehari-hari' },
+          { seq: 2, title: 'Eskalasi Dampak Masalah', tag: 'Pain Point', icon: '⚡', note: 'Rasa frustrasi penonton' },
+          { seq: 3, title: `Pivot Intro: ${prodNameShort}`, tag: '🛍️ PIVOT PRODUK', icon: '💡', note: 'Solusi tepat dan praktis' },
+          { seq: 4, title: 'Demonstrasi Bukti USP', tag: 'Fitur Utama', icon: '🔬', note: 'Keunggulan formula / bahan' },
+          { seq: 5, title: 'Hasil Transformasi & CTA', tag: 'CTA Link Bio', icon: '🚀', note: 'Badan bugar & promo bio' }
+        ];
+      } else if (c === 6) {
+        steps = [
+          { seq: 1, title: 'Hook Relatable / Pain Point', tag: 'Hook 0-3s', icon: '🎯', note: '3 detik pertama penentu' },
+          { seq: 2, title: 'Eskalasi Masalah Penonton', tag: 'Pain Point', icon: '⚡', note: 'Mengapa harus segera diatasi' },
+          { seq: 3, title: `Solusi & Intro ${prodNameShort}`, tag: '🛍️ PIVOT PRODUK', icon: '💡', note: 'Pivot point bridging produk' },
+          { seq: 4, title: 'Demonstrasi Fitur & USP', tag: 'Fitur Unggulan', icon: '🔬', note: 'Bahan aktif & keaslian' },
+          { seq: 5, title: 'Bukti Nyata / Transformasi', tag: 'Social Proof', icon: '✨', note: 'Kepuasan setelah konsumsi' },
+          { seq: 6, title: 'Rekomendasi & Outro CTA', tag: 'CTA Link Bio', icon: '🚀', note: 'Mandatory outro brand & link bio' }
+        ];
+      } else { // 8 Klip
+        steps = [
+          { seq: 1, title: 'Hook Emosional Penonton', tag: 'Hook 0-3s', icon: '🎯', note: 'Membuka perhatian penuh' },
+          { seq: 2, title: 'Eskalasi Masalah Harian', tag: 'Pain Point', icon: '⚡', note: 'Dampak ke rutinitas kerja' },
+          { seq: 3, title: 'Akar Masalah Medis / Seluler', tag: 'Root Cause', icon: '🔍', note: 'Penyebab kerusakan jaringan' },
+          { seq: 4, title: `Pivot Pengenalan: ${prodNameShort}`, tag: '🛍️ PIVOT PRODUK', icon: '💡', note: 'Solusi alami teruji' },
+          { seq: 5, title: 'Fitur Unggulan & Fermentasi', tag: 'Fitur USP', icon: '🔬', note: 'Proses alami bernutrisi' },
+          { seq: 6, title: 'Demonstrasi Rutinitas Konsumsi', tag: 'Daily Routine', icon: '✨', note: 'Praktis 1 sendok per hari' },
+          { seq: 7, title: 'Bukti Hasil Transformasi', tag: 'Social Proof', icon: '🌟', note: 'Daya tahan tubuh terjaga' },
+          { seq: 8, title: 'Penawaran Spesial & Outro CTA', tag: 'CTA Link Bio', icon: '🚀', note: 'Call to action belanja' }
+        ];
+      }
+    }
+
+    // 2. VIDEO EDITORIAL (editorial_campaign)
+    else if (type === 'editorial_campaign') {
+      if (c <= 4) {
+        steps = [
+          { seq: 1, title: 'Tension Hook (Opini Berani)', tag: 'Tension 0-3s', icon: '🔥', note: 'Membongkar mitos umum' },
+          { seq: 2, title: 'Fakta Kontras / Realita', tag: 'Contrast', icon: '⚖️', note: 'Data yang sering diabaikan' },
+          { seq: 3, title: 'Reframe Paradigma Baru', tag: 'Perspective', icon: '💡', note: 'Sudut pandang alternatif' },
+          { seq: 4, title: 'Refleksi Filosofis & Closing', tag: 'Closing Bio', icon: '🌱', note: 'Pesan penutup bermakna' }
+        ];
+      } else if (c <= 6) {
+        steps = [
+          { seq: 1, title: 'Tension Hook Pembuka', tag: 'Tension 0-3s', icon: '🔥', note: 'Pertanyaan provokatif positif' },
+          { seq: 2, title: 'Realita yang Terabaikan', tag: 'Hidden Reality', icon: '👁️', note: 'Fakta di balik gaya hidup' },
+          { seq: 3, title: 'Eksplorasi Dilema & Isu', tag: 'Dilemma', icon: '⚖️', note: 'Konflik kebiasaan sehari-hari' },
+          { seq: 4, title: 'Sudut Pandang / Filosofi Baru', tag: 'New Paradigm', icon: '💡', note: 'Mindset sehat berkelanjutan' },
+          { seq: 5, title: 'Reframe Persepsi Positif', tag: 'Wisdom Core', icon: '🌟', note: 'Kebiasaan kecil berdampak besar' },
+          { seq: 6, title: 'Kalimat Penutup & Outro Reflektif', tag: 'Closing Outro', icon: '🌱', note: 'Outro brand inspiratif' }
+        ];
+      } else {
+        steps = [
+          { seq: 1, title: 'Tension Hook Sensasional', tag: 'Tension 0-3s', icon: '🔥', note: 'Atensi maksimal' },
+          { seq: 2, title: 'Dilema / Pertanyaan Kritis', tag: 'Critical Q', icon: '❓', note: 'Menantang asumsi' },
+          { seq: 3, title: 'Fakta Nyata di Lapangan', tag: 'Field Truth', icon: '👁️', note: 'Studi kasus nyata' },
+          { seq: 4, title: 'Analisa Kontradiksi Pola', tag: 'Contradiction', icon: '⚖️', note: 'Mengapa cara lama gagal' },
+          { seq: 5, title: 'Pencerahan Paradigma', tag: 'Shift Moment', icon: '💡', note: 'Pintu masuk kebiasaan baru' },
+          { seq: 6, title: 'Pilar Filosofi Brand', tag: 'Brand Pillar', icon: '🏛️', note: 'Nilai inti brand' },
+          { seq: 7, title: 'Sintesis & Makna Hidup', tag: 'Synthesis', icon: '🌟', note: 'Ketenangan & kesehatan' },
+          { seq: 8, title: 'Pesan Moral & Refleksi Outro', tag: 'Closing Bio', icon: '🌱', note: 'Kalimat pamungkas' }
+        ];
+      }
+    }
+
+    // 3. VIDEO MULTIPLIER (multiplier_campaign)
+    else if (type === 'multiplier_campaign') {
+      if (c <= 4) {
+        steps = [
+          { seq: 1, title: 'Viral Hook Adaptasi Blueprint', tag: 'Hook 0-3s', icon: '🎬', note: 'Remake formula viral' },
+          { seq: 2, title: 'Eskalasi Cerita Remake', tag: 'Story Pacing', icon: '📈', note: 'Pengembangan narasi' },
+          { seq: 3, title: 'Pivot Nilai / Bridge Produk', tag: 'Bridge Pivot', icon: '🔄', note: 'Transisi rekomendasi' },
+          { seq: 4, title: 'Resolusi Cerita & Outro Brand', tag: 'Outro Contract', icon: '🎯', note: 'Penutup kontrak brand' }
+        ];
+      } else if (c <= 6) {
+        steps = [
+          { seq: 1, title: 'Viral Hook Adaptasi Blueprint', tag: 'Hook 0-3s', icon: '🎬', note: 'Remake hook teruji' },
+          { seq: 2, title: 'Pacing Narasi & Visual Layer', tag: 'Visual Flow', icon: '🌊', note: 'Layering prompt terstruktur' },
+          { seq: 3, title: 'Pengembangan Emosi Penonton', tag: 'Emotional Hook', icon: '⚡', note: 'Menjaga watch time' },
+          { seq: 4, title: 'Pivot Rekomendasi / Bridge', tag: 'Bridge Pivot', icon: '🔄', note: 'Penempatan produk/topik' },
+          { seq: 5, title: 'Penguatan Pesan Utama', tag: 'Key Message', icon: '💎', note: 'Konfirmasi manfaat' },
+          { seq: 6, title: 'Resolusi Cerita & Outro Khusus', tag: 'Outro Contract', icon: '🎯', note: 'Mandatory outro brand' }
+        ];
+      } else {
+        steps = [
+          { seq: 1, title: 'Viral Hook Adaptasi Blueprint', tag: 'Hook 0-3s', icon: '🎬', note: 'Hook 3 detik awal' },
+          { seq: 2, title: 'Pacing Narasi & Visual Layer', tag: 'Visual Flow', icon: '🌊', note: 'Pacing dinamis' },
+          { seq: 3, title: 'Eskalasi Masalah Awal', tag: 'Escalation', icon: '📈', note: 'Pendalaman alur' },
+          { seq: 4, title: 'Climax / Momen Puncak', tag: 'Twist / Climax', icon: '💥', note: 'Kejutan narasi' },
+          { seq: 5, title: 'Transisi Menuju Solusi', tag: 'Transition', icon: '🔄', note: 'Bridge terarah' },
+          { seq: 6, title: 'Demonstrasi & Bukti Manfaat', tag: 'Validation', icon: '✨', note: 'Visual kinestetik' },
+          { seq: 7, title: 'Penguatan Pesan & Makna', tag: 'Core Value', icon: '💎', note: 'Nilai esensial' },
+          { seq: 8, title: 'Resolusi Cerita & Outro Kontrak', tag: 'Outro Contract', icon: '🎯', note: 'CTA interaksi penonton' }
+        ];
+      }
+    }
+
+    // 4. VIDEO RESEP (recipe_campaign)
+    else {
+      if (c <= 4) {
+        steps = [
+          { seq: 1, title: 'Hook Sensori & Visual Action', tag: 'Sensory Hook', icon: '🔥', note: 'Gigitan pertama menggoda' },
+          { seq: 2, title: 'Racikan Bahan & Bumbu', tag: 'Ingredients', icon: '🥣', note: 'Bahan segar terukur' },
+          { seq: 3, title: 'Proses Memasak & Sizzle', tag: 'Cooking Action', icon: '🍳', note: 'Aroma wajan & letupan' },
+          { seq: 4, title: 'Plating & CTA Outro Resep', tag: 'Outro CTA', icon: '🍽️', note: 'Piring saji & simpan resep' }
+        ];
+      } else if (c <= 6) {
+        steps = [
+          { seq: 1, title: 'Hook Pembuka Sensori', tag: 'Sensory Hook', icon: '🔥', note: 'Visual appetizing tajam' },
+          { seq: 2, title: 'Persiapan Bahan Segar', tag: 'Prep Fresh', icon: '🥬', note: 'Komposisi rempah alami' },
+          { seq: 3, title: 'Proses Pengolahan & Masak', tag: 'Cooking Craft', icon: '🍳', note: 'Teknik masak presisi' },
+          { seq: 4, title: 'Sizzle & Detail Tekstur', tag: 'Texture & Heat', icon: '✨', note: 'Kematangan sempurna' },
+          { seq: 5, title: 'Plating Estetik & Garnish', tag: 'Plating Craft', icon: '🎨', note: 'Penataan estetik meja' },
+          { seq: 6, title: 'Sajian Akhir & Outro Bio', tag: 'Outro CTA', icon: '🍽️', note: 'Cek resep lengkap di bio' }
+        ];
+      } else {
+        steps = [
+          { seq: 1, title: 'Hook Sensori & Gigitan Awal', tag: 'Sensory Hook', icon: '🔥', note: 'Kerenyahan / lelehan' },
+          { seq: 2, title: 'Persiapan Bahan Segar', tag: 'Ingredients', icon: '🥬', note: 'Bahan pilihan terbaik' },
+          { seq: 3, title: 'Marinasi & Racikan Bumbu', tag: 'Seasoning', icon: '🥣', note: 'Resapan bumbu merata' },
+          { seq: 4, title: 'Teknik Memasak Inti', tag: 'Core Cooking', icon: '🍳', note: 'Suhu dan durasi tepat' },
+          { seq: 5, title: 'Kematangan & Sizzle Panas', tag: 'Sizzle Heat', icon: '✨', note: 'Warna keemasan menggoda' },
+          { seq: 6, title: 'Finishing Touch & Aroma', tag: 'Finishing', icon: '🌿', note: 'Aroma rempah menguar' },
+          { seq: 7, title: 'Plating Sempurna Resto', tag: 'Plating Art', icon: '🎨', note: 'Standar kafe premium' },
+          { seq: 8, title: 'Sajian Akhir & Link Resep Bio', tag: 'Outro CTA', icon: '🍽️', note: 'Link bio & bookmark' }
+        ];
+      }
+    }
+
+    const normalized = steps.slice(0, c).map((s, idx) => ({
+      ...s,
+      seq: idx + 1,
+      dur: d
+    }));
+
+    return {
+      type,
+      isStaticGrid: false,
+      totalSeconds,
+      clipsCount: c,
+      clipDuration: d,
+      pacingLabel,
+      pacingTag,
+      headerSummary: `ALUR BABAK STORY ARC: ${c} Klip • @${d}s • Total: ${totalSeconds}s (${pacingTag})`,
+      steps: normalized
+    };
+  }
+
+  // Render UI
+  function renderAll() {
+    // 1. Render Campaign Pills
+    document.querySelectorAll('#campaignTypePills .pill-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.type === currentCampaignType);
+    });
+
+    // 2. Render Format Section Visibility
+    const isStatic = currentCampaignType === 'recipe_labs';
+    document.getElementById('formatControlSection').style.display = isStatic ? 'none' : 'block';
+    document.getElementById('catalogSection').style.display = (currentCampaignType === 'product_campaign') ? 'block' : 'none';
+
+    // 3. Render Clip Count & Duration Pills
+    document.querySelectorAll('#clipCountPills .pill-btn').forEach(btn => {
+      btn.classList.toggle('active', Number(btn.dataset.count) === currentClipCount);
+    });
+    document.querySelectorAll('#clipDurPills .pill-btn').forEach(btn => {
+      btn.classList.toggle('active', Number(btn.dataset.dur) === currentClipDur);
+    });
+    document.querySelectorAll('#pivotClipPills .pill-btn').forEach(btn => {
+      btn.classList.toggle('active', Number(btn.dataset.pivot) === currentPivotClip);
+    });
+
+    // 4. Calculate Adaptive Story Arc
+    const arcData = generateAdaptiveStoryArc(currentCampaignType, currentClipCount, currentClipDur, {
+      bridge_at_clip: currentPivotClip
+    });
+
+    // 5. Update Header & Badges
+    document.getElementById('arcHeaderSummary').innerText = arcData.headerSummary;
+    document.getElementById('runtimeBadge').innerText = arcData.isStaticGrid ? 'Format Statis' : `Total: ${arcData.totalSeconds} Detik`;
+    document.getElementById('pacingBadge').innerText = arcData.isStaticGrid ? 'Facebook Long-Form Article' : `${arcData.pacingTag} ~${arcData.pacingLabel}`;
+
+    // 6. Render Steps Grid
+    const stepsGrid = document.getElementById('arcStepsGrid');
+    stepsGrid.innerHTML = arcData.steps.map(step => {
+      const isPivot = step.tag.includes('PIVOT');
+      const isHook = step.seq === 1;
+      const isOutro = step.seq === arcData.steps.length;
+
+      let cardClass = 'arc-step-card';
+      if (isPivot) cardClass += ' is-pivot';
+      else if (isHook) cardClass += ' is-hook';
+      else if (isOutro) cardClass += ' is-outro';
+
+      return `
+        <div class="${cardClass}">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 0.35rem;">
+              <span style="font-weight: 800; color: var(--action-primary); font-size: 0.8rem;">${step.seq}.</span>
+              <span style="font-size: 0.85rem;">${step.icon}</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.3rem;">
+              ${step.dur ? `<span style="font-size: 0.68rem; font-weight: 700; color: var(--text-muted); background: var(--surface-raised); padding: 0.1rem 0.35rem; border-radius: 4px;">${step.dur}s</span>` : ''}
+              <span class="badge-pill" style="background: ${isPivot ? 'var(--status-success-soft)' : 'var(--surface-raised)'}; color: ${isPivot ? 'var(--status-success)' : 'var(--text-secondary)'}; font-size: 0.64rem;">
+                ${step.tag}
+              </span>
+            </div>
+          </div>
+          <div style="font-size: 0.82rem; font-weight: 700; color: var(--text-primary); margin-top: 0.15rem;">
+            ${step.title}
+          </div>
+          <div style="font-size: 0.72rem; color: var(--text-muted);">
+            ${step.note}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // 7. Render Products Grid (Khusus Video Produk)
+    renderProducts();
+  }
+
+  function renderProducts() {
+    const grid = document.getElementById('productGrid');
+    const filtered = simulatedProducts.filter(p => {
+      if (!searchQuery.trim()) return true;
+      const q = searchQuery.toLowerCase().trim();
+      return p.product_name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q);
+    });
+
+    if (filtered.length === 0) {
+      grid.innerHTML = `
+        <div style="grid-column: 1 / -1; padding: 2rem; text-align: center; color: var(--text-muted); border: 1px dashed var(--border-subtle); border-radius: var(--radius-sm);">
+          Tidak ada produk yang cocok dengan "${searchQuery}".
+        </div>
+      `;
+      return;
+    }
+
+    grid.innerHTML = filtered.map(p => {
+      const isSelected = p.id === selectedProductId;
+      return `
+        <div class="product-item ${isSelected ? 'selected' : ''}" onclick="selectProduct('${p.id}')">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.4rem;">
+            <div style="font-size: 0.84rem; font-weight: 800; color: var(--text-primary); line-height: 1.3;">
+              ${p.product_name}
+            </div>
+            ${p.isNew ? `
+              <span class="badge-pill" style="background: var(--status-success-soft); color: var(--status-success); border: 1px solid var(--status-success); font-size: 0.62rem; white-space: nowrap;">
+                ⭐ Baru Diimpor
+              </span>
+            ` : ''}
+          </div>
+          <div style="font-size: 0.72rem; color: var(--text-muted);">
+            📁 ${p.category}
+          </div>
+          <div style="font-size: 0.73rem; color: var(--text-secondary); line-height: 1.3; background: var(--surface); padding: 0.4rem; border-radius: var(--radius-xs);">
+            💡 <em>${p.unique_selling_point}</em>
+          </div>
+          <div style="margin-top: auto; display: flex; justify-content: space-between; align-items: center; font-size: 0.68rem; color: var(--text-muted); padding-top: 0.2rem;">
+            <span>ID: ${p.id.slice(0, 16)}...</span>
+            <span style="font-weight: 700; color: ${isSelected ? 'var(--status-success)' : 'var(--text-muted)'};">
+              ${isSelected ? '✓ Terpilih' : 'Klik Pilih'}
+            </span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Action Handlers
+  function setCampaignType(type) {
+    currentCampaignType = type;
+    renderAll();
+  }
+  function setClipCount(count) {
+    currentClipCount = count;
+    renderAll();
+  }
+  function setClipDuration(dur) {
+    currentClipDur = dur;
+    renderAll();
+  }
+  function setPivotClip(pivot) {
+    currentPivotClip = pivot;
+    renderAll();
+  }
+  function selectProduct(id) {
+    selectedProductId = id;
+    renderAll();
+  }
+  function handleSearch(val) {
+    searchQuery = val;
+    renderProducts();
+  }
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  }
+
+  // Initial load
+  renderAll();
+</script>
+
+</body>
+</html>
+

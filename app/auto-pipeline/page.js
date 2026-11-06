@@ -168,36 +168,212 @@ export default function AutoPipelinePage() {
   const transitionDur = wf.transition_duration !== undefined ? Number(wf.transition_duration) : (activePresetConfig?.transition_duration !== undefined ? Number(activePresetConfig.transition_duration) : 0.5);
   const transitionDesc = `${String(transitionKey).toUpperCase()} (${transitionDur}s)`;
 
-  function getStoryArcSteps(count, dur) {
-    if (count <= 4) {
-      return [
-        { seq: 1, title: 'Hook & Visual Action', dur },
-        { seq: 2, title: 'Bahan & Marinasi', dur },
-        { seq: 3, title: 'Proses Memasak', dur },
-        { seq: 4, title: 'Plating & CTA Outro', dur }
-      ];
+  function generateAdaptiveStoryArc(type, count = 6, dur = 4, presetConfig = {}) {
+    const c = Math.max(3, Number(count) || 6);
+    const d = Math.max(3, Number(dur) || 4);
+    const totalSeconds = c * d;
+
+    // Rekomendasi pacing kata
+    let pacingLabel = '11-14 kata/klip';
+    let pacingTag = 'Pacing Standar';
+    if (d <= 4) {
+      pacingLabel = '8-10 kata/klip';
+      pacingTag = 'Kinetic / Fast';
+    } else if (d >= 8) {
+      pacingLabel = '16-19 kata/klip';
+      pacingTag = 'Veo Sinematik';
     }
-    if (count <= 6) {
-      return [
-        { seq: 1, title: 'Hook Pembuka', dur },
-        { seq: 2, title: 'Persiapan Bahan', dur },
-        { seq: 3, title: 'Proses Memasak', dur },
-        { seq: 4, title: 'Sizzle & Tekstur', dur },
-        { seq: 5, title: 'Plating Sempurna', dur },
-        { seq: 6, title: 'Hasil & Outro Bio', dur }
-      ];
+
+    // Khusus Recipe Labs (Tipe statis foto grid)
+    if (type === 'recipe_labs') {
+      return {
+        type: 'recipe_labs',
+        isStaticGrid: true,
+        totalSeconds: 0,
+        pacingLabel: 'Format Teks Artikel FB',
+        pacingTag: 'Facebook Long-Form',
+        headerSummary: `KOMPOSISI FOTO KOMPOSIT & ARTIKEL FB (${c} Slot Layout Grid)`,
+        steps: [
+          { seq: 1, title: 'Hero Shot Utama (Sajian Matang)', dur: null, tag: 'Hero Split 40%', icon: '🌟' },
+          { seq: 2, title: 'Bahan Baku Segar Pilihan', dur: null, tag: 'Macro Texture', icon: '🌿' },
+          { seq: 3, title: 'Aksi Peracikan di Dapur', dur: null, tag: 'Action Shot', icon: '🍳' },
+          { seq: 4, title: 'Sajian Siap Santap / Plating', dur: null, tag: 'Final Plate', icon: '🍽️' },
+          ...(c > 4 ? Array.from({ length: c - 4 }, (_, i) => ({
+            seq: 5 + i,
+            title: `Detail Tahap Khusus #${i + 1}`,
+            dur: null,
+            tag: 'Step Photo',
+            icon: '📸'
+          })) : [])
+        ]
+      };
     }
-    return [
-      { seq: 1, title: 'Hook Sensori', dur },
-      { seq: 2, title: 'Step 1 Bahan', dur },
-      { seq: 3, title: 'Step 2 Campur', dur },
-      { seq: 4, title: 'Step 3 Masak', dur },
-      { seq: 5, title: 'Step 4 Tekstur', dur },
-      { seq: 6, title: 'Step 5 Finishing', dur },
-      { seq: 7, title: 'Step 6 Plating', dur },
-      { seq: 8, title: 'Outro App Link', dur }
-    ];
+
+    let steps = [];
+
+    // 1. VIDEO PRODUK (product_campaign)
+    if (type === 'product_campaign') {
+      if (c === 3) {
+        steps = [
+          { seq: 1, title: 'Hook Pain Point', tag: 'Hook 0-3s', icon: '🎯' },
+          { seq: 2, title: 'Pivot Solusi Produk', tag: '🛍️ PIVOT PRODUK', icon: '💡' },
+          { seq: 3, title: 'Hasil & Outro CTA', tag: 'CTA Link Bio', icon: '🚀' }
+        ];
+      } else if (c === 4) {
+        steps = [
+          { seq: 1, title: 'Hook Masalah Penonton', tag: 'Hook 0-3s', icon: '🎯' },
+          { seq: 2, title: 'Eskalasi Kebutuhan', tag: 'Pain Point', icon: '⚡' },
+          { seq: 3, title: 'Pivot Solusi Produk', tag: '🛍️ PIVOT PRODUK', icon: '💡' },
+          { seq: 4, title: 'Transformasi & Outro CTA', tag: 'CTA Link Bio', icon: '🚀' }
+        ];
+      } else if (c === 5) {
+        steps = [
+          { seq: 1, title: 'Hook Relatable', tag: 'Hook 0-3s', icon: '🎯' },
+          { seq: 2, title: 'Eskalasi Dampak Masalah', tag: 'Pain Point', icon: '⚡' },
+          { seq: 3, title: 'Pivot Intro Produk', tag: '🛍️ PIVOT PRODUK', icon: '💡' },
+          { seq: 4, title: 'Demonstrasi Bukti USP', tag: 'Fitur Utama', icon: '🔬' },
+          { seq: 5, title: 'Hasil Transformasi & CTA', tag: 'CTA Link Bio', icon: '🚀' }
+        ];
+      } else if (c === 6) {
+        steps = [
+          { seq: 1, title: 'Hook Relatable / Pain Point', tag: 'Hook 0-3s', icon: '🎯' },
+          { seq: 2, title: 'Eskalasi Masalah Penonton', tag: 'Pain Point', icon: '⚡' },
+          { seq: 3, title: 'Solusi & Intro Produk Target', tag: '🛍️ PIVOT PRODUK', icon: '💡' },
+          { seq: 4, title: 'Demonstrasi Fitur & USP', tag: 'Fitur Unggulan', icon: '🔬' },
+          { seq: 5, title: 'Bukti Nyata / Transformasi', tag: 'Social Proof', icon: '✨' },
+          { seq: 6, title: 'Rekomendasi & Outro CTA', tag: 'CTA Link Bio', icon: '🚀' }
+        ];
+      } else {
+        steps = [
+          { seq: 1, title: 'Hook Emosional Penonton', tag: 'Hook 0-3s', icon: '🎯' },
+          { seq: 2, title: 'Eskalasi Masalah Harian', tag: 'Pain Point', icon: '⚡' },
+          { seq: 3, title: 'Akar Masalah Utama', tag: 'Root Cause', icon: '🔍' },
+          { seq: 4, title: 'Pivot Pengenalan Produk', tag: '🛍️ PIVOT PRODUK', icon: '💡' },
+          { seq: 5, title: 'Fitur Unggulan & Formula', tag: 'Fitur USP', icon: '🔬' },
+          { seq: 6, title: 'Demonstrasi Rutinitas Konsumsi', tag: 'Daily Routine', icon: '✨' },
+          { seq: 7, title: 'Bukti Hasil Transformasi', tag: 'Social Proof', icon: '🌟' },
+          { seq: 8, title: 'Penawaran Spesial & Outro CTA', tag: 'CTA Link Bio', icon: '🚀' }
+        ];
+      }
+    }
+
+    // 2. VIDEO EDITORIAL (editorial_campaign)
+    else if (type === 'editorial_campaign') {
+      if (c <= 4) {
+        steps = [
+          { seq: 1, title: 'Tension Hook (Opini Berani)', tag: 'Tension 0-3s', icon: '🔥' },
+          { seq: 2, title: 'Fakta Kontras / Realita', tag: 'Contrast', icon: '⚖️' },
+          { seq: 3, title: 'Reframe Paradigma Baru', tag: 'Perspective', icon: '💡' },
+          { seq: 4, title: 'Refleksi Filosofis & Closing', tag: 'Closing Bio', icon: '🌱' }
+        ];
+      } else if (c <= 6) {
+        steps = [
+          { seq: 1, title: 'Tension Hook Pembuka', tag: 'Tension 0-3s', icon: '🔥' },
+          { seq: 2, title: 'Realita yang Terabaikan', tag: 'Hidden Reality', icon: '👁️' },
+          { seq: 3, title: 'Eksplorasi Dilema & Isu', tag: 'Dilemma', icon: '⚖️' },
+          { seq: 4, title: 'Sudut Pandang / Filosofi Baru', tag: 'New Paradigm', icon: '💡' },
+          { seq: 5, title: 'Reframe Persepsi Positif', tag: 'Wisdom Core', icon: '🌟' },
+          { seq: 6, title: 'Kalimat Penutup & Outro Reflektif', tag: 'Closing Outro', icon: '🌱' }
+        ];
+      } else {
+        steps = [
+          { seq: 1, title: 'Tension Hook Sensasional', tag: 'Tension 0-3s', icon: '🔥' },
+          { seq: 2, title: 'Dilema / Pertanyaan Kritis', tag: 'Critical Q', icon: '❓' },
+          { seq: 3, title: 'Fakta Nyata di Lapangan', tag: 'Field Truth', icon: '👁️' },
+          { seq: 4, title: 'Analisa Kontradiksi Pola', tag: 'Contradiction', icon: '⚖️' },
+          { seq: 5, title: 'Pencerahan Paradigma', tag: 'Shift Moment', icon: '💡' },
+          { seq: 6, title: 'Pilar Filosofi Brand', tag: 'Brand Pillar', icon: '🏛️' },
+          { seq: 7, title: 'Sintesis & Makna Hidup', tag: 'Synthesis', icon: '🌟' },
+          { seq: 8, title: 'Pesan Moral & Refleksi Outro', tag: 'Closing Bio', icon: '🌱' }
+        ];
+      }
+    }
+
+    // 3. VIDEO MULTIPLIER (multiplier_campaign)
+    else if (type === 'multiplier_campaign') {
+      if (c <= 4) {
+        steps = [
+          { seq: 1, title: 'Viral Hook Adaptasi Blueprint', tag: 'Hook 0-3s', icon: '🎬' },
+          { seq: 2, title: 'Eskalasi Cerita Remake', tag: 'Story Pacing', icon: '📈' },
+          { seq: 3, title: 'Pivot Nilai / Bridge Rekomendasi', tag: 'Bridge Pivot', icon: '🔄' },
+          { seq: 4, title: 'Resolusi Cerita & Outro Brand', tag: 'Outro Contract', icon: '🎯' }
+        ];
+      } else if (c <= 6) {
+        steps = [
+          { seq: 1, title: 'Viral Hook Adaptasi Blueprint', tag: 'Hook 0-3s', icon: '🎬' },
+          { seq: 2, title: 'Pacing Narasi & Visual Layer', tag: 'Visual Flow', icon: '🌊' },
+          { seq: 3, title: 'Pengembangan Emosi Penonton', tag: 'Emotional Hook', icon: '⚡' },
+          { seq: 4, title: 'Pivot Rekomendasi / Bridge', tag: 'Bridge Pivot', icon: '🔄' },
+          { seq: 5, title: 'Penguatan Pesan Utama', tag: 'Key Message', icon: '💎' },
+          { seq: 6, title: 'Resolusi Cerita & Outro Khusus', tag: 'Outro Contract', icon: '🎯' }
+        ];
+      } else {
+        steps = [
+          { seq: 1, title: 'Viral Hook Adaptasi Blueprint', tag: 'Hook 0-3s', icon: '🎬' },
+          { seq: 2, title: 'Pacing Narasi & Visual Layer', tag: 'Visual Flow', icon: '🌊' },
+          { seq: 3, title: 'Eskalasi Masalah Awal', tag: 'Escalation', icon: '📈' },
+          { seq: 4, title: 'Climax / Momen Puncak', tag: 'Twist / Climax', icon: '💥' },
+          { seq: 5, title: 'Transisi Menuju Solusi', tag: 'Transition', icon: '🔄' },
+          { seq: 6, title: 'Demonstrasi & Bukti Manfaat', tag: 'Validation', icon: '✨' },
+          { seq: 7, title: 'Penguatan Pesan & Makna', tag: 'Core Value', icon: '💎' },
+          { seq: 8, title: 'Resolusi Cerita & Outro Kontrak', tag: 'Outro Contract', icon: '🎯' }
+        ];
+      }
+    }
+
+    // 4. VIDEO RESEP (recipe_campaign)
+    else {
+      if (c <= 4) {
+        steps = [
+          { seq: 1, title: 'Hook Sensori & Visual Action', tag: 'Sensory Hook', icon: '🔥' },
+          { seq: 2, title: 'Racikan Bahan & Bumbu', tag: 'Ingredients', icon: '🥣' },
+          { seq: 3, title: 'Proses Memasak & Sizzle', tag: 'Cooking Action', icon: '🍳' },
+          { seq: 4, title: 'Plating & CTA Outro Resep', tag: 'Outro CTA', icon: '🍽️' }
+        ];
+      } else if (c <= 6) {
+        steps = [
+          { seq: 1, title: 'Hook Pembuka Sensori', tag: 'Sensory Hook', icon: '🔥' },
+          { seq: 2, title: 'Persiapan Bahan Segar', tag: 'Prep Fresh', icon: '🥬' },
+          { seq: 3, title: 'Proses Pengolahan & Masak', tag: 'Cooking Craft', icon: '🍳' },
+          { seq: 4, title: 'Sizzle & Detail Tekstur', tag: 'Texture & Heat', icon: '✨' },
+          { seq: 5, title: 'Plating Estetik & Garnish', tag: 'Plating Craft', icon: '🎨' },
+          { seq: 6, title: 'Sajian Akhir & Outro Bio', tag: 'Outro CTA', icon: '🍽️' }
+        ];
+      } else {
+        steps = [
+          { seq: 1, title: 'Hook Sensori & Gigitan Awal', tag: 'Sensory Hook', icon: '🔥' },
+          { seq: 2, title: 'Persiapan Bahan Segar', tag: 'Ingredients', icon: '🥬' },
+          { seq: 3, title: 'Marinasi & Racikan Bumbu', tag: 'Seasoning', icon: '🥣' },
+          { seq: 4, title: 'Teknik Memasak Inti', tag: 'Core Cooking', icon: '🍳' },
+          { seq: 5, title: 'Kematangan & Sizzle Panas', tag: 'Sizzle Heat', icon: '✨' },
+          { seq: 6, title: 'Finishing Touch & Aroma', tag: 'Finishing', icon: '🌿' },
+          { seq: 7, title: 'Plating Sempurna Resto', tag: 'Plating Art', icon: '🎨' },
+          { seq: 8, title: 'Sajian Akhir & Link Resep Bio', tag: 'Outro CTA', icon: '🍽️' }
+        ];
+      }
+    }
+
+    const normalized = steps.slice(0, c).map((s, idx) => ({
+      ...s,
+      seq: idx + 1,
+      dur: d
+    }));
+
+    return {
+      type,
+      isStaticGrid: false,
+      totalSeconds,
+      clipsCount: c,
+      clipDuration: d,
+      pacingLabel,
+      pacingTag,
+      headerSummary: `ALUR BABAK STORY ARC: ${c} Klip • @${d}s • Total: ${totalSeconds}s (${pacingTag})`,
+      steps: normalized
+    };
   }
+
+  // Alias helper untuk kompatibilitas
+  const getStoryArcSteps = (count, dur) => generateAdaptiveStoryArc(instantCampaignType, count, dur, activePresetConfig).steps;
 
   // Smart Auto-Detection dari kata kunci topik
   function detectCategoryFromTopic(text) {
@@ -338,7 +514,7 @@ export default function AutoPipelinePage() {
     async function fetchProductsList() {
       setLoadingProducts(true);
       try {
-        const res = await fetch('/api/v2/products?limit=100');
+        const res = await fetch('/api/v2/products?limit=300');
         const data = await res.json();
         if (data.success && Array.isArray(data.data)) {
           setCatalogProducts(data.data);
@@ -405,7 +581,7 @@ export default function AutoPipelinePage() {
   async function fetchProducts() {
     setLoadingProducts(true);
     try {
-      const res = await fetch('/api/v2/products?limit=100');
+      const res = await fetch('/api/v2/products?limit=300');
       const data = await res.json();
       if (data.success && Array.isArray(data.data)) {
         setCatalogProducts(data.data);
@@ -1839,32 +2015,80 @@ export default function AutoPipelinePage() {
                 </div>
 
                 {/* Mini Story Arc Timeline Preview */}
-                <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '0.65rem' }}>
-                  <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '0.45rem' }}>
-                    ALUR BABAK STORY ARC OTOMATIS:
-                  </div>
-                  <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
-                    {getStoryArcSteps(targetClipsCount, clipDuration).map((step) => (
-                      <div
-                        key={step.seq}
-                        style={{
-                          background: 'var(--surface)',
-                          border: '1px solid var(--border-subtle)',
-                          borderRadius: 'var(--radius-xs)',
-                          padding: '0.35rem 0.6rem',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.3rem',
-                          fontSize: '0.72rem'
-                        }}
-                      >
-                        <span style={{ fontWeight: 700, color: 'var(--action-primary)' }}>{step.seq}.</span>
-                        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{step.title}</span>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.66rem' }}>({step.dur}s)</span>
+                {(() => {
+                  const arcData = generateAdaptiveStoryArc(instantCampaignType, targetClipsCount, clipDuration, activePresetConfig);
+                  return (
+                    <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '0.65rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem' }}>
+                        <div style={{ fontSize: '0.74rem', fontWeight: 800, color: 'var(--text-primary)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                          <span>🎯</span>
+                          <span>{arcData.headerSummary}</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                          <span style={{
+                            fontSize: '0.68rem',
+                            fontWeight: 700,
+                            padding: '0.15rem 0.55rem',
+                            borderRadius: '9999px',
+                            background: 'var(--surface-interactive)',
+                            color: 'var(--action-primary)',
+                            border: '1px solid var(--border-subtle)'
+                          }}>
+                            {arcData.isStaticGrid ? 'Format Statis' : `${arcData.pacingTag} ~${arcData.pacingLabel}`}
+                          </span>
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
+
+                      <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
+                        {arcData.steps.map((step) => {
+                          const isPivot = step.tag && step.tag.includes('PIVOT');
+                          const isHook = step.seq === 1;
+                          return (
+                            <div
+                              key={step.seq}
+                              style={{
+                                background: isPivot ? 'var(--surface-interactive)' : 'var(--surface)',
+                                border: isPivot
+                                  ? '1.5px solid var(--status-success)'
+                                  : (isHook ? '1px solid var(--status-warning)' : '1px solid var(--border-subtle)'),
+                                borderRadius: 'var(--radius-xs)',
+                                padding: '0.4rem 0.65rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.35rem',
+                                fontSize: '0.73rem',
+                                boxShadow: isPivot ? '0 0 0 1px var(--status-success-soft)' : 'none'
+                              }}
+                            >
+                              <span style={{ fontWeight: 800, color: 'var(--action-primary)' }}>{step.seq}.</span>
+                              {step.icon && <span style={{ fontSize: '0.8rem' }}>{step.icon}</span>}
+                              <span style={{ fontWeight: isPivot ? 700 : 600, color: isPivot ? 'var(--status-success)' : 'var(--text-primary)' }}>
+                                {step.title}
+                              </span>
+                              {step.dur && (
+                                <span style={{ color: 'var(--text-muted)', fontSize: '0.66rem', fontWeight: 600 }}>
+                                  ({step.dur}s)
+                                </span>
+                              )}
+                              {step.tag && (
+                                <span style={{
+                                  fontSize: '0.62rem',
+                                  fontWeight: 700,
+                                  padding: '0.1rem 0.35rem',
+                                  borderRadius: '4px',
+                                  background: isPivot ? 'var(--status-success-soft)' : 'var(--surface-raised)',
+                                  color: isPivot ? 'var(--status-success)' : 'var(--text-muted)'
+                                }}>
+                                  {step.tag}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
 
               {/* STEP 3: ADAPTIVE CAMPAIGN CONTENT FORM */}

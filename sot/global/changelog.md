@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.35.4 — Adaptive Story Arc Engine & Product Catalog Newest First Sorting (07/11/2026)
+- Implementasi fungsi generateAdaptiveStoryArc untuk 5 varian kampanye di Auto Pipeline
+- Pengurutan katalog produk menjadi ORDER BY created_at DESC sehingga produk baru Garlibee tampil di posisi #1
+- Peningkatan limit katalog produk hingga 300 item pada frontend dan 500 item pada backend
+- Pembaruan styling timeline Story Arc dengan semantic CSS tokens dan indikator pivot produk
+
 ## V2.35.3 — Autonomous Engine Refactor & Multiplier Preset Clip Count Resolution (06/11/2026)
 - Modernisasi lib/autonomous-recipe-engine.js ke lib/autonomous-engine.js dengan backward-compatible facade
 - Resolusi target_clips_count dan parameter preset pada autonomous multiplier pipeline
