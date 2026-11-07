@@ -256,4 +256,73 @@ test('Product Campaign Bridging & 100% CEP-Driven Test Suite', async (t) => {
     assert.equal(parsedConfig.selected_cep, 'Problem-Solution Based');
     assert.equal(parsedConfig.overrides.bridging.bridgeAtClip, 5);
   });
+
+  await t.test('5. Promotion context propagates to draft planner and row creative payload', async () => {
+    const promoCtxText = 'Musim pancaroba anak sering batuk pilek, ibu butuh alternatif alami';
+
+    // 1. Create draft planner with promotion_context
+    const testPlannerId = `pln_promo_${Date.now()}`;
+    await db.prepare(`
+      INSERT INTO content_planners (
+        id, tenant_id, title, account_name, planner_focus, product_id, product_name,
+        target_audience, planner_count, status, use_brand_pillars, pillars_json, promotion_context
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      testPlannerId,
+      'default_tenant',
+      'Promo Context Test',
+      'DapurBotani',
+      'product_campaign',
+      testProdId,
+      'GarliBee Pro Test',
+      'ibu_rumah_tangga',
+      1,
+      'draft',
+      0,
+      '[]',
+      promoCtxText
+    );
+
+    const savedPlanner = await db.prepare('SELECT promotion_context FROM content_planners WHERE id = ?').get(testPlannerId);
+    assert.equal(savedPlanner.promotion_context, promoCtxText, 'promotion_context in content_planners must match');
+
+    // 2. Add row and ingest
+    const testRowId = `row_promo_${Date.now()}`;
+    await db.prepare(`
+      INSERT INTO content_planner_rows (
+        id, planner_id, sequence, pillar, category_cep, title, hook, visual_action
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      testRowId,
+      testPlannerId,
+      1,
+      'Problem-Solution Based',
+      'Problem-Solution Based',
+      'Anak Batuk Pilek Musim Hujan',
+      'Anak demam dan flu?',
+      'Ibu menyiapkan sendok madu GarliBee'
+    );
+
+    const ingestRes = await ingestPlannerToPillarCampaign({
+      plannerId: testPlannerId,
+      campaignName: 'Test Promo Context Ingest',
+      globalSettings: {
+        preset_key: 'product_campaign',
+        visual_mode: 'hybrid_lock',
+        target_product_id: testProdId
+      }
+    });
+
+    const campaignId = ingestRes.campaignId;
+    const items = await db.prepare('SELECT row_creative_payload FROM pillar_campaign_items WHERE campaign_id = ?').all(campaignId);
+    assert.equal(items.length, 1);
+    const payload = JSON.parse(items[0].row_creative_payload);
+    assert.equal(payload.promotion_context, promoCtxText, 'row_creative_payload must carry promotion_context');
+
+    // Clean up
+    await db.prepare('DELETE FROM pillar_campaign_items WHERE campaign_id = ?').run(campaignId);
+    await db.prepare('DELETE FROM pillar_campaigns WHERE id = ?').run(campaignId);
+    await db.prepare('DELETE FROM content_planner_rows WHERE planner_id = ?').run(testPlannerId);
+    await db.prepare('DELETE FROM content_planners WHERE id = ?').run(testPlannerId);
+  });
 });

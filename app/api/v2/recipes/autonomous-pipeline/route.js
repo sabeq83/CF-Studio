@@ -123,6 +123,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
         brandId: body.brand_id || body.brandId,
         productId: body.product_id || body.productId,
         productTitle: body.product_title || body.topic,
+        promotionContext: body.promotion_context || body.promotionContext || body.topic_directive || null,
         selectedCep: body.selected_cep || body.selectedCep || null,
         presetKey: body.preset_key || body.presetKey || 'product_campaign',
         executionMode: body.execution_mode || body.executionMode || 'full_autopilot',

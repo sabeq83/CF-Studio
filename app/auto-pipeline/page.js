@@ -162,9 +162,11 @@ export default function AutoPipelinePage() {
   const [gridBgColor, setGridBgColor] = useState('#0d0d12');
   const [postToFacebook, setPostToFacebook] = useState(true);
 
-  // CEP (Category Entry Point) State
+  // CEP (Category Entry Point) & Promotion Context State
   const [selectedCep, setSelectedCep] = useState('auto');
   const [schedSelectedCep, setSchedSelectedCep] = useState('auto');
+  const [instantPromotionContext, setInstantPromotionContext] = useState('');
+  const [schedPromotionContext, setSchedPromotionContext] = useState('');
 
   // --- SCHEDULER & REPLIZ PUBLISHING STATE ---
   const [activeTab, setActiveTab] = useState('pipeline'); // 'pipeline' | 'schedules'
@@ -770,7 +772,7 @@ export default function AutoPipelinePage() {
         return;
       }
       const prod = catalogProducts.find(p => p.id === effectiveProdId);
-      targetTopic = prod?.product_name || 'Promosi Produk';
+      targetTopic = instantPromotionContext.trim() || prod?.product_name || 'Promosi Produk';
       targetCategory = prod?.category || 'produk';
       targetProductId = effectiveProdId;
     } else if (instantCampaignType === 'editorial_campaign') {
@@ -821,6 +823,7 @@ export default function AutoPipelinePage() {
           topic: targetTopic,
           product_id: targetProductId,
           product_title: targetTopic,
+          promotion_context: instantPromotionContext.trim() || null,
           selected_cep: selectedCep,
           content_pillar: targetPillar,
           deconstruct_asset_id: targetDeconstructId,
@@ -1013,6 +1016,7 @@ export default function AutoPipelinePage() {
     setSchedDays([0, 1, 2, 3, 4, 5, 6]);
     setSchedAutoPublish(true);
     setSchedSelectedCep('auto');
+    setSchedPromotionContext('');
 
     // Reset item selections
     setSelectedProductIds([]);
@@ -1071,6 +1075,7 @@ export default function AutoPipelinePage() {
         : (sched.pipeline_config_json || {});
     } catch (_) {}
     setSchedSelectedCep(schedCfg.selected_cep || 'auto');
+    setSchedPromotionContext(schedCfg.promotion_context || (sched.topic && sched.topic !== sched.target_item_title ? sched.topic : ''));
 
     setProductSearchQuery('');
     setPillarSearchQuery('');
@@ -1118,7 +1123,7 @@ export default function AutoPipelinePage() {
           targetId = selectedProductIds[0];
           const prodObj = catalogProducts.find(p => p.id === targetId);
           targetTitle = prodObj?.product_name || targetTitle;
-          schedTopicVal = targetTitle;
+          schedTopicVal = schedPromotionContext.trim() || targetTitle;
         } else if (schedCampaignType === 'editorial_campaign' && selectedPillars.length > 0) {
           targetId = selectedPillars[0];
           targetTitle = selectedPillars[0];
@@ -1131,7 +1136,7 @@ export default function AutoPipelinePage() {
         }
 
         const editPipelineConfig = schedCampaignType === 'product_campaign'
-          ? { product_id: targetId, selected_cep: schedSelectedCep || 'auto' }
+          ? { product_id: targetId, selected_cep: schedSelectedCep || 'auto', promotion_context: schedPromotionContext.trim() || null }
           : (schedCampaignType === 'editorial_campaign'
               ? { content_pillar: targetTitle }
               : (schedCampaignType === 'multiplier_campaign'
@@ -1171,6 +1176,7 @@ export default function AutoPipelinePage() {
         // Create mode: Cek apakah Batch atau Single
         if (schedCampaignType === 'product_campaign' && selectedProductIds.length > 1) {
           // BATCH PRODUK: 1 Produk = 1 Baris Jadwal Mandiri
+          const promoCtx = schedPromotionContext.trim() || null;
           const items = selectedProductIds.map(prodId => {
             const prod = catalogProducts.find(p => p.id === prodId);
             const prodName = prod?.product_name || 'Produk Katalog';
@@ -1181,7 +1187,7 @@ export default function AutoPipelinePage() {
               pipeline_type: 'product_campaign',
               target_item_id: prodId,
               target_item_title: prodName,
-              topic: prodName,
+              topic: promoCtx || prodName,
               category: prod?.category || 'produk',
               recipe_count: 1,
               generation_time: schedGenTime,
@@ -1190,7 +1196,7 @@ export default function AutoPipelinePage() {
               repliz_account_ids: schedReplizAccountIds,
               auto_publish_enabled: schedAutoPublish,
               timezone: 'Asia/Jakarta',
-              pipeline_config: { product_id: prodId, product_name: prodName, selected_cep: schedSelectedCep || 'auto' }
+              pipeline_config: { product_id: prodId, product_name: prodName, selected_cep: schedSelectedCep || 'auto', promotion_context: promoCtx }
             };
           });
 
@@ -1244,7 +1250,7 @@ export default function AutoPipelinePage() {
             const prod = catalogProducts.find(p => p.id === prodId);
             targetId = prodId;
             targetTitle = prod?.product_name || 'Produk Katalog';
-            finalTopic = targetTitle;
+            finalTopic = schedPromotionContext.trim() || targetTitle;
             finalCategory = prod?.category || 'produk';
             if (!finalName) finalName = `${targetTitle} — ${schedGenTime} WIB`;
           } else if (schedCampaignType === 'editorial_campaign') {
@@ -1267,7 +1273,7 @@ export default function AutoPipelinePage() {
           }
 
           const pipelineConfigPayload = schedCampaignType === 'product_campaign'
-            ? { product_id: targetId, selected_cep: schedSelectedCep || 'auto' }
+            ? { product_id: targetId, selected_cep: schedSelectedCep || 'auto', promotion_context: schedPromotionContext.trim() || null }
             : (schedCampaignType === 'editorial_campaign'
                 ? { content_pillar: targetTitle }
                 : (schedCampaignType === 'multiplier_campaign'
@@ -2391,6 +2397,97 @@ export default function AutoPipelinePage() {
                           </div>
                         );
                       })}
+                    </div>
+                  </div>
+
+                  {/* Sudut Pandang / Konteks Promosi (Promotion Context) */}
+                  <div style={{
+                    marginTop: '0.25rem',
+                    paddingTop: '0.75rem',
+                    borderTop: '1px solid var(--border-subtle)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.45rem'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.35rem' }}>
+                      <label style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        <span>🏷️</span>
+                        <span>Sudut Pandang / Konteks Promosi (Opsional):</span>
+                      </label>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                        Mengarahkan situasi &amp; emosi spesifik cerita
+                      </span>
+                    </div>
+
+                    <textarea
+                      value={instantPromotionContext}
+                      onChange={(e) => setInstantPromotionContext(e.target.value)}
+                      placeholder="Contoh: Musim hujan anak sering batuk pilek dan demam, ibu cemas tapi takut beri obat kimia terus-menerus. Butuh suplemen alami yang rasanya manis disukai anak."
+                      rows={2}
+                      style={{
+                        width: '100%',
+                        background: 'var(--input-bg)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-sm)',
+                        padding: '0.6rem 0.75rem',
+                        fontSize: '0.82rem',
+                        color: 'var(--text-primary)',
+                        outline: 'none',
+                        resize: 'vertical',
+                        lineHeight: 1.4
+                      }}
+                    />
+
+                    {/* Quick Preset Angle Chips */}
+                    <div>
+                      <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '0.3rem' }}>
+                        ⚡ Rekomendasi Sudut Pandang Cepat:
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+                        {[
+                          { label: '🌧️ Musim Flu & Batuk Anak', text: 'Musim pancaroba & hujan bikin anak gampang flu batuk, ibu butuh suplemen daya tahan tubuh alami tanpa efek samping kimia.' },
+                          { label: '🎁 Promo Payday Bundling', text: 'Promo Gajian Payday hemat bundling persediaan kesehatan sekeluarga sebulan.' },
+                          { label: '💼 Lembur & Stamina Kerja', text: 'Pekerja kantoran sering lembur dan kurang tidur, badan gampang drop & lemas saat bangun pagi.' },
+                          { label: '👵 Kolesterol & Orang Tua', text: 'Alternatif suplemen alami untuk orang tua yang punya keluhan kolesterol dan tekanan darah tinggi.' }
+                        ].map((chip, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => setInstantPromotionContext(chip.text)}
+                            style={{
+                              background: 'var(--surface)',
+                              border: '1px solid var(--border-subtle)',
+                              color: 'var(--text-secondary)',
+                              borderRadius: 9999,
+                              padding: '0.25rem 0.6rem',
+                              fontSize: '0.72rem',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                              transition: 'var(--transition)'
+                            }}
+                          >
+                            {chip.label}
+                          </button>
+                        ))}
+                        {instantPromotionContext && (
+                          <button
+                            type="button"
+                            onClick={() => setInstantPromotionContext('')}
+                            style={{
+                              background: 'var(--surface)',
+                              border: '1px solid var(--status-danger-soft)',
+                              color: 'var(--status-danger)',
+                              borderRadius: 9999,
+                              padding: '0.25rem 0.6rem',
+                              fontSize: '0.72rem',
+                              fontWeight: 600,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            ✖ Kosongkan
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -5049,6 +5146,86 @@ export default function AutoPipelinePage() {
                             </div>
                           );
                         })}
+                      </div>
+                    </div>
+
+                    {/* Sudut Pandang / Arahan Promosi Harian (Promotion Context) */}
+                    <div style={{
+                      marginTop: '0.25rem',
+                      paddingTop: '0.75rem',
+                      borderTop: '1px solid var(--border-subtle)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.45rem'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.35rem' }}>
+                        <label style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                          <span>🏷️</span>
+                          <span>Sudut Pandang / Arahan Promosi Harian (Opsional):</span>
+                        </label>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--status-success)', fontWeight: 600 }}>
+                          Aktif saat Eksekusi Jadwal
+                        </span>
+                      </div>
+                      <input
+                        type="text"
+                        value={schedPromotionContext}
+                        onChange={(e) => setSchedPromotionContext(e.target.value)}
+                        placeholder="Contoh: Solusi batuk pilek anak saat musim hujan, rutinitas pagi penambah energi..."
+                        style={{
+                          width: '100%',
+                          height: '38px',
+                          background: 'var(--input-bg)',
+                          border: '1px solid var(--border-subtle)',
+                          borderRadius: 'var(--radius-sm)',
+                          padding: '0 0.75rem',
+                          fontSize: '0.82rem',
+                          color: 'var(--text-primary)',
+                          outline: 'none'
+                        }}
+                      />
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+                        {[
+                          { label: '☀️ Rutinitas Pagi Fit', text: 'Rutinitas pagi 1 sendok sebelum beraktivitas agar tubuh fit sepanjang hari' },
+                          { label: '🏫 Jajan Sembarangan Sekolah', text: 'Kekhawatiran ibu terhadap anak yang sering jajan sembarangan di sekolah' },
+                          { label: '🌧️ Tangkal Flu Musim Hujan', text: 'Persiapan musim hujan agar anggota keluarga tidak saling tertular flu' }
+                        ].map((chip, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => setSchedPromotionContext(chip.text)}
+                            style={{
+                              background: 'var(--surface)',
+                              border: '1px solid var(--border-subtle)',
+                              color: 'var(--text-secondary)',
+                              borderRadius: 9999,
+                              padding: '0.2rem 0.55rem',
+                              fontSize: '0.7rem',
+                              fontWeight: 600,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            {chip.label}
+                          </button>
+                        ))}
+                        {schedPromotionContext && (
+                          <button
+                            type="button"
+                            onClick={() => setSchedPromotionContext('')}
+                            style={{
+                              background: 'var(--surface)',
+                              border: '1px solid var(--status-danger-soft)',
+                              color: 'var(--status-danger)',
+                              borderRadius: 9999,
+                              padding: '0.2rem 0.55rem',
+                              fontSize: '0.7rem',
+                              fontWeight: 600,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            ✖ Kosongkan
+                          </button>
+                        )}
                       </div>
                     </div>
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.35.9 — Integrasi Sudut Pandang Konteks Promosi pada Video Produk (07/11/2026)
+- Input Sudut Pandang Konteks Promosi pada 1-Click Video Produk dengan quick chips
+- Input Arahan Promosi Harian pada Modal Scheduler jadwal otomatis
+- Forward promotion_context ke Content Planner AI Guardrail dan row_creative_payload
+- Update dispatcher cron scheduler auto-pipeline untuk mendukung context promosi
+
 ## V2.35.8 — Integrasi Product Bridging Preset & 100% CEP-Driven Engine (07/11/2026)
 - Exclude brand pillars pada product video untuk mengaktifkan 100% CEP-Driven mode
 - Forward parameter product_bridging dari operator preset ke campaign settings
