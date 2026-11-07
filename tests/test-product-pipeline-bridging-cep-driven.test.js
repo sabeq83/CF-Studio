@@ -325,4 +325,67 @@ test('Product Campaign Bridging & 100% CEP-Driven Test Suite', async (t) => {
     await db.prepare('DELETE FROM content_planner_rows WHERE planner_id = ?').run(testPlannerId);
     await db.prepare('DELETE FROM content_planners WHERE id = ?').run(testPlannerId);
   });
+
+  await t.test('6. Auto Pipeline schedule filtering by brand_id and universal schedule naming logic', async () => {
+    const { createAutoPipelineSchedule, listAutoPipelineSchedules, deleteSchedule } = await import('../lib/auto-pipeline-schedules-repository.js');
+
+    const brandA = 'bp_dapurbotani';
+    const brandB = 'bp_habitfolk';
+
+    // 1. Test universal schedule name assignment in single creation
+    const schedNameUniversal = 'Dapur Botani — GarliBee Daily Morning 05:00';
+    const sched1 = await createAutoPipelineSchedule('default_tenant', {
+      name: schedNameUniversal,
+      brand_id: brandA,
+      pipeline_type: 'product_campaign',
+      target_item_id: testProdId,
+      target_item_title: 'GarliBee Pro Test',
+      preset_key: 'dapurbotani_garlibee',
+      generation_time: '05:00',
+      publish_time: '09:00'
+    });
+
+    assert.equal(sched1.name, schedNameUniversal, 'Schedule name must preserve custom Nama Pengenal Jadwal');
+    assert.equal(sched1.brand_id, brandA);
+    assert.equal(sched1.pipeline_type, 'product_campaign');
+
+    // 2. Test batch naming pattern: customNameBase - prodName
+    const customBatchBase = 'NutriBake Sarapan Sehat';
+    const prodNameItem = 'GarliBee Pro Test';
+    const generatedBatchName = customBatchBase.toLowerCase().includes(prodNameItem.toLowerCase())
+      ? customBatchBase
+      : `${customBatchBase} - ${prodNameItem}`;
+
+    const sched2 = await createAutoPipelineSchedule('default_tenant', {
+      name: generatedBatchName,
+      brand_id: brandB,
+      pipeline_type: 'product_campaign',
+      target_item_id: testProdId,
+      target_item_title: prodNameItem,
+      preset_key: 'habitfolk_6clips_quick',
+      generation_time: '06:00',
+      publish_time: '10:00'
+    });
+
+    assert.equal(sched2.name, `${customBatchBase} - ${prodNameItem}`);
+    assert.equal(sched2.brand_id, brandB);
+
+    // 3. Test brand filtering logic
+    const schedulesAll = await listAutoPipelineSchedules('default_tenant', { status: 'all', brandId: 'all' });
+    const schedulesBrandA = await listAutoPipelineSchedules('default_tenant', { status: 'all', brandId: brandA });
+    const schedulesBrandB = await listAutoPipelineSchedules('default_tenant', { status: 'all', brandId: brandB });
+
+    assert.ok(schedulesAll.some(s => s.id === sched1.id), 'sched1 must be in all schedules');
+    assert.ok(schedulesAll.some(s => s.id === sched2.id), 'sched2 must be in all schedules');
+
+    assert.ok(schedulesBrandA.some(s => s.id === sched1.id), 'sched1 must be in brandA filter');
+    assert.ok(!schedulesBrandA.some(s => s.id === sched2.id), 'sched2 must NOT be in brandA filter');
+
+    assert.ok(schedulesBrandB.some(s => s.id === sched2.id), 'sched2 must be in brandB filter');
+    assert.ok(!schedulesBrandB.some(s => s.id === sched1.id), 'sched1 must NOT be in brandB filter');
+
+    // Clean up
+    await deleteSchedule('default_tenant', sched1.id);
+    await deleteSchedule('default_tenant', sched2.id);
+  });
 });

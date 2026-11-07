@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.35.10 — Filter Brand Profile & Nama Pengenal Jadwal Universal (08/11/2026)
+- Filter Brand Profile pada tab jadwal Auto Pipeline
+- Penyeragaman input Nama Pengenal Jadwal universal di seluruh tipe kampanye
+
 ## V2.35.9 — Integrasi Sudut Pandang Konteks Promosi pada Video Produk (07/11/2026)
 - Input Sudut Pandang Konteks Promosi pada 1-Click Video Produk dengan quick chips
 - Input Arahan Promosi Harian pada Modal Scheduler jadwal otomatis

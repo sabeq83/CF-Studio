@@ -175,6 +175,7 @@ export default function AutoPipelinePage() {
   const [runningScheduleIds, setRunningScheduleIds] = useState({});
   const [scheduleFilter, setScheduleFilter] = useState('all'); // 'all' | 'active' | 'paused' | 'archived'
   const [campaignTypeFilter, setCampaignTypeFilter] = useState('all'); // 'all' | 'product_campaign' | 'editorial_campaign' | 'recipe_campaign' | 'multiplier_campaign' | 'recipe_labs'
+  const [scheduleBrandFilter, setScheduleBrandFilter] = useState('all'); // 'all' | brand.id
   const [replizAccounts, setReplizAccounts] = useState([]);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState(null);
@@ -1096,6 +1097,9 @@ export default function AutoPipelinePage() {
     e.preventDefault();
     if (!schedBrandId) return showToast('Pilih Brand Profile', 'error');
 
+    // Validasi universal nama jadwal
+    if (!schedName.trim()) return showToast('Nama Pengenal Jadwal wajib diisi', 'error');
+
     // Validasi spesifik tipe kampanye
     if (schedCampaignType === 'product_campaign') {
       if (!editingSchedule && selectedProductIds.length === 0) {
@@ -1105,10 +1109,7 @@ export default function AutoPipelinePage() {
       if (!editingSchedule && selectedPillars.length === 0) {
         return showToast('Pilih minimal 1 pilar konten brand untuk dijadwalkan.', 'error');
       }
-    } else if (schedCampaignType === 'multiplier_campaign') {
-      if (!schedName.trim()) return showToast('Nama jadwal wajib diisi', 'error');
-    } else {
-      if (!schedName.trim()) return showToast('Nama jadwal wajib diisi', 'error');
+    } else if (schedCampaignType === 'recipe_campaign') {
       if (!schedTopic.trim()) return showToast('Tema / Arahan topik resep wajib diisi', 'error');
     }
 
@@ -1177,11 +1178,15 @@ export default function AutoPipelinePage() {
         if (schedCampaignType === 'product_campaign' && selectedProductIds.length > 1) {
           // BATCH PRODUK: 1 Produk = 1 Baris Jadwal Mandiri
           const promoCtx = schedPromotionContext.trim() || null;
+          const customNameBase = schedName.trim();
           const items = selectedProductIds.map(prodId => {
             const prod = catalogProducts.find(p => p.id === prodId);
             const prodName = prod?.product_name || 'Produk Katalog';
+            const itemScheduleName = customNameBase
+              ? (customNameBase.toLowerCase().includes(prodName.toLowerCase()) ? customNameBase : `${customNameBase} - ${prodName}`)
+              : `${prodName} — ${schedGenTime} WIB`;
             return {
-              name: `${prodName} — ${schedGenTime} WIB`,
+              name: itemScheduleName,
               brand_id: schedBrandId,
               preset_key: schedPresetKey,
               pipeline_type: 'product_campaign',
@@ -1210,24 +1215,30 @@ export default function AutoPipelinePage() {
           showToast(`Berhasil membuat ${items.length} baris jadwal video produk independen! 🛍️`);
         } else if (schedCampaignType === 'editorial_campaign' && selectedPillars.length > 1) {
           // BATCH EDITORIAL: 1 Pilar = 1 Baris Jadwal Mandiri
-          const items = selectedPillars.map(pillar => ({
-            name: `${pillar} — ${schedGenTime} WIB`,
-            brand_id: schedBrandId,
-            preset_key: schedPresetKey,
-            pipeline_type: 'editorial_campaign',
-            target_item_id: pillar,
-            target_item_title: pillar,
-            topic: pillar,
-            category: 'editorial',
-            recipe_count: 1,
-            generation_time: schedGenTime,
-            publish_time: schedPubTime,
-            days_of_week: schedDays,
-            repliz_account_ids: schedReplizAccountIds,
-            auto_publish_enabled: schedAutoPublish,
-            timezone: 'Asia/Jakarta',
-            pipeline_config: { content_pillar: pillar }
-          }));
+          const customNameBase = schedName.trim();
+          const items = selectedPillars.map(pillar => {
+            const itemScheduleName = customNameBase
+              ? (customNameBase.toLowerCase().includes(pillar.toLowerCase()) ? customNameBase : `${customNameBase} - ${pillar}`)
+              : `${pillar} — ${schedGenTime} WIB`;
+            return {
+              name: itemScheduleName,
+              brand_id: schedBrandId,
+              preset_key: schedPresetKey,
+              pipeline_type: 'editorial_campaign',
+              target_item_id: pillar,
+              target_item_title: pillar,
+              topic: pillar,
+              category: 'editorial',
+              recipe_count: 1,
+              generation_time: schedGenTime,
+              publish_time: schedPubTime,
+              days_of_week: schedDays,
+              repliz_account_ids: schedReplizAccountIds,
+              auto_publish_enabled: schedAutoPublish,
+              timezone: 'Asia/Jakarta',
+              pipeline_config: { content_pillar: pillar }
+            };
+          });
 
           const res = await fetch('/api/v2/recipes/auto-pipeline-schedules', {
             method: 'POST',
@@ -1419,6 +1430,7 @@ export default function AutoPipelinePage() {
     const pType = s.pipeline_type || 'recipe_campaign';
     if (campaignTypeFilter !== 'all' && pType !== campaignTypeFilter) return false;
     if (scheduleFilter !== 'all' && s.status !== scheduleFilter) return false;
+    if (scheduleBrandFilter !== 'all' && s.brand_id !== scheduleBrandFilter) return false;
     return true;
   });
 
@@ -4135,6 +4147,85 @@ export default function AutoPipelinePage() {
               flexDirection: 'column',
               gap: '1.25rem'
             }}>
+              {/* Brand Profile Filter Tabs */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                borderBottom: '1px solid var(--border-subtle)',
+                paddingBottom: '0.85rem',
+                flexWrap: 'wrap'
+              }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-muted)', marginRight: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <span>🏷️</span> Filter Brand:
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setScheduleBrandFilter('all')}
+                  style={{
+                    background: scheduleBrandFilter === 'all' ? 'var(--surface-interactive)' : 'transparent',
+                    color: scheduleBrandFilter === 'all' ? 'var(--action-primary)' : 'var(--text-secondary)',
+                    border: scheduleBrandFilter === 'all' ? '1px solid var(--action-primary)' : '1px solid transparent',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '0.35rem 0.85rem',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    transition: 'var(--transition)'
+                  }}
+                >
+                  <span>Semua Brand</span>
+                  <span style={{
+                    fontSize: '0.68rem',
+                    padding: '0.1rem 0.45rem',
+                    borderRadius: 9999,
+                    background: scheduleBrandFilter === 'all' ? 'var(--status-info-soft)' : 'var(--surface-interactive)',
+                    color: scheduleBrandFilter === 'all' ? 'var(--action-primary)' : 'var(--text-muted)'
+                  }}>
+                    {schedules.length}
+                  </span>
+                </button>
+                {brands.map(b => {
+                  const bCount = schedules.filter(s => s.brand_id === b.id).length;
+                  const isSelected = scheduleBrandFilter === b.id;
+                  return (
+                    <button
+                      key={b.id}
+                      type="button"
+                      onClick={() => setScheduleBrandFilter(b.id)}
+                      style={{
+                        background: isSelected ? 'var(--surface-interactive)' : 'transparent',
+                        color: isSelected ? 'var(--action-primary)' : 'var(--text-secondary)',
+                        border: isSelected ? '1px solid var(--action-primary)' : '1px solid transparent',
+                        borderRadius: 'var(--radius-sm)',
+                        padding: '0.35rem 0.85rem',
+                        fontSize: '0.8rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.35rem',
+                        transition: 'var(--transition)'
+                      }}
+                    >
+                      <span>{b.brand_name}</span>
+                      <span style={{
+                        fontSize: '0.68rem',
+                        padding: '0.1rem 0.45rem',
+                        borderRadius: 9999,
+                        background: isSelected ? 'var(--status-info-soft)' : 'var(--surface-interactive)',
+                        color: isSelected ? 'var(--action-primary)' : 'var(--text-muted)'
+                      }}>
+                        {bCount}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
               {/* Campaign Type Filter Tabs (Multi-Campaign Header) */}
               <div style={{
                 display: 'flex',
@@ -4244,7 +4335,7 @@ export default function AutoPipelinePage() {
                 }}>
                   <span style={{ fontSize: '2.2rem' }}>📭</span>
                   <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                    Tidak ada jadwal yang cocok dengan filter ({campaignTypeFilter !== 'all' ? campaignTypeFilter : ''} {scheduleFilter})
+                    Tidak ada jadwal yang cocok dengan filter ({scheduleBrandFilter !== 'all' ? (brands.find(b => b.id === scheduleBrandFilter)?.brand_name || scheduleBrandFilter) : 'Semua Brand'} · {campaignTypeFilter !== 'all' ? campaignTypeFilter : 'Semua Tipe'} · {scheduleFilter})
                   </div>
                   <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', maxWidth: '460px' }}>
                     Buat jadwal rutin baru untuk memproduksi video dan mempublikasikannya secara berkala ke Repliz.
@@ -4925,6 +5016,41 @@ export default function AutoPipelinePage() {
                   );
                 })()}
 
+                {/* UNIVERSAL: Nama Pengenal Jadwal (Hadir di Seluruh Tipe Kampanye) */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                  <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Nama Pengenal Jadwal</span>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Wajib diisi</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={schedName}
+                    onChange={(e) => setSchedName(e.target.value)}
+                    placeholder="Contoh: Dapur Botani — GarliBee Daily Morning 05:00"
+                    required
+                    style={{
+                      height: '42px',
+                      background: 'var(--input-bg)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: 'var(--radius-sm)',
+                      padding: '0 0.85rem',
+                      fontSize: '0.88rem',
+                      color: 'var(--text-primary)',
+                      outline: 'none'
+                    }}
+                  />
+                  {schedCampaignType === 'product_campaign' && selectedProductIds.length > 1 && (
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                      💡 Mode Batch Multi-Produk ({selectedProductIds.length} produk): Nama produk akan otomatis ditambahkan ke nama pengenal di atas.
+                    </span>
+                  )}
+                  {schedCampaignType === 'editorial_campaign' && selectedPillars.length > 1 && (
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                      💡 Mode Batch Multi-Pilar ({selectedPillars.length} pilar): Nama pilar akan otomatis ditambahkan ke nama pengenal di atas.
+                    </span>
+                  )}
+                </div>
+
                 {/* STEP 3: Konfigurasi Khusus Kampanye (Adaptive) */}
                 {/* 3A. PRODUK: Multi-Select Produk Katalog */}
                 {schedCampaignType === 'product_campaign' && (
@@ -5375,32 +5501,9 @@ export default function AutoPipelinePage() {
                   </div>
                 )}
 
-                {/* 3C. RESEP: Nama Jadwal, Topik Resep & Kategori Kuliner */}
+                {/* 3C. RESEP: Topik Resep & Kategori Kuliner */}
                 {schedCampaignType === 'recipe_campaign' && (
                   <>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                      <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                        Nama Pengenal Jadwal
-                      </label>
-                      <input
-                        type="text"
-                        value={schedName}
-                        onChange={(e) => setSchedName(e.target.value)}
-                        placeholder="Contoh: HabitFolk Daily Morning Snack 05:00"
-                        required
-                        style={{
-                          height: '42px',
-                          background: 'var(--input-bg)',
-                          border: '1px solid var(--border-subtle)',
-                          borderRadius: 'var(--radius-sm)',
-                          padding: '0 0.85rem',
-                          fontSize: '0.88rem',
-                          color: 'var(--text-primary)',
-                          outline: 'none'
-                        }}
-                      />
-                    </div>
-
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                       <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
                         <span>Tema / Arahan Topik Resep Harian</span>
@@ -5556,29 +5659,6 @@ export default function AutoPipelinePage() {
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                       <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                        Nama Pengenal Jadwal
-                      </label>
-                      <input
-                        type="text"
-                        value={schedName}
-                        onChange={(e) => setSchedName(e.target.value)}
-                        placeholder="Contoh: HabitFolk — Daily Multiplier Hook 08:00"
-                        required
-                        style={{
-                          height: '40px',
-                          background: 'var(--input-bg)',
-                          border: '1px solid var(--border-subtle)',
-                          borderRadius: 'var(--radius-sm)',
-                          padding: '0 0.85rem',
-                          fontSize: '0.86rem',
-                          color: 'var(--text-primary)',
-                          outline: 'none'
-                        }}
-                      />
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                      <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
                         Pilih Blueprint Video Acuan (Deconstruct Lab)
                       </label>
                       <select
@@ -5610,7 +5690,7 @@ export default function AutoPipelinePage() {
                   </div>
                 )}
 
-                {/* 3E. RECIPE LABS: Nama Jadwal, Topik, Kolase Grid & Facebook Post */}
+                {/* 3E. RECIPE LABS: Topik, Kolase Grid & Facebook Post */}
                 {schedCampaignType === 'recipe_labs' && (
                   <div style={{
                     background: 'var(--surface-raised)',
@@ -5628,29 +5708,6 @@ export default function AutoPipelinePage() {
                       <span style={{ fontSize: '0.72rem', padding: '0.15rem 0.5rem', borderRadius: 9999, background: 'var(--status-rose-soft)', color: 'var(--status-rose)', fontWeight: 800 }}>
                         Artikel FB + Grid Poster
                       </span>
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                      <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                        Nama Pengenal Jadwal
-                      </label>
-                      <input
-                        type="text"
-                        value={schedName}
-                        onChange={(e) => setSchedName(e.target.value)}
-                        placeholder="Contoh: Dapur Botani — Resep Sehat FB 09:00"
-                        required
-                        style={{
-                          height: '40px',
-                          background: 'var(--input-bg)',
-                          border: '1px solid var(--border-subtle)',
-                          borderRadius: 'var(--radius-sm)',
-                          padding: '0 0.85rem',
-                          fontSize: '0.86rem',
-                          color: 'var(--text-primary)',
-                          outline: 'none'
-                        }}
-                      />
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
