@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup Interaktif: Pemilih CEP pada 1-Click Pipeline & Modal Skedul</title>
+  <style>
+    /* 100% Semantic CSS Tokens sesuai SOP MAKNA Flow dari app/theme.css */
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-purple: #c084fc;
+      --status-purple-soft: rgba(192, 132, 252, 0.14);
+      --status-rose: #f43f5e;
+      --status-rose-soft: rgba(244, 63, 94, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f8fafc;
+      --surface: #ffffff;
+      --surface-raised: #f1f5f9;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --input-bg: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --border-subtle: #e2e8f0;
+      --border-strong: #94a3b8;
+      --action-primary: #0d9488;
+      --action-primary-hover: #14b8a6;
+      --on-action-primary: #ffffff;
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.12);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.12);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.12);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.12);
+      --status-purple: #9333ea;
+      --status-purple-soft: rgba(147, 51, 234, 0.12);
+      --status-rose: #e11d48;
+      --status-rose-soft: rgba(225, 29, 72, 0.12);
+      --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.08);
+      --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.16);
+      --overlay-backdrop: rgba(15, 23, 42, 0.5);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-sans); }
+    body { background: var(--canvas); color: var(--text-primary); padding: 2rem 1rem; min-height: 100vh; display: flex; justify-content: center; }
+    .container { width: 100%; max-width: 940px; display: flex; flex-direction: column; gap: 1.5rem; }
+
+    /* Top Nav */
+    .header-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--surface); border: 1px solid var(--border-subtle);
+      padding: 1rem 1.25rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-card);
+      flex-wrap: wrap; gap: 0.75rem;
+    }
+    .header-title { display: flex; align-items: center; gap: 0.65rem; }
+    .header-title h1 { font-size: 1.15rem; font-weight: 800; color: var(--text-primary); }
+    .badge {
+      font-size: 0.72rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 9999px;
+      background: var(--status-success-soft); color: var(--status-success); border: 1px solid var(--status-success);
+    }
+    .btn-secondary {
+      background: var(--surface-interactive); border: 1px solid var(--border-subtle);
+      color: var(--text-primary); padding: 0.45rem 0.85rem; border-radius: var(--radius-sm);
+      cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: 0.2s; display: inline-flex; align-items: center; gap: 0.4rem;
+    }
+    .btn-secondary:hover { background: var(--surface-hover); }
+
+    /* Nav Tabs */
+    .view-tabs {
+      display: flex; gap: 0.5rem; background: var(--surface); padding: 0.35rem;
+      border-radius: var(--radius-md); border: 1px solid var(--border-subtle);
+    }
+    .view-tab {
+      flex: 1; padding: 0.6rem 1rem; border-radius: var(--radius-sm); border: none;
+      background: transparent; color: var(--text-muted); font-size: 0.85rem; font-weight: 700;
+      cursor: pointer; transition: 0.15s; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    }
+    .view-tab.active {
+      background: var(--surface-interactive); color: var(--text-primary);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+
+    /* Main Card */
+    .card {
+      background: var(--surface); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-card);
+      display: flex; flex-direction: column; gap: 1.35rem;
+    }
+
+    .section-title {
+      font-size: 0.95rem; font-weight: 800; color: var(--text-primary);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    /* Product Grid */
+    .product-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.75rem;
+      max-height: 220px; overflow-y: auto; padding-right: 4px;
+    }
+    .product-item {
+      background: var(--surface-raised); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm); padding: 0.75rem; display: flex; align-items: center;
+      gap: 0.75rem; cursor: pointer; transition: 0.15s;
+    }
+    .product-item:hover { border-color: var(--status-success); background: var(--surface-interactive); }
+    .product-item.selected {
+      border-color: var(--status-success); background: var(--status-success-soft);
+      box-shadow: 0 0 0 1px var(--status-success);
+    }
+    .product-thumb {
+      width: 42px; height: 42px; border-radius: var(--radius-xs); background: var(--surface-interactive);
+      display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;
+    }
+    .product-info { flex: 1; min-width: 0; }
+    .product-name { font-size: 0.82rem; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .product-desc { font-size: 0.7rem; color: var(--text-muted); }
+    .check-circle {
+      width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--border-strong);
+      display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 900;
+      color: transparent; flex-shrink: 0;
+    }
+    .product-item.selected .check-circle {
+      border-color: var(--status-success); background: var(--status-success); color: #ffffff;
+    }
+
+    /* CEP Selector Box */
+    .cep-box {
+      background: var(--surface-raised); border: 1.5px solid var(--status-info);
+      border-radius: var(--radius-md); padding: 1.15rem; display: flex; flex-direction: column; gap: 0.85rem;
+    }
+    .cep-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+    .cep-title { font-size: 0.88rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; }
+    .cep-badge {
+      font-size: 0.72rem; font-weight: 700; padding: 0.2rem 0.65rem; border-radius: 9999px;
+      background: var(--status-info-soft); color: var(--status-info); border: 1px solid var(--status-info);
+    }
+
+    /* CEP Chips Grid */
+    .cep-chips-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.6rem;
+    }
+    .cep-chip {
+      background: var(--surface); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm); padding: 0.65rem 0.85rem; cursor: pointer;
+      display: flex; flex-direction: column; gap: 0.25rem; transition: 0.15s; text-align: left;
+    }
+    .cep-chip:hover { border-color: var(--status-info); background: var(--surface-interactive); }
+    .cep-chip.active {
+      border-color: var(--status-info); background: var(--status-info-soft);
+      box-shadow: 0 0 0 1px var(--status-info);
+    }
+    .cep-chip-top { display: flex; align-items: center; justify-content: space-between; }
+    .cep-chip-title { font-size: 0.82rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.4rem; }
+    .cep-chip-desc { font-size: 0.68rem; color: var(--text-muted); line-height: 1.3; }
+    .cep-radio {
+      width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--border-strong);
+      display: inline-block; position: relative;
+    }
+    .cep-chip.active .cep-radio { border-color: var(--status-info); background: var(--status-info); }
+    .cep-chip.active .cep-radio::after {
+      content: ''; width: 4px; height: 4px; border-radius: 50%; background: #ffffff;
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    }
+
+    /* Adaptive Story Arc Display */
+    .story-arc-box {
+      background: var(--surface-raised); border: 1px dashed var(--border-strong);
+      border-radius: var(--radius-md); padding: 1.15rem; display: flex; flex-direction: column; gap: 0.75rem;
+    }
+    .story-arc-header { display: flex; justify-content: space-between; align-items: center; }
+    .story-arc-title { font-size: 0.82rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 0.45rem; }
+    .story-arc-badge {
+      font-size: 0.68rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 9999px;
+      background: var(--surface-interactive); color: var(--text-secondary); border: 1px solid var(--border-subtle);
+    }
+    .arc-timeline {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem;
+    }
+    @media (max-width: 680px) {
+      .arc-timeline { grid-template-columns: 1fr; }
+    }
+    .arc-step {
+      background: var(--surface); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs); padding: 0.65rem; display: flex; flex-direction: column; gap: 0.25rem;
+      border-top: 3px solid var(--status-info);
+    }
+    .arc-step.step-hook { border-top-color: var(--status-warning); }
+    .arc-step.step-solution { border-top-color: var(--status-success); }
+    .arc-step.step-cta { border-top-color: var(--action-primary); }
+    .arc-step-num { font-size: 0.68rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; }
+    .arc-step-name { font-size: 0.78rem; font-weight: 700; color: var(--text-primary); }
+    .arc-step-desc { font-size: 0.68rem; color: var(--text-muted); line-height: 1.3; }
+
+    /* Action Bar */
+    .action-bar {
+      display: flex; justify-content: space-between; align-items: center; padding-top: 0.5rem; flex-wrap: wrap; gap: 1rem;
+    }
+    .launch-btn {
+      background: var(--status-success); color: var(--on-action-primary); border: none;
+      padding: 0.9rem 1.85rem; border-radius: var(--radius-md); font-size: 0.95rem; font-weight: 700;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 0.6rem;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25); transition: 0.2s;
+    }
+    .launch-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .launch-btn:active { transform: translateY(0); }
+
+    /* Payload Inspector Box */
+    .payload-box {
+      background: var(--input-bg); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md); padding: 1rem; font-family: var(--font-mono);
+      font-size: 0.75rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 0.5rem;
+    }
+    .payload-title { font-size: 0.72rem; font-weight: 700; color: var(--status-info); text-transform: uppercase; letter-spacing: 0.05em; }
+    pre { overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: var(--action-primary); }
+
+    /* MODAL OVERLAY */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: var(--overlay-backdrop); backdrop-filter: blur(4px);
+      display: none; align-items: center; justify-content: center; z-index: 9999; padding: 1.5rem;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-card {
+      background: var(--surface); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg); box-shadow: var(--shadow-modal);
+      width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto; padding: 1.75rem;
+      display: flex; flex-direction: column; gap: 1.25rem; animation: modalPop 0.2s ease-out;
+    }
+    @keyframes modalPop {
+      from { transform: scale(0.96); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle);
+    }
+    .modal-title { font-size: 1.1rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; }
+    .btn-close { background: transparent; border: none; font-size: 1.25rem; color: var(--text-muted); cursor: pointer; }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-label { font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); }
+    .form-input, .form-select {
+      height: 38px; background: var(--input-bg); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm); padding: 0 10px; color: var(--text-primary); font-size: 0.84rem; outline: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Header -->
+    <div class="header-bar">
+      <div class="header-title">
+        <span>⚡</span>
+        <h1>Auto Pipeline: Seleksi CEP &amp; Integrasi Modal Skedul</h1>
+        <span class="badge">MAKNA Flow Engine</span>
+      </div>
+      <div style="display: flex; gap: 0.5rem;">
+        <button class="btn-secondary" onclick="openScheduleModal()">
+          <span>⏰ Buka Modal Skedul</span>
+        </button>
+        <button class="btn-secondary" onclick="toggleTheme()">🌓 Switch Theme</button>
+      </div>
+    </div>
+
+    <!-- View Switcher -->
+    <div class="view-tabs">
+      <button class="view-tab active" id="tab1Click" onclick="switchView('1click')">
+        <span>⚡ View 1: 1-Click Auto Pipeline Langsung</span>
+      </button>
+      <button class="view-tab" id="tabSchedule" onclick="switchView('schedule')">
+        <span>⏰ View 2: Jadwal Rutin Otomatis (Modal Skedul)</span>
+      </button>
+    </div>
+
+    <!-- VIEW 1: 1-Click Instant Pipeline -->
+    <div class="card" id="view1Click">
+      <!-- Section 1: Product Selection -->
+      <div class="section-title">
+        <span>🛍️ 1. Pilih Produk dari Katalog:</span>
+        <span style="font-size: 0.72rem; color: var(--status-success); font-weight: 700;" id="selectedProductLabel">
+          Terpilih: GarliBee — Honey Infused Solo Garlic
+        </span>
+      </div>
+
+      <div class="product-grid" id="productGrid">
+        <!-- Injected via JS -->
+      </div>
+
+      <!-- Section 2: CEP Selector (THE PROPOSED FEATURE) -->
+      <div class="cep-box">
+        <div class="cep-header">
+          <div class="cep-title">
+            <span>🎯</span>
+            <span>2. Sudut Pandang Psikologis Konten (Category Entry Point / CEP):</span>
+          </div>
+          <span class="cep-badge" id="activeCepBadge">⚡ Auto (Rekomendasi AI)</span>
+        </div>
+
+        <p style="font-size: 0.74rem; color: var(--text-secondary); line-height: 1.4;">
+          Pilih pemicu psikologis audiens agar AI Gemini merumuskan hook, masalah harian, dan skrip video sesuai tujuan kampanye ini:
+        </p>
+
+        <div class="cep-chips-grid" id="cepChipsGrid">
+          <!-- Injected via JS -->
+        </div>
+
+        <div style="font-size: 0.72rem; color: var(--text-muted); background: var(--surface); padding: 0.5rem 0.75rem; border-radius: var(--radius-xs); border: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 0.45rem;">
+          <span>💡</span>
+          <span id="cepExplanationText">Mode <strong>Auto</strong> akan merotasi CEP secara alami berdasarkan riwayat konten produk untuk mencegah kebosanan audiens.</span>
+        </div>
+      </div>
+
+      <!-- Section 3: Adaptive Story Arc Preview -->
+      <div class="story-arc-box">
+        <div class="story-arc-header">
+          <div class="story-arc-title">
+            <span>🎬</span>
+            <span>3. Alur Babak Story Arc (Otomatis Menyesuaikan CEP &amp; Durasi):</span>
+          </div>
+          <span class="story-arc-badge" id="arcPresetBadge">Product Showcase (4 Klip • 32 Detik)</span>
+        </div>
+
+        <div class="arc-timeline" id="arcTimeline">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+      <!-- Section 4: Action & Payload Inspector -->
+      <div class="action-bar">
+        <button class="launch-btn" onclick="simulateLaunch()">
+          <span>⚡ Luncurkan Video Produk Sekarang (1-Pass)</span>
+        </button>
+        <span style="font-size: 0.75rem; color: var(--text-muted);">
+          1x API Call ke Gemini AI • Storyboard + VO + Video DNA + Social Media Package
+        </span>
+      </div>
+
+      <!-- Real-Time Payload Inspector -->
+      <div class="payload-box">
+        <div class="payload-title">🔍 Real-Time 1-Click Request Payload (POST /api/v2/recipes/autonomous-pipeline)</div>
+        <pre id="payloadPreview"></pre>
+      </div>
+    </div>
+
+    <!-- VIEW 2: Explanation of Schedule Integration -->
+    <div class="card" id="viewScheduleInfo" style="display: none;">
+      <div class="section-title">
+        <span>⏰ Integrasi CEP ke Jadwal Rutin (Modal Skedul)</span>
+        <button class="btn-secondary" onclick="openScheduleModal()">
+          <span>Buka Modal Skedul Sekarang 🚀</span>
+        </button>
+      </div>
+      <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">
+        Ketika user membuat jadwal harian untuk Video Produk (misal setiap jam 05:00 WIB), user kini bisa mengunci CEP tertentu (contoh: <em>Problem-Solution</em>) atau membiarkannya <em>Auto</em> (agar AI merotasi CEP berbeda tiap harinya).
+      </p>
+      <div class="payload-box">
+        <div class="payload-title">🔍 Payload Schedule Config (Tersimpan di `pipeline_config_json` pada tabel `auto_pipeline_schedules`)</div>
+        <pre id="schedulePayloadPreview"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL DIALOG SKEDUL INTERAKTIF (DENGAN CEP SELECTOR)                      -->
+  <!-- ========================================================================= -->
+  <div class="modal-backdrop" id="scheduleModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>⏰</span>
+          <span>Buat Jadwal Rutin Auto Pipeline Baru</span>
+        </div>
+        <button class="btn-close" onclick="closeScheduleModal()">✕</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 1rem;">
+        <!-- Tipe Kampanye -->
+        <div class="form-group">
+          <label class="form-label">Tipe Kampanye</label>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.5rem;">
+            <div style="background: var(--surface-interactive); border: 1.5px solid var(--status-success); border-radius: var(--radius-sm); padding: 0.6rem; display: flex; align-items: center; justify-content: space-between;">
+              <span style="font-size: 0.82rem; font-weight: 700; color: var(--status-success);">🛍️ Video Produk</span>
+              <span style="color: var(--status-success); font-weight: 900; font-size: 0.75rem;">✓</span>
+            </div>
+            <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.6rem; opacity: 0.6; font-size: 0.82rem; color: var(--text-muted);">
+              📖 Video Editorial
+            </div>
+            <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.6rem; opacity: 0.6; font-size: 0.82rem; color: var(--text-muted);">
+              🍳 Video Resep
+            </div>
+          </div>
+        </div>
+
+        <!-- Nama Jadwal -->
+        <div class="form-group">
+          <label class="form-label">Nama Jadwal</label>
+          <input type="text" class="form-input" id="modalSchedName" value="dapurbotani — GarliBee Daily Showcase">
+        </div>
+
+        <!-- Brand Profile & Waktu -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Brand Profile</label>
+            <select class="form-select">
+              <option selected>dapurbotani (default_tenant)</option>
+              <option>Habitfolk</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Jam Eksekusi Harian</label>
+            <input type="time" class="form-input" value="05:00">
+          </div>
+        </div>
+
+        <!-- Produk Terpilih -->
+        <div class="form-group">
+          <label class="form-label">Produk Katalog yang Dijadwalkan</label>
+          <div style="background: var(--surface-raised); border: 1px solid var(--status-success); border-radius: var(--radius-sm); padding: 0.65rem 0.85rem; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span>🧄</span>
+              <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-primary);">GarliBee — Honey Infused Solo Garlic</span>
+            </div>
+            <span style="font-size: 0.7rem; color: var(--status-success); font-weight: 700;">Aktif</span>
+          </div>
+        </div>
+
+        <!-- THE PROPOSED CEP SELECTOR INSIDE MODAL SKEDUL -->
+        <div class="cep-box" style="border-color: var(--status-success);">
+          <div class="cep-header">
+            <div class="cep-title">
+              <span>🎯</span>
+              <span>Sudut Pandang Psikologis Jadwal (Category Entry Point):</span>
+            </div>
+            <span class="cep-badge" id="modalCepBadge" style="background: var(--status-success-soft); color: var(--status-success); border-color: var(--status-success);">
+              ⚡ Auto (Rotasi Dinamis)
+            </span>
+          </div>
+
+          <p style="font-size: 0.72rem; color: var(--text-secondary); line-height: 1.3;">
+            Tentukan apakah jadwal harian ini fokus ke 1 angle tetap, atau berotasi secara otomatis tiap harinya:
+          </p>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem;" id="modalCepGrid">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+
+        <!-- Modal Action Footer -->
+        <div style="display: flex; justify-content: flex-end; gap: 0.65rem; padding-top: 0.5rem; border-top: 1px solid var(--border-subtle);">
+          <button class="btn-secondary" onclick="closeScheduleModal()">Batal</button>
+          <button class="launch-btn" style="padding: 0.6rem 1.25rem; font-size: 0.85rem;" onclick="saveScheduleSimulation()">
+            💾 Simpan Jadwal Rutin
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentTheme = 'dark';
+    let selectedProductId = 'pe_1793545394035_6698';
+    let selectedCep = 'auto'; // for 1-Click
+    let modalSelectedCep = 'auto'; // for Schedule Modal
+
+    const products = [
+      {
+        id: 'pe_1793545394035_6698',
+        name: 'GarliBee — Honey Infused Solo Garlic',
+        category: 'Herbal Wellness',
+        desc: 'Bawang lanang fermentasi madu mentah 3 bulan.',
+        icon: '🧄'
+      },
+      {
+        id: 'pe_1793545394035_6699',
+        name: 'Madu Randu Asli Organik 500g',
+        category: 'Madu Murni',
+        desc: 'Madu nektar bunga randu murni tanpa olahan.',
+        icon: '🍯'
+      },
+      {
+        id: 'pe_1793545394035_6700',
+        name: 'Sari Jahe Merah Instan Herbal',
+        category: 'Minuman Herbal',
+        desc: 'Ekstrak jahe merah super hangat berkhasiat.',
+        icon: '🫚'
+      }
+    ];
+
+    const cepOptions = [
+      {
+        id: 'auto',
+        label: 'Auto (Rekomendasi AI)',
+        icon: '⚡',
+        shortDesc: 'Rotasi dinamis alami anti-bosan sesuai riwayat konten produk.',
+        arcHookTitle: 'Babak 1: Hook Pembuka Adaptif',
+        arcHookDesc: 'AI memilih hook kontras atau pertanyaan retoris paling segar.'
+      },
+      {
+        id: 'Problem-Solution Based',
+        label: 'Problem-Solution Based',
+        icon: '🎯',
+        shortDesc: 'Angkat rasa sakit & keluhan harian (stamina drop, mudah masuk angin).',
+        arcHookTitle: 'Babak 1: Hook Gejala & Agitasi Masalah',
+        arcHookDesc: 'Menyorot rasa frustrasi tubuh lemas & daya tahan turun saat kerja padat.'
+      },
+      {
+        id: 'Routine Based',
+        label: 'Routine Based',
+        icon: '⏰',
+        shortDesc: 'Integrasikan ke ritual pagi/malam (1 sendok rutin sebelum sarapan).',
+        arcHookTitle: 'Babak 1: Hook Momen Keseharian',
+        arcHookDesc: 'Trigger rutinitas pagi sebelum berangkat kantor: ritual sehat praktis.'
+      },
+      {
+        id: 'Emotional Based',
+        label: 'Emotional Based',
+        icon: '❤️',
+        shortDesc: 'Kepedulian keluarga, rasa cemas orang tua jatuh sakit, atau kasih sayang.',
+        arcHookTitle: 'Babak 1: Hook Empati & Sentuhan Emosional',
+        arcHookDesc: 'Momen kekhawatiran saat orang tersayang mulai sering jatuh sakit.'
+      },
+      {
+        id: 'Aspirational Based',
+        label: 'Aspirational Based',
+        icon: '✨',
+        shortDesc: 'Gaya hidup sehat alami, upgrade diri, vitalitas tanpa obat kimia.',
+        arcHookTitle: 'Babak 1: Hook Kontras Gaya Hidup',
+        arcHookDesc: 'Visual kontras: hidup lesu vs energi prima bugar sepanjang hari.'
+      },
+      {
+        id: 'Commitment Based',
+        label: 'Commitment Based',
+        icon: '💪',
+        shortDesc: 'Tantangan konsistensi (bukti perubahan tubuh setelah 14 hari).',
+        arcHookTitle: 'Babak 1: Hook Tantangan Konsistensi',
+        arcHookDesc: 'Pertanyaan pembuktian: "Apa yang terjadi pada tubuh setelah 14 hari?"'
+      },
+      {
+        id: 'Opportunistic Based',
+        label: 'Opportunistic Based',
+        icon: '🌦️',
+        shortDesc: 'Trigger situasi: cuaca pancaroba, musim hujan, lembur, perjalanan.',
+        arcHookTitle: 'Babak 1: Hook Trigger Situasi Khusus',
+        arcHookDesc: 'Kondisi pancaroba & rekan kantor mulai batuk pilek: alarm benteng tubuh.'
+      }
+    ];
+
+    function renderProducts() {
+      const grid = document.getElementById('productGrid');
+      grid.innerHTML = products.map(p => {
+        const isSelected = p.id === selectedProductId;
+        return `
+          <div class="product-item ${isSelected ? 'selected' : ''}" onclick="selectProduct('${p.id}')">
+            <div class="product-thumb">${p.icon}</div>
+            <div class="product-info">
+              <div class="product-name" title="${p.name}">${p.name}</div>
+              <div class="product-desc">${p.category}</div>
+            </div>
+            <div class="check-circle">✓</div>
+          </div>
+        `;
+      }).join('');
+
+      const activeProd = products.find(p => p.id === selectedProductId);
+      document.getElementById('selectedProductLabel').textContent = `Terpilih: ${activeProd ? activeProd.name : selectedProductId}`;
+    }
+
+    function renderCepChips() {
+      const grid = document.getElementById('cepChipsGrid');
+      grid.innerHTML = cepOptions.map(c => {
+        const isActive = c.id === selectedCep;
+        return `
+          <div class="cep-chip ${isActive ? 'active' : ''}" onclick="selectCep('${c.id}')">
+            <div class="cep-chip-top">
+              <span class="cep-chip-title">
+                <span>${c.icon}</span>
+                <span>${c.label}</span>
+              </span>
+              <span class="cep-radio"></span>
+            </div>
+            <div class="cep-chip-desc">${c.shortDesc}</div>
+          </div>
+        `;
+      }).join('');
+
+      const activeObj = cepOptions.find(c => c.id === selectedCep) || cepOptions[0];
+      document.getElementById('activeCepBadge').textContent = `${activeObj.icon} ${activeObj.label}`;
+      document.getElementById('cepExplanationText').innerHTML = `Sudut pandang terpilih: <strong>${activeObj.label}</strong>. ${activeObj.shortDesc}`;
+    }
+
+    function renderModalCepGrid() {
+      const grid = document.getElementById('modalCepGrid');
+      grid.innerHTML = cepOptions.map(c => {
+        const isActive = c.id === modalSelectedCep;
+        return `
+          <div class="cep-chip ${isActive ? 'active' : ''}" style="padding: 0.5rem 0.65rem;" onclick="selectModalCep('${c.id}')">
+            <div class="cep-chip-top">
+              <span class="cep-chip-title" style="font-size: 0.75rem;">
+                <span>${c.icon}</span>
+                <span>${c.label}</span>
+              </span>
+              <span class="cep-radio"></span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const activeObj = cepOptions.find(c => c.id === modalSelectedCep) || cepOptions[0];
+      document.getElementById('modalCepBadge').textContent = `${activeObj.icon} ${activeObj.label}`;
+    }
+
+    function renderStoryArc() {
+      const timeline = document.getElementById('arcTimeline');
+      const activeCepObj = cepOptions.find(c => c.id === selectedCep) || cepOptions[0];
+      const activeProd = products.find(p => p.id === selectedProductId);
+
+      const steps = [
+        {
+          num: 'Klip 1 (0-8s)',
+          cls: 'step-hook',
+          title: activeCepObj.arcHookTitle,
+          desc: activeCepObj.arcHookDesc
+        },
+        {
+          num: 'Klip 2 (8-16s)',
+          cls: '',
+          title: 'Babak 2: Akar Masalah & Mekanisme',
+          desc: 'Mengapa bawang lanang fermentasi madu mentah 3 bulan memiliki allicin & antioksidan 4x lebih tinggi.'
+        },
+        {
+          num: 'Klip 3 (16-24s)',
+          cls: 'step-solution',
+          title: 'Babak 3: Solusi Produk & Tekstur',
+          desc: `Tampilan visual ${activeProd ? activeProd.name : 'produk'}: tekstur kenyal lembut tanpa getir pedas.`
+        },
+        {
+          num: 'Klip 4 (24-32s)',
+          cls: 'step-cta',
+          title: 'Babak 4: Hasil / CTA Kuat',
+          desc: 'Manfaat tubuh terasa hangat enteng + Ajakan cek keranjang kuning / link di bio.'
+        }
+      ];
+
+      timeline.innerHTML = steps.map(s => `
+        <div class="arc-step ${s.cls}">
+          <div class="arc-step-num">${s.num}</div>
+          <div class="arc-step-name">${s.title}</div>
+          <div class="arc-step-desc">${s.desc}</div>
+        </div>
+      `).join('');
+    }
+
+    function updatePayloadPreviews() {
+      const activeProd = products.find(p => p.id === selectedProductId);
+      
+      // 1-Click Payload
+      const payload1Click = {
+        pipeline_type: 'product_campaign',
+        brand_id: 'bp_dapurbotani',
+        preset_key: 'product_campaign',
+        product_id: selectedProductId,
+        product_title: activeProd?.name,
+        selected_cep: selectedCep, // <-- Parameter CEP terpilih!
+        execution_mode: 'full_autopilot',
+        target_clips_count: 4,
+        clip_duration: 8,
+        voice_persona: 'Indonesian_casual_reporter_vv2',
+        auto_sync_contentflow: 1
+      };
+      document.getElementById('payloadPreview').textContent = JSON.stringify(payload1Click, null, 2);
+
+      // Schedule Payload
+      const schedulePayload = {
+        name: 'dapurbotani — GarliBee Daily Showcase',
+        brand_id: 'bp_dapurbotani',
+        preset_key: 'product_campaign',
+        pipeline_type: 'product_campaign',
+        target_item_id: selectedProductId,
+        target_item_title: activeProd?.name,
+        generation_time: '05:00',
+        publish_time: '09:00',
+        days_of_week: [0, 1, 2, 3, 4, 5, 6],
+        pipeline_config_json: JSON.stringify({
+          product_id: selectedProductId,
+          selected_cep: modalSelectedCep // <-- Parameter CEP tersimpan pada jadwal rutin!
+        }, null, 2)
+      };
+      document.getElementById('schedulePayloadPreview').textContent = JSON.stringify(schedulePayload, null, 2);
+    }
+
+    function selectProduct(id) {
+      selectedProductId = id;
+      renderProducts();
+      renderStoryArc();
+      updatePayloadPreviews();
+    }
+
+    function selectCep(id) {
+      selectedCep = id;
+      renderCepChips();
+      renderStoryArc();
+      updatePayloadPreviews();
+    }
+
+    function selectModalCep(id) {
+      modalSelectedCep = id;
+      renderModalCepGrid();
+      updatePayloadPreviews();
+    }
+
+    function toggleTheme() {
+      currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', currentTheme);
+    }
+
+    function switchView(view) {
+      if (view === '1click') {
+        document.getElementById('tab1Click').classList.add('active');
+        document.getElementById('tabSchedule').classList.remove('active');
+        document.getElementById('view1Click').style.display = 'flex';
+        document.getElementById('viewScheduleInfo').style.display = 'none';
+      } else {
+        document.getElementById('tab1Click').classList.remove('active');
+        document.getElementById('tabSchedule').classList.add('active');
+        document.getElementById('view1Click').style.display = 'none';
+        document.getElementById('viewScheduleInfo').style.display = 'flex';
+      }
+    }
+
+    function openScheduleModal() {
+      document.getElementById('scheduleModal').classList.add('open');
+      renderModalCepGrid();
+    }
+
+    function closeScheduleModal() {
+      document.getElementById('scheduleModal').classList.remove('open');
+    }
+
+    function simulateLaunch() {
+      const activeCepObj = cepOptions.find(c => c.id === selectedCep);
+      const activeProd = products.find(p => p.id === selectedProductId);
+      alert(`🚀 [SIMULASI EKSEKUSI 1-KLIK BERHASIL]\n\nProduk: ${activeProd?.name}\nCEP: ${activeCepObj?.label}\nPipeline: product_campaign (1-Pass)\n\nPayload telah dikirim ke backend! Sistem akan memvalidasi single-item (planner_count: 1) dan mengarahkan AI untuk fokus pada CEP ini.`);
+    }
+
+    function saveScheduleSimulation() {
+      const activeCepObj = cepOptions.find(c => c.id === modalSelectedCep);
+      alert(`💾 [SIMULASI PENYIMPANAN JADWAL BERHASIL]\n\nJadwal harian produk disimpan dengan CEP: ${activeCepObj?.label}!\n\nSaat cron runner berjalan jam 05:00 WIB, engine akan mengeksekusi pipeline dengan CEP ini.`);
+      closeScheduleModal();
+      switchView('schedule');
+    }
+
+    // Init
+    renderProducts();
+    renderCepChips();
+    renderModalCepGrid();
+    renderStoryArc();
+    updatePayloadPreviews();
+  </script>
+</body>
+</html>

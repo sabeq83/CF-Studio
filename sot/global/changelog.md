@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.35.5 — Fix 1-Click Product Pipeline & Add CEP Selection to 1-Click and Schedule Modal (07/11/2026)
+- Fix single-item count validation in content-planner-contract
+- Add Category Entry Point (CEP) selection to 1-Click Product Pipeline and dynamic Adaptive Story Arc preview
+- Add CEP selection to Schedule Modal and persist in pipeline_config_json
+- Switch autonomous engine to ingestPlannerToPillarCampaign for product and editorial campaigns
+
 ## V2.35.4 — Adaptive Story Arc Engine & Product Catalog Newest First Sorting (07/11/2026)
 - Implementasi fungsi generateAdaptiveStoryArc untuk 5 varian kampanye di Auto Pipeline
 - Pengurutan katalog produk menjadi ORDER BY created_at DESC sehingga produk baru Garlibee tampil di posisi #1

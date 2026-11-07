@@ -28,6 +28,79 @@ const LAYOUT_PRESET_METADATA = {
   ]
 };
 
+const CEP_OPTIONS = [
+  {
+    id: 'auto',
+    value: 'auto',
+    label: 'Auto (Rekomendasi AI)',
+    icon: '⚡',
+    desc: 'Rotasi dinamis alami anti-bosan sesuai riwayat konten produk.',
+    shortDesc: 'Rotasi dinamis alami anti-bosan sesuai riwayat konten produk.',
+    arcHookTitle: 'Babak 1: Hook Pembuka Adaptif',
+    arcHookDesc: 'AI memilih hook kontras atau pertanyaan retoris paling segar.'
+  },
+  {
+    id: 'Problem-Solution Based',
+    value: 'Problem-Solution Based',
+    label: 'Problem-Solution Based',
+    icon: '🎯',
+    desc: 'Angkat rasa sakit & keluhan harian (stamina drop, mudah masuk angin).',
+    shortDesc: 'Angkat rasa sakit & keluhan harian (stamina drop, mudah masuk angin).',
+    arcHookTitle: 'Babak 1: Hook Gejala Masalah & Pain Point',
+    arcHookDesc: 'Menyorot rasa frustrasi tubuh lemas & daya tahan turun saat kerja padat.'
+  },
+  {
+    id: 'Routine Based',
+    value: 'Routine Based',
+    label: 'Routine Based',
+    icon: '⏰',
+    desc: 'Integrasikan ke ritual pagi/malam (1 sendok rutin sebelum sarapan).',
+    shortDesc: 'Integrasikan ke ritual pagi/malam (1 sendok rutin sebelum sarapan).',
+    arcHookTitle: 'Babak 1: Hook Momen Rutinitas Keseharian',
+    arcHookDesc: 'Trigger rutinitas pagi sebelum berangkat kantor: ritual sehat praktis.'
+  },
+  {
+    id: 'Emotional Based',
+    value: 'Emotional Based',
+    label: 'Emotional Based',
+    icon: '❤️',
+    desc: 'Kepedulian keluarga, rasa cemas orang tua jatuh sakit, atau kasih sayang.',
+    shortDesc: 'Kepedulian keluarga, rasa cemas orang tua jatuh sakit, atau kasih sayang.',
+    arcHookTitle: 'Babak 1: Hook Empati & Sentuhan Emosional',
+    arcHookDesc: 'Momen kekhawatiran saat orang tersayang mulai sering jatuh sakit.'
+  },
+  {
+    id: 'Aspirational Based',
+    value: 'Aspirational Based',
+    label: 'Aspirational Based',
+    icon: '✨',
+    desc: 'Gaya hidup sehat alami, upgrade diri, vitalitas tanpa obat kimia.',
+    shortDesc: 'Gaya hidup sehat alami, upgrade diri, vitalitas tanpa obat kimia.',
+    arcHookTitle: 'Babak 1: Hook Kontras Gaya Hidup Ideal',
+    arcHookDesc: 'Visual kontras: hidup lesu vs energi prima bugar sepanjang hari.'
+  },
+  {
+    id: 'Commitment Based',
+    value: 'Commitment Based',
+    label: 'Commitment Based',
+    icon: '💪',
+    desc: 'Tantangan konsistensi (bukti perubahan tubuh setelah 14 hari rutin).',
+    shortDesc: 'Tantangan konsistensi (bukti perubahan tubuh setelah 14 hari rutin).',
+    arcHookTitle: 'Babak 1: Hook Tantangan Konsistensi Diri',
+    arcHookDesc: 'Pertanyaan pembuktian: "Apa yang terjadi pada tubuh setelah 14 hari konsumsi rutin?"'
+  },
+  {
+    id: 'Opportunistic Based',
+    value: 'Opportunistic Based',
+    label: 'Opportunistic Based',
+    icon: '🌦️',
+    desc: 'Trigger situasi: cuaca pancaroba, musim hujan, lembur, perjalanan.',
+    shortDesc: 'Trigger situasi: cuaca pancaroba, musim hujan, lembur, perjalanan.',
+    arcHookTitle: 'Babak 1: Hook Pemicu Situasi & Momen Khusus',
+    arcHookDesc: 'Kondisi pancaroba & rekan kantor mulai batuk pilek: alarm benteng tubuh.'
+  }
+];
+
 const SLOT_DEFAULT_ROLES = [
   'Bahan Mentah',
   'Persiapan & Bumbu',
@@ -88,6 +161,10 @@ export default function AutoPipelinePage() {
   const [gridOuterPadding, setGridOuterPadding] = useState(16);
   const [gridBgColor, setGridBgColor] = useState('#0d0d12');
   const [postToFacebook, setPostToFacebook] = useState(true);
+
+  // CEP (Category Entry Point) State
+  const [selectedCep, setSelectedCep] = useState('auto');
+  const [schedSelectedCep, setSchedSelectedCep] = useState('auto');
 
   // --- SCHEDULER & REPLIZ PUBLISHING STATE ---
   const [activeTab, setActiveTab] = useState('pipeline'); // 'pipeline' | 'schedules'
@@ -168,7 +245,7 @@ export default function AutoPipelinePage() {
   const transitionDur = wf.transition_duration !== undefined ? Number(wf.transition_duration) : (activePresetConfig?.transition_duration !== undefined ? Number(activePresetConfig.transition_duration) : 0.5);
   const transitionDesc = `${String(transitionKey).toUpperCase()} (${transitionDur}s)`;
 
-  function generateAdaptiveStoryArc(type, count = 6, dur = 4, presetConfig = {}) {
+  function generateAdaptiveStoryArc(type, count = 6, dur = 4, presetConfig = {}, cepValue = 'auto') {
     const c = Math.max(3, Number(count) || 6);
     const d = Math.max(3, Number(dur) || 4);
     const totalSeconds = c * d;
@@ -353,6 +430,18 @@ export default function AutoPipelinePage() {
       }
     }
 
+    if (type === 'product_campaign' && cepValue && cepValue !== 'auto') {
+      const matchedCep = CEP_OPTIONS.find(o => o.id === cepValue);
+      if (matchedCep && steps.length > 0) {
+        steps[0] = {
+          seq: 1,
+          title: matchedCep.arcHookTitle,
+          tag: matchedCep.id === 'Routine Based' ? 'Routine 0-3s' : (matchedCep.id === 'Emotional Based' ? 'Emotional 0-3s' : (matchedCep.id === 'Aspirational Based' ? 'Aspirational 0-3s' : (matchedCep.id === 'Commitment Based' ? 'Commitment 0-3s' : (matchedCep.id === 'Opportunistic Based' ? 'Situational 0-3s' : 'Problem 0-3s')))),
+          icon: matchedCep.icon
+        };
+      }
+    }
+
     const normalized = steps.slice(0, c).map((s, idx) => ({
       ...s,
       seq: idx + 1,
@@ -373,7 +462,7 @@ export default function AutoPipelinePage() {
   }
 
   // Alias helper untuk kompatibilitas
-  const getStoryArcSteps = (count, dur) => generateAdaptiveStoryArc(instantCampaignType, count, dur, activePresetConfig).steps;
+  const getStoryArcSteps = (count, dur) => generateAdaptiveStoryArc(instantCampaignType, count, dur, activePresetConfig, selectedCep).steps;
 
   // Smart Auto-Detection dari kata kunci topik
   function detectCategoryFromTopic(text) {
@@ -732,6 +821,7 @@ export default function AutoPipelinePage() {
           topic: targetTopic,
           product_id: targetProductId,
           product_title: targetTopic,
+          selected_cep: selectedCep,
           content_pillar: targetPillar,
           deconstruct_asset_id: targetDeconstructId,
           selected_angle: targetChosenAngle,
@@ -922,6 +1012,7 @@ export default function AutoPipelinePage() {
     setIsSchedCategoryManual(false);
     setSchedDays([0, 1, 2, 3, 4, 5, 6]);
     setSchedAutoPublish(true);
+    setSchedSelectedCep('auto');
 
     // Reset item selections
     setSelectedProductIds([]);
@@ -972,6 +1063,14 @@ export default function AutoPipelinePage() {
     } else {
       setSelectedPillars([]);
     }
+
+    let schedCfg = {};
+    try {
+      schedCfg = typeof sched.pipeline_config_json === 'string'
+        ? JSON.parse(sched.pipeline_config_json || '{}')
+        : (sched.pipeline_config_json || {});
+    } catch (_) {}
+    setSchedSelectedCep(schedCfg.selected_cep || 'auto');
 
     setProductSearchQuery('');
     setPillarSearchQuery('');
@@ -1032,7 +1131,7 @@ export default function AutoPipelinePage() {
         }
 
         const editPipelineConfig = schedCampaignType === 'product_campaign'
-          ? { product_id: targetId }
+          ? { product_id: targetId, selected_cep: schedSelectedCep || 'auto' }
           : (schedCampaignType === 'editorial_campaign'
               ? { content_pillar: targetTitle }
               : (schedCampaignType === 'multiplier_campaign'
@@ -1091,7 +1190,7 @@ export default function AutoPipelinePage() {
               repliz_account_ids: schedReplizAccountIds,
               auto_publish_enabled: schedAutoPublish,
               timezone: 'Asia/Jakarta',
-              pipeline_config: { product_id: prodId, product_name: prodName }
+              pipeline_config: { product_id: prodId, product_name: prodName, selected_cep: schedSelectedCep || 'auto' }
             };
           });
 
@@ -1168,7 +1267,7 @@ export default function AutoPipelinePage() {
           }
 
           const pipelineConfigPayload = schedCampaignType === 'product_campaign'
-            ? { product_id: targetId }
+            ? { product_id: targetId, selected_cep: schedSelectedCep || 'auto' }
             : (schedCampaignType === 'editorial_campaign'
                 ? { content_pillar: targetTitle }
                 : (schedCampaignType === 'multiplier_campaign'
@@ -2016,7 +2115,7 @@ export default function AutoPipelinePage() {
 
                 {/* Mini Story Arc Timeline Preview */}
                 {(() => {
-                  const arcData = generateAdaptiveStoryArc(instantCampaignType, targetClipsCount, clipDuration, activePresetConfig);
+                  const arcData = generateAdaptiveStoryArc(instantCampaignType, targetClipsCount, clipDuration, activePresetConfig, selectedCep);
                   return (
                     <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '0.65rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem' }}>
@@ -2234,6 +2333,65 @@ export default function AutoPipelinePage() {
                         );
                       })
                     )}
+                  </div>
+
+                  {/* Category Entry Point (CEP) Selector */}
+                  <div style={{
+                    marginTop: '0.25rem',
+                    paddingTop: '0.75rem',
+                    borderTop: '1px solid var(--border-subtle)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.5rem'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.35rem' }}>
+                      <label style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        <span>🎯</span>
+                        <span>Sudut Masuk Pembeli (Category Entry Point / CEP):</span>
+                      </label>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                        Psikologi hook & pembukaan cerita
+                      </span>
+                    </div>
+
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                      gap: '0.5rem'
+                    }}>
+                      {CEP_OPTIONS.map(opt => {
+                        const isCepSelected = selectedCep === opt.value;
+                        return (
+                          <div
+                            key={opt.value}
+                            onClick={() => setSelectedCep(opt.value)}
+                            style={{
+                              background: isCepSelected ? 'var(--surface-interactive)' : 'var(--surface)',
+                              border: isCepSelected ? '1.5px solid var(--status-success)' : '1px solid var(--border-subtle)',
+                              borderRadius: 'var(--radius-sm)',
+                              padding: '0.55rem 0.7rem',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '0.2rem',
+                              transition: 'var(--transition)'
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                              <span style={{ fontSize: '0.8rem', fontWeight: 700, color: isCepSelected ? 'var(--status-success)' : 'var(--text-primary)' }}>
+                                {opt.icon} {opt.label}
+                              </span>
+                              {isCepSelected && (
+                                <span style={{ fontSize: '0.68rem', color: 'var(--status-success)', fontWeight: 900 }}>✓</span>
+                              )}
+                            </div>
+                            <span style={{ fontSize: '0.67rem', color: 'var(--text-muted)', lineHeight: 1.3 }}>
+                              {opt.desc}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
 
                   <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', background: 'var(--surface)', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border-subtle)' }}>
@@ -4833,6 +4991,65 @@ export default function AutoPipelinePage() {
                           );
                         })
                       )}
+                    </div>
+
+                    {/* Category Entry Point (CEP) Selector for Schedule */}
+                    <div style={{
+                      marginTop: '0.25rem',
+                      paddingTop: '0.75rem',
+                      borderTop: '1px solid var(--border-subtle)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.5rem'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.35rem' }}>
+                        <label style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                          <span>🎯</span>
+                          <span>Sudut Masuk Pembeli (Category Entry Point / CEP):</span>
+                        </label>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                          Diterapkan ke jadwal eksekusi produk
+                        </span>
+                      </div>
+
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+                        gap: '0.5rem'
+                      }}>
+                        {CEP_OPTIONS.map(opt => {
+                          const isCepSelected = schedSelectedCep === opt.value;
+                          return (
+                            <div
+                              key={opt.value}
+                              onClick={() => setSchedSelectedCep(opt.value)}
+                              style={{
+                                background: isCepSelected ? 'var(--surface-interactive)' : 'var(--surface)',
+                                border: isCepSelected ? '1.5px solid var(--status-success)' : '1px solid var(--border-subtle)',
+                                borderRadius: 'var(--radius-sm)',
+                                padding: '0.5rem 0.65rem',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '0.2rem',
+                                transition: 'var(--transition)'
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <span style={{ fontSize: '0.78rem', fontWeight: 700, color: isCepSelected ? 'var(--status-success)' : 'var(--text-primary)' }}>
+                                  {opt.icon} {opt.label}
+                                </span>
+                                {isCepSelected && (
+                                  <span style={{ fontSize: '0.68rem', color: 'var(--status-success)', fontWeight: 900 }}>✓</span>
+                                )}
+                              </div>
+                              <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', lineHeight: 1.3 }}>
+                                {opt.desc}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
 
                     <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', background: 'var(--surface)', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border-subtle)' }}>

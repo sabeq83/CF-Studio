@@ -123,7 +123,8 @@ export const POST = withTenantContext(async (request, _context, user) => {
         brandId: body.brand_id || body.brandId,
         productId: body.product_id || body.productId,
         productTitle: body.product_title || body.topic,
-        presetKey: body.preset_key || body.presetKey || 'product_showcase_6clips',
+        selectedCep: body.selected_cep || body.selectedCep || null,
+        presetKey: body.preset_key || body.presetKey || 'product_campaign',
         executionMode: body.execution_mode || body.executionMode || 'full_autopilot',
         tenantId,
         overrides: body.overrides || {}
@@ -132,7 +133,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
       result = await executeAutonomousEditorialPipeline({
         brandId: body.brand_id || body.brandId,
         pillarTitle: body.content_pillar || body.pillar_title || body.topic,
-        presetKey: body.preset_key || body.presetKey || 'editorial_tension_6clips',
+        presetKey: body.preset_key || body.presetKey || 'brand_editorial_campaign',
         executionMode: body.execution_mode || body.executionMode || 'full_autopilot',
         tenantId,
         overrides: body.overrides || {}
