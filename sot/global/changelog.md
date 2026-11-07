@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.35.8 — Integrasi Product Bridging Preset & 100% CEP-Driven Engine (07/11/2026)
+- Exclude brand pillars pada product video untuk mengaktifkan 100% CEP-Driven mode
+- Forward parameter product_bridging dari operator preset ke campaign settings
+- Eliminasi false-positive recipe hijacking pada pillar campaign ingest
+- Sinkronisasi eksekusi jadwal berkala auto-pipeline scheduler untuk campaign produk
+
 ## V2.35.7 — Universal Visual Mode Preset Resolution with Strict Product & Recipe Hybrid Lock Invariant (07/11/2026)
 - Tambahkan helper resolveEffectiveVisualMode untuk sentralisasi resolusi visual mode
 - Kunci mutlak visual_mode hybrid_lock pada Product Video dan Recipe Video demi konsistensi visual fisik
