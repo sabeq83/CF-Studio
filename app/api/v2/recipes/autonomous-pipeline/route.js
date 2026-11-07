@@ -127,7 +127,10 @@ export const POST = withTenantContext(async (request, _context, user) => {
         presetKey: body.preset_key || body.presetKey || 'product_campaign',
         executionMode: body.execution_mode || body.executionMode || 'full_autopilot',
         tenantId,
-        overrides: body.overrides || {}
+        overrides: {
+          visual_identity_preset_id: body.visual_identity_preset_id || null,
+          ...(body.overrides || {})
+        }
       });
     } else if (pipelineType === 'editorial_campaign') {
       result = await executeAutonomousEditorialPipeline({
@@ -136,7 +139,10 @@ export const POST = withTenantContext(async (request, _context, user) => {
         presetKey: body.preset_key || body.presetKey || 'brand_editorial_campaign',
         executionMode: body.execution_mode || body.executionMode || 'full_autopilot',
         tenantId,
-        overrides: body.overrides || {}
+        overrides: {
+          visual_identity_preset_id: body.visual_identity_preset_id || null,
+          ...(body.overrides || {})
+        }
       });
     } else if (pipelineType === 'multiplier_campaign') {
       result = await executeAutonomousMultiplierPipeline({

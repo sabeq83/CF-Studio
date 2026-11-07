@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.35.6 — Penyelarasan VI Preset Terpilih & Integrasi Target Bahasa Preset Operator (07/11/2026)
+- Pindahkan resolusi operator preset ke Step 0 paling awal pada pipeline produk dan editorial
+- Prioritaskan target_language dari preset operator (id-ID) untuk hook dan narasi bahasa Indonesia
+- Selaraskan fallback visual_identity_preset_id ke vi_habitfolk_macro_craft (menghilangkan nilai inline)
+- Tambahkan helper getOperatorPresetConfigAsync untuk query langsung tenant_settings
+- Teruskan visual_identity_preset_id pada endpoint API autonomous pipeline
+
 ## V2.35.5 — Fix 1-Click Product Pipeline & Add CEP Selection to 1-Click and Schedule Modal (07/11/2026)
 - Fix single-item count validation in content-planner-contract
 - Add Category Entry Point (CEP) selection to 1-Click Product Pipeline and dynamic Adaptive Story Arc preview
