@@ -287,7 +287,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
       target_ai: target_ai || 'Google Veo (8s)',
       video_model: video_model || 'veo_31_lite',
       execution_mode: parsedBody.execution_mode || 'manual_review',
-      visual_mode: (parsedBody.execution_mode === 'full_autopilot') ? 'pure_t2v' : (visual_mode || 'pure_t2v'),
+      visual_mode: (target_product_id || productRefImagePath) ? 'hybrid_lock' : (visual_mode || 'hybrid_lock'),
       product_ref_image_path: productRefImagePath,
       product_filename_declare: productFilenameDeclare,
       visual_overrides_json: identityResult.snapshot ? JSON.stringify(identityResult.snapshot) : null,

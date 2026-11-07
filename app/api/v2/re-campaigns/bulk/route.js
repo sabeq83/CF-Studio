@@ -71,7 +71,7 @@ export const POST = withTenantContext(async (request) => {
       enable_glabs: global_settings.enable_glabs ? 1 : 0,
       enable_ffmpeg: global_settings.enable_ffmpeg ? 1 : 0,
       enable_social_post: global_settings.enable_social_post ? 1 : 0,
-      visual_mode: (global_settings.execution_mode === 'full_autopilot') ? 'pure_t2v' : (global_settings.visual_mode || 'pure_t2v'),
+      visual_mode: (global_settings.visual_mode || 'hybrid_lock'),
       angle_multiplier: global_settings.angle_multiplier !== undefined ? Number(global_settings.angle_multiplier) : 0,
       visual_overrides_json: identityResult.snapshot ? JSON.stringify(identityResult.snapshot) : null,
       visual_identity_preset_id: identityResult.ref?.id || null,

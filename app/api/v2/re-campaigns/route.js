@@ -272,7 +272,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
       enable_glabs: enable_glabs !== undefined ? Number(enable_glabs) : 0,
       enable_ffmpeg: enable_ffmpeg !== undefined ? Number(enable_ffmpeg) : 1,
       enable_social_post: enable_social_post !== undefined ? Number(enable_social_post) : 1,
-      visual_mode: (execution_mode === 'full_autopilot') ? 'pure_t2v' : (visual_mode || 'pure_t2v'),
+      visual_mode: (productRefImagePath ? 'hybrid_lock' : (visual_mode || 'hybrid_lock')),
       product_ref_image_path: productRefImagePath,
       product_filename_declare: productFilenameDeclare,
       angle_multiplier: angle_multiplier !== undefined ? Number(angle_multiplier) : 0,

@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.35.7 — Universal Visual Mode Preset Resolution with Strict Product & Recipe Hybrid Lock Invariant (07/11/2026)
+- Tambahkan helper resolveEffectiveVisualMode untuk sentralisasi resolusi visual mode
+- Kunci mutlak visual_mode hybrid_lock pada Product Video dan Recipe Video demi konsistensi visual fisik
+- Jadikan preset operator sebagai single source of truth untuk seluruh tipe video lainnya
+- Hapus seluruh pembajakan visual_mode pure_t2v saat full autopilot di ingest, scheduler, dan API route
+
 ## V2.35.6 — Penyelarasan VI Preset Terpilih & Integrasi Target Bahasa Preset Operator (07/11/2026)
 - Pindahkan resolusi operator preset ke Step 0 paling awal pada pipeline produk dan editorial
 - Prioritaskan target_language dari preset operator (id-ID) untuk hook dan narasi bahasa Indonesia
