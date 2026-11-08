@@ -634,14 +634,15 @@ export default function AutoPipelinePage() {
     fetchBlueprints();
   }, []);
 
-  async function fetchBlueprints() {
+  async function fetchBlueprints(searchQuery = '') {
     setLoadingBlueprints(true);
     try {
-      const res = await fetch('/api/v2/recipes/autonomous-pipeline?pipeline_type=multiplier_campaign');
+      const qParam = searchQuery ? `&blueprint_search=${encodeURIComponent(searchQuery)}` : '';
+      const res = await fetch(`/api/v2/recipes/autonomous-pipeline?pipeline_type=multiplier_campaign${qParam}`);
       const data = await res.json();
       if (data.success && Array.isArray(data.blueprints)) {
         setBlueprints(data.blueprints);
-        if (data.blueprints.length > 0 && !instantBlueprintId) {
+        if (data.blueprints.length > 0 && (!instantBlueprintId || !data.blueprints.some(b => b.id === instantBlueprintId))) {
           setInstantBlueprintId(data.blueprints[0].id);
         }
       }
@@ -651,6 +652,23 @@ export default function AutoPipelinePage() {
       setLoadingBlueprints(false);
     }
   }
+
+  // Server-Side Search Debounce untuk Deconstruct Blueprint (Tab 1 Launcher)
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      fetchBlueprints(blueprintSearchQuery);
+    }, 350);
+    return () => clearTimeout(handler);
+  }, [blueprintSearchQuery]);
+
+  // Server-Side Search Debounce untuk Modal Penjadwalan Multiplier
+  useEffect(() => {
+    if (!isScheduleModalOpen || schedCampaignType !== 'multiplier_campaign') return;
+    const handler = setTimeout(() => {
+      fetchBlueprints(schedBlueprintSearchQuery);
+    }, 350);
+    return () => clearTimeout(handler);
+  }, [schedBlueprintSearchQuery, isScheduleModalOpen, schedCampaignType]);
 
   async function generateMultiplierAnglesForBlueprint(bpId) {
     if (!bpId) return;

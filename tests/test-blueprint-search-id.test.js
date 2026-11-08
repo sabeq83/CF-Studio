@@ -119,23 +119,53 @@ test('filterBlueprints filters correctly across Reel ID, Niche, and Topic keywor
 });
 
 test('PostgreSQL re_deconstructed_assets query returns enriched columns safely', async () => {
+  const res = await pgQuery(`
+    SELECT id, source_url, original_caption, viral_pattern_summary, niche, core_problem, core_solution, tags, created_at
+    FROM re_deconstructed_assets
+    ORDER BY created_at DESC
+    LIMIT 5
+  `);
+  assert.ok(Array.isArray(res.rows), 'Query should return array of rows');
+  if (res.rows.length > 0) {
+    const row = res.rows[0];
+    assert.ok('id' in row, 'Row must have id');
+    assert.ok('source_url' in row, 'Row must have source_url');
+    assert.ok('niche' in row, 'Row must have niche column');
+    assert.ok('core_problem' in row, 'Row must have core_problem column');
+    assert.ok('core_solution' in row, 'Row must have core_solution column');
+  }
+});
+
+test('Server-Side Search parameterized query executes safely with ILIKE parameter', async () => {
   try {
-    const res = await pgQuery(`
+    const bpSearch = '1476160110888470';
+    let bpSql = `
       SELECT id, source_url, original_caption, viral_pattern_summary, niche, core_problem, core_solution, tags, created_at
       FROM re_deconstructed_assets
-      ORDER BY created_at DESC
-      LIMIT 5
-    `);
-    assert.ok(Array.isArray(res.rows), 'Query should return array of rows');
+    `;
+    const bpParams = [];
+    if (bpSearch) {
+      bpSql += `
+        WHERE (
+          source_url ILIKE $1 
+          OR id::text ILIKE $1 
+          OR core_problem ILIKE $1 
+          OR core_solution ILIKE $1 
+          OR niche ILIKE $1 
+          OR (tags IS NOT NULL AND tags::text ILIKE $1)
+          OR viral_pattern_summary ILIKE $1
+        )
+      `;
+      bpParams.push(`%${bpSearch}%`);
+    }
+    bpSql += ` ORDER BY created_at DESC LIMIT 200`;
+    const res = await pgQuery(bpSql, bpParams);
+    assert.ok(Array.isArray(res.rows), 'Query must return array');
     if (res.rows.length > 0) {
-      const row = res.rows[0];
-      assert.ok('id' in row, 'Row must have id');
-      assert.ok('source_url' in row, 'Row must have source_url');
-      assert.ok('niche' in row, 'Row must have niche column');
-      assert.ok('core_problem' in row, 'Row must have core_problem column');
-      assert.ok('core_solution' in row, 'Row must have core_solution column');
+      assert.ok(res.rows[0].source_url.includes('1476160110888470'));
     }
   } finally {
     await closePgPool();
   }
 });
+

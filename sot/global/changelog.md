@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.35.12 — Server-Side Search for Blueprint Video (08/11/2026)
+- Server-side search Deconstruct Lab dengan parameterized ILIKE
+- Debounced fetch pencarian ID URL numerik dan topik di Auto Pipeline
+
 ## V2.35.11 — Fix Blueprint Video Search by ID & Topic (08/11/2026)
 - Pencarian blueprint Deconstruct Lab berdasar ID numerik URL, niche, dan topik
 - Tampilan human-readable judul dan kategori blueprint di launcher & modal jadwal

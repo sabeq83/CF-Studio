@@ -74,12 +74,28 @@ export const GET = withTenantContext(async (request, _ctx, user) => {
     let blueprints = [];
     if (pipelineType === 'multiplier_campaign' || searchParams.get('include_blueprints') === 'true') {
       try {
-        const bpRes = await pgQuery(`
+        const bpSearch = searchParams.get('blueprint_search')?.trim();
+        let bpSql = `
           SELECT id, source_url, original_caption, viral_pattern_summary, niche, core_problem, core_solution, tags, created_at
           FROM re_deconstructed_assets
-          ORDER BY created_at DESC
-          LIMIT 100
-        `);
+        `;
+        const bpParams = [];
+        if (bpSearch) {
+          bpSql += `
+            WHERE (
+              source_url ILIKE $1 
+              OR id::text ILIKE $1 
+              OR core_problem ILIKE $1 
+              OR core_solution ILIKE $1 
+              OR niche ILIKE $1 
+              OR (tags IS NOT NULL AND tags::text ILIKE $1)
+              OR viral_pattern_summary ILIKE $1
+            )
+          `;
+          bpParams.push(`%${bpSearch}%`);
+        }
+        bpSql += ` ORDER BY created_at DESC LIMIT 200`;
+        const bpRes = await pgQuery(bpSql, bpParams);
         blueprints = bpRes.rows || [];
       } catch (bpErr) {
         console.warn('[Autonomous Pipeline GET] blueprints fetch warning:', bpErr.message);
