@@ -3702,12 +3702,7 @@ export default function AutoPipelinePage() {
                   type="submit"
                   disabled={isLaunching}
                   style={{
-                    background: isLaunching ? 'var(--surface-interactive)' : (
-                      instantCampaignType === 'product_campaign' ? 'var(--status-success)' :
-                      (instantCampaignType === 'editorial_campaign' ? 'var(--status-info)' :
-                      (instantCampaignType === 'multiplier_campaign' ? 'var(--status-purple)' :
-                      (instantCampaignType === 'recipe_labs' ? 'var(--status-rose)' : 'var(--action-primary)')))
-                    ),
+                    background: isLaunching ? 'var(--surface-interactive)' : 'var(--action-primary)',
                     color: isLaunching ? 'var(--text-muted)' : 'var(--on-action-primary)',
                     border: 'none',
                     padding: '0.9rem 1.85rem',
@@ -3718,7 +3713,7 @@ export default function AutoPipelinePage() {
                     alignItems: 'center',
                     gap: '0.6rem',
                     cursor: isLaunching ? 'not-allowed' : 'pointer',
-                    boxShadow: isLaunching ? 'none' : '0 4px 14px rgba(37, 99, 235, 0.25)',
+                    boxShadow: isLaunching ? 'none' : '0 4px 16px var(--accent-glow)',
                     transition: 'var(--transition)'
                   }}
                 >

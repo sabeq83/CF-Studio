@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.35.13 — Uniform 1-Click Launch Button & Theme Tokens (08/11/2026)
+- Penyeragaman warna tombol luncurkan 1-klik di seluruh tipe kampanye Auto Pipeline
+- Pendaftaran token resmi status-purple dan status-rose di app/theme.css
+
 ## V2.35.12 — Server-Side Search for Blueprint Video (08/11/2026)
 - Server-side search Deconstruct Lab dengan parameterized ILIKE
 - Debounced fetch pencarian ID URL numerik dan topik di Auto Pipeline

@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup: Standardisasi Warna Tombol Luncurkan 1-Klik Auto Pipeline</title>
+  <style>
+    /* 100% Semantic CSS Tokens sesuai SOP MAKNA Flow dari app/theme.css */
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --accent-glow: rgba(45, 212, 191, 0.22);
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f8fafc;
+      --surface: #ffffff;
+      --surface-raised: #f1f5f9;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --input-bg: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --border-subtle: #e2e8f0;
+      --border-strong: #94a3b8;
+      --action-primary: #0d9488;
+      --action-primary-hover: #14b8a6;
+      --on-action-primary: #ffffff;
+      --accent-glow: rgba(13, 148, 136, 0.22);
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.12);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.12);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.12);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.12);
+      --focus-ring: #7c3aed;
+      --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.08);
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--canvas);
+      color: var(--text-primary);
+      padding: 2rem 1.5rem;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 960px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+    }
+
+    .header {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem 1.75rem;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .header-info h1 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .header-info p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    .theme-toggle {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.82rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: var(--transition);
+    }
+    .theme-toggle:hover {
+      background: var(--surface-hover);
+    }
+
+    /* Audit Alert Card */
+    .audit-card {
+      background: rgba(239, 68, 68, 0.08);
+      border: 1.5px solid var(--status-danger);
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .audit-card h3 {
+      font-size: 0.95rem;
+      color: var(--status-danger);
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .audit-card ul {
+      margin-left: 1.2rem;
+      font-size: 0.84rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .code-pill {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      padding: 0.15rem 0.4rem;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* Interactive Simulator */
+    .simulator-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .tabs-bar {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 0.75rem;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      padding: 0.55rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      white-space: nowrap;
+      transition: var(--transition);
+    }
+    .tab-btn:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+    .tab-btn.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border-color: var(--action-primary);
+    }
+
+    /* Comparison Section */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 768px) {
+      .comparison-grid { grid-template-columns: 1fr; }
+    }
+
+    .comp-col {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .comp-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .comp-title.bad { color: var(--status-danger); }
+    .comp-title.good { color: var(--status-success); }
+
+    .btn-preview-box {
+      background: var(--surface);
+      border: 1.5px dashed var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 1.75rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 110px;
+    }
+
+    /* Tombol Sebelum (Bermasalah) */
+    .btn-before {
+      border: none;
+      padding: 0.9rem 1.85rem;
+      border-radius: var(--radius-md);
+      font-size: 0.92rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+      transition: var(--transition);
+    }
+
+    /* Tombol Sesudah (Seragam Sesuai Desain Token MAKNA Flow) */
+    .btn-uniform-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      padding: 0.9rem 1.85rem;
+      border-radius: var(--radius-md);
+      font-size: 0.92rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      cursor: pointer;
+      box-shadow: 0 4px 16px var(--accent-glow);
+      transition: var(--transition);
+    }
+    .btn-uniform-primary:hover {
+      background: var(--action-primary-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px var(--accent-glow);
+    }
+
+    /* Variasi Opsi B: Seragam + Badge Kategori */
+    .btn-uniform-badge {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      padding: 0.8rem 1.6rem;
+      border-radius: var(--radius-md);
+      font-size: 0.92rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      cursor: pointer;
+      box-shadow: 0 4px 16px var(--accent-glow);
+      transition: var(--transition);
+    }
+    .btn-badge-tag {
+      background: rgba(0, 0, 0, 0.18);
+      color: inherit;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .state-toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 0.75rem;
+      background: var(--surface-interactive);
+      border-radius: var(--radius-xs);
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-info">
+      <h1>🎨 Audit & Mockup: Penyeragaman Warna Tombol 1-Klik</h1>
+      <p>Simulasi perbaikan kontras rasio & standardisasi tombol peluncuran di seluruh tipe kampanye MAKNA Flow</p>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()">
+      <span id="theme-icon">☀️</span> <span id="theme-text">Mode Terang</span>
+    </button>
+  </header>
+
+  <!-- Temuan Audit -->
+  <div class="audit-card">
+    <h3>🔍 Mengapa Tombol Multiplier & Resep Foto Tidak Jelas Warnanya?</h3>
+    <ul>
+      <li><strong>Token CSS Tidak Didefinisikan:</strong> Pada kode tombol saat ini, kampanye Multiplier memakai <span class="code-pill">var(--status-purple)</span> dan Resep Foto memakai <span class="code-pill">var(--status-rose)</span>. Kedua variabel ini <strong>TIDAK ADA</strong> di <span class="code-pill">app/theme.css</span> sehingga background bernilai transparan (<span class="code-pill">initial</span>).</li>
+      <li><strong>Tabrakan Kontras Teks:</strong> Warna teks tombol dipaksa menggunakan <span class="code-pill">var(--on-action-primary)</span>.
+        Pada <strong>Dark Mode</strong>, warnanya adalah <span class="code-pill">#042f2e</span> (gelap kehijauan). Saat background-nya transparan di atas canvas gelap, teks menjadi gelap di atas gelap (nyaris tak terbaca)!
+        Pada <strong>Light Mode</strong>, warnanya putih <span class="code-pill">#ffffff</span> di atas background putih/terang (putih di atas putih)!
+      </li>
+      <li><strong>Ketidakkonsistenan Warna:</strong> Sebelumnya tiap tipe kampanye memakai warna berbeda (hijau, biru, ungu tak terdefinisi, merah muda tak terdefinisi, toska), sehingga UI terkesan acak.</li>
+    </ul>
+  </div>
+
+  <!-- Interactive Simulator -->
+  <section class="simulator-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+      <h2 style="font-size: 1rem; font-weight: 800; color: var(--text-primary);">
+        🧪 Uji Interaktif Berdasarkan Tipe Kampanye
+      </h2>
+      <div class="state-toggle-row">
+        <label style="cursor: pointer; display: flex; align-items: center; gap: 0.4rem;">
+          <input type="checkbox" id="launching-toggle" onchange="toggleLaunchingState(this.checked)">
+          <span>Simulasikan State Loading (Memproses Pipeline AI...)</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Tipe Kampanye Tabs -->
+    <div class="tabs-bar">
+      <button class="tab-btn active" onclick="selectType('multiplier_campaign', this)">
+        🔀 Video Multiplier (Sebelumnya Bermasalah)
+      </button>
+      <button class="tab-btn" onclick="selectType('recipe_labs', this)">
+        🖼️ Resep Foto / Recipe Labs (Sebelumnya Bermasalah)
+      </button>
+      <button class="tab-btn" onclick="selectType('recipe_campaign', this)">
+        🚀 Auto Pipeline Resep (Video)
+      </button>
+      <button class="tab-btn" onclick="selectType('product_campaign', this)">
+        ⚡ Video Produk
+      </button>
+      <button class="tab-btn" onclick="selectType('editorial_campaign', this)">
+        📌 Video Editorial
+      </button>
+    </div>
+
+    <!-- Comparison Grid -->
+    <div class="comparison-grid">
+      <!-- Kolom Sebelum -->
+      <div class="comp-col">
+        <div class="comp-title bad">
+          <span>❌</span> KONDISI SAAT INI (Bermasalah & Teks Gelap/Hilang)
+        </div>
+        <div class="btn-preview-box">
+          <button class="btn-before" id="btn-before-sample">
+            <span id="btn-before-text">🔀 Luncurkan Multiplier Angle Remix (Winning Blueprint)</span>
+          </button>
+        </div>
+        <div style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.4;">
+          Perhatikan bahwa di Dark Mode teks gelap <span class="code-pill">#042f2e</span> berada di atas background kosong/gelap. Tombol tampak redup dan cacat visual.
+        </div>
+      </div>
+
+      <!-- Kolom Sesudah (Seragam) -->
+      <div class="comp-col">
+        <div class="comp-title good">
+          <span>✅</span> USULAN RESMI: WARNA SERAGAM CANONICAL (Action Primary)
+        </div>
+        <div class="btn-preview-box">
+          <button class="btn-uniform-primary" id="btn-uniform-sample" onclick="alert('Simulasi Peluncuran 1-Klik Berhasil!')">
+            <span id="btn-uniform-text">🔀 Luncurkan Multiplier Angle Remix (Winning Blueprint)</span>
+          </button>
+        </div>
+        <div style="font-size: 0.78rem; color: var(--text-secondary); line-height: 1.4;">
+          Menggunakan 100% token resmi <span class="code-pill">var(--action-primary)</span>. Kontras rasio tinggi (>12:1 di Dark, >8:1 di Light), glow harmonis, dan seragam di semua tipe kampanye!
+        </div>
+      </div>
+    </div>
+
+    <!-- Opsi Tambahan Penyempurnaan -->
+    <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem;">
+      <h3 style="font-size: 0.88rem; color: var(--text-primary); font-weight: 700;">
+        💡 Variasi Alternatif: Seragam dengan Badge Kategori Mini (Opsi B)
+      </h3>
+      <p style="font-size: 0.8rem; color: var(--text-muted);">
+        Warna tombol tetap seragam menggunakan <span class="code-pill">var(--action-primary)</span>, tetapi di samping teks ditambahkan pil penanda agar operator langsung tahu tipe kampanye yang sedang aktif:
+      </p>
+      <div style="display: flex; align-items: center; justify-content: center; padding: 1rem; background: var(--surface); border-radius: var(--radius-sm); border: 1px dashed var(--border-subtle);">
+        <button class="btn-uniform-badge" id="btn-badge-sample">
+          <span class="btn-badge-tag" id="badge-tag-text">Multiplier</span>
+          <span id="btn-badge-text">Luncurkan Angle Remix (Winning Blueprint)</span>
+        </button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  let currentCampaignType = 'multiplier_campaign';
+  let isSimulatedLaunching = false;
+
+  const campaignLabels = {
+    multiplier_campaign: {
+      text: '🔀 Luncurkan Multiplier Angle Remix (Winning Blueprint)',
+      badge: 'Multiplier',
+      badgeText: 'Luncurkan Angle Remix (Winning Blueprint)',
+      // Simulasi bug saat ini:
+      beforeBg: 'transparent',
+      beforeColor: 'var(--on-action-primary)'
+    },
+    recipe_labs: {
+      text: '🖼️ Luncurkan Resep Teks & Foto AI (Grid Komposit)',
+      badge: 'Resep Foto',
+      badgeText: 'Luncurkan Resep Teks & Foto AI (Grid Komposit)',
+      beforeBg: 'transparent',
+      beforeColor: 'var(--on-action-primary)'
+    },
+    recipe_campaign: {
+      text: '🚀 Luncurkan Auto Pipeline Resep (6 Klip Video)',
+      badge: 'Resep Video',
+      badgeText: 'Luncurkan Auto Pipeline Resep (6 Klip Video)',
+      beforeBg: 'var(--action-primary)',
+      beforeColor: 'var(--on-action-primary)'
+    },
+    product_campaign: {
+      text: '⚡ Luncurkan Video Produk Sekarang (1-Pass)',
+      badge: 'Produk',
+      badgeText: 'Luncurkan Video Produk Sekarang (1-Pass)',
+      beforeBg: 'var(--status-success)',
+      beforeColor: 'var(--on-action-primary)'
+    },
+    editorial_campaign: {
+      text: '📌 Luncurkan Video Editorial Sekarang (1-Pass)',
+      badge: 'Editorial',
+      badgeText: 'Luncurkan Video Editorial Sekarang (1-Pass)',
+      beforeBg: 'var(--status-info)',
+      beforeColor: 'var(--on-action-primary)'
+    }
+  };
+
+  function updateButtons() {
+    const data = campaignLabels[currentCampaignType];
+    const btnBefore = document.getElementById('btn-before-sample');
+    const btnUniform = document.getElementById('btn-uniform-sample');
+    const btnBadge = document.getElementById('btn-badge-sample');
+
+    const beforeText = document.getElementById('btn-before-text');
+    const uniformText = document.getElementById('btn-uniform-text');
+    const badgeTag = document.getElementById('badge-tag-text');
+    const badgeText = document.getElementById('btn-badge-text');
+
+    if (isSimulatedLaunching) {
+      beforeText.textContent = '⏳ Memproses Pipeline AI...';
+      uniformText.textContent = '⏳ Memproses Pipeline AI...';
+      badgeText.textContent = '⏳ Memproses Pipeline AI...';
+      btnBefore.style.background = 'var(--surface-interactive)';
+      btnBefore.style.color = 'var(--text-muted)';
+      btnUniform.style.background = 'var(--surface-interactive)';
+      btnUniform.style.color = 'var(--text-muted)';
+      btnBadge.style.background = 'var(--surface-interactive)';
+      btnBadge.style.color = 'var(--text-muted)';
+      return;
+    }
+
+    beforeText.textContent = data.text;
+    uniformText.textContent = data.text;
+    badgeTag.textContent = data.badge;
+    badgeText.textContent = data.badgeText;
+
+    // Tampilkan bug warna saat ini
+    btnBefore.style.background = data.beforeBg;
+    btnBefore.style.color = data.beforeColor;
+
+    // Tampilkan tombol seragam
+    btnUniform.style.background = 'var(--action-primary)';
+    btnUniform.style.color = 'var(--on-action-primary)';
+    btnBadge.style.background = 'var(--action-primary)';
+    btnBadge.style.color = 'var(--on-action-primary)';
+  }
+
+  function selectType(type, elem) {
+    currentCampaignType = type;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    elem.classList.add('active');
+    updateButtons();
+  }
+
+  function toggleLaunchingState(isLaunching) {
+    isSimulatedLaunching = isLaunching;
+    updateButtons();
+  }
+
+  function toggleTheme() {
+    const html = document.documentElement;
+    const cur = html.getAttribute('data-theme') || 'dark';
+    const next = cur === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+
+    const icon = document.getElementById('theme-icon');
+    const text = document.getElementById('theme-text');
+    if (next === 'light') {
+      icon.textContent = '🌙';
+      text.textContent = 'Mode Gelap';
+    } else {
+      icon.textContent = '☀️';
+      text.textContent = 'Mode Terang';
+    }
+    updateButtons();
+  }
+
+  // Initial render
+  updateButtons();
+</script>
+
+</body>
+</html>
+
