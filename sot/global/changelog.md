@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.35.22 — Fix Repliz Media Staging Nextcloud to R2, Error Classification & Delegated Early Scheduling (09/11/2026)
+- Fix Nextcloud share link resolution appending /download
+- Add binary guard against HTML upload to R2
+- Fix Repliz error classifier for media format and robots.txt
+- Enable early delegated scheduling to Repliz with future scheduleAt
+- Heal nutribake_mul_s6so1p_01 media on R2
+
 ## V2.35.21 — Smart Shopee Affiliate di Naskah Awal Multiplier & 20 Riwayat Batch Seluruh Tipe (08/11/2026)
 - Injeksi katalog produk brand ke prompt naskah awal Multiplier tanpa syarat bridging video
 - Fallback cerdas worker mencocokkan produk brand dan menyematkan link Shopee aktif di caption Facebook
