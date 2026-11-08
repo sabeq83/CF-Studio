@@ -19,9 +19,19 @@ export const GET = withTenantContext(async (request) => {
     const { searchParams } = new URL(request.url);
     const search = searchParams.get('search') || '';
     const category = searchParams.get('category') || '';
+    const affiliateStatus = searchParams.get('affiliate_status') || 'all';
+    const brandId = searchParams.get('brand_id') || 'all';
     const sort = searchParams.get('sort') || 'newest';
 
-    const catalog = await listProductCatalog({ search, category, cursor: searchParams.get('cursor'), limit: searchParams.get('limit') || 100, sort });
+    const catalog = await listProductCatalog({
+      search,
+      category,
+      affiliateStatus,
+      brandId,
+      cursor: searchParams.get('cursor'),
+      limit: searchParams.get('limit') || 100,
+      sort
+    });
     let products = catalog.data;
 
     // Rewrite photo_urls: hanya proxy path lokal, jangan bungkus URL eksternal
@@ -54,6 +64,7 @@ export const GET = withTenantContext(async (request) => {
       success: true,
       data: products,
       pagination: catalog.pagination,
+      counts: catalog.counts,
       scraping_count: scrapingCount
     });
   } catch (error) {

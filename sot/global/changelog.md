@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.35.15 — Redesain Database Produk Simple Card & Multi-Brand Affiliate Links (08/11/2026)
+- Redesain kartu produk menjadi ringkas dan hemat ruang (Simple Card)
+- Filter status afiliasi cepat: Multi-Brand (≥2 Link), Ada Link, dan Belum Ada Link (Non-Afiliasi)
+- Dukungan tautan afiliasi Shopee berbeda per Brand Profile (Dapur Botani vs Siasat Sehat)
+- Pembaruan modal edit produk dengan live classification badge dan multi-brand hub
+
 ## V2.35.14 — Smart Shopee Affiliate Injector (Brand Profile Scoped) (08/11/2026)
 - Pencocokan cerdas kata kunci caption ke link Shopee via Gemini AI
 - Isolasi ketat produk etalase berdasarkan Brand Profile kampanye

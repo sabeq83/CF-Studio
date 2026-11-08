@@ -8,12 +8,13 @@ export default function ProductDatabaseModal({
   product = null,
   brandId = null,
   brandName = null,
+  initialTab = 'basic',
   onClose,
   onSuccess
 }) {
   if (!isOpen) return null;
 
-  const [activeTab, setActiveTab] = useState('basic'); // 'basic' | 'visual_ai' | 'brand_links'
+  const [activeTab, setActiveTab] = useState(initialTab || 'basic'); // 'basic' | 'visual_ai' | 'brand_links'
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [brandProfiles, setBrandProfiles] = useState([]);
@@ -274,6 +275,31 @@ export default function ProductDatabaseModal({
         fetchBrandLinks();
       } else {
         showToast(data.error || 'Gagal menghapus link', 'error');
+      }
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  }
+
+  // Update existing brand link inline
+  async function handleUpdateExistingBrandLink(brandProfileId, newUrl, trackingCode = null) {
+    if (!newUrl || !newUrl.trim()) return;
+    try {
+      const res = await fetch(`/api/v2/products/${activeProductId}/brands`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          brandProfileId,
+          affiliateLink: newUrl.trim(),
+          trackingCode
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('✅ Link brand berhasil diperbarui!');
+        fetchBrandLinks();
+      } else {
+        showToast(data.error || 'Gagal update link', 'error');
       }
     } catch (err) {
       showToast(err.message, 'error');
@@ -862,19 +888,73 @@ export default function ProductDatabaseModal({
               {activeTab === 'brand_links' && activeProductId && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   <div style={{
-                    padding: '14px',
+                    padding: '16px',
                     borderRadius: 'var(--radius-md, 12px)',
                     background: 'var(--surface-interactive, #1c2a40)',
                     border: '1px solid var(--border-subtle, #26354a)'
                   }}>
-                    <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--action-primary, #2dd4bf)', marginBottom: '10px' }}>
-                      🔗 Daftar Affiliate Links per Brand Profile
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                      <div>
+                        <div style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--action-primary, #2dd4bf)' }}>
+                          🔗 Tautan Afiliasi per Brand Profile (Multi-Link)
+                        </div>
+                        <div style={{ fontSize: '11.5px', color: 'var(--text-muted, #8290a5)', marginTop: '2px' }}>
+                          Satu produk dapat memiliki link Shopee berbeda sesuai akun brand yang memposting (misal Dapur Botani vs Siasat Sehat).
+                        </div>
+                      </div>
+
+                      {/* Live Dynamic Status Badge */}
+                      {productBrandLinks.length >= 2 ? (
+                        <span style={{
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          padding: '3px 10px',
+                          borderRadius: '999px',
+                          background: 'var(--status-purple-soft, rgba(192, 132, 252, 0.14))',
+                          color: 'var(--status-purple, #c084fc)',
+                          border: '1px solid var(--status-purple, #c084fc)'
+                        }}>
+                          🛍️ Multi-Brand ({productBrandLinks.length} Brand Terhubung)
+                        </span>
+                      ) : productBrandLinks.length === 1 ? (
+                        <span style={{
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          padding: '3px 10px',
+                          borderRadius: '999px',
+                          background: 'var(--status-success-soft, rgba(74, 222, 128, 0.14))',
+                          color: 'var(--status-success, #4ade80)',
+                          border: '1px solid var(--status-success, #4ade80)'
+                        }}>
+                          🔗 1 Brand Terhubung
+                        </span>
+                      ) : (
+                        <span style={{
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          padding: '3px 10px',
+                          borderRadius: '999px',
+                          background: 'var(--status-warning-soft, rgba(251, 191, 36, 0.14))',
+                          color: 'var(--status-warning, #fbbf24)',
+                          border: '1px dashed var(--status-warning, #fbbf24)'
+                        }}>
+                          📦 Murni Non-Afiliasi
+                        </span>
+                      )}
                     </div>
 
                     {/* List of active brand links */}
                     {productBrandLinks.length === 0 ? (
-                      <div style={{ fontSize: '12px', color: 'var(--text-muted, #8290a5)', marginBottom: '12px' }}>
-                        Belum ada brand profile yang terhubung ke produk ini.
+                      <div style={{
+                        fontSize: '12px',
+                        color: 'var(--status-warning, #fbbf24)',
+                        background: 'var(--status-warning-soft, rgba(251, 191, 36, 0.14))',
+                        padding: '10px 14px',
+                        borderRadius: 'var(--radius-sm, 8px)',
+                        border: '1px dashed var(--status-warning, #fbbf24)',
+                        marginBottom: '14px'
+                      }}>
+                        ⚠️ Belum ada brand profile yang terhubung ke produk ini. Produk ini otomatis berstatus <strong>Non-Afiliasi</strong> (hanya untuk konten edukasi/organik).
                       </div>
                     ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '14px' }}>
@@ -886,32 +966,104 @@ export default function ProductDatabaseModal({
                               justifyContent: 'space-between',
                               alignItems: 'center',
                               background: 'var(--input-bg, #0c1422)',
-                              padding: '8px 12px',
+                              padding: '10px 14px',
                               borderRadius: 'var(--radius-sm, 8px)',
-                              border: '1px solid var(--border-subtle, #26354a)'
+                              border: '1px solid var(--border-subtle, #26354a)',
+                              gap: '10px'
                             }}
                           >
-                            <div>
-                              <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary, #f4f7fb)' }}>
+                            <div style={{ minWidth: '120px' }}>
+                              <div style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--text-primary, #f4f7fb)' }}>
                                 {link.brand_name}
                               </div>
-                              <div style={{ fontSize: '11px', color: 'var(--text-muted, #8290a5)', wordBreak: 'break-all' }}>
-                                {link.affiliate_link}
-                              </div>
+                              {link.tracking_code && (
+                                <div style={{ fontSize: '10.5px', color: 'var(--text-muted, #8290a5)' }}>
+                                  Code: {link.tracking_code}
+                                </div>
+                              )}
                             </div>
+
+                            <div style={{ flex: 1, display: 'flex', gap: '6px' }}>
+                              <input
+                                type="text"
+                                defaultValue={link.affiliate_link}
+                                onBlur={(e) => {
+                                  if (e.target.value.trim() !== link.affiliate_link) {
+                                    handleUpdateExistingBrandLink(link.brand_profile_id, e.target.value, link.tracking_code);
+                                  }
+                                }}
+                                placeholder="https://s.shopee.co.id/..."
+                                style={{
+                                  flex: 1,
+                                  height: '32px',
+                                  padding: '0 10px',
+                                  borderRadius: '6px',
+                                  border: '1px solid var(--border-subtle, #26354a)',
+                                  background: 'var(--surface, #101827)',
+                                  color: 'var(--status-info, #60a5fa)',
+                                  fontFamily: 'var(--font-mono, monospace)',
+                                  fontSize: '11.5px',
+                                  outline: 'none'
+                                }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(link.affiliate_link);
+                                  showToast('📋 Link berhasil disalin!');
+                                }}
+                                title="Salin Link"
+                                style={{
+                                  background: 'var(--surface-raised, #162235)',
+                                  border: '1px solid var(--border-subtle, #26354a)',
+                                  borderRadius: '6px',
+                                  color: 'var(--text-secondary, #b6c2d2)',
+                                  padding: '0 8px',
+                                  height: '32px',
+                                  fontSize: '12px',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                📋
+                              </button>
+                              <a
+                                href={link.affiliate_link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title="Buka Link di Tab Baru"
+                                style={{
+                                  background: 'var(--surface-raised, #162235)',
+                                  border: '1px solid var(--border-subtle, #26354a)',
+                                  borderRadius: '6px',
+                                  color: 'var(--text-secondary, #b6c2d2)',
+                                  padding: '0 8px',
+                                  height: '32px',
+                                  fontSize: '12px',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  textDecoration: 'none'
+                                }}
+                              >
+                                🌐
+                              </a>
+                            </div>
+
                             <button
                               type="button"
                               onClick={() => handleDeleteBrandLink(link)}
                               style={{
                                 background: 'transparent',
-                                border: 'none',
+                                border: '1px solid var(--status-danger-soft, rgba(251, 113, 133, 0.14))',
+                                borderRadius: '6px',
                                 color: 'var(--status-danger, #fb7185)',
-                                fontSize: '12px',
+                                fontSize: '11px',
                                 cursor: 'pointer',
-                                padding: '4px 8px'
+                                padding: '6px 10px',
+                                whiteSpace: 'nowrap'
                               }}
                             >
-                              Hapus
+                              🗑️ Hapus
                             </button>
                           </div>
                         ))}
@@ -921,12 +1073,13 @@ export default function ProductDatabaseModal({
                     {/* Add / Update Brand Link Form */}
                     <div style={{
                       background: 'var(--input-bg, #0c1422)',
-                      padding: '12px',
+                      padding: '14px',
                       borderRadius: 'var(--radius-sm, 8px)',
-                      border: '1px solid var(--border-subtle, #26354a)'
+                      border: '1px dashed var(--border-subtle, #26354a)',
+                      marginBottom: '12px'
                     }}>
-                      <div style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', color: 'var(--text-secondary, #b6c2d2)' }}>
-                        Tambah / Update Link Brand
+                      <div style={{ fontSize: '12px', fontWeight: 700, marginBottom: '10px', color: 'var(--text-secondary, #b6c2d2)' }}>
+                        ➕ Hubungkan Link untuk Brand Lain:
                       </div>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
                         <select
@@ -942,9 +1095,9 @@ export default function ProductDatabaseModal({
                             outline: 'none'
                           }}
                         >
-                          <option value="">-- Pilih Brand --</option>
+                          <option value="">-- Pilih Brand Target --</option>
                           {brandProfiles.map(bp => (
-                            <option key={bp.id} value={bp.id}>{bp.brand_name}</option>
+                            <option key={bp.id} value={bp.id}>🏷️ {bp.brand_name}</option>
                           ))}
                         </select>
                         <input
@@ -966,7 +1119,7 @@ export default function ProductDatabaseModal({
                       <div style={{ display: 'flex', gap: '8px' }}>
                         <input
                           type="text"
-                          placeholder="Affiliate Link (https://...)"
+                          placeholder="Affiliate Link Shopee (https://s.shopee.co.id/...)"
                           value={newLinkUrl}
                           onChange={e => setNewLinkUrl(e.target.value)}
                           style={{
@@ -996,12 +1149,32 @@ export default function ProductDatabaseModal({
                             whiteSpace: 'nowrap'
                           }}
                         >
-                          {savingLink ? 'Menyimpan...' : 'Simpan Link'}
+                          {savingLink ? 'Menyimpan...' : '+ Tambah Link'}
                         </button>
+                      </div>
+                    </div>
+
+                    {/* Dynamic Smart Routing Callout Box */}
+                    <div style={{
+                      padding: '10px 14px',
+                      borderRadius: 'var(--radius-sm, 8px)',
+                      fontSize: '12px',
+                      lineHeight: '1.5',
+                      background: 'var(--status-info-soft, rgba(96, 165, 250, 0.14))',
+                      border: '1px solid var(--status-info, #60a5fa)',
+                      color: 'var(--text-primary, #f4f7fb)',
+                      display: 'flex',
+                      gap: '8px',
+                      alignItems: 'flex-start'
+                    }}>
+                      <span>💡</span>
+                      <div>
+                        <strong>Multi-Brand Smart Routing:</strong> Saat konten di-generate untuk Brand A (misal <em>Dapur Botani</em>), link Shopee Dapur Botani yang disisipkan. Saat untuk Brand B (<em>Siasat Sehat</em>), link Shopee Siasat Sehat yang disisipkan! Jika seluruh link dihapus, produk otomatis berstatus <strong>Non-Afiliasi</strong>.
                       </div>
                     </div>
                   </div>
                 </div>
+              )}
               )}
             </div>
 

@@ -15,6 +15,10 @@ export default function ProductDatabasePage() {
   // Search & Filter
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [affiliateStatus, setAffiliateStatus] = useState('all'); // 'all' | 'multi_brand' | 'with_link' | 'without_link'
+  const [selectedBrandId, setSelectedBrandId] = useState('all');
+  const [affiliateCounts, setAffiliateCounts] = useState({ total: 0, multi_brand: 0, with_link: 0, without_link: 0 });
+  const [brandProfilesList, setBrandProfilesList] = useState([]);
 
   // Modals visibility
   const [showAddEditModal, setShowAddEditModal] = useState(false);
@@ -63,17 +67,22 @@ export default function ProductDatabasePage() {
   }
 
   // Fetch products and active queue status
-  async function fetchProducts() {
+  async function fetchProducts(overrideAffiliateStatus = null, overrideBrandId = null) {
     try {
-      const res = await fetch(`/api/v2/products?search=${encodeURIComponent(search)}&category=${encodeURIComponent(selectedCategory)}`);
+      const effStatus = overrideAffiliateStatus !== null ? overrideAffiliateStatus : affiliateStatus;
+      const effBrand = overrideBrandId !== null ? overrideBrandId : selectedBrandId;
+      const res = await fetch(`/api/v2/products?search=${encodeURIComponent(search)}&category=${encodeURIComponent(selectedCategory)}&affiliate_status=${encodeURIComponent(effStatus)}&brand_id=${encodeURIComponent(effBrand)}`);
       const data = await res.json();
       if (data.success) {
         setProducts(data.data || []);
         setScrapingCount(data.scraping_count || 0);
+        if (data.counts) {
+          setAffiliateCounts(data.counts);
+        }
 
         // Populate inline affiliate links map
         const linksMap = {};
-        data.data.forEach(p => {
+        (data.data || []).forEach(p => {
           linksMap[p.id] = p.affiliate_link || '';
         });
         setInlineAffiliateLinks(linksMap);
@@ -87,7 +96,44 @@ export default function ProductDatabasePage() {
 
   useEffect(() => {
     fetchProducts();
-  }, [selectedCategory]);
+  }, [selectedCategory, affiliateStatus, selectedBrandId]);
+
+  useEffect(() => {
+    // Fetch brand profiles for dropdown
+    fetch('/api/v2/brand-profiles')
+      .then(r => r.json())
+      .then(d => {
+        if (d.success && Array.isArray(d.data)) {
+          setBrandProfilesList(d.data);
+        }
+      })
+      .catch(e => console.warn('Fetch brands error:', e));
+  }, []);
+
+  // Quick brand link handlers for card
+  async function handleQuickDeleteBrandLink(productId, brandProfileId, brandName) {
+    if (!confirm(`Hapus link affiliate untuk brand ${brandName || 'ini'}?`)) return;
+    try {
+      const res = await fetch(`/api/v2/products/${productId}/brands?brandProfileId=${encodeURIComponent(brandProfileId)}`, {
+        method: 'DELETE'
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(`🗑 Link brand ${brandName || ''} berhasil dihapus.`);
+        fetchProducts();
+      } else {
+        showToast(data.error || 'Gagal menghapus link', 'error');
+      }
+    } catch (err) {
+      showToast(err.message || 'Gagal menghapus link', 'error');
+    }
+  }
+
+  function handleCopyText(text, label = 'Tautan') {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    showToast(`📋 ${label} berhasil disalin!`);
+  }
 
 
   // Run search on Enter key
@@ -829,21 +875,183 @@ export default function ProductDatabasePage() {
             )}
           </div>
 
+          {/* Quick Status Filter Pills (Sesuai Mockup) */}
+          <div style={{
+            display: 'flex',
+            gap: '10px',
+            marginBottom: '16px',
+            flexWrap: 'wrap'
+          }}>
+            <div
+              onClick={() => setAffiliateStatus('all')}
+              style={{
+                background: affiliateStatus === 'all' ? 'var(--surface-raised)' : 'var(--surface)',
+                border: `1px solid ${affiliateStatus === 'all' ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
+                borderRadius: 'var(--radius-sm)',
+                padding: '8px 14px',
+                fontSize: '12.5px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                color: 'var(--text-primary)',
+                transition: 'all 0.2s ease',
+                userSelect: 'none'
+              }}
+            >
+              <span>Semua Produk</span>
+              <span style={{
+                background: 'var(--surface-interactive)',
+                color: 'var(--text-primary)',
+                padding: '2px 7px',
+                borderRadius: '999px',
+                fontSize: '11px',
+                fontWeight: 700
+              }}>
+                {affiliateCounts.total || products.length}
+              </span>
+            </div>
+
+            <div
+              onClick={() => setAffiliateStatus('multi_brand')}
+              style={{
+                background: affiliateStatus === 'multi_brand' ? 'var(--surface-raised)' : 'var(--surface)',
+                border: `1px solid ${affiliateStatus === 'multi_brand' ? 'var(--status-purple)' : 'var(--border-subtle)'}`,
+                borderRadius: 'var(--radius-sm)',
+                padding: '8px 14px',
+                fontSize: '12.5px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                color: 'var(--text-primary)',
+                transition: 'all 0.2s ease',
+                userSelect: 'none'
+              }}
+            >
+              <span>🛍️ Multi-Brand (≥2 Link)</span>
+              <span style={{
+                background: 'var(--status-purple-soft)',
+                color: 'var(--status-purple)',
+                padding: '2px 7px',
+                borderRadius: '999px',
+                fontSize: '11px',
+                fontWeight: 700
+              }}>
+                {affiliateCounts.multi_brand || 0}
+              </span>
+            </div>
+
+            <div
+              onClick={() => setAffiliateStatus('with_link')}
+              style={{
+                background: affiliateStatus === 'with_link' ? 'var(--surface-raised)' : 'var(--surface)',
+                border: `1px solid ${affiliateStatus === 'with_link' ? 'var(--status-success)' : 'var(--border-subtle)'}`,
+                borderRadius: 'var(--radius-sm)',
+                padding: '8px 14px',
+                fontSize: '12.5px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                color: 'var(--text-primary)',
+                transition: 'all 0.2s ease',
+                userSelect: 'none'
+              }}
+            >
+              <span>🔗 Produk Afiliasi (Ada Link)</span>
+              <span style={{
+                background: 'var(--status-success-soft)',
+                color: 'var(--status-success)',
+                padding: '2px 7px',
+                borderRadius: '999px',
+                fontSize: '11px',
+                fontWeight: 700
+              }}>
+                {affiliateCounts.with_link || 0}
+              </span>
+            </div>
+
+            <div
+              onClick={() => setAffiliateStatus('without_link')}
+              style={{
+                background: affiliateStatus === 'without_link' ? 'var(--surface-raised)' : 'var(--surface)',
+                border: `1px solid ${affiliateStatus === 'without_link' ? 'var(--status-warning)' : 'var(--border-subtle)'}`,
+                borderRadius: 'var(--radius-sm)',
+                padding: '8px 14px',
+                fontSize: '12.5px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                color: 'var(--text-primary)',
+                transition: 'all 0.2s ease',
+                userSelect: 'none'
+              }}
+            >
+              <span>⚠️ Belum Ada Link (Non-Afiliasi)</span>
+              <span style={{
+                background: 'var(--status-warning-soft)',
+                color: 'var(--status-warning)',
+                padding: '2px 7px',
+                borderRadius: '999px',
+                fontSize: '11px',
+                fontWeight: 700
+              }}>
+                {affiliateCounts.without_link || 0}
+              </span>
+            </div>
+          </div>
+
           {/* Filters & Search Bar */}
           <div className="card" style={{ padding: '16px 20px', marginBottom: '24px' }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center' }}>
-              <div style={{ flex: '1 1 320px', maxWidth: '480px', position: 'relative' }}>
+              <div style={{ flex: '1 1 260px', position: 'relative' }}>
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="🔎 Cari berdasarkan nama produk, USP, atau tags..."
+                  placeholder="🔎 Cari nama produk, USP, atau tags..."
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   onKeyDown={handleSearchKeyPress}
                   style={{ width: '100%', height: '40px' }}
                 />
               </div>
-              <div style={{ width: '180px' }}>
+
+              {/* Brand Profile Dropdown Filter */}
+              <div style={{ width: '190px' }}>
+                <select
+                  className="form-select"
+                  value={selectedBrandId}
+                  onChange={e => setSelectedBrandId(e.target.value)}
+                  style={{ margin: 0, height: '40px' }}
+                >
+                  <option value="all">Semua Brand Target</option>
+                  {brandProfilesList.map(b => (
+                    <option key={b.id} value={b.id}>
+                      🏷️ {b.brand_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Affiliate Status Dropdown Filter */}
+              <div style={{ width: '210px' }}>
+                <select
+                  className="form-select"
+                  value={affiliateStatus}
+                  onChange={e => setAffiliateStatus(e.target.value)}
+                  style={{ margin: 0, height: '40px' }}
+                >
+                  <option value="all">Status: Semua Produk</option>
+                  <option value="multi_brand">🛍️ Multi-Brand (≥2 Link)</option>
+                  <option value="with_link">🔗 Ada Link (Minimal 1)</option>
+                  <option value="without_link">⚠️ Belum Ada Link (Non-Afiliasi)</option>
+                </select>
+              </div>
+
+              {/* Category Dropdown */}
+              <div style={{ width: '170px' }}>
                 <select
                   className="form-select"
                   value={selectedCategory}
@@ -856,16 +1064,23 @@ export default function ProductDatabasePage() {
                   ))}
                 </select>
               </div>
-              <button className="btn btn-secondary" onClick={fetchProducts} style={{ height: '40px' }}>
+
+              <button className="btn btn-secondary" onClick={() => fetchProducts()} style={{ height: '40px' }}>
                 Search
               </button>
-              {(search || selectedCategory) && (
+              {(search || selectedCategory || affiliateStatus !== 'all' || selectedBrandId !== 'all') && (
                 <button
                   className="btn"
-                  style={{ background: 'transparent', color: 'var(--text-muted)', border: 'none', height: '40px' }}
-                  onClick={() => { setSearch(''); setSelectedCategory(''); setTimeout(fetchProducts, 100); }}
+                  style={{ background: 'transparent', color: 'var(--text-muted)', border: 'none', height: '40px', cursor: 'pointer' }}
+                  onClick={() => {
+                    setSearch('');
+                    setSelectedCategory('');
+                    setAffiliateStatus('all');
+                    setSelectedBrandId('all');
+                    fetchProducts('all', 'all');
+                  }}
                 >
-                  Clear Filters
+                  Reset Filter
                 </button>
               )}
             </div>
@@ -1003,387 +1218,350 @@ export default function ProductDatabasePage() {
 
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
-                gap: '20px'
+                gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))',
+                gap: '18px'
               }}>
                 {products.map(p => {
-                // Parse tags
-                const tagsList = p.tags
-                  ? p.tags.split(',').map(t => t.trim()).filter(Boolean)
-                  : [];
+                  // Parse tags
+                  const tagsList = p.tags
+                    ? p.tags.split(',').map(t => t.trim()).filter(Boolean)
+                    : [];
 
-                // Parse USP points
-                let uspPoints = [];
-                if (p.unique_selling_point) {
-                  const rawUsp = p.unique_selling_point;
-                  if (rawUsp.startsWith('-') || rawUsp.includes('\n')) {
-                    uspPoints = rawUsp.split('\n').map(l => l.replace(/^-\s*/, '').trim()).filter(Boolean);
-                  } else {
-                    try {
-                      const parsed = JSON.parse(rawUsp);
-                      uspPoints = Array.isArray(parsed) ? parsed : [parsed];
-                    } catch (e) {
-                      uspPoints = [rawUsp];
-                    }
-                  }
-                }
+                  // Resolve active photo URL
+                  const activeTab = viewTabs[p.id] || (p.active_photo === 'raw_photo_url' ? 'raw' : 'cleaned');
+                  const displayPhotoUrl = activeTab === 'raw'
+                    ? p.raw_photo_url
+                    : (p.cleaned_photo_url || p.clean_photo_url);
 
-                // Resolve active tab and display URL
-                // Resolve active tab and display URL (Hanya Raw & Clean)
-                const activeTab = viewTabs[p.id] || (p.active_photo === 'raw_photo_url' ? 'raw' : 'cleaned');
-                const displayPhotoUrl = activeTab === 'raw'
-                  ? p.raw_photo_url
-                  : (p.cleaned_photo_url || p.clean_photo_url);
-                const isTabAvailable = (tab) => tab === 'raw' ? !!p.raw_photo_url : (!!p.cleaned_photo_url || !!p.clean_photo_url);
-                const isCurrentlyActive = (tab) => p.active_photo === (tab === 'raw' ? 'raw_photo_url' : 'cleaned_photo_url') || (tab === 'cleaned' && p.active_photo === 'clean_photo_url');
+                  const brandLinks = Array.isArray(p.brand_links) ? p.brand_links : [];
+                  const brandLinksCount = brandLinks.length;
 
-                return (
-                  <div key={p.id} className="card product-card" style={{
-                    padding: 0,
-                    overflow: 'hidden',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    border: '1px solid var(--border)',
-                    transition: 'all 0.25s ease',
-                  }}>
-                    {/* Upper content */}
-                    <div>
-                      {/* Image Header */}
-                      <div style={{
-                        height: '180px',
-                        background: 'var(--overlay-subtle)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
+                  return (
+                    <div
+                      key={p.id}
+                      className="card product-card-simple"
+                      style={{
+                        background: 'var(--surface)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-md)',
                         overflow: 'hidden',
-                        position: 'relative',
-                        borderBottom: '1px solid var(--border)'
+                        display: 'flex',
+                        flexDirection: 'column',
+                        boxShadow: 'var(--shadow-card)',
+                        transition: 'all 0.2s ease',
+                        position: 'relative'
+                      }}
+                    >
+                      {/* Top Row: Horizontal Split (Thumbnail 80x80 on Left, Identity Info on Right) */}
+                      <div style={{
+                        display: 'flex',
+                        gap: '14px',
+                        padding: '14px 16px',
+                        borderBottom: '1px solid var(--border-subtle)'
                       }}>
-                        {/* Glassmorphic Background Processing Status Overlay */}
-                        {(() => {
-                          const isEnriching = p.enrichment_status === 'pending' || p.enrichment_status === 'processing';
-                          const isPhotoGenerating = (p.photo_status === 'pending' || p.photo_status === 'processing') && p.photo_status !== 'approved';
-                          const isFailed = (p.enrichment_status === 'failed' || p.photo_status === 'failed') && !p.clean_photo_url && !p.raw_photo_url;
-
-                          if (!isEnriching && !isPhotoGenerating && !isFailed) return null;
-
-                          return (
-                            <div style={{
-                              position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                              background: 'rgba(18, 18, 20, 0.88)', display: 'flex', flexDirection: 'column',
-                              alignItems: 'center', justifyContent: 'center', zIndex: 10, padding: '16px',
-                              textAlign: 'center', backdropFilter: 'blur(4px)'
-                            }}>
-                              {isEnriching && (
-                                <>
-                                  <div className="spinner" style={{ width: '22px', height: '22px', marginBottom: '8px', borderTopColor: '#0984e3' }}></div>
-                                  <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#74b9ff' }}>
-                                    ⏳ AI Enrichment {p.enrichment_status === 'processing' ? 'Processing' : 'Pending'}
-                                  </div>
-                                  <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', marginTop: '4px', lineHeight: '1.4' }}>
-                                    Sedang dianalisis oleh Gemini...
-                                  </div>
-                                </>
-                              )}
-                              {!isEnriching && isPhotoGenerating && (
-                                <>
-                                  <div className="spinner" style={{ width: '22px', height: '22px', marginBottom: '8px', borderTopColor: 'var(--status-warning)' }}></div>
-                                  <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#ff7675' }}>
-                                    🎨 Visual Rendering {p.photo_status === 'processing' ? 'Active' : 'Queued'}
-                                  </div>
-                                  <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', marginTop: '4px', lineHeight: '1.4' }}>
-                                    Sedang diproses studio AI / G-Labs...
-                                  </div>
-                                </>
-                              )}
-                              {isFailed && (
-                                <>
-                                  <div style={{ fontSize: '1.4rem', marginBottom: '4px' }}>❌</div>
-                                  <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--danger)' }}>Proses Gagal</div>
-                                  <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', marginTop: '4px', lineHeight: '1.4' }}>
-                                    {p.photo_error || p.enrichment_error || 'Terjadi kesalahan saat pengayaan AI/visual.'}
-                                  </div>
-                                </>
-                              )}
-                            </div>
-                          );
-                        })()}
-
-                        {displayPhotoUrl ? (
-                          <div
-                            style={{ width: '100%', height: '100%', position: 'relative', cursor: 'zoom-in' }}
-                            className="thumbnail-container"
-                            onClick={() => {
-                              console.log("Zooming product photo:", displayPhotoUrl);
-                              setZoomedImage(displayPhotoUrl);
-                            }}
-                          >
-                            <img
-                              src={displayPhotoUrl}
-                              alt={p.product_name}
-                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        {/* Thumbnail Container with Checkbox & Status */}
+                        <div style={{ position: 'relative', width: '80px', height: '80px', flexShrink: 0 }}>
+                          {/* Selection Checkbox */}
+                          <div style={{
+                            position: 'absolute',
+                            top: '4px',
+                            left: '4px',
+                            zIndex: 5,
+                            background: 'rgba(0, 0, 0, 0.55)',
+                            borderRadius: '4px',
+                            width: '20px',
+                            height: '20px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backdropFilter: 'blur(4px)',
+                            border: selectedIds.includes(p.id) ? '1px solid var(--action-primary)' : '1px solid rgba(255,255,255,0.2)'
+                          }}>
+                            <input
+                              type="checkbox"
+                              checked={selectedIds.includes(p.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedIds(prev => [...prev, p.id]);
+                                } else {
+                                  setSelectedIds(prev => prev.filter(id => id !== p.id));
+                                }
+                              }}
+                              style={{
+                                width: '12px',
+                                height: '12px',
+                                cursor: 'pointer',
+                                margin: 0,
+                                accentColor: 'var(--action-primary)'
+                              }}
                             />
-                            <div className="zoom-overlay" style={{
-                              position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                              background: 'var(--overlay-subtle)', display: 'flex', alignItems: 'center',
-                              justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s', pointerEvents: 'none'
-                            }}>
-                              <span style={{ fontSize: '1.5rem', color: 'var(--text-primary)' }}>🔍 Zoom</span>
-                            </div>
                           </div>
-                        ) : (
+
+                          {/* Thumbnail image or placeholder */}
                           <div
-                            onClick={() => document.getElementById(`upload-${p.id}-${activeTab}`).click()}
                             style={{
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                              gap: '6px',
-                              cursor: 'pointer',
                               width: '100%',
                               height: '100%',
-                              justifyContent: 'center',
-                              background: 'var(--surface-interactive)',
-                              border: '2px dashed var(--border-subtle)',
-                              padding: '12px',
-                              textAlign: 'center'
-                            }}
-                          >
-                            <div style={{ fontSize: '2rem', opacity: 0.5 }}>📤</div>
-                            <div style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                              {uploadingProductId === p.id ? 'Mengunggah...' : `Unggah Foto ${activeTab === 'raw' ? 'Raw' : 'Clean'}`}
-                            </div>
-                            <div style={{ fontSize: '0.62rem', color: 'var(--text-muted)' }}>Belum ada foto. Klik untuk menambahkan.</div>
-                          </div>
-                        )}
-
-                        {/* Hidden file inputs for upload */}
-                        {['raw', 'cleaned'].map(tab => (
-                          <input
-                            key={tab}
-                            id={`upload-${p.id}-${tab}`}
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => {
-                              const file = e.target.files[0];
-                              if (file) {
-                                handleUploadPhoto(p.id, tab, file);
-                              }
-                            }}
-                            style={{ display: 'none' }}
-                          />
-                        ))}
-
-                        {/* Use selected photo as active */}
-                        {isTabAvailable(activeTab) && !isCurrentlyActive(activeTab) && (
-                          <button
-                            type="button"
-                            onClick={() => handleSetActivePhoto(p.id, activeTab)}
-                            style={{
-                              position: 'absolute',
-                              top: '12px',
-                              right: '12px',
-                              background: 'var(--accent)',
-                              color: 'var(--text-primary)',
-                              border: 'none',
-                              borderRadius: '4px',
-                              padding: '4px 8px',
-                              fontSize: '0.62rem',
-                              fontWeight: 600,
-                              cursor: 'pointer',
-                              zIndex: 12,
-                              boxShadow: '0 2px 8px rgba(0,0,0,0.5)'
-                            }}
-                          >
-                            ✓ Use {activeTab === 'raw' ? 'Raw' : 'Clean'}
-                          </button>
-                        )}
-
-                        {/* Replace photo button overlay */}
-                        {isTabAvailable(activeTab) && (
-                          <button
-                            type="button"
-                            onClick={() => document.getElementById(`upload-${p.id}-${activeTab}`).click()}
-                            style={{
-                              position: 'absolute',
-                              top: '12px',
-                              right: isTabAvailable(activeTab) && !isCurrentlyActive(activeTab) ? '95px' : '12px',
-                              background: 'rgba(0, 0, 0, 0.65)',
-                              border: '1px solid rgba(255,255,255,0.2)',
-                              color: 'var(--text-primary)',
-                              borderRadius: '4px',
-                              padding: '4px 8px',
-                              fontSize: '0.62rem',
-                              fontWeight: 600,
-                              cursor: 'pointer',
-                              zIndex: 12,
-                              boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
-                              display: 'inline-flex',
+                              borderRadius: 'var(--radius-sm)',
+                              background: 'var(--surface-raised)',
+                              display: 'flex',
                               alignItems: 'center',
-                              gap: '4px'
+                              justifyContent: 'center',
+                              overflow: 'hidden',
+                              border: '1px solid var(--border-subtle)',
+                              cursor: displayPhotoUrl ? 'zoom-in' : 'pointer'
                             }}
-                            disabled={uploadingProductId === p.id}
+                            onClick={() => {
+                              if (displayPhotoUrl) setZoomedImage(displayPhotoUrl);
+                              else handleEditProduct(p);
+                            }}
                           >
-                            ✏️ {uploadingProductId === p.id ? 'Uploading...' : 'Ganti Foto'}
-                          </button>
-                        )}
+                            {displayPhotoUrl ? (
+                              <img
+                                src={displayPhotoUrl}
+                                alt={p.product_name}
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              />
+                            ) : (
+                              <span style={{ fontSize: '28px' }}>📦</span>
+                            )}
+                          </div>
+                        </div>
 
-                        {/* View Tab Selector overlay */}
+                        {/* Header Info (Title, Category, Status Badge) */}
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '6px' }}>
+                            {/* Dynamic Status Badge */}
+                            {brandLinksCount >= 2 ? (
+                              <span style={{
+                                fontSize: '11px',
+                                fontWeight: 700,
+                                padding: '2px 8px',
+                                borderRadius: '999px',
+                                background: 'var(--status-purple-soft)',
+                                color: 'var(--status-purple)',
+                                whiteSpace: 'nowrap'
+                              }}>
+                                🛍️ Multi-Brand ({brandLinksCount} Link)
+                              </span>
+                            ) : brandLinksCount === 1 ? (
+                              <span style={{
+                                fontSize: '11px',
+                                fontWeight: 700,
+                                padding: '2px 8px',
+                                borderRadius: '999px',
+                                background: 'var(--status-success-soft)',
+                                color: 'var(--status-success)',
+                                whiteSpace: 'nowrap'
+                              }}>
+                                🔗 1 Brand Terhubung
+                              </span>
+                            ) : (
+                              <span style={{
+                                fontSize: '11px',
+                                fontWeight: 700,
+                                padding: '2px 8px',
+                                borderRadius: '999px',
+                                background: 'var(--status-warning-soft)',
+                                color: 'var(--status-warning)',
+                                border: '1px dashed var(--status-warning)',
+                                whiteSpace: 'nowrap'
+                              }}>
+                                📦 Murni Non-Afiliasi
+                              </span>
+                            )}
+
+                            {p.category && (
+                              <span style={{
+                                fontSize: '10.5px',
+                                fontWeight: 600,
+                                color: 'var(--text-muted)',
+                                background: 'var(--surface-raised)',
+                                padding: '2px 6px',
+                                borderRadius: '4px',
+                                border: '1px solid var(--border-subtle)',
+                                whiteSpace: 'nowrap'
+                              }}>
+                                {p.category}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Product Title */}
+                          <h4
+                            style={{
+                              fontSize: '14px',
+                              fontWeight: 700,
+                              color: 'var(--text-primary)',
+                              margin: '2px 0 0',
+                              lineHeight: 1.35,
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden'
+                            }}
+                            title={p.product_name}
+                          >
+                            {p.product_name}
+                          </h4>
+
+                          {/* Tags or Short USP snippet */}
+                          <div style={{
+                            fontSize: '11px',
+                            color: 'var(--text-muted)',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            marginTop: '2px'
+                          }}>
+                            {tagsList.length > 0 ? tagsList.map(t => `#${t}`).join(' ') : (p.unique_selling_point ? `USP: ${p.unique_selling_point.slice(0, 45)}...` : 'Belum ada tags')}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Middle Section: Multi-Brand Affiliate Links */}
+                      <div style={{
+                        padding: '10px 14px',
+                        background: 'var(--surface-raised)',
+                        borderBottom: '1px solid var(--border-subtle)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '6px'
+                      }}>
                         <div style={{
-                          position: 'absolute',
-                          bottom: '0',
-                          left: '0',
-                          right: '0',
-                          background: 'var(--overlay-backdrop)',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          color: 'var(--text-secondary)',
                           display: 'flex',
-                          justifyContent: 'space-around',
-                          padding: '4px 0',
-                          zIndex: 10,
-                          backdropFilter: 'blur(4px)',
-                          borderTop: '1px solid var(--border-subtle)'
+                          justifyContent: 'space-between',
+                          alignItems: 'center'
                         }}>
-                          {['raw', 'cleaned'].map(tab => {
-                            const avail = isTabAvailable(tab);
-                            const active = isCurrentlyActive(tab);
-                            const selected = activeTab === tab;
-                            return (
-                              <button
-                                key={tab}
-                                type="button"
-                                onClick={() => setViewTabs(prev => ({ ...prev, [p.id]: tab }))}
+                          <span>Tautan Afiliasi Sesuai Brand:</span>
+                          <span style={{ color: 'var(--text-muted)', fontSize: '10.5px' }}>
+                            {brandLinksCount} Link Aktif
+                          </span>
+                        </div>
+
+                        {brandLinksCount === 0 ? (
+                          <div style={{
+                            fontSize: '11.5px',
+                            color: 'var(--status-warning)',
+                            fontStyle: 'italic',
+                            padding: '3px 0'
+                          }}>
+                            ⚠️ Belum ada link affiliate di brand manapun (Non-Afiliasi).
+                          </div>
+                        ) : (
+                          brandLinks.map(b => (
+                            <div
+                              key={b.brand_product_id || b.brand_profile_id || b.affiliate_link}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                gap: '6px',
+                                fontSize: '11.5px',
+                                background: 'var(--input-bg)',
+                                padding: '5px 8px',
+                                borderRadius: 'var(--radius-xs)',
+                                border: '1px solid var(--border-subtle)'
+                              }}
+                            >
+                              <span style={{
+                                fontWeight: 700,
+                                color: 'var(--text-primary)',
+                                whiteSpace: 'nowrap',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}>
+                                {b.brand_name || 'Brand'}:
+                              </span>
+                              <span
                                 style={{
-                                  background: selected ? 'var(--status-neutral-soft)' : 'transparent',
-                                  color: selected ? 'var(--accent-light)' : avail ? 'var(--text-secondary)' : 'rgba(255,255,255,0.4)',
-                                  border: selected ? '1px solid var(--accent)' : 'none',
-                                  borderRadius: '3px',
-                                  padding: '2px 8px',
-                                  fontSize: '0.65rem',
-                                  fontWeight: 600,
+                                  flex: 1,
+                                  fontFamily: 'var(--font-mono)',
+                                  fontSize: '11px',
+                                  color: 'var(--status-info)',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap',
+                                  textAlign: 'right'
+                                }}
+                                title={b.affiliate_link}
+                              >
+                                {b.affiliate_link ? b.affiliate_link.replace(/^https?:\/\//, '') : '-'}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCopyText(b.affiliate_link, `Link ${b.brand_name}`);
+                                }}
+                                title="Salin Link"
+                                style={{
+                                  background: 'var(--surface-raised)',
+                                  border: '1px solid var(--border-subtle)',
+                                  borderRadius: '4px',
+                                  color: 'var(--text-secondary)',
                                   cursor: 'pointer',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '4px',
+                                  padding: '2px 6px',
+                                  fontSize: '10.5px'
                                 }}
                               >
-                                {tab === 'raw' ? 'Raw' : 'Clean'}
-                                {active && <span style={{ color: 'var(--success-light)', fontSize: '8px' }}>●</span>}
-                                {!avail && <span style={{ color: 'var(--text-muted)', fontSize: '9px', fontWeight: 'normal' }}>(kosong)</span>}
+                                📋
                               </button>
-                            );
-                          })}
-                        </div>
-
-                        {/* Selection Checkbox */}
-                        <div style={{
-                          position: 'absolute',
-                          top: '12px',
-                          left: '12px',
-                          zIndex: 10,
-                          background: 'rgba(0, 0, 0, 0.5)',
-                          borderRadius: '4px',
-                          width: '24px',
-                          height: '24px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          backdropFilter: 'blur(4px)',
-                          border: selectedIds.includes(p.id) ? '1px solid var(--accent)' : '1px solid rgba(255,255,255,0.2)'
-                        }}>
-                          <input
-                            type="checkbox"
-                            checked={selectedIds.includes(p.id)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedIds(prev => [...prev, p.id]);
-                              } else {
-                                setSelectedIds(prev => prev.filter(id => id !== p.id));
-                              }
-                            }}
-                            style={{
-                              width: '14px',
-                              height: '14px',
-                              cursor: 'pointer',
-                              margin: 0,
-                              accentColor: 'var(--accent)'
-                            }}
-                          />
-                        </div>
-
-                        {/* Category badge */}
-                        {p.category && (
-                          <span style={{
-                            position: 'absolute',
-                            top: '12px',
-                            left: '42px',
-                            background: 'rgba(108, 92, 231, 0.85)',
-                            color: 'var(--text-primary)',
-                            fontSize: '0.7rem',
-                            fontWeight: 600,
-                            padding: '3px 8px',
-                            borderRadius: '4px',
-                            backdropFilter: 'blur(4px)',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.5px'
-                          }}>
-                            {p.category}
-                          </span>
-                        )}
-
-                        {/* Marketplace icon badge */}
-                        {p.source_url && (
-                          <span style={{
-                            position: 'absolute',
-                            top: '12px',
-                            right: '12px',
-                            background: 'rgba(0,0,0,0.6)',
-                            color: '#ccc',
-                            fontSize: '0.65rem',
-                            padding: '3px 6px',
-                            borderRadius: '3px',
-                          }}>
-                            {p.source_url.includes('shopee') ? '🛒 Shopee' : p.source_url.includes('tokopedia') ? '🛒 Tokopedia' : '🛒 Store'}
-                          </span>
+                              {b.brand_profile_id !== 'global' && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleQuickDeleteBrandLink(p.id, b.brand_profile_id, b.brand_name);
+                                  }}
+                                  title="Hapus Link Brand Ini"
+                                  style={{
+                                    background: 'transparent',
+                                    border: '1px solid var(--status-danger-soft)',
+                                    borderRadius: '4px',
+                                    color: 'var(--status-danger)',
+                                    cursor: 'pointer',
+                                    padding: '2px 5px',
+                                    fontSize: '10px'
+                                  }}
+                                >
+                                  🗑️
+                                </button>
+                              )}
+                            </div>
+                          ))
                         )}
                       </div>
 
-                      {/* Info body */}
-                      <div style={{ padding: '16px 18px' }}>
-                        <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '6px', color: 'var(--text-primary)', lineHeight: 1.3 }}>
-                          {p.product_name}
-                        </h3>
-
-                        {/* Tampilkan Product UUID */}
-                        <div style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          marginBottom: '10px',
-                          fontSize: '0.68rem',
-                          fontFamily: 'var(--font-mono)',
-                          background: 'var(--surface-interactive)',
-                          border: '1px solid var(--border-subtle)',
-                          padding: '2px 8px',
-                          borderRadius: '4px',
-                          color: 'var(--text-muted)'
-                        }}>
-                          <span>ID: {p.id.slice(0, 8)}</span>
+                      {/* Footer Section: Compact ID & Actions */}
+                      <div style={{
+                        padding: '8px 14px',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        background: 'var(--surface)'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
+                            ID: {p.id.slice(0, 8)}
+                          </span>
                           <button
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              navigator.clipboard.writeText(p.id);
-                              alert('ID produk berhasil disalin!');
+                              handleCopyText(p.id, 'ID Produk');
                             }}
                             style={{
                               background: 'transparent',
                               border: 'none',
-                              color: 'var(--accent-light)',
+                              color: 'var(--text-muted)',
                               cursor: 'pointer',
-                              padding: 0,
-                              fontSize: '0.68rem',
-                              display: 'inline-flex',
-                              alignItems: 'center'
+                              fontSize: '10px',
+                              padding: 0
                             }}
                             title="Salin ID Lengkap"
                           >
@@ -1391,289 +1569,46 @@ export default function ProductDatabasePage() {
                           </button>
                         </div>
 
-                        {/* Tags list */}
-                        {tagsList.length > 0 && (
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: '12px' }}>
-                            {tagsList.map((t, idx) => (
-                              <span key={idx} style={{
-                                fontSize: '0.62rem',
-                                background: 'var(--surface-interactive)',
-                                border: '1px solid var(--border-subtle)',
-                                color: 'var(--text-muted)',
-                                padding: '2px 6px',
-                                borderRadius: '10px'
-                              }}>
-                                #{t}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Physical State / Packaging info */}
-                        {(p.packaging_type || p.is_in_packaging !== undefined) && (
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            marginBottom: '12px',
-                            fontSize: '0.72rem',
-                            color: 'var(--text-secondary)'
-                          }}>
-                            <span style={{
-                              background: 'rgba(255, 165, 0, 0.1)',
-                              border: '1px solid rgba(255, 165, 0, 0.2)',
-                              color: '#ffa502',
-                              padding: '2px 6px',
-                              borderRadius: '4px',
-                              fontWeight: 600
-                            }}>
-                              📦 {p.packaging_type || 'Tanpa Kemasan'}
-                            </span>
-                            <span style={{
-                              background: (p.is_in_packaging === 1 || p.is_in_packaging === true) ? 'var(--status-success-soft)' : 'var(--status-danger-soft)',
-                              border: (p.is_in_packaging === 1 || p.is_in_packaging === true) ? '1px solid var(--status-success-soft)' : '1px solid var(--status-danger-soft)',
-                              color: (p.is_in_packaging === 1 || p.is_in_packaging === true) ? 'var(--status-success)' : 'var(--status-danger)',
-                              padding: '2px 6px',
-                              borderRadius: '4px',
-                              fontWeight: 600
-                            }}>
-                              {(p.is_in_packaging === 1 || p.is_in_packaging === true) ? 'Di dalam Wadah' : 'Tembus Pandang/Terbuka'}
-                            </span>
-                          </div>
-                        )}
-
-                        {/* Status Badges for Product Truth & Geometric Truth */}
-                        <div style={{
-                          display: 'flex',
-                          gap: '8px',
-                          marginBottom: '12px',
-                          fontSize: '0.68rem'
-                        }}>
-                          <span style={{
-                            background: p.product_truth ? 'var(--status-success-soft)' : 'var(--surface-interactive)',
-                            border: p.product_truth ? '1px solid var(--status-success-soft)' : '1px solid var(--border-subtle)',
-                            color: p.product_truth ? 'var(--status-success)' : 'var(--text-muted)',
-                            padding: '2px 6px',
-                            borderRadius: '4px',
-                            fontWeight: 600
-                          }}>
-                            🛡️ {p.product_truth ? 'Product Truth OK' : 'No Product Truth'}
-                          </span>
-                          <span style={{
-                            background: p.geometric_truth ? 'rgba(168, 85, 247, 0.1)' : 'var(--surface-interactive)',
-                            border: p.geometric_truth ? '1px solid rgba(168, 85, 247, 0.2)' : '1px solid var(--border-subtle)',
-                            color: p.geometric_truth ? 'var(--status-neutral)' : 'var(--text-muted)',
-                            padding: '2px 6px',
-                            borderRadius: '4px',
-                            fontWeight: 600
-                          }}>
-                            📐 {p.geometric_truth ? 'Geometry Truth OK' : 'No Geometry Truth'}
-                          </span>
-                        </div>
-
-                        {/* Description */}
-                        {p.product_description && (
-                          <p style={{
-                            fontSize: '0.78rem',
-                            color: 'var(--text-muted)',
-                            marginBottom: '14px',
-                            lineHeight: 1.4,
-                            display: '-webkit-box',
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical',
-                            overflow: 'hidden'
-                          }}>
-                            {p.product_description}
-                          </p>
-                        )}
-
-                        {/* USP Points */}
-                        {uspPoints.length > 0 && (
-                          <div style={{
-                            background: 'var(--surface-interactive)',
-                            border: '1px solid var(--surface-interactive)',
-                            borderRadius: 'var(--radius-sm)',
-                            padding: '10px 14px',
-                            marginBottom: '8px'
-                          }}>
-                            <div style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--accent-light)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                              🌟 Unique Selling Proposition
-                            </div>
-                            <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                              {uspPoints.map((point, index) => (
-                                <li key={index}>{point}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-
-                        {p.source_url && (
-                          <div style={{
-                            fontSize: '0.7rem',
-                            color: 'var(--text-muted)',
-                            marginTop: '10px',
-                            wordBreak: 'break-all',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px'
-                          }}>
-                            <span style={{ fontWeight: 500 }}>🔗 Source:</span>
-                            <a
-                              href={p.source_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{ color: 'var(--accent-light)', textDecoration: 'underline' }}
-                              title={p.source_url}
-                            >
-                              {p.source_url.length > 38 ? p.source_url.substring(0, 35) + '...' : p.source_url}
-                            </a>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Affiliate Link Input Area */}
-                    <div style={{
-                      padding: '12px 18px',
-                      borderTop: '1px solid var(--border)',
-                      background: 'rgba(0,0,0,0.08)'
-                    }}>
-                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 500, marginBottom: '6px' }}>
-                        Affiliate Link:
-                      </div>
-                      <div style={{ display: 'flex', gap: '6px' }}>
-                        <input
-                          type="text"
-                          className="form-input"
-                          placeholder="Paste link afiliasi Anda..."
-                          value={inlineAffiliateLinks[p.id] || ''}
-                          onChange={e => {
-                            const val = e.target.value;
-                            setInlineAffiliateLinks(prev => ({ ...prev, [p.id]: val }));
-                          }}
-                          style={{ flex: 1, fontSize: '0.75rem', height: '32px', padding: '0 8px' }}
-                        />
-                        <button
-                          className="btn btn-secondary btn-sm"
-                          onClick={() => handleQuickSaveAffiliate(p.id)}
-                          disabled={savingAffiliateId === p.id}
-                          style={{ height: '32px', fontSize: '0.7rem', padding: '0 10px' }}
-                        >
-                          {savingAffiliateId === p.id ? '⏳' : 'Save'}
-                        </button>
-                        {inlineAffiliateLinks[p.id] && (
+                        <div style={{ display: 'flex', gap: '6px' }}>
                           <button
                             type="button"
                             className="btn btn-secondary btn-sm"
-                            onClick={() => handleCopyLink(p.id)}
-                            style={{ height: '32px', fontSize: '0.7rem', padding: '0 10px' }}
+                            onClick={() => handleEditProduct(p)}
+                            style={{
+                              height: '28px',
+                              fontSize: '11.5px',
+                              padding: '0 10px',
+                              background: 'var(--surface-raised)',
+                              borderColor: 'var(--border-subtle)',
+                              color: 'var(--text-primary)',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}
                           >
-                            {copiedId === p.id ? '✓ Copied' : '📋 Copy'}
+                            ⚙️ Kelola Link & Detail
                           </button>
-                        )}
+                          <button
+                            type="button"
+                            className="btn btn-sm"
+                            onClick={() => handleDeleteProduct(p.id)}
+                            style={{
+                              height: '28px',
+                              fontSize: '11.5px',
+                              padding: '0 8px',
+                              background: 'transparent',
+                              border: '1px solid var(--border-subtle)',
+                              color: 'var(--status-danger)'
+                            }}
+                            title="Hapus Produk"
+                          >
+                            ✕
+                          </button>
+                        </div>
                       </div>
                     </div>
-
-                    {/* Clean Photo & Re-Enrich AI Button Row */}
-                    <div style={{
-                      padding: '8px 18px',
-                      borderTop: '1px solid var(--border)',
-                      display: 'flex',
-                      gap: '8px',
-                      background: 'var(--surface-interactive)'
-                    }}>
-                      <button
-                        type="button"
-                        onClick={() => handleRegeneratePhoto(p.id)}
-                        disabled={regeneratingPhotoId === p.id || (p.photo_status && ['pending', 'processing'].includes(p.photo_status))}
-                        style={{
-                          flex: 1,
-                          background: (p.clean_photo_url || p.cleaned_photo_url)
-                            ? 'var(--btn-photo-bg)'
-                            : 'var(--btn-photo-neutral-bg)',
-                          border: (p.clean_photo_url || p.cleaned_photo_url)
-                            ? '1px solid var(--btn-photo-border)'
-                            : '1px solid var(--btn-photo-neutral-border)',
-                          color: (p.clean_photo_url || p.cleaned_photo_url)
-                            ? 'var(--btn-photo-text)'
-                            : 'var(--btn-photo-neutral-text)',
-                          fontSize: '0.7rem',
-                          fontWeight: 600,
-                          padding: '6px 8px',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '4px',
-                          transition: 'all 0.2s ease'
-                        }}
-                      >
-                        {regeneratingPhotoId === p.id || (p.photo_status && ['pending', 'processing'].includes(p.photo_status)) ? (
-                          <>
-                            <div className="spinner" style={{ width: '10px', height: '10px', borderTopColor: 'var(--text-primary)' }} />
-                            Rendering...
-                          </>
-                        ) : (
-                          p.clean_photo_url || p.cleaned_photo_url ? '✨ Re-Gen Photo' : '✨ Gen Photo'
-                        )}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleReEnrichProduct(p.id)}
-                        disabled={reEnrichingId === p.id || (p.enrichment_status && ['pending', 'processing'].includes(p.enrichment_status))}
-                        style={{
-                          flex: 1,
-                          background: 'var(--btn-enrich-bg)',
-                          border: '1px solid var(--btn-enrich-border)',
-                          color: 'var(--btn-enrich-text)',
-                          fontSize: '0.7rem',
-                          fontWeight: 600,
-                          padding: '6px 8px',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '4px',
-                          transition: 'all 0.2s ease'
-                        }}
-                      >
-                        {reEnrichingId === p.id || (p.enrichment_status && ['pending', 'processing'].includes(p.enrichment_status)) ? (
-                          <>
-                            <div className="spinner" style={{ width: '10px', height: '10px', borderTopColor: 'var(--text-primary)' }} />
-                            Enriching...
-                          </>
-                        ) : (
-                          '🧠 Re-Enrich AI'
-                        )}
-                      </button>
-                    </div>
-
-                    {/* Actions panel */}
-                    <div style={{
-                      padding: '10px 18px',
-                      borderTop: '1px solid var(--border)',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center'
-                    }}>
-                      <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
-                        Dibuat: {new Date(p.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
-                      </span>
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <button className="btn btn-sm btn-secondary" onClick={() => handleEditProduct(p)} style={{ fontSize: '0.72rem', padding: '4px 10px' }}>
-                          ✏️ Edit
-                        </button>
-                        <button className="btn btn-sm btn-danger" onClick={() => handleDeleteProduct(p.id)} style={{ fontSize: '0.72rem', padding: '4px 8px' }}>
-                          ✕
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
             </div>
           </div>
         )}

@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup: Database Produk Multi-Brand Affiliate Links & Non-Affiliate Filter</title>
+  <style>
+    /* 100% Semantic CSS Tokens sesuai SOP MAKNA Flow dari app/theme.css */
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --accent-glow: rgba(45, 212, 191, 0.22);
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-purple: #c084fc;
+      --status-purple-soft: rgba(192, 132, 252, 0.14);
+      --status-neutral: #94a3b8;
+      --status-neutral-soft: rgba(148, 163, 184, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 24px 60px rgba(0, 0, 0, 0.55);
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f8fafc;
+      --surface: #ffffff;
+      --surface-raised: #f1f5f9;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --input-bg: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --border-subtle: #e2e8f0;
+      --border-strong: #94a3b8;
+      --action-primary: #0d9488;
+      --action-primary-hover: #14b8a6;
+      --on-action-primary: #ffffff;
+      --accent-glow: rgba(13, 148, 136, 0.2);
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.12);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.12);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.12);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.12);
+      --status-purple: #9333ea;
+      --status-purple-soft: rgba(147, 51, 234, 0.12);
+      --status-neutral: #64748b;
+      --status-neutral-soft: rgba(100, 116, 139, 0.12);
+      --focus-ring: #7c3aed;
+      --shadow-card: 0 10px 25px rgba(0, 0, 0, 0.08);
+      --shadow-modal: 0 20px 50px rgba(0, 0, 0, 0.2);
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--canvas);
+      color: var(--text-primary);
+      padding: 30px 24px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1260px;
+      margin: 0 auto;
+    }
+
+    /* Top Bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .header-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge-scope {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--status-purple-soft);
+      color: var(--status-purple);
+      border: 1px solid var(--status-purple);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .theme-toggle {
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Stats Counter Bar */
+    .stats-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .stat-pill {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 8px 14px;
+      font-size: 12.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: var(--transition);
+      user-select: none;
+    }
+
+    .stat-pill:hover, .stat-pill.active {
+      border-color: var(--action-primary);
+      background: var(--surface-raised);
+    }
+
+    .badge-count {
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    /* Filter Card */
+    .filter-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 250px;
+    }
+
+    input, select {
+      width: 100%;
+      height: 40px;
+      padding: 0 14px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 13.5px;
+      transition: var(--transition);
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--focus-ring);
+      box-shadow: 0 0 0 2px var(--accent-glow);
+    }
+
+    .btn {
+      height: 40px;
+      padding: 0 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border: none;
+      transition: var(--transition);
+    }
+
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      box-shadow: 0 2px 8px var(--accent-glow);
+    }
+
+    .btn-primary:hover { background: var(--action-primary-hover); }
+
+    .btn-secondary {
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .btn-secondary:hover {
+      background: var(--surface-interactive);
+      border-color: var(--border-strong);
+    }
+
+    .btn-danger-outline {
+      background: transparent;
+      color: var(--status-danger);
+      border: 1px solid var(--status-danger);
+    }
+
+    .btn-danger-outline:hover { background: var(--status-danger-soft); }
+
+    /* Product Grid */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 20px;
+    }
+
+    .product-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-card);
+      transition: var(--transition);
+    }
+
+    .product-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+    }
+
+    .card-top {
+      display: flex;
+      gap: 14px;
+      padding: 16px;
+    }
+
+    .product-thumb {
+      width: 80px;
+      height: 80px;
+      border-radius: var(--radius-sm);
+      background: var(--surface-raised);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      flex-shrink: 0;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .product-header-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .badge-affiliate {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      width: fit-content;
+    }
+
+    .badge-non-affiliate {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      width: fit-content;
+      border: 1px dashed var(--status-warning);
+    }
+
+    .prod-title {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.35;
+    }
+
+    .prod-category {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Multi-Brand Section on Card */
+    .card-multi-brand-section {
+      padding: 12px 16px;
+      background: var(--surface-raised);
+      border-top: 1px solid var(--border-subtle);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .brand-link-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 12px;
+      background: var(--input-bg);
+      padding: 6px 10px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .brand-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 700;
+      font-size: 11.5px;
+      color: var(--text-primary);
+      white-space: nowrap;
+    }
+
+    .brand-link-val {
+      flex: 1;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--status-info);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      text-align: right;
+    }
+
+    .card-footer {
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface);
+    }
+
+    /* Modal Backdrop & Card */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 680px;
+      box-shadow: var(--shadow-modal);
+      overflow: hidden;
+      animation: modalIn 0.2s ease-out;
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-body {
+      padding: 24px;
+      max-height: 72vh;
+      overflow-y: auto;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      background: var(--surface-raised);
+    }
+
+    .brand-link-item {
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
+    .callout-box {
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      line-height: 1.5;
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="top-bar">
+      <div>
+        <div class="header-title">
+          <span>📦 Database Produk: Multi-Brand Affiliate Management</span>
+          <span class="badge-scope">Multi-Brand Scoped</span>
+        </div>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+          Kelola link affiliate Shopee berbeda per Brand Profile (misal Dapur Botani vs Siasat Sehat), filter produk tanpa link, dan klasifikasi otomatis produk non-afiliasi.
+        </p>
+      </div>
+      <button class="theme-toggle" onclick="toggleTheme()">
+        <span id="themeIcon">☀️</span> Mode Tampilan
+      </button>
+    </div>
+
+    <!-- Quick Status Counter Pills (Filter Cepat) -->
+    <div class="stats-bar">
+      <div class="stat-pill active" id="pillAll" onclick="setAffiliateFilter('all')">
+        <span>Semua Produk</span>
+        <span class="badge-count" style="background:var(--surface-interactive); color:var(--text-primary);" id="countAll">5</span>
+      </div>
+      <div class="stat-pill" id="pillMultiBrand" onclick="setAffiliateFilter('multi_brand')">
+        <span>🛍️ Multi-Brand (≥2 Link)</span>
+        <span class="badge-count" style="background:var(--status-purple-soft); color:var(--status-purple);" id="countMultiBrand">2</span>
+      </div>
+      <div class="stat-pill" id="pillWithLink" onclick="setAffiliateFilter('with_link')">
+        <span>🔗 Produk Afiliasi (Ada Link)</span>
+        <span class="badge-count" style="background:var(--status-success-soft); color:var(--status-success);" id="countWithLink">3</span>
+      </div>
+      <div class="stat-pill" id="pillWithoutLink" onclick="setAffiliateFilter('without_link')">
+        <span>⚠️ Belum Ada Link (Non-Afiliasi)</span>
+        <span class="badge-count" style="background:var(--status-warning-soft); color:var(--status-warning);" id="countWithoutLink">2</span>
+      </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="filter-card">
+      <div class="filter-row">
+        <div class="search-box">
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="🔍 Cari nama produk, kategori, atau tags..." 
+            oninput="renderProducts()"
+          />
+        </div>
+        <div style="width: 220px;">
+          <select id="brandSpecificFilter" onchange="renderProducts()">
+            <option value="all">Semua Brand Target</option>
+            <option value="dapurbotani">🌾 Brand: Dapur Botani</option>
+            <option value="siasatsehat">🌿 Brand: Siasat Sehat</option>
+            <option value="nutribake">🧁 Brand: NutriBake ID</option>
+          </select>
+        </div>
+        <div style="width: 250px;">
+          <select id="affiliateSelectFilter" onchange="onAffiliateSelectChange()">
+            <option value="all">Status: Semua Produk</option>
+            <option value="multi_brand">🛍️ Produk Multi-Brand (≥2 Link)</option>
+            <option value="with_link">🔗 Memiliki Link Afiliasi (Minimal 1)</option>
+            <option value="without_link">⚠️ Belum Ada Link (Murni Non-Afiliasi)</option>
+          </select>
+        </div>
+        <button class="btn btn-secondary" onclick="resetFilters()">Reset Filter</button>
+      </div>
+    </div>
+
+    <!-- Product Grid -->
+    <div class="product-grid" id="productGridContainer">
+      <!-- Dynamic Products Rendered Here -->
+    </div>
+  </div>
+
+  <!-- MODAL EDIT / DETAIL PRODUK (MULTI-BRAND SUPPORT) -->
+  <div class="modal-backdrop" id="editModalBackdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <h3 style="font-size: 16px; font-weight: 700; color: var(--text-primary);" id="modalTitle">Edit Produk & Multi-Brand Links</h3>
+          <span style="font-size: 12px; color: var(--text-muted);" id="modalProductId">ID: pe_02</span>
+        </div>
+        <button onclick="closeEditModal()" style="background:transparent; border:none; color:var(--text-muted); font-size:20px; cursor:pointer;">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom: 16px;">
+          <label style="display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">Nama Produk</label>
+          <input type="text" id="modalProdName" />
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <label style="display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">Kategori</label>
+          <input type="text" id="modalProdCategory" />
+        </div>
+
+        <!-- MULTI-BRAND AFFILIATE LINKS HUB -->
+        <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 16px; margin-bottom: 16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+            <div>
+              <span style="font-size: 13.5px; font-weight: 700; color: var(--text-primary); display:block;">
+                🔗 Tautan Afiliasi per Brand Profile (1 Produk Multi-Link)
+              </span>
+              <span style="font-size: 11.5px; color: var(--text-muted);">
+                Satu produk dapat memiliki link Shopee berbeda sesuai akun brand yang memposting.
+              </span>
+            </div>
+            <span id="modalProductStatusBadge" class="badge-affiliate">🛍️ 2 Brand Terhubung</span>
+          </div>
+
+          <!-- Dynamic Brand Links Container in Modal -->
+          <div id="modalBrandLinksList">
+            <!-- Dynamic brand rows injected here -->
+          </div>
+
+          <!-- Add New Brand Link Section -->
+          <div style="background: var(--surface); border: 1px dashed var(--border-strong); border-radius: var(--radius-sm); padding: 12px; margin-top: 10px;">
+            <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 8px;">
+              ➕ Hubungkan Link untuk Brand Lain:
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <select id="newBrandSelect" style="width: 170px; height: 34px; font-size: 12px;">
+                <option value="siasatsehat">🌿 Siasat Sehat</option>
+                <option value="dapurbotani">🌾 Dapur Botani</option>
+                <option value="nutribake">🧁 NutriBake ID</option>
+              </select>
+              <input 
+                type="text" 
+                id="newBrandUrl" 
+                placeholder="https://s.shopee.co.id/..." 
+                style="flex: 1; min-width: 200px; height: 34px; font-size: 12px;" 
+              />
+              <button type="button" class="btn btn-primary" style="height: 34px; font-size: 12px; padding: 0 12px;" onclick="addBrandLinkInModal()">
+                + Tambah Link
+              </button>
+            </div>
+          </div>
+
+          <!-- Dynamic Explanation Callout -->
+          <div id="modalCalloutHelper" class="callout-box" style="background: var(--status-info-soft); border: 1px solid var(--status-info); color: var(--text-primary);">
+            <span>💡</span>
+            <div><strong>Multi-Brand Smart Routing:</strong> Saat video di-generate untuk <em>Dapur Botani</em>, link Shopee Dapur Botani yang disisipkan. Saat video untuk <em>Siasat Sehat</em>, link Shopee Siasat Sehat yang disisipkan! Jika semua link dihapus, produk otomatis berstatus <strong>Non-Afiliasi</strong>.</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeEditModal()">Tutup</button>
+        <button class="btn btn-primary" onclick="saveProductModal()">💾 Simpan Semua Perubahan</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Database Produk dengan Multi-Brand Affiliate Links (Mencakup Kasus 1 Produk 2 Link: Dapur Botani & Siasat Sehat)
+    let PRODUCTS_DATA = [
+      {
+        id: "pe_01",
+        name: "Nutrifarm Teh Bunga Rosella",
+        category: "Minuman Herbal",
+        tags: "teh, rosella, detoks",
+        icon: "🌺",
+        brand_links: {
+          siasatsehat: { brand_name: "Siasat Sehat", link: "https://s.shopee.co.id/3Viki27LRx", avatar: "🌿" },
+          dapurbotani: { brand_name: "Dapur Botani", link: "https://s.shopee.co.id/dapur_rosella_99", avatar: "🌾" }
+        }
+      },
+      {
+        id: "pe_02",
+        name: "Nutrifarm Jahe Merah Bubuk",
+        category: "Bumbu Dapur",
+        tags: "jahe, rimpang, hangat, detoks",
+        icon: "🫚",
+        brand_links: {
+          dapurbotani: { brand_name: "Dapur Botani", link: "https://s.shopee.co.id/6pyTuAuSlO", avatar: "🌾" },
+          siasatsehat: { brand_name: "Siasat Sehat", link: "https://s.shopee.co.id/siasat_jahe_88", avatar: "🌿" }
+        }
+      },
+      {
+        id: "pe_03",
+        name: "Premix Cocoa Powder Premium",
+        category: "Baking & Bahan Kue",
+        tags: "cokelat, baking, cake",
+        icon: "🍫",
+        brand_links: {
+          nutribake: { brand_name: "NutriBake ID", link: "https://s.shopee.co.id/8pjlcwD60v", avatar: "🧁" }
+        }
+      },
+      // PRODUK MURNI NON-AFILIASI (BELUM ADA LINK SAMA SEKALI)
+      {
+        id: "pe_04",
+        name: "Panci Kaca Borosilikat Tahan Panas 1.5L",
+        category: "Peralatan Masak",
+        tags: "panci kaca, aesthetic, rebusan",
+        icon: "🍲",
+        brand_links: {}
+      },
+      {
+        id: "pe_05",
+        name: "Madu Randu Murni Hutan Jawa 500g",
+        category: "Minuman Herbal",
+        tags: "madu, raw honey, manis alami",
+        icon: "🍯",
+        brand_links: {}
+      }
+    ];
+
+    let currentEditingId = null;
+    let currentAffiliateFilter = 'all';
+
+    function updateCounters() {
+      const total = PRODUCTS_DATA.length;
+      const multiBrand = PRODUCTS_DATA.filter(p => Object.keys(p.brand_links).length >= 2).length;
+      const withLink = PRODUCTS_DATA.filter(p => Object.keys(p.brand_links).length > 0).length;
+      const withoutLink = total - withLink;
+
+      document.getElementById('countAll').innerText = total;
+      document.getElementById('countMultiBrand').innerText = multiBrand;
+      document.getElementById('countWithLink').innerText = withLink;
+      document.getElementById('countWithoutLink').innerText = withoutLink;
+    }
+
+    function setAffiliateFilter(filterType) {
+      currentAffiliateFilter = filterType;
+      document.getElementById('affiliateSelectFilter').value = filterType;
+
+      document.getElementById('pillAll').classList.toggle('active', filterType === 'all');
+      document.getElementById('pillMultiBrand').classList.toggle('active', filterType === 'multi_brand');
+      document.getElementById('pillWithLink').classList.toggle('active', filterType === 'with_link');
+      document.getElementById('pillWithoutLink').classList.toggle('active', filterType === 'without_link');
+
+      renderProducts();
+    }
+
+    function onAffiliateSelectChange() {
+      const val = document.getElementById('affiliateSelectFilter').value;
+      setAffiliateFilter(val);
+    }
+
+    function resetFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('brandSpecificFilter').value = 'all';
+      setAffiliateFilter('all');
+    }
+
+    function renderProducts() {
+      updateCounters();
+
+      const search = document.getElementById('searchInput').value.toLowerCase().trim();
+      const brandFilter = document.getElementById('brandSpecificFilter').value;
+      const container = document.getElementById('productGridContainer');
+      container.innerHTML = '';
+
+      const filtered = PRODUCTS_DATA.filter(p => {
+        // 1. Search text
+        const matchesSearch = !search || 
+          p.name.toLowerCase().includes(search) || 
+          p.category.toLowerCase().includes(search) || 
+          p.tags.toLowerCase().includes(search);
+
+        // 2. Brand Specific filter
+        let matchesBrand = true;
+        if (brandFilter !== 'all') {
+          matchesBrand = !!p.brand_links[brandFilter];
+        }
+
+        // 3. Affiliate Status Filter
+        const linkCount = Object.keys(p.brand_links).length;
+        let matchesAffiliate = true;
+        if (currentAffiliateFilter === 'multi_brand') matchesAffiliate = linkCount >= 2;
+        if (currentAffiliateFilter === 'with_link') matchesAffiliate = linkCount > 0;
+        if (currentAffiliateFilter === 'without_link') matchesAffiliate = linkCount === 0;
+
+        return matchesSearch && matchesBrand && matchesAffiliate;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; background: var(--surface); border: 1px dashed var(--border-subtle); border-radius: var(--radius-md);">
+            <div style="font-size: 38px; margin-bottom: 12px;">🔍</div>
+            <h4 style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">Tidak ada produk yang cocok</h4>
+            <p style="font-size: 13px; color: var(--text-muted);">Coba ubah kata kunci atau ganti filter brand / status afiliasi di atas.</p>
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(p => {
+        const linkKeys = Object.keys(p.brand_links);
+        const linkCount = linkKeys.length;
+        const card = document.createElement('div');
+        card.className = 'product-card';
+
+        let badgeHtml = '';
+        if (linkCount >= 2) {
+          badgeHtml = `<span class="badge-affiliate" style="background:var(--status-purple-soft); color:var(--status-purple);">🛍️ Multi-Brand (${linkCount} Link)</span>`;
+        } else if (linkCount === 1) {
+          badgeHtml = `<span class="badge-affiliate">🔗 1 Brand Terhubung</span>`;
+        } else {
+          badgeHtml = `<span class="badge-non-affiliate">📦 Murni Non-Afiliasi</span>`;
+        }
+
+        let brandRowsHtml = '';
+        if (linkCount === 0) {
+          brandRowsHtml = `
+            <div style="font-size:12px; color:var(--status-warning); font-style:italic; padding:4px 0;">
+              ⚠️ Belum ada link affiliate di brand manapun (Masuk Kategori Non-Afiliasi).
+            </div>
+          `;
+        } else {
+          linkKeys.forEach(bKey => {
+            const b = p.brand_links[bKey];
+            brandRowsHtml += `
+              <div class="brand-link-row">
+                <span class="brand-tag">${b.avatar} ${b.brand_name}:</span>
+                <span class="brand-link-val" title="${b.link}">${b.link.replace('https://', '')}</span>
+                <button type="button" class="btn btn-secondary" style="height:24px; font-size:10px; padding:0 6px;" onclick="copyQuickLink('${b.link}')" title="Salin Link">📋</button>
+                <button type="button" class="btn btn-danger-outline" style="height:24px; font-size:10px; padding:0 6px;" onclick="quickDeleteBrandLink('${p.id}', '${bKey}')" title="Hapus Link Brand Ini">🗑️</button>
+              </div>
+            `;
+          });
+        }
+
+        card.innerHTML = `
+          <div class="card-top">
+            <div class="product-thumb">${p.icon}</div>
+            <div class="product-header-info">
+              ${badgeHtml}
+              <h4 class="prod-title">${p.name}</h4>
+              <span class="prod-category">${p.category} • #${p.tags.split(',').join(' #')}</span>
+            </div>
+          </div>
+
+          <!-- Multi-Brand Affiliate Links Container -->
+          <div class="card-multi-brand-section">
+            <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); display: flex; justify-content: space-between;">
+              <span>Tautan Afiliasi Sesuai Brand:</span>
+              <span style="color:var(--text-muted);">${linkCount} Link Aktif</span>
+            </div>
+            ${brandRowsHtml}
+          </div>
+
+          <div class="card-footer">
+            <span style="font-size: 11px; font-family: var(--font-mono); color: var(--text-muted);">ID: ${p.id}</span>
+            <button class="btn btn-secondary" style="height:32px; font-size:12px; padding:0 12px;" onclick="openEditModal('${p.id}')">
+              ⚙️ Kelola Link & Detail
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function quickDeleteBrandLink(productId, brandKey) {
+      const prod = PRODUCTS_DATA.find(p => p.id === productId);
+      if (!prod) return;
+      const brandName = prod.brand_links[brandKey]?.brand_name || brandKey;
+      if (!confirm(`Hapus link Shopee untuk ${brandName}?`)) return;
+
+      delete prod.brand_links[brandKey];
+      renderProducts();
+    }
+
+    function copyQuickLink(link) {
+      navigator.clipboard.writeText(link);
+      alert('Tautan afiliasi berhasil disalin ke clipboard! 📋');
+    }
+
+    // Modal Functions
+    function openEditModal(productId) {
+      currentEditingId = productId;
+      const prod = PRODUCTS_DATA.find(p => p.id === productId);
+      if (!prod) return;
+
+      document.getElementById('modalTitle').innerText = 'Edit Produk: ' + prod.name;
+      document.getElementById('modalProductId').innerText = 'ID: ' + prod.id;
+      document.getElementById('modalProdName').value = prod.name;
+      document.getElementById('modalProdCategory').value = prod.category;
+
+      renderModalBrandLinks();
+      document.getElementById('editModalBackdrop').classList.add('open');
+    }
+
+    function closeEditModal() {
+      document.getElementById('editModalBackdrop').classList.remove('open');
+    }
+
+    function renderModalBrandLinks() {
+      const prod = PRODUCTS_DATA.find(p => p.id === currentEditingId);
+      if (!prod) return;
+
+      const container = document.getElementById('modalBrandLinksList');
+      container.innerHTML = '';
+
+      const brandKeys = Object.keys(prod.brand_links);
+      const linkCount = brandKeys.length;
+
+      // Update badge in modal
+      const badge = document.getElementById('modalProductStatusBadge');
+      const helper = document.getElementById('modalCalloutHelper');
+
+      if (linkCount >= 2) {
+        badge.className = 'badge-affiliate';
+        badge.style.background = 'var(--status-purple-soft)';
+        badge.style.color = 'var(--status-purple)';
+        badge.innerText = `🛍️ Multi-Brand (${linkCount} Brand Terhubung)`;
+
+        helper.style.background = 'var(--status-info-soft)';
+        helper.style.borderColor = 'var(--status-info)';
+        helper.innerHTML = `
+          <span>💡</span>
+          <div><strong>Multi-Brand Smart Routing Aktif:</strong> Saat video di-generate untuk <em>Dapur Botani</em>, link Shopee Dapur Botani yang disisipkan. Saat untuk <em>Siasat Sehat</em>, link Shopee Siasat Sehat yang disisipkan!</div>
+        `;
+      } else if (linkCount === 1) {
+        badge.className = 'badge-affiliate';
+        badge.style.background = 'var(--status-success-soft)';
+        badge.style.color = 'var(--status-success)';
+        badge.innerText = `🔗 1 Brand Terhubung`;
+
+        helper.style.background = 'var(--status-success-soft)';
+        helper.style.borderColor = 'var(--status-success)';
+        helper.innerHTML = `
+          <span>✅</span>
+          <div>Produk ini aktif dimonetisasi untuk brand <strong>${prod.brand_links[brandKeys[0]].brand_name}</strong>. Anda bisa menambahkan link untuk brand lain di bawah.</div>
+        `;
+      } else {
+        badge.className = 'badge-non-affiliate';
+        badge.innerText = `📦 Murni Non-Afiliasi`;
+
+        helper.style.background = 'var(--status-warning-soft)';
+        helper.style.borderColor = 'var(--status-warning)';
+        helper.innerHTML = `
+          <span>⚠️</span>
+          <div><strong>Status Non-Afiliasi (Default):</strong> Karena tidak ada link affiliate di brand manapun, produk ini murni berfungsi untuk konten edukasi/organik tanpa link penjualan.</div>
+        `;
+      }
+
+      if (linkCount === 0) {
+        container.innerHTML = `<div style="font-size:12px; color:var(--text-muted); padding:8px 0;">Belum ada brand profile yang terhubung ke produk ini.</div>`;
+        return;
+      }
+
+      brandKeys.forEach(bKey => {
+        const b = prod.brand_links[bKey];
+        const item = document.createElement('div');
+        item.className = 'brand-link-item';
+        item.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span style="font-weight:700; font-size:12.5px; color:var(--text-primary);">${b.avatar} ${b.brand_name}</span>
+            <button type="button" class="btn btn-danger-outline" style="height:26px; font-size:11px; padding:0 8px;" onclick="deleteBrandLinkInModal('${bKey}')">
+              🗑️ Hapus Link ${b.brand_name}
+            </button>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <input 
+              type="text" 
+              value="${b.link}" 
+              oninput="updateBrandLinkInModal('${bKey}', this.value)"
+              style="height:32px; font-size:11.5px; font-family:var(--font-mono); color:var(--status-info);"
+            />
+            <button type="button" class="btn btn-secondary" style="height:32px; font-size:11px; padding:0 8px;" onclick="copyQuickLink('${b.link}')">📋</button>
+            <a href="${b.link}" target="_blank" class="btn btn-secondary" style="height:32px; font-size:11px; padding:0 8px; text-decoration:none;">🌐</a>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function updateBrandLinkInModal(brandKey, newUrl) {
+      const prod = PRODUCTS_DATA.find(p => p.id === currentEditingId);
+      if (prod && prod.brand_links[brandKey]) {
+        prod.brand_links[brandKey].link = newUrl;
+      }
+    }
+
+    function deleteBrandLinkInModal(brandKey) {
+      const prod = PRODUCTS_DATA.find(p => p.id === currentEditingId);
+      if (!prod) return;
+      delete prod.brand_links[brandKey];
+      renderModalBrandLinks();
+    }
+
+    function addBrandLinkInModal() {
+      const brandKey = document.getElementById('newBrandSelect').value;
+      const url = document.getElementById('newBrandUrl').value.trim();
+
+      if (!url) {
+        alert('Masukkan URL link affiliate terlebih dahulu.');
+        return;
+      }
+
+      const prod = PRODUCTS_DATA.find(p => p.id === currentEditingId);
+      if (!prod) return;
+
+      const brandNames = {
+        siasatsehat: { name: "Siasat Sehat", avatar: "🌿" },
+        dapurbotani: { name: "Dapur Botani", avatar: "🌾" },
+        nutribake: { name: "NutriBake ID", avatar: "🧁" }
+      };
+
+      prod.brand_links[brandKey] = {
+        brand_name: brandNames[brandKey].name,
+        link: url,
+        avatar: brandNames[brandKey].avatar
+      };
+
+      document.getElementById('newBrandUrl').value = '';
+      renderModalBrandLinks();
+    }
+
+    function saveProductModal() {
+      const prod = PRODUCTS_DATA.find(p => p.id === currentEditingId);
+      if (prod) {
+        prod.name = document.getElementById('modalProdName').value.trim();
+        prod.category = document.getElementById('modalProdCategory').value.trim();
+        closeEditModal();
+        renderProducts();
+      }
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      document.getElementById('themeIcon').innerText = next === 'dark' ? '☀️' : '🌙';
+    }
+
+    window.onload = () => {
+      renderProducts();
+    };
+  </script>
+</body>
+</html>
