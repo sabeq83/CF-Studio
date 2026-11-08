@@ -1175,7 +1175,6 @@ export default function ProductDatabaseModal({
                   </div>
                 </div>
               )}
-              )}
             </div>
 
             {/* Persistent Sticky Footer */}
