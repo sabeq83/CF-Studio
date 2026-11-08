@@ -79,3 +79,4 @@ console.log('✔ Test 3: HTML buffer detected correctly by head sample inspectio
 
 console.log('\n✅ ALL VERIFICATION TESTS PASSED!');
 process.exit(0);
+

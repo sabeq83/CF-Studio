@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.35.23 — Fix ContentFlow Publishing Desync & Cleanup Stale Queued Jobs (09/11/2026)
+- Auto-sync cancelPublishingJob to content_flow_items
+- Map needs_review to Not Published in syncContentFlowSummary
+- Reconcile stale scheduled statuses in database
+
 ## V2.35.22 — Fix Repliz Media Staging Nextcloud to R2, Error Classification & Delegated Early Scheduling (09/11/2026)
 - Fix Nextcloud share link resolution appending /download
 - Add binary guard against HTML upload to R2
