@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.35.20 — Penyeragaman Toggle Smart Affiliate di Modal Skedul, 1-Klik, Modal Ingest & Manual (08/11/2026)
+- Penyeragaman toggle affiliate pada modal skedul auto-pipeline
+- Penambahan toggle affiliate pada form 1-klik instan auto-pipeline
+- Pembaruan toggle affiliate pada modal ingest content planner dan form pembuatan manual
+- Dukungan mode konten murni edukasi tanpa jualan
+
 ## V2.35.19 — Smart Affiliate Generator Multi-Engine (FB Shopee & Non-FB Link di Bio) (08/11/2026)
 - Penyisipan produk affiliate cerdas sejak generator naskah awal 5 mesin konten
 - Platform-adaptive captions: Facebook dengan live clickable Shopee link dan non-FB (IG, TikTok, Shorts, Threads) 100% diarahkan ke Link di Bio

@@ -493,12 +493,13 @@
       </div>
     </div>
 
-    <!-- Mode Selector Bar (3 Moda Pembuatan) -->
+    <!-- Mode Selector Bar (4 Moda Pembuatan & Ingest) -->
     <div class="mode-bar">
-      <span style="font-weight: 700; color: var(--text-secondary); margin-right: 6px;">Moda Eksekusi:</span>
+      <span style="font-weight: 700; color: var(--text-secondary); margin-right: 6px;">Lokasi Kontrol:</span>
       <div class="mode-pill active" onclick="switchMode('1click')">⚡ 1-Klik Instant Launch</div>
-      <div class="mode-pill" onclick="switchMode('schedule')">⏰ Skedul Otomatis (Pipeline)</div>
-      <div class="mode-pill" onclick="switchMode('manual')">✏️ Pembuatan Manual</div>
+      <div class="mode-pill" onclick="switchMode('schedule')">⏰ Modal Skedul Auto-Pipeline</div>
+      <div class="mode-pill" onclick="switchMode('ingest')">📥 Modal Ingest Content Planner</div>
+      <div class="mode-pill" onclick="switchMode('manual')">✏️ Form Pembuatan Manual</div>
     </div>
 
     <!-- Main Content Grid -->
@@ -531,14 +532,13 @@
               <input type="checkbox" id="affiliateMasterCheck" checked
                 style="width: 18px; height: 18px; accent-color: var(--action-primary); cursor: pointer;"
                 onclick="event.stopPropagation(); toggleAffiliateMaster();" />
-              <span>🛒 Smart Shopee Affiliate Integration</span>
+              <span id="affiliateToggleLabel">🛒 Sertakan Rekomendasi Produk & Affiliate (Shopee FB & Link di Bio)</span>
             </div>
             <span id="toggleStatusPill"
               style="font-size: 11px; padding: 2px 8px; border-radius: 999px; background: var(--status-success-soft); color: var(--status-success); font-weight: 700;">AKTIF</span>
           </div>
-          <div class="toggle-subtitle">
-            Gemini AI akan mencocokkan produk brand yang paling relevan dan menyisipkan CTA pintar ke Social Media
-            Package di awal.
+          <div class="toggle-subtitle" id="affiliateToggleSubtitle">
+            Terpasang tepat di atas tombol Luncurkan Sekarang. Default aktif (ON). Jika di-uncheck, video diproduksi sebagai konten edukasi murni tanpa jualan.
           </div>
 
           <div class="toggle-options" id="toggleOptionsArea">
@@ -563,7 +563,7 @@
         </div>
 
         <button class="btn-generate" onclick="runSimulation()">
-          <span>⚡ Generate Naskah & Multi-Platform Package</span>
+          <span id="btnSubmitLabel">⚡ Luncurkan Video Sekarang (1-Pass)</span>
         </button>
       </div>
 
@@ -668,9 +668,42 @@
     function switchMode(mode) {
       currentMode = mode;
       document.querySelectorAll('.mode-pill').forEach(pill => {
-        pill.classList.toggle('active', pill.textContent.toLowerCase().includes(mode));
+        pill.classList.toggle('active', pill.getAttribute('onclick').includes(mode));
       });
-      document.getElementById('modeBadge').textContent = `Mode: ${mode === '1click' ? '1-Klik' : mode === 'schedule' ? 'Skedul' : 'Manual'}`;
+
+      const modeMap = {
+        '1click': {
+          badge: 'Mode: ⚡ 1-Klik Instant Launch',
+          title: '🛒 Sertakan Rekomendasi Produk & Affiliate (Shopee FB & Link di Bio)',
+          subtitle: 'Terpasang tepat di atas tombol Luncurkan Sekarang. Default aktif (ON). Jika di-uncheck, video diproduksi sebagai konten edukasi murni tanpa jualan.',
+          btn: '⚡ Luncurkan Video Sekarang (1-Pass)'
+        },
+        'schedule': {
+          badge: 'Mode: ⏰ Modal Skedul Auto-Pipeline',
+          title: '🛒 Sertakan Rekomendasi Produk & Affiliate (Shopee FB & Link di Bio)',
+          subtitle: 'Menggantikan teks lama "Post Link Affiliate Shopee (Facebook)". Menentukan apakah postingan terjadwal menyertakan link affiliate (FB link aktif & non-FB link di bio) atau clean caption.',
+          btn: '💾 Simpan Jadwal Auto-Pipeline'
+        },
+        'ingest': {
+          badge: 'Mode: 📥 Modal Ingest Content Planner (OPC)',
+          title: '🛒 Sertakan Rekomendasi Produk & Affiliate (Shopee FB & Link di Bio)',
+          subtitle: 'Terpasang pada Accordion 3 (Product Bridging Settings) di Modal Ingest Content Planner. Saat aktif, baris planner yang di-ingest ke OPC akan memuat CTA Shopee FB & Link di Bio.',
+          btn: '✨ Ingest & Launch OPC Campaign'
+        },
+        'manual': {
+          badge: 'Mode: ✏️ Form Pembuatan Manual',
+          title: '🛒 Aktifkan Rekomendasi Produk & Affiliate (Shopee FB & Link di Bio)',
+          subtitle: 'Terpasang di Accordion Product Bridging form manual. Memungkinkan pemilihan manual produk brand spesifik atau AI auto-detect.',
+          btn: '🚀 Buat Kampanye Manual'
+        }
+      };
+
+      const cfg = modeMap[mode] || modeMap['1click'];
+      document.getElementById('modeBadge').textContent = cfg.badge;
+      document.getElementById('affiliateToggleLabel').textContent = cfg.title;
+      document.getElementById('affiliateToggleSubtitle').textContent = cfg.subtitle;
+      document.getElementById('btnSubmitLabel').textContent = cfg.btn;
+      runSimulation();
     }
 
     function onBrandChange() {

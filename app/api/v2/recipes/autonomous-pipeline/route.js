@@ -133,6 +133,13 @@ export const POST = withTenantContext(async (request, _context, user) => {
       return NextResponse.json({ success: true, angles });
     }
 
+    const isAffiliateEnabled = body.post_link_affiliate !== undefined ? Boolean(body.post_link_affiliate) : true;
+    const affiliateOverride = {
+      post_link_affiliate: isAffiliateEnabled,
+      is_affiliate_enabled: isAffiliateEnabled,
+      is_bridging_active: isAffiliateEnabled
+    };
+
     let result;
     if (pipelineType === 'product_campaign') {
       result = await executeAutonomousProductPipeline({
@@ -146,6 +153,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
         tenantId,
         overrides: {
           visual_identity_preset_id: body.visual_identity_preset_id || null,
+          ...affiliateOverride,
           ...(body.overrides || {})
         }
       });
@@ -158,6 +166,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
         tenantId,
         overrides: {
           visual_identity_preset_id: body.visual_identity_preset_id || null,
+          ...affiliateOverride,
           ...(body.overrides || {})
         }
       });
@@ -170,7 +179,10 @@ export const POST = withTenantContext(async (request, _context, user) => {
         executionMode: body.execution_mode || body.executionMode || 'full_autopilot',
         selectedAngle: body.selected_angle || body.selectedAngle || null,
         tenantId,
-        overrides: body.overrides || {}
+        overrides: {
+          ...affiliateOverride,
+          ...(body.overrides || {})
+        }
       });
     } else if (pipelineType === 'recipe_labs') {
       result = await executeAutonomousRecipeLabsPipeline({
@@ -186,7 +198,10 @@ export const POST = withTenantContext(async (request, _context, user) => {
         gridBgColor: body.grid_bg_color || body.gridBgColor || '#0d0d12',
         postToFacebook: body.post_to_facebook !== undefined ? Boolean(body.post_to_facebook) : true,
         tenantId,
-        overrides: body.overrides || {}
+        overrides: {
+          ...affiliateOverride,
+          ...(body.overrides || {})
+        }
       });
     } else {
       const isMotionEnabled = body.enable_motion_text !== undefined 
@@ -203,10 +218,13 @@ export const POST = withTenantContext(async (request, _context, user) => {
         visualIdentityPresetId: body.visual_identity_preset_id || body.visualIdentityPresetId || null,
         enableMotionText: isMotionEnabled,
         motionTextStyle: body.motion_text_style || body.motionTextStyle || 'floating_white_yellow',
+        overrides: {
+          ...affiliateOverride,
+          ...(body.overrides || {})
+        },
         motionTextPosition: body.motion_text_position || body.motionTextPosition || 'bottom',
         videoTransition: body.video_transition || body.videoTransition || 'fade',
         transitionDuration: Number(body.transition_duration || body.transitionDuration || 0.5),
-        overrides: body.overrides || {},
         tenantId
       });
     }

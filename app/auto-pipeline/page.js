@@ -194,6 +194,7 @@ export default function AutoPipelinePage() {
   const [schedReplizAccountIds, setSchedReplizAccountIds] = useState([]);
   const [schedAutoPublish, setSchedAutoPublish] = useState(true);
   const [schedPostAffiliateLink, setSchedPostAffiliateLink] = useState(true);
+  const [instantPostAffiliateLink, setInstantPostAffiliateLink] = useState(true);
   const [modalBrandPresets, setModalBrandPresets] = useState([]);
   const [savingSchedule, setSavingSchedule] = useState(false);
 
@@ -869,7 +870,8 @@ export default function AutoPipelinePage() {
           grid_outer_padding: gridOuterPadding,
           grid_bg_color: gridBgColor,
           visual_style: recipeLabsVisualStyle,
-          post_to_facebook: postToFacebook
+          post_to_facebook: postToFacebook,
+          post_link_affiliate: instantPostAffiliateLink
         })
       });
 
@@ -3701,8 +3703,36 @@ export default function AutoPipelinePage() {
                 </div>
               )}
 
+              {/* Checkbox Toggle Smart Affiliate untuk 1-Klik */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '0.65rem',
+                background: 'var(--surface-raised)',
+                padding: '0.75rem 1rem',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--border-subtle)',
+                marginBottom: '0.85rem'
+              }}>
+                <input
+                  type="checkbox"
+                  id="instantAffiliateCheck"
+                  checked={instantPostAffiliateLink}
+                  onChange={(e) => setInstantPostAffiliateLink(e.target.checked)}
+                  style={{ width: '18px', height: '18px', accentColor: 'var(--action-primary)', cursor: 'pointer', marginTop: '2px' }}
+                />
+                <div>
+                  <label htmlFor="instantAffiliateCheck" style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer', display: 'block' }}>
+                    🛒 Sertakan Rekomendasi Produk & Affiliate (Shopee FB & Link di Bio)
+                  </label>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1.4, display: 'block', marginTop: '2px' }}>
+                    Otomatis mencocokkan produk brand dan menghasilkan CTA adaptif (FB: link Shopee aktif, Non-FB: Link di Bio). Uncheck jika ingin video viral 1-klik murni edukasi tanpa jualan.
+                  </span>
+                </div>
+              </div>
+
               {/* Submit Button */}
-              <div style={{ paddingTop: '0.5rem' }}>
+              <div style={{ paddingTop: '0.25rem' }}>
                 <button
                   type="submit"
                   disabled={isLaunching}
@@ -6382,7 +6412,7 @@ export default function AutoPipelinePage() {
                   </label>
                 </div>
 
-                {/* 🛒 Toggle Kontrol Post Link Affiliate Shopee */}
+                {/* 🛒 Toggle Kontrol Post Link Affiliate Shopee & Link di Bio */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'flex-start',
@@ -6402,10 +6432,10 @@ export default function AutoPipelinePage() {
                   />
                   <div>
                     <label htmlFor="postAffiliateCheck" style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer', display: 'block' }}>
-                      🛒 Post Link Affiliate Shopee (Facebook)
+                      🛒 Sertakan Rekomendasi Produk & Affiliate (Shopee FB & Link di Bio)
                     </label>
                     <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1.4, display: 'block', marginTop: '2px' }}>
-                      Secara cerdas mencari produk relevan di Brand Profile kampanye ini dan menyisipkan link Shopee ke caption Facebook sebelum posting via Repliz.
+                      Secara cerdas menyisipkan link Shopee aktif ke Facebook dan mengarahkan ke Link di Bio untuk Instagram, TikTok, Shorts & Threads. Uncheck untuk jadwal konten murni edukasi tanpa jualan.
                     </span>
                   </div>
                 </div>

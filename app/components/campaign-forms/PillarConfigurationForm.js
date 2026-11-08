@@ -1352,10 +1352,31 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit}>
 
               {activeAccordion === 2 && (
                 <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: 'var(--text-primary)', fontWeight: 600 }}>
-                    <input type="checkbox" checked={isBridgingActive} onChange={e => setIsBridgingActive(e.target.checked)} />
-                    Aktifkan Product Bridging (Sisipkan Transisi Produk Softselling)
-                  </label>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '0.65rem',
+                    background: 'var(--surface-raised)',
+                    padding: '0.75rem 1rem',
+                    borderRadius: 'var(--radius-sm, 8px)',
+                    border: '1px solid var(--border-subtle)'
+                  }}>
+                    <input
+                      type="checkbox"
+                      id="modalIngestAffiliateCheck"
+                      checked={isBridgingActive}
+                      onChange={e => setIsBridgingActive(e.target.checked)}
+                      style={{ width: '18px', height: '18px', accentColor: 'var(--action-primary)', cursor: 'pointer', marginTop: '2px' }}
+                    />
+                    <div>
+                      <label htmlFor="modalIngestAffiliateCheck" style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer', display: 'block' }}>
+                        🛒 Sertakan Rekomendasi Produk & Affiliate (Shopee FB & Link di Bio)
+                      </label>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1.4, display: 'block', marginTop: '2px' }}>
+                        Saat aktif, baris Content Planner yang di-ingest akan memuat rekomendasi produk dengan link aktif Shopee untuk Facebook dan arahan Link di Bio untuk Instagram, TikTok, Shorts &amp; Threads. Uncheck untuk kampanye pilar murni edukasi tanpa jualan.
+                      </span>
+                    </div>
+                  </div>
 
                   {isBridgingActive && (
                     <>

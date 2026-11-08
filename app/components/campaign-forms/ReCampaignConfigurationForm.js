@@ -1658,22 +1658,36 @@ const canonicalConfigurationForm0 = (<form onSubmit={productionMode === 'mass' ?
                 </div>)}
                 {activeAccordion === 2 && (
                   <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <label className="switch">
-                        <input
-                          type="checkbox"
-                          checked={isBridgingActive}
-                          onChange={e => {
-                            const checked = e.target.checked;
-                            setIsBridgingActive(checked);
-                            if (checked && targetClipsCount < bridgeAtClip) {
-                              setTargetClipsCount(bridgeAtClip);
-                            }
-                          }}
-                        />
-                        <span className="slider"></span>
-                      </label>
-                      <strong style={{ fontSize: '0.95rem' }}>🔌 Aktifkan Bridging Promosi Produk</strong>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '0.65rem',
+                      background: 'var(--surface-raised)',
+                      padding: '0.75rem 1rem',
+                      borderRadius: 'var(--radius-sm, 8px)',
+                      border: '1px solid var(--border-subtle)'
+                    }}>
+                      <input
+                        type="checkbox"
+                        id="reCampaignAffiliateCheck"
+                        checked={isBridgingActive}
+                        onChange={e => {
+                          const checked = e.target.checked;
+                          setIsBridgingActive(checked);
+                          if (checked && targetClipsCount < bridgeAtClip) {
+                            setTargetClipsCount(bridgeAtClip);
+                          }
+                        }}
+                        style={{ width: '18px', height: '18px', accentColor: 'var(--action-primary)', cursor: 'pointer', marginTop: '2px' }}
+                      />
+                      <div>
+                        <label htmlFor="reCampaignAffiliateCheck" style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer', display: 'block' }}>
+                          🛒 Sertakan Rekomendasi Produk & Affiliate (Shopee FB & Link di Bio)
+                        </label>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1.4, display: 'block', marginTop: '2px' }}>
+                          Saat aktif, naskah memuat transisi produk dengan link aktif Shopee untuk Facebook dan arahan Link di Bio untuk Instagram, TikTok, Shorts &amp; Threads. Uncheck untuk kampanye murni edukasi tanpa jualan.
+                        </span>
+                      </div>
                     </div>
 
                     {isBridgingActive && (

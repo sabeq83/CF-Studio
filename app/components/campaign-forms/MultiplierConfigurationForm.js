@@ -2325,14 +2325,30 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit} style={{ disp
                   </div>)}
                   {activeAccordion === 2 && (
                     <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '0.65rem',
+                        background: 'var(--surface-raised)',
+                        padding: '0.75rem 1rem',
+                        borderRadius: 'var(--radius-sm, 8px)',
+                        border: '1px solid var(--border-subtle)'
+                      }}>
                         <input
                           type="checkbox"
+                          id="multiplierAffiliateCheck"
                           checked={isBridgingActive}
                           onChange={e => setIsBridgingActive(e.target.checked)}
-                          style={{ width: 18, height: 18, cursor: 'pointer' }}
+                          style={{ width: '18px', height: '18px', accentColor: 'var(--action-primary)', cursor: 'pointer', marginTop: '2px' }}
                         />
-                        <strong>🔌 Aktifkan Bridging Promosi Produk (Sandwich Protocol)</strong>
+                        <div>
+                          <label htmlFor="multiplierAffiliateCheck" style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer', display: 'block' }}>
+                            🛒 Sertakan Rekomendasi Produk & Affiliate (Shopee FB & Link di Bio)
+                          </label>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1.4, display: 'block', marginTop: '2px' }}>
+                            Saat aktif, naskah memuat transisi produk dengan link aktif Shopee untuk Facebook dan arahan Link di Bio untuk Instagram, TikTok, Shorts &amp; Threads. Uncheck untuk konten viral murni edukasi tanpa jualan.
+                          </span>
+                        </div>
                       </div>
 
                       {isBridgingActive && (
