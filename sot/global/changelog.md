@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.35.18 — Optimasi Query Agregasi Multi Brand Link Katalog Produk (08/11/2026)
+- Ganti query GROUP BY dengan correlated subquery json_agg pada listProductCatalog
+- Mencegah error postgresql aggregate pada schema dev dan staging
+
 ## V2.35.17 — Injeksi Link Affiliate Google Sheets Tahap 1 (08/11/2026)
 - Injeksi 178 link affiliate baru ke Staging dan 184 link ke Dev
 - Skrip audit dan injeksi otomatis sheets-vs-db
