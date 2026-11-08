@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.35.14 — Smart Shopee Affiliate Injector (Brand Profile Scoped) (08/11/2026)
+- Pencocokan cerdas kata kunci caption ke link Shopee via Gemini AI
+- Isolasi ketat produk etalase berdasarkan Brand Profile kampanye
+- Toggle kontrol per-jadwal Post Link Affiliate Shopee (Facebook) di modal Auto Pipeline
+- Penempatan link Shopee dan CTA kontekstual rapi sebelum hashtags
+
 ## V2.35.13 — Uniform 1-Click Launch Button & Theme Tokens (08/11/2026)
 - Penyeragaman warna tombol luncurkan 1-klik di seluruh tipe kampanye Auto Pipeline
 - Pendaftaran token resmi status-purple dan status-rose di app/theme.css

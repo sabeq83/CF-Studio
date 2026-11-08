@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi & Mockup: Smart Shopee Affiliate Injector (Brand-Profile Scoped)</title>
+  <style>
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --accent-glow: rgba(45, 212, 191, 0.22);
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-purple: #c084fc;
+      --status-purple-soft: rgba(192, 132, 252, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f8fafc;
+      --surface: #ffffff;
+      --surface-raised: #f1f5f9;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --input-bg: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --border-subtle: #e2e8f0;
+      --border-strong: #94a3b8;
+      --action-primary: #0d9488;
+      --action-primary-hover: #14b8a6;
+      --on-action-primary: #ffffff;
+      --accent-glow: rgba(13, 148, 136, 0.2);
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.12);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.12);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.12);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.12);
+      --status-purple: #9333ea;
+      --status-purple-soft: rgba(147, 51, 234, 0.12);
+      --focus-ring: #7c3aed;
+      --shadow-card: 0 10px 25px rgba(0, 0, 0, 0.08);
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--canvas);
+      color: var(--text-primary);
+      padding: 32px 20px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .badge-scope {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--status-purple-soft);
+      color: var(--status-purple);
+      border: 1px solid var(--status-purple);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .theme-toggle-btn {
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      cursor: pointer;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .grid-layout {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .grid-layout { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    select, textarea, input {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 13.5px;
+      transition: var(--transition);
+    }
+
+    select:focus, textarea:focus, input:focus {
+      outline: none;
+      border-color: var(--focus-ring);
+      box-shadow: 0 0 0 2px var(--accent-glow);
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+      font-family: var(--font-sans);
+      line-height: 1.5;
+    }
+
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 12px 18px;
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 14px var(--accent-glow);
+      transition: var(--transition);
+    }
+
+    .btn-action:hover {
+      background: var(--action-primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .product-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+      max-height: 220px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .product-item {
+      padding: 10px 12px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      font-size: 12.5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .product-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .product-name {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .product-tags {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .product-link-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--status-success);
+      background: var(--status-success-soft);
+      padding: 3px 6px;
+      border-radius: var(--radius-xs);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    /* Simulation Result Box */
+    .result-box {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-top: 20px;
+    }
+
+    .ai-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      margin-bottom: 12px;
+    }
+
+    /* Facebook Post Preview */
+    .fb-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .fb-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .fb-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--action-primary), var(--status-info));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: #fff;
+      font-size: 16px;
+    }
+
+    .fb-user-info h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .fb-user-info span {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .fb-body {
+      font-size: 13.5px;
+      color: var(--text-primary);
+      white-space: pre-line;
+      line-height: 1.6;
+      background: var(--surface-raised);
+      padding: 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .fb-link-highlight {
+      color: #38bdf8;
+      font-weight: 600;
+      text-decoration: underline;
+    }
+
+    .fb-cta-highlight {
+      background: rgba(45, 212, 191, 0.12);
+      border-left: 3px solid var(--action-primary);
+      padding: 8px 12px;
+      margin: 10px 0;
+      border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
+      display: block;
+    }
+
+    .callout-rule {
+      background: var(--status-warning-soft);
+      border: 1px solid var(--status-warning);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-size: 12.5px;
+      color: var(--text-primary);
+      margin-top: 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Top Header -->
+    <div class="header-bar">
+      <div>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+          <h1 style="font-size: 20px; font-weight: 800;">Simulasi Smart Shopee Affiliate Injector</h1>
+          <span class="badge-scope">🔒 Strict Brand Scoped</span>
+        </div>
+        <p style="font-size: 13px; color: var(--text-muted);">
+          Memverifikasi pencocokan cerdas kata kunci caption ke link Shopee khusus brand profile kampanye sebelum posting ke Facebook via Repliz.
+        </p>
+      </div>
+      <button class="theme-toggle-btn" onclick="toggleTheme()">
+        <span id="themeIcon">☀️</span> Mode Tampilan
+      </button>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="grid-layout">
+      <!-- Left Column: Input & Brand Controls -->
+      <div class="card">
+        <div class="card-title">
+          <span>⚙️ Konfigurasi Kampanye & Brand Profile</span>
+          <span style="font-size: 11px; color: var(--text-muted);">Step 1: Pilih Sumber</span>
+        </div>
+
+        <div class="form-group">
+          <label>1. Pilih Brand Profile Kampanye:</label>
+          <select id="brandSelect" onchange="onBrandChange()">
+            <option value="siasatsehat">Siasat Sehat (Health & Herbal Recipes)</option>
+            <option value="dapurbotani">Dapur Botani (Rempah & Bahan Organik)</option>
+            <option value="nutribake">NutriBake ID (Baking & Dessert Sehat)</option>
+            <option value="anekaperedam">Aneka Peredam (Insulasi Akustik/Peredam)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>2. Katalog Produk Aktif Brand Ini (Hanya Link Shopee yang Diizinkan):</label>
+          <div class="product-list" id="productListContainer">
+            <!-- Dynamic products -->
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>3. Template / Sampel Naskah Caption Video:</label>
+          <select id="captionPresetSelect" onchange="onCaptionPresetChange()" style="margin-bottom: 8px;">
+            <option value="0">Contoh 1: Resep Peluntur Lemak Perut Alami (Cocok: Teh Rosella)</option>
+            <option value="1">Contoh 2: Jamu Hangat Jahe Merah & Kayu Manis Dapur (Cocok: Jahe/Kayu Manis)</option>
+            <option value="2">Contoh 3: Cake Cokelat Rendah Gula (Cocok: Cocoa Powder)</option>
+            <option value="3">Contoh 4: Tips Ruang Kerja Tenang Bebas Bising (Cocok: Rockwool)</option>
+            <option value="4">Contoh 5: Tips Meditasi Pagi Umum (Tanpa Produk Relevan - Fail-Safe)</option>
+          </select>
+          <textarea id="captionInput"></textarea>
+        </div>
+
+        <div class="form-group" style="background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 18px;">
+          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-bottom: 4px;">
+            <input type="checkbox" id="toggleAffiliateCheck" checked onchange="onAffiliateToggleChange()" style="width: 18px; height: 18px; accent-color: var(--action-primary); cursor: pointer;" />
+            <span style="font-size: 13.5px; font-weight: 700; color: var(--text-primary);">Post Link Affiliate Shopee (Facebook)</span>
+          </label>
+          <p style="font-size: 11.5px; color: var(--text-muted); margin-left: 28px;">
+            Aktifkan agar sistem secara otomatis mencari produk relevan di Brand Profile kampanye ini dan menyisipkan link Shopee ke caption sebelum posting ke Facebook via Repliz.
+          </p>
+        </div>
+
+        <button class="btn-action" onclick="runAiMatchSimulation()">
+          <span>⚡ Jalankan AI Match & Enriched Caption</span>
+        </button>
+
+        <div class="callout-rule">
+          <span>🛡️</span>
+          <div>
+            <strong>Brand Safety Isolation:</strong> Jika video bertema "Baking Cake" dibuat di brand <em>Siasat Sehat</em>, sistem <strong>DILARANG</strong> menyisipkan link <em>NutriBake Cocoa Powder</em> karena beda Brand Profile! Hanya produk brand yang sama yang boleh diinjeksi.
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: AI Analysis & Live Facebook Preview -->
+      <div class="card">
+        <div class="card-title">
+          <span>📱 Preview Hasil di Facebook (via Repliz)</span>
+          <span class="ai-badge" id="aiStatusBadge">🟢 Siap Simulasi</span>
+        </div>
+
+        <!-- AI Match Diagnostics -->
+        <div class="result-box" id="aiDiagnosticBox">
+          <div style="font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">
+            🤖 AI Semantic Match Diagnostics
+          </div>
+          <div id="aiDiagnosticDetails" style="font-size: 12px; color: var(--text-secondary); line-height: 1.6;">
+            Pilih brand profile dan klik tombol <strong>Jalankan AI Match</strong> untuk melihat proses pencocokan semantik dan pembentukan CTA Shopee.
+          </div>
+        </div>
+
+        <!-- Facebook Preview Card -->
+        <div class="fb-card" style="margin-top: 20px;">
+          <div class="fb-header">
+            <div class="fb-avatar" id="fbAvatar">S</div>
+            <div class="fb-user-info">
+              <h4 id="fbPageName">Siasat Sehat</h4>
+              <span id="fbMetaInfo">Facebook Reels • Terjadwal via Repliz</span>
+            </div>
+          </div>
+          <div class="fb-body" id="fbPreviewBody">
+            Caption akan ditampilkan di sini setelah simulasi dijalankan.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Data Katalog Riil Brand Products MAKNA Flow
+    const BRAND_DATABASE = {
+      siasatsehat: {
+        id: "dc6098cc-e74c-4ec1-9a67-658edc7c710b",
+        name: "Siasat Sehat",
+        avatar: "🌿",
+        products: [
+          {
+            id: "pe_1782444508951_369",
+            name: "Nutrifarm Teh Bunga Rosella",
+            category: "Minuman Herbal & Detoks",
+            tags: "teh herbal, detoks, lemak perut, antioksidan, rempah alami",
+            link: "https://s.shopee.co.id/3Viki27LRx",
+            usp: "Bantu proses detoks harian, lunturkan lemak perut, dan kaya antioksidan alami."
+          }
+        ]
+      },
+      dapurbotani: {
+        id: "df382ce8-2145-4464-ae63-79375ff3aff2",
+        name: "Dapur Botani",
+        avatar: "🌾",
+        products: [
+          {
+            id: "pe_sync_1781148697786_165",
+            name: "Nutrifarm Jahe Merah Bubuk",
+            category: "Bumbu Dapur & Minuman Herbal",
+            tags: "jahe merah, ramuan hangat, bumbu dapur, rempah murni, imun tubuh",
+            link: "https://s.shopee.co.id/6pyTuAuSlO",
+            usp: "100% rimpang jahe merah murni tanpa ampas, hangatkan lambung dan imun."
+          },
+          {
+            id: "pe_1783235604763_116",
+            name: "Nutrifarm Kayu Manis Bubuk",
+            category: "Bumbu & Rempah Dapur",
+            tags: "kayu manis, rempah dapur, penurun gula darah, aroma sedap",
+            link: "https://s.shopee.co.id/gOUN5qLEn",
+            usp: "Aroma manis kayu manis asli Ceylon, bantu kontrol gula darah alami."
+          },
+          {
+            id: "pe_1788145483837_220",
+            name: "Kalon Teh Hijau Premium Saffron",
+            category: "Teh Herbal Pelangsing",
+            tags: "teh hijau, saffron, metabolisme, peluntur lemak",
+            link: "https://s.shopee.co.id/6q03a8reLo",
+            usp: "Kombinasi teh hijau antioksidan dan saffron mewah untuk lingkar pinggang ramping."
+          }
+        ]
+      },
+      nutribake: {
+        id: "940e766b-76d0-49b7-b6d5-01dfb0041d40",
+        name: "NutriBake ID",
+        avatar: "🧁",
+        products: [
+          {
+            id: "pe_1786588017962_4710",
+            name: "Premix Cocoa Powder Premium",
+            category: "Bahan Baking & Minuman",
+            tags: "cokelat bubuk, cocoa powder, bahan kue, brownies sehat, rendah kalori",
+            link: "https://s.shopee.co.id/8pjlcwD60v",
+            usp: "Cokelat bubuk murni kualitas ekspor untuk kue lembut tanpa rasa pahit berlebih."
+          },
+          {
+            id: "pe_1781998087509_929",
+            name: "Beorganik Peanut Butter",
+            category: "Selai & Olesan",
+            tags: "peanut butter, selai kacang, sarapan sehat, olesan roti",
+            link: "https://s.shopee.co.id/3qL5hOv3ru",
+            usp: "100% kacang tanah sangrai tanpa gula dan tanpa minyak tambahan."
+          }
+        ]
+      },
+      anekaperedam: {
+        id: "aa92804e-620b-4881-a28f-dea3d8d92b44",
+        name: "Aneka Peredam",
+        avatar: "🔇",
+        products: [
+          {
+            id: "pe_1790870649792_5256",
+            name: "Rockwool Blanket High Density",
+            category: "Peredam Suara & Panas",
+            tags: "peredam suara, ruang podcast, studio musik, kedap suara, rockwool",
+            link: "https://s.shopee.co.id/anekaperedam_shopee",
+            usp: "Efektif redam kebisingan hingga 95% untuk studio dan kamar tidur tenang."
+          }
+        ]
+      }
+    };
+
+    const SAMPLE_CAPTIONS = [
+      `Menjaga kesehatan tubuh tidak harus rumit atau bergantung pada obat kimia. Cukup manfaatkan rempah alami di dapur untuk membantu proses detoks harianmu serta melunturkan lemak perut yang membandel secara optimal dan aman.\n\nSave video ini agar tidak lupa mencobanya nanti, dan bagikan ke orang terdekatmu!\n\n#ResepSehat #TipsAlami #HealthyLifestyle #DetoksAlami #TipsDapur #Shorts`,
+
+      `Saat cuaca dingin atau badan mulai meriang, racikan rempah hangat seperti jahe merah dan taburan kayu manis bubuk ini langsung bikin tenggorokan plong dan lambung nyaman seketika.\n\nYuk coba resep ini di rumah sore nanti!\n\n#DapurBotani #ResepHerbal #JaheMerah #HangatAlami #TipsKeluarga`,
+
+      `Bikin brownies kukus sehat tanpa takut gula darah naik! Kuncinya ada di pemilihan cocoa powder murni beraroma pekat tanpa gula tambahan.\n\nCocok banget buat cemilan anak-anak dan diet sehat.\n\n#NutriBake #BakingSehat #CocoaPowder #KueRendahGula #BrowniesKukus`,
+
+      `Bikin konten podcast atau kerja dari rumah tapi terganggu suara motor lewat di jalan? Pasang lapisan peredam suara rockwool di dinding agar ruangan hening maksimal.\n\nSimpan video ini buat referensi upgrade ruang kerja impianmu!\n\n#RuangKedapSuara #StudioPodcast #PeredamSuara #WorkFromHome`,
+
+      `Luangkan waktu 5 menit setiap pagi untuk tarik napas dalam-dalam, minum segelas air hangat, dan nikmati hening sebelum memulai rutinitas padatmu.\n\nSemoga harimu penuh ketenangan dan energi positif!\n\n#Mindfulness #SelfCare #PagiTenang #MotivasiHarian`
+    ];
+
+    function onBrandChange() {
+      const brandKey = document.getElementById('brandSelect').value;
+      const brand = BRAND_DATABASE[brandKey];
+      
+      // Update UI avatar & Page Name
+      document.getElementById('fbPageName').innerText = brand.name;
+      document.getElementById('fbAvatar').innerText = brand.avatar;
+
+      // Render product list
+      const container = document.getElementById('productListContainer');
+      container.innerHTML = '';
+      if (!brand.products || brand.products.length === 0) {
+        container.innerHTML = '<div style="color:var(--text-muted); font-size:12px; padding:8px;">Belum ada produk Shopee yang didaftarkan pada brand profile ini.</div>';
+      } else {
+        brand.products.forEach(p => {
+          const item = document.createElement('div');
+          item.className = 'product-item';
+          item.innerHTML = `
+            <div class="product-info">
+              <span class="product-name">📦 ${p.name}</span>
+              <span class="product-tags">${p.category} • Tags: ${p.tags}</span>
+            </div>
+            <a class="product-link-badge" href="${p.link}" target="_blank">🔗 ${p.link.replace('https://', '')}</a>
+          `;
+          container.appendChild(item);
+        });
+      }
+
+      // Auto update sample caption according to brand
+      if (brandKey === 'siasatsehat') document.getElementById('captionPresetSelect').value = '0';
+      if (brandKey === 'dapurbotani') document.getElementById('captionPresetSelect').value = '1';
+      if (brandKey === 'nutribake') document.getElementById('captionPresetSelect').value = '2';
+      if (brandKey === 'anekaperedam') document.getElementById('captionPresetSelect').value = '3';
+      onCaptionPresetChange();
+    }
+
+    function onCaptionPresetChange() {
+      const idx = document.getElementById('captionPresetSelect').value;
+      document.getElementById('captionInput').value = SAMPLE_CAPTIONS[idx];
+      resetPreview();
+    }
+
+    function resetPreview() {
+      document.getElementById('aiStatusBadge').className = 'ai-badge';
+      document.getElementById('aiStatusBadge').innerText = '⚪ Menunggu Uji';
+      document.getElementById('aiDiagnosticDetails').innerHTML = 'Klik tombol <strong>Jalankan AI Match</strong> untuk melihat analisis.';
+      document.getElementById('fbPreviewBody').innerText = document.getElementById('captionInput').value;
+    }
+
+    function onAffiliateToggleChange() {
+      const isEnabled = document.getElementById('toggleAffiliateCheck').checked;
+      const diagBox = document.getElementById('aiDiagnosticDetails');
+      const badge = document.getElementById('aiStatusBadge');
+      const fbBody = document.getElementById('fbPreviewBody');
+      const caption = document.getElementById('captionInput').value;
+
+      if (!isEnabled) {
+        badge.className = 'ai-badge';
+        badge.style.background = 'var(--surface-hover)';
+        badge.style.color = 'var(--text-muted)';
+        badge.innerText = '⚪ Toggle Dinonaktifkan';
+
+        diagBox.innerHTML = `
+          <div style="color:var(--text-muted); font-size:12px;">
+            <strong>Status:</strong> Fitur <em>Post Link Affiliate</em> dinonaktifkan untuk jadwal ini.<br>
+            Caption akan diposting apa adanya ke Facebook tanpa mencari atau menyisipkan link Shopee.
+          </div>
+        `;
+        fbBody.innerText = caption;
+      } else {
+        runAiMatchSimulation();
+      }
+    }
+
+    function runAiMatchSimulation() {
+      const isAffiliateEnabled = document.getElementById('toggleAffiliateCheck').checked;
+      const caption = document.getElementById('captionInput').value;
+      const diagBox = document.getElementById('aiDiagnosticDetails');
+      const badge = document.getElementById('aiStatusBadge');
+      const fbBody = document.getElementById('fbPreviewBody');
+
+      if (!isAffiliateEnabled) {
+        onAffiliateToggleChange();
+        return;
+      }
+
+      const brandKey = document.getElementById('brandSelect').value;
+      const brand = BRAND_DATABASE[brandKey];
+      const caption = document.getElementById('captionInput').value;
+
+      // Simulate Gemini Semantic Intent Matcher with Brand Safety Check
+      let matchedProduct = null;
+      let matchedReason = '';
+      let confidence = 0;
+      let ctaPhrase = '';
+
+      const lowerCaption = caption.toLowerCase();
+
+      // Scoped searching STRICTLY inside brand.products
+      for (const prod of brand.products) {
+        const keywords = prod.tags.split(',').map(t => t.trim().toLowerCase());
+        const matchFound = keywords.some(k => lowerCaption.includes(k));
+        
+        if (matchFound) {
+          matchedProduct = prod;
+          confidence = 0.94;
+          matchedReason = `Konteks naskah terdeteksi relevan dengan pilar: "${prod.tags.split(',').slice(0, 3).join(', ')}".`;
+          
+          if (prod.id === 'pe_1782444508951_369') {
+            ctaPhrase = "Mau coba seduhan teh herbal alami kaya antioksidan seperti di video? Dapatkan Nutrifarm Teh Bunga Rosella asli:";
+          } else if (prod.id === 'pe_sync_1781148697786_165') {
+            ctaPhrase = "Mau bikin ramuan hangat praktis tanpa repot memarut jahe? Gunakan Nutrifarm Jahe Merah Murni di Shopee:";
+          } else if (prod.id === 'pe_1786588017962_4710') {
+            ctaPhrase = "Mau brownies kukusmu bertekstur lembut dan beraroma cokelat pekat alami? Cek Premix Cocoa Powder di Shopee:";
+          } else if (prod.id === 'pe_1790870649792_5256') {
+            ctaPhrase = "Ingin ruangan podcast atau kamar tidur hening bebas bising? Gunakan Rockwool Blanket High Density di Shopee:";
+          } else {
+            ctaPhrase = `Dapatkan ${prod.name} original untuk hasil terbaik di Shopee:`;
+          }
+          break;
+        }
+      }
+
+      const diagBox = document.getElementById('aiDiagnosticDetails');
+      const badge = document.getElementById('aiStatusBadge');
+      const fbBody = document.getElementById('fbPreviewBody');
+
+      if (matchedProduct) {
+        badge.className = 'ai-badge';
+        badge.style.background = 'var(--status-success-soft)';
+        badge.style.color = 'var(--status-success)';
+        badge.innerText = '🟢 Matched (' + Math.round(confidence * 100) + '%)';
+
+        diagBox.innerHTML = `
+          <div style="margin-bottom:6px;"><strong>Target Brand:</strong> ${brand.name} (<code>${brand.id}</code>)</div>
+          <div style="margin-bottom:6px;"><strong>Produk Terpilih:</strong> <span style="color:var(--status-success); font-weight:700;">${matchedProduct.name}</span></div>
+          <div style="margin-bottom:6px;"><strong>Alasan Relevansi:</strong> ${matchedReason}</div>
+          <div style="margin-bottom:6px;"><strong>Brand Safety Scoped:</strong> ✅ Terverifikasi berasal dari brand profile ini (tidak ada kebocoran produk brand lain).</div>
+          <div><strong>CTA Terbina:</strong> <em>"${ctaPhrase}"</em></div>
+        `;
+
+        // Format Caption: separate hashtags, insert CTA before hashtags
+        const hashtagRegex = /(?:^|\s)(#[a-zA-Z0-9_]+)/g;
+        const hashtags = caption.match(hashtagRegex) || [];
+        const cleanNarrative = caption.replace(hashtagRegex, '').trim();
+
+        const formattedHtml = `
+          ${cleanNarrative.replace(/\n/g, '<br>')}
+          <br><br>
+          <div class="fb-cta-highlight">
+            🛒 <strong>${ctaPhrase}</strong><br>
+            👉 <a class="fb-link-highlight" href="${matchedProduct.link}" target="_blank">${matchedProduct.link}</a>
+          </div>
+          <div style="color:var(--status-info); font-size:12px; margin-top:8px;">
+            ${hashtags.join(' ')}
+          </div>
+        `;
+        fbBody.innerHTML = formattedHtml;
+
+      } else {
+        badge.className = 'ai-badge';
+        badge.style.background = 'var(--status-warning-soft)';
+        badge.style.color = 'var(--status-warning)';
+        badge.innerText = '🟡 Fail-Safe (No Match)';
+
+        diagBox.innerHTML = `
+          <div style="margin-bottom:6px;"><strong>Target Brand:</strong> ${brand.name} (<code>${brand.id}</code>)</div>
+          <div style="margin-bottom:6px; color:var(--status-warning);"><strong>Hasil:</strong> Tidak ditemukan produk dalam brand profile ini yang relevan dengan topik naskah.</div>
+          <div><strong>Fail-Safe Action:</strong> Link Shopee <em>TIDAK DISISIPKAN</em> untuk menjaga kredibilitas dan kebersihan konten Facebook (Zero Irrelevant Spam).</div>
+        `;
+
+        fbBody.innerText = caption;
+      }
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      document.getElementById('themeIcon').innerText = next === 'dark' ? '☀️' : '🌙';
+    }
+
+    // Init
+    window.onload = () => {
+      onBrandChange();
+    };
+  </script>
+</body>
+</html>

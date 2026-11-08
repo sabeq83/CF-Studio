@@ -193,6 +193,7 @@ export default function AutoPipelinePage() {
   const [schedDays, setSchedDays] = useState([0, 1, 2, 3, 4, 5, 6]);
   const [schedReplizAccountIds, setSchedReplizAccountIds] = useState([]);
   const [schedAutoPublish, setSchedAutoPublish] = useState(true);
+  const [schedPostAffiliateLink, setSchedPostAffiliateLink] = useState(true);
   const [modalBrandPresets, setModalBrandPresets] = useState([]);
   const [savingSchedule, setSavingSchedule] = useState(false);
 
@@ -1042,6 +1043,7 @@ export default function AutoPipelinePage() {
     setIsSchedCategoryManual(false);
     setSchedDays([0, 1, 2, 3, 4, 5, 6]);
     setSchedAutoPublish(true);
+    setSchedPostAffiliateLink(true);
     setSchedSelectedCep('auto');
     setSchedPromotionContext('');
 
@@ -1103,6 +1105,7 @@ export default function AutoPipelinePage() {
         : (sched.pipeline_config_json || {});
     } catch (_) {}
     setSchedSelectedCep(schedCfg.selected_cep || 'auto');
+    setSchedPostAffiliateLink(schedCfg.post_link_affiliate !== false);
     setSchedPromotionContext(schedCfg.promotion_context || (sched.topic && sched.topic !== sched.target_item_title ? sched.topic : ''));
 
     setProductSearchQuery('');
@@ -1173,6 +1176,7 @@ export default function AutoPipelinePage() {
                   : (schedCampaignType === 'recipe_labs'
                       ? { images_per_recipe: schedImagesPerRecipe, selected_layout_id: schedLayoutId, visual_style: schedVisualStyle, post_to_facebook: schedPostToFacebook }
                       : {})));
+        editPipelineConfig.post_link_affiliate = schedPostAffiliateLink;
 
         const payload = {
           name: schedName.trim(),
@@ -1229,7 +1233,7 @@ export default function AutoPipelinePage() {
               repliz_account_ids: schedReplizAccountIds,
               auto_publish_enabled: schedAutoPublish,
               timezone: 'Asia/Jakarta',
-              pipeline_config: { product_id: prodId, product_name: prodName, selected_cep: schedSelectedCep || 'auto', promotion_context: promoCtx }
+              pipeline_config: { product_id: prodId, product_name: prodName, selected_cep: schedSelectedCep || 'auto', promotion_context: promoCtx, post_link_affiliate: schedPostAffiliateLink }
             };
           });
 
@@ -1264,7 +1268,7 @@ export default function AutoPipelinePage() {
               repliz_account_ids: schedReplizAccountIds,
               auto_publish_enabled: schedAutoPublish,
               timezone: 'Asia/Jakarta',
-              pipeline_config: { content_pillar: pillar }
+              pipeline_config: { content_pillar: pillar, post_link_affiliate: schedPostAffiliateLink }
             };
           });
 
@@ -1320,6 +1324,7 @@ export default function AutoPipelinePage() {
                     : (schedCampaignType === 'recipe_labs'
                         ? { images_per_recipe: schedImagesPerRecipe, selected_layout_id: schedLayoutId, visual_style: schedVisualStyle, post_to_facebook: schedPostToFacebook }
                         : {})));
+          pipelineConfigPayload.post_link_affiliate = schedPostAffiliateLink;
 
           const payload = {
             name: finalName,
@@ -6375,6 +6380,34 @@ export default function AutoPipelinePage() {
                   <label htmlFor="autoPublishCheck" style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer' }}>
                     Otomatis teruskan video ke Repliz setelah selesai di-render oleh FFmpeg
                   </label>
+                </div>
+
+                {/* 🛒 Toggle Kontrol Post Link Affiliate Shopee */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '0.65rem',
+                  background: 'var(--surface-raised)',
+                  padding: '0.75rem 1rem',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--border-subtle)',
+                  marginTop: '0.5rem'
+                }}>
+                  <input
+                    type="checkbox"
+                    id="postAffiliateCheck"
+                    checked={schedPostAffiliateLink}
+                    onChange={(e) => setSchedPostAffiliateLink(e.target.checked)}
+                    style={{ width: '18px', height: '18px', accentColor: 'var(--action-primary)', cursor: 'pointer', marginTop: '2px' }}
+                  />
+                  <div>
+                    <label htmlFor="postAffiliateCheck" style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer', display: 'block' }}>
+                      🛒 Post Link Affiliate Shopee (Facebook)
+                    </label>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1.4, display: 'block', marginTop: '2px' }}>
+                      Secara cerdas mencari produk relevan di Brand Profile kampanye ini dan menyisipkan link Shopee ke caption Facebook sebelum posting via Repliz.
+                    </span>
+                  </div>
                 </div>
 
                 {/* Modal Action Buttons */}

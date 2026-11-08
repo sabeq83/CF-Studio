@@ -46,3 +46,4 @@ test('app/auto-pipeline/page.js standardizes 1-click launch button with canonica
     'Obsolete campaign-specific button background branches must be removed'
   );
 });
+
