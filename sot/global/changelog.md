@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.35.24 — Auto Pipeline Schedule Modal Format & Smart Brand Account Selection (09/11/2026)
+- Auto-fill Nama Pengenal Jadwal dengan format Type Video - Brand Profile -
+- Smart matching & auto-selection akun Repliz sesuai Brand Profile aktif
+- Tombol aksi cepat Pilih Akun Brand Ini pada toolbar Repliz
+
 ## V2.35.23 — Fix ContentFlow Publishing Desync & Cleanup Stale Queued Jobs (09/11/2026)
 - Auto-sync cancelPublishingJob to content_flow_items
 - Map needs_review to Not Published in syncContentFlowSummary

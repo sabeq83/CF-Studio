@@ -962,6 +962,16 @@ export default function AutoPipelinePage() {
       if (data.success && Array.isArray(data.data)) {
         const filtered = data.data.filter(a => a.provider === 'repliz' || a.platform);
         setReplizAccounts(filtered);
+        if (filtered.length > 0) {
+          setSchedReplizAccountIds(prev => {
+            if (prev.length === 0 && schedBrandId && !editingSchedule) {
+              const bObj = brands.find(b => b.id === schedBrandId);
+              const matched = matchAccountsToBrand(filtered, bObj?.brand_name);
+              return matched.map(a => a.id);
+            }
+            return prev;
+          });
+        }
         if (forceSync) {
           showToast(`Berhasil menyinkronkan ${filtered.length} akun live dari Repliz! 🚀`);
         }
@@ -993,15 +1003,74 @@ export default function AutoPipelinePage() {
     }
   }
 
+  function getCampaignTypeLabel(typeKey) {
+    switch (typeKey) {
+      case 'multiplier_campaign': return 'Multiplier';
+      case 'recipe_campaign': return 'Resep';
+      case 'product_campaign': return 'Produk';
+      case 'editorial_campaign': return 'Editorial';
+      case 'recipe_labs': return 'Resep Teks & Foto';
+      default: return 'Multiplier';
+    }
+  }
+
+  function matchAccountsToBrand(accounts, brandName) {
+    if (!brandName || !Array.isArray(accounts)) return [];
+    const normBrand = String(brandName).toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (!normBrand) return [];
+    return accounts.filter(acc => {
+      if (!acc.display_name) return false;
+      const normName = String(acc.display_name).toLowerCase().replace(/[^a-z0-9]/g, '');
+      return normName.includes(normBrand) || normBrand.includes(normName);
+    });
+  }
+
+  function getBrandDisplayName(brand, accounts = []) {
+    if (!brand) return 'Brand';
+    const matched = matchAccountsToBrand(accounts, brand.brand_name);
+    if (matched.length > 0) {
+      const cleanNames = matched
+        .map(a => String(a.display_name || '').replace(/\s+ID$/i, '').trim())
+        .filter(n => !n.includes('|') && !n.startsWith('kost_'));
+      if (cleanNames.length > 0) {
+        return cleanNames[0];
+      }
+    }
+    return brand.brand_name || 'Brand';
+  }
+
+  function computeFormattedScheduleName(typeKey, brand, accounts = [], existingName = '') {
+    const typeLabel = getCampaignTypeLabel(typeKey);
+    const brandName = getBrandDisplayName(brand, accounts);
+    const targetPrefix = `${typeLabel} - ${brandName} - `;
+
+    if (!existingName) {
+      return targetPrefix;
+    }
+
+    // Jika user sudah mengetik suffix setelah tanda '-' kedua, pertahankan suffix tersebut
+    const parts = existingName.split(' - ');
+    if (parts.length >= 3) {
+      const suffix = parts.slice(2).join(' - ').trim();
+      return suffix ? `${targetPrefix}${suffix}` : targetPrefix;
+    }
+
+    // Jika nama sebelumnya berakhiran ' - ' atau memiliki separator lama ' — ', gunakan targetPrefix
+    if (existingName.endsWith(' - ') || existingName.includes(' — ')) {
+      return targetPrefix;
+    }
+
+    return targetPrefix;
+  }
+
   function handleModalBrandChange(newBrandId) {
     setSchedBrandId(newBrandId);
     const targetBrand = brands.find(b => b.id === newBrandId);
-    const brandName = targetBrand?.brand_name || '';
-    if (brandName) {
-      const brandLower = brandName.toLowerCase();
-      const matched = replizAccounts.filter(a => a.display_name && a.display_name.toLowerCase().includes(brandLower));
-      if (matched.length > 0) {
-        setSchedReplizAccountIds(matched.map(a => a.id));
+    if (targetBrand) {
+      const matched = matchAccountsToBrand(replizAccounts, targetBrand.brand_name);
+      setSchedReplizAccountIds(matched.map(a => a.id));
+      if (!editingSchedule) {
+        setSchedName(prev => computeFormattedScheduleName(schedCampaignType, targetBrand, replizAccounts, prev));
       }
     }
     fetchPresetsForModalBrand(newBrandId, schedCampaignType);
@@ -1030,11 +1099,11 @@ export default function AutoPipelinePage() {
 
   function openCreateScheduleModal() {
     const currentBrand = brands.find(b => b.id === selectedBrandId) || brands[0];
-    const brandName = currentBrand?.brand_name || 'Brand';
     const initialTopic = topic || 'Air fryer crispy snack finger foods';
     setEditingSchedule(null);
-    setSchedCampaignType('recipe_campaign');
-    setSchedName(`${brandName} — Daily Morning Reels`);
+    const initialType = 'multiplier_campaign';
+    setSchedCampaignType(initialType);
+    setSchedName(computeFormattedScheduleName(initialType, currentBrand, replizAccounts, ''));
     setSchedBrandId(currentBrand?.id || '');
     setSchedPresetKey(selectedPresetKey || 'habitfolk_6clips_quick');
     setSchedGenTime('05:00');
@@ -1055,11 +1124,10 @@ export default function AutoPipelinePage() {
     setPillarSearchQuery('');
     setSchedBlueprintSearchQuery('');
 
-    const brandLower = brandName.toLowerCase();
-    const matched = replizAccounts.filter(a => a.display_name && a.display_name.toLowerCase().includes(brandLower));
-    setSchedReplizAccountIds(matched.length > 0 ? matched.map(a => a.id) : replizAccounts.slice(0, 4).map(a => a.id));
+    const matched = matchAccountsToBrand(replizAccounts, currentBrand?.brand_name);
+    setSchedReplizAccountIds(matched.map(a => a.id));
 
-    fetchPresetsForModalBrand(currentBrand?.id, 'recipe_campaign');
+    fetchPresetsForModalBrand(currentBrand?.id, initialType);
     setReplizSearchQuery('');
     setSelectedPlatformFilter('all');
     if (replizAccounts.length < 20) {
@@ -5119,18 +5187,7 @@ export default function AutoPipelinePage() {
                             if (!editingSchedule) {
                               setSchedCampaignType(t.key);
                               const bObj = brands.find(b => b.id === schedBrandId);
-                              const bName = bObj?.brand_name || 'Brand';
-                              if (t.key === 'product_campaign') {
-                                setSchedName(`${bName} — Product Showcase`);
-                              } else if (t.key === 'editorial_campaign') {
-                                setSchedName(`${bName} — Editorial Pillar`);
-                              } else if (t.key === 'multiplier_campaign') {
-                                setSchedName(`${bName} — Multiplier Remix Hook`);
-                              } else if (t.key === 'recipe_labs') {
-                                setSchedName(`${bName} — Resep Teks & Foto FB`);
-                              } else {
-                                setSchedName(`${bName} — Daily Morning Reels`);
-                              }
+                              setSchedName(prev => computeFormattedScheduleName(t.key, bObj, replizAccounts, prev));
                               fetchPresetsForModalBrand(schedBrandId, t.key);
                             }
                           }}
@@ -5317,7 +5374,7 @@ export default function AutoPipelinePage() {
                     type="text"
                     value={schedName}
                     onChange={(e) => setSchedName(e.target.value)}
-                    placeholder="Contoh: Dapur Botani — GarliBee Daily Morning 05:00"
+                    placeholder="Contoh: Multiplier - Dapur Botani - Batch 1"
                     required
                     style={{
                       height: '42px',
@@ -6398,6 +6455,8 @@ export default function AutoPipelinePage() {
                         filteredReplizAccounts.map(acc => {
                           const pInfo = getPlatformIcon(acc.platform);
                           const isChecked = schedReplizAccountIds.includes(acc.id);
+                          const activeBrandObj = brands.find(b => b.id === schedBrandId);
+                          const isBrandMatch = activeBrandObj && matchAccountsToBrand([acc], activeBrandObj.brand_name).length > 0;
                           return (
                             <div
                               key={acc.id}
@@ -6418,6 +6477,19 @@ export default function AutoPipelinePage() {
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', fontWeight: 700, color: pInfo.color }}>
                                   <span>{pInfo.icon}</span>
                                   <span>{pInfo.label}</span>
+                                  {isBrandMatch && (
+                                    <span style={{
+                                      fontSize: '0.62rem',
+                                      color: 'var(--action-primary)',
+                                      background: 'var(--surface-interactive)',
+                                      border: '1px solid var(--action-primary)',
+                                      padding: '0 4px',
+                                      borderRadius: '4px',
+                                      fontWeight: 800
+                                    }}>
+                                      Brand
+                                    </span>
+                                  )}
                                 </div>
                                 <div style={{
                                   width: '18px',
@@ -6465,11 +6537,23 @@ export default function AutoPipelinePage() {
                       <span style={{ color: 'var(--text-muted)' }}>
                         Daftar akun yang menerima video serempak
                       </span>
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const bObj = brands.find(b => b.id === schedBrandId);
+                            const matched = matchAccountsToBrand(replizAccounts, bObj?.brand_name);
+                            setSchedReplizAccountIds(matched.map(a => a.id));
+                          }}
+                          style={{ background: 'none', border: 'none', color: 'var(--action-primary)', cursor: 'pointer', fontWeight: 700, fontSize: '0.74rem' }}
+                        >
+                          🎯 Pilih Akun Brand Ini
+                        </button>
+                        <span style={{ color: 'var(--border-strong)' }}>|</span>
                         <button
                           type="button"
                           onClick={handleSelectAllVisible}
-                          style={{ background: 'none', border: 'none', color: 'var(--action-primary)', cursor: 'pointer', textDecoration: 'underline', fontSize: '0.74rem' }}
+                          style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', textDecoration: 'underline', fontSize: '0.74rem' }}
                         >
                           Pilih Semua Hasil
                         </button>

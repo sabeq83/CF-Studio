@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup Modal Jadwal Auto-Pipeline — Penamaan Otomatis & Auto-Select Akun Brand</title>
+  <link rel="stylesheet" href="/theme.css">
+  <style>
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-backdrop: rgba(2, 6, 14, 0.82);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-purple: #c084fc;
+      --status-purple-soft: rgba(192, 132, 252, 0.14);
+      --status-rose: #f43f5e;
+      --status-rose-soft: rgba(244, 63, 94, 0.14);
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.35);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.65);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f8fafc;
+      --sidebar: #f1f5f9;
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #e0f2fe;
+      --surface-hover: #f1f5f9;
+      --input-bg: #ffffff;
+      --overlay-backdrop: rgba(15, 23, 42, 0.55);
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --text-disabled: #94a3b8;
+      --border-subtle: #cbd5e1;
+      --border-strong: #94a3b8;
+      --action-primary: #0d9488;
+      --action-primary-hover: #14b8a6;
+      --on-action-primary: #ffffff;
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.12);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.12);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.12);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.12);
+      --status-purple: #9333ea;
+      --status-purple-soft: rgba(147, 51, 234, 0.12);
+      --status-rose: #e11d48;
+      --status-rose-soft: rgba(225, 29, 72, 0.12);
+      --shadow-card: 0 8px 24px rgba(15, 23, 42, 0.08);
+      --shadow-modal: 0 20px 60px rgba(15, 23, 42, 0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--canvas);
+      color: var(--text-primary);
+      padding: 2rem 1rem;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .top-controls {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      padding: 0.75rem 1.25rem;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+    }
+
+    .theme-toggle-btn {
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      padding: 0.45rem 0.9rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .modal-backdrop {
+      width: 100%;
+      max-width: 900px;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-modal);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface-raised);
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      max-height: calc(100vh - 220px);
+      overflow-y: auto;
+    }
+
+    .badge-pill {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .campaign-type-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.65rem;
+    }
+
+    .campaign-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 0.85rem;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .campaign-card:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+
+    .campaign-card.selected {
+      background: var(--surface-interactive);
+      border-color: var(--action-primary);
+    }
+
+    .field-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.4rem;
+    }
+
+    .text-input, .select-input {
+      width: 100%;
+      height: 42px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0 0.85rem;
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .text-input:focus, .select-input:focus {
+      border-color: var(--action-primary);
+      box-shadow: 0 0 0 2px var(--status-info-soft);
+    }
+
+    .callout-box {
+      background: var(--status-info-soft);
+      border: 1px solid var(--status-info);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1rem;
+      font-size: 0.82rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .repliz-box {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .repliz-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .repliz-quick-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-sm-action {
+      background: var(--surface);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      padding: 0.3rem 0.6rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-sm-action:hover {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+    }
+
+    .repliz-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 0.65rem;
+      max-height: 260px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .account-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .account-card:hover {
+      background: var(--surface-hover);
+    }
+
+    .account-card.checked {
+      background: var(--surface-interactive);
+      border-color: var(--action-primary);
+    }
+
+    .account-icon {
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .account-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .account-name {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .account-meta {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .custom-checkbox {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      border: 1.5px solid var(--border-strong);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 900;
+      color: transparent;
+      flex-shrink: 0;
+    }
+
+    .account-card.checked .custom-checkbox {
+      background: var(--action-primary);
+      border-color: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    .modal-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-submit {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 0.65rem 1.4rem;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .live-summary {
+      background: var(--input-bg);
+      border: 1px dashed var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem 1rem;
+      font-family: var(--font-mono, monospace);
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Controls Bar -->
+  <div class="top-controls">
+    <div>
+      <h3 style="font-size: 0.95rem; font-weight: 700;">Simulasi Modal Auto-Pipeline</h3>
+      <p style="font-size: 0.76rem; color: var(--text-muted);">
+        Format: <code>Type Video - Brand Profile - [Opsional Detail]</code> & Auto-Select Akun Brand Repliz
+      </p>
+    </div>
+    <div style="display: flex; gap: 0.5rem; align-items: center;">
+      <button class="theme-toggle-btn" onclick="toggleTheme()">
+        <span id="theme-icon">☀️</span>
+        <span id="theme-label">Light Mode</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Interactive Modal Container -->
+  <div class="modal-backdrop">
+    <!-- Header -->
+    <div class="modal-header">
+      <div style="display: flex; align-items: center; gap: 0.65rem;">
+        <span style="font-size: 1.25rem;">✨</span>
+        <div>
+          <h2 style="font-size: 1.05rem; font-weight: 800;">Buat Jadwal Rutin Auto Pipeline</h2>
+          <span style="font-size: 0.72rem; color: var(--text-muted);">
+            Konfigurasi otomatisasi terpadu produksi dan penerbitan multi-platform
+          </span>
+        </div>
+      </div>
+      <span class="badge-pill" style="background: var(--status-success-soft); color: var(--status-success); border: 1px solid var(--status-success);">
+        ● Autonomous Engine Active
+      </span>
+    </div>
+
+    <!-- Body -->
+    <div class="modal-body">
+
+      <!-- STEP 1: Pilihan Tipe Kampanye -->
+      <div>
+        <div class="field-label">
+          <span>Pilih Tipe Kampanye</span>
+          <span style="font-size: 0.7rem; color: var(--text-muted);">Mempengaruhi prefix nama jadwal & workflow generator</span>
+        </div>
+        <div class="campaign-type-grid" id="campaign-types-container">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- STEP 2: Brand Profile & Preset -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem;">
+        <div>
+          <div class="field-label">
+            <span>1. Brand Profile</span>
+            <span style="font-size: 0.7rem; color: var(--status-info);">Auto-Sync Nama & Akun</span>
+          </div>
+          <select class="select-input" id="brand-select" onchange="onBrandChange(this.value)">
+            <!-- Populated by JS -->
+          </select>
+        </div>
+
+        <div>
+          <div class="field-label">
+            <span>2. Preset Konfigurasi Video</span>
+            <span style="font-size: 0.7rem; color: var(--status-success);">Preset-Driven</span>
+          </div>
+          <select class="select-input" id="preset-select">
+            <option>Standard Reel 4-Clips (Dynamic Cut)</option>
+            <option>Cinematic Storytelling (VO Emphasis)</option>
+            <option>Viral Hook Remix Multiplier</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- UNIVERSAL: Nama Pengenal Jadwal (Format Baru) -->
+      <div>
+        <div class="field-label">
+          <span>Nama Pengenal Jadwal</span>
+          <span class="badge-pill" style="background: var(--status-info-soft); color: var(--status-info);">
+            ⚡ Otomatis Terformat: Type Video - Brand Profile -
+          </span>
+        </div>
+        <input
+          type="text"
+          class="text-input"
+          id="sched-name-input"
+          oninput="onManualNameInput(this.value)"
+          placeholder="Type Video - Brand Profile - "
+        />
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.35rem; font-size: 0.72rem; color: var(--text-muted);">
+          <span>💡 Ketikkan suffix/keterangan tambahan di ujung kanan (misal: <code>Batch Pagi 07:00</code>). Suffix akan tetap terjaga saat ganti Brand / Tipe!</span>
+          <button type="button" class="btn-sm-action" onclick="resetNameToDefaultPattern()">↺ Reset ke Format Standar</button>
+        </div>
+      </div>
+
+      <!-- Callout Notifikasi Smart Match -->
+      <div class="callout-box" id="smart-match-alert">
+        <span style="font-size: 1.15rem;">🎯</span>
+        <div style="flex: 1;">
+          <strong id="match-summary-title">4 Akun Repliz otomatis terpilih</strong> untuk brand <u id="match-brand-name">Dapur Botani</u>.
+          <div style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 2px;">
+            Anda bebas mencentang atau menghapus centang akun tujuan di bawah sesuai kebutuhan penerbitan.
+          </div>
+        </div>
+      </div>
+
+      <!-- Target Multi-Platform Repliz (Pilih Akun Tujuan) -->
+      <div class="repliz-box">
+        <div class="repliz-header-row">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <label style="font-size: 0.84rem; font-weight: 700; color: var(--text-primary);">
+              Target Multi-Platform Repliz (Pilih Akun Tujuan):
+            </label>
+            <span class="badge-pill" id="selected-counter-badge" style="background: var(--action-primary); color: var(--on-action-primary);">
+              4 Akun Terpilih
+            </span>
+          </div>
+
+          <div class="repliz-quick-actions">
+            <button type="button" class="btn-sm-action" onclick="selectOnlyBrandAccounts()">🎯 Pilih Akun Brand</button>
+            <button type="button" class="btn-sm-action" onclick="selectAllAccounts()">Pilih Semua</button>
+            <button type="button" class="btn-sm-action" onclick="clearSelectedAccounts()">Kosongkan</button>
+          </div>
+        </div>
+
+        <!-- Filter Platform Tabs -->
+        <div style="display: flex; gap: 0.4rem; overflow-x: auto; padding-bottom: 4px;">
+          <button class="btn-sm-action" id="tab-all" onclick="filterPlatform('all')">Semua Akun</button>
+          <button class="btn-sm-action" id="tab-instagram" onclick="filterPlatform('instagram')">📸 Instagram</button>
+          <button class="btn-sm-action" id="tab-tiktok" onclick="filterPlatform('tiktok')">🎵 TikTok</button>
+          <button class="btn-sm-action" id="tab-facebook" onclick="filterPlatform('facebook')">📘 Facebook</button>
+          <button class="btn-sm-action" id="tab-youtube" onclick="filterPlatform('youtube')">▶️ YouTube</button>
+        </div>
+
+        <!-- Accounts Grid -->
+        <div class="repliz-grid" id="accounts-grid">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <!-- Live Payload Summary (Developer & Inspection preview) -->
+      <div>
+        <div class="field-label">
+          <span>Payload JSON Preview (Real-Time State)</span>
+          <span style="font-size: 0.7rem; color: var(--text-muted);">Data yang akan dikirim saat disimpan</span>
+        </div>
+        <div class="live-summary" id="payload-preview">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer">
+      <span style="font-size: 0.78rem; color: var(--text-muted);">
+        Otomatis menjadwalkan eksekusi autonomous pipeline pada jam yang ditentukan
+      </span>
+      <div style="display: flex; gap: 0.6rem;">
+        <button type="button" class="btn-sm-action" style="padding: 0.6rem 1.1rem;" onclick="alert('Modal ditutup')">Batal</button>
+        <button type="button" class="btn-submit" onclick="simulateSave()">💾 Simpan Jadwal</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 1. Data Sumber Realistis dari Database
+    const CAMPAIGN_TYPES = [
+      { key: 'multiplier_campaign', icon: '🔀', label: 'Multiplier', fullName: 'Video Multiplier', desc: 'Remix angle hook dari referensi' },
+      { key: 'recipe_campaign', icon: '🍳', label: 'Resep', fullName: 'Video Resep', desc: 'Cooking guide & food reel 4-klip' },
+      { key: 'product_campaign', icon: '🛍️', label: 'Produk', fullName: 'Video Produk', desc: 'Promosi produk katalog & unboxing' },
+      { key: 'editorial_campaign', icon: '📖', label: 'Editorial', fullName: 'Video Editorial', desc: 'Pilar konten brand & storytelling' },
+      { key: 'recipe_labs', icon: '🖼️', label: 'Resep Teks & Foto', fullName: 'Resep Teks & Foto', desc: 'Naskah FB + Foto grid komposit' }
+    ];
+
+    const BRANDS = [
+      { id: 'b_dapurbotani', name: 'dapurbotani', displayName: 'Dapur Botani' },
+      { id: 'b_nutribake', name: 'nutribake', displayName: 'NutriBake' },
+      { id: 'b_habitfolk', name: 'habitfolk', displayName: 'HabitFolk' },
+      { id: 'b_sasyahouse', name: 'sasyahouse', displayName: 'Sasya House' },
+      { id: 'b_siasatsehat', name: 'siasatsehat', displayName: 'Siasat Sehat' },
+      { id: 'b_bakecraft', name: 'bakecraft', displayName: 'BakeCraft' },
+      { id: 'b_ruangakustik', name: 'Ruang Akustik ID', displayName: 'Ruang Akustik' },
+      { id: 'b_solusithermal', name: 'Solusi Thermal ID', displayName: 'Solusi Thermal' }
+    ];
+
+    const ALL_REPLIZ_ACCOUNTS = [
+      // Dapur Botani
+      { id: 'acc_db_ig', platform: 'instagram', display_name: 'Dapur Botani', handle: '@dapurbotani.id' },
+      { id: 'acc_db_tt', platform: 'tiktok', display_name: 'Dapur Botani', handle: '@dapur_botani' },
+      { id: 'acc_db_fb', platform: 'facebook', display_name: 'Dapur Botani', handle: 'Dapur Botani Page' },
+      { id: 'acc_db_yt', platform: 'youtube', display_name: 'Dapur Botani', handle: 'Dapur Botani Official' },
+
+      // NutriBake
+      { id: 'acc_nb_ig', platform: 'instagram', display_name: 'NutriBake ID', handle: '@nutribake.id' },
+      { id: 'acc_nb_tt', platform: 'tiktok', display_name: 'NutriBake ID', handle: '@nutribake' },
+      { id: 'acc_nb_fb', platform: 'facebook', display_name: 'NutriBake ID', handle: 'NutriBake Fans' },
+      { id: 'acc_nb_yt', platform: 'youtube', display_name: 'NutriBake ID', handle: 'NutriBake Channel' },
+
+      // HabitFolk
+      { id: 'acc_hf_fb', platform: 'facebook', display_name: 'HabitFolk', handle: 'HabitFolk Community' },
+      { id: 'acc_hf_yt', platform: 'youtube', display_name: 'HabitFolk', handle: 'HabitFolk Daily' },
+
+      // Sasya House
+      { id: 'acc_sh_ig', platform: 'instagram', display_name: 'Sasya House', handle: '@sasyahouse' },
+      { id: 'acc_sh_tt', platform: 'tiktok', display_name: 'kost_sasyahouse', handle: '@kost_sasyahouse' },
+
+      // Siasat Sehat
+      { id: 'acc_ss_fb', platform: 'facebook', display_name: 'Siasat Sehat', handle: 'Siasat Sehat ID' },
+      { id: 'acc_ss_yt', platform: 'youtube', display_name: 'Siasat Sehat', handle: 'Siasat Sehat Video' },
+
+      // BakeCraft
+      { id: 'acc_bc_fb', platform: 'facebook', display_name: 'BakeCraft ID', handle: 'BakeCraft Official' },
+
+      // Ruang Akustik
+      { id: 'acc_ra_yt', platform: 'youtube', display_name: 'Ruang Akustik ID', handle: 'Ruang Akustik Audio' },
+      { id: 'acc_ra_tt', platform: 'tiktok', display_name: 'Ruang Akustik ID', handle: '@ruangakustik' },
+      { id: 'acc_ra_fb', platform: 'facebook', display_name: 'Ruang Akustik ID', handle: 'Ruang Akustik Peredam' },
+      { id: 'acc_ra_ig', platform: 'instagram', display_name: 'Ruang Akustik ID', handle: '@ruangakustik_id' },
+
+      // Solusi Thermal
+      { id: 'acc_st_fb', platform: 'facebook', display_name: 'Solusi Thermal ID', handle: 'Solusi Thermal Page' },
+      { id: 'acc_st_ig', platform: 'instagram', display_name: 'Solusi Thermal ID', handle: '@solusithermal' },
+      { id: 'acc_st_tt', platform: 'tiktok', display_name: 'Solusi Thermal ID', handle: '@solusithermal_id' },
+      { id: 'acc_st_yt', platform: 'youtube', display_name: 'Solusi Thermal ID', handle: 'Solusi Thermal Channel' }
+    ];
+
+    // State Aplikasi
+    let currentCampaignType = 'multiplier_campaign';
+    let currentBrandId = 'b_dapurbotani';
+    let customSuffix = ''; // Menyimpan teks yang diketikkan user setelah 'Type - Brand - '
+    let selectedAccountIds = [];
+    let currentPlatformFilter = 'all';
+
+    // Helper Normalisasi Pencocokan Brand Akun
+    function normalizeStr(str) {
+      return String(str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    }
+
+    function getAccountsForBrand(brandObj) {
+      if (!brandObj) return [];
+      const normBrandName = normalizeStr(brandObj.name);
+      const normDisplayName = normalizeStr(brandObj.displayName);
+      return ALL_REPLIZ_ACCOUNTS.filter(acc => {
+        const normAcc = normalizeStr(acc.display_name);
+        return normAcc.includes(normBrandName) || normBrandName.includes(normAcc) ||
+               normAcc.includes(normDisplayName) || normDisplayName.includes(normAcc);
+      });
+    }
+
+    function getCampaignTypeObj(typeKey) {
+      return CAMPAIGN_TYPES.find(t => t.key === typeKey) || CAMPAIGN_TYPES[0];
+    }
+
+    function getBrandObj(brandId) {
+      return BRANDS.find(b => b.id === brandId) || BRANDS[0];
+    }
+
+    // Generator Nama Otomatis Sesuai Format: Type Video - Brand Profile - [Suffix]
+    function computeScheduleName(typeKey, brandId, suffix = '') {
+      const typeObj = getCampaignTypeObj(typeKey);
+      const brandObj = getBrandObj(brandId);
+      const prefix = `${typeObj.label} - ${brandObj.displayName} - `;
+      return suffix ? `${prefix}${suffix}` : prefix;
+    }
+
+    // Inisialisasi Tampilan
+    function init() {
+      renderCampaignTypes();
+      renderBrandSelect();
+      
+      // Default: Otomatis pilih akun sesuai brand pertama (Dapur Botani)
+      const brandObj = getBrandObj(currentBrandId);
+      const matched = getAccountsForBrand(brandObj);
+      selectedAccountIds = matched.map(a => a.id);
+
+      updateScheduleNameInput();
+      renderAccountsGrid();
+      updateMatchAlert();
+      updatePayloadPreview();
+    }
+
+    function renderCampaignTypes() {
+      const container = document.getElementById('campaign-types-container');
+      container.innerHTML = CAMPAIGN_TYPES.map(t => {
+        const isSelected = t.key === currentCampaignType;
+        return `
+          <div class="campaign-card ${isSelected ? 'selected' : ''}" onclick="onSelectCampaignType('${t.key}')">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 1.2rem;">${t.icon}</span>
+              <span style="font-size: 0.65rem; font-weight: 900; color: ${isSelected ? 'var(--action-primary)' : 'transparent'};">✓</span>
+            </div>
+            <strong style="font-size: 0.85rem; color: ${isSelected ? 'var(--action-primary)' : 'var(--text-primary)'};">${t.label}</strong>
+            <span style="font-size: 0.68rem; color: var(--text-muted);">${t.desc}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderBrandSelect() {
+      const select = document.getElementById('brand-select');
+      select.innerHTML = BRANDS.map(b => `
+        <option value="${b.id}" ${b.id === currentBrandId ? 'selected' : ''}>
+          ${b.displayName} (${b.name})
+        </option>
+      `).join('');
+    }
+
+    function onSelectCampaignType(typeKey) {
+      currentCampaignType = typeKey;
+      renderCampaignTypes();
+      updateScheduleNameInput();
+      updatePayloadPreview();
+    }
+
+    function onBrandChange(brandId) {
+      currentBrandId = brandId;
+      const brandObj = getBrandObj(brandId);
+      
+      // Auto-select akun brand yang cocok
+      const matched = getAccountsForBrand(brandObj);
+      selectedAccountIds = matched.map(a => a.id);
+
+      // Re-render
+      updateScheduleNameInput();
+      renderAccountsGrid();
+      updateMatchAlert();
+      updatePayloadPreview();
+    }
+
+    function onManualNameInput(val) {
+      const typeObj = getCampaignTypeObj(currentCampaignType);
+      const brandObj = getBrandObj(currentBrandId);
+      const prefix = `${typeObj.label} - ${brandObj.displayName} - `;
+
+      if (val.startsWith(prefix)) {
+        customSuffix = val.slice(prefix.length);
+      } else {
+        // Jika user mengedit bagian prefix, coba ekstrak suffix setelah tanda '-' kedua
+        const parts = val.split('-');
+        if (parts.length >= 3) {
+          customSuffix = parts.slice(2).join('-').trim();
+        } else {
+          customSuffix = '';
+        }
+      }
+      updatePayloadPreview();
+    }
+
+    function updateScheduleNameInput() {
+      const input = document.getElementById('sched-name-input');
+      const fullName = computeScheduleName(currentCampaignType, currentBrandId, customSuffix);
+      input.value = fullName;
+    }
+
+    function resetNameToDefaultPattern() {
+      customSuffix = '';
+      updateScheduleNameInput();
+      updatePayloadPreview();
+    }
+
+    function updateMatchAlert() {
+      const brandObj = getBrandObj(currentBrandId);
+      const matched = getAccountsForBrand(brandObj);
+      document.getElementById('match-brand-name').textContent = brandObj.displayName;
+      document.getElementById('match-summary-title').textContent = `${matched.length} Akun Repliz otomatis terpilih`;
+      document.getElementById('selected-counter-badge').textContent = `${selectedAccountIds.length} Akun Terpilih`;
+    }
+
+    function getPlatformIcon(platform) {
+      switch (platform) {
+        case 'instagram': return '📸';
+        case 'tiktok': return '🎵';
+        case 'facebook': return '📘';
+        case 'youtube': return '▶️';
+        default: return '🌐';
+      }
+    }
+
+    function renderAccountsGrid() {
+      const grid = document.getElementById('accounts-grid');
+      const filtered = ALL_REPLIZ_ACCOUNTS.filter(acc => {
+        if (currentPlatformFilter === 'all') return true;
+        return acc.platform === currentPlatformFilter;
+      });
+
+      const brandObj = getBrandObj(currentBrandId);
+      const brandAccounts = getAccountsForBrand(brandObj);
+      const brandAccountIds = brandAccounts.map(a => a.id);
+
+      grid.innerHTML = filtered.map(acc => {
+        const isChecked = selectedAccountIds.includes(acc.id);
+        const isBrandMatch = brandAccountIds.includes(acc.id);
+        const icon = getPlatformIcon(acc.platform);
+
+        return `
+          <div class="account-card ${isChecked ? 'checked' : ''}" onclick="toggleAccount('${acc.id}')">
+            <span class="account-icon">${icon}</span>
+            <div class="account-info">
+              <div class="account-name" title="${acc.display_name}">${acc.display_name}</div>
+              <div class="account-meta">
+                <span>${acc.handle}</span>
+                ${isBrandMatch ? '<span style="color: var(--action-primary); font-weight:700;">★ Brand</span>' : ''}
+              </div>
+            </div>
+            <div class="custom-checkbox">${isChecked ? '✓' : ''}</div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('selected-counter-badge').textContent = `${selectedAccountIds.length} Akun Terpilih`;
+    }
+
+    function toggleAccount(accId) {
+      if (selectedAccountIds.includes(accId)) {
+        selectedAccountIds = selectedAccountIds.filter(id => id !== accId);
+      } else {
+        selectedAccountIds.push(accId);
+      }
+      renderAccountsGrid();
+      updateMatchAlert();
+      updatePayloadPreview();
+    }
+
+    function selectOnlyBrandAccounts() {
+      const brandObj = getBrandObj(currentBrandId);
+      const matched = getAccountsForBrand(brandObj);
+      selectedAccountIds = matched.map(a => a.id);
+      renderAccountsGrid();
+      updateMatchAlert();
+      updatePayloadPreview();
+    }
+
+    function selectAllAccounts() {
+      selectedAccountIds = ALL_REPLIZ_ACCOUNTS.map(a => a.id);
+      renderAccountsGrid();
+      updateMatchAlert();
+      updatePayloadPreview();
+    }
+
+    function clearSelectedAccounts() {
+      selectedAccountIds = [];
+      renderAccountsGrid();
+      updateMatchAlert();
+      updatePayloadPreview();
+    }
+
+    function filterPlatform(platform) {
+      currentPlatformFilter = platform;
+      document.querySelectorAll('.repliz-box button[id^="tab-"]').forEach(btn => {
+        btn.style.background = 'var(--surface)';
+        btn.style.borderColor = 'var(--border-subtle)';
+        btn.style.color = 'var(--text-secondary)';
+      });
+      const activeBtn = document.getElementById('tab-' + platform);
+      if (activeBtn) {
+        activeBtn.style.background = 'var(--action-primary)';
+        activeBtn.style.borderColor = 'var(--action-primary)';
+        activeBtn.style.color = 'var(--on-action-primary)';
+      }
+      renderAccountsGrid();
+    }
+
+    function updatePayloadPreview() {
+      const brandObj = getBrandObj(currentBrandId);
+      const payload = {
+        name: document.getElementById('sched-name-input').value,
+        pipeline_type: currentCampaignType,
+        brand_id: currentBrandId,
+        brand_name: brandObj.displayName,
+        repliz_account_ids: selectedAccountIds,
+        selected_accounts_count: selectedAccountIds.length,
+        matched_brand_accounts: selectedAccountIds.map(id => {
+          const acc = ALL_REPLIZ_ACCOUNTS.find(a => a.id === id);
+          return acc ? `${acc.platform}: ${acc.display_name}` : id;
+        })
+      };
+      document.getElementById('payload-preview').textContent = JSON.stringify(payload, null, 2);
+    }
+
+    function simulateSave() {
+      const schedName = document.getElementById('sched-name-input').value;
+      if (selectedAccountIds.length === 0) {
+        if (!confirm('Peringatan: Belum ada akun Repliz yang dipilih. Apakah Anda yakin ingin menyimpan tanpa akun tujuan?')) {
+          return;
+        }
+      }
+      alert('✅ Sukses! Jadwal berhasil disimulasikan:\n\nNama: ' + schedName + '\nAkun Terpilih: ' + selectedAccountIds.length + ' akun');
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+      document.getElementById('theme-label').textContent = next === 'dark' ? 'Light Mode' : 'Dark Mode';
+    }
+
+    // Run on mount
+    init();
+  </script>
+</body>
+</html>
+
