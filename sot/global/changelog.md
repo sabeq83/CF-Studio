@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.35.16 — Database Produk Sync & Anti Duplication Pipeline (08/11/2026)
+- Sinkronisasi database dev ke staging dengan proteksi anti duplikasi 3-lapis
+- Penyediaan utility script sync-dev-to-staging-products.js
+
 ## V2.35.15 — Redesain Database Produk Simple Card & Multi-Brand Affiliate Links (08/11/2026)
 - Redesain kartu produk menjadi ringkas dan hemat ruang (Simple Card)
 - Filter status afiliasi cepat: Multi-Brand (≥2 Link), Ada Link, dan Belum Ada Link (Non-Afiliasi)
