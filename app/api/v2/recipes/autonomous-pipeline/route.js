@@ -75,10 +75,10 @@ export const GET = withTenantContext(async (request, _ctx, user) => {
     if (pipelineType === 'multiplier_campaign' || searchParams.get('include_blueprints') === 'true') {
       try {
         const bpRes = await pgQuery(`
-          SELECT id, source_url, original_caption, viral_pattern_summary, created_at
+          SELECT id, source_url, original_caption, viral_pattern_summary, niche, core_problem, core_solution, tags, created_at
           FROM re_deconstructed_assets
           ORDER BY created_at DESC
-          LIMIT 25
+          LIMIT 100
         `);
         blueprints = bpRes.rows || [];
       } catch (bpErr) {

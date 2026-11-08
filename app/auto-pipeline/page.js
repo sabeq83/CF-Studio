@@ -198,6 +198,7 @@ export default function AutoPipelinePage() {
 
   // Sched Modal State Khusus Multiplier & Recipe Labs
   const [schedBlueprintId, setSchedBlueprintId] = useState('');
+  const [schedBlueprintSearchQuery, setSchedBlueprintSearchQuery] = useState('');
   const [schedImagesPerRecipe, setSchedImagesPerRecipe] = useState(4);
   const [schedLayoutId, setSchedLayoutId] = useState('4_editorial_split');
   const [schedVisualStyle, setSchedVisualStyle] = useState('Food Porn');
@@ -466,6 +467,13 @@ export default function AutoPipelinePage() {
 
   // Alias helper untuk kompatibilitas
   const getStoryArcSteps = (count, dur) => generateAdaptiveStoryArc(instantCampaignType, count, dur, activePresetConfig, selectedCep).steps;
+
+  // Helper ekstraksi ID Reel / Video dari URL (Facebook / Instagram)
+  function extractReelId(url) {
+    if (!url) return '';
+    const m = url.match(/reel\/(\d+)/i) || url.match(/\/(\d{10,})/);
+    return m ? m[1] : '';
+  }
 
   // Smart Auto-Detection dari kata kunci topik
   function detectCategoryFromTopic(text) {
@@ -1024,6 +1032,7 @@ export default function AutoPipelinePage() {
     setSelectedPillars([]);
     setProductSearchQuery('');
     setPillarSearchQuery('');
+    setSchedBlueprintSearchQuery('');
 
     const brandLower = brandName.toLowerCase();
     const matched = replizAccounts.filter(a => a.display_name && a.display_name.toLowerCase().includes(brandLower));
@@ -1080,6 +1089,7 @@ export default function AutoPipelinePage() {
 
     setProductSearchQuery('');
     setPillarSearchQuery('');
+    setSchedBlueprintSearchQuery('');
 
     fetchPresetsForModalBrand(sched.brand_id, pType);
     setReplizSearchQuery('');
@@ -2866,30 +2876,94 @@ export default function AutoPipelinePage() {
                   </div>
 
                   {/* Search Blueprint */}
-                  <div style={{ position: 'relative' }}>
-                    <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '0.85rem' }}>🔍</span>
-                    <input
-                      type="text"
-                      value={blueprintSearchQuery}
-                      onChange={(e) => setBlueprintSearchQuery(e.target.value)}
-                      placeholder="Cari blueprint video dekonstruksi..."
-                      style={{
-                        width: '100%',
-                        height: '38px',
-                        background: 'var(--surface)',
-                        border: '1px solid var(--border-subtle)',
-                        borderRadius: 'var(--radius-sm)',
-                        padding: '0 10px 0 32px',
-                        color: 'var(--text-primary)',
-                        fontSize: '0.84rem',
-                        outline: 'none'
-                      }}
-                    />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                    <div style={{ position: 'relative' }}>
+                      <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '0.85rem' }}>🔍</span>
+                      <input
+                        type="text"
+                        value={blueprintSearchQuery}
+                        onChange={(e) => setBlueprintSearchQuery(e.target.value)}
+                        placeholder="Cari blueprint (ID URL misal 1476160110888470, topik, atau niche)..."
+                        style={{
+                          width: '100%',
+                          height: '38px',
+                          background: 'var(--surface)',
+                          border: '1px solid var(--border-subtle)',
+                          borderRadius: 'var(--radius-sm)',
+                          padding: '0 32px 0 32px',
+                          color: 'var(--text-primary)',
+                          fontSize: '0.84rem',
+                          outline: 'none'
+                        }}
+                      />
+                      {blueprintSearchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => setBlueprintSearchQuery('')}
+                          style={{
+                            position: 'absolute',
+                            right: '8px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            background: 'none',
+                            border: 'none',
+                            color: 'var(--text-muted)',
+                            cursor: 'pointer',
+                            fontSize: '0.85rem',
+                            padding: '4px'
+                          }}
+                          title="Hapus pencarian"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Quick Filter Chips */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>Quick:</span>
+                      {['1476160110888470', 'Baking', 'Cooking', 'Health'].map(chip => (
+                        <button
+                          key={chip}
+                          type="button"
+                          onClick={() => setBlueprintSearchQuery(chip)}
+                          style={{
+                            background: blueprintSearchQuery === chip ? 'var(--status-purple)' : 'var(--surface)',
+                            color: blueprintSearchQuery === chip ? 'var(--on-action-primary)' : 'var(--text-secondary)',
+                            border: `1px solid ${blueprintSearchQuery === chip ? 'var(--status-purple)' : 'var(--border-subtle)'}`,
+                            borderRadius: '999px',
+                            padding: '0.15rem 0.55rem',
+                            fontSize: '0.7rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            transition: 'var(--transition)'
+                          }}
+                        >
+                          {chip}
+                        </button>
+                      ))}
+                      {blueprintSearchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => setBlueprintSearchQuery('')}
+                          style={{
+                            background: 'none',
+                            color: 'var(--status-danger)',
+                            border: 'none',
+                            fontSize: '0.7rem',
+                            cursor: 'pointer',
+                            textDecoration: 'underline'
+                          }}
+                        >
+                          Reset
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   {/* Blueprints Scroll List */}
                   <div style={{
-                    maxHeight: '160px',
+                    maxHeight: '180px',
                     overflowY: 'auto',
                     display: 'flex',
                     flexDirection: 'column',
@@ -2904,84 +2978,157 @@ export default function AutoPipelinePage() {
                       <div style={{ textAlign: 'center', padding: '1.25rem', color: 'var(--text-muted)', fontSize: '0.82rem', background: 'var(--surface)', borderRadius: 'var(--radius-sm)', border: '1px dashed var(--border-subtle)' }}>
                         Belum ada video di Deconstruct Lab. Silakan lakukan dekonstruksi video di menu Deconstruct Lab terlebih dahulu.
                       </div>
-                    ) : (
-                      blueprints
-                        .filter(bp => {
-                          if (!blueprintSearchQuery.trim()) return true;
-                          const q = blueprintSearchQuery.toLowerCase();
-                          return (bp.original_caption && bp.original_caption.toLowerCase().includes(q)) ||
-                                 (bp.source_url && bp.source_url.toLowerCase().includes(q)) ||
-                                 (bp.viral_pattern_summary && bp.viral_pattern_summary.toLowerCase().includes(q));
-                        })
-                        .map(bp => {
-                          const isSelected = instantBlueprintId === bp.id;
-                          return (
-                            <div
-                              key={bp.id}
-                              onClick={() => {
-                                setInstantBlueprintId(bp.id);
-                                if (executionMode === 'manual_review') {
-                                  generateMultiplierAnglesForBlueprint(bp.id);
-                                }
-                              }}
+                    ) : (() => {
+                      const filteredBlueprints = blueprints.filter(bp => {
+                        if (!blueprintSearchQuery.trim()) return true;
+                        const q = blueprintSearchQuery.toLowerCase().trim();
+                        const reelId = extractReelId(bp.source_url);
+                        return (
+                          (reelId && reelId.includes(q)) ||
+                          (bp.source_url && bp.source_url.toLowerCase().includes(q)) ||
+                          (bp.core_problem && bp.core_problem.toLowerCase().includes(q)) ||
+                          (bp.core_solution && bp.core_solution.toLowerCase().includes(q)) ||
+                          (bp.niche && bp.niche.toLowerCase().includes(q)) ||
+                          (bp.tags && (Array.isArray(bp.tags) ? bp.tags.join(' ') : String(bp.tags)).toLowerCase().includes(q)) ||
+                          (bp.viral_pattern_summary && bp.viral_pattern_summary.toLowerCase().includes(q)) ||
+                          (bp.original_caption && bp.original_caption.toLowerCase().includes(q))
+                        );
+                      });
+
+                      if (filteredBlueprints.length === 0) {
+                        return (
+                          <div style={{
+                            textAlign: 'center',
+                            padding: '1.25rem',
+                            color: 'var(--text-muted)',
+                            fontSize: '0.82rem',
+                            background: 'var(--surface)',
+                            borderRadius: 'var(--radius-sm)',
+                            border: '1px dashed var(--border-subtle)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '0.4rem'
+                          }}>
+                            <span>🔍 Tidak ada blueprint yang cocok dengan "{blueprintSearchQuery}"</span>
+                            <button
+                              type="button"
+                              onClick={() => setBlueprintSearchQuery('')}
                               style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.75rem',
-                                padding: '0.55rem 0.75rem',
-                                borderRadius: 'var(--radius-sm)',
-                                background: isSelected ? 'var(--surface-interactive)' : 'var(--surface)',
-                                border: isSelected ? '1.5px solid var(--status-purple)' : '1px solid var(--border-subtle)',
-                                cursor: 'pointer',
-                                transition: 'var(--transition)'
+                                background: 'var(--status-purple-soft)',
+                                color: 'var(--status-purple)',
+                                border: '1px solid var(--status-purple)',
+                                padding: '0.2rem 0.6rem',
+                                borderRadius: 'var(--radius-xs)',
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                cursor: 'pointer'
                               }}
                             >
-                              <div style={{
-                                width: '36px',
-                                height: '36px',
-                                background: '#000000',
-                                color: '#ffffff',
-                                borderRadius: '4px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: '1rem',
-                                flexShrink: 0
-                              }}>
-                                🎬
-                              </div>
-                              <div style={{ flex: 1, minWidth: 0 }}>
-                                <div style={{
-                                  fontSize: '0.82rem',
-                                  fontWeight: 700,
-                                  color: 'var(--text-primary)',
-                                  whiteSpace: 'nowrap',
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis'
-                                }}>
-                                  {bp.original_caption || bp.source_url || bp.id}
-                                </div>
-                                <div style={{
-                                  fontSize: '0.7rem',
-                                  color: 'var(--text-muted)',
-                                  whiteSpace: 'nowrap',
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis'
-                                }}>
-                                  {bp.viral_pattern_summary || 'Formula Hook Teruji'}
-                                </div>
-                              </div>
-                              <span style={{
-                                color: isSelected ? 'var(--status-purple)' : 'var(--text-muted)',
-                                fontWeight: 800,
-                                fontSize: '0.9rem'
-                              }}>
-                                {isSelected ? '✓' : '○'}
-                              </span>
+                              Reset Filter Pencarian
+                            </button>
+                          </div>
+                        );
+                      }
+
+                      return filteredBlueprints.map(bp => {
+                        const isSelected = instantBlueprintId === bp.id;
+                        const rId = extractReelId(bp.source_url);
+                        const title = bp.core_problem || bp.core_solution || bp.original_caption || bp.source_url;
+                        const subtitle = bp.viral_pattern_summary || bp.core_solution || 'Formula Hook Teruji';
+                        return (
+                          <div
+                            key={bp.id}
+                            onClick={() => {
+                              setInstantBlueprintId(bp.id);
+                              if (executionMode === 'manual_review') {
+                                generateMultiplierAnglesForBlueprint(bp.id);
+                              }
+                            }}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.75rem',
+                              padding: '0.55rem 0.75rem',
+                              borderRadius: 'var(--radius-sm)',
+                              background: isSelected ? 'var(--surface-interactive)' : 'var(--surface)',
+                              border: isSelected ? '1.5px solid var(--status-purple)' : '1px solid var(--border-subtle)',
+                              cursor: 'pointer',
+                              transition: 'var(--transition)'
+                            }}
+                          >
+                            <div style={{
+                              width: '38px',
+                              height: '38px',
+                              background: 'var(--surface-raised)',
+                              border: '1px solid var(--border-subtle)',
+                              color: 'var(--text-primary)',
+                              borderRadius: 'var(--radius-xs)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '1.1rem',
+                              flexShrink: 0
+                            }}>
+                              🎬
                             </div>
-                          );
-                        })
-                    )}
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '2px' }}>
+                                <span style={{
+                                  fontFamily: 'monospace',
+                                  fontSize: '0.68rem',
+                                  padding: '0.1rem 0.35rem',
+                                  borderRadius: 'var(--radius-xs)',
+                                  background: 'var(--surface-interactive)',
+                                  color: 'var(--status-info)',
+                                  fontWeight: 700
+                                }}>
+                                  ID: {rId || bp.id.slice(0, 8)}
+                                </span>
+                                {bp.niche && (
+                                  <span style={{
+                                    fontSize: '0.65rem',
+                                    padding: '0.1rem 0.35rem',
+                                    borderRadius: 'var(--radius-xs)',
+                                    background: 'var(--status-purple-soft)',
+                                    color: 'var(--status-purple)',
+                                    fontWeight: 700
+                                  }}>
+                                    {bp.niche}
+                                  </span>
+                                )}
+                              </div>
+                              <div style={{
+                                fontSize: '0.82rem',
+                                fontWeight: 700,
+                                color: 'var(--text-primary)',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis'
+                              }} title={title}>
+                                {title}
+                              </div>
+                              <div style={{
+                                fontSize: '0.7rem',
+                                color: 'var(--text-muted)',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis'
+                              }}>
+                                {subtitle}
+                              </div>
+                            </div>
+                            <span style={{
+                              color: isSelected ? 'var(--status-purple)' : 'var(--text-muted)',
+                              fontWeight: 800,
+                              fontSize: '0.9rem'
+                            }}>
+                              {isSelected ? '✓' : '○'}
+                            </span>
+                          </div>
+                        );
+                      });
+                    })()}
                   </div>
 
                   {/* Skenario Angle Box */}
@@ -5658,9 +5805,48 @@ export default function AutoPipelinePage() {
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                      <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                        Pilih Blueprint Video Acuan (Deconstruct Lab)
-                      </label>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                          Pilih Blueprint Video Acuan (Deconstruct Lab)
+                        </label>
+                        {schedBlueprintSearchQuery && (
+                          <button
+                            type="button"
+                            onClick={() => setSchedBlueprintSearchQuery('')}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: 'var(--status-purple)',
+                              fontSize: '0.72rem',
+                              fontWeight: 700,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Reset Filter
+                          </button>
+                        )}
+                      </div>
+                      <div style={{ position: 'relative' }}>
+                        <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '0.8rem' }}>🔍</span>
+                        <input
+                          type="text"
+                          value={schedBlueprintSearchQuery}
+                          onChange={(e) => setSchedBlueprintSearchQuery(e.target.value)}
+                          placeholder="Ketik ID URL (misal: 1476160110888470), niche, atau topik..."
+                          style={{
+                            width: '100%',
+                            height: '36px',
+                            background: 'var(--input-bg)',
+                            border: '1px solid var(--border-subtle)',
+                            borderRadius: 'var(--radius-sm)',
+                            padding: '0 0.75rem 0 30px',
+                            fontSize: '0.8rem',
+                            color: 'var(--text-primary)',
+                            outline: 'none',
+                            marginBottom: '0.35rem'
+                          }}
+                        />
+                      </div>
                       <select
                         value={schedBlueprintId}
                         onChange={(e) => setSchedBlueprintId(e.target.value)}
@@ -5676,11 +5862,32 @@ export default function AutoPipelinePage() {
                         }}
                       >
                         <option value="">⚡ Autopilot: Blueprint Video Paling Viral (Rank #1 Hook)</option>
-                        {blueprints.map(bp => (
-                          <option key={bp.id} value={bp.id}>
-                            {bp.original_caption ? `${bp.original_caption.substring(0, 50)}...` : (bp.source_url || bp.id)}
-                          </option>
-                        ))}
+                        {blueprints
+                          .filter(bp => {
+                            if (!schedBlueprintSearchQuery.trim()) return true;
+                            const q = schedBlueprintSearchQuery.toLowerCase().trim();
+                            const rId = extractReelId(bp.source_url);
+                            return (
+                              (rId && rId.includes(q)) ||
+                              (bp.source_url && bp.source_url.toLowerCase().includes(q)) ||
+                              (bp.core_problem && bp.core_problem.toLowerCase().includes(q)) ||
+                              (bp.core_solution && bp.core_solution.toLowerCase().includes(q)) ||
+                              (bp.niche && bp.niche.toLowerCase().includes(q)) ||
+                              (bp.tags && (Array.isArray(bp.tags) ? bp.tags.join(' ') : String(bp.tags)).toLowerCase().includes(q)) ||
+                              (bp.viral_pattern_summary && bp.viral_pattern_summary.toLowerCase().includes(q)) ||
+                              (bp.original_caption && bp.original_caption.toLowerCase().includes(q))
+                            );
+                          })
+                          .map(bp => {
+                            const rId = extractReelId(bp.source_url);
+                            const title = bp.core_problem || bp.core_solution || bp.original_caption || bp.source_url;
+                            const label = `[ID: ${rId || bp.id.slice(0, 8)}] ${bp.niche ? `[${bp.niche}] ` : ''}${title}`;
+                            return (
+                              <option key={bp.id} value={bp.id} title={title}>
+                                {label.length > 80 ? `${label.substring(0, 80)}...` : label}
+                              </option>
+                            );
+                          })}
                       </select>
                     </div>
 

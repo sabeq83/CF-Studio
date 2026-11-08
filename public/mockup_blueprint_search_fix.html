@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup Interaktif: Pencarian Blueprint Berdasarkan ID URL & Topik</title>
+  <style>
+    /* 100% Semantic CSS Tokens sesuai SOP MAKNA Flow dari app/theme.css */
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-purple: #c084fc;
+      --status-purple-soft: rgba(192, 132, 252, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f8fafc;
+      --surface: #ffffff;
+      --surface-raised: #f1f5f9;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --input-bg: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --border-subtle: #e2e8f0;
+      --border-strong: #94a3b8;
+      --action-primary: #0d9488;
+      --action-primary-hover: #14b8a6;
+      --on-action-primary: #ffffff;
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.12);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.12);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.12);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.12);
+      --status-purple: #9333ea;
+      --status-purple-soft: rgba(147, 51, 234, 0.12);
+      --focus-ring: #7c3aed;
+      --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.08);
+      --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.16);
+      --overlay-backdrop: rgba(15, 23, 42, 0.5);
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--canvas);
+      color: var(--text-primary);
+      padding: 1.5rem;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 980px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* Header Bar */
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.25rem;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+    }
+    .header-title { display: flex; align-items: center; gap: 0.75rem; }
+    .header-title h1 { font-size: 1.15rem; font-weight: 800; color: var(--text-primary); }
+    .badge {
+      font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.6rem;
+      border-radius: 9999px; background: var(--status-purple-soft); color: var(--status-purple);
+      border: 1px solid var(--status-purple);
+    }
+
+    /* Tab switcher */
+    .view-switcher {
+      display: flex; gap: 0.5rem; background: var(--surface); padding: 0.4rem;
+      border-radius: var(--radius-md); border: 1px solid var(--border-subtle);
+    }
+    .tab-btn {
+      flex: 1; padding: 0.6rem 1rem; border: none; background: transparent;
+      color: var(--text-secondary); border-radius: var(--radius-sm); font-size: 0.85rem;
+      font-weight: 600; cursor: pointer; transition: var(--transition);
+      display: flex; align-items: center; justify-content: center; gap: 0.45rem;
+    }
+    .tab-btn.active {
+      background: var(--surface-interactive); color: var(--status-purple); font-weight: 800;
+      border: 1px solid var(--status-purple);
+    }
+
+    /* Comparison Box */
+    .comparison-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+    }
+    @media (max-width: 768px) {
+      .comparison-grid { grid-template-columns: 1fr; }
+    }
+
+    .card-panel {
+      background: var(--surface); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md); padding: 1.25rem; box-shadow: var(--shadow-card);
+      display: flex; flex-direction: column; gap: 1rem;
+    }
+
+    .card-panel.highlight {
+      border: 1.5px solid var(--status-purple);
+      background: var(--surface-raised);
+    }
+
+    /* Search bar */
+    .search-box {
+      position: relative; width: 100%;
+    }
+    .search-box input {
+      width: 100%; height: 42px; background: var(--input-bg);
+      border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);
+      padding: 0 12px 0 38px; color: var(--text-primary); font-size: 0.88rem;
+      outline: none; transition: var(--transition);
+    }
+    .search-box input:focus {
+      border-color: var(--status-purple); box-shadow: 0 0 0 3px var(--status-purple-soft);
+    }
+    .search-icon {
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      color: var(--text-muted); font-size: 0.95rem; pointer-events: none;
+    }
+    .clear-btn {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      background: transparent; border: none; color: var(--text-muted); cursor: pointer;
+      font-size: 0.8rem; padding: 4px 6px; border-radius: 4px;
+    }
+    .clear-btn:hover { background: var(--surface-interactive); color: var(--text-primary); }
+
+    /* Quick search chips */
+    .quick-chips {
+      display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center;
+    }
+    .chip {
+      font-size: 0.72rem; padding: 0.25rem 0.65rem; border-radius: 9999px;
+      border: 1px solid var(--border-subtle); background: var(--surface-interactive);
+      color: var(--text-secondary); cursor: pointer; transition: var(--transition);
+      display: inline-flex; align-items: center; gap: 0.35rem; font-family: var(--font-mono);
+    }
+    .chip:hover {
+      border-color: var(--status-purple); color: var(--status-purple); background: var(--status-purple-soft);
+    }
+    .chip.active {
+      border-color: var(--status-purple); background: var(--status-purple); color: #ffffff; font-weight: 700;
+    }
+
+    /* List items */
+    .blueprint-list {
+      display: flex; flex-direction: column; gap: 0.55rem;
+      max-height: 380px; overflow-y: auto; padding-right: 4px;
+    }
+
+    .blueprint-item {
+      display: flex; align-items: flex-start; gap: 0.85rem;
+      padding: 0.75rem 0.9rem; border-radius: var(--radius-sm);
+      background: var(--surface); border: 1px solid var(--border-subtle);
+      cursor: pointer; transition: var(--transition);
+    }
+    .blueprint-item:hover {
+      background: var(--surface-interactive); border-color: var(--border-strong);
+    }
+    .blueprint-item.selected {
+      background: var(--surface-interactive); border: 1.5px solid var(--status-purple);
+      box-shadow: 0 4px 16px rgba(192, 132, 252, 0.12);
+    }
+
+    .icon-box {
+      width: 40px; height: 40px; border-radius: var(--radius-xs);
+      background: #090e17; color: #ffffff; display: flex;
+      align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .item-content { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.25rem; }
+
+    .item-header {
+      display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;
+    }
+
+    .niche-badge {
+      font-size: 0.65rem; font-weight: 800; padding: 0.15rem 0.5rem;
+      border-radius: 4px; background: var(--status-info-soft); color: var(--status-info);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+
+    .id-badge {
+      font-size: 0.68rem; font-family: var(--font-mono); font-weight: 700;
+      padding: 0.15rem 0.55rem; border-radius: 4px;
+      background: var(--status-purple-soft); color: var(--status-purple);
+      border: 1px solid var(--status-purple); display: inline-flex; align-items: center; gap: 0.25rem;
+    }
+
+    .item-title {
+      font-size: 0.86rem; font-weight: 700; color: var(--text-primary);
+      line-height: 1.35; word-break: break-word;
+    }
+
+    .item-subtitle {
+      font-size: 0.74rem; color: var(--text-muted); line-height: 1.4;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+
+    .item-url {
+      font-size: 0.68rem; color: var(--text-muted); font-family: var(--font-mono);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90%;
+    }
+
+    .check-circle {
+      width: 20px; height: 20px; border-radius: 50%;
+      border: 1.5px solid var(--border-strong); display: flex;
+      align-items: center; justify-content: center; font-size: 0.75rem;
+      color: transparent; flex-shrink: 0; margin-top: 2px;
+    }
+    .blueprint-item.selected .check-circle {
+      background: var(--status-purple); border-color: var(--status-purple);
+      color: #ffffff; font-weight: 900;
+    }
+
+    /* Modal Simulation Container */
+    .modal-simulation {
+      background: var(--surface); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md); padding: 1.5rem; box-shadow: var(--shadow-modal);
+      display: flex; flex-direction: column; gap: 1rem;
+    }
+
+    /* Callout */
+    .callout {
+      background: var(--surface-raised); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm); padding: 0.85rem 1rem; font-size: 0.8rem;
+      color: var(--text-secondary); display: flex; gap: 0.65rem; align-items: flex-start;
+      line-height: 1.5;
+    }
+    .callout strong { color: var(--text-primary); }
+
+    .highlight-match {
+      background: rgba(192, 132, 252, 0.35); color: #ffffff;
+      padding: 0 2px; border-radius: 2px; font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header Bar -->
+  <div class="header-bar">
+    <div class="header-title">
+      <span style="font-size: 1.4rem;">🎬</span>
+      <div>
+        <h1>Simulasi Mockup: Pencarian Blueprint Berdasarkan ID URL &amp; Topik</h1>
+        <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">
+          Pencarian Instan Mendukung ID Angka URL Reels (misal: <code>1476160110888470</code>), Niche, &amp; Topik Masalah
+        </div>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.65rem;">
+      <span class="badge">MAKNA Flow UI Mockup</span>
+      <button onclick="toggleTheme()" style="background: var(--surface-interactive); border: 1px solid var(--border-subtle); color: var(--text-secondary); padding: 0.4rem 0.8rem; border-radius: var(--radius-sm); font-size: 0.78rem; cursor: pointer;">
+        🌓 Toggle Mode
+      </button>
+    </div>
+  </div>
+
+  <!-- Callout Penjelasan Jawaban -->
+  <div class="callout" style="border-left: 3px solid var(--status-purple);">
+    <span style="font-size: 1.25rem;">💡</span>
+    <div>
+      <strong>Jawaban Pertanyaan Anda:</strong> Ya, Anda <strong>100% BISA</strong> mencari blueprint video hanya dengan memasukkan angka ID reel dari URL (seperti <code>1476160110888470</code>).
+      <br>
+      Sistem akan otomatis mengekstrak ID numerik dari <code>source_url</code> (contoh: <code>facebook.com/reel/1476160110888470</code>) dan mencocokkannya secara instan, sekaligus menampilkan nama topik yang manusiawi (bukan URL mentah).
+    </div>
+  </div>
+
+  <!-- Context Switcher -->
+  <div class="view-switcher">
+    <button class="tab-btn active" onclick="switchContext('launcher')">
+      <span>1️⃣</span> Tab 1: Peluncuran Instan (1-Click Multiplier)
+    </button>
+    <button class="tab-btn" onclick="switchContext('scheduler')">
+      <span>2️⃣</span> Tab 2: Modal Penjadwalan Rutin (Schedule Modal)
+    </button>
+  </div>
+
+  <!-- INTERACTIVE SEARCH COMPONENT -->
+  <div class="card-panel highlight">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+      <div style="font-size: 0.92rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;">
+        <span>🔀</span>
+        <span>Pilih Blueprint Video Pemenang (Deconstruct Lab):</span>
+      </div>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <span style="font-size: 0.74rem; font-weight: 700; padding: 0.2rem 0.65rem; border-radius: 9999px; background: var(--status-purple-soft); color: var(--status-purple); border: 1px solid var(--status-purple);">
+          Winning Hook Engine
+        </span>
+        <span id="counter-badge" style="font-size: 0.72rem; color: var(--text-muted);">
+          6 Blueprint Tersedia
+        </span>
+      </div>
+    </div>
+
+    <!-- Kotak Pencarian Universal -->
+    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          id="blueprint-search-input"
+          oninput="handleSearch(this.value)"
+          placeholder="Cari ID URL (contoh: 1476160110888470), topik resep, atau niche..."
+          value=""
+        />
+        <button id="clear-search-btn" class="clear-btn" style="display: none;" onclick="clearSearch()">✕ Reset</button>
+      </div>
+
+      <!-- Quick Search Chips untuk Uji Coba Cepat -->
+      <div class="quick-chips">
+        <span style="font-size: 0.7rem; color: var(--text-muted); margin-right: 0.2rem;">⚡ Klik Uji Cepat:</span>
+        <button type="button" class="chip" onclick="applyQuickFilter('1476160110888470')">
+          <span>🎯 ID: 1476160110888470</span>
+        </button>
+        <button type="button" class="chip" onclick="applyQuickFilter('chocolate')">
+          <span>🍫 chocolate</span>
+        </button>
+        <button type="button" class="chip" onclick="applyQuickFilter('sarapan')">
+          <span>🍳 sarapan</span>
+        </button>
+        <button type="button" class="chip" onclick="applyQuickFilter('stamina')">
+          <span>⚡ stamina</span>
+        </button>
+        <button type="button" class="chip" onclick="applyQuickFilter('baking')">
+          <span>🧁 Baking</span>
+        </button>
+        <button type="button" class="chip" onclick="applyQuickFilter('oatmeal')">
+          <span>🌾 oatmeal</span>
+        </button>
+        <button type="button" class="chip" onclick="clearSearch()" style="background: transparent; border-color: var(--border-strong);">
+          <span>🔄 Tampilkan Semua</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Blueprint List -->
+    <div class="blueprint-list" id="blueprint-list-container">
+      <!-- Dinamis di-render via JavaScript -->
+    </div>
+
+    <!-- Detail Seleksi Aktif -->
+    <div id="selection-card" style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.85rem 1rem; display: flex; flex-direction: column; gap: 0.4rem;">
+      <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">
+        📌 Blueprint Terpilih untuk Remake Video:
+      </div>
+      <div id="selected-title" style="font-size: 0.88rem; font-weight: 800; color: var(--status-purple);">
+        Did you know if you add milk, then add cornstarch...
+      </div>
+      <div style="display: flex; gap: 0.65rem; align-items: center; font-size: 0.72rem; color: var(--text-muted); flex-wrap: wrap;">
+        <span id="selected-id-tag" class="id-badge">ID: 1476160110888470</span>
+        <span id="selected-niche-tag" class="niche-badge">Baking</span>
+        <span id="selected-url-tag" style="font-family: var(--font-mono);">https://www.facebook.com/reel/1476160110888470</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PERBANDINGAN SEBELUM VS SESUDAH -->
+  <div class="card-panel">
+    <h3 style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 0.45rem;">
+      <span>⚖️</span> Perbandingan: Sebelum vs Sesudah Perbaikan
+    </h3>
+
+    <div class="comparison-grid">
+      <!-- Sebelum -->
+      <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 1rem; display: flex; flex-direction: column; gap: 0.65rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <strong style="color: var(--status-danger); font-size: 0.82rem;">❌ SEBELUM (Kondisi Saat Ini)</strong>
+          <span style="font-size: 0.68rem; padding: 0.1rem 0.4rem; background: var(--status-danger-soft); color: var(--status-danger); border-radius: 4px;">Pencarian Gagal</span>
+        </div>
+        <ul style="font-size: 0.76rem; color: var(--text-secondary); line-height: 1.5; padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.35rem;">
+          <li>Mencari <code>1476160110888470</code> atau <code>chocolate</code> menghasilkan <strong>0 hasil</strong> karena backend tidak mengambil kolom topik.</li>
+          <li>Item menampilkan URL mentah <code>https://www.facebook.com/...</code> karena <code>original_caption</code> bernilai null.</li>
+          <li>Di Modal Jadwal, hanya berupa <code>&lt;select&gt;</code> dropdown URL panjang tanpa kotak pencarian sama sekali.</li>
+          <li>Dibatasi hanya 25 video terbaru.</li>
+        </ul>
+      </div>
+
+      <!-- Sesudah -->
+      <div style="background: var(--surface-raised); border: 1px solid var(--status-success); border-radius: var(--radius-sm); padding: 1rem; display: flex; flex-direction: column; gap: 0.65rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <strong style="color: var(--status-success); font-size: 0.82rem;">✅ SESUDAH (Usulan Perbaikan)</strong>
+          <span style="font-size: 0.68rem; padding: 0.1rem 0.4rem; background: var(--status-success-soft); color: var(--status-success); border-radius: 4px;">Pencarian Cerdas</span>
+        </div>
+        <ul style="font-size: 0.76rem; color: var(--text-secondary); line-height: 1.5; padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.35rem;">
+          <li>Bisa mencari angka ID reel seperti <code>1476160110888470</code> secara instan.</li>
+          <li>Bisa mencari topik resep/masalah seperti <code>chocolate</code>, <code>sarapan</code>, <code>oatmeal</code>, <code>stamina</code>.</li>
+          <li>Menampilkan judul topik yang bersih, badge kategori (Baking, Cooking, dll.), dan chip ID Reel.</li>
+          <li>Modal Jadwal memiliki kotak pencarian interaktif yang sama persis dan responsif.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Data Riil Deconstruct Lab dari Database (termasuk contoh ID user: 1476160110888470)
+  const mockBlueprints = [
+    {
+      id: "bp_1476160110888470",
+      reel_id: "1476160110888470",
+      source_url: "https://www.facebook.com/reel/1476160110888470",
+      niche: "Baking",
+      core_problem: "Did you know if you add milk, then add cornstarch...",
+      core_solution: "Hasil olahan dessert lembut 3 bahan tanpa mixer dan tanpa oven",
+      viral_pattern_summary: "Formula '3-Ingredient Hook' dengan visual ASMR memotong adonan lembut yang menggugah selera."
+    },
+    {
+      id: "ff1a0462-600e-4fb7-b6be-f3b62f3cd008",
+      reel_id: "2130962364300836",
+      source_url: "https://www.facebook.com/reel/2130962364300836",
+      niche: "Cooking",
+      core_problem: "Sarapan praktis, sehat, bergizi tinggi tanpa ribet dan tanpa bahan kimia",
+      core_solution: "Did you know if you mash 1 boiled potato and add oats...",
+      viral_pattern_summary: "Teknik 'Did You Know / Secret Recipe' hook dengan adegan membelah roti hangat (food pull shot)."
+    },
+    {
+      id: "62dc4234-d603-4950-aa56-a433f4598080",
+      reel_id: "850865538060532",
+      source_url: "https://www.facebook.com/reel/850865538060532",
+      niche: "Baking",
+      core_problem: "Stop buying chocolate desserts, make this rich creamy one on your stove in minutes",
+      core_solution: "Stop buying chocolate desserts",
+      viral_pattern_summary: "Visual Culinary ASMR & Pattern Interrupt Hook detik ke-1 dengan aksi menyendok cokelat kental nan menggoda."
+    },
+    {
+      id: "2c904f0a-94b4-4e23-8c52-e22bda7d3293",
+      reel_id: "2773879506311037",
+      source_url: "https://www.facebook.com/reel/2773879506311037",
+      niche: "Baking",
+      core_problem: "Olahan oatmeal sehat bernutrisi tinggi tanpa gula dan tepung biasa",
+      core_solution: "Visualisasi proses yang sangat cepat dan bersih tanpa oven",
+      viral_pattern_summary: "Life-Hack Recipe Hook dengan pertanyaan pembuka 'Did you know...' untuk pecinta diet sehat."
+    },
+    {
+      id: "8795cfaa-8469-490f-bfdc-81ccd46daa16",
+      reel_id: "1034313555836569",
+      source_url: "https://www.facebook.com/reel/1034313555836569",
+      niche: "Health",
+      core_problem: "Stamina pria dan pegal linu: 99% of people don't know this herbal secret",
+      core_solution: "99% of people don't know how honey and black garlic works",
+      viral_pattern_summary: "Reverse-psychology hook dengan visualisasi efek rempah herbal alami langsung ke tubuh."
+    },
+    {
+      id: "d6f466f5-7937-4a57-a970-b5963c0623c0",
+      reel_id: "1689137232102974",
+      source_url: "https://www.facebook.com/reel/1689137232102974",
+      niche: "Baking",
+      core_problem: "Keinginan makan manis/dessert tanpa khawatir gula berlebih dan berat badan naik",
+      core_solution: "This quick and easy yogurt cake is soft, fluffy and zero sugar",
+      viral_pattern_summary: "Result-First Hook menampilkan kue lembut berasap di 3 detik pertama memicu nafsu makan."
+    }
+  ];
+
+  let selectedId = "bp_1476160110888470";
+  let currentSearchQuery = "";
+
+  function extractReelId(url) {
+    if (!url) return '';
+    const match = url.match(/reel\/(\d+)/i) || url.match(/\/(\d{10,})/);
+    return match ? match[1] : '';
+  }
+
+  function highlightText(text, query) {
+    if (!text || !query.trim()) return text || '';
+    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escaped})`, 'gi');
+    return text.replace(regex, '<span class="highlight-match">$1</span>');
+  }
+
+  function renderList(query = '') {
+    const container = document.getElementById('blueprint-list-container');
+    const counterBadge = document.getElementById('counter-badge');
+    const q = query.toLowerCase().trim();
+
+    const filtered = mockBlueprints.filter(bp => {
+      if (!q) return true;
+      const reelId = bp.reel_id || extractReelId(bp.source_url);
+      return (
+        (reelId && reelId.includes(q)) ||
+        (bp.source_url && bp.source_url.toLowerCase().includes(q)) ||
+        (bp.core_problem && bp.core_problem.toLowerCase().includes(q)) ||
+        (bp.core_solution && bp.core_solution.toLowerCase().includes(q)) ||
+        (bp.niche && bp.niche.toLowerCase().includes(q)) ||
+        (bp.viral_pattern_summary && bp.viral_pattern_summary.toLowerCase().includes(q))
+      );
+    });
+
+    counterBadge.textContent = `${filtered.length} Blueprint Ditemukan`;
+
+    if (filtered.length === 0) {
+      container.innerHTML = `
+        <div style="text-align: center; padding: 2rem 1rem; border: 1.5px dashed var(--border-subtle); border-radius: var(--radius-sm); color: var(--text-muted); font-size: 0.85rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+          <span style="font-size: 1.8rem;">🔍</span>
+          <div style="font-weight: 700; color: var(--text-primary);">Tidak ada blueprint yang cocok dengan "${query}"</div>
+          <div style="font-size: 0.76rem;">Coba masukkan kata kunci lain seperti ID URL, "chocolate", "sarapan", atau "baking".</div>
+          <button onclick="clearSearch()" style="margin-top: 0.4rem; background: var(--status-purple-soft); color: var(--status-purple); border: 1px solid var(--status-purple); padding: 0.3rem 0.8rem; border-radius: var(--radius-sm); font-size: 0.75rem; font-weight: 700; cursor: pointer;">
+            Reset Pencarian
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = filtered.map(bp => {
+      const isSelected = selectedId === bp.id;
+      const reelId = bp.reel_id || extractReelId(bp.source_url) || 'Deconstruct Asset';
+      const title = bp.core_problem || bp.core_solution || bp.source_url;
+      const desc = bp.viral_pattern_summary || bp.core_solution || 'Formula Hook Teruji';
+
+      return `
+        <div class="blueprint-item ${isSelected ? 'selected' : ''}" onclick="selectBlueprint('${bp.id}')">
+          <div class="icon-box">🎬</div>
+          <div class="item-content">
+            <div class="item-header">
+              <span class="id-badge">ID: ${highlightText(reelId, q)}</span>
+              ${bp.niche ? `<span class="niche-badge">${highlightText(bp.niche, q)}</span>` : ''}
+              <span class="item-url">${highlightText(bp.source_url, q)}</span>
+            </div>
+            <div class="item-title">${highlightText(title, q)}</div>
+            <div class="item-subtitle">${highlightText(desc, q)}</div>
+          </div>
+          <div class="check-circle">✓</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function selectBlueprint(id) {
+    selectedId = id;
+    const bp = mockBlueprints.find(b => b.id === id);
+    if (bp) {
+      document.getElementById('selected-title').textContent = bp.core_problem || bp.core_solution;
+      document.getElementById('selected-id-tag').textContent = `ID: ${bp.reel_id || extractReelId(bp.source_url)}`;
+      document.getElementById('selected-niche-tag').textContent = bp.niche || 'General';
+      document.getElementById('selected-url-tag').textContent = bp.source_url;
+    }
+    renderList(currentSearchQuery);
+  }
+
+  function handleSearch(val) {
+    currentSearchQuery = val;
+    document.getElementById('clear-search-btn').style.display = val ? 'block' : 'none';
+    renderList(val);
+  }
+
+  function applyQuickFilter(val) {
+    const input = document.getElementById('blueprint-search-input');
+    input.value = val;
+    handleSearch(val);
+  }
+
+  function clearSearch() {
+    const input = document.getElementById('blueprint-search-input');
+    input.value = '';
+    handleSearch('');
+  }
+
+  function switchContext(ctx) {
+    const btns = document.querySelectorAll('.tab-btn');
+    btns.forEach((b, i) => {
+      b.classList.toggle('active', (ctx === 'launcher' && i === 0) || (ctx === 'scheduler' && i === 1));
+    });
+  }
+
+  function toggleTheme() {
+    const html = document.documentElement;
+    const cur = html.getAttribute('data-theme') || 'dark';
+    html.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
+  }
+
+  // Initial render
+  renderList('');
+</script>
+
+</body>
+</html>
+

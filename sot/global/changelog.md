@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.35.11 — Fix Blueprint Video Search by ID & Topic (08/11/2026)
+- Pencarian blueprint Deconstruct Lab berdasar ID numerik URL, niche, dan topik
+- Tampilan human-readable judul dan kategori blueprint di launcher & modal jadwal
+
 ## V2.35.10 — Filter Brand Profile & Nama Pengenal Jadwal Universal (08/11/2026)
 - Filter Brand Profile pada tab jadwal Auto Pipeline
 - Penyeragaman input Nama Pengenal Jadwal universal di seluruh tipe kampanye
