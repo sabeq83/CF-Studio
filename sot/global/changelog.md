@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.35.17 — Injeksi Link Affiliate Google Sheets Tahap 1 (08/11/2026)
+- Injeksi 178 link affiliate baru ke Staging dan 184 link ke Dev
+- Skrip audit dan injeksi otomatis sheets-vs-db
+
 ## V2.35.16 — Database Produk Sync & Anti Duplication Pipeline (08/11/2026)
 - Sinkronisasi database dev ke staging dengan proteksi anti duplikasi 3-lapis
 - Penyediaan utility script sync-dev-to-staging-products.js
