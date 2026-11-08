@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi & Mockup: Generator Naskah Awal Multi-Engine (Smart Affiliate & Multi-Platform)</title>
+  <style>
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --canvas: #090e17;
+      --surface: #111a28;
+      --surface-raised: #182436;
+      --surface-interactive: #203047;
+      --surface-hover: #263a56;
+      --input-bg: #0c1523;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #7f90a6;
+      --border-subtle: #24354c;
+      --border-strong: #3b5273;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --accent-glow: rgba(45, 212, 191, 0.22);
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-purple: #c084fc;
+      --status-purple-soft: rgba(192, 132, 252, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 14px 38px rgba(0, 0, 0, 0.3);
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f8fafc;
+      --surface: #ffffff;
+      --surface-raised: #f1f5f9;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --input-bg: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --border-subtle: #e2e8f0;
+      --border-strong: #94a3b8;
+      --action-primary: #0d9488;
+      --action-primary-hover: #14b8a6;
+      --on-action-primary: #ffffff;
+      --accent-glow: rgba(13, 148, 136, 0.2);
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.12);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.12);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.12);
+      --status-danger: #e11d48;
+      --status-purple: #9333ea;
+      --status-purple-soft: rgba(147, 51, 234, 0.12);
+      --focus-ring: #7c3aed;
+      --shadow-card: 0 10px 25px rgba(0, 0, 0, 0.08);
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--canvas);
+      color: var(--text-primary);
+      padding: 30px 20px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1260px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 20px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .brand-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 700;
+      background: var(--status-purple-soft);
+      color: var(--status-purple);
+      border: 1px solid var(--status-purple);
+    }
+
+    .theme-toggle-btn {
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      cursor: pointer;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Engine Tabs */
+    .engine-nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .engine-tab {
+      padding: 10px 16px;
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .engine-tab:hover {
+      background: var(--surface-raised);
+      color: var(--text-primary);
+    }
+
+    .engine-tab.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border-color: var(--action-primary);
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+
+    /* Mode Subtabs */
+    .mode-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding: 8px 14px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      font-size: 13px;
+    }
+
+    .mode-pill {
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: var(--transition);
+    }
+
+    .mode-pill.active {
+      background: var(--surface);
+      color: var(--text-primary);
+      border: 1px solid var(--border-strong);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Main Grid */
+    .grid-layout {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 960px) {
+      .grid-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    select,
+    textarea,
+    input {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 13.5px;
+      transition: var(--transition);
+    }
+
+    select:focus,
+    textarea:focus,
+    input:focus {
+      outline: none;
+      border-color: var(--focus-ring);
+      box-shadow: 0 0 0 2px var(--accent-glow);
+    }
+
+    textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    /* Toggle Box */
+    .toggle-box {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 20px;
+      transition: var(--transition);
+    }
+
+    .toggle-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+
+    .toggle-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+
+    .toggle-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      margin-left: 30px;
+    }
+
+    .toggle-options {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 16px;
+      font-size: 13px;
+    }
+
+    .radio-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      color: var(--text-secondary);
+    }
+
+    .btn-generate {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 13px 20px;
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 14px var(--accent-glow);
+      transition: var(--transition);
+    }
+
+    .btn-generate:hover {
+      background: var(--action-primary-hover);
+      transform: translateY(-1px);
+    }
+
+    /* Platform Tabs Preview */
+    .platform-tabs {
+      display: flex;
+      gap: 6px;
+      background: var(--surface-raised);
+      padding: 4px;
+      border-radius: var(--radius-md);
+      margin-bottom: 16px;
+    }
+
+    .plat-tab {
+      flex: 1;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      transition: var(--transition);
+    }
+
+    .plat-tab.active {
+      background: var(--surface);
+      color: var(--text-primary);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    }
+
+    .preview-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    .preview-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .plat-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: #fff;
+      font-size: 14px;
+    }
+
+    .caption-box {
+      font-size: 13.5px;
+      line-height: 1.6;
+      white-space: pre-line;
+      color: var(--text-primary);
+      background: var(--canvas);
+      padding: 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .cta-highlight {
+      background: rgba(45, 212, 191, 0.12);
+      border-left: 3px solid var(--action-primary);
+      padding: 8px 12px;
+      margin: 10px 0;
+      border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
+      display: block;
+    }
+
+    .link-text {
+      color: #38bdf8;
+      font-weight: 600;
+      text-decoration: underline;
+    }
+
+    .match-info-box {
+      background: var(--status-info-soft);
+      border: 1px solid var(--status-info);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-size: 12.5px;
+      color: var(--text-primary);
+      margin-top: 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .code-box {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      background: var(--canvas);
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      color: var(--status-info);
+      max-height: 140px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- Top Header -->
+    <div class="top-header">
+      <div>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+          <h1 style="font-size: 20px; font-weight: 800;">Simulasi: Smart Affiliate Injector di Generator Naskah Awal
+          </h1>
+          <span class="brand-pill">Unified Engine Architecture</span>
+        </div>
+        <p style="font-size: 13px; color: var(--text-muted);">
+          Injeksi otomatis rekomendasi produk Shopee sejak naskah pertama kali di-generate: khusus Facebook menyertakan link aktif, sedangkan seluruh platform selain FB (Instagram, TikTok, YouTube) 100% diarahkan ke Link di Bio.
+        </p>
+      </div>
+      <button class="theme-toggle-btn" onclick="toggleTheme()">
+        <span id="themeIcon">☀️</span> Mode Tampilan
+      </button>
+    </div>
+
+    <!-- Engine Selector Tabs (5 Jenis Konten) -->
+    <div class="engine-nav">
+      <div class="engine-tab active" onclick="switchEngine('pillar')">
+        <span>🏛️</span> Pillar Campaign
+      </div>
+      <div class="engine-tab" onclick="switchEngine('recipe_video')">
+        <span>🍳</span> Recipe Video
+      </div>
+      <div class="engine-tab" onclick="switchEngine('editorial')">
+        <span>📰</span> Brand Editorial
+      </div>
+      <div class="engine-tab" onclick="switchEngine('multiplier')">
+        <span>⚡</span> Multiplier Lab
+      </div>
+      <div class="engine-tab" onclick="switchEngine('recipe_photo')">
+        <span>📸</span> Recipe Foto
+      </div>
+    </div>
+
+    <!-- Mode Selector Bar (3 Moda Pembuatan) -->
+    <div class="mode-bar">
+      <span style="font-weight: 700; color: var(--text-secondary); margin-right: 6px;">Moda Eksekusi:</span>
+      <div class="mode-pill active" onclick="switchMode('1click')">⚡ 1-Klik Instant Launch</div>
+      <div class="mode-pill" onclick="switchMode('schedule')">⏰ Skedul Otomatis (Pipeline)</div>
+      <div class="mode-pill" onclick="switchMode('manual')">✏️ Pembuatan Manual</div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid-layout">
+      <!-- Left Column: Generator Form & Affiliate Controls -->
+      <div class="card">
+        <div class="card-title">
+          <span id="formCardTitle">⚙️ Konfigurasi Generator: Pillar Campaign</span>
+          <span style="font-size: 11px; color: var(--text-muted);" id="modeBadge">Mode: 1-Klik</span>
+        </div>
+
+        <div class="form-group">
+          <label>Brand Profile Target:</label>
+          <select id="brandSelect" onchange="onBrandChange()">
+            <option value="dapurbotani">🌾 Dapur Botani (110+ Produk Organik & Rempah)</option>
+            <option value="nutribake">🧁 NutriBake ID (51+ Produk Baking & Diet)</option>
+            <option value="siasatsehat">🌿 Siasat Sehat (17+ Herbal & Wellness)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Topik / Ide Konten / Resep:</label>
+          <input type="text" id="topicInput" value="Resep Salad Cuka Apel Penurun Gula Darah & Kolesterol" />
+        </div>
+
+        <!-- Smart Shopee Affiliate Master Toggle -->
+        <div class="toggle-box" id="toggleBoxContainer">
+          <div class="toggle-header" onclick="toggleAffiliateMaster()">
+            <div class="toggle-title">
+              <input type="checkbox" id="affiliateMasterCheck" checked
+                style="width: 18px; height: 18px; accent-color: var(--action-primary); cursor: pointer;"
+                onclick="event.stopPropagation(); toggleAffiliateMaster();" />
+              <span>🛒 Smart Shopee Affiliate Integration</span>
+            </div>
+            <span id="toggleStatusPill"
+              style="font-size: 11px; padding: 2px 8px; border-radius: 999px; background: var(--status-success-soft); color: var(--status-success); font-weight: 700;">AKTIF</span>
+          </div>
+          <div class="toggle-subtitle">
+            Gemini AI akan mencocokkan produk brand yang paling relevan dan menyisipkan CTA pintar ke Social Media
+            Package di awal.
+          </div>
+
+          <div class="toggle-options" id="toggleOptionsArea">
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="productSelectionMode" value="auto" checked onchange="onProductModeChange()" />
+                <span>🤖 AI Auto-Detect (Paling Cocok)</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="productSelectionMode" value="manual" onchange="onProductModeChange()" />
+                <span>📌 Pilih Produk Spesifik</span>
+              </label>
+            </div>
+
+            <div id="manualProductSelectGroup" style="display: none; margin-top: 8px;">
+              <label style="font-size: 12px;">Pilih Produk Brand untuk Ditautkan:</label>
+              <select id="manualProductSelect">
+                <!-- dynamic options based on brand -->
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-generate" onclick="runSimulation()">
+          <span>⚡ Generate Naskah & Multi-Platform Package</span>
+        </button>
+      </div>
+
+      <!-- Right Column: Live Multi-Platform Result Preview -->
+      <div class="card">
+        <div class="card-title">
+          <span>📱 Preview Social Media Package (Multi-Platform)</span>
+          <span style="font-size: 11px; font-weight: 700; color: var(--status-info);" id="matchStatusLabel">Matched:
+            Nutrifarm Cuka Apel</span>
+        </div>
+
+        <!-- Platform Tabs -->
+        <div class="platform-tabs">
+          <button class="plat-tab active" onclick="switchPlatPreview('facebook')">📘 Facebook</button>
+          <button class="plat-tab" onclick="switchPlatPreview('instagram')">📸 Instagram</button>
+          <button class="plat-tab" onclick="switchPlatPreview('tiktok')">🎵 TikTok</button>
+          <button class="plat-tab" onclick="switchPlatPreview('voiceover')">🎙️ Voice-Over</button>
+          <button class="plat-tab" onclick="switchPlatPreview('json')">📦 JSON Data</button>
+        </div>
+
+        <!-- Live Preview Content Area -->
+        <div class="preview-card" id="previewContainer">
+          <!-- Injected via JS -->
+        </div>
+
+        <div class="match-info-box">
+          <span>💡</span>
+          <div id="platformExplainText">
+            <strong>Platform Smart Adaptation:</strong> Pada <strong>Facebook</strong>, link Shopee disuntikkan langsung dan bisa diklik pembaca. Sementara untuk <strong>seluruh platform selain FB (Instagram, TikTok, YouTube Shorts)</strong>, kalimat CTA 100% dialihkan ke <strong>Link di Bio</strong> agar tidak merusak estetika feed dengan link mati.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Sample Brand Catalog Database
+    const BRAND_PRODUCTS = {
+      dapurbotani: [
+        { id: 'p_1', name: 'Nutrifarm Cuka Apel With Mother', aff: 'https://s.shopee.co.id/3qLpNdU0D3' },
+        { id: 'p_2', name: 'Safiya Garam Himalaya Pink 500g', aff: 'https://s.shopee.co.id/80A4wiZHct' },
+        { id: 'p_3', name: 'Nutrifarm Chia Seeds Organik 250g', aff: 'https://s.shopee.co.id/1BKV4Cdgy9' },
+        { id: 'p_4', name: 'Rayya Madu Bawang Lanang Hitam', aff: 'https://s.shopee.co.id/3qMS2K85hB' }
+      ],
+      nutribake: [
+        { id: 'p_5', name: 'Premix Cocoa Powder Dark Pure 200g', aff: 'https://s.shopee.co.id/8pjlcwD60v' },
+        { id: 'p_6', name: 'BEORGANIK Vegan Butter 250g', aff: 'https://s.shopee.co.id/40fB1m2zbH' },
+        { id: 'p_7', name: 'Tepung Almond Extra Fine Granology', aff: 'https://s.shopee.co.id/17qzZu5uE' }
+      ],
+      siasatsehat: [
+        { id: 'p_8', name: 'Garlickys Bumbu Dapur Organik Bubuk', aff: 'https://s.shopee.co.id/9V0C7L0525' },
+        { id: 'p_9', name: 'Nutrifarm Teh Bunga Rosella Kering', aff: 'https://s.shopee.co.id/gOamkwNRG' },
+        { id: 'p_10', name: 'Nutrifarm Cuka Nanas With Mother', aff: 'https://s.shopee.co.id/1LeUOwJbKF' }
+      ]
+    };
+
+    let currentEngine = 'pillar';
+    let currentMode = '1click';
+    let currentBrand = 'dapurbotani';
+    let affiliateActive = true;
+    let productSelectionMode = 'auto';
+    let activePreviewPlat = 'facebook';
+
+    function init() {
+      populateManualProducts();
+      runSimulation();
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.getElementById('themeIcon').textContent = isDark ? '🌙' : '☀️';
+    }
+
+    function switchEngine(engine) {
+      currentEngine = engine;
+      document.querySelectorAll('.engine-tab').forEach((tab, i) => {
+        tab.classList.toggle('active', tab.textContent.toLowerCase().includes(engine.replace('_', ' ')));
+      });
+
+      const titles = {
+        pillar: 'Pillar Campaign (Strategic Core Content)',
+        recipe_video: 'Recipe Video Studio (Food & Beverage)',
+        editorial: 'Brand Editorial (Content Planner)',
+        multiplier: 'Multiplier Lab (Batch Hook Multiplier)',
+        recipe_photo: 'Recipe Foto (Food Photography)'
+      };
+      document.getElementById('formCardTitle').textContent = `⚙️ Konfigurasi Generator: ${titles[engine]}`;
+
+      const sampleTopics = {
+        pillar: 'Resep Salad Cuka Apel Penurun Gula Darah & Kolesterol',
+        recipe_video: 'Brownies Cokelat Rendah Kalori Tanpa Tepung Terigu',
+        editorial: 'Pentingnya Detoks Alami dengan Teh Bunga Rosella',
+        multiplier: '5 Variasi Sarapan Oat Praktis untuk Diet Sehat',
+        recipe_photo: 'Infografis Bahan & Khasiat Madu Bawang Lanang Hitam'
+      };
+      document.getElementById('topicInput').value = sampleTopics[engine] || 'Topik Konten Sehat';
+      runSimulation();
+    }
+
+    function switchMode(mode) {
+      currentMode = mode;
+      document.querySelectorAll('.mode-pill').forEach(pill => {
+        pill.classList.toggle('active', pill.textContent.toLowerCase().includes(mode));
+      });
+      document.getElementById('modeBadge').textContent = `Mode: ${mode === '1click' ? '1-Klik' : mode === 'schedule' ? 'Skedul' : 'Manual'}`;
+    }
+
+    function onBrandChange() {
+      currentBrand = document.getElementById('brandSelect').value;
+      populateManualProducts();
+      runSimulation();
+    }
+
+    function populateManualProducts() {
+      const select = document.getElementById('manualProductSelect');
+      select.innerHTML = '';
+      const products = BRAND_PRODUCTS[currentBrand] || [];
+      products.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = `${p.name} (${p.aff})`;
+        select.appendChild(opt);
+      });
+    }
+
+    function toggleAffiliateMaster() {
+      affiliateActive = !affiliateActive;
+      document.getElementById('affiliateMasterCheck').checked = affiliateActive;
+      document.getElementById('toggleStatusPill').textContent = affiliateActive ? 'AKTIF' : 'NONAKTIF';
+      document.getElementById('toggleStatusPill').style.background = affiliateActive ? 'var(--status-success-soft)' : 'var(--status-warning-soft)';
+      document.getElementById('toggleStatusPill').style.color = affiliateActive ? 'var(--status-success)' : 'var(--status-warning)';
+      document.getElementById('toggleOptionsArea').style.display = affiliateActive ? 'flex' : 'none';
+      runSimulation();
+    }
+
+    function onProductModeChange() {
+      const radios = document.getElementsByName('productSelectionMode');
+      for (const r of radios) {
+        if (r.checked) productSelectionMode = r.value;
+      }
+      document.getElementById('manualProductSelectGroup').style.display = productSelectionMode === 'manual' ? 'block' : 'none';
+      runSimulation();
+    }
+
+    function switchPlatPreview(plat) {
+      activePreviewPlat = plat;
+      document.querySelectorAll('.plat-tab').forEach(b => {
+        b.classList.toggle('active', b.textContent.toLowerCase().includes(plat));
+      });
+      renderPreview();
+    }
+
+    let generatedData = {};
+
+    function runSimulation() {
+      const brand = currentBrand;
+      const products = BRAND_PRODUCTS[brand] || [];
+      const topic = document.getElementById('topicInput').value;
+
+      let matched = products[0];
+      if (productSelectionMode === 'manual') {
+        const chosenId = document.getElementById('manualProductSelect').value;
+        matched = products.find(p => p.id === chosenId) || products[0];
+      }
+
+      document.getElementById('matchStatusLabel').textContent = affiliateActive
+        ? `Matched: ${matched.name}`
+        : 'Status: Murni Non-Afiliasi (Affiliate Off)';
+
+      // Generate simulation payloads
+      generatedData = {
+        product: matched,
+        affiliateActive: affiliateActive,
+        facebook: {
+          icon: '📘',
+          name: 'Facebook Post',
+          caption: `🥗 ${topic}\n\nSiapa bilang makan sehat itu membosankan? Kombinasi racikan alami ini terbukti ampuh bantu melancarkan pencernaan sekaligus stabilkan gula darah harianmu!\n\n${affiliateActive
+              ? `<div class="cta-highlight">🛒 <strong>Rekomendasi Bahan Resmi:</strong><br>Beli ${matched.name} asli & berkhasiat di Shopee resmi kami di sini:<br><a class="link-text" href="${matched.aff}" target="_blank">${matched.aff}</a></div>`
+              : ''
+            }\nSimpan resep ini dan bagikan ke keluarga yang butuh hidup lebih bugar! 🌿\n\n#ResepSehat #GayaHidupSehat #${brand.toUpperCase()} #SehatAlami`
+        },
+        instagram: {
+          icon: '📸',
+          name: 'Instagram Reel / Carousel',
+          caption: `🥗 ${topic}\n\nSiapa bilang makan sehat itu membosankan? Kombinasi racikan alami ini terbukti ampuh bantu melancarkan pencernaan sekaligus stabilkan gula darah harianmu!\n\n${affiliateActive
+              ? `<div class="cta-highlight">👉 <strong>Info Bahan:</strong><br>Bahan ${matched.name} yang mimin pakai bisa kamu temukan di <strong>Link di Bio ya (No. 08)</strong>! ✨</div>`
+              : ''
+            }\nYuk save resep ini biar nggak lupa pas belanja nanti! 👇\n\n#ResepSehat #DietSehat #KulinerSehat #TipsKesehatan`
+        },
+        tiktok: {
+          icon: '🎵',
+          name: 'TikTok Video',
+          caption: `Cara mudah bikin ${topic}! Simpel tapi khasiatnya luar biasa buat tubuh ✨\n\n${affiliateActive
+              ? `<div class="cta-highlight">👉 <strong>Info Bahan:</strong><br><em>Bahan lengkap ${matched.name} yang mimin pakai bisa kamu temukan di <strong>Link di Bio ya!</strong> ✨</em></div>`
+              : ''
+            }\n#fyp #resepviral #hidupsehat #tipsdiet`
+        },
+        voiceover: {
+          icon: '🎙️',
+          name: 'Voice-Over / Storyboard Narration',
+          caption: `[Scene 1 - Hook]: "Ternyata bikin ramuan penurun gula darah bisa seenak dan semudah ini..."\n[Scene 2 - Value]: "Kuncinya ada di fermentasi alami yang kaya probiotik..."\n[Scene 3 - Action]: "Cukup campurkan 1 sendok ke dalam air hangat di pagi hari..."\n[Scene 4 - Closing CTA]:\n${affiliateActive
+              ? `🗣️ Narator: "Buat kamu yang mau coba, pastikan pakai ${matched.name} yang asli ya! Klik link di bio atau caption di bawah untuk mulai hidup sehat hari ini!"`
+              : `🗣️ Narator: "Yuk mulai rutin konsumsi setiap pagi dan rasakan bedanya di tubuhmu! Jangan lupa save resep ini ya!"`
+            }`
+        },
+        json: {
+          icon: '📦',
+          name: 'Database JSON Metadata',
+          caption: JSON.stringify({
+            topic: topic,
+            brand_profile: brand,
+            engine_type: currentEngine,
+            execution_mode: currentMode,
+            affiliate_integration: affiliateActive,
+            matched_product: affiliateActive ? {
+              product_id: matched.id,
+              product_name: matched.name,
+              affiliate_link: matched.aff
+            } : null,
+            social_media_package: {
+              facebook_caption: "[Caption with live Shopee URL]",
+              instagram_caption: "[Caption with Bio/DM CTA]",
+              tiktok_caption: "[Caption with Link di Bio CTA]"
+            }
+          }, null, 2)
+        }
+      };
+
+      renderPreview();
+    }
+
+    function renderPreview() {
+      const container = document.getElementById('previewContainer');
+      const data = generatedData[activePreviewPlat];
+      if (!data) return;
+
+      if (activePreviewPlat === 'json') {
+        container.innerHTML = `
+          <div class="preview-header">
+            <div class="plat-icon" style="background: #475569;">${data.icon}</div>
+            <div>
+              <strong style="font-size: 14px;">${data.name}</strong>
+              <div style="font-size: 11px; color: var(--text-muted);">Payload Tersimpan di content_flow_items</div>
+            </div>
+          </div>
+          <div class="code-box">${data.caption}</div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="preview-header">
+          <div class="plat-icon" style="background: ${activePreviewPlat === 'facebook' ? '#1877f2' : activePreviewPlat === 'instagram' ? '#e1306c' : activePreviewPlat === 'tiktok' ? '#000000' : '#8b5cf6'}">${data.icon}</div>
+          <div>
+            <strong style="font-size: 14px;">${data.name}</strong>
+            <div style="font-size: 11px; color: var(--text-muted);">${activePreviewPlat === 'facebook' ? 'Link Clickable Aktif' : activePreviewPlat === 'voiceover' ? 'Narasi Video' : 'Diarahkan ke Link di Bio (Anti-Dead-Link)'}</div>
+          </div>
+        </div>
+        <div class="caption-box">${data.caption}</div>
+      `;
+    }
+
+    init();
+  </script>
+</body>
+
+</html>

@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.35.19 — Smart Affiliate Generator Multi-Engine (FB Shopee & Non-FB Link di Bio) (08/11/2026)
+- Penyisipan produk affiliate cerdas sejak generator naskah awal 5 mesin konten
+- Platform-adaptive captions: Facebook dengan live clickable Shopee link dan non-FB (IG, TikTok, Shorts, Threads) 100% diarahkan ke Link di Bio
+- Integrasi Multiplier Lab, Recipe Video, Recipe Foto, Pillar Campaign & Publishing Dispatch Runner
+- Pencegahan link mentah mati pada feed dan kepatuhan algoritma platform
+
 ## V2.35.18 — Optimasi Query Agregasi Multi Brand Link Katalog Produk (08/11/2026)
 - Ganti query GROUP BY dengan correlated subquery json_agg pada listProductCatalog
 - Mencegah error postgresql aggregate pada schema dev dan staging
