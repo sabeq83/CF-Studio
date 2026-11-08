@@ -1,5 +1,13 @@
 # Changelog
 
+## V2.35.21 — Smart Shopee Affiliate di Naskah Awal Multiplier & 20 Riwayat Batch Seluruh Tipe (08/11/2026)
+- Injeksi katalog produk brand ke prompt naskah awal Multiplier tanpa syarat bridging video
+- Fallback cerdas worker mencocokkan produk brand dan menyematkan link Shopee aktif di caption Facebook
+- Auto-heal caption mul_261108_s6so1p dengan link Shopee aktif Nutribake
+- Penyediaan endpoint terpadu /batches menampilkan 20 riwayat terakhir lintas seluruh tipe video
+- Dukungan multi-engine visualizer status pada /status route
+- Pembaruan UI Auto Pipeline dengan filter pills dan badge tipe video
+
 ## V2.35.20 — Penyeragaman Toggle Smart Affiliate di Modal Skedul, 1-Klik, Modal Ingest & Manual (08/11/2026)
 - Penyeragaman toggle affiliate pada modal skedul auto-pipeline
 - Penambahan toggle affiliate pada form 1-klik instan auto-pipeline

@@ -8,6 +8,155 @@ export const GET = withTenantContext(async (request, _context, user) => {
     const campaignId = searchParams.get('campaign_id');
     const db = getDb();
 
+    // Multiplier Campaign Handler (mul_...)
+    if (campaignId && campaignId.startsWith('mul_')) {
+      const task = await db.prepare('SELECT * FROM re_multiplier_tasks WHERE id = ?').get(campaignId);
+      if (!task) {
+        return NextResponse.json({
+          success: true,
+          campaign: null,
+          stages: null,
+          is_completed: false,
+          telemetry: {
+            timestamp: new Date().toLocaleTimeString('id-ID'),
+            message: `Task Multiplier ${campaignId} tidak ditemukan.`
+          }
+        });
+      }
+
+      let storyboard = [];
+      try {
+        storyboard = typeof task.remake_storyboard_json === 'string' ? JSON.parse(task.remake_storyboard_json) : (task.remake_storyboard_json || []);
+      } catch (_) {}
+      const clipsCount = Array.isArray(storyboard) && storyboard.length > 0 ? storyboard.length : 3;
+
+      let glabsIds = [];
+      try {
+        glabsIds = typeof task.glabs_task_ids === 'string' ? JSON.parse(task.glabs_task_ids) : (task.glabs_task_ids || []);
+      } catch (_) {}
+
+      let audioCfg = {};
+      try {
+        audioCfg = typeof task.audio_config_json === 'string' ? JSON.parse(task.audio_config_json) : (task.audio_config_json || {});
+      } catch (_) {}
+
+      let vsoCfg = {};
+      try {
+        vsoCfg = typeof task.vso_config_json === 'string' ? JSON.parse(task.vso_config_json) : (task.vso_config_json || {});
+      } catch (_) {}
+
+      const isDone = task.status === 'completed';
+      const isFailed = task.status === 'error' || task.status === 'failed';
+
+      // 1. Blueprint Deconstruct
+      const s1 = {
+        step: 1,
+        status: 'completed',
+        title: 'Planner / Asset',
+        desc: 'Blueprint Deconstruct Lab',
+        badge: `✓ ${task.deconstruct_asset_id ? task.deconstruct_asset_id.slice(0, 10) : 'Asset Ready'}`
+      };
+
+      // 2. Storyboard Remake
+      const hasStoryboard = Array.isArray(storyboard) && storyboard.length > 0;
+      const s2 = {
+        step: 2,
+        status: hasStoryboard ? 'completed' : (isFailed ? 'failed' : 'processing'),
+        title: 'Storyboard Creation',
+        desc: 'Gemini AI 1-Pass Remix',
+        badge: hasStoryboard ? `✓ ${clipsCount} Klip Siap` : (isFailed ? 'Gagal Naskah' : 'Menyusun Naskah...')
+      };
+
+      // 3. Start Frame Generation
+      const hasStartFrames = Boolean(task.t2i_images_json || task.regenerate_start_frames_status === 'completed' || isDone || (vsoCfg.visual_mode === 'pure_t2v'));
+      const s3 = {
+        step: 3,
+        status: hasStartFrames ? 'completed' : (hasStoryboard ? 'processing' : 'idle'),
+        title: 'Start Frame Generation',
+        desc: vsoCfg.visual_style_preset || 'Visual Continuity',
+        badge: hasStartFrames ? '✓ Visual Style Ready' : (hasStoryboard ? 'Memproses Frame...' : 'Menunggu')
+      };
+
+      // 4. TTS Audio
+      const hasAudio = Boolean(audioCfg.combined_audio_path || isDone || task.status === 'rendering_video' || task.status === 'ffmpeg_processing');
+      const s4 = {
+        step: 4,
+        status: hasAudio ? 'completed' : (hasStartFrames ? 'processing' : 'idle'),
+        title: 'TTS Generation',
+        desc: `${audioCfg.voice_provider || 'Minimax'} voice`,
+        badge: hasAudio ? `✓ Audio MP3 Siap` : (hasStartFrames ? 'Sintesis Audio...' : 'Menunggu')
+      };
+
+      // 5. Video Generation
+      const hasVideoClips = isDone || task.status === 'ffmpeg_processing' || (Array.isArray(glabsIds) && glabsIds.length >= clipsCount);
+      const s5 = {
+        step: 5,
+        status: hasVideoClips ? 'completed' : (hasAudio ? 'processing' : 'idle'),
+        title: 'Video Generation',
+        desc: 'Google Veo Omni Flash',
+        badge: hasVideoClips ? `✓ ${clipsCount}/${clipsCount} Video Selesai` : (hasAudio ? `Merender Veo...` : 'Menunggu')
+      };
+
+      // 6. FFmpeg Processing
+      const hasFfmpeg = isDone || Boolean(task.ffmpeg_output_path);
+      const s6 = {
+        step: 6,
+        status: hasFfmpeg ? 'completed' : (hasVideoClips ? 'processing' : 'idle'),
+        title: 'FFmpeg Processing',
+        desc: `Muxing ${clipsCount} klip + VO`,
+        badge: hasFfmpeg ? '✓ MP4 Final Siap' : (hasVideoClips ? 'Muxing MP4...' : 'Menunggu')
+      };
+
+      // 7. Cloud & Sync
+      const hasCloud = isDone && Boolean(task.nextcloud_video_url);
+      const s7 = {
+        step: 7,
+        status: hasCloud ? 'completed' : (hasFfmpeg ? 'processing' : 'idle'),
+        title: 'Cloud & Sync',
+        desc: 'Nextcloud & Hub ContentFlow',
+        badge: hasCloud ? '✓ Nextcloud Ready' : (hasFfmpeg ? 'Uploading Nextcloud...' : 'Menunggu')
+      };
+
+      let telemetryMsg = 'Multiplier task idle/menunggu...';
+      if (hasCloud) {
+        telemetryMsg = `✓ Video final Multiplier tersimpan di Nextcloud dan siap disinkronkan ke ContentFlow Hub 🚀`;
+      } else if (hasFfmpeg) {
+        telemetryMsg = `Video selesai diracik. Mengunggah ke Nextcloud folder...`;
+      } else if (hasVideoClips) {
+        telemetryMsg = `Muxing FFmpeg klip video Multiplier + audio voice-over...`;
+      } else if (hasAudio) {
+        telemetryMsg = `Sedang merender adegan video via Google Veo Omni Flash...`;
+      } else if (hasStartFrames) {
+        telemetryMsg = `Sedang mensintesis audio voice-over narasi klip...`;
+      } else if (hasStoryboard) {
+        telemetryMsg = `Naskah 1-Pass siap. Menyiapkan frame kontinuitas visual...`;
+      } else {
+        telemetryMsg = `Gemini AI sedang merumuskan variasi angle dan naskah Multiplier...`;
+      }
+
+      const now = new Date();
+      const timeStr = `[${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}]`;
+
+      return NextResponse.json({
+        success: true,
+        campaign: {
+          id: task.id,
+          name: task.campaign_name,
+          topic: task.campaign_name,
+          status: task.status,
+          item_id: task.id,
+          drive_link: task.nextcloud_video_url || null,
+          contentflow_hub_synced: isDone
+        },
+        stages: { s1, s2, s3, s4, s5, s6, s7 },
+        is_completed: isDone,
+        telemetry: {
+          timestamp: timeStr,
+          message: telemetryMsg
+        }
+      });
+    }
+
     let campaign = null;
     if (campaignId) {
       campaign = await db.prepare('SELECT * FROM pillar_campaigns WHERE id = ?').get(campaignId);

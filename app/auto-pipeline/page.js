@@ -533,6 +533,7 @@ export default function AutoPipelinePage() {
   const [activeStep, setActiveStep] = useState(0);
   const [recentCampaigns, setRecentCampaigns] = useState([]);
   const [loadingCampaigns, setLoadingCampaigns] = useState(true);
+  const [batchesFilterType, setBatchesFilterType] = useState('all');
   const [toast, setToast] = useState(null);
 
   // Factual Visualizer State
@@ -762,22 +763,20 @@ export default function AutoPipelinePage() {
     }
   }
 
-  // 3. Fetch Recent OPC Campaigns
+  // 3. Fetch 20 Recent Unified Batches (Lintas Seluruh Tipe Video)
   async function fetchRecentCampaigns() {
     setLoadingCampaigns(true);
     try {
-      const res = await fetch('/api/v2/pillar-campaigns');
+      const res = await fetch('/api/v2/recipes/autonomous-pipeline/batches?limit=20');
       const data = await res.json();
-      const list = data.campaigns || data.data || [];
-      // Filter recipe campaigns atau kampanye dengan prefix opc_
-      const recipeOnly = list.filter(c =>
-        c.content_pillar === 'Recipe Campaign' ||
-        (c.id && c.id.startsWith('opc_')) ||
-        (c.campaign_name && c.campaign_name.includes('Recipe'))
-      );
-      setRecentCampaigns(recipeOnly.slice(0, 10));
+      if (data.success && Array.isArray(data.data)) {
+        setRecentCampaigns(data.data);
+      } else {
+        const fallback = data.campaigns || data.data || [];
+        setRecentCampaigns(fallback.slice(0, 20));
+      }
     } catch (e) {
-      console.warn('[AutoPipeline] Error fetching campaigns:', e);
+      console.warn('[AutoPipeline] Error fetching recent batches:', e);
     } finally {
       setLoadingCampaigns(false);
     }
@@ -4038,10 +4037,13 @@ export default function AutoPipelinePage() {
             flexDirection: 'column',
             gap: '1rem'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
               <div style={{ fontSize: '1.12rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <span>📋</span>
                 <span>Riwayat Batch Kampanye Auto Pipeline</span>
+                <span style={{ fontSize: '0.72rem', background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', padding: '0.15rem 0.5rem', borderRadius: 9999 }}>
+                  20 Terakhir Seluruh Tipe
+                </span>
               </div>
               <button
                 type="button"
@@ -4060,11 +4062,46 @@ export default function AutoPipelinePage() {
               </button>
             </div>
 
+            {/* Filter Pills Bar */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.76rem', fontWeight: 700, color: 'var(--text-muted)', marginRight: '0.2rem' }}>Filter Tipe:</span>
+              {[
+                { key: 'all', label: `Semua Tipe (${recentCampaigns.length})` },
+                { key: 'multiplier', label: `⚡ Multiplier (${recentCampaigns.filter(c => c.campaign_type === 'multiplier_campaign').length})` },
+                { key: 'recipe', label: `🍲 Video Resep (${recentCampaigns.filter(c => c.campaign_type === 'recipe_campaign').length})` },
+                { key: 'product', label: `📦 Promosi Produk (${recentCampaigns.filter(c => c.campaign_type === 'product_campaign').length})` },
+                { key: 'editorial', label: `📰 Brand Editorial (${recentCampaigns.filter(c => c.campaign_type === 'editorial_campaign').length})` },
+                { key: 'recipelabs', label: `📸 Recipe Labs (${recentCampaigns.filter(c => c.campaign_type === 'recipe_labs').length})` }
+              ].map(filter => {
+                const isActive = batchesFilterType === filter.key;
+                return (
+                  <button
+                    key={filter.key}
+                    type="button"
+                    onClick={() => setBatchesFilterType(filter.key)}
+                    style={{
+                      background: isActive ? 'var(--surface-interactive)' : 'var(--surface-raised)',
+                      border: `1px solid ${isActive ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
+                      color: isActive ? 'var(--action-primary)' : 'var(--text-secondary)',
+                      padding: '0.25rem 0.65rem',
+                      borderRadius: '9999px',
+                      fontSize: '0.74rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      transition: 'var(--transition)'
+                    }}
+                  >
+                    {filter.label}
+                  </button>
+                );
+              })}
+            </div>
+
             <div style={{ border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'left' }}>
                 <thead>
                   <tr style={{ background: 'var(--surface-raised)', borderBottom: '1px solid var(--border-subtle)' }}>
-                    <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.78rem', textTransform: 'uppercase' }}>Campaign ID</th>
+                    <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.78rem', textTransform: 'uppercase' }}>Campaign ID & Tipe</th>
                     <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.78rem', textTransform: 'uppercase' }}>Brand & Judul Batch</th>
                     <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.78rem', textTransform: 'uppercase' }}>VI Preset Terpilih</th>
                     <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.78rem', textTransform: 'uppercase' }}>Format Klip</th>
@@ -4082,12 +4119,48 @@ export default function AutoPipelinePage() {
                   ) : recentCampaigns.length === 0 ? (
                     <tr>
                       <td colSpan="6" style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                        Belum ada kampanye batch resep. Masukkan topik di atas dan luncurkan sekarang!
+                        Belum ada kampanye batch. Luncurkan kampanye 1-klik di atas untuk memulai produksi otomatis!
                       </td>
                     </tr>
-                  ) : (
-                    recentCampaigns.map(camp => {
+                  ) : (() => {
+                    const displayed = batchesFilterType === 'all'
+                      ? recentCampaigns
+                      : recentCampaigns.filter(c => 
+                          c.campaign_type === batchesFilterType ||
+                          (batchesFilterType === 'multiplier' && c.campaign_type === 'multiplier_campaign') ||
+                          (batchesFilterType === 'recipe' && c.campaign_type === 'recipe_campaign') ||
+                          (batchesFilterType === 'product' && c.campaign_type === 'product_campaign') ||
+                          (batchesFilterType === 'editorial' && c.campaign_type === 'editorial_campaign') ||
+                          (batchesFilterType === 'recipelabs' && c.campaign_type === 'recipe_labs')
+                        );
+
+                    if (displayed.length === 0) {
+                      return (
+                        <tr>
+                          <td colSpan="6" style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                            Tidak ada batch kampanye untuk filter tipe ini.
+                          </td>
+                        </tr>
+                      );
+                    }
+
+                    return displayed.map(camp => {
                       const isInspected = camp.id === activeCampaignId;
+                      const getTypeBadgeStyle = (type) => {
+                        switch (type) {
+                          case 'multiplier_campaign':
+                            return { background: 'var(--status-purple-soft)', color: 'var(--status-purple)', border: '1px solid var(--status-purple)' };
+                          case 'recipe_campaign':
+                            return { background: 'var(--status-warning-soft)', color: 'var(--status-warning)', border: '1px solid var(--status-warning)' };
+                          case 'editorial_campaign':
+                            return { background: 'var(--status-rose-soft)', color: 'var(--status-rose)', border: '1px solid var(--status-rose)' };
+                          case 'recipe_labs':
+                            return { background: 'var(--status-success-soft)', color: 'var(--status-success)', border: '1px solid var(--status-success)' };
+                          default:
+                            return { background: 'var(--status-info-soft)', color: 'var(--status-info)', border: '1px solid var(--status-info)' };
+                        }
+                      };
+
                       return (
                         <tr
                           key={camp.id}
@@ -4105,65 +4178,88 @@ export default function AutoPipelinePage() {
                           }}
                         >
                           <td style={{ padding: '0.85rem 1rem' }}>
-                            <strong style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: isInspected ? 'var(--action-primary)' : 'inherit' }}>
+                            <strong style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: isInspected ? 'var(--action-primary)' : 'inherit', display: 'block' }}>
                               {camp.id}
                             </strong>
+                            <div style={{ marginTop: '0.25rem' }}>
+                              <span style={{
+                                ...getTypeBadgeStyle(camp.campaign_type),
+                                fontSize: '0.68rem',
+                                fontWeight: 700,
+                                padding: '0.15rem 0.45rem',
+                                borderRadius: 'var(--radius-xs)',
+                                display: 'inline-block'
+                              }}>
+                                {camp.type_badge || 'Batch'}
+                              </span>
+                            </div>
                             {isInspected && (
                               <div style={{ fontSize: '0.68rem', color: 'var(--action-primary)', fontWeight: 700, marginTop: '0.2rem' }}>
                                 👁️ Terpilih di Visualizer
                               </div>
                             )}
                           </td>
-                        <td style={{ padding: '0.85rem 1rem' }}>
-                          <div style={{ fontWeight: 600 }}>{camp.campaign_name || camp.name || 'Recipe Batch'}</div>
-                          <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                            {camp.brand_name || camp.account_name || 'Brand Profile'} • {camp.total_items || 0} Video Items
-                          </div>
-                        </td>
-                        <td style={{ padding: '0.85rem 1rem' }}>
-                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.76rem', color: 'var(--text-secondary)' }}>
-                            {camp.visual_identity_preset_id || 'vi_habitfolk_macro_craft'}
-                          </span>
-                        </td>
-                        <td style={{ padding: '0.85rem 1rem', fontSize: '0.8rem' }}>
-                          {camp.target_clips_count || 8} Klip @ {camp.clip_duration || 4}s ({camp.video_model || 'omni_flash'})
-                        </td>
-                        <td style={{ padding: '0.85rem 1rem' }}>
-                          <span style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '0.35rem',
-                            fontSize: '0.72rem',
-                            fontWeight: 600,
-                            padding: '0.2rem 0.55rem',
-                            borderRadius: 'var(--radius-xs)',
-                            background: camp.status === 'completed' ? 'var(--status-success-soft)' : 'var(--status-warning-soft)',
-                            color: camp.status === 'completed' ? 'var(--status-success)' : 'var(--status-warning)',
-                            border: `1px solid ${camp.status === 'completed' ? 'var(--status-success)' : 'var(--status-warning)'}`
-                          }}>
-                            ● {camp.status === 'completed' ? 'Selesai & Nextcloud Ready' : (camp.status || 'running')}
-                          </span>
-                        </td>
-                        <td style={{ padding: '0.85rem 1rem' }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                            <Link
-                              href={`/pillar-campaigns`}
-                              style={{ color: 'var(--link)', textDecoration: 'none', fontWeight: 600, fontSize: '0.8rem' }}
-                            >
-                              Detail OPC ↗
-                            </Link>
-                            <Link
-                              href={`/content-flow`}
-                              style={{ color: 'var(--status-success)', textDecoration: 'none', fontWeight: 600, fontSize: '0.76rem' }}
-                            >
-                              📊 ContentFlow Hub ↗
-                            </Link>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
+                          <td style={{ padding: '0.85rem 1rem' }}>
+                            <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{camp.campaign_name || camp.name || 'Batch Campaign'}</div>
+                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+                              {camp.brand_name || camp.account_name || 'Brand Profile'} • {camp.total_items || 1} Video Items
+                              {camp.created_at ? ` • ${new Date(camp.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}` : ''}
+                            </div>
+                          </td>
+                          <td style={{ padding: '0.85rem 1rem' }}>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.76rem', color: 'var(--text-secondary)' }}>
+                              {camp.visual_identity_preset_id || 'vi_default'}
+                            </span>
+                          </td>
+                          <td style={{ padding: '0.85rem 1rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                            {camp.format_klip || `${camp.target_clips_count || 8} Klip @ ${camp.clip_duration || 4}s (${camp.video_model || 'omni_flash'})`}
+                          </td>
+                          <td style={{ padding: '0.85rem 1rem' }}>
+                            <span style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.35rem',
+                              fontSize: '0.72rem',
+                              fontWeight: 600,
+                              padding: '0.2rem 0.55rem',
+                              borderRadius: 'var(--radius-xs)',
+                              background: camp.status === 'completed' ? 'var(--status-success-soft)' : 'var(--status-warning-soft)',
+                              color: camp.status === 'completed' ? 'var(--status-success)' : 'var(--status-warning)',
+                              border: `1px solid ${camp.status === 'completed' ? 'var(--status-success)' : 'var(--status-warning)'}`
+                            }}>
+                              ● {camp.status === 'completed' ? 'Selesai & Ready' : (camp.status || 'running')}
+                            </span>
+                          </td>
+                          <td style={{ padding: '0.85rem 1rem' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                              <Link
+                                href={camp.target_detail_url || '/pillar-campaigns'}
+                                style={{ color: 'var(--link)', textDecoration: 'none', fontWeight: 600, fontSize: '0.8rem' }}
+                              >
+                                {camp.detail_label || 'Detail OPC ↗'}
+                              </Link>
+                              <Link
+                                href="/content-flow"
+                                style={{ color: 'var(--status-success)', textDecoration: 'none', fontWeight: 600, fontSize: '0.76rem' }}
+                              >
+                                📊 ContentFlow Hub ↗
+                              </Link>
+                              {camp.video_url && (
+                                <a
+                                  href={camp.video_url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  style={{ color: 'var(--action-primary)', textDecoration: 'none', fontWeight: 600, fontSize: '0.74rem' }}
+                                >
+                                  ☁️ Video Nextcloud ↗
+                                </a>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    });
+                  })()}
                 </tbody>
               </table>
             </div>

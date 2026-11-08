@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Mockup: 20 Riwayat Batch Kampanye Auto Pipeline (Seluruh Tipe Video)</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+  <style>
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-purple: #c084fc;
+      --status-purple-soft: rgba(192, 132, 252, 0.14);
+      --status-rose: #f43f5e;
+      --status-rose-soft: rgba(244, 63, 94, 0.14);
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f8fafc;
+      --surface: #ffffff;
+      --surface-raised: #f1f5f9;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --input-bg: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --action-primary: #0d9488;
+      --action-primary-hover: #0f766e;
+      --on-action-primary: #ffffff;
+      --link: #0284c7;
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.1);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.1);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.1);
+      --status-purple: #9333ea;
+      --status-purple-soft: rgba(147, 51, 234, 0.1);
+      --status-rose: #e11d48;
+      --status-rose-soft: rgba(225, 29, 72, 0.1);
+      --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-sans); }
+    body { background-color: var(--canvas); color: var(--text-primary); padding: 2rem 1.5rem; transition: background var(--transition); }
+    .container { max-width: 1280px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem; }
+
+    /* Top Bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      padding: 1.25rem 1.5rem;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+    }
+    .badge-info {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      padding: 0.25rem 0.65rem;
+      border-radius: var(--radius-xs);
+      font-size: 0.76rem;
+      font-weight: 600;
+      border: 1px solid var(--status-info);
+    }
+
+    /* Visualizer Section */
+    .visualizer-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .stages-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.5rem;
+    }
+    .stage-box {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 0.5rem;
+      text-align: center;
+      position: relative;
+    }
+    .stage-box.completed {
+      border-color: var(--status-success);
+      background: var(--status-success-soft);
+    }
+    .stage-title { font-size: 0.72rem; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
+    .stage-desc { font-size: 0.64rem; color: var(--text-muted); }
+    .stage-badge { font-size: 0.66rem; font-weight: 600; color: var(--status-success); margin-top: 4px; }
+
+    /* Filter Pills */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .filter-pill {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      padding: 0.4rem 0.85rem;
+      border-radius: 9999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .filter-pill:hover, .filter-pill.active {
+      background: var(--surface-interactive);
+      color: var(--action-primary);
+      border-color: var(--action-primary);
+    }
+
+    /* Table */
+    .table-container {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; text-align: left; }
+    th {
+      background: var(--surface-raised);
+      padding: 0.75rem 1rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+      vertical-align: middle;
+    }
+    tr.selectable {
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    tr.selectable:hover {
+      background: var(--surface-raised);
+    }
+    tr.selected {
+      background: var(--surface-interactive) !important;
+      border-left: 3px solid var(--action-primary);
+    }
+
+    /* Badges */
+    .type-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: var(--radius-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    .type-multiplier { background: var(--status-purple-soft); color: var(--status-purple); border: 1px solid var(--status-purple); }
+    .type-recipe { background: var(--status-warning-soft); color: var(--status-warning); border: 1px solid var(--status-warning); }
+    .type-product { background: var(--status-info-soft); color: var(--status-info); border: 1px solid var(--status-info); }
+    .type-editorial { background: var(--status-rose-soft); color: var(--status-rose); border: 1px solid var(--status-rose); }
+    .type-recipelabs { background: var(--status-success-soft); color: var(--status-success); border: 1px solid var(--status-success); }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.2rem 0.55rem;
+      border-radius: var(--radius-xs);
+    }
+    .status-completed { background: var(--status-success-soft); color: var(--status-success); border: 1px solid var(--status-success); }
+    .status-running { background: var(--status-warning-soft); color: var(--status-warning); border: 1px solid var(--status-warning); }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div>
+        <h1 style="font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; gap: 0.6rem;">
+          <span>📋</span>
+          <span>Riwayat Batch Kampanye Auto Pipeline (20 Terakhir Seluruh Tipe)</span>
+        </h1>
+        <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">
+          Menampilkan federasi riwayat batch Multiplier, Video Resep, Promosi Produk, Brand Editorial, dan Recipe Labs secara terpadu.
+        </p>
+      </div>
+      <div style="display: flex; gap: 0.75rem; align-items: center;">
+        <button onclick="toggleTheme()" style="background: var(--surface-raised); border: 1px solid var(--border-subtle); color: var(--text-primary); padding: 0.4rem 0.85rem; border-radius: var(--radius-sm); font-size: 0.78rem; cursor: pointer;">
+          🌓 Switch Theme
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Campaign Inspection Visualizer -->
+    <div class="visualizer-card">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <span style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Status Inspeksi Pipeline Aktif</span>
+          <div style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.6rem; margin-top: 2px;">
+            <span id="visCampaignId" style="font-family: var(--font-mono); color: var(--action-primary);">mul_261108_s6so1p</span>
+            <span id="visTypeBadge" class="type-badge type-multiplier">⚡ Multiplier</span>
+            <span id="visCampaignTitle" style="font-size: 0.9rem; font-weight: 600; color: var(--text-secondary);">nutribake - Multiplier: Solusi Cepat Camilan Sore Tanpa Terigu Buat Pekerja Kantoran</span>
+          </div>
+        </div>
+        <div class="badge-info">
+          <span>● Polling Faktual Multi-Engine Aktif</span>
+        </div>
+      </div>
+
+      <!-- 7 Stages Grid -->
+      <div class="stages-grid" id="visStages">
+        <div class="stage-box completed">
+          <div class="stage-title">1. Planner / Asset</div>
+          <div class="stage-desc">Blueprint Deconstruct</div>
+          <div class="stage-badge">✓ c90f2c27-9a86</div>
+        </div>
+        <div class="stage-box completed">
+          <div class="stage-title">2. Storyboard</div>
+          <div class="stage-desc">Gemini 1-Pass Remix</div>
+          <div class="stage-badge">✓ 3 Klip Siap</div>
+        </div>
+        <div class="stage-box completed">
+          <div class="stage-title">3. Start Frames</div>
+          <div class="stage-desc">Macrophotography</div>
+          <div class="stage-badge">✓ Pure T2V / Ref</div>
+        </div>
+        <div class="stage-box completed">
+          <div class="stage-title">4. TTS Minimax</div>
+          <div class="stage-desc">Professional Anchor</div>
+          <div class="stage-badge">✓ Audio MP3 Siap</div>
+        </div>
+        <div class="stage-box completed">
+          <div class="stage-title">5. Video Veo</div>
+          <div class="stage-desc">Veo 3 Tasks Mapped</div>
+          <div class="stage-badge">✓ 3/3 Video Selesai</div>
+        </div>
+        <div class="stage-box completed">
+          <div class="stage-title">6. FFmpeg Mux</div>
+          <div class="stage-desc">Muxing 3 Klip + VO</div>
+          <div class="stage-badge">✓ MP4 Final Siap</div>
+        </div>
+        <div class="stage-box completed">
+          <div class="stage-title">7. Cloud & Sync</div>
+          <div class="stage-desc">Nextcloud & Hub</div>
+          <div class="stage-badge">✓ Nextcloud Ready</div>
+        </div>
+      </div>
+
+      <!-- Telemetry Box -->
+      <div style="background: var(--input-bg); border: 1px solid var(--border-subtle); padding: 0.65rem 0.85rem; border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.74rem; color: var(--status-success); display: flex; align-items: center; justify-content: space-between;">
+        <span id="visTelemetry">[21:55:10] ✓ Video final tersimpan di Nextcloud dan siap disinkronkan ke ContentFlow Hub 🚀</span>
+        <span style="color: var(--text-muted); font-size: 0.7rem;">Durasi Total: 28s</span>
+      </div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="table-container">
+      
+      <!-- Filter Bar -->
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+        <div class="filter-bar">
+          <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-right: 0.25rem;">Filter Tipe:</span>
+          <button class="filter-pill active" onclick="applyFilter('all')">Semua Tipe (20)</button>
+          <button class="filter-pill" onclick="applyFilter('multiplier')">⚡ Multiplier (6)</button>
+          <button class="filter-pill" onclick="applyFilter('product')">📦 Promosi Produk (5)</button>
+          <button class="filter-pill" onclick="applyFilter('recipe')">🍲 Video Resep (5)</button>
+          <button class="filter-pill" onclick="applyFilter('editorial')">📰 Brand Editorial (3)</button>
+          <button class="filter-pill" onclick="applyFilter('recipelabs')">📸 Recipe Labs (1)</button>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Menampilkan <strong>20 riwayat terakhir</strong></span>
+          <button style="background: var(--surface-raised); border: 1px solid var(--border-subtle); color: var(--text-secondary); padding: 0.35rem 0.75rem; border-radius: var(--radius-sm); font-size: 0.75rem; cursor: pointer;">
+            🔄 Refresh
+          </button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div style="border: 1px solid var(--border-subtle); border-radius: var(--radius-md); overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Campaign ID & Tipe</th>
+              <th>Brand & Judul Kampanye</th>
+              <th>Preset / Visual Identity</th>
+              <th>Format Klip</th>
+              <th>Status Produksi</th>
+              <th>Aksi & Lineage</th>
+            </tr>
+          </thead>
+          <tbody id="batchTableBody">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // Data dummy representatif dari DB aktual (mencakup mul_261108_s6so1p yang dicari user)
+    const campaignsData = [
+      {
+        id: 'mul_261108_s6so1p',
+        type: 'multiplier',
+        typeLabel: '⚡ Multiplier',
+        name: 'nutribake - Multiplier: Solusi Cepat Camilan Sore Tanpa Terigu Buat Pekerja Kantoran',
+        brand: 'nutribake',
+        items: 1,
+        preset: 'Macrophotography',
+        format: '3 Klip @ 8s (Veo Omni Flash)',
+        status: 'completed',
+        statusLabel: 'Selesai & Nextcloud Ready',
+        detailUrl: '/multiplier-lab',
+        detailLabel: 'Detail Multiplier ↗',
+        videoUrl: 'http://100.78.186.123/index.php/s/fADJDNs97A8CfAQ',
+        date: '2026-11-08 14:52'
+      },
+      {
+        id: 'mul_261108_fmly73',
+        type: 'multiplier',
+        typeLabel: '⚡ Multiplier',
+        name: 'dapurbotani - Multiplier: Trik Ganti Mentega Pakai Alpukat Buat Brownies Legit',
+        brand: 'dapurbotani',
+        items: 1,
+        preset: 'Culinary Overhead',
+        format: '3 Klip @ 8s (Veo Omni Flash)',
+        status: 'completed',
+        statusLabel: 'Selesai & Nextcloud Ready',
+        detailUrl: '/multiplier-lab',
+        detailLabel: 'Detail Multiplier ↗',
+        videoUrl: '#',
+        date: '2026-11-08 11:15'
+      },
+      {
+        id: 'opc_261108_8618kc',
+        type: 'recipe',
+        typeLabel: '🍲 Video Resep',
+        name: '[ OPC 20261108 ] - dapurbotani - Garlibee Madu - kesehatan jantung',
+        brand: 'dapurbotani',
+        items: 1,
+        preset: 'vi_habitfolk_macro_craft',
+        format: '8 Klip @ 4s (Veo Omni Flash)',
+        status: 'running',
+        statusLabel: 'Muxing MP4 (Tahap 6)',
+        detailUrl: '/pillar-campaigns',
+        detailLabel: 'Detail OPC ↗',
+        videoUrl: null,
+        date: '2026-11-07 23:24'
+      },
+      {
+        id: 'opc_261108_f68jf1',
+        type: 'product',
+        typeLabel: '📦 Promosi Produk',
+        name: '[Product Campaign] dapurbotani - Garlibee Madu Bawang Lanang',
+        brand: 'dapurbotani',
+        items: 1,
+        preset: 'Product Showcase Dynamic',
+        format: '8 Klip @ 4s (Veo Omni Flash)',
+        status: 'completed',
+        statusLabel: 'Selesai & Nextcloud Ready',
+        detailUrl: '/pillar-campaigns',
+        detailLabel: 'Detail OPC ↗',
+        videoUrl: '#',
+        date: '2026-11-07 22:51'
+      },
+      {
+        id: 'opc_261108_qgsen8',
+        type: 'product',
+        typeLabel: '📦 Promosi Produk',
+        name: '[Product Campaign] dapurbotani - Garlibee Madu Bawang Lanang',
+        brand: 'dapurbotani',
+        items: 1,
+        preset: 'Product Showcase Dynamic',
+        format: '8 Klip @ 4s (Veo Omni Flash)',
+        status: 'completed',
+        statusLabel: 'Selesai & Nextcloud Ready',
+        detailUrl: '/pillar-campaigns',
+        detailLabel: 'Detail OPC ↗',
+        videoUrl: '#',
+        date: '2026-11-07 22:51'
+      },
+      {
+        id: 'mul_261108_q5uca4',
+        type: 'multiplier',
+        typeLabel: '⚡ Multiplier',
+        name: 'siasatsehat - Multiplier: Trik Dapur 8 Menit Peluntur Lemak Perut Alami',
+        brand: 'siasatsehat',
+        items: 1,
+        preset: 'Macrophotography',
+        format: '3 Klip @ 8s (Veo Omni Flash)',
+        status: 'completed',
+        statusLabel: 'Selesai & Nextcloud Ready',
+        detailUrl: '/multiplier-lab',
+        detailLabel: 'Detail Multiplier ↗',
+        videoUrl: '#',
+        date: '2026-11-07 20:50'
+      },
+      {
+        id: 'opc_261108_33xg6o',
+        type: 'editorial',
+        typeLabel: '📰 Brand Editorial',
+        name: '[Editorial Campaign] habitfolk - Mindfulness di Meja Makan',
+        brand: 'habitfolk',
+        items: 1,
+        preset: 'Nordic Clean Studio',
+        format: '8 Klip @ 4s (Veo Omni Flash)',
+        status: 'completed',
+        statusLabel: 'Selesai & Nextcloud Ready',
+        detailUrl: '/pillar-campaigns',
+        detailLabel: 'Detail OPC ↗',
+        videoUrl: '#',
+        date: '2026-11-07 19:40'
+      },
+      {
+        id: 'rcp_261107_k98sa2',
+        type: 'recipelabs',
+        typeLabel: '📸 Recipe Labs',
+        name: 'nutribake - Resep: Roti Gandum No-Knead Praktis 4 Grid',
+        brand: 'nutribake',
+        items: 1,
+        preset: 'Food Porn Split 4',
+        format: '4 Grid Split Carousel',
+        status: 'completed',
+        statusLabel: 'Selesai & Nextcloud Ready',
+        detailUrl: '/recipe-labs',
+        detailLabel: 'Detail Labs ↗',
+        videoUrl: '#',
+        date: '2026-11-07 18:30'
+      },
+      {
+        id: 'opc_261107_jwndxi',
+        type: 'product',
+        typeLabel: '📦 Promosi Produk',
+        name: '[Product Campaign] dapurbotani - Madu Randu Murni',
+        brand: 'dapurbotani',
+        items: 1,
+        preset: 'Product Showcase Dynamic',
+        format: '8 Klip @ 4s (Veo Omni Flash)',
+        status: 'completed',
+        statusLabel: 'Selesai & Nextcloud Ready',
+        detailUrl: '/pillar-campaigns',
+        detailLabel: 'Detail OPC ↗',
+        videoUrl: '#',
+        date: '2026-11-07 17:15'
+      },
+      {
+        id: 'mul_261028_kjrn3g_08',
+        type: 'multiplier',
+        typeLabel: '⚡ Multiplier',
+        name: '[ MULTIPLIER 20261028 ] - dapurbotani - 10 konten varian #8',
+        brand: 'dapurbotani',
+        items: 1,
+        preset: 'Fast Motion Cut',
+        format: '3 Klip @ 6s',
+        status: 'completed',
+        statusLabel: 'Selesai & Nextcloud Ready',
+        detailUrl: '/multiplier-lab',
+        detailLabel: 'Detail Multiplier ↗',
+        videoUrl: '#',
+        date: '2026-10-28 03:14'
+      },
+      {
+        id: 'opc_261027_a84bs9',
+        type: 'recipe',
+        typeLabel: '🍲 Video Resep',
+        name: '[Recipe Campaign] habitfolk - Oats Chia Seed Pudding Segar',
+        brand: 'habitfolk',
+        items: 1,
+        preset: 'vi_habitfolk_macro_craft',
+        format: '8 Klip @ 4s (Veo Omni Flash)',
+        status: 'completed',
+        statusLabel: 'Selesai & Nextcloud Ready',
+        detailUrl: '/pillar-campaigns',
+        detailLabel: 'Detail OPC ↗',
+        videoUrl: '#',
+        date: '2026-10-27 15:10'
+      },
+      {
+        id: 'opc_261027_k9s8dc',
+        type: 'recipe',
+        typeLabel: '🍲 Video Resep',
+        name: '[Recipe Campaign] nutribake - Kue Kering Gluten Free Renyah',
+        brand: 'nutribake',
+        items: 1,
+        preset: 'Macrophotography',
+        format: '8 Klip @ 4s (Veo Omni Flash)',
+        status: 'completed',
+        statusLabel: 'Selesai & Nextcloud Ready',
+        detailUrl: '/pillar-campaigns',
+        detailLabel: 'Detail OPC ↗',
+        videoUrl: '#',
+        date: '2026-10-27 14:02'
+      },
+      {
+        id: 'mul_261026_m87asx',
+        type: 'multiplier',
+        typeLabel: '⚡ Multiplier',
+        name: 'nutribake - Multiplier: Cara Cepat Fermentasi Sourdough Tanpa Ribet',
+        brand: 'nutribake',
+        items: 1,
+        preset: 'Macrophotography',
+        format: '3 Klip @ 8s',
+        status: 'completed',
+        statusLabel: 'Selesai & Nextcloud Ready',
+        detailUrl: '/multiplier-lab',
+        detailLabel: 'Detail Multiplier ↗',
+        videoUrl: '#',
+        date: '2026-10-26 18:22'
+      },
+      {
+        id: 'opc_261026_x871sk',
+        type: 'editorial',
+        typeLabel: '📰 Brand Editorial',
+        name: '[Editorial Campaign] siasatsehat - Kenapa Gula Pasir Bikin Cepat Tua',
+        brand: 'siasatsehat',
+        items: 1,
+        preset: 'Editorial Minimalist',
+        format: '8 Klip @ 4s (Veo Omni Flash)',
+        status: 'completed',
+        statusLabel: 'Selesai & Nextcloud Ready',
+        detailUrl: '/pillar-campaigns',
+        detailLabel: 'Detail OPC ↗',
+        videoUrl: '#',
+        date: '2026-10-26 12:15'
+      },
+      {
+        id: 'opc_261025_p09s8x',
+        type: 'product',
+        typeLabel: '📦 Promosi Produk',
+        name: '[Product Campaign] nutribake - Tepung Sorghum Organik 500gr',
+        brand: 'nutribake',
+        items: 1,
+        preset: 'Product Showcase Dynamic',
+        format: '8 Klip @ 4s (Veo Omni Flash)',
+        status: 'completed',
+        statusLabel: 'Selesai & Nextcloud Ready',
+        detailUrl: '/pillar-campaigns',
+        detailLabel: 'Detail OPC ↗',
+        videoUrl: '#',
+        date: '2026-10-25 09:30'
+      },
+      {
+        id: 'mul_261024_09as8c',
+        type: 'multiplier',
+        typeLabel: '⚡ Multiplier',
+        name: 'dapurbotani - Multiplier: Rahasia Simpan Bawang Putih Tahan 6 Bulan',
+        brand: 'dapurbotani',
+        items: 1,
+        preset: 'Culinary Overhead',
+        format: '3 Klip @ 8s',
+        status: 'completed',
+        statusLabel: 'Selesai & Nextcloud Ready',
+        detailUrl: '/multiplier-lab',
+        detailLabel: 'Detail Multiplier ↗',
+        videoUrl: '#',
+        date: '2026-10-24 16:45'
+      },
+      {
+        id: 'opc_261024_k7623a',
+        type: 'recipe',
+        typeLabel: '🍲 Video Resep',
+        name: '[Recipe Campaign] dapurbotani - Sup Ayam Jahe Hangat Imun Tubuh',
+        brand: 'dapurbotani',
+        items: 1,
+        preset: 'vi_habitfolk_macro_craft',
+        format: '8 Klip @ 4s (Veo Omni Flash)',
+        status: 'completed',
+        statusLabel: 'Selesai & Nextcloud Ready',
+        detailUrl: '/pillar-campaigns',
+        detailLabel: 'Detail OPC ↗',
+        videoUrl: '#',
+        date: '2026-10-24 11:20'
+      },
+      {
+        id: 'opc_261023_8712sa',
+        type: 'recipe',
+        typeLabel: '🍲 Video Resep',
+        name: '[Recipe Campaign] habitfolk - Smoothies Bowl Hijau Detox Pagi',
+        brand: 'habitfolk',
+        items: 1,
+        preset: 'vi_habitfolk_macro_craft',
+        format: '8 Klip @ 4s (Veo Omni Flash)',
+        status: 'completed',
+        statusLabel: 'Selesai & Nextcloud Ready',
+        detailUrl: '/pillar-campaigns',
+        detailLabel: 'Detail OPC ↗',
+        videoUrl: '#',
+        date: '2026-10-23 08:15'
+      },
+      {
+        id: 'opc_261022_9872sa',
+        type: 'editorial',
+        typeLabel: '📰 Brand Editorial',
+        name: '[Editorial Campaign] dapurbotani - Filosofi Madu Hutan Liar',
+        brand: 'dapurbotani',
+        items: 1,
+        preset: 'Nordic Clean Studio',
+        format: '8 Klip @ 4s (Veo Omni Flash)',
+        status: 'completed',
+        statusLabel: 'Selesai & Nextcloud Ready',
+        detailUrl: '/pillar-campaigns',
+        detailLabel: 'Detail OPC ↗',
+        videoUrl: '#',
+        date: '2026-10-22 14:10'
+      },
+      {
+        id: 'opc_261021_0921ka',
+        type: 'product',
+        typeLabel: '📦 Promosi Produk',
+        name: '[Product Campaign] habitfolk - Artisan Granola Almond Cranberry',
+        brand: 'habitfolk',
+        items: 1,
+        preset: 'Product Showcase Dynamic',
+        format: '8 Klip @ 4s (Veo Omni Flash)',
+        status: 'completed',
+        statusLabel: 'Selesai & Nextcloud Ready',
+        detailUrl: '/pillar-campaigns',
+        detailLabel: 'Detail OPC ↗',
+        videoUrl: '#',
+        date: '2026-10-21 10:05'
+      }
+    ];
+
+    let activeSelectedId = 'mul_261108_s6so1p';
+    let currentFilter = 'all';
+
+    function renderTable() {
+      const tbody = document.getElementById('batchTableBody');
+      const filtered = currentFilter === 'all' 
+        ? campaignsData 
+        : campaignsData.filter(c => c.type === currentFilter);
+
+      tbody.innerHTML = filtered.map(camp => {
+        const isSelected = camp.id === activeSelectedId;
+        const typeClass = `type-${camp.type}`;
+        const statusClass = camp.status === 'completed' ? 'status-completed' : 'status-running';
+
+        return `
+          <tr class="selectable ${isSelected ? 'selected' : ''}" onclick="selectCampaign('${camp.id}')">
+            <td>
+              <div style="font-family: var(--font-mono); font-weight: 700; font-size: 0.8rem; color: ${isSelected ? 'var(--action-primary)' : 'inherit'}">
+                ${camp.id}
+              </div>
+              <div style="margin-top: 4px;">
+                <span class="type-badge ${typeClass}">${camp.typeLabel}</span>
+              </div>
+              ${isSelected ? '<div style="font-size: 0.68rem; color: var(--action-primary); font-weight: 700; margin-top: 3px;">👁️ Terpilih di Visualizer</div>' : ''}
+            </td>
+            <td>
+              <div style="font-weight: 600; color: var(--text-primary);">${camp.name}</div>
+              <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">
+                ${camp.brand} • ${camp.items} Video Item • ${camp.date}
+              </div>
+            </td>
+            <td>
+              <span style="font-family: var(--font-mono); font-size: 0.74rem; color: var(--text-secondary);">
+                ${camp.preset}
+              </span>
+            </td>
+            <td style="font-size: 0.78rem; color: var(--text-secondary);">
+              ${camp.format}
+            </td>
+            <td>
+              <span class="status-badge ${statusClass}">
+                ● ${camp.statusLabel}
+              </span>
+            </td>
+            <td>
+              <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                <a href="${camp.detailUrl}" style="color: var(--link); text-decoration: none; font-weight: 600; font-size: 0.78rem;">
+                  ${camp.detailLabel}
+                </a>
+                <a href="/content-flow" style="color: var(--status-success); text-decoration: none; font-weight: 600; font-size: 0.74rem;">
+                  📊 ContentFlow Hub ↗
+                </a>
+                ${camp.videoUrl && camp.videoUrl !== '#' ? `
+                  <a href="${camp.videoUrl}" target="_blank" style="color: var(--action-primary); text-decoration: none; font-weight: 600; font-size: 0.72rem;">
+                    ☁️ Video Nextcloud ↗
+                  </a>
+                ` : ''}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function selectCampaign(id) {
+      activeSelectedId = id;
+      const camp = campaignsData.find(c => c.id === id);
+      if (camp) {
+        document.getElementById('visCampaignId').textContent = camp.id;
+        document.getElementById('visCampaignTitle').textContent = camp.name;
+        
+        const badgeEl = document.getElementById('visTypeBadge');
+        badgeEl.textContent = camp.typeLabel;
+        badgeEl.className = `type-badge type-${camp.type}`;
+
+        document.getElementById('visTelemetry').textContent = `[${new Date().toLocaleTimeString('id-ID')}] Menginspeksi status kampanye ${camp.id} (${camp.typeLabel}) - Status: ${camp.statusLabel}`;
+      }
+      renderTable();
+    }
+
+    function applyFilter(filter) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-pill').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('onclick').includes(`'${filter}'`)) {
+          btn.classList.add('active');
+        }
+      });
+      renderTable();
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+    }
+
+    // Initial render
+    renderTable();
+  </script>
+</body>
+</html>
+
