@@ -239,6 +239,7 @@ export default function AutoPipelinePage() {
   const rawVoicePersona = activePresetConfig?.basic_strategy?.voice_persona || activePresetConfig?.voice_persona || 'English_causual_narrator_vv1';
   const voicePersonaName = rawVoicePersona.replace(/_/g, ' ');
   const targetLanguage = activePresetConfig?.basic_strategy?.target_language || activePresetConfig?.target_language || 'en-US';
+  const wordsPerClip = activePresetConfig?.visual_engine?.words_per_clip || (clipDuration >= 8 ? '17-19 kata' : '8-9 kata');
 
   const wf = activePresetConfig?.workflow || {};
   const isMotionTextOn = wf.enable_motion_text !== undefined ? Boolean(wf.enable_motion_text) : (activePresetConfig?.enable_motion_text !== undefined ? Boolean(activePresetConfig.enable_motion_text) : true);

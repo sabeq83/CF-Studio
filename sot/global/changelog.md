@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.40.3 — Fix wordsPerClip static prerender on Auto Pipeline page (09/11/2026)
+- Definisikan wordsPerClip pada page.js untuk meloloskan static prerender Next.js
+
 ## V2.40.2 — Full 100% Preset Inheritance across 4 Auto Pipeline Video Types (09/11/2026)
 - Harmonisasi resolusi 100% parameter preset (Suara, AI Directive, VI V2, Mesin Visual, Subtitel & Transisi) pada 4 tipe video Auto Pipeline
 - Perbaikan kebocoran Visual Identity dan aktivasi finishing subtitel/transisi pada Multiplier Video
