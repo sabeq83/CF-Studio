@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.40.1 — Recipe Library UI Page & Sidebar Navigation Integration (09/11/2026)
+- Integrasi menu navigasi Recipe Library pada Sidebar kategori PLANNING
+- Pembuatan halaman client app/recipe-library/page.js dengan tabel resep dan ringkasan metrik
+- Modal detail resep dengan proteksi 100% bahan terkunci dan prompt foto 5-layer optical stack
+- Modal batch importer hingga 50 URL dengan jeda acak 10-20 detik anti-bot dan integrasi 1-klik ke Auto Pipeline
+- Kepatuhan 100% Semantic CSS Design Tokens app/theme.css
+
 ## V2.40.0 — Authoritative Recipe Importer & Sequential 50-URL Batch Polish Engine (09/11/2026)
 - Implementasi Schema.org JSON-LD dan Cookpad recipe parser otoritatif
 - Strict Guardrail perlindungan 100% bahan resep (frozen & no AI polish)

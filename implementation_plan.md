@@ -1,363 +1,195 @@
-# Rencana Implementasi: Recipe Importer Otoritatif & Sequential Batch Polish (50 URLs)
+# Rencana Implementasi: Halaman Recipe Library (Pustaka Resep Kuliner) di CF Studio
 
 > [!NOTE]
-> Rencana implementasi ini dirancang untuk mengadopsi dan menyempurnakan arsitektur Importer dari **Recipe Studio** ke dalam **CF Studio**. Fitur ini memungkinkan pengguna dan agen AI (Claude/ChatGPT/Antigravity) mengimpor hingga **50 URL resep secara sekuensial**, menyimpan data mentah ke database, menjalankan **AI Magic Polish** khusus pada *Title*, *Summary*, dan *Direction*, serta **MENJAGA 100% BAHAN RESEP (INGREDIENTS) TETAP UTUH & TIDAK BOLEH DIPOLES**. Resep otoritatif ini selanjutnya menjadi pustaka referensi nyata untuk merancang adegan video memasak yang akurat dan anti-halusinasi.
+> Rencana implementasi ini bertujuan untuk menghadirkan antarmuka pengguna resmi (**Recipe Library**) di aplikasi web CF Studio. Halaman ini menghubungkan repositori database `curated_recipes` dan batch importer engine yang telah selesai di backend, memungkinkan pengguna menavigasi menu `🍲 Recipe Library` di Sidebar, mencari dan memfilter resep terkurasi, melihat detail bahan yang 100% terkunci (*strict guardrail*), mengimpor hingga 50 URL secara sekuensial dengan jeda acak 10–20 detik anti-bot, serta meluncurkan produksi video memasak langsung ke Auto Pipeline.
 
 ---
 
-## Ringkasan Eksekutif & Arsitektur
+## Ringkasan Arsitektur & Antarmuka
 
-### 1. Prinsip Utama (Strict Guardrails)
-- **Otoritatif & Valid**: Resep diambil dari web kuliner nyata berbasis standar Schema.org (`JSON-LD Recipe`) dan parser khusus (Cookpad, dll.).
-- **Bahan Resep Terproteksi (100% Frozen)**: Takaran gram, sendok, siung, dan bahan asli **TIDAK DISENTUH ATAU DIPOLES SAMA SEKALI** oleh AI untuk mencegah kesalahan fatal takaran.
-- **AI Magic Polish (1-Call)**:
-  - **Title**: Dipoles menjadi judul memikat (*click-worthy* & *mouthwatering*).
-  - **Summary**: Dipoles menjadi intro kuliner 2-3 kalimat yang menggugah selera.
-  - **Direction / Steps**: Dipoles menjadi langkah terstruktur kronologis dengan indikator sensori memasak (aroma, warna, tekstur).
-  - **Visual Prompts**: Dibuatkan prompt foto/video 5-layer optical stack untuk sajian akhir.
-- **Pemrosesan Sekuensial 50 Baris URL**:
-  - Dijalankan berurutan (satu per satu) dengan **jeda acak terkontrol (10 - 20 detik)** guna meniru pola browsing manusia alami (*natural human browsing behavior*), mencegah pemblokiran IP oleh Cloudflare/sistem anti-bot situs web kuliner, serta melindungi kuota *rate limit* Gemini AI.
-  - Dilengkapi *real-time progress feedback* dan *graceful error handling* (jika URL #7 gagal, batch tetap lanjut ke URL #8).
+1. **Navigasi Sidebar (`app/components/Sidebar.js`)**:
+   - Menambahkan menu **`🍲 Recipe Library`** di kategori `PLANNING` bersebelahan dengan *Product Database*.
+   - Memetakan rute `/recipe-library` ke peta otorisasi menu.
+
+2. **Halaman Pustaka Resep (`app/recipe-library/page.js`)**:
+   - **Header & Ringkasan Metrik**: Menampilkan total resep, jumlah resep ter-polish, persentase bahan terkunci 100%, dan status siap video.
+   - **Filter & Search Bar**: Live search real-time (nama masakan/bahan), filter kategori (*Makanan Utama, Dessert, Tradisional*), filter status polish (*Polished vs Raw*), dan filter domain sumber (*Cookpad, Masak Apa Hari Ini, dll.*).
+   - **Tabel Pustaka Resep**: Menampilkan daftar resep terkurasi dari endpoint `GET /api/v2/recipes/curated/import-batch` dengan tautan sumber asli, badge keaslian bahan, porsi, waktu masak, dan tombol aksi (*Detail*, *Buat Video*, *Hapus*).
+   - **Modal Impor Batch (Hingga 50 URL)**: Dialog interaktif untuk memasukkan hingga 50 URL resep, memilih preset gaya visual dan jeda acak 10-20 detik anti-bot, dengan progress bar real-time dan log terminal status.
+   - **Modal Detail Resep**: Menampilkan daftar bahan mentah yang 100% terkunci tanpa polesan AI, langkah instruksi sensori hasil polesan, dan prompt foto 5-layer optical stack.
+
+3. **Kepatuhan Token Desain Semantik (Universal Theme)**:
+   - 100% menggunakan token CSS dari `app/theme.css` (`var(--canvas)`, `var(--surface)`, `var(--text-primary)`, `var(--action-primary)`, dll.).
+   - Tanpa hardcoded color (`#hex` atau `rgb()`).
+   - Adaptif sempurna untuk Dark Mode dan Light Mode.
 
 ---
 
 ## Execution Task List
-- [x] **Task 1: Buat Skema & Repositori Database `lib/curated-recipes-repository.js`** untuk tabel `curated_recipes` di PostgreSQL dan SQLite.
-- [x] **Task 2: Buat Modul Fetcher & Parser Otoritatif (`lib/recipe-importer/recipe-url-fetcher.js`, `parsers/json-ld-recipe-parser.js`, `parsers/cookpad-parser.js`)** dengan proteksi SSRF.
-- [x] **Task 3: Buat AI Magic Polish Engine (`lib/recipe-importer/recipe-polish-engine.js`)** dengan Strict Guardrail perlindungan bahan 100% utuh.
-- [x] **Task 4: Buat Sequential Batch Processor (`lib/recipe-importer/recipe-batch-processor.js`)** untuk memproses hingga 50 URL secara sekuensial dan terisolasi.
-- [x] **Task 5: Buat Endpoint API Batch Import & Polishing (`app/api/v2/recipes/curated/import-batch/route.js`)**.
-- [x] **Task 6: Daftarkan Tools MCP `cf_import_recipe_batch` dan `cf_list_curated_recipes` pada `apps/mcp/tools.mjs`**.
-- [x] **Task 7: Buat Standalone HTML Mockup Interaktif (`public/mockup_recipe_importer.html`)** berbasis 100% Semantic CSS Tokens dari `app/theme.css`.
-- [x] **Task 8: Buat Unit Test Suite Komprehensif (`tests/test-curated-recipe-importer.test.js`)**.
-- [x] **Task 9: Uji Verifikasi Otomatis, Next.js Build Check, dan Prosedur Rilis Non-Interaktif**.
+- [x] **Task 1: Perbarui Navigasi Sidebar `app/components/Sidebar.js`** untuk mendaftarkan menu `🍲 Recipe Library` di bawah kategori `PLANNING`.
+- [x] **Task 2: Buat Halaman Client Component `app/recipe-library/page.js`** dengan antarmuka tabel, metrik, modal detail, dan modal impor batch 50 URL.
+- [x] **Task 3: Hubungkan Aksi "Buat Video" ke Auto Pipeline (`/auto-pipeline?pipeline_type=recipe_campaign`)**.
+- [x] **Task 4: Pengujian & Verifikasi Build Next.js (`npm run build`)**.
+- [x] **Task 5: Rilis Non-Interaktif & Atomic Deployment ke Staging Mac Mini**.
 
 ---
 
 ## Before & After Code Snippets
 
-### 1. `lib/curated-recipes-repository.js` (File Baru)
+### 1. `app/components/Sidebar.js`
+
+#### Code Sebelum (Current/Before):
+```javascript
+const menuKeyMap = {
+  '/auto-pipeline': 'pillar_campaign',
+  '/youtube-studio': 'youtube_studio',
+  '/affiliate-studio': 'affiliate_studio',
+  '/contentflow-studio': 'content_flow',
+  '/content-flow': 'content_flow',
+  '/instant-factory': 'instant_campaign',
+  '/re-campaigns': 're_campaign',
+  '/pillar-campaigns': 'pillar_campaign',
+  '/content-planner': 'content_planner',
+  '/content-automations': 'content_automations',
+  '/products': 'product_database',
+  '/deconstruct': 'deconstruct_lab',
+  // ...
+};
+
+const navItems = [
+  { label: 'Dashboard', href: '/dashboard', icon: '◈' },
+
+  { section: 'PLANNING' },
+  { label: 'Content Planner', href: '/content-planner', icon: '🗓️' },
+  { label: 'Product Database', href: '/products', icon: '📦' },
+  { label: 'Deconstruct Lab', href: '/deconstruct', icon: '🔬' },
+  { label: 'Preset Manager', href: '/settings/presets', icon: '🎛️' },
+  // ...
+];
+```
 
 #### Code Sesudah (Proposed/After):
 ```javascript
-import { getDb } from './db.js';
-import { pgQuery } from './db-pg.js';
+const menuKeyMap = {
+  '/auto-pipeline': 'pillar_campaign',
+  '/youtube-studio': 'youtube_studio',
+  '/affiliate-studio': 'affiliate_studio',
+  '/contentflow-studio': 'content_flow',
+  '/content-flow': 'content_flow',
+  '/instant-factory': 'instant_campaign',
+  '/re-campaigns': 're_campaign',
+  '/pillar-campaigns': 'pillar_campaign',
+  '/content-planner': 'content_planner',
+  '/content-automations': 'content_automations',
+  '/products': 'product_database',
+  '/recipe-library': 'product_database',
+  '/deconstruct': 'deconstruct_lab',
+  // ...
+};
 
-export async function ensureCuratedRecipesTable() {
-  const ddl = `
-    CREATE TABLE IF NOT EXISTS curated_recipes (
-      id TEXT PRIMARY KEY,
-      tenant_id TEXT DEFAULT 'default_tenant',
-      source_url TEXT NOT NULL,
-      source_domain TEXT,
-      author TEXT,
-      original_title TEXT NOT NULL,
-      polished_title TEXT,
-      original_summary TEXT,
-      polished_summary TEXT,
-      ingredients_raw JSONB NOT NULL,
-      original_instructions JSONB,
-      polished_instructions JSONB,
-      prep_time TEXT,
-      cook_time TEXT,
-      total_time TEXT,
-      servings TEXT,
-      category TEXT DEFAULT 'makanan_utama',
-      cuisine TEXT DEFAULT 'indonesia',
-      original_image_url TEXT,
-      ai_photo_prompts JSONB,
-      status TEXT DEFAULT 'draft',
-      polish_status TEXT DEFAULT 'unpolished',
-      polish_error TEXT,
-      batch_id TEXT,
-      used_in_campaign_count INT DEFAULT 0,
-      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-    );
-    CREATE INDEX IF NOT EXISTS idx_curated_recipes_tenant ON curated_recipes(tenant_id);
-    CREATE INDEX IF NOT EXISTS idx_curated_recipes_source ON curated_recipes(source_url);
-    CREATE INDEX IF NOT EXISTS idx_curated_recipes_batch ON curated_recipes(batch_id);
-  `;
-  try {
-    await pgQuery(ddl);
-  } catch (err) {
-    console.warn('[Curated Recipes Repository] PG DDL note:', err.message);
-  }
-}
+const navItems = [
+  { label: 'Dashboard', href: '/dashboard', icon: '◈' },
 
-export async function insertCuratedRecipe(data) {
-  await ensureCuratedRecipesTable();
-  const sql = `
-    INSERT INTO curated_recipes (
-      id, tenant_id, source_url, source_domain, author, original_title, polished_title,
-      original_summary, polished_summary, ingredients_raw, original_instructions,
-      polished_instructions, prep_time, cook_time, total_time, servings, category,
-      cuisine, original_image_url, ai_photo_prompts, status, polish_status, batch_id
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
-    ON CONFLICT (id) DO UPDATE SET
-      polished_title = EXCLUDED.polished_title,
-      polished_summary = EXCLUDED.polished_summary,
-      polished_instructions = EXCLUDED.polished_instructions,
-      ai_photo_prompts = EXCLUDED.ai_photo_prompts,
-      polish_status = EXCLUDED.polish_status,
-      updated_at = CURRENT_TIMESTAMP
-    RETURNING *
-  `;
-  const res = await pgQuery(sql, [
-    data.id, data.tenant_id || 'default_tenant', data.source_url, data.source_domain,
-    data.author, data.original_title, data.polished_title, data.original_summary,
-    data.polished_summary, JSON.stringify(data.ingredients_raw),
-    JSON.stringify(data.original_instructions), JSON.stringify(data.polished_instructions),
-    data.prep_time, data.cook_time, data.total_time, data.servings,
-    data.category || 'makanan_utama', data.cuisine || 'indonesia',
-    data.original_image_url, JSON.stringify(data.ai_photo_prompts || []),
-    data.status || 'draft', data.polish_status || 'unpolished', data.batch_id
-  ]);
-  return res.rows[0];
-}
+  { section: 'PLANNING' },
+  { label: 'Content Planner', href: '/content-planner', icon: '🗓️' },
+  { label: 'Product Database', href: '/products', icon: '📦' },
+  { label: 'Recipe Library', href: '/recipe-library', icon: '🍲' },
+  { label: 'Deconstruct Lab', href: '/deconstruct', icon: '🔬' },
+  { label: 'Preset Manager', href: '/settings/presets', icon: '🎛️' },
+  // ...
+];
 ```
 
 ---
 
-### 2. `lib/recipe-importer/recipe-polish-engine.js` (File Baru) — AI Magic Polish dengan Strict Guardrail Bahan
+### 2. `app/recipe-library/page.js` (File Baru)
 
 #### Code Sesudah (Proposed/After):
 ```javascript
-import { executeWithKeyPool } from '../gemini.js';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+'use client';
 
-/**
- * AI Magic Polish: Memoles Title, Summary, dan Direction.
- * STRICT GUARDRAIL: ingredients_raw TIDAK BOLEH DIPOLES/DIUBAH.
- */
-export async function polishRecipeWithAi({ recipeData, stylePreset = 'Food Porn', targetLanguage = 'id-ID' }) {
-  const originalTitle = recipeData.original_title || recipeData.title || '';
-  const originalSummary = recipeData.original_summary || recipeData.summary || '';
-  const originalInstructions = Array.isArray(recipeData.original_instructions)
-    ? recipeData.original_instructions
-    : (recipeData.instructions || []);
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import Sidebar from '../components/Sidebar';
 
-  // Format instruksi untuk konteks AI
-  const formattedSteps = originalInstructions.map((s, i) => `${i + 1}. ${s}`).join('\n');
+export default function RecipeLibraryPage() {
+  const router = useRouter();
+  const [recipes, setRecipes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [polishFilter, setPolishFilter] = useState('');
+  const [domainFilter, setDomainFilter] = useState('');
 
-  const prompt = `Kamu adalah Elite Culinary Author, Food Director & Recipe Polish Engine.
-Tugasmu adalah memoles teks resep masakan agar SANGAT MENGGUGAH SELERA, CLICK-WORTHY, dan JELAS untuk audiens media sosial kuliner modern.
+  // Modals
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
 
-[DATA RESEP ASLI]
-Judul Asli: ${originalTitle}
-Summary Asli: ${originalSummary || 'Belum ada'}
-Langkah Asli:
-${formattedSteps}
+  // Batch Importer State
+  const [importUrls, setImportUrls] = useState('');
+  const [stylePreset, setStylePreset] = useState('Food Porn');
+  const [delayMode, setDelayMode] = useState('random-10-20');
+  const [isImporting, setIsImporting] = useState(false);
+  const [progressText, setProgressText] = useState('');
+  const [progressPct, setProgressPct] = useState(0);
+  const [importLogs, setImportLogs] = useState([]);
 
-[ATURAN WAJIB & GUARDRAILS]
-1. POLISH TITLE:
-   - Buat 1 judul utama yang click-worthy dan menggugah selera (contoh: "Ayam Woku Belanga Khas Manado: Bumbu Pedas Gurih Meresap Sempurna").
-   - Buat 2 judul alternatif yang memikat.
-2. POLISH SUMMARY:
-   - Buat 2-3 kalimat hook puitis kuliner yang mendeskripsikan perpaduan rasa, aroma bumbu, dan kelezatan masakan.
-3. POLISH DIRECTIONS / LANGKAH:
-   - Parafrase langkah-langkah asli menjadi instruksi yang runtut, mudah diikuti, dan memiliki penanda sensori (warna kecokelatan, aroma tumisan harum, kuah mengental menyusut).
-   - JANGAN MENGURANGI inti tahapan memasak asli.
-4. PERLINDUNGAN BAHAN (CRITICAL):
-   - Kamu DILARANG mengubah atau menambahkan bahan dan takaran resep. Bahan asli telah dikunci.
-5. AI PHOTO PROMPT:
-   - Buat 1 prompt 5-layer optical stack dalam Bahasa Inggris untuk generator foto T2I dengan gaya "${stylePreset}".
-
-Output WAJIB berupa JSON dengan schema persis:
-{
-  "polished_title": "Judul utama hasil poles",
-  "alternative_titles": ["Opsi 1", "Opsi 2"],
-  "polished_summary": "Intro 2-3 kalimat",
-  "polished_instructions": [
-    "Langkah 1...",
-    "Langkah 2..."
-  ],
-  "ai_photo_prompt": "English 5-layer optical stack prompt --ar 9:16"
-}`;
-
-  const rawJson = await executeWithKeyPool(1, async (apiKey) => {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: 'gemini-2.5-flash',
-      generationConfig: {
-        temperature: 0.7,
-        responseMimeType: 'application/json'
+  // Fetch data
+  const loadRecipes = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch('/api/v2/recipes/curated/import-batch?limit=100');
+      const json = await res.json();
+      if (json.success && Array.isArray(json.data)) {
+        setRecipes(json.data);
       }
-    });
-    const result = await model.generateContent(prompt);
-    return result.response.text();
+    } catch (err) {
+      console.error('Gagal memuat resep:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadRecipes();
+  }, []);
+
+  // Filter logic
+  const filteredRecipes = recipes.filter(r => {
+    const q = search.toLowerCase();
+    const matchSearch = !q ||
+      r.original_title?.toLowerCase().includes(q) ||
+      r.polished_title?.toLowerCase().includes(q) ||
+      (Array.isArray(r.ingredients_raw) && r.ingredients_raw.some(i => String(i).toLowerCase().includes(q)));
+    const matchCategory = !categoryFilter || r.category === categoryFilter;
+    const matchPolish = !polishFilter || r.polish_status === polishFilter;
+    const matchDomain = !domainFilter || r.source_domain === domainFilter;
+    return matchSearch && matchCategory && matchPolish && matchDomain;
   });
 
-  return JSON.parse(rawJson);
+  // Metrik
+  const totalCount = recipes.length;
+  const polishedCount = recipes.filter(r => r.polish_status === 'polished').length;
+  const frozenCount = recipes.filter(r => Array.isArray(r.ingredients_raw) && r.ingredients_raw.length > 0).length;
+
+  return (
+    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--canvas)', color: 'var(--text-primary)' }}>
+      <Sidebar />
+      <main style={{ flex: 1, padding: '28px 36px', overflowY: 'auto', minWidth: 0 }}>
+        {/* Topbar, Metrics, Filters, Table, Modal Import & Detail */}
+      </main>
+    </div>
+  );
 }
 ```
 
 ---
 
-### 3. `lib/recipe-importer/recipe-batch-processor.js` (File Baru) — Pemrosesan Sekuensial Hingga 50 URLs
-
-#### Code Sesudah (Proposed/After):
-```javascript
-import { v4 as uuidv4 } from 'uuid';
-import { fetchRecipeFromUrl } from './recipe-url-fetcher.js';
-import { polishRecipeWithAi } from './recipe-polish-engine.js';
-import { insertCuratedRecipe } from '../curated-recipes-repository.js';
-
-export async function processRecipeBatchSequential({
-  urls = [],
-  autoPolish = true,
-  stylePreset = 'Food Porn',
-  category = 'makanan_utama',
-  tenantId = 'default_tenant',
-  minDelayMs = 10000, // 10 detik jeda minimal
-  maxDelayMs = 20000, // 20 detik jeda maksimal
-  onProgress = null
-}) {
-  const cleanUrls = urls.map(u => String(u).trim()).filter(Boolean);
-  if (cleanUrls.length === 0) {
-    throw new Error('Daftar URL resep tidak boleh kosong.');
-  }
-  if (cleanUrls.length > 50) {
-    throw new Error('Maksimum URL yang dapat diproses dalam satu batch adalah 50 URL.');
-  }
-
-  const batchId = `rbatch_${uuidv4().replace(/-/g, '').slice(0, 12)}`;
-  const results = [];
-
-  for (let i = 0; i < cleanUrls.length; i++) {
-    const targetUrl = cleanUrls[i];
-    const currentIndex = i + 1;
-    const recipeId = `rcp_${uuidv4().replace(/-/g, '').slice(0, 12)}`;
-
-    try {
-      if (onProgress) onProgress({ index: currentIndex, total: cleanUrls.length, url: targetUrl, status: 'fetching' });
-
-      // 1. Fetch & Parse Otoritatif
-      const scraped = await fetchRecipeFromUrl(targetUrl);
-
-      // 2. Simpan BAHAN ASLI 100% UTUH (FROZEN)
-      const rawIngredients = scraped.ingredients || [];
-
-      let polishedData = null;
-      let polishStatus = 'unpolished';
-
-      // 3. AI Magic Polish jika diaktifkan (Hanya Title, Summary, Directions)
-      if (autoPolish) {
-        if (onProgress) onProgress({ index: currentIndex, total: cleanUrls.length, url: targetUrl, status: 'polishing' });
-        try {
-          polishedData = await polishRecipeWithAi({
-            recipeData: {
-              original_title: scraped.title,
-              original_summary: scraped.summary,
-              original_instructions: scraped.instructions
-            },
-            stylePreset
-          });
-          polishStatus = 'polished';
-        } catch (polErr) {
-          console.warn(`[Batch Importer] Polish warning for URL ${targetUrl}:`, polErr.message);
-          polishStatus = 'failed';
-        }
-      }
-
-      // 4. Simpan ke Database
-      const saved = await insertCuratedRecipe({
-        id: recipeId,
-        tenant_id: tenantId,
-        source_url: targetUrl,
-        source_domain: scraped.domain,
-        author: scraped.author,
-        original_title: scraped.title,
-        polished_title: polishedData?.polished_title || scraped.title,
-        original_summary: scraped.summary,
-        polished_summary: polishedData?.polished_summary || scraped.summary,
-        ingredients_raw: rawIngredients, // DIJAMIN 100% UTUH
-        original_instructions: scraped.instructions,
-        polished_instructions: polishedData?.polished_instructions || scraped.instructions,
-        prep_time: scraped.prep_time,
-        cook_time: scraped.cook_time,
-        total_time: scraped.total_time,
-        servings: scraped.servings,
-        category: category || scraped.category || 'makanan_utama',
-        cuisine: scraped.cuisine || 'indonesia',
-        original_image_url: scraped.image_url,
-        ai_photo_prompts: polishedData?.ai_photo_prompt ? [polishedData.ai_photo_prompt] : [],
-        status: 'ready_for_production',
-        polish_status: polishStatus,
-        batch_id: batchId
-      });
-
-      results.push({
-        index: currentIndex,
-        url: targetUrl,
-        success: true,
-        recipe_id: recipeId,
-        title: saved.polished_title || saved.original_title,
-        ingredients_count: rawIngredients.length,
-        polish_status: polishStatus
-      });
-
-    } catch (err) {
-      results.push({
-        index: currentIndex,
-        url: targetUrl,
-        success: false,
-        error: err.message
-      });
-    }
-
-    // Jeda acak sekuensial (10-20 detik) menyerupai perilaku manusia alami & anti-bot
-    if (i < cleanUrls.length - 1 && maxDelayMs > 0) {
-      const delayMs = Math.floor(Math.random() * (maxDelayMs - minDelayMs + 1)) + minDelayMs;
-      if (onProgress) onProgress({ index: currentIndex, total: cleanUrls.length, status: 'delaying', delayMs });
-      await new Promise(r => setTimeout(r, delayMs));
-    }
-  }
-
-  return {
-    batch_id: batchId,
-    total_processed: cleanUrls.length,
-    success_count: results.filter(r => r.success).length,
-    failed_count: results.filter(r => !r.success).length,
-    results
-  };
-}
-```
-
----
-
-### 4. `apps/mcp/tools.mjs` — Penambahan Tools MCP `cf_import_recipe_batch`
-
-#### Code Sesudah (Proposed/After):
-```javascript
-  // Tool: Sequential Batch Recipe Importer (1-50 URLs)
-  register(
-    'cf_import_recipe_batch',
-    'Import and curate 1 to 50 recipe URLs sequentially into the authoritative recipe database with strict ingredients preservation and AI Magic Polish (title, summary, directions).',
-    {
-      urls: z.array(z.string().url()).min(1).max(50),
-      auto_polish: z.boolean().default(true),
-      style_preset: z.string().default('Food Porn'),
-      category: z.enum(['makanan_utama', 'masakan', 'minuman', 'dessert', 'kue', 'camilan']).default('makanan_utama')
-    },
-    false,
-    ({ urls, auto_polish, style_preset, category }) =>
-      request('/api/v2/recipes/curated/import-batch', {
-        body: { urls, auto_polish, style_preset, category }
-      })
-  );
-
-  // Tool: List Curated Authoritative Recipes
-  register(
-    'cf_list_curated_recipes',
-    'List or search curated authoritative recipes stored in the database for video planning.',
-    {
-      search: z.string().optional(),
-      category: z.string().optional(),
-      limit: z.number().int().min(1).max(100).default(20)
-    },
-    false,
-    ({ search, category, limit }) =>
-      request(`/api/v2/recipes/curated?limit=${limit}${search ? `&search=${encodeURIComponent(search)}` : ''}${category ? `&category=${category}` : ''}`)
-  );
-```
+## Verifikasi dan Pengujian
+1. **Verifikasi Tampilan UI**: Halaman memuat resep dari database `curated_recipes` secara dinamis.
+2. **Pengujian Filter**: Pencarian real-time dan dropdown kategori/polish berfungsi mulus.
+3. **Pengujian Modal Impor**: Menjalankan batch import hingga 50 URL ke API `/api/v2/recipes/curated/import-batch` dengan jeda acak 10-20 detik dan pembaruan tabel otomatis saat selesai.
+4. **Pengujian Responsif & Tema**: Menggunakan 100% token semantik dari `app/theme.css` untuk Dark & Light mode.
+5. **Next.js Production Build**: `npm run build` sukses tanpa error.
+6. **Rilis & Deployment**: Menjalankan rilis non-interaktif dan atomic deployment ke Mac Mini Staging.
