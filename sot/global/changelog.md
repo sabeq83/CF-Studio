@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.38.0 — Ekspansi 7 Pilar CF Studio MCP Server (09/11/2026)
+- Penambahan MCP Product Database (5 tools)
+- Penambahan MCP Visual Identity Studio (5 tools)
+- Penambahan MCP Strategy Presets (4 tools)
+- Penambahan MCP Viral Deconstruction & Review (5 tools)
+- Penambahan MCP Publishing & Observability (5 tools)
+
 ## V2.37.4 — Pembaruan Otomatis (09/11/2026)
 - Pembaruan internal dan optimasi sistem.
 
