@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Mockup: Recipe Importer & Sequential Batch Polish (50 URLs)</title>
+  <link rel="stylesheet" href="/theme.css">
+  <style>
+    body {
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      margin: 0;
+      padding: 32px 20px;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .header {
+      margin-bottom: 24px;
+    }
+    .header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      margin: 0 0 8px 0;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header p {
+      color: var(--text-secondary);
+      margin: 0;
+      font-size: 14px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-card);
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+    textarea.form-control {
+      width: 100%;
+      box-sizing: border-box;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      padding: 12px 14px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.6;
+      resize: vertical;
+      min-height: 140px;
+    }
+    textarea.form-control:focus {
+      outline: none;
+      border-color: var(--action-primary);
+    }
+    .grid-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    select.form-control {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+    .guardrail-alert {
+      background: var(--status-info-soft);
+      border: 1px solid var(--status-info);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--text-primary);
+    }
+    .guardrail-icon {
+      font-size: 18px;
+    }
+    .actions-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 18px;
+    }
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 10px 22px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+    }
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .progress-bar-wrap {
+      background: var(--surface-raised);
+      border-radius: var(--radius-xs);
+      height: 8px;
+      overflow: hidden;
+      margin: 16px 0 8px 0;
+    }
+    .progress-bar-fill {
+      background: var(--action-primary);
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .log-box {
+      background: var(--canvas);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      max-height: 160px;
+      overflow-y: auto;
+      margin-top: 14px;
+      color: var(--text-secondary);
+    }
+    .log-line {
+      margin-bottom: 4px;
+    }
+    .log-success { color: var(--status-success); }
+    .log-info { color: var(--status-info); }
+    .log-warning { color: var(--status-warning); }
+    
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 16px;
+    }
+    table.data-table th {
+      background: var(--surface-raised);
+      color: var(--text-muted);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    table.data-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      vertical-align: top;
+    }
+    .badge-frozen {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      padding: 2px 8px;
+      border-radius: var(--radius-xs);
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-polished {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      padding: 2px 8px;
+      border-radius: var(--radius-xs);
+      font-size: 11px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🍲 Recipe Importer & Sequential Batch Polish</h1>
+      <p>Impor resep otoritatif dari portal web kuliner (Cookpad, Masak Apa Hari Ini, dll.) hingga 50 baris URL sekaligus dengan AI Magic Polish dan jeda acak 10-20 detik anti-bot.</p>
+    </div>
+
+    <div class="guardrail-alert">
+      <span class="guardrail-icon">🔒</span>
+      <div>
+        <strong>Strict Guardrail Otoritatif Aktif:</strong>
+        <div style="color:var(--text-secondary); margin-top:3px;">
+          Bahan resep (<em>ingredients</em>) beserta takaran gram/sendok/siung <strong>TETAP 100% ASLI & TIDAK BOLEH DIPOLES</strong> agar akurat dan valid. AI hanya memoles <strong>Title</strong>, <strong>Summary</strong>, dan <strong>Direction / Langkah</strong> untuk kebutuhan naskah video memasak.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <span>Batch URL Input (1 - 50 URL)</span>
+        <span style="font-size:12px; font-weight:normal; color:var(--text-muted);" id="urlCounter">3 URL terdeteksi</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Masukkan daftar URL resep (satu baris per URL):</label>
+        <textarea id="urlInput" class="form-control" placeholder="https://cookpad.com/id/resep/...&#10;https://www.masakapahariini.com/resep/...&#10;https://endeus.tv/resep/...">https://cookpad.com/id/resep/17492811-ayam-woku-belanga-khas-manado
+https://www.masakapahariini.com/resep/tumis-buncis-daging-cincang-gurih
+https://cookpad.com/id/resep/16829104-mousse-cokelat-alpukat-sehat-diet</textarea>
+      </div>
+
+      <div class="grid-options">
+        <div class="form-group">
+          <label class="form-label">Gaya Visual Foto/Video (AI Prompt):</label>
+          <select id="stylePreset" class="form-control">
+            <option value="Food Porn" selected>Food Porn (Sensori Mengkilap & Sizzling)</option>
+            <option value="Modern Fine Dining">Modern Fine Dining (Minimalis Keramik)</option>
+            <option value="Rustic Comfort Food">Rustic Comfort Food (Dapur Kayu Hangat)</option>
+            <option value="Top-Down Flatlay">Top-Down Flatlay (Editorial Majalah)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Opsi AI Polish Otomatis:</label>
+          <select id="autoPolish" class="form-control">
+            <option value="1" selected>Aktif (Poles Judul, Intro & Langkah Masak)</option>
+            <option value="0">Hanya Simpan Data Mentah (Tanpa Polish)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Jeda Antar URL (Anti-Bot & Rate Limit Guard):</label>
+          <select id="delayMode" class="form-control">
+            <option value="random-10-20" selected>Acak 10 - 20 Detik (Rekomendasi Human Behavior & Anti-Bot)</option>
+            <option value="random-5-10">Acak 5 - 10 Detik (Sedang)</option>
+            <option value="demo-fast">Simulasi Kilat Demo (1.5 - 2.5 Detik)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="actions-row">
+        <button type="button" class="btn-primary" id="btnStartBatch" onclick="simulateBatchImport();">
+          <span>⚡ Mulai Impor & Polish Sekuensial</span>
+        </button>
+        <span style="font-size:12px; color:var(--text-muted);">Maksimal 50 URL per batch</span>
+      </div>
+
+      <!-- Real-time Progress Bar -->
+      <div id="progressSection" style="display:none; margin-top:24px;">
+        <div class="progress-meta">
+          <span id="progressLabel" style="font-weight:600; color:var(--text-primary);">Memproses 1 dari 3...</span>
+          <span id="progressPercent" style="color:var(--action-primary); font-weight:700;">33%</span>
+        </div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="progressBar"></div>
+        </div>
+        <div class="log-box" id="logTerminal"></div>
+      </div>
+    </div>
+
+    <!-- Hasil Impor & Pustaka Resep -->
+    <div class="card" id="resultsSection" style="display:none;">
+      <div class="card-title">
+        <span>Hasil Pustaka Resep Otoritatif (Tersimpan ke Database)</span>
+        <button class="btn-primary" style="padding:6px 14px; font-size:12px;" onclick="alert('Diteruskan ke antrean video rendering!');">
+          🎬 Buat Video dari Semua Resep
+        </button>
+      </div>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Judul Asli & Sumber</th>
+            <th>Judul Ter-Polish (AI)</th>
+            <th>Bahan (100% Asli)</th>
+            <th>Langkah Ter-Polish</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="resultsTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const sampleRecipes = [
+      {
+        url: "https://cookpad.com/id/resep/17492811-ayam-woku-belanga",
+        domain: "cookpad.com",
+        originalTitle: "Ayam Woku Belanga",
+        polishedTitle: "Ayam Woku Belanga Khas Manado: Kuah Kental Pedas Gurih Aroma Kemangi",
+        ingredients: [
+          "1 ekor ayam kampung (potong 12 bagian)",
+          "5 ikat daun kemangi segar",
+          "2 lembar daun pandan wangi",
+          "3 batang serai (memarkan)",
+          "5 siung bawang putih & 8 siung bawang merah",
+          "15 buah cabai rawit merah",
+          "1 sendok teh garam & 1/2 sdt kaldu jamur"
+        ],
+        steps: [
+          "Tumis bumbu halus bersama serai dan daun pandan hingga harum semerbak berminyak.",
+          "Masukkan potongan ayam kampung, aduk merata hingga ayam berubah warna pucat keemasan.",
+          "Tuang sedikit air, ungkep dengan api kecil hingga bumbu pedas gurih meresap sempurna ke serat daging.",
+          "Sesaat sebelum diangkat, taburkan daun kemangi segar, aduk kilat 30 detik hingga layu harum, sajikan selagi panas."
+        ]
+      },
+      {
+        url: "https://www.masakapahariini.com/resep/tumis-buncis-daging",
+        domain: "masakapahariini.com",
+        originalTitle: "Tumis Buncis Daging Cincang",
+        polishedTitle: "Tumis Buncis Daging Cincang ala Resto: Renyah Gurih Manis Bumbu Saus Tiram",
+        ingredients: [
+          "250 gr buncis muda (siangi)",
+          "100 gr daging sapi cincang",
+          "3 siung bawang putih (cincang halus)",
+          "1 sdm saus tiram premium",
+          "1 sdm minyak wijen",
+          "1/2 sdt merica bubuk"
+        ],
+        steps: [
+          "Rebus buncis 1 menit dalam air mendidih bergaram, langsung celup air es agar warna hijau cerah dan tekstur tetap garing renyah.",
+          "Panaskan wajan, tumis bawang putih cincang hingga harum keemasan.",
+          "Masukkan daging cincang, masak hingga berubah warna dan sari daging keluar gurih.",
+          "Bumbui saus tiram dan merica, masukkan buncis, siram minyak wijen dan aduk cepat dengan api besar."
+        ]
+      },
+      {
+        url: "https://cookpad.com/id/resep/16829104-mousse-cokelat-alpukat",
+        domain: "cookpad.com",
+        originalTitle: "Mousse Cokelat Alpukat Sehat",
+        polishedTitle: "Mousse Cokelat Alpukat Lumer: Dessert Sehat Creamy 5 Menit Tanpa Mixer",
+        ingredients: [
+          "2 buah alpukat matang mentega",
+          "4 sdm cokelat bubuk murni",
+          "3 sdm madu hutan murni",
+          "50 ml susu almond tanpa pemanis"
+        ],
+        steps: [
+          "Keruk daging alpukat mentega, masukkan ke dalam blender bersama bubuk kakao murni.",
+          "Tambahkan madu hutan dan susu almond sedikit demi sedikit.",
+          "Haluskan dengan kecepatan tinggi hingga tekstur berubah super creamy dan berkilau mewah.",
+          "Tuang ke dalam gelas saji, dinginkan 30 menit di kulkas, nikmati rasa cokelat legit tanpa rasa bersalah."
+        ]
+      }
+    ];
+
+    function logTerminal(msg, type = 'info') {
+      const box = document.getElementById('logTerminal');
+      const div = document.createElement('div');
+      div.className = 'log-line log-' + type;
+      div.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    async function simulateBatchImport() {
+      const btn = document.getElementById('btnStartBatch');
+      const progressSection = document.getElementById('progressSection');
+      const resultsSection = document.getElementById('resultsSection');
+      const progressBar = document.getElementById('progressBar');
+      const progressLabel = document.getElementById('progressLabel');
+      const progressPercent = document.getElementById('progressPercent');
+      const resultsBody = document.getElementById('resultsTableBody');
+
+      btn.disabled = true;
+      progressSection.style.display = 'block';
+      resultsSection.style.display = 'none';
+      resultsBody.innerHTML = '';
+      document.getElementById('logTerminal').innerHTML = '';
+
+      logTerminal('Memulai pemrosesan sekuensial batch 3 URL resep...', 'info');
+
+      for (let i = 0; i < sampleRecipes.length; i++) {
+        const item = sampleRecipes[i];
+        const stepNum = i + 1;
+        const pct = Math.round((stepNum / sampleRecipes.length) * 100);
+
+        progressLabel.innerText = `Memproses ${stepNum} dari ${sampleRecipes.length}: ${item.originalTitle}`;
+        progressPercent.innerText = `${pct}%`;
+        progressBar.style.width = `${pct}%`;
+
+        logTerminal(`[URL ${stepNum}/3] Mengunduh HTML dari ${item.domain}...`, 'info');
+        await new Promise(r => setTimeout(r, 600));
+
+        logTerminal(`[URL ${stepNum}/3] ✓ Schema.org JSON-LD Recipe terdeteksi. Mengekstrak ${item.ingredients.length} bahan baku asli...`, 'success');
+        await new Promise(r => setTimeout(r, 600));
+
+        logTerminal(`[URL ${stepNum}/3] 🔒 Mengunci bahan asli 100% (STRICT GUARDRAIL)...`, 'info');
+        logTerminal(`[URL ${stepNum}/3] ✨ AI Polish: Memoles Title, Summary, dan Direction...`, 'warning');
+        await new Promise(r => setTimeout(r, 900));
+
+        logTerminal(`[URL ${stepNum}/3] ✓ Tersimpan ke database: "${item.polishedTitle}"`, 'success');
+
+        // Render Table Row
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>#${stepNum}</strong></td>
+          <td>
+            <strong>${item.originalTitle}</strong><br>
+            <span style="font-size:11px; color:var(--text-muted);">${item.domain}</span>
+          </td>
+          <td>
+            <span class="badge-polished">✓ AI Polished</span><br>
+            <strong style="color:var(--action-primary);">${item.polishedTitle}</strong>
+          </td>
+          <td>
+            <span class="badge-frozen">🔒 100% Asli (${item.ingredients.length} bahan)</span>
+            <ul style="margin:6px 0 0 16px; padding:0; font-size:12px; color:var(--text-secondary);">
+              ${item.ingredients.slice(0, 3).map(ing => `<li>${ing}</li>`).join('')}
+              ${item.ingredients.length > 3 ? `<li><em>+${item.ingredients.length - 3} bahan lainnya</em></li>` : ''}
+            </ul>
+          </td>
+          <td>
+            <ol style="margin:0 0 0 16px; padding:0; font-size:12px; color:var(--text-secondary);">
+              ${item.steps.slice(0, 2).map(st => `<li>${st.slice(0, 75)}...</li>`).join('')}
+            </ol>
+          </td>
+          <td>
+            <button class="btn-primary" style="padding:4px 10px; font-size:11px;" onclick="alert('Memicu render video memasak untuk: ${item.polishedTitle}');">
+              🎬 Render Video
+            </button>
+          </td>
+        `;
+        resultsBody.appendChild(tr);
+
+        // Jeda Acak Sekuensial (Anti-Bot & Human Behavior Emulation)
+        if (i < sampleRecipes.length - 1) {
+          const delayMode = document.getElementById('delayMode').value;
+          let minSec = 10, maxSec = 20;
+          if (delayMode === 'random-5-10') {
+            minSec = 5; maxSec = 10;
+          } else if (delayMode === 'demo-fast') {
+            minSec = 1.5; maxSec = 2.5;
+          }
+
+          const randomSec = delayMode === 'demo-fast' 
+            ? +(Math.random() * (maxSec - minSec) + minSec).toFixed(1)
+            : Math.floor(Math.random() * (maxSec - minSec + 1)) + minSec;
+
+          logTerminal(`[Anti-Bot Guard] ⏳ Jeda acak ${randomSec} detik sebelum URL #${stepNum + 1} (meniru browsing alami manusia & cegah block IP)...`, 'warning');
+
+          let remaining = randomSec;
+          while (remaining > 0) {
+            progressLabel.innerText = `[Jeda Anti-Bot] Menunggu ${Math.ceil(remaining)}s sebelum URL #${stepNum + 1}...`;
+            const tick = Math.min(remaining, 1);
+            await new Promise(r => setTimeout(r, tick * 1000));
+            remaining -= tick;
+          }
+        }
+      }
+
+      logTerminal('🎉 Seluruh 3 URL resep berhasil diproses, dipoles, dan disimpan ke database!', 'success');
+      resultsSection.style.display = 'block';
+      btn.disabled = false;
+    }
+  </script>
+</body>
+</html>
+

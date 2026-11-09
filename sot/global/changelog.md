@@ -1,5 +1,13 @@
 # Changelog
 
+## V2.40.0 — Authoritative Recipe Importer & Sequential 50-URL Batch Polish Engine (09/11/2026)
+- Implementasi Schema.org JSON-LD dan Cookpad recipe parser otoritatif
+- Strict Guardrail perlindungan 100% bahan resep (frozen & no AI polish)
+- AI Magic Polish single-pass pada title, summary, direction, dan 5-layer optical photo prompt
+- Sequential batch processor hingga 50 URLs dengan jeda acak 10-20 detik anti-bot
+- Endpoint API /api/v2/recipes/curated/import-batch dan tools MCP cf_import_recipe_batch & cf_list_curated_recipes
+- Repositori database curated_recipes dan standalone interactive HTML mockup
+
 ## V2.39.0 — Add Custom Storyboard MCP Tool & Physical Rendering Engine (09/11/2026)
 - Penambahan engine custom storyboard submission
 - Registrasi tool cf_submit_custom_storyboard pada MCP

@@ -35,7 +35,7 @@ HTTP endpoint: `/mcp`, authenticated using `Authorization: Bearer <CF_STUDIO_MCP
 
 ---
 
-## 3. Registered Tools Catalog (44 Tools across 7 Studio Pillars)
+## 3. Registered Tools Catalog (46 Tools across 7 Studio Pillars)
 
 ### A. Discovery, Identity & Status
 - `cf_whoami`: Read configured CF Studio operator identity, tenant, and scopes. (Legacy alias: `makna_whoami`)
@@ -53,7 +53,11 @@ HTTP endpoint: `/mcp`, authenticated using `Authorization: Bearer <CF_STUDIO_MCP
 - `cf_run_auto_pipeline`: ⚡ Universal master runner supporting all 6 pipeline types dynamically.
 - `cf_create_campaign` / `makna_create_campaign`: Strategic product campaign creation via Operator API v1.
 
-### C. Schedule Management
+### C. Authoritative Recipe Importer & Curated Library
+- `cf_import_recipe_batch`: 🍲 Import and curate up to 50 recipe URLs sequentially with Schema.org JSON-LD extraction, 100% frozen ingredients guardrail, randomized 10-20s human-behavior delay, and AI Magic Polish.
+- `cf_list_curated_recipes`: 📚 List curated authoritative recipes stored in the database with ingredients and polish status.
+
+### D. Schedule Management
 - `cf_list_schedules`: List recurring Auto Pipeline schedules and execution metrics.
 - `cf_create_schedule`: Create a new automated recurring schedule (e.g. daily/weekly cron).
 - `cf_trigger_schedule_now`: Immediately trigger an execution run for an existing schedule.

@@ -20,19 +20,24 @@ async function connected(t, request) {
   return client;
 }
 
-test('discovery of all 43 CF Studio tools across 7 studio pillars and legacy aliases', async t => {
+test('discovery of all 46 CF Studio tools across 7 studio pillars and legacy aliases', async t => {
   const client = await connected(t, async () => ({ success: true }));
   const tools = (await client.listTools()).tools;
-  assert.equal(tools.length, 43);
+  assert.equal(tools.length, 46);
 
   const toolNames = new Set(tools.map(x => x.name));
-  // 5 Auto Pipeline dedicated tools
+  // 6 Auto Pipeline dedicated tools
   assert.ok(toolNames.has('cf_create_product_video'));
   assert.ok(toolNames.has('cf_create_editorial_video'));
   assert.ok(toolNames.has('cf_create_recipe_video'));
   assert.ok(toolNames.has('cf_create_multiplier_video'));
   assert.ok(toolNames.has('cf_create_recipe_labs_post'));
+  assert.ok(toolNames.has('cf_submit_custom_storyboard'));
   assert.ok(toolNames.has('cf_run_auto_pipeline'));
+
+  // Recipe Importer & Curated Library
+  assert.ok(toolNames.has('cf_import_recipe_batch'));
+  assert.ok(toolNames.has('cf_list_curated_recipes'));
 
   // Schedule management tools
   assert.ok(toolNames.has('cf_list_schedules'));
@@ -551,7 +556,7 @@ test('HTTP authentication, origin and host protection, real MCP handshake', asyn
       requestInit: { headers: { authorization: `Bearer ${bearerToken}` } }
     })
   );
-  assert.equal((await client.listTools()).tools.length, 43);
+  assert.equal((await client.listTools()).tools.length, 46);
   assert.equal((await client.callTool({ name: 'cf_whoami' })).isError, undefined);
   assert.equal(calls, 1);
 });

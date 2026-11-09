@@ -306,6 +306,45 @@ export function createCfStudioServer(request) {
       })
   );
 
+  // Authoritative Recipe Importer & Curated Library
+  register(
+    'cf_import_recipe_batch',
+    'Import and curate up to 50 recipe URLs sequentially with Schema.org JSON-LD extraction, 100% frozen ingredients protection, and AI Magic Polish.',
+    {
+      urls: z.array(z.string().url()).min(1).max(50),
+      auto_polish: z.boolean().default(true),
+      style_preset: z.string().default('Food Porn'),
+      category: z.string().default('makanan_utama'),
+      cuisine: z.string().default('indonesia'),
+      min_delay_ms: z.number().int().min(1000).max(60000).default(10000),
+      max_delay_ms: z.number().int().min(1000).max(60000).default(20000)
+    },
+    false,
+    args => request('/api/v2/recipes/curated/import-batch', { body: args })
+  );
+
+  register(
+    'cf_list_curated_recipes',
+    'List curated authoritative recipes stored in the database with ingredients and polish status.',
+    {
+      batch_id: z.string().optional(),
+      search: z.string().optional(),
+      polish_status: z.enum(['polished', 'unpolished', 'fallback_raw', 'failed', 'all']).default('all'),
+      category: z.string().optional(),
+      limit: z.number().int().min(1).max(50).default(20),
+      offset: z.number().int().min(0).default(0)
+    },
+    true,
+    args =>
+      request(
+        `/api/v2/recipes/curated/import-batch?${new URLSearchParams(
+          Object.entries(args)
+            .filter(([_, v]) => v !== undefined && v !== 'all')
+            .map(([k, v]) => [k, String(v)])
+        )}`
+      )
+  );
+
   // Engine 6: Custom Storyboard Submission (Claude / External AI to Video Pipeline)
   register(
     'cf_submit_custom_storyboard',
