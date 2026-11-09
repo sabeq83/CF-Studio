@@ -1,5 +1,14 @@
 # Changelog
 
+## V2.37.0 — CF Studio MCP V2: 5-Engine Auto Pipeline & Schedule Integration (09/11/2026)
+- Rebranding MCP adapter ke @cf-studio/mcp v2.0.0 dan CF_STUDIO_* environment variables
+- Dukungan 5 dedicated tools untuk seluruh engine Auto Pipeline: Product Video, Editorial Video, Recipe Video, Multiplier Video, dan Recipe Labs Post
+- Penyediaan Universal Master Tool cf_run_auto_pipeline untuk eksekusi fleksibel via AI Agent
+- Integrasi manajemen skedul otomatisasi cf_list_schedules, cf_create_schedule, dan cf_trigger_schedule_now
+- Auth bridge di lib/auth.js untuk otentikasi operator credential pada endpoint Auto Pipeline
+- Mempertahankan backward compatibility untuk tool alias legacy makna_*
+- Unit test suite MCP v2 dan verifikasi build Next.js lulus 100%
+
 ## V2.36.1 — Kontrol Ekstraksi Resep Lengkap Video Multiplier pada Auto Pipeline (09/11/2026)
 - Switch toggle generate_recipe di 1-Klik Launch & Modal Skedul Rutin Multiplier
 - Passing parameter generate_recipe end-to-end dari API ke autonomous engine & scheduler runner

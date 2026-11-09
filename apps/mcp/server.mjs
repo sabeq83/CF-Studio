@@ -3,10 +3,10 @@ import { pathToFileURL } from 'node:url';
 import express from 'express';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-import { createMaknaServer, operatorClient } from './tools.mjs';
+import { createCfStudioServer, createMaknaServer, operatorClient } from './tools.mjs';
 
 export function createHttpApp({ request, bearerToken, allowedHosts = ['127.0.0.1', 'localhost'], allowedOrigins = [] }) {
-  if (!bearerToken || bearerToken.length < 32) throw new Error('MAKNA_MCP_BEARER_TOKEN must contain at least 32 characters');
+  if (!bearerToken || bearerToken.length < 32) throw new Error('CF_STUDIO_MCP_BEARER_TOKEN must contain at least 32 characters');
   const digest = value => crypto.createHash('sha256').update(value).digest();
   const app = express();
   app.disable('x-powered-by');
@@ -16,17 +16,17 @@ export function createHttpApp({ request, bearerToken, allowedHosts = ['127.0.0.1
     res.set('Cache-Control', 'no-store');
     next();
   });
-  app.get('/health', (_req, res) => res.json({ status: 'ok', service: 'maknaflow-mcp' }));
+  app.get('/health', (_req, res) => res.json({ status: 'ok', service: 'cf-studio-mcp' }));
   app.use('/mcp', (req, res, next) => {
     if (!crypto.timingSafeEqual(digest(req.headers.authorization || ''), digest(`Bearer ${bearerToken}`))) {
-      res.set('WWW-Authenticate', 'Bearer realm="maknaflow-mcp"');
+      res.set('WWW-Authenticate', 'Bearer realm="cf-studio-mcp"');
       return res.sendStatus(401);
     }
     next();
   });
   app.use(express.json({ limit: '64kb' }));
   app.post('/mcp', async (req, res) => {
-    const server = createMaknaServer(request);
+    const server = createCfStudioServer(request);
     const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
     res.on('close', () => { void transport.close(); void server.close(); });
     try {
@@ -41,15 +41,22 @@ export function createHttpApp({ request, bearerToken, allowedHosts = ['127.0.0.1
 }
 
 async function main() {
-  const request = operatorClient({ baseUrl: process.env.MAKNA_OPERATOR_BASE_URL || 'http://127.0.0.1:5010', token: process.env.MAKNA_OPERATOR_API_TOKEN });
+  const baseUrl = process.env.CF_STUDIO_OPERATOR_BASE_URL || process.env.MAKNA_OPERATOR_BASE_URL || 'http://127.0.0.1:5010';
+  const token = process.env.CF_STUDIO_OPERATOR_API_TOKEN || process.env.MAKNA_OPERATOR_API_TOKEN;
+  const request = operatorClient({ baseUrl, token });
   if (process.argv.includes('--stdio')) {
-    await createMaknaServer(request).connect(new StdioServerTransport());
+    await createCfStudioServer(request).connect(new StdioServerTransport());
     return;
   }
   const list = value => (value || '').split(',').map(x => x.trim()).filter(Boolean);
-  const app = createHttpApp({ request, bearerToken: process.env.MAKNA_MCP_BEARER_TOKEN,
-    allowedHosts: list(process.env.MAKNA_MCP_ALLOWED_HOSTS || '127.0.0.1,localhost'), allowedOrigins: list(process.env.MAKNA_MCP_ALLOWED_ORIGINS) });
-  const http = app.listen(Number(process.env.MAKNA_MCP_PORT || 7030), process.env.MAKNA_MCP_HOST || '127.0.0.1', () => console.error('MAKNA MCP listening'));
+  const bearerToken = process.env.CF_STUDIO_MCP_BEARER_TOKEN || process.env.MAKNA_MCP_BEARER_TOKEN;
+  const allowedHosts = list(process.env.CF_STUDIO_MCP_ALLOWED_HOSTS || process.env.MAKNA_MCP_ALLOWED_HOSTS || '127.0.0.1,localhost');
+  const allowedOrigins = list(process.env.CF_STUDIO_MCP_ALLOWED_ORIGINS || process.env.MAKNA_MCP_ALLOWED_ORIGINS);
+  const host = process.env.CF_STUDIO_MCP_HOST || process.env.MAKNA_MCP_HOST || '127.0.0.1';
+  const port = Number(process.env.CF_STUDIO_MCP_PORT || process.env.MAKNA_MCP_PORT || 7030);
+
+  const app = createHttpApp({ request, bearerToken, allowedHosts, allowedOrigins });
+  const http = app.listen(port, host, () => console.error('CF Studio MCP listening'));
   for (const signal of ['SIGINT', 'SIGTERM']) process.once(signal, () => http.close());
 }
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main().catch(() => { console.error('MAKNA MCP startup failed. Check configuration.'); process.exitCode = 1; });
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main().catch(() => { console.error('CF Studio MCP startup failed. Check configuration.'); process.exitCode = 1; });
