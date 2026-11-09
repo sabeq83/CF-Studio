@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Mockup: Video Editorial Berbasis Keyword (Pilar OFF) — MAKNA Flow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* MAKNA Flow Semantic CSS Tokens (100% Theme Compatible) */
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --surface-subtle: #121c2c;
+      --input-bg: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --shadow-modal: 0 24px 48px -12px rgba(0, 0, 0, 0.5);
+      --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f8fafc;
+      --sidebar: #f1f5f9;
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #f1f5f9;
+      --surface-hover: #e2e8f0;
+      --surface-subtle: #f8fafc;
+      --input-bg: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --border-subtle: #cbd5e1;
+      --border-strong: #94a3b8;
+      --action-primary: #0d9488;
+      --action-primary-hover: #14b8a6;
+      --on-action-primary: #ffffff;
+      --link: #0284c7;
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.12);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.12);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.12);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.12);
+      --shadow-modal: 0 20px 35px -10px rgba(0, 0, 0, 0.15);
+      --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      padding: 1.5rem;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 980px;
+    }
+
+    /* Top Banner Header */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .top-bar-title h1 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .top-bar-title p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    .theme-toggle-btn {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 0.45rem 0.85rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+    .theme-toggle-btn:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+
+    /* Simulation View Switcher */
+    .view-switcher {
+      display: flex;
+      background: var(--surface-raised);
+      padding: 0.35rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      margin-bottom: 1.5rem;
+      gap: 0.35rem;
+    }
+    .view-btn {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: var(--transition);
+    }
+    .view-btn.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      box-shadow: 0 2px 8px rgba(45, 212, 191, 0.25);
+    }
+    .view-btn:not(.active):hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+
+    /* Modal Simulation Card */
+    .modal-frame {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-modal);
+      margin-bottom: 2rem;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.25rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .modal-header-info h2 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .modal-header-info p {
+      font-size: 0.84rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+    .badge-tenant {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid var(--status-info);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+    }
+
+    /* Form Groups */
+    .form-group {
+      margin-bottom: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+    .form-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .form-select, .form-input, .form-textarea {
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.88rem;
+      padding: 0.65rem 0.85rem;
+      outline: none;
+      transition: var(--transition);
+      width: 100%;
+    }
+    .form-select:focus, .form-input:focus, .form-textarea:focus {
+      border-color: var(--action-primary);
+      box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.15);
+    }
+
+    /* Core Feature Box: Segmented Editorial Mode */
+    .editorial-mode-box {
+      background: var(--surface-raised);
+      border: 1.5px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .editorial-mode-box::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 4px; height: 100%;
+      background: var(--status-info);
+    }
+    .mode-selector-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+    .segmented-tabs {
+      display: flex;
+      background: var(--surface);
+      padding: 0.25rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      gap: 0.25rem;
+    }
+    .segment-btn {
+      padding: 0.45rem 0.95rem;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      border-radius: var(--radius-xs);
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: var(--transition);
+    }
+    .segment-btn.active {
+      background: var(--status-info);
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(96, 165, 250, 0.3);
+    }
+    .segment-btn:not(.active):hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+
+    /* Pillar Mode Panels */
+    .pillar-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .pillar-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 0.65rem;
+      max-height: 200px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .pillar-chip {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      padding: 0.65rem 0.85rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: var(--transition);
+      user-select: none;
+    }
+    .pillar-chip:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+      color: var(--text-primary);
+    }
+    .pillar-chip.selected {
+      border-color: var(--status-info);
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      font-weight: 700;
+    }
+
+    /* Keyword Mode Panels */
+    .keyword-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .keyword-suggestions {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .sug-title {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .sug-tag {
+      background: var(--surface);
+      border: 1px dashed var(--border-subtle);
+      color: var(--text-secondary);
+      font-size: 0.74rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .sug-tag:hover {
+      border-color: var(--action-primary);
+      color: var(--action-primary);
+      background: var(--surface-interactive);
+    }
+
+    /* Dynamic Batch Cards Preview (Scheduler Mode) */
+    .batch-preview-box {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      margin-top: 0.5rem;
+    }
+    .batch-preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+    .batch-items-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-height: 180px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .batch-item-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.55rem 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.82rem;
+    }
+    .batch-item-title {
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .batch-item-meta {
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      background: var(--surface-subtle);
+      padding: 0.15rem 0.45rem;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* Live AI Directive Callout */
+    .ai-directive-preview {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem;
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      font-size: 0.8rem;
+      line-height: 1.45;
+    }
+    .ai-directive-preview strong {
+      color: var(--status-info);
+    }
+
+    /* Submit Actions */
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--border-subtle);
+    }
+    .btn-secondary {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      font-weight: 700;
+      font-size: 0.88rem;
+      padding: 0.7rem 1.25rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .btn-secondary:hover {
+      background: var(--surface-hover);
+    }
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      font-weight: 800;
+      font-size: 0.88rem;
+      padding: 0.7rem 1.4rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: var(--transition);
+      box-shadow: 0 4px 14px rgba(45, 212, 191, 0.25);
+    }
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+      transform: translateY(-1px);
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--surface-raised);
+      border: 1px solid var(--status-success);
+      color: var(--text-primary);
+      padding: 0.85rem 1.25rem;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-modal);
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      transform: translateY(120%);
+      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 9999;
+    }
+    .toast.show {
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="top-bar-title">
+        <h1><span>🎯</span> Simulasi Mockup: Video Editorial Berbasis Keyword (Opsi A)</h1>
+        <p>Fitur pemilihan topik fleksibel: Beralih antara Pilar Brand (Existing) atau Keyword Murni (Pilar OFF).</p>
+      </div>
+      <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeBtn">
+        <span>☀️</span> Ganti ke Light Mode
+      </button>
+    </div>
+
+    <!-- View Switcher -->
+    <div class="view-switcher">
+      <button class="view-btn active" id="btnViewInstant" onclick="switchView('instant')">
+        <span>⚡</span> Tampilan 1: Modal Luncurkan 1-Klik Video (Instant)
+      </button>
+      <button class="view-btn" id="btnViewScheduler" onclick="switchView('scheduler')">
+        <span>📅</span> Tampilan 2: Modal Skeduler Batch (Pendekatan A)
+      </button>
+    </div>
+
+    <!-- VIEW 1: MODAL 1-KLIK VIDEO INSTANT -->
+    <div id="viewInstant" class="modal-frame">
+      <div class="modal-header">
+        <div class="modal-header-info">
+          <h2><span>🚀</span> Luncurkan Video Instan 1-Klik (Autonomous Video Launch)</h2>
+          <p>AI Gemini otomatis merancang hook tension, naskah narasi, 10 parameter video DNA, dan social pack.</p>
+        </div>
+        <span class="badge-tenant">Tenant: PT GIM Sosmed</span>
+      </div>
+
+      <!-- Pilih Brand & Tipe Kampanye -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+        <div class="form-group">
+          <label class="form-label"><span>🏢</span> Brand Profile:</label>
+          <select class="form-select" id="instantBrandSelect" onchange="updateBrandContext()">
+            <option value="ruang_akustik">Ruang Akustik ID (Akustik & Peredam Suara)</option>
+            <option value="solusi_thermal">Solusi Thermal ID (Insulasi Panas Ruangan)</option>
+            <option value="jasa_insulasi">Jasa Insulasi ID (Peredam Pipa & Chiller)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label"><span>🎬</span> Tipe Kampanye:</label>
+          <select class="form-select" disabled style="opacity: 0.9; cursor: not-allowed;">
+            <option selected>📖 Video Editorial (Storytelling & Tension)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- CORE FEATURE: EDITORIAL TOPIC MODE SELECTOR -->
+      <div class="editorial-mode-box">
+        <div class="mode-selector-header">
+          <div style="font-size: 0.88rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 0.45rem;">
+            <span>📖</span>
+            <span>Konfigurasi Topik Editorial:</span>
+          </div>
+
+          <!-- Segmented Control: Pilar vs Keyword -->
+          <div class="segmented-tabs">
+            <button type="button" class="segment-btn active" id="btnModePillarInstant" onclick="setInstantMode('pillar')">
+              <span>🏛️</span> Pakai Pilar Brand
+            </button>
+            <button type="button" class="segment-btn" id="btnModeKeywordInstant" onclick="setInstantMode('keyword')">
+              <span>🎯</span> Berbasis Keyword (Pilar OFF)
+            </button>
+          </div>
+        </div>
+
+        <!-- PANEL 1: PILAR BRAND MODE (EXISTING) -->
+        <div id="instantPanelPillar" class="pillar-panel">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.8rem; color: var(--text-muted);">Pilih salah satu pilar konten resmi brand ini:</span>
+            <span id="selectedPillarBadge" style="font-size: 0.74rem; font-weight: 700; color: var(--status-info);">Terpilih: "Kenali Masalah Suara"</span>
+          </div>
+          <div class="pillar-grid" id="instantPillarsGrid">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- PANEL 2: KEYWORD MODE (NEW FEATURE - PILAR OFF) -->
+        <div id="instantPanelKeyword" class="keyword-panel" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.8rem; color: var(--text-muted);">
+              Masukkan kata kunci atau topik pencarian audiens (Pilar brand dinonaktifkan):
+            </span>
+            <span style="font-size: 0.72rem; font-weight: 700; background: var(--status-warning-soft); color: var(--status-warning); padding: 0.15rem 0.5rem; border-radius: 9999px;">
+              Pilar Brand: OFF ⚠️
+            </span>
+          </div>
+
+          <input
+            type="text"
+            class="form-input"
+            id="instantKeywordInput"
+            placeholder="Contoh: peredam suara studio podcast murah, cara hilangkan dengung kamar"
+            value="peredam suara studio podcast"
+            oninput="renderInstantPreview()"
+          />
+
+          <!-- Quick Suggestion Tags -->
+          <div class="keyword-suggestions">
+            <span class="sug-title">💡 Rekomendasi Cepat:</span>
+            <span class="sug-tag" onclick="setQuickKeyword('peredam suara kamar tidur dengung')">peredam suara kamar tidur dengung</span>
+            <span class="sug-tag" onclick="setQuickKeyword('perbedaan rockwool vs glasswool')">perbedaan rockwool vs glasswool</span>
+            <span class="sug-tag" onclick="setQuickKeyword('bocor suara pintu geser kayu')">bocor suara pintu geser kayu</span>
+          </div>
+
+          <!-- AI Directive Preview -->
+          <div class="ai-directive-preview">
+            <span>🤖</span>
+            <div>
+              <strong>Arahan Gemini AI 1-Pass:</strong>
+              <div id="instantAiDirectiveText" style="margin-top: 0.25rem; color: var(--text-secondary);">
+                Pilar brand dinonaktifkan. AI akan membedah search intent dari keyword <em>"peredam suara studio podcast"</em> menjadi naskah storytelling tension berdurasi 30-45 detik dengan formula Hook 8-11 kata.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="showToast('Simulasi modal ditutup')">Batal</button>
+        <button class="btn-primary" onclick="simulateLaunchInstant()">
+          <span>🚀</span> <span id="btnInstantSubmitText">Luncurkan Video Editorial 1-Klik</span>
+        </button>
+      </div>
+    </div>
+
+
+    <!-- VIEW 2: MODAL SKEDULER BATCH (PENDEKATAN A) -->
+    <div id="viewScheduler" class="modal-frame" style="display: none;">
+      <div class="modal-header">
+        <div class="modal-header-info">
+          <h2><span>📅</span> Buat Jadwal Otomatis (Batch Auto Pipeline Scheduler)</h2>
+          <p>Opsi A: Jadwalkan beberapa video sekaligus. Setiap keyword menghasilkan 1 baris jadwal mandiri.</p>
+        </div>
+        <span class="badge-tenant">Pendekatan A: Batch Multi-Schedule</span>
+      </div>
+
+      <!-- Pilih Brand & Preset -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+        <div class="form-group">
+          <label class="form-label"><span>🏢</span> Brand Target:</label>
+          <select class="form-select" id="schedBrandSelect">
+            <option value="ruang_akustik">Ruang Akustik ID</option>
+            <option value="solusi_thermal">Solusi Thermal ID</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label"><span>⚙️</span> Operator Preset:</label>
+          <select class="form-select">
+            <option selected>Brand Editorial Campaign (Veo 8s + Storytelling)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- CORE FEATURE: SCHEDULER EDITORIAL MODE -->
+      <div class="editorial-mode-box">
+        <div class="mode-selector-header">
+          <div style="font-size: 0.88rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 0.45rem;">
+            <span>📅</span>
+            <span>Mode Sumber Topik Penjadwalan:</span>
+          </div>
+
+          <!-- Segmented Control: Pilar vs Keyword -->
+          <div class="segmented-tabs">
+            <button type="button" class="segment-btn" id="btnModePillarSched" onclick="setSchedMode('pillar')">
+              <span>🏛️</span> Multi-Pilar Brand
+            </button>
+            <button type="button" class="segment-btn active" id="btnModeKeywordSched" onclick="setSchedMode('keyword')">
+              <span>🎯</span> Multi-Keyword (Pilar OFF)
+            </button>
+          </div>
+        </div>
+
+        <!-- PANEL 1: SCHEDULER PILAR MODE -->
+        <div id="schedPanelPillar" class="pillar-panel" style="display: none;">
+          <div style="font-size: 0.8rem; color: var(--text-muted);">Pilih pilar brand yang ingin dijadwalkan:</div>
+          <div class="pillar-grid">
+            <div class="pillar-chip selected"><span>✓</span> Kenali Masalah Suara</div>
+            <div class="pillar-chip selected"><span>✓</span> Solusi Akustik Ruang Kerja</div>
+            <div class="pillar-chip"><span>+</span> Mitos Peredam Telur</div>
+            <div class="pillar-chip"><span>+</span> Cara Uji Kebocoran Suara</div>
+          </div>
+        </div>
+
+        <!-- PANEL 2: SCHEDULER KEYWORD MODE (OPTI A BATCH) -->
+        <div id="schedPanelKeyword" class="keyword-panel">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label class="form-label" style="font-size: 0.82rem;">
+              <span>📝</span> Daftar Kata Kunci (1 baris = 1 video independen):
+            </label>
+            <span id="badgeKeywordCount" style="font-size: 0.74rem; font-weight: 700; background: var(--status-info-soft); color: var(--status-info); padding: 0.15rem 0.55rem; border-radius: 9999px;">
+              3 Kata Kunci Terdeteksi
+            </span>
+          </div>
+
+          <textarea
+            class="form-textarea"
+            id="schedKeywordTextarea"
+            rows="5"
+            style="font-family: var(--font-mono); font-size: 0.83rem; line-height: 1.5;"
+            placeholder="Ketik kata kunci target, satu kata kunci per baris..."
+            oninput="renderSchedBatchCards()"
+          >peredam suara studio podcast murah
+cara hilangkan dengung kamar tidur
+perbedaan rockwool vs glasswool untuk studio</textarea>
+
+          <!-- Opsi Distribusi Waktu / Hari -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.85rem; background: var(--surface); padding: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+            <div>
+              <label style="font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 0.35rem;">
+                ⏰ Waktu Generate:
+              </label>
+              <input type="time" class="form-input" value="05:00" id="schedTimeInput" onchange="renderSchedBatchCards()">
+            </div>
+            <div>
+              <label style="font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 0.35rem;">
+                📢 Waktu Publish Sosmed:
+              </label>
+              <input type="time" class="form-input" value="11:30">
+            </div>
+            <div style="grid-column: 1 / -1; display: flex; align-items: center; gap: 0.5rem; margin-top: 0.25rem;">
+              <input type="checkbox" id="chkStaggerDays" checked onchange="renderSchedBatchCards()" style="accent-color: var(--action-primary); width: 16px; height: 16px; cursor: pointer;">
+              <label for="chkStaggerDays" style="font-size: 0.8rem; color: var(--text-primary); cursor: pointer;">
+                <strong>Distribusi Hari Otomatis:</strong> Sebarkan setiap kata kunci ke hari yang berurutan (Senin, Selasa, Rabu, dst).
+              </label>
+            </div>
+          </div>
+
+          <!-- Real-Time Batch Schedule Cards Preview -->
+          <div class="batch-preview-box">
+            <div class="batch-preview-header">
+              <span>📋 Preview Baris Jadwal yang Akan Dibuat di Database:</span>
+              <span id="previewCountText" style="color: var(--status-success); font-weight: 700;">3 Baris Jadwal</span>
+            </div>
+            <div class="batch-items-container" id="schedBatchCardsList">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="showToast('Simulasi jadwal dibatalkan')">Batal</button>
+        <button class="btn-primary" onclick="simulateSaveSchedules()">
+          <span>💾</span> <span id="btnSchedSubmitText">Simpan 3 Baris Jadwal Editorial</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Toast Notification Simulation -->
+  <div class="toast" id="simToast">
+    <span>✅</span>
+    <span id="toastMsg">Notifikasi simulasi</span>
+  </div>
+
+  <script>
+    // Mock Data Brand Pillars
+    const BRAND_PILLARS = {
+      ruang_akustik: [
+        'Kenali Masalah Suara',
+        'Solusi Akustik Ruang Kerja',
+        'Mitos Peredam Telur',
+        'Cara Uji Kebocoran Suara',
+        'Akustik Studio Podcast',
+        'Peredam Suara Pintu Geser'
+      ],
+      solusi_thermal: [
+        'Atap Seng Panas Terik',
+        'Bahaya Suhu Kamar Lembap',
+        'Insulasi Bubble Foil vs Foam',
+        'Tips Rumah Sejuk Tanpa AC'
+      ],
+      jasa_insulasi: [
+        'Kondensasi Pipa Chiller',
+        'Standar Insulasi Industri',
+        'Pencegahan Karat Bawah Insulasi'
+      ]
+    };
+
+    let currentInstantPillar = 'Kenali Masalah Suara';
+    const DAYS_NAMES = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+
+    // Switch View (Instant vs Scheduler)
+    function switchView(view) {
+      document.getElementById('viewInstant').style.display = view === 'instant' ? 'block' : 'none';
+      document.getElementById('viewScheduler').style.display = view === 'scheduler' ? 'block' : 'none';
+      document.getElementById('btnViewInstant').classList.toggle('active', view === 'instant');
+      document.getElementById('btnViewScheduler').classList.toggle('active', view === 'scheduler');
+    }
+
+    // Toggle Theme (Dark / Light)
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.getElementById('themeBtn').innerHTML = isDark
+        ? '<span>🌙</span> Ganti ke Dark Mode'
+        : '<span>☀️</span> Ganti ke Light Mode';
+    }
+
+    // Instant View: Toggle Mode (Pilar vs Keyword)
+    function setInstantMode(mode) {
+      const isPillar = mode === 'pillar';
+      document.getElementById('btnModePillarInstant').classList.toggle('active', isPillar);
+      document.getElementById('btnModeKeywordInstant').classList.toggle('active', !isPillar);
+      document.getElementById('instantPanelPillar').style.display = isPillar ? 'flex' : 'none';
+      document.getElementById('instantPanelKeyword').style.display = isPillar ? 'none' : 'flex';
+      
+      const submitText = isPillar 
+        ? 'Luncurkan Video Editorial 1-Klik' 
+        : 'Luncurkan Video Berbasis Keyword';
+      document.getElementById('btnInstantSubmitText').textContent = submitText;
+    }
+
+    // Scheduler View: Toggle Mode (Pilar vs Keyword)
+    function setSchedMode(mode) {
+      const isPillar = mode === 'pillar';
+      document.getElementById('btnModePillarSched').classList.toggle('active', isPillar);
+      document.getElementById('btnModeKeywordSched').classList.toggle('active', !isPillar);
+      document.getElementById('schedPanelPillar').style.display = isPillar ? 'flex' : 'none';
+      document.getElementById('schedPanelKeyword').style.display = isPillar ? 'none' : 'flex';
+      renderSchedBatchCards();
+    }
+
+    // Render Pillars for Selected Brand
+    function updateBrandContext() {
+      const brandKey = document.getElementById('instantBrandSelect').value;
+      const pillars = BRAND_PILLARS[brandKey] || [];
+      currentInstantPillar = pillars[0] || 'Topik Umum';
+
+      const container = document.getElementById('instantPillarsGrid');
+      container.innerHTML = '';
+      pillars.forEach((p, idx) => {
+        const chip = document.createElement('div');
+        chip.className = `pillar-chip ${idx === 0 ? 'selected' : ''}`;
+        chip.innerHTML = `<span>${idx === 0 ? '✓' : '📖'}</span> ${p}`;
+        chip.onclick = () => {
+          document.querySelectorAll('.pillar-chip').forEach(c => {
+            c.classList.remove('selected');
+            c.querySelector('span').textContent = '📖';
+          });
+          chip.classList.add('selected');
+          chip.querySelector('span').textContent = '✓';
+          currentInstantPillar = p;
+          document.getElementById('selectedPillarBadge').textContent = `Terpilih: "${p}"`;
+        };
+        container.appendChild(chip);
+      });
+      document.getElementById('selectedPillarBadge').textContent = `Terpilih: "${currentInstantPillar}"`;
+    }
+
+    // Set Quick Suggestion Tag to Keyword Input
+    function setQuickKeyword(kw) {
+      document.getElementById('instantKeywordInput').value = kw;
+      renderInstantPreview();
+    }
+
+    // Render Instant AI Directive Preview
+    function renderInstantPreview() {
+      const kw = document.getElementById('instantKeywordInput').value.trim() || 'Topik Pilihan';
+      document.getElementById('instantAiDirectiveText').innerHTML = 
+        `Pilar brand dinonaktifkan (OFF). AI akan membedah search intent dari kata kunci <strong>"${kw}"</strong> menjadi naskah storytelling tension berdurasi 30-45 detik dengan formula Hook 8-11 kata.`;
+    }
+
+    // Render Batch Scheduler Preview Cards
+    function renderSchedBatchCards() {
+      const isKeywordMode = document.getElementById('btnModeKeywordSched').classList.contains('active');
+      const container = document.getElementById('schedBatchCardsList');
+      container.innerHTML = '';
+
+      if (!isKeywordMode) {
+        document.getElementById('btnSchedSubmitText').textContent = 'Simpan Jadwal Pilar Editorial';
+        return;
+      }
+
+      const text = document.getElementById('schedKeywordTextarea').value;
+      const keywords = text.split('\n').map(k => k.trim()).filter(Boolean);
+      const isStaggered = document.getElementById('chkStaggerDays').checked;
+      const genTime = document.getElementById('schedTimeInput').value || '05:00';
+
+      document.getElementById('badgeKeywordCount').textContent = `${keywords.length} Kata Kunci Terdeteksi`;
+      document.getElementById('previewCountText').textContent = `${keywords.length} Baris Jadwal`;
+      document.getElementById('btnSchedSubmitText').textContent = `Simpan ${keywords.length} Baris Jadwal Editorial`;
+
+      if (keywords.length === 0) {
+        container.innerHTML = `<div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; padding: 1rem;">Ketik minimal 1 baris kata kunci di atas...</div>`;
+        return;
+      }
+
+      keywords.forEach((kw, i) => {
+        const day = isStaggered ? DAYS_NAMES[i % DAYS_NAMES.length] : 'Setiap Hari';
+        const card = document.createElement('div');
+        card.className = 'batch-item-card';
+        card.innerHTML = `
+          <div class="batch-item-title">
+            <span style="color: var(--status-info);">#${i + 1}</span>
+            <span>${kw}</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.4rem;">
+            <span class="batch-item-meta">${day}</span>
+            <span class="batch-item-meta">${genTime} WIB</span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // Simulations Toast
+    function showToast(msg) {
+      const toast = document.getElementById('simToast');
+      document.getElementById('toastMsg').textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function simulateLaunchInstant() {
+      const isKeyword = document.getElementById('btnModeKeywordInstant').classList.contains('active');
+      if (isKeyword) {
+        const kw = document.getElementById('instantKeywordInput').value.trim();
+        showToast(`Berhasil meluncurkan video editorial untuk keyword: "${kw}" 🎯`);
+      } else {
+        showToast(`Berhasil meluncurkan video editorial untuk pilar: "${currentInstantPillar}" 🏛️`);
+      }
+    }
+
+    function simulateSaveSchedules() {
+      const text = document.getElementById('schedKeywordTextarea').value;
+      const keywords = text.split('\n').map(k => k.trim()).filter(Boolean);
+      showToast(`Berhasil menyimpan ${keywords.length} baris jadwal video editorial di database! 📅`);
+    }
+
+    // Init on load
+    updateBrandContext();
+    renderSchedBatchCards();
+  </script>
+</body>
+</html>

@@ -548,6 +548,7 @@ export default function AutoPipelinePage() {
   const [pipelineStages, setPipelineStages] = useState(null);
   const [telemetry, setTelemetry] = useState(null);
   const [pollingActive, setPollingActive] = useState(false);
+  const [retryingStage, setRetryingStage] = useState(null);
 
   function showToast(msg, type = 'success') {
     setToast({ msg, type });
@@ -573,6 +574,38 @@ export default function AutoPipelinePage() {
       console.warn('[AutoPipeline] Error fetching factual status:', e);
     }
     return false;
+  }
+
+  async function handleRetryFailedStage(stageKey) {
+    const itemId = activeCampaignData?.item_id;
+    if (!itemId) {
+      showToast('Item ID kampanye tidak ditemukan untuk coba ulang.', 'error');
+      return;
+    }
+    const stepMap = { s4: 'tts', s5: 'visuals', s6: 'ffmpeg' };
+    const step = stepMap[stageKey];
+    if (!step) return;
+
+    setRetryingStage(stageKey);
+    try {
+      const res = await fetch(`/api/v2/pillar-campaigns/items/${itemId}/trigger`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ step })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message || `Berhasil memicu ulang langkah ${step.toUpperCase()}`);
+        setPollingActive(true);
+        if (activeCampaignId) fetchFactualStatus(activeCampaignId);
+      } else {
+        showToast(data.error || 'Gagal memicu langkah', 'error');
+      }
+    } catch (err) {
+      showToast(`Error: ${err.message}`, 'error');
+    } finally {
+      setRetryingStage(null);
+    }
   }
 
   // Polling loop
@@ -4154,6 +4187,38 @@ export default function AutoPipelinePage() {
                     }}>
                       {stageData.badge || 'Menunggu'}
                     </div>
+
+                    {/* Tombol Retry Interaktif jika Tahap Gagal */}
+                    {isFailed && ['s4', 's5', 's6'].includes(st.key) && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRetryFailedStage(st.key);
+                        }}
+                        disabled={retryingStage === st.key}
+                        style={{
+                          marginTop: '0.35rem',
+                          background: 'var(--status-danger-soft)',
+                          color: 'var(--status-danger)',
+                          border: '1px solid var(--status-danger)',
+                          borderRadius: 'var(--radius-xs)',
+                          fontSize: '0.7rem',
+                          fontWeight: 700,
+                          padding: '0.25rem 0.6rem',
+                          cursor: retryingStage === st.key ? 'wait' : 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.3rem',
+                          boxShadow: 'var(--shadow-card)',
+                          transition: 'var(--transition)'
+                        }}
+                        title={`Coba ulang ${st.defaultTitle}`}
+                      >
+                        <span>{retryingStage === st.key ? '⏳' : '🔄'}</span>
+                        <span>{retryingStage === st.key ? 'Memicu...' : 'Coba Ulang'}</span>
+                      </button>
+                    )}
                   </div>
                 );
               })}

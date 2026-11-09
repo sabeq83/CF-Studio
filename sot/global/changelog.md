@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.40.10 — Fix: FFmpeg Pre-flight Self-Healing, Scheduler Isolation & Auto Pipeline Retry (10/11/2026)
+- Pre-flight self-healing pada worker FFmpeg untuk verifikasi dan unduh on-the-fly klip video dan audio
+- Smart auto-retry pada scheduler mengarahkan retry ke tahap visual jika berkas fisik tidak lengkap
+- Akurasi status kampanye pada DB monitor menandai status failed alih-alih completed saat retry habis
+- Tombol Coba Ulang interaktif pada visualizer Auto Pipeline untuk tahap TTS, Video, dan FFmpeg
+- Isolasi scheduler runner ad-hoc/CLI dari looping polling 15s untuk mencegah split-brain asset split
+
 ## V2.40.9 — Fix 1-Klik Video Editorial & Tenant Isolation (10/11/2026)
 - Perbaiki logika default bridging pada endpoint autonomous-pipeline agar tidak melempar error guardrail pada editorial
 - Perbaiki bug ReferenceError presetViId pada executeAutonomousEditorialPipeline dan executeAutonomousProductPipeline
