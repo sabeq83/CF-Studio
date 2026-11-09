@@ -8,6 +8,7 @@ import {
   executeAutonomousEditorialPipeline,
   executeAutonomousMultiplierPipeline,
   executeAutonomousRecipeLabsPipeline,
+  executeCustomStoryboardPipeline,
   listVisualIdentityPresetsForBrand,
   resolveBrandRecipePreset
 } from '../../../../../lib/autonomous-engine.js';
@@ -146,7 +147,13 @@ export const POST = withTenantContext(async (request, _context, user) => {
     const recipeOverride = isRecipeEnabled !== undefined ? { generate_recipe: isRecipeEnabled } : {};
 
     let result;
-    if (pipelineType === 'product_campaign') {
+    if (pipelineType === 'custom_storyboard') {
+      result = await executeCustomStoryboardPipeline({
+        storyboard: body.storyboard || body,
+        tenantId,
+        executionMode: body.execution_mode || body.executionMode || 'full_autopilot'
+      });
+    } else if (pipelineType === 'product_campaign') {
       result = await executeAutonomousProductPipeline({
         brandId: body.brand_id || body.brandId,
         productId: body.product_id || body.productId,

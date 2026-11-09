@@ -35,7 +35,7 @@ HTTP endpoint: `/mcp`, authenticated using `Authorization: Bearer <CF_STUDIO_MCP
 
 ---
 
-## 3. Registered Tools Catalog (43 Tools across 7 Studio Pillars)
+## 3. Registered Tools Catalog (44 Tools across 7 Studio Pillars)
 
 ### A. Discovery, Identity & Status
 - `cf_whoami`: Read configured CF Studio operator identity, tenant, and scopes. (Legacy alias: `makna_whoami`)
@@ -43,13 +43,14 @@ HTTP endpoint: `/mcp`, authenticated using `Authorization: Bearer <CF_STUDIO_MCP
 - `cf_search_catalog`: Search brands, catalog products, and compatible presets. (Legacy alias: `makna_search_catalog`)
 - `cf_get_job_status`: Read campaign status, progress, video download URL, and social media captions. (Legacy alias: `makna_get_campaign_status`)
 
-### B. Auto Pipeline (5 Dedicated Engines + Master Runner)
+### B. Auto Pipeline (6 Dedicated Engines + Master Runner)
 - `cf_create_product_video`: 🛍️ 1-Click Product Video from catalog products with CEP triggers and unboxing.
 - `cf_create_editorial_video`: 📖 1-Click Editorial Video from brand narrative pillars and educational storytelling.
 - `cf_create_recipe_video`: 🍳 1-Click Recipe Food Reels (4-part structure, appetizing hook, voiceover, and structured recipe caption).
 - `cf_create_multiplier_video`: 🔀 1-Click Multiplier Video remixed from a viral deconstruction blueprint.
 - `cf_create_recipe_labs_post`: 🖼️ Recipe Labs Social Post: Facebook recipe article + 4 AI composite grid images (no video rendering).
-- `cf_run_auto_pipeline`: ⚡ Universal master runner supporting all 5 pipeline types dynamically.
+- `cf_submit_custom_storyboard`: 🎬 Submit a pre-crafted custom storyboard from Claude, ChatGPT, or external AI directly into the physical rendering queue (TTS, Veo video, FFmpeg assembly).
+- `cf_run_auto_pipeline`: ⚡ Universal master runner supporting all 6 pipeline types dynamically.
 - `cf_create_campaign` / `makna_create_campaign`: Strategic product campaign creation via Operator API v1.
 
 ### C. Schedule Management

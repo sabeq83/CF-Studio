@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.39.0 — Add Custom Storyboard MCP Tool & Physical Rendering Engine (09/11/2026)
+- Penambahan engine custom storyboard submission
+- Registrasi tool cf_submit_custom_storyboard pada MCP
+- Dukungan rendering langsung dari Claude dan LLM eksternal
+
 ## V2.38.2 — Add Scheduled Caption Duplicates Auto-Heal Utility (09/11/2026)
 - Skrip sanitasi otomatis antrean publishing jobs lama
 - Pembersihan caption snapshot duplikat di database staging

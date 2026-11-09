@@ -1,295 +1,264 @@
-# Rencana Implementasi: Perbaikan Duplikasi Info Bahan/Produk & Hashtag Ganda pada Autopipeline & Multiplier Lab
+# Rencana Implementasi: Fitur Custom Storyboard Submission via MCP (Claude-to-CF Studio Pipeline)
 
 > [!NOTE]
-> Rencana implementasi ini dirancang untuk menuntaskan akar masalah terjadinya **2 blok Info Bahan/Produk** dan **hashtag ganda** pada postingan media sosial (Instagram, TikTok, YouTube, Facebook) yang dihasilkan oleh Auto Pipeline Multiplier Lab.
+> Rencana implementasi ini memungkinkan **Claude (atau LLM eksternal lainnya)** merancang storyboard kreatif secara lengkap di sesi percakapan/chat, kemudian mengirimkannya langsung melalui MCP ke CF Studio untuk dieksekusi oleh mesin produksi (TTS $\rightarrow$ G-Labs AI Video $\rightarrow$ FFmpeg Assembly $\rightarrow$ Omnichannel Publishing).
 
 ---
 
-## Ringkasan Eksekutif & Akar Masalah
+## Ringkasan Eksekutif & Arsitektur
 
-Berdasarkan investigasi pada data riil task `mul_261109_5jhvm0` dan analisis alur kode `lib/smart-affiliate-package-builder.js` serta `lib/re-multiplier-worker.js`:
+Saat ini, seluruh tool pembuatan video di MCP (`cf_create_product_video`, `cf_create_editorial_video`, `cf_create_recipe_video`, `cf_create_multiplier_video`, `cf_create_campaign`) bekerja dengan skema:
+$$\text{User/Claude mengirimkan Brief} \longrightarrow \text{Gemini AI di CF Studio merancang Storyboard} \longrightarrow \text{Rendering}$$
 
-1. **Akar Masalah 1 (Pilihan AI vs Fallback Backend)**:
-   - Gemini AI memilih produk **"Monggo Dark Chocolate"** yang selaras dengan resep mousse cokelat dan merangkai CTA bio di dalam naskah `caption`.
-   - Di database produk, `Monggo Dark Chocolate` memiliki `affiliate_link: null`.
-   - Backend kemudian menjalankan fallback keyword matcher (`selectBestProductMatch`) pada judul kampanye *"Trik Sulap **Telur** Rebus..."*, yang secara keliru mencocokkan kata *"Telur"* ke produk **"Pembersih Kocokan Telur Serbaguna"** (karena memiliki link Shopee).
-2. **Akar Masalah 2 (Penumpukan CTA / Appending Flaw)**:
-   - Fungsi `normalizeSocialMediaPackage` mengevaluasi `if (!captionBio || captionBio === baseCaption)`. Karena Gemini menyamakan `caption_bio` dengan `baseCaption`, kondisi ini bernilai `true`.
-   - Sistem berasumsi bahwa CTA bio belum ada, lalu menempelkan (`append`) blok CTA produk kedua (*Pembersih Kocokan Telur*) beserta deretan hashtag untuk kedua kalinya di bawah `baseCaption` yang sudah memuat CTA produk pertama (*Monggo Dark Chocolate*).
-3. **Akar Masalah 3 (Ketidaksesuaian Link Facebook)**:
-   - Pada Facebook, teks menyebut *Monggo Dark Chocolate*, tetapi link Shopee yang disisipkan berasal dari *Pembersih Kocokan Telur Serbaguna*.
+Dengan fitur baru **Custom Storyboard Engine (`cf_submit_custom_storyboard`)**, alurnya menjadi:
+$$\text{Claude merancang Storyboard di Chat} \longrightarrow \text{Kirim via MCP} \longrightarrow \text{Bypass Generator (Tahap 1)} \longrightarrow \text{TTS} \rightarrow \text{Veo Video} \rightarrow \text{FFmpeg} \rightarrow \text{Publish}$$
+
+### Komponen Utama:
+1. **Pipeline Service (`lib/custom-storyboard-pipeline.js`)**: Validasi struktur storyboard Claude, format naskah & prompt optical stack, pembuatan campaign & item di database, serta inisiasi worker.
+2. **Autonomous Pipeline Endpoint (`app/api/v2/recipes/autonomous-pipeline/route.js`)**: Penambahan handler `pipeline_type: 'custom_storyboard'`.
+3. **MCP Tool Registration (`apps/mcp/tools.mjs`)**: Registrasi tool `cf_submit_custom_storyboard` lengkap dengan skema Zod validasi.
+4. **Dokumentasi MCP (`apps/mcp/README.md`)**: Panduan pemanggilan tool untuk Claude Desktop / Antigravity IDE.
+5. **Unit Test Suite (`tests/test-custom-storyboard-mcp.test.js`)**: Verifikasi integritas skema storyboard dan pipeline execution.
 
 ---
 
 ## Execution Task List
-- [x] **Task 1: Tambahkan Helper Sanitasi `stripCtaAndHashtags` pada `lib/smart-affiliate-package-builder.js`** untuk membersihkan CTA lama dan trailing hashtags sebelum proses adaptasi platform.
-- [x] **Task 2: Refaktorisasi `buildPlatformAdaptiveCaptions` pada `lib/smart-affiliate-package-builder.js`** agar tidak menumpuk CTA dan menyematkan hashtag tepat satu kali di posisi akhir.
-- [x] **Task 3: Perbaiki `normalizeSocialMediaPackage` pada `lib/smart-affiliate-package-builder.js`** agar selalu menggunakan naskah bersih, menyelaraskan produk terpilih, dan mengeliminasi bug duplikasi Bio CTA.
-- [x] **Task 4: Filter Etalase Produk Ber-link Valid pada `buildAffiliatePromptInstruction` (`lib/smart-affiliate-package-builder.js`)** dan tegaskan aturan naskah universal bebas CTA/hashtag pada prompt Gemini.
-- [x] **Task 5: Sinkronkan Produk Pilihan AI (`selected_product_id` / `selected_product_name`) pada `lib/re-multiplier-worker.js`** sebelum fallback ke keyword matcher.
-- [x] **Task 6: Buat Unit Test Suite Khusus Anti-Duplikasi Caption & Smart Affiliate** (`tests/test-affiliate-caption-deduplication.test.js`).
-- [x] **Task 7: Jalankan Uji Verifikasi Otomatis, Build Check Lokal, dan SOP Rilis Non-Interaktif**.
+- [x] **Task 1: Buat Pipeline Engine `lib/custom-storyboard-pipeline.js`** untuk memvalidasi dan memproses injeksi custom storyboard langsung ke status produksi.
+- [x] **Task 2: Ekspor Engine di `lib/autonomous-engine.js`** untuk konsistensi ekosistem engine CF Studio.
+- [x] **Task 3: Tambahkan Handler `custom_storyboard` pada Route `app/api/v2/recipes/autonomous-pipeline/route.js`**.
+- [x] **Task 4: Daftarkan Tool `cf_submit_custom_storyboard` pada MCP Adapter `apps/mcp/tools.mjs`**.
+- [x] **Task 5: Perbarui Dokumentasi MCP Server pada `apps/mcp/README.md`**.
+- [x] **Task 6: Buat Unit Test Suite `tests/test-custom-storyboard-mcp.test.js`**.
+- [x] **Task 7: Uji Coba Verifikasi, Build Check, dan Rilis Non-Interaktif**.
 
 ---
 
 ## Before & After Code Snippets
 
-### 1. `lib/smart-affiliate-package-builder.js` — Penambahan Helper `stripCtaAndHashtags` & Sanitasi Caption
-
-#### Code Sebelum (Current/Before):
-```javascript
-export function buildPlatformAdaptiveCaptions({ baseCaption = '', hashtags = [], matchedProduct = null, brandName = '' }) {
-  let cleanCaption = String(baseCaption || '').trim();
-
-  // Bersihkan jika caption sudah memiliki placeholder atau link s.shopee
-  cleanCaption = cleanCaption
-    .replace(/https?:\/\/s\.shopee\.co\.id\/\S+/gi, '')
-    .replace(/\{\{AFFILIATE_LINK\}\}/g, '')
-    .trim();
-
-  const formattedTags = Array.isArray(hashtags) && hashtags.length > 0
-    ? hashtags.map(h => String(h).trim()).filter(Boolean).map(h => h.startsWith('#') ? h : `#${h}`)
-    : [];
-  const tagsStr = formattedTags.length > 0 ? '\n\n' + formattedTags.join(' ') : '';
-```
+### 1. `lib/custom-storyboard-pipeline.js` (File Baru)
 
 #### Code Sesudah (Proposed/After):
 ```javascript
-/**
- * Membersihkan blok CTA (Bio CTA & Shopee Link) serta trailing hashtags yang mungkin sudah ada di dalam naskah
- * agar tidak terjadi duplikasi saat proses adaptasi platform.
- * @param {string} caption
- * @returns {string}
- */
-export function stripCtaAndHashtags(caption) {
-  if (!caption) return '';
-  let cleaned = String(caption).trim();
+import { v4 as uuidv4 } from 'uuid';
+import { getDb } from './db.js';
+import { startCampaignScheduler } from './scheduler.js';
+import { approvePillarCampaignItemUnchanged } from './pillar-campaign-approval.js';
 
-  // 1. Bersihkan blok CTA Info Bahan / Produk (Bio CTA)
-  cleaned = cleaned.replace(/(?:\r?\n)*👉\s*Info\s*(?:Bahan|Produk|Bahan\/Produk)?[\s\S]*?(?=(?:\r?\n\s*#|$))/gi, '');
-
-  // 2. Bersihkan blok CTA Rekomendasi Resmi Shopee
-  cleaned = cleaned.replace(/(?:\r?\n)*🛒\s*Rekomendasi\s*(?:Bahan|Produk|Bahan\/Produk)?\s*Resmi:[\s\S]*?(?=(?:\r?\n\s*#|$))/gi, '');
-
-  // 3. Bersihkan sisa link shopee atau {{AFFILIATE_LINK}}
-  cleaned = cleaned.replace(/https?:\/\/s\.shopee\.co\.id\/\S+/gi, '');
-  cleaned = cleaned.replace(/\{\{AFFILIATE_LINK\}\}/g, '');
-
-  // 4. Bersihkan deretan hashtag yang menempel di akhir caption
-  cleaned = cleaned.replace(/(?:\r?\n|\s)*(?:#[a-zA-Z0-9_\u00c0-\u00ff]+\s*)+$/g, '');
-
-  return cleaned.trim();
-}
-
-export function buildPlatformAdaptiveCaptions({ baseCaption = '', hashtags = [], matchedProduct = null, brandName = '' }) {
-  const cleanCaption = stripCtaAndHashtags(baseCaption);
-
-  const formattedTags = Array.isArray(hashtags) && hashtags.length > 0
-    ? hashtags.map(h => String(h).trim()).filter(Boolean).map(h => h.startsWith('#') ? h : `#${h}`)
-    : [];
-  const tagsStr = formattedTags.length > 0 ? '\n\n' + formattedTags.join(' ') : '';
-```
-
----
-
-### 2. `lib/smart-affiliate-package-builder.js` — Filter Produk Ber-link Valid pada Prompt Gemini
-
-#### Code Sebelum (Current/Before):
-```javascript
-export function buildAffiliatePromptInstruction({ brandProducts = [], selectedProductId = null, isAffiliateEnabled = true }) {
-  if (!isAffiliateEnabled || !Array.isArray(brandProducts) || brandProducts.length === 0) {
-    return `
-ATURAN SOCIAL MEDIA PACKAGE & AFFILIATE:
-- Konten ini berstatus Murni Edukasi / Non-Afiliasi.
-- Pada objek "social_media_package", hasilkan "caption" universal yang bersih, bernilai edukatif, dan diakhiri hashtags relevan. DILARANG mencantumkan link penjualan.
-`;
+export async function executeCustomStoryboardPipeline({
+  storyboard,
+  tenantId = 'default_tenant',
+  executionMode = 'full_autopilot'
+}) {
+  if (!storyboard || typeof storyboard !== 'object') {
+    throw new Error('Storyboard payload wajib berupa objek JSON.');
   }
 
-  // Siapkan daftar etalase produk brand (maks 10 produk untuk efisiensi token)
-  let candidateProducts = brandProducts;
-```
-
-#### Code Sesudah (Proposed/After):
-```javascript
-export function buildAffiliatePromptInstruction({ brandProducts = [], selectedProductId = null, isAffiliateEnabled = true }) {
-  // Hanya operkan produk yang memiliki affiliate_link aktif dan terisi ke dalam prompt AI
-  const activeAffiliateProducts = (brandProducts || []).filter(p => p.affiliate_link && String(p.affiliate_link).trim() !== '');
-
-  if (!isAffiliateEnabled || activeAffiliateProducts.length === 0) {
-    return `
-ATURAN SOCIAL MEDIA PACKAGE & AFFILIATE:
-- Konten ini berstatus Murni Edukasi / Non-Afiliasi (atau belum ada produk ber-link Shopee terverifikasi).
-- Pada objek "social_media_package", hasilkan "caption" universal yang bersih, bernilai edukatif, dan diakhiri hashtags relevan. DILARANG mencantumkan link penjualan.
-`;
+  const title = (storyboard.title || 'Untitled Custom Storyboard').trim();
+  const scenes = Array.isArray(storyboard.scenes) ? storyboard.scenes : [];
+  if (scenes.length === 0) {
+    throw new Error('Storyboard wajib memiliki minimal 1 scene.');
   }
 
-  // Siapkan daftar etalase produk brand (maks 10 produk untuk efisiensi token)
-  let candidateProducts = activeAffiliateProducts;
-```
+  const db = getDb();
+  const campaignId = `cst_${uuidv4().replace(/-/g, '').slice(0, 12)}`;
+  const videoDna = storyboard.video_dna || {};
+  const aspectRatio = videoDna.aspect_ratio || '9:16';
+  const visualStyle = videoDna.visual_style || 'Cinematic';
 
----
+  // 1. Ingest ke pillar_campaigns
+  await db.prepare(`
+    INSERT INTO pillar_campaigns (
+      id, campaign_name, tenant_id, execution_mode, status, aspect_ratio, visual_style,
+      target_ai_engine, voice_persona, speed_control, target_clips_count, created_at
+    ) VALUES (?, ?, ?, ?, 'running', ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    campaignId,
+    `[Custom Storyboard] ${title}`,
+    tenantId,
+    executionMode,
+    aspectRatio,
+    visualStyle,
+    videoDna.target_ai_engine || 'Google Veo (8s)',
+    videoDna.voice_persona || 'Aoede',
+    videoDna.speed_control || 2.5,
+    scenes.length,
+    new Date().toISOString()
+  );
 
-### 3. `lib/smart-affiliate-package-builder.js` — Normalisasi Bebas Duplikasi pada `normalizeSocialMediaPackage`
+  // 2. Format new_video_plan_json
+  const newVideoPlan = scenes.map((s, idx) => ({
+    clip_index: s.scene_index || (idx + 1),
+    visual_action: s.visual_action || s.visual_prompt || '',
+    new_vo: s.voiceover_text || '',
+    t2i_prompt: s.visual_prompt || s.t2i_prompt || '',
+    i2v_prompt: s.i2v_prompt || s.camera_movement || 'Cinematic subtle motion',
+    duration: s.duration_seconds || 4
+  }));
 
-#### Code Sebelum (Current/Before):
-```javascript
-export function normalizeSocialMediaPackage(rawSocialPackage = {}, matchedProduct = null) {
-  if (!rawSocialPackage || typeof rawSocialPackage !== 'object') {
-    rawSocialPackage = {};
+  const resultJson = {
+    title,
+    video_dna: videoDna,
+    storyboard: scenes,
+    social_media_package: storyboard.social_media_package || {}
+  };
+
+  // 3. Simpan item langsung dengan generation_status: 'completed'
+  const insertItem = await db.prepare(`
+    INSERT INTO pillar_campaign_items (
+      campaign_id, sequence, generation_status, tts_status, visual_status, ffmpeg_status,
+      workflow_status, new_video_plan_json, result_json, video_dna_json, created_at
+    ) VALUES (?, 1, 'completed', 'pending', 'pending', 'pending', ?, ?, ?, ?, ?)
+  `).run(
+    campaignId,
+    executionMode === 'full_autopilot' ? 'production_processing' : 'ready_for_review',
+    JSON.stringify(newVideoPlan),
+    JSON.stringify(resultJson),
+    JSON.stringify(videoDna),
+    new Date().toISOString()
+  );
+
+  const itemId = insertItem.lastInsertRowid;
+
+  if (executionMode === 'full_autopilot' && itemId) {
+    await approvePillarCampaignItemUnchanged(itemId).catch(() => {});
   }
 
-  const baseCaption = rawSocialPackage.caption || rawSocialPackage.caption_universal || '';
-  const hashtags = Array.isArray(rawSocialPackage.hashtags) ? rawSocialPackage.hashtags : [];
-
-  let captionFb = rawSocialPackage.caption_facebook || '';
-  let captionBio = rawSocialPackage.caption_bio || '';
-
-  if (matchedProduct && matchedProduct.affiliate_link) {
-    if (captionFb.includes('{{AFFILIATE_LINK}}')) {
-      captionFb = captionFb.replace(/\{\{AFFILIATE_LINK\}\}/g, matchedProduct.affiliate_link);
-    } else if (!captionFb || captionFb === baseCaption) {
-      const adapted = buildPlatformAdaptiveCaptions({
-        baseCaption,
-        hashtags,
-        matchedProduct
-      });
-      captionFb = adapted.caption_facebook;
-      captionBio = adapted.caption_bio;
-    }
-
-    if (!captionBio || captionBio === baseCaption) {
-      const pName = matchedProduct.product_name || 'Bahan/Produk Rekomendasi';
-      const bioCta = `\n\n👉 Info Bahan/Produk:\nBahan & produk rekomendasi (${pName}) yang mimin pakai bisa kamu cek di Link di Bio ya! ✨`;
-      const tagsStr = hashtags.length > 0 ? '\n\n' + hashtags.map(h => h.startsWith('#') ? h : `#${h}`).join(' ') : '';
-      captionBio = `${baseCaption.trim()}${bioCta}${tagsStr}`;
-    }
-  } else {
-    captionFb = baseCaption;
-    captionBio = baseCaption;
-  }
-```
-
-#### Code Sesudah (Proposed/After):
-```javascript
-export function normalizeSocialMediaPackage(rawSocialPackage = {}, matchedProduct = null) {
-  if (!rawSocialPackage || typeof rawSocialPackage !== 'object') {
-    rawSocialPackage = {};
-  }
-
-  const baseCaption = rawSocialPackage.caption || rawSocialPackage.caption_universal || '';
-  const hashtags = Array.isArray(rawSocialPackage.hashtags) ? rawSocialPackage.hashtags : [];
-
-  // Jika matchedProduct tersedia dan memiliki link Shopee
-  if (matchedProduct && matchedProduct.affiliate_link) {
-    const pName = matchedProduct.product_name || 'Bahan/Produk Rekomendasi';
-    const affLink = matchedProduct.affiliate_link.trim();
-
-    // Selalu bangun platform-adaptive captions secara bersih dan bebas duplikasi
-    const adapted = buildPlatformAdaptiveCaptions({
-      baseCaption,
-      hashtags,
-      matchedProduct
-    });
-
-    let captionFb = rawSocialPackage.caption_facebook || '';
-    if (captionFb && captionFb.includes('{{AFFILIATE_LINK}}')) {
-      captionFb = captionFb.replace(/\{\{AFFILIATE_LINK\}\}/g, affLink);
-    } else {
-      captionFb = adapted.caption_facebook;
-    }
-
-    return {
-      title: rawSocialPackage.title || '',
-      caption: stripCtaAndHashtags(baseCaption),
-      caption_facebook: captionFb,
-      caption_bio: adapted.caption_bio,
-      caption_universal: adapted.caption_universal,
-      hashtags: adapted.hashtags,
-      matched_product: {
-        product_id: matchedProduct.product_id,
-        product_name: pName,
-        affiliate_link: affLink,
-        brand_profile_id: matchedProduct.brand_profile_id || null
-      }
-    };
-  }
-
-  // Non-affiliate / tanpa produk affiliate
-  const cleanBase = stripCtaAndHashtags(baseCaption);
-  const formattedTags = hashtags.length > 0 ? '\n\n' + hashtags.map(h => h.startsWith('#') ? h : `#${h}`).join(' ') : '';
-  const unified = cleanBase + formattedTags;
+  startCampaignScheduler();
 
   return {
-    title: rawSocialPackage.title || '',
-    caption: cleanBase,
-    caption_facebook: rawSocialPackage.caption_facebook ? stripCtaAndHashtags(rawSocialPackage.caption_facebook) + formattedTags : unified,
-    caption_bio: rawSocialPackage.caption_bio ? stripCtaAndHashtags(rawSocialPackage.caption_bio) + formattedTags : unified,
-    caption_universal: unified,
-    hashtags,
-    matched_product: null
+    success: true,
+    campaign_id: campaignId,
+    item_id: itemId,
+    campaign_name: title,
+    status: 'production_processing',
+    total_scenes: scenes.length
   };
 }
 ```
 
 ---
 
-### 4. `lib/re-multiplier-worker.js` — Sinkronisasi Produk Pilihan AI Sebelum Fallback
+### 2. `app/api/v2/recipes/autonomous-pipeline/route.js` — Penambahan Cabang `custom_storyboard`
 
 #### Code Sebelum (Current/Before):
 ```javascript
-    // 2. Smart Fallback: Jika non-bridging video (target_product_id null), cari produk brand via selectBestProductMatch!
-    if (!matchedProduct && isAffiliateEnabled && Array.isArray(brandProductsList) && brandProductsList.length > 0) {
-      const topicForMatching = task.campaign_name || parsed.title || parsed.yt_title || '';
-      matchedProduct = selectBestProductMatch({
-        products: brandProductsList,
-        topic: topicForMatching
+    let result;
+    if (pipelineType === 'product_campaign') {
+      result = await executeAutonomousProductPipeline({
+        brandId: body.brand_id || body.brandId,
+        productId: body.product_id || body.productId,
+...
+    } else if (pipelineType === 'recipe_labs') {
+      result = await executeAutonomousRecipeLabsPipeline({
+...
       });
+    } else {
+      return NextResponse.json({ success: false, error: `pipeline_type '${pipelineType}' tidak didukung` }, { status: 400 });
     }
 ```
 
 #### Code Sesudah (Proposed/After):
 ```javascript
-    // 2. Sinkronkan dengan Pilihan AI (selected_product_id / selected_product_name)
-    if (!matchedProduct && isAffiliateEnabled && Array.isArray(brandProductsList) && brandProductsList.length > 0) {
-      const aiPkg = parsed.social_media_package || {};
-      const aiSelectedId = aiPkg.selected_product_id;
-      const aiSelectedName = aiPkg.selected_product_name;
-
-      if (aiSelectedId || aiSelectedName) {
-        const found = brandProductsList.find(p =>
-          (aiSelectedId && (p.product_id === aiSelectedId || p.brand_product_id === aiSelectedId)) ||
-          (aiSelectedName && String(p.product_name || '').toLowerCase() === String(aiSelectedName).toLowerCase())
-        );
-        if (found && found.affiliate_link) {
-          matchedProduct = {
-            product_id: found.product_id,
-            product_name: found.product_name,
-            affiliate_link: found.affiliate_link
-          };
-        }
-      }
-
-      // 3. Smart Fallback: hanya jika AI tidak memilih produk ber-link valid
-      if (!matchedProduct) {
-        const topicForMatching = task.campaign_name || parsed.title || parsed.yt_title || '';
-        matchedProduct = selectBestProductMatch({
-          products: brandProductsList.filter(p => p.affiliate_link && String(p.affiliate_link).trim() !== ''),
-          topic: topicForMatching
-        });
-      }
+    let result;
+    if (pipelineType === 'custom_storyboard') {
+      const { executeCustomStoryboardPipeline } = await import('../../../../../lib/custom-storyboard-pipeline.js');
+      result = await executeCustomStoryboardPipeline({
+        storyboard: body.storyboard || body,
+        tenantId,
+        executionMode: body.execution_mode || 'full_autopilot'
+      });
+    } else if (pipelineType === 'product_campaign') {
+      result = await executeAutonomousProductPipeline({
+        brandId: body.brand_id || body.brandId,
+...
+    } else if (pipelineType === 'recipe_labs') {
+      result = await executeAutonomousRecipeLabsPipeline({
+...
+      });
+    } else {
+      return NextResponse.json({ success: false, error: `pipeline_type '${pipelineType}' tidak didukung` }, { status: 400 });
     }
 ```
 
 ---
 
-## SOP Verifikasi & Rilis Non-Interaktif
+### 3. `apps/mcp/tools.mjs` — Registrasi Tool `cf_submit_custom_storyboard`
 
-1. **Uji Otomatis Unit Test**:
-   - Jalankan `node --test tests/test-affiliate-caption-deduplication.test.js` dan seluruh test affiliate terkait.
-2. **Uji Build Lokal**:
-   - Pastikan kompilasi Next.js lokal bersih tanpa error (`npm run build`).
-3. **Eksekusi Rilis Otomatis**:
-   - Jalankan rilis non-interaktif sesuai SOP:
-     ```bash
-     npm run release-non-interactive -- --type patch --title "Fix Caption Duplication & AI Affiliate Sync in Autopipeline" --points "Sanitasi stripCtaAndHashtags anti-duplikasi|Filter produk ber-link aktif pada prompt AI|Sinkronisasi produk pilihan AI di Multiplier Worker"
-     ```
+#### Code Sebelum (Current/Before):
+```javascript
+  // Engine 5: Recipe Labs Text & Photo Post (recipe_labs)
+  register(
+    'cf_create_recipe_labs_post',
+    'Create a Recipe Labs social media post: Facebook recipe article + 4 AI composite grid images (no video rendering).',
+    {
+...
+    },
+    false,
+    ({ idempotency_key, ...args }) =>
+      request('/api/v2/recipes/autonomous-pipeline', {
+        key: idempotency_key,
+        body: { pipeline_type: 'recipe_labs', ...args }
+      })
+  );
+```
+
+#### Code Sesudah (Proposed/After):
+```javascript
+  // Engine 5: Recipe Labs Text & Photo Post (recipe_labs)
+  register(
+    'cf_create_recipe_labs_post',
+    'Create a Recipe Labs social media post: Facebook recipe article + 4 AI composite grid images (no video rendering).',
+    {
+...
+    },
+    false,
+    ({ idempotency_key, ...args }) =>
+      request('/api/v2/recipes/autonomous-pipeline', {
+        key: idempotency_key,
+        body: { pipeline_type: 'recipe_labs', ...args }
+      })
+  );
+
+  // Engine 6: Custom Storyboard Submission (Claude-to-Video Engine)
+  register(
+    'cf_submit_custom_storyboard',
+    'Submit a pre-crafted custom storyboard directly to CF Studio for physical rendering (TTS voiceover, AI video clips per scene, and FFmpeg assembly).',
+    {
+      idempotency_key: z.string().trim().min(1).max(128).optional(),
+      brand_id: z.string().max(100).optional(),
+      title: z.string().trim().min(1).max(300),
+      video_dna: z.object({
+        aspect_ratio: z.enum(['9:16', '16:9', '1:1']).default('9:16'),
+        visual_style: z.string().default('Cinematic'),
+        visual_mode: z.enum(['hybrid_lock', 'pure_t2v']).default('hybrid_lock'),
+        voice_persona: z.string().default('Aoede'),
+        speed_control: z.number().default(2.5),
+        target_ai_engine: z.string().default('Google Veo (8s)')
+      }).optional(),
+      scenes: z.array(z.object({
+        scene_index: z.number().int().min(1).max(12),
+        voiceover_text: z.string().trim().min(1),
+        visual_prompt: z.string().trim().min(1),
+        i2v_prompt: z.string().optional(),
+        camera_movement: z.string().optional(),
+        duration_seconds: z.number().min(1).max(15).default(4)
+      })).min(1).max(12),
+      social_media_package: z.object({
+        caption: z.string().optional(),
+        hashtags: z.array(z.string()).optional(),
+        caption_facebook: z.string().optional(),
+        caption_bio: z.string().optional()
+      }).optional(),
+      execution_mode: z.enum(['full_autopilot', 'creative_review']).default('full_autopilot')
+    },
+    false,
+    ({ idempotency_key, ...storyboard }) =>
+      request('/api/v2/recipes/autonomous-pipeline', {
+        key: idempotency_key,
+        body: {
+          pipeline_type: 'custom_storyboard',
+          storyboard
+        }
+      })
+  );
+```

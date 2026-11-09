@@ -306,10 +306,57 @@ export function createCfStudioServer(request) {
       })
   );
 
+  // Engine 6: Custom Storyboard Submission (Claude / External AI to Video Pipeline)
+  register(
+    'cf_submit_custom_storyboard',
+    'Submit a pre-crafted custom storyboard directly to CF Studio for physical rendering (TTS voiceover, AI video clips per scene, and FFmpeg assembly).',
+    {
+      idempotency_key: z.string().trim().min(1).max(128).optional(),
+      brand_id: z.string().max(100).optional(),
+      title: z.string().trim().min(1).max(300),
+      video_dna: z.object({
+        aspect_ratio: z.enum(['9:16', '16:9', '1:1']).default('9:16'),
+        visual_style: z.string().default('Cinematic'),
+        visual_mode: z.enum(['hybrid_lock', 'pure_t2v']).default('hybrid_lock'),
+        voice_persona: z.string().default('Aoede'),
+        speed_control: z.number().default(2.5),
+        target_ai_engine: z.string().default('Google Veo (8s)'),
+        enable_motion_text: z.boolean().default(true),
+        motion_text_style: z.string().default('floating_white_yellow'),
+        video_transition: z.string().default('fade'),
+        transition_duration: z.number().default(0.5)
+      }).optional(),
+      scenes: z.array(z.object({
+        scene_index: z.number().int().min(1).max(12).optional(),
+        voiceover_text: z.string().trim().min(1),
+        visual_prompt: z.string().trim().min(1),
+        i2v_prompt: z.string().optional(),
+        camera_movement: z.string().optional(),
+        duration_seconds: z.number().min(1).max(15).default(4)
+      })).min(1).max(12),
+      social_media_package: z.object({
+        caption: z.string().optional(),
+        hashtags: z.array(z.string()).optional(),
+        caption_facebook: z.string().optional(),
+        caption_bio: z.string().optional()
+      }).optional(),
+      execution_mode: z.enum(['full_autopilot', 'creative_review']).default('full_autopilot')
+    },
+    false,
+    ({ idempotency_key, ...storyboard }) =>
+      request('/api/v2/recipes/autonomous-pipeline', {
+        key: idempotency_key,
+        body: {
+          pipeline_type: 'custom_storyboard',
+          storyboard
+        }
+      })
+  );
+
   // Universal Master Tool for 1-Click Auto Pipeline
   register(
     'cf_run_auto_pipeline',
-    'Universal master runner for any of the 5 CF Studio Auto Pipeline engines.',
+    'Universal master runner for any of the 6 CF Studio Auto Pipeline engines.',
     {
       idempotency_key: z.string().trim().min(1).max(128).optional(),
       pipeline_type: z.enum([
@@ -317,7 +364,8 @@ export function createCfStudioServer(request) {
         'editorial_campaign',
         'recipe_campaign',
         'multiplier_campaign',
-        'recipe_labs'
+        'recipe_labs',
+        'custom_storyboard'
       ]),
       brand_id: z.string().max(100).optional(),
       topic: z.string().max(300).optional(),
@@ -329,6 +377,7 @@ export function createCfStudioServer(request) {
       selected_angle: z.string().max(300).optional(),
       generate_recipe: z.boolean().optional(),
       preset_key: z.string().max(100).optional(),
+      storyboard: z.record(z.any()).optional(),
       execution_mode: z.enum(['full_autopilot', 'creative_review']).default('full_autopilot')
     },
     false,
