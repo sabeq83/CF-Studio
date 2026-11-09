@@ -337,5 +337,5 @@ Memperluas unit test untuk memvalidasi:
 - [x] Task 6: Update `apps/mcp/README.md` dengan panduan CF Studio
 - [x] Task 7: Update dan jalankan `apps/mcp/test/mcp.test.mjs` (`npm run test:mcp`)
 - [x] Task 8: Verifikasi integrasi end-to-end & build aplikasi (`npm run build`)
-- [ ] Task 9: Rilis non-interaktif sesuai SOP (`npm run release-non-interactive`)
+- [x] Task 9: Rilis non-interaktif sesuai SOP (`npm run release-non-interactive`)
 
