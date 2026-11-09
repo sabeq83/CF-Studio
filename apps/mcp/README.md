@@ -35,9 +35,9 @@ HTTP endpoint: `/mcp`, authenticated using `Authorization: Bearer <CF_STUDIO_MCP
 
 ---
 
-## 3. Registered Tools Catalog
+## 3. Registered Tools Catalog (43 Tools across 7 Studio Pillars)
 
-### A. Discovery & Status
+### A. Discovery, Identity & Status
 - `cf_whoami`: Read configured CF Studio operator identity, tenant, and scopes. (Legacy alias: `makna_whoami`)
 - `cf_list_presets`: List available video archetypes and campaign production presets. (Legacy alias: `makna_list_presets`)
 - `cf_search_catalog`: Search brands, catalog products, and compatible presets. (Legacy alias: `makna_search_catalog`)
@@ -56,6 +56,44 @@ HTTP endpoint: `/mcp`, authenticated using `Authorization: Bearer <CF_STUDIO_MCP
 - `cf_list_schedules`: List recurring Auto Pipeline schedules and execution metrics.
 - `cf_create_schedule`: Create a new automated recurring schedule (e.g. daily/weekly cron).
 - `cf_trigger_schedule_now`: Immediately trigger an execution run for an existing schedule.
+
+### D. Pillar 1: Product Database & Knowledge Catalog (Data Engine)
+- `cf_add_product`: Register a new product into the tenant catalog (manual/spec).
+- `cf_enrich_product`: Trigger AI enrichment for product USP, truths, and clean photo prompt.
+- `cf_get_product_detail`: Retrieve full product details, status, truths, and extraction metadata.
+- `cf_update_product`: Update existing product information in the catalog.
+- `cf_scrape_product_url`: Scrape product specifications and images from an e-commerce or product URL.
+
+### E. Pillar 2: Creative & Visual Identity Studio (Visual DNA Engine)
+- `cf_generate_visual_identity`: Generate an AI Visual Identity draft from a creative brief.
+- `cf_create_visual_identity`: Register a structured Visual Identity preset in the tenant.
+- `cf_list_visual_identities`: List available active Visual Identity presets (system & tenant custom).
+- `cf_get_visual_identity`: Get detailed configuration of a Visual Identity preset.
+- `cf_update_visual_identity`: Update an existing custom Visual Identity preset.
+
+### F. Pillar 3: Production Presets & Campaign Archetypes (Strategy Engine)
+- `cf_get_preset_detail`: Get full strategy configuration of an operator preset.
+- `cf_create_preset`: Create a new custom operator preset.
+- `cf_clone_preset`: Clone an existing preset with strategic modifications.
+- `cf_update_preset`: Update an existing custom operator preset.
+
+### G. Pillar 4: Viral Research & Multiplier Lab (Deconstruction Engine)
+- `cf_ingest_viral_video`: Ingest viral video URL into Deconstruct Lab for AI pattern extraction.
+- `cf_list_deconstructed_assets`: Search finished deconstructed viral video blueprints.
+- `cf_get_deconstructed_blueprint`: Get detailed viral pattern breakdown and storyboard of a deconstructed asset.
+
+### H. Pillar 5: Creative Review & Human-in-the-Loop Co-Pilot
+- `cf_get_job_review`: Get human-in-the-loop review artifact (script and storyboard) for a pending job.
+- `cf_approve_job`: Approve pending campaign review items to proceed to production rendering.
+
+### I. Pillar 6: Omnichannel Social Publishing
+- `cf_list_publishing_accounts`: List connected social media publishing accounts (Meta, Repliz, etc.).
+- `cf_create_publishing_job`: Schedule or publish completed content to a social account.
+- `cf_list_publishing_jobs`: Monitor social media publishing job statuses and view live links.
+
+### J. Pillar 7: Studio Observability & Cluster Health
+- `cf_get_cluster_health`: Check real-time health of the 3-node cluster, services, API keys, and queue tasks.
+- `cf_get_studio_stats`: Get overview metrics on content production, stock availability, and publishing counts.
 
 ---
 

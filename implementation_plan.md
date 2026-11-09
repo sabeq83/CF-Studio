@@ -1,287 +1,369 @@
-# Rencana Implementasi: Kontrol Ekstraksi Resep Lengkap Video Multiplier pada Auto Pipeline (`resep-multiplier`)
+# Rencana Implementasi: Ekspansi CF Studio MCP Server (7 Pilar Studio Otomatis)
 
 > [!NOTE]
-> Rencana implementasi lengkap dan spesifik disimpan di: [plans/auto-pipeline-multiplier-recipe-toggle/implementation_plan.md](file:///Users/sabeqmmursyid/_cfstudio/plans/auto-pipeline-multiplier-recipe-toggle/implementation_plan.md).
-> File mockup simulasi UI interaktif tersedia di: [public/mockup_auto_pipeline_recipe_toggle.html](file:///Users/sabeqmmursyid/_cfstudio/public/mockup_auto_pipeline_recipe_toggle.html).
+> Rencana implementasi ini dirancang untuk menyempurnakan dan memperluas arsitektur MCP Server CF Studio (`apps/mcp/`) dari mode *Execution-Only* menjadi *Full-Lifecycle Autonomous Creative Director & Studio Operator* yang dapat mengelola produk, visual identity, strategi preset, riset dekonstruksi, review kreatif, penerbitan media sosial, serta observabilitas sistem secara interaktif melalui chat.
 
 ---
 
-## Ringkasan Eksekutif
-Berdasarkan dokumen usulan dan audit lapangan [resep-multiplier.md](file:///Users/sabeqmmursyid/_cfstudio/resep-multiplier.md), pembuatan video Multiplier otomatis melalui **Auto Pipeline (1-Klik & Skedul Rutin)** belum menyertakan kontrol `generate_recipe`. Hal ini menyebabkan task seperti `mul_261108_s6so1p` kehilangan teks resep/racikan lengkap di caption media sosial (hanya memuat hook, cerita pendek, dan CTA Shopee).
+## Ringkasan Eksekutif & Ruang Lingkup
 
-> [!NOTE]
-> **Koreksi Arsitektur (Clarification on Scope)**:
-> **Content Planner BUKAN titik masuk Multiplier Lab**. Content Planner memproduksi kampanye orisinal (`product_campaign`, `editorial_campaign`, atau modul mandiri `recipe_campaign`) dan di-ingest ke pipeline OPC. Multiplier Lab secara eksklusif memproses **Blueprint Video dari Deconstruct Lab** (`re_deconstructed_assets` -> `re_multiplier_tasks`). Oleh karena itu, kontrol Multiplier Resep ini difokuskan 100% pada 2 Entry Point Multiplier yang sebenarnya di Auto Pipeline.
+Saat ini MCP Server CF Studio memiliki 19 tools (termasuk alias legacy) yang berfokus pada eksekusi Auto Pipeline dan penjadwalan. Untuk memberikan kendali end-to-end melalui chat, kita mengintegrasikan 7 pilar studio ke dalam protokol MCP:
 
-Rencana implementasi ini bertujuan untuk:
-1. Menyediakan **toggle switch ON/OFF** `🍳 Hasilkan Resep / Racikan Lengkap di Caption (Bahan, Takaran & Langkah)` pada 2 titik masuk Video Multiplier:
-   - **Tab 1 Auto Pipeline**: 1-Klik Launch Video Multiplier (`app/auto-pipeline/page.js`).
-   - **Tab 2 Auto Pipeline**: Modal Skedul Penjadwalan Rutin Multiplier (`app/auto-pipeline/page.js`).
-2. Menghubungkan alur parameter `generate_recipe` secara *end-to-end* melalui API (`app/api/v2/recipes/autonomous-pipeline/route.js`), Autonomous Engine (`lib/autonomous-engine.js`), dan Scheduler Runner (`lib/auto-pipeline-scheduler-runner.js`) hingga tersimpan ke database `re_multiplier_tasks`.
-3. Menyelaraskan (*harmonize*) prompt Gemini AI di `lib/prompts.js` agar saat kontrol resep aktif, **teks resep lengkap (Bahan, Takaran, Langkah 1-N, Tips)** hadir utuh baik pada postingan Facebook (diikuti CTA link Shopee aktif) maupun non-Facebook (diikuti arahan Link di Bio).
+1. **Pilar 1: Database Produk & Knowledge Catalog (Data Engine)**
+   - `cf_add_product`: Pendaftaran produk baru manual / spesifikasi.
+   - `cf_enrich_product`: Memicu ekstraksi AI untuk USP, pain points, product truth, clean photo prompt.
+   - `cf_get_product_detail`: Membaca spesifikasi detail produk dan status fotonya.
+   - `cf_update_product`: Memperbarui data produk dan link affiliate.
+   - `cf_scrape_product_url`: Mengambil data dan foto produk dari URL marketplace.
+2. **Pilar 2: Creative & Visual Identity Studio (Visual DNA Engine)**
+   - `cf_generate_visual_identity`: Membuat rancangan visual identity otomatis via AI dari natural language brief.
+   - `cf_create_visual_identity`: Menyimpan visual identity terstruktur ke database tenant.
+   - `cf_list_visual_identities`: Melihat katalog visual identity aktif (sistem & custom).
+   - `cf_get_visual_identity`: Menginspeksi detail rules visual (faceless mode, demographic, lighting, textures).
+   - `cf_update_visual_identity`: Menyesuaikan visual identity yang ada.
+3. **Pilar 3: Production Presets & Campaign Archetypes (Strategy Engine)**
+   - `cf_get_preset_detail`: Membaca detail konfigurasi preset (VO, tempo, clips, visual engine).
+   - `cf_create_preset`: Membuat preset baru untuk tenant.
+   - `cf_clone_preset`: Meng-clone preset sistem untuk dimodifikasi khusus.
+   - `cf_update_preset`: Mengedit preset kustom tenant.
+4. **Pilar 4: Viral Research & Multiplier Lab (Deconstruction Engine)**
+   - `cf_ingest_viral_video`: Memasukkan URL video viral ke queue Deconstruct Lab.
+   - `cf_list_deconstructed_assets`: Mencari blueprint video viral yang telah dibedah.
+   - `cf_get_deconstructed_blueprint`: Membaca hook, problem-solution arc, dan storyboard video viral.
+5. **Pilar 5: Creative Review & Human-in-the-Loop Co-Pilot**
+   - `cf_get_job_review`: Membaca artefak naskah dan storyboard campaign yang pending review.
+   - `cf_approve_job`: Menyetujui naskah/storyboard untuk melanjutkan render video.
+6. **Pilar 6: Omnichannel Social Publishing**
+   - `cf_list_publishing_accounts`: Menampilkan akun media sosial terhubung (Facebook, Instagram, YouTube, Repliz).
+   - `cf_create_publishing_job`: Menjadwalkan atau memublikasikan video/post ke akun media sosial.
+   - `cf_list_publishing_jobs`: Memantau status postingan media sosial.
+7. **Pilar 7: Studio Observability & Cluster Health**
+   - `cf_get_cluster_health`: Memeriksa kesehatan 3-node cluster (Mac Mini, Windows Worker 8765, PostgreSQL).
+   - `cf_get_studio_stats`: Membaca statistik performa studio dan stok video selesai.
 
 ---
 
 ## Execution Task List
-- [x] **Task 1: Perbarui Payload API Autonomous Pipeline untuk Menangkap `generate_recipe`** (`app/api/v2/recipes/autonomous-pipeline/route.js`)
-- [x] **Task 2: Integrasikan Resolusi `generate_recipe` pada Mesin Autonomous Multiplier** (`lib/autonomous-engine.js`)
-- [x] **Task 3: Teruskan Konfigurasi `generate_recipe` pada Auto Pipeline Scheduler Runner** (`lib/auto-pipeline-scheduler-runner.js`)
-- [x] **Task 4: Harmonisasi Prompt Gemini AI Phase 2 untuk Resep Utuh + Smart Affiliate CTA** (`lib/prompts.js`)
-- [x] **Task 5: Tambahkan Kontrol Switch Toggle di UI Auto Pipeline 1-Klik & Modal Skedul** (`app/auto-pipeline/page.js`)
-- [x] **Task 6: Buat & Jalankan Unit Test Suite Otomatis** (`tests/auto-pipeline-multiplier-recipe.test.js`)
-- [x] **Task 7: Verifikasi Cluster Health, Build Produksi Lokal, dan SOP Rilis Non-Interaktif**
+- [x] **Task 1: Perluas `operatorClient` pada `apps/mcp/tools.mjs`** untuk mendukung metode HTTP `PUT`, `DELETE`, dan respons berformat Markdown / Text.
+- [x] **Task 2: Tambahkan Endpoint `GET /api/v2/operator-presets/[key]`** pada backend agar konfigurasi detail suatu preset dapat dibaca langsung oleh MCP tool.
+- [x] **Task 3: Daftarkan Tools Pilar 1 (Product & Catalog) pada `apps/mcp/tools.mjs`** (`cf_add_product`, `cf_enrich_product`, `cf_get_product_detail`, `cf_update_product`, `cf_scrape_product_url`).
+- [x] **Task 4: Daftarkan Tools Pilar 2 (Visual Identity Studio) pada `apps/mcp/tools.mjs`** (`cf_generate_visual_identity`, `cf_create_visual_identity`, `cf_list_visual_identities`, `cf_get_visual_identity`, `cf_update_visual_identity`).
+- [x] **Task 5: Daftarkan Tools Pilar 3 (Production Presets) pada `apps/mcp/tools.mjs`** (`cf_get_preset_detail`, `cf_create_preset`, `cf_clone_preset`, `cf_update_preset`).
+- [x] **Task 6: Daftarkan Tools Pilar 4 & 5 (Viral Deconstruct & Creative Review) pada `apps/mcp/tools.mjs`** (`cf_ingest_viral_video`, `cf_list_deconstructed_assets`, `cf_get_deconstructed_blueprint`, `cf_get_job_review`, `cf_approve_job`).
+- [x] **Task 7: Daftarkan Tools Pilar 6 & 7 (Publishing & Observability) pada `apps/mcp/tools.mjs`** (`cf_list_publishing_accounts`, `cf_create_publishing_job`, `cf_list_publishing_jobs`, `cf_get_cluster_health`, `cf_get_studio_stats`).
+- [x] **Task 8: Perbarui Unit Test Suite `apps/mcp/test/mcp.test.mjs`** untuk memverifikasi pendaftaran seluruh tool baru, validasi input Zod, dan routing endpoint.
+- [x] **Task 9: Perbarui Dokumentasi `apps/mcp/README.md` & `instructions.md`** agar selaras dengan kemampuan MCP 7 pilar terbaru.
+- [x] **Task 10: Jalankan Verifikasi Uji Otomatis (`npm run test:mcp`), Build Check, dan SOP Rilis Non-Interaktif**.
 
 ---
 
 ## Before & After Code Snippets
 
-### 1. `app/api/v2/recipes/autonomous-pipeline/route.js`
-Menangkap `generate_recipe` dari request body dan mengoperkannya ke `overrides`.
+### 1. `apps/mcp/tools.mjs` — Dukungan HTTP Method & Parsing Response pada `operatorClient`
 
 #### Code Sebelum (Current/Before):
 ```javascript
-    const isAffiliateEnabled = body.enable_affiliate_injection !== undefined
-      ? Boolean(body.enable_affiliate_injection)
-      : (body.post_link_affiliate !== undefined ? Boolean(body.post_link_affiliate) : true);
-
-    const affiliateOverride = {
-      enable_affiliate_injection: isAffiliateEnabled,
-      post_link_affiliate: isAffiliateEnabled,
-      affiliate_enabled: isAffiliateEnabled,
-      is_bridging_active: isAffiliateEnabled
-    };
-
-    let result;
-```
-
-#### Code Sesudah (Proposed/After):
-```javascript
-    const isAffiliateEnabled = body.enable_affiliate_injection !== undefined
-      ? Boolean(body.enable_affiliate_injection)
-      : (body.post_link_affiliate !== undefined ? Boolean(body.post_link_affiliate) : true);
-
-    const isRecipeEnabled = body.generate_recipe !== undefined
-      ? Boolean(body.generate_recipe)
-      : (body.generateRecipe !== undefined ? Boolean(body.generateRecipe) : undefined);
-
-    const affiliateOverride = {
-      enable_affiliate_injection: isAffiliateEnabled,
-      post_link_affiliate: isAffiliateEnabled,
-      affiliate_enabled: isAffiliateEnabled,
-      is_bridging_active: isAffiliateEnabled
-    };
-
-    const recipeOverride = isRecipeEnabled !== undefined ? { generate_recipe: isRecipeEnabled } : {};
-
-    let result;
-```
-
----
-
-### 2. `lib/autonomous-engine.js`
-Mengekstrak `generate_recipe` di `executeAutonomousMultiplierPipeline` dan menyimpannya ke `re_multiplier_tasks` serta `bridgingConfig`.
-
-#### Code Sebelum (Current/Before):
-```javascript
-  const bridgingConfig = {
-    is_bridging_active: Boolean(product || presetConfig?.product_bridging?.is_bridging_active),
-    productName: product?.product_name || '',
-    productUrl: product?.product_url || '',
-    targetProductId: product?.id || null,
-    angleTitle: chosenAngle.title,
-    hookText: chosenAngle.hook_text,
-    targetClipsCount: effectiveTargetClipsCount,
-    target_clips_count: effectiveTargetClipsCount,
-    mandatoryOutroLine: effectiveMandatoryOutro,
-    mandatory_outro_line: effectiveMandatoryOutro,
-    visualMode: effectiveVisualMode,
-    visual_mode: effectiveVisualMode,
-    preset_key: presetKey,
-    ...overrides.bridging
-  };
-
-  // ...
-
-  await createMultiplierTask({
-    id: taskId,
-    batch_id: taskId,
-    tenant_id: tenantId,
-    deconstruct_asset_id: targetBlueprintId,
-    target_product_id: product?.id || null,
-    target_product_url: product?.product_url || '',
-    vso_config_json: JSON.stringify(vsoConfig),
-    bridging_config_json: JSON.stringify(bridgingConfig),
-    audio_config_json: JSON.stringify(audioConfig),
-    status: executionMode === 'full_autopilot' ? 'pending_resolution' : 'pending_review',
-    enable_vo_audit: 1,
-    campaign_name: `${brandName} - Multiplier: ${chosenAngle.title}`,
-    brand_profile_id: brand?.id || null,
-    account_name: brandName
-  });
-```
-
-#### Code Sesudah (Proposed/After):
-```javascript
-  const effectiveGenerateRecipe = overrides.generate_recipe !== undefined
-    ? (overrides.generate_recipe ? 1 : 0)
-    : (presetConfig?.basic_strategy?.generate_recipe ? 1 : 0);
-
-  const bridgingConfig = {
-    is_bridging_active: Boolean(product || presetConfig?.product_bridging?.is_bridging_active),
-    productName: product?.product_name || '',
-    productUrl: product?.product_url || '',
-    targetProductId: product?.id || null,
-    angleTitle: chosenAngle.title,
-    hookText: chosenAngle.hook_text,
-    targetClipsCount: effectiveTargetClipsCount,
-    target_clips_count: effectiveTargetClipsCount,
-    mandatoryOutroLine: effectiveMandatoryOutro,
-    mandatory_outro_line: effectiveMandatoryOutro,
-    visualMode: effectiveVisualMode,
-    visual_mode: effectiveVisualMode,
-    preset_key: presetKey,
-    generate_recipe: effectiveGenerateRecipe === 1,
-    ...overrides.bridging
-  };
-
-  // ...
-
-  await createMultiplierTask({
-    id: taskId,
-    batch_id: taskId,
-    tenant_id: tenantId,
-    deconstruct_asset_id: targetBlueprintId,
-    target_product_id: product?.id || null,
-    target_product_url: product?.product_url || '',
-    vso_config_json: JSON.stringify(vsoConfig),
-    bridging_config_json: JSON.stringify(bridgingConfig),
-    audio_config_json: JSON.stringify(audioConfig),
-    status: executionMode === 'full_autopilot' ? 'pending_resolution' : 'pending_review',
-    enable_vo_audit: 1,
-    campaign_name: `${brandName} - Multiplier: ${chosenAngle.title}`,
-    brand_profile_id: brand?.id || null,
-    account_name: brandName,
-    generate_recipe: effectiveGenerateRecipe
-  });
-```
-
----
-
-### 3. `lib/auto-pipeline-scheduler-runner.js`
-Meneruskan konfigurasi `generate_recipe` dari jadwal rutin ke `executeAutonomousMultiplierPipeline`.
-
-#### Code Sebelum (Current/Before):
-```javascript
-  if (pType === 'multiplier_campaign') {
-    const cfg = pipelineConfig;
-
-    return await executeAutonomousMultiplierPipeline({
-      brandId: schedule.brand_id,
-      deconstructAssetId: schedule.target_item_id || cfg.deconstruct_asset_id || null,
-      productId: cfg.product_id || null,
-      presetKey: schedule.preset_key || 'multiplier_deconstruct_remix',
-      executionMode: 'full_autopilot',
-      tenantId
-    });
+export function operatorClient({ baseUrl, token, fetchImpl = fetch }) {
+  const base = new URL(baseUrl);
+  if (!['http:', 'https:'].includes(base.protocol) || base.username || base.password || base.search || base.hash) {
+    throw new Error('Invalid Operator base URL');
   }
-```
-
-#### Code Sesudah (Proposed/After):
-```javascript
-  if (pType === 'multiplier_campaign') {
-    const cfg = pipelineConfig;
-
-    return await executeAutonomousMultiplierPipeline({
-      brandId: schedule.brand_id,
-      deconstructAssetId: schedule.target_item_id || cfg.deconstruct_asset_id || null,
-      productId: cfg.product_id || null,
-      presetKey: schedule.preset_key || 'multiplier_deconstruct_remix',
-      executionMode: 'full_autopilot',
-      tenantId,
-      overrides: {
-        generate_recipe: cfg.generate_recipe !== undefined ? Boolean(cfg.generate_recipe) : undefined,
-        ...(cfg.overrides || {})
+  if (base.protocol !== 'https:' && !isLocalOrPrivateHost(base.hostname)) {
+    throw new Error('Remote Operator API requires HTTPS');
+  }
+  if (!token) throw new Error('CF_STUDIO_OPERATOR_API_TOKEN is required');
+  return async (path, { body, key } = {}) => {
+    try {
+      const response = await fetchImpl(new URL(path, base), {
+        method: body ? 'POST' : 'GET',
+        redirect: 'error',
+        signal: AbortSignal.timeout(60000),
+        headers: {
+          authorization: `Bearer ${token}`,
+          ...(body ? { 'content-type': 'application/json', ...(key ? { 'idempotency-key': key } : {}) } : {})
+        },
+        body: body ? JSON.stringify(body) : undefined
+      });
+      if (!response.ok) {
+        return { success: false, status: response.status, error: 'Operator request rejected; check permissions, input, or job ID.' };
       }
-    });
+      return await response.json();
+    } catch {
+      return { success: false, error: 'Operator API unavailable. For creation, retry with the SAME idempotency_key and identical brief.' };
+    }
+  };
+}
+```
+
+#### Code Sesudah (Proposed/After):
+```javascript
+export function operatorClient({ baseUrl, token, fetchImpl = fetch }) {
+  const base = new URL(baseUrl);
+  if (!['http:', 'https:'].includes(base.protocol) || base.username || base.password || base.search || base.hash) {
+    throw new Error('Invalid Operator base URL');
   }
+  if (base.protocol !== 'https:' && !isLocalOrPrivateHost(base.hostname)) {
+    throw new Error('Remote Operator API requires HTTPS');
+  }
+  if (!token) throw new Error('CF_STUDIO_OPERATOR_API_TOKEN is required');
+  return async (path, { body, key, method } = {}) => {
+    try {
+      const httpMethod = method || (body ? 'POST' : 'GET');
+      const response = await fetchImpl(new URL(path, base), {
+        method: httpMethod,
+        redirect: 'error',
+        signal: AbortSignal.timeout(60000),
+        headers: {
+          authorization: `Bearer ${token}`,
+          ...(body ? { 'content-type': 'application/json', ...(key ? { 'idempotency-key': key } : {}) } : {})
+        },
+        body: body ? JSON.stringify(body) : undefined
+      });
+      if (!response.ok) {
+        return { success: false, status: response.status, error: 'Operator request rejected; check permissions, input, or job ID.' };
+      }
+      const contentType = response.headers?.get?.('content-type') || '';
+      if (contentType.includes('text/markdown') || contentType.includes('text/plain')) {
+        const text = await response.text();
+        return { success: true, markdown: text };
+      }
+      return await response.json();
+    } catch {
+      return { success: false, error: 'Operator API unavailable. For creation, retry with the SAME idempotency_key and identical brief.' };
+    }
+  };
+}
 ```
 
 ---
 
-### 4. `lib/prompts.js`
-Menjamin bahwa saat `isRecipeActive` bernilai `true`, `caption_facebook` dan `caption_bio` memuat teks resep lengkap sebelum CTA Shopee / Bio.
+### 2. `app/api/v2/operator-presets/[key]/route.js` — Penambahan Handler `GET` Preset Detail
 
 #### Code Sebelum (Current/Before):
 ```javascript
-  "caption": "${isRecipeActive ? 'Teks resep/racikan lengkap (Bahan & Takaran, Langkah Pembuatan, Khasiat, Tips, CTA & Hashtags) yang 100% SINKRON dengan bahan adegan visual di atas dengan format emoji rapi (Bahasa ' + (targetLanguage === 'en-US' ? 'Inggris' : 'Indonesia') + ').' : 'Teks caption media sosial baru yang menarik dengan hashtag...'}",
-  "caption_facebook": "Teks naskah caption lengkap khusus Facebook di mana tepat sebelum deretan hashtag disematkan CTA rekomendasi produk: '🛒 Rekomendasi Bahan/Produk Resmi:\\nBeli bahan/produk asli di Shopee resmi kami di sini:\\n{{AFFILIATE_LINK}}'",
-  "caption_bio": "Teks naskah caption lengkap khusus platform selain Facebook (Instagram/TikTok/Shorts) di mana tepat sebelum deretan hashtag disematkan CTA ke bio: '👉 Info Bahan/Produk:\\nBahan & produk rekomendasi yang mimin pakai bisa kamu cek di Link di Bio ya! ✨'",
+export const dynamic = 'force-dynamic';
+
+function requireAdmin(user) {
+  if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
+    const e = new Error('Hanya Admin tenant yang dapat mengelola preset.');
+    e.status = 403;
+    throw e;
+  }
+  return user;
+}
+
+export const PUT = withTenantContext(async (request, { params }, user) => {
 ```
 
 #### Code Sesudah (Proposed/After):
 ```javascript
-  "caption": "${isRecipeActive ? 'Teks resep/racikan lengkap (Bahan & Takaran, Langkah Pembuatan, Khasiat, Tips, CTA & Hashtags) yang 100% SINKRON dengan bahan adegan visual di atas dengan format emoji rapi (Bahasa ' + (targetLanguage === 'en-US' ? 'Inggris' : 'Indonesia') + ').' : 'Teks caption media sosial baru yang menarik dengan hashtag...'}",
-  "caption_facebook": "${isRecipeActive ? 'Teks naskah caption lengkap memuat seluruh teks resep (Bahan & Takaran, Langkah Pembuatan urut nomor, Khasiat & Tips) khusus Facebook di mana tepat sebelum deretan hashtag disematkan CTA rekomendasi produk: \\'🛒 Rekomendasi Bahan/Produk Resmi:\\\\nBeli bahan/produk asli di Shopee resmi kami di sini:\\\\n{{AFFILIATE_LINK}}\\' (Bahasa ' + (targetLanguage === 'en-US' ? 'Inggris' : 'Indonesia') + ').' : 'Teks naskah caption khusus Facebook di mana tepat sebelum deretan hashtag disematkan CTA rekomendasi produk: \\'🛒 Rekomendasi Bahan/Produk Resmi:\\\\nBeli bahan/produk asli di Shopee resmi kami di sini:\\\\n{{AFFILIATE_LINK}}\\'.'}",
-  "caption_bio": "${isRecipeActive ? 'Teks naskah caption lengkap memuat seluruh teks resep (Bahan & Takaran, Langkah Pembuatan urut nomor, Khasiat & Tips) khusus platform selain Facebook (Instagram/TikTok/Shorts) di mana tepat sebelum deretan hashtag disematkan CTA ke bio: \\'👉 Info Bahan/Produk:\\\\nBahan & produk rekomendasi yang mimin pakai bisa kamu cek di Link di Bio ya! ✨\\' (Bahasa ' + (targetLanguage === 'en-US' ? 'Inggris' : 'Indonesia') + ').' : 'Teks naskah caption khusus platform selain Facebook di mana tepat sebelum deretan hashtag disematkan CTA ke bio: \\'👉 Info Bahan/Produk:\\\\nBahan & produk rekomendasi yang mimin pakai bisa kamu cek di Link di Bio ya! ✨\\'.'}",
+export const dynamic = 'force-dynamic';
+
+function requireAdmin(user) {
+  if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
+    const e = new Error('Hanya Admin tenant yang dapat mengelola preset.');
+    e.status = 403;
+    throw e;
+  }
+  return user;
+}
+
+export const GET = withTenantContext(async (_request, { params }, user) => {
+  const tenantPresets = getSetting('operator_presets_json', false) || '{}';
+  hydrateOperatorPresetCache(user.tenantId, tenantPresets);
+  const { key } = await params;
+  const all = listOperatorPresets(user.tenantId);
+  const preset = all[key];
+  if (!preset) {
+    return NextResponse.json({ success: false, error: 'Preset tidak ditemukan.' }, { status: 404 });
+  }
+  return NextResponse.json({ success: true, key, preset });
+});
+
+export const PUT = withTenantContext(async (request, { params }, user) => {
 ```
 
 ---
 
-### 5. `app/auto-pipeline/page.js`
-Menambahkan state `instantGenerateRecipe` dan `schedGenerateRecipe`, kontrol checkbox di UI Tab 1 dan Modal Skedul, serta pengiriman parameter ke API.
+### 3. `apps/mcp/tools.mjs` — Registrasi Tools Baru (Contoh Pilar 1, 2, 3)
 
 #### Code Sebelum (Current/Before):
 ```javascript
-  const [instantPostAffiliateLink, setInstantPostAffiliateLink] = useState(true);
-  const [schedPostAffiliateLink, setSchedPostAffiliateLink] = useState(true);
+  // 4. Schedule Management Tools
+  register(
+    'cf_list_schedules',
+    'List recurring Auto Pipeline schedules in the tenant with their status and execution metrics.',
+    ...
+  );
+
+  return server;
+}
 ```
 
 #### Code Sesudah (Proposed/After):
 ```javascript
-  const [instantPostAffiliateLink, setInstantPostAffiliateLink] = useState(true);
-  const [schedPostAffiliateLink, setSchedPostAffiliateLink] = useState(true);
-  const [instantGenerateRecipe, setInstantGenerateRecipe] = useState(true);
-  const [schedGenerateRecipe, setSchedGenerateRecipe] = useState(true);
+  // 4. Schedule Management Tools
+  register(
+    'cf_list_schedules',
+    ...
+  );
+
+  // 5. Product Database Tools (Pilar 1)
+  register('cf_add_product', 'Register a new product in the tenant catalog.', {
+    product_name: z.string().trim().min(1).max(300),
+    product_description: z.string().max(12000).optional(),
+    category: z.string().max(100).optional(),
+    unique_selling_point: z.string().max(2000).optional(),
+    tags: z.string().max(500).optional(),
+    affiliate_link: z.string().max(1000).optional(),
+    source_url: z.string().max(1000).optional(),
+    packaging_type: z.string().max(100).optional()
+  }, false, args => request('/api/v2/products', { body: args }));
+
+  register('cf_enrich_product', 'Trigger AI enrichment for product USP, truths, and clean photo prompt.', {
+    product_id: z.string().min(1).max(128)
+  }, false, ({ product_id }) => request('/api/v2/products/re-enrich', { body: { ids: [product_id] } }));
+
+  register('cf_get_product_detail', 'Retrieve full product details and extraction metadata.', {
+    product_id: z.string().min(1).max(128)
+  }, true, ({ product_id }) => request(`/api/v2/products/${encodeURIComponent(product_id)}`));
+
+  register('cf_update_product', 'Update existing product information in the catalog.', {
+    product_id: z.string().min(1).max(128),
+    updates: z.record(z.any())
+  }, false, ({ product_id, updates }) => request(`/api/v2/products/${encodeURIComponent(product_id)}`, { method: 'PUT', body: updates }));
+
+  register('cf_scrape_product_url', 'Scrape product specs and images from an e-commerce URL.', {
+    url: z.string().url(),
+    category: z.string().max(100).optional(),
+    tags: z.string().max(500).optional()
+  }, false, ({ url, ...args }) => request('/api/v2/products/scrape', { body: { urls: url, ...args } }));
+
+  // 6. Visual Identity Tools (Pilar 2)
+  register('cf_generate_visual_identity', 'Generate an AI Visual Identity draft from a creative brief.', {
+    seed: z.string().trim().min(1).max(1000),
+    demographic_key: z.string().max(100).optional(),
+    setting: z.string().max(300).optional(),
+    mood: z.string().max(300).optional(),
+    visual_style: z.string().max(100).optional(),
+    color_palette: z.string().max(300).optional()
+  }, false, args => request('/api/v2/visual-identities/ai/generate', { body: args }));
+
+  register('cf_create_visual_identity', 'Register a structured Visual Identity preset.', {
+    label: z.string().trim().min(1).max(200),
+    preset_key: z.string().max(100).optional(),
+    description: z.string().max(1000).optional(),
+    config: z.record(z.any())
+  }, false, args => request('/api/v2/visual-identities', { body: args }));
+
+  register('cf_list_visual_identities', 'List available active Visual Identity presets.', {
+    status: z.enum(['active', 'all', 'archived']).default('active')
+  }, true, args => request(`/api/v2/visual-identities?${new URLSearchParams(args)}`));
+
+  register('cf_get_visual_identity', 'Get detailed configuration of a Visual Identity preset.', {
+    id_or_key: z.string().min(1).max(128)
+  }, true, ({ id_or_key }) => request(`/api/v2/visual-identities/${encodeURIComponent(id_or_key)}`));
+
+  register('cf_update_visual_identity', 'Update an existing custom Visual Identity preset.', {
+    id: z.string().min(1).max(128),
+    label: z.string().max(200).optional(),
+    description: z.string().max(1000).optional(),
+    config: z.record(z.any())
+  }, false, ({ id, ...args }) => request(`/api/v2/visual-identities/${encodeURIComponent(id)}`, { method: 'PUT', body: args }));
+
+  // 7. Production Presets (Pilar 3)
+  register('cf_get_preset_detail', 'Get full strategy configuration of an operator preset.', {
+    preset_key: z.string().min(1).max(128)
+  }, true, ({ preset_key }) => request(`/api/v2/operator-presets/${encodeURIComponent(preset_key)}`));
+
+  register('cf_create_preset', 'Create a new custom operator preset.', {
+    key: z.string().regex(/^[a-z0-9][a-z0-9_-]{2,63}$/),
+    label: z.string().trim().min(1).max(200),
+    config: z.record(z.any())
+  }, false, args => request('/api/v2/operator-presets', { body: args }));
+
+  register('cf_clone_preset', 'Clone an existing preset with strategic modifications.', {
+    source_key: z.string().min(1).max(128),
+    new_key: z.string().regex(/^[a-z0-9][a-z0-9_-]{2,63}$/),
+    new_label: z.string().trim().min(1).max(200),
+    overrides: z.record(z.any()).optional()
+  }, false, async ({ source_key, new_key, new_label, overrides = {} }) => {
+    const existing = await request(`/api/v2/operator-presets/${encodeURIComponent(source_key)}`);
+    if (!existing || !existing.success) return { success: false, error: 'Source preset not found' };
+    const mergedConfig = { ...existing.preset, ...overrides, label: new_label };
+    return request('/api/v2/operator-presets', { body: { key: new_key, label: new_label, config: mergedConfig } });
+  });
+
+  register('cf_update_preset', 'Update an existing custom operator preset.', {
+    key: z.string().regex(/^[a-z0-9][a-z0-9_-]{2,63}$/),
+    label: z.string().max(200).optional(),
+    config: z.record(z.any())
+  }, false, ({ key, ...args }) => request(`/api/v2/operator-presets/${encodeURIComponent(key)}`, { method: 'PUT', body: args }));
+
+  // 8. Viral Deconstruction & Review (Pilar 4 & 5)
+  register('cf_ingest_viral_video', 'Ingest viral video URL for AI deconstruction.', {
+    url: z.string().url(),
+    niche: z.string().max(100).optional(),
+    page_source: z.string().max(100).optional()
+  }, false, ({ url, ...args }) => request('/api/v2/deconstruct', { body: { urls: url, ...args } }));
+
+  register('cf_list_deconstructed_assets', 'Search deconstructed viral video blueprints.', {
+    q: z.string().max(200).optional(),
+    niche: z.string().max(100).optional(),
+    limit: z.number().int().min(1).max(50).default(20)
+  }, true, args => request(`/api/v2/deconstruct?assets=true&${new URLSearchParams(Object.entries(args).filter(([_, v]) => v !== undefined).map(([k, v]) => [k, String(v)]))}`));
+
+  register('cf_get_deconstructed_blueprint', 'Get detailed viral pattern breakdown and storyboard.', {
+    asset_id: z.string().min(1).max(128)
+  }, true, ({ asset_id }) => request(`/api/v2/deconstruct/assets/${encodeURIComponent(asset_id)}`));
+
+  register('cf_get_job_review', 'Get human-in-the-loop review artifact for a pending job.', {
+    job_id: z.string().min(1).max(128)
+  }, true, ({ job_id }) => request(`/api/operator/v1/content-jobs/${encodeURIComponent(job_id)}/review`));
+
+  register('cf_approve_job', 'Approve pending campaign review to proceed to production rendering.', {
+    job_id: z.string().min(1).max(128),
+    review_revision: z.number().int().min(1),
+    review_sha256: z.string().optional()
+  }, false, ({ job_id, ...body }) => request(`/api/operator/v1/content-jobs/${encodeURIComponent(job_id)}/approve`, { body }));
+
+  // 9. Publishing & Observability (Pilar 6 & 7)
+  register('cf_list_publishing_accounts', 'List connected social media publishing accounts.', {
+    provider: z.enum(['meta', 'repliz', 'all']).default('all')
+  }, true, args => request(`/api/v2/publishing/accounts?${new URLSearchParams(args)}`));
+
+  register('cf_create_publishing_job', 'Schedule or publish completed content to a social account.', {
+    account_id: z.string().min(1).max(128),
+    campaign_item_id: z.string().min(1).max(128),
+    platform: z.enum(['facebook', 'instagram', 'tiktok', 'youtube']),
+    scheduled_time: z.string().optional(),
+    caption: z.string().max(5000).optional()
+  }, false, args => request('/api/v2/publishing/jobs', { body: args }));
+
+  register('cf_list_publishing_jobs', 'Monitor social media publishing job statuses.', {
+    status: z.enum(['pending', 'processing', 'completed', 'failed', 'all']).default('all'),
+    platform: z.string().optional(),
+    limit: z.number().int().min(1).max(50).default(20)
+  }, true, args => request(`/api/v2/publishing/jobs?${new URLSearchParams(Object.entries(args).filter(([_, v]) => v !== undefined).map(([k, v]) => [k, String(v)]))}`));
+
+  register('cf_get_cluster_health', 'Check real-time health of the 3-node cluster and services.', {}, true, () => request('/api/v2/system-health'));
+
+  register('cf_get_studio_stats', 'Get overview metrics on content production and stock availability.', {}, true, () => request('/api/v2/dashboard/stats'));
+
+  return server;
+}
 ```
 
-Dan pada `handleLaunchNow`:
-```javascript
-        body: JSON.stringify({
-          pipeline_type: instantCampaignType,
-          // ...
-          post_link_affiliate: instantPostAffiliateLink,
-          generate_recipe: (instantCampaignType === 'multiplier_campaign' || instantCampaignType === 'recipe_campaign') ? instantGenerateRecipe : undefined
-        })
-```
+---
 
-Serta pada boks kontrol Multiplier Tab 1 & Modal Skedul, menyematkan elemen switch:
-```jsx
-{(instantCampaignType === 'multiplier_campaign' || instantCampaignType === 'recipe_campaign') && (
-  <div style={{
-    display: 'flex',
-    alignItems: 'flex-start',
-    gap: '0.65rem',
-    background: 'var(--surface-raised)',
-    padding: '0.75rem 1rem',
-    borderRadius: 'var(--radius-sm)',
-    border: '1px solid var(--border-subtle)',
-    marginBottom: '0.65rem'
-  }}>
-    <input
-      type="checkbox"
-      id="instantRecipeCheck"
-      checked={instantGenerateRecipe}
-      onChange={(e) => setInstantGenerateRecipe(e.target.checked)}
-      style={{ width: '18px', height: '18px', accentColor: 'var(--status-purple)', cursor: 'pointer', marginTop: '2px' }}
-    />
-    <div>
-      <label htmlFor="instantRecipeCheck" style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer', display: 'block' }}>
-        🍳 Hasilkan Resep / Racikan Lengkap di Caption (Bahan, Takaran & Langkah)
-      </label>
-      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1.4, display: 'block', marginTop: '2px' }}>
-        Saat aktif, AI akan menyusun teks resep terperinci (bahan, takaran presisi, langkah pembuatan, khasiat sehat) yang sinkron dengan video referensi dekonstruksi.
-      </span>
-    </div>
-  </div>
-)}
-```
+## SOP Verifikasi & Rilis Non-Interaktif
+
+1. **Uji Otomatis Unit Test MCP**:
+   - Jalankan `npm run test:mcp` untuk memverifikasi ke-40 tools terdaftar dengan benar, validasi argumen Zod, dan routing path ke API backend.
+2. **Uji Build Lokal**:
+   - Pastikan build Next.js lokal bersih tanpa syntax error: `npm run build`.
+3. **Eksekusi Rilis Otomatis**:
+   - Jalankan rilis non-interaktif sesuai SOP:
+     ```bash
+     npm run release-non-interactive -- --type minor --title "Ekspansi 7 Pilar CF Studio MCP Server" --points "Penambahan MCP Product Database|Penambahan MCP Visual Identity Studio|Penambahan MCP Strategy Presets|Penambahan MCP Viral Deconstruction & Review|Penambahan MCP Publishing & Observability"
+     ```

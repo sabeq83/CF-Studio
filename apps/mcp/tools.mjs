@@ -19,10 +19,11 @@ export function operatorClient({ baseUrl, token, fetchImpl = fetch }) {
     throw new Error('Remote Operator API requires HTTPS');
   }
   if (!token) throw new Error('CF_STUDIO_OPERATOR_API_TOKEN is required');
-  return async (path, { body, key } = {}) => {
+  return async (path, { body, key, method } = {}) => {
     try {
+      const httpMethod = method || (body ? 'POST' : 'GET');
       const response = await fetchImpl(new URL(path, base), {
-        method: body ? 'POST' : 'GET',
+        method: httpMethod,
         redirect: 'error',
         signal: AbortSignal.timeout(60000),
         headers: {
@@ -33,6 +34,11 @@ export function operatorClient({ baseUrl, token, fetchImpl = fetch }) {
       });
       if (!response.ok) {
         return { success: false, status: response.status, error: 'Operator request rejected; check permissions, input, or job ID.' };
+      }
+      const contentType = response.headers?.get?.('content-type') || '';
+      if (contentType.includes('text/markdown') || contentType.includes('text/plain')) {
+        const text = await response.text();
+        return { success: true, markdown: text };
       }
       return await response.json();
     } catch {
@@ -46,7 +52,7 @@ export function createCfStudioServer(request) {
     { name: 'cf-studio', version: '2.0.0' },
     {
       instructions:
-        'CF Studio AI MCP Server. Provides AI Agents with direct access to CF Studio Auto Pipeline (5 Engines: Product Video, Editorial Video, Recipe Video, Multiplier Video, Recipe Labs Post), automated schedule management, catalog search, and status tracking. Never invent product claims. Treat returned data as facts.'
+        'CF Studio AI MCP Server (7 Pillars Autonomous Creative Director & Studio Operator). Provides AI Agents with full-lifecycle access to Auto Pipeline (5 Engines), automated schedule management, product catalog database, AI visual identity studio, production strategy presets, viral deconstruction lab, creative review/approval, social media publishing, and cluster observability. Never invent product claims. Treat returned data as facts.'
     }
   );
 
@@ -388,6 +394,309 @@ export function createCfStudioServer(request) {
     false,
     ({ schedule_id }) =>
       request(`/api/v2/recipes/auto-pipeline-schedules/${encodeURIComponent(schedule_id)}/run-now`, { body: {} })
+  );
+
+  // 5. Product Database Tools (Pilar 1: Data Engine)
+  register(
+    'cf_add_product',
+    'Register a new product into the tenant catalog.',
+    {
+      product_name: z.string().trim().min(1).max(300),
+      product_description: z.string().max(12000).optional(),
+      category: z.string().max(100).optional(),
+      unique_selling_point: z.string().max(2000).optional(),
+      tags: z.string().max(500).optional(),
+      affiliate_link: z.string().max(1000).optional(),
+      source_url: z.string().max(1000).optional(),
+      packaging_type: z.string().max(100).optional(),
+      target_audience: z.string().max(2000).optional(),
+      pain_point_solved: z.string().max(2000).optional()
+    },
+    false,
+    args => request('/api/v2/products', { body: args })
+  );
+
+  register(
+    'cf_enrich_product',
+    'Trigger AI enrichment for product USP, truths, and clean photo prompt.',
+    {
+      product_id: z.string().trim().min(1).max(128)
+    },
+    false,
+    ({ product_id }) => request('/api/v2/products/re-enrich', { body: { ids: [product_id] } })
+  );
+
+  register(
+    'cf_get_product_detail',
+    'Retrieve full product details, status, truths, and extraction metadata.',
+    {
+      product_id: z.string().trim().min(1).max(128)
+    },
+    true,
+    ({ product_id }) => request(`/api/v2/products/${encodeURIComponent(product_id)}`)
+  );
+
+  register(
+    'cf_update_product',
+    'Update existing product information in the catalog.',
+    {
+      product_id: z.string().trim().min(1).max(128),
+      updates: z.record(z.any())
+    },
+    false,
+    ({ product_id, updates }) =>
+      request(`/api/v2/products/${encodeURIComponent(product_id)}`, { method: 'PUT', body: updates })
+  );
+
+  register(
+    'cf_scrape_product_url',
+    'Scrape product specifications and images from an e-commerce or product URL.',
+    {
+      url: z.string().url(),
+      category: z.string().max(100).optional(),
+      tags: z.string().max(500).optional()
+    },
+    false,
+    ({ url, ...args }) => request('/api/v2/products/scrape', { body: { urls: url, ...args } })
+  );
+
+  // 6. Visual Identity Tools (Pilar 2: Visual DNA Engine)
+  register(
+    'cf_generate_visual_identity',
+    'Generate an AI Visual Identity draft from a creative brief.',
+    {
+      seed: z.string().trim().min(1).max(1000),
+      demographic_key: z.string().max(100).optional(),
+      setting: z.string().max(300).optional(),
+      mood: z.string().max(300).optional(),
+      visual_style: z.string().max(100).optional(),
+      color_palette: z.string().max(300).optional()
+    },
+    false,
+    args => request('/api/v2/visual-identities/ai/generate', { body: args })
+  );
+
+  register(
+    'cf_create_visual_identity',
+    'Register a structured Visual Identity preset in the tenant.',
+    {
+      label: z.string().trim().min(1).max(200),
+      preset_key: z.string().max(100).optional(),
+      description: z.string().max(1000).optional(),
+      config: z.record(z.any())
+    },
+    false,
+    args => request('/api/v2/visual-identities', { body: args })
+  );
+
+  register(
+    'cf_list_visual_identities',
+    'List available active Visual Identity presets (system & tenant custom).',
+    {
+      status: z.enum(['active', 'all', 'archived']).default('active')
+    },
+    true,
+    args => request(`/api/v2/visual-identities?${new URLSearchParams(args)}`)
+  );
+
+  register(
+    'cf_get_visual_identity',
+    'Get detailed configuration of a Visual Identity preset.',
+    {
+      id_or_key: z.string().trim().min(1).max(128)
+    },
+    true,
+    ({ id_or_key }) => request(`/api/v2/visual-identities/${encodeURIComponent(id_or_key)}`)
+  );
+
+  register(
+    'cf_update_visual_identity',
+    'Update an existing custom Visual Identity preset.',
+    {
+      id: z.string().trim().min(1).max(128),
+      label: z.string().max(200).optional(),
+      description: z.string().max(1000).optional(),
+      config: z.record(z.any()).optional()
+    },
+    false,
+    ({ id, ...args }) => request(`/api/v2/visual-identities/${encodeURIComponent(id)}`, { method: 'PUT', body: args })
+  );
+
+  // 7. Production Presets (Pilar 3: Strategy Engine)
+  register(
+    'cf_get_preset_detail',
+    'Get full strategy configuration of an operator preset.',
+    {
+      preset_key: z.string().trim().min(1).max(128)
+    },
+    true,
+    ({ preset_key }) => request(`/api/v2/operator-presets/${encodeURIComponent(preset_key)}`)
+  );
+
+  register(
+    'cf_create_preset',
+    'Create a new custom operator preset.',
+    {
+      key: z.string().regex(/^[a-z0-9][a-z0-9_-]{2,63}$/),
+      label: z.string().trim().min(1).max(200),
+      config: z.record(z.any())
+    },
+    false,
+    args => request('/api/v2/operator-presets', { body: args })
+  );
+
+  register(
+    'cf_clone_preset',
+    'Clone an existing preset with strategic modifications.',
+    {
+      source_key: z.string().trim().min(1).max(128),
+      new_key: z.string().regex(/^[a-z0-9][a-z0-9_-]{2,63}$/),
+      new_label: z.string().trim().min(1).max(200),
+      overrides: z.record(z.any()).optional()
+    },
+    false,
+    async ({ source_key, new_key, new_label, overrides = {} }) => {
+      const existing = await request(`/api/v2/operator-presets/${encodeURIComponent(source_key)}`);
+      if (!existing || !existing.success) return { success: false, error: 'Source preset not found' };
+      const mergedConfig = { ...existing.preset, ...overrides, label: new_label };
+      return request('/api/v2/operator-presets', { body: { key: new_key, label: new_label, config: mergedConfig } });
+    }
+  );
+
+  register(
+    'cf_update_preset',
+    'Update an existing custom operator preset.',
+    {
+      key: z.string().regex(/^[a-z0-9][a-z0-9_-]{2,63}$/),
+      label: z.string().max(200).optional(),
+      config: z.record(z.any()).optional()
+    },
+    false,
+    ({ key, ...args }) => request(`/api/v2/operator-presets/${encodeURIComponent(key)}`, { method: 'PUT', body: args })
+  );
+
+  // 8. Viral Deconstruction & Review (Pilar 4 & 5: Viral Blueprint & Review)
+  register(
+    'cf_ingest_viral_video',
+    'Ingest viral video URL into Deconstruct Lab for AI pattern extraction.',
+    {
+      url: z.string().url(),
+      niche: z.string().max(100).optional(),
+      page_source: z.string().max(100).optional()
+    },
+    false,
+    ({ url, ...args }) => request('/api/v2/deconstruct', { body: { urls: url, ...args } })
+  );
+
+  register(
+    'cf_list_deconstructed_assets',
+    'Search finished deconstructed viral video blueprints.',
+    {
+      q: z.string().max(200).optional(),
+      niche: z.string().max(100).optional(),
+      limit: z.number().int().min(1).max(50).default(20)
+    },
+    true,
+    args =>
+      request(
+        `/api/v2/deconstruct?assets=true&${new URLSearchParams(
+          Object.entries(args)
+            .filter(([_, v]) => v !== undefined)
+            .map(([k, v]) => [k, String(v)])
+        )}`
+      )
+  );
+
+  register(
+    'cf_get_deconstructed_blueprint',
+    'Get detailed viral pattern breakdown and storyboard of a deconstructed asset.',
+    {
+      asset_id: z.string().trim().min(1).max(128)
+    },
+    true,
+    ({ asset_id }) => request(`/api/v2/deconstruct/assets/${encodeURIComponent(asset_id)}`)
+  );
+
+  register(
+    'cf_get_job_review',
+    'Get human-in-the-loop review artifact (script and storyboard) for a pending job.',
+    {
+      job_id: z.string().trim().min(1).max(128)
+    },
+    true,
+    ({ job_id }) => request(`/api/operator/v1/content-jobs/${encodeURIComponent(job_id)}/review`)
+  );
+
+  register(
+    'cf_approve_job',
+    'Approve pending campaign review items to proceed to production rendering.',
+    {
+      job_id: z.string().trim().min(1).max(128),
+      review_revision: z.number().int().min(1),
+      review_sha256: z.string().optional()
+    },
+    false,
+    ({ job_id, ...body }) => request(`/api/operator/v1/content-jobs/${encodeURIComponent(job_id)}/approve`, { body })
+  );
+
+  // 9. Publishing & Observability (Pilar 6 & 7: Publishing & Cluster Observability)
+  register(
+    'cf_list_publishing_accounts',
+    'List connected social media publishing accounts (Meta, Repliz, etc.).',
+    {
+      provider: z.enum(['meta', 'repliz', 'all']).default('all')
+    },
+    true,
+    args => request(`/api/v2/publishing/accounts?${new URLSearchParams(args)}`)
+  );
+
+  register(
+    'cf_create_publishing_job',
+    'Schedule or publish completed content to a social account.',
+    {
+      account_id: z.string().trim().min(1).max(128),
+      campaign_item_id: z.string().trim().min(1).max(128),
+      platform: z.enum(['facebook', 'instagram', 'tiktok', 'youtube']),
+      scheduled_time: z.string().optional(),
+      caption: z.string().max(5000).optional()
+    },
+    false,
+    args => request('/api/v2/publishing/jobs', { body: args })
+  );
+
+  register(
+    'cf_list_publishing_jobs',
+    'Monitor social media publishing job statuses and view live links.',
+    {
+      status: z.enum(['pending', 'processing', 'completed', 'failed', 'all']).default('all'),
+      platform: z.string().optional(),
+      limit: z.number().int().min(1).max(50).default(20)
+    },
+    true,
+    args =>
+      request(
+        `/api/v2/publishing/jobs?${new URLSearchParams(
+          Object.entries(args)
+            .filter(([_, v]) => v !== undefined)
+            .map(([k, v]) => [k, String(v)])
+        )}`
+      )
+  );
+
+  register(
+    'cf_get_cluster_health',
+    'Check real-time health of the 3-node cluster, services, API keys, and queue tasks.',
+    {},
+    true,
+    () => request('/api/v2/system-health')
+  );
+
+  register(
+    'cf_get_studio_stats',
+    'Get overview metrics on content production, stock availability, and publishing counts.',
+    {},
+    true,
+    () => request('/api/v2/dashboard/stats')
   );
 
   return server;

@@ -20,10 +20,10 @@ async function connected(t, request) {
   return client;
 }
 
-test('discovery of all 19 CF Studio tools and legacy aliases', async t => {
+test('discovery of all 43 CF Studio tools across 7 studio pillars and legacy aliases', async t => {
   const client = await connected(t, async () => ({ success: true }));
   const tools = (await client.listTools()).tools;
-  assert.equal(tools.length, 19);
+  assert.equal(tools.length, 43);
 
   const toolNames = new Set(tools.map(x => x.name));
   // 5 Auto Pipeline dedicated tools
@@ -44,6 +44,44 @@ test('discovery of all 19 CF Studio tools and legacy aliases', async t => {
   assert.ok(toolNames.has('cf_list_presets'));
   assert.ok(toolNames.has('cf_search_catalog'));
   assert.ok(toolNames.has('cf_get_job_status'));
+
+  // Pilar 1: Product Database
+  assert.ok(toolNames.has('cf_add_product'));
+  assert.ok(toolNames.has('cf_enrich_product'));
+  assert.ok(toolNames.has('cf_get_product_detail'));
+  assert.ok(toolNames.has('cf_update_product'));
+  assert.ok(toolNames.has('cf_scrape_product_url'));
+
+  // Pilar 2: Visual Identity Studio
+  assert.ok(toolNames.has('cf_generate_visual_identity'));
+  assert.ok(toolNames.has('cf_create_visual_identity'));
+  assert.ok(toolNames.has('cf_list_visual_identities'));
+  assert.ok(toolNames.has('cf_get_visual_identity'));
+  assert.ok(toolNames.has('cf_update_visual_identity'));
+
+  // Pilar 3: Strategy Presets
+  assert.ok(toolNames.has('cf_get_preset_detail'));
+  assert.ok(toolNames.has('cf_create_preset'));
+  assert.ok(toolNames.has('cf_clone_preset'));
+  assert.ok(toolNames.has('cf_update_preset'));
+
+  // Pilar 4: Viral Deconstruction
+  assert.ok(toolNames.has('cf_ingest_viral_video'));
+  assert.ok(toolNames.has('cf_list_deconstructed_assets'));
+  assert.ok(toolNames.has('cf_get_deconstructed_blueprint'));
+
+  // Pilar 5: Creative Review
+  assert.ok(toolNames.has('cf_get_job_review'));
+  assert.ok(toolNames.has('cf_approve_job'));
+
+  // Pilar 6: Omnichannel Publishing
+  assert.ok(toolNames.has('cf_list_publishing_accounts'));
+  assert.ok(toolNames.has('cf_create_publishing_job'));
+  assert.ok(toolNames.has('cf_list_publishing_jobs'));
+
+  // Pilar 7: Cluster Observability & Stats
+  assert.ok(toolNames.has('cf_get_cluster_health'));
+  assert.ok(toolNames.has('cf_get_studio_stats'));
 
   // Legacy aliases
   assert.ok(toolNames.has('makna_whoami'));
@@ -227,6 +265,237 @@ test('reject invalid arguments before contacting backend; propagate tool error',
   assert.equal(calls, 1);
 });
 
+test('product database tools dispatch to /api/v2/products (Pilar 1)', async t => {
+  const calls = [];
+  const client = await connected(t, async (path, opts) => {
+    calls.push({ path, opts });
+    return { success: true, id: 'pe-123', data: { id: 'pe-123' } };
+  });
+
+  // 1. Add product
+  await client.callTool({
+    name: 'cf_add_product',
+    arguments: {
+      product_name: 'Madu Hutan Sumbawa',
+      category: 'Madu',
+      unique_selling_point: 'Madu murni dari lebah liar',
+      tags: 'madu,alami'
+    }
+  });
+  assert.equal(calls[0].path, '/api/v2/products');
+  assert.equal(calls[0].opts.body.product_name, 'Madu Hutan Sumbawa');
+
+  // 2. Enrich product
+  await client.callTool({
+    name: 'cf_enrich_product',
+    arguments: { product_id: 'pe-123' }
+  });
+  assert.equal(calls[1].path, '/api/v2/products/re-enrich');
+  assert.deepEqual(calls[1].opts.body.ids, ['pe-123']);
+
+  // 3. Get product detail
+  await client.callTool({
+    name: 'cf_get_product_detail',
+    arguments: { product_id: 'pe-123' }
+  });
+  assert.equal(calls[2].path, '/api/v2/products/pe-123');
+
+  // 4. Update product
+  await client.callTool({
+    name: 'cf_update_product',
+    arguments: { product_id: 'pe-123', updates: { category: 'Madu Organik' } }
+  });
+  assert.equal(calls[3].path, '/api/v2/products/pe-123');
+  assert.equal(calls[3].opts.method, 'PUT');
+  assert.equal(calls[3].opts.body.category, 'Madu Organik');
+
+  // 5. Scrape product URL
+  await client.callTool({
+    name: 'cf_scrape_product_url',
+    arguments: { url: 'https://shopee.co.id/product/123/456', category: 'Herbal' }
+  });
+  assert.equal(calls[4].path, '/api/v2/products/scrape');
+  assert.equal(calls[4].opts.body.urls, 'https://shopee.co.id/product/123/456');
+});
+
+test('visual identity tools dispatch to /api/v2/visual-identities (Pilar 2)', async t => {
+  const calls = [];
+  const client = await connected(t, async (path, opts) => {
+    calls.push({ path, opts });
+    return { success: true, id: 'vi-789' };
+  });
+
+  // 1. Generate AI draft
+  await client.callTool({
+    name: 'cf_generate_visual_identity',
+    arguments: { seed: 'Cozy rustic kitchen faceless muslimah', visual_style: '3d_claymation_cozy' }
+  });
+  assert.equal(calls[0].path, '/api/v2/visual-identities/ai/generate');
+  assert.equal(calls[0].opts.body.seed, 'Cozy rustic kitchen faceless muslimah');
+
+  // 2. Create structured visual identity
+  await client.callTool({
+    name: 'cf_create_visual_identity',
+    arguments: { label: 'Cozy Sage Kitchen', preset_key: 'cozy_sage_kitchen', config: { faceless_mode: 'hands_only' } }
+  });
+  assert.equal(calls[1].path, '/api/v2/visual-identities');
+  assert.equal(calls[1].opts.body.label, 'Cozy Sage Kitchen');
+
+  // 3. List visual identities
+  await client.callTool({
+    name: 'cf_list_visual_identities',
+    arguments: { status: 'active' }
+  });
+  assert.ok(calls[2].path.startsWith('/api/v2/visual-identities?'));
+  assert.ok(calls[2].path.includes('status=active'));
+
+  // 4. Get visual identity detail
+  await client.callTool({
+    name: 'cf_get_visual_identity',
+    arguments: { id_or_key: 'cozy_sage_kitchen' }
+  });
+  assert.equal(calls[3].path, '/api/v2/visual-identities/cozy_sage_kitchen');
+
+  // 5. Update visual identity
+  await client.callTool({
+    name: 'cf_update_visual_identity',
+    arguments: { id: 'vi-789', label: 'Updated Label' }
+  });
+  assert.equal(calls[4].path, '/api/v2/visual-identities/vi-789');
+  assert.equal(calls[4].opts.method, 'PUT');
+});
+
+test('strategy preset tools dispatch to /api/v2/operator-presets (Pilar 3)', async t => {
+  const calls = [];
+  const client = await connected(t, async (path, opts) => {
+    calls.push({ path, opts });
+    if (path.includes('source_preset')) {
+      return { success: true, preset: { label: 'Source', basic_strategy: { narrative_mode: 'Storytelling' } } };
+    }
+    return { success: true, key: 'custom_preset' };
+  });
+
+  // 1. Get preset detail
+  await client.callTool({
+    name: 'cf_get_preset_detail',
+    arguments: { preset_key: 'habitfolk_6clips_quick' }
+  });
+  assert.equal(calls[0].path, '/api/v2/operator-presets/habitfolk_6clips_quick');
+
+  // 2. Create preset
+  await client.callTool({
+    name: 'cf_create_preset',
+    arguments: { key: 'skincare_fast_pacing', label: 'Skincare Fast Pacing', config: { clip_duration: 5 } }
+  });
+  assert.equal(calls[1].path, '/api/v2/operator-presets');
+  assert.equal(calls[1].opts.body.key, 'skincare_fast_pacing');
+
+  // 3. Clone preset
+  await client.callTool({
+    name: 'cf_clone_preset',
+    arguments: {
+      source_key: 'source_preset',
+      new_key: 'cloned_preset',
+      new_label: 'Cloned Preset',
+      overrides: { clip_duration: 6 }
+    }
+  });
+  assert.equal(calls[2].path, '/api/v2/operator-presets/source_preset');
+  assert.equal(calls[3].path, '/api/v2/operator-presets');
+  assert.equal(calls[3].opts.body.key, 'cloned_preset');
+  assert.equal(calls[3].opts.body.config.clip_duration, 6);
+
+  // 4. Update preset
+  await client.callTool({
+    name: 'cf_update_preset',
+    arguments: { key: 'custom_preset', config: { clip_duration: 8 } }
+  });
+  assert.equal(calls[4].path, '/api/v2/operator-presets/custom_preset');
+  assert.equal(calls[4].opts.method, 'PUT');
+});
+
+test('viral deconstruction, review, publishing, and observability tools (Pilar 4, 5, 6, 7)', async t => {
+  const calls = [];
+  const client = await connected(t, async (path, opts) => {
+    calls.push({ path, opts });
+    return { success: true, result: 'ok' };
+  });
+
+  // Pilar 4: Ingest viral video
+  await client.callTool({
+    name: 'cf_ingest_viral_video',
+    arguments: { url: 'https://www.tiktok.com/@user/video/1234567890', niche: 'Kuliner' }
+  });
+  assert.equal(calls[0].path, '/api/v2/deconstruct');
+  assert.equal(calls[0].opts.body.urls, 'https://www.tiktok.com/@user/video/1234567890');
+
+  // Pilar 4: List deconstructed assets
+  await client.callTool({
+    name: 'cf_list_deconstructed_assets',
+    arguments: { niche: 'Kuliner', limit: 10 }
+  });
+  assert.ok(calls[1].path.startsWith('/api/v2/deconstruct?assets=true&'));
+  assert.ok(calls[1].path.includes('niche=Kuliner'));
+
+  // Pilar 4: Get deconstructed blueprint
+  await client.callTool({
+    name: 'cf_get_deconstructed_blueprint',
+    arguments: { asset_id: 'asset-999' }
+  });
+  assert.equal(calls[2].path, '/api/v2/deconstruct/assets/asset-999');
+
+  // Pilar 5: Get job review
+  await client.callTool({
+    name: 'cf_get_job_review',
+    arguments: { job_id: 'job-777' }
+  });
+  assert.equal(calls[3].path, '/api/operator/v1/content-jobs/job-777/review');
+
+  // Pilar 5: Approve job
+  await client.callTool({
+    name: 'cf_approve_job',
+    arguments: { job_id: 'job-777', review_revision: 1 }
+  });
+  assert.equal(calls[4].path, '/api/operator/v1/content-jobs/job-777/approve');
+  assert.equal(calls[4].opts.body.review_revision, 1);
+
+  // Pilar 6: List publishing accounts
+  await client.callTool({
+    name: 'cf_list_publishing_accounts',
+    arguments: { provider: 'meta' }
+  });
+  assert.ok(calls[5].path.startsWith('/api/v2/publishing/accounts?'));
+
+  // Pilar 6: Create publishing job
+  await client.callTool({
+    name: 'cf_create_publishing_job',
+    arguments: {
+      account_id: 'acc-1',
+      campaign_item_id: 'item-1',
+      platform: 'facebook',
+      caption: 'Resep Viral'
+    }
+  });
+  assert.equal(calls[6].path, '/api/v2/publishing/jobs');
+  assert.equal(calls[6].opts.body.caption, 'Resep Viral');
+
+  // Pilar 6: List publishing jobs
+  await client.callTool({
+    name: 'cf_list_publishing_jobs',
+    arguments: { status: 'completed' }
+  });
+  assert.ok(calls[7].path.startsWith('/api/v2/publishing/jobs?'));
+  assert.ok(calls[7].path.includes('status=completed'));
+
+  // Pilar 7: Cluster health
+  await client.callTool({ name: 'cf_get_cluster_health' });
+  assert.equal(calls[8].path, '/api/v2/system-health');
+
+  // Pilar 7: Studio stats
+  await client.callTool({ name: 'cf_get_studio_stats' });
+  assert.equal(calls[9].path, '/api/v2/dashboard/stats');
+});
+
 test('operator credentials stay server-side; HTTP failures never expose response secrets', async () => {
   const request = operatorClient({
     baseUrl: 'https://example.com',
@@ -282,7 +551,7 @@ test('HTTP authentication, origin and host protection, real MCP handshake', asyn
       requestInit: { headers: { authorization: `Bearer ${bearerToken}` } }
     })
   );
-  assert.equal((await client.listTools()).tools.length, 19);
+  assert.equal((await client.listTools()).tools.length, 43);
   assert.equal((await client.callTool({ name: 'cf_whoami' })).isError, undefined);
   assert.equal(calls, 1);
 });

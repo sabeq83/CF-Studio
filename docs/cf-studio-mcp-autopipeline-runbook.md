@@ -133,3 +133,4 @@ Buka `http://100.95.245.55:5010/auto-pipeline` -> Tab **Jadwal Autopipeline** ->
 * **Preset**: `habitfolk_8clips_deep` | **Topik**: `air fryer chicken breast`  
 * **Hari**: Setiap Hari (Senin – Minggu) | **Jam Buat**: `01:00 WIB` | **Jam Publish**: `05:11 WIB`  
 * **Target Channels**: Facebook, YouTube (*HabitFolk*)
+

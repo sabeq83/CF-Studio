@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { withTenantContext } from '@/lib/auth';
 import {
   getCustomOperatorPresets,
+  getOperatorPresetConfig,
   isSystemOperatorPreset,
   hydrateOperatorPresetCache,
   normalizePresetCampaignKinds,
@@ -19,6 +20,17 @@ function requireAdmin(user) {
   }
   return user;
 }
+
+export const GET = withTenantContext(async (_request, { params }, user) => {
+  const tenantPresets = getSetting('operator_presets_json', false) || '{}';
+  hydrateOperatorPresetCache(user.tenantId, tenantPresets);
+  const { key } = await params;
+  const preset = getOperatorPresetConfig(key, user.tenantId);
+  if (!preset) {
+    return NextResponse.json({ success: false, error: 'Preset tidak ditemukan.' }, { status: 404 });
+  }
+  return NextResponse.json({ success: true, key, preset });
+});
 
 export const PUT = withTenantContext(async (request, { params }, user) => {
   requireAdmin(user);
