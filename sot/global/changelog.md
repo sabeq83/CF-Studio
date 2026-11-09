@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.40.4 — Upgrade MCP Server Schedule Control and Discovery Tools (09/11/2026)
+- Penambahan repliz_account_ids generate_recipe post_link_affiliate blueprint_id dan execution_mode pada cf_create_schedule
+- Penambahan tools cf_update_schedule cf_toggle_schedule_pause dan cf_delete_schedule untuk kontrol penuh jadwal
+- Penambahan tool discovery cf_search_blueprints dan optimasi cf_list_publishing_accounts untuk AI Agent
+
 ## V2.40.3 — Fix wordsPerClip static prerender on Auto Pipeline page (09/11/2026)
 - Definisikan wordsPerClip pada page.js untuk meloloskan static prerender Next.js
 

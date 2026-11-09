@@ -451,7 +451,7 @@ export function createCfStudioServer(request) {
 
   register(
     'cf_create_schedule',
-    'Create a new recurring Auto Pipeline schedule (e.g. daily/weekly automatic video generation).',
+    'Create a new recurring Auto Pipeline schedule (e.g. daily/weekly automatic video generation) with full publish accounts, recipe toggle, Shopee affiliate link, and blueprint binding.',
     {
       name: z.string().trim().min(1).max(300),
       pipeline_type: z
@@ -467,10 +467,130 @@ export function createCfStudioServer(request) {
       publish_time: z.string().regex(/^\d{2}:\d{2}$/).default('09:00'),
       days_of_week: z.array(z.number().int().min(0).max(6)).default([0, 1, 2, 3, 4, 5, 6]),
       timezone: z.string().default('Asia/Jakarta'),
-      auto_publish_enabled: z.boolean().default(true)
+      auto_publish_enabled: z.boolean().default(true),
+      repliz_account_ids: z.array(z.string()).optional().default([]),
+      generate_recipe: z.boolean().optional(),
+      post_link_affiliate: z.boolean().optional(),
+      blueprint_id: z.string().max(100).optional(),
+      execution_mode: z.enum(['full_autopilot', 'semi_autopilot']).optional().default('full_autopilot'),
+      pipeline_config: z.record(z.any()).optional()
     },
     false,
-    args => request('/api/v2/recipes/auto-pipeline-schedules', { body: args })
+    args => {
+      const {
+        generate_recipe,
+        post_link_affiliate,
+        blueprint_id,
+        execution_mode,
+        pipeline_config,
+        ...restArgs
+      } = args;
+
+      const mergedConfig = {
+        ...(pipeline_config || {}),
+        ...(generate_recipe !== undefined ? { generate_recipe } : {}),
+        ...(post_link_affiliate !== undefined ? { post_link_affiliate } : {}),
+        ...(blueprint_id ? { blueprint_id, deconstruct_asset_id: blueprint_id } : {}),
+        ...(execution_mode ? { execution_mode } : {})
+      };
+
+      const payload = {
+        ...restArgs,
+        pipeline_config_json: mergedConfig
+      };
+
+      return request('/api/v2/recipes/auto-pipeline-schedules', { body: payload });
+    }
+  );
+
+  register(
+    'cf_update_schedule',
+    'Update an existing recurring Auto Pipeline schedule (modify times, preset, publish accounts, recipe toggle, blueprint, or status).',
+    {
+      schedule_id: z.string().trim().min(1).max(128),
+      name: z.string().trim().min(1).max(300).optional(),
+      pipeline_type: z
+        .enum(['product_campaign', 'editorial_campaign', 'recipe_campaign', 'multiplier_campaign', 'recipe_labs'])
+        .optional(),
+      brand_id: z.string().max(100).optional(),
+      preset_key: z.string().max(100).optional(),
+      topic: z.string().max(300).optional(),
+      category: z.string().max(100).optional(),
+      target_item_id: z.string().max(100).optional(),
+      target_item_title: z.string().max(300).optional(),
+      generation_time: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+      publish_time: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+      days_of_week: z.array(z.number().int().min(0).max(6)).optional(),
+      timezone: z.string().optional(),
+      auto_publish_enabled: z.boolean().optional(),
+      repliz_account_ids: z.array(z.string()).optional(),
+      generate_recipe: z.boolean().optional(),
+      post_link_affiliate: z.boolean().optional(),
+      blueprint_id: z.string().max(100).optional(),
+      execution_mode: z.enum(['full_autopilot', 'semi_autopilot']).optional(),
+      pipeline_config: z.record(z.any()).optional(),
+      status: z.enum(['active', 'paused', 'archived']).optional()
+    },
+    false,
+    args => {
+      const {
+        schedule_id,
+        generate_recipe,
+        post_link_affiliate,
+        blueprint_id,
+        execution_mode,
+        pipeline_config,
+        ...restArgs
+      } = args;
+
+      let pipelineConfigUpdate;
+      if (generate_recipe !== undefined || post_link_affiliate !== undefined || blueprint_id || execution_mode || pipeline_config) {
+        pipelineConfigUpdate = {
+          ...(pipeline_config || {}),
+          ...(generate_recipe !== undefined ? { generate_recipe } : {}),
+          ...(post_link_affiliate !== undefined ? { post_link_affiliate } : {}),
+          ...(blueprint_id ? { blueprint_id, deconstruct_asset_id: blueprint_id } : {}),
+          ...(execution_mode ? { execution_mode } : {})
+        };
+      }
+
+      const payload = {
+        ...restArgs,
+        ...(pipelineConfigUpdate ? { pipeline_config_json: pipelineConfigUpdate } : {})
+      };
+
+      return request(`/api/v2/recipes/auto-pipeline-schedules/${encodeURIComponent(schedule_id)}`, {
+        body: payload,
+        method: 'PUT'
+      });
+    }
+  );
+
+  register(
+    'cf_toggle_schedule_pause',
+    'Pause or resume an active Auto Pipeline schedule.',
+    {
+      schedule_id: z.string().trim().min(1).max(128)
+    },
+    false,
+    ({ schedule_id }) =>
+      request(`/api/v2/recipes/auto-pipeline-schedules/${encodeURIComponent(schedule_id)}`, {
+        body: { action: 'toggle_pause' },
+        method: 'PUT'
+      })
+  );
+
+  register(
+    'cf_delete_schedule',
+    'Permanently delete an Auto Pipeline schedule.',
+    {
+      schedule_id: z.string().trim().min(1).max(128)
+    },
+    false,
+    ({ schedule_id }) =>
+      request(`/api/v2/recipes/auto-pipeline-schedules/${encodeURIComponent(schedule_id)}`, {
+        method: 'DELETE'
+      })
   );
 
   register(
@@ -692,6 +812,23 @@ export function createCfStudioServer(request) {
             .filter(([_, v]) => v !== undefined)
             .map(([k, v]) => [k, String(v)])
         )}`
+      )
+  );
+
+  register(
+    'cf_search_blueprints',
+    'Search viral deconstruction blueprints by Facebook Reel URL, TikTok URL, UUID, niche, or topic keyword to retrieve the blueprint UUID and metadata for auto pipeline schedule binding.',
+    {
+      query: z.string().trim().min(1).max(500),
+      niche: z.string().max(100).optional(),
+      limit: z.number().int().min(1).max(50).default(10)
+    },
+    true,
+    ({ query, niche, limit }) =>
+      request(
+        `/api/v2/deconstruct?assets=true&q=${encodeURIComponent(query)}&limit=${limit}${
+          niche ? `&niche=${encodeURIComponent(niche)}` : ''
+        }`
       )
   );
 

@@ -20,10 +20,10 @@ async function connected(t, request) {
   return client;
 }
 
-test('discovery of all 46 CF Studio tools across 7 studio pillars and legacy aliases', async t => {
+test('discovery of all 50 CF Studio tools across 7 studio pillars and legacy aliases', async t => {
   const client = await connected(t, async () => ({ success: true }));
   const tools = (await client.listTools()).tools;
-  assert.equal(tools.length, 46);
+  assert.equal(tools.length, 50);
 
   const toolNames = new Set(tools.map(x => x.name));
   // 6 Auto Pipeline dedicated tools
@@ -42,6 +42,9 @@ test('discovery of all 46 CF Studio tools across 7 studio pillars and legacy ali
   // Schedule management tools
   assert.ok(toolNames.has('cf_list_schedules'));
   assert.ok(toolNames.has('cf_create_schedule'));
+  assert.ok(toolNames.has('cf_update_schedule'));
+  assert.ok(toolNames.has('cf_toggle_schedule_pause'));
+  assert.ok(toolNames.has('cf_delete_schedule'));
   assert.ok(toolNames.has('cf_trigger_schedule_now'));
 
   // Discovery & status
@@ -73,6 +76,7 @@ test('discovery of all 46 CF Studio tools across 7 studio pillars and legacy ali
   // Pilar 4: Viral Deconstruction
   assert.ok(toolNames.has('cf_ingest_viral_video'));
   assert.ok(toolNames.has('cf_list_deconstructed_assets'));
+  assert.ok(toolNames.has('cf_search_blueprints'));
   assert.ok(toolNames.has('cf_get_deconstructed_blueprint'));
 
   // Pilar 5: Creative Review
@@ -201,7 +205,7 @@ test('schedule tools dispatch to /api/v2/recipes/auto-pipeline-schedules', async
   assert.ok(calls[0].path.includes('status=active'));
   assert.ok(calls[0].path.includes('pipeline_type=recipe_campaign'));
 
-  // Create schedule
+  // Create schedule with full publish accounts, recipe toggle, Shopee affiliate link, and blueprint
   await client.callTool({
     name: 'cf_create_schedule',
     arguments: {
@@ -210,19 +214,70 @@ test('schedule tools dispatch to /api/v2/recipes/auto-pipeline-schedules', async
       brand_id: 'brand-1',
       topic: 'Masakan Sehari-hari',
       generation_time: '06:00',
-      publish_time: '10:00'
+      publish_time: '10:00',
+      repliz_account_ids: ['acc_fb_1', 'acc_ig_1'],
+      generate_recipe: true,
+      post_link_affiliate: true,
+      blueprint_id: 'bp-uuid-12345',
+      execution_mode: 'full_autopilot'
     }
   });
   assert.equal(calls[1].path, '/api/v2/recipes/auto-pipeline-schedules');
   assert.equal(calls[1].opts.body.name, 'Resep Harian Pagi');
   assert.equal(calls[1].opts.body.generation_time, '06:00');
+  assert.deepEqual(calls[1].opts.body.repliz_account_ids, ['acc_fb_1', 'acc_ig_1']);
+  assert.equal(calls[1].opts.body.pipeline_config_json.generate_recipe, true);
+  assert.equal(calls[1].opts.body.pipeline_config_json.post_link_affiliate, true);
+  assert.equal(calls[1].opts.body.pipeline_config_json.blueprint_id, 'bp-uuid-12345');
+  assert.equal(calls[1].opts.body.pipeline_config_json.execution_mode, 'full_autopilot');
+
+  // Update schedule
+  await client.callTool({
+    name: 'cf_update_schedule',
+    arguments: {
+      schedule_id: 'sched-456',
+      name: 'Resep Harian Update',
+      generation_time: '07:00',
+      repliz_account_ids: ['acc_fb_updated'],
+      generate_recipe: false
+    }
+  });
+  assert.equal(calls[2].path, '/api/v2/recipes/auto-pipeline-schedules/sched-456');
+  assert.equal(calls[2].opts.method, 'PUT');
+  assert.equal(calls[2].opts.body.name, 'Resep Harian Update');
+  assert.deepEqual(calls[2].opts.body.repliz_account_ids, ['acc_fb_updated']);
+  assert.equal(calls[2].opts.body.pipeline_config_json.generate_recipe, false);
+
+  // Toggle pause schedule
+  await client.callTool({
+    name: 'cf_toggle_schedule_pause',
+    arguments: { schedule_id: 'sched-456' }
+  });
+  assert.equal(calls[3].path, '/api/v2/recipes/auto-pipeline-schedules/sched-456');
+  assert.equal(calls[3].opts.method, 'PUT');
+  assert.equal(calls[3].opts.body.action, 'toggle_pause');
+
+  // Delete schedule
+  await client.callTool({
+    name: 'cf_delete_schedule',
+    arguments: { schedule_id: 'sched-456' }
+  });
+  assert.equal(calls[4].path, '/api/v2/recipes/auto-pipeline-schedules/sched-456');
+  assert.equal(calls[4].opts.method, 'DELETE');
 
   // Trigger schedule run-now
   await client.callTool({
     name: 'cf_trigger_schedule_now',
     arguments: { schedule_id: 'sched-456' }
   });
-  assert.equal(calls[2].path, '/api/v2/recipes/auto-pipeline-schedules/sched-456/run-now');
+  assert.equal(calls[5].path, '/api/v2/recipes/auto-pipeline-schedules/sched-456/run-now');
+
+  // Search blueprints
+  await client.callTool({
+    name: 'cf_search_blueprints',
+    arguments: { query: 'https://www.facebook.com/reel/123456789' }
+  });
+  assert.ok(calls[6].path.startsWith('/api/v2/deconstruct?assets=true&q=https%3A%2F%2Fwww.facebook.com%2Freel%2F123456789'));
 });
 
 test('legacy alias makna_create_campaign preserves backward compatibility', async t => {
@@ -556,7 +611,7 @@ test('HTTP authentication, origin and host protection, real MCP handshake', asyn
       requestInit: { headers: { authorization: `Bearer ${bearerToken}` } }
     })
   );
-  assert.equal((await client.listTools()).tools.length, 46);
+  assert.equal((await client.listTools()).tools.length, 50);
   assert.equal((await client.callTool({ name: 'cf_whoami' })).isError, undefined);
   assert.equal(calls, 1);
 });

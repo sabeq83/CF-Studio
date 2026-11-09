@@ -45,8 +45,13 @@ File konfigurasi: `~/.gemini/config/mcp_config.json`
 | | `cf_create_recipe_labs_post` | Menjalankan pipeline artikel resep & komposit grid foto HD |
 | | `cf_run_auto_pipeline` | Master tool fleksibel untuk mengeksekusi tipe pipeline mana pun |
 | **Manajemen Jadwal** | `cf_list_schedules` | Melihat daftar seluruh jadwal autopipeline (active, paused, all) |
-| | `cf_create_schedule` | Mendaftarkan jadwal otomasi berkala baru ke sistem |
+| | `cf_create_schedule` | Mendaftarkan jadwal baru lengkap dengan akun Repliz, resep, affiliate, & blueprint |
+| | `cf_update_schedule` | Memperbarui jadwal (jam, preset, akun, toggle, atau status) |
+| | `cf_toggle_schedule_pause` | Menjeda (pause) atau mengaktifkan kembali (resume) jadwal |
+| | `cf_delete_schedule` | Menghapus jadwal dari sistem |
 | | `cf_trigger_schedule_now` | Memulai eksekusi on-demand suatu jadwal tanpa menunggu cron |
+| **Discovery Agent** | `cf_list_publishing_accounts` | Melihat daftar akun Facebook, IG, TikTok, YouTube terhubung via Repliz |
+| | `cf_search_blueprints` | Mencari UUID blueprint dari URL Facebook Reel/TikTok atau kata kunci |
 
 ---
 

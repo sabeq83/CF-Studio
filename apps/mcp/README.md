@@ -59,7 +59,10 @@ HTTP endpoint: `/mcp`, authenticated using `Authorization: Bearer <CF_STUDIO_MCP
 
 ### D. Schedule Management
 - `cf_list_schedules`: List recurring Auto Pipeline schedules and execution metrics.
-- `cf_create_schedule`: Create a new automated recurring schedule (e.g. daily/weekly cron).
+- `cf_create_schedule`: Create a new automated recurring schedule with target Repliz publishing accounts, recipe toggle, Shopee affiliate link, and blueprint UUID.
+- `cf_update_schedule`: Update an existing recurring Auto Pipeline schedule (modify times, preset, accounts, toggles, or status).
+- `cf_toggle_schedule_pause`: Pause or resume an active Auto Pipeline schedule.
+- `cf_delete_schedule`: Permanently delete an Auto Pipeline schedule.
 - `cf_trigger_schedule_now`: Immediately trigger an execution run for an existing schedule.
 
 ### D. Pillar 1: Product Database & Knowledge Catalog (Data Engine)
@@ -85,6 +88,7 @@ HTTP endpoint: `/mcp`, authenticated using `Authorization: Bearer <CF_STUDIO_MCP
 ### G. Pillar 4: Viral Research & Multiplier Lab (Deconstruction Engine)
 - `cf_ingest_viral_video`: Ingest viral video URL into Deconstruct Lab for AI pattern extraction.
 - `cf_list_deconstructed_assets`: Search finished deconstructed viral video blueprints.
+- `cf_search_blueprints`: Search viral blueprints by Facebook Reel URL, TikTok URL, UUID, or keyword to bind to schedules.
 - `cf_get_deconstructed_blueprint`: Get detailed viral pattern breakdown and storyboard of a deconstructed asset.
 
 ### H. Pillar 5: Creative Review & Human-in-the-Loop Co-Pilot

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Mockup: Mode 2 Native Veo Audio + Google Voice Persona</title>
+  <link rel="stylesheet" href="/theme.css">
+  <style>
+    :root {
+      --surface: #0f172a;
+      --surface-raised: #1e293b;
+      --surface-interactive: #334155;
+      --surface-subtle: #1e293b80;
+      --border-subtle: #334155;
+      --border-strong: #475569;
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --action-primary: #3b82f6;
+      --action-primary-hover: #2563eb;
+      --on-action-primary: #ffffff;
+      --status-success: #10b981;
+      --status-success-soft: #064e3b40;
+      --status-info: #0ea5e9;
+      --status-info-soft: #0c4a6e40;
+      --status-purple: #8b5cf6;
+      --status-purple-soft: #4c1d9540;
+      --status-warning: #f59e0b;
+      --status-warning-soft: #78350f40;
+      --status-danger: #ef4444;
+      --status-danger-soft: #7f1d1d40;
+      --radius-xs: 4px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    [data-theme="light"] {
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #f1f5f9;
+      --surface-subtle: #f8fafc80;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --action-primary: #2563eb;
+      --action-primary-hover: #1d4ed8;
+      --on-action-primary: #ffffff;
+      --status-success: #059669;
+      --status-success-soft: #ecfdf5;
+      --status-info: #0284c7;
+      --status-info-soft: #f0f9ff;
+      --status-purple: #7c3aed;
+      --status-purple-soft: #f5f3ff;
+      --status-warning: #d97706;
+      --status-warning-soft: #fffbeb;
+      --status-danger: #dc2626;
+      --status-danger-soft: #fef2f2;
+      --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-sans); }
+    body { background: var(--surface); color: var(--text-primary); padding: 2rem; line-height: 1.5; }
+    .container { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem; }
+    .card { background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem; }
+    .header-bar { display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.5rem; }
+    .title-group h2 { font-size: 1.35rem; font-weight: 800; color: var(--text-primary); }
+    .title-group p { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem; }
+    .theme-toggle-btn { background: var(--surface-interactive); color: var(--text-primary); border: 1px solid var(--border-subtle); padding: 0.45rem 0.9rem; border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; }
+    .theme-toggle-btn:hover { border-color: var(--border-strong); }
+
+    /* Engine Mode Selector */
+    .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.75rem; }
+    .mode-card { border: 2px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem; background: var(--surface); cursor: pointer; transition: all 0.2s ease; position: relative; }
+    .mode-card:hover { border-color: var(--action-primary); background: var(--surface-interactive); }
+    .mode-card.active { border-color: var(--action-primary); background: var(--surface-interactive); box-shadow: 0 0 0 1px var(--action-primary); }
+    .mode-card .badge-rec { position: absolute; top: 10px; right: 10px; font-size: 0.68rem; padding: 0.15rem 0.5rem; border-radius: 9999px; font-weight: 700; background: var(--status-purple-soft); color: var(--status-purple); border: 1px solid var(--status-purple); }
+    .mode-title { font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; color: var(--text-primary); }
+    .mode-desc { font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.35rem; }
+
+    /* Google Voice Personas Grid */
+    .personas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap: 0.75rem; margin-top: 0.75rem; }
+    .persona-card { border: 1.5px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.75rem; background: var(--surface); cursor: pointer; transition: all 0.15s ease; display: flex; flex-direction: column; gap: 0.3rem; }
+    .persona-card:hover { border-color: var(--action-primary); }
+    .persona-card.active { border-color: var(--action-primary); background: var(--status-info-soft); box-shadow: 0 0 0 1px var(--action-primary); }
+    .persona-top { display: flex; align-items: center; justify-content: space-between; }
+    .persona-name { font-size: 0.88rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.4rem; }
+    .persona-gender { font-size: 0.68rem; padding: 0.1rem 0.4rem; border-radius: 9999px; background: var(--surface-interactive); color: var(--text-muted); font-weight: 600; }
+    .persona-desc { font-size: 0.75rem; color: var(--text-secondary); line-height: 1.35; }
+    .persona-tag { font-size: 0.68rem; color: var(--status-info); font-weight: 600; margin-top: 0.2rem; }
+
+    /* Audio Options Toggle */
+    .toggles-row { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-subtle); }
+    .toggle-pill { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); cursor: pointer; }
+    .toggle-pill input { accent-color: var(--action-primary); width: 16px; height: 16px; cursor: pointer; }
+
+    /* Prompt Inspector */
+    .code-box { background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.85rem; font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.5; color: var(--text-primary); white-space: pre-wrap; word-break: break-word; }
+    .hl-gold { color: #f59e0b; font-weight: 700; }
+    .hl-cyan { color: #06b6d4; font-weight: 700; }
+    .hl-green { color: #10b981; font-weight: 700; }
+    .hl-purple { color: #a855f7; font-weight: 700; }
+
+    /* Pipeline Status Indicator */
+    .pipeline-flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-top: 1rem; }
+    .flow-node { background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.65rem 0.75rem; display: flex; flex-direction: column; gap: 0.2rem; }
+    .flow-step { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); }
+    .flow-val { font-size: 0.8rem; font-weight: 700; color: var(--text-primary); }
+    .flow-status { font-size: 0.72rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.3rem; margin-top: 0.25rem; }
+    .status-ok { color: var(--status-success); }
+    .status-bypassed { color: var(--status-warning); }
+
+    .btn-apply { background: var(--action-primary); color: var(--on-action-primary); border: none; padding: 0.75rem 1.5rem; border-radius: var(--radius-sm); font-size: 0.9rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; }
+    .btn-apply:hover { background: var(--action-primary-hover); }
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="container">
+    
+    <!-- Top Bar -->
+    <div class="header-bar">
+      <div class="title-group">
+        <h2>🔊 Mode 2: Native Veo 3.1 Audio Generation</h2>
+        <p>Konfigurasi pembuatan video otomatis langsung dengan audio native terintegrasi (Speech, SFX, & Ambience) tanpa Minimax TTS.</p>
+      </div>
+      <button class="theme-toggle-btn" onclick="toggleTheme()">
+        <span id="theme-icon">☀️</span> <span id="theme-label">Light Mode</span>
+      </button>
+    </div>
+
+    <!-- Section 1: Engine Mode Selection -->
+    <div class="card">
+      <div style="font-size: 0.92rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.2rem;">
+        1. Pilih Arsitektur Audio Engine
+      </div>
+      <div style="font-size: 0.8rem; color: var(--text-muted);">
+        Tentukan apakah video menggunakan TTS voiceover terpisah (Mode 1) atau audio bawaan langsung dari Google Veo 3.1 (Mode 2).
+      </div>
+
+      <div class="mode-grid">
+        <!-- Mode 1 Card -->
+        <div class="mode-card" id="card-mode-1" onclick="selectMode('minimax_tts')">
+          <div class="mode-title">
+            <span>🎙️ Mode 1: Minimax / TTS Mux</span>
+          </div>
+          <div class="mode-desc">
+            Video Veo dihasilkan dalam mode hening (<code>silent video</code>), lalu FFmpeg menggabungkan file MP3 dari Minimax/Gemini TTS.
+          </div>
+          <div style="margin-top: 0.6rem; font-size: 0.75rem; color: var(--text-muted);">
+            • Membutuhkan API Key Minimax<br>
+            • Resiko desync jika durasi TTS melebihi klip
+          </div>
+        </div>
+
+        <!-- Mode 2 Card -->
+        <div class="mode-card active" id="card-mode-2" onclick="selectMode('native_veo')">
+          <span class="badge-rec">✨ Rekomendasi Veo 3.1</span>
+          <div class="mode-title">
+            <span>🔊 Mode 2: Native Veo Audio</span>
+          </div>
+          <div class="mode-desc">
+            Veo 3.1 men-generate video dan audio tersinkron secara bersamaan (Joint Audio-Visual Diffusion). Lengkap dengan Speech, SFX, dan Ambience.
+          </div>
+          <div style="margin-top: 0.6rem; font-size: 0.75rem; color: var(--status-success);">
+            • 100% Bebas Kuota Minimax (Zero TTS overhead)<br>
+            • Sinkronisasi gerak bibir & SFX frame-accurate
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Google Voice Persona Selector (Aktif jika Mode 2 dipilih) -->
+    <div class="card" id="persona-section">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+        <div>
+          <div style="font-size: 0.92rem; font-weight: 700; color: var(--text-primary);">
+            2. Karakter Suara: Persona Resmi Google Voice
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">
+            Pilih persona Google Voice yang memandu gaya pengucapan vokal dan intonasi presenter di Veo 3.1.
+          </div>
+        </div>
+        <span style="font-size: 0.75rem; background: var(--status-info-soft); color: var(--status-info); border: 1px solid var(--status-info); padding: 0.2rem 0.6rem; border-radius: 9999px; font-weight: 700;">
+          Google Gemini Voice Engine
+        </span>
+      </div>
+
+      <div class="personas-grid" id="personas-container">
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- Detail Persona Terpilih -->
+      <div style="margin-top: 1rem; background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.85rem; display: flex; flex-direction: column; gap: 0.35rem;">
+        <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+          Vocal Direction Prompt untuk Veo 3.1:
+        </div>
+        <div id="persona-prompt-preview" style="font-size: 0.85rem; font-weight: 600; color: var(--status-info);">
+          Loading...
+        </div>
+      </div>
+
+      <!-- Toggles Tambahan -->
+      <div class="toggles-row">
+        <label class="toggle-pill">
+          <input type="checkbox" id="toggle-sfx" checked onchange="updateInspection()">
+          <span>💥 Synchronized Physical SFX (Foley, ketukan, tuangan, desis)</span>
+        </label>
+        <label class="toggle-pill">
+          <input type="checkbox" id="toggle-ambience" checked onchange="updateInspection()">
+          <span>🌿 Environment Room Tone (Ambience tenang, no echo)</span>
+        </label>
+        <label class="toggle-pill">
+          <input type="checkbox" id="toggle-anti-music" checked onchange="updateInspection()">
+          <span>🚫 Anti-Music Guardrail (Cegah Veo menambahkan musik acak)</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Section 3: Live Compilation Inspector -->
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+        <div style="font-size: 0.92rem; font-weight: 700; color: var(--text-primary);">
+          3. Live Inspector: Veo 3.1 Prompt Output
+        </div>
+        <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">
+          noSoundOverride: <span id="badge-nosound" style="color: var(--status-success); font-weight: 700;">true</span>
+        </span>
+      </div>
+
+      <div class="code-box" id="prompt-output">
+        <!-- Compiled Live Prompt Preview -->
+      </div>
+
+      <!-- Pipeline Execution Matrix -->
+      <div class="pipeline-flow">
+        <div class="flow-node">
+          <span class="flow-step">1. Naskah AI</span>
+          <span class="flow-val">Gemini 2.5 Flash</span>
+          <span class="flow-status status-ok">✓ Storyboard Ready</span>
+        </div>
+        <div class="flow-node">
+          <span class="flow-step">2. TTS Engine</span>
+          <span class="flow-val" id="flow-tts-val">Minimax API</span>
+          <span class="flow-status" id="flow-tts-status">Bypassed (0 Calls)</span>
+        </div>
+        <div class="flow-node">
+          <span class="flow-step">3. Video Generation</span>
+          <span class="flow-val">Veo 3.1 Lite (8s)</span>
+          <span class="flow-status status-ok" id="flow-glabs-status">✓ Native Sound ON</span>
+        </div>
+        <div class="flow-node">
+          <span class="flow-step">4. FFmpeg Muxer</span>
+          <span class="flow-val">Direct Stream Concat</span>
+          <span class="flow-status status-ok">✓ Audio Preserved</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Button -->
+    <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+      <button class="btn-apply" onclick="alert('Preset konfigurasi tersimpan: Mode 2 (Native Veo Audio) dengan persona ' + selectedPersona)">
+        💾 Simpan ke Preset Auto-Pipeline
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    // Data Katalog Google Voice Personas
+    const GOOGLE_PERSONAS = [
+      {
+        id: 'Kore',
+        name: 'Kore',
+        gender: 'Female',
+        avatar: '👩',
+        charDesc: 'Tenang, Lembut & Hangat',
+        tone: 'warm, calm, articulate, gentle Indonesian feminine voice with natural cadence',
+        sampleText: 'Kore speaks in a warm, calm tone, saying: "Mulai hari ini, rutinitas pagimu bisa jadi jauh lebih tenang dan teratur."'
+      },
+      {
+        id: 'Charon',
+        name: 'Charon',
+        gender: 'Male',
+        avatar: '👨',
+        charDesc: 'Dalam, Otoritatif & Berwibawa',
+        tone: 'deep, mature, authoritative, grounded masculine voice with calm clinical confidence',
+        sampleText: 'Charon speaks with deep, authoritative confidence, saying: "Fakta klinis membuktikan bahwa pola tidur teratur adalah kunci regenerasi sel."'
+      },
+      {
+        id: 'Aoede',
+        name: 'Aoede',
+        gender: 'Female',
+        avatar: '👩',
+        charDesc: 'Ekspresif, Ceria & Hangat',
+        tone: 'expressive, vibrant, cheerful, engaging female voice with dynamic inflection',
+        sampleText: 'Aoede speaks in a vibrant, engaging tone, saying: "Wah, ternyata resep smoothie sehat ini cuma butuh tiga bahan simpel aja!"'
+      },
+      {
+        id: 'Fenrir',
+        name: 'Fenrir',
+        gender: 'Male',
+        avatar: '👨',
+        charDesc: 'Berat, Sinematik & Dramatis',
+        tone: 'commanding, intense, dramatic masculine voice with deep resonant presence',
+        sampleText: 'Fenrir narrates with bold, dramatic presence, saying: "Saat energi terkuras, inilah momen pembuktian fokus sesungguhnya."'
+      },
+      {
+        id: 'Puck',
+        name: 'Puck',
+        gender: 'Male/Youth',
+        avatar: '🎭',
+        charDesc: 'Playful, Enerjik & Kasual',
+        tone: 'playful, youthful, energetic, casual modern storytelling pace',
+        sampleText: 'Puck speaks in a playful, casual delivery, saying: "Eits, jangan scroll dulu! Rahasia hack biohacking ini bakal bikin kamu kaget."'
+      },
+      {
+        id: 'Zephyr',
+        name: 'Zephyr',
+        gender: 'Male',
+        avatar: '👨',
+        charDesc: 'Cepat, Tegas & Berenergi',
+        tone: 'swift, clear, dynamic, articulate modern masculine voice',
+        sampleText: 'Zephyr speaks in a fast-paced, articulate rhythm, saying: "Tiga tips kilat produktivitas tanpa burnout yang langsung bisa kamu coba sekarang."'
+      },
+      {
+        id: 'Orus',
+        name: 'Orus',
+        gender: 'Male',
+        avatar: '👨',
+        charDesc: 'Tegas, Lugas & Berita',
+        tone: 'firm, clear, direct, professional male anchor tone',
+        sampleText: 'Orus speaks in a firm, direct anchor cadence, saying: "Informasi penting untuk Anda yang ingin beralih ke gaya hidup organik."'
+      },
+      {
+        id: 'Despina',
+        name: 'Despina',
+        gender: 'Female',
+        avatar: '👩',
+        charDesc: 'Ceria, Ramah & Tersenyum',
+        tone: 'bright, cheerful, sweet, inviting feminine voice with smiling delivery',
+        sampleText: 'Despina speaks in a sweet, welcoming cadence, saying: "Yuk bareng-bareng bikin sarapan sehat yang bikin mood seharian happy!"'
+      }
+    ];
+
+    let currentMode = 'native_veo';
+    let selectedPersona = 'Kore';
+
+    function init() {
+      renderPersonas();
+      selectPersona('Kore');
+      updateInspection();
+    }
+
+    function renderPersonas() {
+      const container = document.getElementById('personas-container');
+      container.innerHTML = GOOGLE_PERSONAS.map(p => `
+        <div class="persona-card ${p.id === selectedPersona ? 'active' : ''}" id="p-card-${p.id}" onclick="selectPersona('${p.id}')">
+          <div class="persona-top">
+            <span class="persona-name">${p.avatar} ${p.name}</span>
+            <span class="persona-gender">${p.gender}</span>
+          </div>
+          <div class="persona-desc">${p.charDesc}</div>
+          <div class="persona-tag">Google Voice ID: ${p.id}</div>
+        </div>
+      `).join('');
+    }
+
+    function selectPersona(id) {
+      selectedPersona = id;
+      document.querySelectorAll('.persona-card').forEach(el => el.classList.remove('active'));
+      const activeEl = document.getElementById(`p-card-${id}`);
+      if (activeEl) activeEl.classList.add('active');
+
+      const persona = GOOGLE_PERSONAS.find(p => p.id === id);
+      if (persona) {
+        document.getElementById('persona-prompt-preview').textContent = 
+          `"${persona.name} (Delivery: ${persona.tone})"`;
+      }
+      updateInspection();
+    }
+
+    function selectMode(mode) {
+      currentMode = mode;
+      document.getElementById('card-mode-1').classList.toggle('active', mode === 'minimax_tts');
+      document.getElementById('card-mode-2').classList.toggle('active', mode === 'native_veo');
+      
+      const personaSection = document.getElementById('persona-section');
+      if (mode === 'minimax_tts') {
+        personaSection.style.opacity = '0.45';
+        personaSection.style.pointerEvents = 'none';
+      } else {
+        personaSection.style.opacity = '1';
+        personaSection.style.pointerEvents = 'auto';
+      }
+      updateInspection();
+    }
+
+    function updateInspection() {
+      const persona = GOOGLE_PERSONAS.find(p => p.id === selectedPersona) || GOOGLE_PERSONAS[0];
+      const withSfx = document.getElementById('toggle-sfx').checked;
+      const withAmbience = document.getElementById('toggle-ambience').checked;
+      const antiMusic = document.getElementById('toggle-anti-music').checked;
+
+      const badgeNoSound = document.getElementById('badge-nosound');
+      const flowTtsVal = document.getElementById('flow-tts-val');
+      const flowTtsStatus = document.getElementById('flow-tts-status');
+      const flowGlabsStatus = document.getElementById('flow-glabs-status');
+
+      if (currentMode === 'minimax_tts') {
+        badgeNoSound.textContent = 'false (Veo disenyapkan)';
+        badgeNoSound.style.color = 'var(--status-warning)';
+        flowTtsVal.textContent = 'Minimax TTS API';
+        flowTtsStatus.textContent = 'Active (Requires API)';
+        flowTtsStatus.className = 'flow-status status-ok';
+        flowGlabsStatus.textContent = 'Silent Video Mode';
+        flowGlabsStatus.className = 'flow-status status-bypassed';
+
+        document.getElementById('prompt-output').innerHTML = 
+          `<span class="hl-gold">silent video, mute, no sound:</span> (VERTICAL 9:16) --ar 9:16 --no landscape [LAYER 1: OPTICS] Shot on 35mm lens. [LAYER 2: SUBJECT] Hands of a Muslimah in modest sage clothing preparing fresh organic ingredients in a cozy modern kitchen. [LAYER 3: ACTION] Smooth slow motion slicing of fresh citrus fruit.`;
+      } else {
+        badgeNoSound.textContent = 'true (Veo bersuara penuh)';
+        badgeNoSound.style.color = 'var(--status-success)';
+        flowTtsVal.textContent = 'Minimax TTS API';
+        flowTtsStatus.textContent = 'Bypassed (0 Calls)';
+        flowTtsStatus.className = 'flow-status status-bypassed';
+        flowGlabsStatus.textContent = '✓ Native Sound ON';
+        flowGlabsStatus.className = 'flow-status status-ok';
+
+        let audioDirectives = [];
+        audioDirectives.push(`[DIALOGUE / SPEECH] ${persona.name} speaks in ${persona.tone}, saying: "Mulai hari ini, rutinitas pagimu bisa jadi jauh lebih tenang dan berenergi."`);
+        if (withSfx) {
+          audioDirectives.push(`[SFX] Sound event: crisp knife cutting citrus on wooden chopping board with gentle natural friction; intensity natural; centered.`);
+        }
+        if (withAmbience) {
+          audioDirectives.push(`[AMBIENCE] Ambience: quiet bright modern kitchen room tone with subtle morning atmosphere.`);
+        }
+        if (antiMusic) {
+          audioDirectives.push(`Do not add background music or singing. Speech must be clean, natural, and sync with mouth movements.`);
+        }
+
+        const compiledPrompt = `(VERTICAL 9:16) --ar 9:16 --no landscape [LAYER 1: OPTICS] Shot on 35mm macro lens, organic lighting. [LAYER 2: SUBJECT] Hands of a Muslimah in modest sage clothing preparing fresh organic ingredients in a cozy modern kitchen. [LAYER 3: ACTION] Smooth slow motion slicing of fresh citrus fruit on a wooden cutting board.
+
+<span class="hl-cyan">Audio direction:</span>
+${audioDirectives.map(d => `<span class="hl-green">${d}</span>`).join('\n')}`;
+
+        document.getElementById('prompt-output').innerHTML = compiledPrompt;
+      }
+    }
+
+    function toggleTheme() {
+      const current = document.body.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', next);
+      document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+      document.getElementById('theme-label').textContent = next === 'dark' ? 'Light Mode' : 'Dark Mode';
+    }
+
+    init();
+  </script>
+</body>
+</html>
+
