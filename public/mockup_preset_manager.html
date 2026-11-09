@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Mockup: 3 Opsi Filter & Grouping Preset Manager — MAKNA Flow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* MAKNA Flow Semantic CSS Tokens (100% Theme Compatible) */
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --sidebar-w: 260px;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --link-hover: #a5f3fc;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-purple: #c084fc;
+      --status-purple-soft: rgba(192, 132, 252, 0.14);
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --input-bg: #ffffff;
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --link: #075ea8;
+      --link-hover: #064b86;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --status-purple: #8b5cf6;
+      --status-purple-soft: #f5f3ff;
+      --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.06);
+      --shadow-modal: 0 16px 48px rgba(0, 0, 0, 0.12);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* Dummy Sidebar */
+    .mock-sidebar {
+      width: var(--sidebar-w);
+      background: var(--sidebar);
+      border-right: 1px solid var(--border-subtle);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      flex-shrink: 0;
+    }
+    .brand-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-badge {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: var(--radius-xs);
+      font-weight: 600;
+    }
+    .nav-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+    .nav-item {
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: var(--transition);
+    }
+    .nav-item:hover { background: var(--surface-hover); color: var(--text-primary); }
+    .nav-item.active {
+      background: var(--surface-interactive);
+      color: var(--action-primary);
+      border: 1px solid var(--border-subtle);
+      font-weight: 600;
+    }
+
+    /* Main Container */
+    .mock-main {
+      flex: 1;
+      padding: 32px 40px;
+      overflow-y: auto;
+      max-width: 1400px;
+    }
+
+    /* Top Floating Switcher Bar */
+    .option-switcher-bar {
+      background: var(--surface-raised);
+      border: 2px solid var(--action-primary);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      box-shadow: var(--shadow-modal);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .option-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn-opt {
+      padding: 9px 16px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+    }
+    .btn-opt span { pointer-events: none; }
+    .btn-opt:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+      border-color: var(--border-strong);
+    }
+    .btn-opt.active {
+      background: var(--action-primary) !important;
+      color: var(--on-action-primary) !important;
+      border-color: var(--action-primary) !important;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(45, 212, 191, 0.35);
+    }
+
+    /* Standard Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: inherit;
+    }
+    .btn-sm { padding: 5px 10px; font-size: 0.78rem; }
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .btn-primary:hover { background: var(--action-primary-hover); }
+    .btn-secondary {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      border-color: var(--border-subtle);
+    }
+    .btn-secondary:hover { background: var(--surface-hover); border-color: var(--border-strong); }
+    .btn-danger {
+      background: var(--status-danger-soft);
+      color: var(--status-danger);
+      border-color: var(--status-danger);
+    }
+    .btn-danger:hover { background: var(--status-danger); color: var(--text-primary); }
+
+    /* Page Header */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .page-subtitle {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    /* View Panel Visibility */
+    .view-panel {
+      transition: opacity 0.2s ease;
+    }
+    .view-panel.hidden {
+      display: none !important;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 24px;
+    }
+
+    /* Option 1: Tabs & Filter Chips */
+    .tab-bar {
+      display: flex;
+      gap: 6px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 18px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+    .tab-item {
+      padding: 9px 16px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      transition: var(--transition);
+      user-select: none;
+    }
+    .tab-item span { pointer-events: none; }
+    .tab-item:hover { color: var(--text-primary); }
+    .tab-item.active {
+      color: var(--action-primary);
+      border-bottom-color: var(--action-primary);
+    }
+    .tab-count {
+      font-size: 0.72rem;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: var(--surface-interactive);
+      color: var(--text-muted);
+    }
+    .tab-item.active .tab-count {
+      background: var(--status-info-soft);
+      color: var(--action-primary);
+    }
+
+    /* Filter Toolbar */
+    .filter-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .search-box {
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      padding: 9px 14px;
+      font-size: 0.88rem;
+      font-family: inherit;
+      width: 320px;
+      outline: none;
+      transition: var(--transition);
+    }
+    .search-box:focus {
+      border-color: var(--action-primary);
+      box-shadow: 0 0 0 2px var(--status-info-soft);
+    }
+    .chip-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .chip {
+      padding: 6px 12px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+    }
+    .chip:hover { border-color: var(--border-strong); color: var(--text-primary); }
+    .chip.active {
+      background: var(--status-info-soft);
+      border-color: var(--status-info);
+      color: var(--status-info);
+    }
+
+    /* Preset Cards Grid (Option 1 & 2) */
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 16px;
+    }
+    .preset-card {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+      transition: var(--transition);
+    }
+    .preset-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-card);
+    }
+    .preset-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .preset-label {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+    .preset-key {
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: var(--radius-xs);
+      font-size: 0.72rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .badge-system {
+      background: var(--surface-raised);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+    }
+    .badge-custom {
+      background: var(--status-purple-soft);
+      color: var(--status-purple);
+      border: 1px solid var(--status-purple);
+    }
+    .badge-veo {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+    }
+    .badge-tts {
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+    }
+    .specs-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      padding: 8px 0;
+      border-top: 1px dashed var(--border-subtle);
+      border-bottom: 1px dashed var(--border-subtle);
+    }
+    .spec-chip {
+      font-size: 0.74rem;
+      color: var(--text-secondary);
+      background: var(--surface-raised);
+      padding: 2px 7px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* Option 2: Sectioned Accordion */
+    .section-box {
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      margin-bottom: 18px;
+      overflow: hidden;
+    }
+    .section-header {
+      padding: 16px 20px;
+      background: var(--surface-raised);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border-subtle);
+      transition: var(--transition);
+      user-select: none;
+    }
+    .section-header:hover {
+      background: var(--surface-hover);
+    }
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-body {
+      padding: 20px;
+      background: var(--surface);
+    }
+
+    /* Option 3: Data Table View */
+    .table-wrap {
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      overflow-x: auto;
+      background: var(--surface);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.86rem;
+    }
+    th {
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+      padding: 12px 16px;
+      font-weight: 600;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      border-bottom: 1px solid var(--border-subtle);
+      cursor: pointer;
+      user-select: none;
+    }
+    th:hover { color: var(--text-primary); }
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      vertical-align: middle;
+    }
+    tr:hover td { background: var(--surface-hover); }
+
+    /* Callout description */
+    .option-intro {
+      background: var(--surface-raised);
+      border-left: 4px solid var(--action-primary);
+      padding: 12px 16px;
+      border-radius: var(--radius-xs);
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .option-intro strong { color: var(--text-primary); }
+  </style>
+</head>
+<body>
+
+  <!-- Mock Sidebar -->
+  <aside class="mock-sidebar">
+    <div class="brand-title">
+      <span>MAKNA FLOW</span>
+      <span class="brand-badge">PRO</span>
+    </div>
+    <ul class="nav-list">
+      <li class="nav-item">📊 Dashboard</li>
+      <li class="nav-item">🎬 Strategic Studio</li>
+      <li class="nav-item">📦 Products Catalog</li>
+      <li class="nav-item">📖 Recipe Library</li>
+      <li class="nav-item active">🎛️ Preset Manager</li>
+      <li class="nav-item">⚙️ Settings</li>
+    </ul>
+    <div style="margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border-subtle);">
+      <button id="themeToggleBtn" class="btn btn-secondary btn-sm" style="width: 100%;">
+        🌓 Ganti Mode (Light/Dark)
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="mock-main">
+
+    <!-- Top Option Switcher Floating Bar -->
+    <div class="option-switcher-bar">
+      <div>
+        <div style="font-size: 0.8rem; font-weight: 700; color: var(--action-primary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">
+          Pilih Opsi Tampilan Preset:
+        </div>
+        <div style="font-size: 0.92rem; font-weight: 700; color: var(--text-primary);">
+          Klik salah satu tombol di kanan untuk berganti mode ➡️
+        </div>
+      </div>
+
+      <div class="option-buttons">
+        <button id="btnOpt1" class="btn-opt active" data-action="switch-opt" data-opt="1">
+          <span>💡 Opsi 1: Smart Tabs</span>
+        </button>
+        <button id="btnOpt2" class="btn-opt" data-action="switch-opt" data-opt="2">
+          <span>📂 Opsi 2: Accordion Sections</span>
+        </button>
+        <button id="btnOpt3" class="btn-opt" data-action="switch-opt" data-opt="3">
+          <span>📊 Opsi 3: Compact Table</span>
+        </button>
+        <button id="btnOptAll" class="btn-opt" data-action="switch-opt" data-opt="all">
+          <span>📑 Tampilkan Semua Sekaligus</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">🎛️ Preset Manager</h1>
+        <p class="page-subtitle">Kelola preset strategi kreatif &amp; video DNA terpusat untuk otomatisasi kampanye.</p>
+      </div>
+      <div>
+        <button class="btn btn-primary">+ Buat Preset Baru</button>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- CONTAINER OPSI 1: SMART TABS + FILTER CHIPS + GRID CARDS -->
+    <!-- ============================================================ -->
+    <div id="viewOption1" class="view-panel">
+      <div class="option-intro">
+        💡 <strong>Opsi 1 (Sangat Direkomendasikan):</strong> Bar tab horizontal memisahkan preset berdasarkan <em>Pipeline Kind</em> (Resep, Produk, Brand, dll.), dilengkapi filter chips real-time untuk <em>Audio Engine</em> (Native Veo vs Minimax) dan <em>Type</em> (System vs Custom).
+      </div>
+
+      <!-- Tab Bar Pipeline Kinds -->
+      <div class="tab-bar">
+        <div class="tab-item active" data-action="filter-tab" data-tab="all">
+          <span>Semua Preset</span>
+          <span class="tab-count">7</span>
+        </div>
+        <div class="tab-item" data-action="filter-tab" data-tab="recipe_campaign">
+          <span>🍲 Resep Kuliner</span>
+          <span class="tab-count">2</span>
+        </div>
+        <div class="tab-item" data-action="filter-tab" data-tab="product_campaign">
+          <span>📦 Produk E-Commerce</span>
+          <span class="tab-count">2</span>
+        </div>
+        <div class="tab-item" data-action="filter-tab" data-tab="brand_editorial">
+          <span>🎬 Brand Editorial</span>
+          <span class="tab-count">1</span>
+        </div>
+        <div class="tab-item" data-action="filter-tab" data-tab="multiplier_campaign">
+          <span>🔀 Multiplier Remix</span>
+          <span class="tab-count">1</span>
+        </div>
+        <div class="tab-item" data-action="filter-tab" data-tab="recipe_labs">
+          <span>🧪 Recipe Labs</span>
+          <span class="tab-count">1</span>
+        </div>
+      </div>
+
+      <!-- Filter Toolbar -->
+      <div class="filter-toolbar">
+        <div style="display: flex; gap: 12px; align-items: center;">
+          <input type="text" id="searchOpt1" class="search-box" placeholder="Cari nama atau key preset...">
+          <span id="counterOpt1" style="font-size: 0.82rem; color: var(--text-muted);">Menampilkan 7 preset</span>
+        </div>
+
+        <div class="chip-group">
+          <span style="font-size: 0.8rem; color: var(--text-muted); margin-right: 4px;">Audio:</span>
+          <span class="chip active" data-action="filter-audio" data-audio="all">Semua</span>
+          <span class="chip" data-action="filter-audio" data-audio="native_veo">🔊 Native Veo</span>
+          <span class="chip" data-action="filter-audio" data-audio="minimax_tts">🎙️ Minimax TTS</span>
+
+          <span style="font-size: 0.8rem; color: var(--text-muted); margin: 0 4px 0 10px;">Tipe:</span>
+          <span class="chip active" data-action="filter-type" data-type="all">Semua</span>
+          <span class="chip" data-action="filter-type" data-type="system">🔒 System</span>
+          <span class="chip" data-action="filter-type" data-type="custom">✏️ Custom</span>
+        </div>
+      </div>
+
+      <!-- Cards Grid -->
+      <div class="preset-grid" id="gridOpt1"></div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- CONTAINER OPSI 2: SECTIONED GROUPING (ACCORDION / SECTIONS) -->
+    <!-- ============================================================ -->
+    <div id="viewOption2" class="view-panel hidden">
+      <div class="option-intro">
+        📂 <strong>Opsi 2 (Sectioned Grouping):</strong> Seluruh preset dikelompokkan ke dalam kotak kategori terorganisir lengkap dengan header, counter jumlah preset, dan kemampuan buka/tutup (<em>collapsible</em>).
+      </div>
+
+      <!-- Section: Resep Kuliner -->
+      <div class="section-box">
+        <div class="section-header" data-action="toggle-section">
+          <div class="section-title">
+            <span>🍲 Resep Kuliner &amp; Food Reels</span>
+            <span class="badge badge-custom" style="font-size: 0.72rem;">2 Preset</span>
+          </div>
+          <span class="toggle-icon" style="font-size: 0.9rem; color: var(--text-muted);">▼</span>
+        </div>
+        <div class="section-body">
+          <div class="preset-grid" id="gridSectionRecipe"></div>
+        </div>
+      </div>
+
+      <!-- Section: Produk E-Commerce -->
+      <div class="section-box">
+        <div class="section-header" data-action="toggle-section">
+          <div class="section-title">
+            <span>📦 Produk E-Commerce &amp; Affiliate</span>
+            <span class="badge badge-custom" style="font-size: 0.72rem;">2 Preset</span>
+          </div>
+          <span class="toggle-icon" style="font-size: 0.9rem; color: var(--text-muted);">▼</span>
+        </div>
+        <div class="section-body">
+          <div class="preset-grid" id="gridSectionProduct"></div>
+        </div>
+      </div>
+
+      <!-- Section: Brand Editorial -->
+      <div class="section-box">
+        <div class="section-header" data-action="toggle-section">
+          <div class="section-title">
+            <span>🎬 Brand Editorial &amp; Storytelling</span>
+            <span class="badge badge-custom" style="font-size: 0.72rem;">1 Preset</span>
+          </div>
+          <span class="toggle-icon" style="font-size: 0.9rem; color: var(--text-muted);">▼</span>
+        </div>
+        <div class="section-body">
+          <div class="preset-grid" id="gridSectionBrand"></div>
+        </div>
+      </div>
+
+      <!-- Section: Multiplier & Recipe Labs -->
+      <div class="section-box">
+        <div class="section-header" data-action="toggle-section">
+          <div class="section-title">
+            <span>🔀 Multiplier &amp; Recipe Labs</span>
+            <span class="badge badge-custom" style="font-size: 0.72rem;">2 Preset</span>
+          </div>
+          <span class="toggle-icon" style="font-size: 0.9rem; color: var(--text-muted);">▼</span>
+        </div>
+        <div class="section-body">
+          <div class="preset-grid" id="gridSectionMisc"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- CONTAINER OPSI 3: COMPACT DATA TABLE VIEW -->
+    <!-- ============================================================ -->
+    <div id="viewOption3" class="view-panel hidden">
+      <div class="option-intro">
+        📊 <strong>Opsi 3 (Compact Data Table):</strong> Tampilan tabel proporsional yang memuat informasi preset secara padat, dapat diurutkan (sortable), dan cocok saat jumlah preset sudah mencapai puluhan.
+      </div>
+
+      <div class="filter-toolbar">
+        <input type="text" id="searchOpt3" class="search-box" placeholder="Filter di dalam tabel...">
+        <div style="font-size: 0.85rem; color: var(--text-muted);">
+          Klik header kolom bertanda ⇅ untuk mengurutkan (A-Z)
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table id="tableOpt3">
+          <thead>
+            <tr>
+              <th style="width: 28%;" data-action="sort-table" data-col="0">Nama Preset &amp; Key ⇅</th>
+              <th style="width: 18%;" data-action="sort-table" data-col="1">Pipeline Kind ⇅</th>
+              <th style="width: 18%;" data-action="sort-table" data-col="2">Audio Engine ⇅</th>
+              <th style="width: 18%;">Video Specs</th>
+              <th style="width: 8%;">Tipe</th>
+              <th style="width: 10%; text-align: center;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyOpt3"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // Data Presets Simulasi
+    const presetsData = [
+      {
+        key: 'recipe_campaign',
+        label: 'Recipe Campaign Default',
+        campaign_kinds: ['recipe_campaign'],
+        kind_label: 'Resep Kuliner',
+        audio_engine: 'native_veo',
+        persona: 'Puck',
+        is_system: true,
+        model: 'Omni Flash',
+        style: 'Food Porn',
+        ratio: '9:16',
+        clips: '4 Clips (8s)'
+      },
+      {
+        key: 'recipe_kuliner_veo_kore',
+        label: 'Resep Kuliner Veo Kore (Custom)',
+        campaign_kinds: ['recipe_campaign'],
+        kind_label: 'Resep Kuliner',
+        audio_engine: 'native_veo',
+        persona: 'Kore',
+        is_system: false,
+        model: 'Veo 3.1 Lite',
+        style: 'Food Porn',
+        ratio: '9:16',
+        clips: '4 Clips (8s)'
+      },
+      {
+        key: 'product_campaign',
+        label: 'Product Campaign Default',
+        campaign_kinds: ['product_campaign'],
+        kind_label: 'Produk E-Commerce',
+        audio_engine: 'minimax_tts',
+        persona: 'Anchor Pro',
+        is_system: true,
+        model: 'Veo 3.1 Lite',
+        style: 'UGC Unboxing',
+        ratio: '9:16',
+        clips: '4 Clips (8s)'
+      },
+      {
+        key: 'product_gadget_showcase',
+        label: 'Product Gadget High-Tech',
+        campaign_kinds: ['product_campaign'],
+        kind_label: 'Produk E-Commerce',
+        audio_engine: 'minimax_tts',
+        persona: 'Commercial VV2',
+        is_system: false,
+        model: 'Veo 3.1 Lite',
+        style: 'Cinematic Modern',
+        ratio: '9:16',
+        clips: '5 Clips (8s)'
+      },
+      {
+        key: 'brand_editorial_campaign',
+        label: 'Brand Editorial Campaign',
+        campaign_kinds: ['brand_editorial'],
+        kind_label: 'Brand Editorial',
+        audio_engine: 'minimax_tts',
+        persona: 'Anchor Pro',
+        is_system: true,
+        model: 'Veo 3.1 Lite',
+        style: 'Cinematic Story',
+        ratio: '9:16',
+        clips: '4 Clips (8s)'
+      },
+      {
+        key: 'multiplier_deconstruct_remix',
+        label: 'Multiplier Deconstruct Remix',
+        campaign_kinds: ['multiplier_campaign'],
+        kind_label: 'Multiplier Remix',
+        audio_engine: 'minimax_tts',
+        persona: 'Anchor Pro',
+        is_system: true,
+        model: 'Veo 3.1 Lite',
+        style: 'Realistic',
+        ratio: '9:16',
+        clips: '4 Clips (8s)'
+      },
+      {
+        key: 'recipe_labs_editorial_food',
+        label: 'Recipe Labs Editorial Food',
+        campaign_kinds: ['recipe_labs'],
+        kind_label: 'Recipe Labs',
+        audio_engine: 'none',
+        persona: '-',
+        is_system: true,
+        model: 'FLUX.1 Pro',
+        style: 'Food Porn Clean',
+        ratio: '1:1',
+        clips: 'Teks & Foto'
+      }
+    ];
+
+    // State Filter Opsi 1
+    let activeTab = 'all';
+    let activeAudio = 'all';
+    let activeType = 'all';
+    let searchQuery1 = '';
+
+    // Switch Option View (Supports 1, 2, 3, or 'all')
+    function switchOption(opt) {
+      const v1 = document.getElementById('viewOption1');
+      const v2 = document.getElementById('viewOption2');
+      const v3 = document.getElementById('viewOption3');
+
+      document.querySelectorAll('.btn-opt').forEach(b => b.classList.remove('active'));
+
+      if (opt === 'all') {
+        v1.classList.remove('hidden');
+        v2.classList.remove('hidden');
+        v3.classList.remove('hidden');
+        document.getElementById('btnOptAll').classList.add('active');
+      } else {
+        v1.classList.add('hidden');
+        v2.classList.add('hidden');
+        v3.classList.add('hidden');
+
+        if (opt === '1' || opt === 1) {
+          v1.classList.remove('hidden');
+          document.getElementById('btnOpt1').classList.add('active');
+        } else if (opt === '2' || opt === 2) {
+          v2.classList.remove('hidden');
+          document.getElementById('btnOpt2').classList.add('active');
+        } else if (opt === '3' || opt === 3) {
+          v3.classList.remove('hidden');
+          document.getElementById('btnOpt3').classList.add('active');
+        }
+      }
+    }
+    window.switchOption = switchOption;
+
+    // Helper Card HTML
+    function createCardHtml(p) {
+      return `
+        <div class="preset-card">
+          <div>
+            <div class="preset-card-header">
+              <div>
+                <div class="preset-label">${p.label}</div>
+                <div class="preset-key">Key: <code>${p.key}</code></div>
+              </div>
+              <span class="badge ${p.is_system ? 'badge-system' : 'badge-custom'}">
+                ${p.is_system ? '🔒 System' : '✏️ Custom'}
+              </span>
+            </div>
+
+            <div style="display: flex; gap: 6px; margin: 12px 0 10px 0; flex-wrap: wrap;">
+              <span class="badge" style="background: var(--status-info-soft); color: var(--status-info); border: 1px solid var(--status-info);">
+                ${p.kind_label}
+              </span>
+              ${p.audio_engine === 'native_veo' ? `
+                <span class="badge badge-veo">
+                  🔊 Native Veo [${p.persona}]
+                </span>
+              ` : p.audio_engine === 'minimax_tts' ? `
+                <span class="badge badge-tts">
+                  🎙️ Minimax [${p.persona}]
+                </span>
+              ` : `
+                <span class="badge" style="background: var(--surface-raised); color: var(--text-muted);">
+                  📄 Teks & Foto
+                </span>
+              `}
+            </div>
+
+            <div class="specs-row">
+              <span class="spec-chip">📐 ${p.ratio}</span>
+              <span class="spec-chip">🎥 ${p.model}</span>
+              <span class="spec-chip">✨ ${p.style}</span>
+              <span class="spec-chip">⏱️ ${p.clips}</span>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px;">
+            ${!p.is_system ? `<button class="btn btn-secondary btn-sm">Edit</button>` : ''}
+            <button class="btn btn-secondary btn-sm">Clone</button>
+            ${!p.is_system ? `<button class="btn btn-danger btn-sm">Delete</button>` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    // Render Cards in Option 1
+    function renderOption1() {
+      const grid = document.getElementById('gridOpt1');
+      if (!grid) return;
+      const filtered = presetsData.filter(p => {
+        const matchTab = activeTab === 'all' || p.campaign_kinds.includes(activeTab);
+        const matchAudio = activeAudio === 'all' || 
+          (activeAudio === 'native_veo' && p.audio_engine === 'native_veo') ||
+          (activeAudio === 'minimax_tts' && p.audio_engine === 'minimax_tts');
+        const matchType = activeType === 'all' || 
+          (activeType === 'system' && p.is_system) ||
+          (activeType === 'custom' && !p.is_system);
+        const matchSearch = !searchQuery1 || 
+          p.label.toLowerCase().includes(searchQuery1.toLowerCase()) ||
+          p.key.toLowerCase().includes(searchQuery1.toLowerCase());
+
+        return matchTab && matchAudio && matchType && matchSearch;
+      });
+
+      const counter = document.getElementById('counterOpt1');
+      if (counter) counter.innerText = `Menampilkan ${filtered.length} dari ${presetsData.length} preset`;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '<div style="grid-column: 1/-1; padding: 30px; text-align: center; color: var(--text-muted); background: var(--surface-raised); border-radius: 8px;">Tidak ada preset yang cocok dengan filter.</div>';
+        return;
+      }
+
+      grid.innerHTML = filtered.map(p => createCardHtml(p)).join('');
+    }
+
+    // Render Option 2 (Sectioned)
+    function renderOption2() {
+      const r = document.getElementById('gridSectionRecipe');
+      const p = document.getElementById('gridSectionProduct');
+      const b = document.getElementById('gridSectionBrand');
+      const m = document.getElementById('gridSectionMisc');
+      if (r) r.innerHTML = presetsData.filter(x => x.campaign_kinds.includes('recipe_campaign')).map(createCardHtml).join('');
+      if (p) p.innerHTML = presetsData.filter(x => x.campaign_kinds.includes('product_campaign')).map(createCardHtml).join('');
+      if (b) b.innerHTML = presetsData.filter(x => x.campaign_kinds.includes('brand_editorial')).map(createCardHtml).join('');
+      if (m) m.innerHTML = presetsData.filter(x => x.campaign_kinds.includes('multiplier_campaign') || x.campaign_kinds.includes('recipe_labs')).map(createCardHtml).join('');
+    }
+
+    // Render Option 3 (Table)
+    function renderOption3(data = presetsData) {
+      const tbody = document.getElementById('tbodyOpt3');
+      if (!tbody) return;
+      tbody.innerHTML = data.map(p => `
+        <tr>
+          <td>
+            <strong style="color: var(--text-primary); font-size: 0.95rem;">${p.label}</strong>
+            <div style="font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-muted); margin-top: 2px;">
+              <code>${p.key}</code>
+            </div>
+          </td>
+          <td>
+            <span class="badge" style="background: var(--status-info-soft); color: var(--status-info); border: 1px solid var(--status-info);">
+              ${p.kind_label}
+            </span>
+          </td>
+          <td>
+            ${p.audio_engine === 'native_veo' ? `
+              <span class="badge badge-veo">🔊 Native Veo [${p.persona}]</span>
+            ` : p.audio_engine === 'minimax_tts' ? `
+              <span class="badge badge-tts">🎙️ Minimax [${p.persona}]</span>
+            ` : `
+              <span style="font-size: 0.8rem; color: var(--text-muted);">None</span>
+            `}
+          </td>
+          <td>
+            <span style="font-size: 0.8rem; color: var(--text-secondary);">
+              ${p.model} · ${p.ratio} · ${p.style}
+            </span>
+          </td>
+          <td>
+            <span class="badge ${p.is_system ? 'badge-system' : 'badge-custom'}">
+              ${p.is_system ? 'System' : 'Custom'}
+            </span>
+          </td>
+          <td style="text-align: center;">
+            <div style="display: inline-flex; gap: 6px;">
+              ${!p.is_system ? `<button class="btn btn-secondary btn-sm">Edit</button>` : ''}
+              <button class="btn btn-secondary btn-sm">Clone</button>
+              ${!p.is_system ? `<button class="btn btn-danger btn-sm">Del</button>` : ''}
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    let sortAsc = true;
+    function sortTable(colIndex) {
+      sortAsc = !sortAsc;
+      const sorted = [...presetsData].sort((a, b) => {
+        let valA = colIndex === 0 ? a.label : colIndex === 1 ? a.kind_label : a.audio_engine;
+        let valB = colIndex === 0 ? b.label : colIndex === 1 ? b.kind_label : b.audio_engine;
+        return sortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+      });
+      renderOption3(sorted);
+    }
+
+    // Global Event Delegation (Guaranteed Clickability)
+    document.addEventListener('click', (e) => {
+      // 1. Switch Option Buttons
+      const optBtn = e.target.closest('[data-action="switch-opt"]');
+      if (optBtn) {
+        const opt = optBtn.getAttribute('data-opt');
+        switchOption(opt);
+        return;
+      }
+
+      // 2. Tab Filter
+      const tabItem = e.target.closest('[data-action="filter-tab"]');
+      if (tabItem) {
+        activeTab = tabItem.getAttribute('data-tab');
+        document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+        tabItem.classList.add('active');
+        renderOption1();
+        return;
+      }
+
+      // 3. Audio Filter Chip
+      const audioChip = e.target.closest('[data-action="filter-audio"]');
+      if (audioChip) {
+        activeAudio = audioChip.getAttribute('data-audio');
+        audioChip.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        audioChip.classList.add('active');
+        renderOption1();
+        return;
+      }
+
+      // 4. Type Filter Chip
+      const typeChip = e.target.closest('[data-action="filter-type"]');
+      if (typeChip) {
+        activeType = typeChip.getAttribute('data-type');
+        typeChip.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        typeChip.classList.add('active');
+        renderOption1();
+        return;
+      }
+
+      // 5. Section Toggle
+      const secHeader = e.target.closest('[data-action="toggle-section"]');
+      if (secHeader) {
+        const body = secHeader.nextElementSibling;
+        const icon = secHeader.querySelector('.toggle-icon');
+        if (body.style.display === 'none') {
+          body.style.display = 'block';
+          if (icon) icon.innerText = '▼';
+        } else {
+          body.style.display = 'none';
+          if (icon) icon.innerText = '▶';
+        }
+        return;
+      }
+
+      // 6. Sort Table Header
+      const thSort = e.target.closest('[data-action="sort-table"]');
+      if (thSort) {
+        const col = parseInt(thSort.getAttribute('data-col'), 10);
+        sortTable(col);
+        return;
+      }
+    });
+
+    // Search inputs
+    const search1 = document.getElementById('searchOpt1');
+    if (search1) {
+      search1.addEventListener('input', (e) => {
+        searchQuery1 = e.target.value.trim();
+        renderOption1();
+      });
+    }
+
+    const search3 = document.getElementById('searchOpt3');
+    if (search3) {
+      search3.addEventListener('input', (e) => {
+        const q = e.target.value.toLowerCase();
+        const filtered = presetsData.filter(p => 
+          p.label.toLowerCase().includes(q) || 
+          p.key.toLowerCase().includes(q) || 
+          p.kind_label.toLowerCase().includes(q)
+        );
+        renderOption3(filtered);
+      });
+    }
+
+    // Theme Switcher
+    const themeBtn = document.getElementById('themeToggleBtn');
+    if (themeBtn) {
+      let currentTheme = 'dark';
+      themeBtn.addEventListener('click', () => {
+        currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+      });
+    }
+
+    // Initialize all views
+    renderOption1();
+    renderOption2();
+    renderOption3();
+  </script>
+</body>
+</html>

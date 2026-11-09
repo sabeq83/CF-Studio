@@ -259,6 +259,15 @@ function mapFormToPayload(f) {
   };
 }
 
+const TABS_CONFIG = [
+  { id: 'all', label: 'Semua Preset' },
+  { id: 'recipe_campaign', label: '🍲 Resep Kuliner' },
+  { id: 'product_campaign', label: '📦 Produk E-Commerce' },
+  { id: 'brand_editorial', label: '🎬 Brand Editorial' },
+  { id: 'multiplier_campaign', label: '🔀 Multiplier Remix' },
+  { id: 'recipe_labs', label: '🧪 Recipe Labs' }
+];
+
 export default function PresetsPage() {
   const [presets, setPresets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -269,6 +278,12 @@ export default function PresetsPage() {
   const [isNew, setIsNew] = useState(true);
   const [busy, setBusy] = useState(false);
   const [activeAccordion, setActiveAccordion] = useState(0); // 0 to 4
+
+  // Filter States (Opsi 1: Smart Tabs & Chips)
+  const [activeTab, setActiveTab] = useState('all');
+  const [audioFilter, setAudioFilter] = useState('all'); // 'all', 'native_veo', 'minimax_tts'
+  const [typeFilter, setTypeFilter] = useState('all'); // 'all', 'system', 'custom'
+  const [searchQuery, setSearchQuery] = useState('');
 
   async function load() {
     setLoading(true);
@@ -369,6 +384,44 @@ export default function PresetsPage() {
 
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
 
+  // Computed Tab Counts
+  const tabCounts = {
+    all: presets.length,
+    recipe_campaign: presets.filter(p => (p.campaign_kinds || []).includes('recipe_campaign')).length,
+    product_campaign: presets.filter(p => (p.campaign_kinds || []).includes('product_campaign')).length,
+    brand_editorial: presets.filter(p => (p.campaign_kinds || []).includes('brand_editorial')).length,
+    multiplier_campaign: presets.filter(p => (p.campaign_kinds || []).includes('multiplier_campaign')).length,
+    recipe_labs: presets.filter(p => (p.campaign_kinds || []).includes('recipe_labs')).length
+  };
+
+  // Computed Filtered Presets
+  const filteredPresets = presets.filter(p => {
+    // 1. Tab filter
+    if (activeTab !== 'all' && !(p.campaign_kinds || []).includes(activeTab)) {
+      return false;
+    }
+
+    // 2. Audio Engine filter
+    const audioMode = p.config?.workflow?.audio_engine_mode || p.config?.basic_strategy?.audio_engine_mode || 'minimax_tts';
+    if (audioFilter === 'native_veo' && audioMode !== 'native_veo') return false;
+    if (audioFilter === 'minimax_tts' && audioMode === 'native_veo') return false;
+
+    // 3. Type filter
+    if (typeFilter === 'system' && !p.is_system) return false;
+    if (typeFilter === 'custom' && p.is_system) return false;
+
+    // 4. Search Query
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      const matchLabel = (p.label || '').toLowerCase().includes(q);
+      const matchKey = (p.key || '').toLowerCase().includes(q);
+      const matchKind = (p.campaign_kinds || []).some(k => k.toLowerCase().includes(q));
+      if (!matchLabel && !matchKey && !matchKind) return false;
+    }
+
+    return true;
+  });
+
   return (
     <div className="app-layout">
       <Sidebar />
@@ -393,47 +446,315 @@ export default function PresetsPage() {
         {loading ? (
           <p>Memuat preset...</p>
         ) : !editMode ? (
-          /* List View */
-          <div className="card" style={{ padding: 20 }}>
-            <h2 style={{ marginTop: 0, marginBottom: 16 }}>Daftar Preset OPC</h2>
-            {presets.length === 0 ? (
-              <p>Belum ada preset. Klik Create Preset untuk membuat baru.</p>
-            ) : (
-              <div style={{ display: 'grid', gap: 12 }}>
-                {presets.map(p => (
-                  <div key={p.key} style={{ padding: 16, border: '1px solid var(--border-color)', borderRadius: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-interactive)' }}>
-                    <div>
-                      <strong style={{ fontSize: '1.05rem', color: 'var(--text-primary)' }}>{p.label}</strong>
-                      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
-                        Key: <code style={{ color: 'var(--accent-color)' }}>{p.key}</code> · Revision: {p.revision} · Type: {p.is_system ? 'System (Read-only)' : 'Custom'}
-                      </div>
-                      <div style={{display:'flex',gap:6,marginTop:7,flexWrap:'wrap',alignItems:'center'}}>
-                        {(p.campaign_kinds||[]).map(kind=><span key={kind} style={{fontSize:11,padding:'3px 7px',borderRadius:12,background:'var(--status-info-soft)'}}>{kind==='product_campaign'?'Product Campaign':kind==='recipe_campaign'?'Recipe Campaign':'Brand Editorial'}</span>)}
-                        {(p.config?.workflow?.audio_engine_mode === 'native_veo' || p.config?.basic_strategy?.audio_engine_mode === 'native_veo') ? (
-                          <span style={{fontSize:11,padding:'3px 7px',borderRadius:12,background:'var(--status-success-soft)',color:'var(--status-success)',fontWeight:600}}>
-                            🔊 Native Veo [{(p.config?.workflow?.google_voice_persona || p.config?.basic_strategy?.google_voice_persona || 'Kore')}]
-                          </span>
-                        ) : (
-                          <span style={{fontSize:11,padding:'3px 7px',borderRadius:12,background:'var(--surface-subtle)',color:'var(--text-muted)'}}>
-                            🎙️ Minimax TTS
-                          </span>
-                        )}
-                        {p.campaign_kinds_source==='inferred'&&<span style={{fontSize:11,color:'var(--warning)'}}>⚠ Inferred — Edit & Save untuk konfirmasi</span>}
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      {p.is_system ? (
-                        isAdmin && <button className="btn btn-secondary btn-sm" onClick={() => handleClone(p)}>Clone</button>
-                      ) : (
-                        <>
-                          {isAdmin && <button className="btn btn-secondary btn-sm" onClick={() => handleEdit(p)}>Edit</button>}
-                          <button className="btn btn-secondary btn-sm" onClick={() => handleClone(p)}>Clone</button>
-                          {isAdmin && <button className="btn btn-danger btn-sm" onClick={() => handleDelete(p.key)}>Delete</button>}
-                        </>
-                      )}
-                    </div>
+          /* List View Modern (Opsi 1: Tabs + Toolbar + Rich Cards Grid) */
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+            {/* 1. Horizontal Tab Bar (Pipeline Kind) */}
+            <div style={{
+              display: 'flex',
+              gap: '6px',
+              borderBottom: '1px solid var(--border-subtle)',
+              overflowX: 'auto',
+              paddingBottom: '2px'
+            }}>
+              {TABS_CONFIG.map(tab => {
+                const isActive = activeTab === tab.id;
+                return (
+                  <div
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    style={{
+                      padding: '9px 16px',
+                      fontSize: '0.88rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      whiteSpace: 'nowrap',
+                      borderBottom: isActive ? '2px solid var(--action-primary)' : '2px solid transparent',
+                      color: isActive ? 'var(--action-primary)' : 'var(--text-secondary)',
+                      transition: 'all 0.15s ease',
+                      userSelect: 'none'
+                    }}
+                  >
+                    <span>{tab.label}</span>
+                    <span style={{
+                      fontSize: '0.72rem',
+                      padding: '2px 7px',
+                      borderRadius: 999,
+                      backgroundColor: isActive ? 'var(--status-info-soft)' : 'var(--surface-interactive)',
+                      color: isActive ? 'var(--action-primary)' : 'var(--text-muted)'
+                    }}>
+                      {tabCounts[tab.id] || 0}
+                    </span>
                   </div>
-                ))}
+                );
+              })}
+            </div>
+
+            {/* 2. Toolbar Filter & Search */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: '14px',
+              flexWrap: 'wrap'
+            }}>
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="Cari nama atau key preset..."
+                  style={{
+                    width: '280px',
+                    padding: '8px 14px',
+                    backgroundColor: 'var(--input-bg)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-sm)',
+                    color: 'var(--text-primary)',
+                    fontSize: '13px'
+                  }}
+                />
+                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                  Menampilkan {filteredPresets.length} dari {presets.length} preset
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Audio:</span>
+                {[
+                  { id: 'all', label: 'Semua' },
+                  { id: 'native_veo', label: '🔊 Native Veo' },
+                  { id: 'minimax_tts', label: '🎙️ Minimax' }
+                ].map(item => {
+                  const active = audioFilter === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setAudioFilter(item.id)}
+                      style={{
+                        padding: '4px 10px',
+                        fontSize: '11.5px',
+                        fontWeight: 600,
+                        borderRadius: 999,
+                        border: '1px solid',
+                        borderColor: active ? 'var(--status-info)' : 'var(--border-subtle)',
+                        backgroundColor: active ? 'var(--status-info-soft)' : 'var(--surface-raised)',
+                        color: active ? 'var(--status-info)' : 'var(--text-secondary)',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      {item.label}
+                    </button>
+                  );
+                })}
+
+                <span style={{ fontSize: '12px', color: 'var(--text-muted)', marginLeft: '10px' }}>Tipe:</span>
+                {[
+                  { id: 'all', label: 'Semua' },
+                  { id: 'system', label: '🔒 System' },
+                  { id: 'custom', label: '✏️ Custom' }
+                ].map(item => {
+                  const active = typeFilter === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setTypeFilter(item.id)}
+                      style={{
+                        padding: '4px 10px',
+                        fontSize: '11.5px',
+                        fontWeight: 600,
+                        borderRadius: 999,
+                        border: '1px solid',
+                        borderColor: active ? 'var(--status-info)' : 'var(--border-subtle)',
+                        backgroundColor: active ? 'var(--status-info-soft)' : 'var(--surface-raised)',
+                        color: active ? 'var(--status-info)' : 'var(--text-secondary)',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 3. Rich Preset Cards Grid */}
+            {filteredPresets.length === 0 ? (
+              <div className="card" style={{ padding: '36px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                <div style={{ fontSize: '28px', marginBottom: '8px' }}>🔍</div>
+                <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px' }}>
+                  Tidak ada preset yang cocok dengan filter
+                </div>
+                <p style={{ margin: 0, fontSize: '12.5px' }}>
+                  Coba sesuaikan kata kunci pencarian atau ganti pilihan tab/chip di atas.
+                </p>
+                {(searchQuery || activeTab !== 'all' || audioFilter !== 'all' || typeFilter !== 'all') && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery('');
+                      setActiveTab('all');
+                      setAudioFilter('all');
+                      setTypeFilter('all');
+                    }}
+                    className="btn btn-secondary btn-sm"
+                    style={{ marginTop: '14px' }}
+                  >
+                    Reset Semua Filter
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))',
+                gap: '16px'
+              }}>
+                {filteredPresets.map(p => {
+                  const config = p.config || {};
+                  const audioMode = config.workflow?.audio_engine_mode || config.basic_strategy?.audio_engine_mode || 'minimax_tts';
+                  const persona = config.workflow?.google_voice_persona || config.basic_strategy?.google_voice_persona || 'Kore';
+                  const model = config.visual_engine?.video_model || 'veo_31_lite';
+                  const style = config.visual_engine?.visual_style || 'Cinematic';
+                  const ratio = config.visual_engine?.aspect_ratio || '9:16';
+                  const clips = config.visual_engine?.target_clips_count || 4;
+
+                  return (
+                    <div
+                      key={p.key}
+                      style={{
+                        backgroundColor: 'var(--surface-interactive)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-sm)',
+                        padding: '18px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        gap: '14px',
+                        boxShadow: 'var(--shadow-card)',
+                        transition: 'transform 0.15s ease, border-color 0.15s ease'
+                      }}
+                    >
+                      <div>
+                        {/* Header: Label, Key, System/Custom Badge */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px' }}>
+                          <div>
+                            <strong style={{ fontSize: '1.02rem', color: 'var(--text-primary)', lineHeight: 1.3 }}>
+                              {p.label}
+                            </strong>
+                            <div style={{ fontSize: '11.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', marginTop: '3px' }}>
+                              Key: <code>{p.key}</code> · Rev: {p.revision}
+                            </div>
+                          </div>
+                          <span style={{
+                            fontSize: '11px',
+                            fontWeight: 600,
+                            padding: '2px 8px',
+                            borderRadius: 'var(--radius-xs)',
+                            backgroundColor: p.is_system ? 'var(--surface-raised)' : 'var(--status-purple-soft)',
+                            color: p.is_system ? 'var(--text-muted)' : 'var(--status-purple)',
+                            border: `1px solid ${p.is_system ? 'var(--border-subtle)' : 'var(--status-purple)'}`,
+                            whiteSpace: 'nowrap'
+                          }}>
+                            {p.is_system ? '🔒 System' : '✏️ Custom'}
+                          </span>
+                        </div>
+
+                        {/* Badges: Campaign Kind & Audio Engine */}
+                        <div style={{ display: 'flex', gap: '6px', margin: '12px 0 10px 0', flexWrap: 'wrap', alignItems: 'center' }}>
+                          {(p.campaign_kinds || []).map(kind => (
+                            <span
+                              key={kind}
+                              style={{
+                                fontSize: '11px',
+                                padding: '2px 7px',
+                                borderRadius: 'var(--radius-xs)',
+                                backgroundColor: 'var(--status-info-soft)',
+                                color: 'var(--status-info)',
+                                border: '1px solid var(--status-info)'
+                              }}
+                            >
+                              {kind === 'product_campaign' ? '📦 Produk' : kind === 'recipe_campaign' ? '🍲 Resep Kuliner' : kind === 'multiplier_campaign' ? '🔀 Multiplier' : kind === 'recipe_labs' ? '🧪 Recipe Labs' : '🎬 Brand Editorial'}
+                            </span>
+                          ))}
+
+                          {audioMode === 'native_veo' ? (
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 600,
+                              padding: '2px 7px',
+                              borderRadius: 'var(--radius-xs)',
+                              backgroundColor: 'var(--status-success-soft)',
+                              color: 'var(--status-success)',
+                              border: '1px solid var(--status-success)'
+                            }}>
+                              🔊 Native Veo [{persona}]
+                            </span>
+                          ) : (
+                            <span style={{
+                              fontSize: '11px',
+                              padding: '2px 7px',
+                              borderRadius: 'var(--radius-xs)',
+                              backgroundColor: 'var(--surface-raised)',
+                              color: 'var(--text-secondary)',
+                              border: '1px solid var(--border-subtle)'
+                            }}>
+                              🎙️ Minimax TTS
+                            </span>
+                          )}
+
+                          {p.campaign_kinds_source === 'inferred' && (
+                            <span style={{ fontSize: '11px', color: 'var(--status-warning)' }}>
+                              ⚠ Inferred
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Specs Row */}
+                        <div style={{
+                          display: 'flex',
+                          gap: '6px',
+                          flexWrap: 'wrap',
+                          padding: '8px 0',
+                          borderTop: '1px dashed var(--border-subtle)',
+                          borderBottom: '1px dashed var(--border-subtle)'
+                        }}>
+                          <span style={{ fontSize: '11px', color: 'var(--text-secondary)', background: 'var(--surface-raised)', padding: '2px 6px', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border-subtle)' }}>
+                            📐 {ratio}
+                          </span>
+                          <span style={{ fontSize: '11px', color: 'var(--text-secondary)', background: 'var(--surface-raised)', padding: '2px 6px', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border-subtle)' }}>
+                            🎥 {model}
+                          </span>
+                          <span style={{ fontSize: '11px', color: 'var(--text-secondary)', background: 'var(--surface-raised)', padding: '2px 6px', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border-subtle)' }}>
+                            ✨ {style}
+                          </span>
+                          <span style={{ fontSize: '11px', color: 'var(--text-secondary)', background: 'var(--surface-raised)', padding: '2px 6px', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border-subtle)' }}>
+                            ⏱️ {clips} clips
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '6px' }}>
+                        {p.is_system ? (
+                          isAdmin && <button className="btn btn-secondary btn-sm" onClick={() => handleClone(p)}>Clone</button>
+                        ) : (
+                          <>
+                            {isAdmin && <button className="btn btn-secondary btn-sm" onClick={() => handleEdit(p)}>Edit</button>}
+                            <button className="btn btn-secondary btn-sm" onClick={() => handleClone(p)}>Clone</button>
+                            {isAdmin && <button className="btn btn-danger btn-sm" onClick={() => handleDelete(p.key)}>Delete</button>}
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>

@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.40.8 — Modernize Preset Manager with Smart Tabs, Filter Chips, and Rich Grid Cards (Option 1) (09/11/2026)
+- Tambahkan horizontal tab bar per jenis campaign (Resep Kuliner, Produk, Brand, Multiplier, Recipe Labs) dengan badge counter otomatis
+- Tambahkan toolbar filter search real-time, chip filter Audio Engine (Native Veo vs Minimax), dan chip filter Type (System vs Custom)
+- Rombak flat list menjadi modern rich preset cards grid yang menampilkan ringkasan visual aspek rasio, video model, style, clips count, dan audio badge
+- Sediakan standalone HTML mockup public/mockup_preset_manager.html untuk pengujian interaktif
+
 ## V2.40.7 — Implement Multi-Platform Recipe URL Scraper with Cookpad Driver, CLI and Modal UI (09/11/2026)
 - Bangun modular scraper engine (lib/scrapers/) dengan Cookpad driver, auto-category extraction, pagination, dan deduplikasi URL
 - Bangun API endpoint /api/recipe-scraper/crawl dengan export format CSV (title, category, url), TSV, dan JSON
