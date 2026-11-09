@@ -1,369 +1,295 @@
-# Rencana Implementasi: Ekspansi CF Studio MCP Server (7 Pilar Studio Otomatis)
+# Rencana Implementasi: Perbaikan Duplikasi Info Bahan/Produk & Hashtag Ganda pada Autopipeline & Multiplier Lab
 
 > [!NOTE]
-> Rencana implementasi ini dirancang untuk menyempurnakan dan memperluas arsitektur MCP Server CF Studio (`apps/mcp/`) dari mode *Execution-Only* menjadi *Full-Lifecycle Autonomous Creative Director & Studio Operator* yang dapat mengelola produk, visual identity, strategi preset, riset dekonstruksi, review kreatif, penerbitan media sosial, serta observabilitas sistem secara interaktif melalui chat.
+> Rencana implementasi ini dirancang untuk menuntaskan akar masalah terjadinya **2 blok Info Bahan/Produk** dan **hashtag ganda** pada postingan media sosial (Instagram, TikTok, YouTube, Facebook) yang dihasilkan oleh Auto Pipeline Multiplier Lab.
 
 ---
 
-## Ringkasan Eksekutif & Ruang Lingkup
+## Ringkasan Eksekutif & Akar Masalah
 
-Saat ini MCP Server CF Studio memiliki 19 tools (termasuk alias legacy) yang berfokus pada eksekusi Auto Pipeline dan penjadwalan. Untuk memberikan kendali end-to-end melalui chat, kita mengintegrasikan 7 pilar studio ke dalam protokol MCP:
+Berdasarkan investigasi pada data riil task `mul_261109_5jhvm0` dan analisis alur kode `lib/smart-affiliate-package-builder.js` serta `lib/re-multiplier-worker.js`:
 
-1. **Pilar 1: Database Produk & Knowledge Catalog (Data Engine)**
-   - `cf_add_product`: Pendaftaran produk baru manual / spesifikasi.
-   - `cf_enrich_product`: Memicu ekstraksi AI untuk USP, pain points, product truth, clean photo prompt.
-   - `cf_get_product_detail`: Membaca spesifikasi detail produk dan status fotonya.
-   - `cf_update_product`: Memperbarui data produk dan link affiliate.
-   - `cf_scrape_product_url`: Mengambil data dan foto produk dari URL marketplace.
-2. **Pilar 2: Creative & Visual Identity Studio (Visual DNA Engine)**
-   - `cf_generate_visual_identity`: Membuat rancangan visual identity otomatis via AI dari natural language brief.
-   - `cf_create_visual_identity`: Menyimpan visual identity terstruktur ke database tenant.
-   - `cf_list_visual_identities`: Melihat katalog visual identity aktif (sistem & custom).
-   - `cf_get_visual_identity`: Menginspeksi detail rules visual (faceless mode, demographic, lighting, textures).
-   - `cf_update_visual_identity`: Menyesuaikan visual identity yang ada.
-3. **Pilar 3: Production Presets & Campaign Archetypes (Strategy Engine)**
-   - `cf_get_preset_detail`: Membaca detail konfigurasi preset (VO, tempo, clips, visual engine).
-   - `cf_create_preset`: Membuat preset baru untuk tenant.
-   - `cf_clone_preset`: Meng-clone preset sistem untuk dimodifikasi khusus.
-   - `cf_update_preset`: Mengedit preset kustom tenant.
-4. **Pilar 4: Viral Research & Multiplier Lab (Deconstruction Engine)**
-   - `cf_ingest_viral_video`: Memasukkan URL video viral ke queue Deconstruct Lab.
-   - `cf_list_deconstructed_assets`: Mencari blueprint video viral yang telah dibedah.
-   - `cf_get_deconstructed_blueprint`: Membaca hook, problem-solution arc, dan storyboard video viral.
-5. **Pilar 5: Creative Review & Human-in-the-Loop Co-Pilot**
-   - `cf_get_job_review`: Membaca artefak naskah dan storyboard campaign yang pending review.
-   - `cf_approve_job`: Menyetujui naskah/storyboard untuk melanjutkan render video.
-6. **Pilar 6: Omnichannel Social Publishing**
-   - `cf_list_publishing_accounts`: Menampilkan akun media sosial terhubung (Facebook, Instagram, YouTube, Repliz).
-   - `cf_create_publishing_job`: Menjadwalkan atau memublikasikan video/post ke akun media sosial.
-   - `cf_list_publishing_jobs`: Memantau status postingan media sosial.
-7. **Pilar 7: Studio Observability & Cluster Health**
-   - `cf_get_cluster_health`: Memeriksa kesehatan 3-node cluster (Mac Mini, Windows Worker 8765, PostgreSQL).
-   - `cf_get_studio_stats`: Membaca statistik performa studio dan stok video selesai.
+1. **Akar Masalah 1 (Pilihan AI vs Fallback Backend)**:
+   - Gemini AI memilih produk **"Monggo Dark Chocolate"** yang selaras dengan resep mousse cokelat dan merangkai CTA bio di dalam naskah `caption`.
+   - Di database produk, `Monggo Dark Chocolate` memiliki `affiliate_link: null`.
+   - Backend kemudian menjalankan fallback keyword matcher (`selectBestProductMatch`) pada judul kampanye *"Trik Sulap **Telur** Rebus..."*, yang secara keliru mencocokkan kata *"Telur"* ke produk **"Pembersih Kocokan Telur Serbaguna"** (karena memiliki link Shopee).
+2. **Akar Masalah 2 (Penumpukan CTA / Appending Flaw)**:
+   - Fungsi `normalizeSocialMediaPackage` mengevaluasi `if (!captionBio || captionBio === baseCaption)`. Karena Gemini menyamakan `caption_bio` dengan `baseCaption`, kondisi ini bernilai `true`.
+   - Sistem berasumsi bahwa CTA bio belum ada, lalu menempelkan (`append`) blok CTA produk kedua (*Pembersih Kocokan Telur*) beserta deretan hashtag untuk kedua kalinya di bawah `baseCaption` yang sudah memuat CTA produk pertama (*Monggo Dark Chocolate*).
+3. **Akar Masalah 3 (Ketidaksesuaian Link Facebook)**:
+   - Pada Facebook, teks menyebut *Monggo Dark Chocolate*, tetapi link Shopee yang disisipkan berasal dari *Pembersih Kocokan Telur Serbaguna*.
 
 ---
 
 ## Execution Task List
-- [x] **Task 1: Perluas `operatorClient` pada `apps/mcp/tools.mjs`** untuk mendukung metode HTTP `PUT`, `DELETE`, dan respons berformat Markdown / Text.
-- [x] **Task 2: Tambahkan Endpoint `GET /api/v2/operator-presets/[key]`** pada backend agar konfigurasi detail suatu preset dapat dibaca langsung oleh MCP tool.
-- [x] **Task 3: Daftarkan Tools Pilar 1 (Product & Catalog) pada `apps/mcp/tools.mjs`** (`cf_add_product`, `cf_enrich_product`, `cf_get_product_detail`, `cf_update_product`, `cf_scrape_product_url`).
-- [x] **Task 4: Daftarkan Tools Pilar 2 (Visual Identity Studio) pada `apps/mcp/tools.mjs`** (`cf_generate_visual_identity`, `cf_create_visual_identity`, `cf_list_visual_identities`, `cf_get_visual_identity`, `cf_update_visual_identity`).
-- [x] **Task 5: Daftarkan Tools Pilar 3 (Production Presets) pada `apps/mcp/tools.mjs`** (`cf_get_preset_detail`, `cf_create_preset`, `cf_clone_preset`, `cf_update_preset`).
-- [x] **Task 6: Daftarkan Tools Pilar 4 & 5 (Viral Deconstruct & Creative Review) pada `apps/mcp/tools.mjs`** (`cf_ingest_viral_video`, `cf_list_deconstructed_assets`, `cf_get_deconstructed_blueprint`, `cf_get_job_review`, `cf_approve_job`).
-- [x] **Task 7: Daftarkan Tools Pilar 6 & 7 (Publishing & Observability) pada `apps/mcp/tools.mjs`** (`cf_list_publishing_accounts`, `cf_create_publishing_job`, `cf_list_publishing_jobs`, `cf_get_cluster_health`, `cf_get_studio_stats`).
-- [x] **Task 8: Perbarui Unit Test Suite `apps/mcp/test/mcp.test.mjs`** untuk memverifikasi pendaftaran seluruh tool baru, validasi input Zod, dan routing endpoint.
-- [x] **Task 9: Perbarui Dokumentasi `apps/mcp/README.md` & `instructions.md`** agar selaras dengan kemampuan MCP 7 pilar terbaru.
-- [x] **Task 10: Jalankan Verifikasi Uji Otomatis (`npm run test:mcp`), Build Check, dan SOP Rilis Non-Interaktif**.
+- [x] **Task 1: Tambahkan Helper Sanitasi `stripCtaAndHashtags` pada `lib/smart-affiliate-package-builder.js`** untuk membersihkan CTA lama dan trailing hashtags sebelum proses adaptasi platform.
+- [x] **Task 2: Refaktorisasi `buildPlatformAdaptiveCaptions` pada `lib/smart-affiliate-package-builder.js`** agar tidak menumpuk CTA dan menyematkan hashtag tepat satu kali di posisi akhir.
+- [x] **Task 3: Perbaiki `normalizeSocialMediaPackage` pada `lib/smart-affiliate-package-builder.js`** agar selalu menggunakan naskah bersih, menyelaraskan produk terpilih, dan mengeliminasi bug duplikasi Bio CTA.
+- [x] **Task 4: Filter Etalase Produk Ber-link Valid pada `buildAffiliatePromptInstruction` (`lib/smart-affiliate-package-builder.js`)** dan tegaskan aturan naskah universal bebas CTA/hashtag pada prompt Gemini.
+- [x] **Task 5: Sinkronkan Produk Pilihan AI (`selected_product_id` / `selected_product_name`) pada `lib/re-multiplier-worker.js`** sebelum fallback ke keyword matcher.
+- [x] **Task 6: Buat Unit Test Suite Khusus Anti-Duplikasi Caption & Smart Affiliate** (`tests/test-affiliate-caption-deduplication.test.js`).
+- [x] **Task 7: Jalankan Uji Verifikasi Otomatis, Build Check Lokal, dan SOP Rilis Non-Interaktif**.
 
 ---
 
 ## Before & After Code Snippets
 
-### 1. `apps/mcp/tools.mjs` — Dukungan HTTP Method & Parsing Response pada `operatorClient`
+### 1. `lib/smart-affiliate-package-builder.js` — Penambahan Helper `stripCtaAndHashtags` & Sanitasi Caption
 
 #### Code Sebelum (Current/Before):
 ```javascript
-export function operatorClient({ baseUrl, token, fetchImpl = fetch }) {
-  const base = new URL(baseUrl);
-  if (!['http:', 'https:'].includes(base.protocol) || base.username || base.password || base.search || base.hash) {
-    throw new Error('Invalid Operator base URL');
-  }
-  if (base.protocol !== 'https:' && !isLocalOrPrivateHost(base.hostname)) {
-    throw new Error('Remote Operator API requires HTTPS');
-  }
-  if (!token) throw new Error('CF_STUDIO_OPERATOR_API_TOKEN is required');
-  return async (path, { body, key } = {}) => {
-    try {
-      const response = await fetchImpl(new URL(path, base), {
-        method: body ? 'POST' : 'GET',
-        redirect: 'error',
-        signal: AbortSignal.timeout(60000),
-        headers: {
-          authorization: `Bearer ${token}`,
-          ...(body ? { 'content-type': 'application/json', ...(key ? { 'idempotency-key': key } : {}) } : {})
-        },
-        body: body ? JSON.stringify(body) : undefined
-      });
-      if (!response.ok) {
-        return { success: false, status: response.status, error: 'Operator request rejected; check permissions, input, or job ID.' };
-      }
-      return await response.json();
-    } catch {
-      return { success: false, error: 'Operator API unavailable. For creation, retry with the SAME idempotency_key and identical brief.' };
-    }
-  };
-}
+export function buildPlatformAdaptiveCaptions({ baseCaption = '', hashtags = [], matchedProduct = null, brandName = '' }) {
+  let cleanCaption = String(baseCaption || '').trim();
+
+  // Bersihkan jika caption sudah memiliki placeholder atau link s.shopee
+  cleanCaption = cleanCaption
+    .replace(/https?:\/\/s\.shopee\.co\.id\/\S+/gi, '')
+    .replace(/\{\{AFFILIATE_LINK\}\}/g, '')
+    .trim();
+
+  const formattedTags = Array.isArray(hashtags) && hashtags.length > 0
+    ? hashtags.map(h => String(h).trim()).filter(Boolean).map(h => h.startsWith('#') ? h : `#${h}`)
+    : [];
+  const tagsStr = formattedTags.length > 0 ? '\n\n' + formattedTags.join(' ') : '';
 ```
 
 #### Code Sesudah (Proposed/After):
 ```javascript
-export function operatorClient({ baseUrl, token, fetchImpl = fetch }) {
-  const base = new URL(baseUrl);
-  if (!['http:', 'https:'].includes(base.protocol) || base.username || base.password || base.search || base.hash) {
-    throw new Error('Invalid Operator base URL');
+/**
+ * Membersihkan blok CTA (Bio CTA & Shopee Link) serta trailing hashtags yang mungkin sudah ada di dalam naskah
+ * agar tidak terjadi duplikasi saat proses adaptasi platform.
+ * @param {string} caption
+ * @returns {string}
+ */
+export function stripCtaAndHashtags(caption) {
+  if (!caption) return '';
+  let cleaned = String(caption).trim();
+
+  // 1. Bersihkan blok CTA Info Bahan / Produk (Bio CTA)
+  cleaned = cleaned.replace(/(?:\r?\n)*👉\s*Info\s*(?:Bahan|Produk|Bahan\/Produk)?[\s\S]*?(?=(?:\r?\n\s*#|$))/gi, '');
+
+  // 2. Bersihkan blok CTA Rekomendasi Resmi Shopee
+  cleaned = cleaned.replace(/(?:\r?\n)*🛒\s*Rekomendasi\s*(?:Bahan|Produk|Bahan\/Produk)?\s*Resmi:[\s\S]*?(?=(?:\r?\n\s*#|$))/gi, '');
+
+  // 3. Bersihkan sisa link shopee atau {{AFFILIATE_LINK}}
+  cleaned = cleaned.replace(/https?:\/\/s\.shopee\.co\.id\/\S+/gi, '');
+  cleaned = cleaned.replace(/\{\{AFFILIATE_LINK\}\}/g, '');
+
+  // 4. Bersihkan deretan hashtag yang menempel di akhir caption
+  cleaned = cleaned.replace(/(?:\r?\n|\s)*(?:#[a-zA-Z0-9_\u00c0-\u00ff]+\s*)+$/g, '');
+
+  return cleaned.trim();
+}
+
+export function buildPlatformAdaptiveCaptions({ baseCaption = '', hashtags = [], matchedProduct = null, brandName = '' }) {
+  const cleanCaption = stripCtaAndHashtags(baseCaption);
+
+  const formattedTags = Array.isArray(hashtags) && hashtags.length > 0
+    ? hashtags.map(h => String(h).trim()).filter(Boolean).map(h => h.startsWith('#') ? h : `#${h}`)
+    : [];
+  const tagsStr = formattedTags.length > 0 ? '\n\n' + formattedTags.join(' ') : '';
+```
+
+---
+
+### 2. `lib/smart-affiliate-package-builder.js` — Filter Produk Ber-link Valid pada Prompt Gemini
+
+#### Code Sebelum (Current/Before):
+```javascript
+export function buildAffiliatePromptInstruction({ brandProducts = [], selectedProductId = null, isAffiliateEnabled = true }) {
+  if (!isAffiliateEnabled || !Array.isArray(brandProducts) || brandProducts.length === 0) {
+    return `
+ATURAN SOCIAL MEDIA PACKAGE & AFFILIATE:
+- Konten ini berstatus Murni Edukasi / Non-Afiliasi.
+- Pada objek "social_media_package", hasilkan "caption" universal yang bersih, bernilai edukatif, dan diakhiri hashtags relevan. DILARANG mencantumkan link penjualan.
+`;
   }
-  if (base.protocol !== 'https:' && !isLocalOrPrivateHost(base.hostname)) {
-    throw new Error('Remote Operator API requires HTTPS');
+
+  // Siapkan daftar etalase produk brand (maks 10 produk untuk efisiensi token)
+  let candidateProducts = brandProducts;
+```
+
+#### Code Sesudah (Proposed/After):
+```javascript
+export function buildAffiliatePromptInstruction({ brandProducts = [], selectedProductId = null, isAffiliateEnabled = true }) {
+  // Hanya operkan produk yang memiliki affiliate_link aktif dan terisi ke dalam prompt AI
+  const activeAffiliateProducts = (brandProducts || []).filter(p => p.affiliate_link && String(p.affiliate_link).trim() !== '');
+
+  if (!isAffiliateEnabled || activeAffiliateProducts.length === 0) {
+    return `
+ATURAN SOCIAL MEDIA PACKAGE & AFFILIATE:
+- Konten ini berstatus Murni Edukasi / Non-Afiliasi (atau belum ada produk ber-link Shopee terverifikasi).
+- Pada objek "social_media_package", hasilkan "caption" universal yang bersih, bernilai edukatif, dan diakhiri hashtags relevan. DILARANG mencantumkan link penjualan.
+`;
   }
-  if (!token) throw new Error('CF_STUDIO_OPERATOR_API_TOKEN is required');
-  return async (path, { body, key, method } = {}) => {
-    try {
-      const httpMethod = method || (body ? 'POST' : 'GET');
-      const response = await fetchImpl(new URL(path, base), {
-        method: httpMethod,
-        redirect: 'error',
-        signal: AbortSignal.timeout(60000),
-        headers: {
-          authorization: `Bearer ${token}`,
-          ...(body ? { 'content-type': 'application/json', ...(key ? { 'idempotency-key': key } : {}) } : {})
-        },
-        body: body ? JSON.stringify(body) : undefined
+
+  // Siapkan daftar etalase produk brand (maks 10 produk untuk efisiensi token)
+  let candidateProducts = activeAffiliateProducts;
+```
+
+---
+
+### 3. `lib/smart-affiliate-package-builder.js` — Normalisasi Bebas Duplikasi pada `normalizeSocialMediaPackage`
+
+#### Code Sebelum (Current/Before):
+```javascript
+export function normalizeSocialMediaPackage(rawSocialPackage = {}, matchedProduct = null) {
+  if (!rawSocialPackage || typeof rawSocialPackage !== 'object') {
+    rawSocialPackage = {};
+  }
+
+  const baseCaption = rawSocialPackage.caption || rawSocialPackage.caption_universal || '';
+  const hashtags = Array.isArray(rawSocialPackage.hashtags) ? rawSocialPackage.hashtags : [];
+
+  let captionFb = rawSocialPackage.caption_facebook || '';
+  let captionBio = rawSocialPackage.caption_bio || '';
+
+  if (matchedProduct && matchedProduct.affiliate_link) {
+    if (captionFb.includes('{{AFFILIATE_LINK}}')) {
+      captionFb = captionFb.replace(/\{\{AFFILIATE_LINK\}\}/g, matchedProduct.affiliate_link);
+    } else if (!captionFb || captionFb === baseCaption) {
+      const adapted = buildPlatformAdaptiveCaptions({
+        baseCaption,
+        hashtags,
+        matchedProduct
       });
-      if (!response.ok) {
-        return { success: false, status: response.status, error: 'Operator request rejected; check permissions, input, or job ID.' };
-      }
-      const contentType = response.headers?.get?.('content-type') || '';
-      if (contentType.includes('text/markdown') || contentType.includes('text/plain')) {
-        const text = await response.text();
-        return { success: true, markdown: text };
-      }
-      return await response.json();
-    } catch {
-      return { success: false, error: 'Operator API unavailable. For creation, retry with the SAME idempotency_key and identical brief.' };
+      captionFb = adapted.caption_facebook;
+      captionBio = adapted.caption_bio;
     }
+
+    if (!captionBio || captionBio === baseCaption) {
+      const pName = matchedProduct.product_name || 'Bahan/Produk Rekomendasi';
+      const bioCta = `\n\n👉 Info Bahan/Produk:\nBahan & produk rekomendasi (${pName}) yang mimin pakai bisa kamu cek di Link di Bio ya! ✨`;
+      const tagsStr = hashtags.length > 0 ? '\n\n' + hashtags.map(h => h.startsWith('#') ? h : `#${h}`).join(' ') : '';
+      captionBio = `${baseCaption.trim()}${bioCta}${tagsStr}`;
+    }
+  } else {
+    captionFb = baseCaption;
+    captionBio = baseCaption;
+  }
+```
+
+#### Code Sesudah (Proposed/After):
+```javascript
+export function normalizeSocialMediaPackage(rawSocialPackage = {}, matchedProduct = null) {
+  if (!rawSocialPackage || typeof rawSocialPackage !== 'object') {
+    rawSocialPackage = {};
+  }
+
+  const baseCaption = rawSocialPackage.caption || rawSocialPackage.caption_universal || '';
+  const hashtags = Array.isArray(rawSocialPackage.hashtags) ? rawSocialPackage.hashtags : [];
+
+  // Jika matchedProduct tersedia dan memiliki link Shopee
+  if (matchedProduct && matchedProduct.affiliate_link) {
+    const pName = matchedProduct.product_name || 'Bahan/Produk Rekomendasi';
+    const affLink = matchedProduct.affiliate_link.trim();
+
+    // Selalu bangun platform-adaptive captions secara bersih dan bebas duplikasi
+    const adapted = buildPlatformAdaptiveCaptions({
+      baseCaption,
+      hashtags,
+      matchedProduct
+    });
+
+    let captionFb = rawSocialPackage.caption_facebook || '';
+    if (captionFb && captionFb.includes('{{AFFILIATE_LINK}}')) {
+      captionFb = captionFb.replace(/\{\{AFFILIATE_LINK\}\}/g, affLink);
+    } else {
+      captionFb = adapted.caption_facebook;
+    }
+
+    return {
+      title: rawSocialPackage.title || '',
+      caption: stripCtaAndHashtags(baseCaption),
+      caption_facebook: captionFb,
+      caption_bio: adapted.caption_bio,
+      caption_universal: adapted.caption_universal,
+      hashtags: adapted.hashtags,
+      matched_product: {
+        product_id: matchedProduct.product_id,
+        product_name: pName,
+        affiliate_link: affLink,
+        brand_profile_id: matchedProduct.brand_profile_id || null
+      }
+    };
+  }
+
+  // Non-affiliate / tanpa produk affiliate
+  const cleanBase = stripCtaAndHashtags(baseCaption);
+  const formattedTags = hashtags.length > 0 ? '\n\n' + hashtags.map(h => h.startsWith('#') ? h : `#${h}`).join(' ') : '';
+  const unified = cleanBase + formattedTags;
+
+  return {
+    title: rawSocialPackage.title || '',
+    caption: cleanBase,
+    caption_facebook: rawSocialPackage.caption_facebook ? stripCtaAndHashtags(rawSocialPackage.caption_facebook) + formattedTags : unified,
+    caption_bio: rawSocialPackage.caption_bio ? stripCtaAndHashtags(rawSocialPackage.caption_bio) + formattedTags : unified,
+    caption_universal: unified,
+    hashtags,
+    matched_product: null
   };
 }
 ```
 
 ---
 
-### 2. `app/api/v2/operator-presets/[key]/route.js` — Penambahan Handler `GET` Preset Detail
+### 4. `lib/re-multiplier-worker.js` — Sinkronisasi Produk Pilihan AI Sebelum Fallback
 
 #### Code Sebelum (Current/Before):
 ```javascript
-export const dynamic = 'force-dynamic';
-
-function requireAdmin(user) {
-  if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
-    const e = new Error('Hanya Admin tenant yang dapat mengelola preset.');
-    e.status = 403;
-    throw e;
-  }
-  return user;
-}
-
-export const PUT = withTenantContext(async (request, { params }, user) => {
+    // 2. Smart Fallback: Jika non-bridging video (target_product_id null), cari produk brand via selectBestProductMatch!
+    if (!matchedProduct && isAffiliateEnabled && Array.isArray(brandProductsList) && brandProductsList.length > 0) {
+      const topicForMatching = task.campaign_name || parsed.title || parsed.yt_title || '';
+      matchedProduct = selectBestProductMatch({
+        products: brandProductsList,
+        topic: topicForMatching
+      });
+    }
 ```
 
 #### Code Sesudah (Proposed/After):
 ```javascript
-export const dynamic = 'force-dynamic';
+    // 2. Sinkronkan dengan Pilihan AI (selected_product_id / selected_product_name)
+    if (!matchedProduct && isAffiliateEnabled && Array.isArray(brandProductsList) && brandProductsList.length > 0) {
+      const aiPkg = parsed.social_media_package || {};
+      const aiSelectedId = aiPkg.selected_product_id;
+      const aiSelectedName = aiPkg.selected_product_name;
 
-function requireAdmin(user) {
-  if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
-    const e = new Error('Hanya Admin tenant yang dapat mengelola preset.');
-    e.status = 403;
-    throw e;
-  }
-  return user;
-}
+      if (aiSelectedId || aiSelectedName) {
+        const found = brandProductsList.find(p =>
+          (aiSelectedId && (p.product_id === aiSelectedId || p.brand_product_id === aiSelectedId)) ||
+          (aiSelectedName && String(p.product_name || '').toLowerCase() === String(aiSelectedName).toLowerCase())
+        );
+        if (found && found.affiliate_link) {
+          matchedProduct = {
+            product_id: found.product_id,
+            product_name: found.product_name,
+            affiliate_link: found.affiliate_link
+          };
+        }
+      }
 
-export const GET = withTenantContext(async (_request, { params }, user) => {
-  const tenantPresets = getSetting('operator_presets_json', false) || '{}';
-  hydrateOperatorPresetCache(user.tenantId, tenantPresets);
-  const { key } = await params;
-  const all = listOperatorPresets(user.tenantId);
-  const preset = all[key];
-  if (!preset) {
-    return NextResponse.json({ success: false, error: 'Preset tidak ditemukan.' }, { status: 404 });
-  }
-  return NextResponse.json({ success: true, key, preset });
-});
-
-export const PUT = withTenantContext(async (request, { params }, user) => {
-```
-
----
-
-### 3. `apps/mcp/tools.mjs` — Registrasi Tools Baru (Contoh Pilar 1, 2, 3)
-
-#### Code Sebelum (Current/Before):
-```javascript
-  // 4. Schedule Management Tools
-  register(
-    'cf_list_schedules',
-    'List recurring Auto Pipeline schedules in the tenant with their status and execution metrics.',
-    ...
-  );
-
-  return server;
-}
-```
-
-#### Code Sesudah (Proposed/After):
-```javascript
-  // 4. Schedule Management Tools
-  register(
-    'cf_list_schedules',
-    ...
-  );
-
-  // 5. Product Database Tools (Pilar 1)
-  register('cf_add_product', 'Register a new product in the tenant catalog.', {
-    product_name: z.string().trim().min(1).max(300),
-    product_description: z.string().max(12000).optional(),
-    category: z.string().max(100).optional(),
-    unique_selling_point: z.string().max(2000).optional(),
-    tags: z.string().max(500).optional(),
-    affiliate_link: z.string().max(1000).optional(),
-    source_url: z.string().max(1000).optional(),
-    packaging_type: z.string().max(100).optional()
-  }, false, args => request('/api/v2/products', { body: args }));
-
-  register('cf_enrich_product', 'Trigger AI enrichment for product USP, truths, and clean photo prompt.', {
-    product_id: z.string().min(1).max(128)
-  }, false, ({ product_id }) => request('/api/v2/products/re-enrich', { body: { ids: [product_id] } }));
-
-  register('cf_get_product_detail', 'Retrieve full product details and extraction metadata.', {
-    product_id: z.string().min(1).max(128)
-  }, true, ({ product_id }) => request(`/api/v2/products/${encodeURIComponent(product_id)}`));
-
-  register('cf_update_product', 'Update existing product information in the catalog.', {
-    product_id: z.string().min(1).max(128),
-    updates: z.record(z.any())
-  }, false, ({ product_id, updates }) => request(`/api/v2/products/${encodeURIComponent(product_id)}`, { method: 'PUT', body: updates }));
-
-  register('cf_scrape_product_url', 'Scrape product specs and images from an e-commerce URL.', {
-    url: z.string().url(),
-    category: z.string().max(100).optional(),
-    tags: z.string().max(500).optional()
-  }, false, ({ url, ...args }) => request('/api/v2/products/scrape', { body: { urls: url, ...args } }));
-
-  // 6. Visual Identity Tools (Pilar 2)
-  register('cf_generate_visual_identity', 'Generate an AI Visual Identity draft from a creative brief.', {
-    seed: z.string().trim().min(1).max(1000),
-    demographic_key: z.string().max(100).optional(),
-    setting: z.string().max(300).optional(),
-    mood: z.string().max(300).optional(),
-    visual_style: z.string().max(100).optional(),
-    color_palette: z.string().max(300).optional()
-  }, false, args => request('/api/v2/visual-identities/ai/generate', { body: args }));
-
-  register('cf_create_visual_identity', 'Register a structured Visual Identity preset.', {
-    label: z.string().trim().min(1).max(200),
-    preset_key: z.string().max(100).optional(),
-    description: z.string().max(1000).optional(),
-    config: z.record(z.any())
-  }, false, args => request('/api/v2/visual-identities', { body: args }));
-
-  register('cf_list_visual_identities', 'List available active Visual Identity presets.', {
-    status: z.enum(['active', 'all', 'archived']).default('active')
-  }, true, args => request(`/api/v2/visual-identities?${new URLSearchParams(args)}`));
-
-  register('cf_get_visual_identity', 'Get detailed configuration of a Visual Identity preset.', {
-    id_or_key: z.string().min(1).max(128)
-  }, true, ({ id_or_key }) => request(`/api/v2/visual-identities/${encodeURIComponent(id_or_key)}`));
-
-  register('cf_update_visual_identity', 'Update an existing custom Visual Identity preset.', {
-    id: z.string().min(1).max(128),
-    label: z.string().max(200).optional(),
-    description: z.string().max(1000).optional(),
-    config: z.record(z.any())
-  }, false, ({ id, ...args }) => request(`/api/v2/visual-identities/${encodeURIComponent(id)}`, { method: 'PUT', body: args }));
-
-  // 7. Production Presets (Pilar 3)
-  register('cf_get_preset_detail', 'Get full strategy configuration of an operator preset.', {
-    preset_key: z.string().min(1).max(128)
-  }, true, ({ preset_key }) => request(`/api/v2/operator-presets/${encodeURIComponent(preset_key)}`));
-
-  register('cf_create_preset', 'Create a new custom operator preset.', {
-    key: z.string().regex(/^[a-z0-9][a-z0-9_-]{2,63}$/),
-    label: z.string().trim().min(1).max(200),
-    config: z.record(z.any())
-  }, false, args => request('/api/v2/operator-presets', { body: args }));
-
-  register('cf_clone_preset', 'Clone an existing preset with strategic modifications.', {
-    source_key: z.string().min(1).max(128),
-    new_key: z.string().regex(/^[a-z0-9][a-z0-9_-]{2,63}$/),
-    new_label: z.string().trim().min(1).max(200),
-    overrides: z.record(z.any()).optional()
-  }, false, async ({ source_key, new_key, new_label, overrides = {} }) => {
-    const existing = await request(`/api/v2/operator-presets/${encodeURIComponent(source_key)}`);
-    if (!existing || !existing.success) return { success: false, error: 'Source preset not found' };
-    const mergedConfig = { ...existing.preset, ...overrides, label: new_label };
-    return request('/api/v2/operator-presets', { body: { key: new_key, label: new_label, config: mergedConfig } });
-  });
-
-  register('cf_update_preset', 'Update an existing custom operator preset.', {
-    key: z.string().regex(/^[a-z0-9][a-z0-9_-]{2,63}$/),
-    label: z.string().max(200).optional(),
-    config: z.record(z.any())
-  }, false, ({ key, ...args }) => request(`/api/v2/operator-presets/${encodeURIComponent(key)}`, { method: 'PUT', body: args }));
-
-  // 8. Viral Deconstruction & Review (Pilar 4 & 5)
-  register('cf_ingest_viral_video', 'Ingest viral video URL for AI deconstruction.', {
-    url: z.string().url(),
-    niche: z.string().max(100).optional(),
-    page_source: z.string().max(100).optional()
-  }, false, ({ url, ...args }) => request('/api/v2/deconstruct', { body: { urls: url, ...args } }));
-
-  register('cf_list_deconstructed_assets', 'Search deconstructed viral video blueprints.', {
-    q: z.string().max(200).optional(),
-    niche: z.string().max(100).optional(),
-    limit: z.number().int().min(1).max(50).default(20)
-  }, true, args => request(`/api/v2/deconstruct?assets=true&${new URLSearchParams(Object.entries(args).filter(([_, v]) => v !== undefined).map(([k, v]) => [k, String(v)]))}`));
-
-  register('cf_get_deconstructed_blueprint', 'Get detailed viral pattern breakdown and storyboard.', {
-    asset_id: z.string().min(1).max(128)
-  }, true, ({ asset_id }) => request(`/api/v2/deconstruct/assets/${encodeURIComponent(asset_id)}`));
-
-  register('cf_get_job_review', 'Get human-in-the-loop review artifact for a pending job.', {
-    job_id: z.string().min(1).max(128)
-  }, true, ({ job_id }) => request(`/api/operator/v1/content-jobs/${encodeURIComponent(job_id)}/review`));
-
-  register('cf_approve_job', 'Approve pending campaign review to proceed to production rendering.', {
-    job_id: z.string().min(1).max(128),
-    review_revision: z.number().int().min(1),
-    review_sha256: z.string().optional()
-  }, false, ({ job_id, ...body }) => request(`/api/operator/v1/content-jobs/${encodeURIComponent(job_id)}/approve`, { body }));
-
-  // 9. Publishing & Observability (Pilar 6 & 7)
-  register('cf_list_publishing_accounts', 'List connected social media publishing accounts.', {
-    provider: z.enum(['meta', 'repliz', 'all']).default('all')
-  }, true, args => request(`/api/v2/publishing/accounts?${new URLSearchParams(args)}`));
-
-  register('cf_create_publishing_job', 'Schedule or publish completed content to a social account.', {
-    account_id: z.string().min(1).max(128),
-    campaign_item_id: z.string().min(1).max(128),
-    platform: z.enum(['facebook', 'instagram', 'tiktok', 'youtube']),
-    scheduled_time: z.string().optional(),
-    caption: z.string().max(5000).optional()
-  }, false, args => request('/api/v2/publishing/jobs', { body: args }));
-
-  register('cf_list_publishing_jobs', 'Monitor social media publishing job statuses.', {
-    status: z.enum(['pending', 'processing', 'completed', 'failed', 'all']).default('all'),
-    platform: z.string().optional(),
-    limit: z.number().int().min(1).max(50).default(20)
-  }, true, args => request(`/api/v2/publishing/jobs?${new URLSearchParams(Object.entries(args).filter(([_, v]) => v !== undefined).map(([k, v]) => [k, String(v)]))}`));
-
-  register('cf_get_cluster_health', 'Check real-time health of the 3-node cluster and services.', {}, true, () => request('/api/v2/system-health'));
-
-  register('cf_get_studio_stats', 'Get overview metrics on content production and stock availability.', {}, true, () => request('/api/v2/dashboard/stats'));
-
-  return server;
-}
+      // 3. Smart Fallback: hanya jika AI tidak memilih produk ber-link valid
+      if (!matchedProduct) {
+        const topicForMatching = task.campaign_name || parsed.title || parsed.yt_title || '';
+        matchedProduct = selectBestProductMatch({
+          products: brandProductsList.filter(p => p.affiliate_link && String(p.affiliate_link).trim() !== ''),
+          topic: topicForMatching
+        });
+      }
+    }
 ```
 
 ---
 
 ## SOP Verifikasi & Rilis Non-Interaktif
 
-1. **Uji Otomatis Unit Test MCP**:
-   - Jalankan `npm run test:mcp` untuk memverifikasi ke-40 tools terdaftar dengan benar, validasi argumen Zod, dan routing path ke API backend.
+1. **Uji Otomatis Unit Test**:
+   - Jalankan `node --test tests/test-affiliate-caption-deduplication.test.js` dan seluruh test affiliate terkait.
 2. **Uji Build Lokal**:
-   - Pastikan build Next.js lokal bersih tanpa syntax error: `npm run build`.
+   - Pastikan kompilasi Next.js lokal bersih tanpa error (`npm run build`).
 3. **Eksekusi Rilis Otomatis**:
    - Jalankan rilis non-interaktif sesuai SOP:
      ```bash
-     npm run release-non-interactive -- --type minor --title "Ekspansi 7 Pilar CF Studio MCP Server" --points "Penambahan MCP Product Database|Penambahan MCP Visual Identity Studio|Penambahan MCP Strategy Presets|Penambahan MCP Viral Deconstruction & Review|Penambahan MCP Publishing & Observability"
+     npm run release-non-interactive -- --type patch --title "Fix Caption Duplication & AI Affiliate Sync in Autopipeline" --points "Sanitasi stripCtaAndHashtags anti-duplikasi|Filter produk ber-link aktif pada prompt AI|Sinkronisasi produk pilihan AI di Multiplier Worker"
      ```

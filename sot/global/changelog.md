@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.38.1 — Fix Caption Duplication & AI Affiliate Sync in Autopipeline (09/11/2026)
+- Sanitasi stripCtaAndHashtags anti-duplikasi
+- Filter produk ber-link aktif pada prompt AI
+- Sinkronisasi produk pilihan AI di Multiplier Worker
+
 ## V2.38.0 — Ekspansi 7 Pilar CF Studio MCP Server (09/11/2026)
 - Penambahan MCP Product Database (5 tools)
 - Penambahan MCP Visual Identity Studio (5 tools)
