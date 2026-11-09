@@ -27,6 +27,12 @@ export function middleware(req) {
     return NextResponse.next();
   }
 
+  // Allow Authorization Bearer token requests (handled by route-level auth / withTenantContext)
+  const authHeader = req.headers.get('authorization');
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return NextResponse.next();
+  }
+
   // Check for session cookie
   const cookieName = process.env.SESSION_COOKIE_NAME || 'makna_session';
   const sessionToken = req.cookies.get(cookieName)?.value;

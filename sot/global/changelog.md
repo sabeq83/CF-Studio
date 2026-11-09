@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.37.1 — Fix: Allow Bearer auth in middleware for Auto Pipeline MCP endpoints (09/11/2026)
+- Izinkan Authorization Bearer header di middleware.js untuk rute Auto Pipeline
+
 ## V2.37.0 — CF Studio MCP V2: 5-Engine Auto Pipeline & Schedule Integration (09/11/2026)
 - Rebranding MCP adapter ke @cf-studio/mcp v2.0.0 dan CF_STUDIO_* environment variables
 - Dukungan 5 dedicated tools untuk seluruh engine Auto Pipeline: Product Video, Editorial Video, Recipe Video, Multiplier Video, dan Recipe Labs Post
