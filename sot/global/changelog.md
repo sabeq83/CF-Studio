@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.36.1 — Kontrol Ekstraksi Resep Lengkap Video Multiplier pada Auto Pipeline (09/11/2026)
+- Switch toggle generate_recipe di 1-Klik Launch & Modal Skedul Rutin Multiplier
+- Passing parameter generate_recipe end-to-end dari API ke autonomous engine & scheduler runner
+- Harmonisasi prompt Gemini AI Phase 2 agar teks resep lengkap dan Smart Affiliate CTA hadir utuh
+- Mockup interaktif public/mockup_auto_pipeline_recipe_toggle.html dan unit test suite
+
 ## V2.36.0 — Rebranding MAKNA Flow to CF Studio (09/11/2026)
 - Rebranding identitas aplikasi menjadi CF Studio
 - Migrasi remote repository ke https://github.com/sabeq83/CF-Studio.git

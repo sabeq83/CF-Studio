@@ -195,6 +195,8 @@ export default function AutoPipelinePage() {
   const [schedAutoPublish, setSchedAutoPublish] = useState(true);
   const [schedPostAffiliateLink, setSchedPostAffiliateLink] = useState(true);
   const [instantPostAffiliateLink, setInstantPostAffiliateLink] = useState(true);
+  const [instantGenerateRecipe, setInstantGenerateRecipe] = useState(true);
+  const [schedGenerateRecipe, setSchedGenerateRecipe] = useState(true);
   const [modalBrandPresets, setModalBrandPresets] = useState([]);
   const [savingSchedule, setSavingSchedule] = useState(false);
 
@@ -870,7 +872,8 @@ export default function AutoPipelinePage() {
           grid_bg_color: gridBgColor,
           visual_style: recipeLabsVisualStyle,
           post_to_facebook: postToFacebook,
-          post_link_affiliate: instantPostAffiliateLink
+          post_link_affiliate: instantPostAffiliateLink,
+          generate_recipe: (instantCampaignType === 'multiplier_campaign' || instantCampaignType === 'recipe_campaign') ? instantGenerateRecipe : undefined
         })
       });
 
@@ -1136,6 +1139,8 @@ export default function AutoPipelinePage() {
     if (catalogProducts.length === 0) {
       fetchProducts();
     }
+    setSchedPostAffiliateLink(true);
+    setSchedGenerateRecipe(true);
     setIsScheduleModalOpen(true);
   }
 
@@ -1175,6 +1180,7 @@ export default function AutoPipelinePage() {
     } catch (_) {}
     setSchedSelectedCep(schedCfg.selected_cep || 'auto');
     setSchedPostAffiliateLink(schedCfg.post_link_affiliate !== false);
+    setSchedGenerateRecipe(schedCfg.generate_recipe !== false);
     setSchedPromotionContext(schedCfg.promotion_context || (sched.topic && sched.topic !== sched.target_item_title ? sched.topic : ''));
 
     setProductSearchQuery('');
@@ -1241,11 +1247,14 @@ export default function AutoPipelinePage() {
           : (schedCampaignType === 'editorial_campaign'
               ? { content_pillar: targetTitle }
               : (schedCampaignType === 'multiplier_campaign'
-                  ? { blueprint_id: targetId, execution_mode: 'full_autopilot' }
+                  ? { blueprint_id: targetId, execution_mode: 'full_autopilot', generate_recipe: schedGenerateRecipe }
                   : (schedCampaignType === 'recipe_labs'
                       ? { images_per_recipe: schedImagesPerRecipe, selected_layout_id: schedLayoutId, visual_style: schedVisualStyle, post_to_facebook: schedPostToFacebook }
                       : {})));
         editPipelineConfig.post_link_affiliate = schedPostAffiliateLink;
+        if (schedCampaignType === 'multiplier_campaign' || schedCampaignType === 'recipe_campaign') {
+          editPipelineConfig.generate_recipe = schedGenerateRecipe;
+        }
 
         const payload = {
           name: schedName.trim(),
@@ -1389,11 +1398,14 @@ export default function AutoPipelinePage() {
             : (schedCampaignType === 'editorial_campaign'
                 ? { content_pillar: targetTitle }
                 : (schedCampaignType === 'multiplier_campaign'
-                    ? { blueprint_id: targetId, execution_mode: 'full_autopilot' }
+                    ? { blueprint_id: targetId, execution_mode: 'full_autopilot', generate_recipe: schedGenerateRecipe }
                     : (schedCampaignType === 'recipe_labs'
                         ? { images_per_recipe: schedImagesPerRecipe, selected_layout_id: schedLayoutId, visual_style: schedVisualStyle, post_to_facebook: schedPostToFacebook }
                         : {})));
           pipelineConfigPayload.post_link_affiliate = schedPostAffiliateLink;
+          if (schedCampaignType === 'multiplier_campaign' || schedCampaignType === 'recipe_campaign') {
+            pipelineConfigPayload.generate_recipe = schedGenerateRecipe;
+          }
 
           const payload = {
             name: finalName,
@@ -3766,6 +3778,36 @@ export default function AutoPipelinePage() {
                         </span>
                       </div>
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Checkbox Toggle Ekstraksi Resep Lengkap untuk Multiplier (dan Recipe Campaign) */}
+              {(instantCampaignType === 'multiplier_campaign' || instantCampaignType === 'recipe_campaign') && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '0.65rem',
+                  background: 'var(--surface-raised)',
+                  padding: '0.75rem 1rem',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--status-purple)',
+                  marginBottom: '0.85rem'
+                }}>
+                  <input
+                    type="checkbox"
+                    id="instantRecipeCheck"
+                    checked={instantGenerateRecipe}
+                    onChange={(e) => setInstantGenerateRecipe(e.target.checked)}
+                    style={{ width: '18px', height: '18px', accentColor: 'var(--status-purple)', cursor: 'pointer', marginTop: '2px' }}
+                  />
+                  <div>
+                    <label htmlFor="instantRecipeCheck" style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer', display: 'block' }}>
+                      🍳 Hasilkan Resep / Racikan Lengkap di Caption (Bahan, Takaran & Langkah)
+                    </label>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1.4, display: 'block', marginTop: '2px' }}>
+                      Saat aktif, AI wajib menyusun teks resep terperinci (bahan, takaran presisi, langkah pembuatan, khasiat sehat) yang sinkron dengan video referensi dekonstruksi.
+                    </span>
                   </div>
                 </div>
               )}
@@ -6591,6 +6633,36 @@ export default function AutoPipelinePage() {
                     Otomatis teruskan video ke Repliz setelah selesai di-render oleh FFmpeg
                   </label>
                 </div>
+
+                {/* 🍳 Toggle Kontrol Ekstraksi Resep Lengkap untuk Multiplier (dan Recipe Campaign) */}
+                {(schedCampaignType === 'multiplier_campaign' || schedCampaignType === 'recipe_campaign') && (
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '0.65rem',
+                    background: 'var(--surface-raised)',
+                    padding: '0.75rem 1rem',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--status-purple)',
+                    marginTop: '0.5rem'
+                  }}>
+                    <input
+                      type="checkbox"
+                      id="schedRecipeCheck"
+                      checked={schedGenerateRecipe}
+                      onChange={(e) => setSchedGenerateRecipe(e.target.checked)}
+                      style={{ width: '18px', height: '18px', accentColor: 'var(--status-purple)', cursor: 'pointer', marginTop: '2px' }}
+                    />
+                    <div>
+                      <label htmlFor="schedRecipeCheck" style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer', display: 'block' }}>
+                        🍳 Hasilkan Resep / Racikan Lengkap di Caption (Bahan, Takaran & Langkah)
+                      </label>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1.4, display: 'block', marginTop: '2px' }}>
+                        Saat aktif, AI wajib menyusun teks resep terperinci (bahan, takaran presisi, langkah pembuatan, khasiat sehat) yang sinkron dengan video referensi dekonstruksi.
+                      </span>
+                    </div>
+                  </div>
+                )}
 
                 {/* 🛒 Toggle Kontrol Post Link Affiliate Shopee & Link di Bio */}
                 <div style={{

@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup Simulasi — Kontrol Ekstraksi Resep Lengkap Video Multiplier (Auto Pipeline)</title>
+  <style>
+    :root, [data-theme="dark"] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-purple: #c084fc;
+      --status-purple-soft: rgba(192, 132, 252, 0.14);
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme="light"] {
+      color-scheme: light;
+      --canvas: #f4f6fa;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #eef2f6;
+      --surface-hover: #e2e8f0;
+      --input-bg: #f8fafc;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --border-subtle: #cbd5e1;
+      --border-strong: #94a3b8;
+      --action-primary: #0f766e;
+      --action-primary-hover: #115e59;
+      --on-action-primary: #ffffff;
+      --link: #0284c7;
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.12);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.12);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.12);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.12);
+      --status-purple: #7c3aed;
+      --status-purple-soft: rgba(124, 58, 237, 0.12);
+      --shadow-card: 0 4px 18px rgba(15, 23, 42, 0.08);
+      --shadow-modal: 0 16px 40px rgba(15, 23, 42, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 2rem 1.25rem;
+      transition: background-color var(--transition), color var(--transition);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 2rem;
+    }
+
+    .badge-header {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: var(--status-purple-soft);
+      color: var(--status-purple);
+      border: 1px solid var(--status-purple);
+    }
+
+    .theme-toggle-btn {
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: var(--transition);
+    }
+    .theme-toggle-btn:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+
+    .entry-tabs {
+      display: flex;
+      gap: 0.65rem;
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+      padding-bottom: 0.25rem;
+    }
+
+    .tab-btn {
+      background: var(--surface);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+      padding: 0.65rem 1.15rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .tab-btn.active {
+      background: var(--status-purple-soft);
+      color: var(--status-purple);
+      border-color: var(--status-purple);
+    }
+
+    .grid-layout {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .grid-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.35rem;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .panel-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 0.75rem;
+    }
+
+    .toggle-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.85rem;
+      transition: var(--transition);
+    }
+
+    .toggle-card.active {
+      border-color: var(--status-purple);
+      background: var(--status-purple-soft);
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: var(--border-strong);
+      border-radius: 24px;
+      transition: var(--transition);
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: #ffffff;
+      border-radius: 50%;
+      transition: var(--transition);
+    }
+
+    input:checked + .slider {
+      background-color: var(--status-purple);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+
+    .toggle-content h4 {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
+      cursor: pointer;
+    }
+
+    .toggle-content p {
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    .info-box {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .preview-box {
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--text-primary);
+      white-space: pre-wrap;
+      line-height: 1.6;
+      max-height: 480px;
+      overflow-y: auto;
+    }
+
+    .platform-selector {
+      display: flex;
+      gap: 0.5rem;
+      background: var(--surface-interactive);
+      padding: 0.35rem;
+      border-radius: var(--radius-sm);
+    }
+
+    .platform-btn {
+      flex: 1;
+      padding: 0.4rem 0.65rem;
+      border-radius: var(--radius-xs);
+      font-size: 0.75rem;
+      font-weight: 700;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: var(--transition);
+      text-align: center;
+    }
+
+    .platform-btn.active {
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .field-tag {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 0.15rem 0.45rem;
+      border-radius: var(--radius-xs);
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      margin-bottom: 0.5rem;
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+      margin-top: 0.5rem;
+    }
+
+    .comparison-table th, .comparison-table td {
+      border: 1px solid var(--border-subtle);
+      padding: 0.55rem 0.75rem;
+      text-align: left;
+    }
+
+    .comparison-table th {
+      background: var(--surface-raised);
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .action-btn {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      padding: 0.85rem 1.25rem;
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: var(--transition);
+    }
+    .action-btn:hover {
+      background: var(--action-primary-hover);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div>
+      <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.35rem;">
+        <span class="badge-header">SOP UI MOCKUP — MULTIPLIER RECIPE CONTROL</span>
+        <span style="font-size: 0.75rem; color: var(--text-muted);">Khusus Alur Multiplier (Auto Pipeline)</span>
+      </div>
+      <h1 style="font-size: 1.45rem; font-weight: 800; color: var(--text-primary);">
+        Kontrol Ekstraksi Resep Lengkap Video Multiplier
+      </h1>
+      <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 0.2rem;">
+        Simulasi kontrol ON/OFF ekstraksi resep pada 2 Entry Points Video Multiplier: 1-Klik Launch &amp; Modal Skedul Penjadwalan Rutin.
+      </p>
+    </div>
+    <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()">
+      <span id="themeIcon">☀️</span> <span id="themeLabel">Light Mode</span>
+    </button>
+  </header>
+
+  <!-- Entry Point Navigation Tabs: HANYA 2 ENTRY POINT MULTIPLIER -->
+  <div class="entry-tabs">
+    <button class="tab-btn active" id="tabBtn1" onclick="switchTab('tab1')">
+      <span>⚡ Entry 1: 1-Klik Launch (Auto Pipeline Tab 1)</span>
+    </button>
+    <button class="tab-btn" id="tabBtn2" onclick="switchTab('tab2')">
+      <span>⏰ Entry 2: Modal Skedul Rutin (Auto Pipeline Tab 2)</span>
+    </button>
+  </div>
+
+  <div class="grid-layout">
+    <!-- LEFT PANEL: FORM CONTROLS -->
+    <div class="panel">
+      <div class="panel-title">
+        <span id="panelEntryTitle">🛠️ Konfigurasi Entry 1: 1-Klik Video Multiplier (Auto Pipeline Tab 1)</span>
+        <span style="font-size: 0.75rem; color: var(--status-purple); font-weight: 700;">Live Interactive</span>
+      </div>
+
+      <!-- Blueprint Selection Simulator -->
+      <div style="display: flex; flex-direction: column; gap: 0.45rem;">
+        <label style="font-size: 0.78rem; font-weight: 700; color: var(--text-secondary);">
+          Blueprint Video Referensi (Deconstruct Lab):
+        </label>
+        <div style="background: var(--surface-raised); border: 1.5px solid var(--status-purple); border-radius: var(--radius-sm); padding: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 0.84rem; font-weight: 700; color: var(--text-primary);">
+              #0b3ef9bb — Camilan Pisang Cokelat 3 Bahan Anti Sugar Spike
+            </div>
+            <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">
+              Niche: Healthy Dessert / Snack • 3 Bahan Pokok Terdeteksi: Pisang, Telur, Kakao Murni
+            </div>
+          </div>
+          <span style="font-size: 0.75rem; font-weight: 800; color: var(--status-purple); background: var(--status-purple-soft); padding: 0.2rem 0.5rem; border-radius: var(--radius-xs);">
+            Rank #1 Blueprint
+          </span>
+        </div>
+      </div>
+
+      <!-- TOGGLE 1: KONTROL RESEP (USULAN UTAMA) -->
+      <div class="toggle-card active" id="recipeToggleCard">
+        <label class="toggle-switch">
+          <input type="checkbox" id="recipeToggle" checked onchange="updateSimulation()">
+          <span class="slider"></span>
+        </label>
+        <div class="toggle-content">
+          <h4 onclick="toggleCheckbox('recipeToggle')">
+            🍳 Hasilkan Resep / Racikan Lengkap di Caption (Bahan, Takaran &amp; Langkah)
+          </h4>
+          <p>
+            Saat aktif (<code>generate_recipe: 1</code>), Gemini AI wajib menyusun teks resep lengkap yang sinkron 100% dengan bahan visual blueprint (takaran presisi, langkah pembuatan urut, dan tips sehat) langsung di caption.
+          </p>
+        </div>
+      </div>
+
+      <!-- TOGGLE 2: SMART AFFILIATE & REKOMENDASI PRODUK -->
+      <div class="toggle-card active" id="affiliateToggleCard">
+        <label class="toggle-switch">
+          <input type="checkbox" id="affiliateToggle" checked onchange="updateSimulation()">
+          <span class="slider"></span>
+        </label>
+        <div class="toggle-content">
+          <h4 onclick="toggleCheckbox('affiliateToggle')">
+            🛒 Sertakan Rekomendasi Produk &amp; Smart Affiliate
+          </h4>
+          <p>
+            Otomatis mencocokkan produk brand dan menyematkan CTA Shopee aktif (Facebook) atau arahan Link di Bio (Instagram, TikTok &amp; Shorts).
+          </p>
+        </div>
+      </div>
+
+      <!-- TARGET PRODUK AFFILIATE SIMULATION -->
+      <div style="display: flex; flex-direction: column; gap: 0.45rem;">
+        <label style="font-size: 0.78rem; font-weight: 700; color: var(--text-secondary);">
+          Produk Katalog Terkait (Auto Bridging):
+        </label>
+        <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.65rem 0.85rem; font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center;">
+          <span>🌾 Granola Timur Tengah Super Crunch 500g</span>
+          <span style="color: var(--status-success); font-weight: 700; font-size: 0.72rem;">Shopee Link Ready ✓</span>
+        </div>
+      </div>
+
+      <!-- SIMULATION AUDIT BOX -->
+      <div class="info-box">
+        <strong>📋 Status Kontrak Database &amp; Engine:</strong>
+        <div style="margin-top: 0.4rem; font-family: var(--font-mono); font-size: 0.72rem; display: flex; flex-direction: column; gap: 0.2rem;">
+          <div>• re_multiplier_tasks.generate_recipe = <span id="dbGenerateRecipeVal" style="color: var(--status-success); font-weight: 700;">1</span></div>
+          <div>• bridging_config_json.generate_recipe = <span id="bridgingRecipeVal" style="color: var(--status-success); font-weight: 700;">true</span></div>
+          <div>• prompt_mandate = <span id="promptMandateStatus" style="color: var(--status-success); font-weight: 700;">INJECTED (getRecipeMandateSection)</span></div>
+        </div>
+      </div>
+
+      <!-- CTA ACTION BUTTON SIMULATOR -->
+      <button class="action-btn" type="button" onclick="simulateLaunch()">
+        <span>🚀 Simulasikan Eksekusi Multiplier Pipeline</span>
+      </button>
+    </div>
+
+    <!-- RIGHT PANEL: LIVE CAPTION PREVIEW -->
+    <div class="panel">
+      <div class="panel-title">
+        <span>📱 Live Social Media Package Preview</span>
+        <div class="platform-selector">
+          <button class="platform-btn active" id="btnFb" onclick="setPlatform('fb')">Facebook (Shopee)</button>
+          <button class="platform-btn" id="btnBio" onclick="setPlatform('bio')">Non-FB (Link di Bio)</button>
+        </div>
+      </div>
+
+      <div>
+        <span class="field-tag">YOUTUBE SHORTS HIGH-CTR TITLE (#Shorts)</span>
+        <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); padding: 0.65rem 0.85rem; border-radius: var(--radius-sm); font-size: 0.84rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.85rem;" id="ytTitleDisplay">
+          Ngidam Manis Jam 4 Sore? Bikin Camilan Sehat 3 Bahan Tanpa Terigu #Shorts
+        </div>
+
+        <span class="field-tag" id="captionTypeTag">CAPTION RESEP LENGKAP + SHOPEE LINK (FACEBOOK)</span>
+        <div class="preview-box" id="captionPreview"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPARISON TABLE SECTION (GAP ANALYSIS) -->
+  <div class="panel" style="margin-top: 2rem;">
+    <div class="panel-title">
+      <span>🔍 Evaluasi Lapangan: Kasus mul_261108_s6so1p vs Hasil Dengan Kontrol Resep Baru</span>
+    </div>
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Parameter</th>
+          <th>Kondisi Nyata Lapangan (Task mul_261108_s6so1p)</th>
+          <th>Hasil Usulan (Dengan Toggle Resep Aktif)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Status generate_recipe</strong></td>
+          <td><span style="color: var(--status-danger); font-weight: 700;">0 (False)</span> — Tidak dikirim dari UI Auto Pipeline</td>
+          <td><span style="color: var(--status-success); font-weight: 700;">1 (True)</span> — Ditangkap dari Toggle UI Auto Pipeline</td>
+        </tr>
+        <tr>
+          <td><strong>Bahan &amp; Takaran</strong></td>
+          <td><span style="color: var(--status-danger);">❌ Hilang</span> — Hanya narasi cerita umum</td>
+          <td><span style="color: var(--status-success); font-weight: 700;">✓ Lengkap &amp; Presisi</span> (Gram, sdm, buah)</td>
+        </tr>
+        <tr>
+          <td><strong>Langkah Pembuatan</strong></td>
+          <td><span style="color: var(--status-danger);">❌ Hilang</span> — Tidak ada instruksi langkah urut</td>
+          <td><span style="color: var(--status-success); font-weight: 700;">✓ Runtut 1 s/d N</span> sesuai urutan adegan klip</td>
+        </tr>
+        <tr>
+          <td><strong>Rekomendasi Affiliate</strong></td>
+          <td>Hanya ada link mentah produk di akhir caption</td>
+          <td><span style="color: var(--status-success); font-weight: 700;">✓ Harmonis</span>: Resep utuh terlebih dahulu, ditutup CTA Shopee resmi</td>
+        </tr>
+        <tr>
+          <td><strong>Nilai Retensi Konten</strong></td>
+          <td>Rendah (Audiens merasa hanya video jualan biasa)</td>
+          <td><strong>Tinggi</strong> (Audiens menyimpan/save postingan karena ada resep bernilai)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  let currentPlatform = 'fb';
+  let activeTab = 'tab1';
+
+  function toggleTheme() {
+    const html = document.documentElement;
+    const currentTheme = html.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    html.setAttribute('data-theme', newTheme);
+    document.getElementById('themeIcon').textContent = newTheme === 'light' ? '🌙' : '☀️';
+    document.getElementById('themeLabel').textContent = newTheme === 'light' ? 'Dark Mode' : 'Light Mode';
+  }
+
+  function toggleCheckbox(id) {
+    const cb = document.getElementById(id);
+    cb.checked = !cb.checked;
+    updateSimulation();
+  }
+
+  function setPlatform(p) {
+    currentPlatform = p;
+    document.getElementById('btnFb').classList.toggle('active', p === 'fb');
+    document.getElementById('btnBio').classList.toggle('active', p === 'bio');
+    updateSimulation();
+  }
+
+  function switchTab(t) {
+    activeTab = t;
+    document.getElementById('tabBtn1').classList.toggle('active', t === 'tab1');
+    document.getElementById('tabBtn2').classList.toggle('active', t === 'tab2');
+
+    const titleEl = document.getElementById('panelEntryTitle');
+    if (t === 'tab1') {
+      titleEl.textContent = '🛠️ Konfigurasi Entry 1: 1-Klik Video Multiplier (Auto Pipeline Tab 1)';
+    } else {
+      titleEl.textContent = '⏰ Konfigurasi Entry 2: Modal Skedul Rutin Multiplier (Auto Pipeline Tab 2)';
+    }
+    updateSimulation();
+  }
+
+  function updateSimulation() {
+    const isRecipe = document.getElementById('recipeToggle').checked;
+    const isAffiliate = document.getElementById('affiliateToggle').checked;
+
+    document.getElementById('recipeToggleCard').classList.toggle('active', isRecipe);
+    document.getElementById('affiliateToggleCard').classList.toggle('active', isAffiliate);
+
+    // Update DB & Contract status
+    document.getElementById('dbGenerateRecipeVal').textContent = isRecipe ? '1' : '0';
+    document.getElementById('dbGenerateRecipeVal').style.color = isRecipe ? 'var(--status-success)' : 'var(--text-muted)';
+    document.getElementById('bridgingRecipeVal').textContent = isRecipe ? 'true' : 'false';
+    document.getElementById('bridgingRecipeVal').style.color = isRecipe ? 'var(--status-success)' : 'var(--text-muted)';
+    document.getElementById('promptMandateStatus').textContent = isRecipe ? 'INJECTED (getRecipeMandateSection)' : 'SKIPPED (Normal Pitch)';
+    document.getElementById('promptMandateStatus').style.color = isRecipe ? 'var(--status-success)' : 'var(--text-muted)';
+
+    // Update Caption Preview
+    const previewEl = document.getElementById('captionPreview');
+    const tagEl = document.getElementById('captionTypeTag');
+
+    let text = '';
+    const openingHook = `Jam 4 sore emang paling rawan lapar mata di kantor. Daripada jajan sembarangan yang bikin lemas dan begah, yuk bikin camilan sehat tanpa terigu ini! Cuma 3 bahan utama, rasanya tetap legit dan pastinya ramah energi sore kamu. Simpan resepnya sekarang! ✨\n\n`;
+
+    const recipeBody = `🥣 BAHAN-BAHAN & TAKARAN:
+- 2 buah pisang matang (lumatkan)
+- 1 butir telur ayam segar
+- 2 sdm cokelat bubuk murni (tanpa gula)
+- Topping: Granola Timur Tengah / dark chocolate chunks secukupnya
+
+👨‍🍳 LANGKAH PEMBUATAN:
+1. Lumatkan pisang di dalam mangkuk sampai lembut merata.
+2. Masukkan telur dan cokelat bubuk, aduk cepat hingga teksturnya kental dan creamy.
+3. Tuang adonan ke wadah tahan panas, lalu beri taburan Granola Timur Tengah di atasnya.
+4. Panggang di oven / air fryer pada suhu 160°C selama 12-15 menit hingga matang legit.
+
+💡 TIPS & KHASIAT SEHAT:
+Bebas gluten/terigu, kaya serat alami, menjaga energi tetap stabil tanpa lonjakan gula darah mendadak!\n\n`;
+
+    let ctaSection = '';
+    if (isAffiliate) {
+      if (currentPlatform === 'fb') {
+        tagEl.textContent = isRecipe 
+          ? 'CAPTION RESEP LENGKAP + SHOPEE LINK (FACEBOOK)' 
+          : 'CAPTION RINGKAS + SHOPEE LINK (FACEBOOK)';
+        ctaSection = `🛒 REKOMENDASI BAHAN/PRODUK RESMI:
+Beli Granola Timur Tengah asli di Shopee resmi kami di sini:
+https://s.shopee.co.id/3B6ZjV2A4J\n\n`;
+      } else {
+        tagEl.textContent = isRecipe 
+          ? 'CAPTION RESEP LENGKAP + LINK DI BIO (NON-FB)' 
+          : 'CAPTION RINGKAS + LINK DI BIO (NON-FB)';
+        ctaSection = `👉 INFO BAHAN & REKOMENDASI:
+Bahan & produk rekomendasi (Granola Timur Tengah) yang mimin pakai bisa kamu cek di Link di Bio ya! ✨\n\n`;
+      }
+    } else {
+      tagEl.textContent = isRecipe 
+        ? 'CAPTION RESEP LENGKAP MURNI EDUKASI' 
+        : 'CAPTION RINGKAS MURNI EDUKASI';
+      ctaSection = `💬 Jangan lupa bagikan postingan ini ke teman ngantormu yang suka lapar mata sore-sore!\n\n`;
+    }
+
+    const hashtags = `#Shorts #CamilanSehat #ResepTanpaTerigu #HealthyDessert #TipsKesehatan #Granola`;
+
+    if (isRecipe) {
+      text = openingHook + recipeBody + ctaSection + hashtags;
+    } else {
+      text = openingHook + ctaSection + hashtags;
+    }
+
+    previewEl.textContent = text;
+  }
+
+  function simulateLaunch() {
+    const isRecipe = document.getElementById('recipeToggle').checked;
+    alert(`Sukses memvalidasi alur Multiplier Pipeline!\n• Entry Point: ${activeTab}\n• generate_recipe: ${isRecipe ? '1 (Aktif)' : '0 (Nonaktif)'}\n• Database & Prompt AI siap dieksekusi.`);
+  }
+
+  // Initial call
+  updateSimulation();
+</script>
+
+</body>
+</html>

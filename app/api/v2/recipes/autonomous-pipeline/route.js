@@ -140,6 +140,11 @@ export const POST = withTenantContext(async (request, _context, user) => {
       is_bridging_active: isAffiliateEnabled
     };
 
+    const isRecipeEnabled = body.generate_recipe !== undefined
+      ? Boolean(body.generate_recipe)
+      : (body.generateRecipe !== undefined ? Boolean(body.generateRecipe) : undefined);
+    const recipeOverride = isRecipeEnabled !== undefined ? { generate_recipe: isRecipeEnabled } : {};
+
     let result;
     if (pipelineType === 'product_campaign') {
       result = await executeAutonomousProductPipeline({
@@ -181,6 +186,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
         tenantId,
         overrides: {
           ...affiliateOverride,
+          ...recipeOverride,
           ...(body.overrides || {})
         }
       });
@@ -220,6 +226,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
         motionTextStyle: body.motion_text_style || body.motionTextStyle || 'floating_white_yellow',
         overrides: {
           ...affiliateOverride,
+          ...recipeOverride,
           ...(body.overrides || {})
         },
         motionTextPosition: body.motion_text_position || body.motionTextPosition || 'bottom',
