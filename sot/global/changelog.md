@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.37.2 — Fix: Support private IP and Tailscale mesh for MCP operator client (09/11/2026)
+- Dukungan IP privat dan Tailscale 100.64.0.0/10 pada MCP operator client
+
 ## V2.37.1 — Fix: Allow Bearer auth in middleware for Auto Pipeline MCP endpoints (09/11/2026)
 - Izinkan Authorization Bearer header di middleware.js untuk rute Auto Pipeline
 

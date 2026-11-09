@@ -1,12 +1,21 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
+function isLocalOrPrivateHost(hostname) {
+  if (['localhost', '127.0.0.1', '[::1]'].includes(hostname)) return true;
+  if (/^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname)) return true;
+  if (/^192\.168\.\d{1,3}\.\d{1,3}$/.test(hostname)) return true;
+  if (/^172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}$/.test(hostname)) return true;
+  if (/^100\.(6[4-9]|[7-9]\d|1[0-1]\d|12[0-7])\.\d{1,3}\.\d{1,3}$/.test(hostname)) return true; // Tailscale 100.64.0.0/10
+  return false;
+}
+
 export function operatorClient({ baseUrl, token, fetchImpl = fetch }) {
   const base = new URL(baseUrl);
   if (!['http:', 'https:'].includes(base.protocol) || base.username || base.password || base.search || base.hash) {
     throw new Error('Invalid Operator base URL');
   }
-  if (base.protocol !== 'https:' && !['localhost', '127.0.0.1', '[::1]'].includes(base.hostname)) {
+  if (base.protocol !== 'https:' && !isLocalOrPrivateHost(base.hostname)) {
     throw new Error('Remote Operator API requires HTTPS');
   }
   if (!token) throw new Error('CF_STUDIO_OPERATOR_API_TOKEN is required');
