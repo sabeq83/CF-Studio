@@ -816,7 +816,7 @@ function ContentFlowHubPageContent() {
                     ContentFlow Publishing Tracker Hub
                   </h1>
                   <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: '2px 0 0' }}>
-                    Pusat pemantauan & manajemen status tayang konten media sosial dari seluruh mesin kampanye MAKNA Flow.
+                    Pusat pemantauan & manajemen status tayang konten media sosial dari seluruh mesin kampanye CF Studio.
                   </p>
                 </div>
               </div>

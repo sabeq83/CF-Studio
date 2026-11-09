@@ -473,14 +473,14 @@ export default function ReportsPage() {
               {tokenSubTab === 'models' && (
                 <div style={{ background: 'var(--surface)', border: '1px solid var(--border-subtle)', borderRadius: '14px', padding: '20px' }}>
                   <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '16px', color: 'var(--text-primary)' }}>
-                    Katalog Model Riil MAKNA Flow &amp; Tarif Resmi Paid Tier
+                    Katalog Model Riil CF Studio &amp; Tarif Resmi Paid Tier
                   </h3>
                   <div style={{ overflowX: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                       <thead>
                         <tr style={{ background: 'var(--surface-raised)', borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', textAlign: 'left' }}>
                           <th style={{ padding: '10px 14px' }}>Model Gemini</th>
-                          <th style={{ padding: '10px 14px' }}>Peran di MAKNA Flow</th>
+                          <th style={{ padding: '10px 14px' }}>Peran di CF Studio</th>
                           <th style={{ padding: '10px 14px' }}>Tarif Input / 1M</th>
                           <th style={{ padding: '10px 14px' }}>Tarif Output / 1M</th>
                           <th style={{ padding: '10px 14px' }}>Panggilan Bulan Ini</th>

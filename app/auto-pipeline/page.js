@@ -1733,7 +1733,7 @@ export default function AutoPipelinePage() {
           padding: '0 2rem'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            <span>MAKNA Flow</span>
+            <span>CF Studio</span>
             <span>/</span>
             <span>Workflow</span>
             <span>/</span>

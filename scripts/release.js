@@ -22,7 +22,7 @@ function getArg(flag) {
 }
 
 async function main() {
-  console.log('🚀 === ASISTEN RILIS OTOMATIS MAKNA === 🚀\n');
+  console.log('🚀 === ASISTEN RILIS OTOMATIS CF STUDIO === 🚀\n');
 
   try {
     // 1. Read package.json

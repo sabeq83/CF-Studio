@@ -379,7 +379,7 @@ export function ChannelDetailView({
             
             <div className={styles.formGroup}>
               <label htmlFor="kb-title-input">KB TITLE</label>
-              <input id="kb-title-input" className={styles.input} type="text" placeholder="e.g. Channel Profile MAKNA Flow" value={kbCreateTitle} onChange={e => setKbCreateTitle(e.target.value)} />
+              <input id="kb-title-input" className={styles.input} type="text" placeholder="e.g. Channel Profile CF Studio" value={kbCreateTitle} onChange={e => setKbCreateTitle(e.target.value)} />
             </div>
 
             {kbUploadMode === 'ai' ? (

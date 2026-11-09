@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.36.0 — Rebranding MAKNA Flow to CF Studio (09/11/2026)
+- Rebranding identitas aplikasi menjadi CF Studio
+- Migrasi remote repository ke https://github.com/sabeq83/CF-Studio.git
+- Pembaruan konfigurasi deployment atomic Mac Mini ke CF Studio
+
 ## V2.35.24 — Auto Pipeline Schedule Modal Format & Smart Brand Account Selection (09/11/2026)
 - Auto-fill Nama Pengenal Jadwal dengan format Type Video - Brand Profile -
 - Smart matching & auto-selection akun Repliz sesuai Brand Profile aktif

@@ -12,7 +12,7 @@ set -e
 # ── Config ───────────────────────────────────────────────────────────────────
 LINUX_USER="${1:-$(whoami)}"
 APP_DIR="/mnt/d/server/maknaflow-staging"   # Drive D:\server\maknaflow-staging
-GITHUB_REPO="https://github.com/sabeq83/maknaflow.git"
+GITHUB_REPO="https://github.com/sabeq83/CF-Studio.git"
 GITHUB_BRANCH="main"
 NODE_VERSION="20"
 PG_USER="maknaflow_staging"

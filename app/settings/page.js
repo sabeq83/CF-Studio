@@ -1014,7 +1014,7 @@ export default function SettingsPage() {
         <div className="page-container">
           <div className="page-header" style={{ marginBottom: '20px' }}>
             <h2>⚙ Settings</h2>
-            <p>Pusat Konfigurasi Engine AI, Storage, & Integrasi MAKNA Flow</p>
+            <p>Pusat Konfigurasi Engine AI, Storage, & Integrasi CF Studio</p>
           </div>
 
           {/* Toast Notification */}

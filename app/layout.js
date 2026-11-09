@@ -4,19 +4,19 @@ import './theme.css';
 export const metadata = {
   metadataBase: new URL('https://contentflow-stg.ast402.my.id'),
   title: {
-    default: 'ContentFlow — Create More. Do Less. | Internal AI Content Engine',
-    template: '%s | ContentFlow'
+    default: 'CF Studio — Create More. Do Less. | Autonomous AI Content Engine',
+    template: '%s | CF Studio'
   },
-  description: 'Internal enterprise AI content orchestration engine for strategic multi-channel video production, automated voice cloning, and distributed rendering.',
+  description: 'Enterprise autonomous AI content orchestration engine for strategic multi-channel video production, automated voice cloning, and distributed rendering.',
   icons: {
     icon: '/favicon.svg',
     apple: '/favicon.svg',
   },
   openGraph: {
-    title: 'ContentFlow — Create More. Do Less.',
-    description: 'Internal enterprise AI content orchestration engine for strategic video production.',
+    title: 'CF Studio — Create More. Do Less.',
+    description: 'Enterprise autonomous AI content orchestration engine for strategic video production.',
     url: 'https://contentflow-stg.ast402.my.id',
-    siteName: 'ContentFlow',
+    siteName: 'CF Studio',
     locale: 'id_ID',
     type: 'website',
   },

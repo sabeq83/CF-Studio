@@ -1,7 +1,7 @@
 export const DEV_ATOMIC_CONFIG = Object.freeze({
   environment: 'dev',
   host: 'masbenu@100.95.245.55',
-  repositoryUrl: 'https://github.com/sabeq83/maknaflow.git',
+  repositoryUrl: 'https://github.com/sabeq83/CF-Studio.git',
   legacyRoot: '/Users/masbenu/maknaflow-dev',
   atomicRoot: '/Users/masbenu/maknaflow-dev-atomic',
   sourceRoot: '/Users/masbenu/maknaflow-dev-atomic/source',
@@ -20,7 +20,7 @@ export const DEV_ATOMIC_CONFIG = Object.freeze({
 export const STAGING_ATOMIC_CONFIG = Object.freeze({
   environment: 'staging',
   host: 'masbenu@100.95.245.55',
-  repositoryUrl: 'https://github.com/sabeq83/maknaflow.git',
+  repositoryUrl: 'https://github.com/sabeq83/CF-Studio.git',
   legacyRoot: '/Users/masbenu/maknaflow-staging',
   atomicRoot: '/Users/masbenu/maknaflow-staging-atomic',
   sourceRoot: '/Users/masbenu/maknaflow-staging-atomic/source',

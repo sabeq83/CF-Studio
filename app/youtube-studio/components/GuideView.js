@@ -5,7 +5,7 @@ export function GuideView() {
     <article className={styles.guideContainer} style={{ padding: '24px', color: 'var(--text)' }}>
       <header style={{ marginBottom: '32px', borderBottom: '1px solid var(--border)', paddingBottom: '16px' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: 700, margin: '0 0 8px 0', color: 'var(--link)' }}>
-          📖 Panduan Penggunaan YouTube Studio MAKNA Flow
+          📖 Panduan Penggunaan YouTube Studio CF Studio
         </h1>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
           Panduan langkah-demi-langkah dari penyiapan dunia (Universe) hingga publikasi video final multi-speaker.
@@ -138,7 +138,7 @@ export function GuideView() {
       </section>
 
       <footer style={{ marginTop: '48px', borderTop: '1px solid var(--border)', paddingTop: '16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-        MAKNA Flow YouTube Studio Engine • Staging Environment
+        CF Studio YouTube Studio Engine • Staging Environment
       </footer>
     </article>
   );

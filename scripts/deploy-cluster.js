@@ -1,6 +1,6 @@
 /**
- * Automated Multi-Node Deployment Script for MAKNA Grid (3-Node Topology)
- * Target Remote Repo: https://github.com/sabeq83/maknaflow.git
+ * Automated Multi-Node Deployment Script for CF Studio (3-Node Topology)
+ * Target Remote Repo: https://github.com/sabeq83/CF-Studio.git
  * 
  * Usage: node scripts/deploy-cluster.js
  */
@@ -8,7 +8,7 @@
 import { execSync } from 'child_process';
 
 console.log('================================================================');
-console.log('🚀 MAKNA FLOW — 3-NODE CLUSTER AUTOMATED DEPLOYMENT');
+console.log('🚀 CF STUDIO — 3-NODE CLUSTER AUTOMATED DEPLOYMENT');
 console.log('================================================================');
 
 function runLocal(cmd) {
