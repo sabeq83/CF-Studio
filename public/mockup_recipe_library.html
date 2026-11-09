@@ -3,229 +3,176 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mockup UI: Pustaka Resep Kuliner (Curated Recipe Library)</title>
-  <link rel="stylesheet" href="/theme.css">
+  <title>Simulasi Mockup: Recipe Library UI Alignment & Proportion</title>
   <style>
-    /* 100% Semantic CSS Tokens dari app/theme.css (Embedded Standalone Support) */
-    :root, [data-theme='dark'] {
+    /* 100% Semantic CSS Design Tokens dari app/theme.css */
+    :root, [data-theme="dark"] {
       color-scheme: dark;
-      --radius: 12px;
-      --radius-xs: 6px;
+      --bg-primary: #0b0f19;
+      --bg-secondary: #111827;
+      --canvas: #0b0f19;
+      --surface: #111827;
+      --surface-raised: #1f2937;
+      --surface-interactive: #374151;
+      --surface-subtle: rgba(31, 41, 55, 0.5);
+      --border: #374151;
+      --border-subtle: #1f2937;
+      --border-strong: #4b5563;
+      --text-primary: #f9fafb;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --input-bg: #1f2937;
+      --action-primary: #2563eb;
+      --action-primary-hover: #1d4ed8;
+      --on-action-primary: #ffffff;
+      --status-success: #10b981;
+      --status-success-soft: rgba(16, 185, 129, 0.15);
+      --status-info: #0ea5e9;
+      --status-info-soft: rgba(14, 165, 233, 0.15);
+      --status-warning: #f59e0b;
+      --status-warning-soft: rgba(245, 158, 11, 0.15);
+      --status-danger: #ef4444;
+      --status-danger-soft: rgba(239, 68, 68, 0.15);
+      --overlay-backdrop: rgba(0, 0, 0, 0.7);
+      --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.3);
+      --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6);
+      --radius-xs: 4px;
       --radius-sm: 8px;
       --radius-md: 12px;
       --radius-lg: 16px;
-      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
       --sidebar-w: 260px;
-      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-      --canvas: #080c14;
-      --sidebar: #0c121e;
-      --surface: #101827;
-      --surface-raised: #162235;
-      --surface-interactive: #1c2a40;
-      --surface-hover: #22334b;
-      --input-bg: #0c1422;
-      --overlay-subtle: rgba(0, 0, 0, 0.24);
-      --overlay-backdrop: rgba(2, 6, 14, 0.76);
-      --text-primary: #f4f7fb;
-      --text-secondary: #b6c2d2;
-      --text-muted: #8290a5;
-      --text-disabled: #66758a;
-      --border-subtle: #26354a;
-      --border-strong: #3c506b;
-      --action-primary: #2dd4bf;
-      --action-primary-hover: #5eead4;
-      --on-action-primary: #042f2e;
-      --link: #67e8f9;
-      --link-hover: #a5f3fc;
-      --status-info: #60a5fa;
-      --status-info-soft: rgba(96, 165, 250, 0.14);
-      --status-success: #4ade80;
-      --status-success-soft: rgba(74, 222, 128, 0.14);
-      --status-warning: #fbbf24;
-      --status-warning-soft: rgba(251, 191, 36, 0.14);
-      --status-danger: #fb7185;
-      --status-danger-soft: rgba(251, 113, 133, 0.14);
-      --status-neutral: #a78bfa;
-      --status-neutral-soft: rgba(167, 139, 250, 0.14);
-      --focus-ring: #a78bfa;
-      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
-      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
 
-    [data-theme='light'] {
+    [data-theme="light"] {
       color-scheme: light;
-      --canvas: #f2f5f8;
-      --sidebar: #ffffff;
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --canvas: #f8fafc;
       --surface: #ffffff;
-      --surface-raised: #f7f9fc;
-      --surface-interactive: #edf2f7;
-      --surface-hover: #e6edf5;
+      --surface-raised: #f1f5f9;
+      --surface-interactive: #e2e8f0;
+      --surface-subtle: rgba(241, 245, 249, 0.8);
+      --border: #e2e8f0;
+      --border-subtle: #cbd5e1;
+      --border-strong: #94a3b8;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
       --input-bg: #ffffff;
-      --overlay-subtle: rgba(30, 41, 59, 0.08);
-      --overlay-backdrop: rgba(15, 23, 42, 0.54);
-      --text-primary: #152033;
-      --text-secondary: #40506a;
-      --text-muted: #66758a;
-      --text-disabled: #8794a6;
-      --border-subtle: #d8e0ea;
-      --border-strong: #aebccd;
-      --action-primary: #087f73;
-      --action-primary-hover: #06665d;
+      --action-primary: #2563eb;
+      --action-primary-hover: #1d4ed8;
       --on-action-primary: #ffffff;
-      --link: #075ea8;
-      --link-hover: #064b86;
-      --status-info: #1d63b7;
-      --status-info-soft: #e8f1fc;
-      --status-success: #177a43;
-      --status-success-soft: #e6f5ec;
-      --status-warning: #925c08;
-      --status-warning-soft: #fff3d7;
-      --status-danger: #b4233d;
-      --status-danger-soft: #fdebef;
-      --status-neutral: #6548bd;
-      --status-neutral-soft: #f0ecfb;
-      --focus-ring: #6548bd;
-      --shadow-card: 0 10px 30px rgba(15, 23, 42, 0.06);
-      --shadow-modal: 0 24px 60px rgba(15, 23, 42, 0.16);
+      --status-success: #059669;
+      --status-success-soft: rgba(5, 150, 105, 0.12);
+      --status-info: #0284c7;
+      --status-info-soft: rgba(2, 132, 199, 0.12);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.12);
+      --status-danger: #dc2626;
+      --status-danger-soft: rgba(220, 38, 38, 0.12);
+      --overlay-backdrop: rgba(15, 23, 42, 0.5);
+      --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.08);
+      --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.15);
     }
 
-    /* Universal Semantic Layout */
-    *, *::before, *::after {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
     body {
-      background-color: var(--canvas);
-      color: var(--text-primary);
-      font-family: var(--font-sans);
       margin: 0;
-      padding: 0;
-      display: flex;
-      min-height: 100vh;
-      line-height: 1.5;
+      font-family: var(--font-sans);
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* Sidebar Shell Simulation */
-    aside.sidebar {
+    /* Layout structure selaras MAKNA Flow */
+    .app-layout {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar-mock {
       width: var(--sidebar-w);
-      background-color: var(--sidebar);
-      border-right: 1px solid var(--border-subtle);
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
       display: flex;
       flex-direction: column;
-      flex-shrink: 0;
-      position: sticky;
-      top: 0;
-      height: 100vh;
-      overflow-y: auto;
-    }
-    .sidebar-header {
-      padding: 20px 18px 14px 18px;
-      border-bottom: 1px solid var(--border-subtle);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .brand-title {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--text-primary);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .nav-section {
-      padding: 16px 14px 6px 14px;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
-      text-transform: uppercase;
-    }
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 9px 16px;
-      color: var(--text-secondary);
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 500;
-      border-radius: var(--radius-xs);
-      margin: 2px 10px;
-      transition: all var(--transition);
-      cursor: pointer;
-    }
-    .nav-item:hover {
-      background-color: var(--surface-hover);
-      color: var(--text-primary);
-    }
-    .nav-item.active {
-      background-color: var(--surface-interactive);
-      color: var(--action-primary);
-      font-weight: 600;
-      border-left: 3px solid var(--action-primary);
-    }
-    .nav-badge-new {
-      margin-left: auto;
-      background: var(--action-primary);
-      color: var(--on-action-primary);
-      font-size: 10px;
-      font-weight: 700;
-      padding: 1px 6px;
-      border-radius: var(--radius-xs);
+      padding: 16px;
     }
 
-    /* Main Container */
-    main.main-content {
+    .main-content {
       flex: 1;
+      margin-left: var(--sidebar-w);
       min-width: 0;
-      background-color: var(--canvas);
-      padding: 28px 36px;
       overflow-y: auto;
+      height: 100vh;
+      background: var(--bg-primary);
     }
 
-    /* Topbar */
-    .topbar {
+    /* Perbandingan Container: Standard Proporsional vs Stretched Lama */
+    .page-container-standard {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 32px 28px;
+      transition: max-width 0.3s ease, padding 0.3s ease;
+    }
+
+    .page-container-stretched {
+      max-width: 100%;
+      margin: 0;
+      padding: 28px 36px;
+      transition: max-width 0.3s ease, padding 0.3s ease;
+    }
+
+    /* Typography & Header Selaras */
+    .page-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 24px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
       gap: 16px;
     }
-    .page-title h1 {
-      margin: 0 0 6px 0;
-      font-size: 24px;
+
+    .page-title {
+      font-size: 1.55rem;
       font-weight: 700;
-      color: var(--text-primary);
+      letter-spacing: -0.02em;
+      margin: 0 0 6px 0;
       display: flex;
       align-items: center;
       gap: 10px;
+      color: var(--text-primary);
     }
-    .page-title p {
+
+    .page-subtitle {
       margin: 0;
       color: var(--text-secondary);
-      font-size: 14px;
-    }
-    .topbar-actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+      font-size: 0.88rem;
+      line-height: 1.5;
     }
 
     /* Buttons */
     .btn {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
       padding: 9px 18px;
       font-size: 13px;
       font-weight: 600;
       border-radius: var(--radius-sm);
       cursor: pointer;
+      transition: all 0.15s ease;
       border: 1px solid transparent;
-      transition: background var(--transition), border-color var(--transition);
       text-decoration: none;
     }
+
     .btn-primary {
       background-color: var(--action-primary);
       color: var(--on-action-primary);
@@ -233,199 +180,175 @@
     .btn-primary:hover {
       background-color: var(--action-primary-hover);
     }
+
     .btn-secondary {
       background-color: var(--surface-raised);
-      border-color: var(--border-subtle);
+      border-color: var(--border);
       color: var(--text-primary);
     }
     .btn-secondary:hover {
       background-color: var(--surface-interactive);
-      border-color: var(--border-strong);
-    }
-    .btn-theme-toggle {
-      background: var(--surface-raised);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-secondary);
-      border-radius: var(--radius-sm);
-      padding: 8px 12px;
-      cursor: pointer;
-      font-size: 12px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
     }
 
-    /* Metrics Grid */
-    .metrics-grid {
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    /* Metrics Grid Selaras */
+    .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      grid-template-columns: repeat(4, 1fr);
       gap: 16px;
       margin-bottom: 24px;
     }
-    .metric-card {
+
+    @media (max-width: 1024px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .stat-card {
       background-color: var(--surface);
-      border: 1px solid var(--border-subtle);
+      border: 1px solid var(--border);
       border-radius: var(--radius-md);
       padding: 16px 20px;
       box-shadow: var(--shadow-card);
     }
-    .metric-label {
-      font-size: 12px;
-      font-weight: 500;
+
+    .stat-title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
       color: var(--text-muted);
-      margin-bottom: 6px;
+      margin-bottom: 8px;
       display: flex;
-      align-items: center;
       justify-content: space-between;
-    }
-    .metric-value {
-      font-size: 26px;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-    .metric-sub {
-      font-size: 12px;
-      color: var(--text-secondary);
-      margin-top: 4px;
+      align-items: center;
     }
 
-    /* Filter & Search Bar */
+    .stat-value {
+      font-size: 1.65rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.1;
+    }
+
+    .stat-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 6px;
+    }
+
+    /* Filter Card */
     .filter-card {
       background-color: var(--surface);
-      border: 1px solid var(--border-subtle);
+      border: 1px solid var(--border);
       border-radius: var(--radius-md);
-      padding: 16px 20px;
+      padding: 14px 18px;
       margin-bottom: 20px;
       display: flex;
       flex-wrap: wrap;
+      gap: 12px;
       align-items: center;
-      gap: 14px;
       box-shadow: var(--shadow-card);
     }
-    .search-input-wrap {
+
+    .search-input-wrapper {
       flex: 1;
       min-width: 240px;
       position: relative;
     }
-    .search-input-wrap input {
+
+    .search-input {
       width: 100%;
       background-color: var(--input-bg);
-      border: 1px solid var(--border-subtle);
+      border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      padding: 9px 14px 9px 36px;
+      padding: 8px 14px 8px 34px;
       font-size: 13px;
       color: var(--text-primary);
     }
-    .search-input-wrap input:focus {
-      outline: none;
-      border-color: var(--action-primary);
-    }
-    .search-icon {
-      position: absolute;
-      left: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted);
-      pointer-events: none;
-    }
-    .filter-select {
-      background-color: var(--input-bg);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
-      color: var(--text-primary);
-      padding: 9px 12px;
-      font-size: 13px;
-      min-width: 150px;
-    }
-    .filter-select:focus {
+    .search-input:focus {
       outline: none;
       border-color: var(--action-primary);
     }
 
-    /* Table Container */
+    .select-control {
+      background-color: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      padding: 8px 12px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    /* Table Container & Proporsi Kolom */
     .table-card {
       background-color: var(--surface);
-      border: 1px solid var(--border-subtle);
+      border: 1px solid var(--border);
       border-radius: var(--radius-md);
       box-shadow: var(--shadow-card);
       overflow: hidden;
     }
-    table.recipe-table {
+
+    .recipe-table {
       width: 100%;
       border-collapse: collapse;
       font-size: 13px;
       text-align: left;
     }
-    table.recipe-table th {
+
+    .recipe-table th {
       background-color: var(--surface-raised);
-      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
       padding: 12px 16px;
-      font-weight: 600;
-      border-bottom: 1px solid var(--border-subtle);
-      white-space: nowrap;
-    }
-    table.recipe-table td {
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--border-subtle);
-      vertical-align: middle;
-      color: var(--text-primary);
-    }
-    table.recipe-table tr:hover td {
-      background-color: var(--surface-hover);
-    }
-    .recipe-meta-sub {
-      font-size: 11px;
       color: var(--text-muted);
-      margin-top: 3px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .recipe-meta-sub a {
-      color: var(--link);
-      text-decoration: none;
-    }
-    .recipe-meta-sub a:hover {
-      text-decoration: underline;
+      font-weight: 600;
+      font-size: 12px;
     }
 
-    /* Badges */
+    .recipe-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      vertical-align: top;
+    }
+
+    .recipe-table tr:hover {
+      background-color: var(--surface-interactive);
+    }
+
     .badge {
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      padding: 3px 8px;
+      padding: 2px 8px;
       border-radius: var(--radius-xs);
       font-size: 11px;
       font-weight: 600;
-      white-space: nowrap;
-    }
-    .badge-frozen {
-      background-color: var(--status-info-soft);
-      color: var(--status-info);
-      border: 1px solid var(--status-info);
-    }
-    .badge-polished {
-      background-color: var(--status-success-soft);
-      color: var(--status-success);
-    }
-    .badge-raw {
-      background-color: var(--status-warning-soft);
-      color: var(--status-warning);
-    }
-    .badge-category {
-      background-color: var(--surface-interactive);
-      color: var(--text-secondary);
-      border: 1px solid var(--border-subtle);
     }
 
-    /* Modal Styles */
+    /* Floating Simulator Switcher Pill */
+    .switcher-pill {
+      position: fixed;
+      top: 16px;
+      right: 24px;
+      z-index: 999;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-strong);
+      padding: 8px 16px;
+      border-radius: 30px;
+      box-shadow: var(--shadow-modal);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      font-size: 12px;
+    }
+
+    /* Modal Backdrop & Dialog */
     .modal-backdrop {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       background-color: var(--overlay-backdrop);
       display: flex;
       align-items: center;
@@ -433,635 +356,349 @@
       z-index: 1000;
       padding: 20px;
     }
-    .modal-content {
+
+    .modal-dialog {
       background-color: var(--surface);
-      border: 1px solid var(--border-subtle);
+      border: 1px solid var(--border);
       border-radius: var(--radius-lg);
       box-shadow: var(--shadow-modal);
       width: 100%;
-      max-width: 820px;
-      max-height: 90vh;
+      max-width: 780px;
+      max-height: 88vh;
       overflow-y: auto;
       padding: 26px;
-    }
-    .modal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-      padding-bottom: 14px;
-      border-bottom: 1px solid var(--border-subtle);
-    }
-    .modal-header h2 {
-      margin: 0;
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-    .btn-close {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-size: 20px;
-      cursor: pointer;
-      padding: 4px;
-    }
-    .btn-close:hover {
-      color: var(--text-primary);
-    }
-
-    /* Guardrail Alert in Modal */
-    .guardrail-box {
-      background-color: var(--status-info-soft);
-      border: 1px solid var(--status-info);
-      border-radius: var(--radius-sm);
-      padding: 12px 16px;
-      margin-bottom: 18px;
-      font-size: 13px;
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      color: var(--text-primary);
-    }
-
-    /* Log Box */
-    .log-box {
-      background-color: var(--canvas);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
-      padding: 12px;
-      font-family: var(--font-mono);
-      font-size: 12px;
-      max-height: 140px;
-      overflow-y: auto;
-      margin-top: 14px;
-      color: var(--text-secondary);
-    }
-    .log-line { margin-bottom: 4px; }
-    .log-success { color: var(--status-success); }
-    .log-warning { color: var(--status-warning); }
-    .log-info { color: var(--status-info); }
-
-    /* Progress bar */
-    .progress-bar-wrap {
-      background-color: var(--surface-raised);
-      border-radius: var(--radius-xs);
-      height: 8px;
-      overflow: hidden;
-      margin: 14px 0 8px 0;
-    }
-    .progress-bar-fill {
-      background-color: var(--action-primary);
-      height: 100%;
-      width: 0%;
-      transition: width 0.3s ease;
     }
   </style>
 </head>
 <body>
 
-  <!-- SIMULASI SIDEBAR CF STUDIO -->
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <div class="brand-title">
-        <span>⚡</span> CF STUDIO
+  <!-- Floating Simulator Switcher Bar -->
+  <div class="switcher-pill">
+    <span style="font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 4px;">
+      <span>📐</span> Mode Lebar Container:
+    </span>
+    <button id="toggleLayoutBtn" class="btn btn-secondary btn-sm" onclick="toggleLayoutMode()">
+      ✅ Mode Baru: Proporsional (1280px Page Container)
+    </button>
+    <button class="btn btn-secondary btn-sm" onclick="toggleTheme()">
+      🌓 Ganti Light / Dark
+    </button>
+  </div>
+
+  <div class="app-layout">
+    <!-- Sidebar Mockup -->
+    <aside class="sidebar-mock">
+      <div style="padding: 8px 4px 16px; border-bottom: 1px solid var(--border);">
+        <strong style="font-size: 15px; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+          <span>⚡</span> MAKNA Flow
+        </strong>
+        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Studio Creative Automation</div>
       </div>
-      <button class="btn-theme-toggle" onclick="toggleTheme();" title="Beralih Light/Dark Mode">
-        <span id="themeIcon">☀️</span>
-      </button>
-    </div>
-
-    <div class="nav-section">PLANNING</div>
-    <div class="nav-item"><span>🗓️</span> Content Planner</div>
-    <div class="nav-item"><span>📦</span> Product Database</div>
-    <!-- MENU BARU DI SIDEBAR -->
-    <div class="nav-item active">
-      <span>🍲</span> Recipe Library
-      <span class="nav-badge-new">NEW</span>
-    </div>
-    <div class="nav-item"><span>🔬</span> Deconstruct Lab</div>
-    <div class="nav-item"><span>🎛️</span> Preset Manager</div>
-    <div class="nav-item"><span>🎨</span> Visual Identity</div>
-    <div class="nav-item"><span>🧬</span> Brand Profile</div>
-
-    <div class="nav-section">WORKFLOW</div>
-    <div class="nav-item"><span>⚡</span> Auto Pipeline</div>
-    <div class="nav-item"><span>▶️</span> YouTube Studio</div>
-    <div class="nav-item"><span>🍳</span> Recipe Labs</div>
-    <div class="nav-item"><span>🚀</span> Instant Campaign</div>
-    <div class="nav-item"><span>🎛️</span> Multiplier Lab</div>
-
-    <div class="nav-section">PUBLISHING</div>
-    <div class="nav-item"><span>📱</span> Recipe Exporter</div>
-    <div class="nav-item"><span>✨</span> ContentFlow Studio</div>
-  </aside>
-
-  <!-- KONTEN UTAMA HALAMAN RECIPE LIBRARY -->
-  <main class="main-content">
-    <div class="topbar">
-      <div class="page-title">
-        <h1>🍲 Pustaka Resep Kuliner (Recipe Library)</h1>
-        <p>Pustaka resep otoritatif terkurasi dengan perlindungan takaran asli 100% & AI Magic Polish untuk produksi video reels memasak.</p>
-      </div>
-      <div class="topbar-actions">
-        <button class="btn btn-secondary" onclick="exportLibraryJson();">
-          <span>📥</span> Ekspor JSON
-        </button>
-        <button class="btn btn-primary" onclick="openImportModal();">
-          <span>⚡</span> Impor Batch Resep (Max 50 URL)
-        </button>
-      </div>
-    </div>
-
-    <!-- METRICS CARDS -->
-    <div class="metrics-grid">
-      <div class="metric-card">
-        <div class="metric-label">
-          <span>TOTAL RESEP TERKURASI</span>
-          <span>📚</span>
+      <nav style="margin-top: 16px; display: grid; gap: 6px; font-size: 13px;">
+        <div style="padding: 8px 12px; border-radius: var(--radius-sm); color: var(--text-secondary);">🚀 Auto-Pipeline</div>
+        <div style="padding: 8px 12px; border-radius: var(--radius-sm); color: var(--text-secondary);">📦 Product Database</div>
+        <div style="padding: 8px 12px; border-radius: var(--radius-sm); background: var(--surface-interactive); color: var(--action-primary); font-weight: 700;">
+          🍲 Recipe Library (Aktif)
         </div>
-        <div class="metric-value" id="statTotal">3</div>
-        <div class="metric-sub">Dari portal kuliner otoritatif</div>
+        <div style="padding: 8px 12px; border-radius: var(--radius-sm); color: var(--text-secondary);">🧪 Deconstruct Lab</div>
+        <div style="padding: 8px 12px; border-radius: var(--radius-sm); color: var(--text-secondary);">🎛️ Preset Manager</div>
+      </nav>
+      <div style="margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text-muted);">
+        v2.40.5 Staging
       </div>
+    </aside>
 
-      <div class="metric-card">
-        <div class="metric-label">
-          <span>AI MAGIC POLISHED</span>
-          <span>✨</span>
-        </div>
-        <div class="metric-value" id="statPolished" style="color:var(--status-success);">3</div>
-        <div class="metric-sub">Title, intro & langkah ter-polish</div>
-      </div>
+    <!-- Main Content Area dengan margin-left: var(--sidebar-w) -->
+    <main class="main-content">
+      <!-- Container yang bisa di-toggle antara Proporsional (.page-container-standard) dan Stretched (.page-container-stretched) -->
+      <div id="pageContainer" class="page-container-standard">
 
-      <div class="metric-card">
-        <div class="metric-label">
-          <span>BAHAN 100% TERKUNCI</span>
-          <span>🔒</span>
-        </div>
-        <div class="metric-value" id="statFrozen" style="color:var(--status-info);">100%</div>
-        <div class="metric-sub">Zero halusinasi takaran bahan</div>
-      </div>
+        <!-- Topbar Header Selaras -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">
+              <span>🍲</span> Pustaka Resep Kuliner (Recipe Library)
+            </h1>
+            <p class="page-subtitle">
+              Pustaka resep kuliner otoritatif dengan takaran 100% terkunci asli &amp; AI sensory polish untuk video reels TikTok &amp; YouTube Shorts.
+            </p>
+          </div>
 
-      <div class="metric-card">
-        <div class="metric-label">
-          <span>SIAP PRODUKSI VIDEO</span>
-          <span>🎬</span>
-        </div>
-        <div class="metric-value">3</div>
-        <div class="metric-sub">Prompt visual 5-layer siap pakai</div>
-      </div>
-    </div>
-
-    <!-- FILTER & SEARCH BAR -->
-    <div class="filter-card">
-      <div class="search-input-wrap">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="searchInput" placeholder="Cari judul resep, bahan, atau sumber..." oninput="filterTable();">
-      </div>
-
-      <select class="filter-select" id="categoryFilter" onchange="filterTable();">
-        <option value="">Semua Kategori</option>
-        <option value="makanan_utama">Makanan Utama</option>
-        <option value="masakan">Masakan Tradisional</option>
-        <option value="dessert">Dessert & Kue</option>
-      </select>
-
-      <select class="filter-select" id="polishFilter" onchange="filterTable();">
-        <option value="">Semua Status Polish</option>
-        <option value="polished">✓ AI Polished</option>
-        <option value="unpolished">Data Mentah</option>
-      </select>
-
-      <select class="filter-select" id="domainFilter" onchange="filterTable();">
-        <option value="">Semua Portal Web</option>
-        <option value="cookpad.com">cookpad.com</option>
-        <option value="masakapahariini.com">masakapahariini.com</option>
-      </select>
-    </div>
-
-    <!-- TABEL PUSTAKA RESEP -->
-    <div class="table-card">
-      <table class="recipe-table">
-        <thead>
-          <tr>
-            <th>Resep & Sumber Asli</th>
-            <th>Judul Ter-Polish (AI)</th>
-            <th>Bahan Baku (100% Asli)</th>
-            <th>Waktu & Porsi</th>
-            <th>Status</th>
-            <th style="text-align:right;">Aksi</th>
-          </tr>
-        </thead>
-        <tbody id="recipeTableBody">
-          <!-- Item 1 -->
-          <tr data-title="ayam woku belanga" data-category="makanan_utama" data-polish="polished" data-domain="cookpad.com">
-            <td>
-              <strong style="color:var(--text-primary);">Ayam Woku Belanga</strong>
-              <div class="recipe-meta-sub">
-                <span>cookpad.com</span> • <a href="https://cookpad.com/id/resep/17492811-ayam-woku-belanga" target="_blank">Lihat Sumber ↗</a>
-              </div>
-            </td>
-            <td>
-              <span class="badge badge-polished">✓ AI Polished</span>
-              <div style="font-weight:600; color:var(--action-primary); margin-top:3px;">
-                Ayam Woku Belanga Khas Manado: Kuah Kental Pedas Gurih Aroma Kemangi
-              </div>
-            </td>
-            <td>
-              <span class="badge badge-frozen">🔒 7 Bahan Terkunci</span>
-              <div style="font-size:11px; color:var(--text-secondary); margin-top:3px;">
-                1 ekor ayam kampung, 5 ikat kemangi, 3 batang serai...
-              </div>
-            </td>
-            <td>
-              <div style="font-size:12px; color:var(--text-secondary);">⏱ 35 mnt</div>
-              <div style="font-size:11px; color:var(--text-muted);">🍽 5 porsi</div>
-            </td>
-            <td>
-              <span class="badge badge-category">Makanan Utama</span>
-            </td>
-            <td style="text-align:right; white-space:nowrap;">
-              <button class="btn btn-secondary" style="padding:5px 10px; font-size:12px;" onclick="viewRecipeDetail(0);">
-                👁 Detail
-              </button>
-              <button class="btn btn-primary" style="padding:5px 12px; font-size:12px;" onclick="alert('Memicu render video memasak di Auto Pipeline!');">
-                🎬 Buat Video
-              </button>
-            </td>
-          </tr>
-
-          <!-- Item 2 -->
-          <tr data-title="tumis buncis daging cincang" data-category="makanan_utama" data-polish="polished" data-domain="masakapahariini.com">
-            <td>
-              <strong style="color:var(--text-primary);">Tumis Buncis Daging Cincang</strong>
-              <div class="recipe-meta-sub">
-                <span>masakapahariini.com</span> • <a href="https://www.masakapahariini.com/resep/tumis-buncis-daging" target="_blank">Lihat Sumber ↗</a>
-              </div>
-            </td>
-            <td>
-              <span class="badge badge-polished">✓ AI Polished</span>
-              <div style="font-weight:600; color:var(--action-primary); margin-top:3px;">
-                Tumis Buncis Daging Cincang ala Resto: Renyah Gurih Manis Saus Tiram
-              </div>
-            </td>
-            <td>
-              <span class="badge badge-frozen">🔒 6 Bahan Terkunci</span>
-              <div style="font-size:11px; color:var(--text-secondary); margin-top:3px;">
-                250 gr buncis muda, 100 gr daging cincang, saus tiram...
-              </div>
-            </td>
-            <td>
-              <div style="font-size:12px; color:var(--text-secondary);">⏱ 15 mnt</div>
-              <div style="font-size:11px; color:var(--text-muted);">🍽 3 porsi</div>
-            </td>
-            <td>
-              <span class="badge badge-category">Makanan Utama</span>
-            </td>
-            <td style="text-align:right; white-space:nowrap;">
-              <button class="btn btn-secondary" style="padding:5px 10px; font-size:12px;" onclick="viewRecipeDetail(1);">
-                👁 Detail
-              </button>
-              <button class="btn btn-primary" style="padding:5px 12px; font-size:12px;" onclick="alert('Memicu render video memasak di Auto Pipeline!');">
-                🎬 Buat Video
-              </button>
-            </td>
-          </tr>
-
-          <!-- Item 3 -->
-          <tr data-title="mousse cokelat alpukat sehat" data-category="dessert" data-polish="polished" data-domain="cookpad.com">
-            <td>
-              <strong style="color:var(--text-primary);">Mousse Cokelat Alpukat Sehat</strong>
-              <div class="recipe-meta-sub">
-                <span>cookpad.com</span> • <a href="https://cookpad.com/id/resep/16829104-mousse-cokelat" target="_blank">Lihat Sumber ↗</a>
-              </div>
-            </td>
-            <td>
-              <span class="badge badge-polished">✓ AI Polished</span>
-              <div style="font-weight:600; color:var(--action-primary); margin-top:3px;">
-                Mousse Cokelat Alpukat Lumer: Dessert Sehat Creamy 5 Menit Tanpa Mixer
-              </div>
-            </td>
-            <td>
-              <span class="badge badge-frozen">🔒 4 Bahan Terkunci</span>
-              <div style="font-size:11px; color:var(--text-secondary); margin-top:3px;">
-                2 buah alpukat mentega, 4 sdm cokelat bubuk, madu murni...
-              </div>
-            </td>
-            <td>
-              <div style="font-size:12px; color:var(--text-secondary);">⏱ 5 mnt</div>
-              <div style="font-size:11px; color:var(--text-muted);">🍽 2 porsi</div>
-            </td>
-            <td>
-              <span class="badge badge-category">Dessert</span>
-            </td>
-            <td style="text-align:right; white-space:nowrap;">
-              <button class="btn btn-secondary" style="padding:5px 10px; font-size:12px;" onclick="viewRecipeDetail(2);">
-                👁 Detail
-              </button>
-              <button class="btn btn-primary" style="padding:5px 12px; font-size:12px;" onclick="alert('Memicu render video memasak di Auto Pipeline!');">
-                🎬 Buat Video
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </main>
-
-  <!-- MODAL BATCH IMPORTER -->
-  <div id="importModal" class="modal-backdrop" style="display:none;">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>⚡ Impor Batch Resep Otoritatif (Hingga 50 URL)</h2>
-        <button class="btn-close" onclick="closeImportModal();">&times;</button>
-      </div>
-
-      <div class="guardrail-box">
-        <span style="font-size:18px;">🔒</span>
-        <div>
-          <strong>Strict Guardrail Otoritatif Aktif:</strong>
-          <div style="color:var(--text-secondary); margin-top:2px;">
-            Bahan resep (<em>ingredients</em>) beserta takaran gram/sendok/siung <strong>DIKUNCI 100% ASLI & TIDAK BOLEH DIPOLES</strong>. AI hanya memoles Judul, Intro, dan Langkah Masak sensori untuk video.
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <button class="btn btn-secondary" onclick="alert('Simulasi: Ekspor JSON berhasil diunduh.')">
+              <span>📥</span> Ekspor JSON
+            </button>
+            <button class="btn btn-primary" onclick="openModal('importModal')">
+              <span>⚡</span> Impor Batch Resep (Maks 50 URL)
+            </button>
           </div>
         </div>
-      </div>
 
-      <div style="margin-bottom:16px;">
-        <label style="display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">
-          Masukkan daftar URL resep (satu baris per URL, maks 50):
-        </label>
-        <textarea id="modalUrls" style="width:100%; min-height:110px; background:var(--input-bg); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); color:var(--text-primary); padding:10px 12px; font-family:var(--font-mono); font-size:12px; line-height:1.5;">https://cookpad.com/id/resep/17492811-ayam-woku-belanga-khas-manado
-https://www.masakapahariini.com/resep/tumis-buncis-daging-cincang-gurih
-https://cookpad.com/id/resep/16829104-mousse-cokelat-alpukat-sehat-diet</textarea>
-      </div>
+        <!-- Metrics Grid (4 Kolom Proporsional) -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-title">
+              <span>TOTAL RESEP TERKURASI</span>
+              <span>📚</span>
+            </div>
+            <div class="stat-value">254</div>
+            <div class="stat-desc">Tersimpan di PostgreSQL DB</div>
+          </div>
 
-      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:14px; margin-bottom:18px;">
-        <div>
-          <label style="display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:4px;">Gaya Foto (AI Prompt):</label>
-          <select id="modalStyle" class="filter-select" style="width:100%;">
-            <option value="Food Porn" selected>Food Porn (Mengkilap & Sizzling)</option>
-            <option value="Modern Fine Dining">Modern Fine Dining (Minimalis)</option>
-            <option value="Rustic Comfort Food">Rustic Comfort Food (Hangat)</option>
+          <div class="stat-card">
+            <div class="stat-title">
+              <span>AI MAGIC POLISHED</span>
+              <span>✨</span>
+            </div>
+            <div class="stat-value" style="color: var(--status-success);">254</div>
+            <div class="stat-desc">Judul, intro &amp; langkah ter-polish</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-title">
+              <span>BAHAN 100% TERKUNCI</span>
+              <span>🔒</span>
+            </div>
+            <div class="stat-value" style="color: var(--status-info);">100%</div>
+            <div class="stat-desc">Zero halusinasi takaran bahan</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-title">
+              <span>SIAP PRODUKSI VIDEO</span>
+              <span>🎬</span>
+            </div>
+            <div class="stat-value">254</div>
+            <div class="stat-desc">Prompt visual 5-layer siap pakai</div>
+          </div>
+        </div>
+
+        <!-- Filter & Search Card -->
+        <div class="filter-card">
+          <div class="search-input-wrapper">
+            <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 13px;">🔍</span>
+            <input type="text" class="search-input" placeholder="Cari nama resep, bahan baku, atau sumber kuliner..." />
+          </div>
+
+          <select class="select-control">
+            <option value="">Semua Kategori</option>
+            <option value="makanan_utama">Makanan Utama</option>
+            <option value="masakan">Masakan Tradisional</option>
+            <option value="dessert">Dessert &amp; Kue</option>
+            <option value="minuman">Minuman</option>
           </select>
-        </div>
 
-        <div>
-          <label style="display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:4px;">Jeda Antar URL (Anti-Bot):</label>
-          <select id="modalDelay" class="filter-select" style="width:100%;">
-            <option value="random-10-20" selected>Acak 10 - 20 Detik (Rekomendasi Human Behavior)</option>
-            <option value="demo-fast">Simulasi Kilat Demo (1.5 - 2.5 Detik)</option>
+          <select class="select-control">
+            <option value="">Semua Status Polish</option>
+            <option value="polished">✓ AI Polished</option>
+            <option value="unpolished">Data Mentah</option>
           </select>
+
+          <select class="select-control">
+            <option value="">Semua Portal Web</option>
+            <option value="cookpad.com">cookpad.com</option>
+            <option value="masakapahariini.com">masakapahariini.com</option>
+          </select>
+
+          <button class="btn btn-secondary" onclick="alert('Data disegarkan.')">
+            🔄 Refresh
+          </button>
         </div>
+
+        <!-- Recipe Table Card dengan Lebar Kolom Terukur Proporsional -->
+        <div class="table-card">
+          <table class="recipe-table">
+            <thead>
+              <tr>
+                <th style="width: 28%;">Resep &amp; Sumber Asli</th>
+                <th style="width: 26%;">Judul Ter-Polish (AI)</th>
+                <th style="width: 20%;">Bahan Baku (100% Asli)</th>
+                <th style="width: 10%;">Waktu &amp; Porsi</th>
+                <th style="width: 8%;">Kategori</th>
+                <th style="width: 8%; text-align: right;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <strong style="color: var(--text-primary); font-size: 13.5px;">Ayam Woku Belanga Khas Manado</strong>
+                  <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px; display: flex; align-items: center; gap: 6px;">
+                    <span>cookpad.com</span> • <a href="#" style="color: var(--action-primary); text-decoration: none;">Lihat Sumber ↗</a>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge" style="background: var(--status-success-soft); color: var(--status-success);">
+                    ✓ AI Polished
+                  </span>
+                  <div style="font-weight: 600; color: var(--action-primary); margin-top: 4px; line-height: 1.4;">
+                    Ayam Woku Belanga Pedas Harum Daun Kemangi Menggoda
+                  </div>
+                </td>
+                <td>
+                  <span class="badge" style="background: var(--status-info-soft); color: var(--status-info); border: 1px solid var(--status-info);">
+                    🔒 12 Bahan Terkunci
+                  </span>
+                  <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+                    Daging ayam 500g, daun kemangi 2 ikat, sereh...
+                  </div>
+                </td>
+                <td>
+                  <div style="color: var(--text-secondary);">⏱ 45 Menit</div>
+                  <div style="color: var(--text-muted); font-size: 11px;">🍽 4 Porsi</div>
+                </td>
+                <td>
+                  <span class="badge" style="background: var(--surface-interactive); color: var(--text-secondary);">
+                    Makanan Utama
+                  </span>
+                </td>
+                <td style="text-align: right; white-space: nowrap;">
+                  <button class="btn btn-secondary btn-sm" onclick="openModal('detailModal')">👁 Detail</button>
+                  <button class="btn btn-primary btn-sm" onclick="alert('Membuka modal 1-klik Auto-Pipeline untuk resep ini!')">🎬 Buat Video</button>
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  <strong style="color: var(--text-primary); font-size: 13.5px;">Tumis Buncis Daging Cincang Gurih</strong>
+                  <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px; display: flex; align-items: center; gap: 6px;">
+                    <span>masakapahariini.com</span> • <a href="#" style="color: var(--action-primary); text-decoration: none;">Lihat Sumber ↗</a>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge" style="background: var(--status-success-soft); color: var(--status-success);">
+                    ✓ AI Polished
+                  </span>
+                  <div style="font-weight: 600; color: var(--action-primary); margin-top: 4px; line-height: 1.4;">
+                    Tumis Buncis Renyah Bawang Gurih dengan Daging Cincang Juicy
+                  </div>
+                </td>
+                <td>
+                  <span class="badge" style="background: var(--status-info-soft); color: var(--status-info); border: 1px solid var(--status-info);">
+                    🔒 8 Bahan Terkunci
+                  </span>
+                  <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+                    Buncis muda 250g, daging sapi cincang 150g...
+                  </div>
+                </td>
+                <td>
+                  <div style="color: var(--text-secondary);">⏱ 20 Menit</div>
+                  <div style="color: var(--text-muted); font-size: 11px;">🍽 3 Porsi</div>
+                </td>
+                <td>
+                  <span class="badge" style="background: var(--surface-interactive); color: var(--text-secondary);">
+                    Masakan
+                  </span>
+                </td>
+                <td style="text-align: right; white-space: nowrap;">
+                  <button class="btn btn-secondary btn-sm" onclick="openModal('detailModal')">👁 Detail</button>
+                  <button class="btn btn-primary btn-sm" onclick="alert('Membuka modal 1-klik Auto-Pipeline untuk resep ini!')">🎬 Buat Video</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL DETAIL SIMULASI -->
+  <div id="detailModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-dialog">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+        <div>
+          <span class="badge" style="background: var(--status-success-soft); color: var(--status-success); margin-bottom: 6px;">
+            ✓ Pustaka Resep Otoritatif
+          </span>
+          <h2 style="margin: 0; font-size: 18px; color: var(--action-primary);">
+            Ayam Woku Belanga Pedas Harum Daun Kemangi Menggoda
+          </h2>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+            Judul Asli: <em>Ayam Woku Belanga Khas Manado</em> • Sumber: cookpad.com
+          </div>
+        </div>
+        <button onclick="closeModal('detailModal')" style="background:none; border:none; color:var(--text-muted); font-size:22px; cursor:pointer;">&times;</button>
       </div>
 
-      <!-- Real-time Progress & Terminal Log -->
-      <div id="modalProgressSection" style="display:none; margin-bottom:18px;">
-        <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:600;">
-          <span id="modalProgressText" style="color:var(--text-primary);">Memproses 1 dari 3...</span>
-          <span id="modalProgressPct" style="color:var(--action-primary);">33%</span>
-        </div>
-        <div class="progress-bar-wrap">
-          <div class="progress-bar-fill" id="modalProgressBar"></div>
-        </div>
-        <div class="log-box" id="modalLogTerminal"></div>
+      <div style="border-left: 3px solid var(--action-primary); padding-left: 12px; font-style: italic; color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">
+        "Ayam woku belanga khas Manado dengan perpaduan rempah kuning pekat, harum daun pandan serta kemangi segar yang mendidih lembut."
       </div>
 
-      <div style="display:flex; justify-content:flex-end; gap:10px;">
-        <button class="btn btn-secondary" onclick="closeImportModal();">Batal</button>
-        <button class="btn btn-primary" id="btnModalStart" onclick="runModalImport();">
-          <span>⚡</span> Mulai Impor Sekuensial
-        </button>
+      <div style="background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 16px;">
+        <div style="font-size: 11px; font-weight: 700; color: var(--status-info); margin-bottom: 8px;">
+          🔒 BAHAN ASLI 100% TERKUNCI (FROZEN - TANPA HALUSINASI AI)
+        </div>
+        <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: var(--text-primary); line-height: 1.6;">
+          <li>500 gram Daging Ayam (potong 8 bagian)</li>
+          <li>2 ikat Daun Kemangi segar</li>
+          <li>2 batang Sereh (memarkan)</li>
+          <li>1 lembar Daun Pandan wangi</li>
+          <li>4 lembar Daun Jeruk purut</li>
+        </ul>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button class="btn btn-secondary btn-sm" onclick="closeModal('detailModal')">Tutup</button>
+        <button class="btn btn-primary btn-sm" onclick="alert('Lanjut ke pipeline video!'); closeModal('detailModal');">🎬 Buat Video Sekarang</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL DETAIL RESEP -->
-  <div id="detailModal" class="modal-backdrop" style="display:none;">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2 id="detailTitle">Detail Resep Terkurasi</h2>
-        <button class="btn-close" onclick="closeDetailModal();">&times;</button>
+  <!-- MODAL IMPOR SIMULASI -->
+  <div id="importModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-dialog">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+        <h2 style="margin: 0; font-size: 18px; color: var(--text-primary);">
+          ⚡ Impor Batch Resep Otoritatif (Hingga 50 URL)
+        </h2>
+        <button onclick="closeModal('importModal')" style="background:none; border:none; color:var(--text-muted); font-size:22px; cursor:pointer;">&times;</button>
       </div>
 
-      <div style="margin-bottom:18px;">
-        <span class="badge badge-frozen" style="margin-bottom:8px;">🔒 BAHAN ASLI 100% TERKUNCI (FROZEN)</span>
-        <div style="background:var(--surface-raised); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:14px; margin-top:8px;">
-          <ul id="detailIngredientsList" style="margin:0; padding-left:20px; font-size:13px; color:var(--text-primary);"></ul>
-        </div>
-      </div>
+      <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+        Masukkan URL resep dari portal Cookpad atau Masak Apa Hari Ini (satu baris per URL).
+      </p>
 
-      <div style="margin-bottom:18px;">
-        <span class="badge badge-polished" style="margin-bottom:8px;">✨ LANGKAH MEMASAK TER-POLISH (AI SENSORY)</span>
-        <div style="background:var(--surface-raised); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:14px; margin-top:8px;">
-          <ol id="detailStepsList" style="margin:0; padding-left:20px; font-size:13px; color:var(--text-primary); line-height:1.6;"></ol>
-        </div>
-      </div>
+      <textarea style="width: 100%; min-height: 100px; background: var(--input-bg); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); padding: 10px; font-family: var(--font-mono); font-size: 12px; margin-bottom: 16px;" placeholder="https://cookpad.com/...&#10;https://www.masakapahariini.com/..."></textarea>
 
-      <div>
-        <label style="display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:4px;">
-          📸 5-Layer Optical Stack AI Photo Prompt (Midjourney/FLUX):
-        </label>
-        <div id="detailPromptBox" style="background:var(--canvas); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:10px 12px; font-family:var(--font-mono); font-size:12px; color:var(--text-secondary);"></div>
-      </div>
-
-      <div style="display:flex; justify-content:flex-end; margin-top:20px;">
-        <button class="btn btn-primary" onclick="alert('Diteruskan ke antrean video rendering!'); closeDetailModal();">
-          🎬 Buat Video dari Resep Ini
-        </button>
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button class="btn btn-secondary btn-sm" onclick="closeModal('importModal')">Batal</button>
+        <button class="btn btn-primary btn-sm" onclick="alert('Simulasi batch impor dimulai!'); closeModal('importModal');">⚡ Mulai Impor</button>
       </div>
     </div>
   </div>
 
   <script>
-    const mockRecipesData = [
-      {
-        title: "Ayam Woku Belanga Khas Manado: Kuah Kental Pedas Gurih Aroma Kemangi",
-        ingredients: [
-          "1 ekor ayam kampung (potong 12 bagian)",
-          "5 ikat daun kemangi segar",
-          "2 lembar daun pandan wangi",
-          "3 batang serai (memarkan)",
-          "5 siung bawang putih & 8 siung bawang merah",
-          "15 buah cabai rawit merah",
-          "1 sdt garam & 1/2 sdt kaldu jamur"
-        ],
-        steps: [
-          "Tumis bumbu halus bersama serai dan daun pandan hingga harum semerbak berminyak.",
-          "Masukkan potongan ayam kampung, aduk merata hingga daging berubah warna keemasan.",
-          "Tuang sedikit air, ungkep api kecil hingga kuah pedas gurih meresap sempurna ke serat daging.",
-          "Taburkan daun kemangi segar sesaat sebelum diangkat, aduk kilat 30 detik hingga layu harum semerbak."
-        ],
-        prompt: "Award-winning culinary photography of Indonesian Ayam Woku Belanga in a traditional claypot, glossy rich yellow-red chili sauce, fresh aromatic kemangi leaves, rising delicate steam, 85mm f/1.8 lens, cinematic kitchen lighting."
-      },
-      {
-        title: "Tumis Buncis Daging Cincang ala Resto: Renyah Gurih Manis Saus Tiram",
-        ingredients: [
-          "250 gr buncis muda (siangi)",
-          "100 gr daging sapi cincang",
-          "3 siung bawang putih (cincang)",
-          "1 sdm saus tiram premium",
-          "1 sdm minyak wijen",
-          "1/2 sdt merica bubuk"
-        ],
-        steps: [
-          "Blansir buncis 1 menit di air bergaram mendidih, langsung celup air es agar warna hijau cerah dan renyah garing.",
-          "Tumis bawang putih cincang hingga harum keemasan.",
-          "Masukkan daging cincang, masak hingga warna kecokelatan dan sari gurih keluar.",
-          "Masukkan buncis, beri saus tiram dan siraman minyak wijen, oseng cepat api besar 1 menit."
-        ],
-        prompt: "Top-down editorial food photography of stir-fried green beans with minced beef, glossy oyster sauce glaze, white ceramic serving plate, crisp vibrant green texture, soft diffused natural daylight."
-      },
-      {
-        title: "Mousse Cokelat Alpukat Lumer: Dessert Sehat Creamy 5 Menit Tanpa Mixer",
-        ingredients: [
-          "2 buah alpukat mentega matang",
-          "4 sdm cokelat bubuk murni",
-          "3 sdm madu hutan murni",
-          "50 ml susu almond tanpa pemanis"
-        ],
-        steps: [
-          "Keruk daging alpukat mentega, masukkan ke blender bersama cokelat murni.",
-          "Tuang madu hutan dan susu almond secara berkala.",
-          "Haluskan hingga tekstur berubah super creamy dan berkilau mewah.",
-          "Tuang ke gelas saji, dinginkan 30 menit, nikmati rasa cokelat legit tanpa bersalah."
-        ],
-        prompt: "Appetizing macro food photography of rich chocolate avocado mousse in a clear dessert glass, garnished with fresh mint leaf and chocolate shavings, creamy glossy texture, moody dark luxury aesthetic."
+    let isStandard = true;
+    function toggleLayoutMode() {
+      const container = document.getElementById('pageContainer');
+      const btn = document.getElementById('toggleLayoutBtn');
+      if (isStandard) {
+        container.className = 'page-container-stretched';
+        btn.innerText = '⚠️ Mode Lama: Melar / Stretched';
+        btn.style.borderColor = 'var(--status-danger)';
+        btn.style.color = 'var(--status-danger)';
+        isStandard = false;
+      } else {
+        container.className = 'page-container-standard';
+        btn.innerText = '✅ Mode Baru: Proporsional (1280px Page Container)';
+        btn.style.borderColor = 'var(--border)';
+        btn.style.color = 'var(--text-primary)';
+        isStandard = true;
       }
-    ];
+    }
 
     function toggleTheme() {
-      const html = document.documentElement;
-      const icon = document.getElementById('themeIcon');
-      if (html.getAttribute('data-theme') === 'dark') {
-        html.setAttribute('data-theme', 'light');
-        icon.innerText = '🌙';
-      } else {
-        html.setAttribute('data-theme', 'dark');
-        icon.innerText = '☀️';
-      }
+      const current = document.documentElement.getAttribute('data-theme');
+      document.documentElement.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
     }
 
-    function openImportModal() {
-      document.getElementById('importModal').style.display = 'flex';
-      document.getElementById('modalProgressSection').style.display = 'none';
-      document.getElementById('modalLogTerminal').innerHTML = '';
-      document.getElementById('btnModalStart').disabled = false;
+    function openModal(id) {
+      document.getElementById(id).style.display = 'flex';
     }
 
-    function closeImportModal() {
-      document.getElementById('importModal').style.display = 'none';
-    }
-
-    function viewRecipeDetail(index) {
-      const item = mockRecipesData[index];
-      if (!item) return;
-      document.getElementById('detailTitle').innerText = item.title;
-      document.getElementById('detailIngredientsList').innerHTML = item.ingredients.map(i => `<li>${i}</li>`).join('');
-      document.getElementById('detailStepsList').innerHTML = item.steps.map(s => `<li>${s}</li>`).join('');
-      document.getElementById('detailPromptBox').innerText = item.prompt;
-      document.getElementById('detailModal').style.display = 'flex';
-    }
-
-    function closeDetailModal() {
-      document.getElementById('detailModal').style.display = 'none';
-    }
-
-    function filterTable() {
-      const q = document.getElementById('searchInput').value.toLowerCase();
-      const cat = document.getElementById('categoryFilter').value;
-      const pol = document.getElementById('polishFilter').value;
-      const dom = document.getElementById('domainFilter').value;
-
-      const rows = document.querySelectorAll('#recipeTableBody tr');
-      rows.forEach(r => {
-        const title = r.getAttribute('data-title') || '';
-        const category = r.getAttribute('data-category') || '';
-        const polish = r.getAttribute('data-polish') || '';
-        const domain = r.getAttribute('data-domain') || '';
-
-        const matchQ = !q || title.includes(q);
-        const matchCat = !cat || category === cat;
-        const matchPol = !pol || polish === pol;
-        const matchDom = !dom || domain === dom;
-
-        if (matchQ && matchCat && matchPol && matchDom) {
-          r.style.display = '';
-        } else {
-          r.style.display = 'none';
-        }
-      });
-    }
-
-    function exportLibraryJson() {
-      alert('Mengekspor seluruh pustaka resep otoritatif dalam format JSON terstruktur!');
-    }
-
-    async function runModalImport() {
-      const btn = document.getElementById('btnModalStart');
-      const progressSec = document.getElementById('modalProgressSection');
-      const logBox = document.getElementById('modalLogTerminal');
-      const pText = document.getElementById('modalProgressText');
-      const pPct = document.getElementById('modalProgressPct');
-      const pBar = document.getElementById('modalProgressBar');
-      const delayMode = document.getElementById('modalDelay').value;
-
-      btn.disabled = true;
-      progressSec.style.display = 'block';
-      logBox.innerHTML = '';
-
-      function log(msg, type = 'info') {
-        const div = document.createElement('div');
-        div.className = 'log-line log-' + type;
-        div.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
-        logBox.appendChild(div);
-        logBox.scrollTop = logBox.scrollHeight;
-      }
-
-      log('Memulai proses sekuensial batch 3 URL resep...', 'info');
-
-      for (let i = 0; i < 3; i++) {
-        const step = i + 1;
-        const pct = Math.round((step / 3) * 100);
-        pText.innerText = `Memproses URL #${step} dari 3...`;
-        pPct.innerText = `${pct}%`;
-        pBar.style.width = `${pct}%`;
-
-        log(`[URL ${step}/3] Mengunduh HTML sumber & verifikasi Schema.org...`, 'info');
-        await new Promise(r => setTimeout(r, 600));
-
-        log(`[URL ${step}/3] 🔒 Mengunci bahan baku mentah 100% (STRICT GUARDRAIL)...`, 'success');
-        log(`[URL ${step}/3] ✨ AI Polish: Memoles Title, Intro, dan Langkah Sensori...`, 'warning');
-        await new Promise(r => setTimeout(r, 800));
-
-        log(`[URL ${step}/3] ✓ Berhasil disimpan ke tabel database curated_recipes!`, 'success');
-
-        if (i < 2) {
-          let minSec = delayMode === 'demo-fast' ? 1.5 : 10;
-          let maxSec = delayMode === 'demo-fast' ? 2.5 : 20;
-          const waitSec = delayMode === 'demo-fast'
-            ? +(Math.random() * (maxSec - minSec) + minSec).toFixed(1)
-            : Math.floor(Math.random() * (maxSec - minSec + 1)) + minSec;
-
-          log(`[Anti-Bot Guard] ⏳ Jeda acak ${waitSec}s sebelum URL #${step + 1} (meniru browsing manusia)...`, 'warning');
-
-          let rem = waitSec;
-          while (rem > 0) {
-            pText.innerText = `[Jeda Anti-Bot] Menunggu ${Math.ceil(rem)}s sebelum URL #${step + 1}...`;
-            const tick = Math.min(rem, 1);
-            await new Promise(r => setTimeout(r, tick * 1000));
-            rem -= tick;
-          }
-        }
-      }
-
-      log('🎉 Seluruh batch berhasil diimpor dan terintegrasi ke pustaka resep!', 'success');
-      btn.disabled = false;
-      setTimeout(() => {
-        closeImportModal();
-        alert('Batch selesai! 3 resep baru telah ditambahkan ke Pustaka Resep.');
-      }, 1000);
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
     }
   </script>
 </body>
 </html>
-

@@ -167,80 +167,83 @@ export default function RecipeLibraryPage() {
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--canvas)', color: 'var(--text-primary)' }}>
+    <div className="app-layout">
       <Sidebar />
 
-      <main style={{ flex: 1, padding: '28px 36px', overflowY: 'auto', minWidth: 0 }}>
-        {/* Toast Notification */}
-        {toastMessage && (
-          <div style={{
-            position: 'fixed',
-            bottom: '24px',
-            right: '24px',
-            zIndex: 9999,
-            backgroundColor: toastMessage.type === 'error' ? 'var(--status-danger)' : 'var(--action-primary)',
-            color: toastMessage.type === 'error' ? 'var(--text-primary)' : 'var(--on-action-primary)',
-            padding: '12px 20px',
-            borderRadius: 'var(--radius-sm)',
-            boxShadow: 'var(--shadow-modal)',
-            fontWeight: 600,
-            fontSize: '13px'
-          }}>
-            {toastMessage.text}
-          </div>
-        )}
+      <main className="main-content">
+        <div className="page-container" style={{ maxWidth: '1280px', margin: '0 auto', padding: '32px 24px' }}>
+          {/* Toast Notification */}
+          {toastMessage && (
+            <div style={{
+              position: 'fixed',
+              bottom: '24px',
+              right: '24px',
+              zIndex: 9999,
+              backgroundColor: toastMessage.type === 'error' ? 'var(--status-danger)' : 'var(--action-primary)',
+              color: toastMessage.type === 'error' ? 'var(--text-primary)' : 'var(--on-action-primary)',
+              padding: '12px 20px',
+              borderRadius: 'var(--radius-sm)',
+              boxShadow: 'var(--shadow-modal)',
+              fontWeight: 600,
+              fontSize: '13px'
+            }}>
+              {toastMessage.text}
+            </div>
+          )}
 
-        {/* Topbar Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
-          <div>
-            <h1 style={{ margin: '0 0 6px 0', fontSize: '24px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span>🍲</span> Pustaka Resep Kuliner (Recipe Library)
-            </h1>
-            <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '14px' }}>
-              Pustaka resep otoritatif terkurasi dengan perlindungan takaran asli 100% & AI Magic Polish untuk produksi video reels kuliner.
-            </p>
-          </div>
+          {/* Topbar Header Selaras MAKNA Flow */}
+          <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px', flexWrap: 'wrap', gap: '16px' }}>
+            <div>
+              <h1 className="page-title" style={{ fontSize: '1.55rem', fontWeight: 700, letterSpacing: '-0.02em', margin: '0 0 6px 0', display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--text-primary)' }}>
+                <span>🍲</span> Pustaka Resep Kuliner (Recipe Library)
+              </h1>
+              <p className="page-subtitle" style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.5 }}>
+                Pustaka resep otoritatif terkurasi dengan perlindungan takaran asli 100% &amp; AI Magic Polish untuk produksi video reels kuliner.
+              </p>
+            </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <button
-              onClick={handleExportJson}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '9px 18px',
-                fontSize: '13px',
-                fontWeight: 600,
-                borderRadius: 'var(--radius-sm)',
-                backgroundColor: 'var(--surface-raised)',
-                border: '1px solid var(--border-subtle)',
-                color: 'var(--text-primary)',
-                cursor: 'pointer'
-              }}
-            >
-              <span>📥</span> Ekspor JSON
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <button
+                onClick={handleExportJson}
+                className="btn btn-secondary"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '9px 18px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  borderRadius: 'var(--radius-sm)',
+                  backgroundColor: 'var(--surface-raised)',
+                  border: '1px solid var(--border-subtle)',
+                  color: 'var(--text-primary)',
+                  cursor: 'pointer'
+                }}
+              >
+                <span>📥</span> Ekspor JSON
+              </button>
 
-            <button
-              onClick={() => setShowImportModal(true)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '9px 18px',
-                fontSize: '13px',
-                fontWeight: 600,
-                borderRadius: 'var(--radius-sm)',
-                backgroundColor: 'var(--action-primary)',
-                color: 'var(--on-action-primary)',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              <span>⚡</span> Impor Batch Resep (Maks 50 URL)
-            </button>
+              <button
+                onClick={() => setShowImportModal(true)}
+                className="btn btn-primary"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '9px 18px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  borderRadius: 'var(--radius-sm)',
+                  backgroundColor: 'var(--action-primary)',
+                  color: 'var(--on-action-primary)',
+                  border: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                <span>⚡</span> Impor Batch Resep (Maks 50 URL)
+              </button>
+            </div>
           </div>
-        </div>
 
         {/* Metrics Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '16px', marginBottom: '24px' }}>
@@ -419,12 +422,12 @@ export default function RecipeLibraryPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', textAlign: 'left' }}>
               <thead>
                 <tr style={{ backgroundColor: 'var(--surface-raised)', borderBottom: '1px solid var(--border-subtle)' }}>
-                  <th style={{ padding: '12px 16px', color: 'var(--text-muted)', fontWeight: 600 }}>Resep & Sumber Asli</th>
-                  <th style={{ padding: '12px 16px', color: 'var(--text-muted)', fontWeight: 600 }}>Judul Ter-Polish (AI)</th>
-                  <th style={{ padding: '12px 16px', color: 'var(--text-muted)', fontWeight: 600 }}>Bahan Baku (100% Asli)</th>
-                  <th style={{ padding: '12px 16px', color: 'var(--text-muted)', fontWeight: 600 }}>Waktu & Porsi</th>
-                  <th style={{ padding: '12px 16px', color: 'var(--text-muted)', fontWeight: 600 }}>Kategori</th>
-                  <th style={{ padding: '12px 16px', color: 'var(--text-muted)', fontWeight: 600, textAlign: 'right' }}>Aksi</th>
+                  <th style={{ width: '28%', padding: '12px 16px', color: 'var(--text-muted)', fontWeight: 600, fontSize: '12px' }}>Resep &amp; Sumber Asli</th>
+                  <th style={{ width: '26%', padding: '12px 16px', color: 'var(--text-muted)', fontWeight: 600, fontSize: '12px' }}>Judul Ter-Polish (AI)</th>
+                  <th style={{ width: '20%', padding: '12px 16px', color: 'var(--text-muted)', fontWeight: 600, fontSize: '12px' }}>Bahan Baku (100% Asli)</th>
+                  <th style={{ width: '10%', padding: '12px 16px', color: 'var(--text-muted)', fontWeight: 600, fontSize: '12px' }}>Waktu &amp; Porsi</th>
+                  <th style={{ width: '8%', padding: '12px 16px', color: 'var(--text-muted)', fontWeight: 600, fontSize: '12px' }}>Kategori</th>
+                  <th style={{ width: '8%', padding: '12px 16px', color: 'var(--text-muted)', fontWeight: 600, fontSize: '12px', textAlign: 'right' }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -433,10 +436,10 @@ export default function RecipeLibraryPage() {
                   const isPolished = r.polish_status === 'polished';
 
                   return (
-                    <tr key={r.id || idx} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                    <tr key={r.id || idx} style={{ borderBottom: '1px solid var(--border-subtle)', transition: 'background-color 0.15s ease' }}>
                       <td style={{ padding: '14px 16px', verticalAlign: 'top' }}>
-                        <strong style={{ color: 'var(--text-primary)' }}>{r.original_title}</strong>
-                        <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <strong style={{ color: 'var(--text-primary)', fontSize: '13.5px' }}>{r.original_title}</strong>
+                        <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                           <span>{r.source_domain || 'web'}</span>
                           {r.source_url && (
                             <>
@@ -446,7 +449,7 @@ export default function RecipeLibraryPage() {
                         </div>
                       </td>
 
-                      <td style={{ padding: '14px 16px', verticalAlign: 'top', maxWidth: '320px' }}>
+                      <td style={{ padding: '14px 16px', verticalAlign: 'top', maxWidth: '300px' }}>
                         <span style={{
                           display: 'inline-flex',
                           alignItems: 'center',
@@ -513,6 +516,7 @@ export default function RecipeLibraryPage() {
                         <div style={{ display: 'inline-flex', gap: '8px' }}>
                           <button
                             onClick={() => setSelectedRecipe(r)}
+                            className="btn btn-secondary btn-sm"
                             style={{
                               padding: '6px 12px',
                               fontSize: '12px',
@@ -529,6 +533,7 @@ export default function RecipeLibraryPage() {
 
                           <button
                             onClick={() => handleLaunchVideo(r)}
+                            className="btn btn-primary btn-sm"
                             style={{
                               padding: '6px 14px',
                               fontSize: '12px',
@@ -550,6 +555,7 @@ export default function RecipeLibraryPage() {
               </tbody>
             </table>
           )}
+          </div>
         </div>
       </main>
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.40.6 — Align Recipe Library UI with MAKNA Flow Layout and Proportional Table Widths (09/11/2026)
+- Bungkus halaman dengan .app-layout, .main-content, dan .page-container selaras menu standar
+- Tetapkan lebar kolom proporsional pada tabel resep (28%, 26%, 20%, 10%, 8%, 8%)
+- Selaraskan typography header, metrics cards, dan styling button aksi
+
 ## V2.40.5 — Implement Mode 2 Native Veo 3.1 Audio with Google Voice Personas in Operator Presets (09/11/2026)
 - Tambahkan katalog 14 persona resmi Google Voice dan compiler arahan audio Veo 3.1 di lib/veo-native-audio.js
 - Integrasikan pengaturan Audio Engine (Minimax TTS vs Native Veo) terpusat pada form Preset Pengaturan (/settings/presets)
