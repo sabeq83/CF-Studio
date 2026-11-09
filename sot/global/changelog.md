@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.40.7 — Implement Multi-Platform Recipe URL Scraper with Cookpad Driver, CLI and Modal UI (09/11/2026)
+- Bangun modular scraper engine (lib/scrapers/) dengan Cookpad driver, auto-category extraction, pagination, dan deduplikasi URL
+- Bangun API endpoint /api/recipe-scraper/crawl dengan export format CSV (title, category, url), TSV, dan JSON
+- Sediakan CLI tool scripts/scrape-recipes.js untuk ekstraksi cepat massal dari terminal tanpa AI token
+- Integrasikan tombol dan modal interaktif Scrape URL Resep pada Recipe Library (app/recipe-library/page.js)
+- Tambahkan automated unit tests lengkap (tests/test-recipe-scraper.test.js)
+
 ## V2.40.6 — Align Recipe Library UI with MAKNA Flow Layout and Proportional Table Widths (09/11/2026)
 - Bungkus halaman dengan .app-layout, .main-content, dan .page-container selaras menu standar
 - Tetapkan lebar kolom proporsional pada tabel resep (28%, 26%, 20%, 10%, 8%, 8%)

@@ -18,6 +18,16 @@ export default function RecipeLibraryPage() {
   const [showImportModal, setShowImportModal] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
 
+  // URL Scraper State (Cookpad & Multi-Platform)
+  const [showScraperModal, setShowScraperModal] = useState(false);
+  const [scraperUrl, setScraperUrl] = useState('https://cookpad.com/id/cari/brownies');
+  const [scraperCategory, setScraperCategory] = useState('brownies');
+  const [scraperPages, setScraperPages] = useState(1);
+  const [scraperLoading, setScraperLoading] = useState(false);
+  const [scrapedResults, setScrapedResults] = useState([]);
+  const [scraperSearch, setScraperSearch] = useState('');
+  const [selectedScrapedUrls, setSelectedScrapedUrls] = useState(new Set());
+
   // Batch Importer State
   const [importUrls, setImportUrls] = useState(
     'https://cookpad.com/id/resep/17492811-ayam-woku-belanga-khas-manado\n' +
@@ -31,6 +41,98 @@ export default function RecipeLibraryPage() {
   const [progressPct, setProgressPct] = useState(0);
   const [importLogs, setImportLogs] = useState([]);
   const [toastMessage, setToastMessage] = useState(null);
+
+  // Auto-detect category from URL input
+  const handleScraperUrlChange = (val) => {
+    setScraperUrl(val);
+    const match = val.match(/\/cari\/([^/?#]+)/i);
+    if (match && match[1]) {
+      const cat = decodeURIComponent(match[1]).replace(/\+/g, ' ').trim().toLowerCase();
+      setScraperCategory(cat);
+    }
+  };
+
+  // Run Crawl
+  const handleExecuteCrawl = async () => {
+    if (!scraperUrl.trim()) {
+      showToast('URL pencarian wajib diisi', 'error');
+      return;
+    }
+    setScraperLoading(true);
+    try {
+      const res = await fetch('/api/recipe-scraper/crawl', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: scraperUrl.trim(),
+          pages: Number(scraperPages) || 1,
+          category: scraperCategory.trim()
+        })
+      });
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data)) {
+        setScrapedResults(data.data);
+        setSelectedScrapedUrls(new Set(data.data.map(d => d.url)));
+        showToast(`Berhasil mengekstrak ${data.total_scraped} resep (${data.category})!`, 'success');
+      } else {
+        showToast(data.error || 'Gagal mengekstrak resep', 'error');
+      }
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setScraperLoading(false);
+    }
+  };
+
+  // Download CSV
+  const handleDownloadScraperCsv = () => {
+    if (scrapedResults.length === 0) return;
+    const header = 'title,category,url\n';
+    const rows = scrapedResults.map(item => {
+      const title = `"${String(item.title || '').replace(/"/g, '""')}"`;
+      const cat = `"${String(item.category || scraperCategory).replace(/"/g, '""')}"`;
+      const url = `"${String(item.url || '').replace(/"/g, '""')}"`;
+      return `${title},${cat},${url}`;
+    });
+    const blob = new Blob([header + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `recipes_${scraperCategory || 'scraped'}_${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('File CSV berhasil diunduh (title, category, url)!', 'success');
+  };
+
+  // Copy TSV
+  const handleCopyScraperTsv = () => {
+    if (scrapedResults.length === 0) return;
+    const header = 'title\tcategory\turl\n';
+    const rows = scrapedResults.map(item => {
+      const title = String(item.title || '').replace(/\t/g, ' ');
+      const cat = String(item.category || scraperCategory).replace(/\t/g, ' ');
+      const url = String(item.url || '');
+      return `${title}\t${cat}\t${url}`;
+    });
+    navigator.clipboard.writeText(header + rows.join('\n')).then(() => {
+      showToast('Data berhasil disalin! Anda bisa langsung paste di Google Sheets / Excel.', 'success');
+    });
+  };
+
+  // Send to batch import
+  const handleSendToBatchImport = () => {
+    const urlsToSend = selectedScrapedUrls.size > 0 
+      ? Array.from(selectedScrapedUrls) 
+      : scrapedResults.map(r => r.url);
+    if (urlsToSend.length === 0) {
+      showToast('Tidak ada URL yang dipilih', 'error');
+      return;
+    }
+    setImportUrls(urlsToSend.join('\n'));
+    setShowScraperModal(false);
+    setShowImportModal(true);
+    showToast(`${urlsToSend.length} URL dipindahkan ke form Import Batch.`, 'info');
+  };
 
   // Load recipes from API
   const loadRecipes = async () => {
@@ -203,6 +305,26 @@ export default function RecipeLibraryPage() {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <button
+                onClick={() => setShowScraperModal(true)}
+                className="btn btn-secondary"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '9px 18px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  borderRadius: 'var(--radius-sm)',
+                  backgroundColor: 'var(--surface-raised)',
+                  border: '1px solid var(--border-subtle)',
+                  color: 'var(--text-primary)',
+                  cursor: 'pointer'
+                }}
+              >
+                <span>🕷️</span> Scrape URL Resep
+              </button>
+
               <button
                 onClick={handleExportJson}
                 className="btn btn-secondary"
@@ -558,6 +680,469 @@ export default function RecipeLibraryPage() {
           </div>
         </div>
       </main>
+
+      {/* MODAL URL SCRAPER (COOKPAD & MULTI-PLATFORM) */}
+      {showScraperModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'var(--overlay-backdrop)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '20px'
+        }}>
+          <div style={{
+            backgroundColor: 'var(--surface)',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: 'var(--radius-lg)',
+            boxShadow: 'var(--shadow-modal)',
+            width: '100%',
+            maxWidth: '1060px',
+            maxHeight: '92vh',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden'
+          }}>
+            {/* Modal Header */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              padding: '20px 24px',
+              borderBottom: '1px solid var(--border-subtle)',
+              backgroundColor: 'var(--surface-raised)'
+            }}>
+              <div>
+                <h2 style={{ margin: '0 0 4px 0', fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>🕷️</span> Scrape URL Resep (Cookpad &amp; Multi-Platform)
+                </h2>
+                <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-muted)' }}>
+                  Ekstraksi massal title, category, dan URL canonical bebas kuota AI (0 Token Gemini).
+                </p>
+              </div>
+              <button
+                onClick={() => !scraperLoading && setShowScraperModal(false)}
+                disabled={scraperLoading}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-muted)',
+                  fontSize: '22px',
+                  cursor: 'pointer',
+                  padding: '0 4px',
+                  lineHeight: 1
+                }}
+              >
+                &times;
+              </button>
+            </div>
+
+            {/* Modal Scrollable Body */}
+            <div style={{ padding: '24px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '18px' }}>
+              {/* Callout Info */}
+              <div style={{
+                backgroundColor: 'var(--surface-raised)',
+                borderLeft: '4px solid var(--action-primary)',
+                borderRadius: 'var(--radius-xs)',
+                padding: '12px 16px',
+                fontSize: '12.5px',
+                color: 'var(--text-secondary)',
+                lineHeight: 1.5
+              }}>
+                💡 <strong style={{ color: 'var(--text-primary)' }}>Anti-Limit Architecture:</strong> Ekstraksi data URL berjalan instan pada level HTML teks murni tanpa memanggil API Gemini. Anda dapat mengumpulkan ratusan/ribuan URL resep, mengunduh file CSV (<code style={{ color: 'var(--action-primary)' }}>title,category,url</code>), menyalin ke Google Sheets, atau mengirimnya ke antrean batch resep.
+              </div>
+
+              {/* Form Konfigurasi */}
+              <div style={{
+                backgroundColor: 'var(--surface-raised)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-sm)',
+                padding: '18px'
+              }}>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '220px 1fr 180px 140px',
+                  gap: '14px',
+                  alignItems: 'end'
+                }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                      Platform Sumber (Driver)
+                    </label>
+                    <select
+                      disabled={scraperLoading}
+                      style={{
+                        width: '100%',
+                        backgroundColor: 'var(--input-bg)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-sm)',
+                        color: 'var(--text-primary)',
+                        padding: '9px 12px',
+                        fontSize: '13px'
+                      }}
+                      defaultValue="cookpad"
+                    >
+                      <option value="cookpad">🍳 Cookpad Indonesia</option>
+                      <option value="endeus" disabled>🍲 Endeus TV (Coming soon)</option>
+                      <option value="brilio" disabled>🥗 Brilio Food (Coming soon)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                      URL Listing / Pencarian Cookpad
+                    </label>
+                    <input
+                      type="text"
+                      value={scraperUrl}
+                      onChange={(e) => handleScraperUrlChange(e.target.value)}
+                      disabled={scraperLoading}
+                      placeholder="https://cookpad.com/id/cari/brownies"
+                      style={{
+                        width: '100%',
+                        backgroundColor: 'var(--input-bg)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-sm)',
+                        color: 'var(--text-primary)',
+                        padding: '9px 12px',
+                        fontSize: '13px',
+                        fontFamily: 'var(--font-mono)'
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                      Kategori (Auto / Edit)
+                    </label>
+                    <input
+                      type="text"
+                      value={scraperCategory}
+                      onChange={(e) => setScraperCategory(e.target.value)}
+                      disabled={scraperLoading}
+                      placeholder="brownies"
+                      style={{
+                        width: '100%',
+                        backgroundColor: 'var(--input-bg)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-sm)',
+                        color: 'var(--text-primary)',
+                        padding: '9px 12px',
+                        fontSize: '13px'
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                      Jml Halaman
+                    </label>
+                    <select
+                      value={scraperPages}
+                      onChange={(e) => setScraperPages(Number(e.target.value))}
+                      disabled={scraperLoading}
+                      style={{
+                        width: '100%',
+                        backgroundColor: 'var(--input-bg)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-sm)',
+                        color: 'var(--text-primary)',
+                        padding: '9px 12px',
+                        fontSize: '13px'
+                      }}
+                    >
+                      <option value={1}>1 Hal (~30 resep)</option>
+                      <option value={2}>2 Hal (~60 resep)</option>
+                      <option value={3}>3 Hal (~90 resep)</option>
+                      <option value={5}>5 Hal (~150 resep)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '14px' }}>
+                  <button
+                    onClick={handleExecuteCrawl}
+                    disabled={scraperLoading}
+                    className="btn btn-primary"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '10px 20px',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      borderRadius: 'var(--radius-sm)',
+                      backgroundColor: 'var(--action-primary)',
+                      color: 'var(--on-action-primary)',
+                      border: 'none',
+                      cursor: scraperLoading ? 'not-allowed' : 'pointer',
+                      opacity: scraperLoading ? 0.7 : 1
+                    }}
+                  >
+                    {scraperLoading ? (
+                      <>
+                        <span style={{ display: 'inline-block', animation: 'spin 1s linear infinite' }}>⏳</span>
+                        <span>Mengekstrak Resep...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>🚀</span>
+                        <span>Mulai Ekstraksi URL</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Hasil Ekstraksi */}
+              {scrapedResults.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  {/* Toolbar & Filter */}
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '12px',
+                    paddingBottom: '8px'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <input
+                        type="text"
+                        value={scraperSearch}
+                        onChange={(e) => setScraperSearch(e.target.value)}
+                        placeholder="Cari judul resep hasil scrape..."
+                        style={{
+                          width: '260px',
+                          backgroundColor: 'var(--input-bg)',
+                          border: '1px solid var(--border-subtle)',
+                          borderRadius: 'var(--radius-sm)',
+                          color: 'var(--text-primary)',
+                          padding: '7px 12px',
+                          fontSize: '12px'
+                        }}
+                      />
+                      <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                        Total: <strong>{scrapedResults.length}</strong> resep ({selectedScrapedUrls.size} terpilih)
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <button
+                        onClick={handleCopyScraperTsv}
+                        className="btn btn-secondary"
+                        style={{
+                          padding: '7px 12px',
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          borderRadius: 'var(--radius-sm)',
+                          backgroundColor: 'var(--surface-raised)',
+                          border: '1px solid var(--border-subtle)',
+                          color: 'var(--text-primary)',
+                          cursor: 'pointer'
+                        }}
+                        title="Salin ke clipboard untuk Google Sheets / Excel"
+                      >
+                        📋 Copy TSV (Sheets)
+                      </button>
+
+                      <button
+                        onClick={handleDownloadScraperCsv}
+                        className="btn btn-secondary"
+                        style={{
+                          padding: '7px 14px',
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          borderRadius: 'var(--radius-sm)',
+                          backgroundColor: 'var(--surface-raised)',
+                          border: '1px solid var(--border-subtle)',
+                          color: 'var(--text-primary)',
+                          cursor: 'pointer'
+                        }}
+                        title="Unduh format title,category,url"
+                      >
+                        📥 Download CSV
+                      </button>
+
+                      <button
+                        onClick={handleSendToBatchImport}
+                        className="btn btn-primary"
+                        style={{
+                          padding: '7px 14px',
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          borderRadius: 'var(--radius-sm)',
+                          backgroundColor: 'var(--action-primary)',
+                          color: 'var(--on-action-primary)',
+                          border: 'none',
+                          cursor: 'pointer'
+                        }}
+                        title="Pindahkan URL terpilih ke form import batch"
+                      >
+                        ⚡ Pindahkan ke Batch Import ({selectedScrapedUrls.size})
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Table Wrapper */}
+                  <div style={{
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-sm)',
+                    overflowX: 'auto',
+                    backgroundColor: 'var(--surface)'
+                  }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                      <thead>
+                        <tr style={{ backgroundColor: 'var(--surface-raised)', borderBottom: '1px solid var(--border-subtle)' }}>
+                          <th style={{ width: '5%', padding: '10px 12px', textAlign: 'center' }}>
+                            <input
+                              type="checkbox"
+                              checked={selectedScrapedUrls.size === scrapedResults.length && scrapedResults.length > 0}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedScrapedUrls(new Set(scrapedResults.map(r => r.url)));
+                                } else {
+                                  setSelectedScrapedUrls(new Set());
+                                }
+                              }}
+                            />
+                          </th>
+                          <th style={{ width: '38%', padding: '10px 12px', textAlign: 'left', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                            Title
+                          </th>
+                          <th style={{ width: '15%', padding: '10px 12px', textAlign: 'left', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                            Category
+                          </th>
+                          <th style={{ width: '28%', padding: '10px 12px', textAlign: 'left', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                            URL Canonical
+                          </th>
+                          <th style={{ width: '14%', padding: '10px 12px', textAlign: 'center', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                            Status Stash
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {scrapedResults
+                          .filter(r => !scraperSearch || (r.title && r.title.toLowerCase().includes(scraperSearch.toLowerCase())))
+                          .map((item, idx) => {
+                            const isChecked = selectedScrapedUrls.has(item.url);
+                            return (
+                              <tr
+                                key={item.id || idx}
+                                style={{
+                                  borderBottom: '1px solid var(--border-subtle)',
+                                  backgroundColor: isChecked ? 'var(--surface-interactive)' : 'transparent'
+                                }}
+                              >
+                                <td style={{ padding: '10px 12px', textAlign: 'center' }}>
+                                  <input
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    onChange={(e) => {
+                                      const next = new Set(selectedScrapedUrls);
+                                      if (e.target.checked) next.add(item.url);
+                                      else next.delete(item.url);
+                                      setSelectedScrapedUrls(next);
+                                    }}
+                                  />
+                                </td>
+                                <td style={{ padding: '10px 12px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                                  {item.title}
+                                </td>
+                                <td style={{ padding: '10px 12px' }}>
+                                  <span style={{
+                                    display: 'inline-flex',
+                                    padding: '2px 8px',
+                                    borderRadius: 'var(--radius-xs)',
+                                    fontSize: '11px',
+                                    fontWeight: 600,
+                                    backgroundColor: 'var(--status-info-soft)',
+                                    color: 'var(--status-info)',
+                                    border: '1px solid var(--status-info)'
+                                  }}>
+                                    {item.category || scraperCategory}
+                                  </span>
+                                </td>
+                                <td style={{ padding: '10px 12px' }}>
+                                  <a
+                                    href={item.url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    style={{
+                                      color: 'var(--link)',
+                                      textDecoration: 'none',
+                                      fontFamily: 'var(--font-mono)',
+                                      fontSize: '11.5px',
+                                      maxWidth: '280px',
+                                      display: 'inline-block',
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                      whiteSpace: 'nowrap'
+                                    }}
+                                  >
+                                    {item.url}
+                                  </a>
+                                </td>
+                                <td style={{ padding: '10px 12px', textAlign: 'center' }}>
+                                  <span style={{
+                                    display: 'inline-flex',
+                                    padding: '2px 8px',
+                                    borderRadius: 'var(--radius-xs)',
+                                    fontSize: '11px',
+                                    fontWeight: 600,
+                                    backgroundColor: 'var(--surface-raised)',
+                                    color: 'var(--text-muted)',
+                                    border: '1px solid var(--border-subtle)'
+                                  }}>
+                                    Raw (0 AI)
+                                  </span>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '16px 24px',
+              borderTop: '1px solid var(--border-subtle)',
+              backgroundColor: 'var(--surface-raised)'
+            }}>
+              <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                {scrapedResults.length > 0 ? `Siap diekspor ke file CSV (${scrapedResults.length} baris)` : 'Belum ada data terekstrak'}
+              </span>
+              <button
+                onClick={() => setShowScraperModal(false)}
+                style={{
+                  padding: '8px 16px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  borderRadius: 'var(--radius-sm)',
+                  backgroundColor: 'var(--surface-interactive)',
+                  border: '1px solid var(--border-subtle)',
+                  color: 'var(--text-primary)',
+                  cursor: 'pointer'
+                }}
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* MODAL IMPOR BATCH RESEP */}
       {showImportModal && (

@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Mockup: Recipe URL Scraper — MAKNA Flow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* MAKNA Flow Semantic CSS Tokens */
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --sidebar-w: 260px;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --link-hover: #a5f3fc;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --input-bg: #ffffff;
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --link: #075ea8;
+      --link-hover: #064b86;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.06);
+      --shadow-modal: 0 16px 48px rgba(0, 0, 0, 0.12);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* Dummy Sidebar */
+    .mock-sidebar {
+      width: var(--sidebar-w);
+      background: var(--sidebar);
+      border-right: 1px solid var(--border-subtle);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      flex-shrink: 0;
+    }
+    .brand-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-badge {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: var(--radius-xs);
+      font-weight: 600;
+    }
+    .nav-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+    .nav-item {
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: var(--transition);
+    }
+    .nav-item:hover { background: var(--surface-hover); color: var(--text-primary); }
+    .nav-item.active {
+      background: var(--surface-interactive);
+      color: var(--action-primary);
+      border: 1px solid var(--border-subtle);
+      font-weight: 600;
+    }
+
+    /* Main Container */
+    .mock-main {
+      flex: 1;
+      padding: 32px 40px;
+      overflow-y: auto;
+      max-width: 1400px;
+    }
+
+    /* Top Banner / Theme Switcher */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .badge-sop {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid var(--status-info);
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 18px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: inherit;
+    }
+    .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .btn-primary:hover { background: var(--action-primary-hover); transform: translateY(-1px); }
+    .btn-secondary {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      border-color: var(--border-subtle);
+    }
+    .btn-secondary:hover { background: var(--surface-hover); border-color: var(--border-strong); }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+    }
+    .btn-outline:hover { background: var(--surface-hover); color: var(--text-primary); }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 24px;
+    }
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    /* Grid Form */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 240px 1fr 180px 140px;
+      gap: 16px;
+      align-items: end;
+    }
+    @media (max-width: 1024px) {
+      .form-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+    .form-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .form-control {
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      font-family: inherit;
+      width: 100%;
+      outline: none;
+      transition: var(--transition);
+    }
+    .form-control:focus {
+      border-color: var(--action-primary);
+      box-shadow: 0 0 0 2px var(--status-info-soft);
+    }
+
+    /* Metrics Bar */
+    .metrics-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .metric-box {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .metric-value {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+    }
+    .metric-label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Info Callout */
+    .callout {
+      background: var(--surface-raised);
+      border-left: 4px solid var(--action-primary);
+      border-radius: var(--radius-xs);
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      font-size: 0.84rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    .callout strong { color: var(--text-primary); }
+
+    /* Table Toolbar */
+    .table-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .toolbar-left, .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Data Table */
+    .table-wrap {
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      overflow-x: auto;
+      background: var(--surface);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.88rem;
+    }
+    th {
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+      padding: 12px 16px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      vertical-align: middle;
+    }
+    tr:hover td { background: var(--surface-hover); }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      border-radius: var(--radius-xs);
+      font-size: 0.75rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .badge-category { background: var(--status-info-soft); color: var(--status-info); border: 1px solid var(--status-info); }
+    .badge-raw { background: var(--surface-interactive); color: var(--text-muted); border: 1px solid var(--border-subtle); }
+    .badge-polished { background: var(--status-success-soft); color: var(--status-success); border: 1px solid var(--status-success); }
+    .url-link {
+      color: var(--link);
+      text-decoration: none;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      max-width: 380px;
+      display: inline-block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .url-link:hover { text-decoration: underline; color: var(--link-hover); }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      border: 1px solid var(--action-primary);
+      box-shadow: var(--shadow-modal);
+      padding: 14px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 1000;
+      transition: var(--transition);
+      transform: translateY(100px);
+      opacity: 0;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+  </style>
+</head>
+<body>
+
+  <!-- Mock Sidebar -->
+  <aside class="mock-sidebar">
+    <div class="brand-title">
+      <span>MAKNA FLOW</span>
+      <span class="brand-badge">PRO</span>
+    </div>
+    <ul class="nav-list">
+      <li class="nav-item">📊 Dashboard</li>
+      <li class="nav-item">🎬 Strategic Studio</li>
+      <li class="nav-item">📦 Products Catalog</li>
+      <li class="nav-item">📖 Recipe Library</li>
+      <li class="nav-item active">🕷️ Recipe URL Scraper</li>
+      <li class="nav-item">🧪 Recipe Labs</li>
+      <li class="nav-item">⚙️ Settings</li>
+    </ul>
+    <div style="margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border-subtle);">
+      <button id="themeToggleBtn" class="btn btn-secondary btn-sm" style="width: 100%;">
+        🌓 Ganti Mode (Light/Dark)
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="mock-main">
+    <div class="top-bar">
+      <div>
+        <h1 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 4px;">Recipe URL Scraper & Catalog Stash</h1>
+        <p style="font-size: 0.88rem; color: var(--text-muted);">
+          Scrape ribuan URL resep bersih tanpa memicu limit Gemini AI (2-Stage Decoupled Pipeline).
+        </p>
+      </div>
+      <div>
+        <span class="badge-sop">SOP Simulasi Mockup Standalone</span>
+      </div>
+    </div>
+
+    <!-- Architectural Safeguard Callout -->
+    <div class="callout">
+      💡 <strong>Solusi Arsitektur Anti-Limit Gemini (Pertanyaan #1 Anda):</strong><br>
+      Scraping URL ini bekerja pada <strong>Stage 1 (Raw Metadata Extractor)</strong> dengan <strong>0 Token AI</strong>. Ribuan URL disimpan ke antrean <em>Raw Stash</em> atau diunduh ke CSV. AI Polish hanya dipanggil pada <strong>Stage 2 (On-Demand / Batch Terpilih)</strong> secara selektif oleh pengguna atau via background worker queue dengan rate limiter aman (RPM/TPM terjaga).
+    </div>
+
+    <!-- Scraper Control Card -->
+    <div class="card">
+      <div class="card-title">
+        <span>⚙️</span> Konfigurasi Scraping URL
+      </div>
+      <div class="card-subtitle">
+        Pilih platform sumber (Cookpad & multi-driver masa depan) dan tentukan kedalaman halaman crawling.
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Platform Sumber (Driver)</label>
+          <select id="sourceDriver" class="form-control">
+            <option value="cookpad" selected>🍳 Cookpad Indonesia</option>
+            <option value="endeus" disabled>🍲 Endeus TV (Coming Soon)</option>
+            <option value="brilio" disabled>🥗 Brilio Food (Coming Soon)</option>
+            <option value="generic" disabled>🌐 Generic Schema.org (Coming Soon)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">URL Pencarian / Listing</label>
+          <input type="text" id="targetUrl" class="form-control" value="https://cookpad.com/id/cari/brownies" placeholder="https://cookpad.com/id/cari/...">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Kategori (Auto / Override)</label>
+          <input type="text" id="targetCategory" class="form-control" value="brownies" placeholder="brownies">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Jml Halaman (Pages)</label>
+          <select id="pageCount" class="form-control">
+            <option value="1">1 Hal (~30 resep)</option>
+            <option value="2" selected>2 Hal (~60 resep)</option>
+            <option value="5">5 Hal (~150 resep)</option>
+            <option value="10">10 Hal (~300 resep)</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
+        <button id="resetBtn" class="btn btn-outline">Reset Form</button>
+        <button id="startScrapeBtn" class="btn btn-primary">
+          <span id="btnIcon">🚀</span> <span id="btnText">Mulai Scrape Data URL</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Metrics Bar -->
+    <div class="metrics-bar">
+      <div class="metric-box">
+        <span class="metric-value" id="statTotalScraped">6</span>
+        <span class="metric-label">Total URL Terekstrak</span>
+      </div>
+      <div class="metric-box">
+        <span class="metric-value" id="statCategory">brownies</span>
+        <span class="metric-label">Target Kategori</span>
+      </div>
+      <div class="metric-box">
+        <span class="metric-value" style="color: var(--status-success);">0 Token</span>
+        <span class="metric-label">Penggunaan Gemini AI (Aman 100%)</span>
+      </div>
+      <div class="metric-box">
+        <span class="metric-value" id="statSpeed">1.2s</span>
+        <span class="metric-label">Durasi Scraping Bersih</span>
+      </div>
+    </div>
+
+    <!-- Scraped Result Table & Actions -->
+    <div class="card">
+      <div class="table-toolbar">
+        <div class="toolbar-left">
+          <input type="text" id="searchTable" class="form-control" style="width: 260px;" placeholder="Filter hasil resep...">
+          <span style="font-size: 0.85rem; color: var(--text-muted);" id="selectionCounter">0 item terpilih</span>
+        </div>
+        <div class="toolbar-right">
+          <button id="copyTsvBtn" class="btn btn-secondary btn-sm" title="Salin langsung untuk ditempel ke Google Sheets / Excel">
+            📋 Copy TSV (Sheets)
+          </button>
+          <button id="downloadCsvBtn" class="btn btn-secondary btn-sm" title="Unduh file CSV dengan format title, category, url">
+            📥 Download CSV
+          </button>
+          <button id="saveDraftBtn" class="btn btn-secondary btn-sm" title="Simpan sebagai draft mentah ke database tanpa AI">
+            💾 Simpan ke Draft Library
+          </button>
+          <button id="polishBatchBtn" class="btn btn-primary btn-sm" title="Poles hanya item terpilih dengan AI">
+            ✨ Poles AI Terpilih (0)
+          </button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table id="recipeTable">
+          <thead>
+            <tr>
+              <th style="width: 4%;"><input type="checkbox" id="selectAll"></th>
+              <th style="width: 32%;">Title</th>
+              <th style="width: 14%;">Category</th>
+              <th style="width: 36%;">URL</th>
+              <th style="width: 14%;">Status Stash</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- Sample Rows -->
+            <tr>
+              <td><input type="checkbox" class="row-checkbox"></td>
+              <td style="font-weight: 600;">Brownies Bihun Gluten Free</td>
+              <td><span class="badge badge-category">brownies</span></td>
+              <td><a href="https://cookpad.com/id/resep/26827973" target="_blank" class="url-link">https://cookpad.com/id/resep/26827973</a></td>
+              <td><span class="badge badge-raw">Raw (No AI)</span></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="row-checkbox"></td>
+              <td style="font-weight: 600;">Brownies Dark Choco</td>
+              <td><span class="badge badge-category">brownies</span></td>
+              <td><a href="https://cookpad.com/id/resep/26824275" target="_blank" class="url-link">https://cookpad.com/id/resep/26824275</a></td>
+              <td><span class="badge badge-raw">Raw (No AI)</span></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="row-checkbox"></td>
+              <td style="font-weight: 600;">Fudgy Brownies super gampang</td>
+              <td><span class="badge badge-category">brownies</span></td>
+              <td><a href="https://cookpad.com/id/resep/26812514" target="_blank" class="url-link">https://cookpad.com/id/resep/26812514</a></td>
+              <td><span class="badge badge-raw">Raw (No AI)</span></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="row-checkbox"></td>
+              <td style="font-weight: 600;">Brownies Burnt Cheesecake</td>
+              <td><span class="badge badge-category">brownies</span></td>
+              <td><a href="https://cookpad.com/id/resep/26782209" target="_blank" class="url-link">https://cookpad.com/id/resep/26782209</a></td>
+              <td><span class="badge badge-raw">Raw (No AI)</span></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="row-checkbox"></td>
+              <td style="font-weight: 600;">Crumble Brownies kukus</td>
+              <td><span class="badge badge-category">brownies</span></td>
+              <td><a href="https://cookpad.com/id/resep/26709853" target="_blank" class="url-link">https://cookpad.com/id/resep/26709853</a></td>
+              <td><span class="badge badge-raw">Raw (No AI)</span></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="row-checkbox"></td>
+              <td style="font-weight: 600;">Shiny Crust Fudgy Brownies</td>
+              <td><span class="badge badge-category">brownies</span></td>
+              <td><a href="https://cookpad.com/id/resep/26701124" target="_blank" class="url-link">https://cookpad.com/id/resep/26701124</a></td>
+              <td><span class="badge badge-raw">Raw (No AI)</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Interactive Toast Notification -->
+  <div id="toastNotification" class="toast">
+    <span id="toastIcon">✅</span>
+    <span id="toastMessage">Pesan notifikasi</span>
+  </div>
+
+  <script>
+    // Theme Switcher Logic
+    const themeBtn = document.getElementById('themeToggleBtn');
+    let currentTheme = 'dark';
+    themeBtn.addEventListener('click', () => {
+      currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', currentTheme);
+      showToast(`Mode tema diubah ke: ${currentTheme.toUpperCase()}`);
+    });
+
+    // Toast helper
+    function showToast(text, icon = '✅') {
+      const toast = document.getElementById('toastNotification');
+      document.getElementById('toastMessage').innerText = text;
+      document.getElementById('toastIcon').innerText = icon;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3500);
+    }
+
+    // Auto update category based on URL
+    const urlInput = document.getElementById('targetUrl');
+    const categoryInput = document.getElementById('targetCategory');
+    urlInput.addEventListener('input', (e) => {
+      const val = e.target.value;
+      const match = val.match(/\/cari\/([^\/\?#]+)/);
+      if (match && match[1]) {
+        categoryInput.value = decodeURIComponent(match[1]);
+        document.getElementById('statCategory').innerText = decodeURIComponent(match[1]);
+      }
+    });
+
+    // Checkbox and selection counter
+    const selectAll = document.getElementById('selectAll');
+    const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+    const counter = document.getElementById('selectionCounter');
+    const polishBtn = document.getElementById('polishBatchBtn');
+
+    function updateSelection() {
+      const selected = document.querySelectorAll('.row-checkbox:checked').length;
+      counter.innerText = `${selected} item terpilih`;
+      polishBtn.innerText = `✨ Poles AI Terpilih (${selected})`;
+      polishBtn.style.opacity = selected > 0 ? '1' : '0.6';
+    }
+
+    selectAll.addEventListener('change', () => {
+      document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = selectAll.checked);
+      updateSelection();
+    });
+
+    document.getElementById('tableBody').addEventListener('change', (e) => {
+      if (e.target.classList.contains('row-checkbox')) {
+        updateSelection();
+      }
+    });
+
+    // CSV Download Trigger
+    document.getElementById('downloadCsvBtn').addEventListener('click', () => {
+      const rows = document.querySelectorAll('#tableBody tr');
+      let csvContent = "title,category,url\n";
+      rows.forEach(tr => {
+        const title = tr.children[1].innerText.replace(/"/g, '""');
+        const category = tr.children[2].innerText.trim();
+        const url = tr.children[3].querySelector('a').href;
+        csvContent += `"${title}","${category}","${url}"\n`;
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `recipes_${categoryInput.value}_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('File CSV berhasil diunduh (title, category, url)!');
+    });
+
+    // Copy TSV for Spreadsheet
+    document.getElementById('copyTsvBtn').addEventListener('click', () => {
+      const rows = document.querySelectorAll('#tableBody tr');
+      let tsv = "title\tcategory\turl\n";
+      rows.forEach(tr => {
+        const title = tr.children[1].innerText;
+        const category = tr.children[2].innerText.trim();
+        const url = tr.children[3].querySelector('a').href;
+        tsv += `${title}\t${category}\t${url}\n`;
+      });
+      navigator.clipboard.writeText(tsv).then(() => {
+        showToast('Data berhasil disalin! Anda bisa langsung Paste di Google Sheets / Excel.');
+      });
+    });
+
+    // Simulate Start Scraping
+    const startBtn = document.getElementById('startScrapeBtn');
+    startBtn.addEventListener('click', () => {
+      const btnText = document.getElementById('btnText');
+      const btnIcon = document.getElementById('btnIcon');
+      btnText.innerText = 'Sedang Mengambil Data...';
+      btnIcon.innerText = '⏳';
+      startBtn.disabled = true;
+
+      setTimeout(() => {
+        btnText.innerText = 'Mulai Scrape Data URL';
+        btnIcon.innerText = '🚀';
+        startBtn.disabled = false;
+        showToast('Scraping selesai! 30 URL baru berhasil dikumpulkan.');
+        document.getElementById('statTotalScraped').innerText = '30';
+        document.getElementById('statSpeed').innerText = '1.8s';
+      }, 1500);
+    });
+
+    // Save to Draft Library
+    document.getElementById('saveDraftBtn').addEventListener('click', () => {
+      showToast('Semua URL berhasil disimpan ke Raw Stash database tanpa memanggil AI!');
+    });
+
+    // Polish Selected
+    polishBtn.addEventListener('click', () => {
+      const selected = document.querySelectorAll('.row-checkbox:checked').length;
+      if (selected === 0) {
+        showToast('Pilih setidaknya 1 baris untuk dipoles AI!', '⚠️');
+        return;
+      }
+      showToast(`Mengirim ${selected} resep ke antrean AI Polish secara terkontrol...`);
+    });
+  </script>
+</body>
+</html>
+
