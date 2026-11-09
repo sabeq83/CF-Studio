@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.38.2 — Add Scheduled Caption Duplicates Auto-Heal Utility (09/11/2026)
+- Skrip sanitasi otomatis antrean publishing jobs lama
+- Pembersihan caption snapshot duplikat di database staging
+
 ## V2.38.1 — Fix Caption Duplication & AI Affiliate Sync in Autopipeline (09/11/2026)
 - Sanitasi stripCtaAndHashtags anti-duplikasi
 - Filter produk ber-link aktif pada prompt AI
