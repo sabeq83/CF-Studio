@@ -1,195 +1,271 @@
-# Rencana Implementasi: Halaman Recipe Library (Pustaka Resep Kuliner) di CF Studio
+# Rencana Implementasi: Penyelarasan Aliran 100% Parameter Preset pada 4 Tipe Video Auto Pipeline
 
-> [!NOTE]
-> Rencana implementasi ini bertujuan untuk menghadirkan antarmuka pengguna resmi (**Recipe Library**) di aplikasi web CF Studio. Halaman ini menghubungkan repositori database `curated_recipes` dan batch importer engine yang telah selesai di backend, memungkinkan pengguna menavigasi menu `🍲 Recipe Library` di Sidebar, mencari dan memfilter resep terkurasi, melihat detail bahan yang 100% terkunci (*strict guardrail*), mengimpor hingga 50 URL secara sekuensial dengan jeda acak 10–20 detik anti-bot, serta meluncurkan produksi video memasak langsung ke Auto Pipeline.
+## Latar Belakang & Tujuan
+Menjamin bahwa seluruh konfigurasi yang telah disimpan oleh pengguna di dalam Operator Preset (Strategi Suara & Naskah, Mesin Visual, Bridging Produk, Visual Identity V2, serta Finishing Subtitel & Transisi) mengalir 100% tanpa ada satu pun parameter yang tercecer, di-drop, atau diganti sepihak oleh sistem di ke-4 tipe video Auto Pipeline (`recipe_campaign`, `product_campaign`, `editorial_campaign`, dan `multiplier_campaign`).
 
----
-
-## Ringkasan Arsitektur & Antarmuka
-
-1. **Navigasi Sidebar (`app/components/Sidebar.js`)**:
-   - Menambahkan menu **`🍲 Recipe Library`** di kategori `PLANNING` bersebelahan dengan *Product Database*.
-   - Memetakan rute `/recipe-library` ke peta otorisasi menu.
-
-2. **Halaman Pustaka Resep (`app/recipe-library/page.js`)**:
-   - **Header & Ringkasan Metrik**: Menampilkan total resep, jumlah resep ter-polish, persentase bahan terkunci 100%, dan status siap video.
-   - **Filter & Search Bar**: Live search real-time (nama masakan/bahan), filter kategori (*Makanan Utama, Dessert, Tradisional*), filter status polish (*Polished vs Raw*), dan filter domain sumber (*Cookpad, Masak Apa Hari Ini, dll.*).
-   - **Tabel Pustaka Resep**: Menampilkan daftar resep terkurasi dari endpoint `GET /api/v2/recipes/curated/import-batch` dengan tautan sumber asli, badge keaslian bahan, porsi, waktu masak, dan tombol aksi (*Detail*, *Buat Video*, *Hapus*).
-   - **Modal Impor Batch (Hingga 50 URL)**: Dialog interaktif untuk memasukkan hingga 50 URL resep, memilih preset gaya visual dan jeda acak 10-20 detik anti-bot, dengan progress bar real-time dan log terminal status.
-   - **Modal Detail Resep**: Menampilkan daftar bahan mentah yang 100% terkunci tanpa polesan AI, langkah instruksi sensori hasil polesan, dan prompt foto 5-layer optical stack.
-
-3. **Kepatuhan Token Desain Semantik (Universal Theme)**:
-   - 100% menggunakan token CSS dari `app/theme.css` (`var(--canvas)`, `var(--surface)`, `var(--text-primary)`, `var(--action-primary)`, dll.).
-   - Tanpa hardcoded color (`#hex` atau `rgb()`).
-   - Adaptif sempurna untuk Dark Mode dan Light Mode.
+Kasus kegagalan pada `mul_261109_r0a20o` (di mana visual menghasilkan tangan wanita bergamis syari di dapur marmer putih padahal preset memakai `multiplier_siasatsehat` yang bertema biohacking klinis 3D) diatasi secara permanen melalui arsitektur terpadu ini.
 
 ---
 
 ## Execution Task List
-- [x] **Task 1: Perbarui Navigasi Sidebar `app/components/Sidebar.js`** untuk mendaftarkan menu `🍲 Recipe Library` di bawah kategori `PLANNING`.
-- [x] **Task 2: Buat Halaman Client Component `app/recipe-library/page.js`** dengan antarmuka tabel, metrik, modal detail, dan modal impor batch 50 URL.
-- [x] **Task 3: Hubungkan Aksi "Buat Video" ke Auto Pipeline (`/auto-pipeline?pipeline_type=recipe_campaign`)**.
-- [x] **Task 4: Pengujian & Verifikasi Build Next.js (`npm run build`)**.
-- [x] **Task 5: Rilis Non-Interaktif & Atomic Deployment ke Staging Mac Mini**.
+- [x] Task 1: Pembuatan Simulasi UI Standalone Mockup (`public/mockup_auto_pipeline_preset_audit.html`)
+- [x] Task 2: Refaktorisasi `lib/autonomous-engine.js` (Aliran Penuh 5 Gerbong Preset untuk 4 Tipe Video)
+- [x] Task 3: Pembaruan `lib/re-multiplier-worker.js` (Failsafe Auto-Healing VI & Injeksi Finishing Subtitel/Transisi ke FFmpeg)
+- [x] Task 4: Perbaikan Forwarding Parameter di `app/api/v2/recipes/autonomous-pipeline/route.js` & `lib/auto-pipeline-scheduler-runner.js`
+- [x] Task 5: Sinkronisasi Modal 1-Klik & Modal Schedule di `app/auto-pipeline/page.js`
+- [x] Task 6: Pembuatan & Eksekusi Unit Test Verifikasi (`tests/test-autonomous-preset-pipeline.test.js`)
+- [x] Task 7: Prosedur Rilis Non-Interaktif & Auto Git Sync
 
 ---
 
-## Before & After Code Snippets
+## Detailed Before & After Code Snippets
 
-### 1. `app/components/Sidebar.js`
+### 1. `lib/autonomous-engine.js` (Multiplier Engine & VI / Workflow Resolution)
 
 #### Code Sebelum (Current/Before):
 ```javascript
-const menuKeyMap = {
-  '/auto-pipeline': 'pillar_campaign',
-  '/youtube-studio': 'youtube_studio',
-  '/affiliate-studio': 'affiliate_studio',
-  '/contentflow-studio': 'content_flow',
-  '/content-flow': 'content_flow',
-  '/instant-factory': 'instant_campaign',
-  '/re-campaigns': 're_campaign',
-  '/pillar-campaigns': 'pillar_campaign',
-  '/content-planner': 'content_planner',
-  '/content-automations': 'content_automations',
-  '/products': 'product_database',
-  '/deconstruct': 'deconstruct_lab',
-  // ...
-};
-
-const navItems = [
-  { label: 'Dashboard', href: '/dashboard', icon: '◈' },
-
-  { section: 'PLANNING' },
-  { label: 'Content Planner', href: '/content-planner', icon: '🗓️' },
-  { label: 'Product Database', href: '/products', icon: '📦' },
-  { label: 'Deconstruct Lab', href: '/deconstruct', icon: '🔬' },
-  { label: 'Preset Manager', href: '/settings/presets', icon: '🎛️' },
-  // ...
-];
-```
-
-#### Code Sesudah (Proposed/After):
-```javascript
-const menuKeyMap = {
-  '/auto-pipeline': 'pillar_campaign',
-  '/youtube-studio': 'youtube_studio',
-  '/affiliate-studio': 'affiliate_studio',
-  '/contentflow-studio': 'content_flow',
-  '/content-flow': 'content_flow',
-  '/instant-factory': 'instant_campaign',
-  '/re-campaigns': 're_campaign',
-  '/pillar-campaigns': 'pillar_campaign',
-  '/content-planner': 'content_planner',
-  '/content-automations': 'content_automations',
-  '/products': 'product_database',
-  '/recipe-library': 'product_database',
-  '/deconstruct': 'deconstruct_lab',
-  // ...
-};
-
-const navItems = [
-  { label: 'Dashboard', href: '/dashboard', icon: '◈' },
-
-  { section: 'PLANNING' },
-  { label: 'Content Planner', href: '/content-planner', icon: '🗓️' },
-  { label: 'Product Database', href: '/products', icon: '📦' },
-  { label: 'Recipe Library', href: '/recipe-library', icon: '🍲' },
-  { label: 'Deconstruct Lab', href: '/deconstruct', icon: '🔬' },
-  { label: 'Preset Manager', href: '/settings/presets', icon: '🎛️' },
-  // ...
-];
-```
-
----
-
-### 2. `app/recipe-library/page.js` (File Baru)
-
-#### Code Sesudah (Proposed/After):
-```javascript
-'use client';
-
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import Sidebar from '../components/Sidebar';
-
-export default function RecipeLibraryPage() {
-  const router = useRouter();
-  const [recipes, setRecipes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
-  const [polishFilter, setPolishFilter] = useState('');
-  const [domainFilter, setDomainFilter] = useState('');
-
-  // Modals
-  const [showImportModal, setShowImportModal] = useState(false);
-  const [selectedRecipe, setSelectedRecipe] = useState(null);
-
-  // Batch Importer State
-  const [importUrls, setImportUrls] = useState('');
-  const [stylePreset, setStylePreset] = useState('Food Porn');
-  const [delayMode, setDelayMode] = useState('random-10-20');
-  const [isImporting, setIsImporting] = useState(false);
-  const [progressText, setProgressText] = useState('');
-  const [progressPct, setProgressPct] = useState(0);
-  const [importLogs, setImportLogs] = useState([]);
-
-  // Fetch data
-  const loadRecipes = async () => {
+// Baris 746-754:
+  let presetConfig = null;
+  if (presetKey) {
     try {
-      setLoading(true);
-      const res = await fetch('/api/v2/recipes/curated/import-batch?limit=100');
-      const json = await res.json();
-      if (json.success && Array.isArray(json.data)) {
-        setRecipes(json.data);
-      }
+      const { resolveOperatorPreset } = await import('./operator-presets.js');
+      presetConfig = resolveOperatorPreset(presetKey, {}, tenantId);
     } catch (err) {
-      console.error('Gagal memuat resep:', err);
-    } finally {
-      setLoading(false);
+      console.warn(`[Autonomous Multiplier Pipeline] Warning resolving preset ${presetKey}:`, err.message);
     }
+  }
+
+// Baris 867-883:
+  const vsoConfig = {
+    is_vso_active: true,
+    character_concept: 'faceless',
+    visual_style_preset: effectiveVisualStyle,
+    visualStyle: effectiveVisualStyle,
+    execution_mode: executionMode,
+    approval_mode: executionMode === 'full_autopilot' ? 'auto' : 'manual',
+    clip_duration: effectiveClipDuration,
+    clipDuration: effectiveClipDuration,
+    narrative_mode: effectiveNarrativeMode,
+    narrativeMode: effectiveNarrativeMode,
+    words_per_clip: effectiveWordsPerClip,
+    wordsPerClip: effectiveWordsPerClip,
+    mandatoryOutroLine: effectiveMandatoryOutro,
+    preset_key: presetKey,
+    ...overrides.vso
   };
+```
 
-  useEffect(() => {
-    loadRecipes();
-  }, []);
+#### Code Sesudah (Proposed/After):
+```javascript
+  // 1b. Resolve Operator Preset Async (Tenant-Safe & Reliable)
+  let presetConfig = null;
+  if (presetKey) {
+    try {
+      const { getOperatorPresetConfigAsync, getOperatorPresetConfig } = await import('./operator-presets.js');
+      presetConfig = await getOperatorPresetConfigAsync(presetKey, tenantId);
+      if (!presetConfig) presetConfig = getOperatorPresetConfig(presetKey, tenantId);
+    } catch (err) {
+      console.warn(`[Autonomous Multiplier Pipeline] Warning resolving preset ${presetKey}:`, err.message);
+    }
+  }
 
-  // Filter logic
-  const filteredRecipes = recipes.filter(r => {
-    const q = search.toLowerCase();
-    const matchSearch = !q ||
-      r.original_title?.toLowerCase().includes(q) ||
-      r.polished_title?.toLowerCase().includes(q) ||
-      (Array.isArray(r.ingredients_raw) && r.ingredients_raw.some(i => String(i).toLowerCase().includes(q)));
-    const matchCategory = !categoryFilter || r.category === categoryFilter;
-    const matchPolish = !polishFilter || r.polish_status === polishFilter;
-    const matchDomain = !domainFilter || r.source_domain === domainFilter;
-    return matchSearch && matchCategory && matchPolish && matchDomain;
-  });
+  // Resolusi Visual Identity Otoritatif
+  let selectedVi = overrides?.visual_identity_preset_id;
+  const presetViId = presetConfig?.visual_swap?.visual_identity_preset_id;
+  if (!selectedVi && presetViId) {
+    selectedVi = presetViId;
+  }
+  if (!selectedVi && brand?.id) {
+    try {
+      const { listVisualIdentityPresetsForBrand } = await import('./visual-override-resolver.js');
+      const brandVis = await listVisualIdentityPresetsForBrand(brand.id);
+      if (brandVis?.length > 0) selectedVi = brandVis[0].id;
+    } catch (_) {}
+  }
 
-  // Metrik
-  const totalCount = recipes.length;
-  const polishedCount = recipes.filter(r => r.polish_status === 'polished').length;
-  const frozenCount = recipes.filter(r => Array.isArray(r.ingredients_raw) && r.ingredients_raw.length > 0).length;
-
-  return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--canvas)', color: 'var(--text-primary)' }}>
-      <Sidebar />
-      <main style={{ flex: 1, padding: '28px 36px', overflowY: 'auto', minWidth: 0 }}>
-        {/* Topbar, Metrics, Filters, Table, Modal Import & Detail */}
-      </main>
-    </div>
+  // Resolusi Workflow Finishing (Subtitel & Transisi)
+  const effectiveEnableMotionText = overrides?.enable_motion_text !== undefined
+    ? (overrides.enable_motion_text ? 1 : 0)
+    : (presetConfig?.workflow?.enable_motion_text !== undefined ? (presetConfig.workflow.enable_motion_text ? 1 : 0) : 1);
+  const effectiveMotionTextStyle = overrides?.motion_text_style || presetConfig?.workflow?.motion_text_style || 'floating_white_yellow';
+  const effectiveMotionTextPosition = overrides?.motion_text_position || presetConfig?.workflow?.motion_text_position || 'bottom';
+  const effectiveVideoTransition = overrides?.video_transition || presetConfig?.workflow?.video_transition || 'fade';
+  const effectiveTransitionDuration = Number(
+    overrides?.transition_duration !== undefined ? overrides.transition_duration : (presetConfig?.workflow?.transition_duration !== undefined ? presetConfig.workflow.transition_duration : 0.5)
   );
-}
+
+  const vsoConfig = {
+    is_vso_active: true,
+    visual_identity_preset_id: selectedVi,
+    character_concept: 'faceless',
+    visual_style_preset: effectiveVisualStyle,
+    visualStyle: effectiveVisualStyle,
+    execution_mode: executionMode,
+    approval_mode: executionMode === 'full_autopilot' ? 'auto' : 'manual',
+    clip_duration: effectiveClipDuration,
+    clipDuration: effectiveClipDuration,
+    narrative_mode: effectiveNarrativeMode,
+    narrativeMode: effectiveNarrativeMode,
+    words_per_clip: effectiveWordsPerClip,
+    wordsPerClip: effectiveWordsPerClip,
+    mandatoryOutroLine: effectiveMandatoryOutro,
+    preset_key: presetKey,
+    enable_motion_text: effectiveEnableMotionText,
+    motion_text_style: effectiveMotionTextStyle,
+    motion_text_position: effectiveMotionTextPosition,
+    video_transition: effectiveVideoTransition,
+    transition_duration: effectiveTransitionDuration,
+    ...overrides.vso
+  };
 ```
 
 ---
 
-## Verifikasi dan Pengujian
-1. **Verifikasi Tampilan UI**: Halaman memuat resep dari database `curated_recipes` secara dinamis.
-2. **Pengujian Filter**: Pencarian real-time dan dropdown kategori/polish berfungsi mulus.
-3. **Pengujian Modal Impor**: Menjalankan batch import hingga 50 URL ke API `/api/v2/recipes/curated/import-batch` dengan jeda acak 10-20 detik dan pembaruan tabel otomatis saat selesai.
-4. **Pengujian Responsif & Tema**: Menggunakan 100% token semantik dari `app/theme.css` untuk Dark & Light mode.
-5. **Next.js Production Build**: `npm run build` sukses tanpa error.
-6. **Rilis & Deployment**: Menjalankan rilis non-interaktif dan atomic deployment ke Mac Mini Staging.
+### 2. `lib/re-multiplier-worker.js` (Failsafe Auto-Healing & Finishing Muxing)
+
+#### Code Sebelum (Current/Before):
+```javascript
+// Baris 363:
+  const targetPresetId = aesthetics.visual_identity_preset_id || aesthetics.visualIdentity?.preset_id;
+
+// Baris 1202-1215:
+  await processTtsStudioMuxing({
+    id: `multiplier_${task.id}`,
+    batchId: task.tts_batch_id || task.id,
+    videoPath: JSON.stringify(glabsVideoUrls),
+    syncOption: audioConfig.ffmpegSyncOption || audioConfig.ffmpeg_sync_option || 'smart_sync',
+    bgmPath: audioConfig.ffmpegBgmPath || audioConfig.ffmpeg_bgm_path || null,
+    bgmVolume: audioConfig.ffmpegBgmVolume !== undefined ? audioConfig.ffmpegBgmVolume : (audioConfig.ffmpeg_bgm_volume !== undefined ? audioConfig.ffmpeg_bgm_volume : 0.00),
+    sfxVolume: audioConfig.ffmpegSfxVolume !== undefined ? audioConfig.ffmpegSfxVolume : (audioConfig.ffmpeg_sfx_volume !== undefined ? audioConfig.ffmpeg_sfx_volume : 0.00),
+    videoScale: audioConfig.ffmpegVideoScale !== undefined ? audioConfig.ffmpegVideoScale : (audioConfig.ffmpeg_video_scale !== undefined ? audioConfig.ffmpeg_video_scale : 1.1),
+    outputPath: finalOutputDiskPath,
+    brandName: task.account_name || 'Brand'
+  });
+```
+
+#### Code Sesudah (Proposed/After):
+```javascript
+  // Auto-healing VI lookup jika targetPresetId kosong
+  let targetPresetId = aesthetics.visual_identity_preset_id || aesthetics.visualIdentity?.preset_id;
+  if (!targetPresetId && aesthetics.preset_key) {
+    try {
+      const { getOperatorPresetConfigAsync } = await import('./operator-presets.js');
+      const pCfg = await getOperatorPresetConfigAsync(aesthetics.preset_key, task.tenant_id);
+      if (pCfg?.visual_swap?.visual_identity_preset_id) {
+        targetPresetId = pCfg.visual_swap.visual_identity_preset_id;
+      }
+    } catch (_) {}
+  }
+  if (!targetPresetId && effectiveBrandId) {
+    try {
+      const { listVisualIdentityPresetsForBrand } = await import('./visual-override-resolver.js');
+      const bVis = await listVisualIdentityPresetsForBrand(effectiveBrandId);
+      if (bVis?.length > 0) targetPresetId = bVis[0].id;
+    } catch (_) {}
+  }
+
+  // Forwarding Motion Text & Video Transition ke FFmpeg Muxing
+  await processTtsStudioMuxing({
+    id: `multiplier_${task.id}`,
+    batchId: task.tts_batch_id || task.id,
+    videoPath: JSON.stringify(glabsVideoUrls),
+    syncOption: audioConfig.ffmpegSyncOption || audioConfig.ffmpeg_sync_option || 'smart_sync',
+    bgmPath: audioConfig.ffmpegBgmPath || audioConfig.ffmpeg_bgm_path || null,
+    bgmVolume: audioConfig.ffmpegBgmVolume !== undefined ? audioConfig.ffmpegBgmVolume : (audioConfig.ffmpeg_bgm_volume !== undefined ? audioConfig.ffmpeg_bgm_volume : 0.00),
+    sfxVolume: audioConfig.ffmpegSfxVolume !== undefined ? audioConfig.ffmpegSfxVolume : (audioConfig.ffmpeg_sfx_volume !== undefined ? audioConfig.ffmpeg_sfx_volume : 0.00),
+    videoScale: audioConfig.ffmpegVideoScale !== undefined ? audioConfig.ffmpegVideoScale : (audioConfig.ffmpeg_video_scale !== undefined ? audioConfig.ffmpeg_video_scale : 1.0),
+    enableMotionText: audioConfig.enable_motion_text !== undefined ? audioConfig.enable_motion_text : (aesthetics.enable_motion_text !== undefined ? aesthetics.enable_motion_text : 1),
+    motionTextStyle: audioConfig.motion_text_style || aesthetics.motion_text_style || 'floating_white_yellow',
+    motionTextPosition: audioConfig.motion_text_position || aesthetics.motion_text_position || 'bottom',
+    videoTransition: audioConfig.video_transition || aesthetics.video_transition || 'fade',
+    transitionDuration: Number(audioConfig.transition_duration !== undefined ? audioConfig.transition_duration : (aesthetics.transition_duration !== undefined ? aesthetics.transition_duration : 0.5)),
+    outputPath: finalOutputDiskPath,
+    brandName: task.account_name || 'Brand'
+  });
+```
+
+---
+
+### 3. `app/api/v2/recipes/autonomous-pipeline/route.js`
+
+#### Code Sebelum (Current/Before):
+```javascript
+// Baris 194-198:
+        overrides: {
+          ...affiliateOverride,
+          ...recipeOverride,
+          ...(body.overrides || {})
+        }
+```
+
+#### Code Sesudah (Proposed/After):
+```javascript
+        overrides: {
+          visual_identity_preset_id: body.visual_identity_preset_id || null,
+          enable_motion_text: body.enable_motion_text,
+          motion_text_style: body.motion_text_style,
+          video_transition: body.video_transition,
+          ...affiliateOverride,
+          ...recipeOverride,
+          ...(body.overrides || {})
+        }
+```
+
+---
+
+### 4. `lib/auto-pipeline-scheduler-runner.js`
+
+#### Code Sebelum (Current/Before):
+```javascript
+// Baris 131-134:
+      overrides: {
+        generate_recipe: cfg.generate_recipe !== undefined ? Boolean(cfg.generate_recipe) : undefined,
+        ...(cfg.overrides || {})
+      }
+```
+
+#### Code Sesudah (Proposed/After):
+```javascript
+      overrides: {
+        visual_identity_preset_id: cfg.visual_identity_preset_id || null,
+        generate_recipe: cfg.generate_recipe !== undefined ? Boolean(cfg.generate_recipe) : undefined,
+        enable_motion_text: cfg.enable_motion_text,
+        motion_text_style: cfg.motion_text_style,
+        video_transition: cfg.video_transition,
+        ...(cfg.overrides || {})
+      }
+```
+
+---
+
+### 5. `app/auto-pipeline/page.js` (Penyelarasan Modal Schedule & Inspector)
+
+#### Code Sebelum (Current/Before):
+```javascript
+// Baris 1250:
+: (schedCampaignType === 'multiplier_campaign'
+    ? { blueprint_id: targetId, execution_mode: 'full_autopilot', generate_recipe: schedGenerateRecipe }
+    : ...)
+```
+
+#### Code Sesudah (Proposed/After):
+```javascript
+: (schedCampaignType === 'multiplier_campaign'
+    ? { 
+        blueprint_id: targetId, 
+        execution_mode: 'full_autopilot', 
+        generate_recipe: schedGenerateRecipe,
+        visual_identity_preset_id: selectedPresetId || activePresetConfig?.visual_swap?.visual_identity_preset_id || null
+      }
+    : ...)
+```
+
+---
+
+## Verifikasi & Validasi
+1. Menjalankan unit test `tests/test-autonomous-preset-pipeline.test.js` untuk menguji:
+   - Resolusi preset asinkron untuk ke-4 tipe video.
+   - Keberadaan `visual_identity_preset_id` dan properti finishing (`motion_text`, `video_transition`) pada `vso_config_json` dan `audio_config_json`.
+   - Auto-healing pada Multiplier Worker saat menerima task tanpa VI eksplisit.
+2. Memverifikasi mockup simulasi HTML di browser (`public/mockup_auto_pipeline_preset_audit.html`).
+3. Melakukan rilis non-interaktif dan sinkronisasi Git otomatis sesuai SOP.

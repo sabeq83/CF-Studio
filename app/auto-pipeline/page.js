@@ -1242,15 +1242,20 @@ export default function AutoPipelinePage() {
           schedTopicVal = targetTitle;
         }
 
+        const schedModalPresets = modalBrandPresets.length > 0 ? modalBrandPresets : operatorPresets;
+        const schedFoundPreset = schedModalPresets.find(p => p.key === schedPresetKey);
+        const schedFoundCfg = schedFoundPreset?.config || schedFoundPreset || {};
+        const schedViId = schedFoundCfg?.visual_swap?.visual_identity_preset_id || null;
+
         const editPipelineConfig = schedCampaignType === 'product_campaign'
-          ? { product_id: targetId, selected_cep: schedSelectedCep || 'auto', promotion_context: schedPromotionContext.trim() || null }
+          ? { product_id: targetId, selected_cep: schedSelectedCep || 'auto', promotion_context: schedPromotionContext.trim() || null, visual_identity_preset_id: schedViId }
           : (schedCampaignType === 'editorial_campaign'
-              ? { content_pillar: targetTitle }
+              ? { content_pillar: targetTitle, visual_identity_preset_id: schedViId }
               : (schedCampaignType === 'multiplier_campaign'
-                  ? { blueprint_id: targetId, execution_mode: 'full_autopilot', generate_recipe: schedGenerateRecipe }
+                  ? { blueprint_id: targetId, execution_mode: 'full_autopilot', generate_recipe: schedGenerateRecipe, visual_identity_preset_id: schedViId }
                   : (schedCampaignType === 'recipe_labs'
                       ? { images_per_recipe: schedImagesPerRecipe, selected_layout_id: schedLayoutId, visual_style: schedVisualStyle, post_to_facebook: schedPostToFacebook }
-                      : {})));
+                      : { visual_identity_preset_id: schedViId })));
         editPipelineConfig.post_link_affiliate = schedPostAffiliateLink;
         if (schedCampaignType === 'multiplier_campaign' || schedCampaignType === 'recipe_campaign') {
           editPipelineConfig.generate_recipe = schedGenerateRecipe;
@@ -1393,15 +1398,20 @@ export default function AutoPipelinePage() {
             if (!finalName) finalName = `Resep Foto (${schedImagesPerRecipe}G) — ${schedGenTime} WIB`;
           }
 
+          const schedModalPresetsSingle = modalBrandPresets.length > 0 ? modalBrandPresets : operatorPresets;
+          const schedFoundPresetSingle = schedModalPresetsSingle.find(p => p.key === schedPresetKey);
+          const schedFoundCfgSingle = schedFoundPresetSingle?.config || schedFoundPresetSingle || {};
+          const schedViIdSingle = schedFoundCfgSingle?.visual_swap?.visual_identity_preset_id || null;
+
           const pipelineConfigPayload = schedCampaignType === 'product_campaign'
-            ? { product_id: targetId, selected_cep: schedSelectedCep || 'auto', promotion_context: schedPromotionContext.trim() || null }
+            ? { product_id: targetId, selected_cep: schedSelectedCep || 'auto', promotion_context: schedPromotionContext.trim() || null, visual_identity_preset_id: schedViIdSingle }
             : (schedCampaignType === 'editorial_campaign'
-                ? { content_pillar: targetTitle }
+                ? { content_pillar: targetTitle, visual_identity_preset_id: schedViIdSingle }
                 : (schedCampaignType === 'multiplier_campaign'
-                    ? { blueprint_id: targetId, execution_mode: 'full_autopilot', generate_recipe: schedGenerateRecipe }
+                    ? { blueprint_id: targetId, execution_mode: 'full_autopilot', generate_recipe: schedGenerateRecipe, visual_identity_preset_id: schedViIdSingle }
                     : (schedCampaignType === 'recipe_labs'
                         ? { images_per_recipe: schedImagesPerRecipe, selected_layout_id: schedLayoutId, visual_style: schedVisualStyle, post_to_facebook: schedPostToFacebook }
-                        : {})));
+                        : { visual_identity_preset_id: schedViIdSingle })));
           pipelineConfigPayload.post_link_affiliate = schedPostAffiliateLink;
           if (schedCampaignType === 'multiplier_campaign' || schedCampaignType === 'recipe_campaign') {
             pipelineConfigPayload.generate_recipe = schedGenerateRecipe;
@@ -2241,6 +2251,40 @@ export default function AutoPipelinePage() {
                     </span>
                     <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                       ✂️ {transitionDesc}
+                    </span>
+                  </div>
+
+                  <div style={{
+                    background: 'var(--surface)',
+                    border: '1.5px solid var(--status-purple)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '0.65rem 0.8rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.2rem'
+                  }}>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--status-purple)', textTransform: 'uppercase' }}>
+                      Identitas Visual (VI) Preset
+                    </span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--status-purple)' }}>
+                      🧬 {activePresetConfig?.visual_swap?.visual_identity_preset_id || selectedPresetId || 'Default Brand VI'}
+                    </span>
+                  </div>
+
+                  <div style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '0.65rem 0.8rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.2rem'
+                  }}>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                      Mode Visual &amp; Pacing
+                    </span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                      🎥 {activePresetConfig?.visual_engine?.visual_mode || 'hybrid_lock'} • {wordsPerClip}
                     </span>
                   </div>
                 </div>
@@ -5397,6 +5441,16 @@ export default function AutoPipelinePage() {
                         </span>
                         <span style={{ color: 'var(--text-secondary)' }}>
                           TTS: <strong style={{ color: 'var(--text-primary)' }}>{pVoice.replace(/_/g, ' ')}</strong>
+                        </span>
+                        <span style={{
+                          padding: '0.2rem 0.55rem',
+                          borderRadius: '999px',
+                          background: 'var(--status-purple-soft)',
+                          color: 'var(--status-purple)',
+                          border: '1px solid var(--status-purple)',
+                          fontWeight: 700
+                        }}>
+                          🧬 VI: {pConfig?.visual_swap?.visual_identity_preset_id || 'vi_default'}
                         </span>
                       </div>
                       <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>

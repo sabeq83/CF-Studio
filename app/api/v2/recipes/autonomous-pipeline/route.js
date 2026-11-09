@@ -192,6 +192,11 @@ export const POST = withTenantContext(async (request, _context, user) => {
         selectedAngle: body.selected_angle || body.selectedAngle || null,
         tenantId,
         overrides: {
+          visual_identity_preset_id: body.visual_identity_preset_id || null,
+          enable_motion_text: body.enable_motion_text,
+          motion_text_style: body.motion_text_style,
+          video_transition: body.video_transition,
+          transition_duration: body.transition_duration,
           ...affiliateOverride,
           ...recipeOverride,
           ...(body.overrides || {})

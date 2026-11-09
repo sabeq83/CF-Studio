@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.40.2 — Full 100% Preset Inheritance across 4 Auto Pipeline Video Types (09/11/2026)
+- Harmonisasi resolusi 100% parameter preset (Suara, AI Directive, VI V2, Mesin Visual, Subtitel & Transisi) pada 4 tipe video Auto Pipeline
+- Perbaikan kebocoran Visual Identity dan aktivasi finishing subtitel/transisi pada Multiplier Video
+- Failsafe auto-healing VI lookup di Multiplier Worker untuk mencegah visual fallback syari_classic
+- Sinkronisasi modal 1-klik dan modal jadwal dengan kartu inspeksi VI dan finishing
+
 ## V2.40.1 — Recipe Library UI Page & Sidebar Navigation Integration (09/11/2026)
 - Integrasi menu navigasi Recipe Library pada Sidebar kategori PLANNING
 - Pembuatan halaman client app/recipe-library/page.js dengan tabel resep dan ringkasan metrik

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Mockup: Aliran 100% Parameter Preset di Auto Pipeline</title>
+  <link rel="stylesheet" href="/theme.css">
+  <style>
+    :root {
+      --surface: #0f172a;
+      --surface-raised: #1e293b;
+      --surface-interactive: #334155;
+      --surface-subtle: #1e293b80;
+      --border-subtle: #334155;
+      --border-strong: #475569;
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --action-primary: #3b82f6;
+      --action-primary-hover: #2563eb;
+      --on-action-primary: #ffffff;
+      --status-success: #10b981;
+      --status-success-soft: #064e3b40;
+      --status-info: #0ea5e9;
+      --status-info-soft: #0c4a6e40;
+      --status-purple: #8b5cf6;
+      --status-purple-soft: #4c1d9540;
+      --status-warning: #f59e0b;
+      --status-warning-soft: #78350f40;
+      --radius-xs: 4px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    [data-theme="light"] {
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #f1f5f9;
+      --surface-subtle: #f8fafc80;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --action-primary: #2563eb;
+      --action-primary-hover: #1d4ed8;
+      --on-action-primary: #ffffff;
+      --status-success: #059669;
+      --status-success-soft: #ecfdf5;
+      --status-info: #0284c7;
+      --status-info-soft: #f0f9ff;
+      --status-purple: #7c3aed;
+      --status-purple-soft: #f5f3ff;
+      --status-warning: #d97706;
+      --status-warning-soft: #fffbeb;
+      --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-sans); }
+    body { background: var(--surface); color: var(--text-primary); padding: 2rem; }
+    .container { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem; }
+    .card { background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem; }
+    .badge { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; }
+    .grid-specs { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.85rem; margin-top: 1rem; }
+    .spec-item { background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.75rem 0.9rem; display: flex; flex-direction: column; gap: 0.25rem; }
+    .spec-label { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+    .spec-val { font-size: 0.88rem; font-weight: 700; color: var(--text-primary); }
+    .btn { background: var(--action-primary); color: var(--on-action-primary); border: none; padding: 0.6rem 1.2rem; border-radius: var(--radius-sm); font-weight: 700; cursor: pointer; }
+    .btn:hover { background: var(--action-primary-hover); }
+    .tag-flow { display: flex; align-items: center; gap: 0.4rem; padding: 0.5rem 0.8rem; background: var(--status-success-soft); border: 1px solid var(--status-success); border-radius: var(--radius-sm); color: var(--status-success); font-size: 0.8rem; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <h2 style="font-size: 1.4rem; font-weight: 800;">Simulasi UI: Inspeksi 100% Parameter Preset di Auto Pipeline</h2>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 0.25rem;">
+          Memverifikasi bahwa seluruh konfigurasi (Suara, Visual Identity, Naskah, Subtitel & Transisi) mengalir transparan.
+        </p>
+      </div>
+      <button class="btn" onclick="toggleTheme()" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">🌓 Ganti Tema</button>
+    </div>
+
+    <!-- Tab Seleksi Kampanye -->
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+      <button class="btn" id="btn-multiplier" onclick="selectCampaign('multiplier')" style="background: var(--status-purple);">🔀 Video Multiplier (Siasat Sehat)</button>
+      <button class="btn" id="btn-product" onclick="selectCampaign('product')" style="background: var(--surface-interactive); color: var(--text-primary);">🛍️ Video Produk</button>
+      <button class="btn" id="btn-editorial" onclick="selectCampaign('editorial')" style="background: var(--surface-interactive); color: var(--text-primary);">📖 Video Editorial</button>
+      <button class="btn" id="btn-recipe" onclick="selectCampaign('recipe')" style="background: var(--surface-interactive); color: var(--text-primary);">🍳 Video Resep</button>
+    </div>
+
+    <!-- Kartu Preview Rincian Preset yang Ditampilkan di Modal 1-Klik & Modal Jadwal -->
+    <div class="card" id="preset-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="font-size: 1.25rem;">📋</span>
+          <div>
+            <span style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary);">Rincian Preset Terpilih: </span>
+            <span id="preset-name" style="color: var(--action-primary); font-weight: 800;">multiplier_siasatsehat</span>
+          </div>
+        </div>
+        <span class="badge" style="background: var(--status-success-soft); color: var(--status-success); border: 1px solid var(--status-success);">
+          🔒 100% Terhubung &amp; Terkunci ke Pipeline
+        </span>
+      </div>
+
+      <!-- 6 Specs Badges Lengkap 5 Gerbong -->
+      <div class="grid-specs">
+        <!-- 1. Format & Durasi -->
+        <div class="spec-item">
+          <span class="spec-label">Format Klip &amp; Durasi</span>
+          <span class="spec-val" id="spec-clips">🎬 3 Klip × 8 detik (~24s)</span>
+          <span style="font-size: 0.72rem; color: var(--text-muted);" id="spec-words">Pacing: 17-19 kata/klip • Rasio 9:16</span>
+        </div>
+
+        <!-- 2. Voice Persona, Speed & Bahasa -->
+        <div class="spec-item">
+          <span class="spec-label">Voice-Over &amp; Target Bahasa</span>
+          <span class="spec-val" id="spec-voice">🎙️ Indonesian_casual_reporter_vv2 (1.0x)</span>
+          <span style="font-size: 0.72rem; color: var(--text-muted);" id="spec-lang">Bahasa: id-ID • Provider: Minimax Turbo</span>
+        </div>
+
+        <!-- 3. VISUAL IDENTITY (KUNCI YANG SEBELUMNYA BOCOR) -->
+        <div class="spec-item" style="border: 1.5px solid var(--status-purple);">
+          <span class="spec-label" style="color: var(--status-purple);">Identitas Visual (Visual Identity V2)</span>
+          <span class="spec-val" id="spec-vi" style="color: var(--status-purple);">🧬 Clinical Biohacking &amp; 3D Anatomy</span>
+          <span style="font-size: 0.72rem; color: var(--text-muted);" id="spec-vi-details">Matte charcoal micro-cement, borosilicate glass, 0% human face</span>
+        </div>
+
+        <!-- 4. Mode Visual AI & Model Video -->
+        <div class="spec-item">
+          <span class="spec-label">Mesin Visual &amp; Model AI</span>
+          <span class="spec-val" id="spec-engine">🤖 Pure T2V (Google Veo 3.1)</span>
+          <span style="font-size: 0.72rem; color: var(--text-muted);" id="spec-style">Style: Realistic Scientific Cinematic</span>
+        </div>
+
+        <!-- 5. Subtitel Dinamis (Motion Text) -->
+        <div class="spec-item">
+          <span class="spec-label">Finishing Subtitel Dinamis</span>
+          <span class="spec-val" id="spec-sub">🟡 Floating Black on White</span>
+          <span style="font-size: 0.72rem; color: var(--text-muted);">Posisi: Bawah • Efek: Pop Bounce &amp; Typewriter</span>
+        </div>
+
+        <!-- 6. Transisi FFmpeg Antar-Klip -->
+        <div class="spec-item">
+          <span class="spec-label">Finishing Transisi Video</span>
+          <span class="spec-val" id="spec-trans">✂️ Fadewhite (0.3s)</span>
+          <span style="font-size: 0.72rem; color: var(--text-muted);">Smart Sync FFmpeg Audio-Video</span>
+        </div>
+      </div>
+
+      <!-- Outro CTA Banner -->
+      <div style="margin-top: 1rem; padding: 0.75rem 0.9rem; background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); display: flex; flex-direction: column; gap: 0.25rem;">
+        <span class="spec-label">Mandatory Outro (CTA Penutup Wajib)</span>
+        <span style="font-size: 0.84rem; font-weight: 700; color: var(--status-warning);" id="spec-outro">
+          "mau resep sehat lainnya? jangan lupa follow &amp; komen mau ya!"
+        </span>
+      </div>
+
+      <!-- Aliran Status Pengiriman -->
+      <div style="margin-top: 1rem;" class="tag-flow">
+        <span>✅ JAMINAN INTEGRITAS PRESET:</span>
+        <span id="flow-msg">Parameter di atas otomatis dikunci ke dalam pembuatan naskah, penjanaan prompt Veo, hingga stitching FFmpeg tanpa kompromi.</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const dataPresets = {
+      multiplier: {
+        name: 'multiplier_siasatsehat',
+        clips: '🎬 3 Klip × 8 detik (~24s)',
+        words: 'Pacing: 17-19 kata/klip • Rasio 9:16',
+        voice: '🎙️ Indonesian_casual_reporter_vv2 (1.0x)',
+        lang: 'Bahasa: id-ID • Provider: Minimax Turbo',
+        vi: '🧬 Clinical Biohacking & 3D Anatomy',
+        viDetails: 'Matte charcoal micro-cement, borosilicate glass, 0% human face',
+        engine: '🤖 Pure T2V (Google Veo 3.1)',
+        style: 'Style: Realistic Scientific Cinematic',
+        sub: '🟡 Floating Black on White',
+        trans: '✂️ Fadewhite (0.3s)',
+        outro: '"mau resep sehat lainnya? jangan lupa follow & komen mau ya!"'
+      },
+      product: {
+        name: 'dapurbotani_kampanye_produk_4_klip',
+        clips: '🎬 4 Klip × 4 detik (~16s)',
+        words: 'Pacing: 8-9 kata/klip • Rasio 9:16',
+        voice: '🎙️ Indonesian_warm_motherly_vv1 (1.0x)',
+        lang: 'Bahasa: id-ID • Provider: Minimax',
+        vi: '🌿 Dapur Botani — Warm Earthy Natural Herbal',
+        viDetails: 'Meja kayu jati rustic, botol kaca amber, daun herbal segar',
+        engine: '🤖 Hybrid Lock Double-Pass (T2I + I2V)',
+        style: 'Style: Photorealistic Culinary Macro',
+        sub: '🟡 Floating White Yellow',
+        trans: '✂️ Fade (0.5s)',
+        outro: '"Dapatkan produk GarliBee sekarang melalui link di bio ya Moms!"'
+      },
+      editorial: {
+        name: 'siasatsehat_editorial_v1',
+        clips: '🎬 4 Klip × 8 detik (~32s)',
+        words: 'Pacing: 20-22 kata/klip • Rasio 9:16',
+        voice: '🎙️ Indonesian_professional_anchor_vv2 (1.0x)',
+        lang: 'Bahasa: id-ID • Provider: Minimax Turbo',
+        vi: '🧬 Clinical Biohacking & 3D Anatomy',
+        viDetails: 'Laboratorium modern, vortex mixer, mikroskopis seluler',
+        engine: '🤖 Pure T2V (Google Veo 3.1)',
+        style: 'Style: Editorial Scientific',
+        sub: '🟡 Floating Black on White',
+        trans: '✂️ Fadewhite (0.3s)',
+        outro: '"mau resep sehat lainnya? follow dan komen mau di bawah ini ya!"'
+      },
+      recipe: {
+        name: 'snacklab_resep_15klip',
+        clips: '🎬 6 Klip × 4 detik (~24s)',
+        words: 'Pacing: 8-9 kata/klip • Rasio 9:16',
+        voice: '🎙️ English_causual_narrator_vv1 (1.0x)',
+        lang: 'Bahasa: en-US • Provider: Minimax',
+        vi: '🍫 SnackLab — Modern Confectionery & Pastry',
+        viDetails: 'Clean marble countertop, sleek stainless steel whisk, macro dessert',
+        engine: '🤖 Hybrid Lock Double-Pass (T2I + I2V)',
+        style: 'Style: Food Porn Macro Appetizing',
+        sub: '🟡 Floating White Yellow',
+        trans: '✂️ Fade (0.5s)',
+        outro: '"Want more quick snack recipes? Check out the link in bio!"'
+      }
+    };
+
+    function selectCampaign(type) {
+      ['multiplier', 'product', 'editorial', 'recipe'].forEach(t => {
+        const btn = document.getElementById(`btn-${t}`);
+        if (t === type) {
+          btn.style.background = 'var(--action-primary)';
+          btn.style.color = 'var(--on-action-primary)';
+        } else {
+          btn.style.background = 'var(--surface-interactive)';
+          btn.style.color = 'var(--text-primary)';
+        }
+      });
+
+      const d = dataPresets[type];
+      document.getElementById('preset-name').innerText = d.name;
+      document.getElementById('spec-clips').innerText = d.clips;
+      document.getElementById('spec-words').innerText = d.words;
+      document.getElementById('spec-voice').innerText = d.voice;
+      document.getElementById('spec-lang').innerText = d.lang;
+      document.getElementById('spec-vi').innerText = d.vi;
+      document.getElementById('spec-vi-details').innerText = d.viDetails;
+      document.getElementById('spec-engine').innerText = d.engine;
+      document.getElementById('spec-style').innerText = d.style;
+      document.getElementById('spec-sub').innerText = d.sub;
+      document.getElementById('spec-trans').innerText = d.trans;
+      document.getElementById('spec-outro').innerText = d.outro;
+    }
+
+    function toggleTheme() {
+      const cur = document.documentElement.getAttribute('data-theme');
+      document.documentElement.setAttribute('data-theme', cur === 'light' ? 'dark' : 'light');
+    }
+  </script>
+</body>
+</html>
+
