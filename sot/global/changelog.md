@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.40.9 — Fix 1-Klik Video Editorial & Tenant Isolation (10/11/2026)
+- Perbaiki logika default bridging pada endpoint autonomous-pipeline agar tidak melempar error guardrail pada editorial
+- Perbaiki bug ReferenceError presetViId pada executeAutonomousEditorialPipeline dan executeAutonomousProductPipeline
+- Sertakan tenant_id pada query INSERT content_planner_rows dan pillar_campaigns untuk menjaga isolasi multi-tenant data
+- Sinkronisasi konfigurasi brand_profiles, gemini_api_keys, dan tenant_settings untuk tenant pt-gim-sosmed ke schema dev
+
 ## V2.40.8 — Modernize Preset Manager with Smart Tabs, Filter Chips, and Rich Grid Cards (Option 1) (09/11/2026)
 - Tambahkan horizontal tab bar per jenis campaign (Resep Kuliner, Produk, Brand, Multiplier, Recipe Labs) dengan badge counter otomatis
 - Tambahkan toolbar filter search real-time, chip filter Audio Engine (Native Veo vs Minimax), dan chip filter Type (System vs Custom)

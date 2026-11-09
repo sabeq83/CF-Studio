@@ -134,11 +134,18 @@ export const POST = withTenantContext(async (request, _context, user) => {
       return NextResponse.json({ success: true, angles });
     }
 
-    const isAffiliateEnabled = body.post_link_affiliate !== undefined ? Boolean(body.post_link_affiliate) : true;
+    const isEditorialOrLabs = pipelineType === 'editorial_campaign' || pipelineType === 'recipe_labs';
+    const isAffiliateEnabled = body.post_link_affiliate !== undefined
+      ? Boolean(body.post_link_affiliate)
+      : (!isEditorialOrLabs);
+    const isBridgingActive = body.is_bridging_active !== undefined
+      ? Boolean(body.is_bridging_active)
+      : (isEditorialOrLabs ? false : isAffiliateEnabled);
+
     const affiliateOverride = {
       post_link_affiliate: isAffiliateEnabled,
       is_affiliate_enabled: isAffiliateEnabled,
-      is_bridging_active: isAffiliateEnabled
+      is_bridging_active: isBridgingActive
     };
 
     const isRecipeEnabled = body.generate_recipe !== undefined
