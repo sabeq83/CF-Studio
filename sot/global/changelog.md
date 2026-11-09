@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.37.3 — Dokumentasi Runbook CF Studio MCP & 29 Jadwal Autopipeline (09/11/2026)
+- Menambahkan runbook operasional MCP CF Studio
+- Mendokumentasikan konfigurasi IDE dan 29 jadwal aktif autopipeline
+
 ## V2.37.2 — Fix: Support private IP and Tailscale mesh for MCP operator client (09/11/2026)
 - Dukungan IP privat dan Tailscale 100.64.0.0/10 pada MCP operator client
 
