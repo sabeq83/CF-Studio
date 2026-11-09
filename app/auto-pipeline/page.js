@@ -236,12 +236,15 @@ export default function AutoPipelinePage() {
   );
   const rawVideoModel = activePresetConfig?.visual_engine?.video_model || activePresetConfig?.video_model || 'omni_flash';
   const videoModelName = rawVideoModel === 'veo_31_lite' ? 'Google Veo (8s)' : 'Veo Omni Flash (4s)';
-  const rawVoicePersona = activePresetConfig?.basic_strategy?.voice_persona || activePresetConfig?.voice_persona || 'English_causual_narrator_vv1';
-  const voicePersonaName = rawVoicePersona.replace(/_/g, ' ');
-  const targetLanguage = activePresetConfig?.basic_strategy?.target_language || activePresetConfig?.target_language || 'en-US';
-  const wordsPerClip = activePresetConfig?.visual_engine?.words_per_clip || (clipDuration >= 8 ? '17-19 kata' : '8-9 kata');
-
+  const bs = activePresetConfig?.basic_strategy || {};
   const wf = activePresetConfig?.workflow || {};
+  const audioEngineMode = wf.audio_engine_mode || bs.audio_engine_mode || 'minimax_tts';
+  const isNativeVeo = audioEngineMode === 'native_veo';
+  const googleVoicePersona = wf.google_voice_persona || bs.google_voice_persona || 'Kore';
+  const rawVoicePersona = bs.voice_persona || activePresetConfig?.voice_persona || 'English_causual_narrator_vv1';
+  const voicePersonaName = rawVoicePersona.replace(/_/g, ' ');
+  const targetLanguage = bs.target_language || activePresetConfig?.target_language || 'en-US';
+  const wordsPerClip = activePresetConfig?.visual_engine?.words_per_clip || (clipDuration >= 8 ? '17-19 kata' : '8-9 kata');
   const isMotionTextOn = wf.enable_motion_text !== undefined ? Boolean(wf.enable_motion_text) : (activePresetConfig?.enable_motion_text !== undefined ? Boolean(activePresetConfig.enable_motion_text) : true);
   const motionStyleKey = wf.motion_text_style || activePresetConfig?.motion_text_style || 'floating_white_yellow';
   const motionStyleDesc = !isMotionTextOn
@@ -2217,7 +2220,11 @@ export default function AutoPipelinePage() {
                       Model AI & Voice-Over
                     </span>
                     <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                      🤖 {videoModelName} • {voicePersonaName} ({targetLanguage})
+                      {isNativeVeo ? (
+                        <>🤖 {videoModelName} • <span style={{ color: 'var(--status-success)' }}>🔊 Native Veo [{googleVoicePersona}]</span> ({targetLanguage})</>
+                      ) : (
+                        <>🤖 {videoModelName} • 🎙️ {voicePersonaName} ({targetLanguage})</>
+                      )}
                     </span>
                   </div>
 

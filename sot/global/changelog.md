@@ -1,5 +1,13 @@
 # Changelog
 
+## V2.40.5 — Implement Mode 2 Native Veo 3.1 Audio with Google Voice Personas in Operator Presets (09/11/2026)
+- Tambahkan katalog 14 persona resmi Google Voice dan compiler arahan audio Veo 3.1 di lib/veo-native-audio.js
+- Integrasikan pengaturan Audio Engine (Minimax TTS vs Native Veo) terpusat pada form Preset Pengaturan (/settings/presets)
+- Alirkan parameter audio Mode 2 ke 4 pipeline Auto-Pipeline dan bypass kuota TTS Minimax saat Mode 2 aktif
+- Perbarui Workers dan FFmpeg Video Studio Processor untuk mempreservasi audio track asli Veo 3.1 tanpa tertimpa kebisuan
+- Tampilkan badge indikator audio informatif pada Inspector Card Auto-Pipeline
+- Lulus pengujian unit test dan MCP test 100%
+
 ## V2.40.4 — Upgrade MCP Server Schedule Control and Discovery Tools (09/11/2026)
 - Penambahan repliz_account_ids generate_recipe post_link_affiliate blueprint_id dan execution_mode pada cf_create_schedule
 - Penambahan tools cf_update_schedule cf_toggle_schedule_pause dan cf_delete_schedule untuk kontrol penuh jadwal

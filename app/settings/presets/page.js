@@ -5,6 +5,7 @@ import Sidebar from '../../components/Sidebar';
 import VisualIdentitySelector from '../../components/VisualIdentitySelector';
 import { getWordsPerClipOptions, getDefaultWordsPerClip, VIDEO_MODELS } from '@/lib/words-per-clip-presets';
 import { GEMINI_VOICES, MINIMAX_VOICES, MINIMAX_ENGLISH_VOICES } from '@/lib/voice-constants';
+import { GOOGLE_VOICE_PERSONAS } from '@/lib/veo-native-audio';
 
 const initialForm = {
   key: '',
@@ -54,6 +55,11 @@ const initialForm = {
 
   // Section 5: workflow
   approval_mode: 'storyboard',
+  audio_engine_mode: 'minimax_tts',
+  google_voice_persona: 'Kore',
+  enable_native_sfx: true,
+  enable_native_ambience: true,
+  anti_music_guardrail: true,
   enable_tts: true,
   voice_provider: 'minimax',
   voice_persona: 'Indonesian_professional_anchor_vv2',
@@ -135,6 +141,11 @@ function mapPresetToForm(p) {
 
     // workflow
     approval_mode: wf.approval_mode || 'storyboard',
+    audio_engine_mode: wf.audio_engine_mode || bs.audio_engine_mode || 'minimax_tts',
+    google_voice_persona: wf.google_voice_persona || bs.google_voice_persona || 'Kore',
+    enable_native_sfx: wf.enable_native_sfx !== undefined ? Boolean(wf.enable_native_sfx) : (bs.enable_native_sfx !== undefined ? Boolean(bs.enable_native_sfx) : true),
+    enable_native_ambience: wf.enable_native_ambience !== undefined ? Boolean(wf.enable_native_ambience) : (bs.enable_native_ambience !== undefined ? Boolean(bs.enable_native_ambience) : true),
+    anti_music_guardrail: wf.anti_music_guardrail !== undefined ? Boolean(wf.anti_music_guardrail) : (bs.anti_music_guardrail !== undefined ? Boolean(bs.anti_music_guardrail) : true),
     enable_tts: Boolean(wf.enable_tts),
     voice_provider: bs.voice_provider || 'minimax',
     voice_persona: bs.voice_persona || 'Indonesian_professional_anchor_vv2',
@@ -170,6 +181,11 @@ function mapFormToPayload(f) {
       campaign_kinds: f.campaign_kinds,
       basic_strategy: {
         narrative_mode: f.narrative_mode,
+        audio_engine_mode: f.audio_engine_mode || 'minimax_tts',
+        google_voice_persona: f.google_voice_persona || 'Kore',
+        enable_native_sfx: Boolean(f.enable_native_sfx),
+        enable_native_ambience: Boolean(f.enable_native_ambience),
+        anti_music_guardrail: Boolean(f.anti_music_guardrail),
         voice_provider: f.voice_provider,
         voice_persona: f.voice_persona,
         voice_speed: Number(f.voice_speed),
@@ -217,6 +233,11 @@ function mapFormToPayload(f) {
       },
       workflow: {
         approval_mode: f.approval_mode,
+        audio_engine_mode: f.audio_engine_mode || 'minimax_tts',
+        google_voice_persona: f.google_voice_persona || 'Kore',
+        enable_native_sfx: Boolean(f.enable_native_sfx),
+        enable_native_ambience: Boolean(f.enable_native_ambience),
+        anti_music_guardrail: Boolean(f.anti_music_guardrail),
         enable_tts: Boolean(f.enable_tts),
         enable_glabs: Boolean(f.enable_glabs),
         enable_ffmpeg: Boolean(f.enable_ffmpeg),
@@ -386,7 +407,19 @@ export default function PresetsPage() {
                       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
                         Key: <code style={{ color: 'var(--accent-color)' }}>{p.key}</code> · Revision: {p.revision} · Type: {p.is_system ? 'System (Read-only)' : 'Custom'}
                       </div>
-                      <div style={{display:'flex',gap:6,marginTop:7,flexWrap:'wrap'}}>{(p.campaign_kinds||[]).map(kind=><span key={kind} style={{fontSize:11,padding:'3px 7px',borderRadius:12,background:'var(--status-info-soft)'}}>{kind==='product_campaign'?'Product Campaign':kind==='recipe_campaign'?'Recipe Campaign':'Brand Editorial'}</span>)}{p.campaign_kinds_source==='inferred'&&<span style={{fontSize:11,color:'var(--warning)'}}>⚠ Inferred — Edit & Save untuk konfirmasi</span>}</div>
+                      <div style={{display:'flex',gap:6,marginTop:7,flexWrap:'wrap',alignItems:'center'}}>
+                        {(p.campaign_kinds||[]).map(kind=><span key={kind} style={{fontSize:11,padding:'3px 7px',borderRadius:12,background:'var(--status-info-soft)'}}>{kind==='product_campaign'?'Product Campaign':kind==='recipe_campaign'?'Recipe Campaign':'Brand Editorial'}</span>)}
+                        {(p.config?.workflow?.audio_engine_mode === 'native_veo' || p.config?.basic_strategy?.audio_engine_mode === 'native_veo') ? (
+                          <span style={{fontSize:11,padding:'3px 7px',borderRadius:12,background:'var(--status-success-soft)',color:'var(--status-success)',fontWeight:600}}>
+                            🔊 Native Veo [{(p.config?.workflow?.google_voice_persona || p.config?.basic_strategy?.google_voice_persona || 'Kore')}]
+                          </span>
+                        ) : (
+                          <span style={{fontSize:11,padding:'3px 7px',borderRadius:12,background:'var(--surface-subtle)',color:'var(--text-muted)'}}>
+                            🎙️ Minimax TTS
+                          </span>
+                        )}
+                        {p.campaign_kinds_source==='inferred'&&<span style={{fontSize:11,color:'var(--warning)'}}>⚠ Inferred — Edit & Save untuk konfirmasi</span>}
+                      </div>
                     </div>
                     <div style={{ display: 'flex', gap: 8 }}>
                       {p.is_system ? (
@@ -754,7 +787,130 @@ export default function PresetsPage() {
                       </label>
                     </div>
 
-                    {form.enable_tts && (
+                    {/* Audio Generation Engine Switcher */}
+                    <div style={{ border: '1px solid var(--border-color)', borderRadius: 10, padding: 16, background: 'var(--surface-raised)', display: 'grid', gap: 14 }}>
+                      <div>
+                        <label style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', display: 'block', marginBottom: 4 }}>
+                          🎙️ Audio Generation Engine
+                        </label>
+                        <p style={{ margin: 0, fontSize: 12, color: 'var(--text-muted)' }}>
+                          Tentukan apakah audio narasi dihasilkan via Minimax TTS eksternal atau disintesis native langsung oleh Google Veo 3.1.
+                        </p>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                        {/* Mode 1 Card */}
+                        <div
+                          onClick={() => setForm({ ...form, audio_engine_mode: 'minimax_tts' })}
+                          style={{
+                            padding: 14,
+                            borderRadius: 8,
+                            border: form.audio_engine_mode !== 'native_veo' ? '2px solid var(--action-primary)' : '1px solid var(--border-subtle)',
+                            background: form.audio_engine_mode !== 'native_veo' ? 'var(--surface-interactive)' : 'var(--surface)',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                            <strong style={{ fontSize: 13, color: 'var(--text-primary)' }}>🎙️ Mode 1: Minimax TTS Mux</strong>
+                            <input
+                              type="radio"
+                              name="audio_engine_mode"
+                              checked={form.audio_engine_mode !== 'native_veo'}
+                              onChange={() => setForm({ ...form, audio_engine_mode: 'minimax_tts' })}
+                            />
+                          </div>
+                          <p style={{ margin: 0, fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                            Narasi voice-over dibuat lewat MiniMax TTS, video Veo di-render silent, lalu di-mux otomatis dengan FFmpeg.
+                          </p>
+                        </div>
+
+                        {/* Mode 2 Card */}
+                        <div
+                          onClick={() => setForm({ ...form, audio_engine_mode: 'native_veo' })}
+                          style={{
+                            padding: 14,
+                            borderRadius: 8,
+                            border: form.audio_engine_mode === 'native_veo' ? '2px solid var(--action-primary)' : '1px solid var(--border-subtle)',
+                            background: form.audio_engine_mode === 'native_veo' ? 'var(--surface-interactive)' : 'var(--surface)',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                            <strong style={{ fontSize: 13, color: 'var(--text-primary)' }}>🔊 Mode 2: Native Veo 3.1 Audio</strong>
+                            <input
+                              type="radio"
+                              name="audio_engine_mode"
+                              checked={form.audio_engine_mode === 'native_veo'}
+                              onChange={() => setForm({ ...form, audio_engine_mode: 'native_veo' })}
+                            />
+                          </div>
+                          <p style={{ margin: 0, fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                            Suara dialog &amp; Foley SFX digenerate langsung oleh Google Veo 3.1 diffusion. <strong>⚡ Hemat kuota TTS Minimax.</strong>
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Mode 2 Options */}
+                      {form.audio_engine_mode === 'native_veo' && (
+                        <div style={{ borderTop: '1px dashed var(--border-color)', paddingTop: 14, display: 'grid', gap: 14 }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.8fr', gap: 14 }}>
+                            <label className="form-label">
+                              Google Voice Persona
+                              <select
+                                className="form-select"
+                                value={form.google_voice_persona || 'Kore'}
+                                onChange={e => setForm({ ...form, google_voice_persona: e.target.value })}
+                              >
+                                {GOOGLE_VOICE_PERSONAS.map(p => (
+                                  <option key={p.id} value={p.id}>
+                                    {p.id} ({p.gender === 'female' ? 'Wanita' : 'Pria'} - {p.style})
+                                  </option>
+                                ))}
+                              </select>
+                            </label>
+                            <div>
+                              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>
+                                Deskripsi Karakter Vokal Veo:
+                              </div>
+                              <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic', background: 'var(--surface)', padding: '8px 12px', borderRadius: 6, border: '1px solid var(--border-subtle)' }}>
+                                &ldquo;{GOOGLE_VOICE_PERSONAS.find(p => p.id === (form.google_voice_persona || 'Kore'))?.descriptionEn || 'Clear and natural voice'}&rdquo;
+                              </div>
+                            </div>
+                          </div>
+
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, background: 'var(--surface)', padding: 12, borderRadius: 8, border: '1px solid var(--border-subtle)' }}>
+                            <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 12, color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                              <input
+                                type="checkbox"
+                                checked={Boolean(form.enable_native_sfx)}
+                                onChange={e => setForm({ ...form, enable_native_sfx: e.target.checked })}
+                              />
+                              <span>🔊 Foley SFX Fisik Tersinkron</span>
+                            </label>
+                            <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 12, color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                              <input
+                                type="checkbox"
+                                checked={Boolean(form.enable_native_ambience)}
+                                onChange={e => setForm({ ...form, enable_native_ambience: e.target.checked })}
+                              />
+                              <span>🍃 Ambience Ruangan Alami</span>
+                            </label>
+                            <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 12, color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                              <input
+                                type="checkbox"
+                                checked={Boolean(form.anti_music_guardrail)}
+                                onChange={e => setForm({ ...form, anti_music_guardrail: e.target.checked })}
+                              />
+                              <span>🛡️ Anti-Music Overlap Guardrail</span>
+                            </label>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {form.audio_engine_mode !== 'native_veo' && form.enable_tts && (
                       <fieldset style={{ border: '1px solid var(--border-color)', borderRadius: 8, padding: 16, display: 'grid', gap: 12 }}>
                         <legend style={{ padding: '0 8px', fontSize: 13, fontWeight: 600 }}>🔊 TTS Audio Engine Settings</legend>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 }}>

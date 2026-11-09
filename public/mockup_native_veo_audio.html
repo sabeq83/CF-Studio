@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simulasi Mockup: Mode 2 Native Veo Audio + Google Voice Persona</title>
+  <title>Simulasi Mockup: Mode 2 Native Veo Audio di Pengaturan Preset</title>
   <link rel="stylesheet" href="/theme.css">
   <style>
     :root {
@@ -74,14 +74,20 @@
     .theme-toggle-btn { background: var(--surface-interactive); color: var(--text-primary); border: 1px solid var(--border-subtle); padding: 0.45rem 0.9rem; border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; }
     .theme-toggle-btn:hover { border-color: var(--border-strong); }
 
-    /* Engine Mode Selector */
-    .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.75rem; }
-    .mode-card { border: 2px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem; background: var(--surface); cursor: pointer; transition: all 0.2s ease; position: relative; }
-    .mode-card:hover { border-color: var(--action-primary); background: var(--surface-interactive); }
-    .mode-card.active { border-color: var(--action-primary); background: var(--surface-interactive); box-shadow: 0 0 0 1px var(--action-primary); }
-    .mode-card .badge-rec { position: absolute; top: 10px; right: 10px; font-size: 0.68rem; padding: 0.15rem 0.5rem; border-radius: 9999px; font-weight: 700; background: var(--status-purple-soft); color: var(--status-purple); border: 1px solid var(--status-purple); }
-    .mode-title { font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; color: var(--text-primary); }
-    .mode-desc { font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.35rem; }
+    /* Form Fields */
+    .form-label { display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); }
+    .form-select, .form-input { background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.55rem 0.85rem; font-size: 0.85rem; color: var(--text-primary); outline: none; }
+    .form-select:focus, .form-input:focus { border-color: var(--action-primary); }
+
+    /* Radio Engine Mode Selector */
+    .mode-radios { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.5rem; }
+    .mode-option { border: 2px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem; background: var(--surface); cursor: pointer; transition: all 0.2s ease; display: flex; gap: 0.75rem; align-items: flex-start; }
+    .mode-option:hover { border-color: var(--action-primary); background: var(--surface-interactive); }
+    .mode-option.active { border-color: var(--action-primary); background: var(--surface-interactive); box-shadow: 0 0 0 1px var(--action-primary); }
+    .mode-option input { margin-top: 3px; accent-color: var(--action-primary); }
+    .mode-option-content { display: flex; flex-direction: column; gap: 0.2rem; }
+    .mode-option-title { font-size: 0.92rem; font-weight: 700; color: var(--text-primary); }
+    .mode-option-desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.35; }
 
     /* Google Voice Personas Grid */
     .personas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap: 0.75rem; margin-top: 0.75rem; }
@@ -99,21 +105,15 @@
     .toggle-pill { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); cursor: pointer; }
     .toggle-pill input { accent-color: var(--action-primary); width: 16px; height: 16px; cursor: pointer; }
 
+    /* Auto-Pipeline Inspector Card (Hasil Aliran Preset) */
+    .autopipeline-preview { background: var(--surface); border: 1px dashed var(--action-primary); border-radius: var(--radius-md); padding: 1.25rem; }
+    .badge-flow { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.72rem; font-weight: 700; }
+
     /* Prompt Inspector */
     .code-box { background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.85rem; font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.5; color: var(--text-primary); white-space: pre-wrap; word-break: break-word; }
     .hl-gold { color: #f59e0b; font-weight: 700; }
     .hl-cyan { color: #06b6d4; font-weight: 700; }
     .hl-green { color: #10b981; font-weight: 700; }
-    .hl-purple { color: #a855f7; font-weight: 700; }
-
-    /* Pipeline Status Indicator */
-    .pipeline-flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-top: 1rem; }
-    .flow-node { background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.65rem 0.75rem; display: flex; flex-direction: column; gap: 0.2rem; }
-    .flow-step { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); }
-    .flow-val { font-size: 0.8rem; font-weight: 700; color: var(--text-primary); }
-    .flow-status { font-size: 0.72rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.3rem; margin-top: 0.25rem; }
-    .status-ok { color: var(--status-success); }
-    .status-bypassed { color: var(--status-warning); }
 
     .btn-apply { background: var(--action-primary); color: var(--on-action-primary); border: none; padding: 0.75rem 1.5rem; border-radius: var(--radius-sm); font-size: 0.9rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; }
     .btn-apply:hover { background: var(--action-primary-hover); }
@@ -125,153 +125,201 @@
     <!-- Top Bar -->
     <div class="header-bar">
       <div class="title-group">
-        <h2>🔊 Mode 2: Native Veo 3.1 Audio Generation</h2>
-        <p>Konfigurasi pembuatan video otomatis langsung dengan audio native terintegrasi (Speech, SFX, & Ambience) tanpa Minimax TTS.</p>
+        <h2>⚙️ Pengaturan Preset: Audio Engine Strategy</h2>
+        <p>Konfigurasi disimpan sekali di Preset (`/settings/presets`) dan otomatis mengalir ke seluruh pembuatan video & jadwal.</p>
       </div>
       <button class="theme-toggle-btn" onclick="toggleTheme()">
         <span id="theme-icon">☀️</span> <span id="theme-label">Light Mode</span>
       </button>
     </div>
 
-    <!-- Section 1: Engine Mode Selection -->
-    <div class="card">
-      <div style="font-size: 0.92rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.2rem;">
-        1. Pilih Arsitektur Audio Engine
-      </div>
-      <div style="font-size: 0.8rem; color: var(--text-muted);">
-        Tentukan apakah video menggunakan TTS voiceover terpisah (Mode 1) atau audio bawaan langsung dari Google Veo 3.1 (Mode 2).
-      </div>
-
-      <div class="mode-grid">
-        <!-- Mode 1 Card -->
-        <div class="mode-card" id="card-mode-1" onclick="selectMode('minimax_tts')">
-          <div class="mode-title">
-            <span>🎙️ Mode 1: Minimax / TTS Mux</span>
-          </div>
-          <div class="mode-desc">
-            Video Veo dihasilkan dalam mode hening (<code>silent video</code>), lalu FFmpeg menggabungkan file MP3 dari Minimax/Gemini TTS.
-          </div>
-          <div style="margin-top: 0.6rem; font-size: 0.75rem; color: var(--text-muted);">
-            • Membutuhkan API Key Minimax<br>
-            • Resiko desync jika durasi TTS melebihi klip
-          </div>
-        </div>
-
-        <!-- Mode 2 Card -->
-        <div class="mode-card active" id="card-mode-2" onclick="selectMode('native_veo')">
-          <span class="badge-rec">✨ Rekomendasi Veo 3.1</span>
-          <div class="mode-title">
-            <span>🔊 Mode 2: Native Veo Audio</span>
-          </div>
-          <div class="mode-desc">
-            Veo 3.1 men-generate video dan audio tersinkron secara bersamaan (Joint Audio-Visual Diffusion). Lengkap dengan Speech, SFX, dan Ambience.
-          </div>
-          <div style="margin-top: 0.6rem; font-size: 0.75rem; color: var(--status-success);">
-            • 100% Bebas Kuota Minimax (Zero TTS overhead)<br>
-            • Sinkronisasi gerak bibir & SFX frame-accurate
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Section 2: Google Voice Persona Selector (Aktif jika Mode 2 dipilih) -->
-    <div class="card" id="persona-section">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-        <div>
-          <div style="font-size: 0.92rem; font-weight: 700; color: var(--text-primary);">
-            2. Karakter Suara: Persona Resmi Google Voice
-          </div>
-          <div style="font-size: 0.8rem; color: var(--text-muted);">
-            Pilih persona Google Voice yang memandu gaya pengucapan vokal dan intonasi presenter di Veo 3.1.
-          </div>
-        </div>
-        <span style="font-size: 0.75rem; background: var(--status-info-soft); color: var(--status-info); border: 1px solid var(--status-info); padding: 0.2rem 0.6rem; border-radius: 9999px; font-weight: 700;">
-          Google Gemini Voice Engine
-        </span>
-      </div>
-
-      <div class="personas-grid" id="personas-container">
-        <!-- Rendered via JS -->
-      </div>
-
-      <!-- Detail Persona Terpilih -->
-      <div style="margin-top: 1rem; background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.85rem; display: flex; flex-direction: column; gap: 0.35rem;">
-        <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
-          Vocal Direction Prompt untuk Veo 3.1:
-        </div>
-        <div id="persona-prompt-preview" style="font-size: 0.85rem; font-weight: 600; color: var(--status-info);">
-          Loading...
-        </div>
-      </div>
-
-      <!-- Toggles Tambahan -->
-      <div class="toggles-row">
-        <label class="toggle-pill">
-          <input type="checkbox" id="toggle-sfx" checked onchange="updateInspection()">
-          <span>💥 Synchronized Physical SFX (Foley, ketukan, tuangan, desis)</span>
-        </label>
-        <label class="toggle-pill">
-          <input type="checkbox" id="toggle-ambience" checked onchange="updateInspection()">
-          <span>🌿 Environment Room Tone (Ambience tenang, no echo)</span>
-        </label>
-        <label class="toggle-pill">
-          <input type="checkbox" id="toggle-anti-music" checked onchange="updateInspection()">
-          <span>🚫 Anti-Music Guardrail (Cegah Veo menambahkan musik acak)</span>
-        </label>
-      </div>
-    </div>
-
-    <!-- Section 3: Live Compilation Inspector -->
+    <!-- Section 1: Form Preset (Bagian Audio Strategy) -->
     <div class="card">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-        <div style="font-size: 0.92rem; font-weight: 700; color: var(--text-primary);">
-          3. Live Inspector: Veo 3.1 Prompt Output
+        <div>
+          <div style="font-size: 1rem; font-weight: 800; color: var(--text-primary);">
+            Preset: <span style="color: var(--action-primary);">multiplier_siasatsehat</span> (SiasatSehat Clinical Biohack 3D)
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">
+            Seksi 5: Workflow & Audio Generation Strategy
+          </div>
         </div>
-        <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">
-          noSoundOverride: <span id="badge-nosound" style="color: var(--status-success); font-weight: 700;">true</span>
+        <span class="badge-flow" style="background: var(--status-success-soft); color: var(--status-success); border: 1px solid var(--status-success);">
+          ✓ Preset First Architecture
         </span>
       </div>
 
-      <div class="code-box" id="prompt-output">
-        <!-- Compiled Live Prompt Preview -->
+      <!-- Pilihan Audio Generation Engine -->
+      <div style="margin-top: 1rem;">
+        <label class="form-label">
+          Pilihan Audio Generation Engine di Preset Ini:
+        </label>
+        
+        <div class="mode-radios">
+          <!-- Option Mode 1 -->
+          <label class="mode-option" id="label-mode-1" onclick="selectMode('minimax_tts')">
+            <input type="radio" name="audio_engine_mode" value="minimax_tts" id="radio-mode-1">
+            <div class="mode-option-content">
+              <span class="mode-option-title">🎙️ Mode 1: Minimax TTS Mux (Tradisional)</span>
+              <span class="mode-option-desc">
+                Video Veo dihasilkan dalam keadaan hening (<code>silent video</code>), lalu suara dibacakan terpisah oleh Minimax TTS dan di-mux oleh FFmpeg.
+              </span>
+            </div>
+          </label>
+
+          <!-- Option Mode 2 -->
+          <label class="mode-option active" id="label-mode-2" onclick="selectMode('native_veo')">
+            <input type="radio" name="audio_engine_mode" value="native_veo" id="radio-mode-2" checked>
+            <div class="mode-option-content">
+              <span class="mode-option-title">🔊 Mode 2: Native Veo 3.1 Audio (AI Voice + SFX)</span>
+              <span class="mode-option-desc">
+                Google Veo 3.1 langsung men-generate video beserta audio tersinkron (vokal presenter, SFX sentuhan, & ambience). <b>Zero kuota Minimax!</b>
+              </span>
+            </div>
+          </label>
+        </div>
       </div>
 
-      <!-- Pipeline Execution Matrix -->
-      <div class="pipeline-flow">
-        <div class="flow-node">
-          <span class="flow-step">1. Naskah AI</span>
-          <span class="flow-val">Gemini 2.5 Flash</span>
-          <span class="flow-status status-ok">✓ Storyboard Ready</span>
+      <!-- Mode 1 Sub-Form: Minimax TTS Settings -->
+      <div id="subform-mode-1" style="display: none; margin-top: 1.25rem; background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 1rem;">
+        <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.75rem;">
+          Pengaturan Minimax TTS Engine
         </div>
-        <div class="flow-node">
-          <span class="flow-step">2. TTS Engine</span>
-          <span class="flow-val" id="flow-tts-val">Minimax API</span>
-          <span class="flow-status" id="flow-tts-status">Bypassed (0 Calls)</span>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+          <label class="form-label">
+            TTS Provider
+            <select class="form-select">
+              <option value="minimax">MiniMax VO Engine</option>
+              <option value="gemini">Gemini TTS Engine</option>
+            </select>
+          </label>
+          <label class="form-label">
+            Voice Persona
+            <select class="form-select">
+              <option>Indonesian Casual Reporter (Vv2)</option>
+              <option>Indonesian Professional Anchor (Vv2)</option>
+              <option>Indonesian SweetGirl</option>
+            </select>
+          </label>
+          <label class="form-label">
+            Model Quality
+            <select class="form-select">
+              <option>speech-2.8-turbo</option>
+              <option>speech-2.8-standard</option>
+            </select>
+          </label>
         </div>
-        <div class="flow-node">
-          <span class="flow-step">3. Video Generation</span>
-          <span class="flow-val">Veo 3.1 Lite (8s)</span>
-          <span class="flow-status status-ok" id="flow-glabs-status">✓ Native Sound ON</span>
+      </div>
+
+      <!-- Mode 2 Sub-Form: Google Voice Persona Selector -->
+      <div id="subform-mode-2" style="margin-top: 1.25rem; background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <div>
+            <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary);">
+              Karakter Suara: Persona Resmi Google Voice (Veo 3.1)
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">
+              Pilih karakter suara Google Voice yang memandu gaya vokal, intonasi, dan pembawaan presenter.
+            </div>
+          </div>
+          <span style="font-size: 0.72rem; background: var(--status-info-soft); color: var(--status-info); border: 1px solid var(--status-info); padding: 0.15rem 0.5rem; border-radius: 9999px; font-weight: 700;">
+            Google Gemini Voice Engine
+          </span>
         </div>
-        <div class="flow-node">
-          <span class="flow-step">4. FFmpeg Muxer</span>
-          <span class="flow-val">Direct Stream Concat</span>
-          <span class="flow-status status-ok">✓ Audio Preserved</span>
+
+        <div class="personas-grid" id="personas-container">
+          <!-- Rendered via JS -->
         </div>
+
+        <!-- Detail Persona Terpilih -->
+        <div style="margin-top: 0.85rem; background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.75rem; display: flex; flex-direction: column; gap: 0.25rem;">
+          <div style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+            Vocal Direction Prompt Veo 3.1:
+          </div>
+          <div id="persona-prompt-preview" style="font-size: 0.82rem; font-weight: 600; color: var(--status-info);">
+            Loading...
+          </div>
+        </div>
+
+        <!-- Toggles Tambahan -->
+        <div class="toggles-row">
+          <label class="toggle-pill">
+            <input type="checkbox" id="toggle-sfx" checked onchange="updateInspection()">
+            <span>💥 Synchronized Physical SFX (foley sentuhan/aksi produk)</span>
+          </label>
+          <label class="toggle-pill">
+            <input type="checkbox" id="toggle-ambience" checked onchange="updateInspection()">
+            <span>🌿 Environment Room Tone (ambience ruangan studio)</span>
+          </label>
+          <label class="toggle-pill">
+            <input type="checkbox" id="toggle-anti-music" checked onchange="updateInspection()">
+            <span>🚫 Anti-Music Guardrail (cegah Veo menambah musik acak)</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Action Button -->
+      <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
+        <button class="btn-apply" onclick="alert('Preset multiplier_siasatsehat berhasil disimpan dengan Mode: ' + currentMode + ' (Persona: ' + selectedPersona + ')!')">
+          💾 Simpan Perubahan Preset
+        </button>
       </div>
     </div>
 
-    <!-- Action Button -->
-    <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
-      <button class="btn-apply" onclick="alert('Preset konfigurasi tersimpan: Mode 2 (Native Veo Audio) dengan persona ' + selectedPersona)">
-        💾 Simpan ke Preset Auto-Pipeline
-      </button>
+    <!-- Section 2: Simulasi Tampilan di Modal Auto-Pipeline (Hanya Membaca dari Preset) -->
+    <div class="card autopipeline-preview">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+        <div>
+          <div style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary);">
+            🚀 Modal Auto-Pipeline (Jalankan 1-Klik / Jadwal)
+          </div>
+          <div style="font-size: 0.78rem; color: var(--text-muted);">
+            User cukup memilih preset. <b>Tidak perlu ada form audio tambahan di modal ini!</b>
+          </div>
+        </div>
+        <span class="badge-flow" style="background: var(--status-purple-soft); color: var(--status-purple); border: 1px solid var(--status-purple);">
+          Praktis & Bersih
+        </span>
+      </div>
+
+      <!-- Inspector Card Preview -->
+      <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.85rem; margin-top: 0.5rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem;">
+        <div>
+          <div style="font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Preset Terpilih</div>
+          <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary);">multiplier_siasatsehat</div>
+        </div>
+        <div>
+          <div style="font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Model AI & Audio Engine</div>
+          <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary);" id="pipeline-engine-badge">
+            <!-- Dynamic -->
+          </div>
+        </div>
+        <div>
+          <div style="font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Visual Identity (VI)</div>
+          <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary);">Clinical Biohack 3D</div>
+        </div>
+        <div>
+          <div style="font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Biaya TTS Minimax</div>
+          <div style="font-size: 0.85rem; font-weight: 700;" id="pipeline-tts-cost">
+            <!-- Dynamic -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Veo Prompt Preview -->
+      <div style="margin-top: 1rem;">
+        <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.35rem;">
+          Pratinjau Prompt Veo yang Dihasilkan:
+        </div>
+        <div class="code-box" id="prompt-output">
+          <!-- Live Preview -->
+        </div>
+      </div>
     </div>
 
   </div>
 
   <script>
-    // Data Katalog Google Voice Personas
     const GOOGLE_PERSONAS = [
       {
         id: 'Kore',
@@ -279,8 +327,7 @@
         gender: 'Female',
         avatar: '👩',
         charDesc: 'Tenang, Lembut & Hangat',
-        tone: 'warm, calm, articulate, gentle Indonesian feminine voice with natural cadence',
-        sampleText: 'Kore speaks in a warm, calm tone, saying: "Mulai hari ini, rutinitas pagimu bisa jadi jauh lebih tenang dan teratur."'
+        tone: 'warm, calm, articulate, gentle Indonesian feminine voice with natural cadence'
       },
       {
         id: 'Charon',
@@ -288,8 +335,7 @@
         gender: 'Male',
         avatar: '👨',
         charDesc: 'Dalam, Otoritatif & Berwibawa',
-        tone: 'deep, mature, authoritative, grounded masculine voice with calm clinical confidence',
-        sampleText: 'Charon speaks with deep, authoritative confidence, saying: "Fakta klinis membuktikan bahwa pola tidur teratur adalah kunci regenerasi sel."'
+        tone: 'deep, mature, authoritative, grounded masculine voice with calm clinical confidence'
       },
       {
         id: 'Aoede',
@@ -297,8 +343,7 @@
         gender: 'Female',
         avatar: '👩',
         charDesc: 'Ekspresif, Ceria & Hangat',
-        tone: 'expressive, vibrant, cheerful, engaging female voice with dynamic inflection',
-        sampleText: 'Aoede speaks in a vibrant, engaging tone, saying: "Wah, ternyata resep smoothie sehat ini cuma butuh tiga bahan simpel aja!"'
+        tone: 'expressive, vibrant, cheerful, engaging female voice with dynamic inflection'
       },
       {
         id: 'Fenrir',
@@ -306,8 +351,7 @@
         gender: 'Male',
         avatar: '👨',
         charDesc: 'Berat, Sinematik & Dramatis',
-        tone: 'commanding, intense, dramatic masculine voice with deep resonant presence',
-        sampleText: 'Fenrir narrates with bold, dramatic presence, saying: "Saat energi terkuras, inilah momen pembuktian fokus sesungguhnya."'
+        tone: 'commanding, intense, dramatic masculine voice with deep resonant presence'
       },
       {
         id: 'Puck',
@@ -315,8 +359,7 @@
         gender: 'Male/Youth',
         avatar: '🎭',
         charDesc: 'Playful, Enerjik & Kasual',
-        tone: 'playful, youthful, energetic, casual modern storytelling pace',
-        sampleText: 'Puck speaks in a playful, casual delivery, saying: "Eits, jangan scroll dulu! Rahasia hack biohacking ini bakal bikin kamu kaget."'
+        tone: 'playful, youthful, energetic, casual modern storytelling pace'
       },
       {
         id: 'Zephyr',
@@ -324,8 +367,7 @@
         gender: 'Male',
         avatar: '👨',
         charDesc: 'Cepat, Tegas & Berenergi',
-        tone: 'swift, clear, dynamic, articulate modern masculine voice',
-        sampleText: 'Zephyr speaks in a fast-paced, articulate rhythm, saying: "Tiga tips kilat produktivitas tanpa burnout yang langsung bisa kamu coba sekarang."'
+        tone: 'swift, clear, dynamic, articulate modern masculine voice'
       },
       {
         id: 'Orus',
@@ -333,8 +375,7 @@
         gender: 'Male',
         avatar: '👨',
         charDesc: 'Tegas, Lugas & Berita',
-        tone: 'firm, clear, direct, professional male anchor tone',
-        sampleText: 'Orus speaks in a firm, direct anchor cadence, saying: "Informasi penting untuk Anda yang ingin beralih ke gaya hidup organik."'
+        tone: 'firm, clear, direct, professional male anchor tone'
       },
       {
         id: 'Despina',
@@ -342,8 +383,7 @@
         gender: 'Female',
         avatar: '👩',
         charDesc: 'Ceria, Ramah & Tersenyum',
-        tone: 'bright, cheerful, sweet, inviting feminine voice with smiling delivery',
-        sampleText: 'Despina speaks in a sweet, welcoming cadence, saying: "Yuk bareng-bareng bikin sarapan sehat yang bikin mood seharian happy!"'
+        tone: 'bright, cheerful, sweet, inviting feminine voice with smiling delivery'
       }
     ];
 
@@ -386,17 +426,14 @@
 
     function selectMode(mode) {
       currentMode = mode;
-      document.getElementById('card-mode-1').classList.toggle('active', mode === 'minimax_tts');
-      document.getElementById('card-mode-2').classList.toggle('active', mode === 'native_veo');
-      
-      const personaSection = document.getElementById('persona-section');
-      if (mode === 'minimax_tts') {
-        personaSection.style.opacity = '0.45';
-        personaSection.style.pointerEvents = 'none';
-      } else {
-        personaSection.style.opacity = '1';
-        personaSection.style.pointerEvents = 'auto';
-      }
+      document.getElementById('radio-mode-1').checked = (mode === 'minimax_tts');
+      document.getElementById('radio-mode-2').checked = (mode === 'native_veo');
+      document.getElementById('label-mode-1').classList.toggle('active', mode === 'minimax_tts');
+      document.getElementById('label-mode-2').classList.toggle('active', mode === 'native_veo');
+
+      document.getElementById('subform-mode-1').style.display = (mode === 'minimax_tts' ? 'block' : 'none');
+      document.getElementById('subform-mode-2').style.display = (mode === 'native_veo' ? 'block' : 'none');
+
       updateInspection();
     }
 
@@ -406,44 +443,32 @@
       const withAmbience = document.getElementById('toggle-ambience').checked;
       const antiMusic = document.getElementById('toggle-anti-music').checked;
 
-      const badgeNoSound = document.getElementById('badge-nosound');
-      const flowTtsVal = document.getElementById('flow-tts-val');
-      const flowTtsStatus = document.getElementById('flow-tts-status');
-      const flowGlabsStatus = document.getElementById('flow-glabs-status');
+      const engineBadge = document.getElementById('pipeline-engine-badge');
+      const ttsCost = document.getElementById('pipeline-tts-cost');
 
       if (currentMode === 'minimax_tts') {
-        badgeNoSound.textContent = 'false (Veo disenyapkan)';
-        badgeNoSound.style.color = 'var(--status-warning)';
-        flowTtsVal.textContent = 'Minimax TTS API';
-        flowTtsStatus.textContent = 'Active (Requires API)';
-        flowTtsStatus.className = 'flow-status status-ok';
-        flowGlabsStatus.textContent = 'Silent Video Mode';
-        flowGlabsStatus.className = 'flow-status status-bypassed';
+        engineBadge.innerHTML = '🤖 Veo (8s) • 🎙️ Minimax [Anchor]';
+        ttsCost.innerHTML = '<span style="color: var(--status-warning);">1x Panggilan Minimax API</span>';
 
         document.getElementById('prompt-output').innerHTML = 
-          `<span class="hl-gold">silent video, mute, no sound:</span> (VERTICAL 9:16) --ar 9:16 --no landscape [LAYER 1: OPTICS] Shot on 35mm lens. [LAYER 2: SUBJECT] Hands of a Muslimah in modest sage clothing preparing fresh organic ingredients in a cozy modern kitchen. [LAYER 3: ACTION] Smooth slow motion slicing of fresh citrus fruit.`;
+          `<span class="hl-gold">silent video, mute, no sound:</span> (VERTICAL 9:16) --ar 9:16 --no landscape [LAYER 1: OPTICS] Shot on Phase One 100mm macro lens. [LAYER 2: SUBJECT] 3D bio-cellular CGI cross-section showing blood vessels and natural nutrient transport. [LAYER 3: ACTION] Smooth camera slow zoom through micro-capillary walls.`;
       } else {
-        badgeNoSound.textContent = 'true (Veo bersuara penuh)';
-        badgeNoSound.style.color = 'var(--status-success)';
-        flowTtsVal.textContent = 'Minimax TTS API';
-        flowTtsStatus.textContent = 'Bypassed (0 Calls)';
-        flowTtsStatus.className = 'flow-status status-bypassed';
-        flowGlabsStatus.textContent = '✓ Native Sound ON';
-        flowGlabsStatus.className = 'flow-status status-ok';
+        engineBadge.innerHTML = `🤖 Veo (8s) • 🔊 Native Veo [${persona.name}]`;
+        ttsCost.innerHTML = '<span style="color: var(--status-success); font-weight: 700;">GRATIS (0 Kuota Minimax) ✨</span>';
 
         let audioDirectives = [];
-        audioDirectives.push(`[DIALOGUE / SPEECH] ${persona.name} speaks in ${persona.tone}, saying: "Mulai hari ini, rutinitas pagimu bisa jadi jauh lebih tenang dan berenergi."`);
+        audioDirectives.push(`[DIALOGUE / SPEECH] ${persona.name} speaks in a ${persona.tone}, saying: "Inilah rahasia biohacking alami yang membuat aliran darahmu tetap optimal setiap hari."`);
         if (withSfx) {
-          audioDirectives.push(`[SFX] Sound event: crisp knife cutting citrus on wooden chopping board with gentle natural friction; intensity natural; centered.`);
+          audioDirectives.push(`[SFX] Sound event: crisp micro-cellular pulse with gentle fluid friction; intensity natural; centered.`);
         }
         if (withAmbience) {
-          audioDirectives.push(`[AMBIENCE] Ambience: quiet bright modern kitchen room tone with subtle morning atmosphere.`);
+          audioDirectives.push(`[AMBIENCE] Ambience: quiet modern clinical treated studio tone with subtle atmospheric presence.`);
         }
         if (antiMusic) {
           audioDirectives.push(`Do not add background music or singing. Speech must be clean, natural, and sync with mouth movements.`);
         }
 
-        const compiledPrompt = `(VERTICAL 9:16) --ar 9:16 --no landscape [LAYER 1: OPTICS] Shot on 35mm macro lens, organic lighting. [LAYER 2: SUBJECT] Hands of a Muslimah in modest sage clothing preparing fresh organic ingredients in a cozy modern kitchen. [LAYER 3: ACTION] Smooth slow motion slicing of fresh citrus fruit on a wooden cutting board.
+        const compiledPrompt = `(VERTICAL 9:16) --ar 9:16 --no landscape [LAYER 1: OPTICS] Shot on Phase One 100mm macro lens. [LAYER 2: SUBJECT] 3D bio-cellular CGI cross-section showing blood vessels and natural nutrient transport. [LAYER 3: ACTION] Smooth camera slow zoom through micro-capillary walls.
 
 <span class="hl-cyan">Audio direction:</span>
 ${audioDirectives.map(d => `<span class="hl-green">${d}</span>`).join('\n')}`;
@@ -464,4 +489,3 @@ ${audioDirectives.map(d => `<span class="hl-green">${d}</span>`).join('\n')}`;
   </script>
 </body>
 </html>
-
