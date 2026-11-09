@@ -111,6 +111,7 @@ releases=${shellQuote(c.releasesRoot)}
 shared=${shellQuote(c.sharedRoot)}
 current=${shellQuote(c.currentLink)}
 legacy=${shellQuote(c.legacyRoot)}
+repo=${shellQuote(c.repositoryUrl)}
 sha=${shellQuote(sha)}
 keep=${Number(keep)}
 activate_environment_processes() {
@@ -127,6 +128,7 @@ cleanup() { rmdir "$lock" 2>/dev/null || true; }
 trap cleanup EXIT INT TERM
 test -d "$source_root/.git"
 test -f "$shared/.env.local"
+git -C "$source_root" remote set-url origin "$repo"
 git -C "$source_root" fetch --prune --tags origin
 git -C "$source_root" cat-file -e "$sha^{commit}"
 release_id="$(date -u +%Y%m%dT%H%M%SZ)-$(printf '%s' "$sha" | cut -c1-12)"
