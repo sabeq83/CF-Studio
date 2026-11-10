@@ -30,7 +30,7 @@ export const STAGING_ATOMIC_CONFIG = Object.freeze({
   uiPort: 5010,
   apiPort: 7010,
   schema: 'staging',
-  pm2Apps: ['maknaflow-staging-ui', 'maknaflow-staging-api'],
+  pm2Apps: ['maknaflow-staging-ui', 'maknaflow-staging-api', 'maknaflow-staging-mcp'],
   defaultRetention: 5,
   confirmationFlag: '--confirm-staging',
   sshOptions: ['-o', 'ServerAliveInterval=15', '-o', 'ServerAliveCountMax=10', '-o', 'ConnectTimeout=30']

@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.40.21 — Auto restart MCP service on staging atomic deploy (10/11/2026)
+- Tambahkan maknaflow-staging-mcp ke daftar pm2Apps STAGING_ATOMIC_CONFIG
+
 ## V2.40.20 — Dukungan Tanggal Spesifik pada MCP Schedule Tools (10/11/2026)
 - Menambahkan parameter target_date dan schedule_mode pada cf_create_schedule dan cf_update_schedule
 - Mendukung filter tanggal dan mode pada cf_list_schedules dan API auto-pipeline-schedules
