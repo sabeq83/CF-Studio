@@ -192,6 +192,8 @@ export default function AutoPipelinePage() {
   const [schedTopic, setSchedTopic] = useState('');
   const [schedCategory, setSchedCategory] = useState('makanan_utama');
   const [isSchedCategoryManual, setIsSchedCategoryManual] = useState(false);
+  const [schedRecipeMode, setSchedRecipeMode] = useState('umbrella'); // 'umbrella' | 'menu_list'
+  const [schedRecipeMenuList, setSchedRecipeMenuList] = useState('');
   const [schedDays, setSchedDays] = useState([0, 1, 2, 3, 4, 5, 6]);
   const [schedReplizAccountIds, setSchedReplizAccountIds] = useState([]);
   const [schedAutoPublish, setSchedAutoPublish] = useState(true);
@@ -204,6 +206,7 @@ export default function AutoPipelinePage() {
 
   // Sched Modal State Khusus Multiplier & Recipe Labs
   const [schedBlueprintId, setSchedBlueprintId] = useState('');
+  const [selectedBlueprintIds, setSelectedBlueprintIds] = useState([]);
   const [schedBlueprintSearchQuery, setSchedBlueprintSearchQuery] = useState('');
   const [schedImagesPerRecipe, setSchedImagesPerRecipe] = useState(4);
   const [schedLayoutId, setSchedLayoutId] = useState('4_editorial_split');
@@ -215,6 +218,8 @@ export default function AutoPipelinePage() {
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [productSearchQuery, setProductSearchQuery] = useState('');
   const [selectedProductIds, setSelectedProductIds] = useState([]);
+  const [schedProductPromoMode, setSchedProductPromoMode] = useState('single'); // 'single' | 'multi_angle'
+  const [schedProductAngleList, setSchedProductAngleList] = useState('');
 
   // Editorial Pillars Selection State (Editorial Campaign)
   const [pillarSearchQuery, setPillarSearchQuery] = useState('');
@@ -1172,6 +1177,17 @@ export default function AutoPipelinePage() {
     });
   }
 
+  function toggleBlueprintSelection(bpId) {
+    setSelectedBlueprintIds(prev => {
+      if (prev.includes(bpId)) {
+        if (prev.length === 1) return prev; // Minimal 1 blueprint terpilih
+        return prev.filter(id => id !== bpId);
+      } else {
+        return [...prev, bpId];
+      }
+    });
+  }
+
   function openCreateScheduleModal() {
     const currentBrand = brands.find(b => b.id === selectedBrandId) || brands[0];
     const initialTopic = topic || 'Air fryer crispy snack finger foods';
@@ -1186,6 +1202,10 @@ export default function AutoPipelinePage() {
     setSchedTopic(initialTopic);
     setSchedCategory(detectCategoryFromTopic(initialTopic));
     setIsSchedCategoryManual(false);
+    setSchedRecipeMode('umbrella');
+    setSchedRecipeMenuList('');
+    setSchedProductPromoMode('single');
+    setSchedProductAngleList('');
     setSchedDays([0, 1, 2, 3, 4, 5, 6]);
     setSchedMode('recurring');
     const defaultDate = new Date();
@@ -1200,6 +1220,8 @@ export default function AutoPipelinePage() {
     // Reset item selections
     setSelectedProductIds([]);
     setSelectedPillars([]);
+    setSelectedBlueprintIds(blueprints.length > 0 ? [blueprints[0].id] : []);
+    setSchedBlueprintId(blueprints[0]?.id || '');
     setProductSearchQuery('');
     setPillarSearchQuery('');
     setSchedBlueprintSearchQuery('');
@@ -1239,6 +1261,19 @@ export default function AutoPipelinePage() {
     setSchedStaggerCalendar(true);
     setSchedReplizAccountIds(Array.isArray(sched.repliz_account_ids) ? sched.repliz_account_ids : []);
     setSchedAutoPublish(sched.auto_publish_enabled !== false);
+
+    setSchedRecipeMode('umbrella');
+    setSchedRecipeMenuList('');
+    setSchedProductPromoMode('single');
+    setSchedProductAngleList('');
+
+    if (pType === 'multiplier_campaign' && (sched.target_item_id || sched.pipeline_config?.blueprint_id)) {
+      const bpId = sched.target_item_id || sched.pipeline_config?.blueprint_id;
+      setSelectedBlueprintIds([bpId]);
+      setSchedBlueprintId(bpId);
+    } else {
+      setSelectedBlueprintIds([]);
+    }
 
     if (pType === 'product_campaign' && sched.target_item_id) {
       setSelectedProductIds([sched.target_item_id]);
@@ -1288,8 +1323,16 @@ export default function AutoPipelinePage() {
 
     // Validasi spesifik tipe kampanye
     if (schedCampaignType === 'product_campaign') {
-      if (!editingSchedule && selectedProductIds.length === 0) {
-        return showToast('Pilih minimal 1 produk dari katalog untuk dijadwalkan.', 'error');
+      if (!editingSchedule) {
+        if (selectedProductIds.length === 0) {
+          return showToast('Pilih minimal 1 produk dari katalog untuk dijadwalkan.', 'error');
+        }
+        if (schedProductPromoMode === 'multi_angle') {
+          const angles = schedProductAngleList.split('\n').map(a => a.trim()).filter(Boolean);
+          if (angles.length === 0) {
+            return showToast('Masukkan minimal 1 baris angle promosi produk.', 'error');
+          }
+        }
       }
     } else if (schedCampaignType === 'editorial_campaign') {
       if (!editingSchedule) {
@@ -1303,7 +1346,18 @@ export default function AutoPipelinePage() {
         }
       }
     } else if (schedCampaignType === 'recipe_campaign') {
-      if (!schedTopic.trim()) return showToast('Tema / Arahan topik resep wajib diisi', 'error');
+      if (!editingSchedule && schedRecipeMode === 'menu_list') {
+        const menus = schedRecipeMenuList.split('\n').map(m => m.trim()).filter(Boolean);
+        if (menus.length === 0) {
+          return showToast('Masukkan minimal 1 baris nama menu kuliner.', 'error');
+        }
+      } else {
+        if (!schedTopic.trim()) return showToast('Tema / Arahan topik resep wajib diisi', 'error');
+      }
+    } else if (schedCampaignType === 'multiplier_campaign') {
+      if (!editingSchedule && selectedBlueprintIds.length === 0) {
+        return showToast('Pilih minimal 1 blueprint acuan video untuk dijadwalkan.', 'error');
+      }
     }
 
     setSavingSchedule(true);
@@ -1541,6 +1595,175 @@ export default function AutoPipelinePage() {
           const data = await res.json();
           if (!data.success) throw new Error(data.error || 'Gagal membuat jadwal batch editorial');
           showToast(`Berhasil membuat ${items.length} baris jadwal video editorial independen! 📖`);
+        } else if (schedCampaignType === 'recipe_campaign' && schedRecipeMode === 'menu_list') {
+          // BATCH RESEP KULINER: 1 Menu = 1 Baris Jadwal Mandiri (Auto Category Detect)
+          const menus = schedRecipeMenuList.split('\n').map(m => m.trim()).filter(Boolean);
+          if (menus.length === 0) throw new Error('Masukkan minimal 1 baris menu resep.');
+
+          const customNameBase = schedName.trim();
+          const items = menus.map((menuTitle, idx) => {
+            let itemDays = schedDays;
+            let itemTargetDate = schedTargetDate;
+            if (schedMode === 'specific_date') {
+              if (schedStaggerCalendar && schedTargetDate) {
+                const d = new Date(schedTargetDate);
+                d.setDate(d.getDate() + idx);
+                itemTargetDate = d.toISOString().slice(0, 10);
+              }
+            } else if (schedStaggerDays && schedDays.length > 0) {
+              itemDays = [schedDays[idx % schedDays.length]];
+            }
+            const autoCat = detectCategoryFromTopic(menuTitle);
+            const itemScheduleName = customNameBase
+              ? (customNameBase.toLowerCase().includes(menuTitle.toLowerCase()) ? customNameBase : `${customNameBase} - ${menuTitle}`)
+              : `Resep: ${menuTitle} — ${schedGenTime} WIB`;
+            return {
+              name: itemScheduleName,
+              brand_id: schedBrandId,
+              preset_key: schedPresetKey,
+              pipeline_type: 'recipe_campaign',
+              target_item_id: null,
+              target_item_title: menuTitle,
+              topic: menuTitle,
+              category: autoCat,
+              recipe_count: 1,
+              generation_time: schedGenTime,
+              publish_time: schedPubTime,
+              days_of_week: itemDays,
+              schedule_mode: schedMode,
+              target_date: schedMode === 'specific_date' ? itemTargetDate : null,
+              repliz_account_ids: schedReplizAccountIds,
+              auto_publish_enabled: schedAutoPublish,
+              timezone: 'Asia/Jakarta',
+              pipeline_config: {
+                generate_recipe: schedGenerateRecipe,
+                post_link_affiliate: schedPostAffiliateLink
+              }
+            };
+          });
+
+          const res = await fetch('/api/v2/recipes/auto-pipeline-schedules', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items })
+          });
+          const data = await res.json();
+          if (!data.success) throw new Error(data.error || 'Gagal membuat jadwal batch resep');
+          showToast(`Berhasil membuat ${items.length} baris jadwal resep kuliner independen! 🍳`);
+        } else if (schedCampaignType === 'multiplier_campaign' && selectedBlueprintIds.length > 1) {
+          // BATCH MULTIPLIER: 1 Blueprint = 1 Baris Jadwal Mandiri
+          const customNameBase = schedName.trim();
+          const items = selectedBlueprintIds.map((bpId, idx) => {
+            const bpObj = blueprints.find(b => b.id === bpId);
+            const bpTitle = bpObj?.core_problem || bpObj?.original_caption || bpObj?.source_url || 'Winning Blueprint';
+            let itemDays = schedDays;
+            let itemTargetDate = schedTargetDate;
+            if (schedMode === 'specific_date') {
+              if (schedStaggerCalendar && schedTargetDate) {
+                const d = new Date(schedTargetDate);
+                d.setDate(d.getDate() + idx);
+                itemTargetDate = d.toISOString().slice(0, 10);
+              }
+            } else if (schedStaggerDays && schedDays.length > 0) {
+              itemDays = [schedDays[idx % schedDays.length]];
+            }
+            const itemScheduleName = customNameBase
+              ? (customNameBase.toLowerCase().includes(bpTitle.toLowerCase()) ? customNameBase : `${customNameBase} - ${bpTitle}`)
+              : `Multiplier: ${bpTitle} — ${schedGenTime} WIB`;
+            return {
+              name: itemScheduleName,
+              brand_id: schedBrandId,
+              preset_key: schedPresetKey,
+              pipeline_type: 'multiplier_campaign',
+              target_item_id: bpId,
+              target_item_title: bpTitle,
+              topic: bpTitle,
+              category: 'multiplier',
+              recipe_count: 1,
+              generation_time: schedGenTime,
+              publish_time: schedPubTime,
+              days_of_week: itemDays,
+              schedule_mode: schedMode,
+              target_date: schedMode === 'specific_date' ? itemTargetDate : null,
+              repliz_account_ids: schedReplizAccountIds,
+              auto_publish_enabled: schedAutoPublish,
+              timezone: 'Asia/Jakarta',
+              pipeline_config: {
+                blueprint_id: bpId,
+                execution_mode: 'full_autopilot',
+                generate_recipe: schedGenerateRecipe,
+                post_link_affiliate: schedPostAffiliateLink
+              }
+            };
+          });
+
+          const res = await fetch('/api/v2/recipes/auto-pipeline-schedules', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items })
+          });
+          const data = await res.json();
+          if (!data.success) throw new Error(data.error || 'Gagal membuat jadwal batch multiplier');
+          showToast(`Berhasil membuat ${items.length} baris jadwal multiplier video independen! 🔀`);
+        } else if (schedCampaignType === 'product_campaign' && schedProductPromoMode === 'multi_angle') {
+          // BATCH PRODUK MULTI-ANGLE: 1 Angle = 1 Baris Jadwal Mandiri untuk 1 Produk Unggulan
+          const angles = schedProductAngleList.split('\n').map(a => a.trim()).filter(Boolean);
+          if (angles.length === 0) throw new Error('Masukkan minimal 1 baris angle promosi produk.');
+          const prodId = selectedProductIds[0] || catalogProducts[0]?.id;
+          const prod = catalogProducts.find(p => p.id === prodId);
+          const prodTitle = prod?.product_name || 'Produk Katalog';
+          const customNameBase = schedName.trim();
+
+          const items = angles.map((angleText, idx) => {
+            let itemDays = schedDays;
+            let itemTargetDate = schedTargetDate;
+            if (schedMode === 'specific_date') {
+              if (schedStaggerCalendar && schedTargetDate) {
+                const d = new Date(schedTargetDate);
+                d.setDate(d.getDate() + idx);
+                itemTargetDate = d.toISOString().slice(0, 10);
+              }
+            } else if (schedStaggerDays && schedDays.length > 0) {
+              itemDays = [schedDays[idx % schedDays.length]];
+            }
+            const itemScheduleName = customNameBase
+              ? `${customNameBase} - ${angleText}`
+              : `[${prodTitle}] ${angleText} — ${schedGenTime} WIB`;
+            return {
+              name: itemScheduleName,
+              brand_id: schedBrandId,
+              preset_key: schedPresetKey,
+              pipeline_type: 'product_campaign',
+              target_item_id: prodId,
+              target_item_title: prodTitle,
+              topic: angleText,
+              category: prod?.category || 'produk',
+              recipe_count: 1,
+              generation_time: schedGenTime,
+              publish_time: schedPubTime,
+              days_of_week: itemDays,
+              schedule_mode: schedMode,
+              target_date: schedMode === 'specific_date' ? itemTargetDate : null,
+              repliz_account_ids: schedReplizAccountIds,
+              auto_publish_enabled: schedAutoPublish,
+              timezone: 'Asia/Jakarta',
+              pipeline_config: {
+                product_id: prodId,
+                selected_cep: schedSelectedCep || 'auto',
+                promotion_context: angleText,
+                post_link_affiliate: schedPostAffiliateLink
+              }
+            };
+          });
+
+          const res = await fetch('/api/v2/recipes/auto-pipeline-schedules', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items })
+          });
+          const data = await res.json();
+          if (!data.success) throw new Error(data.error || 'Gagal membuat jadwal batch angle produk');
+          showToast(`Berhasil membuat ${items.length} baris jadwal promosi angle produk independen! 📦`);
         } else {
           // Single Creation (1 Produk, 1 Pilar, atau Resep)
           let finalName = schedName.trim();
@@ -1574,12 +1797,12 @@ export default function AutoPipelinePage() {
               if (!finalName) finalName = `${pillar} — ${schedGenTime} WIB`;
             }
           } else if (schedCampaignType === 'multiplier_campaign') {
-            targetId = schedBlueprintId || (blueprints[0]?.id || null);
+            targetId = (selectedBlueprintIds.length > 0 ? selectedBlueprintIds[0] : schedBlueprintId) || (blueprints[0]?.id || null);
             const bpObj = blueprints.find(b => b.id === targetId);
-            targetTitle = bpObj?.original_caption || bpObj?.source_url || 'Winning Blueprint';
+            targetTitle = bpObj?.core_problem || bpObj?.core_solution || bpObj?.original_caption || bpObj?.source_url || 'Winning Blueprint';
             finalTopic = targetTitle;
             finalCategory = 'multiplier';
-            if (!finalName) finalName = `${targetTitle} — ${schedGenTime} WIB`;
+            if (!finalName) finalName = `Multiplier: ${targetTitle} — ${schedGenTime} WIB`;
           } else if (schedCampaignType === 'recipe_labs') {
             finalCategory = 'recipe_labs';
             if (!finalName) finalName = `Resep Foto (${schedImagesPerRecipe}G) — ${schedGenTime} WIB`;
@@ -6083,77 +6306,164 @@ export default function AutoPipelinePage() {
                       borderTop: '1px solid var(--border-subtle)',
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: '0.45rem'
+                      gap: '0.55rem'
                     }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.35rem' }}>
                         <label style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                           <span>🏷️</span>
-                          <span>Sudut Pandang / Arahan Promosi Harian (Opsional):</span>
+                          <span>Sudut Pandang / Arahan Promosi Konten:</span>
                         </label>
-                        <span style={{ fontSize: '0.7rem', color: 'var(--status-success)', fontWeight: 600 }}>
-                          Aktif saat Eksekusi Jadwal
-                        </span>
-                      </div>
-                      <input
-                        type="text"
-                        value={schedPromotionContext}
-                        onChange={(e) => setSchedPromotionContext(e.target.value)}
-                        placeholder="Contoh: Solusi batuk pilek anak saat musim hujan, rutinitas pagi penambah energi..."
-                        style={{
-                          width: '100%',
-                          height: '38px',
-                          background: 'var(--input-bg)',
-                          border: '1px solid var(--border-subtle)',
-                          borderRadius: 'var(--radius-sm)',
-                          padding: '0 0.75rem',
-                          fontSize: '0.82rem',
-                          color: 'var(--text-primary)',
-                          outline: 'none'
-                        }}
-                      />
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
-                        {[
-                          { label: '☀️ Rutinitas Pagi Fit', text: 'Rutinitas pagi 1 sendok sebelum beraktivitas agar tubuh fit sepanjang hari' },
-                          { label: '🏫 Jajan Sembarangan Sekolah', text: 'Kekhawatiran ibu terhadap anak yang sering jajan sembarangan di sekolah' },
-                          { label: '🌧️ Tangkal Flu Musim Hujan', text: 'Persiapan musim hujan agar anggota keluarga tidak saling tertular flu' }
-                        ].map((chip, idx) => (
-                          <button
-                            key={idx}
-                            type="button"
-                            onClick={() => setSchedPromotionContext(chip.text)}
-                            style={{
-                              background: 'var(--surface)',
-                              border: '1px solid var(--border-subtle)',
-                              color: 'var(--text-secondary)',
-                              borderRadius: 9999,
-                              padding: '0.2rem 0.55rem',
-                              fontSize: '0.7rem',
-                              fontWeight: 600,
-                              cursor: 'pointer'
-                            }}
-                          >
-                            {chip.label}
-                          </button>
-                        ))}
-                        {schedPromotionContext && (
-                          <button
-                            type="button"
-                            onClick={() => setSchedPromotionContext('')}
-                            style={{
-                              background: 'var(--surface)',
-                              border: '1px solid var(--status-danger-soft)',
-                              color: 'var(--status-danger)',
-                              borderRadius: 9999,
-                              padding: '0.2rem 0.55rem',
-                              fontSize: '0.7rem',
-                              fontWeight: 600,
-                              cursor: 'pointer'
-                            }}
-                          >
-                            ✖ Kosongkan
-                          </button>
+                        {!editingSchedule && (
+                          <div style={{
+                            display: 'flex',
+                            background: 'var(--surface)',
+                            padding: '0.15rem',
+                            borderRadius: 'var(--radius-xs)',
+                            border: '1px solid var(--border-subtle)',
+                            gap: '0.2rem'
+                          }}>
+                            <button
+                              type="button"
+                              onClick={() => setSchedProductPromoMode('single')}
+                              style={{
+                                padding: '0.25rem 0.55rem',
+                                border: 'none',
+                                borderRadius: 'var(--radius-xs)',
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                background: schedProductPromoMode === 'single' ? 'var(--action-primary)' : 'transparent',
+                                color: schedProductPromoMode === 'single' ? 'var(--on-action-primary)' : 'var(--text-secondary)',
+                                transition: 'var(--transition)'
+                              }}
+                            >
+                              Single Angle
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setSchedProductPromoMode('multi_angle')}
+                              style={{
+                                padding: '0.25rem 0.55rem',
+                                border: 'none',
+                                borderRadius: 'var(--radius-xs)',
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                background: schedProductPromoMode === 'multi_angle' ? 'var(--action-primary)' : 'transparent',
+                                color: schedProductPromoMode === 'multi_angle' ? 'var(--on-action-primary)' : 'var(--text-secondary)',
+                                transition: 'var(--transition)'
+                              }}
+                            >
+                              🎯 Multi-Angle (Batch)
+                            </button>
+                          </div>
                         )}
                       </div>
+
+                      {schedProductPromoMode === 'single' || editingSchedule ? (
+                        <>
+                          <input
+                            type="text"
+                            value={schedPromotionContext}
+                            onChange={(e) => setSchedPromotionContext(e.target.value)}
+                            placeholder="Contoh: Solusi batuk pilek anak saat musim hujan, rutinitas pagi penambah energi..."
+                            style={{
+                              width: '100%',
+                              height: '38px',
+                              background: 'var(--input-bg)',
+                              border: '1px solid var(--border-subtle)',
+                              borderRadius: 'var(--radius-sm)',
+                              padding: '0 0.75rem',
+                              fontSize: '0.82rem',
+                              color: 'var(--text-primary)',
+                              outline: 'none'
+                            }}
+                          />
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+                            {[
+                              { label: '☀️ Rutinitas Pagi Fit', text: 'Rutinitas pagi 1 sendok sebelum beraktivitas agar tubuh fit sepanjang hari' },
+                              { label: '🏫 Jajan Sembarangan Sekolah', text: 'Kekhawatiran ibu terhadap anak yang sering jajan sembarangan di sekolah' },
+                              { label: '🌧️ Tangkal Flu Musim Hujan', text: 'Persiapan musim hujan agar anggota keluarga tidak saling tertular flu' }
+                            ].map((chip, idx) => (
+                              <button
+                                key={idx}
+                                type="button"
+                                onClick={() => setSchedPromotionContext(chip.text)}
+                                style={{
+                                  background: 'var(--surface)',
+                                  border: '1px solid var(--border-subtle)',
+                                  color: 'var(--text-secondary)',
+                                  borderRadius: 9999,
+                                  padding: '0.2rem 0.55rem',
+                                  fontSize: '0.7rem',
+                                  fontWeight: 600,
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                {chip.label}
+                              </button>
+                            ))}
+                            {schedPromotionContext && (
+                              <button
+                                type="button"
+                                onClick={() => setSchedPromotionContext('')}
+                                style={{
+                                  background: 'var(--surface)',
+                                  border: '1px solid var(--status-danger-soft)',
+                                  color: 'var(--status-danger)',
+                                  borderRadius: 9999,
+                                  padding: '0.2rem 0.55rem',
+                                  fontSize: '0.7rem',
+                                  fontWeight: 600,
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                ✖ Kosongkan
+                              </button>
+                            )}
+                          </div>
+                        </>
+                      ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+                              Masukkan daftar angle / hook promosi untuk produk terpilih (1 baris = 1 jadwal):
+                            </span>
+                            <span style={{
+                              fontSize: '0.72rem',
+                              fontWeight: 700,
+                              background: 'var(--status-info-soft)',
+                              color: 'var(--status-info)',
+                              padding: '0.15rem 0.55rem',
+                              borderRadius: 'var(--radius-full)',
+                              border: '1px solid var(--status-info)'
+                            }}>
+                              {schedProductAngleList.split('\n').filter(a => a.trim()).length} Angle Terdeteksi
+                            </span>
+                          </div>
+                          <textarea
+                            rows={4}
+                            value={schedProductAngleList}
+                            onChange={(e) => setSchedProductAngleList(e.target.value)}
+                            placeholder={`Review Kejujuran Mengatasi Suara Bising Tetangga & Kamar Bersebelahan\nTutorial Pasang Mandiri Cepat Tanpa Merusak Cat Dinding Kamar\nPromo Flash Sale Gajian Diskon 40% Plus Bebas Ongkir Se-Indonesia`}
+                            style={{
+                              width: '100%',
+                              background: 'var(--input-bg)',
+                              border: '1px solid var(--border-subtle)',
+                              borderRadius: 'var(--radius-sm)',
+                              padding: '0.65rem 0.85rem',
+                              color: 'var(--text-primary)',
+                              fontSize: '0.82rem',
+                              fontFamily: 'var(--font-mono)',
+                              outline: 'none',
+                              lineHeight: 1.6
+                            }}
+                          />
+                          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                            💡 <strong>Universal Batch Angle:</strong> Setiap baris angle akan dibuatkan 1 baris jadwal mandiri untuk produk di atas, lengkap dengan integrasi kalender berurutan (+1 Hari).
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', background: 'var(--surface)', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border-subtle)' }}>
@@ -6391,45 +6701,141 @@ export default function AutoPipelinePage() {
                 {/* 3C. RESEP: Topik Resep & Kategori Kuliner */}
                 {schedCampaignType === 'recipe_campaign' && (
                   <>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                      <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
-                        <span>Tema / Arahan Topik Resep Harian</span>
-                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>AI berkreasi variasi resep baru tiap hari</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={schedTopic}
-                        onChange={(e) => {
-                          const newTopic = e.target.value;
-                          setSchedTopic(newTopic);
-                          if (!isSchedCategoryManual) {
-                            setSchedCategory(detectCategoryFromTopic(newTopic));
-                          }
-                        }}
-                        placeholder="Contoh: Air fryer crispy chicken tenders and snack finger foods"
-                        required
-                        style={{
-                          height: '42px',
-                          background: 'var(--input-bg)',
-                          border: '1px solid var(--border-subtle)',
-                          borderRadius: 'var(--radius-sm)',
-                          padding: '0 0.85rem',
-                          fontSize: '0.88rem',
-                          color: 'var(--text-primary)',
-                          outline: 'none'
-                        }}
-                      />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                      {!editingSchedule && (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                          <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                            Mode Perencanaan Resep:
+                          </label>
+                          <div style={{
+                            display: 'flex',
+                            background: 'var(--surface)',
+                            padding: '0.2rem',
+                            borderRadius: 'var(--radius-sm)',
+                            border: '1px solid var(--border-subtle)',
+                            gap: '0.25rem'
+                          }}>
+                            <button
+                              type="button"
+                              onClick={() => setSchedRecipeMode('umbrella')}
+                              style={{
+                                padding: '0.35rem 0.75rem',
+                                border: 'none',
+                                borderRadius: 'var(--radius-xs)',
+                                fontSize: '0.78rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                background: schedRecipeMode === 'umbrella' ? 'var(--action-primary)' : 'transparent',
+                                color: schedRecipeMode === 'umbrella' ? 'var(--on-action-primary)' : 'var(--text-secondary)',
+                                transition: 'var(--transition)'
+                              }}
+                            >
+                              🍲 Topik Payung (AI Acak)
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setSchedRecipeMode('menu_list')}
+                              style={{
+                                padding: '0.35rem 0.75rem',
+                                border: 'none',
+                                borderRadius: 'var(--radius-xs)',
+                                fontSize: '0.78rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                background: schedRecipeMode === 'menu_list' ? 'var(--action-primary)' : 'transparent',
+                                color: schedRecipeMode === 'menu_list' ? 'var(--on-action-primary)' : 'var(--text-secondary)',
+                                transition: 'var(--transition)'
+                              }}
+                            >
+                              📝 Multi-Line Menu Resep
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {schedRecipeMode === 'umbrella' || editingSchedule ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                          <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
+                            <span>Tema / Arahan Topik Resep Harian</span>
+                            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>AI berkreasi variasi resep baru tiap hari</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={schedTopic}
+                            onChange={(e) => {
+                              const newTopic = e.target.value;
+                              setSchedTopic(newTopic);
+                              if (!isSchedCategoryManual) {
+                                setSchedCategory(detectCategoryFromTopic(newTopic));
+                              }
+                            }}
+                            placeholder="Contoh: Air fryer crispy chicken tenders and snack finger foods"
+                            required={schedRecipeMode === 'umbrella'}
+                            style={{
+                              height: '42px',
+                              background: 'var(--input-bg)',
+                              border: '1px solid var(--border-subtle)',
+                              borderRadius: 'var(--radius-sm)',
+                              padding: '0 0.85rem',
+                              fontSize: '0.88rem',
+                              color: 'var(--text-primary)',
+                              outline: 'none'
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                            <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                              Daftar Nama Menu Kuliner (1 Baris = 1 Jadwal Mandiri):
+                            </span>
+                            <span style={{
+                              fontSize: '0.72rem',
+                              fontWeight: 700,
+                              background: 'var(--status-info-soft)',
+                              color: 'var(--status-info)',
+                              padding: '0.15rem 0.55rem',
+                              borderRadius: 'var(--radius-full)',
+                              border: '1px solid var(--status-info)'
+                            }}>
+                              {schedRecipeMenuList.split('\n').filter(k => k.trim()).length} Menu Resep
+                            </span>
+                          </div>
+                          <textarea
+                            rows={4}
+                            value={schedRecipeMenuList}
+                            onChange={(e) => setSchedRecipeMenuList(e.target.value)}
+                            placeholder={`Ayam Goreng Lengkuas Air Fryer Gurih Meresap\nTahu Bakso Kukus Rendah Kalori\nSup Jamur Enoki Pedas Segar Ala Resto\nBolu Pisang Kukus Lembut Tanpa Mixer`}
+                            style={{
+                              width: '100%',
+                              background: 'var(--input-bg)',
+                              border: '1px solid var(--border-subtle)',
+                              borderRadius: 'var(--radius-sm)',
+                              padding: '0.65rem 0.85rem',
+                              color: 'var(--text-primary)',
+                              fontSize: '0.82rem',
+                              fontFamily: 'var(--font-mono)',
+                              outline: 'none',
+                              lineHeight: 1.6
+                            }}
+                          />
+                          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                            💡 <strong>Deteksi Kategori Otomatis:</strong> Kategori kuliner akan dianalisis secara mandiri dari nama masing-masing masakan untuk menentukan wadah &amp; prompt visual AI.
+                          </div>
+                        </div>
+                      )}
                     </div>
 
-                    <div style={{
-                      background: 'var(--surface-raised)',
-                      border: '1px solid var(--border-subtle)',
-                      borderRadius: 'var(--radius-md)',
-                      padding: '0.85rem',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.65rem'
-                    }}>
+                    {(schedRecipeMode === 'umbrella' || editingSchedule) && (
+                      <div style={{
+                        background: 'var(--surface-raised)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-md)',
+                        padding: '0.85rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.65rem'
+                      }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
                         <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                           <span>🍽️</span>
@@ -6506,7 +6912,7 @@ export default function AutoPipelinePage() {
                                   borderRadius: '50%',
                                   background: isSelected ? 'var(--action-primary)' : 'transparent',
                                   border: `1px solid ${isSelected ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
-                                  color: isSelected ? '#000' : 'transparent',
+                                  color: isSelected ? 'var(--on-action-primary)' : 'transparent',
                                   display: 'flex',
                                   alignItems: 'center',
                                   justifyContent: 'center',
@@ -6521,6 +6927,7 @@ export default function AutoPipelinePage() {
                         })}
                       </div>
                     </div>
+                    )}
                   </>
                 )}
 
@@ -6587,48 +6994,170 @@ export default function AutoPipelinePage() {
                           }}
                         />
                       </div>
-                      <select
-                        value={schedBlueprintId}
-                        onChange={(e) => setSchedBlueprintId(e.target.value)}
-                        style={{
-                          height: '40px',
-                          background: 'var(--input-bg)',
-                          border: '1px solid var(--border-subtle)',
-                          borderRadius: 'var(--radius-sm)',
-                          padding: '0 0.75rem',
-                          fontSize: '0.84rem',
-                          color: 'var(--text-primary)',
-                          outline: 'none'
-                        }}
-                      >
-                        <option value="">⚡ Autopilot: Blueprint Video Paling Viral (Rank #1 Hook)</option>
-                        {blueprints
-                          .filter(bp => {
-                            if (!schedBlueprintSearchQuery.trim()) return true;
-                            const q = schedBlueprintSearchQuery.toLowerCase().trim();
-                            const rId = extractReelId(bp.source_url);
-                            return (
-                              (rId && rId.includes(q)) ||
-                              (bp.source_url && bp.source_url.toLowerCase().includes(q)) ||
-                              (bp.core_problem && bp.core_problem.toLowerCase().includes(q)) ||
-                              (bp.core_solution && bp.core_solution.toLowerCase().includes(q)) ||
-                              (bp.niche && bp.niche.toLowerCase().includes(q)) ||
-                              (bp.tags && (Array.isArray(bp.tags) ? bp.tags.join(' ') : String(bp.tags)).toLowerCase().includes(q)) ||
-                              (bp.viral_pattern_summary && bp.viral_pattern_summary.toLowerCase().includes(q)) ||
-                              (bp.original_caption && bp.original_caption.toLowerCase().includes(q))
-                            );
-                          })
-                          .map(bp => {
-                            const rId = extractReelId(bp.source_url);
-                            const title = bp.core_problem || bp.core_solution || bp.original_caption || bp.source_url;
-                            const label = `[ID: ${rId || bp.id.slice(0, 8)}] ${bp.niche ? `[${bp.niche}] ` : ''}${title}`;
-                            return (
-                              <option key={bp.id} value={bp.id} title={title}>
-                                {label.length > 80 ? `${label.substring(0, 80)}...` : label}
-                              </option>
-                            );
-                          })}
-                      </select>
+                      {editingSchedule ? (
+                        <select
+                          value={schedBlueprintId}
+                          onChange={(e) => setSchedBlueprintId(e.target.value)}
+                          style={{
+                            height: '40px',
+                            background: 'var(--input-bg)',
+                            border: '1px solid var(--border-subtle)',
+                            borderRadius: 'var(--radius-sm)',
+                            padding: '0 0.75rem',
+                            fontSize: '0.84rem',
+                            color: 'var(--text-primary)',
+                            outline: 'none'
+                          }}
+                        >
+                          <option value="">⚡ Autopilot: Blueprint Video Paling Viral (Rank #1 Hook)</option>
+                          {blueprints
+                            .filter(bp => {
+                              if (!schedBlueprintSearchQuery.trim()) return true;
+                              const q = schedBlueprintSearchQuery.toLowerCase().trim();
+                              const rId = extractReelId(bp.source_url);
+                              return (
+                                (rId && rId.includes(q)) ||
+                                (bp.source_url && bp.source_url.toLowerCase().includes(q)) ||
+                                (bp.core_problem && bp.core_problem.toLowerCase().includes(q)) ||
+                                (bp.core_solution && bp.core_solution.toLowerCase().includes(q)) ||
+                                (bp.niche && bp.niche.toLowerCase().includes(q)) ||
+                                (bp.tags && (Array.isArray(bp.tags) ? bp.tags.join(' ') : String(bp.tags)).toLowerCase().includes(q)) ||
+                                (bp.viral_pattern_summary && bp.viral_pattern_summary.toLowerCase().includes(q)) ||
+                                (bp.original_caption && bp.original_caption.toLowerCase().includes(q))
+                              );
+                            })
+                            .map(bp => {
+                              const rId = extractReelId(bp.source_url);
+                              const title = bp.core_problem || bp.core_solution || bp.original_caption || bp.source_url;
+                              const label = `[ID: ${rId || bp.id.slice(0, 8)}] ${bp.niche ? `[${bp.niche}] ` : ''}${title}`;
+                              return (
+                                <option key={bp.id} value={bp.id} title={title}>
+                                  {label.length > 80 ? `${label.substring(0, 80)}...` : label}
+                                </option>
+                              );
+                            })}
+                        </select>
+                      ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem', fontSize: '0.75rem' }}>
+                            <span style={{
+                              fontWeight: 700,
+                              background: 'var(--status-info-soft)',
+                              color: 'var(--status-info)',
+                              padding: '0.15rem 0.55rem',
+                              borderRadius: 'var(--radius-full)',
+                              border: '1px solid var(--status-info)'
+                            }}>
+                              {selectedBlueprintIds.length} Blueprint Dipilih {selectedBlueprintIds.length > 1 ? '(Mode Batch ⚡)' : ''}
+                            </span>
+                            <div style={{ display: 'flex', gap: '0.45rem', alignItems: 'center' }}>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const filtered = blueprints.filter(bp => {
+                                    if (!schedBlueprintSearchQuery.trim()) return true;
+                                    const q = schedBlueprintSearchQuery.toLowerCase().trim();
+                                    const rId = extractReelId(bp.source_url);
+                                    return (
+                                      (rId && rId.includes(q)) ||
+                                      (bp.source_url && bp.source_url.toLowerCase().includes(q)) ||
+                                      (bp.core_problem && bp.core_problem.toLowerCase().includes(q)) ||
+                                      (bp.core_solution && bp.core_solution.toLowerCase().includes(q)) ||
+                                      (bp.niche && bp.niche.toLowerCase().includes(q))
+                                    );
+                                  });
+                                  setSelectedBlueprintIds(filtered.map(b => b.id));
+                                }}
+                                style={{ background: 'none', border: 'none', color: 'var(--action-primary)', cursor: 'pointer', textDecoration: 'underline', fontWeight: 600 }}
+                              >
+                                Pilih Semua
+                              </button>
+                              <span style={{ color: 'var(--border-strong)' }}>|</span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (blueprints.length > 0) setSelectedBlueprintIds([blueprints[0].id]);
+                                }}
+                                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', textDecoration: 'underline', fontWeight: 600 }}
+                              >
+                                Pilih Rank #1 Saja
+                              </button>
+                            </div>
+                          </div>
+
+                          <div style={{
+                            maxHeight: '230px',
+                            overflowY: 'auto',
+                            border: '1px solid var(--border-subtle)',
+                            borderRadius: 'var(--radius-sm)',
+                            padding: '0.5rem',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.45rem',
+                            background: 'var(--surface)'
+                          }}>
+                            {blueprints
+                              .filter(bp => {
+                                if (!schedBlueprintSearchQuery.trim()) return true;
+                                const q = schedBlueprintSearchQuery.toLowerCase().trim();
+                                const rId = extractReelId(bp.source_url);
+                                return (
+                                  (rId && rId.includes(q)) ||
+                                  (bp.source_url && bp.source_url.toLowerCase().includes(q)) ||
+                                  (bp.core_problem && bp.core_problem.toLowerCase().includes(q)) ||
+                                  (bp.core_solution && bp.core_solution.toLowerCase().includes(q)) ||
+                                  (bp.niche && bp.niche.toLowerCase().includes(q)) ||
+                                  (bp.tags && (Array.isArray(bp.tags) ? bp.tags.join(' ') : String(bp.tags)).toLowerCase().includes(q)) ||
+                                  (bp.viral_pattern_summary && bp.viral_pattern_summary.toLowerCase().includes(q)) ||
+                                  (bp.original_caption && bp.original_caption.toLowerCase().includes(q))
+                                );
+                              })
+                              .map(bp => {
+                                const isChecked = selectedBlueprintIds.includes(bp.id);
+                                const rId = extractReelId(bp.source_url);
+                                const title = bp.core_problem || bp.core_solution || bp.original_caption || bp.source_url;
+                                return (
+                                  <div
+                                    key={bp.id}
+                                    onClick={() => toggleBlueprintSelection(bp.id)}
+                                    style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'space-between',
+                                      padding: '0.55rem 0.75rem',
+                                      borderRadius: 'var(--radius-xs)',
+                                      background: isChecked ? 'var(--surface-interactive)' : 'transparent',
+                                      border: isChecked ? '1px solid var(--action-primary)' : '1px solid var(--border-subtle)',
+                                      cursor: 'pointer',
+                                      transition: 'var(--transition)'
+                                    }}
+                                  >
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem', paddingRight: '0.5rem' }}>
+                                      <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                                        {title}
+                                      </span>
+                                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                                        {bp.niche ? `[${bp.niche}] ` : ''}{rId ? `Reel ID: ${rId} • ` : ''}Viral Hook Score: Rank #1
+                                      </span>
+                                    </div>
+                                    <input
+                                      type="checkbox"
+                                      checked={isChecked}
+                                      readOnly
+                                      style={{
+                                        width: '16px',
+                                        height: '16px',
+                                        accentColor: 'var(--action-primary)',
+                                        cursor: 'pointer',
+                                        flexShrink: 0
+                                      }}
+                                    />
+                                  </div>
+                                );
+                              })}
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', background: 'var(--surface)', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border-subtle)' }}>
@@ -6844,12 +7373,18 @@ export default function AutoPipelinePage() {
                 {(() => {
                   const batchItemCount = (
                     schedCampaignType === 'editorial_campaign' && schedEditorialMode === 'keyword'
-                      ? schedMultiKeywords.split('\n').map(s => s.trim()).filter(Boolean).length
+                      ? schedEditorialKeywordsText.split('\n').map(s => s.trim()).filter(Boolean).length
                       : (schedCampaignType === 'editorial_campaign' && schedEditorialMode === 'pillars'
                           ? selectedPillars.length
-                          : (schedCampaignType === 'product_campaign'
-                              ? selectedProductIds.length
-                              : 1))
+                          : (schedCampaignType === 'recipe_campaign' && schedRecipeMode === 'menu_list'
+                              ? schedRecipeMenuList.split('\n').map(s => s.trim()).filter(Boolean).length
+                              : (schedCampaignType === 'multiplier_campaign'
+                                  ? selectedBlueprintIds.length
+                                  : (schedCampaignType === 'product_campaign'
+                                      ? (schedProductPromoMode === 'multi_angle'
+                                          ? schedProductAngleList.split('\n').map(s => s.trim()).filter(Boolean).length
+                                          : selectedProductIds.length)
+                                      : 1))))
                   );
                   const isBatchSchedule = !editingSchedule && batchItemCount > 1;
 

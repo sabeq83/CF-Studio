@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Mockup: Universal Batch Scheduling (4 Lini Video) — MAKNA Flow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --surface-subtle: #121c2c;
+      --input-bg: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --shadow-modal: 0 24px 48px -12px rgba(0, 0, 0, 0.5);
+      --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f8fafc;
+      --sidebar: #f1f5f9;
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #f1f5f9;
+      --surface-hover: #e2e8f0;
+      --surface-subtle: #f8fafc;
+      --input-bg: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --border-subtle: #cbd5e1;
+      --border-strong: #94a3b8;
+      --action-primary: #0d9488;
+      --action-primary-hover: #14b8a6;
+      --on-action-primary: #ffffff;
+      --link: #0284c7;
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.12);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.12);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.12);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.12);
+      --shadow-modal: 0 20px 35px -10px rgba(0, 0, 0, 0.15);
+      --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      line-height: 1.5;
+      padding: 1.5rem;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .theme-toggle-btn {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      padding: 0.45rem 0.85rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: var(--transition);
+    }
+    .theme-toggle-btn:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+
+    /* Tab Switcher */
+    .pipeline-tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      background: var(--surface);
+      padding: 0.35rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+    }
+
+    @media (max-width: 768px) {
+      .pipeline-tabs {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .tab-btn {
+      padding: 0.65rem 0.85rem;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--text-secondary);
+      font-weight: 700;
+      font-size: 0.82rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      transition: var(--transition);
+    }
+    .tab-btn.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      margin-bottom: 1.15rem;
+    }
+
+    .form-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .segmented-control {
+      display: flex;
+      background: var(--surface-raised);
+      padding: 0.25rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      gap: 0.35rem;
+    }
+
+    .segmented-btn {
+      flex: 1;
+      padding: 0.45rem 0.75rem;
+      border: none;
+      border-radius: var(--radius-xs);
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+    }
+    .segmented-btn.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    .form-input, .form-textarea, .form-select {
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.65rem 0.85rem;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.86rem;
+      outline: none;
+      transition: var(--transition);
+    }
+    .form-textarea {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      line-height: 1.6;
+    }
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      border-color: var(--action-primary);
+    }
+
+    .badge-counter {
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      padding: 0.15rem 0.55rem;
+      border-radius: 9999px;
+      border: 1px solid var(--status-info);
+    }
+
+    .blueprint-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 0.65rem;
+      max-height: 260px;
+      overflow-y: auto;
+      padding: 0.5rem;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+    }
+
+    .blueprint-card {
+      padding: 0.75rem;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.5rem;
+      transition: var(--transition);
+    }
+    .blueprint-card:hover {
+      border-color: var(--border-strong);
+    }
+    .blueprint-card.selected {
+      background: var(--surface-interactive);
+      border-color: var(--action-primary);
+    }
+
+    .timing-box {
+      background: var(--surface-raised);
+      padding: 1rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      padding: 0.85rem 1.25rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.92rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: var(--transition);
+      margin-top: 1rem;
+    }
+    .btn-submit:hover {
+      background: var(--action-primary-hover);
+    }
+
+    /* Table */
+    .table-responsive {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      text-align: left;
+    }
+    th {
+      background: var(--surface-raised);
+      color: var(--text-muted);
+      font-weight: 700;
+      padding: 0.75rem 0.85rem;
+      border-bottom: 1px solid var(--border-subtle);
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      letter-spacing: 0.5px;
+    }
+    td {
+      padding: 0.75rem 0.85rem;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+    }
+    tr:hover td {
+      background: var(--surface-subtle);
+    }
+
+    .badge-pipeline {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .badge-recipe { background: rgba(249, 115, 22, 0.15); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.3); }
+    .badge-multiplier { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
+    .badge-product { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+    .badge-editorial { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Top Navigation Header -->
+  <div class="header-bar">
+    <div>
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span style="font-size: 1.4rem;">⚡</span>
+        <h1 style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">
+          Universal Batch Scheduling Simulator
+        </h1>
+        <span style="font-size: 0.7rem; font-weight: 700; background: var(--status-success-soft); color: var(--status-success); padding: 0.15rem 0.5rem; border-radius: 9999px; border: 1px solid var(--status-success);">
+          4 Lini Lengkap
+        </span>
+      </div>
+      <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">
+        Standarisasi Pembuatan Jadwal Massal (Batch) untuk Seluruh Jenis Video Otomatis di MAKNA Flow
+      </p>
+    </div>
+    <div style="display: flex; gap: 0.5rem; align-items: center;">
+      <button class="theme-toggle-btn" onclick="toggleTheme()">
+        <span id="theme-icon">🌙</span> <span id="theme-label">Dark Mode</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Pipeline Type Tabs -->
+  <div class="pipeline-tabs">
+    <button class="tab-btn active" id="tab-recipe" onclick="switchPipeline('recipe')">
+      <span>🍲</span> Resep Kuliner
+    </button>
+    <button class="tab-btn" id="tab-multiplier" onclick="switchPipeline('multiplier')">
+      <span>🔀</span> Multiplier Video
+    </button>
+    <button class="tab-btn" id="tab-product" onclick="switchPipeline('product')">
+      <span>📦</span> Produk Katalog
+    </button>
+    <button class="tab-btn" id="tab-editorial" onclick="switchPipeline('editorial')">
+      <span>📰</span> Brand Editorial
+    </button>
+  </div>
+
+  <!-- Main Generator Card -->
+  <div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <h2 id="generator-title" style="font-size: 1rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;">
+        <span>🍲</span> Konfigurasi Universal Batch Resep Kuliner
+      </h2>
+      <span id="badge-stagger-type" class="badge-counter" style="background: var(--status-warning-soft); color: var(--status-warning); border-color: var(--status-warning);">
+        Otomatis Multi-Jadwal ⚡
+      </span>
+    </div>
+
+    <!-- PANEL 1: RESEP KULINER -->
+    <div id="panel-recipe">
+      <div class="form-group">
+        <label class="form-label">
+          <span>Mode Perencanaan Resep:</span>
+          <span style="font-size: 0.72rem; color: var(--text-muted);">Pilih cara menentukan variasi masakan</span>
+        </label>
+        <div class="segmented-control">
+          <button type="button" class="segmented-btn" id="btn-recipe-umbrella" onclick="setRecipeMode('umbrella')">
+            <span>🍲</span> Topik Payung (AI Acak Tiap Hari)
+          </button>
+          <button type="button" class="segmented-btn active" id="btn-recipe-multiline" onclick="setRecipeMode('multiline')">
+            <span>📝</span> Multi-Line Menu Resep (1 Baris = 1 Jadwal)
+          </button>
+        </div>
+      </div>
+
+      <div id="recipe-umbrella-container" style="display: none;" class="form-group">
+        <label class="form-label">Tema Arahan Topik Resep Harian:</label>
+        <input type="text" class="form-input" id="input-recipe-umbrella" placeholder="Contoh: Air fryer crispy chicken tenders and snack finger foods">
+      </div>
+
+      <div id="recipe-multiline-container" class="form-group">
+        <div class="form-label">
+          <span>Daftar Menu Kuliner Spesifik (1 Baris = 1 Jadwal):</span>
+          <span class="badge-counter" id="recipe-count-badge">4 Menu Terdeteksi</span>
+        </div>
+        <textarea class="form-textarea" id="recipe-multiline-text" rows="5" oninput="updateRecipeBadge()">Ayam Goreng Lengkuas Air Fryer Gurih Meresap
+Tahu Bakso Kukus Rendah Kalori
+Sup Jamur Enoki Pedas Segar Ala Resto
+Bolu Pisang Kukus Lembut Tanpa Mixer</textarea>
+        <span style="font-size: 0.72rem; color: var(--text-muted);">
+          💡 <strong>Deteksi Kategori Otomatis:</strong> Kategori (Ayam, Sayur, Dessert, dll.) terdeteksi otomatis per baris menu masakan.
+        </span>
+      </div>
+    </div>
+
+    <!-- PANEL 2: MULTIPLIER VIDEO -->
+    <div id="panel-multiplier" style="display: none;">
+      <div class="form-group">
+        <label class="form-label">
+          <span>Mode Seleksi Blueprint Multiplier:</span>
+          <span style="font-size: 0.72rem; color: var(--text-muted);">Pilih 1 atau beberapa video acuan viral</span>
+        </label>
+        <div class="segmented-control">
+          <button type="button" class="segmented-btn" id="btn-multi-autopilot" onclick="setMultiplierMode('autopilot')">
+            <span>⚡</span> Autopilot Rank #1 Viral
+          </button>
+          <button type="button" class="segmented-btn active" id="btn-multi-batch" onclick="setMultiplierMode('batch')">
+            <span>🔀</span> Multi-Blueprint Checkbox (Batch Jadwal)
+          </button>
+        </div>
+      </div>
+
+      <div id="multiplier-batch-container" class="form-group">
+        <div class="form-label">
+          <span>Pilih Blueprint Acuan Viral yang Ingin Dijadwalkan:</span>
+          <span class="badge-counter" id="bp-count-badge">3 Blueprint Dipilih</span>
+        </div>
+        <div class="blueprint-grid" id="blueprint-grid-list">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL 3: PRODUK KATALOG -->
+    <div id="panel-product" style="display: none;">
+      <div class="form-group">
+        <label class="form-label">
+          <span>Mode Perencanaan Konten Produk:</span>
+          <span style="font-size: 0.72rem; color: var(--text-muted);">Pilih jenis multi-jadwal produk</span>
+        </label>
+        <div class="segmented-control">
+          <button type="button" class="segmented-btn active" id="btn-prod-multiangle" onclick="setProductMode('multiangle')">
+            <span>🎯</span> Multi-Angle Promo (1 Produk Unggulan)
+          </button>
+          <button type="button" class="segmented-btn" id="btn-prod-catalog" onclick="setProductMode('multiproduct')">
+            <span>📦</span> Multi-Produk Katalog (Beda Produk)
+          </button>
+        </div>
+      </div>
+
+      <div id="prod-angle-container" class="form-group">
+        <label class="form-label">Pilih Produk Unggulan:</label>
+        <select class="form-select" id="select-main-product" style="margin-bottom: 0.75rem;">
+          <option value="prod_1">Peredam Suara Ruangan Acoustic Foam Soundproof (ID: PROD-882)</option>
+          <option value="prod_2">Door Bottom Seal Strip Penahan Debu & Serangga (ID: PROD-441)</option>
+        </select>
+        <div class="form-label">
+          <span>Daftar Sudut Pandang / Angle Promosi (1 Baris = 1 Jadwal):</span>
+          <span class="badge-counter" id="prod-angle-badge">3 Angle Promo</span>
+        </div>
+        <textarea class="form-textarea" id="prod-angle-text" rows="4" oninput="updateProductAngleBadge()">Review Kejujuran Mengatasi Suara Bising Tetangga & Kamar Bersebelahan
+Tutorial Pasang Mandiri Cepat Tanpa Merusak Cat Dinding Kamar
+Promo Flash Sale Gajian Diskon 40% Plus Bebas Ongkir Se-Indonesia</textarea>
+      </div>
+
+      <div id="prod-catalog-container" class="form-group" style="display: none;">
+        <div class="form-label">
+          <span>Pilih Beberapa Produk Katalog Sekaligus:</span>
+          <span class="badge-counter" id="prod-multi-badge">2 Produk Terpilih</span>
+        </div>
+        <div class="blueprint-grid">
+          <div class="blueprint-card selected" onclick="toggleSimProduct(this, 'Acoustic Foam Soundproof')">
+            <div>
+              <div style="font-size: 0.82rem; font-weight: 700;">Acoustic Foam Soundproof</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">Katalog Utama • Stok: 520</div>
+            </div>
+            <input type="checkbox" checked readOnly>
+          </div>
+          <div class="blueprint-card selected" onclick="toggleSimProduct(this, 'Door Bottom Seal Strip')">
+            <div>
+              <div style="font-size: 0.82rem; font-weight: 700;">Door Bottom Seal Strip</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">Katalog Pelengkap • Stok: 1.200</div>
+            </div>
+            <input type="checkbox" checked readOnly>
+          </div>
+          <div class="blueprint-card" onclick="toggleSimProduct(this, 'Window Draught Weatherstrip')">
+            <div>
+              <div style="font-size: 0.82rem; font-weight: 700;">Window Draught Weatherstrip</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">Katalog Baru • Stok: 300</div>
+            </div>
+            <input type="checkbox" readOnly>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL 4: BRAND EDITORIAL (EKSISTING) -->
+    <div id="panel-editorial" style="display: none;">
+      <div class="form-group">
+        <label class="form-label">Mode Konten Editorial:</label>
+        <div class="segmented-control">
+          <button type="button" class="segmented-btn active" id="btn-edit-kw" onclick="setEditorialMode('keyword')">
+            <span>🔑</span> Multi-Keyword Mandiri (Opsi A)
+          </button>
+          <button type="button" class="segmented-btn" id="btn-edit-pil" onclick="setEditorialMode('pillars')">
+            <span>🏛️</span> Multi-Pilar Brand
+          </button>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-label">
+          <span>Daftar Kata Kunci Editorial (1 Baris = 1 Jadwal):</span>
+          <span class="badge-counter" id="edit-kw-badge">3 Keyword</span>
+        </div>
+        <textarea class="form-textarea" id="edit-kw-text" rows="4" oninput="updateEditorialBadge()">Tips Meredam Gema Ruangan Studio Podcast Modal Minim
+Perbandingan Busa Piramid vs Busa Telur untuk Akustik Ruangan
+Cara Pasang Soundproofing yang Benar Tanpa Tukang</textarea>
+      </div>
+    </div>
+
+    <!-- SHARED TIMING & BATCH DISPATCH CONFIG -->
+    <div class="timing-box">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+        <span style="font-size: 0.84rem; font-weight: 800; color: var(--text-primary);">
+          ⚙️ Aturan Distribusi Jadwal (Batch Staggering):
+        </span>
+        <div class="segmented-control" style="max-width: 400px;">
+          <button type="button" class="segmented-btn active" id="btn-time-date" onclick="setTimingMode('specific_date')">
+            <span>📅</span> Tanggal Kalender (Sekali Jalan)
+          </button>
+          <button type="button" class="segmented-btn" id="btn-time-rec" onclick="setTimingMode('recurring')">
+            <span>🔄</span> Rutin Mingguan
+          </button>
+        </div>
+      </div>
+
+      <!-- Specific Date Options -->
+      <div id="timing-date-panel" style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+        <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+          <label style="font-size: 0.74rem; font-weight: 700; color: var(--text-secondary);">Mulai Tanggal:</label>
+          <input type="date" id="batch-start-date" class="form-input" value="2026-11-15" style="font-weight: 700;">
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+          <label style="font-size: 0.74rem; font-weight: 700; color: var(--text-secondary);">Jam Eksekusi:</label>
+          <input type="time" class="form-input" value="05:00" style="font-weight: 700;">
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1.2rem;">
+          <input type="checkbox" id="check-stagger-calendar" checked style="cursor: pointer; width: 16px; height: 16px;">
+          <label for="check-stagger-calendar" style="font-size: 0.78rem; font-weight: 700; color: var(--action-primary); cursor: pointer;">
+            ⚡ Auto-Stagger Kalender (+1 Hari per baris jadwal)
+          </label>
+        </div>
+      </div>
+
+      <!-- Recurring Options -->
+      <div id="timing-rec-panel" style="display: none; flex-direction: column; gap: 0.5rem;">
+        <span style="font-size: 0.76rem; color: var(--text-muted);">
+          Setiap baris batch akan disebarkan secara bergilir pada hari-hari rutin aktif.
+        </span>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <input type="checkbox" id="check-stagger-days" checked style="cursor: pointer; width: 16px; height: 16px;">
+          <label for="check-stagger-days" style="font-size: 0.78rem; font-weight: 700; color: var(--text-primary); cursor: pointer;">
+            ⚡ Auto-Stagger Hari Rutin (Gilir ke Sen, Sel, Rab, Kam...)
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <button type="button" class="btn-submit" onclick="generateSimulatedSchedules()">
+      <span>🚀</span> Buat Seluruh Jadwal Batch Sekaligus dalam 1-Klik
+    </button>
+  </div>
+
+  <!-- Real-Time Monitoring Table of Created Schedules -->
+  <div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+      <h3 style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary);">
+        📋 Hasil Simulasi Batch Schedules yang Terbentuk:
+      </h3>
+      <span id="total-schedules-badge" class="badge-counter" style="background: var(--status-success-soft); color: var(--status-success); border-color: var(--status-success);">
+        4 Jadwal Terdaftar
+      </span>
+    </div>
+
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Nama Jadwal & Topik Independen</th>
+            <th>Lini Video</th>
+            <th>Mode & Target Waktu</th>
+            <th>Jam Gen / Pub</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="schedules-tbody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentTheme = 'dark';
+  let currentPipeline = 'recipe';
+  let recipeMode = 'multiline';
+  let multiplierMode = 'batch';
+  let productMode = 'multiangle';
+  let editorialMode = 'keyword';
+  let timingMode = 'specific_date';
+
+  const demoBlueprints = [
+    { id: 'bp_1', title: 'Hook Suara Tetangga Berisik vs Busa Akustik', niche: 'Home Studio', score: 'Viral Rank #1' },
+    { id: 'bp_2', title: 'Transformasi Kamar Tidur Jadi Kedap Suara', niche: 'DIY Soundproof', score: 'Viral Rank #2' },
+    { id: 'bp_3', title: 'Tutorial Tes Koin & Korek Api Soundproof', niche: 'Product Test', score: 'Viral Rank #3' },
+    { id: 'bp_4', title: 'Kenapa Studio Musik Wajib Pakai Foam Piramid', niche: 'Education', score: 'Viral Rank #4' }
+  ];
+  let selectedBlueprints = ['bp_1', 'bp_2', 'bp_3'];
+
+  function toggleTheme() {
+    currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    document.getElementById('theme-icon').textContent = currentTheme === 'dark' ? '🌙' : '☀️';
+    document.getElementById('theme-label').textContent = currentTheme === 'dark' ? 'Dark Mode' : 'Light Mode';
+  }
+
+  function switchPipeline(pipeline) {
+    currentPipeline = pipeline;
+    ['recipe', 'multiplier', 'product', 'editorial'].forEach(p => {
+      document.getElementById(`tab-${p}`).classList.toggle('active', p === pipeline);
+      document.getElementById(`panel-${p}`).style.display = p === pipeline ? 'block' : 'none';
+    });
+
+    const titles = {
+      recipe: '🍲 Konfigurasi Universal Batch Resep Kuliner',
+      multiplier: '🔀 Konfigurasi Universal Batch Multiplier Video',
+      product: '📦 Konfigurasi Universal Batch Produk Katalog',
+      editorial: '📰 Konfigurasi Universal Batch Brand Editorial'
+    };
+    document.getElementById('generator-title').innerHTML = titles[pipeline];
+    generateSimulatedSchedules();
+  }
+
+  function setRecipeMode(mode) {
+    recipeMode = mode;
+    document.getElementById('btn-recipe-umbrella').classList.toggle('active', mode === 'umbrella');
+    document.getElementById('btn-recipe-multiline').classList.toggle('active', mode === 'multiline');
+    document.getElementById('recipe-umbrella-container').style.display = mode === 'umbrella' ? 'block' : 'none';
+    document.getElementById('recipe-multiline-container').style.display = mode === 'multiline' ? 'block' : 'none';
+    generateSimulatedSchedules();
+  }
+
+  function updateRecipeBadge() {
+    const text = document.getElementById('recipe-multiline-text').value;
+    const count = text.split('\n').filter(s => s.trim()).length;
+    document.getElementById('recipe-count-badge').textContent = `${count} Menu Terdeteksi`;
+  }
+
+  function setMultiplierMode(mode) {
+    multiplierMode = mode;
+    document.getElementById('btn-multi-autopilot').classList.toggle('active', mode === 'autopilot');
+    document.getElementById('btn-multi-batch').classList.toggle('active', mode === 'batch');
+    document.getElementById('multiplier-batch-container').style.display = mode === 'batch' ? 'block' : 'none';
+    generateSimulatedSchedules();
+  }
+
+  function renderBlueprints() {
+    const container = document.getElementById('blueprint-grid-list');
+    container.innerHTML = demoBlueprints.map(bp => {
+      const isSelected = selectedBlueprints.includes(bp.id);
+      return `
+        <div class="blueprint-card ${isSelected ? 'selected' : ''}" onclick="toggleBlueprint('${bp.id}')">
+          <div style="display: flex; flex-direction: column; gap: 0.15rem;">
+            <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-primary);">${bp.title}</span>
+            <span style="font-size: 0.72rem; color: var(--text-muted);">${bp.niche} • ${bp.score}</span>
+          </div>
+          <input type="checkbox" ${isSelected ? 'checked' : ''} readOnly style="accent-color: var(--action-primary);">
+        </div>
+      `;
+    }).join('');
+    document.getElementById('bp-count-badge').textContent = `${selectedBlueprints.length} Blueprint Dipilih`;
+  }
+
+  function toggleBlueprint(id) {
+    if (selectedBlueprints.includes(id)) {
+      if (selectedBlueprints.length === 1) return;
+      selectedBlueprints = selectedBlueprints.filter(b => b !== id);
+    } else {
+      selectedBlueprints.push(id);
+    }
+    renderBlueprints();
+    generateSimulatedSchedules();
+  }
+
+  function setProductMode(mode) {
+    productMode = mode;
+    document.getElementById('btn-prod-multiangle').classList.toggle('active', mode === 'multiangle');
+    document.getElementById('btn-prod-catalog').classList.toggle('active', mode === 'multiproduct');
+    document.getElementById('prod-angle-container').style.display = mode === 'multiangle' ? 'block' : 'none';
+    document.getElementById('prod-catalog-container').style.display = mode === 'multiproduct' ? 'block' : 'none';
+    generateSimulatedSchedules();
+  }
+
+  function updateProductAngleBadge() {
+    const text = document.getElementById('prod-angle-text').value;
+    const count = text.split('\n').filter(s => s.trim()).length;
+    document.getElementById('prod-angle-badge').textContent = `${count} Angle Promo`;
+  }
+
+  function toggleSimProduct(el, name) {
+    el.classList.toggle('selected');
+    const chk = el.querySelector('input');
+    chk.checked = el.classList.contains('selected');
+    generateSimulatedSchedules();
+  }
+
+  function setEditorialMode(mode) {
+    editorialMode = mode;
+    document.getElementById('btn-edit-kw').classList.toggle('active', mode === 'keyword');
+    document.getElementById('btn-edit-pil').classList.toggle('active', mode === 'pillars');
+    generateSimulatedSchedules();
+  }
+
+  function updateEditorialBadge() {
+    const text = document.getElementById('edit-kw-text').value;
+    const count = text.split('\n').filter(s => s.trim()).length;
+    document.getElementById('edit-kw-badge').textContent = `${count} Keyword`;
+  }
+
+  function setTimingMode(mode) {
+    timingMode = mode;
+    document.getElementById('btn-time-date').classList.toggle('active', mode === 'specific_date');
+    document.getElementById('btn-time-rec').classList.toggle('active', mode === 'recurring');
+    document.getElementById('timing-date-panel').style.display = mode === 'specific_date' ? 'flex' : 'none';
+    document.getElementById('timing-rec-panel').style.display = mode === 'recurring' ? 'flex' : 'none';
+    generateSimulatedSchedules();
+  }
+
+  function generateSimulatedSchedules() {
+    const tbody = document.getElementById('schedules-tbody');
+    let items = [];
+    const isSpecificDate = timingMode === 'specific_date';
+    const startDateStr = document.getElementById('batch-start-date').value || '2026-11-15';
+    const staggerDate = document.getElementById('check-stagger-calendar')?.checked ?? true;
+    const daysLabel = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+
+    if (currentPipeline === 'recipe') {
+      if (recipeMode === 'umbrella') {
+        const top = document.getElementById('input-recipe-umbrella').value || 'Resep Air Fryer Harian';
+        items.push({ name: `[Resep Payung] ${top}`, type: 'recipe', badge: 'badge-recipe', label: 'Resep Kuliner' });
+      } else {
+        const lines = document.getElementById('recipe-multiline-text').value.split('\n').map(s => s.trim()).filter(Boolean);
+        lines.forEach(l => items.push({ name: `[Menu Resep] ${l}`, type: 'recipe', badge: 'badge-recipe', label: 'Resep Kuliner' }));
+      }
+    } else if (currentPipeline === 'multiplier') {
+      if (multiplierMode === 'autopilot') {
+        items.push({ name: `[Multiplier] Autopilot Winning Blueprint Rank #1`, type: 'multiplier', badge: 'badge-multiplier', label: 'Multiplier Video' });
+      } else {
+        selectedBlueprints.forEach(bpId => {
+          const bpObj = demoBlueprints.find(b => b.id === bpId);
+          items.push({ name: `[Multiplier] ${bpObj.title}`, type: 'multiplier', badge: 'badge-multiplier', label: 'Multiplier Video' });
+        });
+      }
+    } else if (currentPipeline === 'product') {
+      if (productMode === 'multiangle') {
+        const lines = document.getElementById('prod-angle-text').value.split('\n').map(s => s.trim()).filter(Boolean);
+        lines.forEach(l => items.push({ name: `[Acoustic Foam] ${l}`, type: 'product', badge: 'badge-product', label: 'Produk Katalog' }));
+      } else {
+        document.querySelectorAll('#prod-catalog-container .blueprint-card.selected').forEach(c => {
+          const t = c.querySelector('div div').textContent;
+          items.push({ name: `[Katalog] ${t}`, type: 'product', badge: 'badge-product', label: 'Produk Katalog' });
+        });
+      }
+    } else if (currentPipeline === 'editorial') {
+      const lines = document.getElementById('edit-kw-text').value.split('\n').map(s => s.trim()).filter(Boolean);
+      lines.forEach(l => items.push({ name: `[Keyword Editorial] ${l}`, type: 'editorial', badge: 'badge-editorial', label: 'Brand Editorial' }));
+    }
+
+    document.getElementById('total-schedules-badge').textContent = `${items.length} Jadwal Terdaftar`;
+
+    tbody.innerHTML = items.map((it, idx) => {
+      let timeDisplay = '';
+      if (isSpecificDate) {
+        const d = new Date(startDateStr);
+        if (staggerDate) d.setDate(d.getDate() + idx);
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        timeDisplay = `<span style="font-family: var(--font-mono); font-weight: 700; color: var(--action-primary);">📅 ${yyyy}-${mm}-${dd}</span>`;
+      } else {
+        const day = daysLabel[idx % daysLabel.length];
+        timeDisplay = `<span>🔄 Setiap Hari ${day}</span>`;
+      }
+
+      return `
+        <tr>
+          <td style="font-family: var(--font-mono); font-weight: 700;">#${idx + 1}</td>
+          <td><strong>${it.name}</strong></td>
+          <td><span class="badge-pipeline ${it.badge}">${it.label}</span></td>
+          <td>${timeDisplay}</td>
+          <td style="font-family: var(--font-mono);">05:00 / 09:00</td>
+          <td><span style="font-size: 0.72rem; font-weight: 700; color: var(--status-success); background: var(--status-success-soft); padding: 0.15rem 0.5rem; border-radius: 9999px;">● AKTIF</span></td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  // Initialize
+  renderBlueprints();
+  generateSimulatedSchedules();
+</script>
+
+</body>
+</html>

@@ -19,13 +19,13 @@ Fitur ini menstandarkan antarmuka dan alur pembuatan jadwal massal (*Universal B
 
 ## 📋 Execution Task List
 
-- [ ] **Task 1: State Management Frontend** — Tambahkan state `schedRecipeMode` ('umbrella' | 'menu_list'), `schedRecipeMenuList`, `selectedBlueprintIds` (array), dan `schedProductPromoMode` ('single' | 'multi_angle') pada `app/auto-pipeline/page.js`.
-- [ ] **Task 2: Frontend UI Resep Kuliner (Multi-Menu)** — Tambahkan Segmented Control `[ 🍲 Topik Payung (AI Acak) ]` vs `[ 📝 Multi-Line Menu Resep ]`, textarea daftar menu kuliner, dan badge counter di `app/auto-pipeline/page.js`.
-- [ ] **Task 3: Batch Handler Resep Kuliner** — Tambahkan logika batch mapping pada `handleSaveSchedule` untuk `recipe_campaign` mode `menu_list` dengan deteksi kategori otomatis (`detectCategoryFromTopic`) dan auto-stagger hari/tanggal.
-- [ ] **Task 4: Frontend UI Multiplier (Multi-Blueprint Checkbox)** — Ubah `<select>` dropdown blueprint menjadi antarmuka seleksi multi-checkbox/kartu dengan pencarian dan filter niche di `app/auto-pipeline/page.js`.
-- [ ] **Task 5: Batch Handler Multiplier** — Tambahkan logika batch mapping pada `handleSaveSchedule` untuk `multiplier_campaign` ketika `selectedBlueprintIds.length > 1`.
-- [ ] **Task 6: Frontend UI & Handler Produk Multi-Angle** — Tambahkan opsi textarea multi-angle konteks promosi untuk 1 produk pada `product_campaign`.
-- [ ] **Task 7: Verifikasi End-to-End** — Uji coba pembuatan batch jadwal untuk Resep Kuliner, Multiplier, dan Produk Katalog.
+- [x] **Task 1: State Management Frontend** — Tambahkan state `schedRecipeMode` ('umbrella' | 'menu_list'), `schedRecipeMenuList`, `selectedBlueprintIds` (array), dan `schedProductPromoMode` ('single' | 'multi_angle') pada `app/auto-pipeline/page.js`.
+- [x] **Task 2: Frontend UI Resep Kuliner (Multi-Menu)** — Tambahkan Segmented Control `[ 🍲 Topik Payung (AI Acak) ]` vs `[ 📝 Multi-Line Menu Resep ]`, textarea daftar menu kuliner, dan badge counter di `app/auto-pipeline/page.js`.
+- [x] **Task 3: Batch Handler Resep Kuliner** — Tambahkan logika batch mapping pada `handleSaveSchedule` untuk `recipe_campaign` mode `menu_list` dengan deteksi kategori otomatis (`detectCategoryFromTopic`) dan auto-stagger hari/tanggal.
+- [x] **Task 4: Frontend UI Multiplier (Multi-Blueprint Checkbox)** — Ubah `<select>` dropdown blueprint menjadi antarmuka seleksi multi-checkbox/kartu dengan pencarian dan filter niche di `app/auto-pipeline/page.js`.
+- [x] **Task 5: Batch Handler Multiplier** — Tambahkan logika batch mapping pada `handleSaveSchedule` untuk `multiplier_campaign` ketika `selectedBlueprintIds.length > 1`.
+- [x] **Task 6: Frontend UI & Handler Produk Multi-Angle** — Tambahkan opsi textarea multi-angle konteks promosi untuk 1 produk pada `product_campaign`.
+- [x] **Task 7: Verifikasi End-to-End** — Uji coba pembuatan batch jadwal untuk Resep Kuliner, Multiplier, dan Produk Katalog.
 - [ ] **Task 8: Rilis & Git Sync** — Jalankan `npm run release-non-interactive` dan deploy atomic ke Staging & Dev Mac Mini.
 
 ---

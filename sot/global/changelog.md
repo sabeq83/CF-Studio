@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.40.13 — Feat: Universal Batch Scheduling for All Video Lines (Recipe, Multiplier, Product Multi-Angle) (10/11/2026)
+- Multi-Line Menu Resep Kuliner dengan auto-deteksi kategori masakan
+- Multi-Blueprint Checkbox Selector untuk Multiplier Video
+- Multi-Angle Promo Context untuk Produk Katalog unggulan
+- Integrasi penuh Universal Batch dengan Calendar Date Stagger dan Day Stagger
+
 ## V2.40.12 — Feat: Calendar Date Scheduling Dual-Mode (Recurring vs Specific Date) & Stagger (10/11/2026)
 - Dukungan mode tanggal kalender spesifik (one-time execution) dan rutin mingguan
 - Siklus hidup auto-completion setelah publikasi Repliz
