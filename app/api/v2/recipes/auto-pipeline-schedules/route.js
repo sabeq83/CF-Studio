@@ -12,9 +12,11 @@ export const GET = withTenantContext(async (request, _ctx, user) => {
     const status = searchParams.get('status') || 'all';
     const brandId = searchParams.get('brand_id') || searchParams.get('brand');
     const pipelineType = searchParams.get('pipeline_type') || searchParams.get('type') || 'all';
+    const scheduleMode = searchParams.get('schedule_mode') || 'all';
+    const targetDate = searchParams.get('target_date');
     const tenantId = (!user?.tenantId || user.tenantId === '__none__') ? 'default_tenant' : user.tenantId;
 
-    const schedules = await listAutoPipelineSchedules(tenantId, { status, brandId, pipelineType });
+    const schedules = await listAutoPipelineSchedules(tenantId, { status, brandId, pipelineType, scheduleMode, targetDate });
     const enriched = (schedules || []).map(s => ({
       ...s,
       is_running: isScheduleRunning(s.id)

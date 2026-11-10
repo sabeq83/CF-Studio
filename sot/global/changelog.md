@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.40.20 — Dukungan Tanggal Spesifik pada MCP Schedule Tools (10/11/2026)
+- Menambahkan parameter target_date dan schedule_mode pada cf_create_schedule dan cf_update_schedule
+- Mendukung filter tanggal dan mode pada cf_list_schedules dan API auto-pipeline-schedules
+- Sinkronisasi skema MCP client Antigravity
+
 ## V2.40.19 — Fitur Tampilan Tabel Skedul 1-Baris Sleek & Modern (10/11/2026)
 - Membuat komponen ScheduleTableView dengan tampilan ketat 1-baris dan 100% Semantic CSS Tokens
 - Menggantikan tampilan kartu tebal pada tab Skedul dengan tabel data horizontal berkecepatan scan tinggi

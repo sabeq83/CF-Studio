@@ -479,13 +479,15 @@ export function createCfStudioServer(rawRequest) {
   // 4. Schedule Management Tools
   register(
     'cf_list_schedules',
-    'List recurring Auto Pipeline schedules in the tenant with their status and execution metrics.',
+    'List recurring or specific-date Auto Pipeline schedules in the tenant with their status, target date, and execution metrics.',
     {
       status: z.enum(['active', 'paused', 'all']).default('all'),
       pipeline_type: z
         .enum(['product_campaign', 'editorial_campaign', 'recipe_campaign', 'multiplier_campaign', 'recipe_labs', 'all'])
         .default('all'),
-      brand_id: z.string().max(100).optional()
+      brand_id: z.string().max(100).optional(),
+      schedule_mode: z.enum(['recurring', 'specific_date', 'all']).default('all'),
+      target_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format YYYY-MM-DD').optional()
     },
     true,
     args =>
@@ -500,7 +502,7 @@ export function createCfStudioServer(rawRequest) {
 
   register(
     'cf_create_schedule',
-    'Create a new recurring Auto Pipeline schedule (e.g. daily/weekly automatic video generation) with full publish accounts, recipe toggle, Shopee affiliate link, and blueprint binding.',
+    'Create a new Auto Pipeline schedule (recurring weekly or specific date e.g. target_date: "2026-11-15") with full publish accounts, recipe toggle, Shopee affiliate link, and blueprint binding.',
     {
       name: z.string().trim().min(1).max(300),
       pipeline_type: z
@@ -515,6 +517,8 @@ export function createCfStudioServer(rawRequest) {
       generation_time: z.string().regex(/^\d{2}:\d{2}$/).default('05:00'),
       publish_time: z.string().regex(/^\d{2}:\d{2}$/).default('09:00'),
       days_of_week: z.array(z.number().int().min(0).max(6)).default([0, 1, 2, 3, 4, 5, 6]),
+      schedule_mode: z.enum(['recurring', 'specific_date']).optional(),
+      target_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format YYYY-MM-DD').optional(),
       timezone: z.string().default('Asia/Jakarta'),
       auto_publish_enabled: z.boolean().default(true),
       repliz_account_ids: z.array(z.string()).optional().default([]),
@@ -532,6 +536,8 @@ export function createCfStudioServer(rawRequest) {
         blueprint_id,
         execution_mode,
         pipeline_config,
+        schedule_mode,
+        target_date,
         ...restArgs
       } = args;
 
@@ -543,8 +549,12 @@ export function createCfStudioServer(rawRequest) {
         ...(execution_mode ? { execution_mode } : {})
       };
 
+      const resolvedMode = schedule_mode || (target_date ? 'specific_date' : 'recurring');
+
       const payload = {
         ...restArgs,
+        schedule_mode: resolvedMode,
+        ...(target_date ? { target_date } : {}),
         pipeline_config_json: mergedConfig
       };
 
@@ -554,7 +564,7 @@ export function createCfStudioServer(rawRequest) {
 
   register(
     'cf_update_schedule',
-    'Update an existing recurring Auto Pipeline schedule (modify times, preset, publish accounts, recipe toggle, blueprint, or status).',
+    'Update an existing Auto Pipeline schedule (modify target_date, schedule_mode, times, preset, publish accounts, recipe toggle, blueprint, or status).',
     {
       schedule_id: z.string().trim().min(1).max(128),
       name: z.string().trim().min(1).max(300).optional(),
@@ -570,6 +580,8 @@ export function createCfStudioServer(rawRequest) {
       generation_time: z.string().regex(/^\d{2}:\d{2}$/).optional(),
       publish_time: z.string().regex(/^\d{2}:\d{2}$/).optional(),
       days_of_week: z.array(z.number().int().min(0).max(6)).optional(),
+      schedule_mode: z.enum(['recurring', 'specific_date']).optional(),
+      target_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format YYYY-MM-DD').optional(),
       timezone: z.string().optional(),
       auto_publish_enabled: z.boolean().optional(),
       repliz_account_ids: z.array(z.string()).optional(),
@@ -589,6 +601,8 @@ export function createCfStudioServer(rawRequest) {
         blueprint_id,
         execution_mode,
         pipeline_config,
+        schedule_mode,
+        target_date,
         ...restArgs
       } = args;
 
@@ -603,8 +617,12 @@ export function createCfStudioServer(rawRequest) {
         };
       }
 
+      const resolvedMode = schedule_mode || (target_date ? 'specific_date' : undefined);
+
       const payload = {
         ...restArgs,
+        ...(resolvedMode ? { schedule_mode: resolvedMode } : {}),
+        ...(target_date !== undefined ? { target_date } : {}),
         ...(pipelineConfigUpdate ? { pipeline_config_json: pipelineConfigUpdate } : {})
       };
 
