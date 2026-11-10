@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Antrean Auto-Pipeline (FIFO Queue Engine)</title>
+  <link rel="stylesheet" href="/theme.css">
+  <style>
+    /* Mengadopsi 100% Semantic CSS Design Tokens dari app/theme.css */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background-color: var(--surface);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .brand-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge-queue-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: var(--surface-raised);
+      border: 1px solid var(--border-strong);
+      padding: 6px 14px;
+      border-radius: var(--radius-lg);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .badge-queue-trigger:hover {
+      background-color: var(--surface-interactive);
+      border-color: var(--action-primary);
+    }
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--action-primary);
+      box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.7);
+      animation: pulseAnimation 2s infinite;
+    }
+    @keyframes pulseAnimation {
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.7);
+      }
+      70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 6px rgba(45, 212, 191, 0);
+      }
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(45, 212, 191, 0);
+      }
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: var(--transition);
+    }
+    .btn-primary {
+      background-color: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .btn-primary:hover {
+      background-color: var(--action-primary-hover);
+    }
+    .btn-outline {
+      background-color: var(--surface-raised);
+      border-color: var(--border-subtle);
+      color: var(--text-secondary);
+    }
+    .btn-outline:hover {
+      background-color: var(--surface-interactive);
+      color: var(--text-primary);
+    }
+    main {
+      padding: 32px 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .demo-banner {
+      background-color: var(--status-info-soft);
+      border: 1px solid var(--status-info);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .demo-banner p {
+      font-size: 0.875rem;
+      color: var(--text-primary);
+      line-height: 1.5;
+    }
+    .simulation-controls {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    /* Grid Overview */
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .overview-card {
+      background-color: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px;
+    }
+    .overview-card-header {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+    .overview-card-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .overview-card-desc {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    /* Modal Drawer Antrean */
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: var(--overlay-backdrop);
+      z-index: 50;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .drawer-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      max-width: 540px;
+      background-color: var(--surface);
+      border-left: 1px solid var(--border-subtle);
+      z-index: 51;
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+    }
+    .drawer.active {
+      transform: translateX(0);
+    }
+    .drawer-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .drawer-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .drawer-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.25rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: var(--radius-xs);
+    }
+    .drawer-close:hover {
+      color: var(--text-primary);
+      background-color: var(--surface-interactive);
+    }
+    .drawer-body {
+      padding: 24px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .section-title {
+      font-size: 0.8125rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Task Card */
+    .task-card {
+      background-color: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: var(--transition);
+    }
+    .task-card.processing {
+      border-color: var(--action-primary);
+      box-shadow: 0 0 0 1px var(--action-primary);
+    }
+    .task-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .task-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tag {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: var(--radius-xs);
+    }
+    .tag-processing {
+      background-color: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .tag-queued {
+      background-color: var(--status-warning-soft);
+      color: var(--status-warning);
+      border: 1px solid var(--status-warning);
+    }
+    .tag-completed {
+      background-color: var(--status-success-soft);
+      color: var(--status-success);
+    }
+    .task-name {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+    .task-progress {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--border-subtle);
+      border-top-color: var(--action-primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .task-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .btn-sm {
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      border-radius: var(--radius-xs);
+    }
+    .btn-danger {
+      background-color: var(--status-danger-soft);
+      color: var(--status-danger);
+      border: 1px solid var(--status-danger);
+    }
+    .btn-danger:hover {
+      background-color: var(--status-danger);
+      color: var(--text-primary);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header>
+    <div class="header-left">
+      <div class="brand-title">
+        <span>⚡ MAKNA Flow</span>
+        <span style="color: var(--text-muted); font-weight: 400;">/</span>
+        <span style="color: var(--text-secondary);">Auto-Pipeline</span>
+      </div>
+
+      <!-- Live Queue Badge -->
+      <button class="badge-queue-trigger" id="btnOpenDrawer" onclick="toggleDrawer(true)">
+        <span class="pulse-dot"></span>
+        <span id="badgeQueueText">Antrean: 1 Diproses, 2 Menunggu</span>
+      </button>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn btn-outline" onclick="toggleTheme()">🌓 Ganti Tema</button>
+      <button class="btn btn-primary" onclick="simulateAddJobs()">+ Simulasi 3 Jadwal Serentak (01:00)</button>
+    </div>
+  </header>
+
+  <!-- Main Content Body -->
+  <main>
+    <div class="demo-banner">
+      <div>
+        <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 4px; color: var(--text-primary);">
+          ✨ Simulasi Interaktif: Automated Sequential FIFO Queue Engine
+        </h3>
+        <p>
+          Pengguna kini bebas menentukan jadwal di jam yang sama (misal 3 jadwal serentak pukul 01:00 WIB). Sistem akan memasukkan jadwal ke antrean dan mengeksekusinya secara <strong>sekuensial (satu per satu)</strong> dengan jeda napas 3 detik. Tidak ada lagi pembatasan jarak 15 menit manual!
+        </p>
+      </div>
+      <div style="flex-shrink: 0; margin-left: 20px;">
+        <button class="btn btn-primary" onclick="toggleDrawer(true)">Buka Panel Antrean ➔</button>
+      </div>
+    </div>
+
+    <!-- Summary Overview Grid -->
+    <div class="overview-grid">
+      <div class="overview-card">
+        <div class="overview-card-header">Sedang Diproses</div>
+        <div class="overview-card-value" style="color: var(--action-primary);" id="statProcessing">1</div>
+        <div class="overview-card-desc">1 Task aktif di GPU/Gemini</div>
+      </div>
+      <div class="overview-card">
+        <div class="overview-card-header">Dalam Antrean (FIFO)</div>
+        <div class="overview-card-value" style="color: var(--status-warning);" id="statQueued">2</div>
+        <div class="overview-card-desc">Menunggu giliran otomatis</div>
+      </div>
+      <div class="overview-card">
+        <div class="overview-card-header">Selesai Hari Ini</div>
+        <div class="overview-card-value" style="color: var(--status-success);" id="statCompleted">7</div>
+        <div class="overview-card-desc">Semua konten terbit sesuai jadwal</div>
+      </div>
+      <div class="overview-card">
+        <div class="overview-card-header">Rata-rata Waktu Proses</div>
+        <div class="overview-card-value" style="color: var(--status-info);">42s</div>
+        <div class="overview-card-desc">Per single-pass pipeline</div>
+      </div>
+    </div>
+
+    <!-- Table Preview of Current Schedules -->
+    <div style="background-color: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 24px;">
+      <h3 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 16px;">Daftar Jadwal Auto-Pipeline (Contoh Jam Bersamaan)</h3>
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
+        <thead>
+          <tr style="border-bottom: 1px solid var(--border-subtle); text-align: left; color: var(--text-muted);">
+            <th style="padding: 10px 12px;">ID Jadwal</th>
+            <th style="padding: 10px 12px;">Brand / Nama Pipeline</th>
+            <th style="padding: 10px 12px;">Waktu Buat (Generation)</th>
+            <th style="padding: 10px 12px;">Waktu Publish</th>
+            <th style="padding: 10px 12px;">Status Eksekusi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--border-subtle);">
+            <td style="padding: 12px; font-family: var(--font-mono); font-size: 0.8125rem;">apsched_101</td>
+            <td style="padding: 12px; font-weight: 600;">Editorial - Ruang Akustik (Pagi)</td>
+            <td style="padding: 12px;"><span style="color: var(--action-primary); font-weight: 700;">01:00 WIB</span></td>
+            <td style="padding: 12px; color: var(--text-secondary);">07:15 WIB</td>
+            <td style="padding: 12px;"><span class="tag tag-processing">Sedang Berjalan (Queue #1)</span></td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border-subtle);">
+            <td style="padding: 12px; font-family: var(--font-mono); font-size: 0.8125rem;">apsched_102</td>
+            <td style="padding: 12px; font-weight: 600;">Multiplier - Dapur Botani (Pagi)</td>
+            <td style="padding: 12px;"><span style="color: var(--action-primary); font-weight: 700;">01:00 WIB</span></td>
+            <td style="padding: 12px; color: var(--text-secondary);">06:30 WIB</td>
+            <td style="padding: 12px;"><span class="tag tag-queued">Menunggu (Queue #2)</span></td>
+          </tr>
+          <tr>
+            <td style="padding: 12px; font-family: var(--font-mono); font-size: 0.8125rem;">apsched_103</td>
+            <td style="padding: 12px; font-weight: 600;">Threads Series - NutriBake Sarapan</td>
+            <td style="padding: 12px;"><span style="color: var(--action-primary); font-weight: 700;">01:00 WIB</span></td>
+            <td style="padding: 12px; color: var(--text-secondary);">08:00 WIB</td>
+            <td style="padding: 12px;"><span class="tag tag-queued">Menunggu (Queue #3)</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Slide-Over Drawer / Panel Antrean -->
+  <div class="drawer-backdrop" id="drawerBackdrop" onclick="toggleDrawer(false)"></div>
+  <aside class="drawer" id="queueDrawer">
+    <div class="drawer-header">
+      <div class="drawer-title">
+        <span>⚡ Antrean Produksi Konten</span>
+        <span class="tag tag-processing" id="drawerTagCount">3 Task</span>
+      </div>
+      <button class="drawer-close" onclick="toggleDrawer(false)">✕</button>
+    </div>
+
+    <div class="drawer-body">
+      <!-- Section 1: Sedang Berjalan -->
+      <div>
+        <div class="section-title">
+          <span>Sedang Diproses (Active)</span>
+          <span style="color: var(--action-primary);">1 Task</span>
+        </div>
+        <div class="task-card processing" id="activeTaskCard">
+          <div class="task-card-header">
+            <div class="task-meta">
+              <span class="tag tag-processing">Processing</span>
+              <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">#1 FIFO</span>
+            </div>
+            <span style="font-size: 0.75rem; color: var(--text-muted);" id="taskTimer">Berjalan 18 dtk</span>
+          </div>
+          <div class="task-name" id="activeTaskName">Editorial - Ruang Akustik - cara meredam suara bising</div>
+          <div class="task-progress">
+            <span class="spinner"></span>
+            <span id="activeTaskStage">Membuat Storyboard & Naskah Voice-Over via Gemini AI...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Dalam Antrean -->
+      <div>
+        <div class="section-title">
+          <span>Menunggu Giliran (FIFO Queue)</span>
+          <span style="color: var(--status-warning);" id="queuedCountLabel">2 Task</span>
+        </div>
+        <div id="queuedContainer" style="display: flex; flex-direction: column; gap: 12px;">
+          <!-- Card 2 -->
+          <div class="task-card" id="task2">
+            <div class="task-card-header">
+              <div class="task-meta">
+                <span class="tag tag-queued">Antrean #2</span>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Estimasi: ~45 dtk lagi</span>
+              </div>
+            </div>
+            <div class="task-name">Multiplier - Dapur Botani - 1348256653815595</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">
+              Jadwal Pukul: 01:00 WIB • Tipe: Multiplier Campaign
+            </div>
+            <div class="task-actions">
+              <button class="btn btn-outline btn-sm btn-danger" onclick="cancelJob('task2')">Batal</button>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="task-card" id="task3">
+            <div class="task-card-header">
+              <div class="task-meta">
+                <span class="tag tag-queued">Antrean #3</span>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Estimasi: ~1m 30s lagi</span>
+              </div>
+            </div>
+            <div class="task-name">Threads Series - NutriBake Sarapan Sehat (5-Part)</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">
+              Jadwal Pukul: 01:00 WIB • Tipe: Threads Series
+            </div>
+            <div class="task-actions">
+              <button class="btn btn-outline btn-sm btn-danger" onclick="cancelJob('task3')">Batal</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Riwayat Selesai -->
+      <div>
+        <div class="section-title">
+          <span>Baru Saja Selesai</span>
+          <span style="color: var(--status-success);">Hari Ini</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div class="task-card" style="opacity: 0.85;">
+            <div class="task-card-header">
+              <span class="tag tag-completed">Success</span>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">Durasi: 38 dtk</span>
+            </div>
+            <div class="task-name" style="font-size: 0.875rem;">Editorial - Solusi Thermal - insulasi atap pabrik</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">
+              ID: cmp_1794280436156 • Selesai 00:45:38 WIB
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Script Interaksi Simulasi -->
+  <script>
+    function toggleDrawer(open) {
+      const drawer = document.getElementById('queueDrawer');
+      const backdrop = document.getElementById('drawerBackdrop');
+      if (open) {
+        drawer.classList.add('active');
+        backdrop.classList.add('active');
+      } else {
+        drawer.classList.remove('active');
+        backdrop.classList.remove('active');
+      }
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+    }
+
+    function cancelJob(cardId) {
+      const el = document.getElementById(cardId);
+      if (el) {
+        el.style.opacity = '0';
+        setTimeout(() => {
+          el.remove();
+          updateStats();
+        }, 200);
+      }
+    }
+
+    function updateStats() {
+      const remaining = document.querySelectorAll('#queuedContainer .task-card').length;
+      document.getElementById('statQueued').innerText = remaining;
+      document.getElementById('queuedCountLabel').innerText = remaining + ' Task';
+      document.getElementById('drawerTagCount').innerText = (remaining + 1) + ' Task';
+      document.getElementById('badgeQueueText').innerText = `Antrean: 1 Diproses, ${remaining} Menunggu`;
+    }
+
+    // Simulasi timer progress task berjalan
+    let seconds = 18;
+    setInterval(() => {
+      seconds++;
+      const timerEl = document.getElementById('taskTimer');
+      if (timerEl) timerEl.innerText = `Berjalan ${seconds} dtk`;
+      
+      const stageEl = document.getElementById('activeTaskStage');
+      if (seconds > 25 && stageEl) {
+        stageEl.innerText = "Merender Video di Node 2 & Generate Motion Text...";
+      }
+      if (seconds > 42) {
+        seconds = 1;
+        if (stageEl) stageEl.innerText = "Membuat Storyboard & Naskah Voice-Over via Gemini AI...";
+      }
+    }, 1000);
+
+    function simulateAddJobs() {
+      const container = document.getElementById('queuedContainer');
+      const newId = 'task_' + Date.now();
+      const newCard = document.createElement('div');
+      newCard.className = 'task-card';
+      newCard.id = newId;
+      newCard.innerHTML = `
+        <div class="task-card-header">
+          <div class="task-meta">
+            <span class="tag tag-queued">Antrean Baru</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Baru Ditambahkan</span>
+          </div>
+        </div>
+        <div class="task-name">Product Showcase - GarliBee Daily Morning</div>
+        <div style="font-size: 0.75rem; color: var(--text-muted);">
+          Jadwal Pukul: 01:00 WIB • Tipe: Product Campaign
+        </div>
+        <div class="task-actions">
+          <button class="btn btn-outline btn-sm btn-danger" onclick="cancelJob('${newId}')">Batal</button>
+        </div>
+      `;
+      container.appendChild(newCard);
+      updateStats();
+      toggleDrawer(true);
+    }
+  </script>
+</body>
+</html>
+

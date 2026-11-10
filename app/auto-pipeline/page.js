@@ -4,6 +4,7 @@ import Sidebar from '../components/Sidebar';
 import ScheduleCalendarView from '../components/ScheduleCalendarView';
 import ScheduleTableView from '../components/ScheduleTableView';
 import ThreadsSeriesForm from './ThreadsSeriesForm';
+import AutoPipelineQueueDrawer from '../components/AutoPipelineQueueDrawer';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { GRID_LAYOUT_COORDINATES } from '@/lib/core/GridCoordinates';
@@ -136,6 +137,25 @@ export default function AutoPipelinePage() {
   const [isCategoryManuallySelected, setIsCategoryManuallySelected] = useState(false);
   const [recipeCount, setRecipeCount] = useState(1);
   const [executionMode, setExecutionMode] = useState('full_autopilot');
+
+  // --- ANTRIAN EKSEKUSI PIPELINE (FIFO QUEUE) ---
+  const [isQueueDrawerOpen, setIsQueueDrawerOpen] = useState(false);
+  const [queueSummary, setQueueSummary] = useState({ queued: 0, processing: 0, completed: 0, failed: 0 });
+
+  useEffect(() => {
+    const checkQueue = async () => {
+      try {
+        const res = await fetch('/api/v2/recipes/autonomous-pipeline/queue');
+        const data = await res.json();
+        if (data.success && data.summary) {
+          setQueueSummary(data.summary);
+        }
+      } catch (_) {}
+    };
+    checkQueue();
+    const interval = setInterval(checkQueue, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   // --- MULTI-CAMPAIGN STATE UNTUK TAB 1 (1-KLIK INSTAN) ---
   const [instantCampaignType, setInstantCampaignType] = useState('recipe_campaign'); // 'recipe_campaign' | 'product_campaign' | 'editorial_campaign' | 'multiplier_campaign' | 'recipe_labs'
@@ -2320,6 +2340,33 @@ export default function AutoPipelinePage() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <button
+              onClick={() => setIsQueueDrawerOpen(true)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.45rem',
+                background: 'var(--surface-raised)',
+                border: (queueSummary.queued > 0 || queueSummary.processing > 0) ? '1px solid var(--action-primary)' : '1px solid var(--border-subtle)',
+                padding: '0.25rem 0.65rem',
+                borderRadius: 'var(--radius-xs)',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                color: 'var(--text-primary)',
+                cursor: 'pointer',
+                transition: 'var(--transition)'
+              }}
+              title="Klik untuk melihat antrean produksi konten"
+            >
+              <span style={{
+                width: 7,
+                height: 7,
+                borderRadius: '50%',
+                background: queueSummary.processing > 0 ? 'var(--action-primary)' : (queueSummary.queued > 0 ? 'var(--status-warning)' : 'var(--text-muted)')
+              }}></span>
+              <span>Antrean: {queueSummary.processing > 0 ? `${queueSummary.processing} Diproses` : 'Idle'} {queueSummary.queued > 0 ? `(${queueSummary.queued} Menunggu)` : ''}</span>
+            </button>
+
             <span style={{
               fontSize: '0.72rem',
               fontWeight: 600,
@@ -7887,6 +7934,13 @@ export default function AutoPipelinePage() {
           </div>
         )}
 
+        {/* Persistent FIFO Queue Monitoring Drawer */}
+        <AutoPipelineQueueDrawer 
+          isOpen={isQueueDrawerOpen} 
+          onClose={() => setIsQueueDrawerOpen(false)}
+          queueSummary={queueSummary}
+          onQueueUpdated={setQueueSummary}
+        />
 
         </div>
       </main>

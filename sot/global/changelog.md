@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.40.26 — Arsitektur Antrean Auto-Pipeline Sequential FIFO Queue Engine (11/11/2026)
+- Implementasi Batch Snapshot & Window Tolerance pada auto-pipeline-scheduler-runner
+- Sequential FIFO execution loop dengan jeda napas 3 detik per task
+- Tabel PostgreSQL auto_pipeline_jobs dan repository antrean
+- Endpoint API antrean dan komponen AutoPipelineQueueDrawer di UI Auto-Pipeline
+- Mockup interaktif mockup_auto_pipeline_queue.html
+
 ## V2.40.25 — Auto-Pipeline Threads Series & G-Labs Diffusion Engine (10/11/2026)
 - Mesin Utas Berseri 3-5 Part Single-Pass Gemini Engine
 - Integrasi G-Labs AI Image Node 2 & Text-Only Bypass
