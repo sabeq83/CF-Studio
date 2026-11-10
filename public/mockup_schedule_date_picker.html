@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Mockup: Penjadwalan Berbasis Tanggal & Jam (Calendar Date Scheduling) — MAKNA Flow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* MAKNA Flow Universal Semantic CSS Tokens (100% Theme Compatible) */
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --surface-subtle: #121c2c;
+      --input-bg: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --shadow-modal: 0 24px 48px -12px rgba(0, 0, 0, 0.5);
+      --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f8fafc;
+      --sidebar: #f1f5f9;
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #f1f5f9;
+      --surface-hover: #e2e8f0;
+      --surface-subtle: #f8fafc;
+      --input-bg: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --border-subtle: #cbd5e1;
+      --border-strong: #94a3b8;
+      --action-primary: #0d9488;
+      --action-primary-hover: #14b8a6;
+      --on-action-primary: #ffffff;
+      --link: #0284c7;
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.12);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.12);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.12);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.12);
+      --shadow-modal: 0 20px 35px -10px rgba(0, 0, 0, 0.15);
+      --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      padding: 1.5rem;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1060px;
+    }
+
+    /* Top Bar Header */
+    .top-bar {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow-card);
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .top-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .badge-sim {
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      border: 1px solid var(--status-info);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .theme-toggle-btn {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      padding: 0.45rem 0.85rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: var(--transition);
+    }
+
+    .theme-toggle-btn:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+
+    /* Scenario Tabs */
+    .scenario-nav {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      background: var(--surface);
+      padding: 0.35rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+    }
+
+    .scenario-btn {
+      flex: 1;
+      min-width: 200px;
+      padding: 0.65rem 1rem;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.84rem;
+      font-weight: 700;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: var(--transition);
+    }
+
+    .scenario-btn.active {
+      background: var(--surface-interactive);
+      color: var(--action-primary);
+      border: 1px solid var(--border-strong);
+      box-shadow: var(--shadow-card);
+    }
+
+    /* Card Panels */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow-card);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 0.85rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Segmented Control */
+    .segmented-control {
+      display: flex;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      padding: 0.25rem;
+      border-radius: var(--radius-sm);
+      gap: 0.25rem;
+    }
+
+    .segmented-btn {
+      padding: 0.45rem 0.95rem;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: var(--transition);
+    }
+
+    .segmented-btn.active {
+      background: var(--status-info);
+      color: var(--on-action-primary);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Form Groups */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-bottom: 1.15rem;
+    }
+
+    .form-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.6rem 0.75rem;
+      color: var(--text-primary);
+      font-size: 0.86rem;
+      font-family: inherit;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--action-primary);
+      box-shadow: 0 0 0 2px var(--status-info-soft);
+    }
+
+    /* Day Pills */
+    .days-grid {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .day-pill {
+      padding: 0.5rem 0.95rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+      font-weight: 700;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .day-pill.selected {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border-color: var(--action-primary);
+    }
+
+    /* Quick Date Presets */
+    .quick-dates {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+
+    .quick-date-btn {
+      font-size: 0.74rem;
+      padding: 0.25rem 0.65rem;
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .quick-date-btn:hover {
+      background: var(--surface-hover);
+      color: var(--action-primary);
+      border-color: var(--action-primary);
+    }
+
+    /* Notice Box */
+    .notice-box {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1rem;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+      display: flex;
+      gap: 0.65rem;
+      align-items: flex-start;
+    }
+
+    /* Action Buttons */
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      padding: 0.7rem 1.4rem;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: var(--transition);
+    }
+
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+    }
+
+    .btn-secondary {
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      padding: 0.7rem 1.2rem;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: var(--transition);
+    }
+
+    .btn-secondary:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+
+    /* Table Styles */
+    .table-container {
+      overflow-x: auto;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+      text-align: left;
+    }
+
+    th {
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+      font-weight: 700;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      vertical-align: middle;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: var(--surface-hover);
+    }
+
+    .badge-mode {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .badge-recurring {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid var(--status-info);
+    }
+
+    .badge-specific-date {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border: 1px solid var(--status-warning);
+    }
+
+    .badge-status-active {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+    }
+
+    .badge-status-completed {
+      background: var(--surface-interactive);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* Code Block */
+    .code-block {
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--link);
+      overflow-x: auto;
+      line-height: 1.5;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--surface-raised);
+      border: 1.5px solid var(--action-primary);
+      box-shadow: var(--shadow-modal);
+      padding: 0.85rem 1.25rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      transform: translateY(120%);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 9999;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="top-title">
+      <span style="font-size: 1.4rem;">📅</span>
+      <div>
+        <h1 style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">
+          Simulasi Mockup: Penjadwalan Berbasis Tanggal & Jam
+        </h1>
+        <p style="font-size: 0.78rem; color: var(--text-muted);">
+          Eksperimen Interaktif: Opsi Jadwal Rutin Mingguan vs Tanggal Spesifik (One-Time) & Stagger Kalender
+        </p>
+      </div>
+      <span class="badge-sim">Prototype V1</span>
+    </div>
+
+    <div style="display: flex; gap: 0.65rem; align-items: center;">
+      <button class="theme-toggle-btn" onclick="toggleTheme()">
+        <span id="themeIcon">☀️</span>
+        <span id="themeLabel">Light Mode</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Scenario Navigation -->
+  <div class="scenario-nav">
+    <button class="scenario-btn active" onclick="switchScenario('single')" id="nav-single">
+      <span>1️⃣</span> Modal Jadwal Tunggal (Single Schedule)
+    </button>
+    <button class="scenario-btn" onclick="switchScenario('batch')" id="nav-batch">
+      <span>2️⃣</span> Batch Multi-Keyword + Stagger Tanggal
+    </button>
+    <button class="scenario-btn" onclick="switchScenario('table')" id="nav-table">
+      <span>3️⃣</span> Monitoring Daftar Jadwal & Eksekusi
+    </button>
+  </div>
+
+  <!-- ==================== SCENARIO 1: SINGLE SCHEDULE MODAL ==================== -->
+  <div id="scenario-single" class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <span>⏰</span>
+        <span>Konfigurasi Waktu & Mode Penjadwalan Pipeline</span>
+      </div>
+      <span style="font-size: 0.76rem; color: var(--text-muted);">
+        Menentukan kapan AI memproduksi video dan Repliz mempublikasikannya
+      </span>
+    </div>
+
+    <!-- Segmented Control Mode Jadwal -->
+    <div class="form-group">
+      <div class="form-label">
+        <span>Pilih Mode Penjadwalan:</span>
+        <span style="font-size: 0.74rem; color: var(--text-muted);">
+          Kolom DB: <code>schedule_mode</code>
+        </span>
+      </div>
+      <div class="segmented-control" style="max-width: 440px;">
+        <button type="button" class="segmented-btn active" id="btn-mode-recurring" onclick="setScheduleMode('recurring')">
+          <span>🔄</span> Rutin Mingguan (Hari)
+        </button>
+        <button type="button" class="segmented-btn" id="btn-mode-specific" onclick="setScheduleMode('specific_date')">
+          <span>📅</span> Tanggal Spesifik (Sekali Jalan)
+        </button>
+      </div>
+    </div>
+
+    <!-- Mode 1: Recurring (Pilih Hari) -->
+    <div id="panel-recurring" class="form-group" style="background: var(--surface-raised); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+      <div class="form-label" style="margin-bottom: 0.5rem;">
+        <span>Hari Rutin Eksekusi:</span>
+        <span style="font-size: 0.72rem; color: var(--status-info);" id="recurring-summary">
+          Aktif setiap: Sen, Sel, Rab, Kam, Jum, Sab, Min
+        </span>
+      </div>
+      <div class="days-grid">
+        <button type="button" class="day-pill selected" onclick="toggleDay(this, 1)">Sen</button>
+        <button type="button" class="day-pill selected" onclick="toggleDay(this, 2)">Sel</button>
+        <button type="button" class="day-pill selected" onclick="toggleDay(this, 3)">Rab</button>
+        <button type="button" class="day-pill selected" onclick="toggleDay(this, 4)">Kam</button>
+        <button type="button" class="day-pill selected" onclick="toggleDay(this, 5)">Jum</button>
+        <button type="button" class="day-pill selected" onclick="toggleDay(this, 6)">Sab</button>
+        <button type="button" class="day-pill selected" onclick="toggleDay(this, 0)">Min</button>
+      </div>
+      <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.65rem;">
+        💡 <strong>Karakteristik Rutin:</strong> Pipeline akan terus dieksekusi berulang setiap minggu pada hari-hari yang Anda pilih di atas. Status jadwal tetap <code>active</code>.
+      </p>
+    </div>
+
+    <!-- Mode 2: Specific Date (Date Picker) -->
+    <div id="panel-specific" class="form-group" style="display: none; background: var(--surface-raised); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-strong);">
+      <div class="form-label" style="margin-bottom: 0.5rem;">
+        <span>Pilih Tanggal Kalender Eksekusi:</span>
+        <span style="font-size: 0.72rem; font-weight: 700; background: var(--status-warning-soft); color: var(--status-warning); padding: 0.15rem 0.5rem; border-radius: 9999px;">
+          One-Time Execution 🎯
+        </span>
+      </div>
+      <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+        <input type="date" id="input-target-date" class="form-input" style="max-width: 240px; font-weight: 700;" value="2026-11-15">
+        <div class="quick-dates">
+          <button type="button" class="quick-date-btn" onclick="setQuickDate(0)">Hari Ini</button>
+          <button type="button" class="quick-date-btn" onclick="setQuickDate(1)">Besok</button>
+          <button type="button" class="quick-date-btn" onclick="setQuickDate(3)">+3 Hari</button>
+          <button type="button" class="quick-date-btn" onclick="setQuickDate(7)">+7 Hari</button>
+          <button type="button" class="quick-date-btn" onclick="setQuickDate(14)">+14 Hari</button>
+        </div>
+      </div>
+      <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.65rem;">
+        💡 <strong>Karakteristik Tanggal Spesifik:</strong> Pipeline hanya dieksekusi <strong>1 kali</strong> pada tanggal tersebut. Begitu kampanye selesai diproduksi dan disubmit ke Repliz, status jadwal otomatis berubah menjadi <span class="badge-mode badge-status-completed">Selesai (Completed)</span> sehingga tidak terulang lagi.
+      </p>
+    </div>
+
+    <!-- Jam Generate & Publish Grid -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+      <div class="form-group">
+        <label class="form-label">
+          <span>Jam Produksi AI (Generate Time):</span>
+        </label>
+        <input type="time" id="input-gen-time" class="form-input" value="05:00">
+        <span style="font-size: 0.72rem; color: var(--text-muted);">Waktu AI merender video & DNA naskah</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">
+          <span>Jam Publish Repliz (Publish Time):</span>
+        </label>
+        <input type="time" id="input-pub-time" class="form-input" value="09:00">
+        <span style="font-size: 0.72rem; color: var(--text-muted);" id="pub-time-note">Waktu video dipublikasikan ke sosmed</span>
+      </div>
+    </div>
+
+    <!-- Live Preview Notice Box -->
+    <div class="notice-box" style="margin-top: 0.5rem; margin-bottom: 1.25rem;">
+      <span style="font-size: 1.1rem;">🤖</span>
+      <div id="live-schedule-preview">
+        <strong>Ringkasan Jadwal:</strong> Mode <strong>Rutin Mingguan</strong> setiap hari <strong>Sen, Sel, Rab, Kam, Jum, Sab, Min</strong> pada jam <strong>05:00 WIB</strong> (Publish otomatis jam 09:00 WIB).
+      </div>
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+      <button class="btn-primary" onclick="simulateSaveSingleSchedule()">
+        <span>💾</span> Simpan Konfigurasi Jadwal
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== SCENARIO 2: BATCH KEYWORD + DATE STAGGER ==================== -->
+  <div id="scenario-batch" class="card" style="display: none;">
+    <div class="card-header">
+      <div class="card-title">
+        <span>🚀</span>
+        <span>Batch Multi-Keyword dengan Auto-Stagger Kalender (+1 Hari)</span>
+      </div>
+      <span style="font-size: 0.76rem; color: var(--text-muted);">
+        Opsi A: Otomatis mendistribusikan daftar kata kunci ke tanggal berurutan
+      </span>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">
+        <span>Daftar Kata Kunci Editorial (1 baris = 1 jadwal mandiri):</span>
+        <span style="font-size: 0.72rem; font-weight: 700; background: var(--status-info-soft); color: var(--status-info); padding: 0.15rem 0.55rem; border-radius: 9999px;" id="batch-kw-count">
+          5 Kata Kunci
+        </span>
+      </label>
+      <textarea id="batch-keywords-textarea" class="form-textarea" rows="5" oninput="updateBatchStaggerPreview()" style="font-family: var(--font-mono); font-size: 0.82rem;">peredam suara studio podcast murah
+cara hilangkan dengung kamar tidur tanpa ribet
+perbedaan rockwool vs glasswool untuk peredam
+rekomendasi pintu kedap suara minimalis
+trik pasang busa akustik telur yang benar</textarea>
+    </div>
+
+    <!-- Mode Penjadwalan Batch -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; background: var(--surface-raised); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-bottom: 1.25rem;">
+      <div class="form-group" style="margin-bottom: 0;">
+        <label class="form-label">Tanggal Mulai Penayangan (Start Date):</label>
+        <input type="date" id="batch-start-date" class="form-input" value="2026-11-15" onchange="updateBatchStaggerPreview()">
+      </div>
+      <div class="form-group" style="margin-bottom: 0; justify-content: center;">
+        <label class="form-label">Opsi Distribusi Kalender:</label>
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.4rem;">
+          <input type="checkbox" id="chk-auto-stagger-date" checked onchange="updateBatchStaggerPreview()" style="accent-color: var(--action-primary); cursor: pointer; transform: scale(1.15);">
+          <label for="chk-auto-stagger-date" style="font-size: 0.82rem; font-weight: 700; color: var(--text-primary); cursor: pointer;">
+            Auto-Stagger Tanggal (+1 Hari per Kata Kunci)
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Preview Pemetaan Batch -->
+    <div class="form-group">
+      <div class="form-label" style="margin-bottom: 0.4rem;">
+        <span>Pratinjau Hasil Pemetaan Jadwal Mandiri yang Akan Terbentuk:</span>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Kata Kunci Target</th>
+              <th>Mode Jadwal</th>
+              <th>Tanggal Eksekusi</th>
+              <th>Jam AI</th>
+              <th>Jam Publish</th>
+              <th>Pilar Brand</th>
+            </tr>
+          </thead>
+          <tbody id="batch-preview-tbody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; flex-wrap: wrap; gap: 0.75rem;">
+      <div style="font-size: 0.78rem; color: var(--text-secondary);">
+        ⚡ Sekali klik akan menghasilkan <strong>5 baris jadwal mandiri</strong> di database tanpa saling tumpang tindih.
+      </div>
+      <button class="btn-primary" onclick="simulateSaveBatchSchedules()">
+        <span>🚀</span> Buat 5 Jadwal Kalender Batch
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== SCENARIO 3: SCHEDULES TABLE & EXECUTION ==================== -->
+  <div id="scenario-table" class="card" style="display: none;">
+    <div class="card-header">
+      <div class="card-title">
+        <span>📋</span>
+        <span>Monitoring Jadwal Auto Pipeline & Uji Eksekusi</span>
+      </div>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <select id="filter-schedule-mode" class="form-select" style="font-size: 0.78rem; padding: 0.35rem 0.65rem;" onchange="renderScheduleTable()">
+          <option value="all">Semua Mode Jadwal</option>
+          <option value="recurring">🔄 Rutin Mingguan</option>
+          <option value="specific_date">📅 Tanggal Spesifik</option>
+        </select>
+        <button class="btn-secondary" style="font-size: 0.78rem; padding: 0.35rem 0.75rem;" onclick="resetDemoData()">
+          🔄 Reset Data Demo
+        </button>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Nama Jadwal / Topik</th>
+            <th>Tipe Pipeline</th>
+            <th>Mode</th>
+            <th>Jadwal Pelaksanaan</th>
+            <th>Jam</th>
+            <th>Status</th>
+            <th>Aksi Simulasi</th>
+          </tr>
+        </thead>
+        <tbody id="schedules-tbody">
+          <!-- Dynamically populated -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Detail Payload Inspector -->
+    <div style="margin-top: 1.25rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+        <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary);">
+          🔍 Inspeksi Payload Database (JSON Record):
+        </span>
+        <span style="font-size: 0.72rem; color: var(--text-muted);">
+          Memperlihatkan kolom <code>schedule_mode</code> dan <code>target_date</code>
+        </span>
+      </div>
+      <pre class="code-block" id="json-inspector">// Klik tombol "Inspeksi" pada baris jadwal di atas untuk melihat data mentah DB</pre>
+    </div>
+  </div>
+
+  <!-- Technical Spec Summary Box -->
+  <div class="card" style="border-left: 4px solid var(--action-primary);">
+    <h3 style="font-size: 0.92rem; font-weight: 800; color: var(--action-primary); margin-bottom: 0.5rem;">
+      💡 Ringkasan Arsitektur Usulan Penjadwalan Kalender
+    </h3>
+    <ul style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.6; padding-left: 1.2rem;">
+      <li><strong>Dual-Mode Engine:</strong> Mendukung <code>schedule_mode: 'recurring'</code> (berulang setiap hari terpilih) dan <code>schedule_mode: 'specific_date'</code> (hanya berjalan pada <code>target_date</code>).</li>
+      <li><strong>Automatic Auto-Completion:</strong> Untuk mode <code>specific_date</code>, runner otomatis mengubah status menjadi <code>completed</code> setelah video berhasil digenerate dan dikirim ke Repliz sehingga tidak memicu eksekusi ganda.</li>
+      <li><strong>Auto-Stagger Kalender:</strong> Fitur batch pada Opsi A mendistribusikan <em>N</em> kata kunci ke <em>N</em> tanggal berurutan secara otomatis, menghemat waktu perencanaan kampanye hingga 90%.</li>
+      <li><strong>100% Backward Compatible:</strong> Kolom baru <code>schedule_mode</code> diberi nilai bawaan <code>'recurring'</code> sehingga semua jadwal lama tetap berjalan normal tanpa gangguan.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Floating Toast Notification -->
+<div id="toast" class="toast">
+  <span id="toastIcon">✅</span>
+  <span id="toastMessage">Jadwal berhasil disimpan!</span>
+</div>
+
+<script>
+  // State Simulation
+  let currentScheduleMode = 'recurring';
+  let selectedDays = [1, 2, 3, 4, 5, 6, 0];
+  
+  let schedulesData = [
+    {
+      id: 'apsched_101',
+      name: 'Resep Masakan Rumahan Harian',
+      pipeline_type: 'recipe_campaign',
+      schedule_mode: 'recurring',
+      days_of_week: [1, 2, 3, 4, 5],
+      target_date: null,
+      generation_time: '05:00',
+      publish_time: '09:00',
+      status: 'active',
+      topic: 'Resep menu praktis sehat',
+      use_brand_pillars: true
+    },
+    {
+      id: 'apsched_102',
+      name: '[Keyword Editorial] Peredam Suara Podcast',
+      pipeline_type: 'editorial_campaign',
+      schedule_mode: 'specific_date',
+      days_of_week: [],
+      target_date: '2026-11-15',
+      generation_time: '05:00',
+      publish_time: '09:00',
+      status: 'active',
+      topic: 'peredam suara studio podcast murah',
+      use_brand_pillars: false
+    },
+    {
+      id: 'apsched_103',
+      name: '[Promo] Flash Sale Soundproofing 11.11',
+      pipeline_type: 'product_campaign',
+      schedule_mode: 'specific_date',
+      days_of_week: [],
+      target_date: '2026-11-11',
+      generation_time: '06:00',
+      publish_time: '10:00',
+      status: 'completed',
+      topic: 'Promo Diskon Paket Peredam Akustik',
+      use_brand_pillars: false
+    }
+  ];
+
+  // Theme Toggle
+  function toggleTheme() {
+    const html = document.documentElement;
+    const currentTheme = html.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', newTheme);
+    document.getElementById('themeIcon').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+    document.getElementById('themeLabel').textContent = newTheme === 'dark' ? 'Light Mode' : 'Dark Mode';
+  }
+
+  // Switch Scenario
+  function switchScenario(scenarioId) {
+    document.querySelectorAll('.scenario-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`nav-${scenarioId}`).classList.add('active');
+
+    document.getElementById('scenario-single').style.display = scenarioId === 'single' ? 'block' : 'none';
+    document.getElementById('scenario-batch').style.display = scenarioId === 'batch' ? 'block' : 'none';
+    document.getElementById('scenario-table').style.display = scenarioId === 'table' ? 'block' : 'none';
+
+    if (scenarioId === 'batch') {
+      updateBatchStaggerPreview();
+    } else if (scenarioId === 'table') {
+      renderScheduleTable();
+    }
+  }
+
+  // Set Schedule Mode (Recurring vs Specific Date)
+  function setScheduleMode(mode) {
+    currentScheduleMode = mode;
+    document.getElementById('btn-mode-recurring').classList.toggle('active', mode === 'recurring');
+    document.getElementById('btn-mode-specific').classList.toggle('active', mode === 'specific_date');
+
+    document.getElementById('panel-recurring').style.display = mode === 'recurring' ? 'block' : 'none';
+    document.getElementById('panel-specific').style.display = mode === 'specific_date' ? 'block' : 'none';
+
+    updateSingleLivePreview();
+  }
+
+  // Day Toggle in Recurring Mode
+  function toggleDay(btn, dayIdx) {
+    btn.classList.toggle('selected');
+    if (selectedDays.includes(dayIdx)) {
+      selectedDays = selectedDays.filter(d => d !== dayIdx);
+    } else {
+      selectedDays.push(dayIdx);
+      selectedDays.sort((a, b) => a - b);
+    }
+
+    const dayLabels = { 1: 'Sen', 2: 'Sel', 3: 'Rab', 4: 'Kam', 5: 'Jum', 6: 'Sab', 0: 'Min' };
+    const labelList = selectedDays.map(d => dayLabels[d]).join(', ');
+    document.getElementById('recurring-summary').textContent = selectedDays.length > 0 
+      ? `Aktif setiap: ${labelList}`
+      : '⚠️ Belum ada hari yang dipilih';
+
+    updateSingleLivePreview();
+  }
+
+  // Set Quick Date
+  function setQuickDate(daysToAdd) {
+    const d = new Date();
+    d.setDate(d.getDate() + daysToAdd);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    document.getElementById('input-target-date').value = `${yyyy}-${mm}-${dd}`;
+    updateSingleLivePreview();
+  }
+
+  // Update Single Live Preview
+  function updateSingleLivePreview() {
+    const genTime = document.getElementById('input-gen-time').value;
+    const pubTime = document.getElementById('input-pub-time').value;
+    const previewEl = document.getElementById('live-schedule-preview');
+
+    if (currentScheduleMode === 'recurring') {
+      const dayLabels = { 1: 'Sen', 2: 'Sel', 3: 'Rab', 4: 'Kam', 5: 'Jum', 6: 'Sab', 0: 'Min' };
+      const labelList = selectedDays.map(d => dayLabels[d]).join(', ') || 'Tidak ada hari';
+      previewEl.innerHTML = `<strong>Ringkasan Jadwal:</strong> Mode <strong>Rutin Mingguan</strong> setiap hari <strong>${labelList}</strong> pada jam <strong>${genTime} WIB</strong> (Publish otomatis jam ${pubTime} WIB).`;
+    } else {
+      const targetDate = document.getElementById('input-target-date').value || '2026-11-15';
+      previewEl.innerHTML = `<strong>Ringkasan Jadwal:</strong> Mode <strong>Tanggal Spesifik (One-Time)</strong> pada tanggal <strong style="color: var(--status-warning);">${targetDate}</strong> jam <strong>${genTime} WIB</strong>. Setelah dipublish jam ${pubTime} WIB, status jadwal otomatis diset <em>Selesai</em>.`;
+    }
+  }
+
+  // Simulate Save Single Schedule
+  function simulateSaveSingleSchedule() {
+    const genTime = document.getElementById('input-gen-time').value;
+    const pubTime = document.getElementById('input-pub-time').value;
+    const targetDate = document.getElementById('input-target-date').value;
+
+    const newSched = {
+      id: `apsched_${Date.now().toString().slice(-4)}`,
+      name: currentScheduleMode === 'recurring' ? 'Jadwal Rutin Mingguan Baru' : `Jadwal Tanggal Spesifik (${targetDate})`,
+      pipeline_type: 'editorial_campaign',
+      schedule_mode: currentScheduleMode,
+      days_of_week: currentScheduleMode === 'recurring' ? [...selectedDays] : [],
+      target_date: currentScheduleMode === 'specific_date' ? targetDate : null,
+      generation_time: genTime,
+      publish_time: pubTime,
+      status: 'active',
+      topic: 'Ide konten kreatif baru',
+      use_brand_pillars: false
+    };
+
+    schedulesData.unshift(newSched);
+    showToast(`✅ Jadwal mode ${currentScheduleMode === 'recurring' ? 'Rutin Mingguan' : 'Tanggal Kalender'} berhasil disimpan!`);
+    inspectJson(newSched);
+  }
+
+  // Update Batch Stagger Preview
+  function updateBatchStaggerPreview() {
+    const text = document.getElementById('batch-keywords-textarea').value;
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    document.getElementById('batch-kw-count').textContent = `${lines.length} Kata Kunci`;
+
+    const startDateStr = document.getElementById('batch-start-date').value || '2026-11-15';
+    const isStagger = document.getElementById('chk-auto-stagger-date').checked;
+    const tbody = document.getElementById('batch-preview-tbody');
+    tbody.innerHTML = '';
+
+    const startDate = new Date(startDateStr);
+
+    lines.forEach((kw, idx) => {
+      let targetDate = new Date(startDate);
+      if (isStagger) {
+        targetDate.setDate(targetDate.getDate() + idx);
+      }
+      const yyyy = targetDate.getFullYear();
+      const mm = String(targetDate.getMonth() + 1).padStart(2, '0');
+      const dd = String(targetDate.getDate()).padStart(2, '0');
+      const formattedDate = `${yyyy}-${mm}-${dd}`;
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-weight: 700; color: var(--text-muted);">${idx + 1}</td>
+        <td style="font-weight: 700; color: var(--text-primary);">${kw}</td>
+        <td><span class="badge-mode badge-specific-date">📅 Tanggal Spesifik</span></td>
+        <td style="font-family: var(--font-mono); font-weight: 700; color: var(--action-primary);">${formattedDate}</td>
+        <td>05:00</td>
+        <td>09:00</td>
+        <td><span style="font-size: 0.72rem; color: var(--status-warning); font-weight: 700;">OFF ⚠️</span></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Simulate Save Batch Schedules
+  function simulateSaveBatchSchedules() {
+    const text = document.getElementById('batch-keywords-textarea').value;
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    const startDateStr = document.getElementById('batch-start-date').value || '2026-11-15';
+    const isStagger = document.getElementById('chk-auto-stagger-date').checked;
+    const startDate = new Date(startDateStr);
+
+    lines.forEach((kw, idx) => {
+      let targetDate = new Date(startDate);
+      if (isStagger) {
+        targetDate.setDate(targetDate.getDate() + idx);
+      }
+      const yyyy = targetDate.getFullYear();
+      const mm = String(targetDate.getMonth() + 1).padStart(2, '0');
+      const dd = String(targetDate.getDate()).padStart(2, '0');
+
+      schedulesData.push({
+        id: `apsched_batch_${Date.now().toString().slice(-4)}_${idx + 1}`,
+        name: `[Keyword Editorial] ${kw}`,
+        pipeline_type: 'editorial_campaign',
+        schedule_mode: 'specific_date',
+        days_of_week: [],
+        target_date: `${yyyy}-${mm}-${dd}`,
+        generation_time: '05:00',
+        publish_time: '09:00',
+        status: 'active',
+        topic: kw,
+        use_brand_pillars: false
+      });
+    });
+
+    showToast(`🚀 Berhasil membuat ${lines.length} baris jadwal kalender batch!`);
+    switchScenario('table');
+  }
+
+  // Render Schedule Table
+  function renderScheduleTable() {
+    const filter = document.getElementById('filter-schedule-mode').value;
+    const tbody = document.getElementById('schedules-tbody');
+    tbody.innerHTML = '';
+
+    const filtered = schedulesData.filter(s => {
+      if (filter === 'all') return true;
+      return s.schedule_mode === filter;
+    });
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Tidak ada jadwal pada filter ini.</td></tr>`;
+      return;
+    }
+
+    const dayLabels = { 1: 'Sen', 2: 'Sel', 3: 'Rab', 4: 'Kam', 5: 'Jum', 6: 'Sab', 0: 'Min' };
+
+    filtered.forEach(s => {
+      const isDate = s.schedule_mode === 'specific_date';
+      const scheduleDisplay = isDate
+        ? `<span style="font-family: var(--font-mono); font-weight: 700; color: var(--action-primary);">📅 ${s.target_date}</span>`
+        : `<span>🔄 ${(s.days_of_week || []).map(d => dayLabels[d]).join(', ') || 'Tiap Hari'}</span>`;
+
+      const modeBadge = isDate
+        ? `<span class="badge-mode badge-specific-date">Tanggal Spesifik</span>`
+        : `<span class="badge-mode badge-recurring">Rutin Mingguan</span>`;
+
+      const statusBadge = s.status === 'completed'
+        ? `<span class="badge-mode badge-status-completed">Selesai ✅</span>`
+        : `<span class="badge-mode badge-status-active">Aktif 🟢</span>`;
+
+      const actionButton = isDate && s.status === 'active'
+        ? `<button class="quick-date-btn" style="color: var(--status-success); border-color: var(--status-success);" onclick="simulateRunSchedule('${s.id}')">▶️ Uji Eksekusi</button>`
+        : `<span style="font-size: 0.74rem; color: var(--text-muted);">-</span>`;
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>
+          <div style="font-weight: 700; color: var(--text-primary);">${s.name}</div>
+          <div style="font-size: 0.74rem; color: var(--text-muted);">${s.topic}</div>
+        </td>
+        <td><span style="font-size: 0.76rem; background: var(--surface-interactive); padding: 0.2rem 0.45rem; border-radius: var(--radius-xs);">${s.pipeline_type}</span></td>
+        <td>${modeBadge}</td>
+        <td>${scheduleDisplay}</td>
+        <td style="font-family: var(--font-mono); font-size: 0.78rem;">${s.generation_time} ➔ ${s.publish_time}</td>
+        <td>${statusBadge}</td>
+        <td>
+          <div style="display: flex; gap: 0.4rem; align-items: center;">
+            ${actionButton}
+            <button class="quick-date-btn" onclick='inspectJson(${JSON.stringify(s)})'>🔍 Data</button>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Simulate Run Schedule
+  function simulateRunSchedule(id) {
+    const s = schedulesData.find(item => item.id === id);
+    if (!s) return;
+    s.status = 'completed';
+    s.last_run_at = new Date().toISOString();
+    s.last_campaign_id = `cmp_sim_${Date.now()}`;
+    showToast(`🎯 Pipeline dieksekusi! Status jadwal "${s.name}" otomatis berubah menjadi 'Selesai' (Completed).`);
+    renderScheduleTable();
+    inspectJson(s);
+  }
+
+  // Inspect JSON
+  function inspectJson(obj) {
+    document.getElementById('json-inspector').textContent = JSON.stringify(obj, null, 2);
+  }
+
+  // Reset Demo Data
+  function resetDemoData() {
+    location.reload();
+  }
+
+  // Show Toast
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toastMessage').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => {
+      t.classList.remove('show');
+    }, 3200);
+  }
+
+  // Init
+  document.getElementById('input-gen-time').addEventListener('input', updateSingleLivePreview);
+  document.getElementById('input-pub-time').addEventListener('input', updateSingleLivePreview);
+  document.getElementById('input-target-date').addEventListener('change', updateSingleLivePreview);
+  updateSingleLivePreview();
+  updateBatchStaggerPreview();
+</script>
+
+</body>
+</html>
+
