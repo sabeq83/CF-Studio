@@ -370,12 +370,12 @@ export function ThreadsAffiliateRadar({ brandId, brandName }) {
             justifyContent: 'center',
             fontSize: '24px'
           }}>
-            🎯
+            🧵
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-                Threads Affiliate Radar
+                Threads Labs
               </h1>
               <span style={{
                 display: 'inline-flex',
@@ -392,7 +392,7 @@ export function ThreadsAffiliateRadar({ brandId, brandName }) {
               </span>
             </div>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
-              Memantau keluhan & pertanyaan netizen di Threads untuk rekomendasi produk Shopee secara semi-autopilot.
+              Laboratorium Social Selling & Autonomous Reply Engine via Repliz API untuk rekomendasi produk Shopee.
             </p>
           </div>
         </div>
@@ -654,7 +654,7 @@ export function ThreadsAffiliateRadar({ brandId, brandName }) {
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <strong style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>
-                  Penjadwalan Pencarian Otomatis (Cron Radar)
+                  Penjadwalan Pencarian Otomatis (Threads Labs Cron)
                 </strong>
                 <span style={{
                   padding: '3px 8px',

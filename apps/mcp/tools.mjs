@@ -991,6 +991,86 @@ export function createCfStudioServer(rawRequest) {
     () => request('/api/v2/dashboard/stats')
   );
 
+  // ==========================================
+  // THREADS LABS (SOCIAL SELLING & REPLIZ API)
+  // ==========================================
+
+  register(
+    'cf_threads_labs_scan',
+    'Scan Threads content via Repliz API based on active keywords and trigger AI Shopee affiliate product matching.',
+    {},
+    false,
+    () => request('/api/v2/threads-radar/scan', { method: 'POST' })
+  );
+
+  register(
+    'cf_threads_labs_list_opportunities',
+    'List discovered user posts/complaints from Threads with AI matched Shopee products and natural reply drafts.',
+    {
+      status: z.enum(['all', 'ready', 'posted']).default('all'),
+      limit: z.number().int().min(1).max(50).default(20)
+    },
+    true,
+    args => request(`/api/v2/threads-radar/opportunities?status=${args.status}&limit=${args.limit}`)
+  );
+
+  register(
+    'cf_threads_labs_approve_reply',
+    'Approve and post an AI reply to Threads via Repliz API with product photo and affiliate link.',
+    {
+      draft_id: z.string().trim().min(1),
+      custom_reply_text: z.string().optional()
+    },
+    false,
+    ({ draft_id, custom_reply_text }) =>
+      request(`/api/v2/threads-radar/reply/${encodeURIComponent(draft_id)}`, {
+        method: 'POST',
+        body: custom_reply_text ? { customText: custom_reply_text } : {}
+      })
+  );
+
+  register(
+    'cf_threads_labs_manage_keywords',
+    'Manage Threads Labs monitoring keywords (list, add, or delete).',
+    {
+      action: z.enum(['list', 'add', 'delete']).default('list'),
+      keyword: z.string().optional(),
+      id: z.string().optional()
+    },
+    false,
+    async args => {
+      if (args.action === 'add') {
+        return request('/api/v2/threads-radar/keywords', { method: 'POST', body: { keyword: args.keyword } });
+      }
+      if (args.action === 'delete') {
+        return request(`/api/v2/threads-radar/keywords?id=${encodeURIComponent(args.id)}`, { method: 'DELETE' });
+      }
+      return request('/api/v2/threads-radar/keywords');
+    }
+  );
+
+  register(
+    'cf_threads_labs_get_schedule',
+    'Get current automated Threads Labs scanning schedule, active days (Senin-Minggu), hours, and next execution time.',
+    {},
+    true,
+    () => request('/api/v2/threads-radar/schedule')
+  );
+
+  register(
+    'cf_threads_labs_update_schedule',
+    'Update automated scanning schedule for Threads Labs (active days, specific hours or interval).',
+    {
+      is_active: z.boolean().optional(),
+      schedule_mode: z.enum(['specific', 'interval']).optional(),
+      active_days: z.array(z.string()).optional(),
+      specific_hours: z.array(z.string()).optional(),
+      interval_hours: z.number().int().optional()
+    },
+    false,
+    body => request('/api/v2/threads-radar/schedule', { method: 'POST', body })
+  );
+
   return server;
 }
 

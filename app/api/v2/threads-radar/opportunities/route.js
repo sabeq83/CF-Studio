@@ -41,3 +41,4 @@ export async function GET(req) {
     }, { status: 500 });
   }
 }
+

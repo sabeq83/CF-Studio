@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.40.23 — Rilis Modul Threads Labs & Integrasi 6 Tools MCP Server (10/11/2026)
+- Pembentukan menu dan halaman mandiri Threads Labs di Sidebar (/threads-labs)
+- Integrasi 6 tool MCP Server cf_threads_labs_* untuk kontrol AI Agent via chat
+- Penyelarasan branding Threads Labs di antarmuka Affiliate Studio dan mockup
+
 ## V2.40.22 — Fitur Threads Affiliate Radar & Scheduled Scanner Repliz (10/11/2026)
 - Implementasi modul Threads Affiliate Radar di Affiliate Studio
 - Penjadwalan pencarian kata kunci otomatis (pilihan hari & jam WIB) via Repliz API
