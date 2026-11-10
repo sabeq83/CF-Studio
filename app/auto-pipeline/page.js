@@ -1,6 +1,7 @@
 'use client';
 
 import Sidebar from '../components/Sidebar';
+import ScheduleCalendarView from '../components/ScheduleCalendarView';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { GRID_LAYOUT_COORDINATES } from '@/lib/core/GridCoordinates';
@@ -235,6 +236,12 @@ export default function AutoPipelinePage() {
   });
   const [schedStaggerCalendar, setSchedStaggerCalendar] = useState(true);
   const [scheduleModeFilter, setScheduleModeFilter] = useState('all'); // 'all' | 'recurring' | 'specific_date'
+  const [scheduleViewMode, setScheduleViewMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('cfstudio_schedule_view_mode') || 'list';
+    }
+    return 'list';
+  });
 
   // Repliz Multi-Platform Search & Filter State
   const [replizSearchQuery, setReplizSearchQuery] = useState('');
@@ -1188,7 +1195,7 @@ export default function AutoPipelinePage() {
     });
   }
 
-  function openCreateScheduleModal() {
+  function openCreateScheduleModal(initialTargetDate = null) {
     const currentBrand = brands.find(b => b.id === selectedBrandId) || brands[0];
     const initialTopic = topic || 'Air fryer crispy snack finger foods';
     setEditingSchedule(null);
@@ -1207,10 +1214,17 @@ export default function AutoPipelinePage() {
     setSchedProductPromoMode('single');
     setSchedProductAngleList('');
     setSchedDays([0, 1, 2, 3, 4, 5, 6]);
-    setSchedMode('recurring');
-    const defaultDate = new Date();
-    defaultDate.setDate(defaultDate.getDate() + 1);
-    setSchedTargetDate(defaultDate.toISOString().slice(0, 10));
+
+    const hasValidDate = typeof initialTargetDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(initialTargetDate);
+    if (hasValidDate) {
+      setSchedMode('specific_date');
+      setSchedTargetDate(initialTargetDate);
+    } else {
+      setSchedMode('recurring');
+      const defaultDate = new Date();
+      defaultDate.setDate(defaultDate.getDate() + 1);
+      setSchedTargetDate(defaultDate.toISOString().slice(0, 10));
+    }
     setSchedStaggerCalendar(true);
     setSchedAutoPublish(true);
     setSchedPostAffiliateLink(true);
@@ -5344,13 +5358,82 @@ export default function AutoPipelinePage() {
                     {tab.label}
                   </button>
                 ))}
+
+                {/* View Switcher Segmented Control */}
+                <div style={{
+                  marginLeft: 'auto',
+                  display: 'inline-flex',
+                  background: 'var(--surface-subtle)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '3px',
+                  gap: '3px'
+                }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setScheduleViewMode('list');
+                      if (typeof window !== 'undefined') localStorage.setItem('cfstudio_schedule_view_mode', 'list');
+                    }}
+                    style={{
+                      border: 'none',
+                      background: scheduleViewMode === 'list' ? 'var(--surface)' : 'transparent',
+                      color: scheduleViewMode === 'list' ? 'var(--text-primary)' : 'var(--text-muted)',
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                      padding: '0.35rem 0.75rem',
+                      borderRadius: 'var(--radius-sm)',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      boxShadow: scheduleViewMode === 'list' ? 'var(--shadow-card)' : 'none',
+                      transition: 'var(--transition)'
+                    }}
+                  >
+                    <span>📋</span> Tampilan Tabel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setScheduleViewMode('calendar');
+                      if (typeof window !== 'undefined') localStorage.setItem('cfstudio_schedule_view_mode', 'calendar');
+                    }}
+                    style={{
+                      border: 'none',
+                      background: scheduleViewMode === 'calendar' ? 'var(--surface)' : 'transparent',
+                      color: scheduleViewMode === 'calendar' ? 'var(--text-primary)' : 'var(--text-muted)',
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                      padding: '0.35rem 0.75rem',
+                      borderRadius: 'var(--radius-sm)',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      boxShadow: scheduleViewMode === 'calendar' ? 'var(--shadow-card)' : 'none',
+                      transition: 'var(--transition)'
+                    }}
+                  >
+                    <span>📅</span> Tampilan Kalender
+                  </button>
+                </div>
               </div>
 
-              {/* Schedule List */}
+              {/* Schedule List / Calendar View */}
               {loadingSchedules ? (
                 <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                   Memuat daftar jadwal rutin...
                 </div>
+              ) : scheduleViewMode === 'calendar' ? (
+                <ScheduleCalendarView
+                  schedules={filteredSchedules}
+                  allSchedulesCount={schedules.length}
+                  onEditSchedule={openEditScheduleModal}
+                  onCreateSchedule={(targetDate) => openCreateScheduleModal(targetDate)}
+                  brands={brands}
+                  replizAccounts={replizAccounts}
+                />
               ) : filteredSchedules.length === 0 ? (
                 <div style={{
                   textAlign: 'center',

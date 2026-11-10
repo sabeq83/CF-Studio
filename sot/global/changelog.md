@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.40.18 — Fitur Opsi Tampilan Kalender pada Tab Skedul Auto Pipeline (10/11/2026)
+- Menambahkan segmented control switcher tampilan tabel dan kalender pada tab skedul
+- Membuat komponen ScheduleCalendarView dengan penanggalan dinamis dan slot waktu semantic
+- Mendukung penambahan jadwal langsung via klik tanggal kalender serta persistensi preferensi di localStorage
+
 ## V2.40.17 — Fix: Resilient MCP server bootstrap for Remote Tailscale Service (10/11/2026)
 - Resilient main bootstrap tanpa wajib env token statis
 - Mendukung endpoint /u/:token untuk dynamic operator token per request
