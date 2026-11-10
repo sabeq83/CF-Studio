@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.40.16 — Fix: Add MCP SDK and Zod to root dependencies for Remote Tailscale Service (10/11/2026)
+- Registrasi @modelcontextprotocol/sdk dan zod ke root dependencies
+- Dukungan penuh untuk Remote MCP Service di port 7030 Mac Mini
+
 ## V2.40.15 — Feat: Master Multi-Tenant Operator & URL-Based Remote MCP via Tailscale (10/11/2026)
 - Dukungan Master Operator dengan tenant switching dinamis cf_list_tenants dan cf_switch_tenant
 - Dukungan Tailscale Tokenized URL endpoint /u/:token untuk akses asisten tanpa clone repo

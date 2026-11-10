@@ -40,3 +40,4 @@ export const GET = withTenantContext(async (request, _ctx, user) => {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 });
+

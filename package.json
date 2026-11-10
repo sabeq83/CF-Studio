@@ -1,6 +1,6 @@
 {
   "name": "cf-studio",
-  "version": "2.40.15",
+  "version": "2.40.16",
   "private": true,
   "scripts": {
     "dev": "next dev --webpack -p 3005",
@@ -78,6 +78,7 @@
     "@aws-sdk/client-s3": "^3.1157.0",
     "@google/generative-ai": "^0.24.1",
     "@imgly/background-removal-node": "^1.4.5",
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "adm-zip": "^0.5.17",
     "archiver": "^8.0.0",
     "better-sqlite3": "^12.9.0",
@@ -98,6 +99,7 @@
     "sharp": "^0.35.2",
     "uuid": "^14.0.0",
     "webdav": "^5.10.0",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "zod": "^4.6.7"
   }
 }
