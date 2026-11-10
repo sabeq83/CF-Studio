@@ -49,7 +49,7 @@ flowchart TD
 - [x] **Task 5: Frontend UI (Instant Launch Modal 1-Klik)** — Update `app/auto-pipeline/page.js` untuk menambahkan Segmented Control `[ 🏛️ Pakai Pilar Brand ]` vs `[ 🎯 Berbasis Keyword (Pilar OFF) ]`, input keyword, banner indikator Pilar OFF, dan arahan Single-Pass AI dengan 100% semantic CSS tokens.
 - [x] **Task 6: Frontend UI (Batch Scheduler Modal Opsi A)** — Update `app/auto-pipeline/page.js` untuk menambahkan mode Multi-Keyword textarea, checkbox auto-stagger distribution, counter badge jumlah keyword, dan konstruksi payload batch `items` ke API.
 - [x] **Task 7: Verifikasi End-to-End & Uji Coba** — Uji eksekusi 1-klik keyword editorial dan pembuatan batch jadwal keyword pada environment dev/staging.
-- [ ] **Task 8: Rilis & Git Sync** — Jalankan `npm run release-non-interactive` dan deploy atomic ke Staging & Dev sesuai SOP.
+- [x] **Task 8: Rilis & Git Sync** — Jalankan `npm run release-non-interactive` dan deploy atomic ke Staging & Dev sesuai SOP.
 
 ---
 
