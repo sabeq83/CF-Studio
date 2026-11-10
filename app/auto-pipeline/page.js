@@ -1222,6 +1222,8 @@ export default function AutoPipelinePage() {
     setSelectedPillars([]);
     setSelectedBlueprintIds(blueprints.length > 0 ? [blueprints[0].id] : []);
     setSchedBlueprintId(blueprints[0]?.id || '');
+    setSchedEditorialMode('pillar');
+    setSchedEditorialKeywordsText('');
     setProductSearchQuery('');
     setPillarSearchQuery('');
     setSchedBlueprintSearchQuery('');
@@ -1267,8 +1269,15 @@ export default function AutoPipelinePage() {
     setSchedProductPromoMode('single');
     setSchedProductAngleList('');
 
-    if (pType === 'multiplier_campaign' && (sched.target_item_id || sched.pipeline_config?.blueprint_id)) {
-      const bpId = sched.target_item_id || sched.pipeline_config?.blueprint_id;
+    let schedCfg = {};
+    try {
+      schedCfg = typeof sched.pipeline_config_json === 'string'
+        ? JSON.parse(sched.pipeline_config_json || '{}')
+        : (sched.pipeline_config_json || sched.pipeline_config || {});
+    } catch (_) {}
+
+    if (pType === 'multiplier_campaign' && (sched.target_item_id || schedCfg.blueprint_id)) {
+      const bpId = sched.target_item_id || schedCfg.blueprint_id;
       setSelectedBlueprintIds([bpId]);
       setSchedBlueprintId(bpId);
     } else {
@@ -1281,18 +1290,27 @@ export default function AutoPipelinePage() {
       setSelectedProductIds([]);
     }
 
-    if (pType === 'editorial_campaign' && (sched.target_item_id || sched.target_item_title)) {
-      setSelectedPillars([sched.target_item_id || sched.target_item_title]);
+    if (pType === 'editorial_campaign') {
+      const isKeywordMode = Boolean(schedCfg.keyword || schedCfg.use_brand_pillars === false);
+      if (isKeywordMode) {
+        setSchedEditorialMode('keyword');
+        const singleKw = schedCfg.keyword || sched.target_item_title || sched.topic || '';
+        setSchedEditorialKeywordsText(singleKw);
+        setSelectedPillars([]);
+      } else {
+        setSchedEditorialMode('pillar');
+        setSchedEditorialKeywordsText('');
+        if (sched.target_item_id || sched.target_item_title) {
+          setSelectedPillars([sched.target_item_id || sched.target_item_title]);
+        } else {
+          setSelectedPillars([]);
+        }
+      }
     } else {
       setSelectedPillars([]);
+      setSchedEditorialKeywordsText('');
     }
 
-    let schedCfg = {};
-    try {
-      schedCfg = typeof sched.pipeline_config_json === 'string'
-        ? JSON.parse(sched.pipeline_config_json || '{}')
-        : (sched.pipeline_config_json || {});
-    } catch (_) {}
     setSchedSelectedCep(schedCfg.selected_cep || 'auto');
     setSchedPostAffiliateLink(schedCfg.post_link_affiliate !== false);
     setSchedGenerateRecipe(schedCfg.generate_recipe !== false);
@@ -1398,7 +1416,12 @@ export default function AutoPipelinePage() {
         const editPipelineConfig = schedCampaignType === 'product_campaign'
           ? { product_id: targetId, selected_cep: schedSelectedCep || 'auto', promotion_context: schedPromotionContext.trim() || null, visual_identity_preset_id: schedViId }
           : (schedCampaignType === 'editorial_campaign'
-              ? { content_pillar: targetTitle, visual_identity_preset_id: schedViId }
+              ? {
+                  content_pillar: targetTitle,
+                  keyword: schedEditorialMode === 'keyword' ? targetTitle : null,
+                  use_brand_pillars: schedEditorialMode !== 'keyword',
+                  visual_identity_preset_id: schedViId
+                }
               : (schedCampaignType === 'multiplier_campaign'
                   ? { blueprint_id: targetId, execution_mode: 'full_autopilot', generate_recipe: schedGenerateRecipe, visual_identity_preset_id: schedViId }
                   : (schedCampaignType === 'recipe_labs'
@@ -6486,44 +6509,58 @@ export default function AutoPipelinePage() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
                       <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
                         <span>📅</span>
-                        <span>Mode Sumber Topik Penjadwalan:</span>
+                        <span>{editingSchedule ? 'Topik Penjadwalan Editorial:' : 'Mode Sumber Topik Penjadwalan:'}</span>
                       </div>
-                      <div style={{ display: 'flex', background: 'var(--surface)', padding: '0.25rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)', gap: '0.25rem' }}>
-                        <button
-                          type="button"
-                          onClick={() => setSchedEditorialMode('pillar')}
-                          style={{
-                            padding: '0.35rem 0.75rem',
-                            border: 'none',
-                            borderRadius: 'var(--radius-xs)',
-                            fontSize: '0.78rem',
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            background: schedEditorialMode === 'pillar' ? 'var(--status-info)' : 'transparent',
-                            color: schedEditorialMode === 'pillar' ? 'var(--on-action-primary)' : 'var(--text-muted)',
-                            transition: 'var(--transition)'
-                          }}
-                        >
-                          🏛️ Multi-Pilar Brand
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setSchedEditorialMode('keyword')}
-                          style={{
-                            padding: '0.35rem 0.75rem',
-                            border: 'none',
-                            borderRadius: 'var(--radius-xs)',
-                            fontSize: '0.78rem',
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            background: schedEditorialMode === 'keyword' ? 'var(--status-info)' : 'transparent',
-                            color: schedEditorialMode === 'keyword' ? 'var(--on-action-primary)' : 'var(--text-muted)',
-                            transition: 'var(--transition)'
-                          }}
-                        >
-                          🎯 Multi-Keyword (Pilar OFF)
-                        </button>
-                      </div>
+                      {!editingSchedule ? (
+                        <div style={{ display: 'flex', background: 'var(--surface)', padding: '0.25rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)', gap: '0.25rem' }}>
+                          <button
+                            type="button"
+                            onClick={() => setSchedEditorialMode('pillar')}
+                            style={{
+                              padding: '0.35rem 0.75rem',
+                              border: 'none',
+                              borderRadius: 'var(--radius-xs)',
+                              fontSize: '0.78rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              background: schedEditorialMode === 'pillar' ? 'var(--action-primary)' : 'transparent',
+                              color: schedEditorialMode === 'pillar' ? 'var(--on-action-primary)' : 'var(--text-secondary)',
+                              transition: 'var(--transition)'
+                            }}
+                          >
+                            🏛️ Multi-Pilar Brand
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSchedEditorialMode('keyword')}
+                            style={{
+                              padding: '0.35rem 0.75rem',
+                              border: 'none',
+                              borderRadius: 'var(--radius-xs)',
+                              fontSize: '0.78rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              background: schedEditorialMode === 'keyword' ? 'var(--action-primary)' : 'transparent',
+                              color: schedEditorialMode === 'keyword' ? 'var(--on-action-primary)' : 'var(--text-secondary)',
+                              transition: 'var(--transition)'
+                            }}
+                          >
+                            🎯 Multi-Keyword (Pilar OFF)
+                          </button>
+                        </div>
+                      ) : (
+                        <span style={{
+                          fontSize: '0.74rem',
+                          fontWeight: 700,
+                          background: 'var(--status-info-soft)',
+                          color: 'var(--status-info)',
+                          padding: '0.2rem 0.65rem',
+                          borderRadius: 'var(--radius-full)',
+                          border: '1px solid var(--status-info)'
+                        }}>
+                          {schedEditorialMode === 'keyword' ? '🎯 Mode: Kata Kunci Target (Pilar OFF)' : '🏛️ Mode: Pilar Brand'}
+                        </span>
+                      )}
                     </div>
 
                     {schedEditorialMode === 'pillar' ? (
@@ -6650,6 +6687,33 @@ export default function AutoPipelinePage() {
                           💡 <strong>Aturan 1 Pilar = 1 Baris Jadwal Mandiri:</strong> Jika Anda memilih {selectedPillars.length} pilar, sistem akan membuat <strong>{selectedPillars.length} baris jadwal independen</strong> yang memproduksi konten storytelling sesuai topik pilar tersebut.
                         </div>
                       </>
+                    ) : editingSchedule ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                        <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                          Kata Kunci Target Jadwal Ini:
+                        </label>
+                        <input
+                          type="text"
+                          value={schedEditorialKeywordsText}
+                          onChange={(e) => setSchedEditorialKeywordsText(e.target.value)}
+                          placeholder="Masukkan kata kunci target..."
+                          required
+                          style={{
+                            height: '42px',
+                            background: 'var(--input-bg)',
+                            border: '1px solid var(--border-subtle)',
+                            borderRadius: 'var(--radius-sm)',
+                            padding: '0 0.85rem',
+                            fontSize: '0.88rem',
+                            color: 'var(--text-primary)',
+                            fontWeight: 700,
+                            outline: 'none'
+                          }}
+                        />
+                        <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                          💡 <strong>Jadwal Mandiri:</strong> Jadwal ini secara khusus memproduksi video storytelling tension berdasarkan 1 kata kunci pencarian di atas dengan pilar brand dinonaktifkan (Pilar OFF).
+                        </div>
+                      </div>
                     ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.40.14 — Fix: Editorial Keyword Single Item Edit Display & Date Picker Timezone Drift (10/11/2026)
+- Perbaikan isolasi kata kunci tunggal pada modal edit jadwal editorial
+- Perbaikan PostgreSQL type parser DATE untuk mencegah pergeseran zona waktu kalender
+- Mempertahankan konfigurasi keyword dan use_brand_pillars saat update jadwal
+
 ## V2.40.13 — Feat: Universal Batch Scheduling for All Video Lines (Recipe, Multiplier, Product Multi-Angle) (10/11/2026)
 - Multi-Line Menu Resep Kuliner dengan auto-deteksi kategori masakan
 - Multi-Blueprint Checkbox Selector untuk Multiplier Video
