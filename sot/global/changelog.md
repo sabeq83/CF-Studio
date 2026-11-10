@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.40.12 — Feat: Calendar Date Scheduling Dual-Mode (Recurring vs Specific Date) & Stagger (10/11/2026)
+- Dukungan mode tanggal kalender spesifik (one-time execution) dan rutin mingguan
+- Siklus hidup auto-completion setelah publikasi Repliz
+- Antarmuka modal date picker dan quick date presets
+- Auto-stagger tanggal kalender untuk batch keyword dan produk katalog
+
 ## V2.40.11 — Feat: Keyword-Based Video Editorial & Batch Scheduler (Option A) (10/11/2026)
 - Dukungan pilar brand OFF dan topik berbasis keyword pencarian
 - Segmented control Pilar vs Keyword pada modal 1-klik instan

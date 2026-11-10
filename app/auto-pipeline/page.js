@@ -222,6 +222,14 @@ export default function AutoPipelinePage() {
   const [schedEditorialMode, setSchedEditorialMode] = useState('pillar'); // 'pillar' | 'keyword'
   const [schedEditorialKeywordsText, setSchedEditorialKeywordsText] = useState('');
   const [schedStaggerDays, setSchedStaggerDays] = useState(true);
+  const [schedMode, setSchedMode] = useState('recurring'); // 'recurring' | 'specific_date'
+  const [schedTargetDate, setSchedTargetDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().slice(0, 10);
+  });
+  const [schedStaggerCalendar, setSchedStaggerCalendar] = useState(true);
+  const [scheduleModeFilter, setScheduleModeFilter] = useState('all'); // 'all' | 'recurring' | 'specific_date'
 
   // Repliz Multi-Platform Search & Filter State
   const [replizSearchQuery, setReplizSearchQuery] = useState('');
@@ -1145,6 +1153,15 @@ export default function AutoPipelinePage() {
     });
   }
 
+  function setQuickDatePreset(offsetDays) {
+    const d = new Date();
+    d.setDate(d.getDate() + offsetDays);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    setSchedTargetDate(`${yyyy}-${mm}-${dd}`);
+  }
+
   function toggleReplizAccountSelection(accId) {
     setSchedReplizAccountIds(prev => {
       if (prev.includes(accId)) {
@@ -1170,6 +1187,11 @@ export default function AutoPipelinePage() {
     setSchedCategory(detectCategoryFromTopic(initialTopic));
     setIsSchedCategoryManual(false);
     setSchedDays([0, 1, 2, 3, 4, 5, 6]);
+    setSchedMode('recurring');
+    const defaultDate = new Date();
+    defaultDate.setDate(defaultDate.getDate() + 1);
+    setSchedTargetDate(defaultDate.toISOString().slice(0, 10));
+    setSchedStaggerCalendar(true);
     setSchedAutoPublish(true);
     setSchedPostAffiliateLink(true);
     setSchedSelectedCep('auto');
@@ -1212,6 +1234,9 @@ export default function AutoPipelinePage() {
     setSchedCategory(sched.category || 'makanan_utama');
     setIsSchedCategoryManual(true);
     setSchedDays(Array.isArray(sched.days_of_week) ? sched.days_of_week : [0, 1, 2, 3, 4, 5, 6]);
+    setSchedMode(sched.schedule_mode || 'recurring');
+    setSchedTargetDate(sched.target_date ? String(sched.target_date).slice(0, 10) : new Date().toISOString().slice(0, 10));
+    setSchedStaggerCalendar(true);
     setSchedReplizAccountIds(Array.isArray(sched.repliz_account_ids) ? sched.repliz_account_ids : []);
     setSchedAutoPublish(sched.auto_publish_enabled !== false);
 
@@ -1343,6 +1368,8 @@ export default function AutoPipelinePage() {
           generation_time: schedGenTime,
           publish_time: schedPubTime,
           days_of_week: schedDays,
+          schedule_mode: schedMode,
+          target_date: schedMode === 'specific_date' ? schedTargetDate : null,
           repliz_account_ids: schedReplizAccountIds,
           auto_publish_enabled: schedAutoPublish,
           timezone: 'Asia/Jakarta',
@@ -1363,12 +1390,23 @@ export default function AutoPipelinePage() {
           // BATCH PRODUK: 1 Produk = 1 Baris Jadwal Mandiri
           const promoCtx = schedPromotionContext.trim() || null;
           const customNameBase = schedName.trim();
-          const items = selectedProductIds.map(prodId => {
+          const items = selectedProductIds.map((prodId, idx) => {
             const prod = catalogProducts.find(p => p.id === prodId);
             const prodName = prod?.product_name || 'Produk Katalog';
             const itemScheduleName = customNameBase
               ? (customNameBase.toLowerCase().includes(prodName.toLowerCase()) ? customNameBase : `${customNameBase} - ${prodName}`)
               : `${prodName} — ${schedGenTime} WIB`;
+            let itemDays = schedDays;
+            let itemTargetDate = schedTargetDate;
+            if (schedMode === 'specific_date') {
+              if (schedStaggerCalendar && schedTargetDate) {
+                const d = new Date(schedTargetDate);
+                d.setDate(d.getDate() + idx);
+                itemTargetDate = d.toISOString().slice(0, 10);
+              }
+            } else if (schedStaggerDays && schedDays.length > 0) {
+              itemDays = [schedDays[idx % schedDays.length]];
+            }
             return {
               name: itemScheduleName,
               brand_id: schedBrandId,
@@ -1381,7 +1419,9 @@ export default function AutoPipelinePage() {
               recipe_count: 1,
               generation_time: schedGenTime,
               publish_time: schedPubTime,
-              days_of_week: schedDays,
+              days_of_week: itemDays,
+              schedule_mode: schedMode,
+              target_date: schedMode === 'specific_date' ? itemTargetDate : null,
               repliz_account_ids: schedReplizAccountIds,
               auto_publish_enabled: schedAutoPublish,
               timezone: 'Asia/Jakarta',
@@ -1405,7 +1445,14 @@ export default function AutoPipelinePage() {
           const customNameBase = schedName.trim();
           const items = keywords.map((kw, idx) => {
             let itemDays = schedDays;
-            if (schedStaggerDays && schedDays.length > 0) {
+            let itemTargetDate = schedTargetDate;
+            if (schedMode === 'specific_date') {
+              if (schedStaggerCalendar && schedTargetDate) {
+                const d = new Date(schedTargetDate);
+                d.setDate(d.getDate() + idx);
+                itemTargetDate = d.toISOString().slice(0, 10);
+              }
+            } else if (schedStaggerDays && schedDays.length > 0) {
               itemDays = [schedDays[idx % schedDays.length]];
             }
             const itemScheduleName = customNameBase
@@ -1424,6 +1471,8 @@ export default function AutoPipelinePage() {
               generation_time: schedGenTime,
               publish_time: schedPubTime,
               days_of_week: itemDays,
+              schedule_mode: schedMode,
+              target_date: schedMode === 'specific_date' ? itemTargetDate : null,
               repliz_account_ids: schedReplizAccountIds,
               auto_publish_enabled: schedAutoPublish,
               timezone: 'Asia/Jakarta',
@@ -1447,10 +1496,21 @@ export default function AutoPipelinePage() {
         } else if (schedCampaignType === 'editorial_campaign' && selectedPillars.length > 1) {
           // BATCH EDITORIAL: 1 Pilar = 1 Baris Jadwal Mandiri
           const customNameBase = schedName.trim();
-          const items = selectedPillars.map(pillar => {
+          const items = selectedPillars.map((pillar, idx) => {
             const itemScheduleName = customNameBase
               ? (customNameBase.toLowerCase().includes(pillar.toLowerCase()) ? customNameBase : `${customNameBase} - ${pillar}`)
               : `${pillar} — ${schedGenTime} WIB`;
+            let itemDays = schedDays;
+            let itemTargetDate = schedTargetDate;
+            if (schedMode === 'specific_date') {
+              if (schedStaggerCalendar && schedTargetDate) {
+                const d = new Date(schedTargetDate);
+                d.setDate(d.getDate() + idx);
+                itemTargetDate = d.toISOString().slice(0, 10);
+              }
+            } else if (schedStaggerDays && schedDays.length > 0) {
+              itemDays = [schedDays[idx % schedDays.length]];
+            }
             return {
               name: itemScheduleName,
               brand_id: schedBrandId,
@@ -1463,7 +1523,9 @@ export default function AutoPipelinePage() {
               recipe_count: 1,
               generation_time: schedGenTime,
               publish_time: schedPubTime,
-              days_of_week: schedDays,
+              days_of_week: itemDays,
+              schedule_mode: schedMode,
+              target_date: schedMode === 'specific_date' ? itemTargetDate : null,
               repliz_account_ids: schedReplizAccountIds,
               auto_publish_enabled: schedAutoPublish,
               timezone: 'Asia/Jakarta',
@@ -1560,6 +1622,8 @@ export default function AutoPipelinePage() {
             generation_time: schedGenTime,
             publish_time: schedPubTime,
             days_of_week: schedDays,
+            schedule_mode: schedMode,
+            target_date: schedMode === 'specific_date' ? schedTargetDate : null,
             repliz_account_ids: schedReplizAccountIds,
             auto_publish_enabled: schedAutoPublish,
             timezone: 'Asia/Jakarta',
@@ -1685,6 +1749,7 @@ export default function AutoPipelinePage() {
     if (campaignTypeFilter !== 'all' && pType !== campaignTypeFilter) return false;
     if (scheduleFilter !== 'all' && s.status !== scheduleFilter) return false;
     if (scheduleBrandFilter !== 'all' && s.brand_id !== scheduleBrandFilter) return false;
+    if (scheduleModeFilter !== 'all' && (s.schedule_mode || 'recurring') !== scheduleModeFilter) return false;
     return true;
   });
 
@@ -4983,6 +5048,7 @@ export default function AutoPipelinePage() {
                   { key: 'all', label: 'Semua' },
                   { key: 'active', label: '🟢 Aktif Berjalan' },
                   { key: 'paused', label: '⏸️ Dijeda' },
+                  { key: 'completed', label: '✅ Selesai' },
                   { key: 'archived', label: '📦 Diarsipkan' }
                 ].map(tab => (
                   <button
@@ -4995,6 +5061,35 @@ export default function AutoPipelinePage() {
                       border: scheduleFilter === tab.key ? '1px solid var(--action-primary)' : '1px solid transparent',
                       borderRadius: 'var(--radius-sm)',
                       padding: '0.35rem 0.85rem',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+
+                <span style={{ height: '18px', width: '1px', background: 'var(--border-subtle)', margin: '0 0.4rem' }} />
+
+                <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-muted)', marginRight: '0.25rem' }}>
+                  Mode:
+                </span>
+                {[
+                  { key: 'all', label: 'Semua Mode' },
+                  { key: 'recurring', label: '🔄 Rutin Mingguan' },
+                  { key: 'specific_date', label: '📅 Tanggal Spesifik' }
+                ].map(tab => (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    onClick={() => setScheduleModeFilter(tab.key)}
+                    style={{
+                      background: scheduleModeFilter === tab.key ? 'var(--surface-interactive)' : 'transparent',
+                      color: scheduleModeFilter === tab.key ? 'var(--action-primary)' : 'var(--text-secondary)',
+                      border: scheduleModeFilter === tab.key ? '1px solid var(--action-primary)' : '1px solid transparent',
+                      borderRadius: 'var(--radius-sm)',
+                      padding: '0.35rem 0.75rem',
                       fontSize: '0.8rem',
                       fontWeight: 600,
                       cursor: 'pointer'
@@ -5051,10 +5146,18 @@ export default function AutoPipelinePage() {
                   {filteredSchedules.map(sched => {
                     const statusColor = sched.status === 'active'
                       ? 'var(--status-success)'
-                      : sched.status === 'paused' ? 'var(--status-warning)' : 'var(--text-muted)';
+                      : sched.status === 'paused'
+                        ? 'var(--status-warning)'
+                        : sched.status === 'completed'
+                          ? 'var(--status-info)'
+                          : 'var(--text-muted)';
                     const statusLabel = sched.status === 'active'
                       ? '🟢 AKTIF BERJALAN'
-                      : sched.status === 'paused' ? '⏸️ DIJEDA' : '📦 DIARSIPKAN';
+                      : sched.status === 'paused'
+                        ? '⏸️ DIJEDA'
+                        : sched.status === 'completed'
+                          ? '✅ SELESAI'
+                          : '📦 DIARSIPKAN';
                     const isSchedRunning = Boolean(sched.is_running || runningScheduleIds[sched.id]);
                     const campBadge = getCampaignTypeBadge(sched.pipeline_type);
 
@@ -5109,7 +5212,11 @@ export default function AutoPipelinePage() {
                                 fontWeight: 700,
                                 padding: '0.2rem 0.55rem',
                                 borderRadius: 9999,
-                                background: sched.status === 'active' ? 'var(--status-success-soft)' : 'var(--status-warning-soft)',
+                                background: sched.status === 'active'
+                                  ? 'var(--status-success-soft)'
+                                  : sched.status === 'completed'
+                                    ? 'var(--status-info-soft)'
+                                    : 'var(--status-warning-soft)',
                                 color: statusColor,
                                 border: `1px solid ${statusColor}`
                               }}>
@@ -5182,10 +5289,17 @@ export default function AutoPipelinePage() {
 
                           <div>
                             <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
-                              Hari Rutin:
+                              {sched.schedule_mode === 'specific_date' ? 'Tanggal Eksekusi:' : 'Hari Rutin:'}
                             </div>
                             <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: '0.2rem' }}>
-                              {formatDaysOfWeek(sched.days_of_week)}
+                              {sched.schedule_mode === 'specific_date' ? (
+                                <span style={{ color: 'var(--status-warning)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                                  <span>📅</span>
+                                  <span>{sched.target_date || '-'}</span>
+                                </span>
+                              ) : (
+                                formatDaysOfWeek(sched.days_of_week)
+                              )}
                             </div>
                           </div>
 
@@ -6726,44 +6840,242 @@ export default function AutoPipelinePage() {
                   </div>
                 </div>
 
-                {/* 6. Hari Rutin (Pills) */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                  <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                    Hari Rutin Eksekusi:
-                  </label>
-                  <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
-                    {[
-                      { idx: 1, label: 'Sen' },
-                      { idx: 2, label: 'Sel' },
-                      { idx: 3, label: 'Rab' },
-                      { idx: 4, label: 'Kam' },
-                      { idx: 5, label: 'Jum' },
-                      { idx: 6, label: 'Sab' },
-                      { idx: 0, label: 'Min' }
-                    ].map(day => {
-                      const isSelected = schedDays.includes(day.idx);
-                      return (
-                        <button
-                          key={day.idx}
-                          type="button"
-                          onClick={() => toggleDaySelection(day.idx)}
-                          style={{
-                            padding: '0.45rem 0.85rem',
-                            borderRadius: 'var(--radius-sm)',
-                            border: isSelected ? '1px solid var(--action-primary)' : '1px solid var(--border-subtle)',
-                            background: isSelected ? 'var(--action-primary)' : 'var(--surface-raised)',
-                            color: isSelected ? 'var(--on-action-primary)' : 'var(--text-secondary)',
-                            fontWeight: 700,
-                            fontSize: '0.8rem',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          {day.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
+                {/* 6. Mode Penjadwalan & Hari / Tanggal */}
+                {(() => {
+                  const batchItemCount = (
+                    schedCampaignType === 'editorial_campaign' && schedEditorialMode === 'keyword'
+                      ? schedMultiKeywords.split('\n').map(s => s.trim()).filter(Boolean).length
+                      : (schedCampaignType === 'editorial_campaign' && schedEditorialMode === 'pillars'
+                          ? selectedPillars.length
+                          : (schedCampaignType === 'product_campaign'
+                              ? selectedProductIds.length
+                              : 1))
+                  );
+                  const isBatchSchedule = !editingSchedule && batchItemCount > 1;
+
+                  return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                          Pilih Mode Penjadwalan:
+                        </label>
+                        <div style={{
+                          display: 'flex',
+                          background: 'var(--surface)',
+                          padding: '0.2rem',
+                          borderRadius: 'var(--radius-sm)',
+                          border: '1px solid var(--border-subtle)',
+                          gap: '0.25rem'
+                        }}>
+                          <button
+                            type="button"
+                            onClick={() => setSchedMode('recurring')}
+                            style={{
+                              padding: '0.35rem 0.75rem',
+                              border: 'none',
+                              borderRadius: 'var(--radius-xs)',
+                              fontSize: '0.78rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              background: schedMode === 'recurring' ? 'var(--action-primary)' : 'transparent',
+                              color: schedMode === 'recurring' ? 'var(--on-action-primary)' : 'var(--text-secondary)',
+                              transition: 'var(--transition)'
+                            }}
+                          >
+                            🔄 Rutin Mingguan
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSchedMode('specific_date')}
+                            style={{
+                              padding: '0.35rem 0.75rem',
+                              border: 'none',
+                              borderRadius: 'var(--radius-xs)',
+                              fontSize: '0.78rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              background: schedMode === 'specific_date' ? 'var(--action-primary)' : 'transparent',
+                              color: schedMode === 'specific_date' ? 'var(--on-action-primary)' : 'var(--text-secondary)',
+                              transition: 'var(--transition)'
+                            }}
+                          >
+                            📅 Tanggal Spesifik
+                          </button>
+                        </div>
+                      </div>
+
+                      {schedMode === 'recurring' ? (
+                        <div style={{
+                          background: 'var(--surface-raised)',
+                          padding: '0.85rem',
+                          borderRadius: 'var(--radius-sm)',
+                          border: '1px solid var(--border-subtle)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.5rem'
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                              Hari Rutin Eksekusi:
+                            </span>
+                            <span style={{ fontSize: '0.72rem', color: 'var(--status-info)' }}>
+                              Aktif: {schedDays.map(d => ({ 1: 'Sen', 2: 'Sel', 3: 'Rab', 4: 'Kam', 5: 'Jum', 6: 'Sab', 0: 'Min' }[d])).join(', ')}
+                            </span>
+                          </div>
+                          <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
+                            {[
+                              { idx: 1, label: 'Sen' },
+                              { idx: 2, label: 'Sel' },
+                              { idx: 3, label: 'Rab' },
+                              { idx: 4, label: 'Kam' },
+                              { idx: 5, label: 'Jum' },
+                              { idx: 6, label: 'Sab' },
+                              { idx: 0, label: 'Min' }
+                            ].map(day => {
+                              const isSelected = schedDays.includes(day.idx);
+                              return (
+                                <button
+                                  key={day.idx}
+                                  type="button"
+                                  onClick={() => toggleDaySelection(day.idx)}
+                                  style={{
+                                    padding: '0.45rem 0.85rem',
+                                    borderRadius: 'var(--radius-sm)',
+                                    border: isSelected ? '1px solid var(--action-primary)' : '1px solid var(--border-subtle)',
+                                    background: isSelected ? 'var(--action-primary)' : 'var(--surface)',
+                                    color: isSelected ? 'var(--on-action-primary)' : 'var(--text-secondary)',
+                                    fontWeight: 700,
+                                    fontSize: '0.8rem',
+                                    cursor: 'pointer',
+                                    transition: 'var(--transition)'
+                                  }}
+                                >
+                                  {day.label}
+                                </button>
+                              );
+                            })}
+                          </div>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                            💡 <strong>Karakteristik Rutin:</strong> Pipeline akan terus dieksekusi berulang setiap minggu pada hari terpilih. Status tetap <code>active</code>.
+                          </span>
+                        </div>
+                      ) : (
+                        <div style={{
+                          background: 'var(--surface-raised)',
+                          padding: '0.85rem',
+                          borderRadius: 'var(--radius-sm)',
+                          border: '1px solid var(--border-strong)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.65rem'
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                              Pilih Tanggal Kalender Eksekusi:
+                            </span>
+                            <span style={{
+                              fontSize: '0.7rem',
+                              fontWeight: 700,
+                              background: 'var(--status-warning-soft)',
+                              color: 'var(--status-warning)',
+                              padding: '0.15rem 0.5rem',
+                              borderRadius: 'var(--radius-full)'
+                            }}>
+                              One-Time Execution 🎯
+                            </span>
+                          </div>
+                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                            <input
+                              type="date"
+                              value={schedTargetDate}
+                              onChange={(e) => setSchedTargetDate(e.target.value)}
+                              style={{
+                                height: '38px',
+                                background: 'var(--input-bg)',
+                                border: '1px solid var(--border-subtle)',
+                                borderRadius: 'var(--radius-sm)',
+                                padding: '0 0.75rem',
+                                fontSize: '0.84rem',
+                                color: 'var(--text-primary)',
+                                fontWeight: 700,
+                                outline: 'none'
+                              }}
+                            />
+                            <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                              {[
+                                { label: 'Hari Ini', offset: 0 },
+                                { label: 'Besok', offset: 1 },
+                                { label: '+3 Hari', offset: 3 },
+                                { label: '+7 Hari', offset: 7 },
+                                { label: '+14 Hari', offset: 14 }
+                              ].map(preset => (
+                                <button
+                                  key={preset.label}
+                                  type="button"
+                                  onClick={() => setQuickDatePreset(preset.offset)}
+                                  style={{
+                                    padding: '0.35rem 0.65rem',
+                                    background: 'var(--surface-interactive)',
+                                    border: '1px solid var(--border-subtle)',
+                                    borderRadius: 'var(--radius-xs)',
+                                    fontSize: '0.74rem',
+                                    fontWeight: 600,
+                                    color: 'var(--text-secondary)',
+                                    cursor: 'pointer',
+                                    transition: 'var(--transition)'
+                                  }}
+                                >
+                                  {preset.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Stagger Option jika Batch Mode */}
+                          {isBatchSchedule && (
+                            <div style={{
+                              marginTop: '0.25rem',
+                              padding: '0.5rem 0.75rem',
+                              background: 'var(--surface)',
+                              borderRadius: 'var(--radius-xs)',
+                              border: '1px dashed var(--action-primary)',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '0.35rem'
+                            }}>
+                              <label style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                fontSize: '0.78rem',
+                                fontWeight: 700,
+                                color: 'var(--text-primary)',
+                                cursor: 'pointer'
+                              }}>
+                                <input
+                                  type="checkbox"
+                                  checked={schedStaggerCalendar}
+                                  onChange={(e) => setSchedStaggerCalendar(e.target.checked)}
+                                  style={{ cursor: 'pointer' }}
+                                />
+                                ⚡ Auto-Stagger Kalender (+1 Hari per baris batch)
+                              </label>
+                              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                                {schedStaggerCalendar
+                                  ? `Tiap item batch (${batchItemCount} jadwal) akan disebar ke hari-hari berurutan mulai dari tanggal ${schedTargetDate}.`
+                                  : `Semua item batch (${batchItemCount} jadwal) akan dieksekusi serentak pada tanggal ${schedTargetDate}.`}
+                              </span>
+                            </div>
+                          )}
+
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                            💡 <strong>Karakteristik Tanggal Spesifik:</strong> Pipeline hanya dieksekusi <strong>1 kali</strong> pada tanggal tersebut. Setelah selesai dikirim ke Repliz, status otomatis menjadi <strong>Selesai (Completed)</strong>.
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {/* 7. Multi-Platform Repliz Publishing Selector (Lengkap dengan Search, Filter Platform & Live Sync) */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>

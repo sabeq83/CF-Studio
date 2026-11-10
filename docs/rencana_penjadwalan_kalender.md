@@ -56,13 +56,13 @@ flowchart TD
 
 ## 📋 Execution Task List
 
-- [ ] **Task 1: DDL Database Migration** — Update `lib/db-pg.js` untuk menambahkan kolom `schedule_mode TEXT NOT NULL DEFAULT 'recurring'`, kolom `target_date DATE`, serta indeks performa pada tabel `auto_pipeline_schedules`.
-- [ ] **Task 2: Repository Data Access Layer** — Update `lib/auto-pipeline-schedules-repository.js` untuk memetakan `schedule_mode` dan `target_date` pada `createAutoPipelineSchedule`, `updateAutoPipelineSchedule`, `normalizeScheduleRow`, dan `createAutoPipelineScheduleBatch`.
-- [ ] **Task 3: Background Scheduler Runner Logic** — Update `lib/auto-pipeline-scheduler-runner.js` (`runDueAutoPipelineGenerations` & `computeTargetPublishIso`) untuk mengevaluasi kesesuaian tanggal kalender, mencegah eksekusi ulang jadwal yang telah berjalan, mengupdate status jadwal `specific_date` menjadi `'completed'`, dan menyelaraskan waktu publikasi Repliz.
-- [ ] **Task 4: API Endpoint Parameter Binding** — Update `app/api/v2/recipes/auto-pipeline-schedules/route.js` untuk membaca dan memvalidasi `schedule_mode` dan `target_date` pada endpoint single schedule maupun batch payload (`body.items`).
-- [ ] **Task 5: Frontend UI Modal Skeduler (Segmented Control & Date Picker)** — Update `app/auto-pipeline/page.js` untuk menambahkan Segmented Control `[ 🔄 Rutin Mingguan ]` vs `[ 📅 Tanggal Spesifik ]`, input Date Picker `<input type="date">`, tombol Quick Date Presets (`[Hari Ini]`, `[Besok]`, `[+3 Hari]`, `[+7 Hari]`), dan auto-stagger tanggal kalender untuk batch keyword/produk dengan 100% Semantic CSS Tokens.
-- [ ] **Task 6: Frontend UI Tabel Monitoring & Filter Dual-Mode** — Update tabel monitoring jadwal di `app/auto-pipeline/page.js` untuk menampilkan format tanggal spesifik `📅 YYYY-MM-DD`, badge status `Selesai ✅`, dan filter mode jadwal.
-- [ ] **Task 7: Verifikasi End-to-End & Uji Coba** — Uji pembuatan jadwal tanggal spesifik, eksekusi runner, auto-completion status, serta auto-stagger batch kalender pada environment Dev/Staging.
+- [x] **Task 1: DDL Database Migration** — Update `lib/db-pg.js` untuk menambahkan kolom `schedule_mode TEXT NOT NULL DEFAULT 'recurring'`, kolom `target_date DATE`, serta indeks performa pada tabel `auto_pipeline_schedules`.
+- [x] **Task 2: Repository Data Access Layer** — Update `lib/auto-pipeline-schedules-repository.js` untuk memetakan `schedule_mode` dan `target_date` pada `createAutoPipelineSchedule`, `updateAutoPipelineSchedule`, `normalizeScheduleRow`, dan `createAutoPipelineScheduleBatch`.
+- [x] **Task 3: Background Scheduler Runner Logic** — Update `lib/auto-pipeline-scheduler-runner.js` (`runDueAutoPipelineGenerations` & `computeTargetPublishIso`) untuk mengevaluasi kesesuaian tanggal kalender, mencegah eksekusi ulang jadwal yang telah berjalan, mengupdate status jadwal `specific_date` menjadi `'completed'`, dan menyelaraskan waktu publikasi Repliz.
+- [x] **Task 4: API Endpoint Parameter Binding** — Update `app/api/v2/recipes/auto-pipeline-schedules/route.js` untuk membaca dan memvalidasi `schedule_mode` dan `target_date` pada endpoint single schedule maupun batch payload (`body.items`).
+- [x] **Task 5: Frontend UI Modal Skeduler (Segmented Control & Date Picker)** — Update `app/auto-pipeline/page.js` untuk menambahkan Segmented Control `[ 🔄 Rutin Mingguan ]` vs `[ 📅 Tanggal Spesifik ]`, input Date Picker `<input type="date">`, tombol Quick Date Presets (`[Hari Ini]`, `[Besok]`, `[+3 Hari]`, `[+7 Hari]`), dan auto-stagger tanggal kalender untuk batch keyword/produk dengan 100% Semantic CSS Tokens.
+- [x] **Task 6: Frontend UI Tabel Monitoring & Filter Dual-Mode** — Update tabel monitoring jadwal di `app/auto-pipeline/page.js` untuk menampilkan format tanggal spesifik `📅 YYYY-MM-DD`, badge status `Selesai ✅`, dan filter mode jadwal.
+- [x] **Task 7: Verifikasi End-to-End & Uji Coba** — Uji pembuatan jadwal tanggal spesifik, eksekusi runner, auto-completion status, serta auto-stagger batch kalender pada environment Dev/Staging.
 - [ ] **Task 8: Rilis & Git Sync** — Jalankan `npm run release-non-interactive` dan deploy atomic ke Staging & Dev Mac Mini sesuai SOP.
 
 ---

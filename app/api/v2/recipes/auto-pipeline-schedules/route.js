@@ -58,7 +58,9 @@ export const POST = withTenantContext(async (request, _ctx, user) => {
           repliz_account_ids: Array.isArray(item.repliz_account_ids) ? item.repliz_account_ids : [],
           pipeline_config_json: item.pipeline_config_json || item.pipeline_config || {},
           auto_publish_enabled: item.auto_publish_enabled !== false,
-          status: item.status || 'active'
+          status: item.status || 'active',
+          schedule_mode: item.schedule_mode || 'recurring',
+          target_date: item.target_date || null
         };
         const s = await createAutoPipelineSchedule(tenantId, payload);
         created.push(s);
@@ -94,7 +96,9 @@ export const POST = withTenantContext(async (request, _ctx, user) => {
       repliz_account_ids: Array.isArray(body.repliz_account_ids) ? body.repliz_account_ids : [],
       pipeline_config_json: body.pipeline_config_json || body.pipeline_config || {},
       auto_publish_enabled: body.auto_publish_enabled !== false,
-      status: body.status || 'active'
+      status: body.status || 'active',
+      schedule_mode: body.schedule_mode || 'recurring',
+      target_date: body.target_date || null
     };
 
     const newSchedule = await createAutoPipelineSchedule(tenantId, payload);
