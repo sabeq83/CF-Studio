@@ -172,5 +172,37 @@ module.exports = {
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
       merge_logs: true,
     },
+
+    // ── MCP Remote HTTP Server via Tailscale (Port 7030) ────────────────
+    {
+      name: 'maknaflow-staging-mcp',
+      script: 'apps/mcp/server.mjs',
+      cwd: APP_DIR,
+      interpreter: 'node',
+      node_args: '--env-file=' + path.resolve(APP_DIR, '.env.local'),
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '512M',
+      restart_delay: 2000,
+      env: {
+        NODE_ENV: 'production',
+        CF_STUDIO_MCP_PORT: 7030,
+        CF_STUDIO_MCP_HOST: '0.0.0.0',
+        CF_STUDIO_OPERATOR_BASE_URL: 'http://127.0.0.1:5010',
+        TZ: 'Asia/Jakarta',
+      },
+      env_staging: {
+        NODE_ENV: 'production',
+        CF_STUDIO_MCP_PORT: 7030,
+        CF_STUDIO_MCP_HOST: '0.0.0.0',
+        CF_STUDIO_OPERATOR_BASE_URL: 'http://127.0.0.1:5010',
+        TZ: 'Asia/Jakarta',
+      },
+      out_file: `${APP_DIR}/logs/staging-mcp.out.log`,
+      error_file: `${APP_DIR}/logs/staging-mcp.err.log`,
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      merge_logs: true,
+    },
   ],
 };

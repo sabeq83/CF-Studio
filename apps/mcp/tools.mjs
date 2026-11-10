@@ -19,7 +19,7 @@ export function operatorClient({ baseUrl, token, fetchImpl = fetch }) {
     throw new Error('Remote Operator API requires HTTPS');
   }
   if (!token) throw new Error('CF_STUDIO_OPERATOR_API_TOKEN is required');
-  return async (path, { body, key, method } = {}) => {
+  return async (path, { body, key, method, tenantOverride } = {}) => {
     try {
       const httpMethod = method || (body ? 'POST' : 'GET');
       const response = await fetchImpl(new URL(path, base), {
@@ -28,6 +28,7 @@ export function operatorClient({ baseUrl, token, fetchImpl = fetch }) {
         signal: AbortSignal.timeout(60000),
         headers: {
           authorization: `Bearer ${token}`,
+          ...(tenantOverride ? { 'x-tenant-override': tenantOverride } : {}),
           ...(body ? { 'content-type': 'application/json', ...(key ? { 'idempotency-key': key } : {}) } : {})
         },
         body: body ? JSON.stringify(body) : undefined
@@ -47,7 +48,15 @@ export function operatorClient({ baseUrl, token, fetchImpl = fetch }) {
   };
 }
 
-export function createCfStudioServer(request) {
+export function createCfStudioServer(rawRequest) {
+  let activeTenantOverride = null;
+  const request = (path, opts = {}) => {
+    return rawRequest(path, {
+      ...opts,
+      tenantOverride: opts.tenantOverride || activeTenantOverride
+    });
+  };
+
   const server = new McpServer(
     { name: 'cf-studio', version: '2.0.0' },
     {
@@ -75,11 +84,51 @@ export function createCfStudioServer(request) {
     );
 
   // 1. Discovery & Identity Tools
-  register('cf_whoami', 'Read configured CF Studio operator identity, tenant, and scopes.', {}, true, () =>
-    request('/api/operator/v1/whoami')
+  register('cf_whoami', 'Read configured CF Studio operator identity, active tenant, and scopes.', {}, true, async () => {
+    const res = await request('/api/operator/v1/whoami');
+    if (res && res.operator) {
+      res.operator.session_active_tenant = activeTenantOverride || res.operator.tenant_id;
+    }
+    return res;
+  });
+  register('makna_whoami', 'Read configured CF Studio operator identity, active tenant, and scopes (legacy alias).', {}, true, async () => {
+    const res = await request('/api/operator/v1/whoami');
+    if (res && res.operator) {
+      res.operator.session_active_tenant = activeTenantOverride || res.operator.tenant_id;
+    }
+    return res;
+  });
+
+  register(
+    'cf_list_tenants',
+    'List all active tenants in the cluster (e.g. PT GIM Sosmed, SY Benu, Mas Ibnu). Requires master operator or lists accessible tenants.',
+    {},
+    true,
+    async () => {
+      return request('/api/v2/tenants');
+    }
   );
-  register('makna_whoami', 'Read configured CF Studio operator identity, tenant, and scopes (legacy alias).', {}, true, () =>
-    request('/api/operator/v1/whoami')
+
+  register(
+    'cf_switch_tenant',
+    'Switch the active tenant context for all subsequent operations in this MCP session. Provide tenant ID (e.g. tnt_pt-gim-sosmed_62d0d9) or slug (e.g. pt-gim-sosmed).',
+    {
+      tenant: z.string().trim().min(1).describe('Tenant ID or slug to switch into')
+    },
+    false,
+    async ({ tenant }) => {
+      const check = await rawRequest('/api/v2/tenants', { tenantOverride: tenant });
+      if (!check || !check.success) {
+        return { success: false, error: check?.error || `Unable to switch to tenant: ${tenant}` };
+      }
+      activeTenantOverride = check.active_tenant || tenant;
+      return {
+        success: true,
+        message: `Active tenant successfully switched to: ${activeTenantOverride}. All subsequent tools in this session will operate in this tenant.`,
+        active_tenant: activeTenantOverride,
+        is_master: check.is_master
+      };
+    }
   );
 
   register('cf_list_presets', 'List available campaign production presets and video archetypes.', {}, true, () =>

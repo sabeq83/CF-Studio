@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.40.15 — Feat: Master Multi-Tenant Operator & URL-Based Remote MCP via Tailscale (10/11/2026)
+- Dukungan Master Operator dengan tenant switching dinamis cf_list_tenants dan cf_switch_tenant
+- Dukungan Tailscale Tokenized URL endpoint /u/:token untuk akses asisten tanpa clone repo
+- Konfigurasi PM2 maknaflow-staging-mcp port 7030 di Mac Mini
+
 ## V2.40.14 — Fix: Editorial Keyword Single Item Edit Display & Date Picker Timezone Drift (10/11/2026)
 - Perbaikan isolasi kata kunci tunggal pada modal edit jadwal editorial
 - Perbaikan PostgreSQL type parser DATE untuk mencegah pergeseran zona waktu kalender
