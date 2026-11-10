@@ -26,7 +26,7 @@ Fitur ini menstandarkan antarmuka dan alur pembuatan jadwal massal (*Universal B
 - [x] **Task 5: Batch Handler Multiplier** — Tambahkan logika batch mapping pada `handleSaveSchedule` untuk `multiplier_campaign` ketika `selectedBlueprintIds.length > 1`.
 - [x] **Task 6: Frontend UI & Handler Produk Multi-Angle** — Tambahkan opsi textarea multi-angle konteks promosi untuk 1 produk pada `product_campaign`.
 - [x] **Task 7: Verifikasi End-to-End** — Uji coba pembuatan batch jadwal untuk Resep Kuliner, Multiplier, dan Produk Katalog.
-- [ ] **Task 8: Rilis & Git Sync** — Jalankan `npm run release-non-interactive` dan deploy atomic ke Staging & Dev Mac Mini.
+- [x] **Task 8: Rilis & Git Sync** — Jalankan `npm run release-non-interactive` dan deploy atomic ke Staging & Dev Mac Mini.
 
 ---
 
