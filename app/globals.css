@@ -53,7 +53,24 @@ body {
   letter-spacing: 0.08em;
 }
 
-.sidebar-nav { flex: 1; padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; }
+.sidebar-nav {
+  flex: 1;
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
 
 .nav-link {
   display: flex;
@@ -67,6 +84,7 @@ body {
   font-weight: 500;
   transition: all var(--transition);
   border: 1px solid transparent;
+  flex-shrink: 0;
 }
 
 .nav-link:hover {
@@ -84,6 +102,72 @@ body {
 
 .nav-link .nav-icon { font-size: 1.15rem; width: 24px; text-align: center; }
 .nav-section { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.12em; padding: 16px 16px 6px; font-weight: 600; }
+
+/* ===== COLLAPSIBLE ACCORDION SIDEBAR ===== */
+.sidebar-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  margin-top: 8px;
+  margin-bottom: 2px;
+  cursor: pointer;
+  user-select: none;
+  border-radius: var(--radius-xs, 6px);
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+.sidebar-section-header:hover {
+  background-color: var(--surface-interactive);
+}
+.sidebar-section-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sidebar-section-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sidebar-section-count {
+  font-size: 0.65rem;
+  padding: 1px 6px;
+  border-radius: var(--radius-xs, 6px);
+  background-color: var(--surface-raised);
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.sidebar-section-chevron {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-block;
+}
+.sidebar-section-chevron.collapsed {
+  transform: rotate(-90deg);
+}
+
+.sidebar-section-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+  flex-shrink: 0;
+  max-height: 600px;
+  opacity: 1;
+  transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+}
+.sidebar-section-group.collapsed {
+  max-height: 0 !important;
+  opacity: 0;
+  pointer-events: none;
+}
 
 .main-content {
   flex: 1;

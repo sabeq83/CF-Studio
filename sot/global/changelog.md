@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.40.27 — Perapian Navigasi Sidebar & Collapsible Exclusive Accordion (11/11/2026)
+- Membersihkan 11 menu navigasi yang tidak terpakai
+- Mengubah nama Multiplier Lab menjadi Multiple Labs
+- Menerapkan collapsible exclusive single-open accordion pada seksi sidebar
+- Auto-expand seksi aktif sesuai rute URL
+- Memperbaiki kompresi layout sidebar dengan flex-shrink dan semantic CSS tokens
+
 ## V2.40.26 — Arsitektur Antrean Auto-Pipeline Sequential FIFO Queue Engine (11/11/2026)
 - Implementasi Batch Snapshot & Window Tolerance pada auto-pipeline-scheduler-runner
 - Sequential FIFO execution loop dengan jeda napas 3 detik per task

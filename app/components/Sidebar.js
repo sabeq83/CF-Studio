@@ -2,22 +2,17 @@
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useMemo } from 'react';
 import ThemeToggle from './ThemeToggle';
 import ContentFlowLogo from './ContentFlowLogo';
 
 const menuKeyMap = {
   '/auto-pipeline': 'pillar_campaign',
-  '/youtube-studio': 'youtube_studio',
-  '/affiliate-studio': 'affiliate_studio',
   '/threads-labs': 'affiliate_studio',
-  '/contentflow-studio': 'content_flow',
   '/content-flow': 'content_flow',
-  '/instant-factory': 'instant_campaign',
   '/re-campaigns': 're_campaign',
   '/pillar-campaigns': 'pillar_campaign',
   '/content-planner': 'content_planner',
-  '/content-automations': 'content_automations',
   '/products': 'product_database',
   '/recipe-library': 'product_database',
   '/deconstruct': 'deconstruct_lab',
@@ -25,19 +20,14 @@ const menuKeyMap = {
   '/recipe-labs': 'recipe_labs',
   '/recipe-exporter': 'recipe_labs',
   '/product-bridge-inject': 'product_bridging',
-  '/sheets-autopilot': 'sheets_autopilot',
   '/video-studio': 'ffmpeg_studio',
   '/tts-studio': 'tts_studio',
-  '/scraper': 'video_library',
   '/settings/brand-profiles': 'brand_profiles',
-  '/settings/universes': 'universe_manager',
   '/settings/presets': 'operator_presets',
   '/settings/visual-identities': 'operator_presets',
   '/settings/users': 'admin_only',
   '/settings/tenants': 'superadmin_only',
-  '/settings': 'system_settings',
-  '/reports': 'reports',
-  '/system-health': 'system_health'
+  '/settings': 'system_settings'
 };
 
 const navItems = [
@@ -51,39 +41,39 @@ const navItems = [
   { label: 'Preset Manager', href: '/settings/presets', icon: '🎛️' },
   { label: 'Visual Identity', href: '/settings/visual-identities', icon: '🎨' },
   { label: 'Brand Profile Manager', href: '/settings/brand-profiles', icon: '🧬' },
-  { label: 'Universe Manager', href: '/settings/universes', icon: '🏰' },
 
   { section: 'WORKFLOW' },
   { label: 'Auto Pipeline', href: '/auto-pipeline', icon: '⚡' },
-  { label: 'YouTube Studio', href: '/youtube-studio', icon: '▶️' },
-  { label: 'Affiliate Studio', href: '/affiliate-studio', icon: '◆' },
   { label: 'Threads Labs', href: '/threads-labs', icon: '🧵' },
   { label: 'RE Campaign', href: '/re-campaigns', icon: '🎬' },
   { label: 'Pillar Campaign', href: '/pillar-campaigns', icon: '🌱' },
-  { label: 'Sheets Autopilot', href: '/sheets-autopilot', icon: '🤖' },
   { label: 'Recipe Labs', href: '/recipe-labs', icon: '🍳' },
-  { label: 'Instant Campaign', href: '/instant-factory', icon: '🚀' },
-  { label: 'Multiplier Lab', href: '/multiplier-lab', icon: '🎛️' },
+  { label: 'Multiple Labs', href: '/multiplier-lab', icon: '🎛️' },
   { label: 'Product Bridging', href: '/product-bridge-inject', icon: '🎯' },
 
   { section: 'PUBLISHING' },
-  { label: 'Recipe Exporter', href: '/recipe-exporter', icon: '📱' },
-  { label: 'ContentFlow Studio', href: '/contentflow-studio', icon: '✨' },
   { label: 'ContentFlow Hub', href: '/content-flow', icon: '📊' },
-  { label: 'Content Automations', href: '/content-automations', icon: '⏱️' },
+  { label: 'Recipe Exporter', href: '/recipe-exporter', icon: '📱' },
 
   { section: 'TOOLS' },
   { label: 'Video Studio', href: '/video-studio', icon: '🎞' },
   { label: 'TTS Studio', href: '/tts-studio', icon: '🎙' },
-  { label: 'Video Library', href: '/scraper', icon: '📼' },
 
   { section: 'SYSTEM' },
-  { label: 'Reports & Token Meter', href: '/reports', icon: '📊' },
+  { label: 'Settings', href: '/settings', icon: '⚙' },
   { label: 'User Management', href: '/settings/users', icon: '👥', adminOnly: true },
   { label: 'Tenant Management', href: '/settings/tenants', icon: '🏢', superadminOnly: true },
-  { label: 'System Health', href: '/system-health', icon: '🩺' },
-  { label: 'Settings', href: '/settings', icon: '⚙' },
 ];
+
+function getSectionForPath(pathname, sections) {
+  if (!pathname || pathname === '/' || pathname === '/dashboard') return null;
+  for (const sec of sections) {
+    if (sec.items.some(item => pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href)))) {
+      return sec.name;
+    }
+  }
+  return null;
+}
 
 function SidebarContent() {
   const pathname = usePathname();
@@ -132,43 +122,59 @@ function SidebarContent() {
     return user?.role !== 'superadmin' && menuKey && Array.isArray(user?.tenantDisabledMenus) && user.tenantDisabledMenus.includes(menuKey);
   };
 
-  const processedItems = [];
-  let currentSection = null;
-  let sectionChildren = [];
+  // Group items by section
+  const groupedSections = useMemo(() => {
+    const sections = [];
+    let currentSec = null;
 
-  for (const item of navItems) {
-    if (item.href === '/') {
-      processedItems.push(item);
-      continue;
-    }
-    if (item.section) {
-      if (currentSection) {
-        const allowedChildren = sectionChildren.filter(c => isMenuAllowed(c));
-        if (allowedChildren.length > 0) {
-          processedItems.push(currentSection);
-          const enabled = allowedChildren.filter(c => !checkIsTenantDisabled(c));
-          const disabled = allowedChildren.filter(c => checkIsTenantDisabled(c));
-          processedItems.push(...enabled, ...disabled);
+    for (const item of navItems) {
+      if (item.href === '/dashboard') continue;
+      if (item.section) {
+        if (currentSec && currentSec.items.length > 0) {
+          sections.push(currentSec);
+        }
+        currentSec = { name: item.section, items: [] };
+      } else if (currentSec) {
+        if (isMenuAllowed(item)) {
+          currentSec.items.push(item);
         }
       }
-      currentSection = item;
-      sectionChildren = [];
-    } else {
-      sectionChildren.push(item);
     }
-  }
-
-  if (currentSection) {
-    const allowedChildren = sectionChildren.filter(c => isMenuAllowed(c));
-    if (allowedChildren.length > 0) {
-      processedItems.push(currentSection);
-      const enabled = allowedChildren.filter(c => !checkIsTenantDisabled(c));
-      const disabled = allowedChildren.filter(c => checkIsTenantDisabled(c));
-      processedItems.push(...enabled, ...disabled);
+    if (currentSec && currentSec.items.length > 0) {
+      sections.push(currentSec);
     }
-  }
+    return sections;
+  }, [user]);
 
-  const visibleItems = processedItems;
+  // Exclusive Accordion state: only 1 section open at any given time
+  const [openSection, setOpenSection] = useState(() => {
+    return getSectionForPath(pathname, [
+      { name: 'PLANNING', items: navItems.filter(i => i.href && ['/content-planner', '/products', '/recipe-library', '/deconstruct', '/settings/presets', '/settings/visual-identities', '/settings/brand-profiles'].includes(i.href)) },
+      { name: 'WORKFLOW', items: navItems.filter(i => i.href && ['/auto-pipeline', '/threads-labs', '/re-campaigns', '/pillar-campaigns', '/recipe-labs', '/multiplier-lab', '/product-bridge-inject'].includes(i.href)) },
+      { name: 'PUBLISHING', items: navItems.filter(i => i.href && ['/content-flow', '/recipe-exporter'].includes(i.href)) },
+      { name: 'TOOLS', items: navItems.filter(i => i.href && ['/video-studio', '/tts-studio'].includes(i.href)) },
+      { name: 'SYSTEM', items: navItems.filter(i => i.href && ['/settings', '/settings/users', '/settings/tenants'].includes(i.href)) },
+    ]) || 'WORKFLOW';
+  });
+
+  // Auto-expand section containing active pathname when route changes
+  useEffect(() => {
+    const activeSec = getSectionForPath(pathname, groupedSections);
+    if (activeSec) {
+      setOpenSection(activeSec);
+    }
+  }, [pathname, groupedSections]);
+
+  const toggleSection = (sectionName) => {
+    setOpenSection(prev => prev === sectionName ? null : sectionName);
+  };
+
+  const enabledMenusEnv = process.env.NEXT_PUBLIC_ENABLED_MENUS;
+  const enabledMenusSet = enabledMenusEnv ? new Set(enabledMenusEnv.split(',')) : null;
+
+  const userBrandAccounts = (user && Array.isArray(user.assignedBrandNames))
+    ? user.assignedBrandNames
+    : [];
 
   return (
     <aside className="sidebar">
@@ -177,7 +183,17 @@ function SidebarContent() {
           <ContentFlowLogo variant="horizontal" size="sm" showTagline={true} />
         </Link>
         <div style={{ marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: '0.62rem', fontWeight: 700, color: '#93C5FD', background: 'rgba(59, 130, 246, 0.15)', border: '1px solid rgba(59, 130, 246, 0.3)', padding: '1px 6px', borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <span style={{
+            fontSize: '0.62rem',
+            fontWeight: 700,
+            color: 'var(--action-primary)',
+            background: 'var(--surface-raised)',
+            border: '1px solid var(--border-subtle)',
+            padding: '1px 6px',
+            borderRadius: '4px',
+            textTransform: 'uppercase',
+            letterSpacing: '0.04em'
+          }}>
             🔒 Internal Enterprise
           </span>
           <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)' }}>
@@ -187,121 +203,149 @@ function SidebarContent() {
       </div>
 
       <nav className="sidebar-nav">
-        {visibleItems.map((item, i) => {
-          if (item.section) {
-            return <div key={`sec_${i}`} className="nav-section">{item.section}</div>;
-          }
+        {/* Top-level Item: Dashboard */}
+        <Link
+          href="/dashboard"
+          className={`nav-link ${pathname === '/dashboard' ? 'active' : ''}`}
+          style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+        >
+          <span className="nav-icon">◈</span>
+          Dashboard
+        </Link>
 
-          const enabledMenusEnv = process.env.NEXT_PUBLIC_ENABLED_MENUS;
-          const enabledMenusSet = enabledMenusEnv ? new Set(enabledMenusEnv.split(',')) : null;
-          const menuKey = menuKeyMap[item.href];
-          const isTenantDisabled = user?.role !== 'superadmin' && menuKey && Array.isArray(user?.tenantDisabledMenus) && user.tenantDisabledMenus.includes(menuKey);
-          const isMenuEnabled = (!enabledMenusSet || enabledMenusSet.has(item.href)) && !isTenantDisabled;
-
-          if (!isMenuEnabled) {
-            return (
-              <div
-                key={item.href}
-                className="nav-link disabled"
-                onClick={() => alert(`Modul "${item.label}" dinonaktifkan oleh Superadmin untuk organisasi/tenant Anda.`)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  opacity: 0.4,
-                  cursor: 'not-allowed',
-                  userSelect: 'none',
-                  padding: '10px 12px',
-                  borderRadius: '6px',
-                  marginBottom: '2px'
-                }}
-                title="Modul ini dinonaktifkan oleh Superadmin"
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span className="nav-icon">{item.icon}</span>
-                  <span style={{ fontSize: '0.85rem' }}>{item.label}</span>
-                </div>
-                <span style={{ fontSize: '12px' }}>🔒</span>
-              </div>
-            );
-          }
-
-          const isActive = pathname === item.href;
-          const isContentFlow = item.href === '/content-flow';
-
-          // Get assigned brand accounts from user
-          const userBrandAccounts = (user && Array.isArray(user.assignedBrandNames))
-            ? user.assignedBrandNames
-            : [];
+        {/* Collapsible Sections (Exclusive Single-Open Accordion) */}
+        {groupedSections.map((sec) => {
+          const isOpen = openSection === sec.name;
 
           return (
-            <div key={item.href}>
-              <Link
-                href={item.href}
-                className={`nav-link ${isActive ? 'active' : ''}`}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+            <div key={sec.name} style={{ flexShrink: 0 }}>
+              {/* Section Header Accordion Trigger */}
+              <div
+                className="sidebar-section-header"
+                onClick={() => toggleSection(sec.name)}
+                role="button"
+                tabIndex={0}
+                aria-expanded={isOpen}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span className="nav-icon">{item.icon}</span>
-                  {item.label}
+                <div className="sidebar-section-title">
+                  <span>{sec.name}</span>
                 </div>
-                {isContentFlow && (
-                  <span style={{ fontSize: '10px', opacity: 0.6 }}>▼</span>
-                )}
-              </Link>
+                <div className="sidebar-section-right">
+                  <span className="sidebar-section-count">{sec.items.length}</span>
+                  <span className={`sidebar-section-chevron ${isOpen ? '' : 'collapsed'}`}>▼</span>
+                </div>
+              </div>
 
-              {/* Sub-menu Brand Accounts for ContentFlow Hub */}
-              {isContentFlow && (pathname.startsWith('/content-flow')) && (
-                <div style={{
-                  paddingLeft: '28px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '4px',
-                  marginTop: '4px',
-                  marginBottom: '8px'
-                }}>
-                  <Link
-                    href="/content-flow?account=all"
-                    className={`sidebar-brand-subtab ${currentAccount === 'all' ? 'sidebar-brand-subtab-active' : ''}`}
-                    style={{
-                      fontSize: '11px',
-                      fontWeight: currentAccount === 'all' ? 700 : 500,
-                      padding: '5px 10px',
-                      borderRadius: '6px',
-                      textDecoration: 'none',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
-                    <span>🌐</span> Semua Akun
-                  </Link>
-                  {userBrandAccounts.map(acc => {
-                    const isSubActive = currentAccount.toLowerCase() === acc.toLowerCase();
+              {/* Collapsible Section Group */}
+              <div className={`sidebar-section-group ${isOpen ? '' : 'collapsed'}`}>
+                {sec.items.map((item) => {
+                  const menuKey = menuKeyMap[item.href];
+                  const isTenantDisabled = checkIsTenantDisabled(item);
+                  const isMenuEnabled = (!enabledMenusSet || enabledMenusSet.has(item.href)) && !isTenantDisabled;
+
+                  if (!isMenuEnabled) {
                     return (
-                      <Link
-                        key={acc}
-                        href={`/content-flow?account=${encodeURIComponent(acc)}`}
-                        className={`sidebar-brand-subtab ${isSubActive ? 'sidebar-brand-subtab-active' : ''}`}
+                      <div
+                        key={item.href}
+                        className="nav-link disabled"
+                        onClick={() => alert(`Modul "${item.label}" dinonaktifkan oleh Superadmin untuk organisasi/tenant Anda.`)}
                         style={{
-                          fontSize: '11px',
-                          fontWeight: isSubActive ? 700 : 500,
-                          padding: '5px 10px',
-                          borderRadius: '6px',
-                          textDecoration: 'none',
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '6px',
-                          transition: 'all 0.2s ease'
+                          justifyContent: 'space-between',
+                          opacity: 0.4,
+                          cursor: 'not-allowed',
+                          userSelect: 'none',
+                          padding: '10px 12px',
+                          borderRadius: '6px',
+                          marginBottom: '2px'
                         }}
+                        title="Modul ini dinonaktifkan oleh Superadmin"
                       >
-                        <span>🏷️</span> @{acc}
-                      </Link>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span className="nav-icon">{item.icon}</span>
+                          <span style={{ fontSize: '0.85rem' }}>{item.label}</span>
+                        </div>
+                        <span style={{ fontSize: '12px' }}>🔒</span>
+                      </div>
                     );
-                  })}
-                </div>
-              )}
+                  }
+
+                  const isActive = pathname === item.href;
+                  const isContentFlow = item.href === '/content-flow';
+
+                  return (
+                    <div key={item.href}>
+                      <Link
+                        href={item.href}
+                        className={`nav-link ${isActive ? 'active' : ''}`}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span className="nav-icon">{item.icon}</span>
+                          {item.label}
+                        </div>
+                        {isContentFlow && (
+                          <span style={{ fontSize: '10px', opacity: 0.6 }}>▼</span>
+                        )}
+                      </Link>
+
+                      {/* Sub-menu Brand Accounts for ContentFlow Hub */}
+                      {isContentFlow && (pathname.startsWith('/content-flow')) && (
+                        <div style={{
+                          paddingLeft: '28px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '4px',
+                          marginTop: '4px',
+                          marginBottom: '8px'
+                        }}>
+                          <Link
+                            href="/content-flow?account=all"
+                            className={`sidebar-brand-subtab ${currentAccount === 'all' ? 'sidebar-brand-subtab-active' : ''}`}
+                            style={{
+                              fontSize: '11px',
+                              fontWeight: currentAccount === 'all' ? 700 : 500,
+                              padding: '5px 10px',
+                              borderRadius: '6px',
+                              textDecoration: 'none',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              transition: 'all 0.2s ease'
+                            }}
+                          >
+                            <span>🌐</span> Semua Akun
+                          </Link>
+                          {userBrandAccounts.map(acc => {
+                            const isSubActive = currentAccount.toLowerCase() === acc.toLowerCase();
+                            return (
+                              <Link
+                                key={acc}
+                                href={`/content-flow?account=${encodeURIComponent(acc)}`}
+                                className={`sidebar-brand-subtab ${isSubActive ? 'sidebar-brand-subtab-active' : ''}`}
+                                style={{
+                                  fontSize: '11px',
+                                  fontWeight: isSubActive ? 700 : 500,
+                                  padding: '5px 10px',
+                                  borderRadius: '6px',
+                                  textDecoration: 'none',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  transition: 'all 0.2s ease'
+                                }}
+                              >
+                                <span>🏷️</span> @{acc}
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           );
         })}
@@ -322,12 +366,13 @@ function SidebarContent() {
                 width: '100%',
                 padding: '0.4rem 0.8rem',
                 borderRadius: '6px',
-                border: 'none',
-                background: 'rgba(239, 68, 68, 0.2)',
-                color: '#f87171',
+                border: '1px solid var(--status-danger-soft)',
+                background: 'var(--status-danger-soft)',
+                color: 'var(--status-danger)',
                 cursor: 'pointer',
                 fontSize: '0.85rem',
-                fontWeight: 500
+                fontWeight: 500,
+                transition: 'all 0.2s ease'
               }}
             >
               🚪 Logout
@@ -340,12 +385,13 @@ function SidebarContent() {
               width: '100%',
               padding: '0.4rem 0.8rem',
               borderRadius: '6px',
-              border: 'none',
-              background: 'rgba(239, 68, 68, 0.2)',
-              color: '#f87171',
+              border: '1px solid var(--status-danger-soft)',
+              background: 'var(--status-danger-soft)',
+              color: 'var(--status-danger)',
               cursor: 'pointer',
               fontSize: '0.85rem',
-              fontWeight: 500
+              fontWeight: 500,
+              transition: 'all 0.2s ease'
             }}
           >
             🚪 Logout / Login
@@ -358,7 +404,7 @@ function SidebarContent() {
 
 export default function Sidebar() {
   return (
-    <Suspense fallback={<aside className="sidebar"><div style={{ padding: '1rem', color: '#a1a1aa' }}>Loading...</div></aside>}>
+    <Suspense fallback={<aside className="sidebar"><div style={{ padding: '1rem', color: 'var(--text-muted)' }}>Loading...</div></aside>}>
       <SidebarContent />
     </Suspense>
   );

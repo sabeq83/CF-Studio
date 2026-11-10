@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi: Perapian Sidebar & Collapsible Sections</title>
+  <style>
+    /* 100% Self-Contained Semantic Design Tokens (Dark & Light Mode) */
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --sidebar-w: 260px;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --link-hover: #a5f3fc;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fb;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e2e8f0;
+      --input-bg: #ffffff;
+      --overlay-subtle: rgba(15, 23, 42, 0.08);
+      --overlay-backdrop: rgba(15, 23, 42, 0.45);
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --text-disabled: #94a3b8;
+      --border-subtle: #dbe4ee;
+      --border-strong: #cbd5e1;
+      --action-primary: #0d9488;
+      --action-primary-hover: #0f766e;
+      --on-action-primary: #ffffff;
+      --link: #0891b2;
+      --link-hover: #0e7490;
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.1);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.1);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.1);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.1);
+      --shadow-card: 0 10px 24px rgba(15, 23, 42, 0.06);
+      --shadow-modal: 0 20px 48px rgba(15, 23, 42, 0.16);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* Sidebar Structure */
+    .app-sidebar {
+      width: var(--sidebar-w);
+      background-color: var(--sidebar);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      flex-shrink: 0;
+      z-index: 20;
+    }
+    .sidebar-header {
+      padding: 18px 16px 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text-primary);
+      font-weight: 700;
+      font-size: 1.05rem;
+      letter-spacing: -0.02em;
+    }
+    .logo-badge {
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      border-radius: var(--radius-xs);
+      background: var(--surface-raised);
+      color: var(--action-primary);
+      border: 1px solid var(--border-subtle);
+      font-weight: 700;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 12px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .sidebar-nav::-webkit-scrollbar {
+      width: 4px;
+    }
+    .sidebar-nav::-webkit-scrollbar-thumb {
+      background: var(--border-subtle);
+      border-radius: 4px;
+    }
+
+    /* Section Accordion Header */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      margin-top: 8px;
+      cursor: pointer;
+      user-select: none;
+      border-radius: var(--radius-xs);
+      transition: var(--transition);
+      flex-shrink: 0;
+    }
+    .section-header:hover {
+      background-color: var(--surface-interactive);
+    }
+    .section-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .section-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .section-count {
+      font-size: 0.65rem;
+      padding: 1px 5px;
+      border-radius: var(--radius-xs);
+      background-color: var(--surface-raised);
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .section-chevron {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-block;
+    }
+    .section-chevron.collapsed {
+      transform: rotate(-90deg);
+    }
+
+    /* Section Items Container */
+    .section-group {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      overflow: hidden;
+      flex-shrink: 0;
+      max-height: 600px;
+      transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+    }
+    .section-group.collapsed {
+      max-height: 0 !important;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Nav Item Link */
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 12px;
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.84rem;
+      font-weight: 500;
+      transition: var(--transition);
+      cursor: pointer;
+      user-select: none;
+      flex-shrink: 0;
+    }
+    .nav-item:hover {
+      background-color: var(--surface-interactive);
+      color: var(--text-primary);
+    }
+    .nav-item.active {
+      background-color: var(--surface-raised);
+      color: var(--action-primary);
+      font-weight: 600;
+      border-left: 3px solid var(--action-primary);
+    }
+    .nav-icon {
+      font-size: 0.95rem;
+      width: 18px;
+      text-align: center;
+      display: inline-block;
+    }
+
+    /* Sidebar Footer */
+    .sidebar-footer {
+      padding: 14px 16px;
+      border-top: 1px solid var(--border-subtle);
+      background-color: var(--sidebar);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+    .user-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--surface-interactive);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.75rem;
+      color: var(--action-primary);
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* Main Preview Canvas */
+    .app-main {
+      flex: 1;
+      padding: 36px 40px;
+      overflow-y: auto;
+    }
+    .preview-card {
+      background-color: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-card);
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: var(--transition);
+    }
+    .btn-primary {
+      background-color: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .btn-outline {
+      background-color: var(--surface-raised);
+      border-color: var(--border-subtle);
+      color: var(--text-secondary);
+    }
+    .btn-outline:hover {
+      background-color: var(--surface-interactive);
+      color: var(--text-primary);
+    }
+    .badge-deleted {
+      background-color: var(--status-danger-soft);
+      color: var(--status-danger);
+      border: 1px solid var(--status-danger);
+      padding: 2px 8px;
+      border-radius: var(--radius-xs);
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .badge-retained {
+      background-color: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+      padding: 2px 8px;
+      border-radius: var(--radius-xs);
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Left Sidebar (Live Simulated Component) -->
+  <aside class="app-sidebar">
+    <div class="sidebar-header">
+      <a href="#" class="brand-logo">
+        <span>⚡ MAKNA Flow</span>
+        <span class="logo-badge">v2.40</span>
+      </a>
+      <button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem;" onclick="toggleTheme()" title="Ganti Tema">🌓</button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <!-- Item Utama: Dashboard -->
+      <a class="nav-item" onclick="setActive(this)">
+        <span class="nav-icon">◈</span>
+        <span>Dashboard</span>
+      </a>
+
+      <!-- 1. SECTION: PLANNING -->
+      <div class="section-header" onclick="toggleSection('planning')">
+        <div class="section-title">
+          <span>PLANNING</span>
+        </div>
+        <div class="section-right">
+          <span class="section-count">7</span>
+          <span class="section-chevron collapsed" id="chevron-planning">▼</span>
+        </div>
+      </div>
+      <div class="section-group collapsed" id="group-planning">
+        <a class="nav-item" onclick="setActive(this)"><span class="nav-icon">🗓️</span><span>Content Planner</span></a>
+        <a class="nav-item" onclick="setActive(this)"><span class="nav-icon">📦</span><span>Product Database</span></a>
+        <a class="nav-item" onclick="setActive(this)"><span class="nav-icon">🍲</span><span>Recipe Library</span></a>
+        <a class="nav-item" onclick="setActive(this)"><span class="nav-icon">🔬</span><span>Deconstruct Lab</span></a>
+        <a class="nav-item" onclick="setActive(this)"><span class="nav-icon">🎛️</span><span>Preset Manager</span></a>
+        <a class="nav-item" onclick="setActive(this)"><span class="nav-icon">🎨</span><span>Visual Identity</span></a>
+        <a class="nav-item" onclick="setActive(this)"><span class="nav-icon">🧬</span><span>Brand Profile Manager</span></a>
+      </div>
+
+      <!-- 2. SECTION: WORKFLOW (Terbuka karena memiliki link aktif) -->
+      <div class="section-header" onclick="toggleSection('workflow')">
+        <div class="section-title">
+          <span>WORKFLOW</span>
+        </div>
+        <div class="section-right">
+          <span class="section-count">7</span>
+          <span class="section-chevron" id="chevron-workflow">▼</span>
+        </div>
+      </div>
+      <div class="section-group" id="group-workflow">
+        <a class="nav-item active" onclick="setActive(this)"><span class="nav-icon">⚡</span><span>Auto Pipeline</span></a>
+        <a class="nav-item" onclick="setActive(this)"><span class="nav-icon">🧵</span><span>Threads Labs</span></a>
+        <a class="nav-item" onclick="setActive(this)"><span class="nav-icon">🎬</span><span>RE Campaign</span></a>
+        <a class="nav-item" onclick="setActive(this)"><span class="nav-icon">🌱</span><span>Pillar Campaign</span></a>
+        <a class="nav-item" onclick="setActive(this)"><span class="nav-icon">🍳</span><span>Recipe Labs</span></a>
+        <a class="nav-item" onclick="setActive(this)"><span class="nav-icon">🎛️</span><span>Multiple Labs</span></a>
+        <a class="nav-item" onclick="setActive(this)"><span class="nav-icon">🎯</span><span>Product Bridging</span></a>
+      </div>
+
+      <!-- 3. SECTION: PUBLISHING -->
+      <div class="section-header" onclick="toggleSection('publishing')">
+        <div class="section-title">
+          <span>PUBLISHING</span>
+        </div>
+        <div class="section-right">
+          <span class="section-count">2</span>
+          <span class="section-chevron collapsed" id="chevron-publishing">▼</span>
+        </div>
+      </div>
+      <div class="section-group collapsed" id="group-publishing">
+        <a class="nav-item" onclick="setActive(this)"><span class="nav-icon">📊</span><span>ContentFlow Hub</span></a>
+        <a class="nav-item" onclick="setActive(this)"><span class="nav-icon">📱</span><span>Recipe Exporter</span></a>
+      </div>
+
+      <!-- 4. SECTION: TOOLS -->
+      <div class="section-header" onclick="toggleSection('tools')">
+        <div class="section-title">
+          <span>TOOLS</span>
+        </div>
+        <div class="section-right">
+          <span class="section-count">2</span>
+          <span class="section-chevron collapsed" id="chevron-tools">▼</span>
+        </div>
+      </div>
+      <div class="section-group collapsed" id="group-tools">
+        <a class="nav-item" onclick="setActive(this)"><span class="nav-icon">🎞</span><span>Video Studio</span></a>
+        <a class="nav-item" onclick="setActive(this)"><span class="nav-icon">🎙</span><span>TTS Studio</span></a>
+      </div>
+
+      <!-- 5. SECTION: SYSTEM -->
+      <div class="section-header" onclick="toggleSection('system')">
+        <div class="section-title">
+          <span>SYSTEM</span>
+        </div>
+        <div class="section-right">
+          <span class="section-count">3</span>
+          <span class="section-chevron collapsed" id="chevron-system">▼</span>
+        </div>
+      </div>
+      <div class="section-group collapsed" id="group-system">
+        <a class="nav-item" onclick="setActive(this)"><span class="nav-icon">⚙</span><span>Settings</span></a>
+        <a class="nav-item" onclick="setActive(this)"><span class="nav-icon">👥</span><span>User Management</span></a>
+        <a class="nav-item" onclick="setActive(this)"><span class="nav-icon">🏢</span><span>Tenant Management</span></a>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar">M</div>
+        <div>
+          <div style="font-weight: 600; color: var(--text-primary); font-size: 0.8125rem;">Mas Benu</div>
+          <div style="font-size: 0.7rem; color: var(--text-muted);">Admin • PT GIM</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Canvas Preview -->
+  <main class="app-main">
+    <div style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <h1 style="font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em;">Simulasi Usulan: Perapian Sidebar & Collapsible Accordion</h1>
+        <p style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 4px;">
+          Silakan coba klik header seksi (<em>PLANNING</em>, <em>WORKFLOW</em>, dll.) di sidebar kiri untuk mencoba buka-tutupnya secara langsung.
+        </p>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-outline" onclick="closeAllSections()">Tutup Semua</button>
+      </div>
+    </div>
+
+    <!-- Perbandingan Sebelum vs Sesudah -->
+    <div class="preview-card">
+      <h2 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 16px;">Ringkasan Penghapusan 11 Menu yang Tidak Digunakan</h2>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <!-- Dihapus -->
+        <div style="background-color: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 18px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <strong style="color: var(--status-danger); font-size: 0.875rem;">11 Menu yang Dihapus dari Sidebar:</strong>
+            <span class="badge-deleted">Dibersihkan</span>
+          </div>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 6px; font-size: 0.8125rem; color: var(--text-secondary);">
+            <li>❌ <strong>Sheets Autopilot</strong> (Workflow)</li>
+            <li>❌ <strong>Instant Campaign</strong> (Workflow)</li>
+            <li>❌ <strong>Affiliate Studio</strong> (Workflow)</li>
+            <li>❌ <strong>Universe Manager</strong> (Planning)</li>
+            <li>❌ <strong>YouTube Studio</strong> (Workflow)</li>
+            <li>❌ <strong>Content Automations</strong> (Publishing)</li>
+            <li>❌ <strong>Video Library (Scraper)</strong> (Tools)</li>
+            <li>❌ <strong>System Health</strong> (System)</li>
+            <li>❌ <strong>Reports & Token Meter</strong> (System)</li>
+            <li>❌ <strong>ContentFlow Studio</strong> (Publishing)</li>
+          </ul>
+        </div>
+
+        <!-- Dipertahankan -->
+        <div style="background-color: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 18px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <strong style="color: var(--status-success); font-size: 0.875rem;">Menu Inti yang Dipertahankan & Dikelompokkan:</strong>
+            <span class="badge-retained">Rapi & Fokus</span>
+          </div>
+          <div style="font-size: 0.8125rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 8px;">
+            <div><strong>PLANNING (7):</strong> Content Planner, Product DB, Recipe Library, Deconstruct, Presets, Visual Identity, Brand Profile.</div>
+            <div><strong>WORKFLOW (7):</strong> Auto Pipeline, Threads Labs, RE Campaign, Pillar Campaign, Recipe Labs, Multiple Labs, Product Bridging.</div>
+            <div><strong>PUBLISHING (2):</strong> ContentFlow Hub, Recipe Exporter.</div>
+            <div><strong>TOOLS (2):</strong> Video Studio, TTS Studio.</div>
+            <div><strong>SYSTEM (3):</strong> Settings, User Management, Tenant Management.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Keunggulan Mekanisme Collapsible -->
+    <div class="preview-card">
+      <h2 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 12px;">Fitur Exclusive Accordion yang Diusulkan</h2>
+      <ul style="display: flex; flex-direction: column; gap: 10px; font-size: 0.875rem; color: var(--text-secondary); padding-left: 20px;">
+        <li><strong>Exclusive Single-Open Accordion:</strong> Jika salah satu seksi menu (misal <em>PLANNING</em>) dibuka, maka seksi lainnya (misal <em>WORKFLOW</em>) otomatis tertutup sehingga sidebar tetap sangat rapi, pendek, dan tidak memerlukan scrolling panjang.</li>
+        <li><strong>Auto-Expand Seksi Aktif:</strong> Seksi yang memuat menu aktif (misal <em>WORKFLOW</em> saat membuka Auto Pipeline) otomatis terbuka sendiri saat halaman dimuat.</li>
+        <li><strong>Transisi Halus:</strong> Buka-tutup menu menggunakan animasi transisi CSS halus tanpa layout jumping.</li>
+      </ul>
+    </div>
+  </main>
+
+  <!-- Interactive JavaScript Simulation -->
+  <script>
+    const sections = ['planning', 'workflow', 'publishing', 'tools', 'system'];
+
+    function toggleSection(secId) {
+      const group = document.getElementById('group-' + secId);
+      const chevron = document.getElementById('chevron-' + secId);
+      if (!group || !chevron) return;
+
+      const isCollapsed = group.classList.contains('collapsed');
+
+      // Tutup SEMUA seksi terlebih dahulu (Single / Exclusive Accordion)
+      sections.forEach(s => {
+        const g = document.getElementById('group-' + s);
+        const c = document.getElementById('chevron-' + s);
+        if (g && c) {
+          g.classList.add('collapsed');
+          c.classList.add('collapsed');
+        }
+      });
+
+      // Jika sebelumnya tertutup, maka buka seksi yang diklik
+      if (isCollapsed) {
+        group.classList.remove('collapsed');
+        chevron.classList.remove('collapsed');
+      }
+    }
+
+    function closeAllSections() {
+      sections.forEach(secId => {
+        const group = document.getElementById('group-' + secId);
+        const chevron = document.getElementById('chevron-' + secId);
+        if (group && chevron) {
+          group.classList.add('collapsed');
+          chevron.classList.add('collapsed');
+        }
+      });
+    }
+
+    function setActive(el) {
+      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+    }
+  </script>
+</body>
+</html>
