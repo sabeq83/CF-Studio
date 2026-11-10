@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup: Auto-Pipeline Threads Content & Series Engine (Kultwit)</title>
+  <style>
+    /* 100% Standalone Semantic Design Tokens (MAKNA Flow Universal Theme) */
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+      --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-subtle: #0d1522;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --border-color: #26354a;
+
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+
+      --focus-ring: #2dd4bf;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+
+      --threads-brand: #ffffff;
+      --threads-line: #334155;
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f8fafc;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f1f5f9;
+      --surface-subtle: #f8fafc;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --input-bg: #f8fafc;
+      --overlay-subtle: rgba(15, 23, 42, 0.08);
+      --overlay-backdrop: rgba(15, 23, 42, 0.45);
+
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --text-disabled: #94a3b8;
+
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --border-color: #e2e8f0;
+
+      --action-primary: #0d9488;
+      --action-primary-hover: #14b8a6;
+      --on-action-primary: #ffffff;
+
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.1);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.1);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.1);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.1);
+
+      --focus-ring: #0d9488;
+      --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.06);
+      --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.15);
+
+      --threads-brand: #000000;
+      --threads-line: #cbd5e1;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-sans);
+    }
+
+    body {
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      padding: 24px 20px 80px 20px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Header Bar */
+    .header-card {
+      background-color: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .header-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .badge-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-strong);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .header-title h1 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 8px;
+      border-radius: var(--radius-xs);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-success {
+      background-color: var(--status-success-soft);
+      color: var(--status-success);
+    }
+
+    .badge-info {
+      background-color: var(--status-info-soft);
+      color: var(--status-info);
+    }
+
+    .badge-threads {
+      background-color: var(--surface-interactive);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .header-title p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .theme-switcher {
+      display: flex;
+      align-items: center;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full);
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .theme-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .theme-btn.active {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Navigation Tabs */
+    .tabs-nav {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 8px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+    }
+
+    .tab-btn:hover {
+      background: var(--surface-raised);
+      color: var(--text-primary);
+    }
+
+    .tab-btn.active {
+      background: var(--surface-interactive);
+      color: var(--action-primary);
+      border-bottom: 2px solid var(--action-primary);
+    }
+
+    /* Main Grid Layout */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 460px 1fr;
+      gap: 24px;
+      align-items: flex-start;
+    }
+
+    @media (max-width: 1100px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Control Panel Card */
+    .panel-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 14px;
+    }
+
+    .panel-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .form-select,
+    .form-input,
+    .form-textarea {
+      background: var(--input-bg);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      outline: none;
+      transition: var(--transition);
+      width: 100%;
+    }
+
+    .form-select:focus,
+    .form-input:focus,
+    .form-textarea:focus {
+      border-color: var(--focus-ring);
+      box-shadow: 0 0 0 2px var(--status-info-soft);
+    }
+
+    /* Format Cards Radio Selection */
+    .format-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .format-card {
+      background: var(--surface-raised);
+      border: 2px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .format-card:hover {
+      border-color: var(--border-strong);
+      background: var(--surface-hover);
+    }
+
+    .format-card.selected {
+      border-color: var(--action-primary);
+      background: var(--surface-interactive);
+    }
+
+    .format-card-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-primary);
+    }
+
+    .format-card-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    /* Visual Provider Pill Selectors */
+    .visual-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .visual-pill {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      padding: 7px 12px;
+      border-radius: var(--radius-full);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .visual-pill.selected {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border-color: var(--action-primary);
+    }
+
+    /* Buttons */
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      padding: 12px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: var(--transition);
+      width: 100%;
+    }
+
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+    }
+
+    .btn-secondary {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      border: 1px solid var(--border-strong);
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+    }
+
+    .btn-secondary:hover {
+      background: var(--surface-hover);
+    }
+
+    /* Threads Series Visualizer (Utas View) */
+    .preview-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .preview-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    /* Threads Chained Feed Container */
+    .threads-feed-chain {
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Single Thread Node in Chain */
+    .thread-node {
+      display: flex;
+      gap: 16px;
+      position: relative;
+    }
+
+    .thread-left-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 44px;
+      flex-shrink: 0;
+    }
+
+    .thread-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: var(--radius-full);
+      object-fit: cover;
+      border: 1px solid var(--border-subtle);
+      z-index: 2;
+    }
+
+    /* Vertical Connecting Line */
+    .thread-vertical-line {
+      width: 2px;
+      flex-grow: 1;
+      background-color: var(--threads-line);
+      margin: 6px 0;
+      min-height: 24px;
+    }
+
+    .thread-node:last-child .thread-vertical-line {
+      display: none;
+    }
+
+    .thread-content-box {
+      flex: 1;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: var(--transition);
+    }
+
+    .thread-content-box:hover {
+      border-color: var(--border-strong);
+    }
+
+    .thread-box-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .thread-author-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .author-username {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--text-primary);
+    }
+
+    .part-pill {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: var(--radius-xs);
+      background: var(--surface-interactive);
+      color: var(--action-primary);
+      border: 1px solid var(--border-strong);
+    }
+
+    .thread-editable-text {
+      font-size: 0.92rem;
+      color: var(--text-primary);
+      line-height: 1.55;
+      background: transparent;
+      border: 1px solid transparent;
+      padding: 4px;
+      border-radius: var(--radius-xs);
+      resize: vertical;
+      width: 100%;
+      min-height: 60px;
+      font-family: inherit;
+    }
+
+    .thread-editable-text:focus {
+      outline: none;
+      background: var(--input-bg);
+      border-color: var(--focus-ring);
+    }
+
+    /* Media Attachment in Thread */
+    .thread-media-attachment {
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border-strong);
+      max-width: 480px;
+      position: relative;
+      margin-top: 4px;
+    }
+
+    .thread-media-img {
+      width: 100%;
+      height: 240px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .media-badge {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      color: #fff;
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .thread-bottom-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 6px;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .thread-char-count {
+      font-size: 0.75rem;
+    }
+
+    .thread-icons {
+      display: flex;
+      gap: 14px;
+      font-size: 1rem;
+    }
+
+    /* Schedule View Layout (Tab 2) */
+    .schedule-view {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .slot-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .slot-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .slot-time {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--action-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .slot-body {
+      background: var(--surface-raised);
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface-raised);
+      border: 1px solid var(--action-primary);
+      color: var(--text-primary);
+      padding: 14px 22px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-modal);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 9999;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <!-- Header Card -->
+    <div class="header-card">
+      <div class="header-info">
+        <div class="badge-icon">🧵</div>
+        <div class="header-title">
+          <h1>
+            Auto-Pipeline: Threads Series Content Engine
+            <span class="badge-status badge-success">● Repliz Scheduled</span>
+            <span class="badge-status badge-info">⚡ 1-Klik / Cron Autopilot</span>
+          </h1>
+          <p>Mesin otomatis pembuat postingan berseri (Kultwit Utas 3–5 Part) & penayang terjadwal ke Threads via Repliz API.</p>
+        </div>
+      </div>
+
+      <div class="theme-switcher">
+        <button id="darkBtn" class="theme-btn active" onclick="setTheme('dark')">🌙 Dark</button>
+        <button id="lightBtn" class="theme-btn" onclick="setTheme('light')">☀️ Light</button>
+      </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchMainTab('generator')">
+        <span>⚡ Mode 1-Klik Generator & Utas Visualizer</span>
+      </button>
+      <button class="tab-btn" onclick="switchMainTab('schedule')">
+        <span>⏰ Jadwal Harian & Kalender Antrean (Auto-Pipeline Cron)</span>
+      </button>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 1: 1-KLIK GENERATOR & SERIES VISUALIZER -->
+    <!-- ========================================== -->
+    <div id="tab-generator" class="main-grid">
+
+      <!-- Left Column: Generator Controls -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>⚙️</span> Parameter Utas 1-Klik
+          </div>
+          <span class="part-pill">Gemini Single-Pass</span>
+        </div>
+
+        <!-- Akun Selector -->
+        <div class="form-group">
+          <label class="form-label">
+            <span>Pilih Akun Threads</span>
+            <span style="font-size: 0.75rem; color: var(--action-primary); cursor: pointer;" onclick="showToast('Akun tersinkron dari Repliz')">2 Akun Terhubung</span>
+          </label>
+          <select id="selectAccount" class="form-select" onchange="changeAccount(this.value)">
+            <option value="kost_sasyahouse" selected>@kost_sasyahouse (Sasya House)</option>
+            <option value="nutribake_id">@nutribake_id (NutriBake ID)</option>
+          </select>
+        </div>
+
+        <!-- Tipe Format -->
+        <div class="form-group">
+          <label class="form-label">Format Konten</label>
+          <div class="format-options">
+            <div id="formatSeries" class="format-card selected" onclick="selectFormat('series')">
+              <div class="format-card-title">🧵 Utas Berseri</div>
+              <div class="format-card-desc">1 Hook + 3-4 Balasan (Kultwit berantai pemicu engagement & viralitas)</div>
+            </div>
+            <div id="formatSingle" class="format-card" onclick="selectFormat('single')">
+              <div class="format-card-title">📝 Single Post</div>
+              <div class="format-card-desc">1 Postingan tunggal pendek (Punchy text / Micro thoughts)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tujuan Postingan / Jenis Produk (Revisi 1) -->
+        <div class="form-group">
+          <label class="form-label">
+            <span>Tujuan / Jenis Produk</span>
+            <span style="font-size: 0.75rem; color: var(--action-primary);">Fleksibel 3 Mode</span>
+          </label>
+          <select id="postObjective" class="form-select" onchange="changePostObjective(this.value)">
+            <option value="personal_product" selected>🏢 Produk / Layanan Pribadi (Bisnis Sendiri)</option>
+            <option value="affiliate">🛍️ Produk Affiliate Shopee (Komisi)</option>
+            <option value="pure_organic">💡 Cerita / Edukasi Murni (Tanpa Jualan / Engagement)</option>
+          </select>
+        </div>
+
+        <!-- Container Input Produk Pribadi -->
+        <div id="personalProductBox" class="form-group" style="background: var(--surface-subtle); border: 1px dashed var(--border-strong); padding: 12px; border-radius: var(--radius-sm);">
+          <label class="form-label" style="color: var(--action-primary);">Detail Produk / Layanan Pribadi</label>
+          <input type="text" id="personalProdName" class="form-input" style="margin-bottom: 8px;" placeholder="Nama Produk/Jasa: misal Kamar Deluxe Sasya House" value="Kamar Kost Deluxe Eksklusif Sasya House" oninput="updatePersonalProduct()">
+          <input type="text" id="personalProdCta" class="form-input" placeholder="CTA / Link: misal DM Instagram @kost_sasyahouse / WA" value="DM langsung ke @kost_sasyahouse atau cek link WA di Bio untuk promo bulan ini!" oninput="updatePersonalProduct()">
+        </div>
+
+        <!-- Container Input Produk Affiliate Shopee (Hidden by default, shown if affiliate selected) -->
+        <div id="affiliateProductBox" class="form-group" style="display: none; background: var(--surface-subtle); border: 1px dashed var(--border-strong); padding: 12px; border-radius: var(--radius-sm);">
+          <label class="form-label">
+            <span>Pilih Produk Shopee</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Katalog Shopee</span>
+          </label>
+          <select id="selectProduct" class="form-select" onchange="changeProduct(this.value)">
+            <option value="prod_cable_box" selected>📦 Cable Management Box Organizer (Rp 45.000)</option>
+            <option value="prod_mini_vacuum">🧹 Mini Desktop Vacuum Cleaner USB (Rp 68.000)</option>
+            <option value="prod_diffuser">🌿 Aromatherapy Humidifier Wood Grain (Rp 89.000)</option>
+            <option value="auto_random">🎲 [Pilih Otomatis Produk Terlaris]</option>
+          </select>
+        </div>
+
+        <!-- Container Input Cerita Murni (Hidden by default) -->
+        <div id="pureOrganicBox" class="form-group" style="display: none; background: var(--surface-subtle); border: 1px dashed var(--border-strong); padding: 12px; border-radius: var(--radius-sm);">
+          <label class="form-label">Fokus Topik Cerita</label>
+          <input type="text" id="pureOrganicTopic" class="form-input" placeholder="Topik curhat/tips: misal Pengalaman pertama ngekos hemat" value="Cara hemat budget makan anak kos tanpa kelaparan" oninput="updatePureOrganic()">
+        </div>
+
+        <!-- Pilihan Visual Media: HANYA G-Labs & Text-Only (Revisi 2) -->
+        <div class="form-group">
+          <label class="form-label">
+            <span>Sumber Visual Media (Foto)</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Hanya 2 Opsi</span>
+          </label>
+          <div class="visual-pills">
+            <div id="pillGlabs" class="visual-pill selected" onclick="selectVisualPill('glabs')">🎨 G-Labs AI Image (Node 2)</div>
+            <div id="pillNone" class="visual-pill" onclick="selectVisualPill('none')">🚫 Tanpa Foto (Text-Only)</div>
+          </div>
+          <!-- Input Prompt Tambahan G-Labs -->
+          <div id="glabsPromptRow" style="margin-top: 6px;">
+            <input type="text" id="glabsPromptInput" class="form-input" style="font-size: 0.8rem;" placeholder="Prompt Suasana Visual (Opsional)" value="Cozy modern minimalist bedroom with clean bed and soft warm natural lighting, aesthetic interior photorealistic 8k">
+          </div>
+        </div>
+
+        <!-- Tone of Voice -->
+        <div class="form-group">
+          <label class="form-label">Gaya Bahasa / Persona</label>
+          <select class="form-select">
+            <option selected>🗣️ Curhat Santai & Storytelling Anak Kos</option>
+            <option>💡 Tips & Trik Solutif Praktis</option>
+            <option>🔥 Hot Take / Review Jujur Terbuka</option>
+            <option>✨ Minimalist Aesthetics & Life Hack</option>
+          </select>
+        </div>
+
+        <!-- Trigger Button -->
+        <button id="btnGenerate" class="btn-primary" onclick="simulate1ClickGeneration()">
+          <span id="btnGenIcon">⚡</span>
+          <span id="btnGenText">Jalankan 1-Klik Generate Utas</span>
+        </button>
+
+        <p style="font-size: 0.75rem; color: var(--text-muted); text-align: center;">
+          Diproduksi dalam ~4 detik oleh Gemini AI Engine tanpa beban rendering GPU.
+        </p>
+      </div>
+
+      <!-- Right Column: Interactive Threads Chain Preview -->
+      <div class="preview-card">
+        <div class="preview-header">
+          <div>
+            <h2 style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">
+              Visualizer Rangkaian Utas (Live Editable)
+            </h2>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">
+              Preview rantai balasan khas Threads sebelum didelegasikan ke jadwal Repliz
+            </span>
+          </div>
+
+          <div class="preview-actions">
+            <button class="btn-secondary" onclick="addNewReplyPart()">
+              <span>➕ Tambah Balasan</span>
+            </button>
+            <button class="btn-primary" style="width: auto; padding: 10px 18px;" onclick="scheduleSeriesToRepliz()">
+              <span>📅 Jadwalkan ke Repliz</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Threads Feed Chain with Connecting Lines -->
+        <div class="threads-feed-chain" id="threadsFeedContainer">
+
+          <!-- Part 1: Parent Hook -->
+          <div class="thread-node" id="nodePart1">
+            <div class="thread-left-col">
+              <img id="avatarNode1" class="thread-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop" alt="avatar">
+              <div class="thread-vertical-line"></div>
+            </div>
+            <div class="thread-content-box">
+              <div class="thread-box-header">
+                <div class="thread-author-meta">
+                  <span class="author-username" id="userNode1">kost_sasyahouse</span>
+                  <span class="badge-threads">● Threads</span>
+                </div>
+                <span class="part-pill">Part 1: The Hook (Parent)</span>
+              </div>
+              <textarea class="thread-editable-text" oninput="updateCharCount(this, 'count1')">Gue baru sadar, kebiasaan sepele naruh colokan kabel di lantai kosan itu bahaya banget dan bikin kamar keliatan sumpek kayak gudang rongsokan. 
+
+Setelah riset kecil-kecilan, ternyata ada 3 trik gampang biar kabel estetik & aman. Simak utas singkat ini 🧵👇</textarea>
+              <div class="thread-bottom-bar">
+                <span class="thread-char-count" id="count1">264 karakter</span>
+                <div class="thread-icons">❤️ 💬 🔁 ✈️</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Part 2: The Problem -->
+          <div class="thread-node" id="nodePart2">
+            <div class="thread-left-col">
+              <img id="avatarNode2" class="thread-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop" alt="avatar">
+              <div class="thread-vertical-line"></div>
+            </div>
+            <div class="thread-content-box">
+              <div class="thread-box-header">
+                <div class="thread-author-meta">
+                  <span class="author-username" id="userNode2">kost_sasyahouse</span>
+                </div>
+                <span class="part-pill">Part 2: The Problem</span>
+              </div>
+              <textarea class="thread-editable-text" oninput="updateCharCount(this, 'count2')">Pertama, kabel colokan yang numpuk di lantai itu sarang debu dan rawan banget keinjak pas buru-buru. 
+
+Belum lagi kalau lagi apes ketumpahan air minum waktu tidur. Suasana kamar langsung kerasa semrawut dan bikin mood rebahan jadi hilang total.</textarea>
+              <div class="thread-bottom-bar">
+                <span class="thread-char-count" id="count2">249 karakter</span>
+                <div class="thread-icons">❤️ 💬 🔁 ✈️</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Part 3: The Solution -->
+          <div class="thread-node" id="nodePart3">
+            <div class="thread-left-col">
+              <img id="avatarNode3" class="thread-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop" alt="avatar">
+              <div class="thread-vertical-line"></div>
+            </div>
+            <div class="thread-content-box">
+              <div class="thread-box-header">
+                <div class="thread-author-meta">
+                  <span class="author-username" id="userNode3">kost_sasyahouse</span>
+                </div>
+                <span class="part-pill">Part 3: The Solution</span>
+              </div>
+              <textarea class="thread-editable-text" oninput="updateCharCount(this, 'count3')">Trik paling simpel: isolasi semua colokan ke dalam satu wadah tertutup yang punya lubang ventilasi panas. 
+
+Selain bikin lantai gampang disapu bebas sawang, ruangan 3x3 pun langsung keliatan 2x lebih lega dan modern ala kamar Pinterest.</textarea>
+              <div class="thread-bottom-bar">
+                <span class="thread-char-count" id="count3">247 karakter</span>
+                <div class="thread-icons">❤️ 💬 🔁 ✈️</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Part 4: The Proof & Photo -->
+          <div class="thread-node" id="nodePart4">
+            <div class="thread-left-col">
+              <img id="avatarNode4" class="thread-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop" alt="avatar">
+              <div class="thread-vertical-line"></div>
+            </div>
+            <div class="thread-content-box">
+              <div class="thread-box-header">
+                <div class="thread-author-meta">
+                  <span class="author-username" id="userNode4">kost_sasyahouse</span>
+                </div>
+                <span class="part-pill">Part 4: Bukti & Visual</span>
+              </div>
+              <textarea id="textPart4" class="thread-editable-text" oninput="updateCharCount(this, 'count4')">Ini suasana kamar setelah ditata rapi. Pencahayaan alami dari jendela bikin sirkulasi udara seger dan nyaman banget buat istirahat sehabis kerja/kuliah seharian. 
+
+Bener-bener definisi kamar impian anak kos yang tenang dan estetik:</textarea>
+              
+              <!-- Lampiran Foto G-Labs AI Ambient -->
+              <div class="thread-media-attachment" id="mediaBoxPart4">
+                <img id="imgPart4" class="thread-media-img" src="https://images.unsplash.com/photo-1513694203232-719a280e022f?w=800&auto=format&fit=crop" alt="Cozy Bedroom">
+                <div class="media-badge">
+                  <span id="mediaBadgeText">🎨 Generated by G-Labs (Node 2)</span>
+                </div>
+              </div>
+
+              <div class="thread-bottom-bar">
+                <span class="thread-char-count" id="count4">236 karakter + 1 Foto AI</span>
+                <div class="thread-icons">❤️ 💬 🔁 ✈️</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Part 5: CTA / Link -->
+          <div class="thread-node" id="nodePart5">
+            <div class="thread-left-col">
+              <img id="avatarNode5" class="thread-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop" alt="avatar">
+              <div class="thread-vertical-line"></div>
+            </div>
+            <div class="thread-content-box" style="border-color: var(--action-primary); background: var(--surface-subtle);">
+              <div class="thread-box-header">
+                <div class="thread-author-meta">
+                  <span class="author-username" id="userNode5">kost_sasyahouse</span>
+                  <span class="badge-status badge-info" id="badgePart5">🏢 Produk Pribadi</span>
+                </div>
+                <span class="part-pill" id="partPill5">Part 5: CTA Produk Pribadi</span>
+              </div>
+              <textarea id="textPart5" class="thread-editable-text" oninput="updateCharCount(this, 'count5')">Buat temen-temen yang lagi cari kamar kost eksklusif & tenang di area strategis, unit Kamar Deluxe di Sasya House kebetulan lagi ada 1 slot kosong!
+
+Langsung DM aja ke @kost_sasyahouse atau hubungi WA di Bio profil ya buat jadwal survey. First come, first served! ✨</textarea>
+              <div class="thread-bottom-bar">
+                <span class="thread-char-count" id="count5">282 karakter</span>
+                <div class="thread-icons">❤️ 💬 🔁 ✈️</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: JADWAL RUTIN (AUTO-PIPELINE CRON)   -->
+    <!-- ========================================== -->
+    <div id="tab-schedule" class="schedule-view" style="display: none;">
+      
+      <div class="panel-card">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>⏰</span> Konfigurasi Jadwal Harian Auto-Pipeline (Threads Full Autopilot)
+          </div>
+          <span class="badge-status badge-success">● Scheduler Active</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
+          <div class="form-group">
+            <label class="form-label">Nama Jadwal Pipeline</label>
+            <input type="text" class="form-input" value="Harian Sasya House Lifestyle (@kost_sasyahouse)">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Akun Threads Terpilih</label>
+            <select class="form-select">
+              <option selected>@kost_sasyahouse (Sasya House)</option>
+              <option>@nutribake_id (NutriBake ID)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Fokus Konten Rutin</label>
+            <select class="form-select">
+              <option selected>🏢 Produk Pribadi (Promosi Kamar Kos Sasya House)</option>
+              <option>🛍️ Produk Affiliate Shopee (Komisi)</option>
+              <option>💡 Cerita / Tips Murni (Engagement & Follower)</option>
+              <option>🔀 Mix Otomatis (Rotasi Seimbang Tiap Hari)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Sumber Visual Media</label>
+            <select class="form-select">
+              <option selected>🎨 G-Labs AI Ambient Image (Node 2)</option>
+              <option>🚫 Tanpa Foto (Text-Only)</option>
+              <option>🔀 Mix (Pagi Text-Only, Malam G-Labs Foto)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Frekuensi Harian</label>
+            <select class="form-select">
+              <option selected>3x Sehari (09:30, 13:00, 20:30 WIB)</option>
+              <option>2x Sehari (12:00, 19:30 WIB)</option>
+              <option>4x Sehari (08:00, 12:30, 17:00, 21:00 WIB)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Mode Eksekusi Publikasi</label>
+            <select class="form-select">
+              <option selected>🚀 Full Autopilot (Langsung Jadwal ke Repliz)</option>
+              <option>📝 Draft Queue (Perlu Approval Manual di Threads Labs)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button class="btn-secondary" onclick="showToast('Jadwal ditrigger instan!')">⚡ Test Trigger Sekarang</button>
+          <button class="btn-primary" style="width: auto;" onclick="showToast('✓ Konfigurasi Jadwal Disimpan!')">💾 Simpan Jadwal</button>
+        </div>
+      </div>
+
+      <!-- Upcoming Scheduled Queue -->
+      <div class="panel-title" style="margin-top: 10px;">
+        <span>📅</span> Antrean Konten Threads Mendatang (Next 3 Slots)
+      </div>
+
+      <div class="schedule-grid">
+        <div class="slot-card">
+          <div class="slot-header">
+            <div class="slot-time"><span>☀️</span> 09:30 WIB (Pagi Ini)</div>
+            <span class="badge-status badge-success">Ready to Publish</span>
+          </div>
+          <div class="slot-body">
+            <strong>🧵 Utas 5-Part: Solusi Kamar Sempit & Meja Belajar</strong>
+            <p>Produk: Foldable Wall Table Shopee (Rp 120.000)</p>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Status: Terdaftar di Repliz Cloud Schedule</span>
+          </div>
+        </div>
+
+        <div class="slot-card">
+          <div class="slot-header">
+            <div class="slot-time"><span>🍱</span> 13:00 WIB (Siang Ini)</div>
+            <span class="badge-status badge-info">Queued</span>
+          </div>
+          <div class="slot-body">
+            <strong>🧵 Utas 4-Part: Masak Mie Instan Bebas Minyak & Kerak</strong>
+            <p>Produk: Panci Elektrik Serbaguna Keramik (Rp 75.000)</p>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Status: Siap di-dispatch</span>
+          </div>
+        </div>
+
+        <div class="slot-card">
+          <div class="slot-header">
+            <div class="slot-time"><span>🌙</span> 20:30 WIB (Malam Ini)</div>
+            <span class="badge-status badge-info">Queued</span>
+          </div>
+          <div class="slot-body">
+            <strong>🧵 Utas 5-Part: Trik Tidur Nyenyak Anti Nyamuk & Suara Bising</strong>
+            <p>Produk: Kelambu Lipat Portable + Earplugs Soft (Rp 55.000)</p>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Status: Siap di-dispatch</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Toast Notification Popup -->
+  <div class="toast" id="toastBox">
+    <span id="toastIcon">✓</span>
+    <span id="toastMessage">Notifikasi sistem</span>
+  </div>
+
+  <script>
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      document.getElementById('darkBtn').classList.toggle('active', theme === 'dark');
+      document.getElementById('lightBtn').classList.toggle('active', theme === 'light');
+    }
+
+    function switchMainTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+        btn.classList.toggle('active', (tab === 'generator' && idx === 0) || (tab === 'schedule' && idx === 1));
+      });
+      document.getElementById('tab-generator').style.display = tab === 'generator' ? 'grid' : 'none';
+      document.getElementById('tab-schedule').style.display = tab === 'schedule' ? 'flex' : 'none';
+    }
+
+    function selectFormat(type) {
+      document.getElementById('formatSeries').classList.toggle('selected', type === 'series');
+      document.getElementById('formatSingle').classList.toggle('selected', type === 'single');
+      
+      const nodes = [document.getElementById('nodePart2'), document.getElementById('nodePart3'), document.getElementById('nodePart4'), document.getElementById('nodePart5')];
+      nodes.forEach(n => {
+        if (n) n.style.display = type === 'series' ? 'flex' : 'none';
+      });
+
+      const hookPill = document.querySelector('#nodePart1 .part-pill');
+      if (hookPill) {
+        hookPill.textContent = type === 'series' ? 'Part 1: The Hook (Parent)' : 'Single Post Utama';
+      }
+
+      showToast(type === 'series' ? 'Format diubah ke: Utas Berseri (5 Part)' : 'Format diubah ke: Single Post');
+    }
+
+    function selectVisualPill(mode) {
+      document.getElementById('pillGlabs').classList.toggle('selected', mode === 'glabs');
+      document.getElementById('pillNone').classList.toggle('selected', mode === 'none');
+      
+      const mediaBox = document.getElementById('mediaBoxPart4');
+      const glabsRow = document.getElementById('glabsPromptRow');
+      const countEl = document.getElementById('count4');
+
+      if (mode === 'none') {
+        if (mediaBox) mediaBox.style.display = 'none';
+        if (glabsRow) glabsRow.style.display = 'none';
+        if (countEl) countEl.textContent = '236 karakter (Text-Only)';
+        showToast('Visual diubah ke: Tanpa Foto (Text-Only)');
+      } else {
+        if (mediaBox) mediaBox.style.display = 'block';
+        if (glabsRow) glabsRow.style.display = 'block';
+        if (countEl) countEl.textContent = '236 karakter + 1 Foto AI';
+        showToast('Visual diubah ke: G-Labs AI Ambient Image (Node 2)');
+      }
+    }
+
+    function changePostObjective(obj) {
+      const personalBox = document.getElementById('personalProductBox');
+      const affiliateBox = document.getElementById('affiliateProductBox');
+      const organicBox = document.getElementById('pureOrganicBox');
+
+      personalBox.style.display = obj === 'personal_product' ? 'flex' : 'none';
+      affiliateBox.style.display = obj === 'affiliate' ? 'flex' : 'none';
+      organicBox.style.display = obj === 'pure_organic' ? 'flex' : 'none';
+
+      const badgePart5 = document.getElementById('badgePart5');
+      const pillPart5 = document.getElementById('partPill5');
+      const textPart5 = document.getElementById('textPart5');
+
+      if (obj === 'personal_product') {
+        badgePart5.textContent = '🏢 Produk Pribadi';
+        badgePart5.className = 'badge-status badge-info';
+        pillPart5.textContent = 'Part 5: CTA Produk Pribadi';
+        updatePersonalProduct();
+        showToast('Tujuan diubah: Promosi Produk/Layanan Pribadi');
+      } else if (obj === 'affiliate') {
+        badgePart5.textContent = '🛒 Link Affiliate';
+        badgePart5.className = 'badge-status badge-success';
+        pillPart5.textContent = 'Part 5: Spill & CTA Shopee';
+        textPart5.value = `Banyak yang nanya di DM beli di mana, gue co di toko official Shopee ini ya:\n🔗 https://s.shopee.co.id/aff_cablebox_88 \n\nMumpung lagi ada flash sale + gratis ongkir ekstra. Semoga bermanfaat buat temen-temen! Bookmark/Repost jika ngebantu ya! 🙌`;
+        updateCharCount(textPart5, 'count5');
+        showToast('Tujuan diubah: Rekomendasi Produk Shopee Affiliate');
+      } else if (obj === 'pure_organic') {
+        badgePart5.textContent = '💬 Diskusi Murni';
+        badgePart5.className = 'badge-status badge-threads';
+        pillPart5.textContent = 'Part 5: Ajakan Diskusi / Poll';
+        textPart5.value = `Nah itu 3 hal penting yang menurut gue wajib diperhatiin pas baru pertama kali ngatur kamar sendiri.\n\nKalian punya pengalaman serupa atau tips hemat lainnya? Spill cerita kalian di kolom replies ya! Repost/Bookmark kalau relate 🙌`;
+        updateCharCount(textPart5, 'count5');
+        showToast('Tujuan diubah: Cerita / Edukasi Murni (Tanpa Jualan)');
+      }
+    }
+
+    function updatePersonalProduct() {
+      const name = document.getElementById('personalProdName').value;
+      const cta = document.getElementById('personalProdCta').value;
+      const textPart5 = document.getElementById('textPart5');
+      textPart5.value = `Buat temen-temen yang lagi cari ${name || 'rekomendasi'}, kebetulan slot pendaftaran/ketersediaan minggu ini masih dibuka!\n\n${cta || 'Hubungi kami via DM untuk info lebih lanjut!'} First come, first served! ✨`;
+      updateCharCount(textPart5, 'count5');
+    }
+
+    function updatePureOrganic() {
+      const topic = document.getElementById('pureOrganicTopic').value;
+      const textPart5 = document.getElementById('textPart5');
+      textPart5.value = `Itu tadi sedikit cerita dan insight seputar "${topic || 'tips sehari-hari'}".\n\nKalian ada pandangan lain atau pengalaman seru soal ini? Drop cerita kalian di replies bawah ya! Jangan lupa Repost jika ngebantu! 🙌`;
+      updateCharCount(textPart5, 'count5');
+    }
+
+    function changeAccount(acc) {
+      const isSasya = acc === 'kost_sasyahouse';
+      const userText = isSasya ? 'kost_sasyahouse' : 'nutribake_id';
+      const avatarSrc = isSasya 
+        ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop'
+        : 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=100&auto=format&fit=crop';
+
+      for (let i = 1; i <= 5; i++) {
+        const u = document.getElementById(`userNode${i}`);
+        const a = document.getElementById(`avatarNode${i}`);
+        if (u) u.textContent = userText;
+        if (a) a.src = avatarSrc;
+      }
+
+      // Update personal product preset for this account
+      const prodNameInput = document.getElementById('personalProdName');
+      const prodCtaInput = document.getElementById('personalProdCta');
+      const imgPart4 = document.getElementById('imgPart4');
+      const glabsPrompt = document.getElementById('glabsPromptInput');
+
+      if (isSasya) {
+        prodNameInput.value = 'Kamar Kost Deluxe Eksklusif Sasya House';
+        prodCtaInput.value = 'DM langsung ke @kost_sasyahouse atau cek link WA di Bio untuk promo bulan ini!';
+        imgPart4.src = 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=800&auto=format&fit=crop';
+        glabsPrompt.value = 'Cozy modern minimalist bedroom with clean bed and soft warm natural lighting, aesthetic interior photorealistic 8k';
+      } else {
+        prodNameInput.value = 'Paket Artisan Sourdough & Granola NutriBake';
+        prodCtaInput.value = 'Order via DM @nutribake_id atau klik link WhatsApp di Bio untuk fresh delivery besok pagi!';
+        imgPart4.src = 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&auto=format&fit=crop';
+        glabsPrompt.value = 'Freshly baked sourdough artisan bread on wooden cutting board with rustic bakery ambience, photorealistic 8k';
+      }
+
+      if (document.getElementById('postObjective').value === 'personal_product') {
+        updatePersonalProduct();
+      }
+
+      showToast(`Akun aktif berganti ke @${userText}`);
+    }
+
+    function changeProduct(val) {
+      showToast(`Produk target diperbarui: ${val}`);
+    }
+
+    function updateCharCount(textarea, countId) {
+      const len = textarea.value.length;
+      const el = document.getElementById(countId);
+      if (el) el.textContent = `${len} karakter`;
+    }
+
+    function simulate1ClickGeneration() {
+      const btn = document.getElementById('btnGenerate');
+      const icon = document.getElementById('btnGenIcon');
+      const text = document.getElementById('btnGenText');
+      const obj = document.getElementById('postObjective').value;
+      const isNone = document.getElementById('pillNone').classList.contains('selected');
+
+      btn.disabled = true;
+      icon.textContent = '⏳';
+      text.textContent = 'Merangkai Utas dengan Gemini AI...';
+
+      setTimeout(() => {
+        if (isNone) {
+          text.textContent = 'Menyusun Struktur Text-Only & CTA...';
+        } else {
+          text.textContent = 'Menyiapkan Request Visual ke G-Labs Node 2...';
+        }
+      }, 1400);
+
+      setTimeout(() => {
+        btn.disabled = false;
+        icon.textContent = '⚡';
+        text.textContent = 'Jalankan 1-Klik Generate Utas';
+        const msg = obj === 'personal_product' 
+          ? '✓ Berhasil me-generate Utas Promosi Produk Pribadi!' 
+          : (obj === 'affiliate' ? '✓ Berhasil me-generate Utas Affiliate Shopee!' : '✓ Berhasil me-generate Utas Cerita/Edukasi Murni!');
+        showToast(msg);
+      }, 2800);
+    }
+
+    function scheduleSeriesToRepliz() {
+      showToast('🚀 Rangkaian Utas 5-Part Berhasil Didaftarkan ke Jadwal Repliz!');
+    }
+
+    function addNewReplyPart() {
+      showToast('Part baru ditambahkan ke antrean balasan');
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toastBox');
+      const m = document.getElementById('toastMessage');
+      m.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3500);
+    }
+  </script>
+
+</body>
+
+</html>
+

@@ -214,6 +214,28 @@ export const POST = withTenantContext(async (request, _context, user) => {
           ...(body.overrides || {})
         }
       });
+    } else if (pipelineType === 'threads_series') {
+      const { executeAutonomousThreadsSeriesPipeline } = await import('../../../../../lib/threads-series-pipeline.js');
+      result = await executeAutonomousThreadsSeriesPipeline({
+        schedule: {
+          id: `manual_${Date.now()}`,
+          auto_publish_enabled: body.auto_publish !== false,
+          repliz_account_ids: body.account_id ? [body.account_id] : []
+        },
+        pipelineConfig: {
+          account_id: body.account_id,
+          account_username: body.account_username,
+          post_objective: body.post_objective || 'personal_product',
+          personal_product_name: body.personal_product_name,
+          personal_product_cta: body.personal_product_cta,
+          affiliate_product_title: body.affiliate_product_title,
+          affiliate_product_link: body.affiliate_product_link,
+          pure_organic_topic: body.pure_organic_topic,
+          visual_mode: body.visual_mode || 'glabs'
+        },
+        tenantId,
+        targetPublishIso: body.publish_time || new Date(Date.now() + 10 * 60 * 1000).toISOString()
+      });
     } else if (pipelineType === 'recipe_labs') {
       result = await executeAutonomousRecipeLabsPipeline({
         brandId: body.brand_id || body.brandId,

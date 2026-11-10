@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import Link from 'next/link';
 
 export function ThreadsAffiliateRadar({ brandId, brandName }) {
   // State data utama
@@ -537,6 +538,28 @@ export function ThreadsAffiliateRadar({ brandId, brandName }) {
             }}>🔄</span>
             <span>{syncingAccounts ? 'Menyinkronkan...' : 'Sync Akun Threads'}</span>
           </button>
+
+          {/* Tombol Pintasan ke Auto-Pipeline Utas Berseri */}
+          <Link
+            href="/auto-pipeline"
+            style={{
+              backgroundColor: 'var(--surface-raised)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border-strong)',
+              padding: '9px 16px',
+              borderRadius: 'var(--radius-sm, 8px)',
+              fontSize: '0.85rem',
+              fontWeight: 700,
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'var(--transition)'
+            }}
+          >
+            <span>⚡</span>
+            <span>Auto-Pipeline Utas Berseri</span>
+          </Link>
 
           {/* Tombol Scan Threads Sekarang */}
           <button

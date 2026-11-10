@@ -3,6 +3,7 @@
 import Sidebar from '../components/Sidebar';
 import ScheduleCalendarView from '../components/ScheduleCalendarView';
 import ScheduleTableView from '../components/ScheduleTableView';
+import ThreadsSeriesForm from './ThreadsSeriesForm';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { GRID_LAYOUT_COORDINATES } from '@/lib/core/GridCoordinates';
@@ -214,6 +215,17 @@ export default function AutoPipelinePage() {
   const [schedLayoutId, setSchedLayoutId] = useState('4_editorial_split');
   const [schedVisualStyle, setSchedVisualStyle] = useState('Food Porn');
   const [schedPostToFacebook, setSchedPostToFacebook] = useState(true);
+
+  // State Khusus Threads Series Engine (1-Klik & Scheduler)
+  const [threadsObjective, setThreadsObjective] = useState('personal_product');
+  const [threadsPersonalProductName, setThreadsPersonalProductName] = useState('Kamar Deluxe Paviliun Sasya House');
+  const [threadsPersonalProductCta, setThreadsPersonalProductCta] = useState('DM @sasyahouse sekarang untuk info ketersediaan kamar & promo survei!');
+  const [threadsAffiliateProductTitle, setThreadsAffiliateProductTitle] = useState('Kasur Busa Orthopedic Anti Sakit Punggung');
+  const [threadsAffiliateProductLink, setThreadsAffiliateProductLink] = useState('https://shope.ee/contoh_affiliate');
+  const [threadsPureOrganicTopic, setThreadsPureOrganicTopic] = useState('5 Kebiasaan malam hari sebelum tidur yang bikin kualitas istirahat naik 2x lipat');
+  const [threadsVisualMode, setThreadsVisualMode] = useState('glabs');
+  const [threadsSelectedAccountId, setThreadsSelectedAccountId] = useState('');
+  const [threadsSeriesPosts, setThreadsSeriesPosts] = useState([]);
 
   // Product Catalog Selection State (Product Campaign)
   const [catalogProducts, setCatalogProducts] = useState([]);
@@ -700,6 +712,7 @@ export default function AutoPipelinePage() {
     fetchReplizAccounts();
     fetchProductsList();
     fetchBlueprints();
+    fetchThreadsSeriesPosts();
   }, []);
 
   async function fetchBlueprints(searchQuery = '') {
@@ -906,6 +919,27 @@ export default function AutoPipelinePage() {
       }
       targetTopic = recipeLabsTopic.trim();
       targetCategory = recipeLabsCategory || 'Makanan';
+    } else if (instantCampaignType === 'threads_series') {
+      if (threadsObjective === 'personal_product') {
+        if (!threadsPersonalProductName.trim()) {
+          showToast('Nama produk / jasa pribadi wajib diisi.', 'error');
+          return;
+        }
+        targetTopic = threadsPersonalProductName.trim();
+      } else if (threadsObjective === 'affiliate_shopee') {
+        if (!threadsAffiliateProductTitle.trim()) {
+          showToast('Judul produk affiliate Shopee wajib diisi.', 'error');
+          return;
+        }
+        targetTopic = threadsAffiliateProductTitle.trim();
+      } else {
+        if (!threadsPureOrganicTopic.trim()) {
+          showToast('Topik cerita murni / edukasi wajib diisi.', 'error');
+          return;
+        }
+        targetTopic = threadsPureOrganicTopic.trim();
+      }
+      targetCategory = 'threads_series';
     } else {
       if (!topic || !topic.trim()) {
         showToast('Topik resep wajib diisi.', 'error');
@@ -949,13 +983,29 @@ export default function AutoPipelinePage() {
           visual_style: recipeLabsVisualStyle,
           post_to_facebook: postToFacebook,
           post_link_affiliate: instantPostAffiliateLink,
-          generate_recipe: (instantCampaignType === 'multiplier_campaign' || instantCampaignType === 'recipe_campaign') ? instantGenerateRecipe : undefined
+          generate_recipe: (instantCampaignType === 'multiplier_campaign' || instantCampaignType === 'recipe_campaign') ? instantGenerateRecipe : undefined,
+          // Parameter Khusus Threads Series Utas Berseri
+          post_objective: threadsObjective,
+          personal_product_name: threadsPersonalProductName,
+          personal_product_cta: threadsPersonalProductCta,
+          affiliate_product_title: threadsAffiliateProductTitle,
+          affiliate_product_link: threadsAffiliateProductLink,
+          pure_organic_topic: threadsPureOrganicTopic,
+          visual_mode: threadsVisualMode,
+          account_id: threadsSelectedAccountId || null,
+          auto_publish: schedAutoPublish
         })
       });
 
       const data = await res.json();
 
       if (data.success) {
+        if (instantCampaignType === 'threads_series') {
+          showToast(`Utas Berseri Threads ("${data.theme || targetTopic}") berhasil dibuat (${data.series?.length || 5} Part)! 🧵✨`);
+          fetchThreadsSeriesPosts();
+          return;
+        }
+
         setActiveCampaignId(data.campaign_id || data.task_id);
         setPollingActive(true);
         fetchFactualStatus(data.campaign_id || data.task_id);
@@ -1060,6 +1110,18 @@ export default function AutoPipelinePage() {
       if (forceSync) showToast('Gagal sinkronisasi akun Repliz: ' + e.message, 'error');
     } finally {
       if (forceSync) setIsSyncingRepliz(false);
+    }
+  }
+
+  async function fetchThreadsSeriesPosts() {
+    try {
+      const res = await fetch('/api/v2/threads-series?limit=30');
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data)) {
+        setThreadsSeriesPosts(data.data);
+      }
+    } catch (e) {
+      console.warn('[AutoPipeline] Error fetching threads series posts:', e);
     }
   }
 
@@ -1441,7 +1503,18 @@ export default function AutoPipelinePage() {
                   ? { blueprint_id: targetId, execution_mode: 'full_autopilot', generate_recipe: schedGenerateRecipe, visual_identity_preset_id: schedViId }
                   : (schedCampaignType === 'recipe_labs'
                       ? { images_per_recipe: schedImagesPerRecipe, selected_layout_id: schedLayoutId, visual_style: schedVisualStyle, post_to_facebook: schedPostToFacebook }
-                      : { visual_identity_preset_id: schedViId })));
+                      : (schedCampaignType === 'threads_series'
+                          ? {
+                              post_objective: threadsObjective,
+                              personal_product_name: threadsPersonalProductName,
+                              personal_product_cta: threadsPersonalProductCta,
+                              affiliate_product_title: threadsAffiliateProductTitle,
+                              affiliate_product_link: threadsAffiliateProductLink,
+                              pure_organic_topic: threadsPureOrganicTopic,
+                              visual_mode: threadsVisualMode,
+                              account_id: threadsSelectedAccountId || null
+                            }
+                          : { visual_identity_preset_id: schedViId }))));
         editPipelineConfig.post_link_affiliate = schedPostAffiliateLink;
         if (schedCampaignType === 'multiplier_campaign' || schedCampaignType === 'recipe_campaign') {
           editPipelineConfig.generate_recipe = schedGenerateRecipe;
@@ -1844,6 +1917,14 @@ export default function AutoPipelinePage() {
           } else if (schedCampaignType === 'recipe_labs') {
             finalCategory = 'recipe_labs';
             if (!finalName) finalName = `Resep Foto (${schedImagesPerRecipe}G) — ${schedGenTime} WIB`;
+          } else if (schedCampaignType === 'threads_series') {
+            finalCategory = 'threads_series';
+            const threadsTitle = threadsObjective === 'personal_product'
+              ? threadsPersonalProductName
+              : (threadsObjective === 'affiliate_shopee' ? threadsAffiliateProductTitle : threadsPureOrganicTopic);
+            targetTitle = threadsTitle;
+            finalTopic = threadsTitle;
+            if (!finalName) finalName = `Threads: ${threadsTitle} — ${schedGenTime} WIB`;
           }
 
           const schedModalPresetsSingle = modalBrandPresets.length > 0 ? modalBrandPresets : operatorPresets;
@@ -1864,7 +1945,18 @@ export default function AutoPipelinePage() {
                     ? { blueprint_id: targetId, execution_mode: 'full_autopilot', generate_recipe: schedGenerateRecipe, visual_identity_preset_id: schedViIdSingle }
                     : (schedCampaignType === 'recipe_labs'
                         ? { images_per_recipe: schedImagesPerRecipe, selected_layout_id: schedLayoutId, visual_style: schedVisualStyle, post_to_facebook: schedPostToFacebook }
-                        : { visual_identity_preset_id: schedViIdSingle })));
+                        : (schedCampaignType === 'threads_series'
+                            ? {
+                                post_objective: threadsObjective,
+                                personal_product_name: threadsPersonalProductName,
+                                personal_product_cta: threadsPersonalProductCta,
+                                affiliate_product_title: threadsAffiliateProductTitle,
+                                affiliate_product_link: threadsAffiliateProductLink,
+                                pure_organic_topic: threadsPureOrganicTopic,
+                                visual_mode: threadsVisualMode,
+                                account_id: threadsSelectedAccountId || null
+                              }
+                            : { visual_identity_preset_id: schedViIdSingle }))));
           pipelineConfigPayload.post_link_affiliate = schedPostAffiliateLink;
           if (schedCampaignType === 'multiplier_campaign' || schedCampaignType === 'recipe_campaign') {
             pipelineConfigPayload.generate_recipe = schedGenerateRecipe;
@@ -2004,6 +2096,7 @@ export default function AutoPipelinePage() {
   const countRecipeCampaigns = schedules.filter(s => (s.pipeline_type || 'recipe_campaign') === 'recipe_campaign').length;
   const countMultiplierCampaigns = schedules.filter(s => s.pipeline_type === 'multiplier_campaign').length;
   const countRecipeLabsCampaigns = schedules.filter(s => s.pipeline_type === 'recipe_labs').length;
+  const countThreadsSeriesCampaigns = schedules.filter(s => s.pipeline_type === 'threads_series').length;
 
   const filteredSchedules = schedules.filter(s => {
     const pType = s.pipeline_type || 'recipe_campaign';
@@ -2047,6 +2140,14 @@ export default function AutoPipelinePage() {
           color: 'var(--status-rose)',
           bg: 'var(--status-rose-soft)',
           border: 'var(--status-rose)'
+        };
+      case 'threads_series':
+        return {
+          icon: '🧵',
+          label: 'Threads Series',
+          color: 'var(--status-info)',
+          bg: 'var(--status-info-soft)',
+          border: 'var(--status-info)'
         };
       case 'recipe_campaign':
       default:
@@ -2431,7 +2532,8 @@ export default function AutoPipelinePage() {
                     { key: 'editorial_campaign', icon: '📖', label: 'Video Editorial', desc: 'Pilar brand, hook tension & storytelling edukatif 1-pass', color: 'var(--status-info)' },
                     { key: 'recipe_campaign', icon: '🍳', label: 'Video Resep', desc: 'Food reels & cooking guide 4-babak 1-pass', color: 'var(--status-warning)' },
                     { key: 'multiplier_campaign', icon: '🔀', label: 'Video Multiplier', desc: 'Remix angle & hook dari video referensi pemenang', color: 'var(--status-purple)' },
-                    { key: 'recipe_labs', icon: '🖼️', label: 'Resep Teks & Foto', desc: 'Naskah resep FB + Foto AI dalam susunan grid komposit', color: 'var(--status-rose)' }
+                    { key: 'recipe_labs', icon: '🖼️', label: 'Resep Teks & Foto', desc: 'Naskah resep FB + Foto AI dalam susunan grid komposit', color: 'var(--status-rose)' },
+                    { key: 'threads_series', icon: '🧵', label: 'Threads Series', desc: 'Kultwit autopilot 3–5 part + Foto G-Labs atau Text-Only', color: 'var(--status-info)' }
                   ].map(t => {
                     const isSelected = instantCampaignType === t.key;
                     return (
@@ -4393,33 +4495,61 @@ export default function AutoPipelinePage() {
                 </div>
               )}
 
-              {/* Checkbox Toggle Smart Affiliate untuk 1-Klik */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: '0.65rem',
-                background: 'var(--surface-raised)',
-                padding: '0.75rem 1rem',
-                borderRadius: 'var(--radius-sm)',
-                border: '1px solid var(--border-subtle)',
-                marginBottom: '0.85rem'
-              }}>
-                <input
-                  type="checkbox"
-                  id="instantAffiliateCheck"
-                  checked={instantPostAffiliateLink}
-                  onChange={(e) => setInstantPostAffiliateLink(e.target.checked)}
-                  style={{ width: '18px', height: '18px', accentColor: 'var(--action-primary)', cursor: 'pointer', marginTop: '2px' }}
+              {/* 3F: THREADS SERIES (Utas Berseri 3-5 Part & Foto G-Labs / Text-Only) */}
+              {instantCampaignType === 'threads_series' && (
+                <ThreadsSeriesForm
+                  objective={threadsObjective}
+                  setObjective={setThreadsObjective}
+                  personalProductName={threadsPersonalProductName}
+                  setPersonalProductName={setThreadsPersonalProductName}
+                  personalProductCta={threadsPersonalProductCta}
+                  setPersonalProductCta={setThreadsPersonalProductCta}
+                  affiliateProductTitle={threadsAffiliateProductTitle}
+                  setAffiliateProductTitle={setThreadsAffiliateProductTitle}
+                  affiliateProductLink={threadsAffiliateProductLink}
+                  setAffiliateProductLink={setThreadsAffiliateProductLink}
+                  pureOrganicTopic={threadsPureOrganicTopic}
+                  setPureOrganicTopic={setThreadsPureOrganicTopic}
+                  visualMode={threadsVisualMode}
+                  setVisualMode={setThreadsVisualMode}
+                  selectedAccountId={threadsSelectedAccountId}
+                  setSelectedAccountId={setThreadsSelectedAccountId}
+                  replizAccounts={replizAccounts}
+                  onSyncAccounts={() => fetchReplizAccounts(true)}
+                  isSyncingAccounts={isSyncingRepliz}
+                  recentPosts={threadsSeriesPosts}
                 />
-                <div>
-                  <label htmlFor="instantAffiliateCheck" style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer', display: 'block' }}>
-                    🛒 Sertakan Rekomendasi Produk & Affiliate (Shopee FB & Link di Bio)
-                  </label>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1.4, display: 'block', marginTop: '2px' }}>
-                    Otomatis mencocokkan produk brand dan menghasilkan CTA adaptif (FB: link Shopee aktif, Non-FB: Link di Bio). Uncheck jika ingin video viral 1-klik murni edukasi tanpa jualan.
-                  </span>
+              )}
+
+              {/* Checkbox Toggle Smart Affiliate untuk 1-Klik */}
+              {instantCampaignType !== 'threads_series' && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '0.65rem',
+                  background: 'var(--surface-raised)',
+                  padding: '0.75rem 1rem',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--border-subtle)',
+                  marginBottom: '0.85rem'
+                }}>
+                  <input
+                    type="checkbox"
+                    id="instantAffiliateCheck"
+                    checked={instantPostAffiliateLink}
+                    onChange={(e) => setInstantPostAffiliateLink(e.target.checked)}
+                    style={{ width: '18px', height: '18px', accentColor: 'var(--action-primary)', cursor: 'pointer', marginTop: '2px' }}
+                  />
+                  <div>
+                    <label htmlFor="instantAffiliateCheck" style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer', display: 'block' }}>
+                      🛒 Sertakan Rekomendasi Produk & Affiliate (Shopee FB & Link di Bio)
+                    </label>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1.4, display: 'block', marginTop: '2px' }}>
+                      Otomatis mencocokkan produk brand dan menghasilkan CTA adaptif (FB: link Shopee aktif, Non-FB: Link di Bio). Uncheck jika ingin video viral 1-klik murni edukasi tanpa jualan.
+                    </span>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Submit Button */}
               <div style={{ paddingTop: '0.25rem' }}>
@@ -4452,7 +4582,9 @@ export default function AutoPipelinePage() {
                                 ? `🔀 Luncurkan Multiplier Angle Remix (Winning Blueprint)`
                                 : (instantCampaignType === 'recipe_labs'
                                     ? `🖼️ Luncurkan Resep Teks & Foto AI (Grid Komposit)`
-                                    : `🚀 Luncurkan Auto Pipeline Resep (${targetClipsCount} Klip Video)`)))
+                                    : (instantCampaignType === 'threads_series'
+                                        ? `🧵 Buat Utas Berseri & Jadwalkan ke Repliz`
+                                        : `🚀 Luncurkan Auto Pipeline Resep (${targetClipsCount} Klip Video)`))))
                     )}
                   </span>
                 </button>
@@ -5254,7 +5386,8 @@ export default function AutoPipelinePage() {
                   { key: 'editorial_campaign', label: '📖 Video Editorial', count: countEditorialCampaigns },
                   { key: 'recipe_campaign', label: '🍳 Video Resep', count: countRecipeCampaigns },
                   { key: 'multiplier_campaign', label: '🔀 Video Multiplier', count: countMultiplierCampaigns },
-                  { key: 'recipe_labs', label: '🖼️ Resep Teks & Foto', count: countRecipeLabsCampaigns }
+                  { key: 'recipe_labs', label: '🖼️ Resep Teks & Foto', count: countRecipeLabsCampaigns },
+                  { key: 'threads_series', label: '🧵 Threads Series', count: countThreadsSeriesCampaigns }
                 ].map(tab => {
                   const isSelected = campaignTypeFilter === tab.key;
                   return (
@@ -5554,7 +5687,8 @@ export default function AutoPipelinePage() {
                       { key: 'editorial_campaign', icon: '📖', label: 'Video Editorial', desc: 'Pilar konten brand & storytelling', color: 'var(--status-info)' },
                       { key: 'recipe_campaign', icon: '🍳', label: 'Video Resep', desc: 'Cooking guide & food reel 4-klip', color: 'var(--status-warning)' },
                       { key: 'multiplier_campaign', icon: '🔀', label: 'Video Multiplier', desc: 'Remix angle hook dari referensi', color: 'var(--status-purple)' },
-                      { key: 'recipe_labs', icon: '🖼️', label: 'Resep Teks & Foto', desc: 'Naskah FB + Foto grid komposit', color: 'var(--status-rose)' }
+                      { key: 'recipe_labs', icon: '🖼️', label: 'Resep Teks & Foto', desc: 'Naskah FB + Foto grid komposit', color: 'var(--status-rose)' },
+                      { key: 'threads_series', icon: '🧵', label: 'Threads Series', desc: 'Kultwit autopilot 3–5 part + Foto G-Labs atau Teks', color: 'var(--status-info)' }
                     ].map(t => {
                       const isSelected = schedCampaignType === t.key;
                       return (
@@ -7056,6 +7190,32 @@ export default function AutoPipelinePage() {
                       </label>
                     </div>
                   </div>
+                )}
+
+                {/* 3F. THREADS SERIES: Konfigurasi Utas Berseri Terjadwal */}
+                {schedCampaignType === 'threads_series' && (
+                  <ThreadsSeriesForm
+                    objective={threadsObjective}
+                    setObjective={setThreadsObjective}
+                    personalProductName={threadsPersonalProductName}
+                    setPersonalProductName={setThreadsPersonalProductName}
+                    personalProductCta={threadsPersonalProductCta}
+                    setPersonalProductCta={setThreadsPersonalProductCta}
+                    affiliateProductTitle={threadsAffiliateProductTitle}
+                    setAffiliateProductTitle={setThreadsAffiliateProductTitle}
+                    affiliateProductLink={threadsAffiliateProductLink}
+                    setAffiliateProductLink={setThreadsAffiliateProductLink}
+                    pureOrganicTopic={threadsPureOrganicTopic}
+                    setPureOrganicTopic={setThreadsPureOrganicTopic}
+                    visualMode={threadsVisualMode}
+                    setVisualMode={setThreadsVisualMode}
+                    selectedAccountId={threadsSelectedAccountId}
+                    setSelectedAccountId={setThreadsSelectedAccountId}
+                    replizAccounts={replizAccounts}
+                    onSyncAccounts={() => fetchReplizAccounts(true)}
+                    isSyncingAccounts={isSyncingRepliz}
+                    recentPosts={threadsSeriesPosts}
+                  />
                 )}
 
                 {/* STEP 4: Dua Waktu Terpisah (Jam Pembuatan & Jam Publish - Format 24 Jam WIB) */}

@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.40.25 — Auto-Pipeline Threads Series & G-Labs Diffusion Engine (10/11/2026)
+- Mesin Utas Berseri 3-5 Part Single-Pass Gemini Engine
+- Integrasi G-Labs AI Image Node 2 & Text-Only Bypass
+- Orkestrasi Auto-Pipeline 1-Klik & Jadwal Harian Repliz Scheduler
+- Formulir Interaktif 3 Tujuan Postingan & Preview Live di Auto-Pipeline & Threads Labs
+
 ## V2.40.24 — Threads Labs Multi-Account Selector & On-Demand Sync (10/11/2026)
 - Fitur pemilih akun Threads aktif di header Threads Labs
 - Tombol Sync Akun Threads on-demand dari Repliz API
