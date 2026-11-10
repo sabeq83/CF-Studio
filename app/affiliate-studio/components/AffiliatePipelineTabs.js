@@ -14,7 +14,8 @@ export function AffiliatePipelineTabs({
 }) {
   const setupTabs = [
     { key: 'overview', label: 'Overview', icon: '🏢', count: counts.overviewCount },
-    { key: 'products', label: 'Products', icon: '📦', count: counts.productsCount ? `${counts.productsCount} Ready` : null }
+    { key: 'products', label: 'Products', icon: '📦', count: counts.productsCount ? `${counts.productsCount} Ready` : null },
+    { key: 'threads-radar', label: 'Threads Radar', icon: '📡', count: counts.threadsRadarCount || 'Live' }
   ];
 
   const pipelineStages = [

@@ -20,6 +20,7 @@ import { BrandProductionRuns } from './BrandProductionRuns';
 import { AffiliateProductionWorkspace } from './AffiliateProductionWorkspace';
 import { BrandPublishingDashboard } from './BrandPublishingDashboard';
 import { BrandPerformanceOverview } from './BrandPerformanceOverview';
+import { ThreadsAffiliateRadar } from './ThreadsAffiliateRadar';
 import styles from './AffiliateStudio.module.css';
 
 export function AffiliateStudioWorkspace() {
@@ -455,6 +456,12 @@ export function AffiliateStudioWorkspace() {
             }
           }}
           onRefresh={() => activeBrand && loadProducts(activeBrand.id, productFilters)}
+        />
+      )}
+      {activeView === 'threads-radar' && (
+        <ThreadsAffiliateRadar
+          brandId={activeBrand?.id}
+          brandName={activeBrand?.name || activeBrand?.brand_name}
         />
       )}
       {(activeView === 'calendar' || activeView === 'campaigns') && (

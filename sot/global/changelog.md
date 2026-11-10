@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.40.22 — Fitur Threads Affiliate Radar & Scheduled Scanner Repliz (10/11/2026)
+- Implementasi modul Threads Affiliate Radar di Affiliate Studio
+- Penjadwalan pencarian kata kunci otomatis (pilihan hari & jam WIB) via Repliz API
+- Integrasi AI Cognitive Matcher untuk rekomendasi produk Shopee dan posting komentar Threads
+
 ## V2.40.21 — Auto restart MCP service on staging atomic deploy (10/11/2026)
 - Tambahkan maknaflow-staging-mcp ke daftar pm2Apps STAGING_ATOMIC_CONFIG
 

@@ -1,0 +1,1834 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup: Threads Affiliate Radar & Social Selling AI</title>
+  <style>
+    /* 100% Standalone Semantic Design Tokens (MAKNA Flow Universal Theme) */
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-subtle: #0d1522;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+      
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --border-color: #26354a;
+      
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      
+      --focus-ring: #2dd4bf;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f8fafc;
+      --sidebar: #f1f5f9;
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-subtle: #f1f5f9;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --input-bg: #ffffff;
+      --overlay-subtle: rgba(0, 0, 0, 0.05);
+      --overlay-backdrop: rgba(15, 23, 42, 0.5);
+      
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --text-disabled: #94a3b8;
+      
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --border-color: #e2e8f0;
+      
+      --action-primary: #0d9488;
+      --action-primary-hover: #14b8a6;
+      --on-action-primary: #ffffff;
+      
+      --status-info: #0284c7;
+      --status-info-soft: #e0f2fe;
+      --status-success: #16a34a;
+      --status-success-soft: #dcfce7;
+      --status-warning: #d97706;
+      --status-warning-soft: #fef3c7;
+      --status-danger: #dc2626;
+      --status-danger-soft: #fee2e2;
+      
+      --focus-ring: #0d9488;
+      --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-modal: 0 20px 25px -5px rgba(0,0,0,0.15);
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      padding: 24px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1380px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Top Navigation / Header */
+    .header-card {
+      background-color: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow-card);
+    }
+
+    .header-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .badge-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-strong);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .header-title h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-title p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .theme-switcher {
+      display: inline-flex;
+      background-color: var(--surface-subtle);
+      padding: 4px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      gap: 4px;
+    }
+
+    .theme-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 7px 14px;
+      border-radius: var(--radius-xs);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+
+    .theme-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .theme-btn.active {
+      background-color: var(--surface-interactive);
+      color: var(--text-primary);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .stat-card {
+      background-color: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .stat-subtext {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 8px;
+      border-radius: var(--radius-xs);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-success {
+      background-color: var(--status-success-soft);
+      color: var(--status-success);
+    }
+
+    .badge-info {
+      background-color: var(--status-info-soft);
+      color: var(--status-info);
+    }
+
+    .badge-warning {
+      background-color: var(--status-warning-soft);
+      color: var(--status-warning);
+    }
+
+    /* Keyword Monitoring Bar */
+    .keyword-card {
+      background-color: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .keyword-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .keyword-form {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .input-text {
+      background-color: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      outline: none;
+      transition: var(--transition);
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .input-text:focus {
+      border-color: var(--focus-ring);
+    }
+
+    .btn-primary {
+      background-color: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      padding: 8px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--action-primary-hover);
+    }
+
+    .btn-secondary {
+      background-color: var(--surface-interactive);
+      color: var(--text-primary);
+      border: 1px solid var(--border-strong);
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--surface-hover);
+    }
+
+    .keyword-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      background-color: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      padding: 5px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chip-delete {
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .chip-delete:hover {
+      color: var(--status-danger);
+    }
+
+    /* Automated Scan Scheduler Card Styles */
+    .scheduler-card {
+      background-color: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .scheduler-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .scheduler-header-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .scheduler-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: var(--radius-sm);
+      background-color: var(--surface-interactive);
+      border: 1px solid var(--border-strong);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .scheduler-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Toggle Switch */
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--surface-interactive);
+      border: 1px solid var(--border-strong);
+      transition: var(--transition);
+      border-radius: 24px;
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: var(--text-primary);
+      transition: var(--transition);
+      border-radius: 50%;
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+      background-color: var(--action-primary);
+      border-color: var(--action-primary);
+    }
+
+    .toggle-switch input:checked + .toggle-slider:before {
+      transform: translateX(20px);
+      background-color: var(--on-action-primary);
+    }
+
+    .scheduler-body {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transition: var(--transition);
+    }
+
+    .scheduler-body.disabled {
+      opacity: 0.45;
+      pointer-events: none;
+    }
+
+    .scheduler-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 18px;
+    }
+
+    .scheduler-section {
+      background-color: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.88rem;
+      color: var(--text-primary);
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .preset-pills {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .preset-pill {
+      background-color: var(--surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      padding: 5px 12px;
+      border-radius: var(--radius-xs);
+      font-size: 0.75rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .preset-pill:hover {
+      background-color: var(--surface-hover);
+      color: var(--text-primary);
+    }
+
+    .preset-pill.active {
+      background-color: var(--surface-interactive);
+      border-color: var(--border-strong);
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .day-selector {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .day-btn {
+      flex: 1;
+      min-width: 42px;
+      padding: 9px 0;
+      text-align: center;
+      background-color: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .day-btn:hover {
+      background-color: var(--surface-hover);
+      color: var(--text-primary);
+    }
+
+    .day-btn.active {
+      background-color: var(--action-primary);
+      color: var(--on-action-primary);
+      border-color: var(--action-primary);
+      font-weight: 700;
+    }
+
+    .day-summary {
+      font-size: 0.78rem;
+      color: var(--status-success);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .schedule-mode-toggle {
+      display: inline-flex;
+      background-color: var(--surface);
+      padding: 3px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border-subtle);
+      gap: 2px;
+    }
+
+    .mode-tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 4px 10px;
+      border-radius: var(--radius-xs);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .mode-tab-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .mode-tab-btn.active {
+      background-color: var(--surface-interactive);
+      color: var(--text-primary);
+    }
+
+    .hour-chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .hour-chip {
+      background-color: var(--surface);
+      border: 1px solid var(--border-subtle);
+      padding: 6px 12px;
+      border-radius: var(--radius-xs);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hour-add-form {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .input-time,
+    .select-input {
+      background-color: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 6px 12px;
+      border-radius: var(--radius-xs);
+      font-size: 0.82rem;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .input-time:focus,
+    .select-input:focus {
+      border-color: var(--focus-ring);
+    }
+
+    .interval-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .interval-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .scheduler-footer-banner {
+      background-color: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .footer-banner-info {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .next-run-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge-icon-mini {
+      font-size: 1.2rem;
+    }
+
+    .safety-shield-mini {
+      font-size: 0.74rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .footer-banner-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Toast Notification */
+    .toast-popup {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background-color: var(--surface-raised);
+      border: 1px solid var(--status-success);
+      color: var(--text-primary);
+      padding: 12px 20px;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-modal);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      z-index: 1000;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
+    }
+
+    .toast-popup.show {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Radar Main Table */
+    .radar-table-container {
+      background-color: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+    }
+
+    .table-toolbar {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: var(--surface-raised);
+    }
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .tab-pills {
+      display: flex;
+      gap: 6px;
+    }
+
+    .tab-pill {
+      padding: 6px 14px;
+      border-radius: var(--radius-xs);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .tab-pill.active {
+      background-color: var(--surface-interactive);
+      color: var(--text-primary);
+    }
+
+    .radar-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    .radar-table th {
+      background-color: var(--surface-raised);
+      color: var(--text-muted);
+      text-align: left;
+      padding: 12px 18px;
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .radar-table td {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border-subtle);
+      vertical-align: top;
+    }
+
+    .radar-table tr:hover {
+      background-color: var(--surface-hover);
+    }
+
+    /* Column Styles */
+    .post-cell {
+      max-width: 340px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .post-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .post-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: var(--surface-interactive);
+      border: 1px solid var(--border-strong);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      overflow: hidden;
+    }
+
+    .post-author {
+      font-weight: 600;
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    .post-author:hover {
+      text-decoration: underline;
+    }
+
+    .post-time {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .post-snippet {
+      color: var(--text-secondary);
+      line-height: 1.45;
+      font-size: 0.85rem;
+      background-color: var(--surface-raised);
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* Product Match Cell */
+    .product-cell {
+      max-width: 260px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .product-thumb {
+      width: 52px;
+      height: 52px;
+      border-radius: var(--radius-sm);
+      background-color: var(--surface-interactive);
+      border: 1px solid var(--border-strong);
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .product-info {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .product-name {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      line-height: 1.3;
+    }
+
+    .product-price {
+      font-size: 0.8rem;
+      color: var(--action-primary);
+      font-weight: 700;
+    }
+
+    /* Reply Draft Cell */
+    .draft-cell {
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .draft-bubble {
+      background-color: var(--surface-interactive);
+      border: 1px solid var(--border-strong);
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      line-height: 1.45;
+      position: relative;
+    }
+
+    .strategy-badge {
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: var(--radius-xs);
+      font-weight: 600;
+      text-transform: uppercase;
+      align-self: flex-start;
+    }
+
+    .strategy-soft {
+      background-color: var(--status-info-soft);
+      color: var(--status-info);
+    }
+
+    .strategy-direct {
+      background-color: var(--status-success-soft);
+      color: var(--status-success);
+    }
+
+    /* Action Buttons */
+    .action-cell {
+      white-space: nowrap;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .btn-approve {
+      background-color: var(--status-success);
+      color: var(--on-action-primary);
+      border: none;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+
+    .btn-approve:hover {
+      filter: brightness(1.1);
+    }
+
+    .btn-edit {
+      background-color: var(--surface-interactive);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-strong);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: var(--transition);
+    }
+
+    .btn-edit:hover {
+      background-color: var(--surface-hover);
+      color: var(--text-primary);
+    }
+
+    .btn-skip {
+      background: transparent;
+      color: var(--text-muted);
+      border: none;
+      font-size: 0.75rem;
+      cursor: pointer;
+      padding: 4px;
+      text-align: center;
+    }
+
+    .btn-skip:hover {
+      color: var(--status-danger);
+    }
+
+    /* Modal Simulation */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: var(--overlay-backdrop);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-box {
+      background-color: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      width: 90%;
+      max-width: 600px;
+      padding: 24px;
+      box-shadow: var(--shadow-modal);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .modal-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .modal-textarea {
+      width: 100%;
+      min-height: 110px;
+      background-color: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+      resize: vertical;
+    }
+
+    .modal-textarea:focus {
+      border-color: var(--focus-ring);
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <!-- Header & Title -->
+    <div class="header-card">
+      <div class="header-info">
+        <div class="badge-icon">🎯</div>
+        <div class="header-title">
+          <h1>Threads Affiliate Radar <span class="badge-status badge-success">● Repliz API Live</span></h1>
+          <p>Agen 1 (Radar) & Agen 2 (Strategist) memantau keluhan & pertanyaan netizen di Threads untuk rekomendasi
+            produk Shopee.</p>
+        </div>
+      </div>
+      <div class="theme-switcher">
+        <button id="darkBtn" class="theme-btn active" onclick="setTheme('dark')">🌙 Dark</button>
+        <button id="lightBtn" class="theme-btn" onclick="setTheme('light')">☀️ Light</button>
+      </div>
+    </div>
+
+    <!-- Key Metrics Bar -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-label">Peluang Terpantau (Hari Ini)</span>
+        <div class="stat-value">11 <span class="badge-status badge-info">+11 baru</span></div>
+        <span class="stat-subtext">Dari 3 kata kunci aktif di Threads</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Draf Jawaban Siap Review</span>
+        <div class="stat-value" id="readyCount">3</div>
+        <span class="stat-subtext">Tercocokkan produk Shopee oleh Gemini AI</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Balasan Terkirim</span>
+        <div class="stat-value" id="sentCount">0 <span class="badge-status badge-success">0% bounce</span></div>
+        <span class="stat-subtext">Via akun @kost_sasyahouse (Repliz)</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Jadwal Radar Otomatis</span>
+        <div class="stat-value">4x / Hari <span class="badge-status badge-success" id="statScheduleBadge">● Aktif</span></div>
+        <span class="stat-subtext" id="statNextScanText">Next: Hari ini, 17:00 WIB (Senin - Minggu)</span>
+      </div>
+    </div>
+
+    <!-- Keyword Management & Scan Trigger -->
+    <div class="keyword-card">
+      <div class="keyword-header">
+        <strong style="font-size: 0.9rem; color: var(--text-primary);">📡 Radar Kata Kunci yang Dipantau:</strong>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn-primary" id="scanBtn">
+            <span>🔍</span> Scan Threads Sekarang via Repliz
+          </button>
+        </div>
+      </div>
+      <div class="keyword-chips" id="keywordChips">
+        <div class="chip"><span>kamar panas</span> <span class="chip-delete" onclick="removeChip(this)">×</span></div>
+        <div class="chip"><span>rekomendasi peredam suara</span> <span class="chip-delete"
+            onclick="removeChip(this)">×</span></div>
+        <div class="chip"><span>rekomendasi AC murah</span> <span class="chip-delete"
+            onclick="removeChip(this)">×</span></div>
+      </div>
+      <div class="keyword-form">
+        <input type="text" class="input-text" id="newKeywordInput"
+          placeholder="Tambah kata kunci baru (contoh: wajan anti lengket, mic wireless)...">
+        <button class="btn-secondary" id="addKeywordBtn">+ Tambah Kata Kunci</button>
+      </div>
+    </div>
+
+    <!-- Automated Keyword Scan Scheduler Card -->
+    <div class="scheduler-card">
+      <div class="scheduler-header">
+        <div class="scheduler-header-title">
+          <div class="scheduler-icon">⏰</div>
+          <div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <strong style="font-size: 0.95rem; color: var(--text-primary);">Penjadwalan Pencarian Otomatis (Cron Radar)</strong>
+              <span class="badge-status badge-success" id="scheduleStatusBadge">● Aktif</span>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 3px;">
+              Agen 1 (Radar) akan otomatis memindai Threads menggunakan API Repliz sesuai hari dan jam yang ditentukan.
+            </p>
+          </div>
+        </div>
+        <div class="scheduler-header-actions">
+          <label class="toggle-switch">
+            <input type="checkbox" id="schedulerEnabledToggle" checked onchange="toggleScheduler(this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+          <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary);" id="schedulerToggleLabel">Jadwal Aktif</span>
+        </div>
+      </div>
+
+      <div class="scheduler-body" id="schedulerBody">
+        <div class="scheduler-grid">
+          
+          <!-- Section 1: Pengaturan Hari -->
+          <div class="scheduler-section">
+            <div class="section-title">
+              <span style="display: flex; align-items: center; gap: 6px;">
+                <span>📅</span> <strong>1. Pilih Hari Pemindaian</strong>
+              </span>
+              <div class="preset-pills">
+                <button class="preset-pill active" id="presetAllBtn" onclick="setDayPreset('all')">Semua Hari</button>
+                <button class="preset-pill" id="presetWorkBtn" onclick="setDayPreset('workdays')">Hari Kerja</button>
+                <button class="preset-pill" id="presetWeekendBtn" onclick="setDayPreset('weekends')">Akhir Pekan</button>
+              </div>
+            </div>
+
+            <div class="day-selector" id="daySelector">
+              <button class="day-btn active" data-day="Senin" onclick="toggleDay(this)">Sen</button>
+              <button class="day-btn active" data-day="Selasa" onclick="toggleDay(this)">Sel</button>
+              <button class="day-btn active" data-day="Rabu" onclick="toggleDay(this)">Rab</button>
+              <button class="day-btn active" data-day="Kamis" onclick="toggleDay(this)">Kam</button>
+              <button class="day-btn active" data-day="Jumat" onclick="toggleDay(this)">Jum</button>
+              <button class="day-btn active" data-day="Sabtu" onclick="toggleDay(this)">Sab</button>
+              <button class="day-btn active" data-day="Minggu" onclick="toggleDay(this)">Min</button>
+            </div>
+
+            <div class="day-summary" id="daySummary">
+              <span>✓</span> <span>Berjalan setiap hari: Senin, Selasa, Rabu, Kamis, Jumat, Sabtu, Minggu (7 hari aktif)</span>
+            </div>
+          </div>
+
+          <!-- Section 2: Pengaturan Jam -->
+          <div class="scheduler-section">
+            <div class="section-title">
+              <span style="display: flex; align-items: center; gap: 6px;">
+                <span>⏰</span> <strong>2. Pilih Jam Pemindaian</strong>
+              </span>
+              <div class="schedule-mode-toggle">
+                <button class="mode-tab-btn active" id="modeSpecificBtn" onclick="setHourMode('specific')">Jam Spesifik (Prime Time)</button>
+                <button class="mode-tab-btn" id="modeIntervalBtn" onclick="setHourMode('interval')">Interval Jam</button>
+              </div>
+            </div>
+
+            <!-- Mode A: Jam Spesifik (Slot) -->
+            <div id="specificHoursContainer">
+              <div class="hour-chips" id="hourChips">
+                <div class="hour-chip"><span>08:00 WIB</span> <span class="chip-delete" onclick="removeHour(this)">×</span></div>
+                <div class="hour-chip"><span>12:30 WIB</span> <span class="chip-delete" onclick="removeHour(this)">×</span></div>
+                <div class="hour-chip"><span>17:00 WIB</span> <span class="chip-delete" onclick="removeHour(this)">×</span></div>
+                <div class="hour-chip"><span>20:30 WIB</span> <span class="chip-delete" onclick="removeHour(this)">×</span></div>
+              </div>
+              <div class="hour-add-form">
+                <input type="time" class="input-time" id="newHourInput" value="19:00">
+                <button class="btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="addHourSlot()">+ Tambah Jam Scan</button>
+                <span style="font-size: 0.74rem; color: var(--text-muted);">Slot jam prime time pencarian warga Threads</span>
+              </div>
+            </div>
+
+            <!-- Mode B: Interval Jam -->
+            <div id="intervalHoursContainer" style="display: none;">
+              <div class="interval-controls">
+                <div class="interval-row">
+                  <span style="font-size: 0.8rem; color: var(--text-secondary);">Frekuensi:</span>
+                  <select class="select-input" id="intervalSelect" onchange="updateIntervalSummary()">
+                    <option value="2">Setiap 2 Jam Sekali</option>
+                    <option value="3" selected>Setiap 3 Jam Sekali</option>
+                    <option value="4">Setiap 4 Jam Sekali</option>
+                    <option value="6">Setiap 6 Jam Sekali</option>
+                  </select>
+                </div>
+                <div class="interval-row">
+                  <span style="font-size: 0.8rem; color: var(--text-secondary);">Rentang jam aktif:</span>
+                  <select class="select-input" id="rangeStartSelect" onchange="updateIntervalSummary()">
+                    <option value="07:00" selected>07:00 WIB</option>
+                    <option value="08:00">08:00 WIB</option>
+                    <option value="09:00">09:00 WIB</option>
+                  </select>
+                  <span style="color: var(--text-muted); font-size: 0.8rem;">s/d</span>
+                  <select class="select-input" id="rangeEndSelect" onchange="updateIntervalSummary()">
+                    <option value="21:00">21:00 WIB</option>
+                    <option value="22:00" selected>22:00 WIB</option>
+                    <option value="23:00">23:00 WIB</option>
+                  </select>
+                </div>
+              </div>
+              <div class="day-summary" id="intervalSummary" style="margin-top: 8px;">
+                <span>✓</span> <span>Agen akan memindai Threads setiap 3 jam antara 07:00 - 22:00 WIB (07:00, 10:00, 13:00, 16:00, 19:00, 22:00).</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Section 3: Next Scan & Safety Guard Summary Banner -->
+        <div class="scheduler-footer-banner">
+          <div class="footer-banner-info">
+            <div class="next-run-badge">
+              <span class="badge-icon-mini">⏳</span>
+              <div>
+                <strong style="font-size: 0.82rem; color: var(--text-primary);" id="nextRunText">Jadwal Berikutnya: Hari Ini, 17:00 WIB (± 18 Menit Lagi)</strong>
+                <p style="font-size: 0.74rem; color: var(--text-muted);">Terakhir sukses dipindai: Hari Ini, 12:30 WIB • 11 peluang terdeteksi</p>
+              </div>
+            </div>
+            <div class="safety-shield-mini">
+              <span>🛡️ <strong>Safety Shield:</strong> Jitter delay acak ±5 menit aktif untuk mencegah pola bot terjadwal pada Repliz API.</span>
+            </div>
+          </div>
+          <div class="footer-banner-actions">
+            <button class="btn-secondary" style="padding: 7px 14px; font-size: 0.8rem;" id="testScheduleBtn" onclick="testRunNow()">
+              <span>⚡</span> Uji Eksekusi Jadwal Sekarang
+            </button>
+            <button class="btn-primary" style="padding: 7px 16px; font-size: 0.8rem;" onclick="saveScheduleSettings()">
+              <span>💾</span> Simpan Konfigurasi Jadwal
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Opportunities Table -->
+    <div class="radar-table-container">
+      <div class="table-toolbar">
+        <div class="toolbar-left">
+          <strong style="font-size: 0.9rem; color: var(--text-primary);">Daftar Peluang Relevan
+            (Semi-Autopilot)</strong>
+          <div class="tab-pills">
+            <button class="tab-pill active">Semua (3)</button>
+            <button class="tab-pill">Siap Review (3)</button>
+            <button class="tab-pill">Terkirim (0)</button>
+          </div>
+        </div>
+        <span style="font-size: 0.8rem; color: var(--text-muted);">Akun Aktif: <strong>@kost_sasyahouse</strong> (Repliz
+          Connected)</span>
+      </div>
+
+      <table class="radar-table">
+        <thead>
+          <tr>
+            <th style="width: 32%;">Postingan Threads (Target)</th>
+            <th style="width: 25%;">Solusi Produk Shopee</th>
+            <th style="width: 33%;">Draf Balasan AI (Agen 2)</th>
+            <th style="width: 10%;">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+
+          <!-- Row 1 (Hasil live pencarian Repliz tadi) -->
+          <tr id="row-1">
+            <td>
+              <div class="post-cell">
+                <div class="post-meta">
+                  <div class="post-avatar">👤</div>
+                  <div>
+                    <a href="https://www.threads.com/@elfanmdi/post/Dfjfhcsk2om" target="_blank"
+                      class="post-author">@elfanmdi</a>
+                    <div class="post-time">2 jam lalu · Kata Kunci: "kamar panas"</div>
+                  </div>
+                </div>
+                <div class="post-snippet">
+                  "Rekomendasi AC buat Bandung yang super panas ini bisa skaligus pasang di rumah dan garansi ok gais?
+                  Yg murah2 aja 1/2PK buat kamar kecil...."
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="product-cell">
+                <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200" alt="Aluminium Foil"
+                  class="product-thumb">
+                <div class="product-info">
+                  <span class="product-name">Aluminium Foil Bubble Insulation 4mm</span>
+                  <span class="product-price">Rp 32.000 / m²</span>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);">Tolak Panas Atap 97%</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="draft-cell">
+                <span class="strategy-badge strategy-soft">💡 Strategi: Soft-in-Bio</span>
+                <div class="draft-bubble" id="text-1">
+                  Fyi kalau atapnya seng/asbes mending lapisin aluminium bubble foil ini dulu kak di plafon, lumayan bgt
+                  bisa nurunin 4-6 derajat jadi AC 1/2 PK ga boros listrik (fotonya kyk gini). Link tokonya ada di bio
+                  profil ya!
+                </div>
+                <div style="font-size: 0.75rem; color: var(--status-success); font-weight: 600;">
+                  ✓ Skor AI: 94% Relevan
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="action-cell">
+                <button class="btn-approve" onclick="approveReply('row-1')">
+                  <span>✓</span> Setujui & Balas
+                </button>
+                <button class="btn-edit" onclick="openEditModal('row-1')">✏️ Edit Teks</button>
+                <button class="btn-skip" onclick="skipRow('row-1')">Lewati</button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 2 -->
+          <tr id="row-2">
+            <td>
+              <div class="post-cell">
+                <div class="post-meta">
+                  <div class="post-avatar">👤</div>
+                  <div>
+                    <a href="#" class="post-author">@dimas_saputra</a>
+                    <div class="post-time">3 jam lalu · Kata Kunci: "rekomendasi peredam suara"</div>
+                  </div>
+                </div>
+                <div class="post-snippet">
+                  "Tetangga sebelah berisik bgt renovasi rumah, ada saran peredam suara dinding kamar yg ga ribet
+                  pasangnya tapi ngefek?"
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="product-cell">
+                <img src="https://images.unsplash.com/photo-1585338107529-13afc5f02586?w=200" alt="Rockwool"
+                  class="product-thumb">
+                <div class="product-info">
+                  <span class="product-name">Busa Peredam Suara Akustik Pyramid</span>
+                  <span class="product-price">Rp 18.500 / lembar</span>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);">Mudah ditempel sendiri</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="draft-cell">
+                <span class="strategy-badge strategy-soft">💡 Strategi: Soft-in-Bio</span>
+                <div class="draft-bubble" id="text-2">
+                  Bisa coba pasang foam akustik model piramid kak, di kamarku lumayan bgt ngeredam dengung dan suara
+                  luar (fotonya kyk gini). Pemasangannya tinggal pake double tape. Link tokonya udah aku taruh di bio ya
+                  kak.
+                </div>
+                <div style="font-size: 0.75rem; color: var(--status-success); font-weight: 600;">
+                  ✓ Skor AI: 89% Relevan
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="action-cell">
+                <button class="btn-approve" onclick="approveReply('row-2')">
+                  <span>✓</span> Setujui & Balas
+                </button>
+                <button class="btn-edit" onclick="openEditModal('row-2')">✏️ Edit Teks</button>
+                <button class="btn-skip" onclick="skipRow('row-2')">Lewati</button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 3 -->
+          <tr id="row-3">
+            <td>
+              <div class="post-cell">
+                <div class="post-meta">
+                  <div class="post-avatar">👤</div>
+                  <div>
+                    <a href="#" class="post-author">@rachel_anindya</a>
+                    <div class="post-time">4 jam lalu · Kata Kunci: "rekomendasi AC murah"</div>
+                  </div>
+                </div>
+                <div class="post-snippet">
+                  "Kamar kosan lantai 2 panasnya minta ampun, mau beli AC tapi daya listrik cuma 900 watt ga bakal kuat.
+                  Ada alternatif pendingin lain ga ya?"
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="product-cell">
+                <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200" alt="Air Cooler"
+                  class="product-thumb">
+                <div class="product-info">
+                  <span class="product-name">Portable Air Cooler Mini USB 5W</span>
+                  <span class="product-price">Rp 79.000</span>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);">Listrik hanya 5 Watt</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="draft-cell">
+                <span class="strategy-badge strategy-direct">🔗 Strategi: Direct Link</span>
+                <div class="draft-bubble" id="text-3">
+                  Kalo daya 900W mending pake portable air cooler mini kak, cuma 5 watt dicolok powerbank aja idup.
+                  Diisi air es semriwing bgt buat kamar kos sempit. Nih link shopeenya: https://s.shopee.co.id/sample
+                </div>
+                <div style="font-size: 0.75rem; color: var(--status-success); font-weight: 600;">
+                  ✓ Skor AI: 91% Relevan
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="action-cell">
+                <button class="btn-approve" onclick="approveReply('row-3')">
+                  <span>✓</span> Setujui & Balas
+                </button>
+                <button class="btn-edit" onclick="openEditModal('row-3')">✏️ Edit Teks</button>
+                <button class="btn-skip" onclick="skipRow('row-3')">Lewati</button>
+              </div>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- Modal Edit Draf -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-box">
+      <h3 class="modal-title">✏️ Edit Teks Balasan Threads</h3>
+      <p style="font-size: 0.85rem; color: var(--text-muted);">
+        Pastikan bahasa tetap santai, empatik, dan tidak memicu filter spam Threads Meta.
+      </p>
+      <textarea class="modal-textarea" id="modalTextarea"></textarea>
+      <div style="font-size: 0.75rem; color: var(--text-secondary); display: flex; align-items: center; gap: 8px;">
+        <span>📷 Foto Produk Terlampir: <strong>Otomatis diunggah via Repliz API</strong></span>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeEditModal()">Batal</button>
+        <button class="btn-primary" onclick="saveEditedText()">Simpan Perubahan</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Theme Switcher Logic
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      try {
+        localStorage.setItem('maknaflow_theme', theme);
+      } catch (e) {}
+      const darkBtn = document.getElementById('darkBtn');
+      const lightBtn = document.getElementById('lightBtn');
+      if (darkBtn && lightBtn) {
+        if (theme === 'dark') {
+          darkBtn.classList.add('active');
+          lightBtn.classList.remove('active');
+        } else {
+          lightBtn.classList.add('active');
+          darkBtn.classList.remove('active');
+        }
+      }
+    }
+
+    // Initialize Theme immediately from localStorage or default to dark
+    (function initTheme() {
+      let saved = null;
+      try {
+        saved = localStorage.getItem('maknaflow_theme');
+      } catch (e) {}
+      const initial = saved || 'dark';
+      setTheme(initial);
+    })();
+
+    // Keyword Chips Management
+    const newKeywordInput = document.getElementById('newKeywordInput');
+    const addKeywordBtn = document.getElementById('addKeywordBtn');
+    const keywordChips = document.getElementById('keywordChips');
+
+    addKeywordBtn.addEventListener('click', () => {
+      const val = newKeywordInput.value.trim();
+      if (!val) return;
+      const chip = document.createElement('div');
+      chip.className = 'chip';
+      chip.innerHTML = `<span>${val}</span> <span class="chip-delete" onclick="removeChip(this)">×</span>`;
+      keywordChips.appendChild(chip);
+      newKeywordInput.value = '';
+    });
+
+    function removeChip(el) {
+      el.parentElement.remove();
+    }
+
+    // Action Buttons Simulation
+    let activeEditRowId = null;
+    const editModal = document.getElementById('editModal');
+    const modalTextarea = document.getElementById('modalTextarea');
+
+    function openEditModal(rowId) {
+      activeEditRowId = rowId;
+      const textEl = document.getElementById('text-' + rowId.split('-')[1]);
+      modalTextarea.value = textEl.textContent.trim();
+      editModal.classList.add('open');
+    }
+
+    function closeEditModal() {
+      editModal.classList.remove('open');
+    }
+
+    function saveEditedText() {
+      if (!activeEditRowId) return;
+      const textEl = document.getElementById('text-' + activeEditRowId.split('-')[1]);
+      textEl.textContent = modalTextarea.value.trim();
+      closeEditModal();
+    }
+
+    let sentCount = 0;
+    let readyCount = 3;
+
+    function approveReply(rowId) {
+      const row = document.getElementById(rowId);
+      const actionCell = row.querySelector('.action-cell');
+      actionCell.innerHTML = `
+      <span class="badge-status badge-info" style="padding: 6px 10px;">
+        ⏳ Mengirim via Repliz...
+      </span>
+    `;
+
+      setTimeout(() => {
+        actionCell.innerHTML = `
+        <span class="badge-status badge-success" style="padding: 6px 10px;">
+          ✓ Terkirim ke Threads!
+        </span>
+      `;
+        row.style.opacity = '0.7';
+        sentCount++;
+        readyCount--;
+        document.getElementById('sentCount').innerHTML = `${sentCount} <span class="badge-status badge-success">✓ Live</span>`;
+        document.getElementById('readyCount').textContent = readyCount;
+      }, 1500);
+    }
+
+    function skipRow(rowId) {
+      const row = document.getElementById(rowId);
+      row.style.transition = 'all 0.3s ease';
+      row.style.opacity = '0';
+      setTimeout(() => {
+        row.remove();
+        readyCount--;
+        document.getElementById('readyCount').textContent = readyCount;
+      }, 300);
+    }
+
+    // Scan Button Trigger Simulation
+    document.getElementById('scanBtn').addEventListener('click', function () {
+      this.innerHTML = '<span>⏳</span> Memindai Threads via Repliz...';
+      this.disabled = true;
+      setTimeout(() => {
+        this.innerHTML = '<span>✓</span> Pemindaian Selesai (11 Pos Ditemukan)';
+        showToast('✓ 11 Postingan baru berhasil dipindai via Repliz API');
+        setTimeout(() => {
+          this.innerHTML = '<span>🔍</span> Scan Threads Sekarang via Repliz';
+          this.disabled = false;
+        }, 2000);
+      }, 2000);
+    });
+
+    // ==========================================
+    // SCHEDULER MANAGEMENT LOGIC (HARI & JAM)
+    // ==========================================
+    let isSchedulerActive = true;
+    let currentHourMode = 'specific'; // 'specific' | 'interval'
+
+    function toggleScheduler(enabled) {
+      isSchedulerActive = enabled;
+      const body = document.getElementById('schedulerBody');
+      const badge = document.getElementById('scheduleStatusBadge');
+      const label = document.getElementById('schedulerToggleLabel');
+      const statBadge = document.getElementById('statScheduleBadge');
+      const statText = document.getElementById('statNextScanText');
+
+      if (enabled) {
+        body.classList.remove('disabled');
+        badge.className = 'badge-status badge-success';
+        badge.textContent = '● Aktif';
+        label.textContent = 'Jadwal Aktif';
+        statBadge.className = 'badge-status badge-success';
+        statBadge.textContent = '● Aktif';
+        updateDaySummary();
+        showToast('✓ Penjadwalan Radar otomatis diaktifkan');
+      } else {
+        body.classList.add('disabled');
+        badge.className = 'badge-status badge-warning';
+        badge.textContent = '○ Nonaktif';
+        label.textContent = 'Jadwal Nonaktif';
+        statBadge.className = 'badge-status badge-warning';
+        statBadge.textContent = '○ Terjeda';
+        statText.textContent = 'Jadwal otomatis terjeda (Mode Manual)';
+        showToast('⚠️ Penjadwalan Radar dinonaktifkan');
+      }
+    }
+
+    function setDayPreset(preset) {
+      const presetButtons = document.querySelectorAll('.preset-pill');
+      presetButtons.forEach(b => b.classList.remove('active'));
+
+      if (preset === 'all') {
+        document.getElementById('presetAllBtn').classList.add('active');
+        document.querySelectorAll('.day-btn').forEach(btn => btn.classList.add('active'));
+      } else if (preset === 'workdays') {
+        document.getElementById('presetWorkBtn').classList.add('active');
+        document.querySelectorAll('.day-btn').forEach(btn => {
+          const day = btn.getAttribute('data-day');
+          if (['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'].includes(day)) {
+            btn.classList.add('active');
+          } else {
+            btn.classList.remove('active');
+          }
+        });
+      } else if (preset === 'weekends') {
+        document.getElementById('presetWeekendBtn').classList.add('active');
+        document.querySelectorAll('.day-btn').forEach(btn => {
+          const day = btn.getAttribute('data-day');
+          if (['Sabtu', 'Minggu'].includes(day)) {
+            btn.classList.add('active');
+          } else {
+            btn.classList.remove('active');
+          }
+        });
+      }
+      updateDaySummary();
+    }
+
+    function toggleDay(btn) {
+      btn.classList.toggle('active');
+      // Reset preset active pill
+      document.querySelectorAll('.preset-pill').forEach(b => b.classList.remove('active'));
+      updateDaySummary();
+    }
+
+    function updateDaySummary() {
+      const activeDays = [];
+      document.querySelectorAll('.day-btn.active').forEach(b => {
+        activeDays.push(b.getAttribute('data-day'));
+      });
+
+      const daySummary = document.getElementById('daySummary');
+      const statText = document.getElementById('statNextScanText');
+
+      if (activeDays.length === 7) {
+        daySummary.innerHTML = '<span>✓</span> <span>Berjalan setiap hari: Senin s/d Minggu (7 hari aktif)</span>';
+        if (isSchedulerActive) statText.textContent = 'Next: Hari ini, 17:00 WIB (Senin - Minggu)';
+      } else if (activeDays.length === 5 && !activeDays.includes('Sabtu') && !activeDays.includes('Minggu')) {
+        daySummary.innerHTML = '<span>✓</span> <span>Berjalan pada hari kerja: Senin s/d Jumat (5 hari aktif)</span>';
+        if (isSchedulerActive) statText.textContent = 'Next: Hari ini, 17:00 WIB (Hari Kerja)';
+      } else if (activeDays.length === 2 && activeDays.includes('Sabtu') && activeDays.includes('Minggu')) {
+        daySummary.innerHTML = '<span>✓</span> <span>Berjalan pada akhir pekan: Sabtu & Minggu (2 hari aktif)</span>';
+        if (isSchedulerActive) statText.textContent = 'Next: Sabtu depan, 08:00 WIB (Akhir Pekan)';
+      } else if (activeDays.length === 0) {
+        daySummary.innerHTML = '<span style="color: var(--status-danger);">⚠️ Tidak ada hari yang dipilih! Silakan aktifkan minimal 1 hari.</span>';
+        if (isSchedulerActive) statText.textContent = 'Peringatan: Tidak ada hari aktif';
+      } else {
+        daySummary.innerHTML = `<span>✓</span> <span>Berjalan pada: ${activeDays.join(', ')} (${activeDays.length} hari aktif)</span>`;
+        if (isSchedulerActive) statText.textContent = `Next: Hari ini, 17:00 WIB (${activeDays.length} hari/minggu)`;
+      }
+    }
+
+    function setHourMode(mode) {
+      currentHourMode = mode;
+      const specificContainer = document.getElementById('specificHoursContainer');
+      const intervalContainer = document.getElementById('intervalHoursContainer');
+      const modeSpecificBtn = document.getElementById('modeSpecificBtn');
+      const modeIntervalBtn = document.getElementById('modeIntervalBtn');
+
+      if (mode === 'specific') {
+        modeSpecificBtn.classList.add('active');
+        modeIntervalBtn.classList.remove('active');
+        specificContainer.style.display = 'block';
+        intervalContainer.style.display = 'none';
+      } else {
+        modeIntervalBtn.classList.add('active');
+        modeSpecificBtn.classList.remove('active');
+        specificContainer.style.display = 'none';
+        intervalContainer.style.display = 'block';
+        updateIntervalSummary();
+      }
+    }
+
+    function addHourSlot() {
+      const input = document.getElementById('newHourInput');
+      const val = input.value;
+      if (!val) return;
+
+      const formatted = `${val} WIB`;
+      const chips = document.querySelectorAll('#hourChips .hour-chip span');
+      for (const c of chips) {
+        if (c.textContent.trim() === formatted) {
+          showToast(`⚠️ Jam ${formatted} sudah ada di daftar`);
+          return;
+        }
+      }
+
+      const chip = document.createElement('div');
+      chip.className = 'hour-chip';
+      chip.innerHTML = `<span>${formatted}</span> <span class="chip-delete" onclick="removeHour(this)">×</span>`;
+      document.getElementById('hourChips').appendChild(chip);
+      showToast(`✓ Jam scan baru ditambahkan: ${formatted}`);
+    }
+
+    function removeHour(el) {
+      const hourText = el.parentElement.querySelector('span').textContent;
+      el.parentElement.remove();
+      showToast(`Jam scan ${hourText} dihapus`);
+    }
+
+    function updateIntervalSummary() {
+      const interval = document.getElementById('intervalSelect').value;
+      const start = document.getElementById('rangeStartSelect').value;
+      const end = document.getElementById('rangeEndSelect').value;
+
+      const startH = parseInt(start.split(':')[0], 10);
+      const endH = parseInt(end.split(':')[0], 10);
+      const intH = parseInt(interval, 10);
+
+      const generated = [];
+      for (let h = startH; h <= endH; h += intH) {
+        generated.push((h < 10 ? '0' + h : h) + ':00');
+      }
+
+      const summaryEl = document.getElementById('intervalSummary');
+      summaryEl.innerHTML = `<span>✓</span> <span>Agen akan memindai Threads setiap ${intH} jam antara ${start} - ${end} WIB (${generated.join(', ')}).</span>`;
+    }
+
+    function testRunNow() {
+      const btn = document.getElementById('testScheduleBtn');
+      btn.innerHTML = '<span>⏳</span> Mengeksekusi Scan Terjadwal...';
+      btn.disabled = true;
+
+      setTimeout(() => {
+        btn.innerHTML = '<span>⚡</span> Uji Eksekusi Jadwal Sekarang';
+        btn.disabled = false;
+        showToast('✓ Simulasi Eksekusi Sukses: 11 postingan Threads ditemukan & draf AI diperbarui');
+        document.getElementById('nextRunText').textContent = 'Jadwal Berikutnya: Hari Ini, 20:30 WIB (± 3 Jam 45 Menit Lagi)';
+      }, 1800);
+    }
+
+    function saveScheduleSettings() {
+      const activeDays = [];
+      document.querySelectorAll('.day-btn.active').forEach(b => {
+        activeDays.push(b.getAttribute('data-day'));
+      });
+
+      const specificHours = [];
+      document.querySelectorAll('#hourChips .hour-chip span').forEach(s => {
+        if (!s.classList.contains('chip-delete')) {
+          specificHours.push(s.textContent.trim());
+        }
+      });
+
+      const config = {
+        enabled: isSchedulerActive,
+        days: activeDays,
+        hourMode: currentHourMode,
+        specificHours: specificHours,
+        interval: document.getElementById('intervalSelect').value,
+        rangeStart: document.getElementById('rangeStartSelect').value,
+        rangeEnd: document.getElementById('rangeEndSelect').value,
+        updatedAt: new Date().toISOString()
+      };
+
+      try {
+        localStorage.setItem('threads_radar_schedule_config', JSON.stringify(config));
+      } catch (e) {}
+
+      showToast('✓ Konfigurasi Penjadwalan Radar Berhasil Disimpan!');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastPopup');
+      const toastMsg = document.getElementById('toastMsg');
+      toastMsg.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3500);
+    }
+
+    // Initialize schedule summary on page load
+    (function initSchedule() {
+      updateDaySummary();
+      updateIntervalSummary();
+    })();
+  </script>
+
+  <!-- Toast Notification Popup -->
+  <div class="toast-popup" id="toastPopup">
+    <span style="font-size: 1.2rem;">✓</span>
+    <span id="toastMsg">Pengaturan Berhasil Disimpan</span>
+  </div>
+
+</body>
+
+</html>
