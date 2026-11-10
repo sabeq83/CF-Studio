@@ -35,6 +35,13 @@ export function ThreadsAffiliateRadar({ brandId, brandName }) {
   const [editTextValue, setEditTextValue] = useState('');
   const [savingEdit, setSavingEdit] = useState(false);
 
+  // State Akun Threads
+  const [accounts, setAccounts] = useState([]);
+  const [selectedAccountId, setSelectedAccountId] = useState('');
+  const [selectedUsername, setSelectedUsername] = useState('');
+  const [syncingAccounts, setSyncingAccounts] = useState(false);
+  const [switchingAccount, setSwitchingAccount] = useState(false);
+
   // Status balasan yang sedang diproses
   const [replyingMap, setReplyingMap] = useState({});
 
@@ -47,6 +54,64 @@ export function ThreadsAffiliateRadar({ brandId, brandName }) {
       setToast(prev => ({ ...prev, show: false }));
     }, 3500);
   }, []);
+
+  // Fetch daftar akun Threads
+  const loadAccounts = useCallback(async () => {
+    try {
+      const res = await fetch('/api/v2/threads-radar/accounts').then(r => r.json());
+      if (res.success) {
+        setAccounts(res.data || []);
+        if (res.selectedAccountId) setSelectedAccountId(res.selectedAccountId);
+        if (res.selectedUsername) setSelectedUsername(res.selectedUsername);
+      }
+    } catch (err) {
+      console.warn('Gagal memuat akun Threads:', err.message);
+    }
+  }, []);
+
+  // Handler Sinkronisasi Akun dari Repliz
+  const handleSyncAccounts = async () => {
+    setSyncingAccounts(true);
+    try {
+      const res = await fetch('/api/v2/threads-radar/accounts/sync', { method: 'POST' }).then(r => r.json());
+      if (res.success) {
+        setAccounts(res.data || []);
+        if (res.selectedAccountId) setSelectedAccountId(res.selectedAccountId);
+        if (res.selectedUsername) setSelectedUsername(res.selectedUsername);
+        showToast(res.message || 'Akun Threads berhasil disinkronkan dari Repliz!', 'success');
+      } else {
+        showToast(res.error || 'Gagal menyinkronkan akun', 'error');
+      }
+    } catch (err) {
+      showToast(`Error: ${err.message}`, 'error');
+    } finally {
+      setSyncingAccounts(false);
+    }
+  };
+
+  // Handler Pilih Akun Aktif
+  const handleSelectAccount = async (newAccountId) => {
+    setSwitchingAccount(true);
+    try {
+      const res = await fetch('/api/v2/threads-radar/accounts/select', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accountId: newAccountId })
+      }).then(r => r.json());
+      if (res.success) {
+        setSelectedAccountId(newAccountId);
+        const found = accounts.find(a => (a.account_id || a.id) === newAccountId);
+        if (found) setSelectedUsername(found.username);
+        showToast(res.message || 'Akun aktif Threads diperbarui', 'success');
+      } else {
+        showToast(res.error || 'Gagal mengganti akun', 'error');
+      }
+    } catch (err) {
+      showToast(`Error: ${err.message}`, 'error');
+    } finally {
+      setSwitchingAccount(false);
+    }
+  };
 
   // Fetch semua data awal
   const loadRadarData = useCallback(async () => {
@@ -66,6 +131,12 @@ export function ThreadsAffiliateRadar({ brandId, brandName }) {
           active_days: schedRes.data.active_days || prev.active_days,
           specific_hours: schedRes.data.specific_hours || prev.specific_hours
         }));
+        if (schedRes.data.selected_account_id) {
+          setSelectedAccountId(schedRes.data.selected_account_id);
+        }
+        if (schedRes.data.selected_account_username) {
+          setSelectedUsername(schedRes.data.selected_account_username);
+        }
       }
       if (oppRes.success) setOpportunities(oppRes.data || []);
     } catch (err) {
@@ -77,7 +148,8 @@ export function ThreadsAffiliateRadar({ brandId, brandName }) {
 
   useEffect(() => {
     loadRadarData();
-  }, [loadRadarData]);
+    loadAccounts();
+  }, [loadRadarData, loadAccounts]);
 
   // Tambah Kata Kunci
   const handleAddKeyword = async (e) => {
@@ -397,7 +469,76 @@ export function ThreadsAffiliateRadar({ brandId, brandName }) {
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          {/* Akun Threads Selector */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            backgroundColor: 'var(--surface-raised)',
+            border: '1px solid var(--border-subtle)',
+            padding: '6px 12px',
+            borderRadius: 'var(--radius-sm, 8px)'
+          }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500 }}>Akun Threads:</span>
+            <select
+              value={selectedAccountId || ''}
+              onChange={(e) => handleSelectAccount(e.target.value)}
+              disabled={switchingAccount || syncingAccounts || accounts.length === 0}
+              style={{
+                background: 'var(--input-bg)',
+                color: 'var(--text-primary)',
+                border: '1px solid var(--border-strong)',
+                borderRadius: 'var(--radius-xs, 6px)',
+                padding: '5px 10px',
+                fontSize: '0.85rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                outline: 'none'
+              }}
+            >
+              {accounts.length === 0 ? (
+                <option value="">(Belum ada akun)</option>
+              ) : (
+                accounts.map(acc => (
+                  <option key={acc.account_id || acc.id} value={acc.account_id || acc.id}>
+                    @{acc.username || 'unknown'} {acc.name ? `(${acc.name})` : ''}
+                  </option>
+                ))
+              )}
+            </select>
+          </div>
+
+          {/* Tombol Sync Akun Threads */}
+          <button
+            type="button"
+            onClick={handleSyncAccounts}
+            disabled={syncingAccounts}
+            style={{
+              backgroundColor: 'var(--surface-interactive)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border-strong)',
+              padding: '8px 14px',
+              borderRadius: 'var(--radius-sm, 8px)',
+              fontSize: '0.82rem',
+              fontWeight: 600,
+              cursor: syncingAccounts ? 'not-allowed' : 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              opacity: syncingAccounts ? 0.7 : 1,
+              transition: 'var(--transition)'
+            }}
+          >
+            <span style={{
+              display: 'inline-block',
+              transform: syncingAccounts ? 'rotate(360deg)' : 'none',
+              transition: 'transform 0.8s ease'
+            }}>🔄</span>
+            <span>{syncingAccounts ? 'Menyinkronkan...' : 'Sync Akun Threads'}</span>
+          </button>
+
+          {/* Tombol Scan Threads Sekarang */}
           <button
             type="button"
             onClick={handleTriggerScan}
@@ -492,7 +633,7 @@ export function ThreadsAffiliateRadar({ brandId, brandName }) {
             </span>
           </div>
           <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-            Via akun @kost_sasyahouse (Repliz)
+            Via akun @{selectedUsername || 'kost_sasyahouse'} (Repliz)
           </span>
         </div>
 

@@ -46,6 +46,9 @@ async function main() {
 
   console.log('1. Memeriksa keberadaan tool Threads Labs di MCP Server:');
   const expectedTools = [
+    'cf_threads_labs_list_accounts',
+    'cf_threads_labs_sync_accounts',
+    'cf_threads_labs_select_account',
     'cf_threads_labs_scan',
     'cf_threads_labs_list_opportunities',
     'cf_threads_labs_approve_reply',
@@ -86,3 +89,4 @@ main().catch(err => {
   console.error('❌ MCP Tool Test Failed:', err);
   process.exit(1);
 });
+

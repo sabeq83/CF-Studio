@@ -1059,16 +1059,31 @@
 
   <div class="container">
 
-    <!-- Header & Title -->
+    <!-- Header & Title with Account Selector -->
     <div class="header-card">
       <div class="header-info">
-        <div class="badge-icon">🎯</div>
+        <div class="badge-icon">🧵</div>
         <div class="header-title">
           <h1>Threads Labs <span class="badge-status badge-success">● Repliz API Live</span></h1>
-          <p>Agen 1 (Radar) & Agen 2 (Strategist) memantau keluhan & pertanyaan netizen di Threads untuk rekomendasi
-            produk Shopee.</p>
+          <p>Laboratorium Social Selling & Autonomous Reply Engine via Repliz API untuk rekomendasi produk Shopee.</p>
         </div>
       </div>
+
+      <!-- Akun Threads Selector & Sync Action -->
+      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 8px; background: var(--surface-raised); border: 1px solid var(--border-subtle); padding: 6px 12px; border-radius: var(--radius-sm);">
+          <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">Akun Threads:</span>
+          <select id="threadsAccountSelect" onchange="simulateSelectAccount(this.value)" style="background: var(--input-bg); color: var(--text-primary); border: 1px solid var(--border-strong); border-radius: var(--radius-xs); padding: 5px 10px; font-size: 0.85rem; font-weight: 600; cursor: pointer; outline: none;">
+            <option value="6af2de8cfc43f81b7871eae6" selected>@kost_sasyahouse (Sasya House)</option>
+            <option value="6af3032ffc43f81b78728090">@nutribake_id (NutriBake ID)</option>
+          </select>
+        </div>
+        <button id="btnSyncMock" onclick="simulateSyncAccounts()" class="action-btn" style="background: var(--surface-interactive); color: var(--text-primary); border: 1px solid var(--border-strong); font-size: 0.82rem; padding: 7px 14px; gap: 6px; cursor: pointer;">
+          <span id="syncIcon" style="display: inline-block; transition: transform 0.8s ease;">🔄</span>
+          <span id="syncLabel">Sync Akun Threads</span>
+        </button>
+      </div>
+
       <div class="theme-switcher">
         <button id="darkBtn" class="theme-btn active" onclick="setTheme('dark')">🌙 Dark</button>
         <button id="lightBtn" class="theme-btn" onclick="setTheme('light')">☀️ Light</button>
@@ -1804,6 +1819,36 @@
       } catch (e) {}
 
       showToast('✓ Konfigurasi Penjadwalan Radar Berhasil Disimpan!');
+    }
+
+    function simulateSyncAccounts() {
+      const btn = document.getElementById('btnSyncMock');
+      const icon = document.getElementById('syncIcon');
+      const label = document.getElementById('syncLabel');
+
+      btn.disabled = true;
+      icon.style.transform = 'rotate(360deg)';
+      label.textContent = 'Menyinkronkan...';
+
+      setTimeout(() => {
+        btn.disabled = false;
+        icon.style.transform = 'none';
+        label.textContent = 'Sync Akun Threads';
+        showToast('✓ Berhasil menyinkronkan 2 akun Threads dari Repliz!');
+      }, 1200);
+    }
+
+    function simulateSelectAccount(accId) {
+      const select = document.getElementById('threadsAccountSelect');
+      const selectedOption = select.options[select.selectedIndex];
+      const username = selectedOption.text.split(' ')[0] || '@kost_sasyahouse';
+      
+      const sentSubtext = document.querySelector('.stat-card:nth-child(3) .stat-subtext');
+      if (sentSubtext) {
+        sentSubtext.textContent = `Via akun ${username} (Repliz)`;
+      }
+
+      showToast(`✓ Akun Threads aktif dialihkan ke ${username}`);
     }
 
     function showToast(msg) {

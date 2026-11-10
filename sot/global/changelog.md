@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.40.24 — Threads Labs Multi-Account Selector & On-Demand Sync (10/11/2026)
+- Fitur pemilih akun Threads aktif di header Threads Labs
+- Tombol Sync Akun Threads on-demand dari Repliz API
+- Dukungan database threads_connected_accounts & selected_account_id
+- 3 tool MCP baru: list_accounts, sync_accounts, select_account
+
 ## V2.40.23 — Rilis Modul Threads Labs & Integrasi 6 Tools MCP Server (10/11/2026)
 - Pembentukan menu dan halaman mandiri Threads Labs di Sidebar (/threads-labs)
 - Integrasi 6 tool MCP Server cf_threads_labs_* untuk kontrol AI Agent via chat

@@ -996,6 +996,35 @@ export function createCfStudioServer(rawRequest) {
   // ==========================================
 
   register(
+    'cf_threads_labs_list_accounts',
+    'List all connected Threads accounts from Repliz and display currently selected active account.',
+    {},
+    true,
+    () => request('/api/v2/threads-radar/accounts')
+  );
+
+  register(
+    'cf_threads_labs_sync_accounts',
+    'Force sync connected Threads accounts directly from Repliz API and update local cache.',
+    {},
+    false,
+    () => request('/api/v2/threads-radar/accounts/sync', { method: 'POST' })
+  );
+
+  register(
+    'cf_threads_labs_select_account',
+    'Select active Threads account to be used for radar scanning and comment publishing.',
+    {
+      account_id: z.string().trim().min(1)
+    },
+    false,
+    ({ account_id }) => request('/api/v2/threads-radar/accounts/select', {
+      method: 'POST',
+      body: { accountId: account_id }
+    })
+  );
+
+  register(
     'cf_threads_labs_scan',
     'Scan Threads content via Repliz API based on active keywords and trigger AI Shopee affiliate product matching.',
     {},

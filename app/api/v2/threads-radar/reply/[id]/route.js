@@ -4,7 +4,8 @@ import { pgQuery } from '@/lib/db-pg';
 import { 
   updateDraftStatus, 
   updateDraftText, 
-  logExecutionOutcome 
+  logExecutionOutcome,
+  getRadarSchedule
 } from '@/lib/threads-affiliate-repository';
 import { 
   getReplizCredentials, 
@@ -54,7 +55,10 @@ export async function POST(req, context) {
       return NextResponse.json({ success: false, error: 'Kredensial Repliz belum dikonfigurasi' }, { status: 400 });
     }
 
-    const threadsAcc = await getActiveThreadsAccount(credentials);
+    const schedule = await getRadarSchedule(tenantId);
+    const preferredAccountId = schedule?.selected_account_id || null;
+
+    const threadsAcc = await getActiveThreadsAccount(credentials, preferredAccountId);
     if (!threadsAcc) {
       return NextResponse.json({ success: false, error: 'Tidak ditemukan akun Threads aktif di Repliz' }, { status: 400 });
     }
