@@ -63,7 +63,7 @@ flowchart TD
 - [x] **Task 5: Frontend UI Modal Skeduler (Segmented Control & Date Picker)** — Update `app/auto-pipeline/page.js` untuk menambahkan Segmented Control `[ 🔄 Rutin Mingguan ]` vs `[ 📅 Tanggal Spesifik ]`, input Date Picker `<input type="date">`, tombol Quick Date Presets (`[Hari Ini]`, `[Besok]`, `[+3 Hari]`, `[+7 Hari]`), dan auto-stagger tanggal kalender untuk batch keyword/produk dengan 100% Semantic CSS Tokens.
 - [x] **Task 6: Frontend UI Tabel Monitoring & Filter Dual-Mode** — Update tabel monitoring jadwal di `app/auto-pipeline/page.js` untuk menampilkan format tanggal spesifik `📅 YYYY-MM-DD`, badge status `Selesai ✅`, dan filter mode jadwal.
 - [x] **Task 7: Verifikasi End-to-End & Uji Coba** — Uji pembuatan jadwal tanggal spesifik, eksekusi runner, auto-completion status, serta auto-stagger batch kalender pada environment Dev/Staging.
-- [ ] **Task 8: Rilis & Git Sync** — Jalankan `npm run release-non-interactive` dan deploy atomic ke Staging & Dev Mac Mini sesuai SOP.
+- [x] **Task 8: Rilis & Git Sync** — Jalankan `npm run release-non-interactive` dan deploy atomic ke Staging & Dev Mac Mini sesuai SOP.
 
 ---
 
