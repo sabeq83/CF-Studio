@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.40.19 — Fitur Tampilan Tabel Skedul 1-Baris Sleek & Modern (10/11/2026)
+- Membuat komponen ScheduleTableView dengan tampilan ketat 1-baris dan 100% Semantic CSS Tokens
+- Menggantikan tampilan kartu tebal pada tab Skedul dengan tabel data horizontal berkecepatan scan tinggi
+- Mendukung interaksi klik baris untuk edit jadwal dan aksi cepat
+
 ## V2.40.18 — Fitur Opsi Tampilan Kalender pada Tab Skedul Auto Pipeline (10/11/2026)
 - Menambahkan segmented control switcher tampilan tabel dan kalender pada tab skedul
 - Membuat komponen ScheduleCalendarView dengan penanggalan dinamis dan slot waktu semantic

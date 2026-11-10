@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup: Tampilan Tabel Skedul 1-Baris Sleek — MAKNA Flow</title>
+  <style>
+    :root {
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-subtle: #f1f5f9;
+      --surface-interactive: #e2e8f0;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --border-color: #cbd5e1;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --input-bg: #ffffff;
+      --focus-ring: #06b6d4;
+      --action-primary: #0891b2;
+      --action-primary-hover: #0e7490;
+      --on-action-primary: #ffffff;
+      --status-success: #16a34a;
+      --status-success-soft: #dcfce7;
+      --status-info: #0284c7;
+      --status-info-soft: #e0f2fe;
+      --status-warning: #d97706;
+      --status-warning-soft: #fef3c7;
+      --status-danger: #dc2626;
+      --status-danger-soft: #fee2e2;
+      --shadow-card: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.02);
+      --shadow-modal: 0 20px 25px -5px rgba(0,0,0,0.2), 0 8px 10px -6px rgba(0,0,0,0.2);
+      --radius-xs: 4px;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme="dark"] {
+      --surface: #0f172a;
+      --surface-raised: #1e293b;
+      --surface-subtle: #172033;
+      --surface-interactive: #334155;
+      --border-subtle: #1e293b;
+      --border-strong: #334155;
+      --border-color: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --input-bg: #0f172a;
+      --focus-ring: #22d3ee;
+      --action-primary: #06b6d4;
+      --action-primary-hover: #0891b2;
+      --on-action-primary: #000000;
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.15);
+      --status-info: #38bdf8;
+      --status-info-soft: rgba(56, 189, 248, 0.15);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.15);
+      --status-danger: #f87171;
+      --status-danger-soft: rgba(248, 113, 113, 0.15);
+      --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+      --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-family);
+      background: var(--surface-subtle);
+      color: var(--text-primary);
+      padding: 1.5rem;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* Top Bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+      box-shadow: var(--shadow-card);
+    }
+
+    .top-bar h1 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .top-bar p {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      margin-top: 0.2rem;
+    }
+
+    .theme-toggle-btn {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 0.45rem 0.9rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Control & Filter Bar */
+    .control-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 0.85rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.85rem;
+      box-shadow: var(--shadow-card);
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-right: 0.2rem;
+    }
+
+    .pill-filter {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-secondary);
+      padding: 0.3rem 0.7rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .pill-filter:hover {
+      background: var(--surface-raised);
+    }
+
+    .pill-filter.active {
+      background: var(--surface-interactive);
+      color: var(--action-primary);
+      border-color: var(--action-primary);
+    }
+
+    .search-input {
+      background: var(--input-bg);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      padding: 0.38rem 0.85rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      outline: none;
+      width: 250px;
+      transition: var(--transition);
+    }
+
+    .search-input:focus {
+      border-color: var(--focus-ring);
+      box-shadow: 0 0 0 2px var(--focus-ring);
+    }
+
+    /* ========================================================= */
+    /* SLEEK 1-BARIS TABLE (STRICT SINGLE-LINE ROWS)             */
+    /* ========================================================= */
+    .table-wrapper {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+    }
+
+    .table-header-info {
+      padding: 0.65rem 1.25rem;
+      background: var(--surface-raised);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    .sleek-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.82rem;
+      white-space: nowrap;
+    }
+
+    .sleek-table th {
+      background: var(--surface-raised);
+      padding: 0.65rem 1rem;
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border-subtle);
+      user-select: none;
+    }
+
+    .sleek-table td {
+      padding: 0.65rem 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+      vertical-align: middle;
+      height: 48px; /* Strict compact height */
+      transition: background 0.1s ease;
+    }
+
+    .sleek-table tbody tr {
+      cursor: pointer;
+      transition: background 0.1s ease;
+    }
+
+    .sleek-table tbody tr:hover td {
+      background: var(--surface-raised);
+    }
+
+    /* Column Specific Styles */
+    .time-flow-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: var(--radius-xs);
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .date-badge {
+      font-size: 0.78rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.18rem 0.5rem;
+      border-radius: var(--radius-xs);
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+    }
+
+    .date-badge.specific {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+    }
+
+    .keyword-cell {
+      max-width: 320px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .brand-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.18rem 0.5rem;
+      border-radius: 9999px;
+      background: var(--surface-interactive);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .channels-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .channel-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: var(--radius-xs);
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.18rem 0.55rem;
+      border-radius: 9999px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .status-active {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+    }
+    .status-active .status-dot { background: var(--status-success); box-shadow: 0 0 6px var(--status-success); }
+
+    .status-paused {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border: 1px solid var(--status-warning);
+    }
+    .status-paused .status-dot { background: var(--status-warning); }
+
+    /* Single-Line Action Buttons */
+    .row-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      justify-content: flex-end;
+    }
+
+    .act-btn {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      border-radius: var(--radius-xs);
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .act-btn:hover {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      border-color: var(--border-strong);
+    }
+
+    .act-btn.primary {
+      color: var(--action-primary);
+      border-color: var(--action-primary);
+      background: var(--status-info-soft);
+    }
+
+    .act-btn.primary:hover {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    /* Modal Backdrop Simulation */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 1rem;
+    }
+
+    .modal-dialog {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 550px;
+      box-shadow: var(--shadow-modal);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h3 {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .modal-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.1rem;
+    }
+
+    .modal-body {
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      font-size: 0.84rem;
+    }
+
+    .modal-footer {
+      padding: 0.85rem 1.25rem;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      background: var(--surface-raised);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Top Header -->
+    <header class="top-bar">
+      <div>
+        <h1>
+          <span>⚡</span> Usulan Revisi: Tampilan Tabel Skedul 1-Baris (Single-Line Sleek)
+        </h1>
+        <p>Setiap jadwal menempati <strong>tepat 1 baris</strong> (~48px) yang rapat, rapi, dan mudah di-scan secara horizontal.</p>
+      </div>
+      <button class="theme-toggle-btn" onclick="toggleTheme()">🌓 Ganti Tema</button>
+    </header>
+
+    <!-- Filter Bar -->
+    <div class="control-card">
+      <div class="filter-group">
+        <span class="filter-label">Brand:</span>
+        <button class="pill-filter active">Semua Brand (8)</button>
+        <button class="pill-filter">Solusi Thermal ID (7)</button>
+        <button class="pill-filter">Habitfolk (1)</button>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">Status:</span>
+        <button class="pill-filter active">Semua Status</button>
+        <button class="pill-filter">🟢 Aktif (7)</button>
+        <button class="pill-filter">⏸️ Dijeda (1)</button>
+      </div>
+
+      <div>
+        <input type="text" class="search-input" placeholder="🔍 Cari keyword atau brand..." onkeyup="filterRows(this.value)">
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- 1-BARIS SLEEK TABLE                                      -->
+    <!-- ======================================================== -->
+    <div class="table-wrapper">
+      <div class="table-header-info">
+        <div>
+          Menampilkan <strong>8 Jadwal Terjadwal</strong> &bull; Klik pada baris mana saja untuk membuka popup edit jadwal
+        </div>
+        <div style="font-size: 0.75rem;">
+          <span>Tinggi per baris: <strong>48px</strong> (Strict 1-Line)</span>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="sleek-table">
+          <thead>
+            <tr>
+              <th style="width: 140px;">WAKTU (BUAT ➔ PUBLISH)</th>
+              <th style="width: 125px;">TANGGAL / RUTIN</th>
+              <th>KEYWORD / TOPIK KONTEN</th>
+              <th style="width: 190px;">BRAND &amp; TIPE</th>
+              <th style="width: 130px;">REPLIZ</th>
+              <th style="width: 95px;">STATUS</th>
+              <th style="width: 130px; text-align: right; padding-right: 1.25rem;">AKSI</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <!-- Row 1 -->
+            <tr onclick="openScheduleModal('cara membuat ruangan tidak bergema', '00:45', '12:09', '11 Nov 2026', 'Solusi Thermal ID')">
+              <td>
+                <span class="time-flow-pill" style="border-left: 3px solid var(--status-info);">
+                  <span style="color: var(--status-info);">00:45</span>
+                  <span style="color: var(--text-muted);">➔</span>
+                  <span style="color: var(--status-success);">12:09</span>
+                  <span style="font-size: 0.65rem; color: var(--text-muted);">WIB</span>
+                </span>
+              </td>
+              <td>
+                <span class="date-badge specific">
+                  <span>📅</span> 11 Nov 2026
+                </span>
+              </td>
+              <td>
+                <div class="keyword-cell" title="cara membuat ruangan tidak bergema">
+                  cara membuat ruangan tidak bergema
+                </div>
+              </td>
+              <td>
+                <span class="brand-badge">
+                  <span>📖</span> Solusi Thermal ID
+                </span>
+              </td>
+              <td>
+                <div class="channels-group">
+                  <span class="channel-icon" title="YouTube">▶️</span>
+                  <span class="channel-icon" title="Facebook">📘</span>
+                  <span class="channel-icon" title="Instagram">📸</span>
+                  <span class="channel-icon" title="TikTok">🎵</span>
+                </div>
+              </td>
+              <td>
+                <span class="status-pill status-active">
+                  <span class="status-dot"></span>
+                  <span>Aktif</span>
+                </span>
+              </td>
+              <td style="text-align: right; padding-right: 1.25rem;" onclick="event.stopPropagation()">
+                <div class="row-actions">
+                  <button class="act-btn primary" title="⚡ Run Now (Tes Eksekusi)">⚡</button>
+                  <button class="act-btn" title="✏️ Edit Jadwal" onclick="openScheduleModal('cara membuat ruangan tidak bergema', '00:45', '12:09', '11 Nov 2026', 'Solusi Thermal ID')">✏️</button>
+                  <button class="act-btn" title="⏸️ Jeda Jadwal">⏸️</button>
+                  <button class="act-btn" title="📦 Arsipkan">📦</button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Row 2 -->
+            <tr onclick="openScheduleModal('perbedaan gema dan gaung', '00:45', '12:14', '12 Nov 2026', 'Solusi Thermal ID')">
+              <td>
+                <span class="time-flow-pill" style="border-left: 3px solid var(--status-info);">
+                  <span style="color: var(--status-info);">00:45</span>
+                  <span style="color: var(--text-muted);">➔</span>
+                  <span style="color: var(--status-success);">12:14</span>
+                  <span style="font-size: 0.65rem; color: var(--text-muted);">WIB</span>
+                </span>
+              </td>
+              <td>
+                <span class="date-badge specific">
+                  <span>📅</span> 12 Nov 2026
+                </span>
+              </td>
+              <td>
+                <div class="keyword-cell" title="perbedaan gema dan gaung">
+                  perbedaan gema dan gaung
+                </div>
+              </td>
+              <td>
+                <span class="brand-badge">
+                  <span>📖</span> Solusi Thermal ID
+                </span>
+              </td>
+              <td>
+                <div class="channels-group">
+                  <span class="channel-icon" title="YouTube">▶️</span>
+                  <span class="channel-icon" title="Facebook">📘</span>
+                  <span class="channel-icon" title="Instagram">📸</span>
+                  <span class="channel-icon" title="TikTok">🎵</span>
+                </div>
+              </td>
+              <td>
+                <span class="status-pill status-active">
+                  <span class="status-dot"></span>
+                  <span>Aktif</span>
+                </span>
+              </td>
+              <td style="text-align: right; padding-right: 1.25rem;" onclick="event.stopPropagation()">
+                <div class="row-actions">
+                  <button class="act-btn primary" title="⚡ Run Now (Tes Eksekusi)">⚡</button>
+                  <button class="act-btn" title="✏️ Edit Jadwal" onclick="openScheduleModal('perbedaan gema dan gaung', '00:45', '12:14', '12 Nov 2026', 'Solusi Thermal ID')">✏️</button>
+                  <button class="act-btn" title="⏸️ Jeda Jadwal">⏸️</button>
+                  <button class="act-btn" title="📦 Arsipkan">📦</button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Row 3 -->
+            <tr onclick="openScheduleModal('ruangan terlalu bergema', '00:45', '12:22', '13 Nov 2026', 'Solusi Thermal ID')">
+              <td>
+                <span class="time-flow-pill" style="border-left: 3px solid var(--status-info);">
+                  <span style="color: var(--status-info);">00:45</span>
+                  <span style="color: var(--text-muted);">➔</span>
+                  <span style="color: var(--status-success);">12:22</span>
+                  <span style="font-size: 0.65rem; color: var(--text-muted);">WIB</span>
+                </span>
+              </td>
+              <td>
+                <span class="date-badge specific">
+                  <span>📅</span> 13 Nov 2026
+                </span>
+              </td>
+              <td>
+                <div class="keyword-cell" title="ruangan terlalu bergema">
+                  ruangan terlalu bergema
+                </div>
+              </td>
+              <td>
+                <span class="brand-badge">
+                  <span>📖</span> Solusi Thermal ID
+                </span>
+              </td>
+              <td>
+                <div class="channels-group">
+                  <span class="channel-icon" title="YouTube">▶️</span>
+                  <span class="channel-icon" title="Facebook">📘</span>
+                  <span class="channel-icon" title="Instagram">📸</span>
+                  <span class="channel-icon" title="TikTok">🎵</span>
+                </div>
+              </td>
+              <td>
+                <span class="status-pill status-active">
+                  <span class="status-dot"></span>
+                  <span>Aktif</span>
+                </span>
+              </td>
+              <td style="text-align: right; padding-right: 1.25rem;" onclick="event.stopPropagation()">
+                <div class="row-actions">
+                  <button class="act-btn primary" title="⚡ Run Now (Tes Eksekusi)">⚡</button>
+                  <button class="act-btn" title="✏️ Edit Jadwal" onclick="openScheduleModal('ruangan terlalu bergema', '00:45', '12:22', '13 Nov 2026', 'Solusi Thermal ID')">✏️</button>
+                  <button class="act-btn" title="⏸️ Jeda Jadwal">⏸️</button>
+                  <button class="act-btn" title="📦 Arsipkan">📦</button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Row 4 -->
+            <tr onclick="openScheduleModal('cara memperbaiki akustik ruangan', '00:45', '12:07', '14 Nov 2026', 'Solusi Thermal ID')">
+              <td>
+                <span class="time-flow-pill" style="border-left: 3px solid var(--status-info);">
+                  <span style="color: var(--status-info);">00:45</span>
+                  <span style="color: var(--text-muted);">➔</span>
+                  <span style="color: var(--status-success);">12:07</span>
+                  <span style="font-size: 0.65rem; color: var(--text-muted);">WIB</span>
+                </span>
+              </td>
+              <td>
+                <span class="date-badge specific">
+                  <span>📅</span> 14 Nov 2026
+                </span>
+              </td>
+              <td>
+                <div class="keyword-cell" title="cara memperbaiki akustik ruangan">
+                  cara memperbaiki akustik ruangan
+                </div>
+              </td>
+              <td>
+                <span class="brand-badge">
+                  <span>📖</span> Solusi Thermal ID
+                </span>
+              </td>
+              <td>
+                <div class="channels-group">
+                  <span class="channel-icon" title="YouTube">▶️</span>
+                  <span class="channel-icon" title="Facebook">📘</span>
+                  <span class="channel-icon" title="Instagram">📸</span>
+                  <span class="channel-icon" title="TikTok">🎵</span>
+                </div>
+              </td>
+              <td>
+                <span class="status-pill status-active">
+                  <span class="status-dot"></span>
+                  <span>Aktif</span>
+                </span>
+              </td>
+              <td style="text-align: right; padding-right: 1.25rem;" onclick="event.stopPropagation()">
+                <div class="row-actions">
+                  <button class="act-btn primary" title="⚡ Run Now (Tes Eksekusi)">⚡</button>
+                  <button class="act-btn" title="✏️ Edit Jadwal" onclick="openScheduleModal('cara memperbaiki akustik ruangan', '00:45', '12:07', '14 Nov 2026', 'Solusi Thermal ID')">✏️</button>
+                  <button class="act-btn" title="⏸️ Jeda Jadwal">⏸️</button>
+                  <button class="act-btn" title="📦 Arsipkan">📦</button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Row 5 -->
+            <tr onclick="openScheduleModal('material penyerap suara', '00:45', '12:18', '15 Nov 2026', 'Solusi Thermal ID')">
+              <td>
+                <span class="time-flow-pill" style="border-left: 3px solid var(--status-info);">
+                  <span style="color: var(--status-info);">00:45</span>
+                  <span style="color: var(--text-muted);">➔</span>
+                  <span style="color: var(--status-success);">12:18</span>
+                  <span style="font-size: 0.65rem; color: var(--text-muted);">WIB</span>
+                </span>
+              </td>
+              <td>
+                <span class="date-badge specific">
+                  <span>📅</span> 15 Nov 2026
+                </span>
+              </td>
+              <td>
+                <div class="keyword-cell" title="material penyerap suara">
+                  material penyerap suara
+                </div>
+              </td>
+              <td>
+                <span class="brand-badge">
+                  <span>📖</span> Solusi Thermal ID
+                </span>
+              </td>
+              <td>
+                <div class="channels-group">
+                  <span class="channel-icon" title="YouTube">▶️</span>
+                  <span class="channel-icon" title="Facebook">📘</span>
+                  <span class="channel-icon" title="Instagram">📸</span>
+                  <span class="channel-icon" title="TikTok">🎵</span>
+                </div>
+              </td>
+              <td>
+                <span class="status-pill status-active">
+                  <span class="status-dot"></span>
+                  <span>Aktif</span>
+                </span>
+              </td>
+              <td style="text-align: right; padding-right: 1.25rem;" onclick="event.stopPropagation()">
+                <div class="row-actions">
+                  <button class="act-btn primary" title="⚡ Run Now (Tes Eksekusi)">⚡</button>
+                  <button class="act-btn" title="✏️ Edit Jadwal" onclick="openScheduleModal('material penyerap suara', '00:45', '12:18', '15 Nov 2026', 'Solusi Thermal ID')">✏️</button>
+                  <button class="act-btn" title="⏸️ Jeda Jadwal">⏸️</button>
+                  <button class="act-btn" title="📦 Arsipkan">📦</button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Row 6 -->
+            <tr onclick="openScheduleModal('cara mengurangi pantulan suara', '00:45', '12:25', '16 Nov 2026', 'Solusi Thermal ID')">
+              <td>
+                <span class="time-flow-pill" style="border-left: 3px solid var(--status-info);">
+                  <span style="color: var(--status-info);">00:45</span>
+                  <span style="color: var(--text-muted);">➔</span>
+                  <span style="color: var(--status-success);">12:25</span>
+                  <span style="font-size: 0.65rem; color: var(--text-muted);">WIB</span>
+                </span>
+              </td>
+              <td>
+                <span class="date-badge specific">
+                  <span>📅</span> 16 Nov 2026
+                </span>
+              </td>
+              <td>
+                <div class="keyword-cell" title="cara mengurangi pantulan suara">
+                  cara mengurangi pantulan suara
+                </div>
+              </td>
+              <td>
+                <span class="brand-badge">
+                  <span>📖</span> Solusi Thermal ID
+                </span>
+              </td>
+              <td>
+                <div class="channels-group">
+                  <span class="channel-icon" title="YouTube">▶️</span>
+                  <span class="channel-icon" title="Facebook">📘</span>
+                  <span class="channel-icon" title="Instagram">📸</span>
+                  <span class="channel-icon" title="TikTok">🎵</span>
+                </div>
+              </td>
+              <td>
+                <span class="status-pill status-active">
+                  <span class="status-dot"></span>
+                  <span>Aktif</span>
+                </span>
+              </td>
+              <td style="text-align: right; padding-right: 1.25rem;" onclick="event.stopPropagation()">
+                <div class="row-actions">
+                  <button class="act-btn primary" title="⚡ Run Now (Tes Eksekusi)">⚡</button>
+                  <button class="act-btn" title="✏️ Edit Jadwal" onclick="openScheduleModal('cara mengurangi pantulan suara', '00:45', '12:25', '16 Nov 2026', 'Solusi Thermal ID')">✏️</button>
+                  <button class="act-btn" title="⏸️ Jeda Jadwal">⏸️</button>
+                  <button class="act-btn" title="📦 Arsipkan">📦</button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Row 7 -->
+            <tr onclick="openScheduleModal('perbedaan peredam suara dan peredam gema', '00:45', '12:11', '17 Nov 2026', 'Solusi Thermal ID')">
+              <td>
+                <span class="time-flow-pill" style="border-left: 3px solid var(--status-info);">
+                  <span style="color: var(--status-info);">00:45</span>
+                  <span style="color: var(--text-muted);">➔</span>
+                  <span style="color: var(--status-success);">12:11</span>
+                  <span style="font-size: 0.65rem; color: var(--text-muted);">WIB</span>
+                </span>
+              </td>
+              <td>
+                <span class="date-badge specific">
+                  <span>📅</span> 17 Nov 2026
+                </span>
+              </td>
+              <td>
+                <div class="keyword-cell" title="perbedaan peredam suara dan peredam gema">
+                  perbedaan peredam suara dan peredam gema
+                </div>
+              </td>
+              <td>
+                <span class="brand-badge">
+                  <span>📖</span> Solusi Thermal ID
+                </span>
+              </td>
+              <td>
+                <div class="channels-group">
+                  <span class="channel-icon" title="YouTube">▶️</span>
+                  <span class="channel-icon" title="Facebook">📘</span>
+                  <span class="channel-icon" title="Instagram">📸</span>
+                  <span class="channel-icon" title="TikTok">🎵</span>
+                </div>
+              </td>
+              <td>
+                <span class="status-pill status-active">
+                  <span class="status-dot"></span>
+                  <span>Aktif</span>
+                </span>
+              </td>
+              <td style="text-align: right; padding-right: 1.25rem;" onclick="event.stopPropagation()">
+                <div class="row-actions">
+                  <button class="act-btn primary" title="⚡ Run Now (Tes Eksekusi)">⚡</button>
+                  <button class="act-btn" title="✏️ Edit Jadwal" onclick="openScheduleModal('perbedaan peredam suara dan peredam gema', '00:45', '12:11', '17 Nov 2026', 'Solusi Thermal ID')">✏️</button>
+                  <button class="act-btn" title="⏸️ Jeda Jadwal">⏸️</button>
+                  <button class="act-btn" title="📦 Arsipkan">📦</button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Row 8 (Sore / Recurring) -->
+            <tr onclick="openScheduleModal('insulasi panas atap pabrik', '12:15', '16:08', 'Setiap Hari', 'Solusi Thermal ID')">
+              <td>
+                <span class="time-flow-pill" style="border-left: 3px solid var(--action-primary);">
+                  <span style="color: var(--action-primary);">12:15</span>
+                  <span style="color: var(--text-muted);">➔</span>
+                  <span style="color: var(--status-success);">16:08</span>
+                  <span style="font-size: 0.65rem; color: var(--text-muted);">WIB</span>
+                </span>
+              </td>
+              <td>
+                <span class="date-badge">
+                  <span>🔄</span> Setiap Hari
+                </span>
+              </td>
+              <td>
+                <div class="keyword-cell" title="insulasi panas atap pabrik">
+                  insulasi panas atap pabrik
+                </div>
+              </td>
+              <td>
+                <span class="brand-badge">
+                  <span>📖</span> Solusi Thermal ID
+                </span>
+              </td>
+              <td>
+                <div class="channels-group">
+                  <span class="channel-icon" title="YouTube">▶️</span>
+                  <span class="channel-icon" title="Facebook">📘</span>
+                  <span class="channel-icon" title="Instagram">📸</span>
+                  <span class="channel-icon" title="TikTok">🎵</span>
+                </div>
+              </td>
+              <td>
+                <span class="status-pill status-paused">
+                  <span class="status-dot"></span>
+                  <span>Dijeda</span>
+                </span>
+              </td>
+              <td style="text-align: right; padding-right: 1.25rem;" onclick="event.stopPropagation()">
+                <div class="row-actions">
+                  <button class="act-btn primary" title="⚡ Run Now (Tes Eksekusi)">⚡</button>
+                  <button class="act-btn" title="✏️ Edit Jadwal" onclick="openScheduleModal('insulasi panas atap pabrik', '12:15', '16:08', 'Setiap Hari', 'Solusi Thermal ID')">✏️</button>
+                  <button class="act-btn" title="▶️ Lanjutkan Jadwal">▶️</button>
+                  <button class="act-btn" title="📦 Arsipkan">📦</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Edit Modal Simulation -->
+  <div class="modal-backdrop" id="edit-modal" onclick="closeScheduleModal()">
+    <div class="modal-dialog" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3><span>✏️</span> Edit Jadwal Rutin</h3>
+        <button class="modal-close-btn" onclick="closeScheduleModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div>
+          <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">Target Keyword / Topik:</label>
+          <input type="text" id="modal-keyword" class="search-input" style="width: 100%; margin-top: 0.25rem;">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div>
+            <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">Jam Buat Konten:</label>
+            <input type="text" id="modal-gen" class="search-input" style="width: 100%; margin-top: 0.25rem;">
+          </div>
+          <div>
+            <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">Jam Publish Repliz:</label>
+            <input type="text" id="modal-pub" class="search-input" style="width: 100%; margin-top: 0.25rem;">
+          </div>
+        </div>
+        <div>
+          <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">Tanggal / Frekuensi:</label>
+          <input type="text" id="modal-date" class="search-input" style="width: 100%; margin-top: 0.25rem;">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="pill-filter" onclick="closeScheduleModal()">Batal</button>
+        <button class="pill-filter active" style="padding: 0.45rem 1rem;" onclick="closeScheduleModal()">Simpan Perubahan</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+    }
+
+    function filterRows(keyword) {
+      const q = (keyword || '').toLowerCase();
+      const rows = document.querySelectorAll('#table-body tr');
+      rows.forEach(r => {
+        const text = r.innerText.toLowerCase();
+        r.style.display = text.includes(q) ? '' : 'none';
+      });
+    }
+
+    function openScheduleModal(keyword, genTime, pubTime, date, brand) {
+      document.getElementById('modal-keyword').value = keyword;
+      document.getElementById('modal-gen').value = genTime;
+      document.getElementById('modal-pub').value = pubTime;
+      document.getElementById('modal-date').value = date;
+      document.getElementById('edit-modal').style.display = 'flex';
+    }
+
+    function closeScheduleModal() {
+      document.getElementById('edit-modal').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
