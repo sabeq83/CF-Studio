@@ -61,6 +61,9 @@ export function createHttpApp({ request, baseUrl, bearerToken, allowedHosts = ['
 
   app.post('/mcp', async (req, res) => {
     const clientRequest = req.clientToken ? operatorClient({ baseUrl, token: req.clientToken }) : request;
+    if (!clientRequest) {
+      return res.status(500).json({ error: 'Default operator token not configured on server' });
+    }
     await handleMcpSession(req, res, clientRequest);
   });
   app.all('/mcp', (_req, res) => res.set('Allow', 'POST').sendStatus(405));
@@ -69,9 +72,10 @@ export function createHttpApp({ request, baseUrl, bearerToken, allowedHosts = ['
 
 async function main() {
   const baseUrl = process.env.CF_STUDIO_OPERATOR_BASE_URL || process.env.MAKNA_OPERATOR_BASE_URL || 'http://127.0.0.1:5010';
-  const token = process.env.CF_STUDIO_OPERATOR_API_TOKEN || process.env.MAKNA_OPERATOR_API_TOKEN;
-  const request = operatorClient({ baseUrl, token });
+  const token = process.env.CF_STUDIO_OPERATOR_API_TOKEN || process.env.MAKNA_OPERATOR_API_TOKEN || '';
+  const request = token ? operatorClient({ baseUrl, token }) : null;
   if (process.argv.includes('--stdio')) {
+    if (!request) throw new Error('CF_STUDIO_OPERATOR_API_TOKEN is required in stdio mode');
     await createCfStudioServer(request).connect(new StdioServerTransport());
     return;
   }
@@ -83,7 +87,7 @@ async function main() {
   const port = Number(process.env.CF_STUDIO_MCP_PORT || process.env.MAKNA_MCP_PORT || 7030);
 
   const app = createHttpApp({ request, baseUrl, bearerToken, allowedHosts, allowedOrigins });
-  const http = app.listen(port, host, () => console.error('CF Studio MCP listening'));
+  const http = app.listen(port, host, () => console.error(`CF Studio MCP listening on ${host}:${port}`));
   for (const signal of ['SIGINT', 'SIGTERM']) process.once(signal, () => http.close());
 }
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main().catch(() => { console.error('CF Studio MCP startup failed. Check configuration.'); process.exitCode = 1; });
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main().catch(err => { console.error('CF Studio MCP startup failed:', err); process.exitCode = 1; });

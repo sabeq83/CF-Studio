@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.40.17 — Fix: Resilient MCP server bootstrap for Remote Tailscale Service (10/11/2026)
+- Resilient main bootstrap tanpa wajib env token statis
+- Mendukung endpoint /u/:token untuk dynamic operator token per request
+
 ## V2.40.16 — Fix: Add MCP SDK and Zod to root dependencies for Remote Tailscale Service (10/11/2026)
 - Registrasi @modelcontextprotocol/sdk dan zod ke root dependencies
 - Dukungan penuh untuk Remote MCP Service di port 7030 Mac Mini
