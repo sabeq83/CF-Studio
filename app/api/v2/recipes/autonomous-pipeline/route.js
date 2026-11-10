@@ -177,14 +177,19 @@ export const POST = withTenantContext(async (request, _context, user) => {
         }
       });
     } else if (pipelineType === 'editorial_campaign') {
+      const isKeywordMode = body.use_brand_pillars === false || Boolean(body.keyword);
       result = await executeAutonomousEditorialPipeline({
         brandId: body.brand_id || body.brandId,
         pillarTitle: body.content_pillar || body.pillar_title || body.topic,
+        keyword: body.keyword || (isKeywordMode ? (body.content_pillar || body.pillar_title || body.topic) : null),
+        useBrandPillars: body.use_brand_pillars !== undefined ? Boolean(body.use_brand_pillars) : !isKeywordMode,
         presetKey: body.preset_key || body.presetKey || 'brand_editorial_campaign',
         executionMode: body.execution_mode || body.executionMode || 'full_autopilot',
         tenantId,
         overrides: {
           visual_identity_preset_id: body.visual_identity_preset_id || null,
+          use_brand_pillars: body.use_brand_pillars !== undefined ? Boolean(body.use_brand_pillars) : !isKeywordMode,
+          keyword: body.keyword || (isKeywordMode ? (body.content_pillar || body.pillar_title || body.topic) : null),
           ...affiliateOverride,
           ...(body.overrides || {})
         }

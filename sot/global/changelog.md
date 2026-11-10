@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.40.11 — Feat: Keyword-Based Video Editorial & Batch Scheduler (Option A) (10/11/2026)
+- Dukungan pilar brand OFF dan topik berbasis keyword pencarian
+- Segmented control Pilar vs Keyword pada modal 1-klik instan
+- Batch scheduler Option A untuk multi-line keywords dengan auto-stagger hari
+- Single-pass prompt search intent dan dynamic campaign naming
+
 ## V2.40.10 — Fix: FFmpeg Pre-flight Self-Healing, Scheduler Isolation & Auto Pipeline Retry (10/11/2026)
 - Pre-flight self-healing pada worker FFmpeg untuk verifikasi dan unduh on-the-fly klip video dan audio
 - Smart auto-retry pada scheduler mengarahkan retry ke tahap visual jika berkas fisik tidak lengkap

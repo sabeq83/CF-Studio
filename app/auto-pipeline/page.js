@@ -138,6 +138,8 @@ export default function AutoPipelinePage() {
   const [instantCampaignType, setInstantCampaignType] = useState('recipe_campaign'); // 'recipe_campaign' | 'product_campaign' | 'editorial_campaign' | 'multiplier_campaign' | 'recipe_labs'
   const [instantProductId, setInstantProductId] = useState('');
   const [instantPillar, setInstantPillar] = useState('');
+  const [instantEditorialMode, setInstantEditorialMode] = useState('pillar'); // 'pillar' | 'keyword'
+  const [instantEditorialKeyword, setInstantEditorialKeyword] = useState('');
   const [instantProductSearch, setInstantProductSearch] = useState('');
   const [instantPillarSearch, setInstantPillarSearch] = useState('');
 
@@ -217,6 +219,9 @@ export default function AutoPipelinePage() {
   // Editorial Pillars Selection State (Editorial Campaign)
   const [pillarSearchQuery, setPillarSearchQuery] = useState('');
   const [selectedPillars, setSelectedPillars] = useState([]);
+  const [schedEditorialMode, setSchedEditorialMode] = useState('pillar'); // 'pillar' | 'keyword'
+  const [schedEditorialKeywordsText, setSchedEditorialKeywordsText] = useState('');
+  const [schedStaggerDays, setSchedStaggerDays] = useState(true);
 
   // Repliz Multi-Platform Search & Filter State
   const [replizSearchQuery, setReplizSearchQuery] = useState('');
@@ -843,14 +848,25 @@ export default function AutoPipelinePage() {
       targetCategory = prod?.category || 'produk';
       targetProductId = effectiveProdId;
     } else if (instantCampaignType === 'editorial_campaign') {
-      const effectivePillar = instantPillar || (modalAvailablePillars[0] || 'Eat Better, Not Perfect');
-      if (!effectivePillar) {
-        showToast('Pilih pilar brand terlebih dahulu.', 'error');
-        return;
+      if (instantEditorialMode === 'keyword') {
+        const kw = instantEditorialKeyword.trim();
+        if (!kw) {
+          showToast('Masukkan kata kunci target editorial terlebih dahulu.', 'error');
+          return;
+        }
+        targetTopic = kw;
+        targetCategory = 'editorial';
+        targetPillar = kw;
+      } else {
+        const effectivePillar = instantPillar || (modalAvailablePillars[0] || 'Eat Better, Not Perfect');
+        if (!effectivePillar) {
+          showToast('Pilih pilar brand terlebih dahulu.', 'error');
+          return;
+        }
+        targetTopic = effectivePillar;
+        targetCategory = 'editorial';
+        targetPillar = effectivePillar;
       }
-      targetTopic = effectivePillar;
-      targetCategory = 'editorial';
-      targetPillar = effectivePillar;
     } else if (instantCampaignType === 'multiplier_campaign') {
       targetDeconstructId = instantBlueprintId || (blueprints[0]?.id || null);
       if (!targetDeconstructId) {
@@ -893,6 +909,8 @@ export default function AutoPipelinePage() {
           promotion_context: instantPromotionContext.trim() || null,
           selected_cep: selectedCep,
           content_pillar: targetPillar,
+          keyword: instantCampaignType === 'editorial_campaign' && instantEditorialMode === 'keyword' ? instantEditorialKeyword.trim() : null,
+          use_brand_pillars: instantCampaignType === 'editorial_campaign' ? (instantEditorialMode !== 'keyword') : true,
           deconstruct_asset_id: targetDeconstructId,
           selected_angle: targetChosenAngle,
           category: targetCategory,
@@ -1249,8 +1267,15 @@ export default function AutoPipelinePage() {
         return showToast('Pilih minimal 1 produk dari katalog untuk dijadwalkan.', 'error');
       }
     } else if (schedCampaignType === 'editorial_campaign') {
-      if (!editingSchedule && selectedPillars.length === 0) {
-        return showToast('Pilih minimal 1 pilar konten brand untuk dijadwalkan.', 'error');
+      if (!editingSchedule) {
+        if (schedEditorialMode === 'keyword') {
+          const kws = schedEditorialKeywordsText.split('\n').map(k => k.trim()).filter(Boolean);
+          if (kws.length === 0) {
+            return showToast('Masukkan minimal 1 baris kata kunci target.', 'error');
+          }
+        } else if (selectedPillars.length === 0) {
+          return showToast('Pilih minimal 1 pilar konten brand untuk dijadwalkan.', 'error');
+        }
       }
     } else if (schedCampaignType === 'recipe_campaign') {
       if (!schedTopic.trim()) return showToast('Tema / Arahan topik resep wajib diisi', 'error');
@@ -1268,10 +1293,17 @@ export default function AutoPipelinePage() {
           const prodObj = catalogProducts.find(p => p.id === targetId);
           targetTitle = prodObj?.product_name || targetTitle;
           schedTopicVal = schedPromotionContext.trim() || targetTitle;
-        } else if (schedCampaignType === 'editorial_campaign' && selectedPillars.length > 0) {
-          targetId = selectedPillars[0];
-          targetTitle = selectedPillars[0];
-          schedTopicVal = targetTitle;
+        } else if (schedCampaignType === 'editorial_campaign') {
+          if (schedEditorialMode === 'keyword') {
+            const kw = schedEditorialKeywordsText.split('\n').map(k => k.trim()).filter(Boolean)[0] || schedTopic;
+            targetId = kw;
+            targetTitle = kw;
+            schedTopicVal = kw;
+          } else if (selectedPillars.length > 0) {
+            targetId = selectedPillars[0];
+            targetTitle = selectedPillars[0];
+            schedTopicVal = targetTitle;
+          }
         } else if (schedCampaignType === 'multiplier_campaign') {
           targetId = schedBlueprintId || editingSchedule.target_item_id || (blueprints[0]?.id || null);
           const bpObj = blueprints.find(b => b.id === targetId);
@@ -1365,6 +1397,53 @@ export default function AutoPipelinePage() {
           const data = await res.json();
           if (!data.success) throw new Error(data.error || 'Gagal membuat jadwal batch produk');
           showToast(`Berhasil membuat ${items.length} baris jadwal video produk independen! 🛍️`);
+        } else if (schedCampaignType === 'editorial_campaign' && schedEditorialMode === 'keyword') {
+          // BATCH KEYWORD EDITORIAL (Opsi A: 1 Baris Keyword = 1 Jadwal Mandiri)
+          const keywords = schedEditorialKeywordsText.split('\n').map(k => k.trim()).filter(Boolean);
+          if (keywords.length === 0) throw new Error('Masukkan minimal 1 baris kata kunci target.');
+
+          const customNameBase = schedName.trim();
+          const items = keywords.map((kw, idx) => {
+            let itemDays = schedDays;
+            if (schedStaggerDays && schedDays.length > 0) {
+              itemDays = [schedDays[idx % schedDays.length]];
+            }
+            const itemScheduleName = customNameBase
+              ? (customNameBase.toLowerCase().includes(kw.toLowerCase()) ? customNameBase : `${customNameBase} - ${kw}`)
+              : `Keyword: ${kw} — ${schedGenTime} WIB`;
+            return {
+              name: itemScheduleName,
+              brand_id: schedBrandId,
+              preset_key: schedPresetKey,
+              pipeline_type: 'editorial_campaign',
+              target_item_id: kw,
+              target_item_title: kw,
+              topic: kw,
+              category: 'editorial',
+              recipe_count: 1,
+              generation_time: schedGenTime,
+              publish_time: schedPubTime,
+              days_of_week: itemDays,
+              repliz_account_ids: schedReplizAccountIds,
+              auto_publish_enabled: schedAutoPublish,
+              timezone: 'Asia/Jakarta',
+              pipeline_config: { 
+                content_pillar: kw, 
+                keyword: kw, 
+                use_brand_pillars: false, 
+                post_link_affiliate: schedPostAffiliateLink 
+              }
+            };
+          });
+
+          const res = await fetch('/api/v2/recipes/auto-pipeline-schedules', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items })
+          });
+          const data = await res.json();
+          if (!data.success) throw new Error(data.error || 'Gagal membuat jadwal batch keyword');
+          showToast(`Berhasil membuat ${items.length} baris jadwal video keyword independen! 🎯`);
         } else if (schedCampaignType === 'editorial_campaign' && selectedPillars.length > 1) {
           // BATCH EDITORIAL: 1 Pilar = 1 Baris Jadwal Mandiri
           const customNameBase = schedName.trim();
@@ -1417,12 +1496,21 @@ export default function AutoPipelinePage() {
             finalCategory = prod?.category || 'produk';
             if (!finalName) finalName = `${targetTitle} — ${schedGenTime} WIB`;
           } else if (schedCampaignType === 'editorial_campaign') {
-            const pillar = selectedPillars[0];
-            targetId = pillar;
-            targetTitle = pillar;
-            finalTopic = pillar;
-            finalCategory = 'editorial';
-            if (!finalName) finalName = `${pillar} — ${schedGenTime} WIB`;
+            if (schedEditorialMode === 'keyword') {
+              const kw = schedEditorialKeywordsText.split('\n').map(k => k.trim()).filter(Boolean)[0] || 'Keyword Editorial';
+              targetId = kw;
+              targetTitle = kw;
+              finalTopic = kw;
+              finalCategory = 'editorial';
+              if (!finalName) finalName = `Keyword: ${kw} — ${schedGenTime} WIB`;
+            } else {
+              const pillar = selectedPillars[0];
+              targetId = pillar;
+              targetTitle = pillar;
+              finalTopic = pillar;
+              finalCategory = 'editorial';
+              if (!finalName) finalName = `${pillar} — ${schedGenTime} WIB`;
+            }
           } else if (schedCampaignType === 'multiplier_campaign') {
             targetId = schedBlueprintId || (blueprints[0]?.id || null);
             const bpObj = blueprints.find(b => b.id === targetId);
@@ -1443,7 +1531,12 @@ export default function AutoPipelinePage() {
           const pipelineConfigPayload = schedCampaignType === 'product_campaign'
             ? { product_id: targetId, selected_cep: schedSelectedCep || 'auto', promotion_context: schedPromotionContext.trim() || null, visual_identity_preset_id: schedViIdSingle }
             : (schedCampaignType === 'editorial_campaign'
-                ? { content_pillar: targetTitle, visual_identity_preset_id: schedViIdSingle }
+                ? { 
+                    content_pillar: targetTitle, 
+                    keyword: schedEditorialMode === 'keyword' ? targetTitle : null,
+                    use_brand_pillars: schedEditorialMode !== 'keyword',
+                    visual_identity_preset_id: schedViIdSingle 
+                  }
                 : (schedCampaignType === 'multiplier_campaign'
                     ? { blueprint_id: targetId, execution_mode: 'full_autopilot', generate_recipe: schedGenerateRecipe, visual_identity_preset_id: schedViIdSingle }
                     : (schedCampaignType === 'recipe_labs'
@@ -2708,11 +2801,11 @@ export default function AutoPipelinePage() {
                 </div>
               )}
 
-              {/* 3B: VIDEO EDITORIAL (Pilar Brand Selector) */}
+              {/* 3B: VIDEO EDITORIAL (Segmented Control: Pilar vs Keyword) */}
               {instantCampaignType === 'editorial_campaign' && (
                 <div style={{
                   background: 'var(--surface-raised)',
-                  border: '1.5px solid var(--status-info)',
+                  border: '1.5px solid var(--border-strong)',
                   borderRadius: 'var(--radius-md)',
                   padding: '1.15rem',
                   display: 'flex',
@@ -2722,110 +2815,187 @@ export default function AutoPipelinePage() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
                     <div style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
                       <span>📖</span>
-                      <span>Pilih Pilar Konten Brand:</span>
+                      <span>Konfigurasi Topik Editorial:</span>
                     </div>
-                    {instantPillar && (
-                      <span style={{
-                        fontSize: '0.72rem',
-                        fontWeight: 700,
-                        padding: '0.2rem 0.65rem',
-                        borderRadius: 9999,
-                        background: 'var(--status-info-soft)',
-                        color: 'var(--status-info)',
-                        border: '1px solid var(--status-info)'
-                      }}>
-                        Terpilih: "{instantPillar}"
-                      </span>
-                    )}
+
+                    {/* Segmented Control - 100% Semantic Tokens */}
+                    <div style={{ display: 'flex', background: 'var(--surface)', padding: '0.25rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)', gap: '0.25rem' }}>
+                      <button
+                        type="button"
+                        onClick={() => setInstantEditorialMode('pillar')}
+                        style={{
+                          padding: '0.35rem 0.75rem',
+                          border: 'none',
+                          borderRadius: 'var(--radius-xs)',
+                          fontSize: '0.78rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          background: instantEditorialMode === 'pillar' ? 'var(--status-info)' : 'transparent',
+                          color: instantEditorialMode === 'pillar' ? 'var(--on-action-primary)' : 'var(--text-muted)',
+                          transition: 'var(--transition)'
+                        }}
+                      >
+                        🏛️ Pakai Pilar Brand
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setInstantEditorialMode('keyword')}
+                        style={{
+                          padding: '0.35rem 0.75rem',
+                          border: 'none',
+                          borderRadius: 'var(--radius-xs)',
+                          fontSize: '0.78rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          background: instantEditorialMode === 'keyword' ? 'var(--status-info)' : 'transparent',
+                          color: instantEditorialMode === 'keyword' ? 'var(--on-action-primary)' : 'var(--text-muted)',
+                          transition: 'var(--transition)'
+                        }}
+                      >
+                        🎯 Berbasis Keyword (Pilar OFF)
+                      </button>
+                    </div>
                   </div>
 
-                  {/* Search box */}
-                  <div style={{ position: 'relative' }}>
-                    <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '0.85rem' }}>🔍</span>
-                    <input
-                      type="text"
-                      value={instantPillarSearch}
-                      onChange={(e) => setInstantPillarSearch(e.target.value)}
-                      placeholder="Cari topik pilar brand..."
-                      style={{
-                        width: '100%',
-                        height: '38px',
-                        background: 'var(--surface)',
-                        border: '1px solid var(--border-subtle)',
-                        borderRadius: 'var(--radius-sm)',
-                        padding: '0 10px 0 32px',
-                        color: 'var(--text-primary)',
-                        fontSize: '0.84rem',
-                        outline: 'none'
-                      }}
-                    />
-                  </div>
-
-                  {/* Scrollable Pillars List */}
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-                    gap: '0.65rem',
-                    maxHeight: '240px',
-                    overflowY: 'auto',
-                    paddingRight: '4px'
-                  }}>
-                    {filteredInstantPillars.length === 0 ? (
-                      <div style={{ gridColumn: '1 / -1', padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.82rem', border: '1px dashed var(--border-subtle)', borderRadius: 'var(--radius-sm)' }}>
-                        Tidak ada pilar yang cocok dengan "{instantPillarSearch}".
+                  {instantEditorialMode === 'pillar' ? (
+                    <>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Pilih salah satu pilar konten resmi brand:</span>
+                        {instantPillar && (
+                          <span style={{
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            padding: '0.2rem 0.65rem',
+                            borderRadius: 9999,
+                            background: 'var(--status-info-soft)',
+                            color: 'var(--status-info)',
+                            border: '1px solid var(--status-info)'
+                          }}>
+                            Terpilih: "{instantPillar}"
+                          </span>
+                        )}
                       </div>
-                    ) : (
-                      filteredInstantPillars.map((pillar, idx) => {
-                        const isSelected = instantPillar === pillar;
-                        return (
-                          <div
-                            key={idx}
-                            onClick={() => setInstantPillar(pillar)}
-                            style={{
-                              background: isSelected ? 'var(--surface-interactive)' : 'var(--surface)',
-                              border: isSelected ? '1.5px solid var(--status-info)' : '1px solid var(--border-subtle)',
-                              borderRadius: 'var(--radius-sm)',
-                              padding: '0.75rem 0.85rem',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              gap: '0.65rem',
-                              transition: 'var(--transition)'
-                            }}
-                          >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flex: 1, minWidth: 0 }}>
-                              <span style={{ fontSize: '1.1rem' }}>📌</span>
-                              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={pillar}>
-                                {pillar}
-                              </span>
-                            </div>
 
-                            <div style={{
-                              width: '18px',
-                              height: '18px',
-                              borderRadius: '50%',
-                              border: isSelected ? '1.5px solid var(--status-info)' : '1.5px solid var(--border-strong)',
-                              background: isSelected ? 'var(--status-info)' : 'transparent',
-                              color: isSelected ? '#ffffff' : 'transparent',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontSize: '0.65rem',
-                              fontWeight: 900,
-                              flexShrink: 0
-                            }}>
-                              ✓
-                            </div>
+                      {/* Search box */}
+                      <div style={{ position: 'relative' }}>
+                        <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '0.85rem' }}>🔍</span>
+                        <input
+                          type="text"
+                          value={instantPillarSearch}
+                          onChange={(e) => setInstantPillarSearch(e.target.value)}
+                          placeholder="Cari topik pilar brand..."
+                          style={{
+                            width: '100%',
+                            height: '38px',
+                            background: 'var(--surface)',
+                            border: '1px solid var(--border-subtle)',
+                            borderRadius: 'var(--radius-sm)',
+                            padding: '0 10px 0 32px',
+                            color: 'var(--text-primary)',
+                            fontSize: '0.84rem',
+                            outline: 'none'
+                          }}
+                        />
+                      </div>
+
+                      {/* Scrollable Pillars List */}
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+                        gap: '0.65rem',
+                        maxHeight: '240px',
+                        overflowY: 'auto',
+                        paddingRight: '4px'
+                      }}>
+                        {filteredInstantPillars.length === 0 ? (
+                          <div style={{ gridColumn: '1 / -1', padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.82rem', border: '1px dashed var(--border-subtle)', borderRadius: 'var(--radius-sm)' }}>
+                            Tidak ada pilar yang cocok dengan "{instantPillarSearch}".
                           </div>
-                        );
-                      })
-                    )}
-                  </div>
+                        ) : (
+                          filteredInstantPillars.map((pillar, idx) => {
+                            const isSelected = instantPillar === pillar;
+                            return (
+                              <div
+                                key={idx}
+                                onClick={() => setInstantPillar(pillar)}
+                                style={{
+                                  background: isSelected ? 'var(--surface-interactive)' : 'var(--surface)',
+                                  border: isSelected ? '1.5px solid var(--status-info)' : '1px solid var(--border-subtle)',
+                                  borderRadius: 'var(--radius-sm)',
+                                  padding: '0.75rem 0.85rem',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                  gap: '0.65rem',
+                                  transition: 'var(--transition)'
+                                }}
+                              >
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flex: 1, minWidth: 0 }}>
+                                  <span style={{ fontSize: '1.1rem' }}>📌</span>
+                                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={pillar}>
+                                    {pillar}
+                                  </span>
+                                </div>
 
-                  <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', background: 'var(--surface)', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border-subtle)' }}>
-                    💡 <strong>1-Pass Editorial Engine:</strong> AI Gemini otomatis merancang hook tension kontroversial/fakta, storytelling edukatif, dan format video editorial sesuai pilar brand ini dalam 1-pass.
-                  </div>
+                                <div style={{
+                                  width: '18px',
+                                  height: '18px',
+                                  borderRadius: '50%',
+                                  border: isSelected ? '1.5px solid var(--status-info)' : '1.5px solid var(--border-strong)',
+                                  background: isSelected ? 'var(--status-info)' : 'transparent',
+                                  color: isSelected ? 'var(--on-action-primary)' : 'transparent',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontSize: '0.65rem',
+                                  fontWeight: 900,
+                                  flexShrink: 0
+                                }}>
+                                  ✓
+                                </div>
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+
+                      <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', background: 'var(--surface)', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border-subtle)' }}>
+                        💡 <strong>1-Pass Editorial Engine:</strong> AI Gemini otomatis merancang hook tension kontroversial/fakta, storytelling edukatif, dan format video editorial sesuai pilar brand ini dalam 1-pass.
+                      </div>
+                    </>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                          Masukkan kata kunci atau topik pencarian audiens (Pilar brand dinonaktifkan):
+                        </span>
+                        <span style={{ fontSize: '0.72rem', fontWeight: 700, background: 'var(--status-warning-soft)', color: 'var(--status-warning)', padding: '0.15rem 0.5rem', borderRadius: 9999 }}>
+                          Pilar Brand: OFF ⚠️
+                        </span>
+                      </div>
+                      <input
+                        type="text"
+                        value={instantEditorialKeyword}
+                        onChange={(e) => setInstantEditorialKeyword(e.target.value)}
+                        placeholder="Contoh: peredam suara studio podcast murah, cara hilangkan dengung kamar"
+                        style={{
+                          width: '100%',
+                          height: '38px',
+                          background: 'var(--surface)',
+                          border: '1px solid var(--border-subtle)',
+                          borderRadius: 'var(--radius-sm)',
+                          padding: '0 10px',
+                          color: 'var(--text-primary)',
+                          fontSize: '0.84rem',
+                          outline: 'none'
+                        }}
+                      />
+                      <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', background: 'var(--surface-interactive)', padding: '0.55rem 0.75rem', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border-subtle)' }}>
+                        🤖 <strong>Arahan Single-Pass Gemini Engine:</strong> AI akan membedah search intent dari keyword ini menjadi narasi storytelling tension berdurasi 30-45 detik dengan formula Hook 8-11 kata tanpa terikat pilar bawaan brand.
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -5878,11 +6048,11 @@ export default function AutoPipelinePage() {
                   </div>
                 )}
 
-                {/* 3B. EDITORIAL: Multi-Select Pilar Konten Brand */}
+                {/* 3B. EDITORIAL: Segmented Control & Multi-Keyword Textarea */}
                 {schedCampaignType === 'editorial_campaign' && (
                   <div style={{
                     background: 'var(--surface-raised)',
-                    border: '1.5px solid var(--status-info)',
+                    border: '1.5px solid var(--border-strong)',
                     borderRadius: 'var(--radius-md)',
                     padding: '1rem',
                     display: 'flex',
@@ -5891,130 +6061,216 @@ export default function AutoPipelinePage() {
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
                       <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                        <span>📖</span>
-                        <span>Pilih Pilar Konten Brand:</span>
+                        <span>📅</span>
+                        <span>Mode Sumber Topik Penjadwalan:</span>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{
-                          fontSize: '0.72rem',
-                          fontWeight: 700,
-                          padding: '0.2rem 0.65rem',
-                          borderRadius: 9999,
-                          background: 'var(--status-info-soft)',
-                          color: 'var(--status-info)',
-                          border: '1px solid var(--status-info)'
-                        }}>
-                          {selectedPillars.length} Pilar Dipilih
-                        </span>
+                      <div style={{ display: 'flex', background: 'var(--surface)', padding: '0.25rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)', gap: '0.25rem' }}>
+                        <button
+                          type="button"
+                          onClick={() => setSchedEditorialMode('pillar')}
+                          style={{
+                            padding: '0.35rem 0.75rem',
+                            border: 'none',
+                            borderRadius: 'var(--radius-xs)',
+                            fontSize: '0.78rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            background: schedEditorialMode === 'pillar' ? 'var(--status-info)' : 'transparent',
+                            color: schedEditorialMode === 'pillar' ? 'var(--on-action-primary)' : 'var(--text-muted)',
+                            transition: 'var(--transition)'
+                          }}
+                        >
+                          🏛️ Multi-Pilar Brand
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSchedEditorialMode('keyword')}
+                          style={{
+                            padding: '0.35rem 0.75rem',
+                            border: 'none',
+                            borderRadius: 'var(--radius-xs)',
+                            fontSize: '0.78rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            background: schedEditorialMode === 'keyword' ? 'var(--status-info)' : 'transparent',
+                            color: schedEditorialMode === 'keyword' ? 'var(--on-action-primary)' : 'var(--text-muted)',
+                            transition: 'var(--transition)'
+                          }}
+                        >
+                          🎯 Multi-Keyword (Pilar OFF)
+                        </button>
                       </div>
                     </div>
 
-                    {/* Search box & Quick Selection */}
-                    <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                      <div style={{ flex: 1, minWidth: '220px', position: 'relative' }}>
-                        <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '0.85rem' }}>🔍</span>
-                        <input
-                          type="text"
-                          value={pillarSearchQuery}
-                          onChange={(e) => setPillarSearchQuery(e.target.value)}
-                          placeholder="Cari nama pilar brand..."
+                    {schedEditorialMode === 'pillar' ? (
+                      <>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Pilih pilar brand yang ingin dijadwalkan:</span>
+                          <span style={{
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            padding: '0.2rem 0.65rem',
+                            borderRadius: 9999,
+                            background: 'var(--status-info-soft)',
+                            color: 'var(--status-info)',
+                            border: '1px solid var(--status-info)'
+                          }}>
+                            {selectedPillars.length} Pilar Dipilih
+                          </span>
+                        </div>
+
+                        {/* Search box & Quick Selection */}
+                        <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                          <div style={{ flex: 1, minWidth: '220px', position: 'relative' }}>
+                            <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '0.85rem' }}>🔍</span>
+                            <input
+                              type="text"
+                              value={pillarSearchQuery}
+                              onChange={(e) => setPillarSearchQuery(e.target.value)}
+                              placeholder="Cari nama pilar brand..."
+                              style={{
+                                width: '100%',
+                                height: '36px',
+                                background: 'var(--surface)',
+                                border: '1px solid var(--border-subtle)',
+                                borderRadius: 'var(--radius-sm)',
+                                padding: '0 10px 0 32px',
+                                color: 'var(--text-primary)',
+                                fontSize: '0.82rem',
+                                outline: 'none'
+                              }}
+                            />
+                          </div>
+                          <div style={{ display: 'flex', gap: '0.45rem', fontSize: '0.75rem' }}>
+                            <button
+                              type="button"
+                              onClick={handleSelectAllPillars}
+                              style={{ background: 'none', border: 'none', color: 'var(--action-primary)', cursor: 'pointer', textDecoration: 'underline', fontWeight: 600 }}
+                            >
+                              Pilih Semua
+                            </button>
+                            <span style={{ color: 'var(--border-strong)' }}>|</span>
+                            <button
+                              type="button"
+                              onClick={handleClearPillars}
+                              style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', textDecoration: 'underline', fontWeight: 600 }}
+                            >
+                              Hapus Pilihan
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Scrollable Pillars List */}
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))',
+                          gap: '0.6rem',
+                          maxHeight: '220px',
+                          overflowY: 'auto',
+                          paddingRight: '4px'
+                        }}>
+                          {filteredPillars.length === 0 ? (
+                            <div style={{ gridColumn: '1 / -1', padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.82rem', border: '1px dashed var(--border-subtle)', borderRadius: 'var(--radius-sm)' }}>
+                              Tidak ada pilar yang cocok dengan "{pillarSearchQuery}".
+                            </div>
+                          ) : (
+                            filteredPillars.map((pillar, idx) => {
+                              const isChecked = selectedPillars.includes(pillar);
+                              return (
+                                <div
+                                  key={idx}
+                                  onClick={() => togglePillarSelection(pillar)}
+                                  style={{
+                                    background: isChecked ? 'var(--surface-interactive)' : 'var(--surface)',
+                                    border: isChecked ? '1.5px solid var(--status-info)' : '1px solid var(--border-subtle)',
+                                    borderRadius: 'var(--radius-sm)',
+                                    padding: '0.65rem 0.75rem',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    gap: '0.65rem',
+                                    transition: 'var(--transition)'
+                                  }}
+                                >
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flex: 1, minWidth: 0 }}>
+                                    <span style={{ fontSize: '1rem' }}>📌</span>
+                                    <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={pillar}>
+                                      {pillar}
+                                    </span>
+                                  </div>
+
+                                  <div style={{
+                                    width: '18px',
+                                    height: '18px',
+                                    borderRadius: '50%',
+                                    border: isChecked ? '1.5px solid var(--status-info)' : '1.5px solid var(--border-strong)',
+                                    background: isChecked ? 'var(--status-info)' : 'transparent',
+                                    color: isChecked ? 'var(--on-action-primary)' : 'transparent',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '0.65rem',
+                                    fontWeight: 900,
+                                    flexShrink: 0
+                                  }}>
+                                    ✓
+                                  </div>
+                                </div>
+                              );
+                            })
+                          )}
+                        </div>
+
+                        <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', background: 'var(--surface)', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border-subtle)' }}>
+                          💡 <strong>Aturan 1 Pilar = 1 Baris Jadwal Mandiri:</strong> Jika Anda memilih {selectedPillars.length} pilar, sistem akan membuat <strong>{selectedPillars.length} baris jadwal independen</strong> yang memproduksi konten storytelling sesuai topik pilar tersebut.
+                        </div>
+                      </>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                            Daftar Kata Kunci (1 baris = 1 jadwal mandiri):
+                          </label>
+                          <span style={{ fontSize: '0.74rem', fontWeight: 700, background: 'var(--status-info-soft)', color: 'var(--status-info)', padding: '0.15rem 0.55rem', borderRadius: 9999 }}>
+                            {schedEditorialKeywordsText.split('\n').filter(k => k.trim()).length} Kata Kunci
+                          </span>
+                        </div>
+                        <textarea
+                          rows={4}
+                          value={schedEditorialKeywordsText}
+                          onChange={(e) => setSchedEditorialKeywordsText(e.target.value)}
+                          placeholder={'peredam suara studio podcast murah\ncara hilangkan dengung kamar tidur\nperbedaan rockwool vs glasswool untuk studio'}
                           style={{
                             width: '100%',
-                            height: '36px',
                             background: 'var(--surface)',
                             border: '1px solid var(--border-subtle)',
                             borderRadius: 'var(--radius-sm)',
-                            padding: '0 10px 0 32px',
+                            padding: '0.65rem',
                             color: 'var(--text-primary)',
                             fontSize: '0.82rem',
-                            outline: 'none'
+                            fontFamily: 'var(--font-mono)',
+                            outline: 'none',
+                            resize: 'vertical'
                           }}
                         />
-                      </div>
-                      <div style={{ display: 'flex', gap: '0.45rem', fontSize: '0.75rem' }}>
-                        <button
-                          type="button"
-                          onClick={handleSelectAllPillars}
-                          style={{ background: 'none', border: 'none', color: 'var(--action-primary)', cursor: 'pointer', textDecoration: 'underline', fontWeight: 600 }}
-                        >
-                          Pilih Semua
-                        </button>
-                        <span style={{ color: 'var(--border-strong)' }}>|</span>
-                        <button
-                          type="button"
-                          onClick={handleClearPillars}
-                          style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', textDecoration: 'underline', fontWeight: 600 }}
-                        >
-                          Hapus Pilihan
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Scrollable Pillars List */}
-                    <div style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))',
-                      gap: '0.6rem',
-                      maxHeight: '220px',
-                      overflowY: 'auto',
-                      paddingRight: '4px'
-                    }}>
-                      {filteredPillars.length === 0 ? (
-                        <div style={{ gridColumn: '1 / -1', padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.82rem', border: '1px dashed var(--border-subtle)', borderRadius: 'var(--radius-sm)' }}>
-                          Tidak ada pilar yang cocok dengan "{pillarSearchQuery}".
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <input
+                            type="checkbox"
+                            id="chkSchedStagger"
+                            checked={schedStaggerDays}
+                            onChange={(e) => setSchedStaggerDays(e.target.checked)}
+                            style={{ accentColor: 'var(--action-primary)', cursor: 'pointer' }}
+                          />
+                          <label htmlFor="chkSchedStagger" style={{ fontSize: '0.8rem', color: 'var(--text-primary)', cursor: 'pointer' }}>
+                            <strong>Distribusi Hari Otomatis:</strong> Sebarkan setiap kata kunci ke hari yang berurutan (Senin, Selasa, Rabu, dst).
+                          </label>
                         </div>
-                      ) : (
-                        filteredPillars.map((pillar, idx) => {
-                          const isChecked = selectedPillars.includes(pillar);
-                          return (
-                            <div
-                              key={idx}
-                              onClick={() => togglePillarSelection(pillar)}
-                              style={{
-                                background: isChecked ? 'var(--surface-interactive)' : 'var(--surface)',
-                                border: isChecked ? '1.5px solid var(--status-info)' : '1px solid var(--border-subtle)',
-                                borderRadius: 'var(--radius-sm)',
-                                padding: '0.65rem 0.75rem',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                gap: '0.65rem',
-                                transition: 'var(--transition)'
-                              }}
-                            >
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flex: 1, minWidth: 0 }}>
-                                <span style={{ fontSize: '1rem' }}>📌</span>
-                                <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={pillar}>
-                                  {pillar}
-                                </span>
-                              </div>
-
-                              <div style={{
-                                width: '18px',
-                                height: '18px',
-                                borderRadius: '50%',
-                                border: isChecked ? '1.5px solid var(--status-info)' : '1.5px solid var(--border-strong)',
-                                background: isChecked ? 'var(--status-info)' : 'transparent',
-                                color: isChecked ? '#ffffff' : 'transparent',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: '0.65rem',
-                                fontWeight: 900,
-                                flexShrink: 0
-                              }}>
-                                ✓
-                              </div>
-                            </div>
-                          );
-                        })
-                      )}
-                    </div>
-
-                    <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', background: 'var(--surface)', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border-subtle)' }}>
-                      💡 <strong>Aturan 1 Pilar = 1 Baris Jadwal Mandiri:</strong> Jika Anda memilih {selectedPillars.length} pilar, sistem akan membuat <strong>{selectedPillars.length} baris jadwal independen</strong> yang memproduksi konten storytelling sesuai topik pilar tersebut.
-                    </div>
+                        <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', background: 'var(--surface)', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border-subtle)' }}>
+                          💡 <strong>Opsi A (Batch Multi-Jadwal):</strong> Setiap baris kata kunci akan dibuatkan 1 baris jadwal mandiri di database dengan pilar brand dinonaktifkan (Pilar OFF). AI Gemini 1-Pass akan memproduksi video storytelling tension sesuai intent pencarian keyword tersebut.
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
