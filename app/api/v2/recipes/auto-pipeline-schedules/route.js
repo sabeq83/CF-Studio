@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
-import { withTenantContext } from '@/lib/auth';
+import { withAutoPipelineAccess } from '@/lib/auth';
 import {
   listAutoPipelineSchedules,
   createAutoPipelineSchedule
 } from '@/lib/auto-pipeline-schedules-repository';
 import { isScheduleRunning } from '@/lib/auto-pipeline-scheduler-runner';
 
-export const GET = withTenantContext(async (request, _ctx, user) => {
+export const GET = withAutoPipelineAccess(async (request, _ctx, user) => {
   try {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status') || 'all';
@@ -32,7 +32,7 @@ export const GET = withTenantContext(async (request, _ctx, user) => {
   }
 });
 
-export const POST = withTenantContext(async (request, _ctx, user) => {
+export const POST = withAutoPipelineAccess(async (request, _ctx, user) => {
   try {
     const body = await request.json().catch(() => ({}));
     const tenantId = (!user?.tenantId || user.tenantId === '__none__') ? 'default_tenant' : user.tenantId;

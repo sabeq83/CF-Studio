@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.40.32 — Language-First Recipe Taxonomy & Multi-Tenant Lockdown for Auto-Pipeline and Threads Labs (11/11/2026)
+- Perbaiki JSX syntax error pada form resep foto & teks Recipe Labs
+- Implementasi taksonomi kuliner internasional (Language-First) dan penegakan keyword resep ketat
+- Perbaiki scheduler runner dan error getS/nextPendingItem pada eksekusi otomatis resep
+- Daftarkan permission keys mandiri dan pasang guardrails UI & API untuk mengunci Auto Pipeline dan Threads Labs per tenant
+
 ## V2.40.31 — Perbaikan Import getActiveTenantId pada Ingest Pillar Campaign (11/11/2026)
 - Menambahkan import getActiveTenantId pada lib/pillar-campaign-ingest.js
 - Memperbaiki error ingest planner tenant Mas Ibnu

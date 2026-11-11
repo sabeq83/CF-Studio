@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { withTenantContext } from '@/lib/auth';
+import { withAutoPipelineAccess } from '@/lib/auth';
 import {
   getAutoPipelineScheduleById,
   updateAutoPipelineSchedule,
@@ -8,7 +8,7 @@ import {
   deleteSchedule
 } from '@/lib/auto-pipeline-schedules-repository';
 
-export const GET = withTenantContext(async (_request, context, user) => {
+export const GET = withAutoPipelineAccess(async (_request, context, user) => {
   try {
     const { id } = await context.params;
     const tenantId = (!user?.tenantId || user.tenantId === '__none__') ? 'default_tenant' : user.tenantId;
@@ -25,7 +25,7 @@ export const GET = withTenantContext(async (_request, context, user) => {
   }
 });
 
-export const PUT = withTenantContext(async (request, context, user) => {
+export const PUT = withAutoPipelineAccess(async (request, context, user) => {
   try {
     const { id } = await context.params;
     const tenantId = (!user?.tenantId || user.tenantId === '__none__') ? 'default_tenant' : user.tenantId;
@@ -62,7 +62,7 @@ export const PUT = withTenantContext(async (request, context, user) => {
   }
 });
 
-export const DELETE = withTenantContext(async (_request, context, user) => {
+export const DELETE = withAutoPipelineAccess(async (_request, context, user) => {
   try {
     const { id } = await context.params;
     const tenantId = (!user?.tenantId || user.tenantId === '__none__') ? 'default_tenant' : user.tenantId;

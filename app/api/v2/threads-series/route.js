@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, isTenantMenuDisabled } from '@/lib/auth';
 import { pgQuery } from '@/lib/db-pg';
 import { executeAutonomousThreadsSeriesPipeline } from '@/lib/threads-series-pipeline';
 
@@ -15,6 +15,10 @@ function getTenantId(req) {
 
 export async function GET(req) {
   try {
+    const user = getCurrentUser(req);
+    if (isTenantMenuDisabled(user, 'threads_labs')) {
+      return NextResponse.json({ success: false, error: 'Akses ditolak: Modul Threads Labs dinonaktifkan untuk tenant ini.' }, { status: 403 });
+    }
     const tenantId = getTenantId(req);
     const { searchParams } = new URL(req.url);
     const limit = Math.min(Number(searchParams.get('limit') || 30), 100);
@@ -39,6 +43,10 @@ export async function GET(req) {
 
 export async function POST(req) {
   try {
+    const user = getCurrentUser(req);
+    if (isTenantMenuDisabled(user, 'threads_labs')) {
+      return NextResponse.json({ success: false, error: 'Akses ditolak: Modul Threads Labs dinonaktifkan untuk tenant ini.' }, { status: 403 });
+    }
     const tenantId = getTenantId(req);
     const body = await req.json();
 

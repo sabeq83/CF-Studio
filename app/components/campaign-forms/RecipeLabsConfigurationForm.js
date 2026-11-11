@@ -2516,14 +2516,10 @@ return (
                 </div>
 
                 {/* 2. Formulir Tipe Static */}
-                {campaignType === 'static' && (
-                  {canonicalConfigurationForm0}
-                )}
+                {campaignType === 'static' && canonicalConfigurationForm0}
 
                 {/* 3. Formulir Tipe Video Reels (Mengadopsi Tab/Accordion OPC) */}
-                {campaignType === 'video' && (
-                  {canonicalConfigurationForm1}
-                )}
+                {campaignType === 'video' && canonicalConfigurationForm1}
               </div>
             )}
           </div>

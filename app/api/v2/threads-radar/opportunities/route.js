@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, isTenantMenuDisabled } from '@/lib/auth';
 import { listOpportunitiesWithProducts } from '@/lib/threads-affiliate-repository';
 
 export const dynamic = 'force-dynamic';
@@ -14,6 +14,10 @@ function getTenantId(req) {
 
 export async function GET(req) {
   try {
+    const user = getCurrentUser(req);
+    if (isTenantMenuDisabled(user, 'threads_labs')) {
+      return NextResponse.json({ success: false, error: 'Akses ditolak: Modul Threads Labs dinonaktifkan untuk tenant ini.' }, { status: 403 });
+    }
     const tenantId = getTenantId(req);
     const { searchParams } = new URL(req.url);
     const status = searchParams.get('status') || 'all';

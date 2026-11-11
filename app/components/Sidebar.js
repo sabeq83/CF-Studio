@@ -7,8 +7,8 @@ import ThemeToggle from './ThemeToggle';
 import ContentFlowLogo from './ContentFlowLogo';
 
 const menuKeyMap = {
-  '/auto-pipeline': 'pillar_campaign',
-  '/threads-labs': 'affiliate_studio',
+  '/auto-pipeline': 'auto_pipeline',
+  '/threads-labs': 'threads_labs',
   '/content-flow': 'content_flow',
   '/re-campaigns': 're_campaign',
   '/pillar-campaigns': 'pillar_campaign',

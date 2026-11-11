@@ -123,6 +123,76 @@ const SLOT_GRADIENTS = [
   "linear-gradient(135deg, var(--surface-interactive) 0%, var(--surface-interactive) 100%)"
 ];
 
+const INTERNATIONAL_RECIPE_TAXONOMY = {
+  en_US: {
+    label: '🇺🇸 Global English (International / US & UK Standard)',
+    placeholderKeyword: 'e.g., Crispy Honey Garlic Air Fryer Chicken Bites',
+    categories: [
+      { group: 'Core Meal Courses', options: [
+        'Main Courses & Entrees',
+        'Breakfast & Brunch Favorites',
+        'Appetizers, Starters & Small Bites',
+        'Soups, Stews & Slow-Cooked Bowls',
+        'Salads & Fresh Grain Bowls'
+      ]},
+      { group: 'Modern Lifestyle & Performance', options: [
+        'Quick & Easy Weeknight Dinners (Under 20 Mins)',
+        'Air Fryer & Convection Essentials',
+        'High-Protein Meal Prep & Fitness',
+        'Low-Carb, Keto & Diabetic-Friendly',
+        '100% Plant-Based & Gourmet Vegan'
+      ]},
+      { group: 'Bakery & Beverages', options: [
+        'Desserts, Pastries & Artisanal Bakery',
+        'Specialty Drinks, Smoothies & Coffee'
+      ]}
+    ]
+  },
+  id_ID: {
+    label: '🇮🇩 Bahasa Indonesia (Pasar Domestik & UMKM)',
+    placeholderKeyword: 'Contoh: Ayam Bakar Madu Pedas Manis Gurih',
+    categories: [
+      { group: 'Waktu Makan Utama', options: [
+        'Menu Hidangan Utama & Lauk Pauk (Main Course)',
+        'Menu Sarapan Praktis & Cepat (Breakfast)',
+        'Camilan, Gorengan Gurih & Finger Food',
+        'Sup Hangat, Sayur Kuah & Soto Nusantara',
+        'Masakan Tradisional Nusantara & Aneka Sambal'
+      ]},
+      { group: 'Gaya Hidup & Kepraktisan Masak', options: [
+        'Menu Praktis 15-20 Menit (One-Pan / Tumisan)',
+        'Kreasi Masakan Air Fryer Sehat',
+        'Menu Tinggi Protein & Meal Prep Fitnes',
+        'Menu Rendah Kalori, Diet Sehat & Sayuran'
+      ]},
+      { group: 'Kue & Minuman', options: [
+        'Kue, Dessert Manis & Roti Rumahan',
+        'Minuman Segar, Es Nusantara & Kopi Kekinian'
+      ]}
+    ]
+  },
+  bilingual: {
+    label: '🌐 Bilingual (Global English Hook + Indonesian Body)',
+    placeholderKeyword: 'e.g., Crispy Garlic Butter Wings / Sayap Ayam Mentega Krispi',
+    categories: [
+      { group: 'Courses / Waktu Makan', options: [
+        'Main Courses & Entrees (Hidangan Utama)',
+        'Breakfast & Morning Favorites (Sarapan Sehat)',
+        'Appetizers & Finger Foods (Camilan & Snack)'
+      ]},
+      { group: 'Modern Cooking Trends', options: [
+        'Quick & Easy Weeknight Dinners (Menu Praktis Cepat)',
+        'Air Fryer & Convection Essentials (Masakan Air Fryer)',
+        'High-Protein Fitness Meal Prep (Menu Tinggi Protein)'
+      ]},
+      { group: 'Bakery & Drinks', options: [
+        'Desserts & Artisanal Bakery (Kue & Hidangan Manis)',
+        'Specialty Beverages & Coffee (Minuman & Kopi)'
+      ]}
+    ]
+  }
+};
+
 export default function AutoPipelinePage() {
   const [brands, setBrands] = useState([]);
   const [selectedBrandId, setSelectedBrandId] = useState('');
@@ -235,6 +305,25 @@ export default function AutoPipelinePage() {
   const [schedLayoutId, setSchedLayoutId] = useState('4_editorial_split');
   const [schedVisualStyle, setSchedVisualStyle] = useState('Food Porn');
   const [schedPostToFacebook, setSchedPostToFacebook] = useState(true);
+  const [schedTargetLanguage, setSchedTargetLanguage] = useState('en_US');
+  const [schedRecipeClassification, setSchedRecipeClassification] = useState('Quick & Easy Weeknight Dinners (Under 20 Mins)');
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isTenantLocked, setIsTenantLocked] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then(res => res.json())
+      .then(data => {
+        if (data.authenticated && data.user) {
+          setCurrentUser(data.user);
+          const locked = data.user.role !== 'superadmin' &&
+            Array.isArray(data.user.tenantDisabledMenus) &&
+            data.user.tenantDisabledMenus.includes('auto_pipeline');
+          setIsTenantLocked(locked);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // State Khusus Threads Series Engine (1-Klik & Scheduler)
   const [threadsObjective, setThreadsObjective] = useState('personal_product');
@@ -1279,6 +1368,7 @@ export default function AutoPipelinePage() {
   }
 
   function openCreateScheduleModal(initialTargetDate = null) {
+    if (isTenantLocked) return showToast('Akses Auto Pipeline dinonaktifkan untuk tenant Anda oleh Superadmin', 'error');
     const currentBrand = brands.find(b => b.id === selectedBrandId) || brands[0];
     const initialTopic = topic || 'Air fryer crispy snack finger foods';
     setEditingSchedule(null);
@@ -1313,6 +1403,12 @@ export default function AutoPipelinePage() {
     setSchedPostAffiliateLink(true);
     setSchedSelectedCep('auto');
     setSchedPromotionContext('');
+    setSchedTargetLanguage('en_US');
+    setSchedRecipeClassification('Main Courses & Entrees');
+    setSchedImagesPerRecipe(4);
+    setSchedLayoutId('4_editorial_split');
+    setSchedVisualStyle('Food Porn');
+    setSchedPostToFacebook(true);
 
     // Reset item selections
     setSelectedProductIds([]);
@@ -1343,6 +1439,7 @@ export default function AutoPipelinePage() {
   }
 
   function openEditScheduleModal(sched) {
+    if (isTenantLocked) return showToast('Akses Auto Pipeline dinonaktifkan untuk tenant Anda oleh Superadmin', 'error');
     setEditingSchedule(sched);
     const pType = sched.pipeline_type || 'recipe_campaign';
     setSchedCampaignType(pType);
@@ -1412,6 +1509,15 @@ export default function AutoPipelinePage() {
     setSchedPostAffiliateLink(schedCfg.post_link_affiliate !== false);
     setSchedGenerateRecipe(schedCfg.generate_recipe !== false);
     setSchedPromotionContext(schedCfg.promotion_context || (sched.topic && sched.topic !== sched.target_item_title ? sched.topic : ''));
+
+    if (pType === 'recipe_labs') {
+      setSchedImagesPerRecipe(schedCfg.images_per_recipe || 4);
+      setSchedLayoutId(schedCfg.selected_layout_id || '4_editorial_split');
+      setSchedVisualStyle(schedCfg.visual_style || 'Food Porn');
+      setSchedPostToFacebook(schedCfg.post_to_facebook !== false);
+      setSchedTargetLanguage(schedCfg.target_language || 'en_US');
+      setSchedRecipeClassification(schedCfg.recipe_classification || schedCfg.category || sched.category || 'Main Courses & Entrees');
+    }
 
     setProductSearchQuery('');
     setPillarSearchQuery('');
@@ -1935,8 +2041,10 @@ export default function AutoPipelinePage() {
             finalCategory = 'multiplier';
             if (!finalName) finalName = `Multiplier: ${targetTitle} — ${schedGenTime} WIB`;
           } else if (schedCampaignType === 'recipe_labs') {
-            finalCategory = 'recipe_labs';
-            if (!finalName) finalName = `Resep Foto (${schedImagesPerRecipe}G) — ${schedGenTime} WIB`;
+            targetTitle = schedTopic?.trim() || 'Culinary Recipe';
+            finalTopic = targetTitle;
+            finalCategory = schedRecipeClassification || (schedTargetLanguage === 'id_ID' ? 'Menu Hidangan Utama & Lauk Pauk (Main Course)' : 'Main Courses & Entrees');
+            if (!finalName) finalName = `Recipe: ${targetTitle} (${schedImagesPerRecipe}G) — ${schedGenTime} WIB`;
           } else if (schedCampaignType === 'threads_series') {
             finalCategory = 'threads_series';
             const threadsTitle = threadsObjective === 'personal_product'
@@ -1964,7 +2072,16 @@ export default function AutoPipelinePage() {
                 : (schedCampaignType === 'multiplier_campaign'
                     ? { blueprint_id: targetId, execution_mode: 'full_autopilot', generate_recipe: schedGenerateRecipe, visual_identity_preset_id: schedViIdSingle }
                     : (schedCampaignType === 'recipe_labs'
-                        ? { images_per_recipe: schedImagesPerRecipe, selected_layout_id: schedLayoutId, visual_style: schedVisualStyle, post_to_facebook: schedPostToFacebook }
+                        ? { 
+                            images_per_recipe: schedImagesPerRecipe, 
+                            selected_layout_id: schedLayoutId, 
+                            visual_style: schedVisualStyle, 
+                            post_to_facebook: schedPostToFacebook,
+                            topic: finalTopic,
+                            category: finalCategory,
+                            recipe_classification: finalCategory,
+                            target_language: schedTargetLanguage || 'en_US'
+                          }
                         : (schedCampaignType === 'threads_series'
                             ? {
                                 post_objective: threadsObjective,
@@ -2390,6 +2507,26 @@ export default function AutoPipelinePage() {
           flexDirection: 'column',
           gap: '2rem'
         }}>
+
+          {/* Tenant Lock Warning Banner */}
+          {isTenantLocked && (
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.08), rgba(220, 38, 38, 0.03))',
+              border: '1px solid var(--status-danger)',
+              borderRadius: 'var(--radius-md)',
+              padding: '36px 24px',
+              textAlign: 'center',
+              marginBottom: '1rem'
+            }}>
+              <div style={{ fontSize: '42px', marginBottom: '12px' }}>🔒</div>
+              <h2 style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--status-danger)', margin: '0 0 8px' }}>
+                Modul Auto Pipeline Dibatasi oleh Superadmin
+              </h2>
+              <p style={{ color: 'var(--text-secondary)', maxWidth: '580px', margin: '0 auto', fontSize: '0.92rem', lineHeight: '1.6' }}>
+                Akses ke modul penjadwalan otonom ini dinonaktifkan untuk organisasi/tenant Anda. Silakan hubungi administrator platform jika Anda memerlukan aktivasi fitur ini.
+              </p>
+            </div>
+          )}
 
           {/* Toast Notification */}
           {toast && (
@@ -7119,30 +7256,105 @@ export default function AutoPipelinePage() {
                       </span>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                        <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                          Tema / Arahan Resep
-                        </label>
-                        <input
-                          type="text"
-                          value={schedTopic}
-                          onChange={(e) => setSchedTopic(e.target.value)}
-                          placeholder="Contoh: Resep Masakan Rumahan Sehat"
-                          required
-                          style={{
-                            height: '38px',
-                            background: 'var(--input-bg)',
-                            border: '1px solid var(--border-subtle)',
-                            borderRadius: 'var(--radius-sm)',
-                            padding: '0 0.75rem',
-                            fontSize: '0.84rem',
-                            color: 'var(--text-primary)',
-                            outline: 'none'
-                          }}
-                        />
-                      </div>
+                    {/* 1. Language-First Control */}
+                    <div style={{
+                      background: 'var(--surface)',
+                      border: '1px solid var(--border-strong)',
+                      borderRadius: 'var(--radius-sm)',
+                      padding: '0.75rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.35rem'
+                    }}>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--action-primary)' }}>
+                        🌐 1. Target Market / Bahasa Resep
+                      </label>
+                      <select
+                        value={schedTargetLanguage}
+                        onChange={(e) => {
+                          const newLang = e.target.value;
+                          setSchedTargetLanguage(newLang);
+                          const firstCat = INTERNATIONAL_RECIPE_TAXONOMY[newLang]?.categories?.[0]?.options?.[0] || 'Main Courses & Entrees';
+                          setSchedRecipeClassification(firstCat);
+                        }}
+                        style={{
+                          height: '38px',
+                          background: 'var(--input-bg)',
+                          border: '1px solid var(--border-subtle)',
+                          borderRadius: 'var(--radius-sm)',
+                          padding: '0 0.75rem',
+                          fontSize: '0.84rem',
+                          color: 'var(--text-primary)',
+                          outline: 'none',
+                          fontWeight: 600
+                        }}
+                      >
+                        <option value="en_US">🇺🇸 Global English (International / US & UK Standard)</option>
+                        <option value="id_ID">🇮🇩 Bahasa Indonesia (Pasar Domestik & UMKM)</option>
+                        <option value="bilingual">🌐 Bilingual (English Hook + Indonesian Body)</option>
+                      </select>
+                      <small style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                        Klasifikasi resep di bawah otomatis menyesuaikan dengan standar bahasa terpilih.
+                      </small>
+                    </div>
 
+                    {/* 2. Responsive Classification Dropdown */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                        🏷️ 2. {schedTargetLanguage === 'id_ID' ? 'Klasifikasi Jenis Resep' : 'Culinary Category'}
+                      </label>
+                      <select
+                        value={schedRecipeClassification}
+                        onChange={(e) => setSchedRecipeClassification(e.target.value)}
+                        style={{
+                          height: '38px',
+                          background: 'var(--input-bg)',
+                          border: '1px solid var(--border-subtle)',
+                          borderRadius: 'var(--radius-sm)',
+                          padding: '0 0.75rem',
+                          fontSize: '0.84rem',
+                          color: 'var(--text-primary)',
+                          outline: 'none'
+                        }}
+                      >
+                        {(INTERNATIONAL_RECIPE_TAXONOMY[schedTargetLanguage]?.categories || []).map((grp, gIdx) => (
+                          <optgroup key={gIdx} label={grp.group}>
+                            {grp.options.map((opt, oIdx) => (
+                              <option key={oIdx} value={opt}>{opt}</option>
+                            ))}
+                          </optgroup>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* 3. Strict Keyword / Dish Name */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                        🎯 3. {schedTargetLanguage === 'id_ID' ? 'Kata Kunci Menu Wajib (Strict Enforcement)' : 'Mandatory Dish Keyword (Strict Enforcement)'}
+                      </label>
+                      <input
+                        type="text"
+                        value={schedTopic}
+                        onChange={(e) => setSchedTopic(e.target.value)}
+                        placeholder={INTERNATIONAL_RECIPE_TAXONOMY[schedTargetLanguage]?.placeholderKeyword || 'e.g., Crispy Honey Garlic Air Fryer Chicken Bites'}
+                        required
+                        style={{
+                          height: '38px',
+                          background: 'var(--input-bg)',
+                          border: '1px solid var(--border-subtle)',
+                          borderRadius: 'var(--radius-sm)',
+                          padding: '0 0.75rem',
+                          fontSize: '0.84rem',
+                          color: 'var(--text-primary)',
+                          outline: 'none'
+                        }}
+                      />
+                      <small style={{ fontSize: '0.72rem', color: 'var(--status-warning)' }}>
+                        ⚠️ Gemini AI dipaksa membuat resep 100% berfokus pada hidangan ini.
+                      </small>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                         <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
                           Gaya Visual Foto AI
@@ -7167,9 +7379,7 @@ export default function AutoPipelinePage() {
                           <option value="Dark Moody">Dark Moody Contrast & Cinematic Smoke</option>
                         </select>
                       </div>
-                    </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                         <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
                           Jumlah Foto dalam Kolase
@@ -7198,7 +7408,9 @@ export default function AutoPipelinePage() {
                           <option value={6}>6 Gambar Kolase</option>
                         </select>
                       </div>
+                    </div>
 
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                         <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
                           Template Susunan Grid

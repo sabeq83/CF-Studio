@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAKNA Flow — International Recipe Standards (Language-Adaptive)</title>
+  <style>
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --sidebar-w: 260px;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-rose: #f43f5e;
+      --status-rose-soft: rgba(244, 63, 94, 0.14);
+      --status-purple: #c084fc;
+      --status-purple-soft: rgba(192, 132, 252, 0.14);
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f8fafc;
+      --sidebar: #f1f5f9;
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --input-bg: #ffffff;
+      --overlay-subtle: rgba(0, 0, 0, 0.05);
+      --overlay-backdrop: rgba(15, 23, 42, 0.4);
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --text-disabled: #94a3b8;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --action-primary: #0d9488;
+      --action-primary-hover: #0f766e;
+      --on-action-primary: #ffffff;
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.1);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.1);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.1);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.1);
+      --status-rose: #e11d48;
+      --status-rose-soft: rgba(225, 29, 72, 0.1);
+      --status-purple: #9333ea;
+      --status-purple-soft: rgba(147, 51, 234, 0.1);
+      --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.05);
+      --shadow-modal: 0 20px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--canvas);
+      color: var(--text-primary);
+      line-height: 1.5;
+      padding: 1.5rem;
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 1.5rem;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+    }
+    .badge-rose { background: var(--status-rose-soft); color: var(--status-rose); border: 1px solid var(--status-rose); }
+    .badge-teal { background: var(--status-info-soft); color: var(--action-primary); border: 1px solid var(--action-primary); }
+
+    .nav-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 0.5rem;
+    }
+    .tab-btn {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .tab-btn.active {
+      background: var(--surface-raised);
+      color: var(--action-primary);
+      border-color: var(--action-primary);
+    }
+
+    .grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 900px) {
+      .grid-2col { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      box-shadow: var(--shadow-card);
+    }
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      margin-bottom: 1rem;
+    }
+    .form-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .form-control {
+      height: 38px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0 0.75rem;
+      font-size: 0.85rem;
+      color: var(--text-primary);
+      outline: none;
+      font-family: inherit;
+      transition: var(--transition);
+    }
+    .form-control:focus {
+      border-color: var(--action-primary);
+    }
+
+    .language-hero-box {
+      background: var(--surface-raised);
+      border: 1.5px solid var(--action-primary);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem;
+      margin-bottom: 1.15rem;
+    }
+
+    .prompt-box {
+      background: var(--canvas);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      white-space: pre-wrap;
+      max-height: 480px;
+      overflow-y: auto;
+    }
+
+    /* Simulation Sidebar Mock */
+    .sim-sidebar {
+      width: 240px;
+      background: var(--sidebar);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .sim-nav-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius-xs);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+    .sim-nav-item:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+    .sim-nav-item.locked {
+      opacity: 0.45;
+      cursor: not-allowed;
+      background: var(--overlay-subtle);
+      color: var(--text-disabled);
+    }
+    .sim-nav-item.active {
+      background: var(--surface-raised);
+      color: var(--action-primary);
+    }
+
+    .alert-banner {
+      background: var(--status-danger-soft);
+      border: 1px solid var(--status-danger);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header-bar">
+    <div>
+      <h2>🌍 MAKNA Flow — Language-First Recipe Classification & Tenant Lockdown</h2>
+      <p style="font-size: 0.85rem; color: var(--text-secondary);">
+        Setting bahasa di posisi teratas mengatur secara dinamis klasifikasi resep, format takaran, dan penegakan keyword wajib AI.
+      </p>
+    </div>
+    <div style="display: flex; gap: 0.5rem;">
+      <span class="badge badge-rose">Language-First Taxonomy</span>
+      <span class="badge badge-teal">Multi-Tenant RBAC</span>
+      <button onclick="toggleTheme()" class="tab-btn" style="padding: 0.25rem 0.65rem;">🌓 Theme</button>
+    </div>
+  </div>
+
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('recipe')">1. Language-First Recipe Classification & Keyword AI</button>
+    <button class="tab-btn" onclick="switchTab('tenant')">2. Multi-Tenant Lockdown (Auto Pipeline & Threads Labs)</button>
+  </div>
+
+  <!-- TAB 1: LANGUAGE-FIRST CLASSIFICATION -->
+  <div id="tab-recipe">
+    <div class="grid-2col">
+      <!-- Form Input -->
+      <div class="card" style="border-top: 3px solid var(--action-primary);">
+        <div class="card-title">
+          <span>🍽️</span> Konfigurasi Jadwal Resep (Auto Pipeline)
+        </div>
+        
+        <!-- STEP 1: SETTING BAHASA DI PALING ATAS (TOP CONTROL) -->
+        <div class="language-hero-box">
+          <div class="form-group" style="margin-bottom: 0.5rem;">
+            <label class="form-label" style="color: var(--action-primary); font-size: 0.84rem;">
+              <span>🌐 1. PILIH BAHASA & TARGET MARKET (LANGKAH PERTAMA)</span>
+              <span class="badge badge-teal">Language-First Engine</span>
+            </label>
+            <select id="targetLanguage" class="form-control" style="font-weight: 700; border-color: var(--action-primary);" onchange="handleLanguageChange()">
+              <option value="en_US" selected>🇺🇸 Global English (International Market / US & UK Standard)</option>
+              <option value="id_ID">🇮🇩 Bahasa Indonesia (Pasar Domestik & UMKM Kuliner)</option>
+              <option value="bilingual">🌐 Bilingual (English Viral Hook + Localized Indonesian Body)</option>
+            </select>
+          </div>
+          <div style="font-size: 0.74rem; color: var(--text-secondary);">
+            💡 <em>Opsi klasifikasi resep, panduan takaran, dan contoh keyword di bawah akan <strong>otomatis menyesuaikan</strong> dengan bahasa yang dipilih di sini.</em>
+          </div>
+        </div>
+
+        <!-- STEP 2: KLASIFIKASI RESEP YANG MENYESUAIKAN DENGAN BAHASA TERPILIH -->
+        <div class="form-group">
+          <label class="form-label">
+            <span id="classificationLabel">🏷️ 2. International Culinary Category</span>
+            <span id="classificationSub" style="font-size: 0.7rem; color: var(--status-success);">Adapted for Global English</span>
+          </label>
+          <select id="recipeCategory" class="form-control" onchange="updatePromptPreview()">
+            <!-- Populated reactively based on targetLanguage -->
+          </select>
+          <small id="classificationHint" style="font-size: 0.72rem; color: var(--text-muted);">
+            Aligned with international culinary standards (AllRecipes, BBC Good Food, NYT Cooking).
+          </small>
+        </div>
+
+        <!-- STEP 3: SISTEM TAKARAN & PENGUKURAN -->
+        <div class="form-group">
+          <label class="form-label">
+            <span id="measurementLabel">⚖️ 3. Measurement & Units System</span>
+          </label>
+          <select id="measurementSystem" class="form-control" onchange="updatePromptPreview()">
+            <!-- Populated reactively based on targetLanguage -->
+          </select>
+        </div>
+
+        <!-- STEP 4: KATA KUNCI WAJIB / NAMA HIDANGAN SPESIFIK -->
+        <div class="form-group">
+          <label class="form-label">
+            <span id="keywordLabel">🎯 4. Specific Dish Topic / Keyword Wajib (Strict Enforcement)</span>
+            <span style="font-size: 0.7rem; color: var(--status-warning);">Mandatory Guardrail</span>
+          </label>
+          <input type="text" id="recipeKeyword" class="form-control" 
+            value="Crispy Honey Garlic Air Fryer Chicken Bites" 
+            oninput="updatePromptPreview()"
+            placeholder="e.g., Crispy Honey Garlic Air Fryer Chicken Bites">
+          <small style="font-size: 0.72rem; color: var(--status-warning);">
+            ⚠️ Sistem akan memaksa Gemini AI membuat naskah resep & prompt visual 100% berpusat pada hidangan ini.
+          </small>
+        </div>
+
+        <!-- STEP 5: GAYA VISUAL & JUMLAH SLOT KOLASE -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div class="form-group">
+            <label class="form-label">🎨 Gaya Visual Foto AI</label>
+            <select id="visualStyle" class="form-control" onchange="updatePromptPreview()">
+              <option value="Food Porn & Commercial Glossy" selected>Food Porn & Commercial Glossy</option>
+              <option value="Rustic Countryside & Wooden Texture">Rustic Countryside & Raw Wood</option>
+              <option value="Clean Nordic Studio & Bright Sunlight">Clean Nordic Studio & Bright Daylight</option>
+              <option value="Dark Moody & Cinematic Smoke">Dark Moody & Cinematic Smoke</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">📐 Slot Kolase Grid</label>
+            <select id="imgCount" class="form-control" onchange="updatePromptPreview()">
+              <option value="4" selected>4 Foto (1 Hero + 3 Detail)</option>
+              <option value="3">3 Foto (Triptych)</option>
+              <option value="5">5 Foto (Detailed Process)</option>
+              <option value="6">6 Foto (Full Editorial)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="background: var(--surface-raised); padding: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-top: 0.25rem;">
+          <div style="font-size: 0.78rem; font-weight: 700; color: var(--status-success); margin-bottom: 0.25rem;">
+            ✅ Facebook Global Auto-Publishing:
+          </div>
+          <div id="fbPublishDesc" style="font-size: 0.75rem; color: var(--text-secondary);">
+            Artikel naskah Facebook profesional dalam bahasa terpilih + poster grid foto AI resolusi tinggi.
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Prompt Preview -->
+      <div class="card">
+        <div class="card-title" style="justify-content: space-between;">
+          <span>🤖 Live AI System Prompt (Node 1)</span>
+          <span id="promptStatusBadge" class="badge badge-teal">English Global Mode</span>
+        </div>
+        <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
+          System prompt yang disusun otomatis dan dieksekusi oleh Gemini AI di latar belakang:
+        </p>
+        <div id="promptOutput" class="prompt-box"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: TENANT LOCKDOWN -->
+  <div id="tab-tenant" style="display: none;">
+    <div style="margin-bottom: 1rem; display: flex; align-items: center; gap: 1rem;">
+      <label style="font-size: 0.85rem; font-weight: 700;">Simulate Login As Tenant:</label>
+      <select id="tenantSwitcher" class="form-control" style="width: 340px;" onchange="switchTenantSimulation()">
+        <option value="default_tenant">👑 default_tenant (Superadmin / Global Owner)</option>
+        <option value="tnt_sy-benu_415f99">🏢 SY Benu (Locked: Auto Pipeline & Threads Labs)</option>
+        <option value="tnt_pt-gim-sosmed_62d0d9">🏢 PT GIM Sosmed (Unlocked: Full Enterprise Access)</option>
+        <option value="tnt_mas-ibnu_e0eb25">🏢 Mas Ibnu (Locked: Auto Pipeline & Threads Labs)</option>
+      </select>
+    </div>
+
+    <div class="grid-2col">
+      <!-- Sidebar View Simulation -->
+      <div class="card">
+        <div class="card-title">
+          <span>📑</span> Sidebar Navigation Response
+        </div>
+        <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+          Navigasi sidebar MAKNA Flow beradaptasi secara dinamis sesuai hak akses tenant:
+        </p>
+        <div class="sim-sidebar" id="sidebarContainer">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Page View Simulation -->
+      <div class="card">
+        <div class="card-title">
+          <span>🖥️</span> Page Response (<code>/auto-pipeline</code>)
+        </div>
+        <div id="pageContentContainer">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      document.documentElement.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      if (tab === 'recipe') {
+        document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+        document.getElementById('tab-recipe').style.display = 'block';
+        document.getElementById('tab-tenant').style.display = 'none';
+      } else {
+        document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+        document.getElementById('tab-recipe').style.display = 'none';
+        document.getElementById('tab-tenant').style.display = 'block';
+        switchTenantSimulation();
+      }
+    }
+
+    // TAXONOMY DATA PER LANGUAGE
+    const taxonomies = {
+      'en_US': {
+        classificationLabel: '🏷️ 2. International Culinary Category (Course / Lifestyle)',
+        classificationSub: 'Standard Global Taxonomy',
+        classificationHint: 'Aligned with international culinary standards (AllRecipes, BBC Good Food, NYT Cooking).',
+        measurementLabel: '⚖️ 3. Measurement & Units Standard',
+        keywordLabel: '🎯 4. Specific Dish Topic / Mandatory Keyword',
+        badgeText: 'English Global Mode',
+        defaultKeyword: 'Crispy Honey Garlic Air Fryer Chicken Bites',
+        keywordPlaceholder: 'e.g., Crispy Honey Garlic Air Fryer Chicken Bites, Creamy Tuscan Salmon...',
+        measurements: [
+          { val: 'US Customary & Metric (dual: cups, tbsp, g/ml)', label: 'US Customary & Metric (dual: cups, tbsp, g/ml)' },
+          { val: 'Metric Only (grams, ml, kg)', label: 'Metric Only (grams, ml, kg)' },
+          { val: 'US Customary Only (oz, lbs, cups)', label: 'US Customary Only (oz, lbs, cups)' }
+        ],
+        categories: [
+          { group: 'Core Meal Occasions (Courses)', options: [
+            { val: 'Main Courses & Entrees', label: '🍽️ Main Courses & Entrees (Poultry, Meat, Seafood, Pasta)' },
+            { val: 'Breakfast & Brunch Favorites', label: '🍳 Breakfast & Brunch Favorites (Pancakes, Oats, Eggs, Toast)' },
+            { val: 'Appetizers, Starters & Small Bites', label: '🥟 Appetizers, Starters & Small Bites (Finger foods, Dips)' },
+            { val: 'Soups, Stews & Slow-Cooked Bowls', label: '🍲 Soups, Stews & Slow-Cooked Bowls (Bisques, Chowders)' },
+            { val: 'Salads & Fresh Grain Bowls', label: '🥗 Salads & Fresh Grain Bowls (Caesar, Detox, Mediterranean)' }
+          ]},
+          { group: 'Modern Lifestyle & High-Performance', options: [
+            { val: 'Quick & Easy Weeknight Dinners (Under 20 Mins)', label: '⏱️ Quick & Easy Weeknight Dinners (15–20 Mins, 1-Pan)', selected: true },
+            { val: 'Air Fryer & Convection Essentials', label: '♨️ Air Fryer & Convection Essentials (Crispy, Oil-Free)' },
+            { val: 'High-Protein Meal Prep & Fitness', label: '💪 High-Protein Meal Prep & Fitness (Lean Muscle, Macro-Balanced)' },
+            { val: 'Low-Carb, Keto & Diabetic-Friendly', label: '🥑 Low-Carb, Keto & Diabetic-Friendly (Clean Fats, Sugar-Free)' },
+            { val: '100% Plant-Based & Gourmet Vegan', label: '🌿 100% Plant-Based & Gourmet Vegan (Cruelty-Free, Dairy-Free)' }
+          ]},
+          { group: 'Bakery, Sweet Treats & Beverages', options: [
+            { val: 'Desserts, Pastries & Artisanal Bakery', label: '🍰 Desserts, Pastries & Artisanal Bakery (Cakes, Cookies, Breads)' },
+            { val: 'Specialty Drinks, Smoothies & Coffee', label: '☕ Specialty Drinks, Smoothies & Artisanal Coffee' }
+          ]}
+        ]
+      },
+      'id_ID': {
+        classificationLabel: '🏷️ 2. Klasifikasi Kuliner Standar Nasional',
+        classificationSub: 'Kategori Pasar Indonesia & UMKM',
+        classificationHint: 'Disesuaikan dengan selera lidah dan kebiasaan belanja masyarakat Indonesia.',
+        measurementLabel: '⚖️ 3. Standar Satuan Takaran Masak',
+        keywordLabel: '🎯 4. Topik Menu / Kata Kunci Resep Wajib',
+        badgeText: 'Mode Bahasa Indonesia',
+        defaultKeyword: 'Ayam Bakar Madu Pedas Manis Gurih',
+        keywordPlaceholder: 'Contoh: Ayam Bakar Madu Pedas Manis, Sop Buntut Sapi Rempah...',
+        measurements: [
+          { val: 'Metrik Standar Indonesia (gram, sdm, sdt, ml)', label: 'Metrik Standar Indonesia (gram, sdm, sdt, ml)' },
+          { val: 'Takaran Praktis Rumahan (butir, siung, lembar, gelas)', label: 'Takaran Praktis Rumahan (butir, siung, lembar, gelas)' }
+        ],
+        categories: [
+          { group: 'Kategori Waktu Makan Utama', options: [
+            { val: 'Menu Hidangan Utama & Lauk Pauk (Main Course)', label: '🍽️ Menu Hidangan Utama & Lauk Pauk (Ayam, Daging, Seafood)', selected: true },
+            { val: 'Menu Sarapan Praktis & Cepat (Breakfast)', label: '🍳 Menu Sarapan Praktis & Cepat (Nasi Goreng, Bubur, Telur)' },
+            { val: 'Camilan, Gorengan Gurih & Finger Food', label: '🥟 Camilan, Gorengan Gurih & Jajanan Pasar (Bakwan, Cireng, Dimsum)' },
+            { val: 'Sup Hangat, Sayur Kuah & Soto Nusantara', label: '🍲 Sup Hangat, Sayur Kuah & Soto Nusantara (Soto, Rawon, Sayur Asem)' },
+            { val: 'Masakan Tradisional Nusantara & Aneka Sambal', label: '🌶️ Masakan Tradisional Nusantara & Aneka Sambal (Rendang, Balado)' }
+          ]},
+          { group: 'Gaya Hidup & Kepraktisan Masak', options: [
+            { val: 'Menu Praktis 15-20 Menit (One-Pan / Tumisan)', label: '⏱️ Menu Praktis 15–20 Menit (Tumis Cepat, 1 Wajan Rumahan)' },
+            { val: 'Kreasi Masakan Air Fryer Sehat', label: '♨️ Kreasi Masakan Air Fryer Sehat (Crispy Renyah Bebas Minyak)' },
+            { val: 'Menu Tinggi Protein & Meal Prep Fitnes', label: '💪 Menu Tinggi Protein & Meal Prep Sehat (Dada Ayam, Telur, Tahu)' },
+            { val: 'Menu Rendah Kalori, Diet Sehat & Sayuran', label: '🥗 Menu Rendah Kalori, Diet Sehat & Sayuran Segar' }
+          ]},
+          { group: 'Kue, Dessert & Minuman Kekinian', options: [
+            { val: 'Kue, Dessert Manis & Roti Rumahan', label: '🍰 Kue Basah/Kering, Dessert Manis & Roti Rumahan' },
+            { val: 'Minuman Segar, Es Nusantara & Kopi Kekinian', label: '☕ Minuman Segar, Es Nusantara & Kopi Kekinian' }
+          ]}
+        ]
+      },
+      'bilingual': {
+        classificationLabel: '🏷️ 2. Bilingual Classification (English & Indonesian)',
+        classificationSub: 'Global Reach + Local Market',
+        classificationHint: 'Format ganda: headline & hook internasional + isi penjelasan lokal.',
+        measurementLabel: '⚖️ 3. Dual Measurement Standards',
+        keywordLabel: '🎯 4. Dual Target Keyword / Dish Topic',
+        badgeText: 'Bilingual Hybrid Mode',
+        defaultKeyword: 'Crispy Garlic Butter Wings / Sayap Ayam Mentega Krispi',
+        keywordPlaceholder: 'e.g., Crispy Garlic Butter Wings / Sayap Ayam Mentega Krispi',
+        measurements: [
+          { val: 'Dual Metric & US Customary (tbsp, cups, gram, ml)', label: 'Dual Metric & US Customary (tbsp, cups, gram, ml)' }
+        ],
+        categories: [
+          { group: 'Courses / Waktu Makan', options: [
+            { val: 'Main Courses & Entrees (Hidangan Utama)', label: '🍽️ Main Courses & Entrees (Hidangan Utama)', selected: true },
+            { val: 'Breakfast & Morning Favorites (Sarapan Sehat)', label: '🍳 Breakfast & Morning Favorites (Sarapan Sehat)' },
+            { val: 'Appetizers & Finger Foods (Camilan & Snack)', label: '🥟 Appetizers & Finger Foods (Camilan & Snack)' }
+          ]},
+          { group: 'Modern Cooking Trends', options: [
+            { val: 'Quick & Easy Weeknight Dinners (Menu Praktis Cepat)', label: '⏱️ Quick & Easy Weeknight Dinners (Menu Praktis Cepat)' },
+            { val: 'Air Fryer & Convection Essentials (Masakan Air Fryer)', label: '♨️ Air Fryer & Convection Essentials (Masakan Air Fryer)' },
+            { val: 'High-Protein Fitness Meal Prep (Menu Tinggi Protein)', label: '💪 High-Protein Fitness Meal Prep (Menu Tinggi Protein)' }
+          ]},
+          { group: 'Bakery & Drinks', options: [
+            { val: 'Desserts & Artisanal Bakery (Kue & Hidangan Manis)', label: '🍰 Desserts & Artisanal Bakery (Kue & Hidangan Manis)' },
+            { val: 'Specialty Beverages & Coffee (Minuman & Kopi)', label: '☕ Specialty Beverages & Coffee (Minuman & Kopi)' }
+          ]}
+        ]
+      }
+    };
+
+    function handleLanguageChange() {
+      const lang = document.getElementById('targetLanguage').value;
+      const tax = taxonomies[lang];
+
+      // 1. Update UI Labels
+      document.getElementById('classificationLabel').innerText = tax.classificationLabel;
+      document.getElementById('classificationSub').innerText = tax.classificationSub;
+      document.getElementById('classificationHint').innerText = tax.classificationHint;
+      document.getElementById('measurementLabel').innerText = tax.measurementLabel;
+      document.getElementById('keywordLabel').innerText = tax.keywordLabel;
+      document.getElementById('promptStatusBadge').innerText = tax.badgeText;
+
+      // 2. Repopulate Category Dropdown
+      const catSelect = document.getElementById('recipeCategory');
+      catSelect.innerHTML = '';
+      tax.categories.forEach(group => {
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = group.group;
+        group.options.forEach(opt => {
+          const option = document.createElement('option');
+          option.value = opt.val;
+          option.innerText = opt.label;
+          if (opt.selected) option.selected = true;
+          optgroup.appendChild(option);
+        });
+        catSelect.appendChild(optgroup);
+      });
+
+      // 3. Repopulate Measurement Dropdown
+      const measureSelect = document.getElementById('measurementSystem');
+      measureSelect.innerHTML = '';
+      tax.measurements.forEach((m, idx) => {
+        const option = document.createElement('option');
+        option.value = m.val;
+        option.innerText = m.label;
+        if (idx === 0) option.selected = true;
+        measureSelect.appendChild(option);
+      });
+
+      // 4. Update Keyword Placeholder and Default if untouched
+      const kwInput = document.getElementById('recipeKeyword');
+      kwInput.placeholder = tax.keywordPlaceholder;
+      kwInput.value = tax.defaultKeyword;
+
+      updatePromptPreview();
+    }
+
+    function updatePromptPreview() {
+      const lang = document.getElementById('targetLanguage').value;
+      const cat = document.getElementById('recipeCategory').value;
+      const kw = document.getElementById('recipeKeyword').value || 'Artisanal Culinary Dish';
+      const measure = document.getElementById('measurementSystem').value;
+      const style = document.getElementById('visualStyle').value;
+      const count = document.getElementById('imgCount').value;
+
+      let langDirective = '';
+      let promptTitle = '';
+
+      if (lang === 'en_US') {
+        langDirective = `[LANGUAGE DIRECTIVE: INTERNATIONAL ENGLISH ONLY]
+Write the dish title, Facebook article copy, ingredient quantities (${measure}), step-by-step techniques, and all visual prompts strictly in polished, appetizing, professional American/International English.`;
+        promptTitle = `You are a World-Class Executive Chef and Commercial Culinary Photographer.
+Your mission is to formulate an irresistible, tested, and commercially viral recipe tailored for the International culinary category: "${cat}".
+
+[MANDATORY TOPIC & DISH KEYWORD ENFORCEMENT]
+The recipe MUST STRICTLY revolve around this exact dish / keyword: "${kw}".
+DO NOT deviate, generalize, or substitute with unrelated dishes.
+The dish title, primary ingredients list, step-by-step techniques, and visual prompts MUST explicitly feature "${kw}".
+
+[CULINARY TAXONOMY & STANDARDS]
+- Category: ${cat}
+- Measurement Units: ${measure}
+${langDirective}
+
+[VISUAL PHOTOGRAPHY MANDATE]
+Maintain the "${style}" photography aesthetic across all ${count} image prompts:
+- Slot 1: Hero master presentation of the completed dish, ultra high detail, appetizing commercial lighting.
+- Slot 2: [MANDATORY GUARDRAIL: FACELESS ONLY. Hands/forearms only from elbow down]. Action shot of preparation or cooking physics.
+- Slot 3: Macro close-up texture shot (glaze, sizzle, garnish).
+- Slot 4+: Plating or dining lifestyle arrangement.
+
+Respond ONLY in valid JSON matching this schema:
+{
+  "title": "${kw}",
+  "cuisine_category": "${cat}",
+  "prep_time": "15 mins",
+  "cook_time": "20 mins",
+  "servings": "4 servings",
+  "content_md": "# The Ultimate ${kw}\\n\\n## Ingredients\\n- ...\\n\\n## Step-by-Step Instructions\\n1. ...",
+  "prompts": {
+    "image_1": "High-end commercial photography in ${style} style of ${kw}...",
+    "image_2": "Faceless culinary action shot in ${style} style preparing ${kw}...",
+    "image_3": "Macro detail shot in ${style} style of ${kw} glistening under soft studio lighting..."
+  }
+}`;
+      } else if (lang === 'id_ID') {
+        langDirective = `[PANDUAN BAHASA: BAHASA INDONESIA NASIONAL]
+Tuliskan judul, naskah artikel Facebook lengkap, takaran bahan (${measure}), dan langkah pembuatan dalam Bahasa Indonesia yang menggugah selera, akrab, dan teruji. Prompts T2I gambar tetap dalam Bahasa Inggris kuliner.`;
+        promptTitle = `Anda adalah Koki Profesional dan Ahli Fotografi Makanan.
+Tugas Anda adalah membuat 1 resep kuliner yang sangat lezat, menggugah selera, dan teruji untuk klasifikasi: "${cat}".
+
+[MANDATORY TOPIC & DISH KEYWORD ENFORCEMENT]
+Resep yang dibuat WAJIB KETAT berpusat pada topik/kata kunci berikut: "${kw}".
+DILARANG KERAS menyimpang atau membuat hidangan lain yang tidak berhubungan dengan "${kw}".
+Nama resep, daftar bahan utama, dan seluruh alur pembuatan harus secara eksplisit mengolah sajian ini.
+
+[STANDAR TAKARAN & FORMAT]
+- Klasifikasi Kategori: ${cat}
+- Standar Satuan Takaran: ${measure}
+${langDirective}
+
+[PANDUAN VISUAL FOTOGRAFI AI]
+Gunakan karakteristik fotografi "${style}" secara konsisten pada setiap ${count} prompt gambar (T2I dalam bahasa Inggris):
+- Slot 1: Foto hero hidangan matang sempurna, detail tekstur tinggi, pencahayaan komersial menggugah selera.
+- Slot 2: [MANDATORY GUARDRAIL: FACELESS ONLY. Hanya tangan/lengan dari siku ke bawah]. Aksi memasak di dapur.
+- Slot 3: Close up shot tekstur kuah, bumbu meresap, atau lelehan garnish.
+- Slot 4+: Penataan hidangan siap santap di meja makan.
+
+Beri jawaban HANYA dalam format JSON valid dengan struktur berikut:
+{
+  "title": "${kw}",
+  "cuisine_category": "${cat}",
+  "prep_time": "15 menit",
+  "cook_time": "20 menit",
+  "servings": "4 porsi",
+  "content_md": "# Rahasia Lezat ${kw}\\n\\n## Bahan-bahan Utama\\n- ...\\n\\n## Langkah Memasak\\n1. ...",
+  "prompts": {
+    "image_1": "High-end commercial food photography in ${style} style of ${kw}...",
+    "image_2": "Faceless culinary action shot in ${style} style preparing ${kw}...",
+    "image_3": "Macro detail shot in ${style} style of ${kw}..."
+  }
+}`;
+      } else {
+        // Bilingual
+        promptTitle = `You are an International Culinary Copywriter and Food Photographer.
+Formulate a viral bilingual Facebook post for category: "${cat}" focusing strictly on "${kw}".
+Headline and hooks in English, followed by localized body copy in Indonesian.
+Measurement system: ${measure}. Photography style: ${style}.`;
+      }
+
+      document.getElementById('promptOutput').innerText = promptTitle;
+    }
+
+    // Mock Database for Tenants Disabled Menus
+    const tenantPermissions = {
+      'default_tenant': { role: 'superadmin', disabled: [] },
+      'tnt_sy-benu_415f99': { role: 'admin', disabled: ['auto_pipeline', 'threads_labs', 'sheets_autopilot'] },
+      'tnt_pt-gim-sosmed_62d0d9': { role: 'admin', disabled: [] },
+      'tnt_mas-ibnu_e0eb25': { role: 'admin', disabled: ['auto_pipeline', 'threads_labs', 'youtube_studio'] }
+    };
+
+    function switchTenantSimulation() {
+      const selected = document.getElementById('tenantSwitcher').value;
+      const tInfo = tenantPermissions[selected];
+      const isSuperadmin = tInfo.role === 'superadmin';
+      const isAutoPipelineLocked = !isSuperadmin && tInfo.disabled.includes('auto_pipeline');
+      const isThreadsLocked = !isSuperadmin && tInfo.disabled.includes('threads_labs');
+
+      // 1. Render Sidebar Items
+      const sidebar = document.getElementById('sidebarContainer');
+      sidebar.innerHTML = `
+        <div style="font-size: 0.7rem; font-weight: 800; color: var(--text-muted); padding: 0.25rem 0.5rem;">WORKFLOW</div>
+        <div class="sim-nav-item ${isAutoPipelineLocked ? 'locked' : 'active'}" title="${isAutoPipelineLocked ? 'Module locked by Superadmin' : 'Full Access'}">
+          <span>⚡ Auto Pipeline</span>
+          <span>${isAutoPipelineLocked ? '🔒' : '✓'}</span>
+        </div>
+        <div class="sim-nav-item ${isThreadsLocked ? 'locked' : ''}" title="${isThreadsLocked ? 'Module locked by Superadmin' : 'Full Access'}">
+          <span>🧵 Threads Labs</span>
+          <span>${isThreadsLocked ? '🔒' : '✓'}</span>
+        </div>
+        <div class="sim-nav-item">
+          <span>🍳 Recipe Labs</span>
+          <span>✓</span>
+        </div>
+        <div class="sim-nav-item">
+          <span>🌱 Pillar Campaign</span>
+          <span>✓</span>
+        </div>
+        <div class="sim-nav-item">
+          <span>🎬 RE Campaign</span>
+          <span>✓</span>
+        </div>
+      `;
+
+      // 2. Render Page Content
+      const page = document.getElementById('pageContentContainer');
+      if (isAutoPipelineLocked) {
+        page.innerHTML = `
+          <div class="alert-banner">
+            <span style="font-size: 1.5rem;">🔒</span>
+            <div>
+              <strong style="color: var(--status-danger);">Access Restricted: Auto Pipeline Module Locked</strong>
+              <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                This autonomous cron scheduler module is currently disabled by Superadmin for your organization (<code>${selected}</code>). 
+                Please contact your platform administrator if you require this feature.
+              </div>
+            </div>
+          </div>
+          <div style="padding: 2rem; text-align: center; color: var(--text-muted); background: var(--canvas); border-radius: var(--radius-sm); border: 1px dashed var(--border-subtle);">
+            🚫 No autonomous pipelines or schedules accessible for this account.
+          </div>
+        `;
+      } else {
+        page.innerHTML = `
+          <div style="background: var(--status-success-soft); border: 1px solid var(--status-success); border-radius: var(--radius-sm); padding: 0.75rem 1rem; margin-bottom: 1rem; color: var(--status-success); font-size: 0.85rem; font-weight: 600;">
+            ✓ Your organization has full access to Autonomous Pipeline Schedulers.
+          </div>
+          <div style="padding: 1.5rem; background: var(--canvas); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+            <div style="font-weight: 700; margin-bottom: 0.5rem;">📋 Active Schedules & Automation Queue</div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary);">
+              - 🍳 Global Recipe: Crispy Honey Garlic Air Fryer Chicken Bites (05:00 UTC+7)<br>
+              - 🛍️ Product Video: Air Fryer Deluxe Showcase (10:00 UTC+7)<br>
+              - 📖 Editorial Pillar: 5 Essential Rules for Clean Meal Prep (16:00 UTC+7)
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // Initial setup: initialize reactive language
+    handleLanguageChange();
+    switchTenantSimulation();
+  </script>
+</body>
+</html>
