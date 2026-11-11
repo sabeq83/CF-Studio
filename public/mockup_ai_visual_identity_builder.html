@@ -1035,7 +1035,7 @@
           <textarea 
             id="userPromptInput"
             class="prompt-textarea" 
-            placeholder="Contoh: Saya ingin visual identity gaya stickman minimalis untuk edukasi bisnis, warna hitam putih dengan aksen kuning stabilo..."
+            placeholder="Contoh: Saya ingin visual identity gaya kartun stickman doodle minimalis yang ekspresif untuk edukasi bisnis, warna hitam putih dengan aksen kuning stabilo..."
           ></textarea>
 
           <!-- 12 Inspiration Chips -->
@@ -1428,22 +1428,27 @@
 const PRESET_IDEAS = {
       // 1. Stickman Doodles
       stickman: {
-        prompt: "Saya ingin visual identity gaya stickman minimalis untuk edukasi bisnis, warna hitam putih dengan aksen kuning stabilo, karakter faceless memegang tablet atau laptop, latar belakang clean studio.",
-        label: "Minimalist Stickman Business Guide",
+        prompt: "Saya ingin visual identity gaya kartun stickman doodle minimalis yang ekspresif untuk edukasi bisnis, warna hitam putih dengan aksen kuning stabilo, karakter stickman dengan ekspresi wajah garis simpel memegang tablet atau laptop, latar belakang clean studio.",
+        label: "Expressive Stickman Business Guide",
         key: "stickman_business_v1",
-        rationale: "Karakter stickman monokromatik modern dengan goresan garis tegas. Aksen kuning cerah (#FACC15) digunakan untuk menonjolkan poin edukasi bisnis. Sangat kuat untuk memikat atensi di feed media sosial.",
-        visualMode: "Stickman Line Art",
-        subject: "Stylized Faceless Figure",
+        rationale: "Karakter kartun stickman modern ekspresif dengan mata titik dan senyum simpel. Aksen kuning cerah (#FACC15) digunakan untuk menonjolkan poin edukasi bisnis. Wajah kartun doodle diizinkan penuh untuk menyampaikan emosi dan fokus penjelasan.",
+        visualMode: "Stickman Line Art (Cartoon)",
+        subject: "Stylized Cartoon Character (Expressive Face)",
         environment: "Clean White Paper Studio",
         palette: "Monochrome + Bright Yellow (#FACC15)",
-        t2i: "A charming minimalist stickman character sitting at a sleek desk, holding a glowing digital tablet with charts, ultra clean white textured paper background, bold expressive black ink outline, vibrant yellow highlighter accent line art, soft ambient studio drop shadow, isometric high-angle view, modern editorial vector illustration, commercial 4k.",
+        t2i: "A charming minimalist stickman cartoon character sitting at a sleek desk, friendly expressive simple dot eyes and curved smile line, holding a glowing digital tablet with charts, ultra clean white textured paper background, bold expressive black ink outline, vibrant yellow highlighter accent line art, soft ambient studio drop shadow, isometric high-angle view, modern editorial vector illustration, commercial 4k.",
         svg: `<svg class="art-svg" viewBox="0 0 360 480" xmlns="http://www.w3.org/2000/svg">
           <rect width="360" height="480" fill="#f8fafc"/>
           <defs><pattern id="g1" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e2e8f0" stroke-width="0.8"/></pattern></defs>
           <rect width="360" height="480" fill="url(#g1)" opacity="0.6"/>
           <ellipse cx="180" cy="380" rx="130" ry="24" fill="#cbd5e1" opacity="0.5"/>
           <rect x="70" y="320" width="220" height="12" rx="4" fill="#0f172a"/>
-          <circle cx="180" cy="160" r="34" fill="none" stroke="#0f172a" stroke-width="8"/>
+          <!-- Stickman Head with Expressive Cartoon Face -->
+          <circle cx="180" cy="160" r="34" fill="#ffffff" stroke="#0f172a" stroke-width="7"/>
+          <circle cx="170" cy="154" r="3.5" fill="#0f172a"/>
+          <circle cx="190" cy="154" r="3.5" fill="#0f172a"/>
+          <path d="M 170 168 Q 180 178 190 168" fill="none" stroke="#0f172a" stroke-width="3.5" stroke-linecap="round"/>
+          <!-- Stickman Body & Limbs -->
           <line x1="180" y1="194" x2="180" y2="280" stroke="#0f172a" stroke-width="8" stroke-linecap="round"/>
           <line x1="180" y1="280" x2="140" y2="350" stroke="#0f172a" stroke-width="8" stroke-linecap="round"/>
           <line x1="180" y1="280" x2="220" y2="350" stroke="#0f172a" stroke-width="8" stroke-linecap="round"/>
@@ -1458,7 +1463,7 @@ const PRESET_IDEAS = {
           <circle cx="250" cy="130" r="28" fill="#facc15" opacity="0.9"/>
           <path d="M 235 150 L 225 160 L 242 153 Z" fill="#facc15"/>
           <text x="250" y="136" font-family="sans-serif" font-weight="900" font-size="20" fill="#0f172a" text-anchor="middle">💡</text>
-          <text x="180" y="445" font-family="sans-serif" font-weight="700" font-size="11" fill="#94a3b8" text-anchor="middle" letter-spacing="1">G-LABS PREVIEW • STICKMAN DOODLES</text>
+          <text x="180" y="445" font-family="sans-serif" font-weight="700" font-size="11" fill="#94a3b8" text-anchor="middle" letter-spacing="1">G-LABS PREVIEW • STICKMAN DOODLES (EXPRESSIVE FACE)</text>
         </svg>`
       },
 

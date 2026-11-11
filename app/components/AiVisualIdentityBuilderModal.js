@@ -8,7 +8,7 @@ const TRENDING_PRESETS = [
     icon: '🎨',
     name: 'Stickman Doodles',
     tag: 'Explainer',
-    prompt: 'Saya ingin visual identity gaya stickman minimalis untuk edukasi bisnis, warna hitam putih dengan aksen kuning stabilo, karakter faceless memegang tablet atau laptop, latar belakang clean studio.'
+    prompt: 'Saya ingin visual identity gaya kartun stickman doodle minimalis yang ekspresif untuk edukasi bisnis, warna hitam putih dengan aksen kuning stabilo, karakter stickman dengan ekspresi wajah garis simpel memegang tablet atau laptop, latar belakang clean studio.'
   },
   {
     id: 'paper_cutout',

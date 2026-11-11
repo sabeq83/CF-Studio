@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.40.39 — Perbaikan 12 Ide Visual Preset AI Builder & Wajah Kartun Stickman (11/11/2026)
+- Perbaiki error isometric_society supporting role dengan fallback cerdas
+- Dukung wajah kartun stickman doodle clay tanpa terblokir faceless guardrails
+- Tambahkan automated test 12 preset ide visual
+
 ## V2.40.38 — AI Visual Identity Builder 1-Kolom Hero Review & Auto Preview (11/11/2026)
 - Restrukturisasi layout modal AI Visual Identity Builder ke 1-kolom vertikal dengan Hero Control Bar dan Kanvas Preview langsung di atas (Y ~110px)
 - Auto-collapse composer menjadi compact concept bar setelah usulan dirakit
