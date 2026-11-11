@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup Simulasi: Visual Identity Syar'iy Classic Atmospheric Serenity (GarliBee)</title>
+  <style>
+    /* ==========================================================================
+       100% Self-Contained Semantic Design Tokens from app/theme.css
+       ========================================================================== */
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --radius-xs: 4px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+      --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+      /* Semantic Surfaces */
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --surface-subtle: rgba(255, 255, 255, 0.04);
+      --input-bg: #0c1422;
+      --overlay-backdrop: rgba(2, 6, 14, 0.82);
+
+      /* Typography / Text */
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+
+      /* Borders */
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --border-color: #26354a;
+      --focus-ring: rgba(45, 212, 191, 0.4);
+
+      /* Actions & Brand */
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --accent-spark: #fbbf24;
+
+      /* Status Badges */
+      --status-info: #38bdf8;
+      --status-info-soft: rgba(56, 189, 248, 0.14);
+      --status-success: #34d399;
+      --status-success-soft: rgba(52, 211, 153, 0.14);
+      --status-warning: #f59e0b;
+      --status-warning-soft: rgba(245, 158, 11, 0.14);
+      --status-danger: #f87171;
+      --status-danger-soft: rgba(248, 113, 113, 0.14);
+
+      --shadow-modal: 0 24px 48px -12px rgba(0, 0, 0, 0.6);
+      --shadow-card: 0 8px 24px -6px rgba(0, 0, 0, 0.4);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f8fafc;
+      --sidebar: #f1f5f9;
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --surface-subtle: rgba(0, 0, 0, 0.03);
+      --input-bg: #ffffff;
+      --overlay-backdrop: rgba(15, 23, 42, 0.5);
+
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --text-disabled: #94a3b8;
+
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --border-color: #e2e8f0;
+      --focus-ring: rgba(13, 148, 136, 0.3);
+
+      --action-primary: #0d9488;
+      --action-primary-hover: #0f766e;
+      --on-action-primary: #ffffff;
+      --accent-spark: #d97706;
+
+      --status-info: #0284c7;
+      --status-info-soft: rgba(2, 132, 199, 0.1);
+      --status-success: #059669;
+      --status-success-soft: rgba(5, 150, 105, 0.1);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.1);
+      --status-danger: #dc2626;
+      --status-danger-soft: rgba(220, 38, 38, 0.1);
+
+      --shadow-modal: 0 24px 48px -12px rgba(15, 23, 42, 0.2);
+      --shadow-card: 0 8px 24px -6px rgba(15, 23, 42, 0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      padding: 24px;
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      max-width: 1240px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Top Bar */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .theme-btn {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .theme-btn:hover { background: var(--surface-hover); }
+
+    /* Concept Banner */
+    .concept-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-left: 4px solid var(--action-primary);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .info-box {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+    }
+
+    /* Mode Comparison Toggle */
+    .mode-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .mode-card {
+      background: var(--surface);
+      border: 2px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+    }
+    .mode-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+    }
+    .mode-card.active {
+      border-color: var(--action-primary);
+      background: var(--surface-raised);
+      box-shadow: 0 0 0 1px var(--action-primary);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-success { background: var(--status-success-soft); color: var(--status-success); border: 1px solid var(--status-success); }
+    .badge-warning { background: var(--status-warning-soft); color: var(--status-warning); border: 1px solid var(--status-warning); }
+    .badge-info { background: var(--status-info-soft); color: var(--status-info); border: 1px solid var(--status-info); }
+
+    /* Scene Grid */
+    .scene-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 1024px) {
+      .concept-card { grid-template-columns: 1fr; }
+      .scene-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 640px) {
+      .mode-selector { grid-template-columns: 1fr; }
+      .scene-grid { grid-template-columns: 1fr; }
+    }
+
+    .clip-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-card);
+      transition: var(--transition);
+    }
+    .clip-card:hover { border-color: var(--border-strong); }
+
+    .clip-header {
+      background: var(--surface-raised);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .clip-frame {
+      width: 100%;
+      height: 200px;
+      background: var(--surface-interactive);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .clip-frame svg { width: 100%; height: 100%; object-fit: cover; }
+
+    .clip-body {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .section-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 3px;
+    }
+
+    .box-snippet {
+      font-size: 12px;
+      border-radius: var(--radius-xs);
+      padding: 10px;
+      line-height: 1.45;
+    }
+    .box-visual {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      min-height: 60px;
+    }
+    .box-audio {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      min-height: 70px;
+    }
+
+    .connector-badge {
+      background: var(--accent-spark);
+      color: #000;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 11px;
+      margin-right: 4px;
+      display: inline-block;
+    }
+
+    /* Preset Parameter Specs */
+    .specs-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+    }
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 14px;
+    }
+    @media (max-width: 800px) {
+      .specs-grid { grid-template-columns: 1fr; }
+    }
+    .spec-item {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+    }
+    .spec-key {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .spec-val {
+      font-size: 13px;
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div>
+      <div style="font-size: 11px; font-weight: 700; color: var(--action-primary); text-transform: uppercase; letter-spacing: 0.5px;">
+        Visual Identity Studio Simulation • Schema V2
+      </div>
+      <h1 style="font-size: 19px; font-weight: 800; margin-top: 2px;">
+        Syar'iy Classic — Atmospheric Serenity & Wholesome Home (GarliBee)
+      </h1>
+    </div>
+    <button class="theme-btn" onclick="toggleTheme()">
+      <span id="theme-icon">☀️</span> <span id="theme-text">Light Mode</span>
+    </button>
+  </div>
+
+  <!-- Concept Context Card -->
+  <div class="concept-card">
+    <div class="info-box">
+      <div style="font-size: 13px; font-weight: 700; color: var(--status-warning); margin-bottom: 6px;">
+        ⚠️ Kendala Visual Identity Lama (Stereotipe Monoton)
+      </div>
+      <div style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.5;">
+        Sebelumnya, aturan <em>faceless</em> dan preset syar'i di-hardcode ke instruksi sempit:
+        <strong>"hands manipulating ingredients on the tabletop workspace"</strong>. Akibatnya, dari Klip 1 s/d Klip 4 selalu menampilkan aksi tangan memotong di talenan atau meja dapur yang membosankan dan memicu <em>ad fatigue</em>.
+      </div>
+    </div>
+    <div class="info-box">
+      <div style="font-size: 13px; font-weight: 700; color: var(--status-success); margin-bottom: 6px;">
+        ✨ Solusi Usulan Baru: Penceritaan Suasana Lingkungan & Cuaca
+      </div>
+      <div style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.5;">
+        Aturan syariat <strong>100% Faceless</strong> tetap dipatuhi ketat, namun kamera dibebaskan untuk mengeksplorasi <strong>Environmental Weather Storytelling</strong>: jendela kaca berembun saat hujan deras, uap hangat cangkir herbal, siluet tampak belakang santun (*back-view modesty*), dan *macro truth* jar madu GarliBee.
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Comparison Mode Selector -->
+  <div class="mode-selector">
+    <div class="mode-card" id="card-old" onclick="switchMode('old')">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 14px; font-weight: 800;">Mode Lama: Dapur Monoton</span>
+        <span class="badge badge-warning">Monoton / Ad Fatigue</span>
+      </div>
+      <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.4;">
+        Seluruh klip terikat di meja dapur. Saat hook bertema musim hujan, visual tetap memaksakan tangan memotong bawang di talenan.
+      </p>
+    </div>
+
+    <div class="mode-card active" id="card-new" onclick="switchMode('new')">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 14px; font-weight: 800;">Mode Baru: Atmospheric Serenity (Usulan)</span>
+        <span class="badge badge-success">Rekomendasi • High Retensi</span>
+      </div>
+      <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.4;">
+        Kamera membuka dengan kaca jendela berembun hujan, sudut ruang santai hangat, siluet santun tampak belakang, lalu ke botol GarliBee bercahaya keemasan.
+      </p>
+    </div>
+  </div>
+
+  <!-- Dynamic Clips Simulation (4 Clips) -->
+  <div class="scene-grid" id="clips-container">
+    <!-- Populated by JavaScript -->
+  </div>
+
+  <!-- Visual Identity Preset Specification Table -->
+  <div class="specs-card">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h3 style="font-size: 15px; font-weight: 800;">⚙️ Konfigurasi Spesifikasi Preset Schema V2</h3>
+      <span class="badge badge-info">ID: syari_classic_atmospheric_home</span>
+    </div>
+    <div class="specs-grid">
+      <div class="spec-item">
+        <div class="spec-key">Subject & Faceless Mode</div>
+        <div class="spec-val">atmospheric_modest (Back-view & environmental, 100% Faceless)</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-key">Primary Visual Style</div>
+        <div class="spec-val">cinematic_atmospheric_naturalism</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-key">Framing Diversity</div>
+        <div class="spec-val">Rain Windowpane (40%) • Back-View (30%) • Amber Macro (30%)</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-key">Lighting Atmosphere</div>
+        <div class="spec-val">Soft Moody Overcast Daylight + Warm 2700K Interior Ambient</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-key">Wardrobe Palette</div>
+        <div class="spec-val">Warm Mocha, Oat Beige, Amber Terracotta (Wrists Covered)</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-key">Guardrail Anti-Monotony</div>
+        <div class="spec-val">Enforced: Dilarang mengulang talenan dapur berturut-turut</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let currentMode = 'new';
+
+  const modesData = {
+    old: [
+      {
+        scene: 1,
+        role: 'Hook (Problem)',
+        badgeClass: 'badge-warning',
+        title: 'Tangan di Meja Dapur',
+        visual: 'Close-up tangan di atas talenan dapur kayu memegang pisau memotong bawang. Latar belakang dinding ubin putih dapur.',
+        audio: '"Musim hujan bikin badan gampang tumbang, lindungi dari sekarang."',
+        svg: `<svg viewBox="0 0 300 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="300" height="200" fill="#2d3748"/>
+          <rect y="120" width="300" height="80" fill="#744210"/>
+          <rect x="50" y="130" width="200" height="60" rx="4" fill="#d69e2e"/>
+          <circle cx="150" cy="160" r="18" fill="#e2e8f0"/>
+          <rect x="110" y="140" width="80" height="10" fill="#cbd5e0" transform="rotate(-15 110 140)"/>
+          <text x="150" y="70" fill="#cbd5e0" font-size="12" font-family="sans-serif" text-anchor="middle" font-weight="bold">Klip 1: Tangan di Talenan Dapur</text>
+        </svg>`
+      },
+      {
+        scene: 2,
+        role: 'Eskalasi',
+        badgeClass: 'badge-warning',
+        title: 'Tangan Mengaduk Gelas',
+        visual: 'Tangan memegang sendok logam mengaduk air di cangkir kaca di atas meja dapur yang sama.',
+        audio: '"Daya tahan tubuh yang menurun bikin aktivitas harian terganggu."',
+        svg: `<svg viewBox="0 0 300 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="300" height="200" fill="#2d3748"/>
+          <rect y="130" width="300" height="70" fill="#744210"/>
+          <rect x="125" y="90" width="50" height="70" rx="4" fill="#a0aec0" fill-opacity="0.4" stroke="#e2e8f0"/>
+          <line x1="150" y1="70" x2="150" y2="130" stroke="#cbd5e0" stroke-width="4"/>
+          <text x="150" y="50" fill="#cbd5e0" font-size="12" font-family="sans-serif" text-anchor="middle" font-weight="bold">Klip 2: Tangan Aduk Cangkir Dapur</text>
+        </svg>`
+      },
+      {
+        scene: 3,
+        role: 'Bridging (Produk)',
+        badgeClass: 'badge-warning',
+        title: 'Tangan Pegang Botol',
+        visual: 'Tangan memegang botol GarliBee di depan ubin dapur yang sama.',
+        audio: '"Untung ada GarliBee, madu bawang lanang fermentasi alami."',
+        svg: `<svg viewBox="0 0 300 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="300" height="200" fill="#2d3748"/>
+          <rect y="130" width="300" height="70" fill="#744210"/>
+          <rect x="120" y="80" width="60" height="80" rx="8" fill="#d97706"/>
+          <rect x="130" y="100" width="40" height="30" fill="#1a202c"/>
+          <text x="150" y="50" fill="#cbd5e0" font-size="12" font-family="sans-serif" text-anchor="middle" font-weight="bold">Klip 3: Botol di Meja Dapur</text>
+        </svg>`
+      },
+      {
+        scene: 4,
+        role: 'CTA',
+        badgeClass: 'badge-warning',
+        title: 'Tangan Sendok Madu',
+        visual: 'Tangan menyendok madu lagi di meja dapur yang sama, diulang.',
+        audio: '"Konsumsi tiap hari untuk jaga stamina. Klik link di bio ya!"',
+        svg: `<svg viewBox="0 0 300 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="300" height="200" fill="#2d3748"/>
+          <rect y="130" width="300" height="70" fill="#744210"/>
+          <circle cx="150" cy="150" r="30" fill="#d97706" fill-opacity="0.8"/>
+          <text x="150" y="50" fill="#cbd5e0" font-size="12" font-family="sans-serif" text-anchor="middle" font-weight="bold">Klip 4: Meja Dapur Lagi (Monoton)</text>
+        </svg>`
+      }
+    ],
+    new: [
+      {
+        scene: 1,
+        role: 'Atmospheric Hook',
+        badgeClass: 'badge-success',
+        title: 'Rain Windowpane (Kaca Jendela Hujan)',
+        visual: 'Cinematic shallow macro shot dari tetesan air hujan mengalir deras di kaca jendela berembun. Di luar terlihat dedaunan hijau basah dan langit mendung syahdu. Tirai katun krem bergoyang pelan tertiup hawa dingin sejuk. Zero Product & Zero Dapur.',
+        audio: '"Musim hujan bikin badan gampang tumbang, lindungi dari sekarang."',
+        svg: `<svg viewBox="0 0 300 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="rainSky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#1e293b"/>
+              <stop offset="100%" stop-color="#334155"/>
+            </linearGradient>
+            <linearGradient id="warmLight" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.2"/>
+              <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.05"/>
+            </linearGradient>
+          </defs>
+          <rect width="300" height="200" fill="url(#rainSky)"/>
+          <!-- Window frame -->
+          <rect x="20" y="15" width="260" height="170" rx="4" stroke="#475569" stroke-width="8" fill="none"/>
+          <line x1="150" y1="15" x2="150" y2="185" stroke="#475569" stroke-width="6"/>
+          <!-- Rain droplets on glass -->
+          <ellipse cx="60" cy="50" rx="2" ry="7" fill="#93c5fd" fill-opacity="0.7"/>
+          <ellipse cx="80" cy="110" rx="3" ry="12" fill="#93c5fd" fill-opacity="0.8"/>
+          <ellipse cx="110" cy="70" rx="2" ry="9" fill="#93c5fd" fill-opacity="0.6"/>
+          <ellipse cx="190" cy="90" rx="3" ry="14" fill="#93c5fd" fill-opacity="0.75"/>
+          <ellipse cx="220" cy="45" rx="2" ry="8" fill="#93c5fd" fill-opacity="0.6"/>
+          <ellipse cx="240" cy="130" rx="2.5" ry="11" fill="#93c5fd" fill-opacity="0.7"/>
+          <!-- Warm interior reflection overlay -->
+          <rect x="24" y="19" width="122" height="162" fill="url(#warmLight)"/>
+          <text x="150" y="165" fill="#f8fafc" font-size="11" font-family="sans-serif" text-anchor="middle" font-weight="700">🌧️ Suasana Hujan di Luar Jendela</text>
+        </svg>`
+      },
+      {
+        scene: 2,
+        role: 'Cozy Nook & Escalation',
+        badgeClass: 'badge-info',
+        title: 'Back-View Modest Living (Tampak Belakang)',
+        visual: 'Sudut ruang tengah hangat. Dari sudut belakang (back-view full modesty, zero wajah), tampak siluet tenang muslimah bergamis & khimar longgar warna oat-beige sedang berdiri memandang ke luar jendela sambil memegang cangkir hangat dengan syal rajut lembut.',
+        audio: '<span class="connector-badge">Padahal,</span> paparan angin dingin dan cuaca lembap bisa menurunkan pertahanan alami tubuh tanpa kita sadari.',
+        svg: `<svg viewBox="0 0 300 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="300" height="200" fill="#0f172a"/>
+          <!-- Warm living room floor & wall -->
+          <rect y="140" width="300" height="60" fill="#78350f" fill-opacity="0.3"/>
+          <rect x="180" y="20" width="100" height="120" stroke="#64748b" stroke-width="4" fill="#1e293b"/>
+          <!-- Window rain drops in background -->
+          <ellipse cx="210" cy="60" rx="1.5" ry="6" fill="#93c5fd" fill-opacity="0.5"/>
+          <ellipse cx="240" cy="80" rx="2" ry="8" fill="#93c5fd" fill-opacity="0.5"/>
+          <!-- Warm lamp glow -->
+          <circle cx="50" cy="60" r="35" fill="#f59e0b" fill-opacity="0.25"/>
+          <!-- Modest Muslimah Back View Silhouette -->
+          <path d="M 120 75 Q 140 60 160 75 Q 170 120 175 180 L 105 180 Q 110 120 120 75 Z" fill="#b45309" fill-opacity="0.75"/>
+          <path d="M 125 70 Q 140 55 155 70 Q 165 95 160 115 Q 140 125 120 115 Q 115 95 125 70 Z" fill="#d97706" fill-opacity="0.9"/>
+          <text x="150" y="165" fill="#f8fafc" font-size="11" font-family="sans-serif" text-anchor="middle" font-weight="700">🏡 Siluet Tampak Belakang Santun</text>
+        </svg>`
+      },
+      {
+        scene: 3,
+        role: 'Bridging & Solution',
+        badgeClass: 'badge-success',
+        title: 'Amber Window Sill Macro (Botol di Kusen)',
+        visual: 'Jar kaca GarliBee diletakkan di kusen jendela kayu jati dengan latar butiran hujan bokeh buram. Cahaya sore hangat menembus toples kaca, memperlihatkan butiran bawang lanang bulat terfermentasi keemasan dalam madu mentah kental. Sendok kayu mengangkat 1 butir bawang utuh berkilau.',
+        audio: '<span class="connector-badge">Di titik inilah,</span> GarliBee hadir memadukan madu mentah dan bawang lanang fermentasi alami 3 bulan untuk benteng imunitas.',
+        svg: `<svg viewBox="0 0 300 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="300" height="200" fill="#1e293b"/>
+          <!-- Blurred window rain bokeh -->
+          <circle cx="60" cy="50" r="18" fill="#93c5fd" fill-opacity="0.2"/>
+          <circle cx="220" cy="60" r="24" fill="#93c5fd" fill-opacity="0.15"/>
+          <circle cx="250" cy="110" r="15" fill="#93c5fd" fill-opacity="0.25"/>
+          <!-- Window sill wood -->
+          <rect y="130" width="300" height="70" fill="#451a03"/>
+          <!-- GarliBee Squircle Glass Jar -->
+          <rect x="110" y="65" width="80" height="90" rx="14" fill="#d97706" fill-opacity="0.85" stroke="#fef3c7" stroke-width="2"/>
+          <!-- Silver ribbed lid -->
+          <rect x="118" y="52" width="64" height="14" rx="3" fill="#e2e8f0" stroke="#94a3b8"/>
+          <!-- Matte black label with gold accent -->
+          <rect x="118" y="90" width="64" height="40" rx="2" fill="#0f172a"/>
+          <rect x="135" y="98" width="30" height="4" fill="#fbbf24"/>
+          <!-- Honey fermented solo garlic pearls -->
+          <circle cx="135" cy="140" r="10" fill="#78350f"/>
+          <circle cx="165" cy="138" r="11" fill="#78350f"/>
+          <!-- Wooden spoon lifting one garlic -->
+          <path d="M 80 100 Q 100 115 125 110" stroke="#b45309" stroke-width="6" stroke-linecap="round"/>
+          <circle cx="130" cy="108" r="9" fill="#92400e"/>
+          <text x="150" y="185" fill="#fef3c7" font-size="11" font-family="sans-serif" text-anchor="middle" font-weight="700">🍯 Jar GarliBee di Kusen Jendela</text>
+        </svg>`
+      },
+      {
+        scene: 4,
+        role: 'CTA & Restored Wholesome',
+        badgeClass: 'badge-info',
+        title: 'Warm Herbal Infusion (Ritual Seduh)',
+        visual: 'Madu GarliBee diaduk pelan ke cangkir air hangat di atas tatakan kayu rustic dengan kepulan uap lembut. Manset gamis syar'i menutupi pergelangan tangan memegang cangkir dengan tenang. Ruangan memancarkan kehangatan, kesehatan, dan ketenangan keluarga.',
+        audio: '<span class="connector-badge">Hasilnya,</span> tubuh tetap fit, hangat, dan siap beraktivitas tanpa khawatir cuaca. Rawat kesehatan keluargamu sekarang!',
+        svg: `<svg viewBox="0 0 300 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="300" height="200" fill="#0f172a"/>
+          <!-- Table surface -->
+          <rect y="125" width="300" height="75" fill="#361803"/>
+          <ellipse cx="150" cy="155" rx="55" ry="20" fill="#582a0b" stroke="#78350f" stroke-width="2"/>
+          <!-- Ceramic cup -->
+          <rect x="120" y="90" width="60" height="55" rx="8" fill="#f8fafc" stroke="#e2e8f0"/>
+          <!-- Honey swirl inside cup -->
+          <ellipse cx="150" cy="98" rx="24" ry="8" fill="#d97706"/>
+          <!-- Steam curls -->
+          <path d="M 140 85 Q 135 65 142 50" stroke="#f8fafc" stroke-width="2" stroke-linecap="round" fill="none" stroke-dasharray="3,3" opacity="0.75"/>
+          <path d="M 155 85 Q 160 65 152 48" stroke="#f8fafc" stroke-width="2" stroke-linecap="round" fill="none" stroke-dasharray="3,3" opacity="0.75"/>
+          <!-- Modest wrist sleeve touching cup -->
+          <rect x="70" y="105" width="45" height="22" rx="6" fill="#78350f" fill-opacity="0.8"/>
+          <ellipse cx="116" cy="116" rx="6" ry="8" fill="#fcd34d" fill-opacity="0.8"/>
+          <text x="150" y="185" fill="#f8fafc" font-size="11" font-family="sans-serif" text-anchor="middle" font-weight="700">☕ Ritual Seduh Hangat & Kebugaran</text>
+        </svg>`
+      }
+    ]
+  };
+
+  function renderClips(mode) {
+    const container = document.getElementById('clips-container');
+    const clips = modesData[mode];
+    container.innerHTML = clips.map(clip => `
+      <div class="clip-card">
+        <div class="clip-header">
+          <span>Klip ${clip.scene}</span>
+          <span class="badge ${clip.badgeClass}">${clip.role}</span>
+        </div>
+        <div class="clip-frame">
+          ${clip.svg}
+        </div>
+        <div class="clip-body">
+          <div>
+            <div class="section-label">Arah Adegan & Sinematografi</div>
+            <div style="font-weight: 700; font-size: 13px; margin-bottom: 4px; color: var(--text-primary);">${clip.title}</div>
+            <div class="box-snippet box-visual">${clip.visual}</div>
+          </div>
+          <div>
+            <div class="section-label">Naskah Voiceover</div>
+            <div class="box-snippet box-audio">${clip.audio}</div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function switchMode(mode) {
+    currentMode = mode;
+    document.getElementById('card-old').classList.toggle('active', mode === 'old');
+    document.getElementById('card-new').classList.toggle('active', mode === 'new');
+    renderClips(mode);
+  }
+
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    const nextTheme = isDark ? 'light' : 'dark';
+    html.setAttribute('data-theme', nextTheme);
+    document.getElementById('theme-icon').textContent = isDark ? '🌙' : '☀️';
+    document.getElementById('theme-text').textContent = isDark ? 'Dark Mode' : 'Light Mode';
+  }
+
+  // Initial render
+  renderClips('new');
+</script>
+
+</body>
+</html>

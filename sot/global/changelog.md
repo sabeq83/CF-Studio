@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.40.42 — Visual Identity Syar'iy Classic Atmospheric Serenity & Wholesome Home (11/11/2026)
+- Daftarkan preset Schema V2 syari_classic_atmospheric_home dengan guardrail anti-monotoni
+- Perluas framing syari_classic dan aturan faceless di lib/prompts.js untuk mendukung penceritaan cuaca & back-view modesty
+- Sediakan mockup interaktif standalone HTML public/mockup_vi_syari_atmospheric_garlibee.html dan unit test scripts/test-vi-syari-atmospheric.mjs
+
 ## V2.40.41 — Perbaikan Resolusi Judul YouTube High-CTR pada Jadwal Autopipeline (11/11/2026)
 - Ekstraksi pkg.title dari social_media_package_json pada Scheduler Autopipeline
 - Fallback berjenjang pkg.title > hook > campaign_title pada Repliz dispatch
