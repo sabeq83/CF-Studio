@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.40.33 — 1-Click Auto Pipeline Language-First Recipe Configuration & International Taxonomy (11/11/2026)
+- Integrasikan selector Language-First pada formulir 1-Klik Instan Recipe Labs
+- Terapkan taksonomi kuliner internasional/nasional dan dynamic placeholder pada Tab 1
+- Kirim target_language dan recipe_classification ke autonomous-pipeline API
+- Simpan konfigurasi bahasa dan klasifikasi resep ke recipe_campaigns.config_json untuk kepatuhan AI ketat
+
 ## V2.40.32 — Language-First Recipe Taxonomy & Multi-Tenant Lockdown for Auto-Pipeline and Threads Labs (11/11/2026)
 - Perbaiki JSX syntax error pada form resep foto & teks Recipe Labs
 - Implementasi taksonomi kuliner internasional (Language-First) dan penegakan keyword resep ketat

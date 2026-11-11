@@ -237,9 +237,13 @@ export const POST = withTenantContext(async (request, _context, user) => {
         targetPublishIso: body.publish_time || new Date(Date.now() + 10 * 60 * 1000).toISOString()
       });
     } else if (pipelineType === 'recipe_labs') {
+      const recipeClass = body.recipe_classification || body.recipeClassification || body.category || 'Makanan';
+      const targetLang = body.target_language || body.targetLanguage || 'en_US';
       result = await executeAutonomousRecipeLabsPipeline({
         brandId: body.brand_id || body.brandId,
-        category: body.category || 'Makanan',
+        category: recipeClass,
+        recipeClassification: recipeClass,
+        targetLanguage: targetLang,
         topic: body.topic || 'Resep Praktis Pilihan',
         visualStyle: body.visual_style || body.visualStyle || 'Food Porn',
         imagesPerRecipe: Number(body.images_per_recipe || body.imagesPerRecipe || 4),

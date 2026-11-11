@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MAKNA Flow — International Recipe Standards (Language-Adaptive)</title>
+  <title>MAKNA Flow — 1-Klik Auto Pipeline & Language-First Recipe Configuration</title>
   <style>
     :root, [data-theme='dark'] {
       color-scheme: dark;
@@ -121,17 +121,19 @@
       margin-bottom: 1.5rem;
       border-bottom: 1px solid var(--border-subtle);
       padding-bottom: 0.5rem;
+      overflow-x: auto;
     }
     .tab-btn {
       background: transparent;
       border: 1px solid var(--border-subtle);
       color: var(--text-secondary);
-      padding: 0.5rem 1rem;
+      padding: 0.55rem 1.15rem;
       border-radius: var(--radius-sm);
       font-size: 0.85rem;
       font-weight: 600;
       cursor: pointer;
       transition: var(--transition);
+      white-space: nowrap;
     }
     .tab-btn.active {
       background: var(--surface-raised);
@@ -144,7 +146,7 @@
       grid-template-columns: 1fr 1fr;
       gap: 1.5rem;
     }
-    @media (max-width: 900px) {
+    @media (max-width: 960px) {
       .grid-2col { grid-template-columns: 1fr; }
     }
 
@@ -198,34 +200,75 @@
       background: var(--surface-raised);
       border: 1.5px solid var(--action-primary);
       border-radius: var(--radius-sm);
-      padding: 0.85rem;
-      margin-bottom: 1.15rem;
+      padding: 0.95rem;
+      margin-bottom: 1rem;
     }
 
     .prompt-box {
-      background: var(--canvas);
-      border: 1px solid var(--border-strong);
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
       border-radius: var(--radius-sm);
       padding: 1rem;
       font-family: var(--font-mono);
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       color: var(--text-secondary);
       white-space: pre-wrap;
-      max-height: 480px;
+      line-height: 1.55;
+      max-height: 520px;
       overflow-y: auto;
     }
 
-    /* Simulation Sidebar Mock */
-    .sim-sidebar {
-      width: 240px;
-      background: var(--sidebar);
+    .type-pill-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .type-pill {
+      background: var(--surface-raised);
       border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      padding: 0.75rem;
+      border-radius: var(--radius-sm);
+      padding: 0.65rem 0.5rem;
+      text-align: center;
+      cursor: pointer;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      transition: var(--transition);
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
+      align-items: center;
+      gap: 0.25rem;
     }
+    .type-pill.active {
+      background: var(--surface-interactive);
+      border-color: var(--status-rose);
+      color: var(--text-primary);
+      box-shadow: 0 0 0 1px var(--status-rose);
+    }
+
+    .btn-launch {
+      background: linear-gradient(135deg, var(--action-primary), #0ea5e9);
+      color: var(--on-action-primary);
+      border: none;
+      padding: 0.75rem 1.25rem;
+      border-radius: var(--radius-sm);
+      font-weight: 800;
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      box-shadow: 0 4px 14px rgba(45, 212, 191, 0.3);
+      transition: var(--transition);
+    }
+    .btn-launch:hover {
+      opacity: 0.92;
+      transform: translateY(-1px);
+    }
+
     .sim-nav-item {
       display: flex;
       align-items: center;
@@ -264,142 +307,222 @@
       gap: 0.75rem;
       margin-bottom: 1rem;
     }
+
+    .layout-badge {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      background: var(--surface-interactive);
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      margin-right: 0.35rem;
+    }
   </style>
 </head>
 <body>
 
   <div class="header-bar">
     <div>
-      <h2>🌍 MAKNA Flow — Language-First Recipe Classification & Tenant Lockdown</h2>
+      <h2>⚡ MAKNA Flow — 1-Klik Auto Pipeline (Language-First Recipe Configuration)</h2>
       <p style="font-size: 0.85rem; color: var(--text-secondary);">
-        Setting bahasa di posisi teratas mengatur secara dinamis klasifikasi resep, format takaran, dan penegakan keyword wajib AI.
+        Simulasi interaktif konfigurasi resep berstandar internasional pada Tab 1 (Eksekusi 1-Klik Instan) & Tab 2 (Scheduler).
       </p>
     </div>
-    <div style="display: flex; gap: 0.5rem;">
-      <span class="badge badge-rose">Language-First Taxonomy</span>
-      <span class="badge badge-teal">Multi-Tenant RBAC</span>
+    <div style="display: flex; gap: 0.5rem; align-items: center;">
+      <span class="badge badge-rose">1-Klik Auto Pipeline</span>
+      <span class="badge badge-teal">Language-First Taxonomy</span>
       <button onclick="toggleTheme()" class="tab-btn" style="padding: 0.25rem 0.65rem;">🌓 Theme</button>
     </div>
   </div>
 
   <div class="nav-tabs">
-    <button class="tab-btn active" onclick="switchTab('recipe')">1. Language-First Recipe Classification & Keyword AI</button>
-    <button class="tab-btn" onclick="switchTab('tenant')">2. Multi-Tenant Lockdown (Auto Pipeline & Threads Labs)</button>
+    <button id="btnTab1" class="tab-btn active" onclick="switchMainTab('instant')">⚡ 1. Tab 1: Eksekusi 1-Klik Instan (Recipe Labs)</button>
+    <button id="btnTab2" class="tab-btn" onclick="switchMainTab('scheduler')">🗓️ 2. Tab 2: Penjadwalan Kalender (Scheduler Modal)</button>
+    <button id="btnTab3" class="tab-btn" onclick="switchMainTab('tenant')">🔒 3. Multi-Tenant Lockdown (RBAC & Guardrails)</button>
   </div>
 
-  <!-- TAB 1: LANGUAGE-FIRST CLASSIFICATION -->
-  <div id="tab-recipe">
+  <!-- TAB 1: 1-KLIK AUTO PIPELINE -->
+  <div id="tab-instant">
     <div class="grid-2col">
-      <!-- Form Input -->
-      <div class="card" style="border-top: 3px solid var(--action-primary);">
-        <div class="card-title">
-          <span>🍽️</span> Konfigurasi Jadwal Resep (Auto Pipeline)
+      <!-- Sisi Kiri: Form 1-Klik Instan Multi-Campaign -->
+      <div class="card" style="border-top: 3px solid var(--status-rose);">
+        <div class="card-title" style="justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 0.45rem;">
+            <span>⚡</span>
+            <span>Eksekusi 1-Klik Instan Multi-Campaign</span>
+          </div>
+          <span class="badge badge-rose">Tab 1 Active</span>
         </div>
-        
-        <!-- STEP 1: SETTING BAHASA DI PALING ATAS (TOP CONTROL) -->
-        <div class="language-hero-box">
-          <div class="form-group" style="margin-bottom: 0.5rem;">
-            <label class="form-label" style="color: var(--action-primary); font-size: 0.84rem;">
-              <span>🌐 1. PILIH BAHASA & TARGET MARKET (LANGKAH PERTAMA)</span>
-              <span class="badge badge-teal">Language-First Engine</span>
+        <p style="font-size: 0.76rem; color: var(--text-muted); margin-bottom: 0.85rem;">
+          Pilih tipe kampanye, lalu formulir resep otomatis mengadopsi kontrol bahasa di urutan pertama:
+        </p>
+
+        <!-- Selector Tipe Kampanye 1-Klik -->
+        <div class="type-pill-grid">
+          <div class="type-pill" onclick="alert('Format Video Resep (Storyboards + AI Clips)')">
+            <span>🍳</span><span>Video Resep</span>
+          </div>
+          <div class="type-pill" onclick="alert('Format Video Produk')">
+            <span>📦</span><span>Video Produk</span>
+          </div>
+          <div class="type-pill" onclick="alert('Format Editorial')">
+            <span>📰</span><span>Editorial</span>
+          </div>
+          <div class="type-pill" onclick="alert('Format Multiplier Remix')">
+            <span>🎛️</span><span>Multiplier</span>
+          </div>
+          <div class="type-pill active">
+            <span>🖼️</span><span>Resep Teks & Foto</span>
+          </div>
+          <div class="type-pill" onclick="alert('Format Threads Series')">
+            <span>🧵</span><span>Utas Threads</span>
+          </div>
+        </div>
+
+        <!-- FORM RECIPE LABS DENGAN LANGUAGE-FIRST ENGINE -->
+        <div style="background: var(--surface-raised); border: 1.5px solid var(--status-rose); border-radius: var(--radius-md); padding: 1.15rem; display: flex; flexDirection: column; gap: 0.85rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong style="font-size: 0.86rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.35rem;">
+              <span>🖼️</span> Konfigurasi Resep Teks & Foto AI (1-Klik Asli)
+            </strong>
+            <span style="font-size: 0.7rem; font-weight: 800; padding: 0.2rem 0.55rem; border-radius: 9999px; background: var(--status-rose-soft); color: var(--status-rose); border: 1px solid var(--status-rose);">
+              Artikel FB + 12-Grid Slot Renderer
+            </span>
+          </div>
+
+          <!-- LANGKAH 1: LANGUAGE-FIRST CONTROL -->
+          <div class="language-hero-box" style="margin-top: 0.5rem; margin-bottom: 0.75rem;">
+            <div class="form-group" style="margin-bottom: 0.35rem;">
+              <label class="form-label" style="color: var(--action-primary); font-size: 0.82rem;">
+                <span>🌐 1. PILIH BAHASA & TARGET MARKET (LANGKAH PERTAMA)</span>
+                <span class="badge badge-teal">Top Control</span>
+              </label>
+              <select id="instantTargetLanguage" class="form-control" style="font-weight: 700; border-color: var(--action-primary);" onchange="handleInstantLanguageChange()">
+                <option value="en_US" selected>🇺🇸 Global English (International / US & UK Standard)</option>
+                <option value="id_ID">🇮🇩 Bahasa Indonesia (Pasar Domestik & UMKM Kuliner)</option>
+                <option value="bilingual">🌐 Bilingual (English Hook + Indonesian Body)</option>
+              </select>
+            </div>
+            <div style="font-size: 0.72rem; color: var(--text-muted);">
+              💡 <em>Klasifikasi resep internasional, satuan takaran, dan contoh keyword di bawah akan <strong>otomatis menyesuaikan secara reaktif</strong>.</em>
+            </div>
+          </div>
+
+          <!-- LANGKAH 2: KLASIFIKASI RESEP STANDAR -->
+          <div class="form-group">
+            <label class="form-label">
+              <span id="instantClassificationLabel">🏷️ 2. International Culinary Category</span>
+              <span id="instantClassificationSub" style="font-size: 0.7rem; color: var(--status-success);">Adapted for Global English</span>
             </label>
-            <select id="targetLanguage" class="form-control" style="font-weight: 700; border-color: var(--action-primary);" onchange="handleLanguageChange()">
-              <option value="en_US" selected>🇺🇸 Global English (International Market / US & UK Standard)</option>
-              <option value="id_ID">🇮🇩 Bahasa Indonesia (Pasar Domestik & UMKM Kuliner)</option>
-              <option value="bilingual">🌐 Bilingual (English Viral Hook + Localized Indonesian Body)</option>
+            <select id="instantRecipeClassification" class="form-control" onchange="updateInstantPreview()">
+              <!-- Populated reactively -->
             </select>
+            <small id="instantClassificationHint" style="font-size: 0.72rem; color: var(--text-muted);">
+              Aligned with international culinary standards (AllRecipes, BBC Good Food, NYT Cooking).
+            </small>
           </div>
-          <div style="font-size: 0.74rem; color: var(--text-secondary);">
-            💡 <em>Opsi klasifikasi resep, panduan takaran, dan contoh keyword di bawah akan <strong>otomatis menyesuaikan</strong> dengan bahasa yang dipilih di sini.</em>
-          </div>
-        </div>
 
-        <!-- STEP 2: KLASIFIKASI RESEP YANG MENYESUAIKAN DENGAN BAHASA TERPILIH -->
-        <div class="form-group">
-          <label class="form-label">
-            <span id="classificationLabel">🏷️ 2. International Culinary Category</span>
-            <span id="classificationSub" style="font-size: 0.7rem; color: var(--status-success);">Adapted for Global English</span>
-          </label>
-          <select id="recipeCategory" class="form-control" onchange="updatePromptPreview()">
-            <!-- Populated reactively based on targetLanguage -->
-          </select>
-          <small id="classificationHint" style="font-size: 0.72rem; color: var(--text-muted);">
-            Aligned with international culinary standards (AllRecipes, BBC Good Food, NYT Cooking).
-          </small>
-        </div>
-
-        <!-- STEP 3: SISTEM TAKARAN & PENGUKURAN -->
-        <div class="form-group">
-          <label class="form-label">
-            <span id="measurementLabel">⚖️ 3. Measurement & Units System</span>
-          </label>
-          <select id="measurementSystem" class="form-control" onchange="updatePromptPreview()">
-            <!-- Populated reactively based on targetLanguage -->
-          </select>
-        </div>
-
-        <!-- STEP 4: KATA KUNCI WAJIB / NAMA HIDANGAN SPESIFIK -->
-        <div class="form-group">
-          <label class="form-label">
-            <span id="keywordLabel">🎯 4. Specific Dish Topic / Keyword Wajib (Strict Enforcement)</span>
-            <span style="font-size: 0.7rem; color: var(--status-warning);">Mandatory Guardrail</span>
-          </label>
-          <input type="text" id="recipeKeyword" class="form-control" 
-            value="Crispy Honey Garlic Air Fryer Chicken Bites" 
-            oninput="updatePromptPreview()"
-            placeholder="e.g., Crispy Honey Garlic Air Fryer Chicken Bites">
-          <small style="font-size: 0.72rem; color: var(--status-warning);">
-            ⚠️ Sistem akan memaksa Gemini AI membuat naskah resep & prompt visual 100% berpusat pada hidangan ini.
-          </small>
-        </div>
-
-        <!-- STEP 5: GAYA VISUAL & JUMLAH SLOT KOLASE -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <!-- LANGKAH 3: KATA KUNCI WAJIB / TOPIK HIDANGAN -->
           <div class="form-group">
-            <label class="form-label">🎨 Gaya Visual Foto AI</label>
-            <select id="visualStyle" class="form-control" onchange="updatePromptPreview()">
-              <option value="Food Porn & Commercial Glossy" selected>Food Porn & Commercial Glossy</option>
-              <option value="Rustic Countryside & Wooden Texture">Rustic Countryside & Raw Wood</option>
-              <option value="Clean Nordic Studio & Bright Sunlight">Clean Nordic Studio & Bright Daylight</option>
-              <option value="Dark Moody & Cinematic Smoke">Dark Moody & Cinematic Smoke</option>
-            </select>
+            <label class="form-label">
+              <span id="instantKeywordLabel">🎯 3. Specific Dish Topic / Keyword Wajib (Strict Enforcement)</span>
+              <span style="font-size: 0.7rem; color: var(--status-warning);">Mandatory Guardrail</span>
+            </label>
+            <input type="text" id="instantRecipeTopic" class="form-control" 
+              value="Crispy Honey Garlic Air Fryer Chicken Bites" 
+              oninput="updateInstantPreview()"
+              placeholder="e.g., Crispy Honey Garlic Air Fryer Chicken Bites...">
+            <small style="font-size: 0.72rem; color: var(--status-warning);">
+              ⚠️ Sistem akan memaksa Gemini AI membuat naskah resep & prompt visual 100% berpusat pada hidangan ini tanpa deviasi.
+            </small>
           </div>
-          <div class="form-group">
-            <label class="form-label">📐 Slot Kolase Grid</label>
-            <select id="imgCount" class="form-control" onchange="updatePromptPreview()">
-              <option value="4" selected>4 Foto (1 Hero + 3 Detail)</option>
-              <option value="3">3 Foto (Triptych)</option>
-              <option value="5">5 Foto (Detailed Process)</option>
-              <option value="6">6 Foto (Full Editorial)</option>
-            </select>
-          </div>
-        </div>
 
-        <div style="background: var(--surface-raised); padding: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-top: 0.25rem;">
-          <div style="font-size: 0.78rem; font-weight: 700; color: var(--status-success); margin-bottom: 0.25rem;">
-            ✅ Facebook Global Auto-Publishing:
+          <!-- LANGKAH 4: GAYA VISUAL FOTOGRAFI AI & GRID LAYOUT -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+            <div class="form-group">
+              <label class="form-label">🎨 Gaya Visual Fotografi</label>
+              <select id="instantVisualStyle" class="form-control" onchange="updateInstantPreview()">
+                <option value="Food Porn" selected>Food Porn & Commercial Glossy</option>
+                <option value="Rustic Countryside">Rustic Countryside & Wooden Texture</option>
+                <option value="Clean Nordic">Clean Nordic Studio & Bright Sunlight</option>
+                <option value="Dark Moody">Dark Moody Contrast & Cinematic Smoke</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">📐 Layout Grid Komposit</label>
+              <select id="instantLayoutId" class="form-control" onchange="updateInstantPreview()">
+                <option value="4_editorial_split" selected>4 Slot: 1 Hero Besar + 3 Vertikal</option>
+                <option value="3_vertical_cards">3 Slot: Triptych Kartu Vertikal</option>
+                <option value="4_symmetric_grid">4 Slot: Grid Simetris 2x2</option>
+                <option value="5_magazine_featured">5 Slot: 1 Banner Atas + 4 Bawah</option>
+              </select>
+            </div>
           </div>
-          <div id="fbPublishDesc" style="font-size: 0.75rem; color: var(--text-secondary);">
-            Artikel naskah Facebook profesional dalam bahasa terpilih + poster grid foto AI resolusi tinggi.
+
+          <!-- LANGKAH 5: CHECKBOX PUBLIKASI FACEBOOK -->
+          <div style="display: flex; align-items: center; gap: 0.65rem; background: var(--surface); padding: 0.65rem 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+            <input type="checkbox" id="instantPostToFb" checked style="accent-color: var(--status-rose); width: 16px; height: 16px;">
+            <label for="instantPostToFb" style="font-size: 0.8rem; font-weight: 600; cursor: pointer;">
+              🚀 Otomatis Ekspor Artikel Naskah & Poster Grid ke Facebook Exporter Hub
+            </label>
           </div>
+
+          <!-- TOMBOL LUNCURKAN 1-KLIK INSTAN -->
+          <button type="button" class="btn-launch" onclick="triggerInstantLaunchSimulation()">
+            <span>⚡</span>
+            <span>Luncurkan Kampanye 1-Klik Instan Sekarang</span>
+          </button>
         </div>
       </div>
 
-      <!-- Live Prompt Preview -->
+      <!-- Sisi Kanan: Live Request Payload & Live Gemini AI System Prompt -->
       <div class="card">
         <div class="card-title" style="justify-content: space-between;">
-          <span>🤖 Live AI System Prompt (Node 1)</span>
-          <span id="promptStatusBadge" class="badge badge-teal">English Global Mode</span>
+          <span>📡 1-Klik Request Payload & System Prompt Preview</span>
+          <span id="instantBadge" class="badge badge-teal">English Global Mode</span>
         </div>
-        <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
-          System prompt yang disusun otomatis dan dieksekusi oleh Gemini AI di latar belakang:
-        </p>
-        <div id="promptOutput" class="prompt-box"></div>
+
+        <div style="margin-bottom: 0.85rem;">
+          <div style="font-size: 0.78rem; font-weight: 700; color: var(--action-primary); margin-bottom: 0.35rem;">
+            1. POST Payload JSON ke <code>/api/v2/recipes/autonomous-pipeline</code>:
+          </div>
+          <pre id="payloadPreview" style="background: var(--input-bg); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.75rem; font-family: var(--font-mono); font-size: 0.73rem; color: var(--text-secondary); max-height: 180px; overflow-y: auto;"></pre>
+        </div>
+
+        <div style="margin-bottom: 0.85rem;">
+          <div style="font-size: 0.78rem; font-weight: 700; color: var(--status-rose); margin-bottom: 0.35rem;">
+            2. Live Gemini AI System Prompt (`processRecipeGenerator` di Node 1):
+          </div>
+          <div id="instantPromptOutput" class="prompt-box" style="max-height: 280px;"></div>
+        </div>
+
+        <!-- Notification Toast Simulasi -->
+        <div id="launchToast" style="display: none; background: var(--status-success-soft); border: 1px solid var(--status-success); border-radius: var(--radius-sm); padding: 0.75rem 1rem; color: var(--status-success); font-size: 0.82rem; font-weight: 600; align-items: center; gap: 0.5rem;">
+          <span>🎉</span>
+          <span id="launchToastText">Kampanye 1-Klik berhasil diluncurkan ke scheduler background!</span>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- TAB 2: TENANT LOCKDOWN -->
+  <!-- TAB 2: SCHEDULER MODAL TAB -->
+  <div id="tab-scheduler" style="display: none;">
+    <div class="card">
+      <div class="card-title">
+        <span>🗓️</span> Penjadwalan Kalender Auto Pipeline (Telah Terpasang di v2.40.32)
+      </div>
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+        Konfigurasi Language-First pada modal scheduler telah aktif pada release v2.40.32. Pengguna dapat memilih jam generate, jam publish, dan target akun Repliz secara otomatis.
+      </p>
+      <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 1rem; font-size: 0.82rem;">
+        ✓ Language-First selector di Langkah 1 teratas formulir modal<br>
+        ✓ Penegakan keyword <code>[MANDATORY TOPIC & DISH KEYWORD ENFORCEMENT]</code> di <code>lib/scheduler-processors.js</code><br>
+        ✓ Propagasi <code>topic</code>, <code>category</code>, <code>recipe_classification</code>, dan <code>target_language</code> via <code>lib/auto-pipeline-scheduler-runner.js</code>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: TENANT LOCKDOWN -->
   <div id="tab-tenant" style="display: none;">
     <div style="margin-bottom: 1rem; display: flex; align-items: center; gap: 1rem;">
       <label style="font-size: 0.85rem; font-weight: 700;">Simulate Login As Tenant:</label>
@@ -418,20 +541,23 @@
           <span>📑</span> Sidebar Navigation Response
         </div>
         <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
-          Navigasi sidebar MAKNA Flow beradaptasi secara dinamis sesuai hak akses tenant:
+          Menu di sidebar secara otomatis dikunci (berstatus disabled dan menampilkan ikon 🔒) jika Superadmin membatasi tenant:
         </p>
-        <div class="sim-sidebar" id="sidebarContainer">
-          <!-- Populated by JS -->
+        <div id="sidebarContainer" style="background: var(--sidebar); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.75rem; display: flex; flex-direction: column; gap: 0.35rem;">
+          <!-- Injected via JavaScript -->
         </div>
       </div>
 
-      <!-- Page View Simulation -->
+      <!-- Page Guard Response -->
       <div class="card">
         <div class="card-title">
-          <span>🖥️</span> Page Response (<code>/auto-pipeline</code>)
+          <span>🛡️</span> UI Page Guard & API 403 Response
         </div>
+        <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+          Jika pengguna berusaha mengakses langsung melalui URL (misal <code>/auto-pipeline</code> atau <code>/threads-labs</code>):
+        </p>
         <div id="pageContentContainer">
-          <!-- Populated by JS -->
+          <!-- Injected via JavaScript -->
         </div>
       </div>
     </div>
@@ -439,74 +565,61 @@
 
   <script>
     function toggleTheme() {
-      const current = document.documentElement.getAttribute('data-theme');
-      document.documentElement.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
+      const html = document.documentElement;
+      html.setAttribute('data-theme', html.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
     }
 
-    function switchTab(tab) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      if (tab === 'recipe') {
-        document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
-        document.getElementById('tab-recipe').style.display = 'block';
-        document.getElementById('tab-tenant').style.display = 'none';
-      } else {
-        document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
-        document.getElementById('tab-recipe').style.display = 'none';
-        document.getElementById('tab-tenant').style.display = 'block';
-        switchTenantSimulation();
-      }
+    function switchMainTab(tab) {
+      document.getElementById('tab-instant').style.display = tab === 'instant' ? 'block' : 'none';
+      document.getElementById('tab-scheduler').style.display = tab === 'scheduler' ? 'block' : 'none';
+      document.getElementById('tab-tenant').style.display = tab === 'tenant' ? 'block' : 'none';
+
+      document.getElementById('btnTab1').className = 'tab-btn ' + (tab === 'instant' ? 'active' : '');
+      document.getElementById('btnTab2').className = 'tab-btn ' + (tab === 'scheduler' ? 'active' : '');
+      document.getElementById('btnTab3').className = 'tab-btn ' + (tab === 'tenant' ? 'active' : '');
     }
 
-    // TAXONOMY DATA PER LANGUAGE
+    // TAXONOMIES DEFINITION
     const taxonomies = {
       'en_US': {
-        classificationLabel: '🏷️ 2. International Culinary Category (Course / Lifestyle)',
-        classificationSub: 'Standard Global Taxonomy',
+        classificationLabel: '🏷️ 2. International Culinary Category',
+        classificationSub: 'Adapted for Global English (US/UK Standards)',
         classificationHint: 'Aligned with international culinary standards (AllRecipes, BBC Good Food, NYT Cooking).',
-        measurementLabel: '⚖️ 3. Measurement & Units Standard',
-        keywordLabel: '🎯 4. Specific Dish Topic / Mandatory Keyword',
+        measurementLabel: '⚖️ 3. Measurement & Units System',
+        keywordLabel: '🎯 3. Specific Dish Topic / Keyword Wajib (Strict Enforcement)',
         badgeText: 'English Global Mode',
         defaultKeyword: 'Crispy Honey Garlic Air Fryer Chicken Bites',
-        keywordPlaceholder: 'e.g., Crispy Honey Garlic Air Fryer Chicken Bites, Creamy Tuscan Salmon...',
-        measurements: [
-          { val: 'US Customary & Metric (dual: cups, tbsp, g/ml)', label: 'US Customary & Metric (dual: cups, tbsp, g/ml)' },
-          { val: 'Metric Only (grams, ml, kg)', label: 'Metric Only (grams, ml, kg)' },
-          { val: 'US Customary Only (oz, lbs, cups)', label: 'US Customary Only (oz, lbs, cups)' }
-        ],
+        keywordPlaceholder: 'e.g., Crispy Honey Garlic Air Fryer Chicken Bites, Garlic Butter Steak Bites...',
         categories: [
-          { group: 'Core Meal Occasions (Courses)', options: [
-            { val: 'Main Courses & Entrees', label: '🍽️ Main Courses & Entrees (Poultry, Meat, Seafood, Pasta)' },
-            { val: 'Breakfast & Brunch Favorites', label: '🍳 Breakfast & Brunch Favorites (Pancakes, Oats, Eggs, Toast)' },
-            { val: 'Appetizers, Starters & Small Bites', label: '🥟 Appetizers, Starters & Small Bites (Finger foods, Dips)' },
-            { val: 'Soups, Stews & Slow-Cooked Bowls', label: '🍲 Soups, Stews & Slow-Cooked Bowls (Bisques, Chowders)' },
-            { val: 'Salads & Fresh Grain Bowls', label: '🥗 Salads & Fresh Grain Bowls (Caesar, Detox, Mediterranean)' }
+          { group: 'Primary Meal Courses', options: [
+            { val: 'Main Courses & Entrees', label: '🍽️ Main Courses & Entrees (Chicken, Beef, Seafood, Pork)', selected: true },
+            { val: 'Breakfast & Morning Favorites', label: '🍳 Breakfast & Brunch (Pancakes, Egg Muffins, Oatmeal Bowls)' },
+            { val: 'Appetizers & Finger Foods', label: '🥟 Appetizers & Finger Foods (Wings, Dips, Sliders, Bites)' },
+            { val: 'Soups, Stews & Chilis', label: '🍲 Soups, Stews & Hearty Chilis (Chowder, Beef Stew, Broths)' },
+            { val: 'Salads & Healthy Bowls', label: '🥗 Salads & Healthy Bowls (Caesar, Grain Bowls, Mediterranean)' }
           ]},
-          { group: 'Modern Lifestyle & High-Performance', options: [
-            { val: 'Quick & Easy Weeknight Dinners (Under 20 Mins)', label: '⏱️ Quick & Easy Weeknight Dinners (15–20 Mins, 1-Pan)', selected: true },
-            { val: 'Air Fryer & Convection Essentials', label: '♨️ Air Fryer & Convection Essentials (Crispy, Oil-Free)' },
-            { val: 'High-Protein Meal Prep & Fitness', label: '💪 High-Protein Meal Prep & Fitness (Lean Muscle, Macro-Balanced)' },
-            { val: 'Low-Carb, Keto & Diabetic-Friendly', label: '🥑 Low-Carb, Keto & Diabetic-Friendly (Clean Fats, Sugar-Free)' },
-            { val: '100% Plant-Based & Gourmet Vegan', label: '🌿 100% Plant-Based & Gourmet Vegan (Cruelty-Free, Dairy-Free)' }
+          { group: 'Cooking Method & Lifestyle', options: [
+            { val: 'Quick & Easy Weeknight Dinners (Under 20 Mins)', label: '⏱️ Quick & Easy Weeknight Dinners (Under 20 Mins)' },
+            { val: 'Air Fryer & Convection Essentials', label: '♨️ Air Fryer & Convection Essentials (Ultra-Crispy, Oil-Free)' },
+            { val: 'High-Protein Fitness Meal Prep', label: '💪 High-Protein Fitness Meal Prep (Chicken Breast, Quinoa, Macros)' },
+            { val: 'Keto, Low-Carb & Diabetic Friendly', label: '🥑 Keto & Low-Carb High-Fat (Zero Sugar, Cauliflower Rice)' },
+            { val: 'Plant-Based, Vegan & Vegetarian', label: '🌱 Plant-Based, Vegan & Vegetarian (Tofu, Tempeh, Legumes)' }
           ]},
-          { group: 'Bakery, Sweet Treats & Beverages', options: [
-            { val: 'Desserts, Pastries & Artisanal Bakery', label: '🍰 Desserts, Pastries & Artisanal Bakery (Cakes, Cookies, Breads)' },
-            { val: 'Specialty Drinks, Smoothies & Coffee', label: '☕ Specialty Drinks, Smoothies & Artisanal Coffee' }
+          { group: 'Bakery, Sweet & Drinks', options: [
+            { val: 'Baking, Artisanal Bread & Desserts', label: '🍰 Baking, Artisanal Bread & Desserts (Cookies, Pies, Sourdough)' },
+            { val: 'Beverages, Smoothies & Specialty Coffee', label: '☕ Specialty Beverages & Coffee (Espresso, Matcha, Detox Juice)' }
           ]}
         ]
       },
       'id_ID': {
-        classificationLabel: '🏷️ 2. Klasifikasi Kuliner Standar Nasional',
-        classificationSub: 'Kategori Pasar Indonesia & UMKM',
+        classificationLabel: '🏷️ 2. Klasifikasi Kuliner Nasional Indonesia',
+        classificationSub: 'Standar Kuliner Nusantara & Lidah Domestik',
         classificationHint: 'Disesuaikan dengan selera lidah dan kebiasaan belanja masyarakat Indonesia.',
         measurementLabel: '⚖️ 3. Standar Satuan Takaran Masak',
-        keywordLabel: '🎯 4. Topik Menu / Kata Kunci Resep Wajib',
+        keywordLabel: '🎯 3. Topik Menu / Kata Kunci Resep Wajib',
         badgeText: 'Mode Bahasa Indonesia',
-        defaultKeyword: 'Ayam Bakar Madu Pedas Manis Gurih',
-        keywordPlaceholder: 'Contoh: Ayam Bakar Madu Pedas Manis, Sop Buntut Sapi Rempah...',
-        measurements: [
-          { val: 'Metrik Standar Indonesia (gram, sdm, sdt, ml)', label: 'Metrik Standar Indonesia (gram, sdm, sdt, ml)' },
-          { val: 'Takaran Praktis Rumahan (butir, siung, lembar, gelas)', label: 'Takaran Praktis Rumahan (butir, siung, lembar, gelas)' }
-        ],
+        defaultKeyword: 'Ayam Goreng Mentega Gurih Renyah',
+        keywordPlaceholder: 'Contoh: Ayam Goreng Mentega Gurih, Sambal Udang Balado Petai...',
         categories: [
           { group: 'Kategori Waktu Makan Utama', options: [
             { val: 'Menu Hidangan Utama & Lauk Pauk (Main Course)', label: '🍽️ Menu Hidangan Utama & Lauk Pauk (Ayam, Daging, Seafood)', selected: true },
@@ -532,13 +645,10 @@
         classificationSub: 'Global Reach + Local Market',
         classificationHint: 'Format ganda: headline & hook internasional + isi penjelasan lokal.',
         measurementLabel: '⚖️ 3. Dual Measurement Standards',
-        keywordLabel: '🎯 4. Dual Target Keyword / Dish Topic',
+        keywordLabel: '🎯 3. Dual Target Keyword / Dish Topic',
         badgeText: 'Bilingual Hybrid Mode',
-        defaultKeyword: 'Crispy Garlic Butter Wings / Sayap Ayam Mentega Krispi',
-        keywordPlaceholder: 'e.g., Crispy Garlic Butter Wings / Sayap Ayam Mentega Krispi',
-        measurements: [
-          { val: 'Dual Metric & US Customary (tbsp, cups, gram, ml)', label: 'Dual Metric & US Customary (tbsp, cups, gram, ml)' }
-        ],
+        defaultKeyword: 'Crispy Honey Butter Wings / Sayap Ayam Madu Krispi',
+        keywordPlaceholder: 'e.g., Crispy Honey Butter Wings / Sayap Ayam Madu Krispi...',
         categories: [
           { group: 'Courses / Waktu Makan', options: [
             { val: 'Main Courses & Entrees (Hidangan Utama)', label: '🍽️ Main Courses & Entrees (Hidangan Utama)', selected: true },
@@ -558,20 +668,17 @@
       }
     };
 
-    function handleLanguageChange() {
-      const lang = document.getElementById('targetLanguage').value;
+    function handleInstantLanguageChange() {
+      const lang = document.getElementById('instantTargetLanguage').value;
       const tax = taxonomies[lang];
 
-      // 1. Update UI Labels
-      document.getElementById('classificationLabel').innerText = tax.classificationLabel;
-      document.getElementById('classificationSub').innerText = tax.classificationSub;
-      document.getElementById('classificationHint').innerText = tax.classificationHint;
-      document.getElementById('measurementLabel').innerText = tax.measurementLabel;
-      document.getElementById('keywordLabel').innerText = tax.keywordLabel;
-      document.getElementById('promptStatusBadge').innerText = tax.badgeText;
+      document.getElementById('instantClassificationLabel').innerText = tax.classificationLabel;
+      document.getElementById('instantClassificationSub').innerText = tax.classificationSub;
+      document.getElementById('instantClassificationHint').innerText = tax.classificationHint;
+      document.getElementById('instantKeywordLabel').innerText = tax.keywordLabel;
+      document.getElementById('instantBadge').innerText = tax.badgeText;
 
-      // 2. Repopulate Category Dropdown
-      const catSelect = document.getElementById('recipeCategory');
+      const catSelect = document.getElementById('instantRecipeClassification');
       catSelect.innerHTML = '';
       tax.categories.forEach(group => {
         const optgroup = document.createElement('optgroup');
@@ -586,119 +693,90 @@
         catSelect.appendChild(optgroup);
       });
 
-      // 3. Repopulate Measurement Dropdown
-      const measureSelect = document.getElementById('measurementSystem');
-      measureSelect.innerHTML = '';
-      tax.measurements.forEach((m, idx) => {
-        const option = document.createElement('option');
-        option.value = m.val;
-        option.innerText = m.label;
-        if (idx === 0) option.selected = true;
-        measureSelect.appendChild(option);
-      });
-
-      // 4. Update Keyword Placeholder and Default if untouched
-      const kwInput = document.getElementById('recipeKeyword');
+      const kwInput = document.getElementById('instantRecipeTopic');
       kwInput.placeholder = tax.keywordPlaceholder;
       kwInput.value = tax.defaultKeyword;
 
-      updatePromptPreview();
+      updateInstantPreview();
     }
 
-    function updatePromptPreview() {
-      const lang = document.getElementById('targetLanguage').value;
-      const cat = document.getElementById('recipeCategory').value;
-      const kw = document.getElementById('recipeKeyword').value || 'Artisanal Culinary Dish';
-      const measure = document.getElementById('measurementSystem').value;
-      const style = document.getElementById('visualStyle').value;
-      const count = document.getElementById('imgCount').value;
+    function updateInstantPreview() {
+      const lang = document.getElementById('instantTargetLanguage').value;
+      const cat = document.getElementById('instantRecipeClassification').value;
+      const kw = document.getElementById('instantRecipeTopic').value || 'Menu Resep Pilihan';
+      const style = document.getElementById('instantVisualStyle').value;
+      const layoutId = document.getElementById('instantLayoutId').value;
+      const postFb = document.getElementById('instantPostToFb').checked;
 
-      let langDirective = '';
-      let promptTitle = '';
+      // 1. JSON Payload Preview ke API /api/v2/recipes/autonomous-pipeline
+      const payload = {
+        pipeline_type: 'recipe_labs',
+        target_language: lang,
+        recipe_classification: cat,
+        topic: kw,
+        category: cat,
+        visual_style: style,
+        images_per_recipe: 4,
+        selected_layout_id: layoutId,
+        grid_gap_size: 12,
+        grid_border_radius: 16,
+        grid_outer_padding: 16,
+        grid_bg_color: '#0d0d12',
+        post_to_facebook: postFb
+      };
 
+      document.getElementById('payloadPreview').innerText = JSON.stringify(payload, null, 2);
+
+      // 2. Gemini System Prompt Preview
+      let promptText = '';
       if (lang === 'en_US') {
-        langDirective = `[LANGUAGE DIRECTIVE: INTERNATIONAL ENGLISH ONLY]
-Write the dish title, Facebook article copy, ingredient quantities (${measure}), step-by-step techniques, and all visual prompts strictly in polished, appetizing, professional American/International English.`;
-        promptTitle = `You are a World-Class Executive Chef and Commercial Culinary Photographer.
-Your mission is to formulate an irresistible, tested, and commercially viral recipe tailored for the International culinary category: "${cat}".
+        promptText = `You are an Executive Chef and Commercial Food Photographer.
+Your task is to create 1 mouthwatering, tested recipe and high-converting Facebook editorial copy for category: "${cat}".
 
 [MANDATORY TOPIC & DISH KEYWORD ENFORCEMENT]
 The recipe MUST STRICTLY revolve around this exact dish / keyword: "${kw}".
 DO NOT deviate, generalize, or substitute with unrelated dishes.
 The dish title, primary ingredients list, step-by-step techniques, and visual prompts MUST explicitly feature "${kw}".
 
-[CULINARY TAXONOMY & STANDARDS]
-- Category: ${cat}
-- Measurement Units: ${measure}
-${langDirective}
+[STANDARDS & MEASUREMENT DIRECTIVES]
+- Target Language: American/International English
+- Measurement Units: US Customary & Metric dual format (cups, tbsp, oz, grams)
 
-[VISUAL PHOTOGRAPHY MANDATE]
-Maintain the "${style}" photography aesthetic across all ${count} image prompts:
-- Slot 1: Hero master presentation of the completed dish, ultra high detail, appetizing commercial lighting.
-- Slot 2: [MANDATORY GUARDRAIL: FACELESS ONLY. Hands/forearms only from elbow down]. Action shot of preparation or cooking physics.
-- Slot 3: Macro close-up texture shot (glaze, sizzle, garnish).
-- Slot 4+: Plating or dining lifestyle arrangement.
-
-Respond ONLY in valid JSON matching this schema:
-{
-  "title": "${kw}",
-  "cuisine_category": "${cat}",
-  "prep_time": "15 mins",
-  "cook_time": "20 mins",
-  "servings": "4 servings",
-  "content_md": "# The Ultimate ${kw}\\n\\n## Ingredients\\n- ...\\n\\n## Step-by-Step Instructions\\n1. ...",
-  "prompts": {
-    "image_1": "High-end commercial photography in ${style} style of ${kw}...",
-    "image_2": "Faceless culinary action shot in ${style} style preparing ${kw}...",
-    "image_3": "Macro detail shot in ${style} style of ${kw} glistening under soft studio lighting..."
-  }
-}`;
+[VISUAL PHOTOGRAPHY DIRECTIVE]
+Apply the "${style}" photography aesthetic consistently across all 4 image prompts:
+- Slot 1: Hero plating of ${kw}
+- Slot 2: [FACELESS ONLY] Kitchen action shot
+- Slot 3: Macro texture detail
+- Slot 4: Serving presentation`;
       } else if (lang === 'id_ID') {
-        langDirective = `[PANDUAN BAHASA: BAHASA INDONESIA NASIONAL]
-Tuliskan judul, naskah artikel Facebook lengkap, takaran bahan (${measure}), dan langkah pembuatan dalam Bahasa Indonesia yang menggugah selera, akrab, dan teruji. Prompts T2I gambar tetap dalam Bahasa Inggris kuliner.`;
-        promptTitle = `Anda adalah Koki Profesional dan Ahli Fotografi Makanan.
+        promptText = `Anda adalah Koki Profesional dan Ahli Fotografi Makanan.
 Tugas Anda adalah membuat 1 resep kuliner yang sangat lezat, menggugah selera, dan teruji untuk klasifikasi: "${cat}".
 
 [MANDATORY TOPIC & DISH KEYWORD ENFORCEMENT]
 Resep yang dibuat WAJIB KETAT berpusat pada topik/kata kunci berikut: "${kw}".
 DILARANG KERAS menyimpang atau membuat hidangan lain yang tidak berhubungan dengan "${kw}".
-Nama resep, daftar bahan utama, dan seluruh alur pembuatan harus secara eksplisit mengolah sajian ini.
 
-[STANDAR TAKARAN & FORMAT]
-- Klasifikasi Kategori: ${cat}
-- Standar Satuan Takaran: ${measure}
-${langDirective}
-
-[PANDUAN VISUAL FOTOGRAFI AI]
-Gunakan karakteristik fotografi "${style}" secara konsisten pada setiap ${count} prompt gambar (T2I dalam bahasa Inggris):
-- Slot 1: Foto hero hidangan matang sempurna, detail tekstur tinggi, pencahayaan komersial menggugah selera.
-- Slot 2: [MANDATORY GUARDRAIL: FACELESS ONLY. Hanya tangan/lengan dari siku ke bawah]. Aksi memasak di dapur.
-- Slot 3: Close up shot tekstur kuah, bumbu meresap, atau lelehan garnish.
-- Slot 4+: Penataan hidangan siap santap di meja makan.
-
-Beri jawaban HANYA dalam format JSON valid dengan struktur berikut:
-{
-  "title": "${kw}",
-  "cuisine_category": "${cat}",
-  "prep_time": "15 menit",
-  "cook_time": "20 menit",
-  "servings": "4 porsi",
-  "content_md": "# Rahasia Lezat ${kw}\\n\\n## Bahan-bahan Utama\\n- ...\\n\\n## Langkah Memasak\\n1. ...",
-  "prompts": {
-    "image_1": "High-end commercial food photography in ${style} style of ${kw}...",
-    "image_2": "Faceless culinary action shot in ${style} style preparing ${kw}...",
-    "image_3": "Macro detail shot in ${style} style of ${kw}..."
-  }
-}`;
+[PANDUAN BAHASA & TAKARAN]
+- Naskah artikel Facebook lengkap dalam Bahasa Indonesia yang akrab & menggugah selera
+- Satuan takaran standar Indonesia (gram, sdm, sdt, ml)
+- Gaya visual fotografi AI: "${style}"`;
       } else {
-        // Bilingual
-        promptTitle = `You are an International Culinary Copywriter and Food Photographer.
-Formulate a viral bilingual Facebook post for category: "${cat}" focusing strictly on "${kw}".
-Headline and hooks in English, followed by localized body copy in Indonesian.
-Measurement system: ${measure}. Photography style: ${style}.`;
+        promptText = `You are an International Culinary Copywriter.
+Create a high-converting viral bilingual recipe post for category: "${cat}" focusing strictly on "${kw}".
+Headline & hook in English, followed by localized body copy in Indonesian.`;
       }
 
-      document.getElementById('promptOutput').innerText = promptTitle;
+      document.getElementById('instantPromptOutput').innerText = promptText;
+    }
+
+    function triggerInstantLaunchSimulation() {
+      const toast = document.getElementById('launchToast');
+      const kw = document.getElementById('instantRecipeTopic').value || 'Resep Pilihan';
+      document.getElementById('launchToastText').innerText = `⚡ Kampanye 1-Klik Resep ("${kw}") berhasil dikirimkan ke autonomous-pipeline dan scheduler! (HTTP 200 OK)`;
+      toast.style.display = 'flex';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 5000);
     }
 
     // Mock Database for Tenants Disabled Menus
@@ -716,7 +794,6 @@ Measurement system: ${measure}. Photography style: ${style}.`;
       const isAutoPipelineLocked = !isSuperadmin && tInfo.disabled.includes('auto_pipeline');
       const isThreadsLocked = !isSuperadmin && tInfo.disabled.includes('threads_labs');
 
-      // 1. Render Sidebar Items
       const sidebar = document.getElementById('sidebarContainer');
       sidebar.innerHTML = `
         <div style="font-size: 0.7rem; font-weight: 800; color: var(--text-muted); padding: 0.25rem 0.5rem;">WORKFLOW</div>
@@ -736,13 +813,8 @@ Measurement system: ${measure}. Photography style: ${style}.`;
           <span>🌱 Pillar Campaign</span>
           <span>✓</span>
         </div>
-        <div class="sim-nav-item">
-          <span>🎬 RE Campaign</span>
-          <span>✓</span>
-        </div>
       `;
 
-      // 2. Render Page Content
       const page = document.getElementById('pageContentContainer');
       if (isAutoPipelineLocked) {
         page.innerHTML = `
@@ -752,33 +824,21 @@ Measurement system: ${measure}. Photography style: ${style}.`;
               <strong style="color: var(--status-danger);">Access Restricted: Auto Pipeline Module Locked</strong>
               <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.25rem;">
                 This autonomous cron scheduler module is currently disabled by Superadmin for your organization (<code>${selected}</code>). 
-                Please contact your platform administrator if you require this feature.
               </div>
             </div>
-          </div>
-          <div style="padding: 2rem; text-align: center; color: var(--text-muted); background: var(--canvas); border-radius: var(--radius-sm); border: 1px dashed var(--border-subtle);">
-            🚫 No autonomous pipelines or schedules accessible for this account.
           </div>
         `;
       } else {
         page.innerHTML = `
-          <div style="background: var(--status-success-soft); border: 1px solid var(--status-success); border-radius: var(--radius-sm); padding: 0.75rem 1rem; margin-bottom: 1rem; color: var(--status-success); font-size: 0.85rem; font-weight: 600;">
+          <div style="background: var(--status-success-soft); border: 1px solid var(--status-success); border-radius: var(--radius-sm); padding: 0.75rem 1rem; color: var(--status-success); font-size: 0.85rem; font-weight: 600;">
             ✓ Your organization has full access to Autonomous Pipeline Schedulers.
-          </div>
-          <div style="padding: 1.5rem; background: var(--canvas); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
-            <div style="font-weight: 700; margin-bottom: 0.5rem;">📋 Active Schedules & Automation Queue</div>
-            <div style="font-size: 0.8rem; color: var(--text-secondary);">
-              - 🍳 Global Recipe: Crispy Honey Garlic Air Fryer Chicken Bites (05:00 UTC+7)<br>
-              - 🛍️ Product Video: Air Fryer Deluxe Showcase (10:00 UTC+7)<br>
-              - 📖 Editorial Pillar: 5 Essential Rules for Clean Meal Prep (16:00 UTC+7)
-            </div>
           </div>
         `;
       }
     }
 
-    // Initial setup: initialize reactive language
-    handleLanguageChange();
+    // Initialize
+    handleInstantLanguageChange();
     switchTenantSimulation();
   </script>
 </body>

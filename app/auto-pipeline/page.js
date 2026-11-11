@@ -246,8 +246,10 @@ export default function AutoPipelinePage() {
   const [blueprintSearchQuery, setBlueprintSearchQuery] = useState('');
 
   // Recipe Labs (Text & Photo Composite Grid) State (Tab 1)
-  const [recipeLabsTopic, setRecipeLabsTopic] = useState('Ayam Panggang Madu Lemon Teflon');
-  const [recipeLabsCategory, setRecipeLabsCategory] = useState('Makanan');
+  const [instantTargetLanguage, setInstantTargetLanguage] = useState('en_US');
+  const [instantRecipeClassification, setInstantRecipeClassification] = useState('Quick & Easy Weeknight Dinners (Under 20 Mins)');
+  const [recipeLabsTopic, setRecipeLabsTopic] = useState('Crispy Honey Garlic Air Fryer Chicken Bites');
+  const [recipeLabsCategory, setRecipeLabsCategory] = useState('Quick & Easy Weeknight Dinners (Under 20 Mins)');
   const [recipeLabsVisualStyle, setRecipeLabsVisualStyle] = useState('Food Porn');
   const [imagesPerRecipe, setImagesPerRecipe] = useState(4);
   const [selectedLayoutId, setSelectedLayoutId] = useState('4_editorial_split');
@@ -1027,7 +1029,7 @@ export default function AutoPipelinePage() {
         return;
       }
       targetTopic = recipeLabsTopic.trim();
-      targetCategory = recipeLabsCategory || 'Makanan';
+      targetCategory = instantRecipeClassification || recipeLabsCategory || 'Makanan';
     } else if (instantCampaignType === 'threads_series') {
       if (threadsObjective === 'personal_product') {
         if (!threadsPersonalProductName.trim()) {
@@ -1068,6 +1070,8 @@ export default function AutoPipelinePage() {
           brand_id: selectedBrandId,
           preset_key: selectedPresetKey,
           topic: targetTopic,
+          target_language: instantCampaignType === 'recipe_labs' ? instantTargetLanguage : undefined,
+          recipe_classification: instantCampaignType === 'recipe_labs' ? instantRecipeClassification : undefined,
           product_id: targetProductId,
           product_title: targetTopic,
           promotion_context: instantPromotionContext.trim() || null,
@@ -4215,7 +4219,7 @@ export default function AutoPipelinePage() {
                 </div>
               )}
 
-              {/* 3E: RECIPE LABS (100% Mengadopsi Layout Asli dari RecipeLabsConfigurationForm.js) */}
+              {/* 3E: RECIPE LABS (Language-First International Classification Engine) */}
               {instantCampaignType === 'recipe_labs' && (
                 <div style={{
                   background: 'var(--surface-raised)',
@@ -4229,7 +4233,7 @@ export default function AutoPipelinePage() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
                     <div style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
                       <span>🖼️</span>
-                      <span>Konfigurasi Resep Teks & Foto AI (Recipe Labs Asli)</span>
+                      <span>Konfigurasi Resep Teks & Foto AI (1-Klik Asli)</span>
                     </div>
                     <span style={{
                       fontSize: '0.72rem',
@@ -4244,17 +4248,96 @@ export default function AutoPipelinePage() {
                     </span>
                   </div>
 
+                  {/* 1. Language-First Control (Top Hero Box) */}
+                  <div style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border-strong)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '0.75rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.35rem'
+                  }}>
+                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--action-primary)' }}>
+                      🌐 1. Target Market / Bahasa Resep
+                    </label>
+                    <select
+                      value={instantTargetLanguage}
+                      onChange={(e) => {
+                        const newLang = e.target.value;
+                        setInstantTargetLanguage(newLang);
+                        const firstCat = INTERNATIONAL_RECIPE_TAXONOMY[newLang]?.categories?.[0]?.options?.[0] || 'Main Courses & Entrees';
+                        setInstantRecipeClassification(firstCat);
+                      }}
+                      style={{
+                        height: '38px',
+                        background: 'var(--input-bg)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-sm)',
+                        padding: '0 0.75rem',
+                        fontSize: '0.84rem',
+                        color: 'var(--text-primary)',
+                        outline: 'none',
+                        fontWeight: 600
+                      }}
+                    >
+                      <option value="en_US">🇺🇸 Global English (International / US & UK Standard)</option>
+                      <option value="id_ID">🇮🇩 Bahasa Indonesia (Pasar Domestik & UMKM)</option>
+                      <option value="bilingual">🌐 Bilingual (English Hook + Indonesian Body)</option>
+                    </select>
+                    <small style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                      Klasifikasi resep di bawah otomatis menyesuaikan dengan standar bahasa terpilih.
+                    </small>
+                  </div>
+
+                  {/* 2. Klasifikasi Resep Berstandar Internasional/Nasional */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                      🏷️ 2. {INTERNATIONAL_RECIPE_TAXONOMY[instantTargetLanguage]?.label || 'Klasifikasi Resep Standar'}
+                    </label>
+                    <select
+                      value={instantRecipeClassification}
+                      onChange={(e) => setInstantRecipeClassification(e.target.value)}
+                      style={{
+                        height: '38px',
+                        background: 'var(--input-bg)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-sm)',
+                        padding: '0 0.75rem',
+                        fontSize: '0.84rem',
+                        color: 'var(--text-primary)',
+                        outline: 'none'
+                      }}
+                    >
+                      {(INTERNATIONAL_RECIPE_TAXONOMY[instantTargetLanguage]?.categories || []).map((group) => (
+                        <optgroup key={group.group} label={group.group}>
+                          {group.options.map((opt) => (
+                            <option key={opt} value={opt}>
+                              {opt}
+                            </option>
+                          ))}
+                        </optgroup>
+                      ))}
+                    </select>
+                  </div>
+
                   {/* Topik Menu & Gaya Visual */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.75rem' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                       <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                        Topik / Nama Menu Resep:
+                        🎯 3. Topik / Nama Menu Resep Wajib:
                       </label>
                       <input
                         type="text"
                         value={recipeLabsTopic}
                         onChange={(e) => setRecipeLabsTopic(e.target.value)}
-                        placeholder="Contoh: Ayam Panggang Madu Lemon Teflon..."
+                        placeholder={
+                          instantTargetLanguage === 'en_US'
+                            ? 'e.g., Crispy Honey Garlic Air Fryer Chicken Bites...'
+                            : (instantTargetLanguage === 'id_ID'
+                                ? 'Contoh: Ayam Goreng Mentega Gurih, Sambal Udang...'
+                                : 'e.g., Crispy Honey Butter Wings / Sayap Ayam Madu...')
+                        }
                         style={{
                           height: '38px',
                           background: 'var(--input-bg)',
