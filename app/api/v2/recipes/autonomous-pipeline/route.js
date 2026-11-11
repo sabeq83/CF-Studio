@@ -239,13 +239,15 @@ export const POST = withTenantContext(async (request, _context, user) => {
     } else if (pipelineType === 'recipe_labs') {
       const recipeClass = body.recipe_classification || body.recipeClassification || body.category || 'Makanan';
       const targetLang = body.target_language || body.targetLanguage || 'en_US';
+      const aspectRatio = body.aspect_ratio || body.aspectRatio || '3:4';
       result = await executeAutonomousRecipeLabsPipeline({
         brandId: body.brand_id || body.brandId,
         category: recipeClass,
         recipeClassification: recipeClass,
         targetLanguage: targetLang,
         topic: body.topic || 'Resep Praktis Pilihan',
-        visualStyle: body.visual_style || body.visualStyle || 'Food Porn',
+        aspectRatio,
+        visualStyle: body.visual_style || body.visualStyle || 'Modern Minimalist Nordic Studio',
         imagesPerRecipe: Number(body.images_per_recipe || body.imagesPerRecipe || 4),
         selectedLayoutId: body.selected_layout_id || body.selectedLayoutId || '4_editorial_split',
         gridGapSize: Number(body.grid_gap_size !== undefined ? body.grid_gap_size : 12),
@@ -255,6 +257,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
         postToFacebook: body.post_to_facebook !== undefined ? Boolean(body.post_to_facebook) : true,
         tenantId,
         overrides: {
+          aspect_ratio: aspectRatio,
           ...affiliateOverride,
           ...(body.overrides || {})
         }

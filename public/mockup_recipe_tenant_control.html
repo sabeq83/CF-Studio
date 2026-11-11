@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MAKNA Flow — 1-Klik Auto Pipeline & Language-First Recipe Configuration</title>
+  <title>MAKNA Flow — Recipe Labs Multi-Aspect Layout & Photography Environment Studio</title>
   <style>
     :root, [data-theme='dark'] {
       color-scheme: dark;
@@ -99,54 +99,73 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-bottom: 1.5rem;
       padding-bottom: 1rem;
       border-bottom: 1px solid var(--border-subtle);
-      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
     }
-    .badge {
+    .header-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .theme-toggle-btn {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 0.4rem 0.85rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
       display: inline-flex;
       align-items: center;
-      gap: 0.35rem;
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 0.25rem 0.65rem;
-      border-radius: 9999px;
+      gap: 0.4rem;
     }
-    .badge-rose { background: var(--status-rose-soft); color: var(--status-rose); border: 1px solid var(--status-rose); }
-    .badge-teal { background: var(--status-info-soft); color: var(--action-primary); border: 1px solid var(--action-primary); }
 
-    .nav-tabs {
+    .tab-nav {
       display: flex;
       gap: 0.5rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.25rem;
       border-bottom: 1px solid var(--border-subtle);
       padding-bottom: 0.5rem;
       overflow-x: auto;
     }
     .tab-btn {
       background: transparent;
-      border: 1px solid var(--border-subtle);
+      border: 1px solid transparent;
       color: var(--text-secondary);
-      padding: 0.55rem 1.15rem;
+      padding: 0.55rem 1rem;
       border-radius: var(--radius-sm);
-      font-size: 0.85rem;
-      font-weight: 600;
       cursor: pointer;
-      transition: var(--transition);
+      font-size: 0.84rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
       white-space: nowrap;
+      transition: var(--transition);
+    }
+    .tab-btn:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
     }
     .tab-btn.active {
       background: var(--surface-raised);
       color: var(--action-primary);
-      border-color: var(--action-primary);
+      border-color: var(--border-strong);
+      box-shadow: var(--shadow-card);
     }
 
     .grid-2col {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
+      gap: 1.25rem;
     }
-    @media (max-width: 960px) {
+    @media (max-width: 1024px) {
       .grid-2col { grid-template-columns: 1fr; }
     }
 
@@ -158,9 +177,10 @@
       box-shadow: var(--shadow-card);
     }
     .card-title {
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 700;
-      margin-bottom: 0.75rem;
+      color: var(--text-primary);
+      margin-bottom: 0.85rem;
       display: flex;
       align-items: center;
       gap: 0.5rem;
@@ -170,7 +190,7 @@
       display: flex;
       flex-direction: column;
       gap: 0.35rem;
-      margin-bottom: 1rem;
+      margin-bottom: 0.85rem;
     }
     .form-label {
       font-size: 0.8rem;
@@ -186,384 +206,719 @@
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-sm);
       padding: 0 0.75rem;
-      font-size: 0.85rem;
       color: var(--text-primary);
+      font-size: 0.84rem;
       outline: none;
-      font-family: inherit;
       transition: var(--transition);
+      font-family: inherit;
     }
     .form-control:focus {
       border-color: var(--action-primary);
+      box-shadow: 0 0 0 2px var(--action-primary-hover);
     }
 
-    .language-hero-box {
-      background: var(--surface-raised);
-      border: 1.5px solid var(--action-primary);
-      border-radius: var(--radius-sm);
-      padding: 0.95rem;
-      margin-bottom: 1rem;
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.15rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 700;
     }
+    .badge-rose { background: var(--status-rose-soft); color: var(--status-rose); border: 1px solid var(--status-rose); }
+    .badge-teal { background: rgba(45, 212, 191, 0.15); color: var(--action-primary); border: 1px solid var(--action-primary); }
+    .badge-warning { background: var(--status-warning-soft); color: var(--status-warning); border: 1px solid var(--status-warning); }
 
-    .prompt-box {
-      background: var(--input-bg);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
-      padding: 1rem;
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      color: var(--text-secondary);
-      white-space: pre-wrap;
-      line-height: 1.55;
-      max-height: 520px;
-      overflow-y: auto;
-    }
-
-    .type-pill-grid {
+    /* ASPECT RATIO SELECTOR CARDS */
+    .ratio-selector-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 0.5rem;
-      margin-bottom: 1rem;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.55rem;
+      margin-bottom: 0.85rem;
     }
-    .type-pill {
-      background: var(--surface-raised);
-      border: 1px solid var(--border-subtle);
+    .ratio-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border-subtle);
       border-radius: var(--radius-sm);
       padding: 0.65rem 0.5rem;
-      text-align: center;
       cursor: pointer;
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: var(--text-secondary);
+      text-align: center;
       transition: var(--transition);
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 0.25rem;
     }
-    .type-pill.active {
-      background: var(--surface-interactive);
+    .ratio-card:hover {
+      border-color: var(--border-strong);
+      background: var(--surface-hover);
+    }
+    .ratio-card.active {
       border-color: var(--status-rose);
+      background: var(--surface-raised);
+      box-shadow: 0 0 0 2px var(--status-rose-soft);
+    }
+    .ratio-icon {
+      font-size: 1.1rem;
+    }
+    .ratio-title {
+      font-size: 0.82rem;
+      font-weight: 700;
       color: var(--text-primary);
-      box-shadow: 0 0 0 1px var(--status-rose);
+    }
+    .ratio-desc {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+    }
+
+    /* ENVIRONMENT STYLING PREVIEW CARD */
+    .env-detail-box {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem;
+      margin-top: 0.5rem;
+      font-size: 0.76rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .env-row {
+      display: grid;
+      grid-template-columns: 100px 1fr;
+      gap: 0.5rem;
+    }
+    .env-label {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .env-val {
+      color: var(--text-secondary);
+    }
+
+    /* LIVE COLLAGE VISUALIZER */
+    .visualizer-wrapper {
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .canvas-container {
+      position: relative;
+      background: #0d0d12;
+      border: 2px solid var(--border-strong);
+      border-radius: 12px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      display: grid;
+      padding: 8px;
+      box-sizing: border-box;
+      width: 100%;
+      max-width: 320px;
+    }
+    /* Dynamic Aspect Ratios */
+    .canvas-container.ratio-1-1 {
+      aspect-ratio: 1 / 1;
+      max-width: 290px;
+    }
+    .canvas-container.ratio-3-4 {
+      aspect-ratio: 3 / 4;
+      max-width: 270px;
+    }
+    .canvas-container.ratio-9-16 {
+      aspect-ratio: 9 / 16;
+      max-width: 230px;
+    }
+
+    .grid-slot {
+      position: absolute;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      transition: var(--transition);
+      box-sizing: border-box;
+      background-size: cover;
+      background-position: center;
+    }
+    .slot-badge {
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      color: #fff;
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 2px 5px;
+      border-radius: 4px;
+      align-self: flex-start;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .slot-role {
+      font-size: 0.65rem;
+      color: #fff;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+      font-weight: 600;
+    }
+
+    .prompt-box {
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      line-height: 1.45;
+      color: var(--text-secondary);
+      white-space: pre-wrap;
+      overflow-y: auto;
     }
 
     .btn-launch {
-      background: linear-gradient(135deg, var(--action-primary), #0ea5e9);
+      background: var(--action-primary);
       color: var(--on-action-primary);
       border: none;
-      padding: 0.75rem 1.25rem;
-      border-radius: var(--radius-sm);
-      font-weight: 800;
-      font-size: 0.88rem;
+      padding: 0.85rem 1.25rem;
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+      font-weight: 700;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
-      width: 100%;
-      box-shadow: 0 4px 14px rgba(45, 212, 191, 0.3);
       transition: var(--transition);
+      box-shadow: 0 4px 14px rgba(45, 212, 191, 0.25);
+      margin-top: 0.5rem;
     }
     .btn-launch:hover {
-      opacity: 0.92;
+      background: var(--action-primary-hover);
       transform: translateY(-1px);
-    }
-
-    .sim-nav-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.5rem 0.75rem;
-      border-radius: var(--radius-xs);
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--text-secondary);
-      text-decoration: none;
-      transition: var(--transition);
-    }
-    .sim-nav-item:hover {
-      background: var(--surface-hover);
-      color: var(--text-primary);
-    }
-    .sim-nav-item.locked {
-      opacity: 0.45;
-      cursor: not-allowed;
-      background: var(--overlay-subtle);
-      color: var(--text-disabled);
-    }
-    .sim-nav-item.active {
-      background: var(--surface-raised);
-      color: var(--action-primary);
-    }
-
-    .alert-banner {
-      background: var(--status-danger-soft);
-      border: 1px solid var(--status-danger);
-      border-radius: var(--radius-sm);
-      padding: 1rem;
-      color: var(--text-primary);
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 1rem;
-    }
-
-    .layout-badge {
-      display: inline-block;
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      background: var(--surface-interactive);
-      font-size: 0.72rem;
-      font-family: var(--font-mono);
-      margin-right: 0.35rem;
     }
   </style>
 </head>
 <body>
 
-  <div class="header-bar">
-    <div>
-      <h2>⚡ MAKNA Flow — 1-Klik Auto Pipeline (Language-First Recipe Configuration)</h2>
-      <p style="font-size: 0.85rem; color: var(--text-secondary);">
-        Simulasi interaktif konfigurasi resep berstandar internasional pada Tab 1 (Eksekusi 1-Klik Instan) & Tab 2 (Scheduler).
-      </p>
+  <!-- HEADER BAR -->
+  <header class="header-bar">
+    <div class="header-title">
+      <span>🖼️</span>
+      <span>MAKNA Flow — Recipe Labs Multi-Aspect Layout & Photography Environment Studio</span>
+      <span class="badge badge-rose">Release Candidate v2.40.35</span>
     </div>
-    <div style="display: flex; gap: 0.5rem; align-items: center;">
-      <span class="badge badge-rose">1-Klik Auto Pipeline</span>
-      <span class="badge badge-teal">Language-First Taxonomy</span>
-      <button onclick="toggleTheme()" class="tab-btn" style="padding: 0.25rem 0.65rem;">🌓 Theme</button>
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <span style="font-size: 0.75rem; color: var(--text-muted);">
+        Node 1 Staging (Port 5010) • Active Workspace
+      </span>
+      <button class="theme-toggle-btn" onclick="toggleTheme()">
+        <span>🌓</span>
+        <span>Toggle Theme</span>
+      </button>
     </div>
-  </div>
+  </header>
 
-  <div class="nav-tabs">
-    <button id="btnTab1" class="tab-btn active" onclick="switchMainTab('instant')">⚡ 1. Tab 1: Eksekusi 1-Klik Instan (Recipe Labs)</button>
-    <button id="btnTab2" class="tab-btn" onclick="switchMainTab('scheduler')">🗓️ 2. Tab 2: Penjadwalan Kalender (Scheduler Modal)</button>
-    <button id="btnTab3" class="tab-btn" onclick="switchMainTab('tenant')">🔒 3. Multi-Tenant Lockdown (RBAC & Guardrails)</button>
-  </div>
+  <!-- TAB NAVIGASI -->
+  <nav class="tab-nav">
+    <button id="btnTab1" class="tab-btn active" onclick="switchMainTab('instant')">
+      <span>⚡</span>
+      <span>1-Klik Auto Pipeline & Recipe Labs (Live Visualizer)</span>
+    </button>
+    <button id="btnTab2" class="tab-btn" onclick="switchMainTab('specs')">
+      <span>📖</span>
+      <span>4 Photography Environments & Prompt Blueprints</span>
+    </button>
+    <button id="btnTab3" class="tab-btn" onclick="switchMainTab('tenant')">
+      <span>🛡️</span>
+      <span>Tenant Lockdown & RBAC Guardrails</span>
+    </button>
+  </nav>
 
-  <!-- TAB 1: 1-KLIK AUTO PIPELINE -->
+  <!-- ========================================== -->
+  <!-- TAB 1: 1-KLIK AUTO PIPELINE & LIVE VISUALIZER -->
+  <!-- ========================================== -->
   <div id="tab-instant">
     <div class="grid-2col">
-      <!-- Sisi Kiri: Form 1-Klik Instan Multi-Campaign -->
-      <div class="card" style="border-top: 3px solid var(--status-rose);">
-        <div class="card-title" style="justify-content: space-between;">
-          <div style="display: flex; align-items: center; gap: 0.45rem;">
-            <span>⚡</span>
-            <span>Eksekusi 1-Klik Instan Multi-Campaign</span>
-          </div>
-          <span class="badge badge-rose">Tab 1 Active</span>
-        </div>
-        <p style="font-size: 0.76rem; color: var(--text-muted); margin-bottom: 0.85rem;">
-          Pilih tipe kampanye, lalu formulir resep otomatis mengadopsi kontrol bahasa di urutan pertama:
-        </p>
 
-        <!-- Selector Tipe Kampanye 1-Klik -->
-        <div class="type-pill-grid">
-          <div class="type-pill" onclick="alert('Format Video Resep (Storyboards + AI Clips)')">
-            <span>🍳</span><span>Video Resep</span>
-          </div>
-          <div class="type-pill" onclick="alert('Format Video Produk')">
-            <span>📦</span><span>Video Produk</span>
-          </div>
-          <div class="type-pill" onclick="alert('Format Editorial')">
-            <span>📰</span><span>Editorial</span>
-          </div>
-          <div class="type-pill" onclick="alert('Format Multiplier Remix')">
-            <span>🎛️</span><span>Multiplier</span>
-          </div>
-          <div class="type-pill active">
-            <span>🖼️</span><span>Resep Teks & Foto</span>
-          </div>
-          <div class="type-pill" onclick="alert('Format Threads Series')">
-            <span>🧵</span><span>Utas Threads</span>
-          </div>
-        </div>
-
-        <!-- FORM RECIPE LABS DENGAN LANGUAGE-FIRST ENGINE -->
-        <div style="background: var(--surface-raised); border: 1.5px solid var(--status-rose); border-radius: var(--radius-md); padding: 1.15rem; display: flex; flexDirection: column; gap: 0.85rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <strong style="font-size: 0.86rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.35rem;">
-              <span>🖼️</span> Konfigurasi Resep Teks & Foto AI (1-Klik Asli)
-            </strong>
-            <span style="font-size: 0.7rem; font-weight: 800; padding: 0.2rem 0.55rem; border-radius: 9999px; background: var(--status-rose-soft); color: var(--status-rose); border: 1px solid var(--status-rose);">
-              Artikel FB + 12-Grid Slot Renderer
-            </span>
-          </div>
-
-          <!-- LANGKAH 1: LANGUAGE-FIRST CONTROL -->
-          <div class="language-hero-box" style="margin-top: 0.5rem; margin-bottom: 0.75rem;">
-            <div class="form-group" style="margin-bottom: 0.35rem;">
-              <label class="form-label" style="color: var(--action-primary); font-size: 0.82rem;">
-                <span>🌐 1. PILIH BAHASA & TARGET MARKET (LANGKAH PERTAMA)</span>
-                <span class="badge badge-teal">Top Control</span>
-              </label>
-              <select id="instantTargetLanguage" class="form-control" style="font-weight: 700; border-color: var(--action-primary);" onchange="handleInstantLanguageChange()">
-                <option value="en_US" selected>🇺🇸 Global English (International / US & UK Standard)</option>
-                <option value="id_ID">🇮🇩 Bahasa Indonesia (Pasar Domestik & UMKM Kuliner)</option>
-                <option value="bilingual">🌐 Bilingual (English Hook + Indonesian Body)</option>
-              </select>
-            </div>
-            <div style="font-size: 0.72rem; color: var(--text-muted);">
-              💡 <em>Klasifikasi resep internasional, satuan takaran, dan contoh keyword di bawah akan <strong>otomatis menyesuaikan secara reaktif</strong>.</em>
-            </div>
-          </div>
-
-          <!-- LANGKAH 2: KLASIFIKASI RESEP STANDAR -->
-          <div class="form-group">
-            <label class="form-label">
-              <span id="instantClassificationLabel">🏷️ 2. International Culinary Category</span>
-              <span id="instantClassificationSub" style="font-size: 0.7rem; color: var(--status-success);">Adapted for Global English</span>
-            </label>
-            <select id="instantRecipeClassification" class="form-control" onchange="updateInstantPreview()">
-              <!-- Populated reactively -->
-            </select>
-            <small id="instantClassificationHint" style="font-size: 0.72rem; color: var(--text-muted);">
-              Aligned with international culinary standards (AllRecipes, BBC Good Food, NYT Cooking).
-            </small>
-          </div>
-
-          <!-- LANGKAH 3: KATA KUNCI WAJIB / TOPIK HIDANGAN -->
-          <div class="form-group">
-            <label class="form-label">
-              <span id="instantKeywordLabel">🎯 3. Specific Dish Topic / Keyword Wajib (Strict Enforcement)</span>
-              <span style="font-size: 0.7rem; color: var(--status-warning);">Mandatory Guardrail</span>
-            </label>
-            <input type="text" id="instantRecipeTopic" class="form-control" 
-              value="Crispy Honey Garlic Air Fryer Chicken Bites" 
-              oninput="updateInstantPreview()"
-              placeholder="e.g., Crispy Honey Garlic Air Fryer Chicken Bites...">
-            <small style="font-size: 0.72rem; color: var(--status-warning);">
-              ⚠️ Sistem akan memaksa Gemini AI membuat naskah resep & prompt visual 100% berpusat pada hidangan ini tanpa deviasi.
-            </small>
-          </div>
-
-          <!-- LANGKAH 4: GAYA VISUAL FOTOGRAFI AI & GRID LAYOUT -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-            <div class="form-group">
-              <label class="form-label">🎨 Gaya Visual Fotografi</label>
-              <select id="instantVisualStyle" class="form-control" onchange="updateInstantPreview()">
-                <option value="Food Porn" selected>Food Porn & Commercial Glossy</option>
-                <option value="Rustic Countryside">Rustic Countryside & Wooden Texture</option>
-                <option value="Clean Nordic">Clean Nordic Studio & Bright Sunlight</option>
-                <option value="Dark Moody">Dark Moody Contrast & Cinematic Smoke</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">📐 Layout Grid Komposit</label>
-              <select id="instantLayoutId" class="form-control" onchange="updateInstantPreview()">
-                <option value="4_editorial_split" selected>4 Slot: 1 Hero Besar + 3 Vertikal</option>
-                <option value="3_vertical_cards">3 Slot: Triptych Kartu Vertikal</option>
-                <option value="4_symmetric_grid">4 Slot: Grid Simetris 2x2</option>
-                <option value="5_magazine_featured">5 Slot: 1 Banner Atas + 4 Bawah</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- LANGKAH 5: CHECKBOX PUBLIKASI FACEBOOK -->
-          <div style="display: flex; align-items: center; gap: 0.65rem; background: var(--surface); padding: 0.65rem 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
-            <input type="checkbox" id="instantPostToFb" checked style="accent-color: var(--status-rose); width: 16px; height: 16px;">
-            <label for="instantPostToFb" style="font-size: 0.8rem; font-weight: 600; cursor: pointer;">
-              🚀 Otomatis Ekspor Artikel Naskah & Poster Grid ke Facebook Exporter Hub
-            </label>
-          </div>
-
-          <!-- TOMBOL LUNCURKAN 1-KLIK INSTAN -->
-          <button type="button" class="btn-launch" onclick="triggerInstantLaunchSimulation()">
-            <span>⚡</span>
-            <span>Luncurkan Kampanye 1-Klik Instan Sekarang</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Sisi Kanan: Live Request Payload & Live Gemini AI System Prompt -->
+      <!-- Sisi Kiri: Formulir Kontrol Interaktif -->
       <div class="card">
         <div class="card-title" style="justify-content: space-between;">
-          <span>📡 1-Klik Request Payload & System Prompt Preview</span>
-          <span id="instantBadge" class="badge badge-teal">English Global Mode</span>
-        </div>
-
-        <div style="margin-bottom: 0.85rem;">
-          <div style="font-size: 0.78rem; font-weight: 700; color: var(--action-primary); margin-bottom: 0.35rem;">
-            1. POST Payload JSON ke <code>/api/v2/recipes/autonomous-pipeline</code>:
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span>🍳</span>
+            <span>Konfigurasi Resep Teks & Foto AI (Recipe Labs)</span>
           </div>
-          <pre id="payloadPreview" style="background: var(--input-bg); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.75rem; font-family: var(--font-mono); font-size: 0.73rem; color: var(--text-secondary); max-height: 180px; overflow-y: auto;"></pre>
+          <span class="badge badge-rose">12-Slot Sharp Composer</span>
         </div>
 
-        <div style="margin-bottom: 0.85rem;">
-          <div style="font-size: 0.78rem; font-weight: 700; color: var(--status-rose); margin-bottom: 0.35rem;">
-            2. Live Gemini AI System Prompt (`processRecipeGenerator` di Node 1):
+        <!-- 1. LANGUAGE-FIRST SELECTOR -->
+        <div style="background: var(--surface-raised); border: 1.5px solid var(--action-primary); border-radius: var(--radius-sm); padding: 0.75rem; margin-bottom: 0.85rem;">
+          <div class="form-group" style="margin-bottom: 0.35rem;">
+            <label class="form-label" style="color: var(--action-primary); font-size: 0.82rem;">
+              <span>🌐 1. PILIH BAHASA & TARGET PASAR (TOP CONTROL)</span>
+              <span class="badge badge-teal">Language-First</span>
+            </label>
+            <select id="instantTargetLanguage" class="form-control" style="font-weight: 700; border-color: var(--action-primary);" onchange="handleLanguageChange()">
+              <option value="en_US" selected>🇺🇸 Global English (International / US & UK Standard)</option>
+              <option value="id_ID">🇮🇩 Bahasa Indonesia (Pasar Domestik & UMKM Kuliner)</option>
+              <option value="bilingual">🌐 Bilingual (English Hook + Indonesian Body)</option>
+            </select>
           </div>
-          <div id="instantPromptOutput" class="prompt-box" style="max-height: 280px;"></div>
+          <div style="font-size: 0.72rem; color: var(--text-muted);">
+            Klasifikasi kuliner dan contoh menu otomatis menyesuaikan dengan standar internasional / nasional terpilih.
+          </div>
         </div>
 
-        <!-- Notification Toast Simulasi -->
-        <div id="launchToast" style="display: none; background: var(--status-success-soft); border: 1px solid var(--status-success); border-radius: var(--radius-sm); padding: 0.75rem 1rem; color: var(--status-success); font-size: 0.82rem; font-weight: 600; align-items: center; gap: 0.5rem;">
-          <span>🎉</span>
-          <span id="launchToastText">Kampanye 1-Klik berhasil diluncurkan ke scheduler background!</span>
+        <!-- 2. KLASIFIKASI KULINER -->
+        <div class="form-group">
+          <label class="form-label">
+            <span id="classificationLabel">🏷️ 2. International Culinary Category</span>
+            <span id="classificationSub" style="font-size: 0.7rem; color: var(--status-success);">Adapted for Global English</span>
+          </label>
+          <select id="recipeClassification" class="form-control" onchange="updateLivePreview()">
+            <!-- Populated dynamically via JS -->
+          </select>
         </div>
+
+        <!-- 3. KATA KUNCI TOPIK MENU (STRICT ENFORCEMENT) -->
+        <div class="form-group">
+          <label class="form-label">
+            <span id="keywordLabel">🎯 3. Mandatory Dish Keyword (Strict Enforcement)</span>
+            <span style="font-size: 0.7rem; color: var(--status-warning);">Zero Hallucination</span>
+          </label>
+          <input type="text" id="recipeTopic" class="form-control" 
+            value="Crispy Honey Garlic Air Fryer Chicken Bites" 
+            oninput="updateLivePreview()"
+            placeholder="e.g., Crispy Honey Garlic Air Fryer Chicken Bites...">
+          <small style="font-size: 0.72rem; color: var(--status-warning);">
+            ⚠️ Gemini AI dipaksa membuat resep & prompt T2I 100% berfokus pada hidangan ini tanpa deviasi.
+          </small>
+        </div>
+
+        <!-- 4. ORIENTASI / RASIO LAYOUT KOLASE (FITUR BARU) -->
+        <div class="form-group" style="margin-top: 1rem;">
+          <label class="form-label">
+            <span>📐 4. Orientasi Layout Kolase Sharp (Aspect Ratio)</span>
+            <span class="badge badge-rose">New Feature</span>
+          </label>
+          <div class="ratio-selector-grid">
+            <div id="ratioCard-1-1" class="ratio-card" onclick="selectAspectRatio('1:1')">
+              <span class="ratio-icon">⏹️</span>
+              <span class="ratio-title">1:1 Square</span>
+              <span class="ratio-desc">1080 x 1080 px<br>IG / FB Feed Post</span>
+            </div>
+            <div id="ratioCard-3-4" class="ratio-card active" onclick="selectAspectRatio('3:4')">
+              <span class="ratio-icon">📱</span>
+              <span class="ratio-title">3:4 Portrait</span>
+              <span class="ratio-desc">1080 x 1440 px<br>FB & IG Feed Optimal</span>
+            </div>
+            <div id="ratioCard-9-16" class="ratio-card" onclick="selectAspectRatio('9:16')">
+              <span class="ratio-icon">📜</span>
+              <span class="ratio-title">9:16 Vertical</span>
+              <span class="ratio-desc">1080 x 1920 px<br>Stories / Pins Poster</span>
+            </div>
+          </div>
+          <small style="font-size: 0.72rem; color: var(--text-muted);">
+            💡 Rasio <strong>3:4 (1080x1440)</strong> direkomendasikan untuk postingan feed Facebook dan Instagram karena memaksimalkan area layar tanpa terpotong (*no crop*).
+          </small>
+        </div>
+
+        <!-- 5. 4 GAYA ENVIRONMENT FOTOGRAFI AI (FITUR BARU) -->
+        <div class="form-group" style="margin-top: 0.75rem;">
+          <label class="form-label">
+            <span>🎨 5. Gaya Environment Fotografi Komersial</span>
+            <span class="badge badge-teal">Commercial Standard</span>
+          </label>
+          <select id="photographyEnvironment" class="form-control" onchange="handleEnvironmentChange()">
+            <option value="rustic_warm">🌿 Rustic Warm Tabletop & Artisanal Kitchen (Earthy, Cozy & Natural)</option>
+            <option value="modern_nordic" selected>⚪ Modern Minimalist Nordic Studio (Bright, Clean & Scandinavian)</option>
+            <option value="dark_moody">🍷 Dark Moody Chiaroscuro & Cinematic Smoke (Dramatic & Fine Dining)</option>
+            <option value="vibrant_alfresco">🍋 Vibrant Alfresco Sunlit Patio (Fresh, Mediterranean & Sun-Drenched)</option>
+          </select>
+
+          <!-- Interactive Environment Detail Box -->
+          <div id="envDetailBox" class="env-detail-box">
+            <div class="env-row">
+              <span class="env-label">Permukaan:</span>
+              <span id="envSurface" class="env-val">Countertop marmer Carrara putih / semen beton matte halus.</span>
+            </div>
+            <div class="env-row">
+              <span class="env-label">Pencahayaan:</span>
+              <span id="envLighting" class="env-val">Bright diffused daylight studio, bayangan lembut bebas kontras keras.</span>
+            </div>
+            <div class="env-row">
+              <span class="env-label">Properti & Aksen:</span>
+              <span id="envProps" class="env-val">Piring keramik artisanal warna netral/pastel, sendok garpu brushed steel, aksen microgreens.</span>
+            </div>
+            <div class="env-row">
+              <span class="env-label">Cocok Untuk:</span>
+              <span id="envBestFor" class="env-val" style="color: var(--action-primary); font-weight: 600;">Healthy food, salad, smoothie, clean meal prep, dan hidangan air fryer modern.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. PRESET LAYOUT JUMLAH SLOT -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.5rem;">
+          <div class="form-group">
+            <label class="form-label">Slot Gambar</label>
+            <select id="imageCount" class="form-control" onchange="handleImageCountChange()">
+              <option value="3">3 Foto (Triptych / Split)</option>
+              <option value="4" selected>4 Foto (Editorial 1+3)</option>
+              <option value="5">5 Foto (Magazine Featured)</option>
+              <option value="6">6 Foto (Hexa-Grid Spread)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Preset Layout</label>
+            <select id="layoutPreset" class="form-control" onchange="updateLivePreview()">
+              <!-- Populated dynamically via JS -->
+            </select>
+          </div>
+        </div>
+
+        <!-- 7. CHECKBOX PUBLIKASI FACEBOOK -->
+        <div style="display: flex; align-items: center; gap: 0.65rem; background: var(--surface); padding: 0.65rem 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-top: 0.5rem;">
+          <input type="checkbox" id="postToFacebook" checked style="accent-color: var(--status-rose); width: 16px; height: 16px;">
+          <label for="postToFacebook" style="font-size: 0.8rem; font-weight: 600; cursor: pointer;">
+            🚀 Otomatis Ekspor Artikel Naskah & Poster Grid ke Nextcloud / Facebook Hub
+          </label>
+        </div>
+
+        <!-- TOMBOL LUNCURKAN -->
+        <button type="button" class="btn-launch" onclick="triggerSimulation()">
+          <span>⚡</span>
+          <span>Luncurkan Pipeline Resep Teks & Foto AI (Grid Sharp)</span>
+        </button>
       </div>
+
+      <!-- Sisi Kanan: Live Dynamic Visualizer & AI Prompt Output -->
+      <div style="display: flex; flex-direction: column; gap: 1rem;">
+        
+        <!-- LIVE COLLAGE VISUALIZER BOX -->
+        <div class="card" style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <div class="card-title" style="justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span>👀</span>
+              <span>Live Visualizer Kolase Sharp (12x12 Grid Coordinate)</span>
+            </div>
+            <span id="canvasResBadge" class="badge badge-teal">1080 x 1440 px (3:4)</span>
+          </div>
+
+          <div class="visualizer-wrapper">
+            <!-- CANVAS CONTAINER BERSIFAT DINAMIS MENGIKUTI ASPEK RASIO -->
+            <div id="dynamicCanvas" class="canvas-container ratio-3-4">
+              <!-- Grid slots injected via JS based on GridCoordinates.js -->
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; font-size: 0.73rem; color: var(--text-muted);">
+            <span>Border Radius: <strong>32px</strong> • Outer Gap: <strong>24px</strong></span>
+            <span>Sharp Quality: <strong>95% JPEG</strong> • Background: <strong>#0d0d12</strong></span>
+          </div>
+        </div>
+
+        <!-- REQUEST PAYLOAD & SYSTEM PROMPT PREVIEW -->
+        <div class="card" style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <div class="card-title" style="justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span>📡</span>
+              <span>Payload JSON & Live Gemini AI System Prompt</span>
+            </div>
+            <span id="langModeBadge" class="badge badge-rose">Global English</span>
+          </div>
+
+          <div>
+            <div style="font-size: 0.76rem; font-weight: 700; color: var(--action-primary); margin-bottom: 0.35rem;">
+              POST Payload JSON (ke <code>/api/v2/recipes/autonomous-pipeline</code>):
+            </div>
+            <pre id="payloadPreview" style="background: var(--input-bg); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.65rem; font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-secondary); max-height: 140px; overflow-y: auto;"></pre>
+          </div>
+
+          <div>
+            <div style="font-size: 0.76rem; font-weight: 700; color: var(--status-rose); margin-bottom: 0.35rem;">
+              Live Gemini AI System Prompt & T2I Environment Blueprint:
+            </div>
+            <div id="promptOutput" class="prompt-box" style="max-height: 220px;"></div>
+          </div>
+
+          <!-- NOTIFIKASI TOAST -->
+          <div id="toastNotif" style="display: none; background: var(--status-success-soft); border: 1px solid var(--status-success); border-radius: var(--radius-sm); padding: 0.75rem 1rem; color: var(--status-success); font-size: 0.82rem; font-weight: 600; align-items: center; gap: 0.5rem;">
+            <span>🎉</span>
+            <span id="toastNotifText">Kampanye resep berhasil di-enqueue dengan dimensi kanvas terpilih!</span>
+          </div>
+        </div>
+
+      </div>
+
     </div>
   </div>
 
-  <!-- TAB 2: SCHEDULER MODAL TAB -->
-  <div id="tab-scheduler" style="display: none;">
+  <!-- ========================================== -->
+  <!-- TAB 2: 4 PHOTOGRAPHY ENVIRONMENTS SPECS -->
+  <!-- ========================================== -->
+  <div id="tab-specs" style="display: none;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem;">
+      
+      <!-- Card 1 -->
+      <div class="card" style="border-top: 3px solid #d97706;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+          <h3 style="font-size: 0.95rem; color: #d97706;">🌿 Rustic Warm Tabletop & Artisanal Kitchen</h3>
+          <span class="badge" style="background: rgba(217, 119, 6, 0.15); color: #d97706;">Warm & Earthy</span>
+        </div>
+        <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+          Nuansa dapur rumah pedesaan yang hangat, autentik, dan ramah keluarga. Menonjolkan tekstur kayu alami dan rempah mentah.
+        </p>
+        <div style="font-size: 0.74rem; display: flex; flex-direction: column; gap: 0.35rem; color: var(--text-muted); background: var(--surface-raised); padding: 0.75rem; border-radius: var(--radius-sm);">
+          <div>🪵 <strong>Permukaan:</strong> Reclaimed weathered oak wood table, wrinkled linen cloth.</div>
+          <div>☀️ <strong>Pencahayaan:</strong> Golden-hour side-window daylight, warm cozy ambient.</div>
+          <div>🍳 <strong>Properti:</strong> Cast iron skillet, wooden cutting boards, coarse sea salt flakes, scattered rosemary.</div>
+          <div>💡 <strong>Cocok Untuk:</strong> Comfort food, slow-cooked stew, baking & artisanal bread, hearty meals.</div>
+        </div>
+        <div style="margin-top: 0.75rem;">
+          <div style="font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.25rem;">T2I Prompt Blueprint:</div>
+          <div class="prompt-box" style="font-size: 0.68rem; max-height: 100px;">"Masterpiece food photography, rustic reclaimed weathered oak wood kitchen table, natural wrinkled linen napkin, vintage cast iron accents, naturally scattered raw herbs and sea salt, warm golden-hour side window lighting, cozy artisanal mood, shallow depth of field, commercial editorial quality."</div>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="card" style="border-top: 3px solid #2dd4bf;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+          <h3 style="font-size: 0.95rem; color: #2dd4bf;">⚪ Modern Minimalist Nordic Studio</h3>
+          <span class="badge" style="background: rgba(45, 212, 191, 0.15); color: #2dd4bf;">Clean & Bright</span>
+        </div>
+        <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+          Estetika studio kuliner Skandinavia yang ultra-bersih, lapang, higienis, dan kontemporer dengan kontras jernih.
+        </p>
+        <div style="font-size: 0.74rem; display: flex; flex-direction: column; gap: 0.35rem; color: var(--text-muted); background: var(--surface-raised); padding: 0.75rem; border-radius: var(--radius-sm);">
+          <div>🏛️ <strong>Permukaan:</strong> Polished white Carrara marble countertop, matte gray concrete.</div>
+          <div>💡 <strong>Pencahayaan:</strong> Bright diffused high-key studio softbox daylight, clean soft shadows.</div>
+          <div>🍽️ <strong>Properti:</strong> Matte artisan ceramic tableware, minimalist brushed steel cutlery, microgreens.</div>
+          <div>💡 <strong>Cocok Untuk:</strong> Air fryer healthy meals, salads, vegan bowls, modern clean diet.</div>
+        </div>
+        <div style="margin-top: 0.75rem;">
+          <div style="font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.25rem;">T2I Prompt Blueprint:</div>
+          <div class="prompt-box" style="font-size: 0.68rem; max-height: 100px;">"Clean minimalist Nordic culinary studio photography, pristine white Carrara marble countertop, matte artisan ceramic dishware, brushed steel utensils, high-key bright diffused daylight studio illumination, soft airy shadows, crisp pristine aesthetic, Michelin guide editorial quality."</div>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="card" style="border-top: 3px solid #f43f5e;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+          <h3 style="font-size: 0.95rem; color: #f43f5e;">🍷 Dark Moody Chiaroscuro & Smoke</h3>
+          <span class="badge" style="background: rgba(244, 63, 94, 0.15); color: #f43f5e;">Dramatic Fine Dining</span>
+        </div>
+        <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+          Suasana restoran fine-dining mewah malam hari dengan bayangan pekat chiaroscuro dan kepulan uap panas dramatis.
+        </p>
+        <div style="font-size: 0.74rem; display: flex; flex-direction: column; gap: 0.35rem; color: var(--text-muted); background: var(--surface-raised); padding: 0.75rem; border-radius: var(--radius-sm);">
+          <div>🪨 <strong>Permukaan:</strong> Dark textured charcoal slate stone, charred dark wood table.</div>
+          <div>🕯️ <strong>Pencahayaan:</strong> Single-directional Rembrandt beam spot lighting, deep rich shadows.</div>
+          <div>💨 <strong>Properti:</strong> Matte black stoneware dish, glistening rich food glaze, gentle rising steam wisps.</div>
+          <div>💡 <strong>Cocok Untuk:</strong> Grilled steak, gourmet meat, rich savory stews, espresso, dark chocolate desserts.</div>
+        </div>
+        <div style="margin-top: 0.75rem;">
+          <div style="font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.25rem;">T2I Prompt Blueprint:</div>
+          <div class="prompt-box" style="font-size: 0.68rem; max-height: 100px;">"Dramatic dark moody chiaroscuro gourmet food photography, dark rough slate stone tabletop, deep rich atmospheric shadows, single directional dramatic beam lighting, gentle rising culinary steam wisps, matte black stoneware, glistening rich food textures, luxury fine-dining presentation."</div>
+        </div>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="card" style="border-top: 3px solid #38bdf8;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+          <h3 style="font-size: 0.95rem; color: #38bdf8;">🍋 Vibrant Alfresco Sunlit Patio</h3>
+          <span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">Mediterranean Summer</span>
+        </div>
+        <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+          Teras outdoor Mediterania yang bermandikan sinar matahari cerah, penuh energi liburan musim panas dengan bayangan dedaunan.
+        </p>
+        <div style="font-size: 0.74rem; display: flex; flex-direction: column; gap: 0.35rem; color: var(--text-muted); background: var(--surface-raised); padding: 0.75rem; border-radius: var(--radius-sm);">
+          <div>🏺 <strong>Permukaan:</strong> Warm rustic terracotta tiles, sun-bleached weathered patio wood.</div>
+          <div>☀️ <strong>Pencahayaan:</strong> Direct sun-drenched lighting with crisp dappled olive leaf shadows.</div>
+          <div>🍋 <strong>Properti:</strong> Clear condensation glassware, fresh sliced citrus, vibrant basil, golden olive oil bottle.</div>
+          <div>💡 <strong>Cocok Untuk:</strong> Fresh seafood, pasta, Mediterranean dishes, summer salad, cold drinks & mocktails.</div>
+        </div>
+        <div style="margin-top: 0.75rem;">
+          <div style="font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.25rem;">T2I Prompt Blueprint:</div>
+          <div class="prompt-box" style="font-size: 0.68rem; max-height: 100px;">"Vibrant outdoor alfresco Mediterranean patio food photography, sun-drenched terracotta table, crisp dappled sunlight through olive branches casting artistic leaf shadows, condensation on glassware, fresh citrus and vibrant herbs, lively high saturation, energetic summer dining."</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- TAB 3: TENANT LOCKDOWN & RBAC GUARDRAILS -->
+  <!-- ========================================== -->
+  <div id="tab-tenant" style="display: none;">
     <div class="card">
       <div class="card-title">
-        <span>🗓️</span> Penjadwalan Kalender Auto Pipeline (Telah Terpasang di v2.40.32)
+        <span>🛡️</span> Multi-Tenant Isolation & Feature Access Lockdown
       </div>
       <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
-        Konfigurasi Language-First pada modal scheduler telah aktif pada release v2.40.32. Pengguna dapat memilih jam generate, jam publish, dan target akun Repliz secara otomatis.
+        Setiap parameter kampanye (termasuk rasio kanvas `aspect_ratio` dan `visual_style`) disimpan terisolasi di database PostgreSQL `recipe_campaigns` dengan binding `tenant_id` eksplisit.
       </p>
-      <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 1rem; font-size: 0.82rem;">
-        ✓ Language-First selector di Langkah 1 teratas formulir modal<br>
-        ✓ Penegakan keyword <code>[MANDATORY TOPIC & DISH KEYWORD ENFORCEMENT]</code> di <code>lib/scheduler-processors.js</code><br>
-        ✓ Propagasi <code>topic</code>, <code>category</code>, <code>recipe_classification</code>, dan <code>target_language</code> via <code>lib/auto-pipeline-scheduler-runner.js</code>
+      <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 1rem; font-size: 0.82rem; line-height: 1.6;">
+        ✓ <strong>Schema Database:</strong> <code>dev</code> (Port 5020/7020) & <code>staging</code> (Port 5010/7010) terpisah total.<br>
+        ✓ <strong>Data Binding:</strong> Kolom <code>tenant_id</code> diterapkan pada pembuatan tabel <code>recipe_campaigns</code> dan <code>recipe_items</code>.<br>
+        ✓ <strong>Sharp Execution:</strong> Folder output poster disimpan terisolasi pada <code>public/uploads/recipes/{tenantId}/{campaignId}/05_GRID_POSTER.jpg</code>.
       </div>
     </div>
   </div>
 
-  <!-- TAB 3: TENANT LOCKDOWN -->
-  <div id="tab-tenant" style="display: none;">
-    <div style="margin-bottom: 1rem; display: flex; align-items: center; gap: 1rem;">
-      <label style="font-size: 0.85rem; font-weight: 700;">Simulate Login As Tenant:</label>
-      <select id="tenantSwitcher" class="form-control" style="width: 340px;" onchange="switchTenantSimulation()">
-        <option value="default_tenant">👑 default_tenant (Superadmin / Global Owner)</option>
-        <option value="tnt_sy-benu_415f99">🏢 SY Benu (Locked: Auto Pipeline & Threads Labs)</option>
-        <option value="tnt_pt-gim-sosmed_62d0d9">🏢 PT GIM Sosmed (Unlocked: Full Enterprise Access)</option>
-        <option value="tnt_mas-ibnu_e0eb25">🏢 Mas Ibnu (Locked: Auto Pipeline & Threads Labs)</option>
-      </select>
-    </div>
-
-    <div class="grid-2col">
-      <!-- Sidebar View Simulation -->
-      <div class="card">
-        <div class="card-title">
-          <span>📑</span> Sidebar Navigation Response
-        </div>
-        <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
-          Menu di sidebar secara otomatis dikunci (berstatus disabled dan menampilkan ikon 🔒) jika Superadmin membatasi tenant:
-        </p>
-        <div id="sidebarContainer" style="background: var(--sidebar); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.75rem; display: flex; flex-direction: column; gap: 0.35rem;">
-          <!-- Injected via JavaScript -->
-        </div>
-      </div>
-
-      <!-- Page Guard Response -->
-      <div class="card">
-        <div class="card-title">
-          <span>🛡️</span> UI Page Guard & API 403 Response
-        </div>
-        <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
-          Jika pengguna berusaha mengakses langsung melalui URL (misal <code>/auto-pipeline</code> atau <code>/threads-labs</code>):
-        </p>
-        <div id="pageContentContainer">
-          <!-- Injected via JavaScript -->
-        </div>
-      </div>
-    </div>
-  </div>
-
+  <!-- ========================================== -->
+  <!-- JAVASCRIPT LOGIC & DYNAMIC RENDERER -->
+  <!-- ========================================== -->
   <script>
+    // State
+    let currentAspectRatio = '3:4'; // '1:1' | '3:4' | '9:16'
+    let currentImageCount = 4;
+    let currentLayoutId = '4_editorial_split';
+    let currentEnv = 'modern_nordic';
+
+    // 12x12 Coordinates from lib/core/GridCoordinates.js
+    const LAYOUT_COORDINATES = {
+      3: {
+        '3_split_left': [
+          { id: 1, x: 0, y: 0, w: 6, h: 12, role: 'Hero Plating' },
+          { id: 2, x: 6, y: 0, w: 6, h: 6, role: 'Action Shot' },
+          { id: 3, x: 6, y: 6, w: 6, h: 6, role: 'Macro Texture' }
+        ],
+        '3_split_right': [
+          { id: 1, x: 0, y: 0, w: 6, h: 6, role: 'Action Shot' },
+          { id: 2, x: 0, y: 6, w: 6, h: 6, role: 'Macro Texture' },
+          { id: 3, x: 6, y: 0, w: 6, h: 12, role: 'Hero Plating' }
+        ]
+      },
+      4: {
+        '4_editorial_split': [
+          { id: 1, x: 0, y: 0, w: 7, h: 8, role: 'Hero Main Plating' },
+          { id: 2, x: 7, y: 0, w: 5, h: 4, role: 'Bahan Mentah' },
+          { id: 3, x: 7, y: 4, w: 5, h: 4, role: 'Proses Memasak' },
+          { id: 4, x: 0, y: 8, w: 12, h: 4, role: 'Sajian Lifestyle' }
+        ],
+        '4_modern_masonry': [
+          { id: 1, x: 0, y: 0, w: 12, h: 5, role: 'Wide Panoramic' },
+          { id: 2, x: 0, y: 5, w: 6, h: 4, role: 'Bahan Mentah' },
+          { id: 3, x: 6, y: 5, w: 6, h: 7, role: 'Hero Plating' },
+          { id: 4, x: 0, y: 9, w: 6, h: 3, role: 'Macro Detail' }
+        ]
+      },
+      5: {
+        '5_pentagon_grid': [
+          { id: 1, x: 0, y: 0, w: 6, h: 4, role: 'Bahan Baku' },
+          { id: 2, x: 6, y: 0, w: 6, h: 3, role: 'Bumbu & Saus' },
+          { id: 3, x: 0, y: 4, w: 7, h: 5, role: 'Hero Plating' },
+          { id: 4, x: 7, y: 3, w: 5, h: 6, role: 'Aksi Memasak' },
+          { id: 5, x: 0, y: 9, w: 12, h: 3, role: 'Dining Lifestyle' }
+        ]
+      },
+      6: {
+        '6_magazine_spread': [
+          { id: 1, x: 0, y: 0, w: 4, h: 4, role: 'Bahan Baku' },
+          { id: 2, x: 4, y: 0, w: 8, h: 4, role: 'Hero Master' },
+          { id: 3, x: 0, y: 4, w: 8, h: 4, role: 'Aksi Dapur' },
+          { id: 4, x: 8, y: 4, w: 4, h: 4, role: 'Bumbu Garnish' },
+          { id: 5, x: 0, y: 8, w: 6, h: 4, role: 'Tekstur Macro' },
+          { id: 6, x: 6, y: 8, w: 6, h: 4, role: 'Sajian Siap Santap' }
+        ]
+      }
+    };
+
+    // Environment styling definitions
+    const ENV_STYLES = {
+      'rustic_warm': {
+        name: 'Rustic Warm Tabletop & Artisanal Kitchen',
+        surface: 'Papan kayu jati/oak reklamasi tua (weathered oak wood) & kain linen bernuansa krem berkerut alami.',
+        lighting: 'Cahaya alami golden-hour dari jendela samping, bayangan lembut, saturasi hangat menggugah selera.',
+        props: 'Wajan cast iron vintage, talenan kayu tebal, taburan sea salt flakes, butiran lada hitam, rosemary.',
+        bestFor: 'Comfort food, baking & pastry, slow-cooked stew, hidangan keluarga tradisional.',
+        gradientColor: 'linear-gradient(135deg, #78350f, #b45309)',
+        promptSnippet: 'Masterpiece food photography, set on a rustic weathered reclaimed oak wood kitchen table, textured wrinkled linen cloth, vintage cast iron accents, naturally scattered raw spices, warm natural golden-hour side window lighting, cozy artisanal mood, shallow depth of field, commercial editorial quality.'
+      },
+      'modern_nordic': {
+        name: 'Modern Minimalist Nordic Studio',
+        surface: 'Countertop marmer Carrara putih berurat abu-abu halus atau semen beton ekspos matte halus.',
+        lighting: 'Bright diffused high-key daylight studio illumination, bayangan lembut bebas kontras keras.',
+        props: 'Piring keramik artisanal warna netral/putih gading, sendok garpu brushed steel, microgreens.',
+        bestFor: 'Healthy food, salad, smoothie, clean meal prep, dan hidangan air fryer modern.',
+        gradientColor: 'linear-gradient(135deg, #0f766e, #14b8a6)',
+        promptSnippet: 'Clean minimalist Nordic studio food photography, pristine white Carrara marble countertop, matte artisan ceramic dishware, sleek brushed steel utensils, high-key bright diffused daylight studio lighting, soft airy shadows, crisp pristine aesthetic, modern Michelin culinary guide style.'
+      },
+      'dark_moody': {
+        name: 'Dark Moody Chiaroscuro & Atmospheric Smoke',
+        surface: 'Batu slate hitam bertekstur arang gelap (charcoal slate) atau meja kayu hitam charred timber.',
+        lighting: 'Pencahayaan satu arah terarah (chiaroscuro / Rembrandt food lighting), kontras gelap dramatis.',
+        props: 'Piring keramik stoneware hitam pekat, lelehan saus berkilau, kepulan uap panas/asap tipis dramatis.',
+        bestFor: 'Grilled steak, gourmet meat, hidangan berkuah kental, espresso / kopi, dessert cokelat mewah.',
+        gradientColor: 'linear-gradient(135deg, #4c0519, #9f1239)',
+        promptSnippet: 'Dramatic dark moody chiaroscuro gourmet food photography, dark rough slate stone tabletop, deep rich atmospheric shadows, single directional dramatic beam lighting, gentle rising culinary steam wisps, matte black stoneware, glistening rich food textures, luxury fine-dining presentation.'
+      },
+      'vibrant_alfresco': {
+        name: 'Vibrant Alfresco Sunlit Patio',
+        surface: 'Meja terakota hangat atau kayu lapuk cerah bermandikan sinar matahari (sun-bleached patio wood).',
+        lighting: 'Sinar matahari langsung musim panas dengan bayangan daun zaitun bergradasi (dappled leaf shadows).',
+        props: 'Gelas kaca bening berembun, irisan lemon segar, daun basil/mint segar, botol minyak zaitun keemasan.',
+        bestFor: 'Seafood segar, pasta & pizza Mediterania, salad musim panas, mocktail dingin, sajian BBQ.',
+        gradientColor: 'linear-gradient(135deg, #0369a1, #38bdf8)',
+        promptSnippet: 'Vibrant outdoor alfresco Mediterranean patio food photography, sun-drenched terracotta table, crisp dappled sunlight through olive branches casting artistic leaf shadows, condensation on glassware, fresh citrus and vibrant herbs, lively high saturation, energetic summer dining.'
+      }
+    };
+
+    // Taxonomies
+    const taxonomies = {
+      'en_US': {
+        label: '🏷️ 2. International Culinary Category',
+        sub: 'Adapted for Global English (US/UK Standards)',
+        kwLabel: '🎯 3. Mandatory Dish Keyword (Strict Enforcement)',
+        badge: 'Global English Mode',
+        defaultKw: 'Crispy Honey Garlic Air Fryer Chicken Bites',
+        categories: [
+          'Main Courses & Entrees (Chicken, Beef, Seafood)',
+          'Breakfast & Morning Favorites (Pancakes, Oatmeal)',
+          'Appetizers & Finger Foods (Wings, Dips, Sliders)',
+          'Quick & Easy Weeknight Dinners (Under 20 Mins)',
+          'Air Fryer & Convection Essentials (Ultra-Crispy)',
+          'High-Protein Fitness Meal Prep (Healthy Macros)',
+          'Baking, Artisanal Bread & Desserts'
+        ]
+      },
+      'id_ID': {
+        label: '🏷️ 2. Klasifikasi Kuliner Nasional Indonesia',
+        sub: 'Standar Kuliner Nusantara & Lidah Domestik',
+        kwLabel: '🎯 3. Topik Menu / Kata Kunci Resep Wajib',
+        badge: 'Mode Bahasa Indonesia',
+        defaultKw: 'Ayam Goreng Mentega Gurih Renyah',
+        categories: [
+          'Menu Hidangan Utama & Lauk Pauk (Ayam, Daging, Seafood)',
+          'Menu Sarapan Praktis & Cepat (Nasi Goreng, Bubur)',
+          'Camilan, Gorengan Gurih & Jajanan Pasar',
+          'Menu Praktis 15-20 Menit (Tumis Cepat Rumahan)',
+          'Kreasi Masakan Air Fryer Sehat (Bebas Minyak)',
+          'Menu Tinggi Protein & Meal Prep Fitnes Sehat',
+          'Kue Basah/Kering & Dessert Manis'
+        ]
+      },
+      'bilingual': {
+        label: '🏷️ 2. Bilingual Classification (English & Indonesian)',
+        sub: 'Global Reach + Local Market',
+        kwLabel: '🎯 3. Dual Target Keyword / Dish Topic',
+        badge: 'Bilingual Hybrid Mode',
+        defaultKw: 'Crispy Honey Butter Wings / Sayap Ayam Madu Krispi',
+        categories: [
+          'Main Courses & Entrees (Hidangan Utama)',
+          'Quick & Easy Weeknight Dinners (Menu Praktis Cepat)',
+          'Air Fryer & Convection Essentials (Masakan Air Fryer)',
+          'High-Protein Fitness Meal Prep (Menu Tinggi Protein)',
+          'Desserts & Artisanal Bakery (Kue & Hidangan Manis)'
+        ]
+      }
+    };
+
     function toggleTheme() {
       const html = document.documentElement;
       html.setAttribute('data-theme', html.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
@@ -571,152 +926,134 @@
 
     function switchMainTab(tab) {
       document.getElementById('tab-instant').style.display = tab === 'instant' ? 'block' : 'none';
-      document.getElementById('tab-scheduler').style.display = tab === 'scheduler' ? 'block' : 'none';
+      document.getElementById('tab-specs').style.display = tab === 'specs' ? 'block' : 'none';
       document.getElementById('tab-tenant').style.display = tab === 'tenant' ? 'block' : 'none';
 
       document.getElementById('btnTab1').className = 'tab-btn ' + (tab === 'instant' ? 'active' : '');
-      document.getElementById('btnTab2').className = 'tab-btn ' + (tab === 'scheduler' ? 'active' : '');
+      document.getElementById('btnTab2').className = 'tab-btn ' + (tab === 'specs' ? 'active' : '');
       document.getElementById('btnTab3').className = 'tab-btn ' + (tab === 'tenant' ? 'active' : '');
     }
 
-    // TAXONOMIES DEFINITION
-    const taxonomies = {
-      'en_US': {
-        classificationLabel: '🏷️ 2. International Culinary Category',
-        classificationSub: 'Adapted for Global English (US/UK Standards)',
-        classificationHint: 'Aligned with international culinary standards (AllRecipes, BBC Good Food, NYT Cooking).',
-        measurementLabel: '⚖️ 3. Measurement & Units System',
-        keywordLabel: '🎯 3. Specific Dish Topic / Keyword Wajib (Strict Enforcement)',
-        badgeText: 'English Global Mode',
-        defaultKeyword: 'Crispy Honey Garlic Air Fryer Chicken Bites',
-        keywordPlaceholder: 'e.g., Crispy Honey Garlic Air Fryer Chicken Bites, Garlic Butter Steak Bites...',
-        categories: [
-          { group: 'Primary Meal Courses', options: [
-            { val: 'Main Courses & Entrees', label: '🍽️ Main Courses & Entrees (Chicken, Beef, Seafood, Pork)', selected: true },
-            { val: 'Breakfast & Morning Favorites', label: '🍳 Breakfast & Brunch (Pancakes, Egg Muffins, Oatmeal Bowls)' },
-            { val: 'Appetizers & Finger Foods', label: '🥟 Appetizers & Finger Foods (Wings, Dips, Sliders, Bites)' },
-            { val: 'Soups, Stews & Chilis', label: '🍲 Soups, Stews & Hearty Chilis (Chowder, Beef Stew, Broths)' },
-            { val: 'Salads & Healthy Bowls', label: '🥗 Salads & Healthy Bowls (Caesar, Grain Bowls, Mediterranean)' }
-          ]},
-          { group: 'Cooking Method & Lifestyle', options: [
-            { val: 'Quick & Easy Weeknight Dinners (Under 20 Mins)', label: '⏱️ Quick & Easy Weeknight Dinners (Under 20 Mins)' },
-            { val: 'Air Fryer & Convection Essentials', label: '♨️ Air Fryer & Convection Essentials (Ultra-Crispy, Oil-Free)' },
-            { val: 'High-Protein Fitness Meal Prep', label: '💪 High-Protein Fitness Meal Prep (Chicken Breast, Quinoa, Macros)' },
-            { val: 'Keto, Low-Carb & Diabetic Friendly', label: '🥑 Keto & Low-Carb High-Fat (Zero Sugar, Cauliflower Rice)' },
-            { val: 'Plant-Based, Vegan & Vegetarian', label: '🌱 Plant-Based, Vegan & Vegetarian (Tofu, Tempeh, Legumes)' }
-          ]},
-          { group: 'Bakery, Sweet & Drinks', options: [
-            { val: 'Baking, Artisanal Bread & Desserts', label: '🍰 Baking, Artisanal Bread & Desserts (Cookies, Pies, Sourdough)' },
-            { val: 'Beverages, Smoothies & Specialty Coffee', label: '☕ Specialty Beverages & Coffee (Espresso, Matcha, Detox Juice)' }
-          ]}
-        ]
-      },
-      'id_ID': {
-        classificationLabel: '🏷️ 2. Klasifikasi Kuliner Nasional Indonesia',
-        classificationSub: 'Standar Kuliner Nusantara & Lidah Domestik',
-        classificationHint: 'Disesuaikan dengan selera lidah dan kebiasaan belanja masyarakat Indonesia.',
-        measurementLabel: '⚖️ 3. Standar Satuan Takaran Masak',
-        keywordLabel: '🎯 3. Topik Menu / Kata Kunci Resep Wajib',
-        badgeText: 'Mode Bahasa Indonesia',
-        defaultKeyword: 'Ayam Goreng Mentega Gurih Renyah',
-        keywordPlaceholder: 'Contoh: Ayam Goreng Mentega Gurih, Sambal Udang Balado Petai...',
-        categories: [
-          { group: 'Kategori Waktu Makan Utama', options: [
-            { val: 'Menu Hidangan Utama & Lauk Pauk (Main Course)', label: '🍽️ Menu Hidangan Utama & Lauk Pauk (Ayam, Daging, Seafood)', selected: true },
-            { val: 'Menu Sarapan Praktis & Cepat (Breakfast)', label: '🍳 Menu Sarapan Praktis & Cepat (Nasi Goreng, Bubur, Telur)' },
-            { val: 'Camilan, Gorengan Gurih & Finger Food', label: '🥟 Camilan, Gorengan Gurih & Jajanan Pasar (Bakwan, Cireng, Dimsum)' },
-            { val: 'Sup Hangat, Sayur Kuah & Soto Nusantara', label: '🍲 Sup Hangat, Sayur Kuah & Soto Nusantara (Soto, Rawon, Sayur Asem)' },
-            { val: 'Masakan Tradisional Nusantara & Aneka Sambal', label: '🌶️ Masakan Tradisional Nusantara & Aneka Sambal (Rendang, Balado)' }
-          ]},
-          { group: 'Gaya Hidup & Kepraktisan Masak', options: [
-            { val: 'Menu Praktis 15-20 Menit (One-Pan / Tumisan)', label: '⏱️ Menu Praktis 15–20 Menit (Tumis Cepat, 1 Wajan Rumahan)' },
-            { val: 'Kreasi Masakan Air Fryer Sehat', label: '♨️ Kreasi Masakan Air Fryer Sehat (Crispy Renyah Bebas Minyak)' },
-            { val: 'Menu Tinggi Protein & Meal Prep Fitnes', label: '💪 Menu Tinggi Protein & Meal Prep Sehat (Dada Ayam, Telur, Tahu)' },
-            { val: 'Menu Rendah Kalori, Diet Sehat & Sayuran', label: '🥗 Menu Rendah Kalori, Diet Sehat & Sayuran Segar' }
-          ]},
-          { group: 'Kue, Dessert & Minuman Kekinian', options: [
-            { val: 'Kue, Dessert Manis & Roti Rumahan', label: '🍰 Kue Basah/Kering, Dessert Manis & Roti Rumahan' },
-            { val: 'Minuman Segar, Es Nusantara & Kopi Kekinian', label: '☕ Minuman Segar, Es Nusantara & Kopi Kekinian' }
-          ]}
-        ]
-      },
-      'bilingual': {
-        classificationLabel: '🏷️ 2. Bilingual Classification (English & Indonesian)',
-        classificationSub: 'Global Reach + Local Market',
-        classificationHint: 'Format ganda: headline & hook internasional + isi penjelasan lokal.',
-        measurementLabel: '⚖️ 3. Dual Measurement Standards',
-        keywordLabel: '🎯 3. Dual Target Keyword / Dish Topic',
-        badgeText: 'Bilingual Hybrid Mode',
-        defaultKeyword: 'Crispy Honey Butter Wings / Sayap Ayam Madu Krispi',
-        keywordPlaceholder: 'e.g., Crispy Honey Butter Wings / Sayap Ayam Madu Krispi...',
-        categories: [
-          { group: 'Courses / Waktu Makan', options: [
-            { val: 'Main Courses & Entrees (Hidangan Utama)', label: '🍽️ Main Courses & Entrees (Hidangan Utama)', selected: true },
-            { val: 'Breakfast & Morning Favorites (Sarapan Sehat)', label: '🍳 Breakfast & Morning Favorites (Sarapan Sehat)' },
-            { val: 'Appetizers & Finger Foods (Camilan & Snack)', label: '🥟 Appetizers & Finger Foods (Camilan & Snack)' }
-          ]},
-          { group: 'Modern Cooking Trends', options: [
-            { val: 'Quick & Easy Weeknight Dinners (Menu Praktis Cepat)', label: '⏱️ Quick & Easy Weeknight Dinners (Menu Praktis Cepat)' },
-            { val: 'Air Fryer & Convection Essentials (Masakan Air Fryer)', label: '♨️ Air Fryer & Convection Essentials (Masakan Air Fryer)' },
-            { val: 'High-Protein Fitness Meal Prep (Menu Tinggi Protein)', label: '💪 High-Protein Fitness Meal Prep (Menu Tinggi Protein)' }
-          ]},
-          { group: 'Bakery & Drinks', options: [
-            { val: 'Desserts & Artisanal Bakery (Kue & Hidangan Manis)', label: '🍰 Desserts & Artisanal Bakery (Kue & Hidangan Manis)' },
-            { val: 'Specialty Beverages & Coffee (Minuman & Kopi)', label: '☕ Specialty Beverages & Coffee (Minuman & Kopi)' }
-          ]}
-        ]
-      }
-    };
+    function selectAspectRatio(ratio) {
+      currentAspectRatio = ratio;
+      document.getElementById('ratioCard-1-1').className = 'ratio-card ' + (ratio === '1:1' ? 'active' : '');
+      document.getElementById('ratioCard-3-4').className = 'ratio-card ' + (ratio === '3:4' ? 'active' : '');
+      document.getElementById('ratioCard-9-16').className = 'ratio-card ' + (ratio === '9:16' ? 'active' : '');
 
-    function handleInstantLanguageChange() {
+      const canvas = document.getElementById('dynamicCanvas');
+      canvas.className = 'canvas-container ratio-' + ratio.replace(':', '-');
+
+      const resBadge = document.getElementById('canvasResBadge');
+      if (ratio === '1:1') resBadge.innerText = '1080 x 1080 px (1:1 Square)';
+      else if (ratio === '3:4') resBadge.innerText = '1080 x 1440 px (3:4 Portrait Feed)';
+      else resBadge.innerText = '1080 x 1920 px (9:16 Full Vertical)';
+
+      renderCollageSlots();
+      updateLivePreview();
+    }
+
+    function handleEnvironmentChange() {
+      currentEnv = document.getElementById('photographyEnvironment').value;
+      const env = ENV_STYLES[currentEnv];
+      document.getElementById('envSurface').innerText = env.surface;
+      document.getElementById('envLighting').innerText = env.lighting;
+      document.getElementById('envProps').innerText = env.props;
+      document.getElementById('envBestFor').innerText = env.bestFor;
+
+      renderCollageSlots();
+      updateLivePreview();
+    }
+
+    function handleImageCountChange() {
+      currentImageCount = Number(document.getElementById('imageCount').value);
+      const layoutSelect = document.getElementById('layoutPreset');
+      layoutSelect.innerHTML = '';
+
+      const presets = LAYOUT_COORDINATES[currentImageCount] || {};
+      const keys = Object.keys(presets);
+      keys.forEach((k, idx) => {
+        const opt = document.createElement('option');
+        opt.value = k;
+        opt.innerText = k.replace(/_/g, ' ').toUpperCase();
+        if (idx === 0) opt.selected = true;
+        layoutSelect.appendChild(opt);
+      });
+
+      currentLayoutId = keys[0] || '4_editorial_split';
+      renderCollageSlots();
+      updateLivePreview();
+    }
+
+    function handleLanguageChange() {
       const lang = document.getElementById('instantTargetLanguage').value;
       const tax = taxonomies[lang];
 
-      document.getElementById('instantClassificationLabel').innerText = tax.classificationLabel;
-      document.getElementById('instantClassificationSub').innerText = tax.classificationSub;
-      document.getElementById('instantClassificationHint').innerText = tax.classificationHint;
-      document.getElementById('instantKeywordLabel').innerText = tax.keywordLabel;
-      document.getElementById('instantBadge').innerText = tax.badgeText;
+      document.getElementById('classificationLabel').innerText = tax.label;
+      document.getElementById('classificationSub').innerText = tax.sub;
+      document.getElementById('keywordLabel').innerText = tax.kwLabel;
+      document.getElementById('langModeBadge').innerText = tax.badge;
 
-      const catSelect = document.getElementById('instantRecipeClassification');
+      const catSelect = document.getElementById('recipeClassification');
       catSelect.innerHTML = '';
-      tax.categories.forEach(group => {
-        const optgroup = document.createElement('optgroup');
-        optgroup.label = group.group;
-        group.options.forEach(opt => {
-          const option = document.createElement('option');
-          option.value = opt.val;
-          option.innerText = opt.label;
-          if (opt.selected) option.selected = true;
-          optgroup.appendChild(option);
-        });
-        catSelect.appendChild(optgroup);
+      tax.categories.forEach((cat, idx) => {
+        const opt = document.createElement('option');
+        opt.value = cat;
+        opt.innerText = cat;
+        if (idx === 0) opt.selected = true;
+        catSelect.appendChild(opt);
       });
 
-      const kwInput = document.getElementById('instantRecipeTopic');
-      kwInput.placeholder = tax.keywordPlaceholder;
-      kwInput.value = tax.defaultKeyword;
-
-      updateInstantPreview();
+      document.getElementById('recipeTopic').value = tax.defaultKw;
+      updateLivePreview();
     }
 
-    function updateInstantPreview() {
-      const lang = document.getElementById('instantTargetLanguage').value;
-      const cat = document.getElementById('instantRecipeClassification').value;
-      const kw = document.getElementById('instantRecipeTopic').value || 'Menu Resep Pilihan';
-      const style = document.getElementById('instantVisualStyle').value;
-      const layoutId = document.getElementById('instantLayoutId').value;
-      const postFb = document.getElementById('instantPostToFb').checked;
+    function renderCollageSlots() {
+      const canvas = document.getElementById('dynamicCanvas');
+      canvas.innerHTML = '';
 
-      // 1. JSON Payload Preview ke API /api/v2/recipes/autonomous-pipeline
+      const count = currentImageCount;
+      const layoutId = document.getElementById('layoutPreset')?.value || Object.keys(LAYOUT_COORDINATES[count])[0];
+      const slots = LAYOUT_COORDINATES[count]?.[layoutId] || LAYOUT_COORDINATES[4]['4_editorial_split'];
+      const env = ENV_STYLES[currentEnv];
+
+      slots.forEach(slot => {
+        const el = document.createElement('div');
+        el.className = 'grid-slot';
+        
+        // Slot coordinate positioning in 12x12 percentage
+        el.style.left = `calc(${((slot.x / 12) * 100).toFixed(2)}% + 3px)`;
+        el.style.top = `calc(${((slot.y / 12) * 100).toFixed(2)}% + 3px)`;
+        el.style.width = `calc(${((slot.w / 12) * 100).toFixed(2)}% - 6px)`;
+        el.style.height = `calc(${((slot.h / 12) * 100).toFixed(2)}% - 6px)`;
+        el.style.background = env.gradientColor;
+
+        el.innerHTML = `
+          <span class="slot-badge">Slot #${slot.id}</span>
+          <span class="slot-role">${slot.role}</span>
+        `;
+
+        canvas.appendChild(el);
+      });
+    }
+
+    function updateLivePreview() {
+      const lang = document.getElementById('instantTargetLanguage').value;
+      const cat = document.getElementById('recipeClassification').value;
+      const kw = document.getElementById('recipeTopic').value || 'Menu Resep';
+      const layoutId = document.getElementById('layoutPreset')?.value || '4_editorial_split';
+      const postFb = document.getElementById('postToFacebook').checked;
+      const env = ENV_STYLES[currentEnv];
+
+      // 1. JSON Payload Preview
       const payload = {
         pipeline_type: 'recipe_labs',
         target_language: lang,
         recipe_classification: cat,
         topic: kw,
         category: cat,
-        visual_style: style,
-        images_per_recipe: 4,
+        aspect_ratio: currentAspectRatio,
+        visual_style: env.name,
+        images_per_recipe: currentImageCount,
         selected_layout_id: layoutId,
         grid_gap_size: 12,
         grid_border_radius: 16,
@@ -731,115 +1068,64 @@
       let promptText = '';
       if (lang === 'en_US') {
         promptText = `You are an Executive Chef and Commercial Food Photographer.
-Your task is to create 1 mouthwatering, tested recipe and high-converting Facebook editorial copy for category: "${cat}".
+Create 1 mouthwatering tested recipe and Facebook editorial article for category: "${cat}".
 
 [MANDATORY TOPIC & DISH KEYWORD ENFORCEMENT]
 The recipe MUST STRICTLY revolve around this exact dish / keyword: "${kw}".
-DO NOT deviate, generalize, or substitute with unrelated dishes.
-The dish title, primary ingredients list, step-by-step techniques, and visual prompts MUST explicitly feature "${kw}".
+DO NOT generalize or substitute with unrelated dishes.
 
-[STANDARDS & MEASUREMENT DIRECTIVES]
-- Target Language: American/International English
-- Measurement Units: US Customary & Metric dual format (cups, tbsp, oz, grams)
+[COLLAGE CANVAS & ORIENTATION DIRECTIVE]
+- Target Canvas Ratio: ${currentAspectRatio} (${currentAspectRatio === '1:1' ? '1080x1080 Square Feed' : (currentAspectRatio === '3:4' ? '1080x1440 Portrait Feed' : '1080x1920 Full Vertical')})
+- Total Visual Slots: ${currentImageCount} Compositional Slots
 
-[VISUAL PHOTOGRAPHY DIRECTIVE]
-Apply the "${style}" photography aesthetic consistently across all 4 image prompts:
-- Slot 1: Hero plating of ${kw}
-- Slot 2: [FACELESS ONLY] Kitchen action shot
-- Slot 3: Macro texture detail
-- Slot 4: Serving presentation`;
+[ENVIRONMENT PHOTOGRAPHY MANDATE: ${env.name}]
+Maintain this precise photography aesthetic across all ${currentImageCount} image prompts:
+- Tabletop & Surface: ${env.surface}
+- Lighting Atmosphere: ${env.lighting}
+- Styling Props: ${env.props}
+- T2I Master Seed: "${env.promptSnippet}"`;
       } else if (lang === 'id_ID') {
         promptText = `Anda adalah Koki Profesional dan Ahli Fotografi Makanan.
-Tugas Anda adalah membuat 1 resep kuliner yang sangat lezat, menggugah selera, dan teruji untuk klasifikasi: "${cat}".
+Buat 1 resep kuliner lezat & naskah Facebook menggugah selera untuk klasifikasi: "${cat}".
 
 [MANDATORY TOPIC & DISH KEYWORD ENFORCEMENT]
-Resep yang dibuat WAJIB KETAT berpusat pada topik/kata kunci berikut: "${kw}".
-DILARANG KERAS menyimpang atau membuat hidangan lain yang tidak berhubungan dengan "${kw}".
+Resep WAJIB KETAT berpusat pada topik/kata kunci: "${kw}".
+DILARANG KERAS menyimpang atau membuat hidangan lain yang tidak berhubungan.
 
-[PANDUAN BAHASA & TAKARAN]
-- Naskah artikel Facebook lengkap dalam Bahasa Indonesia yang akrab & menggugah selera
-- Satuan takaran standar Indonesia (gram, sdm, sdt, ml)
-- Gaya visual fotografi AI: "${style}"`;
+[ARAHAN KANVAS & ASPEK RASIO]
+- Aspek Rasio Target: ${currentAspectRatio} (${currentAspectRatio === '1:1' ? '1080x1080 Feed Kotak' : (currentAspectRatio === '3:4' ? '1080x1440 Portrait Optimal' : '1080x1920 Vertikal Panjang')})
+- Jumlah Slot Kolase: ${currentImageCount} Slot Komposisi
+
+[GAYA ENVIRONMENT FOTOGRAFI AI: ${env.name}]
+Gunakan estetika fotografi berikut secara konsisten pada seluruh prompt gambar:
+- Permukaan Meja: ${env.surface}
+- Pencahayaan: ${env.lighting}
+- Properti Dapur: ${env.props}`;
       } else {
         promptText = `You are an International Culinary Copywriter.
-Create a high-converting viral bilingual recipe post for category: "${cat}" focusing strictly on "${kw}".
-Headline & hook in English, followed by localized body copy in Indonesian.`;
+Create a high-converting bilingual recipe post for category: "${cat}" focusing strictly on "${kw}".
+Canvas Ratio: ${currentAspectRatio}. Photography Style: "${env.name}".`;
       }
 
-      document.getElementById('instantPromptOutput').innerText = promptText;
+      document.getElementById('promptOutput').innerText = promptText;
     }
 
-    function triggerInstantLaunchSimulation() {
-      const toast = document.getElementById('launchToast');
-      const kw = document.getElementById('instantRecipeTopic').value || 'Resep Pilihan';
-      document.getElementById('launchToastText').innerText = `⚡ Kampanye 1-Klik Resep ("${kw}") berhasil dikirimkan ke autonomous-pipeline dan scheduler! (HTTP 200 OK)`;
+    function triggerSimulation() {
+      const toast = document.getElementById('toastNotif');
+      const kw = document.getElementById('recipeTopic').value || 'Resep Pilihan';
+      document.getElementById('toastNotifText').innerText = `⚡ Kampanye resep ("${kw}") berhasil diluncurkan dengan rasio kanvas ${currentAspectRatio} & gaya "${ENV_STYLES[currentEnv].name}"! (HTTP 200 OK)`;
       toast.style.display = 'flex';
       setTimeout(() => {
         toast.style.display = 'none';
       }, 5000);
     }
 
-    // Mock Database for Tenants Disabled Menus
-    const tenantPermissions = {
-      'default_tenant': { role: 'superadmin', disabled: [] },
-      'tnt_sy-benu_415f99': { role: 'admin', disabled: ['auto_pipeline', 'threads_labs', 'sheets_autopilot'] },
-      'tnt_pt-gim-sosmed_62d0d9': { role: 'admin', disabled: [] },
-      'tnt_mas-ibnu_e0eb25': { role: 'admin', disabled: ['auto_pipeline', 'threads_labs', 'youtube_studio'] }
-    };
-
-    function switchTenantSimulation() {
-      const selected = document.getElementById('tenantSwitcher').value;
-      const tInfo = tenantPermissions[selected];
-      const isSuperadmin = tInfo.role === 'superadmin';
-      const isAutoPipelineLocked = !isSuperadmin && tInfo.disabled.includes('auto_pipeline');
-      const isThreadsLocked = !isSuperadmin && tInfo.disabled.includes('threads_labs');
-
-      const sidebar = document.getElementById('sidebarContainer');
-      sidebar.innerHTML = `
-        <div style="font-size: 0.7rem; font-weight: 800; color: var(--text-muted); padding: 0.25rem 0.5rem;">WORKFLOW</div>
-        <div class="sim-nav-item ${isAutoPipelineLocked ? 'locked' : 'active'}" title="${isAutoPipelineLocked ? 'Module locked by Superadmin' : 'Full Access'}">
-          <span>⚡ Auto Pipeline</span>
-          <span>${isAutoPipelineLocked ? '🔒' : '✓'}</span>
-        </div>
-        <div class="sim-nav-item ${isThreadsLocked ? 'locked' : ''}" title="${isThreadsLocked ? 'Module locked by Superadmin' : 'Full Access'}">
-          <span>🧵 Threads Labs</span>
-          <span>${isThreadsLocked ? '🔒' : '✓'}</span>
-        </div>
-        <div class="sim-nav-item">
-          <span>🍳 Recipe Labs</span>
-          <span>✓</span>
-        </div>
-        <div class="sim-nav-item">
-          <span>🌱 Pillar Campaign</span>
-          <span>✓</span>
-        </div>
-      `;
-
-      const page = document.getElementById('pageContentContainer');
-      if (isAutoPipelineLocked) {
-        page.innerHTML = `
-          <div class="alert-banner">
-            <span style="font-size: 1.5rem;">🔒</span>
-            <div>
-              <strong style="color: var(--status-danger);">Access Restricted: Auto Pipeline Module Locked</strong>
-              <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.25rem;">
-                This autonomous cron scheduler module is currently disabled by Superadmin for your organization (<code>${selected}</code>). 
-              </div>
-            </div>
-          </div>
-        `;
-      } else {
-        page.innerHTML = `
-          <div style="background: var(--status-success-soft); border: 1px solid var(--status-success); border-radius: var(--radius-sm); padding: 0.75rem 1rem; color: var(--status-success); font-size: 0.85rem; font-weight: 600;">
-            ✓ Your organization has full access to Autonomous Pipeline Schedulers.
-          </div>
-        `;
-      }
-    }
-
-    // Initialize
-    handleInstantLanguageChange();
-    switchTenantSimulation();
+    // Initialize on load
+    handleLanguageChange();
+    handleImageCountChange();
+    handleEnvironmentChange();
+    selectAspectRatio('3:4');
   </script>
+
 </body>
 </html>

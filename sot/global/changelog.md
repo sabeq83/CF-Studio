@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.40.35 — feat: multi-aspect collage layout & 4 photography environments for recipe labs and auto pipeline scheduler (11/11/2026)
+- Add 1:1, 3:4, and 9:16 collage layout support to Sharp engine
+- Add 4 commercial photography environments with rich T2I prompt blueprint
+- Propagate aspect_ratio and visual_style to Auto Pipeline Tab 1 and Tab 2 Scheduler
+
 ## V2.40.34 — Threaded Concurrent T2I Batch Dispatch for Recipe Labs (11/11/2026)
 - Refaktorisasi processRecipeGLabs dari serial blocking menjadi Threaded Concurrent Batch
 - Terapkan Fast Concurrent Dispatch untuk mengirim seluruh prompt T2I serentak ke G-Labs

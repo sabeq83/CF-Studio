@@ -250,7 +250,8 @@ export default function AutoPipelinePage() {
   const [instantRecipeClassification, setInstantRecipeClassification] = useState('Quick & Easy Weeknight Dinners (Under 20 Mins)');
   const [recipeLabsTopic, setRecipeLabsTopic] = useState('Crispy Honey Garlic Air Fryer Chicken Bites');
   const [recipeLabsCategory, setRecipeLabsCategory] = useState('Quick & Easy Weeknight Dinners (Under 20 Mins)');
-  const [recipeLabsVisualStyle, setRecipeLabsVisualStyle] = useState('Food Porn');
+  const [instantRecipeAspectRatio, setInstantRecipeAspectRatio] = useState('3:4');
+  const [recipeLabsVisualStyle, setRecipeLabsVisualStyle] = useState('Modern Minimalist Nordic Studio');
   const [imagesPerRecipe, setImagesPerRecipe] = useState(4);
   const [selectedLayoutId, setSelectedLayoutId] = useState('4_editorial_split');
   const [gridGapSize, setGridGapSize] = useState(12);
@@ -305,7 +306,8 @@ export default function AutoPipelinePage() {
   const [schedBlueprintSearchQuery, setSchedBlueprintSearchQuery] = useState('');
   const [schedImagesPerRecipe, setSchedImagesPerRecipe] = useState(4);
   const [schedLayoutId, setSchedLayoutId] = useState('4_editorial_split');
-  const [schedVisualStyle, setSchedVisualStyle] = useState('Food Porn');
+  const [schedRecipeAspectRatio, setSchedRecipeAspectRatio] = useState('3:4');
+  const [schedVisualStyle, setSchedVisualStyle] = useState('Modern Minimalist Nordic Studio');
   const [schedPostToFacebook, setSchedPostToFacebook] = useState(true);
   const [schedTargetLanguage, setSchedTargetLanguage] = useState('en_US');
   const [schedRecipeClassification, setSchedRecipeClassification] = useState('Quick & Easy Weeknight Dinners (Under 20 Mins)');
@@ -1093,6 +1095,7 @@ export default function AutoPipelinePage() {
           grid_border_radius: gridBorderRadius,
           grid_outer_padding: gridOuterPadding,
           grid_bg_color: gridBgColor,
+          aspect_ratio: instantRecipeAspectRatio,
           visual_style: recipeLabsVisualStyle,
           post_to_facebook: postToFacebook,
           post_link_affiliate: instantPostAffiliateLink,
@@ -1517,7 +1520,8 @@ export default function AutoPipelinePage() {
     if (pType === 'recipe_labs') {
       setSchedImagesPerRecipe(schedCfg.images_per_recipe || 4);
       setSchedLayoutId(schedCfg.selected_layout_id || '4_editorial_split');
-      setSchedVisualStyle(schedCfg.visual_style || 'Food Porn');
+      setSchedRecipeAspectRatio(schedCfg.aspect_ratio || '3:4');
+      setSchedVisualStyle(schedCfg.visual_style || 'Modern Minimalist Nordic Studio');
       setSchedPostToFacebook(schedCfg.post_to_facebook !== false);
       setSchedTargetLanguage(schedCfg.target_language || 'en_US');
       setSchedRecipeClassification(schedCfg.recipe_classification || schedCfg.category || sched.category || 'Main Courses & Entrees');
@@ -1632,7 +1636,17 @@ export default function AutoPipelinePage() {
               : (schedCampaignType === 'multiplier_campaign'
                   ? { blueprint_id: targetId, execution_mode: 'full_autopilot', generate_recipe: schedGenerateRecipe, visual_identity_preset_id: schedViId }
                   : (schedCampaignType === 'recipe_labs'
-                      ? { images_per_recipe: schedImagesPerRecipe, selected_layout_id: schedLayoutId, visual_style: schedVisualStyle, post_to_facebook: schedPostToFacebook }
+                      ? { 
+                          images_per_recipe: schedImagesPerRecipe, 
+                          selected_layout_id: schedLayoutId, 
+                          aspect_ratio: schedRecipeAspectRatio || '3:4',
+                          visual_style: schedVisualStyle, 
+                          post_to_facebook: schedPostToFacebook,
+                          topic: schedTopicVal,
+                          category: schedCategory,
+                          recipe_classification: schedRecipeClassification,
+                          target_language: schedTargetLanguage || 'en_US'
+                        }
                       : (schedCampaignType === 'threads_series'
                           ? {
                               post_objective: threadsObjective,
@@ -2079,6 +2093,7 @@ export default function AutoPipelinePage() {
                         ? { 
                             images_per_recipe: schedImagesPerRecipe, 
                             selected_layout_id: schedLayoutId, 
+                            aspect_ratio: schedRecipeAspectRatio || '3:4',
                             visual_style: schedVisualStyle, 
                             post_to_facebook: schedPostToFacebook,
                             topic: finalTopic,
@@ -4350,9 +4365,52 @@ export default function AutoPipelinePage() {
                         }}
                       />
                     </div>
+                    {/* Orientasi Rasio Kolase Poster */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
+                        <span>📐 Orientasi / Rasio Kolase Poster:</span>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--status-rose)', fontWeight: 600 }}>
+                          {instantRecipeAspectRatio === '1:1' ? '1080x1080 (Square Feed)' : (instantRecipeAspectRatio === '3:4' ? '1080x1440 (Portrait Feed Optimal)' : '1080x1920 (Full Vertical)')}
+                        </span>
+                      </label>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
+                        {[
+                          { key: '1:1', icon: '⏹️', label: '1:1 Square', sub: 'IG/FB Feed' },
+                          { key: '3:4', icon: '📱', label: '3:4 Portrait', sub: 'Feed Optimal' },
+                          { key: '9:16', icon: '📜', label: '9:16 Vertical', sub: 'Stories/Pins' }
+                        ].map(ratio => {
+                          const isSelected = instantRecipeAspectRatio === ratio.key;
+                          return (
+                            <button
+                              key={ratio.key}
+                              type="button"
+                              onClick={() => setInstantRecipeAspectRatio(ratio.key)}
+                              style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                padding: '0.5rem 0.25rem',
+                                borderRadius: 'var(--radius-sm)',
+                                border: isSelected ? '1.5px solid var(--status-rose)' : '1px solid var(--border-subtle)',
+                                background: isSelected ? 'var(--surface-interactive)' : 'var(--surface)',
+                                color: isSelected ? 'var(--status-rose)' : 'var(--text-secondary)',
+                                cursor: 'pointer',
+                                transition: 'var(--transition)'
+                              }}
+                            >
+                              <span style={{ fontSize: '1.1rem' }}>{ratio.icon}</span>
+                              <span style={{ fontSize: '0.78rem', fontWeight: 700 }}>{ratio.label}</span>
+                              <span style={{ fontSize: '0.66rem', color: 'var(--text-muted)' }}>{ratio.sub}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                       <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                        Gaya Visual Fotografi AI:
+                        🎨 Gaya Environment Fotografi AI:
                       </label>
                       <select
                         value={recipeLabsVisualStyle}
@@ -4368,10 +4426,10 @@ export default function AutoPipelinePage() {
                           outline: 'none'
                         }}
                       >
-                        <option value="Food Porn">Food Porn & Glossy Commercial</option>
-                        <option value="Rustic Countryside">Rustic Countryside & Wooden Texture</option>
-                        <option value="Clean Nordic">Clean Nordic Studio & Bright Sunlight</option>
-                        <option value="Dark Moody">Dark Moody Contrast & Cinematic Smoke</option>
+                        <option value="Rustic Warm Tabletop & Artisanal Kitchen">🌿 Rustic Warm Tabletop & Artisanal Kitchen (Earthy & Cozy)</option>
+                        <option value="Modern Minimalist Nordic Studio">⚪ Modern Minimalist Nordic Studio (Bright, Clean & Scandinavian)</option>
+                        <option value="Dark Moody Chiaroscuro & Atmospheric Smoke">🍷 Dark Moody Chiaroscuro & Atmospheric Smoke (Dramatic Fine Dining)</option>
+                        <option value="Vibrant Alfresco Sunlit Patio">🍋 Vibrant Alfresco Sunlit Patio (Fresh Mediterranean Outdoors)</option>
                       </select>
                     </div>
                   </div>
@@ -7437,10 +7495,53 @@ export default function AutoPipelinePage() {
                       </small>
                     </div>
 
+                    {/* 4. Orientasi / Rasio Kolase Poster */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
+                        <span>📐 Orientasi / Rasio Kolase Poster:</span>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--status-rose)', fontWeight: 600 }}>
+                          {schedRecipeAspectRatio === '1:1' ? '1080x1080 (Square Feed)' : (schedRecipeAspectRatio === '3:4' ? '1080x1440 (Portrait Feed Optimal)' : '1080x1920 (Full Vertical)')}
+                        </span>
+                      </label>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
+                        {[
+                          { key: '1:1', icon: '⏹️', label: '1:1 Square', sub: 'IG/FB Feed' },
+                          { key: '3:4', icon: '📱', label: '3:4 Portrait', sub: 'Feed Optimal' },
+                          { key: '9:16', icon: '📜', label: '9:16 Vertical', sub: 'Stories/Pins' }
+                        ].map(ratio => {
+                          const isSelected = schedRecipeAspectRatio === ratio.key;
+                          return (
+                            <button
+                              key={ratio.key}
+                              type="button"
+                              onClick={() => setSchedRecipeAspectRatio(ratio.key)}
+                              style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                padding: '0.45rem 0.25rem',
+                                borderRadius: 'var(--radius-sm)',
+                                border: isSelected ? '1.5px solid var(--status-rose)' : '1px solid var(--border-subtle)',
+                                background: isSelected ? 'var(--surface-interactive)' : 'var(--surface)',
+                                color: isSelected ? 'var(--status-rose)' : 'var(--text-secondary)',
+                                cursor: 'pointer',
+                                transition: 'var(--transition)'
+                              }}
+                            >
+                              <span style={{ fontSize: '1.05rem' }}>{ratio.icon}</span>
+                              <span style={{ fontSize: '0.78rem', fontWeight: 700 }}>{ratio.label}</span>
+                              <span style={{ fontSize: '0.66rem', color: 'var(--text-muted)' }}>{ratio.sub}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                         <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                          Gaya Visual Foto AI
+                          🎨 Gaya Environment Foto AI
                         </label>
                         <select
                           value={schedVisualStyle}
@@ -7456,10 +7557,10 @@ export default function AutoPipelinePage() {
                             outline: 'none'
                           }}
                         >
-                          <option value="Food Porn">Food Porn & Glossy Commercial</option>
-                          <option value="Rustic Countryside">Rustic Countryside & Wooden Texture</option>
-                          <option value="Clean Nordic">Clean Nordic Studio & Bright Sunlight</option>
-                          <option value="Dark Moody">Dark Moody Contrast & Cinematic Smoke</option>
+                          <option value="Rustic Warm Tabletop & Artisanal Kitchen">🌿 Rustic Warm Tabletop & Artisanal Kitchen</option>
+                          <option value="Modern Minimalist Nordic Studio">⚪ Modern Minimalist Nordic Studio</option>
+                          <option value="Dark Moody Chiaroscuro & Atmospheric Smoke">🍷 Dark Moody Chiaroscuro & Atmospheric Smoke</option>
+                          <option value="Vibrant Alfresco Sunlit Patio">🍋 Vibrant Alfresco Sunlit Patio</option>
                         </select>
                       </div>
 

@@ -109,7 +109,7 @@ export default function RecipeLabsPage({ mode = 'direct', onCapture, onSuccess, 
   const [accountName, setAccountName] = useState('');
   const [category, setCategory] = useState('Makanan');
   const [customCategory, setCustomCategory] = useState('');
-  const [visualStyle, setVisualStyle] = useState('Food Porn');
+  const [visualStyle, setVisualStyle] = useState('Modern Minimalist Nordic Studio');
   const [targetDemographic, setTargetDemographic] = useState('genz_casual');
   const [targetDemographicCustom, setTargetDemographicCustom] = useState('');
   const [nextcloudParentFolder, setNextcloudParentFolder] = useState('MAKNA_Recipes');
@@ -293,10 +293,10 @@ export default function RecipeLabsPage({ mode = 'direct', onCapture, onSuccess, 
   ];
 
   const visualStyleOptions = [
-    'Food Porn',
-    'Macrophotography',
-    'Cinematic Studio',
-    'Rustic Aesthetic'
+    'Rustic Warm Tabletop & Artisanal Kitchen',
+    'Modern Minimalist Nordic Studio',
+    'Dark Moody Chiaroscuro & Atmospheric Smoke',
+    'Vibrant Alfresco Sunlit Patio'
   ];
 
   useEffect(() => {
@@ -554,6 +554,7 @@ export default function RecipeLabsPage({ mode = 'direct', onCapture, onSuccess, 
         category,
         custom_category: customCategory,
         visual_style: visualStyle,
+        aspect_ratio: aspectRatio || '3:4',
         nextcloud_parent_folder: nextcloudParentFolder,
         post_to_facebook: 0,
         enable_glabs: enableGlabs,
@@ -850,6 +851,50 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit} style={{ disp
                         />
                       </div>
                     ))}
+
+                    {(!captureMode || studioStep === 0) && (
+                      <div className="form-group">
+                        <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span>Orientasi / Rasio Kolase Poster</span>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--action-primary)', fontWeight: 600 }}>
+                            {aspectRatio === '1:1' ? '1080x1080 (Square)' : (aspectRatio === '3:4' ? '1080x1440 (Portrait Optimal)' : '1080x1920 (Full Vertical)')}
+                          </span>
+                        </label>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', marginTop: '0.25rem' }}>
+                          {[
+                            { key: '1:1', icon: '⏹️', label: '1:1 Square', sub: 'Feed' },
+                            { key: '3:4', icon: '📱', label: '3:4 Portrait', sub: 'Optimal' },
+                            { key: '9:16', icon: '📜', label: '9:16 Vertical', sub: 'Story' }
+                          ].map(ratio => {
+                            const isSelected = aspectRatio === ratio.key;
+                            return (
+                              <button
+                                key={ratio.key}
+                                type="button"
+                                onClick={() => setAspectRatio(ratio.key)}
+                                style={{
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  padding: '0.5rem 0.25rem',
+                                  borderRadius: 'var(--radius-sm)',
+                                  border: isSelected ? '1.5px solid var(--action-primary)' : '1px solid var(--border-subtle)',
+                                  background: isSelected ? 'var(--surface-interactive)' : 'var(--surface)',
+                                  color: isSelected ? 'var(--action-primary)' : 'var(--text-secondary)',
+                                  cursor: 'pointer',
+                                  transition: 'var(--transition)'
+                                }}
+                              >
+                                <span style={{ fontSize: '1.05rem' }}>{ratio.icon}</span>
+                                <span style={{ fontSize: '0.78rem', fontWeight: 700 }}>{ratio.label}</span>
+                                <span style={{ fontSize: '0.66rem', color: 'var(--text-muted)' }}>{ratio.sub}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
 
                     {(!captureMode || studioStep === 0) && (<div className="form-group">
                       <label className="form-label">Visual Style (Fotografi AI)</label>
