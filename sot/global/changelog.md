@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.41.1 — Fix Publishing Scheduler Integer Overflow & Auto Pipeline Retry (12/11/2026)
+- Fix integer overflow query pada listPublishingJobs untuk Multiplier IDs
+- Dukungan JOIN dual-column c.video_id OR c.id pada content_flow_items
+- Tambahkan self-healing auto retry pada Auto Pipeline Scheduler untuk jadwal failed
+
 ## V2.41.0 — Integrasi Remotion React Video Engine & Explainer Studio (11/11/2026)
 - Instalasi dan konfigurasi Remotion React Engine v4
 - Template explainer 30 detik GarliBee dengan 5 adegan terstruktur
