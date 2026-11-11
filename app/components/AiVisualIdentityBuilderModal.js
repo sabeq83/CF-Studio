@@ -1,1141 +1,1123 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import {
-  SUBJECT_KINDS,
-  HUMAN_FACELESS_MODES,
-  POPULATION_MODES
-} from '../../lib/visual-identity-contract';
-import {
-  DEFAULT_VISUAL_STYLE,
-  PRIMARY_STYLE_KEYS,
-  SUPPORTING_ONLY_STYLE_KEYS,
-  VISUAL_STYLE_KEYS,
-  VISUAL_LANGUAGE_CATALOG,
-  NARRATIVE_FUNCTIONS,
-  getVisualStyleDefinition
-} from '../../lib/visual-language-catalog';
+import { useState } from 'react';
 
-const BUILDER_STEPS = [
-  { id: 'foundation', label: '1. Foundation', description: 'Brand seed & core idea' },
-  { id: 'subject', label: '2. Subject', description: 'Faceless subject system' },
-  { id: 'visual_language', label: '3. Visual Language', description: 'Primary & supporting modes' },
-  { id: 'routing', label: '4. Mode Routing', description: 'Narrative scene mapping' },
-  { id: 'review', label: '5. Output & Review', description: 'AI generation & preview' }
+const TRENDING_PRESETS = [
+  {
+    id: 'stickman',
+    icon: '🎨',
+    name: 'Stickman Doodles',
+    tag: 'Explainer',
+    prompt: 'Saya ingin visual identity gaya stickman minimalis untuk edukasi bisnis, warna hitam putih dengan aksen kuning stabilo, karakter faceless memegang tablet atau laptop, latar belakang clean studio.'
+  },
+  {
+    id: 'paper_cutout',
+    icon: '📦',
+    name: 'Paper Cutout Craft',
+    tag: 'Tactile',
+    prompt: 'Saya ingin gaya visual paper cutout layer bertumpuk nuansa kopi dan kuliner artisanal, tekstur kertas coklat craft dan off-white, pencahayaan lembut.'
+  },
+  {
+    id: 'clay_3d',
+    icon: '🧸',
+    name: '3D Clay Mascot',
+    tag: 'Stop-Motion',
+    prompt: 'Saya ingin karakter maskot 3D claymation lucu seperti kucing barista dengan celemek barista, pencahayaan softbox studio, warna pastel lembut.'
+  },
+  {
+    id: 'nordic_kitchen',
+    icon: '☕',
+    name: 'Nordic Kitchen Studio',
+    tag: 'Clean Living',
+    prompt: 'Saya ingin visual identity dapur modern Nordic minimalis, meja kayu oak dan marmer putih, pencahayaan alami jendela pagi, sangat estetik.'
+  },
+  {
+    id: 'dark_moody',
+    icon: '🎬',
+    name: 'Dark Chiaroscuro',
+    tag: 'Smoke & Meat',
+    prompt: 'Saya ingin visual identity dark moody chiaroscuro dengan asap dramatis dan latar batu hitam slate untuk daging steak premium.'
+  },
+  {
+    id: 'technical_blueprint',
+    icon: '💻',
+    name: 'Technical Blueprint',
+    tag: 'Dev & Data',
+    prompt: 'Saya ingin gaya visual blueprint teknis arsitektur berwarna biru navy dengan garis skematik putih dan cyan, monospaced font, untuk konten analisis AI dan fintech.'
+  },
+  {
+    id: 'lofi_flash',
+    icon: '📸',
+    name: 'Lo-Fi 35mm Flash',
+    tag: 'Candid UGC',
+    prompt: 'Saya ingin gaya foto candid kamera analog 35mm dengan direct flash malam hari dan film grain tebal untuk street food viral dan review jujur.'
+  },
+  {
+    id: 'isometric_diorama',
+    icon: '📐',
+    name: 'Isometric 3D World',
+    tag: 'Miniature',
+    prompt: 'Saya ingin gaya miniatur isometrik 3D diorama pulau mengambang dengan perkebunan kopi dan kota mini, pencahayaan tilt-shift lembut.'
+  },
+  {
+    id: 'pop_risograph',
+    icon: '🖨️',
+    name: 'Pop Risograph',
+    tag: 'Retro Halftone',
+    prompt: 'Saya ingin gaya sablon cetak risograph retro dengan titik halftone vintage dan warna neon kontras tinggi seperti pink dan biru teal.'
+  },
+  {
+    id: 'luminous_glass',
+    icon: '💎',
+    name: 'Luminous Glass',
+    tag: 'Trend 2027',
+    prompt: 'Saya ingin visual identity futuristik tren 2027 dengan material frosted glass tembus pandang, refraksi prisma pelangi, pendaran luminous cyan cair.'
+  },
+  {
+    id: 'sumi_e_ink',
+    icon: '🪵',
+    name: 'Sumi-e Asian Ink',
+    tag: 'Zen Tea',
+    prompt: 'Saya ingin gaya lukisan kuas kaligrafi Sumi-e oriental tradisional dengan tinta hitam dinamis di atas kertas beras washi dan aksen stempel merah cinnabar.'
+  },
+  {
+    id: 'vintage_scrapbook',
+    icon: '📰',
+    name: 'Vintage Scrapbook',
+    tag: 'Investigation',
+    prompt: 'Saya ingin gaya visual scrapbook koran investigasi retro tahun 70-an dengan sobekan kertas arsip, selotip transparan, dan lingkaran spidol merah.'
+  }
 ];
 
 export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditing }) {
-  const [activeStep, setActiveStep] = useState(0);
+  const [userPrompt, setUserPrompt] = useState(TRENDING_PRESETS[0].prompt);
+  const [activeChip, setActiveChip] = useState('stickman');
+  const [isSynthesizing, setIsSynthesizing] = useState(false);
+  const [synthesisStage, setSynthesisStage] = useState('');
   const [error, setError] = useState(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [isRefining, setIsRefining] = useState(false);
 
-  // Creative Brief State
-  const [brief, setBrief] = useState({
-    seed: 'Wa’y Siyasi — Membaca fakta, memahami akar masalah dan sistem di balik kebijakan sosial-politik dalam kerangka pemikiran Islam.',
-    purpose: 'Edukasi sosial politik faceless sistematis',
-    audience: 'Masyarakat umum dan pemuda kritis',
-    mood: 'Intelektual, reflektif, tajam, berwibawa',
-    subject_kind: 'human',
-    faceless_mode: 'featureless_editorial',
-    population_mode: 'single_group_or_crowd',
-    aspect_ratio: '9:16',
-    variation_level: 'balanced',
-    primary_style: 'editorial_graphic_novel',
-    supporting_styles: ['isometric_society', 'symbolic_surrealism', 'paper_cutout_documentary'],
-    mode_routing: {
-      hook: 'symbolic_surrealism',
-      context: 'editorial_graphic_novel',
-      mechanism: 'isometric_society',
-      consequence: 'editorial_graphic_novel',
-      evidence_reveal: 'paper_cutout_documentary',
-      conclusion: 'symbolic_surrealism'
-    },
-    texture_direction: 'Subtle printed paper grain, editorial ink, tactile collage',
-    composition_direction: '1 primary idea per scene, vertical social safe zones, clean negative space',
-    metaphor_direction: 'Concept -> physical object -> visual action',
-    wardrobe_direction: 'Everyday civilian attire, modest charcoal, off-white, warm gray',
-    color_direction: 'Charcoal, off-white, warm gray, muted beige, max 1 accent color',
-    environment_direction: 'Clean structural environment with subtle paper texture',
-    lighting_direction: 'Soft directional editorial lighting with geometric shadows',
-    camera_direction: 'Editorial wide, isometric systemic view, silhouette profiles',
-    special_constraints: 'Strictly faceless; intentional crowds allowed only without visible faces'
-  });
+  // Proposal state
+  const [proposal, setProposal] = useState(null);
+  const [t2iPrompt, setT2iPrompt] = useState('');
+  const [aspectRatio, setAspectRatio] = useState('9:16');
 
-  // Current AI generated/refined draft state
-  const [draft, setDraft] = useState(null);
-  const [refineInstruction, setRefineInstruction] = useState('');
+  // G-Labs Live Test Render state
+  const [isRenderingGlabs, setIsRenderingGlabs] = useState(false);
+  const [renderStage, setRenderStage] = useState('');
+  const [renderedImageUrl, setRenderedImageUrl] = useState(null);
+  const [renderError, setRenderError] = useState(null);
 
-  // Active styles available for routing
-  const activeStyles = useMemo(() => {
-    return [brief.primary_style, ...(brief.supporting_styles || [])];
-  }, [brief.primary_style, brief.supporting_styles]);
+  // Save state
+  const [isSaving, setIsSaving] = useState(false);
+  const [toastMessage, setToastMessage] = useState(null);
 
-  // Handle Style Card Role Change (Primary / Supporting / Off)
-  const handleSetStyleRole = (styleKey, role) => {
-    const targetDef = getVisualStyleDefinition(styleKey);
-    if (role === 'primary' && targetDef?.role === 'supporting') {
-      setError(`Gaya "${targetDef.label}" dirancang khusus sebagai Supporting Mode dan tidak dapat dijadikan Primary Style.`);
+  const showToast = (title, desc) => {
+    setToastMessage({ title, desc });
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 3500);
+  };
+
+  const handleSelectChip = (preset) => {
+    setActiveChip(preset.id);
+    setUserPrompt(preset.prompt);
+  };
+
+  // 1. AI Synthesis (Call Gemini 1-Pass)
+  const handleSynthesize = async () => {
+    const promptClean = userPrompt.trim();
+    if (!promptClean) {
+      setError('Silakan ketikkan konsep visual atau pilih salah satu ide tren di atas.');
       return;
     }
 
-    setBrief(prev => {
-      let nextPrimary = prev.primary_style;
-      let nextSupporting = [...(prev.supporting_styles || [])];
-
-      if (role === 'primary') {
-        if (nextPrimary !== styleKey) {
-          // Demote old primary to supporting if not already there
-          if (!nextSupporting.includes(nextPrimary)) {
-            nextSupporting.push(nextPrimary);
-          }
-          // Remove new primary from supporting
-          nextSupporting = nextSupporting.filter(s => s !== styleKey);
-          nextPrimary = styleKey;
-        }
-      } else if (role === 'supporting') {
-        if (nextPrimary === styleKey) {
-          // Cannot set primary to supporting without choosing another primary
-          return prev;
-        }
-        if (!nextSupporting.includes(styleKey)) {
-          nextSupporting.push(styleKey);
-        }
-      } else if (role === 'off') {
-        if (nextPrimary === styleKey) {
-          // Cannot turn off primary; select another primary first
-          return prev;
-        }
-        nextSupporting = nextSupporting.filter(s => s !== styleKey);
-      }
-
-      // Repair routes if any route used a now-disabled style
-      const allowedStyles = [nextPrimary, ...nextSupporting];
-      const nextRouting = { ...prev.mode_routing };
-      for (const fn of NARRATIVE_FUNCTIONS) {
-        if (!allowedStyles.includes(nextRouting[fn])) {
-          nextRouting[fn] = nextPrimary;
-        }
-      }
-
-      return {
-        ...prev,
-        primary_style: nextPrimary,
-        supporting_styles: nextSupporting,
-        mode_routing: nextRouting
-      };
-    });
-  };
-
-  const handleUpdateRoute = (narrativeFn, styleKey) => {
-    setBrief(prev => ({
-      ...prev,
-      mode_routing: {
-        ...prev.mode_routing,
-        [narrativeFn]: styleKey
-      }
-    }));
-  };
-
-  const handleInputChange = (field, value) => {
-    setBrief(prev => {
-      const next = { ...prev, [field]: value };
-      if (field === 'subject_kind') {
-        if (value === 'human' || value === 'blank_face_3d') {
-          next.faceless_mode = value === 'blank_face_3d' ? 'blank_face_3d' : 'featureless_editorial';
-        } else {
-          next.faceless_mode = 'not_applicable';
-        }
-      }
-      return next;
-    });
-  };
-
-  const handleGenerate = async (e) => {
-    if (e) e.preventDefault();
-    if (!brief.seed || brief.seed.trim().length < 3) {
-      setError('Seed visual wajib diisi (minimal 3 karakter)');
-      return;
-    }
-
-    setIsGenerating(true);
     setError(null);
+    setIsSynthesizing(true);
+    setSynthesisStage('🧠 Menganalisis ide konsep dan tone estetika...');
 
     try {
+      setTimeout(() => {
+        setSynthesisStage('📐 Memetakan ke Schema v2 Visual Identity (Faceless Invariant & Palet)...');
+      }, 1000);
+
+      setTimeout(() => {
+        setSynthesisStage('✨ Merakit Production T2I Prompt untuk G-Labs...');
+      }, 2200);
+
       const res = await fetch('/api/v2/visual-identities/ai/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(brief)
+        body: JSON.stringify({ prompt: promptClean })
       });
-      const result = await res.json();
-      if (!result.success) {
-        throw new Error(result.error || 'Gagal menghasilkan identitas visual');
+
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || 'Gagal menghasilkan usulan Visual Identity.');
       }
 
-      setDraft(result.data);
-      setActiveStep(4); // Go to step 5 (review)
+      setProposal(json.data);
+      setT2iPrompt(json.data.t2i_prompt || '');
+      setRenderedImageUrl(null);
+      setRenderError(null);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Terjadi kesalahan saat memanggil AI.');
     } finally {
-      setIsGenerating(false);
+      setIsSynthesizing(false);
+      setSynthesisStage('');
     }
   };
 
-  const handleRefine = async (e) => {
-    if (e) e.preventDefault();
-    if (!refineInstruction || refineInstruction.trim().length === 0) return;
+  // 2. G-Labs Live Preview Generation
+  const handleRenderGlabs = async () => {
+    if (!t2iPrompt || !t2iPrompt.trim()) {
+      setRenderError('Prompt T2I tidak boleh kosong.');
+      return;
+    }
 
-    setIsRefining(true);
-    setError(null);
+    setRenderError(null);
+    setIsRenderingGlabs(true);
+    setRenderStage('Mengirim task ke Worker G-Labs Node 2...');
 
     try {
-      const res = await fetch('/api/v2/visual-identities/ai/refine', {
+      setTimeout(() => {
+        setRenderStage('Worker Node 2 GPU Rendering AI Image (Veo/Imagen)...');
+      }, 3000);
+
+      const res = await fetch('/api/v2/visual-identities/ai/test-render', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          brief,
-          current_draft: {
-            label: draft.label,
-            description: draft.description,
-            suggested_preset_key: draft.suggested_preset_key,
-            creative_rationale: draft.creative_rationale,
-            config: draft.config
-          },
-          instruction: refineInstruction
+          prompt: t2iPrompt.trim(),
+          aspect_ratio: aspectRatio
         })
       });
-      const result = await res.json();
-      if (!result.success) {
-        throw new Error(result.error || 'Gagal menyempurnakan identitas visual');
+
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || 'Generasi gambar G-Labs gagal.');
       }
 
-      setDraft(result.data);
-      setRefineInstruction('');
+      setRenderedImageUrl(json.image_url);
+      showToast('Render Berhasil!', 'Visual nyata berhasil dibuat oleh G-Labs Node 2.');
     } catch (err) {
-      setError(err.message);
+      setRenderError(err.message || 'Gagal merender gambar di G-Labs.');
     } finally {
-      setIsRefining(false);
+      setIsRenderingGlabs(false);
+      setRenderStage('');
     }
   };
 
-  // Resolved Prompt Preview string
-  const previewPrompt = useMemo(() => {
-    if (draft?.resolved_preview?.style_prompt) {
-      return draft.resolved_preview.style_prompt;
+  // 3. Direct Save to Database
+  const handleSaveDirect = async () => {
+    if (!proposal) return;
+
+    setIsSaving(true);
+    try {
+      const res = await fetch('/api/v2/visual-identities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          label: proposal.label,
+          description: proposal.description,
+          preset_key: proposal.suggested_preset_key,
+          config: proposal.config
+        })
+      });
+
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || 'Gagal menyimpan preset.');
+      }
+
+      showToast('Preset Berhasil Disimpan! 🎉', `Visual Identity "${proposal.label}" siap digunakan di seluruh pipeline.`);
+      setTimeout(() => {
+        onClose();
+        if (typeof window !== 'undefined') {
+          window.location.reload();
+        }
+      }, 1200);
+    } catch (err) {
+      setError(err.message || 'Gagal menyimpan preset ke database.');
+    } finally {
+      setIsSaving(false);
     }
-    const primaryDef = getVisualStyleDefinition(brief.primary_style);
-    return `(VERTICAL ${brief.aspect_ratio}) [PRIMARY STYLE] ${primaryDef.prompt}, [TEXTURE] ${brief.texture_direction}, [COMPOSITION] ${brief.composition_direction}, [NEGATIVE] ${primaryDef.negative_prompts.join(', ')}`;
-  }, [draft, brief]);
+  };
+
+  // 4. Continue in Standard Form
+  const handleOpenStandardForm = () => {
+    if (!proposal) return;
+    if (onContinueEditing) {
+      onContinueEditing(proposal.config, proposal.label, proposal.description);
+    }
+  };
+
+  const handleCopyPrompt = () => {
+    if (!t2iPrompt) return;
+    navigator.clipboard.writeText(t2iPrompt);
+    showToast('Prompt Disalin! 📋', 'Production prompt siap digunakan di tools eksternal.');
+  };
 
   return (
     <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="ai-visual-identity-title"
       style={{
         position: 'fixed',
         inset: 0,
         backgroundColor: 'var(--overlay-backdrop)',
+        backdropFilter: 'blur(8px)',
+        zIndex: 1000,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 1000,
-        padding: 20,
+        padding: '20px',
         overflowY: 'auto'
       }}
     >
       <div
         style={{
-          width: '100%',
-          maxWidth: '1080px',
-          background: 'var(--surface)',
+          backgroundColor: 'var(--surface)',
           border: '1px solid var(--border-strong)',
-          borderRadius: 'var(--radius-md, 12px)',
+          borderRadius: 'var(--radius-lg, 16px)',
+          width: '100%',
+          maxWidth: '1020px',
           maxHeight: '92vh',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: 'var(--shadow-card, 0 12px 34px rgba(0,0,0,0.3))'
+          boxShadow: 'var(--shadow-modal)',
+          overflow: 'hidden'
         }}
       >
-        {/* Header */}
+        {/* Modal Header */}
         <div
           style={{
+            padding: '18px 24px',
+            borderBottom: '1px solid var(--border-subtle)',
+            backgroundColor: 'var(--surface-raised)',
             display: 'flex',
             justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '18px 24px',
-            borderBottom: '1px solid var(--border-subtle)'
+            alignItems: 'center'
           }}
         >
-          <div>
-            <span
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <div
               style={{
-                fontSize: '11px',
-                fontWeight: 800,
-                color: 'var(--action-primary)',
-                letterSpacing: '.1em',
-                textTransform: 'uppercase'
+                width: '42px',
+                height: '42px',
+                borderRadius: 'var(--radius-md, 12px)',
+                background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(99, 102, 241, 0.2))',
+                border: '1px solid rgba(14, 165, 233, 0.4)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '22px'
               }}
             >
-              VISUAL IDENTITY STUDIO V2
-            </span>
-            <h2
-              id="ai-visual-identity-title"
-              style={{
-                fontSize: '1.25rem',
-                fontWeight: 850,
-                color: 'var(--text-primary)',
-                margin: '2px 0 0'
-              }}
-            >
-              Multi-Mode Visual Language Builder
-            </h2>
+              ✨
+            </div>
+            <div>
+              <h2 style={{ fontSize: '17px', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+                AI Visual Identity Studio Builder
+              </h2>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
+                Ketik konsep visual santai atau pilih 12 ide tren 2026-2027. AI merakit konfigurasi lengkap dan prompt T2I untuk live review G-Labs.
+              </p>
+            </div>
           </div>
           <button
             onClick={onClose}
-            className="btn"
             style={{
-              padding: '6px 12px',
-              fontSize: '13px',
-              background: 'var(--surface-interactive)',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: 'var(--radius-sm, 8px)',
-              color: 'var(--text-secondary)'
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--text-muted)',
+              fontSize: '22px',
+              width: '32px',
+              height: '32px',
+              borderRadius: 'var(--radius-sm, 6px)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}
+            title="Tutup Modal"
           >
-            ✕ Tutup
+            &times;
           </button>
         </div>
 
-        {/* Step Indicator */}
+        {/* Modal Body */}
         <div
           style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(5, 1fr)',
-            gap: 8,
-            padding: '14px 24px',
-            background: 'var(--surface-raised)',
-            borderBottom: '1px solid var(--border-subtle)',
-            overflowX: 'auto'
+            padding: '24px',
+            overflowY: 'auto',
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '22px'
           }}
         >
-          {BUILDER_STEPS.map((s, idx) => {
-            const isActive = activeStep === idx;
-            const isDone = activeStep > idx;
-            return (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => setActiveStep(idx)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  padding: '8px 10px',
-                  borderRadius: 'var(--radius-sm, 8px)',
-                  background: isActive ? 'var(--surface)' : 'transparent',
-                  border: isActive ? '1px solid var(--action-primary)' : '1px solid transparent',
-                  color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  fontSize: '12px',
-                  fontWeight: isActive ? 700 : 500
-                }}
-              >
-                <span
-                  style={{
-                    width: 22,
-                    height: 22,
-                    borderRadius: '50%',
-                    display: 'grid',
-                    placeItems: 'center',
-                    background: (isActive || isDone) ? 'var(--action-primary)' : 'var(--surface-interactive)',
-                    color: (isActive || isDone) ? 'var(--on-action-primary)' : 'var(--text-muted)',
-                    fontSize: '11px',
-                    fontWeight: 800,
-                    flexShrink: 0
-                  }}
-                >
-                  {idx + 1}
-                </span>
-                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {s.label.replace(/^\d+\.\s*/, '')}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Body Workspace */}
-        <div style={{ overflowY: 'auto', padding: 24, flexGrow: 1 }}>
           {error && (
             <div
               style={{
-                background: 'var(--status-danger-soft)',
+                padding: '12px 16px',
+                backgroundColor: 'var(--status-danger-soft)',
                 border: '1px solid var(--status-danger)',
-                color: 'var(--status-danger)',
-                padding: 12,
                 borderRadius: 'var(--radius-sm, 8px)',
+                color: 'var(--status-danger)',
                 fontSize: '13px',
-                marginBottom: 18
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
               }}
             >
-              ⚠️ <strong>Error:</strong> {error}
+              <span>⚠️</span>
+              <span>{error}</span>
             </div>
           )}
 
-          {/* STEP 1: FOUNDATION */}
-          {activeStep === 0 && (
-            <div style={{ display: 'grid', gap: 18 }}>
-              <div>
-                <h3 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 4px', color: 'var(--text-primary)' }}>
-                  1. Brand Foundation & Seed
-                </h3>
-                <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0 }}>
-                  Definisikan filosofi visual utama, tujuan konten, dan target audiens brand Anda.
-                </p>
-              </div>
+          {/* Part 1: Magic Input Composer */}
+          <div
+            style={{
+              backgroundColor: 'var(--surface-raised)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: 'var(--radius-md, 12px)',
+              padding: '20px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '14px',
+              boxShadow: 'var(--shadow-card)'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span>💬</span> Konsep Ide Visual Anda
+              </span>
+              <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                Ketik bebas konsep visual, subjek, mood, dan palet warna
+              </span>
+            </div>
 
-              <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                Visual Seed / Arahan Inti Brand (Wajib)*
-                <textarea
-                  rows={4}
-                  value={brief.seed}
-                  onChange={e => handleInputChange('seed', e.target.value)}
-                  placeholder="Deskripsikan inti pesan visual brand..."
+            <textarea
+              value={userPrompt}
+              onChange={(e) => setUserPrompt(e.target.value)}
+              placeholder="Contoh: Saya ingin visual identity gaya stickman minimalis untuk edukasi bisnis, warna hitam putih dengan aksen kuning stabilo..."
+              rows={3}
+              style={{
+                width: '100%',
+                backgroundColor: 'var(--input-bg)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-sm, 8px)',
+                padding: '12px 14px',
+                fontFamily: 'inherit',
+                fontSize: '13px',
+                color: 'var(--text-primary)',
+                resize: 'vertical',
+                lineHeight: 1.5,
+                outline: 'none'
+              }}
+            />
+
+            {/* Inspiration Chips: 12 Trends 2026-2027 */}
+            <div
+              style={{
+                backgroundColor: 'var(--surface)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-sm, 8px)',
+                padding: '14px 16px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '10px'
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span
                   style={{
-                    width: '100%',
-                    padding: 10,
-                    borderRadius: 'var(--radius-sm, 8px)',
-                    background: 'var(--input-bg)',
-                    border: '1px solid var(--border-subtle)',
-                    color: 'var(--text-primary)',
-                    fontFamily: 'inherit',
-                    fontSize: '13px'
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    color: 'var(--text-secondary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
                   }}
-                />
-              </label>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
-                <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                  Tujuan Konten (Purpose)
-                  <input
-                    type="text"
-                    value={brief.purpose}
-                    onChange={e => handleInputChange('purpose', e.target.value)}
-                    placeholder="Contoh: Edukasi sosial politik faceless"
-                    style={{
-                      padding: '9px 11px',
-                      borderRadius: 'var(--radius-sm, 8px)',
-                      background: 'var(--input-bg)',
-                      border: '1px solid var(--border-subtle)',
-                      color: 'var(--text-primary)',
-                      fontSize: '13px'
-                    }}
-                  />
-                </label>
-
-                <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                  Target Audiens
-                  <input
-                    type="text"
-                    value={brief.audience}
-                    onChange={e => handleInputChange('audience', e.target.value)}
-                    placeholder="Contoh: Pemuda kritis & masyarakat umum"
-                    style={{
-                      padding: '9px 11px',
-                      borderRadius: 'var(--radius-sm, 8px)',
-                      background: 'var(--input-bg)',
-                      border: '1px solid var(--border-subtle)',
-                      color: 'var(--text-primary)',
-                      fontSize: '13px'
-                    }}
-                  />
-                </label>
-
-                <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                  Mood & Tonality
-                  <input
-                    type="text"
-                    value={brief.mood}
-                    onChange={e => handleInputChange('mood', e.target.value)}
-                    placeholder="Contoh: Intelektual, reflektif, tajam"
-                    style={{
-                      padding: '9px 11px',
-                      borderRadius: 'var(--radius-sm, 8px)',
-                      background: 'var(--input-bg)',
-                      border: '1px solid var(--border-subtle)',
-                      color: 'var(--text-primary)',
-                      fontSize: '13px'
-                    }}
-                  />
-                </label>
-
-                <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                  Aspect Ratio
-                  <select
-                    value={brief.aspect_ratio}
-                    onChange={e => handleInputChange('aspect_ratio', e.target.value)}
-                    style={{
-                      padding: '9px 11px',
-                      borderRadius: 'var(--radius-sm, 8px)',
-                      background: 'var(--input-bg)',
-                      border: '1px solid var(--border-subtle)',
-                      color: 'var(--text-primary)',
-                      fontSize: '13px'
-                    }}
-                  >
-                    <option value="9:16">Vertical 9:16 (TikTok, Reels, Shorts)</option>
-                    <option value="16:9">Horizontal 16:9 (YouTube Standard)</option>
-                    <option value="1:1">Square 1:1 (Instagram Feed)</option>
-                  </select>
-                </label>
-              </div>
-            </div>
-          )}
-
-          {/* STEP 2: SUBJECT SYSTEM */}
-          {activeStep === 1 && (
-            <div style={{ display: 'grid', gap: 18 }}>
-              <div>
-                <h3 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 4px', color: 'var(--text-primary)' }}>
-                  2. Subject & Population System
-                </h3>
-                <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0 }}>
-                  Konfigurasi subjek manusia tanpa wajah (faceless) dan aturan kerumunan (intentional crowd).
-                </p>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
-                <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                  Subject Kind
-                  <select
-                    value={brief.subject_kind}
-                    onChange={e => handleInputChange('subject_kind', e.target.value)}
-                    style={{
-                      padding: '9px 11px',
-                      borderRadius: 'var(--radius-sm, 8px)',
-                      background: 'var(--input-bg)',
-                      border: '1px solid var(--border-subtle)',
-                      color: 'var(--text-primary)',
-                      fontSize: '13px'
-                    }}
-                  >
-                    <option value="human">Human (Faceless)</option>
-                    <option value="blank_face_3d">Blank Face 3D</option>
-                    <option value="animal">Animal</option>
-                    <option value="mascot_object">Mascot / Object</option>
-                  </select>
-                </label>
-
-                <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                  Faceless Treatment Mode
-                  <select
-                    value={brief.faceless_mode}
-                    onChange={e => handleInputChange('faceless_mode', e.target.value)}
-                    style={{
-                      padding: '9px 11px',
-                      borderRadius: 'var(--radius-sm, 8px)',
-                      background: 'var(--input-bg)',
-                      border: '1px solid var(--border-subtle)',
-                      color: 'var(--text-primary)',
-                      fontSize: '13px'
-                    }}
-                  >
-                    <option value="featureless_editorial">Featureless Editorial (Minimalist silhouette / turned away)</option>
-                    <option value="hands_only">Hands Only (Forearms & hands focused)</option>
-                    <option value="silhouette">Silhouette (High-contrast backlight)</option>
-                    <option value="crop_below_neck">Crop Below Neck</option>
-                    <option value="back_view">Back View</option>
-                    <option value="first_person_pov">First-Person POV</option>
-                  </select>
-                </label>
-
-                <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                  Population Mode
-                  <select
-                    value={brief.population_mode}
-                    onChange={e => handleInputChange('population_mode', e.target.value)}
-                    style={{
-                      padding: '9px 11px',
-                      borderRadius: 'var(--radius-sm, 8px)',
-                      background: 'var(--input-bg)',
-                      border: '1px solid var(--border-subtle)',
-                      color: 'var(--text-primary)',
-                      fontSize: '13px'
-                    }}
-                  >
-                    <option value="single_group_or_crowd">Single, Group, or Intentional Crowd (Flexible)</option>
-                    <option value="single">Single Character Only</option>
-                    <option value="group">Small Group (2-4 characters)</option>
-                    <option value="crowd">Intentional Crowd (Systemic faceless masses)</option>
-                  </select>
-                </label>
-              </div>
-
-              <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                Deskripsi Arahan Subjek & Busana (Wardrobe Direction)
-                <textarea
-                  rows={3}
-                  value={brief.wardrobe_direction}
-                  onChange={e => handleInputChange('wardrobe_direction', e.target.value)}
-                  placeholder="Contoh: Warga sipil berpakaian kasual sopan, palet charcoal, off-white, warm gray..."
+                >
+                  <span>🔥</span> 12 Pilihan Ide Visual Cepat (Tren 2026 & Proyeksi 2027):
+                </span>
+                <span
                   style={{
-                    width: '100%',
-                    padding: 10,
-                    borderRadius: 'var(--radius-sm, 8px)',
-                    background: 'var(--input-bg)',
-                    border: '1px solid var(--border-subtle)',
-                    color: 'var(--text-primary)',
-                    fontSize: '13px'
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    padding: '2px 8px',
+                    borderRadius: 'var(--radius-full)',
+                    backgroundColor: 'var(--status-warning-soft)',
+                    color: 'var(--status-warning)',
+                    border: '1px solid var(--border-subtle)'
                   }}
-                />
-              </label>
-            </div>
-          )}
-
-          {/* STEP 3: VISUAL LANGUAGE */}
-          {activeStep === 2 && (
-            <div style={{ display: 'grid', gap: 18 }}>
-              <div>
-                <h3 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 4px', color: 'var(--text-primary)' }}>
-                  3. Multi-Mode Visual Language
-                </h3>
-                <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0 }}>
-                  Pilih 1 <strong>Primary Style</strong> utama dan beberapa <strong>Supporting Styles</strong> pendukung.
-                </p>
+                >
+                  Tactile & Anti-AI Trends
+                </span>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14 }}>
-                {VISUAL_STYLE_KEYS.map(key => {
-                  const def = VISUAL_LANGUAGE_CATALOG[key];
-                  const isPrimary = brief.primary_style === key;
-                  const isSupporting = (brief.supporting_styles || []).includes(key);
-                  const isOff = !isPrimary && !isSupporting;
-                  const isSupportingOnly = def?.role === 'supporting';
-
-                  return (
-                    <div
-                      key={key}
-                      style={{
-                        borderRadius: 'var(--radius-md, 12px)',
-                        border: isPrimary ? '2px solid var(--action-primary)' : isSupporting ? '1px solid var(--status-info)' : '1px solid var(--border-subtle)',
-                        background: 'var(--surface-raised)',
-                        overflow: 'hidden',
-                        display: 'flex',
-                        flexDirection: 'column'
-                      }}
-                    >
-                      <div style={{ padding: 14, flexGrow: 1 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
-                          <div>
-                            <strong style={{ fontSize: '13px', color: 'var(--text-primary)', display: 'block' }}>{def.label}</strong>
-                            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                              {def.family} • {def.rendering_medium}
-                            </span>
-                          </div>
-                          <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                            {isSupportingOnly && (
-                              <span
-                                style={{
-                                  fontSize: '9px',
-                                  fontWeight: 700,
-                                  textTransform: 'uppercase',
-                                  padding: '2px 5px',
-                                  borderRadius: 'var(--radius-xs, 4px)',
-                                  background: 'var(--surface-interactive)',
-                                  color: 'var(--text-secondary)'
-                                }}
-                              >
-                                Supp-Only
-                              </span>
-                            )}
-                            {isPrimary && (
-                              <span
-                                style={{
-                                  fontSize: '10px',
-                                  fontWeight: 800,
-                                  textTransform: 'uppercase',
-                                  padding: '2px 6px',
-                                  borderRadius: 'var(--radius-xs, 4px)',
-                                  background: 'var(--action-primary)',
-                                  color: 'var(--on-action-primary)'
-                                }}
-                              >
-                                PRIMARY
-                              </span>
-                            )}
-                            {isSupporting && (
-                              <span
-                                style={{
-                                  fontSize: '10px',
-                                  fontWeight: 700,
-                                  textTransform: 'uppercase',
-                                  padding: '2px 6px',
-                                  borderRadius: 'var(--radius-xs, 4px)',
-                                  background: 'var(--status-info-soft)',
-                                  color: 'var(--status-info)'
-                                }}
-                              >
-                                SUPPORTING
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 12px', lineHeight: 1.4 }}>
-                          {def.description}
-                        </p>
-                      </div>
-
-                      {/* Segmented Controls: Primary / Supporting / Off */}
-                      <div
-                        style={{
-                          display: 'grid',
-                          gridTemplateColumns: 'repeat(3, 1fr)',
-                          borderTop: '1px solid var(--border-subtle)',
-                          background: 'var(--surface)'
-                        }}
-                      >
-                        <button
-                          type="button"
-                          onClick={() => handleSetStyleRole(key, 'primary')}
-                          disabled={isSupportingOnly}
-                          title={isSupportingOnly ? 'Gaya ini khusus mode pendukung (supporting-only)' : undefined}
-                          style={{
-                            padding: '8px 4px',
-                            fontSize: '11px',
-                            fontWeight: isPrimary ? 800 : 500,
-                            background: isPrimary ? 'var(--action-primary)' : 'transparent',
-                            color: isPrimary ? 'var(--on-action-primary)' : isSupportingOnly ? 'var(--text-muted)' : 'var(--text-secondary)',
-                            border: 0,
-                            borderRight: '1px solid var(--border-subtle)',
-                            cursor: isSupportingOnly ? 'not-allowed' : 'pointer',
-                            opacity: isSupportingOnly ? 0.4 : 1
-                          }}
-                        >
-                          Primary
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleSetStyleRole(key, 'supporting')}
-                          style={{
-                            padding: '8px 4px',
-                            fontSize: '11px',
-                            fontWeight: isSupporting ? 800 : 500,
-                            background: isSupporting ? 'var(--status-info-soft)' : 'transparent',
-                            color: isSupporting ? 'var(--status-info)' : 'var(--text-secondary)',
-                            border: 0,
-                            borderRight: '1px solid var(--border-subtle)',
-                            cursor: isPrimary ? 'not-allowed' : 'pointer',
-                            opacity: isPrimary ? 0.5 : 1
-                          }}
-                          disabled={isPrimary}
-                        >
-                          Supporting
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleSetStyleRole(key, 'off')}
-                          style={{
-                            padding: '8px 4px',
-                            fontSize: '11px',
-                            fontWeight: isOff ? 800 : 500,
-                            background: isOff ? 'var(--surface-interactive)' : 'transparent',
-                            color: isOff ? 'var(--text-muted)' : 'var(--text-secondary)',
-                            border: 0,
-                            cursor: isPrimary ? 'not-allowed' : 'pointer',
-                            opacity: isPrimary ? 0.5 : 1
-                          }}
-                          disabled={isPrimary}
-                        >
-                          Off
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* STEP 4: NARRATIVE MODE ROUTING */}
-          {activeStep === 3 && (
-            <div style={{ display: 'grid', gap: 18 }}>
-              <div>
-                <h3 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 4px', color: 'var(--text-primary)' }}>
-                  4. Narrative Mode Routing
-                </h3>
-                <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0 }}>
-                  Arahkan fungsi narasi setiap scene ke visual mode yang sesuai. Hanya mode yang aktif (Primary & Supporting) yang dapat dipilih.
-                </p>
-              </div>
-
-              <div style={{ display: 'grid', gap: 10 }}>
-                {NARRATIVE_FUNCTIONS.map(fn => {
-                  const currentStyle = brief.mode_routing?.[fn] || brief.primary_style;
-                  const labels = {
-                    hook: 'Hook (01) — Pembuka kontras / visualisasi metaforik',
-                    context: 'Context (02) — Latar belakang & fakta fenomena',
-                    mechanism: 'Mechanism (03) — Alur sistemik / cara kerja kebijakan',
-                    consequence: 'Consequence (04) — Dampak riil terhadap masyarakat',
-                    evidence_reveal: 'Evidence Reveal (05) — Bukti dokumen / data / investigasi',
-                    conclusion: 'Conclusion (06) — Solusi sistemik & perspektif Islam'
-                  };
-
-                  return (
-                    <div
-                      key={fn}
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: '1fr minmax(200px, 280px)',
-                        alignItems: 'center',
-                        gap: 14,
-                        padding: '12px 16px',
-                        borderRadius: 'var(--radius-sm, 8px)',
-                        background: 'var(--surface-raised)',
-                        border: '1px solid var(--border-subtle)'
-                      }}
-                    >
-                      <div>
-                        <strong style={{ fontSize: '13px', color: 'var(--text-primary)', textTransform: 'capitalize' }}>
-                          {fn.replace(/_/g, ' ')}
-                        </strong>
-                        <small style={{ display: 'block', color: 'var(--text-muted)', fontSize: '11px', marginTop: 2 }}>
-                          {labels[fn] || fn}
-                        </small>
-                      </div>
-
-                      <select
-                        value={currentStyle}
-                        onChange={e => handleUpdateRoute(fn, e.target.value)}
-                        style={{
-                          padding: '8px 10px',
-                          borderRadius: 'var(--radius-sm, 8px)',
-                          background: 'var(--input-bg)',
-                          border: '1px solid var(--border-subtle)',
-                          color: 'var(--text-primary)',
-                          fontSize: '12px',
-                          fontWeight: 600
-                        }}
-                      >
-                        {activeStyles.map(sKey => (
-                          <option key={sKey} value={sKey}>
-                            {VISUAL_LANGUAGE_CATALOG[sKey]?.label} {sKey === brief.primary_style ? '(Primary)' : ''}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* STEP 5: OUTPUT & REVIEW */}
-          {activeStep === 4 && (
-            <div style={{ display: 'grid', gap: 18 }}>
-              <div>
-                <h3 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 4px', color: 'var(--text-primary)' }}>
-                  5. Output & AI Generation
-                </h3>
-                <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0 }}>
-                  Jalankan Single-Pass Gemini AI untuk menyusun preset terstruktur lengkap atau terapkan langsung ke editor.
-                </p>
-              </div>
-
-              {/* Generate AI Button & Live Prompt Preview */}
               <div
                 style={{
-                  padding: 16,
-                  borderRadius: 'var(--radius-md, 12px)',
-                  background: 'var(--surface-raised)',
-                  border: '1px solid var(--border-subtle)',
                   display: 'grid',
-                  gap: 14
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+                  gap: '8px'
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
-                  <div>
-                    <strong style={{ fontSize: '13px', color: 'var(--text-primary)' }}>Single-Pass Gemini Generator</strong>
-                    <span style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)' }}>
-                      Menghasilkan seluruh parameter visual, prompt layers, dan guardrail dalam 1x panggilan.
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleGenerate}
-                    disabled={isGenerating}
-                    className="btn primary"
+                {TRENDING_PRESETS.map((p) => {
+                  const isActive = activeChip === p.id;
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => handleSelectChip(p)}
+                      style={{
+                        backgroundColor: isActive ? 'var(--status-info-soft)' : 'var(--surface-interactive)',
+                        border: `1px solid ${isActive ? 'var(--status-info)' : 'var(--border-subtle)'}`,
+                        color: isActive ? 'var(--status-info)' : 'var(--text-secondary)',
+                        fontSize: '12px',
+                        fontWeight: isActive ? 600 : 500,
+                        padding: '8px 12px',
+                        borderRadius: 'var(--radius-sm, 6px)',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        textAlign: 'left',
+                        transition: 'var(--transition)'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                        <span>{p.icon}</span>
+                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden' }}>{p.name}</span>
+                      </div>
+                      <span
+                        style={{
+                          fontSize: '9px',
+                          fontWeight: 700,
+                          padding: '2px 5px',
+                          borderRadius: 'var(--radius-xs, 4px)',
+                          backgroundColor: isActive ? 'var(--status-info)' : 'var(--surface)',
+                          color: isActive ? 'var(--on-action-primary)' : 'var(--text-muted)',
+                          border: '1px solid var(--border-subtle)'
+                        }}
+                      >
+                        {p.tag}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Action Row */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+              <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                💡 Klik ide di atas atau ketik bebas konsep visual Anda sendiri.
+              </span>
+              <button
+                type="button"
+                onClick={handleSynthesize}
+                disabled={isSynthesizing}
+                style={{
+                  background: 'linear-gradient(135deg, var(--action-primary), #6366f1)',
+                  color: 'var(--on-action-primary)',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: 'var(--radius-sm, 8px)',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: isSynthesizing ? 'not-allowed' : 'pointer',
+                  opacity: isSynthesizing ? 0.6 : 1,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: '0 4px 12px rgba(14, 165, 233, 0.3)'
+                }}
+              >
+                <span>{isSynthesizing ? '⏳' : '✨'}</span>
+                <span>{isSynthesizing ? 'AI sedang merakit usulan...' : 'Buat Usulan Visual Identity (1-Click AI)'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* AI Synthesis Progress State */}
+          {isSynthesizing && (
+            <div
+              style={{
+                backgroundColor: 'var(--surface-interactive)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-md, 12px)',
+                padding: '16px 20px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '10px'
+              }}
+            >
+              <div
+                style={{
+                  height: '6px',
+                  backgroundColor: 'var(--input-bg)',
+                  borderRadius: 'var(--radius-full)',
+                  overflow: 'hidden'
+                }}
+              >
+                <div
+                  style={{
+                    height: '100%',
+                    background: 'linear-gradient(90deg, var(--action-primary), #818cf8)',
+                    width: '85%',
+                    animation: 'pulse 1.5s infinite'
+                  }}
+                />
+              </div>
+              <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                {synthesisStage || 'Sedang memproses...'}
+              </div>
+            </div>
+          )}
+
+          {/* Part 2: Interactive Proposal Card */}
+          {proposal && (
+            <div
+              style={{
+                backgroundColor: 'var(--surface-raised)',
+                border: '1px solid var(--border-strong)',
+                borderRadius: 'var(--radius-md, 12px)',
+                overflow: 'hidden',
+                boxShadow: 'var(--shadow-card)',
+                display: 'flex',
+                flexDirection: 'column'
+              }}
+            >
+              {/* Proposal Header */}
+              <div
+                style={{
+                  backgroundColor: 'var(--surface-interactive)',
+                  padding: '16px 20px',
+                  borderBottom: '1px solid var(--border-subtle)',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: '10px'
+                }}
+              >
+                <div>
+                  <div
                     style={{
-                      padding: '9px 18px',
-                      fontSize: '13px',
+                      backgroundColor: 'var(--status-success-soft)',
+                      color: 'var(--status-success)',
+                      fontSize: '11px',
                       fontWeight: 700,
-                      background: 'var(--action-primary)',
-                      color: 'var(--on-action-primary)',
-                      border: 0,
-                      borderRadius: 'var(--radius-sm, 8px)',
-                      cursor: isGenerating ? 'wait' : 'pointer'
+                      padding: '2px 8px',
+                      borderRadius: 'var(--radius-full)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      marginBottom: '4px'
                     }}
                   >
-                    {isGenerating ? '⏳ Merumuskan Preset...' : '✨ Generate AI Preset'}
+                    <span>✨</span> Usulan Siap Direview
+                  </div>
+                  <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+                    {proposal.label}
+                  </h3>
+                  <span style={{ fontFamily: 'var(--font-mono, monospace)', fontSize: '11px', color: 'var(--text-muted)' }}>
+                    preset_key: {proposal.suggested_preset_key}
+                  </span>
+                </div>
+                <span
+                  style={{
+                    fontSize: '11px',
+                    color: 'var(--text-muted)',
+                    backgroundColor: 'var(--surface)',
+                    padding: '4px 10px',
+                    borderRadius: 'var(--radius-sm, 6px)',
+                    border: '1px solid var(--border-subtle)'
+                  }}
+                >
+                  Schema v2 Compliant • Faceless Invariant Enforced
+                </span>
+              </div>
+
+              {/* Rationale */}
+              {proposal.creative_rationale && (
+                <div
+                  style={{
+                    padding: '14px 20px',
+                    fontSize: '13px',
+                    color: 'var(--text-secondary)',
+                    borderBottom: '1px solid var(--border-subtle)',
+                    backgroundColor: 'var(--surface-subtle)',
+                    lineHeight: 1.6
+                  }}
+                >
+                  "{proposal.creative_rationale}"
+                </div>
+              )}
+
+              {/* Attributes Strip */}
+              <div
+                style={{
+                  padding: '14px 20px',
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                  gap: '12px',
+                  borderBottom: '1px solid var(--border-subtle)'
+                }}
+              >
+                <div
+                  style={{
+                    backgroundColor: 'var(--surface)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-sm, 6px)',
+                    padding: '10px 12px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '3px'
+                  }}
+                >
+                  <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                    Visual Mode
+                  </span>
+                  <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    {proposal.config?.visual_language?.primary_style || 'Standard'}
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    backgroundColor: 'var(--surface)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-sm, 6px)',
+                    padding: '10px 12px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '3px'
+                  }}
+                >
+                  <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                    Subject System
+                  </span>
+                  <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    {proposal.config?.subject?.kind} ({proposal.config?.subject?.faceless_mode})
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    backgroundColor: 'var(--surface)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-sm, 6px)',
+                    padding: '10px 12px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '3px'
+                  }}
+                >
+                  <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                    Environment
+                  </span>
+                  <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    {proposal.config?.environment?.preset_key || 'Custom Setting'}
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    backgroundColor: 'var(--surface)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-sm, 6px)',
+                    padding: '10px 12px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '3px'
+                  }}
+                >
+                  <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                    Lighting & Cam
+                  </span>
+                  <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    {proposal.config?.lighting?.preset_key} • {proposal.config?.camera?.framing}
+                  </span>
+                </div>
+              </div>
+
+              {/* T2I Prompt Box */}
+              <div
+                style={{
+                  padding: '18px 20px',
+                  borderBottom: '1px solid var(--border-subtle)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span>📝</span> Production T2I Prompt (English for G-Labs / Veo / Imagen)
+                    <span
+                      style={{
+                        backgroundColor: 'var(--status-info-soft)',
+                        color: 'var(--status-info)',
+                        fontSize: '10px',
+                        fontWeight: 700,
+                        padding: '2px 6px',
+                        borderRadius: 'var(--radius-xs, 4px)'
+                      }}
+                    >
+                      G-Labs Ready
+                    </span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleCopyPrompt}
+                    style={{
+                      backgroundColor: 'var(--surface-interactive)',
+                      color: 'var(--text-secondary)',
+                      border: '1px solid var(--border-subtle)',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      padding: '4px 10px',
+                      borderRadius: 'var(--radius-xs, 4px)',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px'
+                    }}
+                  >
+                    <span>📋</span> Salin Prompt
                   </button>
                 </div>
 
-                {/* Live Prompt Preview Box */}
-                <div>
-                  <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                    Resolved Production Prompt Preview:
+                <textarea
+                  value={t2iPrompt}
+                  onChange={(e) => setT2iPrompt(e.target.value)}
+                  rows={3}
+                  title="Prompt ini dapat Anda edit secara langsung sebelum melakukan render di G-Labs"
+                  style={{
+                    width: '100%',
+                    backgroundColor: 'var(--input-bg)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-sm, 6px)',
+                    padding: '10px 12px',
+                    fontFamily: 'var(--font-mono, monospace)',
+                    fontSize: '12px',
+                    color: 'var(--text-secondary)',
+                    lineHeight: 1.5,
+                    resize: 'vertical',
+                    outline: 'none'
+                  }}
+                />
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                    💡 Tip: Anda dapat mengedit teks prompt di atas secara bebas sebelum menekan tombol render G-Labs.
                   </span>
-                  <div
-                    style={{
-                      marginTop: 6,
-                      padding: 12,
-                      background: 'var(--input-bg)',
-                      border: '1px solid var(--border-subtle)',
-                      borderRadius: 'var(--radius-sm, 8px)',
-                      fontFamily: 'ui-monospace, monospace',
-                      fontSize: '11px',
-                      lineHeight: 1.5,
-                      color: 'var(--text-secondary)',
-                      maxHeight: 140,
-                      overflowY: 'auto',
-                      whiteSpace: 'pre-wrap'
-                    }}
-                  >
-                    {previewPrompt}
-                  </div>
+                  <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono, monospace)', color: 'var(--status-success)' }}>
+                    Face Invariant: Enforced
+                  </span>
                 </div>
               </div>
 
-              {/* Draft Output if Generated */}
-              {draft && (
+              {/* G-Labs Review Section */}
+              <div
+                style={{
+                  padding: '20px',
+                  backgroundColor: 'var(--surface)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '16px'
+                }}
+              >
                 <div
                   style={{
-                    padding: 16,
-                    borderRadius: 'var(--radius-md, 12px)',
-                    background: 'var(--surface-interactive)',
-                    border: '1px solid var(--border-strong)',
-                    display: 'grid',
-                    gap: 12
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '12px',
+                    backgroundColor: 'var(--surface-interactive)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-sm, 8px)',
+                    padding: '10px 14px'
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-                    <div>
-                      <h4 style={{ margin: 0, fontSize: '14px', color: 'var(--text-primary)' }}>{draft.label}</h4>
-                      <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--text-muted)' }}>{draft.description}</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-muted)' }}>Aspek Rasio:</span>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      {['9:16', '1:1', '16:9'].map((ratio) => (
+                        <button
+                          key={ratio}
+                          type="button"
+                          onClick={() => setAspectRatio(ratio)}
+                          style={{
+                            backgroundColor: aspectRatio === ratio ? 'var(--action-primary)' : 'var(--input-bg)',
+                            color: aspectRatio === ratio ? 'var(--on-action-primary)' : 'var(--text-secondary)',
+                            border: `1px solid ${aspectRatio === ratio ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
+                            fontSize: '11px',
+                            fontWeight: 600,
+                            padding: '4px 10px',
+                            borderRadius: 'var(--radius-xs, 4px)',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {ratio}
+                        </button>
+                      ))}
                     </div>
-                    {draft.compliance && (
-                      <span
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleRenderGlabs}
+                    disabled={isRenderingGlabs}
+                    style={{
+                      background: 'linear-gradient(135deg, #10b981, #059669)',
+                      color: '#ffffff',
+                      border: 'none',
+                      padding: '8px 18px',
+                      borderRadius: 'var(--radius-sm, 8px)',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      cursor: isRenderingGlabs ? 'not-allowed' : 'pointer',
+                      opacity: isRenderingGlabs ? 0.6 : 1,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
+                    }}
+                  >
+                    <span>🎨</span>
+                    <span>{isRenderingGlabs ? 'Rendering di G-Labs...' : 'Generate Visual Preview (G-Labs Node 2)'}</span>
+                  </button>
+                </div>
+
+                {renderError && (
+                  <div
+                    style={{
+                      padding: '10px 14px',
+                      backgroundColor: 'var(--status-danger-soft)',
+                      border: '1px solid var(--status-danger)',
+                      borderRadius: 'var(--radius-sm, 6px)',
+                      color: 'var(--status-danger)',
+                      fontSize: '12px'
+                    }}
+                  >
+                    ⚠️ {renderError}
+                  </div>
+                )}
+
+                {/* Preview Viewport Canvas */}
+                <div
+                  style={{
+                    border: renderedImageUrl ? '1px solid var(--border-subtle)' : '2px dashed var(--border-strong)',
+                    borderRadius: 'var(--radius-md, 12px)',
+                    backgroundColor: renderedImageUrl ? 'var(--canvas)' : 'var(--input-bg)',
+                    minHeight: '280px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: renderedImageUrl ? '16px' : '24px',
+                    position: 'relative'
+                  }}
+                >
+                  {isRenderingGlabs ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', textAlign: 'center' }}>
+                      <div
                         style={{
-                          fontSize: '11px',
-                          fontWeight: 700,
-                          padding: '3px 8px',
-                          borderRadius: 'var(--radius-xs, 4px)',
-                          background: draft.compliance.status === 'compliant' ? 'var(--status-success-soft)' : 'var(--status-info-soft)',
-                          color: draft.compliance.status === 'compliant' ? 'var(--status-success)' : 'var(--status-info)'
+                          width: '40px',
+                          height: '40px',
+                          border: '4px solid var(--surface-interactive)',
+                          borderTopColor: 'var(--action-primary)',
+                          borderRadius: '50%',
+                          animation: 'spin 0.9s linear infinite'
+                        }}
+                      />
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                          {renderStage || 'Memproses generasi visual...'}
+                        </div>
+                        <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono, monospace)', color: 'var(--status-info)', marginTop: '4px' }}>
+                          Target: Node 2 Worker (Port 8765)
+                        </div>
+                      </div>
+                    </div>
+                  ) : renderedImageUrl ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', width: '100%' }}>
+                      <div
+                        style={{
+                          maxWidth: aspectRatio === '9:16' ? '300px' : aspectRatio === '1:1' ? '380px' : '480px',
+                          width: '100%',
+                          borderRadius: 'var(--radius-sm, 8px)',
+                          overflow: 'hidden',
+                          boxShadow: '0 12px 30px rgba(0, 0, 0, 0.4)',
+                          border: '1px solid var(--border-subtle)',
+                          backgroundColor: '#000000'
                         }}
                       >
-                        Score: {draft.compliance.score}/100 ({draft.compliance.status})
-                      </span>
-                    )}
-                  </div>
-
-                  {draft.creative_rationale && (
-                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)', background: 'var(--surface)', padding: 10, borderRadius: 'var(--radius-sm, 8px)' }}>
-                      <strong>Creative Rationale:</strong> {draft.creative_rationale}
+                        <img
+                          src={renderedImageUrl}
+                          alt="G-Labs Preview Render"
+                          style={{ width: '100%', height: 'auto', display: 'block' }}
+                        />
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <button
+                          type="button"
+                          onClick={handleRenderGlabs}
+                          style={{
+                            backgroundColor: 'var(--surface-interactive)',
+                            border: '1px solid var(--border-subtle)',
+                            color: 'var(--text-primary)',
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            padding: '6px 14px',
+                            borderRadius: 'var(--radius-sm, 6px)',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px'
+                          }}
+                        >
+                          <span>🔄</span> Render Variasi Lain
+                        </button>
+                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono, monospace)' }}>
+                          G-Labs Live Render OK
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textAlign: 'center', maxWidth: '420px' }}>
+                      <span style={{ fontSize: '36px', opacity: 0.7 }}>🖼️</span>
+                      <h4 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                        Review Visual Belum Dibuat
+                      </h4>
+                      <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0 }}>
+                        Klik tombol <strong>"Generate Visual Preview (G-Labs Node 2)"</strong> di atas untuk merender visual nyata dari prompt ini sebelum menyimpannya.
+                      </p>
                     </div>
                   )}
-
-                  {/* Refinement input */}
-                  <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-                    <input
-                      type="text"
-                      value={refineInstruction}
-                      onChange={e => setRefineInstruction(e.target.value)}
-                      placeholder="Instruksi penyempurnaan (misal: buat bayangan lebih geometris)..."
-                      style={{
-                        flexGrow: 1,
-                        padding: '8px 10px',
-                        fontSize: '12px',
-                        background: 'var(--input-bg)',
-                        border: '1px solid var(--border-subtle)',
-                        borderRadius: 'var(--radius-sm, 8px)',
-                        color: 'var(--text-primary)'
-                      }}
-                    />
-                    <button
-                      type="button"
-                      onClick={handleRefine}
-                      disabled={isRefining || !refineInstruction.trim()}
-                      className="btn"
-                      style={{
-                        padding: '8px 14px',
-                        fontSize: '12px',
-                        fontWeight: 600,
-                        background: 'var(--surface-raised)',
-                        color: 'var(--text-primary)',
-                        border: '1px solid var(--border-subtle)',
-                        borderRadius: 'var(--radius-sm, 8px)',
-                        cursor: (isRefining || !refineInstruction.trim()) ? 'not-allowed' : 'pointer'
-                      }}
-                    >
-                      {isRefining ? '⏳ Menyempurnakan...' : 'Refine'}
-                    </button>
-                  </div>
                 </div>
-              )}
+              </div>
             </div>
           )}
         </div>
 
-        {/* Footer Navigation */}
+        {/* Modal Footer */}
         <div
           style={{
+            padding: '16px 24px',
+            borderTop: '1px solid var(--border-subtle)',
+            backgroundColor: 'var(--surface-raised)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            padding: '16px 24px',
-            borderTop: '1px solid var(--border-subtle)',
-            background: 'var(--surface-raised)'
+            flexWrap: 'wrap',
+            gap: '12px'
           }}
         >
-          <button
-            type="button"
-            onClick={() => setActiveStep(prev => Math.max(0, prev - 1))}
-            disabled={activeStep === 0}
-            className="btn"
-            style={{
-              padding: '8px 16px',
-              fontSize: '13px',
-              fontWeight: 600,
-              background: 'transparent',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: 'var(--radius-sm, 8px)',
-              color: 'var(--text-secondary)',
-              cursor: activeStep === 0 ? 'not-allowed' : 'pointer',
-              opacity: activeStep === 0 ? 0.4 : 1
-            }}
-          >
-            ← Sebelumnya
-          </button>
+          <div>
+            <button
+              type="button"
+              onClick={() => {
+                setProposal(null);
+                setT2iPrompt('');
+                setRenderedImageUrl(null);
+              }}
+              style={{
+                backgroundColor: 'var(--surface-interactive)',
+                color: 'var(--text-secondary)',
+                border: '1px solid var(--border-subtle)',
+                fontSize: '13px',
+                fontWeight: 600,
+                padding: '9px 16px',
+                borderRadius: 'var(--radius-sm, 8px)',
+                cursor: 'pointer'
+              }}
+            >
+              <span>🔄</span> Buat Usulan Baru
+            </button>
+          </div>
 
-          <div style={{ display: 'flex', gap: 10 }}>
-            {activeStep < 4 ? (
-              <button
-                type="button"
-                onClick={() => setActiveStep(prev => Math.min(4, prev + 1))}
-                className="btn primary"
-                style={{
-                  padding: '8px 18px',
-                  fontSize: '13px',
-                  fontWeight: 700,
-                  background: 'var(--action-primary)',
-                  color: 'var(--on-action-primary)',
-                  border: 0,
-                  borderRadius: 'var(--radius-sm, 8px)',
-                  cursor: 'pointer'
-                }}
-              >
-                Lanjutkan →
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => {
-                  if (onContinueEditing) {
-                    if (draft?.config) {
-                      onContinueEditing(draft.config, draft.label, draft.description);
-                    } else {
-                      // Apply current brief configuration as config
-                      const syntheticConfig = {
-                        schema_version: '2',
-                        label: brief.purpose || 'Custom Visual Identity',
-                        description: brief.seed,
-                        subject: {
-                          kind: brief.subject_kind,
-                          faceless_mode: brief.faceless_mode,
-                          population_mode: brief.population_mode,
-                          demographic_key: 'custom',
-                          custom_description: brief.wardrobe_direction
-                        },
-                        visual_language: {
-                          primary_style: brief.primary_style,
-                          supporting_styles: brief.supporting_styles,
-                          disabled_styles: VISUAL_STYLE_KEYS.filter(k => k !== brief.primary_style && !brief.supporting_styles.includes(k))
-                        },
-                        mode_routing: brief.mode_routing,
-                        rendering: {
-                          geometry: 'simplified_semi_realistic',
-                          textures: ['printed_paper_grain', 'editorial_ink'],
-                          shadow_style: 'strong_geometric',
-                          finish: 'matte_editorial'
-                        },
-                        composition: {
-                          primary_idea_count: 1,
-                          primary_subject_count: 1,
-                          negative_space: 'required',
-                          safe_zone: 'vertical_social_ui'
-                        },
-                        metaphor_engine: {
-                          enabled: true,
-                          pattern: 'concept_to_object_to_action'
-                        },
-                        wardrobe: {
-                          mode: 'fixed',
-                          preset_key: 'sage_muted',
-                          custom_description: brief.wardrobe_direction,
-                          sleeve_policy: 'wrists_covered'
-                        },
-                        environment: {
-                          preset_key: 'general_workspace',
-                          custom_description: brief.environment_direction
-                        },
-                        lighting: {
-                          preset_key: 'window_daylight',
-                          custom_description: brief.lighting_direction
-                        },
-                        camera: {
-                          framing: 'editorial_wide',
-                          perspective: 'third_person'
-                        },
-                        style: {
-                          preset_key: brief.primary_style,
-                          aspect_ratio: brief.aspect_ratio
-                        },
-                        guardrails: {
-                          face_visibility: 'prohibited',
-                          reflection_face: 'prohibited',
-                          unintended_people: 'prohibited',
-                          extra_people: 'prohibited',
-                          intentional_crowd: 'allowed_faceless',
-                          identity_drift: 'prohibited',
-                          wardrobe_drift: 'prohibited',
-                          required_negative_prompts: []
-                        }
-                      };
-                      onContinueEditing(syntheticConfig, brief.purpose || 'Custom Visual Identity', brief.seed);
-                    }
-                  }
-                  onClose();
-                }}
-                className="btn primary"
-                style={{
-                  padding: '8px 20px',
-                  fontSize: '13px',
-                  fontWeight: 800,
-                  background: 'var(--action-primary)',
-                  color: 'var(--on-action-primary)',
-                  border: 0,
-                  borderRadius: 'var(--radius-sm, 8px)',
-                  cursor: 'pointer'
-                }}
-              >
-                ✓ Terapkan ke Editor Manual
-              </button>
-            )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <button
+              type="button"
+              onClick={handleOpenStandardForm}
+              disabled={!proposal}
+              style={{
+                backgroundColor: 'var(--surface-interactive)',
+                color: 'var(--text-secondary)',
+                border: '1px solid var(--border-subtle)',
+                fontSize: '13px',
+                fontWeight: 600,
+                padding: '9px 16px',
+                borderRadius: 'var(--radius-sm, 8px)',
+                cursor: proposal ? 'pointer' : 'not-allowed',
+                opacity: proposal ? 1 : 0.5
+              }}
+            >
+              <span>✏️</span> Kustomisasi Lanjut di Form
+            </button>
+
+            <button
+              type="button"
+              onClick={handleSaveDirect}
+              disabled={!proposal || isSaving}
+              style={{
+                backgroundColor: 'var(--action-primary)',
+                color: 'var(--on-action-primary)',
+                border: 'none',
+                fontSize: '13px',
+                fontWeight: 700,
+                padding: '9px 20px',
+                borderRadius: 'var(--radius-sm, 8px)',
+                cursor: proposal && !isSaving ? 'pointer' : 'not-allowed',
+                opacity: proposal && !isSaving ? 1 : 0.5,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 12px rgba(14, 165, 233, 0.3)'
+              }}
+            >
+              <span>💾</span>
+              <span>{isSaving ? 'Menyimpan...' : 'Simpan sebagai Visual Identity'}</span>
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '28px',
+            right: '28px',
+            backgroundColor: 'var(--surface-raised)',
+            border: '1px solid var(--border-strong)',
+            boxShadow: 'var(--shadow-modal)',
+            padding: '14px 20px',
+            borderRadius: 'var(--radius-md, 12px)',
+            zIndex: 2000,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px'
+          }}
+        >
+          <span style={{ fontSize: '20px' }}>✅</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>
+              {toastMessage.title}
+            </div>
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+              {toastMessage.desc}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

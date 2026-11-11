@@ -1,0 +1,1905 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup: AI Visual Identity Studio Builder (12 Trend 2026-2027 Visual Ideas)</title>
+  <style>
+    /* ==========================================================================
+       100% Self-Contained Semantic Design Tokens (Universal Dark / Light Mode)
+       ========================================================================== */
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --radius-xs: 4px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+      --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+      /* Semantic Surfaces */
+      --canvas: #090d16;
+      --sidebar: #0e1524;
+      --surface: #131c2e;
+      --surface-raised: #18233a;
+      --surface-interactive: #1f2d4a;
+      --surface-hover: #26385a;
+      --surface-subtle: rgba(255, 255, 255, 0.04);
+      --input-bg: #0b111e;
+      --overlay-backdrop: rgba(3, 7, 18, 0.8);
+
+      /* Typography / Text */
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #8292a8;
+      --text-disabled: #4b5563;
+
+      /* Borders */
+      --border-subtle: #243249;
+      --border-strong: #384c6e;
+      --border-color: #243249;
+      --focus-ring: rgba(45, 212, 191, 0.4);
+
+      /* Actions & Brand */
+      --action-primary: #0ea5e9;
+      --action-primary-hover: #38bdf8;
+      --on-action-primary: #ffffff;
+      --accent-spark: #f59e0b;
+      --accent-spark-hover: #fbbf24;
+
+      /* Status */
+      --status-info: #38bdf8;
+      --status-info-soft: rgba(56, 189, 248, 0.14);
+      --status-success: #34d399;
+      --status-success-soft: rgba(52, 211, 153, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #f87171;
+      --status-danger-soft: rgba(248, 113, 113, 0.14);
+
+      /* Shadows */
+      --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.35);
+      --shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.65);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f1f5f9;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e2e8f0;
+      --surface-subtle: rgba(15, 23, 42, 0.04);
+      --input-bg: #ffffff;
+      --overlay-backdrop: rgba(15, 23, 42, 0.6);
+
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --text-disabled: #94a3b8;
+
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --border-color: #e2e8f0;
+      --focus-ring: rgba(14, 165, 233, 0.35);
+
+      --action-primary: #0284c7;
+      --action-primary-hover: #0369a1;
+      --on-action-primary: #ffffff;
+      --accent-spark: #d97706;
+      --accent-spark-hover: #b45309;
+
+      --status-info: #0284c7;
+      --status-info-soft: rgba(2, 132, 199, 0.1);
+      --status-success: #059669;
+      --status-success-soft: rgba(5, 150, 105, 0.1);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.1);
+      --status-danger: #dc2626;
+      --status-danger-soft: rgba(220, 38, 38, 0.1);
+
+      --shadow-card: 0 8px 24px rgba(15, 23, 42, 0.06);
+      --shadow-modal: 0 20px 48px rgba(15, 23, 42, 0.2);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    /* Background Studio Workspace View */
+    .app-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 14px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .app-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--text-primary);
+    }
+    .app-brand span.badge-pill {
+      background: var(--surface-interactive);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border-subtle);
+    }
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .theme-toggle-btn {
+      background: var(--surface-interactive);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+    .theme-toggle-btn:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+
+    .main-page {
+      padding: 28px;
+      max-width: 1360px;
+      margin: 0 auto;
+    }
+    .page-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .page-title-row h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .page-title-row p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .open-builder-btn {
+      background: linear-gradient(135deg, var(--action-primary), #6366f1);
+      color: #ffffff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(14, 165, 233, 0.35);
+      transition: var(--transition);
+    }
+    .open-builder-btn:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+
+    /* Backdrop & Modal Container */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay-backdrop);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .modal-dialog {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 1040px;
+      max-height: 94vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-modal);
+      overflow: hidden;
+      animation: modalFadeIn 0.25s ease-out;
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.97) translateY(8px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* Modal Header */
+    .modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .magic-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(99, 102, 241, 0.2));
+      border: 1px solid rgba(14, 165, 233, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+    .modal-title-wrap h2 {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .modal-title-wrap p {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .modal-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .modal-close-btn:hover {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+    }
+
+    /* Modal Body */
+    .modal-body {
+      padding: 24px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    /* Step 1: 1-Prompt Magic Input Box */
+    .prompt-composer-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: var(--shadow-card);
+    }
+    .prompt-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .prompt-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .prompt-hint {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .prompt-textarea {
+      width: 100%;
+      min-height: 80px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-family: var(--font-sans);
+      font-size: 13px;
+      color: var(--text-primary);
+      resize: vertical;
+      line-height: 1.5;
+      outline: none;
+      transition: var(--transition);
+    }
+    .prompt-textarea:focus {
+      border-color: var(--action-primary);
+      box-shadow: 0 0 0 3px var(--focus-ring);
+    }
+
+    /* Inspiration Chips (12 Trends) */
+    .inspiration-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+    }
+    .inspiration-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .inspiration-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .trend-indicator {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent-spark);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .chips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 8px;
+    }
+    .chip-btn {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: var(--transition);
+      user-select: none;
+      text-align: left;
+    }
+    .chip-btn .chip-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .chip-btn .chip-tag {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 5px;
+      border-radius: var(--radius-xs);
+      background: var(--surface);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+    }
+    .chip-btn:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+      border-color: var(--border-strong);
+      transform: translateY(-1px);
+    }
+    .chip-btn.active {
+      background: var(--status-info-soft);
+      border-color: var(--status-info);
+      color: var(--status-info);
+      font-weight: 600;
+    }
+    .chip-btn.active .chip-tag {
+      background: var(--status-info);
+      color: #ffffff;
+      border-color: var(--status-info);
+    }
+
+    /* Action Trigger Button */
+    .composer-action-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 4px;
+    }
+    .composer-tip {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .synthesize-btn {
+      background: linear-gradient(135deg, var(--action-primary), #6366f1);
+      color: #ffffff;
+      border: none;
+      padding: 11px 22px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+      transition: var(--transition);
+    }
+    .synthesize-btn:hover:not(:disabled) {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+    .synthesize-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* AI Synthesis Progress State */
+    .ai-synthesis-progress {
+      display: none;
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      flex-direction: column;
+      gap: 10px;
+      animation: fadeIn 0.3s ease;
+    }
+    .progress-status-bar {
+      height: 6px;
+      background: var(--input-bg);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-status-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--action-primary), #818cf8);
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+    .progress-text {
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Step 2: Proposal Card */
+    .proposal-card {
+      display: none;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .proposal-card-header {
+      background: var(--surface-interactive);
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .proposal-title-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .badge-ready {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      width: fit-content;
+    }
+    .proposal-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .proposal-slug {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .proposal-rationale {
+      padding: 16px 20px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--surface-subtle);
+      line-height: 1.6;
+    }
+
+    /* Blueprint Attributes Grid */
+    .attributes-strip {
+      padding: 14px 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .attribute-box {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .attr-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+    .attr-value {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* Production T2I Prompt Section */
+    .t2i-section {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .t2i-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .t2i-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .t2i-badge-glabs {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: var(--radius-xs);
+    }
+    .copy-btn {
+      background: var(--surface-interactive);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .copy-btn:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+    .t2i-editable-box {
+      width: 100%;
+      min-height: 90px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      resize: vertical;
+      outline: none;
+      transition: var(--transition);
+    }
+    .t2i-editable-box:focus {
+      border-color: var(--action-primary);
+      color: var(--text-primary);
+      box-shadow: 0 0 0 2px var(--focus-ring);
+    }
+
+    /* Live Visual Review Section (G-Labs Node 2) */
+    .glabs-review-container {
+      padding: 20px;
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .glabs-control-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+    }
+    .aspect-selector {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .aspect-selector span {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .aspect-pills {
+      display: flex;
+      gap: 6px;
+    }
+    .aspect-pill {
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .aspect-pill:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+    .aspect-pill.selected {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border-color: var(--action-primary);
+    }
+
+    .glabs-render-btn {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #ffffff;
+      border: none;
+      padding: 8px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      transition: var(--transition);
+    }
+    .glabs-render-btn:hover:not(:disabled) {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+    .glabs-render-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Live Preview Viewport */
+    .preview-canvas-box {
+      border: 2px dashed var(--border-strong);
+      border-radius: var(--radius-md);
+      background: var(--input-bg);
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition);
+    }
+    .preview-canvas-box.has-rendered {
+      border-style: solid;
+      border-color: var(--border-subtle);
+      padding: 0;
+      background: var(--canvas);
+    }
+    .empty-preview-prompt {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      text-align: center;
+      max-width: 440px;
+    }
+    .empty-preview-icon {
+      font-size: 36px;
+      opacity: 0.7;
+    }
+    .empty-preview-prompt h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .empty-preview-prompt p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Worker Rendering Animation */
+    .rendering-overlay {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      text-align: center;
+    }
+    .spinner-ring {
+      width: 44px;
+      height: 44px;
+      border: 4px solid var(--surface-interactive);
+      border-top-color: var(--action-primary);
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .rendering-stage-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .rendering-stage-sub {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--status-info);
+    }
+
+    /* Rendered Image Display */
+    .rendered-image-container {
+      display: none;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .rendered-art-frame {
+      max-width: 460px;
+      width: 100%;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-subtle);
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: max-width 0.25s ease;
+    }
+    .art-svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .rendered-toolbar {
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .re-render-btn {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+    .re-render-btn:hover {
+      background: var(--surface-hover);
+    }
+
+    /* Modal Footer Actions */
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .footer-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-secondary {
+      background: var(--surface-interactive);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 9px 16px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .btn-secondary:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+    .btn-primary-save {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 9px 20px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+      transition: var(--transition);
+    }
+    .btn-primary-save:hover:not(:disabled) {
+      background: var(--action-primary-hover);
+      transform: translateY(-1px);
+    }
+    .btn-primary-save:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Toast Notification */
+    .toast-popup {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-strong);
+      box-shadow: var(--shadow-modal);
+      padding: 14px 20px;
+      border-radius: var(--radius-md);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      animation: toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes toastIn {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .toast-icon {
+      font-size: 20px;
+    }
+    .toast-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .toast-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .toast-desc {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background App Bar (Simulation of Visual Identity Studio) -->
+  <header class="app-header">
+    <div class="app-brand">
+      <span>🎭 CF Studio</span>
+      <span class="badge-pill">Visual Identity Studio v2</span>
+    </div>
+    <div class="nav-controls">
+      <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()">
+        🌙 Mode Gelap
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Background Page -->
+  <main class="main-page">
+    <div class="page-title-row">
+      <div>
+        <h1>🎭 Visual Identity Studio v2</h1>
+        <p>Sistem identitas visual multi-mode deterministik, narrative routing, dan faceless production rules.</p>
+      </div>
+      <button class="open-builder-btn" onclick="openModal()">
+        ✨ AI Studio Builder
+      </button>
+    </div>
+
+    <!-- Info Banner for Mockup Simulation -->
+    <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <div>
+        <h3 style="font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">🚀 Mockup Baru: 12 Ide Visual Cepat Tren 2026-2027</h3>
+        <p style="font-size: 13px; color: var(--text-secondary);">Dilengkapi 12 gaya visual trending (Stickman, Paper Cutout, Clay 3D, Nordic, Chiaroscuro, Blueprint, Lo-Fi 35mm, Diorama, Risograph, Luminous Glass 2027, Sumi-e, Scrapbook) terhubung ke G-Labs.</p>
+      </div>
+      <button class="btn-secondary" onclick="openModal()">Buka Ulang Modal Builder</button>
+    </div>
+  </main>
+
+  <!-- Modal Component: Simplified AI Studio Builder -->
+  <div class="modal-overlay" id="builderModal">
+    <div class="modal-dialog">
+      
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="magic-icon">✨</div>
+          <div>
+            <h2>AI Visual Identity Studio Builder</h2>
+            <p>Ceritakan konsep visual dalam 1 kalimat santai, atau pilih 12 ide tren 2026-2027. AI merakit preset Schema v2 dan prompt T2I untuk live review G-Labs.</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal()" title="Tutup Modal">&times;</button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        
+        <!-- Part 1: Magic Input Composer -->
+        <div class="prompt-composer-card">
+          <div class="prompt-label-row">
+            <span class="prompt-label">
+              <span>💬</span> Konsep Ide Visual Anda
+            </span>
+            <span class="prompt-hint">Ketik bebas konsep visual, subjek, mood, dan palet warna</span>
+          </div>
+
+          <textarea 
+            id="userPromptInput"
+            class="prompt-textarea" 
+            placeholder="Contoh: Saya ingin visual identity gaya stickman minimalis untuk edukasi bisnis, warna hitam putih dengan aksen kuning stabilo, karakter faceless memegang tablet..."
+          ></textarea>
+
+          <!-- Inspiration Chips (12 Trends 2026-2027) -->
+          <div class="inspiration-container">
+            <div class="inspiration-header">
+              <span class="inspiration-title">
+                <span>🔥</span> 12 Pilihan Ide Visual Cepat (Tren 2026 & Proyeksi 2027) :
+              </span>
+              <span class="trend-indicator">Anti-AI Rebellion & Tactile Authenticity</span>
+            </div>
+            
+            <div class="chips-grid">
+              <!-- 1. Stickman -->
+              <button class="chip-btn active" onclick="applyPresetChip('stickman')">
+                <span class="chip-info"><span>🎨</span> Stickman Doodles</span>
+                <span class="chip-tag">Explainer</span>
+              </button>
+
+              <!-- 2. Paper Cutout -->
+              <button class="chip-btn" onclick="applyPresetChip('paper_cutout')">
+                <span class="chip-info"><span>📦</span> Paper Cutout Craft</span>
+                <span class="chip-tag">Tactile</span>
+              </button>
+
+              <!-- 3. Claymation -->
+              <button class="chip-btn" onclick="applyPresetChip('clay_3d')">
+                <span class="chip-info"><span>🧸</span> 3D Clay Mascot</span>
+                <span class="chip-tag">Stop-Motion</span>
+              </button>
+
+              <!-- 4. Nordic Minimalist -->
+              <button class="chip-btn" onclick="applyPresetChip('nordic_minimalist')">
+                <span class="chip-info"><span>☕</span> Nordic Kitchen Studio</span>
+                <span class="chip-tag">Clean Living</span>
+              </button>
+
+              <!-- 5. Dark Chiaroscuro -->
+              <button class="chip-btn" onclick="applyPresetChip('dark_moody')">
+                <span class="chip-info"><span>🎬</span> Dark Chiaroscuro</span>
+                <span class="chip-tag">Smoke & Meat</span>
+              </button>
+
+              <!-- 6. Technical Blueprint -->
+              <button class="chip-btn" onclick="applyPresetChip('technical_blueprint')">
+                <span class="chip-info"><span>💻</span> Technical Blueprint</span>
+                <span class="chip-tag">Dev & Data</span>
+              </button>
+
+              <!-- 7. Lo-Fi Flash -->
+              <button class="chip-btn" onclick="applyPresetChip('lofi_flash')">
+                <span class="chip-info"><span>📸</span> Lo-Fi 35mm Flash</span>
+                <span class="chip-tag">Candid UGC</span>
+              </button>
+
+              <!-- 8. Isometric Diorama -->
+              <button class="chip-btn" onclick="applyPresetChip('isometric_diorama')">
+                <span class="chip-info"><span>📐</span> Isometric 3D World</span>
+                <span class="chip-tag">Miniature</span>
+              </button>
+
+              <!-- 9. Pop Risograph -->
+              <button class="chip-btn" onclick="applyPresetChip('pop_risograph')">
+                <span class="chip-info"><span>🖨️</span> Pop Risograph</span>
+                <span class="chip-tag">Retro Halftone</span>
+              </button>
+
+              <!-- 10. Luminous Glass (2027) -->
+              <button class="chip-btn" onclick="applyPresetChip('luminous_glass')">
+                <span class="chip-info"><span>💎</span> Luminous Glass</span>
+                <span class="chip-tag" style="color: var(--action-primary); font-weight: 700;">Trend 2027</span>
+              </button>
+
+              <!-- 11. Sumi-e Asian Ink -->
+              <button class="chip-btn" onclick="applyPresetChip('sumi_e_ink')">
+                <span class="chip-info"><span>🪵</span> Sumi-e Asian Ink</span>
+                <span class="chip-tag">Zen Tea</span>
+              </button>
+
+              <!-- 12. Vintage Scrapbook -->
+              <button class="chip-btn" onclick="applyPresetChip('vintage_scrapbook')">
+                <span class="chip-info"><span>📰</span> Vintage Scrapbook</span>
+                <span class="chip-tag">Investigation</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Composer Actions -->
+          <div class="composer-action-row">
+            <span class="composer-tip">💡 Pilih salah satu ide di atas atau ketik bebas konsep visual Anda sendiri.</span>
+            <button class="synthesize-btn" id="synthesizeBtn" onclick="runAiSynthesis()">
+              <span>✨</span> Buat Usulan Visual Identity (1-Click AI)
+            </button>
+          </div>
+        </div>
+
+        <!-- AI Synthesis Progress Animation -->
+        <div class="ai-synthesis-progress" id="synthesisProgress">
+          <div class="progress-status-bar">
+            <div class="progress-status-fill" id="progressFill"></div>
+          </div>
+          <div class="progress-text" id="progressText">
+            <span>⏳</span> Membaca konsep & mengekstrak tone estetika...
+          </div>
+        </div>
+
+        <!-- Part 2: Interactive Proposal Card -->
+        <div class="proposal-card" id="proposalCard">
+          
+          <div class="proposal-card-header">
+            <div class="proposal-title-info">
+              <div class="badge-ready">
+                <span>✨</span> Usulan Siap Direview
+              </div>
+              <h3 class="proposal-name" id="proposalLabel">Minimalist Stickman Business Guide</h3>
+              <span class="proposal-slug" id="proposalKey">preset_key: stickman_business_v1</span>
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted); background: var(--surface); padding: 4px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+              Schema v2 Compliant • Faceless Invariant Enforced
+            </span>
+          </div>
+
+          <!-- Rationale -->
+          <div class="proposal-rationale" id="proposalRationale">
+            "Mengusung karakter stickman monokromatik modern dengan goresan garis tegas dan proporsional. Aksen kuning cerah (#FACC15) digunakan untuk menonjolkan poin edukasi bisnis. Bersifat faceless alami dan sangat kuat untuk memikat atensi di feed media sosial."
+          </div>
+
+          <!-- Key Technical Attributes Grid -->
+          <div class="attributes-strip">
+            <div class="attribute-box">
+              <span class="attr-label">Visual Mode</span>
+              <span class="attr-value" id="attrVisualMode">Stickman Line Art</span>
+            </div>
+            <div class="attribute-box">
+              <span class="attr-label">Subject & Faceless</span>
+              <span class="attr-value" id="attrSubject">Stylized Faceless Figure</span>
+            </div>
+            <div class="attribute-box">
+              <span class="attr-label">Environment</span>
+              <span class="attr-value" id="attrEnvironment">Clean White Paper Studio</span>
+            </div>
+            <div class="attribute-box">
+              <span class="attr-label">Accent & Palette</span>
+              <span class="attr-value" id="attrPalette">Monochrome + Bright Yellow</span>
+            </div>
+          </div>
+
+          <!-- Production T2I Prompt Section -->
+          <div class="t2i-section">
+            <div class="t2i-header-row">
+              <span class="t2i-title">
+                <span>📝</span> Production T2I Prompt (English for G-Labs / Veo / Imagen)
+                <span class="t2i-badge-glabs">G-Labs Ready</span>
+              </span>
+              <button class="copy-btn" onclick="copyPrompt()">
+                <span>📋</span> Salin Prompt
+              </button>
+            </div>
+
+            <textarea 
+              id="t2iPromptBox" 
+              class="t2i-editable-box" 
+              spellcheck="false"
+              title="Prompt ini dapat Anda edit secara langsung sebelum melakukan render di G-Labs"
+            >A charming minimalist stickman character sitting at a sleek desk, holding a glowing digital tablet with charts, ultra clean white textured paper background, bold expressive black ink outline, vibrant yellow highlighter accent line art, soft ambient studio drop shadow, isometric high-angle view, modern editorial vector illustration, commercial 4k.</textarea>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px;">
+              <span style="font-size: 11px; color: var(--text-muted);">
+                💡 Tip: Anda dapat mengedit teks prompt di atas secara bebas sebelum menekan tombol render G-Labs.
+              </span>
+              <span style="font-size: 11px; font-family: var(--font-mono); color: var(--status-success);">
+                Face Invariant: Enforced
+              </span>
+            </div>
+          </div>
+
+          <!-- Live Visual Review Section (G-Labs Node 2) -->
+          <div class="glabs-review-container">
+            <div class="glabs-control-bar">
+              <div class="aspect-selector">
+                <span>Aspek Rasio:</span>
+                <div class="aspect-pills">
+                  <button class="aspect-pill selected" onclick="selectAspect(this, '9:16')">9:16 Story</button>
+                  <button class="aspect-pill" onclick="selectAspect(this, '1:1')">1:1 Square</button>
+                  <button class="aspect-pill" onclick="selectAspect(this, '16:9')">16:9 Wide</button>
+                </div>
+              </div>
+
+              <button class="glabs-render-btn" id="glabsRenderBtn" onclick="runGlabsRender()">
+                <span>🎨</span> Generate Visual Preview (G-Labs Node 2)
+              </button>
+            </div>
+
+            <!-- Preview Viewport -->
+            <div class="preview-canvas-box" id="previewCanvas">
+              
+              <!-- State A: Belum Dirender -->
+              <div class="empty-preview-prompt" id="emptyPreviewPrompt">
+                <div class="empty-preview-icon">🖼️</div>
+                <h4>Review Visual Belum Dibuat</h4>
+                <p>Klik tombol <strong>"Generate Visual Preview (G-Labs Node 2)"</strong> di atas untuk memicu worker Node 2 merender contoh visual dari prompt ini secara nyata.</p>
+              </div>
+
+              <!-- State B: Sedang Rendering di Worker G-Labs -->
+              <div class="rendering-overlay" id="renderingOverlay">
+                <div class="spinner-ring"></div>
+                <div>
+                  <div class="rendering-stage-title" id="renderStageText">Mengirim task ke Worker G-Labs Node 2...</div>
+                  <div class="rendering-stage-sub" id="renderTaskSub">Target: http://100.64.70.61:8765/api/generate</div>
+                </div>
+              </div>
+
+              <!-- State C: Hasil Render Ditampilkan -->
+              <div class="rendered-image-container" id="renderedContainer">
+                <div class="rendered-art-frame" id="artFrame">
+                  <div id="artSvgContainer" style="width: 100%; display: flex; justify-content: center;"></div>
+                </div>
+
+                <div class="rendered-toolbar">
+                  <button class="re-render-btn" onclick="runGlabsRender(true)">
+                    <span>🔄</span> Render Variasi Lain
+                  </button>
+                  <span id="renderStatusBadge" style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">
+                    Status: Render Sukses via G-Labs (0.75s)
+                  </span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <div class="footer-left">
+          <button class="btn-secondary" onclick="resetBuilder()">
+            <span>🔄</span> Buat Usulan Baru
+          </button>
+        </div>
+        <div class="footer-right">
+          <button class="btn-secondary" id="btnAdvancedEdit" onclick="goToAdvancedForm()" disabled>
+            <span>✏️</span> Kustomisasi Lanjut di Form
+          </button>
+          <button class="btn-primary-save" id="btnSavePreset" onclick="saveVisualIdentityPreset()" disabled>
+            <span>💾</span> Simpan sebagai Visual Identity
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast Success Popup -->
+  <div class="toast-popup" id="toastPopup">
+    <div class="toast-icon">✅</div>
+    <div class="toast-text">
+      <div class="toast-title" id="toastTitle">Berhasil Disimpan!</div>
+      <div class="toast-desc" id="toastDesc">Preset telah ditambahkan ke database Visual Identity.</div>
+    </div>
+  </div>
+
+  <script>
+    // Theme Toggle Logic
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      const btn = document.getElementById('themeToggleBtn');
+      btn.innerHTML = next === 'dark' ? '🌙 Mode Gelap' : '☀️ Mode Terang';
+    }
+
+    function openModal() {
+      document.getElementById('builderModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('builderModal').style.display = 'none';
+    }
+
+    // 12 Trending Visual Presets Dataset (2026-2027)
+    const PRESET_IDEAS = {
+      // 1. Stickman Doodles
+      stickman: {
+        prompt: "Saya ingin visual identity gaya stickman minimalis untuk edukasi bisnis, warna hitam putih dengan aksen kuning stabilo, karakter faceless memegang tablet atau laptop, latar belakang clean studio.",
+        label: "Minimalist Stickman Business Guide",
+        key: "stickman_business_v1",
+        rationale: "Karakter stickman monokromatik modern dengan goresan garis tegas. Aksen kuning cerah (#FACC15) digunakan untuk menonjolkan poin edukasi bisnis. Sangat kuat untuk memikat atensi di feed media sosial.",
+        visualMode: "Stickman Line Art",
+        subject: "Stylized Faceless Figure",
+        environment: "Clean White Paper Studio",
+        palette: "Monochrome + Bright Yellow (#FACC15)",
+        t2i: "A charming minimalist stickman character sitting at a sleek desk, holding a glowing digital tablet with charts, ultra clean white textured paper background, bold expressive black ink outline, vibrant yellow highlighter accent line art, soft ambient studio drop shadow, isometric high-angle view, modern editorial vector illustration, commercial 4k.",
+        svg: `<svg class="art-svg" viewBox="0 0 360 480" xmlns="http://www.w3.org/2000/svg">
+          <rect width="360" height="480" fill="#f8fafc"/>
+          <defs><pattern id="g1" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e2e8f0" stroke-width="0.8"/></pattern></defs>
+          <rect width="360" height="480" fill="url(#g1)" opacity="0.6"/>
+          <ellipse cx="180" cy="380" rx="130" ry="24" fill="#cbd5e1" opacity="0.5"/>
+          <rect x="70" y="320" width="220" height="12" rx="4" fill="#0f172a"/>
+          <circle cx="180" cy="160" r="34" fill="none" stroke="#0f172a" stroke-width="8"/>
+          <line x1="180" y1="194" x2="180" y2="280" stroke="#0f172a" stroke-width="8" stroke-linecap="round"/>
+          <line x1="180" y1="280" x2="140" y2="350" stroke="#0f172a" stroke-width="8" stroke-linecap="round"/>
+          <line x1="180" y1="280" x2="220" y2="350" stroke="#0f172a" stroke-width="8" stroke-linecap="round"/>
+          <path d="M 180 220 L 130 250 L 120 280" fill="none" stroke="#0f172a" stroke-width="8" stroke-linecap="round"/>
+          <rect x="110" y="275" width="18" height="22" rx="3" fill="#facc15" stroke="#0f172a" stroke-width="3"/>
+          <path d="M 180 220 L 225 245 L 240 270" fill="none" stroke="#0f172a" stroke-width="8" stroke-linecap="round"/>
+          <rect x="220" y="260" width="55" height="40" rx="5" fill="#0f172a" stroke="#0ea5e9" stroke-width="2"/>
+          <rect x="224" y="264" width="47" height="32" rx="3" fill="#facc15"/>
+          <line x1="228" y1="285" x2="242" y2="275" stroke="#0f172a" stroke-width="3" stroke-linecap="round"/>
+          <line x1="242" y1="275" x2="252" y2="282" stroke="#0f172a" stroke-width="3" stroke-linecap="round"/>
+          <line x1="252" y1="282" x2="265" y2="270" stroke="#0f172a" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="250" cy="130" r="28" fill="#facc15" opacity="0.9"/>
+          <path d="M 235 150 L 225 160 L 242 153 Z" fill="#facc15"/>
+          <text x="250" y="136" font-family="sans-serif" font-weight="900" font-size="20" fill="#0f172a" text-anchor="middle">💡</text>
+          <text x="180" y="445" font-family="sans-serif" font-weight="700" font-size="11" fill="#94a3b8" text-anchor="middle" letter-spacing="1">G-LABS PREVIEW • STICKMAN DOODLES</text>
+        </svg>`
+      },
+
+      // 2. Paper Cutout Craft
+      paper_cutout: {
+        prompt: "Saya ingin gaya visual paper cutout layer bertumpuk nuansa kopi dan kuliner artisanal, tekstur kertas coklat craft dan off-white, pencahayaan lembut.",
+        label: "Artisanal Paper Cutout Cafe",
+        key: "paper_cutout_cafe_v1",
+        rationale: "Teknik paper-craft bertingkat menghasilkan kedalaman estetika analog yang hangat dan tak lekang oleh waktu. Menunjukkan bukti sentuhan fisik di era jenuh AI.",
+        visualMode: "Paper Cutout Documentary",
+        subject: "Artisanal Barista Hands Only",
+        environment: "Craft Paper Studio Backdrop",
+        palette: "Earthy Terracotta & Cream",
+        t2i: "Exquisite layered paper cutout craft of barista hands pouring latte art, warm roasted coffee beans scattered on tactile kraft paper texture, soft directional studio lighting casting real paper drop shadows, warm cream and burnt amber tones, 3d papercraft art style, 8k masterpiece.",
+        svg: `<svg class="art-svg" viewBox="0 0 360 480" xmlns="http://www.w3.org/2000/svg">
+          <rect width="360" height="480" fill="#f7f3ee"/>
+          <path d="M 0 0 L 360 0 L 360 480 L 0 480 Z" fill="#f3ece2"/>
+          <!-- Layered paper waves -->
+          <path d="M 0 120 Q 90 180 180 140 T 360 170 L 360 480 L 0 480 Z" fill="#e8dac8" filter="drop-shadow(0 4px 6px rgba(0,0,0,0.15))"/>
+          <path d="M 0 220 Q 120 280 240 230 T 360 270 L 360 480 L 0 480 Z" fill="#d4ba98" filter="drop-shadow(0 5px 8px rgba(0,0,0,0.18))"/>
+          <path d="M 0 310 Q 140 370 270 320 T 360 360 L 360 480 L 0 480 Z" fill="#8c5836" filter="drop-shadow(0 6px 10px rgba(0,0,0,0.22))"/>
+          <!-- Coffee Cup silhouette paper cutout -->
+          <circle cx="180" cy="270" r="55" fill="#fcf9f5" filter="drop-shadow(0 8px 12px rgba(0,0,0,0.2))"/>
+          <circle cx="180" cy="270" r="44" fill="#5c3822"/>
+          <!-- Paper Latte Art Heart -->
+          <path d="M 180 255 C 160 235 150 250 160 265 C 170 280 180 290 180 290 C 180 290 190 280 200 265 C 210 250 200 235 180 255 Z" fill="#fcf9f5"/>
+          <text x="180" y="445" font-family="sans-serif" font-weight="700" font-size="11" fill="#f3ece2" text-anchor="middle" letter-spacing="1">G-LABS PREVIEW • PAPER CUTOUT CRAFT</text>
+        </svg>`
+      },
+
+      // 3. Clay 3D
+      clay_3d: {
+        prompt: "Saya ingin karakter maskot 3D claymation lucu seperti kucing barista dengan celemek barista, pencahayaan softbox studio, warna pastel lembut.",
+        label: "Cute Claymation Cat Barista",
+        key: "clay_cat_barista_v1",
+        rationale: "Gaya claymation 3D plastisin organik memberikan sentuhan ramah, playful, dan memiliki brand retention yang tinggi pada audiens muda.",
+        visualMode: "Stylized 3D Clay",
+        subject: "British Shorthair Cat Mascot",
+        environment: "Cozy Pastel Coffee Bar",
+        palette: "Matcha Green & Pastel Peach",
+        t2i: "Cute stylized 3d claymation British Shorthair cat barista wearing a tiny denim apron, standing behind a miniature espresso machine, soft clay texture with subtle thumbprint details, dreamy pastel studio softbox lighting, shallow depth of field, adorable stop-motion aesthetic, unreal engine 5 render, 4k.",
+        svg: `<svg class="art-svg" viewBox="0 0 360 480" xmlns="http://www.w3.org/2000/svg">
+          <rect width="360" height="480" fill="#fde2d2"/>
+          <circle cx="180" cy="240" r="160" fill="#e8f5e9" opacity="0.6"/>
+          <!-- Clay table -->
+          <rect x="30" y="330" width="300" height="80" rx="20" fill="#8d6e63"/>
+          <rect x="40" y="340" width="280" height="15" rx="7" fill="#a1887f"/>
+          <!-- Cat Body -->
+          <ellipse cx="180" cy="280" rx="65" ry="75" fill="#90a4ae"/>
+          <!-- Apron -->
+          <path d="M 140 250 L 220 250 L 210 320 L 150 320 Z" fill="#1e3a8a"/>
+          <!-- Cat Head -->
+          <circle cx="180" cy="180" r="58" fill="#90a4ae"/>
+          <!-- Ears -->
+          <polygon points="135,140 120,95 160,125" fill="#78909c"/>
+          <polygon points="225,140 240,95 200,125" fill="#78909c"/>
+          <polygon points="135,135 125,105 155,125" fill="#f8bbd0"/>
+          <polygon points="225,135 235,105 205,125" fill="#f8bbd0"/>
+          <!-- Cat Face features (Clay eyes) -->
+          <circle cx="160" cy="175" r="7" fill="#263238"/>
+          <circle cx="200" cy="175" r="7" fill="#263238"/>
+          <circle cx="158" cy="173" r="2.5" fill="#ffffff"/>
+          <circle cx="198" cy="173" r="2.5" fill="#ffffff"/>
+          <polygon points="180,186 174,192 186,192" fill="#f48fb1"/>
+          <!-- Whiskers -->
+          <line x1="150" y1="188" x2="120" y2="184" stroke="#455a64" stroke-width="2.5"/>
+          <line x1="150" y1="194" x2="120" y2="198" stroke="#455a64" stroke-width="2.5"/>
+          <line x1="210" y1="188" x2="240" y2="184" stroke="#455a64" stroke-width="2.5"/>
+          <line x1="210" y1="194" x2="240" y2="198" stroke="#455a64" stroke-width="2.5"/>
+          <text x="180" y="445" font-family="sans-serif" font-weight="700" font-size="11" fill="#78909c" text-anchor="middle" letter-spacing="1">G-LABS PREVIEW • 3D CLAYMATION MASCOT</text>
+        </svg>`
+      },
+
+      // 4. Nordic Minimalist
+      nordic_minimalist: {
+        prompt: "Saya ingin visual identity dapur modern Nordic minimalis, meja kayu oak dan marmer putih, pencahayaan alami jendela pagi, sangat estetik.",
+        label: "Nordic Minimalist Kitchen Studio",
+        key: "nordic_kitchen_studio_v1",
+        rationale: "Elemen kayu alami dan marmer putih memberikan kesan higienis, bersih, dan mewah untuk fotografi produk dan resep modern.",
+        visualMode: "Commercial Food Photography",
+        subject: "Chef Hands Prepping Ingredients",
+        environment: "Nordic Oak & Marble Kitchen",
+        palette: "Warm White, Oak, Sage Green",
+        t2i: "Close-up POV of delicate hands holding a ceramic bowl, light oak wooden countertop and white Carrara marble, morning window daylight streaming in with soft shadows, organic sourdough bread and fresh rosemary sprig in background, editorial food magazine quality, shot on 50mm f/1.8 lens.",
+        svg: `<svg class="art-svg" viewBox="0 0 360 480" xmlns="http://www.w3.org/2000/svg">
+          <rect width="360" height="240" fill="#f8fafc"/>
+          <rect y="240" width="360" height="240" fill="#e2c9a9"/>
+          <!-- Oak Wood Lines -->
+          <line x1="0" y1="300" x2="360" y2="300" stroke="#d4b48d" stroke-width="2"/>
+          <line x1="0" y1="360" x2="360" y2="360" stroke="#d4b48d" stroke-width="2"/>
+          <line x1="0" y1="420" x2="360" y2="420" stroke="#d4b48d" stroke-width="2"/>
+          <!-- Soft window shadow diagonally -->
+          <polygon points="60,0 160,0 360,340 260,340" fill="#ffffff" opacity="0.35"/>
+          <!-- Marble cutting board -->
+          <rect x="70" y="160" width="220" height="180" rx="12" fill="#ffffff" filter="drop-shadow(0 12px 20px rgba(0,0,0,0.12))"/>
+          <circle cx="180" cy="250" r="50" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="3"/>
+          <circle cx="180" cy="250" r="38" fill="#10b981" opacity="0.2"/>
+          <!-- Fresh Rosemary Sprig -->
+          <path d="M 140 240 Q 180 250 220 230" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round"/>
+          <line x1="160" y1="243" x2="155" y2="235" stroke="#059669" stroke-width="2.5"/>
+          <line x1="180" y1="248" x2="185" y2="238" stroke="#059669" stroke-width="2.5"/>
+          <line x1="200" y1="242" x2="208" y2="233" stroke="#059669" stroke-width="2.5"/>
+          <text x="180" y="445" font-family="sans-serif" font-weight="700" font-size="11" fill="#785c3b" text-anchor="middle" letter-spacing="1">G-LABS PREVIEW • NORDIC KITCHEN STUDIO</text>
+        </svg>`
+      },
+
+      // 5. Dark Chiaroscuro
+      dark_moody: {
+        prompt: "Saya ingin visual identity dark moody chiaroscuro dengan asap dramatis dan latar batu hitam slate untuk daging steak premium.",
+        label: "Dark Moody Chiaroscuro Steakhouse",
+        key: "dark_moody_steak_v1",
+        rationale: "Kontras tinggi antara bayangan pekat dan highlight keemasan menghadirkan nuansa eksklusif, maskulin, dan menggugah selera indrawi.",
+        visualMode: "Dark Moody Chiaroscuro",
+        subject: "Hands Slicing Juicy Wagyu",
+        environment: "Dark Textured Slate Stone",
+        palette: "Charcoal Black & Ember Gold",
+        t2i: "Dramatic chiaroscuro food photography, hands holding a damascus chef knife slicing hot grilled wagyu steak, subtle atmospheric smoke rising, dark textured slate stone background, warm golden rim light accentuating meat juiciness, fine dining commercial aesthetic, 8k cinematic.",
+        svg: `<svg class="art-svg" viewBox="0 0 360 480" xmlns="http://www.w3.org/2000/svg">
+          <rect width="360" height="480" fill="#090d16"/>
+          <!-- Slate texture circle glow -->
+          <radialGradient id="goldGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+          </radialGradient>
+          <circle cx="180" cy="240" r="160" fill="url(#goldGlow)"/>
+          <!-- Slate stone board -->
+          <polygon points="50,220 310,210 290,360 40,350" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+          <!-- Juicy Steak cut -->
+          <path d="M 100 280 C 100 240 260 230 260 280 C 260 320 100 320 100 280 Z" fill="#7f1d1d" stroke="#f59e0b" stroke-width="2"/>
+          <line x1="140" y1="255" x2="130" y2="305" stroke="#b91c1c" stroke-width="4"/>
+          <line x1="170" y1="250" x2="165" y2="308" stroke="#b91c1c" stroke-width="4"/>
+          <line x1="200" y1="252" x2="198" y2="305" stroke="#b91c1c" stroke-width="4"/>
+          <line x1="230" y1="260" x2="225" y2="300" stroke="#b91c1c" stroke-width="4"/>
+          <!-- Rising smoke paths -->
+          <path d="M 150 240 Q 140 180 170 140 T 150 80" fill="none" stroke="#ffffff" stroke-width="3" opacity="0.25" stroke-linecap="round"/>
+          <path d="M 190 230 Q 210 170 185 130 T 205 70" fill="none" stroke="#ffffff" stroke-width="3" opacity="0.2" stroke-linecap="round"/>
+          <text x="180" y="445" font-family="sans-serif" font-weight="700" font-size="11" fill="#f59e0b" text-anchor="middle" letter-spacing="1">G-LABS PREVIEW • DARK CHIAROSCURO</text>
+        </svg>`
+      },
+
+      // 6. Technical Blueprint
+      technical_blueprint: {
+        prompt: "Saya ingin gaya visual blueprint teknis arsitektur berwarna biru navy dengan garis skematik putih dan cyan, monospaced font, untuk konten analisis AI dan fintech.",
+        label: "Technical Architecture Blueprint",
+        key: "technical_blueprint_v1",
+        rationale: "Estetika developer-chic dan brutalism teknis memberikan kesan otoritas tinggi, objektif, dan presisi bagi audiens profesional.",
+        visualMode: "Technical Schematic",
+        subject: "Faceless Systems Architect",
+        environment: "Digital Grid Blueprint",
+        palette: "Navy Blue & Cyan Line",
+        t2i: "Architectural technical blueprint schematic of an automated logistics warehouse, crisp cyan and white vector lines on deep navy blueprint paper background, isometric exploded view, clean monospace annotations, ultra-high precision engineering aesthetic, 4k.",
+        svg: `<svg class="art-svg" viewBox="0 0 360 480" xmlns="http://www.w3.org/2000/svg">
+          <rect width="360" height="480" fill="#0a192f"/>
+          <!-- Blueprint Grid -->
+          <defs><pattern id="bpGrid" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M 24 0 L 0 0 0 24" fill="none" stroke="#172a45" stroke-width="1"/></pattern></defs>
+          <rect width="360" height="480" fill="url(#bpGrid)"/>
+          <!-- Schematic Box 3D -->
+          <polygon points="180,120 280,170 180,220 80,170" fill="none" stroke="#64ffda" stroke-width="2"/>
+          <polygon points="80,170 180,220 180,310 80,260" fill="none" stroke="#0ea5e9" stroke-width="2"/>
+          <polygon points="280,170 180,220 180,310 280,260" fill="none" stroke="#38bdf8" stroke-width="2"/>
+          <!-- Internal dashed lines -->
+          <line x1="180" y1="120" x2="180" y2="220" stroke="#64ffda" stroke-width="1" stroke-dasharray="4,4"/>
+          <!-- Blueprint dimensions & labels -->
+          <line x1="60" y1="170" x2="60" y2="260" stroke="#94a3b8" stroke-width="1"/>
+          <text x="50" y="220" font-family="monospace" font-size="10" fill="#94a3b8" text-anchor="end">H: 1080</text>
+          <text x="180" y="360" font-family="monospace" font-weight="700" font-size="13" fill="#64ffda" text-anchor="middle">SYS_FLOW // V.26</text>
+          <text x="180" y="445" font-family="sans-serif" font-weight="700" font-size="11" fill="#38bdf8" text-anchor="middle" letter-spacing="1">G-LABS PREVIEW • TECHNICAL BLUEPRINT</text>
+        </svg>`
+      },
+
+      // 7. Lo-Fi Flash (Candid)
+      lofi_flash: {
+        prompt: "Saya ingin gaya foto candid kamera analog 35mm dengan direct flash malam hari dan film grain tebal untuk street food viral dan review jujur.",
+        label: "Candid 35mm Lo-Fi Flash",
+        key: "lofi_flash_candid_v1",
+        rationale: "Memberontak terhadap foto AI yang terlalu mulus. Kilatan flash langsung dan tekstur film 35mm memancarkan keaslian murni tanpa rekayasa.",
+        visualMode: "Candid Lo-Fi Analog",
+        subject: "Hands Unwrapping Street Food",
+        environment: "Urban Street Concrete at Night",
+        palette: "High-Contrast Flash & Warm Grain",
+        t2i: "Candid 35mm film street photography, close-up hands unwrapping hot crispy street food from parchment paper, harsh direct flash photography against a concrete night street background, gritty film grain, authentic unpolished social media documentary aesthetic, Kodak Portra 400 look.",
+        svg: `<svg class="art-svg" viewBox="0 0 360 480" xmlns="http://www.w3.org/2000/svg">
+          <rect width="360" height="480" fill="#111827"/>
+          <!-- Flash Burst Center -->
+          <radialGradient id="flashBurst" cx="50%" cy="45%" r="60%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
+            <stop offset="60%" stop-color="#fbbf24" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#000000" stop-opacity="0.8"/>
+          </radialGradient>
+          <rect width="360" height="480" fill="url(#flashBurst)"/>
+          <!-- Hand holding street snack -->
+          <path d="M 120 480 L 140 320 L 190 310 L 210 480 Z" fill="#d97706" opacity="0.8"/>
+          <rect x="130" y="220" width="100" height="110" rx="6" fill="#fde68a" stroke="#d97706" stroke-width="2"/>
+          <path d="M 130 220 Q 180 250 230 220" fill="#f59e0b"/>
+          <!-- 35mm Date Stamp in Orange (Retro) -->
+          <text x="320" y="440" font-family="monospace" font-weight="900" font-size="14" fill="#f97316" text-anchor="end">'26 11 11</text>
+          <text x="180" y="465" font-family="sans-serif" font-weight="700" font-size="10" fill="#9ca3af" text-anchor="middle" letter-spacing="1">G-LABS PREVIEW • 35MM LO-FI FLASH</text>
+        </svg>`
+      },
+
+      // 8. Isometric Diorama
+      isometric_diorama: {
+        prompt: "Saya ingin gaya miniatur isometrik 3D diorama pulau mengambang dengan perkebunan kopi dan kota mini, pencahayaan tilt-shift lembut.",
+        label: "Isometric 3D Micro-World",
+        key: "isometric_diorama_v1",
+        rationale: "Menampilkan proses bisnis dan alur kerja dalam bentuk diorama mikro yang sangat adiktif untuk disaksikan di video berputar.",
+        visualMode: "Isometric Society",
+        subject: "Miniature Faceless Workers",
+        environment: "Floating Island Diorama",
+        palette: "Pastel Earth & Clean Resin",
+        t2i: "Intricate isometric 3D floating diorama of a modern sustainable organic farm and coffee plantation, miniature faceless workers, clean pastel color palette, soft studio tilt-shift lens blur, clay and matte resin render, highly detailed miniature architectural model, 8k.",
+        svg: `<svg class="art-svg" viewBox="0 0 360 480" xmlns="http://www.w3.org/2000/svg">
+          <rect width="360" height="480" fill="#e0f2fe"/>
+          <!-- Floating Island Base -->
+          <polygon points="180,180 300,240 180,300 60,240" fill="#86efac"/>
+          <polygon points="60,240 180,300 180,370 60,310" fill="#78350f"/>
+          <polygon points="300,240 180,300 180,370 300,310" fill="#92400e"/>
+          <!-- Mini House -->
+          <polygon points="180,160 210,175 180,190 150,175" fill="#f87171"/>
+          <polygon points="150,175 180,190 180,220 150,205" fill="#ffffff"/>
+          <polygon points="210,175 180,190 180,220 210,205" fill="#f1f5f9"/>
+          <!-- Mini Trees -->
+          <circle cx="110" cy="225" r="14" fill="#15803d"/>
+          <circle cx="240" cy="235" r="16" fill="#15803d"/>
+          <circle cx="200" cy="250" r="12" fill="#16a34a"/>
+          <!-- Mini Lake -->
+          <ellipse cx="140" cy="260" rx="20" ry="10" fill="#38bdf8"/>
+          <text x="180" y="445" font-family="sans-serif" font-weight="700" font-size="11" fill="#0284c7" text-anchor="middle" letter-spacing="1">G-LABS PREVIEW • ISOMETRIC 3D DIORAMA</text>
+        </svg>`
+      },
+
+      // 9. Pop Risograph
+      pop_risograph: {
+        prompt: "Saya ingin gaya sablon cetak risograph retro dengan titik halftone vintage dan warna neon kontras tinggi seperti pink dan biru teal.",
+        label: "Retro Pop Risograph Halftone",
+        key: "pop_risograph_v1",
+        rationale: "Kombinasi warna neon cerah dan ketidakteraturan cetak offset zine independen menghasilkan visual feed yang sangat standout dan magnetik.",
+        visualMode: "Retro Pop Risograph",
+        subject: "Stylized Hands Toasting Glasses",
+        environment: "Speckled Unbleached Paper",
+        palette: "Fluorescent Pink & Electric Teal",
+        t2i: "Retro risograph art print illustration, two hands toasting glasses with sparkling beverage, visible halftone dot pattern, authentic soy ink texture on speckled unbleached paper, intentional slight color misregistration, neon orange and electric teal ink overlay, vintage indie zine aesthetic.",
+        svg: `<svg class="art-svg" viewBox="0 0 360 480" xmlns="http://www.w3.org/2000/svg">
+          <rect width="360" height="480" fill="#fef3c7"/>
+          <!-- Misregistered Pink Layer -->
+          <circle cx="184" cy="216" r="80" fill="#ec4899" opacity="0.75"/>
+          <!-- Misregistered Teal Layer -->
+          <circle cx="176" cy="224" r="80" fill="#06b6d4" opacity="0.75"/>
+          <!-- Center Star Icon -->
+          <polygon points="180,160 195,205 240,205 205,230 220,275 180,248 140,275 155,230 120,205 165,205" fill="#fef3c7"/>
+          <text x="180" y="350" font-family="sans-serif" font-weight="900" font-size="24" fill="#0f172a" text-anchor="middle" letter-spacing="2">POP ZINE '26</text>
+          <text x="180" y="445" font-family="sans-serif" font-weight="700" font-size="11" fill="#db2777" text-anchor="middle" letter-spacing="1">G-LABS PREVIEW • POP RISOGRAPH</text>
+        </svg>`
+      },
+
+      // 10. Luminous Glass (Trend 2027)
+      luminous_glass: {
+        prompt: "Saya ingin visual identity futuristik tren 2027 dengan material frosted glass tembus pandang, refraksi prisma pelangi, pendaran luminous cyan cair.",
+        label: "Luminous Prism Frosted Glass",
+        key: "luminous_prism_glass_v1",
+        rationale: "Mengadopsi tren global WGSN 2027 Luminous Blue & Glassmorphism. Memadukan estetika bersih kristal dengan pendaran cahaya holografik menenangkan.",
+        visualMode: "Future Glass & Prism",
+        subject: "Botanical Essence Dropper",
+        environment: "Luminous Cyan Prism Studio",
+        palette: "Luminous Blue & Prism Rainbow",
+        t2i: "Futuristic aesthetic of frosted translucent glass pedestal displaying glowing botanical drops, soft ethereal rainbow chromatic aberration refraction, clean luminous cyan and aquatic blue gradient ambiance, pristine studio lighting, ultra-clean high-tech luxury skincare visual, 8k octanerender.",
+        svg: `<svg class="art-svg" viewBox="0 0 360 480" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="prismGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#0284c7"/>
+              <stop offset="50%" stop-color="#38bdf8"/>
+              <stop offset="100%" stop-color="#818cf8"/>
+            </linearGradient>
+            <linearGradient id="rainbow" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#f43f5e" stop-opacity="0.6"/>
+              <stop offset="33%" stop-color="#facc15" stop-opacity="0.6"/>
+              <stop offset="66%" stop-color="#34d399" stop-opacity="0.6"/>
+              <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.6"/>
+            </linearGradient>
+          </defs>
+          <rect width="360" height="480" fill="url(#prismGrad)"/>
+          <!-- Frosted Glass Pedestal -->
+          <rect x="80" y="160" width="200" height="200" rx="24" fill="#ffffff" fill-opacity="0.25" stroke="#ffffff" stroke-width="2" stroke-opacity="0.5"/>
+          <!-- Prism Rainbow Caustic -->
+          <path d="M 80 220 L 280 180 L 280 210 L 80 250 Z" fill="url(#rainbow)"/>
+          <!-- Glowing Drop -->
+          <circle cx="180" cy="250" r="30" fill="#ffffff" fill-opacity="0.8"/>
+          <circle cx="180" cy="250" r="14" fill="#38bdf8"/>
+          <text x="180" y="445" font-family="sans-serif" font-weight="700" font-size="11" fill="#e0f2fe" text-anchor="middle" letter-spacing="1">G-LABS PREVIEW • LUMINOUS GLASS 2027</text>
+        </svg>`
+      },
+
+      // 11. Sumi-e Asian Ink
+      sumi_e_ink: {
+        prompt: "Saya ingin gaya lukisan kuas kaligrafi Sumi-e oriental tradisional dengan tinta hitam dinamis di atas kertas beras washi dan aksen stempel merah cinnabar.",
+        label: "Neo-Asian Sumi-e Zen Ink",
+        key: "sumi_e_zen_ink_v1",
+        rationale: "Goresan kuas tinta hitam dinamis berpadu dengan kertas berserat menghadirkan ketenangan, kearifan artisan, dan keagungan oriental.",
+        visualMode: "Neo-Asian Sumi-e",
+        subject: "Hands Pouring Artisanal Tea",
+        environment: "Fibrous Washi Paper Studio",
+        palette: "Sumi Black, Rice White, Cinnabar Red",
+        t2i: "Contemporary Japanese Sumi-e ink wash illustration, hands pouring hot green tea from a cast iron kettle into a ceramic cup, dynamic black calligraphy brush strokes on fibrous washi rice paper, delicate vermilion red seal stamp accent, subtle gold leaf flakes, serene zen aesthetic, 4k.",
+        svg: `<svg class="art-svg" viewBox="0 0 360 480" xmlns="http://www.w3.org/2000/svg">
+          <rect width="360" height="480" fill="#f5f0e6"/>
+          <!-- Brush stroke mountain / wave -->
+          <path d="M 40 320 C 100 220 180 160 320 280" fill="none" stroke="#18181b" stroke-width="18" stroke-linecap="round"/>
+          <path d="M 80 340 C 140 260 220 220 300 310" fill="none" stroke="#27272a" stroke-width="8" stroke-linecap="round" opacity="0.6"/>
+          <!-- Cast iron kettle silhouette -->
+          <circle cx="180" cy="240" r="44" fill="#09090b"/>
+          <path d="M 180 196 C 160 170 200 170 180 196" fill="none" stroke="#09090b" stroke-width="6"/>
+          <!-- Red Cinnabar Stamp (Hankou) -->
+          <rect x="270" y="80" width="32" height="32" rx="4" fill="#dc2626"/>
+          <rect x="274" y="84" width="24" height="24" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+          <text x="286" y="101" font-family="sans-serif" font-weight="900" font-size="14" fill="#ffffff" text-anchor="middle">禅</text>
+          <text x="180" y="445" font-family="sans-serif" font-weight="700" font-size="11" fill="#71717a" text-anchor="middle" letter-spacing="1">G-LABS PREVIEW • SUMI-E ASIAN INK</text>
+        </svg>`
+      },
+
+      // 12. Vintage Scrapbook
+      vintage_scrapbook: {
+        prompt: "Saya ingin gaya visual scrapbook koran investigasi retro tahun 70-an dengan sobekan kertas arsip, selotip transparan, dan lingkaran spidol merah.",
+        label: "Investigative Vintage Scrapbook",
+        key: "vintage_scrapbook_doc_v1",
+        rationale: "Menghadirkan aura misteri dan investigasi mendalam melalui kliping koran dan dokumen arsip yang membuktikan fakta narasi.",
+        visualMode: "Vintage Investigative Collage",
+        subject: "Archival Hands Pinning Evidence",
+        environment: "Textured Corkboard Backdrop",
+        palette: "Aged Sepia & Blood Red Marker",
+        t2i: "Vintage investigative editorial scrapbook collage, torn retro newspaper clippings and archival monochrome photos pinned to a corkboard, transparent scotch tape details, typewriter font notes, bold red marker circles highlighting key evidence, tactile textured mixed media documentary visual, 8k.",
+        svg: `<svg class="art-svg" viewBox="0 0 360 480" xmlns="http://www.w3.org/2000/svg">
+          <rect width="360" height="480" fill="#c29b68"/>
+          <!-- Cork texture pattern -->
+          <!-- Pinned Newspaper Clippings -->
+          <polygon points="50,110 240,90 230,280 40,260" fill="#fef3c7" filter="drop-shadow(0 8px 12px rgba(0,0,0,0.3))"/>
+          <line x1="60" y1="130" x2="220" y2="114" stroke="#78350f" stroke-width="4"/>
+          <line x1="60" y1="150" x2="210" y2="135" stroke="#a16207" stroke-width="2"/>
+          <line x1="60" y1="165" x2="200" y2="150" stroke="#a16207" stroke-width="2"/>
+          <!-- Red marker circle -->
+          <ellipse cx="140" cy="180" rx="35" ry="25" fill="none" stroke="#ef4444" stroke-width="4"/>
+          <!-- Pushpin -->
+          <circle cx="140" cy="95" r="7" fill="#dc2626"/>
+          <circle cx="140" cy="95" r="3" fill="#ffffff"/>
+          <!-- Scotch Tape Piece -->
+          <polygon points="120,70 160,65 155,90 115,95" fill="#ffffff" opacity="0.5"/>
+          <text x="180" y="445" font-family="sans-serif" font-weight="700" font-size="11" fill="#451a03" text-anchor="middle" letter-spacing="1">G-LABS PREVIEW • VINTAGE SCRAPBOOK</text>
+        </svg>`
+      }
+    };
+
+    let currentSelectedPresetKey = 'stickman';
+
+    function applyPresetChip(chipId) {
+      const p = PRESET_IDEAS[chipId];
+      if (!p) return;
+      currentSelectedPresetKey = chipId;
+      document.getElementById('userPromptInput').value = p.prompt;
+
+      // Update active chip state
+      document.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+    }
+
+    // Run AI Synthesis Simulation
+    function runAiSynthesis() {
+      const promptVal = document.getElementById('userPromptInput').value.trim();
+      if (!promptVal) {
+        alert('Silakan ketikkan konsep visual atau klik salah satu dari 12 ide tren di atas.');
+        return;
+      }
+
+      const btn = document.getElementById('synthesizeBtn');
+      const progressBox = document.getElementById('synthesisProgress');
+      const progressFill = document.getElementById('progressFill');
+      const progressText = document.getElementById('progressText');
+      const proposalCard = document.getElementById('proposalCard');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳</span> AI sedang menganalisis...';
+      progressBox.style.display = 'flex';
+      proposalCard.style.display = 'none';
+
+      // Pick corresponding preset or fallback to selected key
+      let presetData = PRESET_IDEAS[currentSelectedPresetKey] || PRESET_IDEAS.stickman;
+
+      // Step-by-step progress simulation
+      progressFill.style.width = '25%';
+      progressText.innerHTML = '<span>🧠</span> Menganalisis ide konsep, tone estetika 2026/2027, dan subjek visual...';
+
+      setTimeout(() => {
+        progressFill.style.width = '65%';
+        progressText.innerHTML = '<span>📐</span> Memetakan ke Schema v2 Visual Identity (Faceless Invariant & Palet)...';
+
+        setTimeout(() => {
+          progressFill.style.width = '100%';
+          progressText.innerHTML = '<span>✨</span> Merakit Production T2I Prompt untuk G-Labs Worker (Node 2)...';
+
+          setTimeout(() => {
+            progressBox.style.display = 'none';
+            btn.disabled = false;
+            btn.innerHTML = '<span>✨</span> Buat Usulan Visual Identity (1-Click AI)';
+            
+            // Populate Proposal
+            document.getElementById('proposalLabel').innerText = presetData.label;
+            document.getElementById('proposalKey').innerText = 'preset_key: ' + presetData.key;
+            document.getElementById('proposalRationale').innerText = `"${presetData.rationale}"`;
+            document.getElementById('attrVisualMode').innerText = presetData.visualMode;
+            document.getElementById('attrSubject').innerText = presetData.subject;
+            document.getElementById('attrEnvironment').innerText = presetData.environment;
+            document.getElementById('attrPalette').innerText = presetData.palette;
+            document.getElementById('t2iPromptBox').value = presetData.t2i;
+
+            // Inject respective artwork SVG
+            document.getElementById('artSvgContainer').innerHTML = presetData.svg;
+
+            // Reset G-Labs preview state to clean
+            resetGlabsCanvas();
+
+            // Enable footer buttons
+            document.getElementById('btnSavePreset').disabled = false;
+            document.getElementById('btnAdvancedEdit').disabled = false;
+
+            proposalCard.style.display = 'block';
+            proposalCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 350);
+        }, 450);
+      }, 450);
+    }
+
+    function resetGlabsCanvas() {
+      document.getElementById('previewCanvas').classList.remove('has-rendered');
+      document.getElementById('emptyPreviewPrompt').style.display = 'flex';
+      document.getElementById('renderingOverlay').style.display = 'none';
+      document.getElementById('renderedContainer').style.display = 'none';
+    }
+
+    function selectAspect(btn, aspect) {
+      document.querySelectorAll('.aspect-pill').forEach(p => p.classList.remove('selected'));
+      btn.classList.add('selected');
+
+      const frame = document.getElementById('artFrame');
+      if (aspect === '9:16') {
+        frame.style.maxWidth = '300px';
+      } else if (aspect === '1:1') {
+        frame.style.maxWidth = '380px';
+      } else {
+        frame.style.maxWidth = '480px';
+      }
+    }
+
+    // Run G-Labs Render Simulation (Worker Node 2)
+    function runGlabsRender(isReRender = false) {
+      const renderBtn = document.getElementById('glabsRenderBtn');
+      const emptyPrompt = document.getElementById('emptyPreviewPrompt');
+      const renderingOverlay = document.getElementById('renderingOverlay');
+      const renderedContainer = document.getElementById('renderedContainer');
+      const canvasBox = document.getElementById('previewCanvas');
+      const stageText = document.getElementById('renderStageText');
+      const taskSub = document.getElementById('renderTaskSub');
+      const statusBadge = document.getElementById('renderStatusBadge');
+
+      renderBtn.disabled = true;
+      renderBtn.innerHTML = '<span>⏳</span> Rendering...';
+      emptyPrompt.style.display = 'none';
+      renderedContainer.style.display = 'none';
+      renderingOverlay.style.display = 'flex';
+      canvasBox.classList.remove('has-rendered');
+
+      stageText.innerText = 'Mengirim prompt ke Worker G-Labs Node 2...';
+      taskSub.innerText = 'Endpoint: http://100.64.70.61:8765/api/generate';
+
+      setTimeout(() => {
+        stageText.innerText = 'Node 2 GPU Rendering AI Image (Veo/Imagen)...';
+        taskSub.innerText = 'Task ID: #glabs_t2i_' + Math.floor(100000 + Math.random() * 900000);
+
+        setTimeout(() => {
+          stageText.innerText = 'Mengunduh hasil render ke Cloud Storage...';
+          taskSub.innerText = 'Format: PNG High Definition (1080px)';
+
+          setTimeout(() => {
+            renderingOverlay.style.display = 'none';
+            renderedContainer.style.display = 'flex';
+            canvasBox.classList.add('has-rendered');
+            renderBtn.disabled = false;
+            renderBtn.innerHTML = '<span>🎨</span> Generate Visual Preview (G-Labs Node 2)';
+
+            const randomSpeed = (0.6 + Math.random() * 0.4).toFixed(2);
+            statusBadge.innerText = `Status: Render Sukses via G-Labs Node 2 (${randomSpeed}s)`;
+
+            showToast('Preview Visual Siap! 🎨', isReRender ? 'Variasi visual baru berhasil dibuat oleh G-Labs.' : 'G-Labs berhasil merender visual nyata dari prompt.');
+          }, 450);
+        }, 700);
+      }, 600);
+    }
+
+    function copyPrompt() {
+      const promptText = document.getElementById('t2iPromptBox').value;
+      navigator.clipboard.writeText(promptText);
+      showToast('Prompt Disalin! 📋', 'Production prompt siap digunakan di tools eksternal.');
+    }
+
+    function saveVisualIdentityPreset() {
+      const name = document.getElementById('proposalLabel').innerText;
+      showToast('Preset Berhasil Disimpan! 🎉', `Visual Identity "${name}" kini aktif dan dapat langsung dipilih di Pillar Campaigns, Recipe Labs, dan Multiplier.`);
+      setTimeout(() => {
+        closeModal();
+      }, 1500);
+    }
+
+    function goToAdvancedForm() {
+      const name = document.getElementById('proposalLabel').innerText;
+      showToast('Membuka Form Lanjutan ✏️', `Konfigurasi "${name}" dimuat ke formulir manual reguler.`);
+      closeModal();
+    }
+
+    function resetBuilder() {
+      document.getElementById('userPromptInput').value = '';
+      document.getElementById('proposalCard').style.display = 'none';
+      document.getElementById('synthesisProgress').style.display = 'none';
+      document.getElementById('btnSavePreset').disabled = true;
+      document.getElementById('btnAdvancedEdit').disabled = true;
+      document.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('active'));
+      resetGlabsCanvas();
+    }
+
+    function showToast(title, desc) {
+      const toast = document.getElementById('toastPopup');
+      document.getElementById('toastTitle').innerText = title;
+      document.getElementById('toastDesc').innerText = desc;
+      toast.style.display = 'flex';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 3500);
+    }
+
+    // Auto open modal on initial load for preview
+    window.addEventListener('DOMContentLoaded', () => {
+      // Pre-select stickman idea for immediate preview testing
+      document.getElementById('userPromptInput').value = PRESET_IDEAS.stickman.prompt;
+    });
+  </script>
+</body>
+</html>

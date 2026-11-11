@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.40.37 — feat: simplify AI Visual Identity Studio Builder with 1-prompt magic, 12 trend ideas, and live G-Labs preview (11/11/2026)
+- Simplify AI Visual Identity Builder into 1-prompt magic modal with 12 trending 2026-2027 visual ideas
+- Add /api/v2/visual-identities/ai/test-render route for live image generation via G-Labs Node 2
+- Enhance Gemini visual synthesizer to assemble ready-to-use production English T2I prompts
+
 ## V2.40.36 — feat: update cf-studio MCP tools for recipe labs multi-aspect layout & photography environments (11/11/2026)
 - Update cf_create_recipe_labs_post with 1:1, 3:4, 9:16 aspect ratios and 4 photography environments
 - Update cf_run_auto_pipeline and test suite (61 tools)
