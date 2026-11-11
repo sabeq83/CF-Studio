@@ -295,21 +295,19 @@ export default function PublishingScheduler({
       .catch(() => {});
   }, []);
 
-  // Combined Brand Options
+  // Combined Brand Options (Strictly scoped to active tenant brand profiles & active tenant jobs)
   const allBrandOptions = useMemo(() => {
     const names = new Set();
+    // 1. Profil brand resmi milik tenant aktif
     availableBrands.forEach(b => {
-      if (b.brand_name) names.add(b.brand_name);
+      if (b.brand_name && b.brand_name.trim()) names.add(b.brand_name.trim());
     });
-    accounts.forEach(a => {
-      if (a.display_name) names.add(a.display_name);
-    });
+    // 2. Brand yang terdapat pada item publishing aktif di tenant ini
     jobs.forEach(j => {
-      if (j.brand_profile) names.add(j.brand_profile);
-      if (j.account_name) names.add(j.account_name);
+      if (j.brand_profile && j.brand_profile.trim()) names.add(j.brand_profile.trim());
     });
     return Array.from(names).sort().map(name => ({ brand_name: name }));
-  }, [availableBrands, accounts, jobs]);
+  }, [availableBrands, jobs]);
 
   // Load Settings for Cloud Base Domain & Check Google OAuth Return Draft
   useEffect(() => {

@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.40.30 — Isolasi Tenant Ketat pada Filter Brand Profile Publishing Scheduler (11/11/2026)
+- Menambahkan klausa WHERE tenant_id pada API brand profiles dan lib/db
+- Memperketat multi-join repository publishing dengan tenant_id
+- Membersihkan generator dropdown brand options di antarmuka Publishing Scheduler
+
 ## V2.40.29 — Perbaikan Multi-Source Filter Brand & Pembersihan Job Needs Review (11/11/2026)
 - Kueri filter brand diperluas mendukung multi-sumber (Content Flow, Pillar Campaign, dan Akun Sosmed)
 - Perbaikan filter status yang saling menimpa view queue/history

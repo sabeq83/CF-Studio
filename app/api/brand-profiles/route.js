@@ -13,22 +13,24 @@ export async function GET(req) {
 
     let brands = [];
 
-    if (currentUser.role === 'admin') {
+    if (currentUser.role === 'admin' || currentUser.role === 'superadmin') {
       brands = await tenantContext.run(currentUser.tenantId, () => db.prepare(`
         SELECT id, brand_name, tone_of_voice, visual_signature, color_palette, forbidden_elements, brand_slogan_or_cta,
                editorial_brand_context, editorial_content_goal, editorial_content_pillars_json, guideline_filename, created_at
-        FROM brand_profiles ORDER BY brand_name ASC
-      `).all());
+        FROM brand_profiles 
+        WHERE tenant_id = ?
+        ORDER BY brand_name ASC
+      `).all(currentUser.tenantId));
     } else {
-      // Regular user: return assigned brand profiles
+      // Regular user: return assigned brand profiles within active tenant
       brands = await tenantContext.run(currentUser.tenantId, () => db.prepare(`
         SELECT bp.id, bp.brand_name, bp.tone_of_voice, bp.visual_signature, bp.color_palette, bp.forbidden_elements, bp.brand_slogan_or_cta,
                bp.editorial_brand_context, bp.editorial_content_goal, bp.editorial_content_pillars_json, bp.guideline_filename, bp.created_at
         FROM brand_profiles bp
         JOIN user_brands ub ON bp.id = ub.brand_id
-        WHERE ub.user_id = ?
+        WHERE ub.user_id = ? AND bp.tenant_id = ?
         ORDER BY bp.brand_name ASC
-      `).all(currentUser.id));
+      `).all(currentUser.id, currentUser.tenantId));
     }
 
     return NextResponse.json({ success: true, brands });
