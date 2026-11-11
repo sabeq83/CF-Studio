@@ -1,6 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  serverExternalPackages: ['better-sqlite3', '@imgly/background-removal-node'],
+  serverExternalPackages: [
+    'better-sqlite3',
+    '@imgly/background-removal-node',
+    '@remotion/bundler',
+    '@remotion/renderer',
+    'esbuild'
+  ],
   turbopack: {},
   webpack: (config, { dev, isServer }) => {
     if (dev) {

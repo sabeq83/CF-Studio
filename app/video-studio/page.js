@@ -1,10 +1,31 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import Sidebar from '../components/Sidebar';
 import './studio.css';
 
+const RemotionPreviewPlayer = dynamic(() => import('../components/RemotionPreviewPlayer'), { ssr: false });
+
 export default function VideoStudio() {
+  // Studio Engine Mode ('ffmpeg' | 'remotion')
+  const [studioMode, setStudioMode] = useState('ffmpeg');
+
+  // Remotion Explainer State
+  const [remotionProps, setRemotionProps] = useState({
+    hookTitle: 'Makan enak?',
+    hookHighlight: 'Boleh banget.',
+    hookSubtitle: 'Makan enak itu hak semua orang.',
+    brandName: 'GarliBee',
+    packSize: 'Kemasan 300 Gram',
+    ctaText: 'Cek Keranjang Kuning',
+    disclaimer: 'Pangan olahan, bukan obat.',
+    themeColor: '#F59E0B'
+  });
+  const [remotionRendering, setRemotionRendering] = useState(false);
+  const [remotionProgress, setRemotionProgress] = useState(0);
+  const [remotionVideoUrl, setRemotionVideoUrl] = useState(null);
+
   // Video Inputs
   const [videoSourceType, setVideoSourceType] = useState('upload');
   const [videoFiles, setVideoFiles] = useState([]);
@@ -355,6 +376,56 @@ export default function VideoStudio() {
     }
   }
 
+  async function triggerRemotionRender() {
+    setRemotionRendering(true);
+    setRemotionProgress(0);
+    setRemotionVideoUrl(null);
+    setErrorMessage('');
+    setStatusMessage('Memulai rendering Remotion Explainer 30s di background...');
+
+    try {
+      const res = await fetch('/api/v2/remotion/render', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          compositionId: 'GarliBeeExplainer',
+          inputProps: remotionProps
+        })
+      });
+      const data = await res.json();
+      if (!data.success) {
+        throw new Error(data.error || 'Gagal memicu rendering Remotion');
+      }
+
+      const jobId = data.jobId;
+      const poll = setInterval(async () => {
+        try {
+          const sRes = await fetch(`/api/v2/remotion/status/${jobId}`);
+          const sData = await sRes.json();
+          if (sData.success && sData.job) {
+            setRemotionProgress(sData.job.progress || 0);
+            if (sData.job.status === 'completed') {
+              clearInterval(poll);
+              setRemotionRendering(false);
+              setRemotionVideoUrl(sData.job.videoUrl);
+              setStatusMessage('🎉 Render Remotion MP4 selesai! Video siap diputar/diunduh.');
+            } else if (sData.job.status === 'failed') {
+              clearInterval(poll);
+              setRemotionRendering(false);
+              setErrorMessage(`Render failed: ${sData.job.error}`);
+            }
+          }
+        } catch (e) {
+          clearInterval(poll);
+          setRemotionRendering(false);
+        }
+      }, 1500);
+    } catch (err) {
+      setRemotionRendering(false);
+      setErrorMessage(err.message || 'Render request error');
+    }
+  }
+
   function formatBytes(bytes) {
     if (!bytes) return '0 B';
     const k = 1024;
@@ -382,8 +453,52 @@ export default function VideoStudio() {
       <main className="main-content">
         <div className="page-container">
           <div className="page-header" style={{ marginBottom: '16px' }}>
-            <h2>🎞 FFmpeg Standalone Video Studio</h2>
-            <p>Pusat penyuntingan & sinkronisasi audio-video native dengan proteksi server CPU-bound</p>
+            <h2>🎞 Standalone Video Studio</h2>
+            <p>Pusat penyuntingan & sinkronisasi video FFmpeg dan Remotion React Explainer Engine</p>
+          </div>
+
+          {/* Studio Engine Mode Tabs */}
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '24px' }}>
+            <button
+              type="button"
+              className={`btn ${studioMode === 'ffmpeg' ? 'btn-primary' : 'btn-secondary'}`}
+              style={{
+                padding: '10px 20px',
+                borderRadius: '10px',
+                fontWeight: 700,
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                background: studioMode === 'ffmpeg' ? 'var(--action-primary)' : 'var(--surface-raised)',
+                color: studioMode === 'ffmpeg' ? 'var(--on-action-primary)' : 'var(--text-primary)',
+                border: '1px solid var(--border-color)'
+              }}
+              onClick={() => setStudioMode('ffmpeg')}
+            >
+              🎞 FFmpeg Muxer & Sync
+            </button>
+            <button
+              type="button"
+              className={`btn ${studioMode === 'remotion' ? 'btn-primary' : 'btn-secondary'}`}
+              style={{
+                padding: '10px 20px',
+                borderRadius: '10px',
+                fontWeight: 700,
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: studioMode === 'remotion' ? 'var(--action-primary)' : 'var(--surface-raised)',
+                color: studioMode === 'remotion' ? 'var(--on-action-primary)' : 'var(--text-primary)',
+                border: '1px solid var(--border-color)'
+              }}
+              onClick={() => setStudioMode('remotion')}
+            >
+              <span>⚡ Remotion Explainer Studio</span>
+              <span style={{ fontSize: '0.72rem', background: '#F59E0B', color: '#1E1B18', padding: '2px 8px', borderRadius: '4px', fontWeight: 900 }}>
+                REACT ENGINE
+              </span>
+            </button>
           </div>
 
           {errorMessage && (
@@ -399,7 +514,155 @@ export default function VideoStudio() {
             </div>
           )}
 
-          <div className="ffmpeg-studio-container">
+          {studioMode === 'remotion' ? (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'minmax(420px, 1fr) 420px',
+              gap: '24px',
+              background: 'var(--surface-raised)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '16px',
+              padding: '24px',
+              boxShadow: 'var(--shadow-card)'
+            }}>
+              {/* Form Controls */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '4px' }}>
+                  Storyboard & Narasi Explainer (30s GarliBee)
+                </h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                  Ubah teks naskah dan parameter di bawah. Video canvas di sebelah kanan akan langsung mengupdate tampilan secara real-time!
+                </p>
+
+                <div className="form-group">
+                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Klip 1: Hook Title</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={remotionProps.hookTitle}
+                    onChange={(e) => setRemotionProps({ ...remotionProps, hookTitle: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Klip 1: Highlight Badge</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={remotionProps.hookHighlight}
+                    onChange={(e) => setRemotionProps({ ...remotionProps, hookHighlight: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Klip 1: Sub-narasi</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={remotionProps.hookSubtitle}
+                    onChange={(e) => setRemotionProps({ ...remotionProps, hookSubtitle: e.target.value })}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div className="form-group">
+                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Nama Brand</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={remotionProps.brandName}
+                      onChange={(e) => setRemotionProps({ ...remotionProps, brandName: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Kemasan Pack</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={remotionProps.packSize}
+                      onChange={(e) => setRemotionProps({ ...remotionProps, packSize: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Klip 5: Teks CTA</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={remotionProps.ctaText}
+                    onChange={(e) => setRemotionProps({ ...remotionProps, ctaText: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Disclaimer Regulasi</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={remotionProps.disclaimer}
+                    onChange={(e) => setRemotionProps({ ...remotionProps, disclaimer: e.target.value })}
+                  />
+                </div>
+
+                {/* Render Button */}
+                <div style={{ marginTop: '12px' }}>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    disabled={remotionRendering}
+                    onClick={triggerRemotionRender}
+                    style={{
+                      width: '100%',
+                      padding: '14px',
+                      borderRadius: '10px',
+                      fontWeight: 800,
+                      fontSize: '1rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '10px',
+                      backgroundColor: 'var(--action-primary)',
+                      color: 'var(--on-action-primary)',
+                      cursor: remotionRendering ? 'not-allowed' : 'pointer',
+                      border: 'none'
+                    }}
+                  >
+                    {remotionRendering ? (
+                      <>⏳ Sedang Render Remotion ({remotionProgress}%)...</>
+                    ) : (
+                      <>⚡ Export Video MP4 (Remotion 30s)</>
+                    )}
+                  </button>
+
+                  {remotionVideoUrl && (
+                    <div style={{ marginTop: '16px', padding: '12px', background: 'var(--status-success-soft)', border: '1px solid var(--status-success)', borderRadius: '8px' }}>
+                      <p style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--status-success)', marginBottom: '8px' }}>
+                        🎉 Video berhasil di-render!
+                      </p>
+                      <a
+                        href={remotionVideoUrl}
+                        download
+                        className="btn btn-sm"
+                        style={{ padding: '6px 14px', borderRadius: '6px', background: 'var(--status-success)', color: '#ffffff', textDecoration: 'none', fontWeight: 700, display: 'inline-block' }}
+                      >
+                        ⬇️ Unduh Video MP4
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Player Preview */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '12px' }}>
+                  Interactive Live Canvas (Scrubber)
+                </h4>
+                <RemotionPreviewPlayer inputProps={remotionProps} />
+              </div>
+            </div>
+          ) : (
+            <div className="ffmpeg-studio-container">
             {/* PANEL KIRI: CONTROL & CONFIG */}
             <div className="studio-control-panel">
               <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -977,6 +1240,7 @@ export default function VideoStudio() {
 
             </div>
           </div>
+          )}
         </div>
       </main>
     </div>

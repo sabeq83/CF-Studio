@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAKNA Flow — Remotion Explainer Studio Mockup</title>
+  <style>
+    :root, [data-theme="dark"] {
+      --surface: #0f172a;
+      --surface-raised: #1e293b;
+      --surface-interactive: #334155;
+      --surface-subtle: #172033;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.16);
+      --border-color: rgba(255, 255, 255, 0.12);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --input-bg: #0b1120;
+      --focus-ring: #f59e0b;
+      --action-primary: #f59e0b;
+      --action-primary-hover: #d97706;
+      --on-action-primary: #1e1b18;
+      --status-info: #0284c7;
+      --status-info-soft: rgba(2, 132, 199, 0.15);
+      --status-success: #10b981;
+      --status-success-soft: rgba(16, 185, 129, 0.15);
+      --status-warning: #f59e0b;
+      --status-warning-soft: rgba(245, 158, 11, 0.15);
+      --status-danger: #ef4444;
+      --status-danger-soft: rgba(239, 68, 68, 0.15);
+      --overlay-backdrop: rgba(0, 0, 0, 0.75);
+      --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    }
+
+    [data-theme="light"] {
+      --surface: #f8fafc;
+      --surface-raised: #ffffff;
+      --surface-interactive: #e2e8f0;
+      --surface-subtle: #f1f5f9;
+      --border-subtle: rgba(0, 0, 0, 0.06);
+      --border-strong: rgba(0, 0, 0, 0.15);
+      --border-color: rgba(0, 0, 0, 0.1);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --input-bg: #f8fafc;
+      --focus-ring: #d97706;
+      --action-primary: #f59e0b;
+      --action-primary-hover: #d97706;
+      --on-action-primary: #ffffff;
+      --status-info: #0284c7;
+      --status-info-soft: rgba(2, 132, 199, 0.1);
+      --status-success: #10b981;
+      --status-success-soft: rgba(16, 185, 129, 0.1);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.1);
+      --status-danger: #dc2626;
+      --status-danger-soft: rgba(220, 38, 38, 0.1);
+      --overlay-backdrop: rgba(15, 23, 42, 0.6);
+      --shadow-modal: 0 20px 30px -10px rgba(0, 0, 0, 0.15);
+      --shadow-card: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--surface); color: var(--text-primary); min-height: 100vh; display: flex; flex-direction: column; }
+    
+    header {
+      background-color: var(--surface-raised);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 16px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand-title { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 1.15rem; }
+    .badge-pill {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border: 1px solid var(--status-warning);
+    }
+
+    .btn-toggle-theme {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 460px 1fr;
+      flex: 1;
+      height: calc(100vh - 65px);
+      overflow: hidden;
+    }
+
+    /* LEFT PANEL: Controls */
+    .editor-pane {
+      background: var(--surface-raised);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .pane-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .pane-header h2 { font-size: 1.05rem; font-weight: 700; }
+    .pane-content { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+    .form-group label { font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); }
+    .form-control {
+      background: var(--input-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+    .form-control:focus { border-color: var(--focus-ring); }
+
+    .scene-card {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .scene-card.active {
+      border-color: var(--action-primary);
+      box-shadow: 0 0 0 1px var(--action-primary);
+      background: var(--surface-raised);
+    }
+    .scene-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .scene-card-title { font-weight: 700; font-size: 0.88rem; }
+    .scene-timing { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
+
+    /* RIGHT PANEL: Live Player & Scrubber */
+    .preview-pane {
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+    }
+
+    .canvas-wrapper {
+      position: relative;
+      width: 360px;
+      height: 640px; /* 9:16 aspect ratio scaled */
+      background: #0f1216;
+      border-radius: 24px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .canvas-screen {
+      flex: 1;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 20px;
+      text-align: center;
+    }
+
+    /* Scene Elements inside Canvas */
+    .brand-tag {
+      position: absolute;
+      top: 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+    }
+
+    .c-hook-title { font-size: 1.6rem; font-weight: 900; color: #ffffff; margin-bottom: 8px; line-height: 1.1; }
+    .c-hook-highlight {
+      background: var(--action-primary);
+      color: #1e1b18;
+      font-size: 1.7rem;
+      font-weight: 900;
+      padding: 4px 14px;
+      border-radius: 8px;
+      display: inline-block;
+      margin-bottom: 12px;
+    }
+    .c-hook-sub { font-size: 0.85rem; color: rgba(255, 255, 255, 0.8); line-height: 1.3; }
+
+    /* Scene 2 Canvas Elements */
+    .c-habit-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      width: 100%;
+      margin-top: 10px;
+    }
+    .c-habit-item {
+      background: #1e232a;
+      border-radius: 12px;
+      padding: 12px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+    .c-check-badge {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #10b981;
+      color: white;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Scene 3 Canvas Elements */
+    .c-dial-circle {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      border: 6px solid #f59e0b;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #1e232a;
+      margin-bottom: 16px;
+      box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);
+    }
+
+    /* Bottom Scrubber Controls */
+    .scrubber-bar {
+      margin-top: 24px;
+      width: 480px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 14px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .scrubber-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .play-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: 900;
+    }
+
+    .timeline-slider {
+      width: 100%;
+      accent-color: var(--action-primary);
+      cursor: pointer;
+    }
+
+    .scene-pills-row {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+    }
+    .scene-pill {
+      flex: 1;
+      padding: 6px 4px;
+      text-align: center;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .scene-pill.active {
+      background: var(--status-warning-soft);
+      border-color: var(--status-warning);
+      color: var(--status-warning);
+    }
+
+    .btn-export {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: background-color 0.15s ease;
+    }
+    .btn-export:hover { background: var(--action-primary-hover); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand-title">
+      <span>🎬 MAKNA Flow</span>
+      <span class="badge-pill">Remotion Explainer Engine</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span style="font-size: 0.85rem; color: var(--text-secondary);">GarliBee 30-Sec Template</span>
+      <button class="btn-toggle-theme" onclick="toggleTheme()">🌓 Ganti Tema</button>
+    </div>
+  </header>
+
+  <div class="workspace-grid">
+    <!-- LEFT PANEL -->
+    <div class="editor-pane">
+      <div class="pane-header">
+        <h2>Storyboard & Scene Config</h2>
+        <span class="scene-timing" id="headerTiming">Klip 1: Hook (0-4s)</span>
+      </div>
+
+      <div class="pane-content">
+        <!-- Scene Cards -->
+        <div class="scene-card active" onclick="selectScene(1)" id="sceneCard1">
+          <div class="scene-card-header">
+            <span class="scene-card-title">Klip 1: Food Appeal Hook</span>
+            <span class="scene-timing">0 - 4 dtk</span>
+          </div>
+          <div class="form-group">
+            <label>Headline Teks</label>
+            <input type="text" class="form-control" id="inputTitle" value="Makan enak?" oninput="updatePreview()">
+          </div>
+          <div class="form-group" style="margin-top: 8px;">
+            <label>Highlight Badge</label>
+            <input type="text" class="form-control" id="inputHighlight" value="Boleh banget." oninput="updatePreview()">
+          </div>
+          <div class="form-group" style="margin-top: 8px;">
+            <label>Sub-narasi</label>
+            <input type="text" class="form-control" id="inputSubtitle" value="Makan enak itu hak semua orang." oninput="updatePreview()">
+          </div>
+        </div>
+
+        <div class="scene-card" onclick="selectScene(2)" id="sceneCard2">
+          <div class="scene-card-header">
+            <span class="scene-card-title">Klip 2: 4-Grid Rutinitas Harian</span>
+            <span class="scene-timing">4 - 11 dtk</span>
+          </div>
+          <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">
+            Menampilkan animasi ikon: Jalan Pagi, Air Putih, Sayur Segar, dan Tidur Cukup dengan centang hijau bertahap.
+          </p>
+        </div>
+
+        <div class="scene-card" onclick="selectScene(3)" id="sceneCard3">
+          <div class="scene-card-header">
+            <span class="scene-card-title">Klip 3: Fermentasi Alami GarliBee</span>
+            <span class="scene-timing">11 - 19 dtk</span>
+          </div>
+          <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">
+            Radial dial animasi memutar waktu 3 bulan fermentasi alami bawang lanang dan madu mentah.
+          </p>
+        </div>
+
+        <div class="scene-card" onclick="selectScene(4)" id="sceneCard4">
+          <div class="scene-card-header">
+            <span class="scene-card-title">Klip 4: Dosis Harian & Kalender</span>
+            <span class="scene-timing">19 - 26 dtk</span>
+          </div>
+          <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">
+            Sendok kayu 1 siung + 1 sendok berpadu kalender 7 hari berturut-turut.
+          </p>
+        </div>
+
+        <div class="scene-card" onclick="selectScene(5)" id="sceneCard5">
+          <div class="scene-card-header">
+            <span class="scene-card-title">Klip 5: CTA Keranjang Kuning</span>
+            <span class="scene-timing">26 - 30 dtk</span>
+          </div>
+          <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">
+            Packshot botol 300g, disclaimer BPOM/Pangan Olahan, dan tombol CTA denyut.
+          </p>
+        </div>
+
+        <!-- Action Export -->
+        <button class="btn-export" onclick="simulateRender()">
+          <span>⚡ Render Video MP4 (Remotion Headless)</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="preview-pane">
+      <div class="canvas-wrapper">
+        <div class="canvas-screen" id="canvasScreen">
+          <!-- TOP TAG -->
+          <div class="brand-tag">
+            <span style="color: #f59e0b;">●</span>
+            <span>GARLIBEE</span>
+            <span style="color: rgba(255,255,255,0.4);">| Explainer</span>
+          </div>
+
+          <!-- DYNAMIC SCENE CONTAINER -->
+          <div id="dynamicScene">
+            <!-- Default Scene 1 -->
+            <div style="margin-bottom: 24px;">
+              <span style="font-size: 48px;">🍢 🍲 🍗</span>
+              <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-top: 6px;">Sate • Gulai • Gorengan</div>
+            </div>
+            <div class="c-hook-title" id="previewTitle">Makan enak?</div>
+            <div class="c-hook-highlight" id="previewHighlight">Boleh banget.</div>
+            <div class="c-hook-sub" id="previewSubtitle">Makan enak itu hak semua orang.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCRUBBER BAR -->
+      <div class="scrubber-bar">
+        <div class="scene-pills-row">
+          <div class="scene-pill active" onclick="seekTo(0)" id="pill1">Klip 1 (0-4s)</div>
+          <div class="scene-pill" onclick="seekTo(120)" id="pill2">Klip 2 (4-11s)</div>
+          <div class="scene-pill" onclick="seekTo(330)" id="pill3">Klip 3 (11-19s)</div>
+          <div class="scene-pill" onclick="seekTo(570)" id="pill4">Klip 4 (19-26s)</div>
+          <div class="scene-pill" onclick="seekTo(780)" id="pill5">Klip 5 (26-30s)</div>
+        </div>
+
+        <input type="range" class="timeline-slider" id="timelineSlider" min="0" max="900" value="0" oninput="onSlideTimeline(this.value)">
+
+        <div class="scrubber-controls">
+          <button class="play-btn" onclick="togglePlay()" id="playBtn">▶</button>
+          <div style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary);">
+            <span id="timeCounter">00:00</span> / <span>00:30</span>
+            <span style="color: var(--text-muted); margin-left: 8px;">(<span id="frameCounter">0</span> / 900 frame)</span>
+          </div>
+          <span style="font-size: 0.75rem; font-weight: 700; color: var(--status-success);">30 FPS • 1080x1920</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentFrame = 0;
+    let isPlaying = false;
+    let playInterval = null;
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme') || 'dark';
+      html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+    }
+
+    function updatePreview() {
+      const title = document.getElementById('inputTitle').value;
+      const highlight = document.getElementById('inputHighlight').value;
+      const sub = document.getElementById('inputSubtitle').value;
+
+      const pTitle = document.getElementById('previewTitle');
+      const pHigh = document.getElementById('previewHighlight');
+      const pSub = document.getElementById('previewSubtitle');
+
+      if (pTitle) pTitle.innerText = title;
+      if (pHigh) pHigh.innerText = highlight;
+      if (pSub) pSub.innerText = sub;
+    }
+
+    function renderSceneContent(sceneNum) {
+      const container = document.getElementById('dynamicScene');
+      if (sceneNum === 1) {
+        container.innerHTML = `
+          <div style="margin-bottom: 24px;">
+            <span style="font-size: 48px;">🍢 🍲 🍗</span>
+            <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-top: 6px;">Sate • Gulai • Gorengan</div>
+          </div>
+          <div class="c-hook-title" id="previewTitle">${document.getElementById('inputTitle').value}</div>
+          <div class="c-hook-highlight" id="previewHighlight">${document.getElementById('inputHighlight').value}</div>
+          <div class="c-hook-sub" id="previewSubtitle">${document.getElementById('inputSubtitle').value}</div>
+        `;
+      } else if (sceneNum === 2) {
+        container.innerHTML = `
+          <div style="font-size: 1.15rem; font-weight: 800; color: #ffffff; margin-bottom: 16px;">
+            Seimbangkan dengan<br><span style="color: #10b981;">Kebiasaan Harian</span>
+          </div>
+          <div class="c-habit-grid">
+            <div class="c-habit-item">
+              <div class="c-check-badge">✓</div>
+              <div style="font-size: 28px;">👟</div>
+              <div style="font-size: 0.8rem; font-weight: 800; color: #ffffff; margin-top: 6px;">Jalan Pagi</div>
+              <div style="font-size: 0.65rem; color: #94a3b8;">30 menit aktif</div>
+            </div>
+            <div class="c-habit-item">
+              <div class="c-check-badge">✓</div>
+              <div style="font-size: 28px;">💧</div>
+              <div style="font-size: 0.8rem; font-weight: 800; color: #ffffff; margin-top: 6px;">Air Putih</div>
+              <div style="font-size: 0.65rem; color: #94a3b8;">2 liter hidrasi</div>
+            </div>
+            <div class="c-habit-item">
+              <div class="c-check-badge">✓</div>
+              <div style="font-size: 28px;">🥗</div>
+              <div style="font-size: 0.8rem; font-weight: 800; color: #ffffff; margin-top: 6px;">Makan Sayur</div>
+              <div style="font-size: 0.65rem; color: #94a3b8;">Serat & vitamin</div>
+            </div>
+            <div class="c-habit-item">
+              <div class="c-check-badge">✓</div>
+              <div style="font-size: 28px;">🌙</div>
+              <div style="font-size: 0.8rem; font-weight: 800; color: #ffffff; margin-top: 6px;">Tidur Cukup</div>
+              <div style="font-size: 0.65rem; color: #94a3b8;">7-8 jam lelap</div>
+            </div>
+          </div>
+        `;
+      } else if (sceneNum === 3) {
+        container.innerHTML = `
+          <div style="font-size: 1.1rem; font-weight: 800; color: #ffffff; margin-bottom: 16px;">
+            Salah Satunya: <span style="color: #f59e0b;">GarliBee</span>
+          </div>
+          <div class="c-dial-circle">
+            <span style="font-size: 32px;">🍯</span>
+            <span style="font-size: 0.8rem; font-weight: 900; color: #ffffff; margin-top: 4px;">GarliBee</span>
+            <span style="font-size: 0.65rem; color: #f59e0b;">Fermentasi 3 Bln</span>
+          </div>
+          <div style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 8px 16px; color: #fbbf24; font-size: 0.8rem; font-weight: 700;">
+            Bawang Lanang + Madu Mentah
+          </div>
+        `;
+      } else if (sceneNum === 4) {
+        container.innerHTML = `
+          <div style="font-size: 1.15rem; font-weight: 800; color: #ffffff; margin-bottom: 16px;">
+            1 Siung + 1 Sendok / Hari
+          </div>
+          <div style="background: #1e232a; border-radius: 16px; padding: 14px; width: 100%; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 12px;">
+            <div style="font-size: 28px; margin-bottom: 4px;">🥄 🧄</div>
+            <div style="font-size: 0.85rem; font-weight: 800; color: #ffffff;">Praktis Setiap Hari</div>
+          </div>
+          <div style="display: flex; gap: 4px; justify-content: center; width: 100%;">
+            <span style="background: #10b981; color: white; padding: 4px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 700;">✓ Sen</span>
+            <span style="background: #10b981; color: white; padding: 4px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 700;">✓ Sel</span>
+            <span style="background: #10b981; color: white; padding: 4px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 700;">✓ Rab</span>
+            <span style="background: #10b981; color: white; padding: 4px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 700;">✓ Kam</span>
+            <span style="background: #10b981; color: white; padding: 4px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 700;">✓ Jum</span>
+          </div>
+        `;
+      } else if (sceneNum === 5) {
+        container.innerHTML = `
+          <div style="width: 100px; height: 100px; border-radius: 20px; background: #1e232a; border: 2px solid #f59e0b; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 16px;">
+            <span style="font-size: 32px;">🫙</span>
+            <span style="font-size: 0.7rem; font-weight: 800; color: #ffffff;">300 Gram</span>
+          </div>
+          <div style="font-size: 1.1rem; font-weight: 800; color: #ffffff; margin-bottom: 14px;">
+            Teman Rutinitas Sehatmu
+          </div>
+          <div style="background: #f59e0b; color: #1e1b18; font-weight: 900; font-size: 0.95rem; padding: 10px 24px; border-radius: 12px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);">
+            🛒 Cek Keranjang Kuning
+          </div>
+          <div style="font-size: 0.65rem; color: rgba(255,255,255,0.5); margin-top: 14px;">
+            * Pangan olahan, bukan obat.
+          </div>
+        `;
+      }
+    }
+
+    function selectScene(num) {
+      for (let i = 1; i <= 5; i++) {
+        const card = document.getElementById('sceneCard' + i);
+        const pill = document.getElementById('pill' + i);
+        if (card) card.classList.toggle('active', i === num);
+        if (pill) pill.classList.toggle('active', i === num);
+      }
+      renderSceneContent(num);
+    }
+
+    function seekTo(frame) {
+      currentFrame = frame;
+      document.getElementById('timelineSlider').value = frame;
+      onSlideTimeline(frame);
+    }
+
+    function onSlideTimeline(val) {
+      currentFrame = parseInt(val, 10);
+      document.getElementById('frameCounter').innerText = currentFrame;
+      const sec = Math.floor(currentFrame / 30);
+      document.getElementById('timeCounter').innerText = `00:${sec < 10 ? '0' : ''}${sec}`;
+
+      // Scene mapping based on frames
+      if (currentFrame < 120) {
+        selectScene(1);
+      } else if (currentFrame < 330) {
+        selectScene(2);
+      } else if (currentFrame < 570) {
+        selectScene(3);
+      } else if (currentFrame < 780) {
+        selectScene(4);
+      } else {
+        selectScene(5);
+      }
+    }
+
+    function togglePlay() {
+      const btn = document.getElementById('playBtn');
+      if (isPlaying) {
+        clearInterval(playInterval);
+        isPlaying = false;
+        btn.innerText = '▶';
+      } else {
+        isPlaying = true;
+        btn.innerText = '⏸';
+        playInterval = setInterval(() => {
+          if (currentFrame >= 900) {
+            currentFrame = 0;
+          }
+          currentFrame += 6;
+          seekTo(currentFrame);
+        }, 100);
+      }
+    }
+
+    function simulateRender() {
+      alert('🚀 Memulai render Remotion Headless MP4 via Playwright Chromium & FFmpeg di Staging Mac Mini...');
+    }
+  </script>
+</body>
+</html>
+

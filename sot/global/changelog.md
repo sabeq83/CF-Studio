@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.41.0 — Integrasi Remotion React Video Engine & Explainer Studio (11/11/2026)
+- Instalasi dan konfigurasi Remotion React Engine v4
+- Template explainer 30 detik GarliBee dengan 5 adegan terstruktur
+- Interactive live canvas player di Video Studio dan API render asinkron
+- Pendaftaran operator preset brand_explainer_remotion dan direct bypass di autopipeline
+
 ## V2.40.42 — Visual Identity Syar'iy Classic Atmospheric Serenity & Wholesome Home (11/11/2026)
 - Daftarkan preset Schema V2 syari_classic_atmospheric_home dengan guardrail anti-monotoni
 - Perluas framing syari_classic dan aturan faceless di lib/prompts.js untuk mendukung penceritaan cuaca & back-view modesty
