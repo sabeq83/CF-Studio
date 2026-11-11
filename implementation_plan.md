@@ -1,271 +1,232 @@
-# Rencana Implementasi: Penyelarasan Aliran 100% Parameter Preset pada 4 Tipe Video Auto Pipeline
+# Rencana Implementasi: Perbaikan UI/UX AI Visual Identity Studio Builder (Opsi A: 1-Kolom Vertikal)
 
-## Latar Belakang & Tujuan
-Menjamin bahwa seluruh konfigurasi yang telah disimpan oleh pengguna di dalam Operator Preset (Strategi Suara & Naskah, Mesin Visual, Bridging Produk, Visual Identity V2, serta Finishing Subtitel & Transisi) mengalir 100% tanpa ada satu pun parameter yang tercecer, di-drop, atau diganti sepihak oleh sistem di ke-4 tipe video Auto Pipeline (`recipe_campaign`, `product_campaign`, `editorial_campaign`, dan `multiplier_campaign`).
+## Latar Belakang & Akar Masalah
 
-Kasus kegagalan pada `mul_261109_r0a20o` (di mana visual menghasilkan tangan wanita bergamis syari di dapur marmer putih padahal preset memakai `multiplier_siasatsehat` yang bertema biohacking klinis 3D) diatasi secara permanen melalui arsitektur terpadu ini.
+Pengguna melaporkan bahwa saat membuat Visual Identity baru melalui AI Studio Builder, proses seolah berhenti ("stuck") setelah muncul badge **"Usulan Siap Direview"**, dan tombol **"Generate Visual Preview (G-Labs Node 2)"** tidak terlihat.
+
+Akar masalahnya adalah **urutan tumpukan vertikal yang keliru**:
+- Proposal Card menaruh Rationale, 4 Atribut, dan Textarea Prompt T2I *di atas* tombol Generate.
+- Akibatnya, tombol Generate dan Kanvas Preview terdorong ke posisi Y: ~850px (*below the fold*), tidak terlihat pada layar standar.
+
+Pengguna meminta evaluasi: *"kenapa harus 2 kolom split? apakah 1 kolom vertikal tidak bisa?"* dan menginstruksikan: *"coba buat mockup opsi A"*.
+
+---
+
+## Solusi Desain Opsi A: 1-Kolom Vertikal (Linear, Bersih, Hero di Atas)
+
+**Mockup interaktif Opsi A sudah diimplementasikan dan aktif sebagai default** di:  
+🔗 `http://100.95.245.55:5010/mockup_ai_visual_identity_builder.html`  
+*(Dilengkapi pula tombol switcher di header modal untuk beralih antara Opsi A dan Opsi B secara instan)*.
+
+### 1. Auto-Collapse Composer (Stage 1 → Stage 2)
+- Saat usulan AI selesai dirakit, Composer 12-chips menciut menjadi **Compact Concept Bar (40px)** di bagian atas.
+- Pengguna tetap dapat mengklik tombol *"✏️ Ubah Konsep Ide"* untuk kembali mengedit prompt kapan saja.
+
+### 2. Membalik Urutan Vertikal: Hero Preview Naik ke Atas
+- **Posisi 1**: Header Usulan (Nama Preset, Badge Siap Direview, preset_key)
+- **Posisi 2 (Y: ~110px)**: **Control Bar Aspek Rasio + TOMBOL GENERATE BERPENDAR** (`pulseGlow` hijau cerah)
+- **Posisi 3**: **Kanvas Preview G-Labs** (Langsung tampil utuh di tengah layar)
+- **Posisi 4 (Di bawah kanvas)**: Strip Atribut 4-item (Visual Mode, Subject, Environment, Color Palette)
+- **Posisi 5 (Di bawah kanvas)**: Textarea Production T2I Prompt (editable + tombol Salin)
+- **Posisi 6 (Di bawah kanvas)**: Rationale Desain Estetika
+
+### 3. Keunggulan Opsi A:
+- **Nol Scroll**: Tombol Generate berada di Y: ~110px dari atas modal, langsung tampak di hadapan pengguna.
+- **Lebar Modal Standar**: Cukup `max-width: 820px` (tidak perlu melebar sampai 1140px).
+- **Alur Linear Alami**: Mata pengguna bergerak fokus dari atas (tombol render & visual) ke bawah (detail prompt jika ingin dioprek).
 
 ---
 
 ## Execution Task List
-- [x] Task 1: Pembuatan Simulasi UI Standalone Mockup (`public/mockup_auto_pipeline_preset_audit.html`)
-- [x] Task 2: Refaktorisasi `lib/autonomous-engine.js` (Aliran Penuh 5 Gerbong Preset untuk 4 Tipe Video)
-- [x] Task 3: Pembaruan `lib/re-multiplier-worker.js` (Failsafe Auto-Healing VI & Injeksi Finishing Subtitel/Transisi ke FFmpeg)
-- [x] Task 4: Perbaikan Forwarding Parameter di `app/api/v2/recipes/autonomous-pipeline/route.js` & `lib/auto-pipeline-scheduler-runner.js`
-- [x] Task 5: Sinkronisasi Modal 1-Klik & Modal Schedule di `app/auto-pipeline/page.js`
-- [x] Task 6: Pembuatan & Eksekusi Unit Test Verifikasi (`tests/test-autonomous-preset-pipeline.test.js`)
-- [x] Task 7: Prosedur Rilis Non-Interaktif & Auto Git Sync
+- [x] Task 1: Pembuatan Mockup Interaktif Opsi A (1-Kolom Vertikal dengan Hero di Atas) + Switcher Opsi B
+- [x] Task 2: Sinkronisasi Mockup ke Server Mac Mini Staging (`http://100.95.245.55:5010/mockup_ai_visual_identity_builder.html`)
+- [x] Task 3: Tambah state baru (`autoPreview`, `isComposeMode`) & import `useEffect`/`useRef` di `AiVisualIdentityBuilderModal.js`
+- [x] Task 4: Implementasi Auto-Collapse Composer → Compact Concept Bar pada React Component
+- [x] Task 5: Refaktor Urutan JSX Proposal Card ke 1-Kolom Vertikal (Hero Control Bar + Kanvas di Atas, Spesifikasi di Bawah)
+- [x] Task 6: Implementasi Tombol Generate Berpendar (`pulseGlow`) + Tombol Cadangan di Kanvas Kosong
+- [x] Task 7: Implementasi Toggle Auto-Generate Preview & CSS Keyframes Injection
+- [x] Task 8: Verifikasi Build Lokal (`npm run build`) & Uji Fungsionalitas
+- [ ] Task 9: Prosedur Rilis Non-Interaktif & Deploy ke Staging Mac Mini
 
 ---
 
-## Detailed Before & After Code Snippets
+## Detailed Before & After Code Snippets (Untuk Implementasi React Component)
 
-### 1. `lib/autonomous-engine.js` (Multiplier Engine & VI / Workflow Resolution)
+### 1. State Baru & Auto-Collapse Flag
+
+**File**: [`AiVisualIdentityBuilderModal.js`](file:///Users/sabeqmmursyid/_cfstudio/app/components/AiVisualIdentityBuilderModal.js#L92-L115)
 
 #### Code Sebelum (Current/Before):
 ```javascript
-// Baris 746-754:
-  let presetConfig = null;
-  if (presetKey) {
-    try {
-      const { resolveOperatorPreset } = await import('./operator-presets.js');
-      presetConfig = resolveOperatorPreset(presetKey, {}, tenantId);
-    } catch (err) {
-      console.warn(`[Autonomous Multiplier Pipeline] Warning resolving preset ${presetKey}:`, err.message);
-    }
-  }
+export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditing }) {
+  const [userPrompt, setUserPrompt] = useState(TRENDING_PRESETS[0].prompt);
+  const [activeChip, setActiveChip] = useState('stickman');
+  const [isSynthesizing, setIsSynthesizing] = useState(false);
+  const [synthesisStage, setSynthesisStage] = useState('');
+  const [error, setError] = useState(null);
 
-// Baris 867-883:
-  const vsoConfig = {
-    is_vso_active: true,
-    character_concept: 'faceless',
-    visual_style_preset: effectiveVisualStyle,
-    visualStyle: effectiveVisualStyle,
-    execution_mode: executionMode,
-    approval_mode: executionMode === 'full_autopilot' ? 'auto' : 'manual',
-    clip_duration: effectiveClipDuration,
-    clipDuration: effectiveClipDuration,
-    narrative_mode: effectiveNarrativeMode,
-    narrativeMode: effectiveNarrativeMode,
-    words_per_clip: effectiveWordsPerClip,
-    wordsPerClip: effectiveWordsPerClip,
-    mandatoryOutroLine: effectiveMandatoryOutro,
-    preset_key: presetKey,
-    ...overrides.vso
-  };
+  // Proposal state
+  const [proposal, setProposal] = useState(null);
+  const [t2iPrompt, setT2iPrompt] = useState('');
+  const [aspectRatio, setAspectRatio] = useState('9:16');
 ```
 
 #### Code Sesudah (Proposed/After):
 ```javascript
-  // 1b. Resolve Operator Preset Async (Tenant-Safe & Reliable)
-  let presetConfig = null;
-  if (presetKey) {
-    try {
-      const { getOperatorPresetConfigAsync, getOperatorPresetConfig } = await import('./operator-presets.js');
-      presetConfig = await getOperatorPresetConfigAsync(presetKey, tenantId);
-      if (!presetConfig) presetConfig = getOperatorPresetConfig(presetKey, tenantId);
-    } catch (err) {
-      console.warn(`[Autonomous Multiplier Pipeline] Warning resolving preset ${presetKey}:`, err.message);
-    }
-  }
+export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditing }) {
+  const [userPrompt, setUserPrompt] = useState(TRENDING_PRESETS[0].prompt);
+  const [activeChip, setActiveChip] = useState('stickman');
+  const [isSynthesizing, setIsSynthesizing] = useState(false);
+  const [synthesisStage, setSynthesisStage] = useState('');
+  const [error, setError] = useState(null);
 
-  // Resolusi Visual Identity Otoritatif
-  let selectedVi = overrides?.visual_identity_preset_id;
-  const presetViId = presetConfig?.visual_swap?.visual_identity_preset_id;
-  if (!selectedVi && presetViId) {
-    selectedVi = presetViId;
-  }
-  if (!selectedVi && brand?.id) {
-    try {
-      const { listVisualIdentityPresetsForBrand } = await import('./visual-override-resolver.js');
-      const brandVis = await listVisualIdentityPresetsForBrand(brand.id);
-      if (brandVis?.length > 0) selectedVi = brandVis[0].id;
-    } catch (_) {}
-  }
+  // Proposal state
+  const [proposal, setProposal] = useState(null);
+  const [t2iPrompt, setT2iPrompt] = useState('');
+  const [aspectRatio, setAspectRatio] = useState('9:16');
 
-  // Resolusi Workflow Finishing (Subtitel & Transisi)
-  const effectiveEnableMotionText = overrides?.enable_motion_text !== undefined
-    ? (overrides.enable_motion_text ? 1 : 0)
-    : (presetConfig?.workflow?.enable_motion_text !== undefined ? (presetConfig.workflow.enable_motion_text ? 1 : 0) : 1);
-  const effectiveMotionTextStyle = overrides?.motion_text_style || presetConfig?.workflow?.motion_text_style || 'floating_white_yellow';
-  const effectiveMotionTextPosition = overrides?.motion_text_position || presetConfig?.workflow?.motion_text_position || 'bottom';
-  const effectiveVideoTransition = overrides?.video_transition || presetConfig?.workflow?.video_transition || 'fade';
-  const effectiveTransitionDuration = Number(
-    overrides?.transition_duration !== undefined ? overrides.transition_duration : (presetConfig?.workflow?.transition_duration !== undefined ? presetConfig.workflow.transition_duration : 0.5)
-  );
-
-  const vsoConfig = {
-    is_vso_active: true,
-    visual_identity_preset_id: selectedVi,
-    character_concept: 'faceless',
-    visual_style_preset: effectiveVisualStyle,
-    visualStyle: effectiveVisualStyle,
-    execution_mode: executionMode,
-    approval_mode: executionMode === 'full_autopilot' ? 'auto' : 'manual',
-    clip_duration: effectiveClipDuration,
-    clipDuration: effectiveClipDuration,
-    narrative_mode: effectiveNarrativeMode,
-    narrativeMode: effectiveNarrativeMode,
-    words_per_clip: effectiveWordsPerClip,
-    wordsPerClip: effectiveWordsPerClip,
-    mandatoryOutroLine: effectiveMandatoryOutro,
-    preset_key: presetKey,
-    enable_motion_text: effectiveEnableMotionText,
-    motion_text_style: effectiveMotionTextStyle,
-    motion_text_position: effectiveMotionTextPosition,
-    video_transition: effectiveVideoTransition,
-    transition_duration: effectiveTransitionDuration,
-    ...overrides.vso
-  };
+  // 🚀 Opsi A: Auto-collapse composer flag & Auto-preview toggle
+  const [isComposeMode, setIsComposeMode] = useState(true);
+  const [autoPreview, setAutoPreview] = useState(true);
+  const modalBodyRef = useRef(null);
 ```
 
 ---
 
-### 2. `lib/re-multiplier-worker.js` (Failsafe Auto-Healing & Finishing Muxing)
+### 2. Membalik Urutan JSX Proposal Card (Hero Preview Naik ke Atas)
 
-#### Code Sebelum (Current/Before):
-```javascript
-// Baris 363:
-  const targetPresetId = aesthetics.visual_identity_preset_id || aesthetics.visualIdentity?.preset_id;
+**File**: [`AiVisualIdentityBuilderModal.js`](file:///Users/sabeqmmursyid/_cfstudio/app/components/AiVisualIdentityBuilderModal.js#L580-L1006)
 
-// Baris 1202-1215:
-  await processTtsStudioMuxing({
-    id: `multiplier_${task.id}`,
-    batchId: task.tts_batch_id || task.id,
-    videoPath: JSON.stringify(glabsVideoUrls),
-    syncOption: audioConfig.ffmpegSyncOption || audioConfig.ffmpeg_sync_option || 'smart_sync',
-    bgmPath: audioConfig.ffmpegBgmPath || audioConfig.ffmpeg_bgm_path || null,
-    bgmVolume: audioConfig.ffmpegBgmVolume !== undefined ? audioConfig.ffmpegBgmVolume : (audioConfig.ffmpeg_bgm_volume !== undefined ? audioConfig.ffmpeg_bgm_volume : 0.00),
-    sfxVolume: audioConfig.ffmpegSfxVolume !== undefined ? audioConfig.ffmpegSfxVolume : (audioConfig.ffmpeg_sfx_volume !== undefined ? audioConfig.ffmpeg_sfx_volume : 0.00),
-    videoScale: audioConfig.ffmpegVideoScale !== undefined ? audioConfig.ffmpegVideoScale : (audioConfig.ffmpeg_video_scale !== undefined ? audioConfig.ffmpeg_video_scale : 1.1),
-    outputPath: finalOutputDiskPath,
-    brandName: task.account_name || 'Brand'
-  });
+#### Code Sebelum (Current/Before) — Urutan Lama (Tombol Generate Terkubur di Bawah):
+```jsx
+{/* Part 2: Interactive Proposal Card */}
+{proposal && (
+  <div style={{ backgroundColor: 'var(--surface-raised)', borderRadius: '12px', ... }}>
+    {/* 1. Header */}
+    <div style={{ padding: '16px 20px' }}>...</div>
+
+    {/* 2. Rationale (Menghabiskan ruang vertikal) */}
+    {proposal.creative_rationale && <div>...</div>}
+
+    {/* 3. Attributes Strip */}
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>...</div>
+
+    {/* 4. T2I Prompt Textarea (Menghabiskan ruang vertikal) */}
+    <div style={{ padding: '18px 20px' }}>
+      <textarea rows={3} ... />
+    </div>
+
+    {/* 5. G-Labs Review Section (TERKUBUR DI BAWAH Y > 800px) */}
+    <div style={{ padding: '20px' }}>
+      <button onClick={handleRenderGlabs}>Generate Visual Preview</button>
+      <div style={{ minHeight: '280px' }}>...kanvas...</div>
+    </div>
+  </div>
+)}
 ```
 
-#### Code Sesudah (Proposed/After):
-```javascript
-  // Auto-healing VI lookup jika targetPresetId kosong
-  let targetPresetId = aesthetics.visual_identity_preset_id || aesthetics.visualIdentity?.preset_id;
-  if (!targetPresetId && aesthetics.preset_key) {
-    try {
-      const { getOperatorPresetConfigAsync } = await import('./operator-presets.js');
-      const pCfg = await getOperatorPresetConfigAsync(aesthetics.preset_key, task.tenant_id);
-      if (pCfg?.visual_swap?.visual_identity_preset_id) {
-        targetPresetId = pCfg.visual_swap.visual_identity_preset_id;
-      }
-    } catch (_) {}
-  }
-  if (!targetPresetId && effectiveBrandId) {
-    try {
-      const { listVisualIdentityPresetsForBrand } = await import('./visual-override-resolver.js');
-      const bVis = await listVisualIdentityPresetsForBrand(effectiveBrandId);
-      if (bVis?.length > 0) targetPresetId = bVis[0].id;
-    } catch (_) {}
-  }
+#### Code Sesudah (Proposed/After) — Urutan Opsi A (Hero Preview Naik ke Atas, Y: ~110px):
+```jsx
+{/* Part 2: Opsi A - 1-Kolom Vertikal dengan Hero Preview di Atas */}
+{proposal && (
+  <div style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-strong)', borderRadius: 'var(--radius-md, 12px)', overflow: 'hidden', boxShadow: 'var(--shadow-card)', display: 'flex', flexDirection: 'column' }}>
+    
+    {/* 1. Header Usulan */}
+    <div style={{ backgroundColor: 'var(--surface-interactive)', padding: '12px 18px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div>
+        <div style={{ backgroundColor: 'var(--status-success-soft)', color: 'var(--status-success)', fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: 'var(--radius-full)' }}>
+          ✨ Usulan Siap Direview
+        </div>
+        <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', margin: '4px 0 0 0' }}>
+          {proposal.label}
+        </h3>
+        <span style={{ fontFamily: 'var(--font-mono, monospace)', fontSize: '11px', color: 'var(--text-muted)' }}>
+          preset_key: {proposal.suggested_preset_key}
+        </span>
+      </div>
+      <span style={{ fontSize: '11px', color: 'var(--text-muted)', backgroundColor: 'var(--surface)', padding: '4px 10px', borderRadius: 'var(--radius-sm, 6px)', border: '1px solid var(--border-subtle)' }}>
+        Schema v2 Compliant • Faceless Invariant
+      </span>
+    </div>
 
-  // Forwarding Motion Text & Video Transition ke FFmpeg Muxing
-  await processTtsStudioMuxing({
-    id: `multiplier_${task.id}`,
-    batchId: task.tts_batch_id || task.id,
-    videoPath: JSON.stringify(glabsVideoUrls),
-    syncOption: audioConfig.ffmpegSyncOption || audioConfig.ffmpeg_sync_option || 'smart_sync',
-    bgmPath: audioConfig.ffmpegBgmPath || audioConfig.ffmpeg_bgm_path || null,
-    bgmVolume: audioConfig.ffmpegBgmVolume !== undefined ? audioConfig.ffmpegBgmVolume : (audioConfig.ffmpeg_bgm_volume !== undefined ? audioConfig.ffmpeg_bgm_volume : 0.00),
-    sfxVolume: audioConfig.ffmpegSfxVolume !== undefined ? audioConfig.ffmpegSfxVolume : (audioConfig.ffmpeg_sfx_volume !== undefined ? audioConfig.ffmpeg_sfx_volume : 0.00),
-    videoScale: audioConfig.ffmpegVideoScale !== undefined ? audioConfig.ffmpegVideoScale : (audioConfig.ffmpeg_video_scale !== undefined ? audioConfig.ffmpeg_video_scale : 1.0),
-    enableMotionText: audioConfig.enable_motion_text !== undefined ? audioConfig.enable_motion_text : (aesthetics.enable_motion_text !== undefined ? aesthetics.enable_motion_text : 1),
-    motionTextStyle: audioConfig.motion_text_style || aesthetics.motion_text_style || 'floating_white_yellow',
-    motionTextPosition: audioConfig.motion_text_position || aesthetics.motion_text_position || 'bottom',
-    videoTransition: audioConfig.video_transition || aesthetics.video_transition || 'fade',
-    transitionDuration: Number(audioConfig.transition_duration !== undefined ? audioConfig.transition_duration : (aesthetics.transition_duration !== undefined ? aesthetics.transition_duration : 0.5)),
-    outputPath: finalOutputDiskPath,
-    brandName: task.account_name || 'Brand'
-  });
-```
+    {/* 2. 🌟 HERO SECTION: CONTROL BAR & KANVAS PREVIEW LANGSUNG DI ATAS 🌟 */}
+    <div style={{ padding: '14px 18px', backgroundColor: 'var(--surface)', borderBottom: '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', backgroundColor: 'var(--surface-interactive)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm, 8px)', flexWrap: 'wrap', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-muted)' }}>Rasio:</span>
+          <div style={{ display: 'flex', gap: '5px' }}>
+            {['9:16', '1:1', '16:9'].map((ratio) => (
+              <button key={ratio} type="button" onClick={() => setAspectRatio(ratio)} style={{ backgroundColor: aspectRatio === ratio ? 'var(--action-primary)' : 'var(--input-bg)', color: aspectRatio === ratio ? 'var(--on-action-primary)' : 'var(--text-secondary)', border: `1px solid ${aspectRatio === ratio ? 'var(--action-primary)' : 'var(--border-subtle)'}`, fontSize: '11px', fontWeight: 600, padding: '4px 10px', borderRadius: 'var(--radius-xs, 4px)', cursor: 'pointer' }}>
+                {ratio}
+              </button>
+            ))}
+          </div>
+        </div>
 
----
+        {/* 🌟 TOMBOL GENERATE BERPENDAR MENYALA (POSISI Y ~110px) 🌟 */}
+        <button
+          type="button"
+          onClick={handleRenderGlabs}
+          disabled={isRenderingGlabs}
+          style={{
+            background: 'linear-gradient(135deg, var(--status-success), var(--action-primary))',
+            color: 'var(--on-action-primary)',
+            border: 'none',
+            padding: '8px 18px',
+            borderRadius: 'var(--radius-sm, 8px)',
+            fontSize: '12.5px',
+            fontWeight: 700,
+            cursor: isRenderingGlabs ? 'not-allowed' : 'pointer',
+            opacity: isRenderingGlabs ? 0.6 : 1,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            boxShadow: '0 4px 14px rgba(74, 222, 128, 0.45)',
+            animation: isRenderingGlabs ? 'none' : 'pulseGlow 2.5s infinite'
+          }}
+        >
+          <span>{isRenderingGlabs ? '⏳' : '🎨'}</span>
+          <span>{isRenderingGlabs ? 'Rendering di G-Labs...' : 'Generate Visual Preview (G-Labs)'}</span>
+        </button>
+      </div>
 
-### 3. `app/api/v2/recipes/autonomous-pipeline/route.js`
+      {/* Kanvas Viewport Box (Langsung tampil di tengah) */}
+      <div style={{ border: renderedImageUrl ? '1px solid var(--border-subtle)' : '2px dashed var(--border-strong)', borderRadius: 'var(--radius-md, 12px)', backgroundColor: renderedImageUrl ? 'var(--canvas)' : 'var(--input-bg)', minHeight: '290px', maxHeight: '380px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '16px', position: 'relative' }}>
+        {/* State Empty / Rendering / Rendered */}
+      </div>
+    </div>
 
-#### Code Sebelum (Current/Before):
-```javascript
-// Baris 194-198:
-        overrides: {
-          ...affiliateOverride,
-          ...recipeOverride,
-          ...(body.overrides || {})
-        }
-```
+    {/* 3. SPESIFIKASI & PROMPT T2I DI BAWAH KANVAS PREVIEW */}
+    <div style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      {/* 4 Kotak Atribut Horizontal */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+        {/* Visual Mode, Subject System, Environment, Lighting */}
+      </div>
 
-#### Code Sesudah (Proposed/After):
-```javascript
-        overrides: {
-          visual_identity_preset_id: body.visual_identity_preset_id || null,
-          enable_motion_text: body.enable_motion_text,
-          motion_text_style: body.motion_text_style,
-          video_transition: body.video_transition,
-          ...affiliateOverride,
-          ...recipeOverride,
-          ...(body.overrides || {})
-        }
-```
+      {/* Textarea Production T2I Prompt */}
+      <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm, 8px)', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {/* T2I Header + Copy Button + Textarea */}
+      </div>
 
----
+      {/* Rationale Desain Estetika */}
+      {proposal.creative_rationale && (
+        <div style={{ backgroundColor: 'var(--surface-subtle)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm, 8px)', padding: '10px 14px' }}>
+          <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>💡 Alasan Desain Estetika (Rationale):</div>
+          <div style={{ fontSize: '12px', color: 'var(--text-secondary)', fontStyle: 'italic', marginTop: '4px' }}>
+            "{proposal.creative_rationale}"
+          </div>
+        </div>
+      )}
+    </div>
 
-### 4. `lib/auto-pipeline-scheduler-runner.js`
-
-#### Code Sebelum (Current/Before):
-```javascript
-// Baris 131-134:
-      overrides: {
-        generate_recipe: cfg.generate_recipe !== undefined ? Boolean(cfg.generate_recipe) : undefined,
-        ...(cfg.overrides || {})
-      }
-```
-
-#### Code Sesudah (Proposed/After):
-```javascript
-      overrides: {
-        visual_identity_preset_id: cfg.visual_identity_preset_id || null,
-        generate_recipe: cfg.generate_recipe !== undefined ? Boolean(cfg.generate_recipe) : undefined,
-        enable_motion_text: cfg.enable_motion_text,
-        motion_text_style: cfg.motion_text_style,
-        video_transition: cfg.video_transition,
-        ...(cfg.overrides || {})
-      }
-```
-
----
-
-### 5. `app/auto-pipeline/page.js` (Penyelarasan Modal Schedule & Inspector)
-
-#### Code Sebelum (Current/Before):
-```javascript
-// Baris 1250:
-: (schedCampaignType === 'multiplier_campaign'
-    ? { blueprint_id: targetId, execution_mode: 'full_autopilot', generate_recipe: schedGenerateRecipe }
-    : ...)
-```
-
-#### Code Sesudah (Proposed/After):
-```javascript
-: (schedCampaignType === 'multiplier_campaign'
-    ? { 
-        blueprint_id: targetId, 
-        execution_mode: 'full_autopilot', 
-        generate_recipe: schedGenerateRecipe,
-        visual_identity_preset_id: selectedPresetId || activePresetConfig?.visual_swap?.visual_identity_preset_id || null
-      }
-    : ...)
+  </div>
+)}
 ```
 
 ---
 
-## Verifikasi & Validasi
-1. Menjalankan unit test `tests/test-autonomous-preset-pipeline.test.js` untuk menguji:
-   - Resolusi preset asinkron untuk ke-4 tipe video.
-   - Keberadaan `visual_identity_preset_id` dan properti finishing (`motion_text`, `video_transition`) pada `vso_config_json` dan `audio_config_json`.
-   - Auto-healing pada Multiplier Worker saat menerima task tanpa VI eksplisit.
-2. Memverifikasi mockup simulasi HTML di browser (`public/mockup_auto_pipeline_preset_audit.html`).
-3. Melakukan rilis non-interaktif dan sinkronisasi Git otomatis sesuai SOP.
+## File yang Dimodifikasi
+
+| # | File | Jenis Perubahan |
+|---|------|-----------------|
+| 1 | `app/components/AiVisualIdentityBuilderModal.js` | Refaktor urutan JSX (1-Kolom Vertikal dengan Hero Preview di Atas), Auto-collapse Composer, Toggle Auto-preview, CSS inject |

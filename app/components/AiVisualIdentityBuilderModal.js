@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const TRENDING_PRESETS = [
   {
@@ -101,6 +101,11 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
   const [t2iPrompt, setT2iPrompt] = useState('');
   const [aspectRatio, setAspectRatio] = useState('9:16');
 
+  // 🚀 Opsi A: 1-Kolom Vertikal State Control
+  const [isComposeMode, setIsComposeMode] = useState(true);
+  const [autoPreview, setAutoPreview] = useState(true);
+  const modalBodyRef = useRef(null);
+
   // G-Labs Live Test Render state
   const [isRenderingGlabs, setIsRenderingGlabs] = useState(false);
   const [renderStage, setRenderStage] = useState('');
@@ -110,6 +115,26 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
   // Save state
   const [isSaving, setIsSaving] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
+
+  // Inject CSS keyframes for pulseGlow and spin
+  useEffect(() => {
+    const styleId = 'ai-vi-builder-keyframes';
+    if (typeof document !== 'undefined' && !document.getElementById(styleId)) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.textContent = `
+        @keyframes pulseGlow {
+          0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+          70% { box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+        }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }, []);
 
   const showToast = (title, desc) => {
     setToastMessage({ title, desc });
@@ -156,9 +181,23 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
       }
 
       setProposal(json.data);
-      setT2iPrompt(json.data.t2i_prompt || '');
+      const generatedPrompt = json.data.t2i_prompt || '';
+      setT2iPrompt(generatedPrompt);
       setRenderedImageUrl(null);
       setRenderError(null);
+
+      // 🚀 KEY UX FIX: Collapse composer into compact bar
+      setIsComposeMode(false);
+      setTimeout(() => {
+        modalBodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 100);
+
+      // 🚀 Auto-preview trigger if enabled
+      if (autoPreview && generatedPrompt) {
+        setTimeout(() => {
+          handleRenderGlabs(generatedPrompt);
+        }, 300);
+      }
     } catch (err) {
       setError(err.message || 'Terjadi kesalahan saat memanggil AI.');
     } finally {
@@ -168,8 +207,9 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
   };
 
   // 2. G-Labs Live Preview Generation
-  const handleRenderGlabs = async () => {
-    if (!t2iPrompt || !t2iPrompt.trim()) {
+  const handleRenderGlabs = async (overridePrompt = null) => {
+    const promptToUse = (typeof overridePrompt === 'string' ? overridePrompt : t2iPrompt)?.trim();
+    if (!promptToUse) {
       setRenderError('Prompt T2I tidak boleh kosong.');
       return;
     }
@@ -187,7 +227,7 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prompt: t2iPrompt.trim(),
+          prompt: promptToUse,
           aspect_ratio: aspectRatio
         })
       });
@@ -198,7 +238,7 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
       }
 
       setRenderedImageUrl(json.image_url);
-      showToast('Render Berhasil!', 'Visual nyata berhasil dibuat oleh G-Labs Node 2.');
+      showToast('Render Berhasil! 🎨', 'Visual nyata berhasil dibuat oleh G-Labs Node 2.');
     } catch (err) {
       setRenderError(err.message || 'Gagal merender gambar di G-Labs.');
     } finally {
@@ -268,7 +308,7 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '20px',
+        padding: '16px',
         overflowY: 'auto'
       }}
     >
@@ -278,8 +318,8 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
           border: '1px solid var(--border-strong)',
           borderRadius: 'var(--radius-lg, 16px)',
           width: '100%',
-          maxWidth: '1020px',
-          maxHeight: '92vh',
+          maxWidth: '840px',
+          maxHeight: '94vh',
           display: 'flex',
           flexDirection: 'column',
           boxShadow: 'var(--shadow-modal)',
@@ -289,7 +329,7 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
         {/* Modal Header */}
         <div
           style={{
-            padding: '18px 24px',
+            padding: '14px 22px',
             borderBottom: '1px solid var(--border-subtle)',
             backgroundColor: 'var(--surface-raised)',
             display: 'flex',
@@ -297,28 +337,29 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
             alignItems: 'center'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div
               style={{
-                width: '42px',
-                height: '42px',
+                width: '38px',
+                height: '38px',
                 borderRadius: 'var(--radius-md, 12px)',
-                background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(99, 102, 241, 0.2))',
-                border: '1px solid rgba(14, 165, 233, 0.4)',
+                background: 'var(--status-info-soft)',
+                border: '1px solid var(--status-info)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '22px'
+                fontSize: '18px',
+                color: 'var(--status-info)'
               }}
             >
               ✨
             </div>
             <div>
-              <h2 style={{ fontSize: '17px', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+              <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
                 AI Visual Identity Studio Builder
               </h2>
               <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
-                Ketik konsep visual santai atau pilih 12 ide tren 2026-2027. AI merakit konfigurasi lengkap dan prompt T2I untuk live review G-Labs.
+                1-Prompt Magic & Live Review via G-Labs (Node 2)
               </p>
             </div>
           </div>
@@ -345,13 +386,14 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
 
         {/* Modal Body */}
         <div
+          ref={modalBodyRef}
           style={{
-            padding: '24px',
+            padding: '16px 20px',
             overflowY: 'auto',
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            gap: '22px'
+            gap: '14px'
           }}
         >
           {error && (
@@ -373,173 +415,241 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
             </div>
           )}
 
-          {/* Part 1: Magic Input Composer */}
-          <div
-            style={{
-              backgroundColor: 'var(--surface-raised)',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: 'var(--radius-md, 12px)',
-              padding: '20px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '14px',
-              boxShadow: 'var(--shadow-card)'
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span>💬</span> Konsep Ide Visual Anda
-              </span>
-              <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                Ketik bebas konsep visual, subjek, mood, dan palet warna
-              </span>
-            </div>
-
-            <textarea
-              value={userPrompt}
-              onChange={(e) => setUserPrompt(e.target.value)}
-              placeholder="Contoh: Saya ingin visual identity gaya stickman minimalis untuk edukasi bisnis, warna hitam putih dengan aksen kuning stabilo..."
-              rows={3}
-              style={{
-                width: '100%',
-                backgroundColor: 'var(--input-bg)',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: 'var(--radius-sm, 8px)',
-                padding: '12px 14px',
-                fontFamily: 'inherit',
-                fontSize: '13px',
-                color: 'var(--text-primary)',
-                resize: 'vertical',
-                lineHeight: 1.5,
-                outline: 'none'
-              }}
-            />
-
-            {/* Inspiration Chips: 12 Trends 2026-2027 */}
+          {/* STAGE 2: Compact Concept Bar (shown when proposal exists and composer is collapsed) */}
+          {!isComposeMode && proposal && (
             <div
               style={{
-                backgroundColor: 'var(--surface)',
+                backgroundColor: 'var(--surface-raised)',
                 border: '1px solid var(--border-subtle)',
                 borderRadius: 'var(--radius-sm, 8px)',
-                padding: '14px 16px',
+                padding: '8px 14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '12px'
+              }}
+            >
+              <div
+                style={{
+                  fontSize: '12.5px',
+                  color: 'var(--text-secondary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  overflow: 'hidden',
+                  whiteSpace: 'nowrap',
+                  textOverflow: 'ellipsis'
+                }}
+              >
+                <span>💡</span>
+                <span>
+                  Konsep Aktif:{' '}
+                  <strong style={{ color: 'var(--text-primary)' }}>
+                    {userPrompt.slice(0, 65)}
+                    {userPrompt.length > 65 ? '...' : ''}
+                  </strong>
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsComposeMode(true)}
+                style={{
+                  backgroundColor: 'var(--surface-interactive)',
+                  color: 'var(--action-primary)',
+                  border: '1px solid var(--border-subtle)',
+                  fontSize: '11.5px',
+                  fontWeight: 600,
+                  padding: '4px 10px',
+                  borderRadius: 'var(--radius-sm, 6px)',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  whiteSpace: 'nowrap',
+                  transition: 'var(--transition)'
+                }}
+              >
+                <span>✏️</span> Ubah Konsep Ide
+              </button>
+            </div>
+          )}
+
+          {/* STAGE 1: Full Composer Card (Drafting Mode) */}
+          {isComposeMode && (
+            <div
+              style={{
+                backgroundColor: 'var(--surface-raised)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-md, 12px)',
+                padding: '16px 18px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '10px'
+                gap: '12px',
+                boxShadow: 'var(--shadow-card)',
+                transition: 'var(--transition)'
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span
-                  style={{
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px',
-                    color: 'var(--text-secondary)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px'
-                  }}
-                >
-                  <span>🔥</span> 12 Pilihan Ide Visual Cepat (Tren 2026 & Proyeksi 2027):
+                <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>💬</span> Konsep Ide Visual Anda
                 </span>
-                <span
-                  style={{
-                    fontSize: '10px',
-                    fontWeight: 700,
-                    padding: '2px 8px',
-                    borderRadius: 'var(--radius-full)',
-                    backgroundColor: 'var(--status-warning-soft)',
-                    color: 'var(--status-warning)',
-                    border: '1px solid var(--border-subtle)'
-                  }}
-                >
-                  Tactile & Anti-AI Trends
+                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                  Ketik bebas konsep visual, subjek, mood, dan palet warna
                 </span>
               </div>
 
+              <textarea
+                value={userPrompt}
+                onChange={(e) => setUserPrompt(e.target.value)}
+                placeholder="Contoh: Saya ingin visual identity gaya stickman minimalis untuk edukasi bisnis, warna hitam putih dengan aksen kuning stabilo..."
+                rows={3}
+                style={{
+                  width: '100%',
+                  backgroundColor: 'var(--input-bg)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-sm, 8px)',
+                  padding: '10px 14px',
+                  fontFamily: 'inherit',
+                  fontSize: '13px',
+                  color: 'var(--text-primary)',
+                  resize: 'vertical',
+                  lineHeight: 1.5,
+                  outline: 'none'
+                }}
+              />
+
+              {/* Inspiration Chips: 12 Trends 2026-2027 */}
               <div
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+                  backgroundColor: 'var(--surface)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-sm, 8px)',
+                  padding: '10px 12px',
+                  display: 'flex',
+                  flexDirection: 'column',
                   gap: '8px'
                 }}
               >
-                {TRENDING_PRESETS.map((p) => {
-                  const isActive = activeChip === p.id;
-                  return (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onClick={() => handleSelectChip(p)}
-                      style={{
-                        backgroundColor: isActive ? 'var(--status-info-soft)' : 'var(--surface-interactive)',
-                        border: `1px solid ${isActive ? 'var(--status-info)' : 'var(--border-subtle)'}`,
-                        color: isActive ? 'var(--status-info)' : 'var(--text-secondary)',
-                        fontSize: '12px',
-                        fontWeight: isActive ? 600 : 500,
-                        padding: '8px 12px',
-                        borderRadius: 'var(--radius-sm, 6px)',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        textAlign: 'left',
-                        transition: 'var(--transition)'
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                        <span>{p.icon}</span>
-                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden' }}>{p.name}</span>
-                      </div>
-                      <span
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span
+                    style={{
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      color: 'var(--text-secondary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <span>🔥</span> 12 Pilihan Ide Visual Cepat (Tren 2026-2027) :
+                  </span>
+                  <span
+                    style={{
+                      fontSize: '10px',
+                      fontWeight: 700,
+                      padding: '2px 7px',
+                      borderRadius: 'var(--radius-full)',
+                      backgroundColor: 'var(--status-warning-soft)',
+                      color: 'var(--status-warning)'
+                    }}
+                  >
+                    Tactile & Anti-AI Trends
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(175px, 1fr))',
+                    gap: '6px'
+                  }}
+                >
+                  {TRENDING_PRESETS.map((p) => {
+                    const isActive = activeChip === p.id;
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => handleSelectChip(p)}
                         style={{
-                          fontSize: '9px',
-                          fontWeight: 700,
-                          padding: '2px 5px',
-                          borderRadius: 'var(--radius-xs, 4px)',
-                          backgroundColor: isActive ? 'var(--status-info)' : 'var(--surface)',
-                          color: isActive ? 'var(--on-action-primary)' : 'var(--text-muted)',
-                          border: '1px solid var(--border-subtle)'
+                          backgroundColor: isActive ? 'var(--status-info-soft)' : 'var(--surface-interactive)',
+                          border: `1px solid ${isActive ? 'var(--status-info)' : 'var(--border-subtle)'}`,
+                          color: isActive ? 'var(--status-info)' : 'var(--text-secondary)',
+                          fontSize: '11px',
+                          fontWeight: isActive ? 600 : 500,
+                          padding: '6px 10px',
+                          borderRadius: 'var(--radius-sm, 6px)',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          textAlign: 'left',
+                          transition: 'var(--transition)'
                         }}
                       >
-                        {p.tag}
-                      </span>
-                    </button>
-                  );
-                })}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                          <span>{p.icon}</span>
+                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden' }}>{p.name}</span>
+                        </div>
+                        <span
+                          style={{
+                            fontSize: '9px',
+                            fontWeight: 700,
+                            padding: '2px 5px',
+                            borderRadius: 'var(--radius-xs, 4px)',
+                            backgroundColor: isActive ? 'var(--status-info)' : 'var(--surface)',
+                            color: isActive ? 'var(--on-action-primary)' : 'var(--text-muted)',
+                            border: '1px solid var(--border-subtle)'
+                          }}
+                        >
+                          {p.tag}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Action Row */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginTop: '4px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-secondary)', cursor: 'pointer', userSelect: 'none' }}>
+                  <input
+                    type="checkbox"
+                    checked={autoPreview}
+                    onChange={(e) => setAutoPreview(e.target.checked)}
+                    style={{ accentColor: 'var(--action-primary)' }}
+                  />
+                  <span>⚡ Langsung render preview visual (G-Labs Node 2) setelah usulan dibuat</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={handleSynthesize}
+                  disabled={isSynthesizing}
+                  style={{
+                    background: 'linear-gradient(135deg, var(--action-primary), var(--status-info))',
+                    color: 'var(--on-action-primary)',
+                    border: 'none',
+                    padding: '9px 20px',
+                    borderRadius: 'var(--radius-sm, 8px)',
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    cursor: isSynthesizing ? 'not-allowed' : 'pointer',
+                    opacity: isSynthesizing ? 0.6 : 1,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 14px rgba(45, 212, 191, 0.4)',
+                    transition: 'var(--transition)'
+                  }}
+                >
+                  <span>{isSynthesizing ? '⏳' : '✨'}</span>
+                  <span>{isSynthesizing ? 'AI sedang merakit usulan...' : 'Generate Usulan Visual Identity (1-Click AI)'}</span>
+                </button>
               </div>
             </div>
-
-            {/* Action Row */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-              <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                💡 Klik ide di atas atau ketik bebas konsep visual Anda sendiri.
-              </span>
-              <button
-                type="button"
-                onClick={handleSynthesize}
-                disabled={isSynthesizing}
-                style={{
-                  background: 'linear-gradient(135deg, var(--action-primary), #6366f1)',
-                  color: 'var(--on-action-primary)',
-                  border: 'none',
-                  padding: '10px 20px',
-                  borderRadius: 'var(--radius-sm, 8px)',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  cursor: isSynthesizing ? 'not-allowed' : 'pointer',
-                  opacity: isSynthesizing ? 0.6 : 1,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  boxShadow: '0 4px 12px rgba(14, 165, 233, 0.3)'
-                }}
-              >
-                <span>{isSynthesizing ? '⏳' : '✨'}</span>
-                <span>{isSynthesizing ? 'AI sedang merakit usulan...' : 'Buat Usulan Visual Identity (1-Click AI)'}</span>
-              </button>
-            </div>
-          </div>
+          )}
 
           {/* AI Synthesis Progress State */}
           {isSynthesizing && (
@@ -548,10 +658,10 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
                 backgroundColor: 'var(--surface-interactive)',
                 border: '1px solid var(--border-subtle)',
                 borderRadius: 'var(--radius-md, 12px)',
-                padding: '16px 20px',
+                padding: '12px 16px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '10px'
+                gap: '6px'
               }}
             >
               <div
@@ -565,7 +675,7 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
                 <div
                   style={{
                     height: '100%',
-                    background: 'linear-gradient(90deg, var(--action-primary), #818cf8)',
+                    background: 'linear-gradient(90deg, var(--action-primary), var(--status-info))',
                     width: '85%',
                     animation: 'pulse 1.5s infinite'
                   }}
@@ -577,7 +687,9 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
             </div>
           )}
 
-          {/* Part 2: Interactive Proposal Card */}
+          {/* ==================================================================
+               OPSI A: 1-KOLOM VERTIKAL DENGAN HERO PREVIEW DI ATAS
+               ================================================================== */}
           {proposal && (
             <div
               style={{
@@ -590,17 +702,17 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
                 flexDirection: 'column'
               }}
             >
-              {/* Proposal Header */}
+              {/* 1. Header Usulan */}
               <div
                 style={{
                   backgroundColor: 'var(--surface-interactive)',
-                  padding: '16px 20px',
+                  padding: '12px 18px',
                   borderBottom: '1px solid var(--border-subtle)',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   flexWrap: 'wrap',
-                  gap: '10px'
+                  gap: '8px'
                 }}
               >
                 <div>
@@ -608,14 +720,14 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
                     style={{
                       backgroundColor: 'var(--status-success-soft)',
                       color: 'var(--status-success)',
-                      fontSize: '11px',
+                      fontSize: '10.5px',
                       fontWeight: 700,
-                      padding: '2px 8px',
+                      padding: '2px 7px',
                       borderRadius: 'var(--radius-full)',
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '5px',
-                      marginBottom: '4px'
+                      gap: '4px',
+                      marginBottom: '3px'
                     }}
                   >
                     <span>✨</span> Usulan Siap Direview
@@ -641,194 +753,15 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
                 </span>
               </div>
 
-              {/* Rationale */}
-              {proposal.creative_rationale && (
-                <div
-                  style={{
-                    padding: '14px 20px',
-                    fontSize: '13px',
-                    color: 'var(--text-secondary)',
-                    borderBottom: '1px solid var(--border-subtle)',
-                    backgroundColor: 'var(--surface-subtle)',
-                    lineHeight: 1.6
-                  }}
-                >
-                  "{proposal.creative_rationale}"
-                </div>
-              )}
-
-              {/* Attributes Strip */}
+              {/* 2. 🌟 HERO SECTION: CONTROL BAR & KANVAS PREVIEW LANGSUNG DI ATAS (Y ~110px) 🌟 */}
               <div
                 style={{
-                  padding: '14px 20px',
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-                  gap: '12px',
-                  borderBottom: '1px solid var(--border-subtle)'
-                }}
-              >
-                <div
-                  style={{
-                    backgroundColor: 'var(--surface)',
-                    border: '1px solid var(--border-subtle)',
-                    borderRadius: 'var(--radius-sm, 6px)',
-                    padding: '10px 12px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '3px'
-                  }}
-                >
-                  <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                    Visual Mode
-                  </span>
-                  <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)' }}>
-                    {proposal.config?.visual_language?.primary_style || 'Standard'}
-                  </span>
-                </div>
-
-                <div
-                  style={{
-                    backgroundColor: 'var(--surface)',
-                    border: '1px solid var(--border-subtle)',
-                    borderRadius: 'var(--radius-sm, 6px)',
-                    padding: '10px 12px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '3px'
-                  }}
-                >
-                  <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                    Subject System
-                  </span>
-                  <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)' }}>
-                    {proposal.config?.subject?.kind} ({proposal.config?.subject?.faceless_mode})
-                  </span>
-                </div>
-
-                <div
-                  style={{
-                    backgroundColor: 'var(--surface)',
-                    border: '1px solid var(--border-subtle)',
-                    borderRadius: 'var(--radius-sm, 6px)',
-                    padding: '10px 12px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '3px'
-                  }}
-                >
-                  <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                    Environment
-                  </span>
-                  <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)' }}>
-                    {proposal.config?.environment?.preset_key || 'Custom Setting'}
-                  </span>
-                </div>
-
-                <div
-                  style={{
-                    backgroundColor: 'var(--surface)',
-                    border: '1px solid var(--border-subtle)',
-                    borderRadius: 'var(--radius-sm, 6px)',
-                    padding: '10px 12px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '3px'
-                  }}
-                >
-                  <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                    Lighting & Cam
-                  </span>
-                  <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)' }}>
-                    {proposal.config?.lighting?.preset_key} • {proposal.config?.camera?.framing}
-                  </span>
-                </div>
-              </div>
-
-              {/* T2I Prompt Box */}
-              <div
-                style={{
-                  padding: '18px 20px',
+                  padding: '14px 18px',
+                  backgroundColor: 'var(--surface)',
                   borderBottom: '1px solid var(--border-subtle)',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '10px'
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span>📝</span> Production T2I Prompt (English for G-Labs / Veo / Imagen)
-                    <span
-                      style={{
-                        backgroundColor: 'var(--status-info-soft)',
-                        color: 'var(--status-info)',
-                        fontSize: '10px',
-                        fontWeight: 700,
-                        padding: '2px 6px',
-                        borderRadius: 'var(--radius-xs, 4px)'
-                      }}
-                    >
-                      G-Labs Ready
-                    </span>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={handleCopyPrompt}
-                    style={{
-                      backgroundColor: 'var(--surface-interactive)',
-                      color: 'var(--text-secondary)',
-                      border: '1px solid var(--border-subtle)',
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      padding: '4px 10px',
-                      borderRadius: 'var(--radius-xs, 4px)',
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '5px'
-                    }}
-                  >
-                    <span>📋</span> Salin Prompt
-                  </button>
-                </div>
-
-                <textarea
-                  value={t2iPrompt}
-                  onChange={(e) => setT2iPrompt(e.target.value)}
-                  rows={3}
-                  title="Prompt ini dapat Anda edit secara langsung sebelum melakukan render di G-Labs"
-                  style={{
-                    width: '100%',
-                    backgroundColor: 'var(--input-bg)',
-                    border: '1px solid var(--border-subtle)',
-                    borderRadius: 'var(--radius-sm, 6px)',
-                    padding: '10px 12px',
-                    fontFamily: 'var(--font-mono, monospace)',
-                    fontSize: '12px',
-                    color: 'var(--text-secondary)',
-                    lineHeight: 1.5,
-                    resize: 'vertical',
-                    outline: 'none'
-                  }}
-                />
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px' }}>
-                  <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                    💡 Tip: Anda dapat mengedit teks prompt di atas secara bebas sebelum menekan tombol render G-Labs.
-                  </span>
-                  <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono, monospace)', color: 'var(--status-success)' }}>
-                    Face Invariant: Enforced
-                  </span>
-                </div>
-              </div>
-
-              {/* G-Labs Review Section */}
-              <div
-                style={{
-                  padding: '20px',
-                  backgroundColor: 'var(--surface)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '16px'
+                  gap: '12px'
                 }}
               >
                 <div
@@ -837,16 +770,16 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     flexWrap: 'wrap',
-                    gap: '12px',
+                    gap: '10px',
                     backgroundColor: 'var(--surface-interactive)',
                     border: '1px solid var(--border-subtle)',
                     borderRadius: 'var(--radius-sm, 8px)',
-                    padding: '10px 14px'
+                    padding: '8px 12px'
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-muted)' }}>Aspek Rasio:</span>
-                    <div style={{ display: 'flex', gap: '6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontSize: '11.5px', fontWeight: 600, color: 'var(--text-muted)' }}>Rasio:</span>
+                    <div style={{ display: 'flex', gap: '5px' }}>
                       {['9:16', '1:1', '16:9'].map((ratio) => (
                         <button
                           key={ratio}
@@ -860,7 +793,8 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
                             fontWeight: 600,
                             padding: '4px 10px',
                             borderRadius: 'var(--radius-xs, 4px)',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            transition: 'var(--transition)'
                           }}
                         >
                           {ratio}
@@ -869,28 +803,31 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
                     </div>
                   </div>
 
+                  {/* 🌟 TOMBOL GENERATE BERPENDAR MENYALA 🌟 */}
                   <button
                     type="button"
-                    onClick={handleRenderGlabs}
+                    onClick={() => handleRenderGlabs()}
                     disabled={isRenderingGlabs}
                     style={{
-                      background: 'linear-gradient(135deg, #10b981, #059669)',
-                      color: '#ffffff',
+                      background: 'linear-gradient(135deg, var(--status-success), var(--action-primary))',
+                      color: 'var(--on-action-primary)',
                       border: 'none',
                       padding: '8px 18px',
                       borderRadius: 'var(--radius-sm, 8px)',
-                      fontSize: '12px',
+                      fontSize: '12.5px',
                       fontWeight: 700,
                       cursor: isRenderingGlabs ? 'not-allowed' : 'pointer',
                       opacity: isRenderingGlabs ? 0.6 : 1,
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '8px',
-                      boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
+                      boxShadow: '0 4px 14px rgba(74, 222, 128, 0.45)',
+                      animation: isRenderingGlabs ? 'none' : 'pulseGlow 2.5s infinite',
+                      transition: 'var(--transition)'
                     }}
                   >
-                    <span>🎨</span>
-                    <span>{isRenderingGlabs ? 'Rendering di G-Labs...' : 'Generate Visual Preview (G-Labs Node 2)'}</span>
+                    <span>{isRenderingGlabs ? '⏳' : '🎨'}</span>
+                    <span>{isRenderingGlabs ? 'Rendering di G-Labs...' : 'Generate Visual Preview (G-Labs)'}</span>
                   </button>
                 </div>
 
@@ -915,22 +852,24 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
                     border: renderedImageUrl ? '1px solid var(--border-subtle)' : '2px dashed var(--border-strong)',
                     borderRadius: 'var(--radius-md, 12px)',
                     backgroundColor: renderedImageUrl ? 'var(--canvas)' : 'var(--input-bg)',
-                    minHeight: '280px',
+                    minHeight: '290px',
+                    maxHeight: '380px',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    padding: renderedImageUrl ? '16px' : '24px',
-                    position: 'relative'
+                    padding: renderedImageUrl ? '12px' : '20px',
+                    position: 'relative',
+                    overflow: 'hidden'
                   }}
                 >
                   {isRenderingGlabs ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', textAlign: 'center' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', textAlign: 'center' }}>
                       <div
                         style={{
                           width: '40px',
                           height: '40px',
-                          border: '4px solid var(--surface-interactive)',
+                          border: '3.5px solid var(--surface-interactive)',
                           borderTopColor: 'var(--action-primary)',
                           borderRadius: '50%',
                           animation: 'spin 0.9s linear infinite'
@@ -940,67 +879,281 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
                         <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>
                           {renderStage || 'Memproses generasi visual...'}
                         </div>
-                        <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono, monospace)', color: 'var(--status-info)', marginTop: '4px' }}>
+                        <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono, monospace)', color: 'var(--status-info)', marginTop: '3px' }}>
                           Target: Node 2 Worker (Port 8765)
                         </div>
                       </div>
                     </div>
                   ) : renderedImageUrl ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', width: '100%' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', width: '100%' }}>
                       <div
                         style={{
-                          maxWidth: aspectRatio === '9:16' ? '300px' : aspectRatio === '1:1' ? '380px' : '480px',
+                          maxWidth: aspectRatio === '9:16' ? '260px' : aspectRatio === '1:1' ? '310px' : '360px',
                           width: '100%',
                           borderRadius: 'var(--radius-sm, 8px)',
                           overflow: 'hidden',
-                          boxShadow: '0 12px 30px rgba(0, 0, 0, 0.4)',
+                          boxShadow: '0 12px 30px rgba(0, 0, 0, 0.45)',
                           border: '1px solid var(--border-subtle)',
-                          backgroundColor: '#000000'
+                          backgroundColor: 'var(--surface)',
+                          transition: 'max-width 0.25s ease'
                         }}
                       >
                         <img
                           src={renderedImageUrl}
                           alt="G-Labs Preview Render"
-                          style={{ width: '100%', height: 'auto', display: 'block' }}
+                          style={{ width: '100%', height: 'auto', display: 'block', maxHeight: '260px', objectFit: 'contain' }}
                         />
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', maxWidth: '500px', paddingTop: '6px', borderTop: '1px solid var(--border-subtle)' }}>
                         <button
                           type="button"
-                          onClick={handleRenderGlabs}
+                          onClick={() => handleRenderGlabs()}
                           style={{
                             backgroundColor: 'var(--surface-interactive)',
                             border: '1px solid var(--border-subtle)',
                             color: 'var(--text-primary)',
-                            fontSize: '12px',
+                            fontSize: '11.5px',
                             fontWeight: 600,
-                            padding: '6px 14px',
+                            padding: '5px 12px',
                             borderRadius: 'var(--radius-sm, 6px)',
                             cursor: 'pointer',
                             display: 'inline-flex',
                             alignItems: 'center',
-                            gap: '6px'
+                            gap: '5px'
                           }}
                         >
                           <span>🔄</span> Render Variasi Lain
                         </button>
                         <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono, monospace)' }}>
-                          G-Labs Live Render OK
+                          Status: Render Sukses via G-Labs
                         </span>
                       </div>
                     </div>
                   ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textAlign: 'center', maxWidth: '420px' }}>
-                      <span style={{ fontSize: '36px', opacity: 0.7 }}>🖼️</span>
-                      <h4 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textAlign: 'center', maxWidth: '440px' }}>
+                      <span style={{ fontSize: '32px', opacity: 0.8 }}>🖼️</span>
+                      <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
                         Review Visual Belum Dibuat
                       </h4>
-                      <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0 }}>
-                        Klik tombol <strong>"Generate Visual Preview (G-Labs Node 2)"</strong> di atas untuk merender visual nyata dari prompt ini sebelum menyimpannya.
+                      <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0, lineHeight: 1.45 }}>
+                        Tekan tombol <strong>"Generate Visual Preview (G-Labs)"</strong> di atas untuk merender visual nyata dari prompt ini.
                       </p>
+                      <button
+                        type="button"
+                        onClick={() => handleRenderGlabs()}
+                        style={{
+                          marginTop: '6px',
+                          backgroundColor: 'var(--surface-interactive)',
+                          border: '1px solid var(--action-primary)',
+                          color: 'var(--action-primary)',
+                          padding: '7px 16px',
+                          borderRadius: 'var(--radius-sm, 8px)',
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          transition: 'var(--transition)'
+                        }}
+                      >
+                        <span>🎨</span> Klik untuk Generate Preview Visual
+                      </button>
                     </div>
                   )}
                 </div>
+              </div>
+
+              {/* 3. SPESIFIKASI & PROMPT T2I DI BAWAH KANVAS PREVIEW */}
+              <div
+                style={{
+                  padding: '16px 18px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '14px'
+                }}
+              >
+                {/* 4 Atribut Grid */}
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+                    gap: '8px'
+                  }}
+                >
+                  <div
+                    style={{
+                      backgroundColor: 'var(--surface)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: 'var(--radius-sm, 6px)',
+                      padding: '8px 10px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '2px'
+                    }}
+                  >
+                    <span style={{ fontSize: '9.5px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.3px' }}>
+                      Visual Mode
+                    </span>
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {proposal.config?.visual_language?.primary_style || 'Standard'}
+                    </span>
+                  </div>
+
+                  <div
+                    style={{
+                      backgroundColor: 'var(--surface)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: 'var(--radius-sm, 6px)',
+                      padding: '8px 10px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '2px'
+                    }}
+                  >
+                    <span style={{ fontSize: '9.5px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.3px' }}>
+                      Subject System
+                    </span>
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {proposal.config?.subject?.kind} ({proposal.config?.subject?.faceless_mode})
+                    </span>
+                  </div>
+
+                  <div
+                    style={{
+                      backgroundColor: 'var(--surface)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: 'var(--radius-sm, 6px)',
+                      padding: '8px 10px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '2px'
+                    }}
+                  >
+                    <span style={{ fontSize: '9.5px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.3px' }}>
+                      Environment
+                    </span>
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {proposal.config?.environment?.preset_key || 'Custom Setting'}
+                    </span>
+                  </div>
+
+                  <div
+                    style={{
+                      backgroundColor: 'var(--surface)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: 'var(--radius-sm, 6px)',
+                      padding: '8px 10px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '2px'
+                    }}
+                  >
+                    <span style={{ fontSize: '9.5px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.3px' }}>
+                      Lighting & Cam
+                    </span>
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {proposal.config?.lighting?.preset_key} • {proposal.config?.camera?.framing}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Production T2I Prompt Box */}
+                <div
+                  style={{
+                    backgroundColor: 'var(--surface)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-sm, 8px)',
+                    padding: '12px 14px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span>📝</span> Production T2I Prompt
+                      <span
+                        style={{
+                          backgroundColor: 'var(--status-info-soft)',
+                          color: 'var(--status-info)',
+                          fontSize: '9.5px',
+                          fontWeight: 700,
+                          padding: '1px 6px',
+                          borderRadius: 'var(--radius-xs, 4px)'
+                        }}
+                      >
+                        G-Labs Ready
+                      </span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleCopyPrompt}
+                      style={{
+                        backgroundColor: 'var(--surface-interactive)',
+                        color: 'var(--text-secondary)',
+                        border: '1px solid var(--border-subtle)',
+                        fontSize: '10.5px',
+                        fontWeight: 600,
+                        padding: '3px 8px',
+                        borderRadius: 'var(--radius-xs, 4px)',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      <span>📋</span> Salin
+                    </button>
+                  </div>
+
+                  <textarea
+                    value={t2iPrompt}
+                    onChange={(e) => setT2iPrompt(e.target.value)}
+                    rows={2}
+                    title="Prompt ini dapat Anda edit secara langsung sebelum melakukan render di G-Labs"
+                    style={{
+                      width: '100%',
+                      height: '70px',
+                      backgroundColor: 'var(--input-bg)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: 'var(--radius-xs, 4px)',
+                      padding: '8px 10px',
+                      fontFamily: 'var(--font-mono, monospace)',
+                      fontSize: '11.5px',
+                      color: 'var(--text-secondary)',
+                      lineHeight: 1.45,
+                      resize: 'vertical',
+                      outline: 'none'
+                    }}
+                  />
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '10.5px', color: 'var(--text-muted)' }}>
+                    <span>💡 Tip: Anda dapat mengedit teks prompt di atas secara bebas.</span>
+                    <span style={{ fontFamily: 'var(--font-mono, monospace)', color: 'var(--status-success)', fontWeight: 600 }}>
+                      Face Invariant: Enforced
+                    </span>
+                  </div>
+                </div>
+
+                {/* Rationale Box */}
+                {proposal.creative_rationale && (
+                  <div
+                    style={{
+                      backgroundColor: 'var(--surface-subtle)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: 'var(--radius-sm, 8px)',
+                      padding: '10px 14px'
+                    }}
+                  >
+                    <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.3px' }}>
+                      💡 Alasan Desain Estetika (Rationale):
+                    </div>
+                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)', fontStyle: 'italic', marginTop: '4px', lineHeight: 1.5 }}>
+                      "{proposal.creative_rationale}"
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -1009,14 +1162,14 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
         {/* Modal Footer */}
         <div
           style={{
-            padding: '16px 24px',
+            padding: '12px 20px',
             borderTop: '1px solid var(--border-subtle)',
             backgroundColor: 'var(--surface-raised)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
             flexWrap: 'wrap',
-            gap: '12px'
+            gap: '10px'
           }}
         >
           <div>
@@ -1026,16 +1179,22 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
                 setProposal(null);
                 setT2iPrompt('');
                 setRenderedImageUrl(null);
+                setRenderError(null);
+                setIsComposeMode(true);
               }}
               style={{
                 backgroundColor: 'var(--surface-interactive)',
                 color: 'var(--text-secondary)',
                 border: '1px solid var(--border-subtle)',
-                fontSize: '13px',
+                fontSize: '12px',
                 fontWeight: 600,
-                padding: '9px 16px',
+                padding: '7px 14px',
                 borderRadius: 'var(--radius-sm, 8px)',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                transition: 'var(--transition)'
               }}
             >
               <span>🔄</span> Buat Usulan Baru
@@ -1051,12 +1210,16 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
                 backgroundColor: 'var(--surface-interactive)',
                 color: 'var(--text-secondary)',
                 border: '1px solid var(--border-subtle)',
-                fontSize: '13px',
+                fontSize: '12px',
                 fontWeight: 600,
-                padding: '9px 16px',
+                padding: '7px 14px',
                 borderRadius: 'var(--radius-sm, 8px)',
                 cursor: proposal ? 'pointer' : 'not-allowed',
-                opacity: proposal ? 1 : 0.5
+                opacity: proposal ? 1 : 0.5,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                transition: 'var(--transition)'
               }}
             >
               <span>✏️</span> Kustomisasi Lanjut di Form
@@ -1070,16 +1233,17 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
                 backgroundColor: 'var(--action-primary)',
                 color: 'var(--on-action-primary)',
                 border: 'none',
-                fontSize: '13px',
+                fontSize: '12.5px',
                 fontWeight: 700,
-                padding: '9px 20px',
+                padding: '7px 18px',
                 borderRadius: 'var(--radius-sm, 8px)',
                 cursor: proposal && !isSaving ? 'pointer' : 'not-allowed',
                 opacity: proposal && !isSaving ? 1 : 0.5,
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '8px',
-                boxShadow: '0 4px 12px rgba(14, 165, 233, 0.3)'
+                gap: '7px',
+                boxShadow: '0 4px 12px rgba(45, 212, 191, 0.3)',
+                transition: 'var(--transition)'
               }}
             >
               <span>💾</span>
@@ -1094,17 +1258,18 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
         <div
           style={{
             position: 'fixed',
-            bottom: '28px',
-            right: '28px',
+            bottom: '24px',
+            right: '24px',
             backgroundColor: 'var(--surface-raised)',
             border: '1px solid var(--border-strong)',
             boxShadow: 'var(--shadow-modal)',
-            padding: '14px 20px',
+            padding: '12px 18px',
             borderRadius: 'var(--radius-md, 12px)',
             zIndex: 2000,
             display: 'flex',
             alignItems: 'center',
-            gap: '12px'
+            gap: '10px',
+            animation: 'fadeIn 0.25s ease'
           }}
         >
           <span style={{ fontSize: '20px' }}>✅</span>

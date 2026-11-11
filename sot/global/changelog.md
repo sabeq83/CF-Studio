@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.40.38 — AI Visual Identity Builder 1-Kolom Hero Review & Auto Preview (11/11/2026)
+- Restrukturisasi layout modal AI Visual Identity Builder ke 1-kolom vertikal dengan Hero Control Bar dan Kanvas Preview langsung di atas (Y ~110px)
+- Auto-collapse composer menjadi compact concept bar setelah usulan dirakit
+- Tombol Generate berpendar pulseGlow dan tombol cadangan di kanvas kosong
+- Fitur auto-generate preview visual ke G-Labs Node 2 setelah usulan selesai
+
 ## V2.40.37 — feat: simplify AI Visual Identity Studio Builder with 1-prompt magic, 12 trend ideas, and live G-Labs preview (11/11/2026)
 - Simplify AI Visual Identity Builder into 1-prompt magic modal with 12 trending 2026-2027 visual ideas
 - Add /api/v2/visual-identities/ai/test-render route for live image generation via G-Labs Node 2
