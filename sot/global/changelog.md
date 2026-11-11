@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.41.2 — Guardrail Syari Faceless & Anti-Face Leak Fix (12/11/2026)
+- Camera framing enforcer & modular biometric anchor
+- Refaktorisasi syari_classic back-view dan hands-only
+- Regenerasi start frame opc_261111_2tt6sg klip 1 & 2
+
 ## V2.41.1 — Fix Publishing Scheduler Integer Overflow & Auto Pipeline Retry (12/11/2026)
 - Fix integer overflow query pada listPublishingJobs untuk Multiplier IDs
 - Dukungan JOIN dual-column c.video_id OR c.id pada content_flow_items

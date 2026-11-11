@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inspeksi Visual Identity: Syari Classic Atmospheric Faceless</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f8fafc;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f1f5f9;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --input-bg: #f8fafc;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --action-primary: #0d9488;
+      --action-primary-hover: #14b8a6;
+      --on-action-primary: #ffffff;
+      --status-info: #3b82f6;
+      --status-info-soft: rgba(59, 130, 246, 0.12);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.12);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.12);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.12);
+      --shadow-card: 0 4px 16px rgba(15, 23, 42, 0.08);
+      --shadow-modal: 0 16px 48px rgba(15, 23, 42, 0.16);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      line-height: 1.5;
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 1360px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .header-info h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-info p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+    }
+
+    .badge-success {
+      background-color: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+    }
+
+    .badge-danger {
+      background-color: var(--status-danger-soft);
+      color: var(--status-danger);
+      border: 1px solid var(--status-danger);
+    }
+
+    .badge-warning {
+      background-color: var(--status-warning-soft);
+      color: var(--status-warning);
+      border: 1px solid var(--status-warning);
+    }
+
+    .badge-info {
+      background-color: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid var(--status-info);
+    }
+
+    .controls-group {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    button.theme-toggle {
+      background-color: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: background-color 0.2s;
+    }
+
+    button.theme-toggle:hover {
+      background-color: var(--surface-hover);
+    }
+
+    /* Meta Cards Banner */
+    .metadata-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .meta-card {
+      background-color: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .meta-card .label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .meta-card .value {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-top: 4px;
+    }
+
+    .meta-card .subtext {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    /* Tabs */
+    .tab-bar {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 24px;
+    }
+
+    .tab-btn {
+      padding: 10px 18px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .tab-btn.active {
+      color: var(--action-primary);
+      border-bottom-color: var(--action-primary);
+    }
+
+    /* Comparison Section */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    @media (max-width: 960px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .visual-panel {
+      background-color: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-header {
+      padding: 14px 18px;
+      background-color: var(--surface-raised);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .panel-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .image-preview-wrapper {
+      position: relative;
+      background-color: var(--canvas);
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 480px;
+    }
+
+    .image-preview-wrapper img {
+      max-width: 280px;
+      width: 100%;
+      height: auto;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-strong);
+      box-shadow: var(--shadow-modal);
+      object-fit: cover;
+      aspect-ratio: 9/16;
+    }
+
+    .detection-annotation {
+      position: absolute;
+      top: 36px;
+      right: 36px;
+      background-color: rgba(2, 6, 14, 0.85);
+      border: 1px solid var(--status-danger);
+      color: var(--status-danger);
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      backdrop-filter: blur(8px);
+      box-shadow: var(--shadow-card);
+      max-width: 240px;
+    }
+
+    .detection-annotation.clean {
+      border-color: var(--status-success);
+      color: var(--status-success);
+    }
+
+    .prompt-inspector {
+      padding: 16px 18px;
+      border-top: 1px solid var(--border-subtle);
+      background-color: var(--surface);
+      font-size: 13px;
+      flex-grow: 1;
+    }
+
+    .prompt-inspector h4 {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .prompt-box {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background-color: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      color: var(--text-secondary);
+      max-height: 180px;
+      overflow-y: auto;
+      line-height: 1.6;
+      word-break: break-word;
+    }
+
+    .highlight-danger {
+      color: var(--status-danger);
+      font-weight: 700;
+      background-color: var(--status-danger-soft);
+      padding: 1px 4px;
+      border-radius: 4px;
+    }
+
+    .highlight-success {
+      color: var(--status-success);
+      font-weight: 700;
+      background-color: var(--status-success-soft);
+      padding: 1px 4px;
+      border-radius: 4px;
+    }
+
+    .highlight-barrier {
+      color: var(--action-primary);
+      font-weight: 700;
+      background-color: rgba(45, 212, 191, 0.15);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--action-primary);
+      display: inline-block;
+      margin-bottom: 4px;
+    }
+
+    /* All Clips Matrix */
+    .clips-table-card {
+      background-color: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 32px;
+    }
+
+    .clips-table-card h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+
+    table.clips-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    table.clips-table th {
+      text-align: left;
+      padding: 12px 14px;
+      background-color: var(--surface-raised);
+      color: var(--text-secondary);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    table.clips-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      vertical-align: middle;
+    }
+
+    table.clips-table tr:hover td {
+      background-color: var(--surface-hover);
+    }
+
+    .table-thumbnail {
+      width: 48px;
+      height: 85px;
+      border-radius: 4px;
+      object-fit: cover;
+      border: 1px solid var(--border-subtle);
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-info">
+        <h1>
+          Inspeksi Visual Identity Syari Faceless
+          <span class="badge badge-success">GUARDRAIL ACTIVE</span>
+        </h1>
+        <p>Audit visual mendalam & verifikasi hasil perbaikan anti-face leak untuk kampanye <strong>opc_261111_2tt6sg</strong> (Item #2089).</p>
+      </div>
+      <div class="controls-group">
+        <button class="theme-toggle" onclick="toggleTheme()">🌓 Toggle Mode</button>
+      </div>
+    </header>
+
+    <!-- Metadata Grid -->
+    <div class="metadata-grid">
+      <div class="meta-card">
+        <div class="label">Campaign & Visual Identity</div>
+        <div class="value">syari_classic_atmospheric_home</div>
+        <div class="subtext">Item ID: 2089 | Brand: GarliBee Monobulb</div>
+      </div>
+      <div class="meta-card">
+        <div class="label">Diffusion Engine & Model</div>
+        <div class="value">G-Labs (nano_banana_2 / FLUX)</div>
+        <div class="subtext">Flow-matching (positive-prompt enforced)</div>
+      </div>
+      <div class="meta-card">
+        <div class="label">Syar'iy Rule Enforcement</div>
+        <div class="value" style="color: var(--status-success);">Zero Face & Modest Framing</div>
+        <div class="subtext">100% out of frame & 180° Rear View</div>
+      </div>
+      <div class="meta-card">
+        <div class="label">Status Revisi Start Frame</div>
+        <div class="value">Revision 2 (Regenerated)</div>
+        <div class="subtext">Klip 1 & 2 terisolasi dari fitur wajah</div>
+      </div>
+    </div>
+
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('clip1')">Klip 1: Typing & Tabletop (POV Hands)</button>
+      <button class="tab-btn" onclick="switchTab('clip2')">Klip 2: Rainy Window (180° Rear View)</button>
+      <button class="tab-btn" onclick="switchTab('matrix')">Matriks Audit 6 Klip Lengkap</button>
+    </div>
+
+    <!-- TAB 1: KLIP 1 -->
+    <div id="tab-clip1" class="tab-content">
+      <div class="comparison-grid">
+        <!-- Sebelum (Leak) -->
+        <div class="visual-panel">
+          <div class="panel-header">
+            <span class="panel-title">
+              <span class="badge badge-danger">SEBELUM (REVISION 1)</span>
+              Face Leak Terdeteksi
+            </span>
+            <span class="badge badge-danger">NON-COMPLIANT</span>
+          </div>
+          <div class="image-preview-wrapper">
+            <img src="/temp/inspect_2089/opc_start_frame_2089_clip_1_r1_9364090b.jpg" alt="Klip 1 Sebelum Perbaikan" onerror="this.src='/uploads/start_frames/opc_start_frame_2089_clip_1_r1_9364090b.jpg'">
+            <div class="detection-annotation">
+              ⚠️ <strong>Wajah Samping Terlihat</strong><br>
+              Profil pipi, mata samping, dan wajah terlihat jelas akibat subjek terbuka "A person typing" dan "pulling cardigan".
+            </div>
+          </div>
+          <div class="prompt-inspector">
+            <h4>Anatomi Prompt Sebelum Perbaikan:</h4>
+            <div class="prompt-box">
+              (VERTICAL 9:16) [LAYER 1: OPTICS] (Realistic cinematic film aesthetic, 35mm lens). [LAYER 2: CRAFT & WORKSPACE TRUTH] (Biometric Anchor: Modest syar'i aesthetic... For culinary/tabletop... For lifestyle/atmospheric scenes...), (Wardrobe: in Mocca, Taupe & Caramel Latte colors...), (Action & Craft: <span class="highlight-danger">A person typing on a laptop keyboard at a cozy wooden desk, briefly pausing to pull a warm cardigan closer</span>), (Texture: sleek laptop aluminum)...
+            </div>
+          </div>
+        </div>
+
+        <!-- Sesudah (Clean) -->
+        <div class="visual-panel">
+          <div class="panel-header">
+            <span class="panel-title">
+              <span class="badge badge-success">SESUDAH (REVISION 2)</span>
+              POV Hands Only Strict Framing
+            </span>
+            <span class="badge badge-success">100% SYAR'I COMPLIANT</span>
+          </div>
+          <div class="image-preview-wrapper">
+            <img src="/uploads/start_frames/opc_start_frame_2089_clip_1_r2_8c8772b6.jpg" id="clip1-r2-img" alt="Klip 1 Sesudah Perbaikan">
+            <div class="detection-annotation clean">
+              ✅ <strong>Zero Face Guaranteed</strong><br>
+              Barrier tag membatasi kamera secara fisik: sudut neck-down POV, hanya tangan berselubung lengan panjang di atas keyboard laptop.
+            </div>
+          </div>
+          <div class="prompt-inspector">
+            <h4>Anatomi Prompt Sesudah Perbaikan:</h4>
+            <div class="prompt-box">
+              <span class="highlight-barrier">[CAMERA FRAMING: Strict neck-down POV close-up cropped tightly below chest, hands only, head and face 100% out of frame]</span> (VERTICAL 9:16) [LAYER 1: OPTICS] (Realistic cinematic film aesthetic, macro 45-degree angled POV close-up cropped below collarbone...). [LAYER 2: CRAFT & WORKSPACE TRUTH] (Biometric Anchor: <span class="highlight-success">POV close-up framing focusing strictly on female forearms and hands covered down to the wrists, head and face 100% out of frame</span>), (Action & Craft: <span class="highlight-success">POV close-up focusing strictly on hands typing on a laptop keyboard, strictly hands and workspace only, head and face 100% out of frame</span>)...
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: KLIP 2 -->
+    <div id="tab-clip2" class="tab-content" style="display: none;">
+      <div class="comparison-grid">
+        <!-- Sebelum (Leak) -->
+        <div class="visual-panel">
+          <div class="panel-header">
+            <span class="panel-title">
+              <span class="badge badge-warning">SEBELUM (REVISION 1)</span>
+              Sudut Serong 3/4 (Profil Hidung/Alis Terlihat)
+            </span>
+            <span class="badge badge-warning">RISK OF FACE LEAK</span>
+          </div>
+          <div class="image-preview-wrapper">
+            <img src="/temp/inspect_2089/opc_start_frame_2089_clip_2_r1_8fd2fc71.jpg" alt="Klip 2 Sebelum Perbaikan" onerror="this.src='/uploads/start_frames/opc_start_frame_2089_clip_2_r1_8fd2fc71.jpg'">
+            <div class="detection-annotation">
+              ⚠️ <strong>Sudut Kamera Serong 3/4</strong><br>
+              Ketiadaan tag "direct 180-degree rear view" membuat model difusi memutar kamera ke samping sehingga kontur profil wajah tampak saat menatap jendela hujan.
+            </div>
+          </div>
+          <div class="prompt-inspector">
+            <h4>Anatomi Prompt Sebelum Perbaikan:</h4>
+            <div class="prompt-box">
+              (VERTICAL 9:16) [LAYER 1: OPTICS] (Atmospheric cinematic eye-level framing, 35mm lens, 8K resolution). [LAYER 2: CRAFT & WORKSPACE TRUTH] (Biometric Anchor: Modest syar'i aesthetic...), (Action & Craft: <span class="highlight-danger">Observing the quiet rainy night while holding a steaming ceramic mug with both hands, calm and reflective moment</span>)...
+            </div>
+          </div>
+        </div>
+
+        <!-- Sesudah (Clean) -->
+        <div class="visual-panel">
+          <div class="panel-header">
+            <span class="panel-title">
+              <span class="badge badge-success">SESUDAH (REVISION 2)</span>
+              180-Degree Direct Rear Shot
+            </span>
+            <span class="badge badge-success">100% SYAR'I COMPLIANT</span>
+          </div>
+          <div class="image-preview-wrapper">
+            <img src="/uploads/start_frames/opc_start_frame_2089_clip_2_r2_514295af.jpg" id="clip2-r2-img" alt="Klip 2 Sesudah Perbaikan">
+            <div class="detection-annotation clean">
+              ✅ <strong>180° Rear View Modesty</strong><br>
+              Kamera berada tepat di belakang punggung subjek menatap ke arah jendela hujan. Jilbab/khimar lebar menutup sempurna tanpa ada profil wajah samping.
+            </div>
+          </div>
+          <div class="prompt-inspector">
+            <h4>Anatomi Prompt Sesudah Perbaikan:</h4>
+            <div class="prompt-box">
+              <span class="highlight-barrier">[CAMERA FRAMING: Strict 180-degree rear shot positioned directly behind subject's back, subject completely facing away toward the window/background, zero facial profile, zero visible eyes/nose/mouth]</span> (VERTICAL 9:16) [LAYER 1: OPTICS] (Atmospheric cinematic 180-degree direct rear view from behind...). [LAYER 2: CRAFT & WORKSPACE TRUTH] (Biometric Anchor: <span class="highlight-success">Strict 180-degree rear view positioned directly behind subject's back, modest Muslimah in wide flowing khimar and loose abaya completely facing away, 100% zero facial features</span>)...
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: FULL MATRIX -->
+    <div id="tab-matrix" class="tab-content" style="display: none;">
+      <div class="clips-table-card">
+        <h3>Matriks Kepatuhan Syar'iy & Visual DNA 6 Klip (opc_261111_2tt6sg)</h3>
+        <table class="clips-table">
+          <thead>
+            <tr>
+              <th>Klip</th>
+              <th>Thumbnail</th>
+              <th>Deskripsi Adegan</th>
+              <th>Teknik Kamera & Barrier</th>
+              <th>Status Syar'iy</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Klip 1</strong></td>
+              <td><img src="/temp/inspect_2089/opc_start_frame_2089_clip_1_r1_9364090b.jpg" class="table-thumbnail"></td>
+              <td>Mengetik di laptop di meja kayu saat hujan malam hari</td>
+              <td><code>[CAMERA FRAMING: Strict neck-down POV close-up]</code></td>
+              <td><span class="badge badge-success">RESOLVED (R2)</span></td>
+            </tr>
+            <tr>
+              <td><strong>Klip 2</strong></td>
+              <td><img src="/temp/inspect_2089/opc_start_frame_2089_clip_2_r1_8fd2fc71.jpg" class="table-thumbnail"></td>
+              <td>Menatap jendela luar malam hari sambil memegang cangkir keramik hangat</td>
+              <td><code>[CAMERA FRAMING: Strict 180-degree rear shot]</code></td>
+              <td><span class="badge badge-success">RESOLVED (R2)</span></td>
+            </tr>
+            <tr>
+              <td><strong>Klip 3</strong></td>
+              <td><img src="/temp/inspect_2089/opc_start_frame_2089_clip_3_r1_0ccf834c.jpg" class="table-thumbnail"></td>
+              <td>Simulasi kinetik 3D Bio-Cellular / mikroskopik metabolisme</td>
+              <td>Extreme macro cellular void (zero human presence)</td>
+              <td><span class="badge badge-success">100% COMPLIANT</span></td>
+            </tr>
+            <tr>
+              <td><strong>Klip 4</strong></td>
+              <td><img src="/temp/inspect_2089/opc_start_frame_2089_clip_4_r1_066ca418.jpg" class="table-thumbnail"></td>
+              <td>Tangan berbusana santun menuangkan madu herbal dengan sendok kayu di meja</td>
+              <td>POV Tabletop Hands Only (wrists covered)</td>
+              <td><span class="badge badge-success">100% COMPLIANT</span></td>
+            </tr>
+            <tr>
+              <td><strong>Klip 5</strong></td>
+              <td><img src="/temp/inspect_2089/opc_start_frame_2089_clip_5_r1_7002e571.jpg" class="table-thumbnail"></td>
+              <td>Membuka tutup jar GarliBee di ambang jendela berhujan</td>
+              <td>Product Macro & Hands Only</td>
+              <td><span class="badge badge-success">100% COMPLIANT</span></td>
+            </tr>
+            <tr>
+              <td><strong>Klip 6</strong></td>
+              <td><img src="/temp/inspect_2089/opc_start_frame_2089_clip_6_r1_977b10b9.jpg" class="table-thumbnail"></td>
+              <td>Toples GarliBee dan sendok madu di samping cangkir teh beruap (CTA)</td>
+              <td>Product Hero Shot on Window Sill</td>
+              <td><span class="badge badge-success">100% COMPLIANT</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+      const activeTab = document.getElementById('tab-' + tabId);
+      if (activeTab) activeTab.style.display = 'block';
+
+      event.target.classList.add('active');
+    }
+  </script>
+</body>
+</html>
