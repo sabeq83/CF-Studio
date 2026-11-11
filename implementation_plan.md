@@ -46,7 +46,7 @@ Pengguna meminta evaluasi: *"kenapa harus 2 kolom split? apakah 1 kolom vertikal
 - [x] Task 6: Implementasi Tombol Generate Berpendar (`pulseGlow`) + Tombol Cadangan di Kanvas Kosong
 - [x] Task 7: Implementasi Toggle Auto-Generate Preview & CSS Keyframes Injection
 - [x] Task 8: Verifikasi Build Lokal (`npm run build`) & Uji Fungsionalitas
-- [ ] Task 9: Prosedur Rilis Non-Interaktif & Deploy ke Staging Mac Mini
+- [x] Task 9: Prosedur Rilis Non-Interaktif & Deploy ke Staging Mac Mini
 
 ---
 
