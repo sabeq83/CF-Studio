@@ -20,10 +20,10 @@ async function connected(t, request) {
   return client;
 }
 
-test('discovery of all 50 CF Studio tools across 7 studio pillars and legacy aliases', async t => {
+test('discovery of all 61 CF Studio tools across 7 studio pillars and legacy aliases', async t => {
   const client = await connected(t, async () => ({ success: true }));
   const tools = (await client.listTools()).tools;
-  assert.equal(tools.length, 50);
+  assert.equal(tools.length, 61);
 
   const toolNames = new Set(tools.map(x => x.name));
   // 6 Auto Pipeline dedicated tools
@@ -165,15 +165,22 @@ test('auto pipeline 5 engines dispatch to /api/v2/recipes/autonomous-pipeline', 
   await client.callTool({
     name: 'cf_create_recipe_labs_post',
     arguments: {
-      topic: 'Brownies Fudgy',
-      visual_style: 'Food Porn',
+      topic: 'Crispy Honey Garlic Air Fryer Chicken Bites',
+      target_language: 'en_US',
+      recipe_classification: 'Main Courses & Entrees',
+      aspect_ratio: '3:4',
+      visual_style: 'Modern Minimalist Nordic Studio',
+      images_per_recipe: 4,
       selected_layout_id: '4_editorial_split',
       post_to_facebook: true,
       idempotency_key: 'key-labs-1'
     }
   });
   assert.equal(calls[4].opts.body.pipeline_type, 'recipe_labs');
-  assert.equal(calls[4].opts.body.topic, 'Brownies Fudgy');
+  assert.equal(calls[4].opts.body.topic, 'Crispy Honey Garlic Air Fryer Chicken Bites');
+  assert.equal(calls[4].opts.body.aspect_ratio, '3:4');
+  assert.equal(calls[4].opts.body.visual_style, 'Modern Minimalist Nordic Studio');
+  assert.equal(calls[4].opts.body.target_language, 'en_US');
   assert.equal(calls[4].opts.body.selected_layout_id, '4_editorial_split');
 
   // 6. Universal Master Tool
@@ -611,7 +618,7 @@ test('HTTP authentication, origin and host protection, real MCP handshake', asyn
       requestInit: { headers: { authorization: `Bearer ${bearerToken}` } }
     })
   );
-  assert.equal((await client.listTools()).tools.length, 50);
+  assert.equal((await client.listTools()).tools.length, 61);
   assert.equal((await client.callTool({ name: 'cf_whoami' })).isError, undefined);
   assert.equal(calls, 1);
 });

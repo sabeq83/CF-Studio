@@ -334,16 +334,35 @@ export function createCfStudioServer(rawRequest) {
   // Engine 5: Recipe Labs Text & Photo Post (recipe_labs)
   register(
     'cf_create_recipe_labs_post',
-    'Create a Recipe Labs social media post: Facebook recipe article + 4 AI composite grid images (no video rendering).',
+    'Create a Recipe Labs social media post: Facebook recipe article + 3-6 AI composite grid images (1:1, 3:4, or 9:16 layout) across 4 commercial photography environments.',
     {
       idempotency_key: z.string().trim().min(1).max(128).optional(),
       brand_id: z.string().max(100).optional(),
       topic: z.string().trim().min(1).max(300),
+      target_language: z.enum(['en_US', 'id_ID', 'bilingual']).default('en_US'),
+      recipe_classification: z.string().max(200).optional(),
       category: z.string().max(100).default('Makanan'),
-      visual_style: z.string().max(100).default('Food Porn'),
-      images_per_recipe: z.number().int().min(1).max(4).default(4),
+      aspect_ratio: z.enum(['1:1', '3:4', '9:16']).default('3:4'),
+      visual_style: z
+        .enum([
+          'Rustic Warm Tabletop & Artisanal Kitchen',
+          'Modern Minimalist Nordic Studio',
+          'Dark Moody Chiaroscuro & Atmospheric Smoke',
+          'Vibrant Alfresco Sunlit Patio'
+        ])
+        .or(z.string().max(100))
+        .default('Modern Minimalist Nordic Studio'),
+      images_per_recipe: z.number().int().min(3).max(6).default(4),
       selected_layout_id: z
-        .enum(['4_editorial_split', '4_grid_equal', '3_editorial_focus', '2_vertical_split', '2_horizontal_split'])
+        .enum([
+          '3_split_left',
+          '3_split_right',
+          '4_editorial_split',
+          '4_modern_masonry',
+          '5_pentagon_grid',
+          '6_magazine_spread'
+        ])
+        .or(z.string().max(100))
         .default('4_editorial_split'),
       post_to_facebook: z.boolean().default(true)
     },
@@ -457,6 +476,12 @@ export function createCfStudioServer(rawRequest) {
       ]),
       brand_id: z.string().max(100).optional(),
       topic: z.string().max(300).optional(),
+      target_language: z.enum(['en_US', 'id_ID', 'bilingual']).optional(),
+      recipe_classification: z.string().max(200).optional(),
+      aspect_ratio: z.enum(['1:1', '3:4', '9:16']).optional(),
+      visual_style: z.string().max(100).optional(),
+      images_per_recipe: z.number().int().min(3).max(6).optional(),
+      selected_layout_id: z.string().max(100).optional(),
       product_id: z.string().max(100).optional(),
       product_title: z.string().max(300).optional(),
       content_pillar: z.string().max(300).optional(),

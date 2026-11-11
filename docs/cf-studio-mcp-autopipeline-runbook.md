@@ -42,7 +42,7 @@ File konfigurasi: `~/.gemini/config/mcp_config.json`
 | | `cf_create_editorial_video` | Menjalankan pipeline video editorial storytelling (Brand Editorial) |
 | | `cf_create_recipe_video` | Menjalankan pipeline video resep kuliner (Recipe Campaign) |
 | | `cf_create_multiplier_video` | Menjalankan pipeline video multiplier remix berbasis blueprint viral |
-| | `cf_create_recipe_labs_post` | Menjalankan pipeline artikel resep & komposit grid foto HD |
+| | `cf_create_recipe_labs_post` | Menjalankan pipeline artikel resep & komposit grid foto HD (3-6 foto, rasio 1:1, 3:4, 9:16 & 4 environment) |
 | | `cf_run_auto_pipeline` | Master tool fleksibel untuk mengeksekusi tipe pipeline mana pun |
 | **Manajemen Jadwal** | `cf_list_schedules` | Melihat daftar seluruh jadwal autopipeline (active, paused, all) |
 | | `cf_create_schedule` | Mendaftarkan jadwal baru lengkap dengan akun Repliz, resep, affiliate, & blueprint |

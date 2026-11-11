@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.40.36 — feat: update cf-studio MCP tools for recipe labs multi-aspect layout & photography environments (11/11/2026)
+- Update cf_create_recipe_labs_post with 1:1, 3:4, 9:16 aspect ratios and 4 photography environments
+- Update cf_run_auto_pipeline and test suite (61 tools)
+- Sync Antigravity MCP schema cache and runbook
+
 ## V2.40.35 — feat: multi-aspect collage layout & 4 photography environments for recipe labs and auto pipeline scheduler (11/11/2026)
 - Add 1:1, 3:4, and 9:16 collage layout support to Sharp engine
 - Add 4 commercial photography environments with rich T2I prompt blueprint
