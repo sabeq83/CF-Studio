@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.40.34 — Threaded Concurrent T2I Batch Dispatch for Recipe Labs (11/11/2026)
+- Refaktorisasi processRecipeGLabs dari serial blocking menjadi Threaded Concurrent Batch
+- Terapkan Fast Concurrent Dispatch untuk mengirim seluruh prompt T2I serentak ke G-Labs
+- Terapkan Unified Concurrent Polling loop terpadu selaras dengan arsitektur Pillar Campaign
+- Dukungan konfigurasi global webhook_t2i_pattern dan toleransi kegagalan parsial
+
 ## V2.40.33 — 1-Click Auto Pipeline Language-First Recipe Configuration & International Taxonomy (11/11/2026)
 - Integrasikan selector Language-First pada formulir 1-Klik Instan Recipe Labs
 - Terapkan taksonomi kuliner internasional/nasional dan dynamic placeholder pada Tab 1
