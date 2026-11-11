@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup Simulasi: Hook Visual Mode & Kesinambungan Narasi Storyboard</title>
+  <style>
+    /* ==========================================================================
+       100% Self-Contained Semantic Design Tokens from app/theme.css
+       ========================================================================== */
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --radius-xs: 4px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+      --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+      /* Semantic Surfaces */
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --surface-subtle: rgba(255, 255, 255, 0.04);
+      --input-bg: #0c1422;
+      --overlay-backdrop: rgba(2, 6, 14, 0.82);
+
+      /* Typography / Text */
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+
+      /* Borders */
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --border-color: #26354a;
+      --focus-ring: rgba(45, 212, 191, 0.4);
+
+      /* Actions & Brand */
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --accent-spark: #fbbf24;
+
+      /* Status Badges */
+      --status-info: #38bdf8;
+      --status-info-soft: rgba(56, 189, 248, 0.14);
+      --status-success: #34d399;
+      --status-success-soft: rgba(52, 211, 153, 0.14);
+      --status-warning: #f59e0b;
+      --status-warning-soft: rgba(245, 158, 11, 0.14);
+      --status-danger: #f87171;
+      --status-danger-soft: rgba(248, 113, 113, 0.14);
+
+      --shadow-modal: 0 24px 48px -12px rgba(0, 0, 0, 0.6);
+      --shadow-card: 0 8px 24px -6px rgba(0, 0, 0, 0.4);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f8fafc;
+      --sidebar: #f1f5f9;
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --surface-subtle: rgba(0, 0, 0, 0.03);
+      --input-bg: #ffffff;
+      --overlay-backdrop: rgba(15, 23, 42, 0.5);
+
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --text-disabled: #94a3b8;
+
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --border-color: #e2e8f0;
+      --focus-ring: rgba(13, 148, 136, 0.3);
+
+      --action-primary: #0d9488;
+      --action-primary-hover: #0f766e;
+      --on-action-primary: #ffffff;
+      --accent-spark: #d97706;
+
+      --status-info: #0284c7;
+      --status-info-soft: rgba(2, 132, 199, 0.1);
+      --status-success: #059669;
+      --status-success-soft: rgba(5, 150, 105, 0.1);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.1);
+      --status-danger: #dc2626;
+      --status-danger-soft: rgba(220, 38, 38, 0.1);
+
+      --shadow-modal: 0 24px 48px -12px rgba(15, 23, 42, 0.2);
+      --shadow-card: 0 8px 24px -6px rgba(15, 23, 42, 0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      padding: 24px;
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      max-width: 1200px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Top Bar */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .theme-btn {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .theme-btn:hover { background: var(--surface-hover); }
+
+    /* Problem Context Banner */
+    .context-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-left: 4px solid var(--action-primary);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .issue-box {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+    }
+    .issue-title {
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    /* Interactive Switcher Section */
+    .control-panel {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .mode-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .mode-card {
+      background: var(--surface-raised);
+      border: 2px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+    }
+    .mode-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+    }
+    .mode-card.active {
+      border-color: var(--action-primary);
+      background: var(--surface-interactive);
+      box-shadow: 0 0 0 1px var(--action-primary);
+    }
+    .mode-badge {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      font-weight: 700;
+    }
+    .badge-recommended {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+    }
+    .badge-standard {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid var(--status-info);
+    }
+
+    /* Retention Meter */
+    .retention-bar-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 16px;
+      font-size: 13px;
+    }
+    .retention-gauge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+    }
+    .meter-bar {
+      width: 140px;
+      height: 8px;
+      background: var(--surface-interactive);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+    .meter-fill {
+      height: 100%;
+      border-radius: var(--radius-full);
+      transition: width 0.5s ease;
+    }
+
+    /* Timeline & Storyboard Display */
+    .timeline-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .clips-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .context-card { grid-template-columns: 1fr; }
+      .mode-cards { grid-template-columns: 1fr; }
+      .clips-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 600px) {
+      .clips-grid { grid-template-columns: 1fr; }
+    }
+
+    .clip-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-card);
+      transition: var(--transition);
+    }
+    .clip-card:hover {
+      border-color: var(--border-strong);
+    }
+
+    .clip-header {
+      background: var(--surface-raised);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .clip-role-badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: var(--radius-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .role-hook { background: var(--status-warning-soft); color: var(--status-warning); }
+    .role-escalation { background: var(--status-info-soft); color: var(--status-info); }
+    .role-bridging { background: var(--status-success-soft); color: var(--status-success); border: 1px solid var(--status-success); }
+    .role-cta { background: var(--surface-interactive); color: var(--text-secondary); }
+
+    .clip-frame {
+      width: 100%;
+      height: 180px;
+      background: var(--surface-interactive);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .clip-frame svg {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .clip-body {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .section-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .visual-action-box {
+      font-size: 12px;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      padding: 8px;
+      color: var(--text-secondary);
+      min-height: 52px;
+    }
+
+    .narration-box {
+      font-size: 12.5px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      padding: 10px;
+      color: var(--text-primary);
+      line-height: 1.45;
+      min-height: 80px;
+      position: relative;
+    }
+
+    .connector-tag {
+      background: var(--accent-spark);
+      color: #000;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 11px;
+      margin-right: 4px;
+      display: inline-block;
+    }
+
+    /* Monologue Stream Panel */
+    .monologue-container {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .monologue-text {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text-primary);
+    }
+
+    /* Form Preview Section */
+    .form-preview-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <!-- Topbar -->
+    <header class="topbar">
+      <div>
+        <div style="font-size: 11px; font-weight: 700; color: var(--action-primary); text-transform: uppercase; letter-spacing: 1px;">
+          MAKNA Flow • Content Planner & Video Pipeline
+        </div>
+        <h1 style="font-size: 18px; font-weight: 800; margin-top: 2px;">
+          Simulasi: Hook Visual Mode & Kesinambungan Narasi Storyboard
+        </h1>
+      </div>
+      <button class="theme-btn" onclick="toggleTheme()">
+        <span id="themeIcon">☀️</span> <span id="themeText">Light Mode</span>
+      </button>
+    </header>
+
+    <!-- Context & Issue Breakdown -->
+    <section class="context-card">
+      <div class="issue-box">
+        <div class="issue-title" style="color: var(--status-warning);">
+          <span>⚠️</span> 1. Visual Produk di Klip Pertama
+        </div>
+        <p style="font-size: 12.5px; color: var(--text-secondary);">
+          <strong>Penyebab:</strong> Prompt Content Planner AI Call 2 secara kaku mewajibkan <em>"Perlihatkan aksi produk secara fisik"</em>, sehingga Klip 1 langsung menampilkan botol produk. Penonton langsung sadar ini iklan dan segera swipe away.
+        </p>
+        <div style="margin-top: 8px; font-size: 12px; color: var(--status-success); font-weight: 600;">
+          ✨ Solusi: Opsi <strong>Problem & Context First</strong> (Klip 1 murni masalah/relatable, produk baru hadir di Klip Bridging).
+        </div>
+      </div>
+
+      <div class="issue-box">
+        <div class="issue-title" style="color: var(--status-info);">
+          <span>🔗</span> 2. Narasi Storyboard Kurang Nyambung
+        </div>
+        <p style="font-size: 12.5px; color: var(--text-secondary);">
+          <strong>Penyebab:</strong> Naskah dibuat secara terkotak-kotak (chunking) tanpa kata sambung transisi wacana (discourse markers) antar adegan, sehingga terkesan seperti slide terpisah yang patah-patah.
+        </p>
+        <div style="margin-top: 8px; font-size: 12px; color: var(--status-info); font-weight: 600;">
+          ✨ Solusi: Mandat <strong>Master Monologue Through-Line</strong> dengan kata transisi wajib di awal Klip 2 s/d 4.
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Mode Switcher -->
+    <section class="control-panel">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+        <div>
+          <h2 style="font-size: 15px; font-weight: 800;">Pilih Fokus Visual Klip 1 (Opening Hook)</h2>
+          <span style="font-size: 12px; color: var(--text-muted);">
+            Klik salah satu opsi di bawah untuk melihat simulasi visual dan naskah secara real-time
+          </span>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <label style="font-size: 12px; font-weight: 700; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 6px;">
+            <input type="checkbox" id="connectorToggle" checked onchange="toggleConnectors(this.checked)" style="accent-color: var(--action-primary);">
+            Aktifkan Kata Transisi Alur (Connective Flow)
+          </label>
+        </div>
+      </div>
+
+      <div class="mode-cards">
+        <!-- Option A: Problem First -->
+        <div class="mode-card active" id="cardProblemFirst" onclick="selectHookMode('problem_first')">
+          <span class="mode-badge badge-recommended">Rekomendasi Utama (Anti-Bosan)</span>
+          <div style="font-size: 15px; font-weight: 800; display: flex; align-items: center; gap: 8px; color: var(--action-primary);">
+            <span>🌿</span> Mode Problem & Context First
+          </div>
+          <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.4;">
+            <strong>Klip 1:</strong> Murni visualisasi masalah sehari-hari, ekspresi frustrasi, atau fenomena objek <strong>(Tanpa Produk)</strong>.<br>
+            <strong>Klip Bridging:</strong> Produk GarliBee baru diperkenalkan secara elegan di Klip 3 sebagai jawaban atas masalah.
+          </p>
+          <div style="font-size: 11px; color: var(--status-success); font-weight: 700; margin-top: 4px;">
+            ✓ Memikat atensi organik • ✓ Tidak terkesan jualan kasar • ✓ Retensi tinggi
+          </div>
+        </div>
+
+        <!-- Option B: Direct Product -->
+        <div class="mode-card" id="cardProductFirst" onclick="selectHookMode('product_first')">
+          <span class="mode-badge badge-standard">Opsional (Direct Hard-Sell)</span>
+          <div style="font-size: 15px; font-weight: 800; display: flex; align-items: center; gap: 8px; color: var(--text-primary);">
+            <span>📦</span> Mode Direct Product Showcase
+          </div>
+          <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.4;">
+            <strong>Klip 1:</strong> Langsung memperlihatkan kemasan fisik botol produk dan logo di detik 0-3.<br>
+            <strong>Klip 2-4:</strong> Demo fitur, khasiat mendalam, dan penawaran pembelian langsung.
+          </p>
+          <div style="font-size: 11px; color: var(--status-warning); font-weight: 700; margin-top: 4px;">
+            ⚡ Cocok untuk promo diskon tanggal kembar / unboxing katalog produk.
+          </div>
+        </div>
+      </div>
+
+      <!-- Retention Prediction Bar -->
+      <div class="retention-bar-container">
+        <span style="color: var(--text-secondary);">
+          📊 Estimasi Retensi Penonton TikTok / Shorts (Detik 0 - 3):
+        </span>
+        <div class="retention-gauge">
+          <span id="retentionScore" style="color: var(--status-success); font-size: 15px;">89% Tertahan (Sangat Tinggi)</span>
+          <div class="meter-bar">
+            <div class="meter-fill" id="meterFill" style="width: 89%; background: var(--status-success);"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Timeline & Storyboard Display -->
+    <div class="timeline-title-row">
+      <h3 style="font-size: 15px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+        <span>🎬</span> Simulasi Storyboard 4-Klip (GarliBee Madu Bawang Tunggal)
+      </h3>
+      <span style="font-size: 11px; color: var(--text-muted); background: var(--surface); padding: 4px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+        Durasi: 4 Klip (~16 Detik) • Voiceover: Indonesian Anchor
+      </span>
+    </div>
+
+    <section class="clips-grid" id="clipsGrid">
+      <!-- Generated via JavaScript for interactivity -->
+    </section>
+
+    <!-- Cohesive Single Monologue Through-Line Box -->
+    <section class="monologue-container">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="font-size: 14px; font-weight: 800; display: flex; align-items: center; gap: 8px; color: var(--action-primary);">
+          <span>🎙️</span> Naskah Monolog Utuh (Single Monologue Through-Line)
+        </h3>
+        <span style="font-size: 11px; color: var(--text-muted);">
+          Penggabungan seluruh narasi klip menjadi satu kesatuan cerita tanpa jeda
+        </span>
+      </div>
+      <div class="monologue-text" id="monologueText">
+        <!-- Rendered text -->
+      </div>
+    </section>
+
+    <!-- Implementation Form Preview in Content Planner Form -->
+    <section class="form-preview-card">
+      <div>
+        <span style="font-size: 11px; font-weight: 700; color: var(--action-primary); text-transform: uppercase;">
+          Rancangan Penempatan di UI Web App
+        </span>
+        <h3 style="font-size: 15px; font-weight: 800; margin-top: 2px;">
+          Preview Kontrol Form di Content Planner (`PlannerConfigurationForm.js`)
+        </h3>
+      </div>
+
+      <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div>
+          <label style="font-size: 12px; font-weight: 700; display: block; margin-bottom: 6px; color: var(--text-secondary);">
+            Fokus Kampanye
+          </label>
+          <div style="background: var(--input-bg); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 8px 12px; font-size: 13px; color: var(--text-primary);">
+            📦 Product Campaign (GarliBee Bawang Tunggal)
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size: 12px; font-weight: 700; display: block; margin-bottom: 6px; color: var(--action-primary);">
+            Fokus Visual Klip 1 (Opening Hook) <span style="color: var(--status-success); font-size: 10px;">★ Baru</span>
+          </label>
+          <select id="uiSelectPreview" onchange="syncFromUiSelect(this.value)" style="width: 100%; background: var(--input-bg); border: 1px solid var(--action-primary); border-radius: 6px; padding: 8px 12px; font-size: 13px; color: var(--text-primary); outline: none;">
+            <option value="problem_first">🌿 Problem & Context First (Rekomendasi — Produk Baru di Bridging)</option>
+            <option value="product_first">📦 Direct Product Showcase (Langsung Tampilkan Produk di Detik Awal)</option>
+          </select>
+          <span style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 4px;">
+            Mencegah penonton bosan karena tidak langsung menyadari video adalah promosi jualan produk.
+          </span>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // State
+    let currentMode = 'problem_first';
+    let enableConnectors = true;
+
+    const STORYBOARD_DATA = {
+      problem_first: {
+        retentionScore: '89% Tertahan (Sangat Tinggi)',
+        retentionPercent: '89%',
+        retentionColor: 'var(--status-success)',
+        clips: [
+          {
+            scene: 1,
+            role: 'Hook (Problem & Context)',
+            badgeClass: 'role-hook',
+            svg: `<svg viewBox="0 0 240 180" xmlns="http://www.w3.org/2000/svg">
+              <rect width="240" height="180" fill="#1e293b"/>
+              <ellipse cx="120" cy="150" rx="90" ry="20" fill="#0f172a"/>
+              <!-- Warm Morning Breakfast Table (No Product!) -->
+              <rect x="30" y="100" width="180" height="60" rx="4" fill="#334155"/>
+              <path d="M 60 90 L 80 90 L 76 115 L 64 115 Z" fill="#94a3b8"/>
+              <ellipse cx="70" cy="90" rx="10" ry="4" fill="#cbd5e1"/>
+              <!-- Steam rising from coffee cup -->
+              <path d="M 70 82 Q 74 74 68 66 T 72 54" fill="none" stroke="#e2e8f0" stroke-width="2" opacity="0.6"/>
+              <!-- Faceless hands holding stomach / feeling bloated -->
+              <circle cx="160" cy="80" r="14" fill="#e2e8f0" opacity="0.1"/>
+              <path d="M 140 120 C 140 100, 180 100, 180 120" fill="none" stroke="#fcd34d" stroke-width="4" stroke-linecap="round"/>
+              <text x="120" y="40" font-family="sans-serif" font-size="10" font-weight="700" fill="#fcd34d" text-anchor="middle">NO PRODUCT SHOWN • RELATABLE PROBLEM</text>
+            </svg>`,
+            visualAction: "POV suasana meja sarapan pagi, uap cangkir kopi mengepul hangat, tangan faceless menyentuh perut yang terasa begah dan tidak nyaman.",
+            connector: "",
+            textWithConnector: "Kenapa perut sering terasa begah dan penuh setiap kali selesai sarapan pagi?",
+            textWithoutConnector: "Kenapa perut sering terasa begah dan penuh setiap kali selesai sarapan pagi?"
+          },
+          {
+            scene: 2,
+            role: 'Eskalasi Masalah',
+            badgeClass: 'role-escalation',
+            svg: `<svg viewBox="0 0 240 180" xmlns="http://www.w3.org/2000/svg">
+              <rect width="240" height="180" fill="#1e293b"/>
+              <!-- Oily food and iced drink dilemma -->
+              <rect x="40" y="70" width="70" height="70" rx="6" fill="#334155"/>
+              <circle cx="75" cy="105" r="24" fill="#d97706" opacity="0.8"/>
+              <!-- Crossed warning icon -->
+              <circle cx="170" cy="105" r="26" fill="#dc2626" opacity="0.2"/>
+              <text x="170" y="112" font-family="sans-serif" font-size="22" font-weight="900" fill="#f87171" text-anchor="middle">⚠️</text>
+              <text x="120" y="40" font-family="sans-serif" font-size="10" font-weight="700" fill="#38bdf8" text-anchor="middle">SITUASI DILEMA AUDIENS</text>
+            </svg>`,
+            visualAction: "Kamera tilt-down memperlihatkan makanan berminyak dan segelas air es, menggambarkan kebiasaan harian yang memicu penumpukan gas pencernaan.",
+            connector: "Padahal,",
+            textWithConnector: "<span class='connector-tag'>Padahal,</span> sudah coba kurangi makan pedas, tapi rasa kembung ini tetap mengganggu konsentrasi dan merusak mood kerja seharian.",
+            textWithoutConnector: "Sudah coba kurangi makan pedas, rasa kembung ini mengganggu konsentrasi dan merusak mood kerja seharian."
+          },
+          {
+            scene: 3,
+            role: 'Product Bridging (Reveal)',
+            badgeClass: 'role-bridging',
+            svg: `<svg viewBox="0 0 240 180" xmlns="http://www.w3.org/2000/svg">
+              <rect width="240" height="180" fill="#0f172a"/>
+              <!-- Authentic Honey Garlic Jar Presentation -->
+              <ellipse cx="120" cy="155" rx="60" ry="14" fill="#000" opacity="0.5"/>
+              <rect x="90" y="65" width="60" height="75" rx="8" fill="#d97706" stroke="#f59e0b" stroke-width="2"/>
+              <!-- Honey level -->
+              <rect x="94" y="80" width="52" height="56" rx="4" fill="#b45309"/>
+              <circle cx="110" cy="100" r="7" fill="#1c1917"/>
+              <circle cx="130" cy="115" r="8" fill="#1c1917"/>
+              <!-- Gold spoon dipping -->
+              <line x1="160" y1="40" x2="125" y2="90" stroke="#facc15" stroke-width="4" stroke-linecap="round"/>
+              <ellipse cx="125" cy="90" rx="8" ry="4" fill="#facc15"/>
+              <text x="120" y="32" font-family="sans-serif" font-size="10" font-weight="800" fill="#34d399" text-anchor="middle">✨ PRODUCT REVEAL HERE (KLIP 3)</text>
+            </svg>`,
+            visualAction: "Kamera macro sinematik, tangan faceless membuka toples GarliBee, mencelupkan sendok kayu ke dalam lelehan madu fermentasi bawang tunggal yang berkilau keemasan.",
+            connector: "Nah, daripada",
+            textWithConnector: "<span class='connector-tag'>Nah, daripada</span> terus menahan rasa tidak nyaman, membiasakan satu sendok madu fermentasi bawang tunggal GarliBee sebelum beraktivitas bantu usus terasa jauh lebih ringan.",
+            textWithoutConnector: "Membiasakan satu sendok madu fermentasi bawang tunggal GarliBee sebelum beraktivitas bantu usus terasa jauh lebih ringan."
+          },
+          {
+            scene: 4,
+            role: 'Resolution & CTA',
+            badgeClass: 'role-cta',
+            svg: `<svg viewBox="0 0 240 180" xmlns="http://www.w3.org/2000/svg">
+              <rect width="240" height="180" fill="#1e293b"/>
+              <circle cx="120" cy="90" r="50" fill="#34d399" opacity="0.15"/>
+              <text x="120" y="85" font-family="sans-serif" font-size="28" text-anchor="middle">🌱</text>
+              <rect x="50" y="125" width="140" height="26" rx="13" fill="#0d9488"/>
+              <text x="120" y="142" font-family="sans-serif" font-size="10" font-weight="800" fill="#ffffff" text-anchor="middle">KLIK KERANJANG KUNING</text>
+              <text x="120" y="36" font-family="sans-serif" font-size="10" font-weight="700" fill="#94a3b8" text-anchor="middle">RESOLUSI SEHAT & CTA</text>
+            </svg>`,
+            visualAction: "Pemandangan jendela pagi yang terang, segelas air hangat di samping toples GarliBee, mencerminkan kenyamanan hidup sehat bebas begah.",
+            connector: "Hasilnya,",
+            textWithConnector: "<span class='connector-tag'>Hasilnya,</span> rutinitas harian bisa kamu jalani dengan tenang dan bugar. Yuk checkout GarliBee original di keranjang kuning sekarang!",
+            textWithoutConnector: "Rutinitas harian bisa kamu jalani dengan tenang dan bugar. Checkout GarliBee original di keranjang kuning sekarang!"
+          }
+        ]
+      },
+
+      product_first: {
+        retentionScore: '34% Tertahan (Rentan Swipe Away)',
+        retentionPercent: '34%',
+        retentionColor: 'var(--status-danger)',
+        clips: [
+          {
+            scene: 1,
+            role: 'Direct Product Intro',
+            badgeClass: 'role-hook',
+            svg: `<svg viewBox="0 0 240 180" xmlns="http://www.w3.org/2000/svg">
+              <rect width="240" height="180" fill="#0f172a"/>
+              <!-- Bottle displayed immediately in Clip 1 -->
+              <ellipse cx="120" cy="150" rx="60" ry="14" fill="#000" opacity="0.6"/>
+              <rect x="85" y="55" width="70" height="85" rx="8" fill="#d97706" stroke="#f59e0b" stroke-width="3"/>
+              <rect x="95" y="75" width="50" height="40" rx="3" fill="#fef3c7"/>
+              <text x="120" y="98" font-family="sans-serif" font-size="10" font-weight="900" fill="#78350f" text-anchor="middle">GarliBee</text>
+              <text x="120" y="32" font-family="sans-serif" font-size="10" font-weight="800" fill="#f87171" text-anchor="middle">⚠️ PRODUK MUNCUL DI DETIK 0 (IKLAN JELAS)</text>
+            </svg>`,
+            visualAction: "Extreme close-up kemasan toples GarliBee di tengah meja, tangan memutar tutup toples dan logo produk terlihat jelas sejak detik pertama.",
+            connector: "",
+            textWithConnector: "Ini dia GarliBee madu bawang tunggal fermentasi alami untuk solusi masalah perut begah kamu!",
+            textWithoutConnector: "Ini dia GarliBee madu bawang tunggal fermentasi alami untuk solusi masalah perut begah kamu!"
+          },
+          {
+            scene: 2,
+            role: 'Product Feature Demo',
+            badgeClass: 'role-escalation',
+            svg: `<svg viewBox="0 0 240 180" xmlns="http://www.w3.org/2000/svg">
+              <rect width="240" height="180" fill="#1e293b"/>
+              <circle cx="120" cy="90" r="40" fill="#d97706" opacity="0.3"/>
+              <text x="120" y="85" font-family="sans-serif" font-size="24" text-anchor="middle">🥄</text>
+              <text x="120" y="115" font-family="sans-serif" font-size="11" font-weight="700" fill="#fef3c7" text-anchor="middle">Tekstur Madu Pekat</text>
+              <text x="120" y="36" font-family="sans-serif" font-size="10" font-weight="700" fill="#38bdf8" text-anchor="middle">DEMO TEKSTUR & BAHAN</text>
+            </svg>`,
+            visualAction: "Sendok kayu mengangkat butiran bawang tunggal hitam yang kenyal dari genangan madu hutan murni.",
+            connector: "Diperkaya",
+            textWithConnector: "<span class='connector-tag'>Diperkaya</span> senyawa alisin murni dan madu hutan pilihan yang difermentasi matang lebih dari tiga bulan penuh.",
+            textWithoutConnector: "Senyawa alisin murni dan madu hutan pilihan difermentasi matang lebih dari tiga bulan penuh."
+          },
+          {
+            scene: 3,
+            role: 'Cara Konsumsi',
+            badgeClass: 'role-bridging',
+            svg: `<svg viewBox="0 0 240 180" xmlns="http://www.w3.org/2000/svg">
+              <rect width="240" height="180" fill="#1e293b"/>
+              <path d="M 100 130 L 140 130 L 135 70 L 105 70 Z" fill="#64748b"/>
+              <ellipse cx="120" cy="70" rx="15" ry="4" fill="#cbd5e1"/>
+              <text x="120" y="110" font-family="sans-serif" font-size="16" text-anchor="middle">🍵</text>
+              <text x="120" y="36" font-family="sans-serif" font-size="10" font-weight="700" fill="#34d399" text-anchor="middle">PENGGUNAAN HARIAN</text>
+            </svg>`,
+            visualAction: "Menuangkan satu sendok madu GarliBee ke dalam cangkir air hangat, diaduk perlahan hingga larut sempurna.",
+            connector: "Cukup",
+            textWithConnector: "<span class='connector-tag'>Cukup</span> konsumsi satu sendok setiap pagi dan malam hari untuk menjaga stamina dan pencernaan tetap nyaman.",
+            textWithoutConnector: "Konsumsi satu sendok setiap pagi dan malam hari untuk menjaga stamina dan pencernaan tetap nyaman."
+          },
+          {
+            scene: 4,
+            role: 'Promo Flash Sale & CTA',
+            badgeClass: 'role-cta',
+            svg: `<svg viewBox="0 0 240 180" xmlns="http://www.w3.org/2000/svg">
+              <rect width="240" height="180" fill="#1e293b"/>
+              <rect x="40" y="60" width="160" height="60" rx="8" fill="#dc2626"/>
+              <text x="120" y="85" font-family="sans-serif" font-size="14" font-weight="900" fill="#fff" text-anchor="middle">DISKON SPESIAL 30%</text>
+              <text x="120" y="105" font-family="sans-serif" font-size="10" font-weight="700" fill="#fef08a" text-anchor="middle">HARI INI SAJA</text>
+              <text x="120" y="36" font-family="sans-serif" font-size="10" font-weight="700" fill="#f87171" text-anchor="middle">HARD-SELL DIRECT OFFER</text>
+            </svg>`,
+            visualAction: "Grafis promo diskon terbatas dengan toples GarliBee di samping tombol beli.",
+            connector: "Mumpung",
+            textWithConnector: "<span class='connector-tag'>Mumpung</span> ada promo potongan harga khusus hari ini, pesan sekarang di keranjang kuning sebelum kehabisan!",
+            textWithoutConnector: "Ada promo potongan harga khusus hari ini, pesan sekarang di keranjang kuning sebelum kehabisan!"
+          }
+        ]
+      }
+    };
+
+    function selectHookMode(mode) {
+      currentMode = mode;
+      document.getElementById('cardProblemFirst').classList.toggle('active', mode === 'problem_first');
+      document.getElementById('cardProductFirst').classList.toggle('active', mode === 'product_first');
+      document.getElementById('uiSelectPreview').value = mode;
+      renderTimeline();
+    }
+
+    function syncFromUiSelect(val) {
+      selectHookMode(val);
+    }
+
+    function toggleConnectors(enabled) {
+      enableConnectors = enabled;
+      renderTimeline();
+    }
+
+    function renderTimeline() {
+      const data = STORYBOARD_DATA[currentMode];
+
+      // Update Retention Gauge
+      document.getElementById('retentionScore').innerText = data.retentionScore;
+      document.getElementById('retentionScore').style.color = data.retentionColor;
+      document.getElementById('meterFill').style.width = data.retentionPercent;
+      document.getElementById('meterFill').style.background = data.retentionColor;
+
+      // Render 4 Clips
+      const grid = document.getElementById('clipsGrid');
+      grid.innerHTML = data.clips.map(clip => `
+        <div class="clip-card">
+          <div class="clip-header">
+            <span>Klip ${clip.scene}</span>
+            <span class="clip-role-badge ${clip.badgeClass}">${clip.role}</span>
+          </div>
+          <div class="clip-frame">
+            ${clip.svg}
+          </div>
+          <div class="clip-body">
+            <div>
+              <div class="section-label">Aksi Visual (Kamera & Adegan):</div>
+              <div class="visual-action-box">${clip.visualAction}</div>
+            </div>
+            <div>
+              <div class="section-label">Naskah Voiceover (${enableConnectors ? 'Bersambung' : 'Terpisah'}):</div>
+              <div class="narration-box">
+                ${enableConnectors ? clip.textWithConnector : clip.textWithoutConnector}
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      // Render Single Monologue Stream
+      const monologue = data.clips.map((c, i) => {
+        const text = enableConnectors ? (c.connector ? `<strong>${c.connector}</strong> ${c.textWithoutConnector.replace(c.connector, '').trim()}` : c.textWithoutConnector) : c.textWithoutConnector;
+        return `[Klip ${c.scene}] "${text}"`;
+      }).join(' ');
+
+      document.getElementById('monologueText').innerHTML = `
+        <div style="font-style: italic; color: var(--text-primary);">
+          ${monologue}
+        </div>
+        <div style="margin-top: 10px; font-size: 11.5px; color: var(--text-muted); border-top: 1px dashed var(--border-subtle); padding-top: 8px;">
+          ${enableConnectors 
+            ? '✨ <strong>Status Alur:</strong> Naskah memiliki benang merah yang utuh dengan kata sambung transisi (discourse markers) sehingga mengalir mulus tanpa lompatan logika.'
+            : '⚠️ <strong>Status Alur:</strong> Naskah tanpa kata transisi terdengar seperti kumpulan poin terpisah yang dibaca secara kaku.'}
+        </div>
+      `;
+    }
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      document.getElementById('themeIcon').innerText = next === 'dark' ? '☀️' : '🌙';
+      document.getElementById('themeText').innerText = next === 'dark' ? 'Light Mode' : 'Dark Mode';
+    }
+
+    // Initial render
+    window.addEventListener('DOMContentLoaded', () => {
+      renderTimeline();
+    });
+  </script>
+</body>
+</html>
+

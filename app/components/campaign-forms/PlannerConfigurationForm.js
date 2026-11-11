@@ -79,6 +79,7 @@ export default function ContentPlannerDashboard({ mode = 'direct', onCapture, on
   const [editorialDirty, setEditorialDirty] = useState(false);
   const [editorialSource, setEditorialSource] = useState('empty');
   const [pendingEditorialBrandId, setPendingEditorialBrandId] = useState('');
+  const [hookVisualMode, setHookVisualMode] = useState('problem_first'); // 'problem_first' | 'product_first'
 
   // World-Aware state (Tahap 1)
   const [contentWorld, setContentWorld] = useState('real_world');
@@ -407,6 +408,7 @@ export default function ContentPlannerDashboard({ mode = 'direct', onCapture, on
           use_brand_pillars: useBrandPillars,
           cep_selection_mode: plannerFocus === 'product_campaign' ? cepSelectionMode : 'sequential',
           selected_ceps: plannerFocus === 'product_campaign' && cepSelectionMode === 'custom' ? selectedCeps : null,
+          hook_visual_mode: plannerFocus === 'product_campaign' ? hookVisualMode : 'problem_first',
           // Recipe Campaign payload
           recipe_config: plannerFocus === 'recipe_campaign' ? {
             category: recipeCategory,
@@ -1696,6 +1698,61 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleGenerate}>
                         </div>
                       </div>
                     )}
+                  </div>
+                )}
+
+                {plannerFocus === 'product_campaign' && (!captureMode || studioStep === 2) && (
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>
+                      🎬 Fokus Visual Klip 1 (Opening Hook):
+                    </label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                      <div
+                        onClick={() => setHookVisualMode('problem_first')}
+                        style={{
+                          border: `1px solid ${hookVisualMode === 'problem_first' ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
+                          background: hookVisualMode === 'problem_first' ? 'var(--surface-raised)' : 'var(--surface-subtle)',
+                          borderRadius: '10px',
+                          padding: '12px 14px',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          boxShadow: hookVisualMode === 'problem_first' ? '0 0 0 1px var(--action-primary)' : 'none'
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                          <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>🌿 Problem & Context First</span>
+                          <span style={{ color: hookVisualMode === 'problem_first' ? 'var(--action-primary)' : 'var(--text-muted)', fontSize: '14px' }}>
+                            {hookVisualMode === 'problem_first' ? '●' : '○'}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.35 }}>
+                          Klip 1 murni ekspresi/situasi masalah nyata (Zero Product). Produk baru hadir di adegan solusi/bridging agar tidak memicu kebosanan audiens (Rekomendasi).
+                        </div>
+                      </div>
+
+                      <div
+                        onClick={() => setHookVisualMode('product_first')}
+                        style={{
+                          border: `1px solid ${hookVisualMode === 'product_first' ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
+                          background: hookVisualMode === 'product_first' ? 'var(--surface-raised)' : 'var(--surface-subtle)',
+                          borderRadius: '10px',
+                          padding: '12px 14px',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          boxShadow: hookVisualMode === 'product_first' ? '0 0 0 1px var(--action-primary)' : 'none'
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                          <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>📦 Product Demo First</span>
+                          <span style={{ color: hookVisualMode === 'product_first' ? 'var(--action-primary)' : 'var(--text-muted)', fontSize: '14px' }}>
+                            {hookVisualMode === 'product_first' ? '●' : '○'}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.35 }}>
+                          Klip 1 langsung memperlihatkan aksi produk secara fisik dari detik pertama (Cocok untuk hard-sell / demonstrasi langsung).
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
 

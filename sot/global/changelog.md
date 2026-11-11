@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.40.40 — Fokus Visual Klip 1 Opsional & Kesinambungan Narasi Storyboard (11/11/2026)
+- Opsi Hook Visual Klip 1 Problem-First default dan Product-First demo
+- Master Monologue Through-Line dan Connective Flow Mandate pada Storyboard Prompts
+- Seleksi Hook Visual Mode pada PlannerConfigurationForm dengan Semantic Design Tokens
+- Automated test test-product-pipeline-hook-and-flow.mjs
+
 ## V2.40.39 — Perbaikan 12 Ide Visual Preset AI Builder & Wajah Kartun Stickman (11/11/2026)
 - Perbaiki error isometric_society supporting role dengan fallback cerdas
 - Dukung wajah kartun stickman doodle clay tanpa terblokir faceless guardrails

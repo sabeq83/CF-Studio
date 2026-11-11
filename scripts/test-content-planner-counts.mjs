@@ -11,7 +11,7 @@ import {
 for (const count of PRODUCT_PLANNER_COUNTS) {
   assert.deepEqual(validatePlannerCount('product_campaign', count), { count, rowsPerPillar: null });
 }
-for (const count of [0, 1, 5, 7, 29, 31]) {
+for (const count of [0, 2, 5, 7, 29, 31]) {
   assert.throws(() => validatePlannerCount('product_campaign', count), /siklus CEP/);
 }
 
