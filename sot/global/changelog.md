@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.40.41 — Perbaikan Resolusi Judul YouTube High-CTR pada Jadwal Autopipeline (11/11/2026)
+- Ekstraksi pkg.title dari social_media_package_json pada Scheduler Autopipeline
+- Fallback berjenjang pkg.title > hook > campaign_title pada Repliz dispatch
+- Pengecekan cerdas dan pertahanan ganda pada worker YouTube untuk mencegah posting nama kampanye
+- Automated test test-auto-pipeline-youtube-title.mjs
+
 ## V2.40.40 — Fokus Visual Klip 1 Opsional & Kesinambungan Narasi Storyboard (11/11/2026)
 - Opsi Hook Visual Klip 1 Problem-First default dan Product-First demo
 - Master Monologue Through-Line dan Connective Flow Mandate pada Storyboard Prompts
