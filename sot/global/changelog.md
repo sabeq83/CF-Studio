@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.40.31 — Perbaikan Import getActiveTenantId pada Ingest Pillar Campaign (11/11/2026)
+- Menambahkan import getActiveTenantId pada lib/pillar-campaign-ingest.js
+- Memperbaiki error ingest planner tenant Mas Ibnu
+
 ## V2.40.30 — Isolasi Tenant Ketat pada Filter Brand Profile Publishing Scheduler (11/11/2026)
 - Menambahkan klausa WHERE tenant_id pada API brand profiles dan lib/db
 - Memperketat multi-join repository publishing dengan tenant_id
