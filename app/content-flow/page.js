@@ -909,6 +909,7 @@ function ContentFlowHubPageContent() {
             <PublishingScheduler
               initialPreloadItem={schedulePreloadItem}
               initialPreloadItems={bulkPreloadItems}
+              controlledBrandProfileId={accountQuery !== 'all' ? accountQuery : null}
               onBackToLibrary={() => {
                 handleSwitchView('library');
                 setSchedulePreloadItem(null);
@@ -924,6 +925,7 @@ function ContentFlowHubPageContent() {
                 <PublishingScheduler
                   initialPreloadItem={schedulePreloadItem}
                   initialPreloadItems={bulkPreloadItems}
+                  controlledBrandProfileId={accountQuery !== 'all' ? accountQuery : null}
                   modalOnly={true}
                   onBackToLibrary={() => {
                     setSchedulePreloadItem(null);

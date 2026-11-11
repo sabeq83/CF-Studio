@@ -286,3 +286,30 @@ export const PATCH = withTenantContext(async (request, { params }, user) => {
     );
   }
 });
+
+export const DELETE = withTenantContext(async (request, { params }) => {
+  try {
+    const { id } = await params;
+    const tenantId = getActiveTenantId();
+    const { deletePublishingJobById } = await import('@/lib/publishing-repository');
+    const deleted = await deletePublishingJobById(tenantId, id);
+
+    if (!deleted) {
+      return NextResponse.json(
+        { success: false, error: 'Publishing job tidak ditemukan atau gagal dihapus.' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: `Publishing job #${id} berhasil dihapus.`
+    });
+  } catch (error) {
+    console.error('[Publishing Jobs ID DELETE Error]:', error);
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: error.status || 500 }
+    );
+  }
+});

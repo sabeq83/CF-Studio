@@ -19,7 +19,8 @@ export const GET = withTenantContext(async (request) => {
     const status = searchParams.get('status') || 'all';
     const platform = searchParams.get('platform') || 'all';
     const accountId = searchParams.get('account_id') || searchParams.get('accountId') || 'all';
-    const brand = searchParams.get('brand') || searchParams.get('brand_profile') || 'all';
+    const rawBrand = searchParams.get('brand') || searchParams.get('brand_profile') || 'all';
+    const brand = rawBrand !== 'all' ? decodeURIComponent(rawBrand).trim() : 'all';
     const contentId = searchParams.get('content_id') || searchParams.get('contentId') || '';
     const startDate = searchParams.get('start_date') || searchParams.get('startDate') || '';
     const endDate = searchParams.get('end_date') || searchParams.get('endDate') || '';
@@ -64,6 +65,17 @@ export const POST = withTenantContext(async (request, user) => {
   try {
     const tenantId = getActiveTenantId();
     const rawBody = await request.json();
+
+    if (rawBody?.action === 'clear-failed') {
+      const { clearFailedPublishingJobs } = await import('@/lib/publishing-repository');
+      const count = await clearFailedPublishingJobs(tenantId);
+      return NextResponse.json({
+        success: true,
+        message: `${count} jadwal publikasi berstatus gagal berhasil dibersihkan.`,
+        deletedCount: count
+      });
+    }
+
     const result = await schedulePublishingJobs({
       tenantId,
       userId: user?.id || null,
@@ -81,6 +93,35 @@ export const POST = withTenantContext(async (request, user) => {
         reconnectUrl: error.reconnectUrl || null
       },
       { status: error.status || 400 }
+    );
+  }
+});
+
+export const DELETE = withTenantContext(async (request) => {
+  try {
+    const tenantId = getActiveTenantId();
+    const { searchParams } = new URL(request.url);
+    const action = searchParams.get('action');
+
+    if (action === 'clear-failed') {
+      const { clearFailedPublishingJobs } = await import('@/lib/publishing-repository');
+      const count = await clearFailedPublishingJobs(tenantId);
+      return NextResponse.json({
+        success: true,
+        message: `${count} jadwal publikasi berstatus gagal berhasil dibersihkan.`,
+        deletedCount: count
+      });
+    }
+
+    return NextResponse.json(
+      { success: false, error: "Action tidak valid. Gunakan '?action=clear-failed'" },
+      { status: 400 }
+    );
+  } catch (error) {
+    console.error('[Publishing Jobs DELETE Error]:', error);
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: error.status || 500 }
     );
   }
 });

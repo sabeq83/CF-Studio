@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.40.28 — UI Antrean 1 Kolom Penuh & Perbaikan Filter Brand Berspasi (11/11/2026)
+- Tabel antrean penjadwalan diubah menjadi 1 kolom penuh (100% full-width)
+- Slide-Over Sheet Drawer off-canvas dengan backdrop overlay untuk melihat detail publikasi
+- Fitur Bersihkan Gagal (bulk clear failed jobs) dan hapus single job gagal
+- Perbaikan kueri dan normalisasi filter brand profile berspasi dengan LOWER(TRIM())
+- Mockup HTML antrean 1 kolom dan mockup analitik video Repliz
+
 ## V2.40.27 — Perapian Navigasi Sidebar & Collapsible Exclusive Accordion (11/11/2026)
 - Membersihkan 11 menu navigasi yang tidak terpakai
 - Mengubah nama Multiplier Lab menjadi Multiple Labs

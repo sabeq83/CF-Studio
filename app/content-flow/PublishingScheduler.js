@@ -83,6 +83,8 @@ export default function PublishingScheduler({
   const [selectedJobId, setSelectedJobId] = useState(null);
   const [selectedJobDetail, setSelectedJobDetail] = useState(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
+  const [deletingJobId, setDeletingJobId] = useState(null);
+  const [clearingFailed, setClearingFailed] = useState(false);
 
   // Filters
   const [filterBrandProfile, setFilterBrandProfile] = useState(controlledBrandProfileId || 'all');
@@ -520,9 +522,6 @@ export default function PublishingScheduler({
       if (json.success) {
         setJobs(json.data || []);
         if (json.metrics) setMetrics(json.metrics);
-        if (json.data && json.data.length > 0 && !selectedJobId) {
-          setSelectedJobId(json.data[0].id);
-        }
       }
     } catch (err) {
       console.error('Error fetching publishing jobs:', err);
@@ -530,7 +529,7 @@ export default function PublishingScheduler({
     } finally {
       setLoading(false);
     }
-  }, [activeTab, filterBrandProfile, filterPlatform, filterStatus, searchTerm, selectedJobId]);
+  }, [activeTab, filterBrandProfile, filterPlatform, filterStatus, searchTerm]);
 
   // 3. Fetch Control Status (Global Pause)
   const fetchControl = useCallback(async () => {
@@ -684,6 +683,58 @@ export default function PublishingScheduler({
       }
     } catch (err) {
       showToast(`Error: ${err.message} ❌`);
+    }
+  };
+
+  // Delete Single Job
+  const handleDeleteJob = async (jobId) => {
+    if (!window.confirm(`Hapus jadwal publikasi #${jobId} dari antrean?`)) return;
+    setDeletingJobId(jobId);
+    try {
+      const res = await fetch(`/api/v2/publishing/jobs/${jobId}`, {
+        method: 'DELETE'
+      });
+      const json = await res.json();
+      if (json.success) {
+        showToast(json.message || 'Jadwal berhasil dihapus ✨');
+        if (selectedJobId === jobId) {
+          setSelectedJobId(null);
+          setSelectedJobDetail(null);
+        }
+        fetchJobs();
+      } else {
+        showToast(`Gagal menghapus: ${json.error || 'Terjadi kesalahan'} ❌`);
+      }
+    } catch (err) {
+      showToast(`Error: ${err.message} ❌`);
+    } finally {
+      setDeletingJobId(null);
+    }
+  };
+
+  // Clear All Failed Jobs
+  const handleClearFailedJobs = async () => {
+    if (!window.confirm('Bersihkan semua jadwal publikasi yang berstatus gagal (failed)?')) return;
+    setClearingFailed(true);
+    try {
+      const res = await fetch('/api/v2/publishing/jobs?action=clear-failed', {
+        method: 'DELETE'
+      });
+      const json = await res.json();
+      if (json.success) {
+        showToast(json.message || 'Antrean gagal berhasil dibersihkan ✨');
+        if (selectedJobDetail?.status === 'failed') {
+          setSelectedJobId(null);
+          setSelectedJobDetail(null);
+        }
+        fetchJobs();
+      } else {
+        showToast(`Gagal membersihkan: ${json.error || 'Terjadi kesalahan'} ❌`);
+      }
+    } catch (err) {
+      showToast(`Error: ${err.message} ❌`);
+    } finally {
+      setClearingFailed(false);
     }
   };
 
@@ -1104,6 +1155,22 @@ export default function PublishingScheduler({
 
   return (
     <div style={{ color: 'var(--text-primary)', fontFamily: 'Inter, system-ui, sans-serif' }}>
+      <style>{`
+        @keyframes cfDrawerSlideIn {
+          from { transform: translateX(100%); }
+          to { transform: translateX(0); }
+        }
+        @keyframes cfFadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .cf-drawer-panel {
+          animation: cfDrawerSlideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .cf-drawer-backdrop {
+          animation: cfFadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+      `}</style>
       {/* Toast */}
       {toastMsg && (
         <div style={{
@@ -1344,13 +1411,39 @@ export default function PublishingScheduler({
         </div>
       )}
 
-      {/* Tab 1: Queue & History Layout (Table + Drawer) */}
+      {/* Tab 1: Queue & History Layout (Full-Width 1-Column Table + Slide-Over Drawer) */}
       {(activeTab === 'queue' || activeTab === 'history') && (
-        <div style={{ display: 'grid', gridTemplateColumns: selectedJobDetail ? 'minmax(0, 1fr) 320px' : '1fr', gap: 14 }}>
-          <div style={{ background: 'var(--surface)', border: '1px solid var(--surface-interactive)', borderRadius: 12, overflow: 'hidden' }}>
-            <div style={{ height: 46, borderBottom: '1px solid var(--surface-interactive)', display: 'flex', alignItems: 'center', padding: '0 16px', color: 'var(--text-primary)', fontSize: 12, fontWeight: 800 }}>
-              {activeTab === 'queue' ? 'Daftar Antrean Terjadwal' : 'Riwayat Hasil Publikasi'}
-              <span style={{ color: 'var(--text-muted)', fontWeight: 500, marginLeft: 8 }}>({jobs.length} item)</span>
+        <div style={{ width: '100%' }}>
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--border-subtle)', borderRadius: 12, overflow: 'hidden', width: '100%' }}>
+            <div style={{ height: 48, borderBottom: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px', color: 'var(--text-primary)', fontSize: 13, fontWeight: 800 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span>{activeTab === 'queue' ? 'Daftar Antrean Terjadwal' : 'Riwayat Hasil Publikasi'}</span>
+                <span style={{ color: 'var(--text-muted)', fontWeight: 500, fontSize: 12 }}>({jobs.length} item)</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                {(metrics.needsAction > 0 || jobs.some(j => j.status === 'failed')) && (
+                  <button
+                    onClick={handleClearFailedJobs}
+                    disabled={clearingFailed}
+                    title="Hapus semua antrean publikasi yang berstatus gagal (failed)"
+                    style={{
+                      background: 'var(--status-danger-soft)',
+                      border: '1px solid var(--status-danger)',
+                      color: 'var(--status-danger)',
+                      padding: '5px 12px',
+                      borderRadius: 7,
+                      fontSize: 11,
+                      fontWeight: 700,
+                      cursor: clearingFailed ? 'not-allowed' : 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 6
+                    }}
+                  >
+                    <span>{clearingFailed ? '⏳ Membersihkan...' : '🧹 Bersihkan Gagal'}</span>
+                  </button>
+                )}
+              </div>
             </div>
 
             {loading ? (
@@ -1382,14 +1475,14 @@ export default function PublishingScheduler({
                             cursor: 'pointer',
                             background: isSelected ? 'var(--surface-interactive)' : 'transparent',
                             borderBottom: '1px solid var(--border-subtle)',
-                            boxShadow: isSelected ? 'inset 3px 0 var(--status-neutral)' : 'none'
+                            boxShadow: isSelected ? 'inset 3px 0 var(--action-primary)' : 'none'
                           }}
                         >
                           <td style={{ padding: '12px 14px' }}>
-                            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
                               <div style={{
-                                width: 40, height: 40, borderRadius: 8, background: 'var(--surface)',
-                                display: 'grid', placeItems: 'center', color: '#a78bfa', fontWeight: 800, flexShrink: 0
+                                width: 40, height: 40, borderRadius: 8, background: 'var(--surface-interactive)',
+                                display: 'grid', placeItems: 'center', color: 'var(--action-primary)', fontWeight: 800, flexShrink: 0
                               }}>
                                  {job.platform === 'facebook' ? 'FB' : 
                                   job.platform === 'instagram' ? 'IG' :
@@ -1399,17 +1492,17 @@ export default function PublishingScheduler({
                                   job.platform === 'youtube' ? 'YT' : '◎'}
                               </div>
                               <div>
-                                <div style={{ color: 'var(--text-primary)', fontWeight: 750, maxWidth: 220, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                <div style={{ color: 'var(--text-primary)', fontWeight: 750, maxWidth: 360, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                   {job.content_title || job.content_id}
                                 </div>
                                 <div style={{ color: 'var(--text-muted)', fontSize: 11, marginTop: 2 }}>
-                                  {job.content_id} · Mode: {job.publish_mode.toUpperCase()}
+                                  {job.content_id} · Mode: <strong>{job.publish_mode.toUpperCase()}</strong>
                                 </div>
                               </div>
                             </div>
                           </td>
                           <td style={{ padding: '12px 14px' }}>
-                            <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{job.account_name || 'Meta Account'}</div>
+                            <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{job.account_name || 'Akun'}</div>
                             <div style={{ color: 'var(--text-muted)', fontSize: 11 }}>{job.platform.toUpperCase()} ({job.media_type})</div>
                           </td>
                           <td style={{ padding: '12px 14px' }}>
@@ -1422,15 +1515,15 @@ export default function PublishingScheduler({
                               </div>
                             )}
                           </td>
-                           <td style={{ padding: '12px 14px' }}>
+                          <td style={{ padding: '12px 14px' }}>
                             {getStatusBadge(job.status, job.approval_status)}
                           </td>
                           <td style={{ padding: '12px 14px', textAlign: 'right' }} onClick={(e) => e.stopPropagation()}>
-                            <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                            <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', alignItems: 'center' }}>
                               {job.approval_status === 'pending_approval' && (
                                 <button
                                   onClick={() => handleApproveJob(job.id)}
-                                  style={{ background: '#14532d', border: '1px solid #166534', color: '#86efac', padding: '5px 9px', borderRadius: 6, fontSize: 11, cursor: 'pointer', fontWeight: 700 }}
+                                  style={{ background: 'var(--status-success-soft)', border: '1px solid var(--status-success)', color: 'var(--status-success)', padding: '5px 9px', borderRadius: 6, fontSize: 11, cursor: 'pointer', fontWeight: 700 }}
                                 >
                                   Approve
                                 </button>
@@ -1439,32 +1532,42 @@ export default function PublishingScheduler({
                                 <>
                                   <button
                                     onClick={() => { setRescheduleModalJob(job); setNewScheduleTime(job.scheduled_at.slice(0, 16)); }}
-                                    style={{ background: '#19243a', border: '1px solid #36445f', color: 'var(--text-secondary)', padding: '5px 9px', borderRadius: 6, fontSize: 11, cursor: 'pointer', fontWeight: 700 }}
+                                    style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', padding: '5px 9px', borderRadius: 6, fontSize: 11, cursor: 'pointer', fontWeight: 700 }}
                                   >
                                     Ubah
                                   </button>
                                   <button
                                     onClick={() => handleCancelJob(job.id)}
-                                    style={{ background: '#371923', border: '1px solid #5b2635', color: '#fb7185', padding: '5px 9px', borderRadius: 6, fontSize: 11, cursor: 'pointer', fontWeight: 700 }}
+                                    style={{ background: 'var(--status-danger-soft)', border: '1px solid var(--status-danger)', color: 'var(--status-danger)', padding: '5px 9px', borderRadius: 6, fontSize: 11, cursor: 'pointer', fontWeight: 700 }}
                                   >
                                     Batal
                                   </button>
                                 </>
                               )}
                               {(job.status === 'failed' || job.status === 'cancelled') && (
-                                <button
-                                  onClick={() => handleRetryJob(job.id)}
-                                  style={{ background: '#1e3a8a', border: '1px solid var(--status-info)', color: '#93c5fd', padding: '5px 9px', borderRadius: 6, fontSize: 11, cursor: 'pointer', fontWeight: 700 }}
-                                >
-                                  Retry
-                                </button>
+                                <>
+                                  <button
+                                    onClick={() => handleRetryJob(job.id)}
+                                    style={{ background: 'var(--status-info-soft)', border: '1px solid var(--status-info)', color: 'var(--status-info)', padding: '5px 9px', borderRadius: 6, fontSize: 11, cursor: 'pointer', fontWeight: 700 }}
+                                  >
+                                    Retry
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteJob(job.id)}
+                                    disabled={deletingJobId === job.id}
+                                    title="Hapus jadwal publikasi ini dari antrean"
+                                    style={{ background: 'var(--status-danger-soft)', border: '1px solid var(--status-danger)', color: 'var(--status-danger)', padding: '5px 8px', borderRadius: 6, fontSize: 11, cursor: 'pointer', fontWeight: 700 }}
+                                  >
+                                    {deletingJobId === job.id ? '⏳' : '🗑️'}
+                                  </button>
+                                </>
                               )}
                               {(job.external_post_id || job.status === 'published' || job.status === 'draft_created') && (
                                 <button
                                   disabled={syncingJobId === job.id}
                                   onClick={() => handleSyncMetaPost(job.id)}
                                   title="Sinkronkan status dan URL postingan dari Meta Graph API"
-                                  style={{ background: 'var(--status-info-soft)', border: '1px solid var(--status-info)', color: '#93c5fd', padding: '5px 8px', borderRadius: 6, fontSize: 11, cursor: 'pointer', fontWeight: 600 }}
+                                  style={{ background: 'var(--status-info-soft)', border: '1px solid var(--status-info)', color: 'var(--status-info)', padding: '5px 8px', borderRadius: 6, fontSize: 11, cursor: 'pointer', fontWeight: 600 }}
                                 >
                                   {syncingJobId === job.id ? '⏳' : '🔄 Sync'}
                                 </button>
@@ -1481,25 +1584,31 @@ export default function PublishingScheduler({
                                     job.platform === 'linkedin' ? 'LinkedIn' : 'Facebook'
                                   }`}
                                   style={{
-                                    background: 
-                                      job.platform === 'instagram' ? 'rgba(236,72,153,0.2)' : 
-                                      job.platform === 'tiktok' ? 'rgba(0, 242, 254, 0.2)' : 
-                                      'rgba(37,99,235,0.2)',
-                                    border: `1px solid ${
-                                      job.platform === 'instagram' ? '#ec4899' : 
-                                      job.platform === 'tiktok' ? '#00F2FE' : 
-                                      'var(--status-info)'
-                                    }`,
-                                    color: 
-                                      job.platform === 'instagram' ? '#f472b6' : 
-                                      job.platform === 'tiktok' ? '#00F2FE' : 
-                                      '#93c5fd',
+                                    background: 'var(--surface-interactive)',
+                                    border: '1px solid var(--border-subtle)',
+                                    color: 'var(--link)',
                                     padding: '5px 8px', borderRadius: 6, fontSize: 11, textDecoration: 'none', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 2
                                   }}
                                 >
                                   ↗️
                                 </a>
                               )}
+                              <button
+                                onClick={() => setSelectedJobId(job.id)}
+                                title="Lihat detail lengkap jadwal ini"
+                                style={{
+                                  background: 'var(--surface-interactive)',
+                                  border: '1px solid var(--border-subtle)',
+                                  color: 'var(--text-secondary)',
+                                  padding: '5px 9px',
+                                  borderRadius: 6,
+                                  fontSize: 11,
+                                  cursor: 'pointer',
+                                  fontWeight: 700
+                                }}
+                              >
+                                Detail 👁️
+                              </button>
                             </div>
                           </td>
                         </tr>
@@ -1511,262 +1620,359 @@ export default function PublishingScheduler({
             )}
           </div>
 
-          {/* Drawer Detail Panel */}
-          {selectedJobDetail && (
-            <aside style={{ background: 'var(--surface)', border: '1px solid var(--surface-interactive)', borderRadius: 12, padding: 16 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <h3 style={{ margin: 0, fontSize: 14, color: 'var(--text-primary)', fontWeight: 800 }}>Detail Publikasi</h3>
-                <button
-                  onClick={() => setSelectedJobDetail(null)}
-                  style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
-                >
-                  <XIcon style={{ width: 16, height: 16 }} />
-                </button>
-              </div>
-
-              <div style={{ marginBottom: 12 }}>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase' }}>Konten</div>
-                <div style={{ color: 'var(--text-primary)', fontWeight: 750, fontSize: 13, marginTop: 2 }}>{selectedJobDetail.content_title}</div>
-                <div style={{ color: 'var(--text-muted)', fontSize: 11 }}>ID: {selectedJobDetail.content_id}</div>
-              </div>
-
-              <div style={{ marginBottom: 12 }}>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase' }}>Akun & Platform</div>
-                <div style={{ color: 'var(--text-secondary)', fontSize: 12, marginTop: 2 }}>
-                  {selectedJobDetail.account_name} ({selectedJobDetail.platform.toUpperCase()})
+          {/* Slide-Over Sheet Drawer with Backdrop Overlay */}
+          {selectedJobId && (
+            <>
+              <div
+                className="cf-drawer-backdrop"
+                onClick={() => {
+                  setSelectedJobId(null);
+                  setSelectedJobDetail(null);
+                }}
+                style={{
+                  position: 'fixed',
+                  inset: 0,
+                  background: 'var(--overlay-backdrop)',
+                  zIndex: 1000,
+                  backdropFilter: 'blur(4px)'
+                }}
+              />
+              <aside
+                className="cf-drawer-panel"
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  right: 0,
+                  bottom: 0,
+                  width: 440,
+                  maxWidth: '90vw',
+                  background: 'var(--surface)',
+                  borderLeft: '1px solid var(--border-subtle)',
+                  boxShadow: 'var(--shadow-modal)',
+                  zIndex: 1001,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  overflowY: 'auto'
+                }}
+              >
+                {/* Drawer Header */}
+                <div style={{
+                  padding: '18px 20px',
+                  borderBottom: '1px solid var(--border-subtle)',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  background: 'var(--surface-raised)'
+                }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: 15, color: 'var(--text-primary)', fontWeight: 800 }}>Detail Publikasi</h3>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>ID #{selectedJobId}</span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setSelectedJobId(null);
+                      setSelectedJobDetail(null);
+                    }}
+                    style={{
+                      background: 'var(--surface-interactive)',
+                      border: '1px solid var(--border-subtle)',
+                      color: 'var(--text-muted)',
+                      cursor: 'pointer',
+                      borderRadius: 6,
+                      width: 28,
+                      height: 28,
+                      display: 'grid',
+                      placeItems: 'center'
+                    }}
+                    title="Tutup detail (Esc / Click luar)"
+                  >
+                    <XIcon style={{ width: 16, height: 16 }} />
+                  </button>
                 </div>
-                <div style={{ color: 'var(--text-muted)', fontSize: 11 }}>Mode: {selectedJobDetail.publish_mode.toUpperCase()} · Tipe: {selectedJobDetail.media_type}</div>
-              </div>
 
-              <div style={{ marginBottom: 12 }}>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase' }}>Status & Jadwal</div>
-                <div style={{ marginTop: 4 }}>{getStatusBadge(selectedJobDetail.status, selectedJobDetail.approval_status)}</div>
-                {selectedJobDetail.approval_status === 'pending_approval' && (
-                  <div style={{ marginTop: 8 }}>
-                    <button
-                      onClick={() => handleApproveJob(selectedJobDetail.id)}
-                      style={{
-                        width: '100%',
-                        background: '#166534',
-                        border: '1px solid #15803d',
-                        color: '#bbf7d0',
-                        padding: '6px 12px',
-                        borderRadius: 6,
-                        fontSize: 11,
-                        cursor: 'pointer',
-                        fontWeight: 700,
-                        textAlign: 'center'
-                      }}
-                    >
-                      ✅ Approve & Posting Sekarang
-                    </button>
-                  </div>
-                )}
-                <div style={{ color: 'var(--text-secondary)', fontSize: 11, marginTop: 4 }}>
-                  {formatScheduleTime(selectedJobDetail.scheduled_at, selectedJobDetail.account_timezone)}
-                </div>
-              </div>
-
-              {selectedJobDetail.external_post_id && (
-                <div style={{ marginBottom: 12, padding: 10, background: '#0b111d', border: '1px solid #1e293b', borderRadius: 8 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase' }}>External Meta Post</div>
-                    <button
-                      type="button"
-                      disabled={syncingJobId === selectedJobDetail.id}
-                      onClick={() => handleSyncMetaPost(selectedJobDetail.id)}
-                      style={{
-                        background: 'var(--status-info-soft)', border: '1px solid var(--status-info)', color: '#93c5fd',
-                        fontSize: 10, fontWeight: 700, padding: '3px 7px', borderRadius: 4, cursor: 'pointer'
-                      }}
-                    >
-                      {syncingJobId === selectedJobDetail.id ? '⏳ Sinkronkan...' : '🔄 Sinkronkan URL'}
-                    </button>
-                  </div>
-                  <div style={{ color: 'var(--link)', fontSize: 11, wordBreak: 'break-all', marginTop: 4 }}>
-                    ID: #{selectedJobDetail.external_post_id}
-                  </div>
-                  {selectedJobDetail.external_permalink ? (
-                    <a
-                      href={selectedJobDetail.external_permalink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 8,
-                        background: 
-                          selectedJobDetail.platform === 'instagram' ? 'linear-gradient(135deg, #ec4899, var(--status-neutral))' : 
-                          selectedJobDetail.platform === 'tiktok' ? 'linear-gradient(135deg, #00f2fe, #fe0979)' : 
-                          '#2563eb',
-                        color: 'var(--text-primary)', fontSize: 11, fontWeight: 700, padding: '6px 12px', borderRadius: 6, textDecoration: 'none'
-                      }}
-                    >
-                      <span>↗️ Buka di {
-                        selectedJobDetail.platform === 'instagram' ? 'Instagram' : 
-                        selectedJobDetail.platform === 'tiktok' ? 'TikTok' : 
-                        selectedJobDetail.platform === 'threads' ? 'Threads' : 
-                        selectedJobDetail.platform === 'linkedin' ? 'LinkedIn' : 'Facebook'
-                      }</span>
-                    </a>
+                {/* Drawer Body */}
+                <div style={{ padding: '20px', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {loadingDetail || !selectedJobDetail ? (
+                    <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>Memuat detail jadwal...</div>
                   ) : (
-                    <div style={{ color: 'var(--text-muted)', fontSize: 10, marginTop: 4 }}>
-                      Klik "Sinkronkan URL" untuk memuat link kanonikal postingan.
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Actionable Provider Error Card */}
-              {(selectedJobDetail.last_error_message || selectedJobDetail.status === 'needs_review' || selectedJobDetail.status === 'failed' || selectedJobDetail.status === 'retry_wait') && (
-                <div style={{
-                  marginBottom: 14,
-                  padding: 12,
-                  background: selectedJobDetail.status === 'retry_wait' ? 'var(--status-info-soft)' : '#27171d',
-                  border: `1px solid ${selectedJobDetail.status === 'retry_wait' ? 'var(--status-info)' : '#5c202d'}`,
-                  borderRadius: 8
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                    <span style={{
-                      fontSize: 10,
-                      color: selectedJobDetail.status === 'retry_wait' ? '#93c5fd' : '#fb7185',
-                      fontWeight: 800,
-                      textTransform: 'uppercase'
-                    }}>
-                      {selectedJobDetail.status === 'retry_wait' ? '⏳ Menunggu Percobaan Ulang Otomatis' : '⚠️ Diagnosis Kegagalan Provider'}
-                    </span>
-                    <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
-                      Percobaan: <strong>{selectedJobDetail.attempt_count || 0} / {selectedJobDetail.max_attempts || 3}</strong>
-                    </span>
-                  </div>
-
-                  <div style={{
-                    color: selectedJobDetail.status === 'retry_wait' ? 'var(--text-secondary)' : '#fca5a5',
-                    fontSize: 11,
-                    lineHeight: 1.4,
-                    marginBottom: 8
-                  }}>
-                    {selectedJobDetail.last_error_message || 'Terjadi gangguan saat eksekusi provider.'}
-                  </div>
-
-                  {selectedJobDetail.external_schedule_id && (
-                    <div style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span>Schedule ID Repliz:</span>
-                      <code style={{ background: 'rgba(0,0,0,0.3)', padding: '2px 6px', borderRadius: 4, color: 'var(--link)' }}>
-                        {selectedJobDetail.external_schedule_id}
-                      </code>
-                    </div>
-                  )}
-
-                  {/* Tindakan Reconnect untuk Error Permission Facebook */}
-                  {selectedJobDetail.last_error_code === 'REPLIZ_FACEBOOK_PERMISSION_REQUIRED' && (
-                    <div style={{ marginTop: 8, padding: 8, background: 'rgba(0,0,0,0.3)', borderRadius: 6, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                      <div style={{ fontSize: 10, color: '#fef08a' }}>
-                        💡 <strong>Langkah Perbaikan:</strong> Buka akun Anda di dashboard Repliz, perbarui izin akses / sambungkan ulang akun Facebook Page, lalu centang konfirmasi di bawah.
+                    <>
+                      {/* Konten Section */}
+                      <div style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)', borderRadius: 10, padding: 14 }}>
+                        <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Konten Video</div>
+                        <div style={{ color: 'var(--text-primary)', fontWeight: 750, fontSize: 14, marginTop: 4 }}>{selectedJobDetail.content_title || selectedJobDetail.content_id}</div>
+                        <div style={{ color: 'var(--text-muted)', fontSize: 11, marginTop: 2 }}>ID: {selectedJobDetail.content_id}</div>
                       </div>
-                      <a
-                        href="https://repliz.com/user/account"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: 6,
-                          background: 'var(--status-info-soft)',
-                          border: '1px solid var(--status-info)',
-                          color: '#93c5fd',
-                          padding: '5px 10px',
-                          borderRadius: 4,
-                          fontSize: 11,
-                          fontWeight: 700,
-                          textDecoration: 'none'
-                        }}
-                      >
-                        <span>↗️ Kelola & Reconnect Akun di Repliz</span>
-                      </a>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, color: 'var(--text-secondary)', cursor: 'pointer' }}>
-                        <input
-                          type="checkbox"
-                          checked={confirmedReconnect}
-                          onChange={(e) => setConfirmedReconnect(e.target.checked)}
-                        />
-                        <span>Saya sudah melakukan Reconnect akun di Repliz</span>
-                      </label>
-                    </div>
-                  )}
 
-                  {/* Tombol Aksi Manual Retry & Health Check */}
-                  <div style={{ display: 'flex', gap: 6, marginTop: 10 }}>
-                    <button
-                      type="button"
-                      disabled={checkingHealthId === selectedJobDetail.account_id}
-                      onClick={() => handleCheckAccountHealth(selectedJobDetail.account_id)}
-                      style={{
-                        flex: 1,
-                        background: 'var(--surface)',
-                        border: '1px solid var(--surface-interactive)',
-                        color: 'var(--text-secondary)',
-                        padding: '6px 10px',
-                        borderRadius: 6,
-                        fontSize: 10,
-                        fontWeight: 700,
-                        cursor: 'pointer'
-                      }}
-                    >
-                      {checkingHealthId === selectedJobDetail.account_id ? '⏳ Memeriksa...' : '🔍 Periksa Koneksi Akun'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleRetryJob(selectedJobDetail.id, { confirmedReconnect })}
-                      style={{
-                        flex: 1,
-                        background: 'var(--status-info-soft)',
-                        border: '1px solid var(--status-info)',
-                        color: 'var(--link)',
-                        padding: '6px 10px',
-                        borderRadius: 6,
-                        fontSize: 10,
-                        fontWeight: 700,
-                        cursor: 'pointer'
-                      }}
-                    >
-                      🔄 Coba Ulang (Manual Retry)
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              <div style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', marginBottom: 4 }}>Caption Snapshot</div>
-                <div style={{
-                  background: '#0b111d', border: '1px solid #222d41', padding: 10, borderRadius: 8,
-                  color: 'var(--text-muted)', fontSize: 11, maxHeight: 100, overflowY: 'auto', whiteSpace: 'pre-wrap'
-                }}>
-                  {selectedJobDetail.caption_snapshot || '(Tanpa caption)'}
-                </div>
-              </div>
-
-              {/* Timeline attempts */}
-              <div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', marginBottom: 6 }}>Log Percobaan</div>
-                {selectedJobDetail.attempts && selectedJobDetail.attempts.length > 0 ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    {selectedJobDetail.attempts.map((att, idx) => (
-                      <div key={att.id || idx} style={{ background: '#0b111d', padding: 8, borderRadius: 6, fontSize: 10 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)', fontWeight: 700 }}>
-                          <span>Percobaan #{att.attempt_number} · {att.stage}</span>
-                          <span className={`outcome-${(att.outcome || '').toLowerCase()}`}>{att.outcome.toUpperCase()}</span>
+                      {/* Akun & Platform */}
+                      <div style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)', borderRadius: 10, padding: 14 }}>
+                        <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Tujuan Publikasi</div>
+                        <div style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: 13, marginTop: 4 }}>
+                          {selectedJobDetail.account_name || 'Akun'} ({selectedJobDetail.platform.toUpperCase()})
                         </div>
-                        {att.sanitized_message && (
-                          <div style={{ color: 'var(--text-muted)', marginTop: 2 }}>{att.sanitized_message}</div>
+                        <div style={{ color: 'var(--text-muted)', fontSize: 11, marginTop: 2 }}>
+                          Mode: <strong>{selectedJobDetail.publish_mode.toUpperCase()}</strong> · Tipe: {selectedJobDetail.media_type}
+                        </div>
+                      </div>
+
+                      {/* Status & Jadwal */}
+                      <div style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)', borderRadius: 10, padding: 14 }}>
+                        <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Status & Waktu Tayang</div>
+                        <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
+                          {getStatusBadge(selectedJobDetail.status, selectedJobDetail.approval_status)}
+                        </div>
+                        {selectedJobDetail.approval_status === 'pending_approval' && (
+                          <div style={{ marginTop: 10 }}>
+                            <button
+                              onClick={() => handleApproveJob(selectedJobDetail.id)}
+                              style={{
+                                width: '100%',
+                                background: 'var(--status-success-soft)',
+                                border: '1px solid var(--status-success)',
+                                color: 'var(--status-success)',
+                                padding: '8px 12px',
+                                borderRadius: 6,
+                                fontSize: 12,
+                                cursor: 'pointer',
+                                fontWeight: 750,
+                                textAlign: 'center'
+                              }}
+                            >
+                              ✅ Approve & Posting Sekarang
+                            </button>
+                          </div>
+                        )}
+                        <div style={{ color: 'var(--text-secondary)', fontSize: 12, marginTop: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span>📅</span>
+                          <span>{formatScheduleTime(selectedJobDetail.scheduled_at, selectedJobDetail.account_timezone)}</span>
+                        </div>
+                      </div>
+
+                      {/* External Post link / status */}
+                      {selectedJobDetail.external_post_id && (
+                        <div style={{ padding: 12, background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)', borderRadius: 10 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase' }}>External Meta / Repliz Post</div>
+                            <button
+                              type="button"
+                              disabled={syncingJobId === selectedJobDetail.id}
+                              onClick={() => handleSyncMetaPost(selectedJobDetail.id)}
+                              style={{
+                                background: 'var(--status-info-soft)', border: '1px solid var(--status-info)', color: 'var(--status-info)',
+                                fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 4, cursor: 'pointer'
+                              }}
+                            >
+                              {syncingJobId === selectedJobDetail.id ? '⏳ Sinkronkan...' : '🔄 Sinkronkan URL'}
+                            </button>
+                          </div>
+                          <div style={{ color: 'var(--link)', fontSize: 11, wordBreak: 'break-all', marginTop: 4 }}>
+                            ID: #{selectedJobDetail.external_post_id}
+                          </div>
+                          {selectedJobDetail.external_permalink ? (
+                            <a
+                              href={selectedJobDetail.external_permalink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 8,
+                                background: 'var(--action-primary)',
+                                color: 'var(--on-action-primary)', fontSize: 11, fontWeight: 700, padding: '6px 12px', borderRadius: 6, textDecoration: 'none'
+                              }}
+                            >
+                              <span>↗️ Buka di {
+                                selectedJobDetail.platform === 'instagram' ? 'Instagram' : 
+                                selectedJobDetail.platform === 'tiktok' ? 'TikTok' : 
+                                selectedJobDetail.platform === 'threads' ? 'Threads' : 
+                                selectedJobDetail.platform === 'linkedin' ? 'LinkedIn' : 'Facebook'
+                              }</span>
+                            </a>
+                          ) : (
+                            <div style={{ color: 'var(--text-muted)', fontSize: 10, marginTop: 4 }}>
+                              Klik "Sinkronkan URL" untuk memuat link kanonikal postingan.
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Actionable Error Card */}
+                      {(selectedJobDetail.last_error_message || selectedJobDetail.status === 'needs_review' || selectedJobDetail.status === 'failed' || selectedJobDetail.status === 'retry_wait') && (
+                        <div style={{
+                          padding: 14,
+                          background: selectedJobDetail.status === 'retry_wait' ? 'var(--status-info-soft)' : 'var(--status-danger-soft)',
+                          border: `1px solid ${selectedJobDetail.status === 'retry_wait' ? 'var(--status-info)' : 'var(--status-danger)'}`,
+                          borderRadius: 10
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                            <span style={{
+                              fontSize: 10,
+                              color: selectedJobDetail.status === 'retry_wait' ? 'var(--status-info)' : 'var(--status-danger)',
+                              fontWeight: 800,
+                              textTransform: 'uppercase'
+                            }}>
+                              {selectedJobDetail.status === 'retry_wait' ? '⏳ Menunggu Percobaan Ulang Otomatis' : '⚠️ Diagnosis Kegagalan Provider'}
+                            </span>
+                            <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
+                              Percobaan: <strong>{selectedJobDetail.attempt_count || 0} / {selectedJobDetail.max_attempts || 3}</strong>
+                            </span>
+                          </div>
+
+                          <div style={{
+                            color: 'var(--text-primary)',
+                            fontSize: 11,
+                            lineHeight: 1.4,
+                            marginBottom: 10
+                          }}>
+                            {selectedJobDetail.last_error_message || 'Terjadi gangguan saat eksekusi provider.'}
+                          </div>
+
+                          {selectedJobDetail.external_schedule_id && (
+                            <div style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                              <span>Schedule ID Repliz:</span>
+                              <code style={{ background: 'var(--surface)', padding: '2px 6px', borderRadius: 4, color: 'var(--link)', border: '1px solid var(--border-subtle)' }}>
+                                {selectedJobDetail.external_schedule_id}
+                              </code>
+                            </div>
+                          )}
+
+                          {/* Tindakan Reconnect untuk Error Permission Facebook */}
+                          {selectedJobDetail.last_error_code === 'REPLIZ_FACEBOOK_PERMISSION_REQUIRED' && (
+                            <div style={{ marginTop: 8, padding: 8, background: 'var(--surface)', borderRadius: 6, border: '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                              <div style={{ fontSize: 10, color: 'var(--status-warning)' }}>
+                                💡 <strong>Langkah Perbaikan:</strong> Buka akun Anda di dashboard Repliz, perbarui izin akses / sambungkan ulang akun Facebook Page, lalu centang konfirmasi di bawah.
+                              </div>
+                              <a
+                                href="https://repliz.com/user/account"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  gap: 6,
+                                  background: 'var(--status-info-soft)',
+                                  border: '1px solid var(--status-info)',
+                                  color: 'var(--status-info)',
+                                  padding: '5px 10px',
+                                  borderRadius: 4,
+                                  fontSize: 11,
+                                  fontWeight: 700,
+                                  textDecoration: 'none'
+                                }}
+                              >
+                                <span>↗️ Kelola & Reconnect Akun di Repliz</span>
+                              </a>
+                              <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                                <input
+                                  type="checkbox"
+                                  checked={confirmedReconnect}
+                                  onChange={(e) => setConfirmedReconnect(e.target.checked)}
+                                />
+                                <span>Saya sudah melakukan Reconnect akun di Repliz</span>
+                              </label>
+                            </div>
+                          )}
+
+                          {/* Tombol Aksi Manual Retry, Health Check & Hapus */}
+                          <div style={{ display: 'flex', gap: 6, marginTop: 10 }}>
+                            <button
+                              type="button"
+                              disabled={checkingHealthId === selectedJobDetail.account_id}
+                              onClick={() => handleCheckAccountHealth(selectedJobDetail.account_id)}
+                              style={{
+                                flex: 1,
+                                background: 'var(--surface)',
+                                border: '1px solid var(--border-subtle)',
+                                color: 'var(--text-secondary)',
+                                padding: '6px 10px',
+                                borderRadius: 6,
+                                fontSize: 10,
+                                fontWeight: 700,
+                                cursor: 'pointer'
+                              }}
+                            >
+                              {checkingHealthId === selectedJobDetail.account_id ? '⏳ Memeriksa...' : '🔍 Periksa Koneksi'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleRetryJob(selectedJobDetail.id, { confirmedReconnect })}
+                              style={{
+                                flex: 1,
+                                background: 'var(--status-info-soft)',
+                                border: '1px solid var(--status-info)',
+                                color: 'var(--status-info)',
+                                padding: '6px 10px',
+                                borderRadius: 6,
+                                fontSize: 10,
+                                fontWeight: 700,
+                                cursor: 'pointer'
+                              }}
+                            >
+                              🔄 Retry
+                            </button>
+                            <button
+                              type="button"
+                              disabled={deletingJobId === selectedJobDetail.id}
+                              onClick={() => handleDeleteJob(selectedJobDetail.id)}
+                              style={{
+                                background: 'var(--status-danger-soft)',
+                                border: '1px solid var(--status-danger)',
+                                color: 'var(--status-danger)',
+                                padding: '6px 10px',
+                                borderRadius: 6,
+                                fontSize: 10,
+                                fontWeight: 700,
+                                cursor: 'pointer'
+                              }}
+                              title="Hapus jadwal publikasi ini dari antrean"
+                            >
+                              {deletingJobId === selectedJobDetail.id ? '⏳' : '🗑️ Hapus'}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Caption Snapshot */}
+                      <div style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)', borderRadius: 10, padding: 14 }}>
+                        <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', marginBottom: 6 }}>Caption Snapshot</div>
+                        <div style={{
+                          background: 'var(--surface)', border: '1px solid var(--border-subtle)', padding: 10, borderRadius: 8,
+                          color: 'var(--text-secondary)', fontSize: 11, maxHeight: 120, overflowY: 'auto', whiteSpace: 'pre-wrap'
+                        }}>
+                          {selectedJobDetail.caption_snapshot || '(Tanpa caption)'}
+                        </div>
+                      </div>
+
+                      {/* Timeline attempts */}
+                      <div style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)', borderRadius: 10, padding: 14 }}>
+                        <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', marginBottom: 8 }}>Log Percobaan</div>
+                        {selectedJobDetail.attempts && selectedJobDetail.attempts.length > 0 ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                            {selectedJobDetail.attempts.map((att, idx) => (
+                              <div key={att.id || idx} style={{ background: 'var(--surface)', border: '1px solid var(--border-subtle)', padding: 8, borderRadius: 6, fontSize: 10 }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)', fontWeight: 700 }}>
+                                  <span>Percobaan #{att.attempt_number} · {att.stage}</span>
+                                  <span style={{
+                                    color: (att.outcome || '').toLowerCase() === 'success' ? 'var(--status-success)' :
+                                           (att.outcome || '').toLowerCase() === 'failed' ? 'var(--status-danger)' : 'var(--status-warning)',
+                                    fontWeight: 800
+                                  }}>
+                                    {att.outcome.toUpperCase()}
+                                  </span>
+                                </div>
+                                {att.sanitized_message && (
+                                  <div style={{ color: 'var(--text-muted)', marginTop: 2 }}>{att.sanitized_message}</div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div style={{ color: 'var(--text-muted)', fontSize: 11 }}>Belum ada riwayat percobaan.</div>
                         )}
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div style={{ color: 'var(--text-muted)', fontSize: 11 }}>Belum ada riwayat percobaan.</div>
-                )}
-              </div>
-            </aside>
+                    </>
+                  )}
+                </div>
+              </aside>
+            </>
           )}
         </div>
       )}
