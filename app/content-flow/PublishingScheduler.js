@@ -96,6 +96,8 @@ export default function PublishingScheduler({
   useEffect(() => {
     if (controlledBrandProfileId) {
       setFilterBrandProfile(controlledBrandProfileId);
+    } else {
+      setFilterBrandProfile('all');
     }
   }, [controlledBrandProfileId]);
 
@@ -299,11 +301,15 @@ export default function PublishingScheduler({
     availableBrands.forEach(b => {
       if (b.brand_name) names.add(b.brand_name);
     });
+    accounts.forEach(a => {
+      if (a.display_name) names.add(a.display_name);
+    });
     jobs.forEach(j => {
       if (j.brand_profile) names.add(j.brand_profile);
+      if (j.account_name) names.add(j.account_name);
     });
     return Array.from(names).sort().map(name => ({ brand_name: name }));
-  }, [availableBrands, jobs]);
+  }, [availableBrands, accounts, jobs]);
 
   // Load Settings for Cloud Base Domain & Check Google OAuth Return Draft
   useEffect(() => {
@@ -714,7 +720,7 @@ export default function PublishingScheduler({
 
   // Clear All Failed Jobs
   const handleClearFailedJobs = async () => {
-    if (!window.confirm('Bersihkan semua jadwal publikasi yang berstatus gagal (failed)?')) return;
+    if (typeof window !== 'undefined' && !window.confirm('Bersihkan semua jadwal publikasi yang gagal/perlu tindakan?')) return;
     setClearingFailed(true);
     try {
       const res = await fetch('/api/v2/publishing/jobs?action=clear-failed', {
@@ -723,7 +729,7 @@ export default function PublishingScheduler({
       const json = await res.json();
       if (json.success) {
         showToast(json.message || 'Antrean gagal berhasil dibersihkan ✨');
-        if (selectedJobDetail?.status === 'failed') {
+        if (selectedJobDetail?.status === 'failed' || selectedJobDetail?.status === 'needs_review') {
           setSelectedJobId(null);
           setSelectedJobDetail(null);
         }
@@ -1289,7 +1295,15 @@ export default function PublishingScheduler({
           <div style={{ fontSize: 24, fontWeight: 850, color: 'var(--status-warning)', marginTop: 4 }}>{metrics.retryWait}</div>
           <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>Percobaan otomatis</div>
         </div>
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--surface-interactive)', borderRadius: 12, padding: 14 }}>
+        <div
+          onClick={() => setFilterStatus(filterStatus === 'failed' ? 'all' : 'failed')}
+          style={{
+            background: 'var(--surface)',
+            border: filterStatus === 'failed' ? '1px solid var(--status-danger)' : '1px solid var(--surface-interactive)',
+            borderRadius: 12, padding: 14, cursor: 'pointer'
+          }}
+          title="Klik untuk memfilter daftar jadwal yang perlu tindakan / gagal"
+        >
           <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.6px' }}>Perlu Tindakan</div>
           <div style={{ fontSize: 24, fontWeight: 850, color: metrics.needsAction > 0 ? 'var(--status-danger)' : 'var(--text-muted)', marginTop: 4 }}>{metrics.needsAction}</div>
           <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>Failed / Needs review</div>
@@ -1421,11 +1435,11 @@ export default function PublishingScheduler({
                 <span style={{ color: 'var(--text-muted)', fontWeight: 500, fontSize: 12 }}>({jobs.length} item)</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                {(metrics.needsAction > 0 || jobs.some(j => j.status === 'failed')) && (
+                {(metrics.needsAction > 0 || jobs.some(j => j.status === 'failed' || j.status === 'needs_review')) && (
                   <button
                     onClick={handleClearFailedJobs}
                     disabled={clearingFailed}
-                    title="Hapus semua antrean publikasi yang berstatus gagal (failed)"
+                    title="Hapus semua antrean publikasi yang berstatus gagal / perlu tindakan"
                     style={{
                       background: 'var(--status-danger-soft)',
                       border: '1px solid var(--status-danger)',
@@ -1544,7 +1558,7 @@ export default function PublishingScheduler({
                                   </button>
                                 </>
                               )}
-                              {(job.status === 'failed' || job.status === 'cancelled') && (
+                              {(job.status === 'failed' || job.status === 'cancelled' || job.status === 'needs_review') && (
                                 <>
                                   <button
                                     onClick={() => handleRetryJob(job.id)}

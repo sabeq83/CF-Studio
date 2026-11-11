@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.40.29 — Perbaikan Multi-Source Filter Brand & Pembersihan Job Needs Review (11/11/2026)
+- Kueri filter brand diperluas mendukung multi-sumber (Content Flow, Pillar Campaign, dan Akun Sosmed)
+- Perbaikan filter status yang saling menimpa view queue/history
+- Fitur Bersihkan Gagal diperluas untuk menghapus status needs_review dan failed
+- Sinkronisasi opsi brand profile di dropdown dengan akun terhubung
+- Kartu metrik Perlu Tindakan dapat diklik untuk toggle filter
+
 ## V2.40.28 — UI Antrean 1 Kolom Penuh & Perbaikan Filter Brand Berspasi (11/11/2026)
 - Tabel antrean penjadwalan diubah menjadi 1 kolom penuh (100% full-width)
 - Slide-Over Sheet Drawer off-canvas dengan backdrop overlay untuk melihat detail publikasi
