@@ -7,6 +7,8 @@ import { useState, useEffect } from 'react';
 import { resolvePlannerInstructions } from '@/lib/prompt-instructions';
 import { VIDEO_MODELS, getWordsPerClipOptions, getDefaultWordsPerClip } from '@/lib/words-per-clip-presets';
 import VisualIdentitySelector from '../VisualIdentitySelector';
+import BridgeSegmentsEditor from './BridgeSegmentsEditor';
+import { normalizeBridgePayload } from '@/lib/bridging/bridge-plan';
 import { GEMINI_VOICES, MINIMAX_VOICES, MINIMAX_ENGLISH_VOICES, getDefaultVoicePersona } from '@/lib/voice-constants';
 import { getDemographicOptions } from '@/lib/demographic-constants';
 
@@ -82,7 +84,17 @@ export default function PillarConfigurationForm({
   const [isBridgingActive, setIsBridgingActive] = useState(true);
   const [bridgeAtClip, setBridgeAtClip] = useState(2); // Isian bebas number
   const [bridgeDurationClips, setBridgeDurationClips] = useState(1);
+  const [bridgeSegments, setBridgeSegments] = useState([{ at_clip: 2, duration_clips: 1, role: 'intro' }]);
   const [bridgingMode, setBridgingMode] = useState('manual_input'); // 'manual_input' | 'select_existing' | 'url_extract'
+
+  const applyBridgeSegmentsChange = (nextSegments) => {
+    const clean = Array.isArray(nextSegments) && nextSegments.length > 0
+      ? nextSegments
+      : [{ at_clip: 2, duration_clips: 1, role: 'intro' }];
+    setBridgeSegments(clean);
+    setBridgeAtClip(Number(clean[0].at_clip ?? 2));
+    setBridgeDurationClips(Number(clean[0].duration_clips ?? 1));
+  };
 
   // Accordion 4: Visual Identity
   const [isVsoActive, setIsVsoActive] = useState(false);
@@ -259,8 +271,17 @@ export default function PillarConfigurationForm({
       if (typeof setBridgingMode === 'function') {
         setBridgingMode(config.product_bridging.bridging_mode || 'select_existing');
       }
-      setBridgeAtClip(Number(config.product_bridging.bridge_at_clip ?? (config.visual_engine?.target_clips_count === 4 ? 3 : 2)));
-      setBridgeDurationClips(Number(config.product_bridging.bridge_duration_clips ?? 1));
+      const norm = normalizeBridgePayload(config.product_bridging, config.visual_engine, {
+        targetClips: config.visual_engine?.target_clips_count || 4,
+        defaultActive: true
+      });
+      if (norm.segments.length > 0) {
+        applyBridgeSegmentsChange(norm.segments);
+      } else {
+        const fbAt = Number(config.product_bridging.bridge_at_clip ?? (config.visual_engine?.target_clips_count === 4 ? 3 : 2));
+        const fbDur = Number(config.product_bridging.bridge_duration_clips ?? 1);
+        applyBridgeSegmentsChange([{ at_clip: fbAt, duration_clips: fbDur, role: 'intro' }]);
+      }
     }
 
     // Accordion 4: Visual Identity
@@ -344,8 +365,9 @@ export default function PillarConfigurationForm({
       product_bridging: {
         is_bridging_active: Boolean(isBridgingActive),
         bridging_mode: typeof bridgingMode !== 'undefined' ? bridgingMode : 'select_existing',
-        bridge_at_clip: Number(bridgeAtClip ?? 3),
-        bridge_duration_clips: Number(bridgeDurationClips ?? 1)
+        bridge_at_clip: Number(bridgeSegments[0]?.at_clip ?? bridgeAtClip ?? 3),
+        bridge_duration_clips: Number(bridgeSegments[0]?.duration_clips ?? bridgeDurationClips ?? 1),
+        bridge_segments: bridgeSegments
       },
       visual_identity_preset_id: isVsoActive ? visualIdentity?.preset_id : null,
       visual_overrides_json: isVsoActive && visualIdentity?.preset_id === 'custom' ? visualIdentity.visual_overrides_json : null,
@@ -606,6 +628,7 @@ export default function PillarConfigurationForm({
           is_bridging_active: isBridgingActive ? 1 : 0,
           bridge_at_clip: Number(bridgeAtClip),
           bridge_duration_clips: Number(bridgeDurationClips),
+          bridge_segments: isBridgingActive ? bridgeSegments : [],
           bridging_mode: bridgingMode,
           product_ref_image_path: productRefImage || null,
           enable_vo_audit: enableVoAudit,
@@ -1380,37 +1403,22 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit}>
 
                   {isBridgingActive && (
                     <>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
-                        <div>
-                          <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Mulai Bridging Klip Ke:</label>
-                          <input
-                            type="number"
-                            min="1"
-                            max="10"
-                            value={bridgeAtClip}
-                            onChange={e => setBridgeAtClip(Number(e.target.value))}
-                            style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}
-                            required
-                          />
-                        </div>
+                      <BridgeSegmentsEditor
+                        segments={bridgeSegments}
+                        onChange={applyBridgeSegmentsChange}
+                        targetClips={Number(targetClipsCount || 4)}
+                        fallbackAtClip={bridgeAtClip}
+                        fallbackDurationClips={bridgeDurationClips}
+                        singleZoneOnly={visualStyle === 'investigative_faceless'}
+                      />
 
-                        <div>
-                          <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Durasi Bridging:</label>
-                          <select value={bridgeDurationClips} onChange={e => setBridgeDurationClips(Number(e.target.value))} style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}>
-                            <option value={1}>1 Klip</option>
-                            <option value={2}>2 Klip</option>
-                            <option value={0}>0 (Sisa Seluruh Klip)</option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Metode Penyertaan Produk:</label>
-                          <select value={bridgingMode} onChange={e => setBridgingMode(e.target.value)} style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}>
-                            <option value="manual_input">📸 Autofetch dari Content Planner Master</option>
-                            <option value="select_existing">📦 Pilih Produk Terdaftar</option>
-                            <option value="url_extract">🔗 Extract dari URL Marketplace</option>
-                          </select>
-                        </div>
+                      <div>
+                        <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Metode Penyertaan Produk:</label>
+                        <select value={bridgingMode} onChange={e => setBridgingMode(e.target.value)} style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}>
+                          <option value="manual_input">📸 Autofetch dari Content Planner Master</option>
+                          <option value="select_existing">📦 Pilih Produk Terdaftar</option>
+                          <option value="url_extract">🔗 Extract dari URL Marketplace</option>
+                        </select>
                       </div>
 
                       {/* Autofetch Visual Status Badge */}

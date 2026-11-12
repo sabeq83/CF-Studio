@@ -316,6 +316,38 @@ test('6. executeCustomStoryboardPipeline inherits full configuration from preset
     assert.equal(batchCampaign.voice_provider, 'minimax');
     assert.equal(Number(batchCampaign.clip_duration), 5); // explicit override respected
 
+    // Test 2b: Multi-segment bridge_segments + bridge_duration_clips=0 persisted on pillar_campaigns
+    const multiRes = await executeCustomStoryboardPipeline({
+      storyboard: {
+        preset_key: 'product_campaign',
+        title: 'Multi-Segment Custom Storyboard',
+        bridge_segments: [
+          { at_clip: 2, duration_clips: 1, role: 'intro' },
+          { at_clip: 4, duration_clips: 0, role: 'recall' }
+        ],
+        scenes: [
+          { scene_index: 1, voiceover_text: 'Hook masalah.', visual_prompt: 'Morning desk --ar 9:16' },
+          { scene_index: 2, voiceover_text: 'Intro produk.', visual_prompt: 'Product intro --ar 9:16' },
+          { scene_index: 3, voiceover_text: 'Cerita jeda.', visual_prompt: 'Gap scene --ar 9:16' },
+          { scene_index: 4, voiceover_text: 'Recall sampai akhir.', visual_prompt: 'Product recall --ar 9:16' },
+          { scene_index: 5, voiceover_text: 'CTA penutup.', visual_prompt: 'Outro with product --ar 9:16' }
+        ]
+      },
+      tenantId: 'default_tenant',
+      executionMode: 'creative_review'
+    });
+    createdCampaignIds.push(multiRes.campaign_id);
+    assert.deepEqual(multiRes.bridge_segments, [
+      { at_clip: 2, duration_clips: 1, role: 'intro' },
+      { at_clip: 4, duration_clips: 0, role: 'recall' }
+    ]);
+    const multiCampaign = await db.prepare('SELECT bridge_segments, bridge_at_clip FROM pillar_campaigns WHERE id = ?').get(multiRes.campaign_id);
+    assert.equal(Number(multiCampaign.bridge_at_clip), 2);
+    assert.deepEqual(JSON.parse(multiCampaign.bridge_segments), [
+      { at_clip: 2, duration_clips: 1, role: 'intro' },
+      { at_clip: 4, duration_clips: 0, role: 'recall' }
+    ]);
+
     // Test 3: Unknown preset_key throws descriptive error
     await assert.rejects(
       async () => executeCustomStoryboardPipeline({

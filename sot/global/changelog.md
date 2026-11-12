@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.44.0 — Multi-Segment Product Bridging (Multiplier & Pillar) (13/11/2026)
+- Central bridge-plan & zone prompt resolver with pre/intro/gap/recall/post zoning and single-segment snapshot parity
+- Multi-segment BridgeSegmentsEditor UI across Multiplier, Pillar, and Operator Presets plus pillar_campaigns.bridge_segments schema support
+- Multiplier, Pillar, Custom Storyboard MCP schema, and Auto-Pipeline multi-segment isolation & reference contracts
+
 ## V2.43.1 — Dynamic Multiplier Bridging, Smooth Copywriting & Custom Storyboard Preset (13/11/2026)
 - Propagate dynamic bridge_at_clip and bridge_duration_clips across multiplier-pairing.js, prompts.js, and re-multiplier-worker.js without hardcoding
 - Integrate Dynamic Story Curve, sentence integrity rules, and autopilot hybrid_lock T2I start frame transitions

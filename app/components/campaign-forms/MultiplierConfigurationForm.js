@@ -5,6 +5,8 @@ import { captureCanonicalFormData } from '@/lib/campaign-configuration/capture';
 
 import Sidebar from '../Sidebar';
 import VisualIdentitySelector from '../VisualIdentitySelector';
+import BridgeSegmentsEditor from './BridgeSegmentsEditor';
+import { normalizeBridgePayload } from '@/lib/bridging/bridge-plan';
 import { useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { getWordsPerClipOptions, getDefaultWordsPerClip, VIDEO_MODELS } from '@/lib/words-per-clip-presets';
@@ -110,6 +112,16 @@ function MultiplierLabPageContent({ mode = 'direct', onCapture, onSuccess, onCan
   const [targetClipsCount, setTargetClipsCount] = useState(4);
   const [bridgeAtClip, setBridgeAtClip] = useState(2);
   const [bridgeDurationClips, setBridgeDurationClips] = useState(1);
+  const [bridgeSegments, setBridgeSegments] = useState([{ at_clip: 2, duration_clips: 1, role: 'intro' }]);
+
+  const applyBridgeSegmentsChange = (nextSegments) => {
+    const clean = Array.isArray(nextSegments) && nextSegments.length > 0
+      ? nextSegments
+      : [{ at_clip: 2, duration_clips: 1, role: 'intro' }];
+    setBridgeSegments(clean);
+    setBridgeAtClip(Number(clean[0].at_clip ?? 2));
+    setBridgeDurationClips(Number(clean[0].duration_clips ?? 1));
+  };
   const [promotionStyle, setPromotionStyle] = useState('Softselling');
   const [bridgingMode, setBridgingMode] = useState('url_extract');
   const [manualProductName, setManualProductName] = useState('');
@@ -220,8 +232,17 @@ function MultiplierLabPageContent({ mode = 'direct', onCapture, onSuccess, onCan
       if (typeof setBridgingMode === 'function') {
         setBridgingMode(config.product_bridging.bridging_mode || 'select_existing');
       }
-      setBridgeAtClip(Number(config.product_bridging.bridge_at_clip ?? (config.visual_engine?.target_clips_count === 4 ? 3 : 2)));
-      setBridgeDurationClips(Number(config.product_bridging.bridge_duration_clips ?? 1));
+      const norm = normalizeBridgePayload(config.product_bridging, config.visual_engine, {
+        targetClips: config.visual_engine?.target_clips_count || null,
+        defaultActive: true
+      });
+      if (norm.segments.length > 0) {
+        applyBridgeSegmentsChange(norm.segments);
+      } else {
+        const fbAt = Number(config.product_bridging.bridge_at_clip ?? (config.visual_engine?.target_clips_count === 4 ? 3 : 2));
+        const fbDur = Number(config.product_bridging.bridge_duration_clips ?? 1);
+        applyBridgeSegmentsChange([{ at_clip: fbAt, duration_clips: fbDur, role: 'intro' }]);
+      }
     }
 
     // Accordion 4: Visual Swap Overrides (VSO)
@@ -298,8 +319,9 @@ function MultiplierLabPageContent({ mode = 'direct', onCapture, onSuccess, onCan
       product_bridging: {
         is_bridging_active: Boolean(isBridgingActive),
         bridging_mode: typeof bridgingMode !== 'undefined' ? bridgingMode : 'select_existing',
-        bridge_at_clip: Number(bridgeAtClip ?? 3),
-        bridge_duration_clips: Number(bridgeDurationClips ?? 1)
+        bridge_at_clip: Number(bridgeSegments[0]?.at_clip ?? bridgeAtClip ?? 3),
+        bridge_duration_clips: Number(bridgeSegments[0]?.duration_clips ?? bridgeDurationClips ?? 1),
+        bridge_segments: bridgeSegments
       },
       visual_swap: {
         is_vso_active: Boolean(isVsoActive),
@@ -916,7 +938,9 @@ function MultiplierLabPageContent({ mode = 'direct', onCapture, onSuccess, onCan
           brand_profile_id: selectedBrandId || null,
           campaign_type: isPureStory ? 'pure_storytelling' : 'product_campaign',
           isBridgingActive: isPureStory ? false : isBridgingActive,
-          targetClipsCount, bridgeAtClip, bridgeDurationClips, promotionStyle, bridgingMode,
+          targetClipsCount, bridgeAtClip, bridgeDurationClips,
+          bridge_segments: isPureStory ? [] : bridgeSegments,
+          promotionStyle, bridgingMode,
           manualProductName: isPureStory ? '' : manualProductName,
           manualProductDesc: isPureStory ? '' : manualProductDesc,
           manualProductUsp: isPureStory ? '' : manualProductUsp,
@@ -2351,29 +2375,26 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit} style={{ disp
                         </div>
                       </div>
 
-                      {isBridgingActive && (
+                      {isBridgingActive && (() => {
+                        const selectedAsset = assets.find(a => selectedBlueprintIds.includes(a.id) || a.id === selectedAssetId);
+                        let blueprintClips = 0;
+                        try {
+                          if (selectedAsset?.original_storyboard_json) {
+                            const parsedSb = JSON.parse(selectedAsset.original_storyboard_json);
+                            if (Array.isArray(parsedSb)) blueprintClips = parsedSb.length;
+                          }
+                        } catch (_) {}
+                        const previewTargetClips = Math.max(blueprintClips || Number(targetClipsCount || 4), 4);
+                        return (
                         <>
                           <div className="form-group">
-                            <label className="form-label">Sisipkan Transisi Promosi pada Klip Ke- (X)</label>
-                            <input
-                              type="number"
-                              className="form-input"
-                              min="2"
-                              max={targetClipsCount}
-                              value={bridgeAtClip}
-                              onChange={e => setBridgeAtClip(Number(e.target.value))}
+                            <BridgeSegmentsEditor
+                              segments={bridgeSegments}
+                              onChange={applyBridgeSegmentsChange}
+                              targetClips={previewTargetClips}
+                              fallbackAtClip={bridgeAtClip}
+                              fallbackDurationClips={bridgeDurationClips}
                             />
-                          </div>
-
-                          <div className="form-group">
-                            <label className="form-label">Durasi Bridging Produk (Klip)</label>
-                            <select className="form-input" value={bridgeDurationClips} onChange={e => setBridgeDurationClips(Number(e.target.value))}>
-                              <option value="0">0 (Sisa seluruh klip)</option>
-                              <option value="1">1 Klip</option>
-                              <option value="2">2 Klip</option>
-                              <option value="3">3 Klip</option>
-                              <option value="4">4 Klip</option>
-                            </select>
                           </div>
 
                           <div className="form-group">
@@ -2417,7 +2438,8 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit} style={{ disp
                             );
                           })()}
                         </>
-                      )}
+                        );
+                      })()}
                     </div>
                   )}
                 </div>)}

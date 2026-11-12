@@ -137,3 +137,95 @@ test('2. buildMultiplierPhase2Prompt respects snake_case bridging keys, enforces
   assert.ok(prompt6.includes('ZONA PENUTUP / TRANSITION BACK (KLIP #6 s.d. KLIP #6)'));
   assert.ok(prompt6.includes('Klip ke-4 hingga Klip ke-5'));
 });
+
+test('3. Multi-segment bridging ([2/1 intro, 6/1 recall] on 7 clips) propagates from preset, zones Multiplier Phase 2 prompt, and isolates intro vs recall start frame', async () => {
+  const { resolveBridgePlan } = await import('../lib/bridging/bridge-plan.js');
+
+  const multiPreset = {
+    id: 'preset_multi',
+    name: 'Multi Preset',
+    config: {
+      visual_engine: {
+        target_clips_count: 7,
+        clip_duration: 4,
+        words_per_clip: '8-9 kata'
+      },
+      product_bridging: {
+        is_bridging_active: true,
+        bridge_at_clip: 2,
+        bridge_duration_clips: 1,
+        bridge_segments: [
+          { at_clip: 2, duration_clips: 1, role: 'intro' },
+          { at_clip: 6, duration_clips: 1, role: 'recall' }
+        ]
+      }
+    }
+  };
+
+  const bridgingCfg = buildAutonomousBridgingConfig({
+    presetConfig: multiPreset.config,
+    effectiveTargetClipsCount: 7,
+    effectiveVisualMode: 'hybrid_lock'
+  });
+
+  assert.equal(bridgingCfg.bridge_at_clip, 2);
+  assert.equal(bridgingCfg.bridge_duration_clips, 1);
+  assert.deepEqual(bridgingCfg.bridge_segments, [
+    { at_clip: 2, duration_clips: 1, role: 'intro' },
+    { at_clip: 6, duration_clips: 1, role: 'recall' }
+  ]);
+
+  const productDNA = {
+    product_name: 'Madu Pahit Asli',
+    visual_anchor_description: 'Glass jar of pure bitter honey'
+  };
+  const aesthetics = {
+    clip_duration: 4,
+    words_per_clip: '8-9 kata',
+    narrative_mode: 'auto',
+    visual_style_preset: 'Macrophotography'
+  };
+
+  const blueprint7 = Array.from({ length: 7 }, (_, i) => ({
+    scene: i + 1,
+    visual_description: `Scene ${i + 1}`,
+    narration_transcript: `Narasi ${i + 1}`
+  }));
+
+  const multiPrompt = buildMultiplierPhase2Prompt(
+    blueprint7,
+    productDNA,
+    aesthetics,
+    { ...bridgingCfg, target_clips_count: 7, visual_mode: 'hybrid_lock' },
+    { isVsoActive: true },
+    { enable_tts: true, voice_provider: 'minimax' }
+  );
+
+  assert.ok(multiPrompt.includes('MULTI-SEGMENT'), 'Expected MULTI-SEGMENT zoning header');
+  assert.ok(multiPrompt.includes('ZONA PRE-BRIDGING (Klip #1)'));
+  assert.ok(multiPrompt.includes('ZONA INTRO PRODUK — PERKENALAN UTAMA (Klip #2)'));
+  assert.ok(multiPrompt.includes('ZONA GAP / JEDA CERITA MURNI (KLIP #3 s.d. KLIP #5'));
+  assert.ok(multiPrompt.includes('ZONA RECALL PRODUK — PENGINGAT / BUKTI / CTA (Klip #6)'));
+  assert.ok(multiPrompt.includes('ZONA POST-BRIDGING / PENUTUP (Klip #7)'));
+  assert.ok(multiPrompt.includes('Clips 2 and 6') || multiPrompt.includes('Klip 2, 6'), 'Expected @product_truth binding to cite Clips 2 and 6');
+  assert.ok(multiPrompt.includes('Klip 2, 6'), 'Expected Indonesian T2I target range to cite Klip 2, 6');
+
+  const plan = resolveBridgePlan({
+    targetClips: 7,
+    isBridgingActive: true,
+    segments: bridgingCfg.bridge_segments
+  });
+  assert.deepEqual(plan.productClips, [2, 6]);
+  assert.equal(plan.zoneOf(1), 'pre');
+  assert.equal(plan.zoneOf(2), 'intro');
+  assert.equal(plan.zoneOf(3), 'gap');
+  assert.equal(plan.zoneOf(5), 'gap');
+  assert.equal(plan.zoneOf(6), 'recall');
+  assert.equal(plan.zoneOf(7), 'post');
+
+  // Worker generatedStartFrameUrl contract: intro index 0 gets start-frame reuse, recall gets T2I auto-gen
+  const segAt2 = plan.segmentOf(2);
+  const segAt6 = plan.segmentOf(6);
+  assert.equal(plan.isSegmentStart(2) && segAt2?.index === 0, true);
+  assert.equal(plan.isSegmentStart(6) && segAt6?.index === 0, false);
+});

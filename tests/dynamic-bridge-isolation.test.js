@@ -145,3 +145,67 @@ test('Dynamic Bridge Isolation: defaults gracefully when bridge_at_clip = 2', ()
     'Dynamic curve should introduce at Clip 2 when bridgeAtClip = 2'
   );
 });
+
+test('Dynamic Multi-Segment Pillar: [2/1 intro, 6/1 recall] on 7 clips isolates Gap hands vs zero product, and Investigative locks single-zone', () => {
+  const productData = {
+    product_name: 'GarliBee',
+    product_description: 'Bawang lanang fermentasi dalam madu mentah',
+    unique_selling_point: 'Fermentasi 3 bulan kaya allicin aktif',
+    packaging_type: 'Jar Kaca',
+    is_in_packaging: 1,
+    t2i_prompt: 'A transparent jar of GarliBee',
+    i2v_action_prompt: 'Macro spoon dipping into amber fluid'
+  };
+
+  const visualOverrides = {
+    schema_version: 'visual_identity_snapshot_v1',
+    structured: {
+      visual_language: {
+        primary_style: 'commercial_product_cinematic'
+      }
+    }
+  };
+
+  const multiCampaign = {
+    campaign_name: 'Test Multi-Segment Pillar Campaign',
+    content_pillar: 'Solusi Kolesterol',
+    category_cep: 'Kecemasan Kolesterol',
+    target_clips_count: 7,
+    bridge_at_clip: 2,
+    bridge_duration_clips: 1,
+    bridge_segments: JSON.stringify([
+      { at_clip: 2, duration_clips: 1, role: 'intro' },
+      { at_clip: 6, duration_clips: 1, role: 'recall' }
+    ]),
+    is_bridging_active: 1,
+    visual_style: 'metaphoric_faceless',
+    narrative_mode: 'Problem-Solution',
+    custom_hook: 'Angka kolesterol bikin gelisah?',
+    visual_action_guideline: 'Kamera makro pipa kaca transparan'
+  };
+
+  const multiPrompt = buildOrganicPillarPrompt([], multiCampaign, productData, {}, visualOverrides);
+
+  // Pre-bridging stays 100% pure isolated object (Clip 1)
+  assert.ok(multiPrompt.includes('🚨 KHUSUS KLIP 1 s/d 1 (METAFORA OBJEK PRE-BRIDGING — 100% PURE ISOLATED OBJECT ONLY):'));
+  // Multi-segment contract emitted with Intro (2) + Gap (3..5) + Recall (6) + Post (7)
+  assert.ok(multiPrompt.includes('PRODUCT BRIDGING MULTI-SEGMENT & STRICT CLIP ZONING CONTRACT'));
+  assert.ok(multiPrompt.includes('ZONA INTRO PRODUK — PERKENALAN UTAMA (Klip #2)'));
+  assert.ok(multiPrompt.includes('ZONA GAP / JEDA CERITA MURNI (KLIP #3 s.d. KLIP #5'));
+  assert.ok(multiPrompt.includes('ZONA RECALL PRODUK — PENGINGAT / BUKTI / CTA (Klip #6)'));
+  assert.ok(multiPrompt.includes('ZONA POST-BRIDGING / PENUTUP (Klip #7)'));
+  // Gap / Post allows consistent hands without product in metaphoric_faceless
+  assert.ok(multiPrompt.includes('ZONA GAP / POST'));
+  assert.ok(multiPrompt.includes('strictly no product shown, strictly no bottle, jar, or commercial packaging'));
+  // Product truth contract targets Clips 2 and 6
+  assert.ok(multiPrompt.includes('Clips 2 and 6'));
+
+  // Investigative faceless disables multi-segment and stays single-zone
+  const invCampaign = {
+    ...multiCampaign,
+    visual_style: 'investigative_faceless'
+  };
+  const invPrompt = buildOrganicPillarPrompt([], invCampaign, productData, {}, visualOverrides);
+  assert.ok(!invPrompt.includes('PRODUCT BRIDGING MULTI-SEGMENT & STRICT CLIP ZONING CONTRACT'));
+  assert.ok(!invPrompt.includes('ZONA RECALL PRODUK'));
+});

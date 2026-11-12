@@ -10,6 +10,7 @@ import {
 import { generateCampaignId } from '../../../../lib/id-generator';
 import { withTenantContext } from '../../../../lib/auth';
 import { resolveVisualIdentitySubmission } from '../../../../lib/visual-override-resolver';
+import { normalizeBridgePayload } from '../../../../lib/bridging/bridge-plan';
 
 function extractSpreadsheetId(input) {
   if (!input) return null;
@@ -72,6 +73,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
         target_clips_count: Number(formData.get('target_clips_count') || 4),
         bridge_at_clip: Number(formData.get('bridge_at_clip') || 2),
         bridge_duration_clips: Number(formData.get('bridge_duration_clips') !== null ? formData.get('bridge_duration_clips') : 1),
+        bridge_segments: formData.get('bridge_segments') || null,
         bridging_mode: formData.get('bridging_mode') || 'select_existing',
         target_product_id: formData.get('target_product_id') || null,
         ephemeral_product_data: formData.get('ephemeral_product_data') || null,
@@ -194,6 +196,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
       target_clips_count,
       bridge_at_clip,
       bridge_duration_clips,
+      bridge_segments,
       bridging_mode,
       target_product_id,
       ephemeral_product_data,
@@ -263,6 +266,21 @@ export const POST = withTenantContext(async (request, _context, user) => {
       accountName = brand.brand_name || accountName;
     }
 
+    const effectiveVisualStyle = visual_style || 'Cinematic';
+    const bridgeNorm = normalizeBridgePayload({
+      is_bridging_active: Boolean(is_bridging_active),
+      bridge_at_clip: bridge_at_clip || 2,
+      bridge_duration_clips: bridge_duration_clips !== undefined ? Number(bridge_duration_clips) : 1,
+      bridge_segments: bridge_segments ?? null
+    }, {}, {
+      targetClips: target_clips_count || 4,
+      defaultActive: Boolean(is_bridging_active),
+      singleZoneOnly: effectiveVisualStyle === 'investigative_faceless'
+    });
+    if (bridgeNorm.active && bridgeNorm.errors.length > 0) {
+      return NextResponse.json({ error: bridgeNorm.errors[0] }, { status: 400 });
+    }
+
     const campaignData = {
       id,
       campaign_name: campaign_name.trim(),
@@ -274,12 +292,13 @@ export const POST = withTenantContext(async (request, _context, user) => {
       custom_instruction: custom_instruction || '',
       brand_profile_id: brand_profile_id || null,
       narrative_mode: narrative_mode || 'Storytelling',
-      visual_style: visual_style || 'Cinematic',
+      visual_style: effectiveVisualStyle,
       face_visibility: face_visibility || 'Faceless',
       is_bridging_active: is_bridging_active ? 1 : 0,
       target_clips_count: target_clips_count || 4,
-      bridge_at_clip: bridge_at_clip || 2,
-      bridge_duration_clips: bridge_duration_clips !== undefined ? Number(bridge_duration_clips) : 1,
+      bridge_at_clip: bridgeNorm.legacy.bridge_at_clip,
+      bridge_duration_clips: bridgeNorm.legacy.bridge_duration_clips,
+      bridge_segments: bridgeNorm.storageJson,
       bridging_mode: bridging_mode || 'select_existing',
       target_product_id: target_product_id || null,
       ephemeral_product_data: ephemeral_product_data || null,

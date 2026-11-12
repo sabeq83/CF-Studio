@@ -5,6 +5,7 @@ import { useEffect, useState, useRef, Suspense } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { normalizeAudioConfig, syncAudioConfigKeyValue } from '@/lib/multiplier-audio-config';
 import { GEMINI_VOICES, MINIMAX_VOICES, MINIMAX_ENGLISH_VOICES } from '@/lib/voice-constants';
+import { resolveBridgePlan, readBridgeInputs } from '@/lib/bridging/bridge-plan';
 
 function renderPhaseBadge(task) {
   let text = '⚡ Fase 1 : Pending';
@@ -1532,46 +1533,49 @@ function CampaignDetailPageContent() {
                                     {storyboard.length > 1 && (
                                       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', padding: '10px 14px', background: 'var(--surface-interactive)', border: '1px solid var(--border-subtle)', borderRadius: 8, marginBottom: 12 }}>
                                         <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', marginRight: 4 }}>⚡ Lompat Cepat:</span>
-                                        {storyboard.map((_, sidx) => {
-                                          const isActive = (activeClipIndex[task.id] !== undefined ? activeClipIndex[task.id] : 0) === sidx;
-                                          const isBridge = (bridging.isBridgingActive !== false) &&
-                                            Number(sidx + 1) >= Number(bridging.bridgeAtClip || 0) &&
-                                            Number(sidx + 1) < (Number(bridging.bridgeAtClip || 0) + Number(bridging.bridgeDurationClips || 1));
-                                          return (
-                                            <button
-                                              key={sidx}
-                                              type="button"
-                                              onClick={() => {
-                                                setActiveClipIndex(prev => ({ ...prev, [task.id]: sidx }));
-                                                const el = document.getElementById(`mult-clip-${task.id}-${sidx}`);
-                                                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                                              }}
-                                              style={{
-                                                padding: '4px 10px',
-                                                fontSize: '0.72rem',
-                                                fontWeight: isActive ? 700 : 500,
-                                                borderRadius: 4,
-                                                border: isActive ? '1px solid var(--accent)' : '1px solid var(--border-subtle)',
-                                                background: isActive ? 'var(--accent)' : 'var(--surface)',
-                                                color: isActive ? 'var(--on-action-primary, #042f2e)' : 'var(--text-primary)',
-                                                cursor: 'pointer',
-                                                transition: 'all 0.15s ease'
-                                              }}
-                                            >
-                                              Klip #{sidx + 1} {isBridge ? '🌉' : ''}
-                                            </button>
-                                          );
-                                        })}
+                                        {(() => {
+                                          const multPlan = resolveBridgePlan(readBridgeInputs(bridging, { target_clips_count: storyboard.length || 4 }, { defaultActive: true }));
+                                          return storyboard.map((_, sidx) => {
+                                            const isActive = (activeClipIndex[task.id] !== undefined ? activeClipIndex[task.id] : 0) === sidx;
+                                            const isBridge = multPlan.isProductClip(sidx + 1);
+                                            const segRole = multPlan.zoneOf(sidx + 1);
+                                            return (
+                                              <button
+                                                key={sidx}
+                                                type="button"
+                                                onClick={() => {
+                                                  setActiveClipIndex(prev => ({ ...prev, [task.id]: sidx }));
+                                                  const el = document.getElementById(`mult-clip-${task.id}-${sidx}`);
+                                                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                                }}
+                                                style={{
+                                                  padding: '4px 10px',
+                                                  fontSize: '0.72rem',
+                                                  fontWeight: isActive ? 700 : 500,
+                                                  borderRadius: 4,
+                                                  border: isActive ? '1px solid var(--accent)' : '1px solid var(--border-subtle)',
+                                                  background: isActive ? 'var(--accent)' : 'var(--surface)',
+                                                  color: isActive ? 'var(--on-action-primary, #042f2e)' : 'var(--text-primary)',
+                                                  cursor: 'pointer',
+                                                  transition: 'all 0.15s ease'
+                                                }}
+                                                title={isBridge ? `Zona Produk (${segRole.toUpperCase()})` : `Zona ${segRole.toUpperCase()}`}
+                                              >
+                                                Klip #{sidx + 1} {isBridge ? (segRole === 'recall' ? '🔁' : '🌉') : ''}
+                                              </button>
+                                            );
+                                          });
+                                        })()}
                                       </div>
                                     )}
 
                                     {/* Clips edit rows dengan Accordion (Klip 1 default terbuka) */}
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                                      {storyboard.map((clip, cidx) => {
+                                      {(() => {
+                                        const multClipPlan = resolveBridgePlan(readBridgeInputs(bridging, { target_clips_count: storyboard.length || 4 }, { defaultActive: true }));
+                                        return storyboard.map((clip, cidx) => {
                                         const isExpanded = (activeClipIndex[task.id] !== undefined ? activeClipIndex[task.id] : 0) === cidx;
-                                        const isBridge = (bridging.isBridgingActive !== false) &&
-                                          Number(cidx + 1) >= Number(bridging.bridgeAtClip || 0) &&
-                                          Number(cidx + 1) < (Number(bridging.bridgeAtClip || 0) + Number(bridging.bridgeDurationClips || 1));
+                                        const isBridge = multClipPlan.isProductClip(cidx + 1);
 
                                         return (
                                           <div
@@ -1756,7 +1760,8 @@ function CampaignDetailPageContent() {
                                           )}
                                         </div>
                                       );
-                                    })}
+                                    });
+                                    })()}
                                     </div>
 
                                     {/* YouTube Shorts High-CTR Title */}

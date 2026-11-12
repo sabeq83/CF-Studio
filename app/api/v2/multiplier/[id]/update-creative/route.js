@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { dbRun, getMultiplierTaskById } from '@/lib/db';
 import { withTenantContext } from '@/lib/auth';
 import { normalizeAudioConfig } from '@/lib/multiplier-audio-config';
+import { normalizeBridgePayload } from '@/lib/bridging/bridge-plan';
 
 export const POST = withTenantContext(async (req, { params }) => {
   try {
@@ -25,6 +26,22 @@ export const POST = withTenantContext(async (req, { params }) => {
     }));
 
     const normalizedAudio = normalizeAudioConfig(audioConfig || {});
+    const targetClipsCount = Array.isArray(storyboard) && storyboard.length > 0 ? storyboard.length : null;
+    const bridgeNorm = normalizeBridgePayload(bridgingConfig || {}, vsoConfig || {}, {
+      targetClips: targetClipsCount,
+      defaultActive: bridgingConfig?.campaign_type !== 'pure_storytelling' && bridgingConfig?.is_bridging_active !== false
+    });
+    if (bridgeNorm.active && bridgeNorm.errors.length > 0) {
+      return NextResponse.json({ success: false, error: bridgeNorm.errors[0] }, { status: 400 });
+    }
+    const normalizedBridging = {
+      ...(bridgingConfig || {}),
+      is_bridging_active: bridgeNorm.active,
+      bridge_at_clip: bridgeNorm.legacy.bridge_at_clip,
+      bridge_duration_clips: bridgeNorm.legacy.bridge_duration_clips,
+      ...(bridgeNorm.active ? { bridge_segments: bridgeNorm.segments } : {})
+    };
+    if (!bridgeNorm.active) delete normalizedBridging.bridge_segments;
 
     await dbRun(`
       UPDATE re_multiplier_tasks
@@ -40,7 +57,7 @@ export const POST = withTenantContext(async (req, { params }) => {
       JSON.stringify(storyboard || []),
       JSON.stringify(prompts),
       JSON.stringify(vsoConfig || {}),
-      JSON.stringify(bridgingConfig || {}),
+      JSON.stringify(normalizedBridging),
       JSON.stringify(normalizedAudio),
       newCaption || '',
       ytTitle !== undefined ? ytTitle : null,

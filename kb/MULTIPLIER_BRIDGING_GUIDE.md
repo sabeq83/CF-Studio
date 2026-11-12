@@ -38,3 +38,12 @@ Struktur cerita beradaptasi fleksibel mengikuti parameter `target_clips_count`, 
 
 ## 3. Variasi Multi-Axis Angles
 Setiap variasi baris di Multiplier Lab mengeksplorasi sudut pandang unik yang berbeda (emosional, tutorial praktis, perbandingan sebelum-sesudah, edukasi sains, atau curhatan santai), namun seluruhnya tetap mematuhi disiplin transisi alami di atas.
+
+---
+
+## 4. Pola Multi-Segmen Bridging (Intro + Gap + Recall)
+Untuk video yang lebih panjang (misalnya 6–8+ klip) atau produk yang butuh penguatan memori tanpa terasa seperti iklan terus-menerus, gunakan konfigurasi `bridge_segments` (maksimal **3 segmen** per video):
+- **Segmen #1 (`intro`)**: Perkenalan produk perdana secara halus sebagai jawaban alami atas masalah/hook di zona `PRE`.
+- **Zona `GAP` (Jeda Bebas Produk)**: Kembali ke cerita/edukasi/kehidupan audiens agar penonton tidak jenuh. **DILARANG KERAS** menyebut nama produk, bahan khas produk, atau memunculkan kemasan pada zona Gap.
+- **Segmen #2+ (`recall`)**: Produk muncul kembali secara ringkas (pengingat, bukti praktis, atau ajakan ringan). **DILARANG MEMPERKENALKAN ULANG DARI AWAL** (hindari frasa *"kenalin ini..."*); sambungkan seolah penonton sudah melihatnya di Intro.
+- **Zona `POST`**: Penutup dan kesimpulan cerita bebas produk (kecuali jika segmen terakhir memakai `duration_clips = 0` "sampai akhir").

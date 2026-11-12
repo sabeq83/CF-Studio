@@ -3,6 +3,8 @@
 import Sidebar from '../components/Sidebar';
 import ImportPlannerModal from '../components/ImportPlannerModal';
 import VisualIdentitySelector from '../components/VisualIdentitySelector';
+import BridgeSegmentsEditor from '../components/campaign-forms/BridgeSegmentsEditor';
+import { normalizeBridgePayload } from '@/lib/bridging/bridge-plan';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
 import { getWordsPerClipOptions, getDefaultWordsPerClip, VIDEO_MODELS } from '@/lib/words-per-clip-presets';
@@ -95,6 +97,16 @@ export default function OrganicPillarPage() {
   const [targetClipsCount, setTargetClipsCount] = useState(4);
   const [bridgeAtClip, setBridgeAtClip] = useState(2);
   const [bridgeDurationClips, setBridgeDurationClips] = useState(1);
+  const [bridgeSegments, setBridgeSegments] = useState([{ at_clip: 2, duration_clips: 1, role: 'intro' }]);
+
+  const applyBridgeSegmentsChange = (nextSegments) => {
+    const clean = Array.isArray(nextSegments) && nextSegments.length > 0
+      ? nextSegments
+      : [{ at_clip: 2, duration_clips: 1, role: 'intro' }];
+    setBridgeSegments(clean);
+    setBridgeAtClip(Number(clean[0].at_clip ?? 2));
+    setBridgeDurationClips(Number(clean[0].duration_clips ?? 1));
+  };
   const [promotionStyle, setPromotionStyle] = useState('Softselling');
   const [bridgingMode, setBridgingMode] = useState('select_existing');
   const [products, setProducts] = useState([]);
@@ -222,8 +234,17 @@ export default function OrganicPillarPage() {
     if (config.product_bridging) {
       setIsBridgingActive(Boolean(config.product_bridging.is_bridging_active));
       setBridgingMode(config.product_bridging.bridging_mode || 'select_existing');
-      setBridgeAtClip(Number(config.product_bridging.bridge_at_clip ?? (config.visual_engine?.target_clips_count === 4 ? 3 : 2)));
-      setBridgeDurationClips(Number(config.product_bridging.bridge_duration_clips ?? 1));
+      const norm = normalizeBridgePayload(config.product_bridging, config.visual_engine, {
+        targetClips: config.visual_engine?.target_clips_count || 4,
+        defaultActive: true
+      });
+      if (norm.segments.length > 0) {
+        applyBridgeSegmentsChange(norm.segments);
+      } else {
+        const fbAt = Number(config.product_bridging.bridge_at_clip ?? (config.visual_engine?.target_clips_count === 4 ? 3 : 2));
+        const fbDur = Number(config.product_bridging.bridge_duration_clips ?? 1);
+        applyBridgeSegmentsChange([{ at_clip: fbAt, duration_clips: fbDur, role: 'intro' }]);
+      }
     }
 
     // Accordion 4: Visual Swap Overrides (VSO)
@@ -311,8 +332,9 @@ export default function OrganicPillarPage() {
       product_bridging: {
         is_bridging_active: Boolean(isBridgingActive),
         bridging_mode: bridgingMode || 'select_existing',
-        bridge_at_clip: Number(bridgeAtClip ?? 3),
-        bridge_duration_clips: Number(bridgeDurationClips ?? 1)
+        bridge_at_clip: Number(bridgeSegments[0]?.at_clip ?? bridgeAtClip ?? 3),
+        bridge_duration_clips: Number(bridgeSegments[0]?.duration_clips ?? bridgeDurationClips ?? 1),
+        bridge_segments: bridgeSegments
       },
       visual_swap: {
         is_vso_active: Boolean(isVsoActive),
@@ -714,6 +736,8 @@ export default function OrganicPillarPage() {
           is_bridging_active: isBridgingActive,
           target_clips_count: targetClipsCount,
           bridge_at_clip: bridgeAtClip,
+          bridge_duration_clips: bridgeDurationClips,
+          bridge_segments: isBridgingActive ? bridgeSegments : [],
           bridging_mode: 'select_existing',
           aspect_ratio: aspectRatio,
           target_ai: targetAi,
@@ -782,8 +806,17 @@ export default function OrganicPillarPage() {
     }
 
     if (isBridgingActive) {
-      if (bridgeAtClip < 2 || bridgeAtClip > targetClipsCount) {
-        showToast(`Titik transisi harus berada di antara klip ke-2 hingga ke-${targetClipsCount}.`, 'error');
+      const bridgeNorm = normalizeBridgePayload({
+        is_bridging_active: true,
+        bridge_at_clip: bridgeAtClip,
+        bridge_duration_clips: bridgeDurationClips,
+        bridge_segments: bridgeSegments
+      }, {}, {
+        targetClips: targetClipsCount,
+        singleZoneOnly: visualStyle === 'investigative_faceless'
+      });
+      if (bridgeNorm.errors.length > 0) {
+        showToast(bridgeNorm.errors[0], 'error');
         return;
       }
       if (bridgingMode === 'select_existing' && !targetProductId) {
@@ -840,6 +873,7 @@ export default function OrganicPillarPage() {
       formData.append('target_clips_count', String(targetClipsCount));
       formData.append('bridge_at_clip', String(bridgeAtClip));
       formData.append('bridge_duration_clips', String(bridgeDurationClips));
+      formData.append('bridge_segments', isBridgingActive ? JSON.stringify(bridgeSegments) : '');
       formData.append('bridging_mode', bridgingMode);
       formData.append('target_product_id', bridgingMode === 'select_existing' && isBridgingActive ? (targetProductId || '') : '');
       if (ephemeral_product_data) {
@@ -1017,8 +1051,16 @@ export default function OrganicPillarPage() {
 
       setIsBridgingActive(c.is_bridging_active === 1);
       setTargetClipsCount(c.target_clips_count || 4);
-      setBridgeAtClip(c.bridge_at_clip || 2);
-      setBridgeDurationClips(c.bridge_duration_clips !== undefined ? c.bridge_duration_clips : 1);
+      const cloneNorm = normalizeBridgePayload(c, {}, { targetClips: c.target_clips_count || 4, defaultActive: true });
+      if (cloneNorm.segments.length > 0) {
+        applyBridgeSegmentsChange(cloneNorm.segments);
+      } else {
+        applyBridgeSegmentsChange([{
+          at_clip: c.bridge_at_clip || 2,
+          duration_clips: c.bridge_duration_clips !== undefined ? c.bridge_duration_clips : 1,
+          role: 'intro'
+        }]);
+      }
       setPromotionStyle(c.promotion_style || 'Softselling');
       setBridgingMode(c.bridging_mode || 'select_existing');
       setTargetProductId(c.target_product_id || '');
@@ -1907,34 +1949,14 @@ export default function OrganicPillarPage() {
                       {isBridgingActive && (
                         <>
                           <div className="form-group">
-                            <label className="form-label">Sisipkan Transisi Promosi pada Klip Ke- (X)</label>
-                            <input
-                              type="number"
-                              className="form-input"
-                              min="2"
-                              max={targetClipsCount}
-                              value={bridgeAtClip}
-                              onChange={e => setBridgeAtClip(Number(e.target.value))}
-                              required
+                            <BridgeSegmentsEditor
+                              segments={bridgeSegments}
+                              onChange={applyBridgeSegmentsChange}
+                              targetClips={Number(targetClipsCount || 4)}
+                              fallbackAtClip={bridgeAtClip}
+                              fallbackDurationClips={bridgeDurationClips}
+                              singleZoneOnly={visualStyle === 'investigative_faceless'}
                             />
-                          </div>
-
-                          <div className="form-group">
-                            <label className="form-label">Durasi Bridging Produk (Klip)</label>
-                            <select
-                              className="form-input"
-                              value={bridgeDurationClips}
-                              onChange={e => setBridgeDurationClips(parseInt(e.target.value) || 1)}
-                              required={isBridgingActive}
-                            >
-                              <option value="0">0 (Sisa seluruh klip)</option>
-                              <option value="1">1 Klip</option>
-                              <option value="2">2 Klip</option>
-                              <option value="3">3 Klip</option>
-                              <option value="4">4 Klip</option>
-                              <option value="5">5 Klip</option>
-                            </select>
-                            <small style={{ color: 'var(--text-muted)' }}>Jumlah klip berturut-turut yang membahas produk. Nilai 0 berarti membahas produk dari klip transisi sampai selesai.</small>
                           </div>
 
                           <div className="form-group">

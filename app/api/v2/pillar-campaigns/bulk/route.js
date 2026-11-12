@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createPillarCampaignBundle, getDb } from '@/lib/db';
 import { generateCampaignId } from '@/lib/id-generator';
 import { resolveVisualIdentitySubmission } from '@/lib/visual-override-resolver';
+import { normalizeBridgePayload } from '@/lib/bridging/bridge-plan';
 
 function extractSpreadsheetId(input) {
   if (!input) return null;
@@ -38,6 +39,21 @@ export const POST = withTenantContext(async (request) => {
       accountName = brand.brand_name || accountName;
     }
 
+    const bulkVisualStyle = global_settings.visual_style || 'Cinematic';
+    const bulkBridgeNorm = normalizeBridgePayload({
+      is_bridging_active: Boolean(global_settings.is_bridging_active),
+      bridge_at_clip: global_settings.bridge_at_clip || 2,
+      bridge_duration_clips: global_settings.bridge_duration_clips !== undefined ? Number(global_settings.bridge_duration_clips) : 1,
+      bridge_segments: global_settings.bridge_segments ?? null
+    }, {}, {
+      targetClips: global_settings.target_clips_count || 4,
+      defaultActive: Boolean(global_settings.is_bridging_active),
+      singleZoneOnly: bulkVisualStyle === 'investigative_faceless'
+    });
+    if (bulkBridgeNorm.active && bulkBridgeNorm.errors.length > 0) {
+      return NextResponse.json({ error: bulkBridgeNorm.errors[0] }, { status: 400 });
+    }
+
     // 1. Create the global campaign row
     const campaignData = {
       id: campaignId,
@@ -52,12 +68,13 @@ export const POST = withTenantContext(async (request) => {
       target_demographic: global_settings.target_demographic || null,
       target_demographic_custom: global_settings.target_demographic_custom || null,
       narrative_mode: global_settings.narrative_mode || 'Storytelling',
-      visual_style: global_settings.visual_style || 'Cinematic',
+      visual_style: bulkVisualStyle,
       face_visibility: global_settings.face_visibility || 'Faceless',
       is_bridging_active: global_settings.is_bridging_active ? 1 : 0,
       target_clips_count: global_settings.target_clips_count || 4,
-      bridge_at_clip: global_settings.bridge_at_clip || 2,
-      bridge_duration_clips: global_settings.bridge_duration_clips !== undefined ? Number(global_settings.bridge_duration_clips) : 1,
+      bridge_at_clip: bulkBridgeNorm.legacy.bridge_at_clip,
+      bridge_duration_clips: bulkBridgeNorm.legacy.bridge_duration_clips,
+      bridge_segments: bulkBridgeNorm.storageJson,
       bridging_mode: global_settings.bridging_mode || 'select_existing',
       target_product_id: null,
       ephemeral_product_data: null,

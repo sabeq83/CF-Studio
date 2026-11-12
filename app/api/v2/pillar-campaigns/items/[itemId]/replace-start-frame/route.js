@@ -3,6 +3,7 @@ import { getDb, updatePillarCampaignItem } from '../../../../../../../lib/db';
 import fs from 'fs';
 import path from 'path';
 import { recordCompletedStartFrameAsset } from '@/lib/pillar-start-frame-service';
+import { resolveBridgePlan, readBridgeInputs } from '@/lib/bridging/bridge-plan';
 
 import { withTenantContext } from '@/lib/auth';
 
@@ -78,11 +79,9 @@ export const POST = withTenantContext(async (req, { params }) => {
         t2i_images_json: JSON.stringify(localT2iImages)
       };
 
-      // If it is the bridging clip, update t2i_start_frame_path column
-      const bridgeAtClip = campaign.bridge_at_clip || 2;
-      const bridgeDurationClips = campaign.bridge_duration_clips !== undefined ? Number(campaign.bridge_duration_clips) : 1;
-      const productEndClip = bridgeDurationClips > 0 ? (bridgeAtClip + bridgeDurationClips - 1) : bridgeAtClip;
-      const isBridge = (clipIndex >= bridgeAtClip && clipIndex <= productEndClip);
+      // If it is a bridging clip, update t2i_start_frame_path column
+      const bridgePlan = resolveBridgePlan(readBridgeInputs(campaign, {}, { defaultActive: true }));
+      const isBridge = bridgePlan.isProductClip(clipIndex);
 
       if (isBridge) {
         updates.t2i_start_frame_path = relativeStartFramePath;

@@ -3,6 +3,7 @@ import { dbRun, getMultiplierTaskById } from '@/lib/db';
 import fs from 'fs';
 import path from 'path';
 import { withTenantContext } from '@/lib/auth';
+import { resolveBridgePlan, readBridgeInputs } from '@/lib/bridging/bridge-plan';
 
 export const POST = withTenantContext(async (req, { params }) => {
   try {
@@ -66,8 +67,9 @@ export const POST = withTenantContext(async (req, { params }) => {
     try {
       bridging = JSON.parse(task.bridging_config_json || '{}');
     } catch (_) {}
-    const bridgeAtClip = Number(bridging.bridgeAtClip) || 2;
-    if (clipIndex === bridgeAtClip) {
+    const aesthetics = (() => { try { return JSON.parse(task.vso_config_json || '{}'); } catch { return {}; } })();
+    const bridgePlan = resolveBridgePlan(readBridgeInputs(bridging, aesthetics, { defaultActive: true }));
+    if (bridgePlan.isProductClip(clipIndex) && bridgePlan.segmentOf(clipIndex)?.index === 0 && bridgePlan.isSegmentStart(clipIndex)) {
       bridging.productRefImagePath = relativeStartFramePath;
     }
 

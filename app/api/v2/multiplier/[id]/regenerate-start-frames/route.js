@@ -4,6 +4,7 @@ import { generateImage, getTaskStatus, getFileUrl } from '@/lib/webhook-client';
 import fs from 'fs';
 import path from 'path';
 import { withTenantContext } from '@/lib/auth';
+import { resolveBridgePlan, readBridgeInputs } from '@/lib/bridging/bridge-plan';
 
 export const POST = withTenantContext(async (req, { params }) => {
   try {
@@ -83,6 +84,8 @@ async function runTaskRegenerateStartFramesBackground(taskId, task, prompts) {
       }
     }
 
+    const aesthetics = (() => { try { return JSON.parse(task.vso_config_json || '{}'); } catch { return {}; } })();
+    const bridgePlan = resolveBridgePlan(readBridgeInputs(bridging, { ...aesthetics, target_clips_count: prompts.length }, { defaultActive: true }));
     const totalCount = prompts.length;
     
     for (let i = 0; i < totalCount; i++) {
@@ -94,9 +97,7 @@ async function runTaskRegenerateStartFramesBackground(taskId, task, prompts) {
 
       console.log(`[Multiplier SF Batch] Processing clip ${clipIndex} for task ${taskId}...`);
 
-      const isBridgeClip = (bridging.isBridgingActive !== false) &&
-                           Number(clipIndex) >= Number(bridging.bridgeAtClip || 0) &&
-                           Number(clipIndex) < (Number(bridging.bridgeAtClip || 0) + Number(bridging.bridgeDurationClips || 1));
+      const isBridgeClip = bridgePlan.isProductClip(clipIndex);
 
       const t2iResult = await generateImage({
         prompt: promptText,

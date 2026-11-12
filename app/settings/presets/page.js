@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/Sidebar';
 import VisualIdentitySelector from '../../components/VisualIdentitySelector';
+import BridgeSegmentsEditor from '../../components/campaign-forms/BridgeSegmentsEditor';
+import { normalizeBridgePayload } from '@/lib/bridging/bridge-plan';
 import { getWordsPerClipOptions, getDefaultWordsPerClip, VIDEO_MODELS } from '@/lib/words-per-clip-presets';
 import { GEMINI_VOICES, MINIMAX_VOICES, MINIMAX_ENGLISH_VOICES, ELEVENLABS_ID_VOICES, ELEVENLABS_EN_VOICES, ELEVENLABS_MODELS } from '@/lib/voice-constants';
 import { GOOGLE_VOICE_PERSONAS } from '@/lib/veo-native-audio';
@@ -39,6 +41,7 @@ const initialForm = {
   bridging_mode: 'select_existing',
   bridge_at_clip: 3,
   bridge_duration_clips: 1,
+  bridge_segments: [{ at_clip: 3, duration_clips: 1, role: 'intro' }],
 
   // Section 4: visual_swap
   is_vso_active: false,
@@ -129,6 +132,12 @@ function mapPresetToForm(p) {
     bridging_mode: pb.bridging_mode || 'select_existing',
     bridge_at_clip: Number(pb.bridge_at_clip ?? 3),
     bridge_duration_clips: Number(pb.bridge_duration_clips ?? 1),
+    bridge_segments: (() => {
+      const norm = normalizeBridgePayload(pb, ve, { targetClips: Number(ve.target_clips_count ?? 12), defaultActive: true });
+      return norm.segments.length > 0
+        ? norm.segments
+        : [{ at_clip: Number(pb.bridge_at_clip ?? 3), duration_clips: Number(pb.bridge_duration_clips ?? 1), role: 'intro' }];
+    })(),
 
     // visual_swap
     is_vso_active: Boolean(vs.is_vso_active),
@@ -227,8 +236,11 @@ function mapFormToPayload(f) {
       product_bridging: {
         is_bridging_active: Boolean(f.is_bridging_active),
         bridging_mode: f.bridging_mode || 'select_existing',
-        bridge_at_clip: Number(f.bridge_at_clip ?? 3),
-        bridge_duration_clips: Number(f.bridge_duration_clips ?? 1)
+        bridge_at_clip: Number(f.bridge_segments?.[0]?.at_clip ?? f.bridge_at_clip ?? 3),
+        bridge_duration_clips: Number(f.bridge_segments?.[0]?.duration_clips ?? f.bridge_duration_clips ?? 1),
+        bridge_segments: Array.isArray(f.bridge_segments) && f.bridge_segments.length > 0
+          ? f.bridge_segments
+          : [{ at_clip: Number(f.bridge_at_clip ?? 3), duration_clips: Number(f.bridge_duration_clips ?? 1), role: 'intro' }]
       },
       visual_swap: {
         is_vso_active: Boolean(f.is_vso_active),
@@ -1038,7 +1050,7 @@ export default function PresetsPage() {
                     </label>
 
                     {form.is_bridging_active && (
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 }}>
+                      <div style={{ display: 'grid', gap: 14 }}>
                         <label className="form-label">
                           Bridging Mode
                           <select className="form-select" value={form.bridging_mode} onChange={e => setForm({ ...form, bridging_mode: e.target.value })}>
@@ -1046,14 +1058,22 @@ export default function PresetsPage() {
                             <option value="manual_input">Manual Prompt Only</option>
                           </select>
                         </label>
-                        <label className="form-label">
-                          Bridge at Clip (Index Klip)
-                          <input type="number" className="form-input" min="1" max="12" value={form.bridge_at_clip} onChange={e => setForm({ ...form, bridge_at_clip: e.target.value })} />
-                        </label>
-                        <label className="form-label">
-                          Bridge Duration (Jumlah Klip)
-                          <input type="number" className="form-input" min="1" max="12" value={form.bridge_duration_clips} onChange={e => setForm({ ...form, bridge_duration_clips: e.target.value })} />
-                        </label>
+                        <BridgeSegmentsEditor
+                          segments={form.bridge_segments}
+                          onChange={(nextSegments) => {
+                            const first = nextSegments[0] || { at_clip: 3, duration_clips: 1 };
+                            setForm({
+                              ...form,
+                              bridge_segments: nextSegments,
+                              bridge_at_clip: Number(first.at_clip ?? 3),
+                              bridge_duration_clips: Number(first.duration_clips ?? 1)
+                            });
+                          }}
+                          targetClips={Number(form.target_clips_count || 7)}
+                          fallbackAtClip={Number(form.bridge_at_clip ?? 3)}
+                          fallbackDurationClips={Number(form.bridge_duration_clips ?? 1)}
+                          singleZoneOnly={form.visual_style === 'investigative_faceless'}
+                        />
                       </div>
                     )}
                   </div>

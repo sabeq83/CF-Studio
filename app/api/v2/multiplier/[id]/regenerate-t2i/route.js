@@ -4,6 +4,7 @@ import { generateImage, getTaskStatus, getFileUrl } from '@/lib/webhook-client';
 import fs from 'fs';
 import path from 'path';
 import { withTenantContext } from '@/lib/auth';
+import { resolveBridgePlan, readBridgeInputs } from '@/lib/bridging/bridge-plan';
 
 export const POST = withTenantContext(async (req, { params }) => {
   try {
@@ -39,9 +40,9 @@ export const POST = withTenantContext(async (req, { params }) => {
 
     console.log(`[Multiplier UI Regenerate] Submitting T2I task for clip ${clipIndex}...`);
 
-    const isBridgeClip = (bridging.isBridgingActive !== false) &&
-                         Number(clipIndex) >= Number(bridging.bridgeAtClip || 0) &&
-                         Number(clipIndex) < (Number(bridging.bridgeAtClip || 0) + Number(bridging.bridgeDurationClips || 1));
+    const aesthetics = (() => { try { return JSON.parse(task.vso_config_json || '{}'); } catch { return {}; } })();
+    const bridgePlan = resolveBridgePlan(readBridgeInputs(bridging, aesthetics, { defaultActive: true }));
+    const isBridgeClip = bridgePlan.isProductClip(clipIndex);
 
     const t2iResult = await generateImage({
       prompt: t2i_prompt,

@@ -492,6 +492,12 @@ export function createCfStudioServer(rawRequest) {
   );
 
   // 3. Auto Pipeline: Dedicated Engine Tools
+  const bridgeSegmentSchema = z.object({
+    at_clip: z.number().int().min(1).max(12),
+    duration_clips: z.number().int().min(0).max(12).default(1),
+    role: z.enum(['intro', 'recall']).optional()
+  });
+
   // Engine 1: Product Video (product_campaign)
   register(
     'cf_create_product_video',
@@ -505,6 +511,9 @@ export function createCfStudioServer(rawRequest) {
       selected_cep: z.string().max(200).optional(),
       visual_identity_preset_id: z.string().max(100).optional(),
       post_link_affiliate: z.boolean().default(true),
+      bridge_at_clip: z.number().int().min(1).max(12).optional(),
+      bridge_duration_clips: z.number().int().min(0).max(12).optional(),
+      bridge_segments: z.array(bridgeSegmentSchema).max(3).optional(),
       voice_provider: z.enum(['gemini', 'minimax', 'elevenlabs']).optional(),
       voice_persona: z.string().max(120).optional(),
       preset_key: z.string().max(100).default('product_campaign'),
@@ -650,6 +659,9 @@ export function createCfStudioServer(rawRequest) {
       generate_recipe: z.boolean().default(true),
       post_link_affiliate: z.boolean().default(true),
       visual_identity_preset_id: z.string().max(100).optional(),
+      bridge_at_clip: z.number().int().min(1).max(12).optional(),
+      bridge_duration_clips: z.number().int().min(0).max(12).optional(),
+      bridge_segments: z.array(bridgeSegmentSchema).max(3).optional(),
       preset_key: z.string().max(100).default('multiplier_deconstruct_remix'),
       execution_mode: z.enum(['full_autopilot', 'creative_review']).default('full_autopilot')
     },
@@ -781,7 +793,8 @@ export function createCfStudioServer(rawRequest) {
     ffmpeg_bgm_volume: z.number().optional(),
     ffmpeg_sync_option: z.string().optional(),
     bridge_at_clip: z.number().int().min(1).max(12).optional(),
-    bridge_duration_clips: z.number().int().min(1).max(12).optional()
+    bridge_duration_clips: z.number().int().min(0).max(12).optional(),
+    bridge_segments: z.array(bridgeSegmentSchema).max(3).optional()
   });
 
   const storyboardSceneSchema = z.object({
@@ -811,7 +824,8 @@ export function createCfStudioServer(rawRequest) {
     auto_sync_contentflow: z.boolean().optional(),
     visual_identity_preset_id: z.string().max(100).optional(),
     bridge_at_clip: z.number().int().min(1).max(12).optional(),
-    bridge_duration_clips: z.number().int().min(1).max(12).optional(),
+    bridge_duration_clips: z.number().int().min(0).max(12).optional(),
+    bridge_segments: z.array(bridgeSegmentSchema).max(3).optional(),
     title: z.string().trim().min(1).max(300).optional(),
     video_dna: storyboardVideoDnaSchema.optional(),
     scenes: z.array(storyboardSceneSchema).min(1).max(12).optional(),
@@ -966,6 +980,9 @@ export function createCfStudioServer(rawRequest) {
       selected_angle: z.union([z.record(z.any()), z.string().max(300), z.null()]).optional(),
       generate_recipe: z.boolean().optional(),
       preset_key: z.string().max(100).optional(),
+      bridge_at_clip: z.number().int().min(1).max(12).optional(),
+      bridge_duration_clips: z.number().int().min(0).max(12).optional(),
+      bridge_segments: z.array(bridgeSegmentSchema).max(3).optional(),
       storyboard: z.record(z.any()).optional(),
       execution_mode: z.enum(['full_autopilot', 'creative_review']).default('full_autopilot')
     },

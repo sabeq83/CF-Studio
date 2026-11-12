@@ -11,6 +11,30 @@ import {
   dbAll
 } from '@/lib/db';
 import { generateCampaignId } from '@/lib/id-generator';
+import { normalizeBridgePayload } from '@/lib/bridging/bridge-plan';
+
+function applyNormalizedBridgingConfig(bridgingConfig, vsoConfig) {
+  const defaultActive = bridgingConfig?.campaign_type !== 'pure_storytelling' && bridgingConfig?.is_bridging_active !== false;
+  const normalized = normalizeBridgePayload(bridgingConfig, vsoConfig, {
+    targetClips: vsoConfig?.target_clips_count || vsoConfig?.targetClipsCount || null,
+    defaultActive
+  });
+  if (normalized.active && normalized.errors.length > 0) {
+    return { error: normalized.errors[0] };
+  }
+  const updated = {
+    ...(bridgingConfig || {}),
+    is_bridging_active: normalized.active,
+    bridge_at_clip: normalized.legacy.bridge_at_clip,
+    bridge_duration_clips: normalized.legacy.bridge_duration_clips
+  };
+  if (normalized.active) {
+    updated.bridge_segments = normalized.segments;
+  } else {
+    delete updated.bridge_segments;
+  }
+  return { bridgingConfig: updated };
+}
 
 import { withTenantContext } from '@/lib/auth';
 
@@ -257,6 +281,12 @@ export const POST = withTenantContext(async (request) => {
         bridgingConfig.product_ref_image_path = productRefImagePath;
       }
 
+      const normRes = applyNormalizedBridgingConfig(bridgingConfig, vsoConfig);
+      if (normRes.error) {
+        return NextResponse.json({ success: false, error: normRes.error }, { status: 400 });
+      }
+      bridgingConfig = normRes.bridgingConfig;
+
       // Standardisasi ID Kampanye Multiplier selaras Pillar ('opc') dan RE ('re'): mul_YYMMDD_6hex
       const batchId = generateCampaignId('mul');
 
@@ -305,6 +335,12 @@ export const POST = withTenantContext(async (request) => {
     if (productRefImagePath) {
       bridgingConfig.product_ref_image_path = productRefImagePath;
     }
+
+    const normLegacyRes = applyNormalizedBridgingConfig(bridgingConfig, vsoConfig);
+    if (normLegacyRes.error) {
+      return NextResponse.json({ success: false, error: normLegacyRes.error }, { status: 400 });
+    }
+    bridgingConfig = normLegacyRes.bridgingConfig;
 
     const tasksCreated = [];
 

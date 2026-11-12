@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MAKNA Flow — Mockup Multi-Segment Product Bridging</title>
+  <style>
+    /* ==========================================================================
+       SEMANTIC CSS DESIGN TOKENS (Synchronized 1:1 with app/theme.css)
+       ========================================================================== */
+    :root,
+    [data-theme="dark"] {
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --border-color: var(--border-subtle);
+      --border: var(--border-subtle);
+
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --accent-color: var(--action-primary);
+
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --status-purple: #c084fc;
+      --status-purple-soft: rgba(192, 132, 252, 0.14);
+      --status-rose: #f43f5e;
+      --status-rose-soft: rgba(244, 63, 94, 0.14);
+
+      --overlay-subtle: rgba(255, 255, 255, 0.03);
+      --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.35);
+      --focus-ring: rgba(45, 212, 191, 0.35);
+    }
+
+    [data-theme="light"] {
+      --canvas: #f2f5f8;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e2e8f0;
+      --input-bg: #ffffff;
+
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+
+      --border-subtle: #d8e0ea;
+      --border-strong: #b4c2d4;
+      --border-color: var(--border-subtle);
+      --border: var(--border-subtle);
+
+      --action-primary: #087f73;
+      --action-primary-hover: #0a9688;
+      --on-action-primary: #ffffff;
+      --accent-color: var(--action-primary);
+
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --status-neutral: #6548bd;
+      --status-neutral-soft: #f0ecfb;
+      --status-purple: #7c3aed;
+      --status-purple-soft: #f3e8ff;
+      --status-rose: #be123c;
+      --status-rose-soft: #ffe4e6;
+
+      --overlay-subtle: rgba(21, 32, 51, 0.03);
+      --shadow-card: 0 8px 24px rgba(15, 23, 42, 0.07);
+      --focus-ring: rgba(8, 127, 115, 0.25);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      background: var(--canvas);
+      color: var(--text-primary);
+      line-height: 1.5;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    /* Layout Shell */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: var(--sidebar);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 12px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-badge {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid var(--border-subtle);
+      letter-spacing: 0.4px;
+    }
+    .brand h1 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    .brand p {
+      margin: 0;
+      font-size: 0.76rem;
+      color: var(--text-muted);
+    }
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn:hover:not(:disabled) {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border-color: transparent;
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: var(--action-primary-hover);
+      border-color: transparent;
+    }
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 0.75rem;
+      border-radius: 6px;
+    }
+    .btn-danger {
+      background: var(--status-danger-soft);
+      color: var(--status-danger);
+      border-color: transparent;
+    }
+    .btn-danger:hover:not(:disabled) {
+      border-color: var(--status-danger);
+      background: var(--status-danger-soft);
+    }
+
+    .container {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 20px 24px 56px;
+      display: grid;
+      gap: 18px;
+    }
+
+    /* Surface Tabs */
+    .surface-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 6px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+    }
+    .surface-tab {
+      flex: 1 1 180px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .surface-tab small {
+      display: block;
+      font-weight: 400;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .surface-tab.active {
+      background: var(--surface-interactive);
+      border-color: var(--action-primary);
+      color: var(--text-primary);
+    }
+
+    /* Main Grid */
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 18px;
+      align-items: start;
+    }
+    @media (max-width: 980px) {
+      .workspace-grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: var(--shadow-card);
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .card-title {
+      margin: 0;
+      font-size: 0.96rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-sub {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      margin: 2px 0 0;
+    }
+
+    /* Form Controls matching MultiplierConfigurationForm / PillarConfigurationForm */
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    @media (max-width: 640px) {
+      .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
+    }
+
+    .form-group, .form-label {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 9px 11px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      background: var(--input-bg);
+      color: var(--text-primary);
+      font-size: 0.84rem;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--action-primary);
+      box-shadow: 0 0 0 3px var(--focus-ring);
+    }
+
+    .BridgingBox {
+      margin-top: 10px;
+      padding: 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      display: grid;
+      gap: 14px;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      cursor: pointer;
+    }
+    .checkbox-row input[type="checkbox"] {
+      width: 17px;
+      height: 17px;
+      accent-color: var(--action-primary);
+    }
+
+    /* Quick Patterns Bar */
+    .quick-patterns {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: var(--overlay-subtle);
+      border: 1px dashed var(--border-subtle);
+    }
+    .quick-patterns-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-right: 4px;
+    }
+    .chip-btn {
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-interactive);
+      color: var(--text-secondary);
+      font-size: 0.74rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .chip-btn:hover {
+      border-color: var(--action-primary);
+      color: var(--text-primary);
+    }
+    .chip-btn.active {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border-color: var(--status-info);
+    }
+
+    /* Segment Rows */
+    .segment-list {
+      display: grid;
+      gap: 10px;
+    }
+    .segment-row {
+      display: grid;
+      grid-template-columns: auto 1fr 1fr 1.15fr auto;
+      gap: 10px;
+      align-items: end;
+      padding: 12px;
+      border-radius: 9px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+    }
+    @media (max-width: 720px) {
+      .segment-row { grid-template-columns: 1fr 1fr; }
+    }
+    .seg-index-badge {
+      align-self: center;
+      padding: 5px 9px;
+      border-radius: 7px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .role-intro {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+    }
+    .role-recall {
+      background: var(--status-purple-soft);
+      color: var(--status-purple);
+    }
+
+    /* Alerts & Warnings */
+    .alert {
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      border: 1px solid var(--border-subtle);
+    }
+    .alert-warning {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+    }
+    .alert-info {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+    }
+    .alert-danger {
+      background: var(--status-danger-soft);
+      color: var(--status-danger);
+    }
+    .alert-success {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+    }
+
+    /* Live Visual Timeline Strip */
+    .timeline-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(74px, 1fr));
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .clip-node {
+      padding: 10px 8px;
+      border-radius: 9px;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      text-align: center;
+      transition: transform 0.12s ease, border-color 0.15s ease;
+    }
+    .clip-node:hover {
+      transform: translateY(-2px);
+      border-color: var(--border-strong);
+    }
+    .clip-node.selected {
+      border-color: var(--action-primary);
+      box-shadow: 0 0 0 2px var(--focus-ring);
+    }
+    .clip-num {
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .zone-pill {
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 0.66rem;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+    .zone-pre    { background: var(--status-info-soft);    color: var(--status-info); }
+    .zone-intro  { background: var(--status-warning-soft); color: var(--status-warning); }
+    .zone-gap    { background: var(--status-neutral-soft); color: var(--status-neutral); }
+    .zone-recall { background: var(--status-purple-soft);  color: var(--status-purple); }
+    .zone-post   { background: var(--status-success-soft); color: var(--status-success); }
+
+    .clip-icons {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    /* Inspector Panel */
+    .inspector-box {
+      padding: 14px;
+      border-radius: 10px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      display: grid;
+      gap: 10px;
+    }
+    .kv-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .kv-item {
+      padding: 9px 11px;
+      border-radius: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+    }
+    .kv-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: var(--text-muted);
+      margin-bottom: 3px;
+    }
+    .kv-val {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .code-box {
+      margin: 0;
+      padding: 12px;
+      border-radius: 8px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.74rem;
+      line-height: 1.5;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+
+    .accordion {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .accordion-header {
+      padding: 13px 16px;
+      font-weight: 700;
+      font-size: 0.86rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .accordion-body {
+      padding: 16px;
+      background: var(--surface);
+      display: grid;
+      gap: 14px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+    }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-badge">MOCKUP INTERAKTIF</span>
+      <div>
+        <h1>Multi-Segment Product Bridging (Pre → Intro → Gap → Recall → Post)</h1>
+        <p>Simulasi UI, <code>resolveBridgePlan()</code> Engine, Prompt Zoning &amp; Edge-Case Validation sebelum implementasi kode</p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button type="button" class="btn btn-sm" id="btnResetDemo">↻ Reset Default Demo</button>
+      <button type="button" class="btn btn-sm" id="btnThemeToggle">☀️ Switch to Light Mode</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Surface Switcher -->
+    <nav class="surface-tabs" aria-label="Pilih Surface UI">
+      <button type="button" class="surface-tab active" data-surface="multiplier">
+        1. Multiplier Lab Form
+        <small>MultiplierConfigurationForm.js</small>
+      </button>
+      <button type="button" class="surface-tab" data-surface="pillar">
+        2. Pillar Campaign Form
+        <small>PillarConfigurationForm.js</small>
+      </button>
+      <button type="button" class="surface-tab" data-surface="preset">
+        3. Operator Preset Editor
+        <small>app/settings/presets/page.js</small>
+      </button>
+      <button type="button" class="surface-tab" data-surface="detail">
+        4. Detail &amp; Edge-Case Sim
+        <small>Campaign Detail + Prompt Zoning</small>
+      </button>
+    </nav>
+
+    <div class="workspace-grid">
+      <!-- LEFT COLUMN: Active Form Surface -->
+      <section class="card" id="surfaceLeftCard">
+        <!-- SURFACE 1: MULTIPLIER -->
+        <div id="pane-multiplier" class="surface-pane">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">⚡ Multiplier Configuration Form</h2>
+              <p class="card-sub">Simulasi bagian Product Bridging pada <code>MultiplierConfigurationForm.js</code></p>
+            </div>
+            <span class="tag">Max 3 Segmen</span>
+          </div>
+
+          <div class="form-grid-2" style="margin-bottom: 14px;">
+            <label class="form-group">
+              Target Jumlah Klip Video (4s/klip)
+              <input type="number" class="form-input js-clips-input" min="4" max="12" value="7" />
+            </label>
+            <label class="form-group">
+              Gaya Promosi Produk
+              <select class="form-select" id="mulPromoStyle">
+                <option value="Softselling">Softselling (Halus &amp; Relatable)</option>
+                <option value="Education">Education (Informatif &amp; Solutif)</option>
+                <option value="Hardsell">Hardsell (Promo Langsung)</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="BridgingBox">
+            <label class="checkbox-row">
+              <input type="checkbox" class="js-bridging-active" checked />
+              <span>🛒 Sertakan Rekomendasi Produk &amp; Affiliate (Shopee FB &amp; Link di Bio)</span>
+            </label>
+
+            <div class="js-bridging-body">
+              <div class="form-grid-2" style="margin-bottom: 12px;">
+                <div class="kv-item">
+                  <div class="kv-label">Produk Terpilih</div>
+                  <div class="kv-val">Susu Steril Kurma Madu 189ml</div>
+                </div>
+                <div class="kv-item">
+                  <div class="kv-label">Foto Acuan Produk</div>
+                  <div class="kv-val" style="color: var(--status-success);">✓ Reference Image + Product Truth</div>
+                </div>
+              </div>
+
+              <!-- Shared BridgeSegmentsEditor Mount -->
+              <div id="editor-mount-multiplier"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SURFACE 2: PILLAR -->
+        <div id="pane-pillar" class="surface-pane hidden">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">🏛️ Pillar Campaign Configuration</h2>
+              <p class="card-sub">Simulasi integrasi <code>visual_style</code> &amp; <code>BridgeSegmentsEditor</code> di <code>PillarConfigurationForm.js</code></p>
+            </div>
+            <span class="tag">Pillar Engine</span>
+          </div>
+
+          <div class="form-grid-3" style="margin-bottom: 14px;">
+            <label class="form-group">
+              Jumlah Klip Pillar
+              <input type="number" class="form-input js-clips-input" min="4" max="12" value="7" />
+            </label>
+            <label class="form-group">
+              Visual Style
+              <select class="form-select" id="pillarVisualStyle">
+                <option value="metaphoric_faceless">Metaphoric Faceless (3D/Visual Metaphor)</option>
+                <option value="realistic_human">Realistic Human / Lifestyle</option>
+                <option value="investigative_faceless">Investigative Faceless (Single-Zone Only)</option>
+              </select>
+            </label>
+            <label class="form-group">
+              Metode Penyertaan Produk
+              <select class="form-select" id="pillarBridgingMethod">
+                <option value="direct_softsell">Direct Softsell</option>
+                <option value="story_metaphor">Story Metaphor</option>
+                <option value="ending_cta">Ending CTA</option>
+              </select>
+            </label>
+          </div>
+
+          <div id="pillarInvestigativeNotice" class="alert alert-warning hidden" style="margin-bottom: 12px;">
+            <span>⚠️</span>
+            <div>
+              <strong>Mode <code>investigative_faceless</code> aktif:</strong> Sesuai aturan Rencana §2.4, multi-segmen (<code>recall</code>) dinonaktifkan sementara untuk mode investigatif agar alur cerita tidak terpecah—hanya segmen pertama yang dijalankan.
+            </div>
+          </div>
+
+          <div class="BridgingBox">
+            <label class="checkbox-row">
+              <input type="checkbox" class="js-bridging-active" checked />
+              <span>🌉 Aktifkan Product Bridging (Multi-Segment Support)</span>
+            </label>
+            <div class="js-bridging-body">
+              <div id="editor-mount-pillar"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SURFACE 3: PRESET EDITOR -->
+        <div id="pane-preset" class="surface-pane hidden">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">🎛️ Operator Preset Editor</h2>
+              <p class="card-sub">Simulasi Accordion 3 pada <code>app/settings/presets/page.js</code> + Output MCP <code>preset_key</code></p>
+            </div>
+            <span class="tag">preset_key: viral_story_2hit</span>
+          </div>
+
+          <div class="accordion">
+            <div class="accordion-header">
+              <span>3. Product Bridging Configuration</span>
+              <span style="color: var(--action-primary);">▼ Expanded</span>
+            </div>
+            <div class="accordion-body">
+              <div class="form-grid-2">
+                <label class="form-group">
+                  Simulasi Target Klip Pemakai Preset
+                  <input type="number" class="form-input js-clips-input" min="4" max="12" value="7" />
+                </label>
+                <label class="form-group">
+                  Bridging Mode
+                  <select class="form-select" id="presetBridgingMode">
+                    <option value="select_existing">Select Existing Product Photo</option>
+                    <option value="manual_input">Manual Prompt Only</option>
+                  </select>
+                </label>
+              </div>
+
+              <label class="checkbox-row">
+                <input type="checkbox" class="js-bridging-active" checked />
+                <span>Aktifkan Product Bridging pada Preset</span>
+              </label>
+
+              <div class="js-bridging-body">
+                <div id="editor-mount-preset"></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 14px;">
+            <div class="kv-label">Payload Backward-Compatible Preset JSON (<code>product_bridging</code>)</div>
+            <pre class="code-box" id="presetJsonOut"></pre>
+          </div>
+        </div>
+
+        <!-- SURFACE 4: DETAIL & EDGE CASE SIM -->
+        <div id="pane-detail" class="surface-pane hidden">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">📋 Campaign Detail &amp; Edge-Case Tester</h2>
+              <p class="card-sub">Simulasi tampilan ringkas <code>describeBridgePlan()</code> + uji aturan normalisasi §2.2</p>
+            </div>
+            <span class="tag" id="detailSummaryTag">Klip 2, 6</span>
+          </div>
+
+          <!-- Detail Accordion Preview matching app/pillar-campaigns/[id]/page.js -->
+          <div class="accordion" style="margin-bottom: 14px;">
+            <div class="accordion-header">
+              <span>🌉 Info Konfigurasi Product Bridging Settings</span>
+              <span class="tag" id="detailActiveBadge">Aktif</span>
+            </div>
+            <div class="accordion-body">
+              <div class="kv-grid">
+                <div class="kv-item">
+                  <div class="kv-label">Ringkasan Jadwal Bridging (<code>describeBridgePlan</code>)</div>
+                  <div class="kv-val" id="detailScheduleText">—</div>
+                </div>
+                <div class="kv-item">
+                  <div class="kv-label">Total Klip Zona Produk</div>
+                  <div class="kv-val" id="detailCoverageText">—</div>
+                </div>
+              </div>
+              <div>
+                <div class="kv-label" style="margin-bottom: 6px;">Daftar Segmen Ternormalisasi</div>
+                <div id="detailSegmentsPills" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Edge Case Scenario Buttons -->
+          <div class="BridgingBox">
+            <div class="kv-label">Uji Skenario Edge Case Normalizer (<code>normalizeBridgeSegments</code>)</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+              <button type="button" class="btn btn-sm" data-testcase="adjacent">⚡ Uji Auto-Merge Segmen Berdempetan (Klip 2 dur 1 + Klip 3 dur 1)</button>
+              <button type="button" class="btn btn-sm" data-testcase="zero_middle">🚫 Uji <code>duration_clips = 0</code> di Tengah (Harus Clamp ke 1)</button>
+              <button type="button" class="btn btn-sm" data-testcase="zero_tail">∞ Uji <code>duration_clips = 0</code> di Segmen Terakhir (Sampai Akhir)</button>
+              <button type="button" class="btn btn-sm" data-testcase="out_of_range">📏 Uji Klip Melebihi Total Klip (Klip 9 dari 6 Klip)</button>
+            </div>
+            <div id="edgeCaseResult" class="alert alert-info" style="margin-top: 4px;">
+              <span>ℹ️</span>
+              <div>Pilih tombol skenario di atas untuk melihat bagaimana <code>resolveBridgePlan()</code> membersihkan input secara deterministik.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT COLUMN: Shared Live Bridge Plan, Timeline Strip & Prompt Zoning Inspector -->
+      <aside class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">🧭 Live Bridge Timeline &amp; Engine Preview</h2>
+            <p class="card-sub">Klik salah satu klip di bawah untuk inspeksi aturan Naskah AI &amp; Visual T2I</p>
+          </div>
+          <span class="tag" id="planModeBadge">Multi-Segment</span>
+        </div>
+
+        <!-- Warnings from resolveBridgePlan -->
+        <div id="planWarningsBox" style="display: grid; gap: 8px; margin-bottom: 12px;"></div>
+
+        <!-- Visual Clip Strip -->
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="kv-label">Peta Zona Klip (Total: <span id="lblTotalClips">7</span> Klip)</span>
+            <span style="font-size: 0.72rem; color: var(--text-muted);" id="lblDescribePlan">Klip 2, 6</span>
+          </div>
+          <div class="timeline-strip" id="timelineStrip"></div>
+        </div>
+
+        <!-- Legend -->
+        <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border-subtle);">
+          <span class="zone-pill zone-pre">PRE: Hook/Masalah</span>
+          <span class="zone-pill zone-intro">INTRO: Perkenalan Produk</span>
+          <span class="zone-pill zone-gap">GAP: Jeda Cerita Murni</span>
+          <span class="zone-pill zone-recall">RECALL: Pengingat/CTA</span>
+          <span class="zone-pill zone-post">POST: Penutup</span>
+        </div>
+
+        <!-- Selected Clip Deep Inspector -->
+        <div class="inspector-box" style="margin-top: 14px;" id="clipInspector"></div>
+
+        <!-- Generated Prompt Contract Preview -->
+        <div style="margin-top: 14px;">
+          <div class="kv-label" style="margin-bottom: 6px;">Output <code>buildBridgeZoningContract()</code> (Masuk ke System Prompt Gemini)</div>
+          <pre class="code-box" id="promptContractOut"></pre>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    // =========================================================================
+    // STATE & CORE resolveBridgePlan() ENGINE MIRRORING IMPLEMENTATION PLAN
+    // =========================================================================
+    const MAX_SEGMENTS = 3;
+
+    const state = {
+      surface: 'multiplier',
+      theme: 'dark',
+      totalClips: 7,
+      isActive: true,
+      visualStyle: 'metaphoric_faceless',
+      promoStyle: 'Softselling',
+      bridgingMode: 'select_existing',
+      pillarMethod: 'direct_softsell',
+      selectedClip: 2,
+      segments: [
+        { at_clip: 2, duration_clips: 1, role: 'intro' },
+        { at_clip: 6, duration_clips: 2, role: 'recall' }
+      ],
+      rawTestNote: null
+    };
+
+    function clampInt(val, min, max, fallback) {
+      const n = parseInt(val, 10);
+      if (!Number.isFinite(n)) return fallback;
+      return Math.max(min, Math.min(max, n));
+    }
+
+    /**
+     * Exact JS simulation of lib/bridging/bridge-plan.js -> normalizeBridgeSegments & resolveBridgePlan
+     */
+    function resolveBridgePlan(rawSegments, totalClips, options = {}) {
+      const warnings = [];
+      const clipsCount = clampInt(totalClips, 1, 12, 6);
+      const isActive = options.isActive !== false;
+      const singleZoneOnly = Boolean(options.singleZoneOnly);
+
+      if (!isActive || !Array.isArray(rawSegments) || rawSegments.length === 0) {
+        const clipMap = {};
+        for (let i = 1; i <= clipsCount; i++) {
+          clipMap[i] = { clip: i, zone: 'pre', role: null, segmentIndex: -1, hasProductRef: false };
+        }
+        return { isActive: false, totalClips: clipsCount, segments: [], clipMap, warnings: [] };
+      }
+
+      // 1. Copy & initial clamp (drop out-of-range at_clip > totalClips)
+      let working = rawSegments
+        .slice(0, MAX_SEGMENTS)
+        .map((s, idx) => ({
+          at_clip: clampInt(s.at_clip, 1, 99, 2),
+          duration_clips: clampInt(s.duration_clips, 0, 12, 1),
+          role: idx === 0 ? 'intro' : (s.role === 'intro' ? 'intro' : 'recall')
+        }))
+        .filter((s) => {
+          if (s.at_clip > clipsCount) {
+            warnings.push(`Segmen pada Klip ${s.at_clip} dibuang karena melebihi total ${clipsCount} klip.`);
+            return false;
+          }
+          return true;
+        });
+
+      if (working.length === 0) {
+        const fallbackClip = Math.min(2, clipsCount);
+        working = [{ at_clip: fallbackClip, duration_clips: 1, role: 'intro' }];
+        warnings.push(`Tidak ada segmen valid; fallback ke Klip ${fallbackClip}.`);
+      }
+
+      // 2. Investigative faceless guard (§2.4)
+      if (singleZoneOnly && working.length > 1) {
+        working = [working[0]];
+        warnings.push('Mode investigative_faceless hanya menjalankan segmen pertama (1 zona) agar investigasi tetap utuh.');
+      }
+
+      // 3. Sort ascending by at_clip
+      working.sort((a, b) => a.at_clip - b.at_clip);
+      working[0].role = 'intro'; // Segmen paling awal selalu intro
+
+      // 4. Duration=0 only allowed in last segment; resolve end_clip & merge adjacent/overlapping
+      const merged = [];
+      for (let i = 0; i < working.length; i++) {
+        const cur = { ...working[i] };
+        const isLast = i === working.length - 1;
+
+        if (cur.duration_clips === 0 && !isLast) {
+          cur.duration_clips = 1;
+          warnings.push(`Segmen Klip ${cur.at_clip} memiliki durasi 0 (sampai akhir) padahal bukan segmen terakhir -> diclamp menjadi 1 klip.`);
+        }
+
+        const curEnd = cur.duration_clips === 0
+          ? clipsCount
+          : Math.min(clipsCount, cur.at_clip + cur.duration_clips - 1);
+
+        if (merged.length === 0) {
+          merged.push({ ...cur, end_clip: curEnd });
+          continue;
+        }
+
+        const prev = merged[merged.length - 1];
+        // Harus ada jeda >= 1 klip (cur.at_clip > prev.end_clip + 1)
+        if (cur.at_clip <= prev.end_clip + 1) {
+          const newEnd = Math.max(prev.end_clip, curEnd);
+          prev.end_clip = newEnd;
+          prev.duration_clips = newEnd === clipsCount && (cur.duration_clips === 0 || prev.duration_clips === 0)
+            ? 0
+            : (newEnd - prev.at_clip + 1);
+          warnings.push(`Segmen Klip ${cur.at_clip} berdempetan/overlap dengan Klip ${prev.at_clip}..${prev.end_clip} -> otomatis digabung.`);
+        } else {
+          merged.push({ ...cur, end_clip: curEnd });
+        }
+      }
+
+      // 5. Assign zones for clips 1..clipsCount
+      const firstStart = merged[0].at_clip;
+      const lastEnd = merged[merged.length - 1].end_clip;
+      const clipMap = {};
+
+      for (let i = 1; i <= clipsCount; i++) {
+        const segIdx = merged.findIndex((seg) => i >= seg.at_clip && i <= seg.end_clip);
+        if (segIdx !== -1) {
+          const seg = merged[segIdx];
+          const zone = seg.role === 'intro' ? 'intro' : 'recall';
+          clipMap[i] = {
+            clip: i,
+            zone,
+            role: seg.role,
+            segmentIndex: segIdx,
+            segment: seg,
+            hasProductRef: true
+          };
+        } else if (i < firstStart) {
+          clipMap[i] = { clip: i, zone: 'pre', role: null, segmentIndex: -1, hasProductRef: false };
+        } else if (i > lastEnd) {
+          clipMap[i] = { clip: i, zone: 'post', role: null, segmentIndex: -1, hasProductRef: false };
+        } else {
+          clipMap[i] = { clip: i, zone: 'gap', role: null, segmentIndex: -1, hasProductRef: false };
+        }
+      }
+
+      return { isActive: true, totalClips: clipsCount, segments: merged, clipMap, warnings };
+    }
+
+    function describeBridgePlan(plan) {
+      if (!plan.isActive || plan.segments.length === 0) return 'Nonaktif';
+      return 'Klip ' + plan.segments.map((s) => {
+        if (s.duration_clips === 0) return `${s.at_clip}–${plan.totalClips} (sampai akhir)`;
+        if (s.duration_clips === 1) return `${s.at_clip}`;
+        return `${s.at_clip}–${s.end_clip}`;
+      }).join(', ');
+    }
+
+    function buildBridgeZoningContract(plan, visualStyle, promoStyle) {
+      if (!plan.isActive) return '// Bridging nonaktif — seluruh klip fokus storytelling organik tanpa penyebutan produk.';
+      const lines = [
+        `[PRODUCT BRIDGING MULTI-SEGMENT CONTRACT | Gaya: ${promoStyle}]`,
+        `Total Klip: ${plan.totalClips} | Jadwal: ${describeBridgePlan(plan)}`,
+        ''
+      ];
+      for (let i = 1; i <= plan.totalClips; i++) {
+        const info = plan.clipMap[i];
+        if (info.zone === 'pre') {
+          lines.push(`- Klip ${i} [ZONE: PRE]: DILARANG menyebut nama produk/merek/harga. Fokus hook, ketegangan, atau masalah audiens.`);
+        } else if (info.zone === 'intro') {
+          lines.push(`- Klip ${i} [ZONE: INTRO]: PERKENALKAN produk sebagai solusi alami + suntikkan reference image / product_truth.`);
+        } else if (info.zone === 'gap') {
+          const metaphorHint = visualStyle === 'metaphoric_faceless'
+            ? 'Tangan/karakter tetap konsisten melanjutkan aktivitas, TETAPI tanpa kemasan/logo produk.'
+            : 'Kembali ke alur cerita/penjelasan dampak tanpa menjual atau menampilkan kemasan produk.';
+          lines.push(`- Klip ${i} [ZONE: GAP]: JEDA CERITA MURNI. Jangan menyebut produk/CTA. ${metaphorHint}`);
+        } else if (info.zone === 'recall') {
+          lines.push(`- Klip ${i} [ZONE: RECALL]: PENGINGAT HALUS / PENGUATAN MANFAAT / CTA. Tampilkan kembali produk via reference image (jangan mengulang perkenalan awal).`);
+        } else if (info.zone === 'post') {
+          lines.push(`- Klip ${i} [ZONE: POST]: Penutup refleksi atau CTA ringan tanpa memperkenalkan fitur baru.`);
+        }
+      }
+      return lines.join('\n');
+    }
+
+    // =========================================================================
+    // UI RENDERERS
+    // =========================================================================
+    function renderSharedEditor(mountId) {
+      const mount = document.getElementById(mountId);
+      if (!mount) return;
+
+      const addDisabled = state.segments.length >= MAX_SEGMENTS ? 'disabled' : '';
+      const activePattern = getActivePatternName();
+
+      let rowsHtml = state.segments.map((seg, idx) => {
+        const roleBadgeClass = idx === 0 ? 'role-intro' : 'role-recall';
+        const roleLabel = idx === 0 ? 'Segmen 1 · INTRO' : `Segmen ${idx + 1} · ${seg.role.toUpperCase()}`;
+        const canRemove = state.segments.length > 1;
+        return `
+          <div class="segment-row" data-idx="${idx}">
+            <span class="seg-index-badge ${roleBadgeClass}">${roleLabel}</span>
+            <label class="form-group">
+              Mulai Klip Ke-
+              <input type="number" class="form-input js-seg-at" min="1" max="${state.totalClips}" value="${seg.at_clip}" data-idx="${idx}" />
+            </label>
+            <label class="form-group">
+              Durasi (0 = s/d akhir)
+              <input type="number" class="form-input js-seg-dur" min="0" max="${state.totalClips}" value="${seg.duration_clips}" data-idx="${idx}" />
+            </label>
+            <label class="form-group">
+              Peran Segmen
+              <select class="form-select js-seg-role" data-idx="${idx}" ${idx === 0 ? 'disabled' : ''}>
+                <option value="intro" ${seg.role === 'intro' ? 'selected' : ''}>Intro (Perkenalan)</option>
+                <option value="recall" ${seg.role === 'recall' ? 'selected' : ''}>Recall (Pengingat &amp; CTA)</option>
+              </select>
+            </label>
+            <button type="button" class="btn btn-sm btn-danger js-seg-remove" data-idx="${idx}" ${canRemove ? '' : 'disabled'} title="Hapus segmen">✕</button>
+          </div>
+        `;
+      }).join('');
+
+      mount.innerHTML = `
+        <div class="quick-patterns" style="margin-bottom: 12px;">
+          <span class="quick-patterns-label">Pola Cepat:</span>
+          <button type="button" class="chip-btn js-pattern ${activePattern === 'single' ? 'active' : ''}" data-pattern="single">1 Titik (Klasik)</button>
+          <button type="button" class="chip-btn js-pattern ${activePattern === 'two_hit' ? 'active' : ''}" data-pattern="two_hit">2 Titik (Intro + Penutup)</button>
+          <button type="button" class="chip-btn js-pattern ${activePattern === 'three_hit' ? 'active' : ''}" data-pattern="three_hit">3 Titik (Awal + Tengah + CTA)</button>
+        </div>
+
+        <div class="segment-list">${rowsHtml}</div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; gap: 10px;">
+          <button type="button" class="btn btn-sm btn-primary js-seg-add" ${addDisabled}>
+            + Tambah Titik Kemunculan (${state.segments.length}/${MAX_SEGMENTS})
+          </button>
+          <span style="font-size: 0.74rem; color: var(--text-muted);">
+            Jarak antar segmen minimal 1 klip jeda (<code>gap</code>).
+          </span>
+        </div>
+      `;
+    }
+
+    function getActivePatternName() {
+      if (state.segments.length === 1) return 'single';
+      if (state.segments.length === 2) return 'two_hit';
+      if (state.segments.length === 3) return 'three_hit';
+      return '';
+    }
+
+    function applyQuickPattern(name) {
+      const n = state.totalClips;
+      state.rawTestNote = null;
+      if (name === 'single') {
+        state.segments = [{ at_clip: Math.min(2, n), duration_clips: 1, role: 'intro' }];
+      } else if (name === 'two_hit') {
+        const last = Math.max(4, n - 1);
+        state.segments = [
+          { at_clip: 2, duration_clips: 1, role: 'intro' },
+          { at_clip: last, duration_clips: 0, role: 'recall' }
+        ];
+      } else if (name === 'three_hit') {
+        const mid = Math.max(4, Math.ceil(n / 2));
+        const end = Math.max(mid + 2, n);
+        state.segments = [
+          { at_clip: 2, duration_clips: 1, role: 'intro' },
+          { at_clip: Math.min(mid, n - 2), duration_clips: 1, role: 'recall' },
+          { at_clip: Math.min(end, n), duration_clips: 1, role: 'recall' }
+        ];
+      }
+      renderAll();
+    }
+
+    function getSampleNarration(zone, clipNum) {
+      const map = {
+        pre: `"Kadang badan terasa cepat drop padahal kerjaan baru setengah jalan."`,
+        intro: `"Untung ada Susu Steril Kurma Madu yang praktis langsung minum saat istirahat."`,
+        gap: `"Begitu ritme napas kembali stabil, fokus kerja pun pelan-pelan balik lagi."`,
+        recall: `"Simpan satu kaleng Susu Steril Kurma Madu di tas—klik keranjang sebelum kehabisan."`,
+        post: `"Rawat energi harianmu mulai dari kebiasaan kecil hari ini."`
+      };
+      return map[zone] || `Klip ${clipNum}`;
+    }
+
+    function renderAll() {
+      // Sync shared inputs across tabs
+      document.querySelectorAll('.js-clips-input').forEach((el) => { el.value = state.totalClips; });
+      document.querySelectorAll('.js-bridging-active').forEach((el) => { el.checked = state.isActive; });
+      document.querySelectorAll('.js-bridging-body').forEach((el) => {
+        el.classList.toggle('hidden', !state.isActive);
+      });
+
+      const isPillarInvestigative = state.surface === 'pillar' && state.visualStyle === 'investigative_faceless';
+      document.getElementById('pillarInvestigativeNotice').classList.toggle('hidden', !isPillarInvestigative);
+
+      // Render editors
+      renderSharedEditor('editor-mount-multiplier');
+      renderSharedEditor('editor-mount-pillar');
+      renderSharedEditor('editor-mount-preset');
+
+      // Compute active plan
+      const plan = resolveBridgePlan(state.segments, state.totalClips, {
+        isActive: state.isActive,
+        singleZoneOnly: isPillarInvestigative
+      });
+
+      if (state.selectedClip > plan.totalClips) state.selectedClip = plan.totalClips;
+
+      // Right column headers & warnings
+      document.getElementById('lblTotalClips').textContent = plan.totalClips;
+      const summaryDesc = describeBridgePlan(plan);
+      document.getElementById('lblDescribePlan').textContent = summaryDesc;
+      document.getElementById('planModeBadge').textContent = !plan.isActive
+        ? 'Nonaktif'
+        : plan.segments.length > 1
+          ? `Multi-Segment (${plan.segments.length} Titik)`
+          : 'Single-Segment';
+
+      const warningsBox = document.getElementById('planWarningsBox');
+      if (plan.warnings.length > 0) {
+        warningsBox.innerHTML = plan.warnings.map((w) => `
+          <div class="alert alert-warning">
+            <span>⚠️</span>
+            <div>${w}</div>
+          </div>
+        `).join('');
+      } else if (state.rawTestNote) {
+        warningsBox.innerHTML = `
+          <div class="alert alert-success">
+            <span>✓</span>
+            <div>${state.rawTestNote}</div>
+          </div>
+        `;
+      } else {
+        warningsBox.innerHTML = '';
+      }
+
+      // Render Timeline Strip
+      const stripEl = document.getElementById('timelineStrip');
+      let stripHtml = '';
+      for (let i = 1; i <= plan.totalClips; i++) {
+        const info = plan.clipMap[i];
+        const isSel = i === state.selectedClip ? 'selected' : '';
+        const iconText = info.hasProductRef ? '📸 T2I Ref' : '🎬 Story';
+        stripHtml += `
+          <button type="button" class="clip-node ${isSel}" data-clip="${i}">
+            <span class="clip-num">Klip ${i}</span>
+            <span class="zone-pill zone-${info.zone}">${info.zone}</span>
+            <span class="clip-icons">${iconText}</span>
+          </button>
+        `;
+      }
+      stripEl.innerHTML = stripHtml;
+
+      // Render Selected Clip Inspector
+      const selInfo = plan.clipMap[state.selectedClip] || plan.clipMap[1];
+      const zoneTitleMap = {
+        pre: 'PRE — Storytelling Sebelum Produk',
+        intro: 'INTRO — Perkenalan Produk Utama',
+        gap: 'GAP — Jeda Cerita Tanpa Produk',
+        recall: 'RECALL — Kemunculan Ulang / Pengingat',
+        post: 'POST — Penutup Setelah Segmen Terakhir'
+      };
+      const t2iBehavior = selInfo.hasProductRef
+        ? (selInfo.zone === 'intro'
+            ? 'Suntik product_truth + foto acuan user (atau generatedStartFrameUrl jika diupload)'
+            : 'Suntik product_truth + foto acuan produk (Recall selalu auto-generate T2I)')
+        : (selInfo.zone === 'gap' && state.surface === 'pillar' && state.visualStyle === 'metaphoric_faceless'
+            ? 'Tanpa foto produk. Karakter/tangan tetap boleh konsisten, tanpa kemasan/logo'
+            : 'Tanpa product_truth & tanpa foto acuan produk');
+
+      const aiScriptBehavior = {
+        pre: 'Dilarang menyebut merek/produk/harga. Bangun masalah atau hook emosional.',
+        intro: 'Transisi halus memperkenalkan produk sebagai jawaban alami atas konteks pre-bridge.',
+        gap: 'Kembali ke emosi/dampak manusiawi tanpa jualan agar iklan terasa organik.',
+        recall: 'Pengingat singkat / penguatan bukti & CTA halus tanpa mengulang definisi awal.',
+        post: 'Resolusi cerita atau CTA akhir ringan tanpa informasi fitur baru.'
+      }[selInfo.zone];
+
+      document.getElementById('clipInspector').innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <strong>Inspeksi Klip ${selInfo.clip}</strong>
+          <span class="zone-pill zone-${selInfo.zone}">${zoneTitleMap[selInfo.zone]}</span>
+        </div>
+        <div class="kv-grid">
+          <div class="kv-item">
+            <div class="kv-label">Aturan Naskah Gemini AI</div>
+            <div class="kv-val" style="font-size: 0.78rem; font-weight: 500;">${aiScriptBehavior}</div>
+          </div>
+          <div class="kv-item">
+            <div class="kv-label">Aturan Visual &amp; T2I Worker</div>
+            <div class="kv-val" style="font-size: 0.78rem; font-weight: 500;">${t2iBehavior}</div>
+          </div>
+        </div>
+        <div class="kv-item">
+          <div class="kv-label">Simulasi Output VO Klip ${selInfo.clip} (~8–9 kata / 4 detik)</div>
+          <div class="kv-val" style="font-style: italic;">${getSampleNarration(selInfo.zone, selInfo.clip)}</div>
+        </div>
+      `;
+
+      // Render Prompt Contract
+      document.getElementById('promptContractOut').textContent =
+        buildBridgeZoningContract(plan, state.visualStyle, state.promoStyle);
+
+      // Render Preset Backward-Compatible JSON
+      const firstSeg = plan.segments[0] || { at_clip: 2, duration_clips: 1 };
+      const presetJson = {
+        is_bridging_active: plan.isActive,
+        bridging_mode: state.bridgingMode,
+        bridge_at_clip: firstSeg.at_clip,
+        bridge_duration_clips: firstSeg.duration_clips,
+        bridge_segments: plan.segments.map(({ at_clip, duration_clips, role }) => ({
+          at_clip,
+          duration_clips,
+          role
+        }))
+      };
+      document.getElementById('presetJsonOut').textContent = JSON.stringify(presetJson, null, 2);
+
+      // Render Detail Surface
+      document.getElementById('detailSummaryTag').textContent = summaryDesc;
+      document.getElementById('detailActiveBadge').textContent = plan.isActive ? 'Aktif' : 'Nonaktif';
+      document.getElementById('detailScheduleText').textContent = summaryDesc;
+      const productClipsCount = Object.values(plan.clipMap).filter((c) => c.hasProductRef).length;
+      document.getElementById('detailCoverageText').textContent =
+        `${productClipsCount} dari ${plan.totalClips} klip (${Math.round((productClipsCount / plan.totalClips) * 100)}%)`;
+
+      document.getElementById('detailSegmentsPills').innerHTML = plan.isActive
+        ? plan.segments.map((s, idx) => `
+            <span class="tag">
+              <span class="zone-pill zone-${s.role === 'intro' ? 'intro' : 'recall'}">${s.role.toUpperCase()}</span>
+              Segmen ${idx + 1}: Klip ${s.at_clip} → ${s.end_clip} (${s.duration_clips === 0 ? 's/d akhir' : s.duration_clips + ' klip'})
+            </span>
+          `).join('')
+        : '<span class="tag">Tidak ada segmen aktif</span>';
+    }
+
+    // =========================================================================
+    // EVENT DELEGATION
+    // =========================================================================
+    document.querySelectorAll('.surface-tab').forEach((tab) => {
+      tab.addEventListener('click', () => {
+        state.surface = tab.dataset.surface;
+        document.querySelectorAll('.surface-tab').forEach((t) => t.classList.remove('active'));
+        tab.classList.add('active');
+        document.querySelectorAll('.surface-pane').forEach((p) => p.classList.add('hidden'));
+        document.getElementById(`pane-${state.surface}`).classList.remove('hidden');
+        renderAll();
+      });
+    });
+
+    document.getElementById('btnThemeToggle').addEventListener('click', () => {
+      state.theme = state.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', state.theme);
+      document.getElementById('btnThemeToggle').textContent =
+        state.theme === 'dark' ? '☀️ Switch to Light Mode' : '🌙 Switch to Dark Mode';
+    });
+
+    document.getElementById('btnResetDemo').addEventListener('click', () => {
+      state.totalClips = 7;
+      state.isActive = true;
+      state.visualStyle = 'metaphoric_faceless';
+      state.segments = [
+        { at_clip: 2, duration_clips: 1, role: 'intro' },
+        { at_clip: 6, duration_clips: 2, role: 'recall' }
+      ];
+      state.selectedClip = 2;
+      state.rawTestNote = null;
+      document.getElementById('pillarVisualStyle').value = 'metaphoric_faceless';
+      renderAll();
+    });
+
+    document.addEventListener('input', (e) => {
+      if (e.target.classList.contains('js-clips-input')) {
+        state.totalClips = clampInt(e.target.value, 4, 12, 7);
+        renderAll();
+      } else if (e.target.classList.contains('js-seg-at')) {
+        const idx = parseInt(e.target.dataset.idx, 10);
+        state.segments[idx].at_clip = clampInt(e.target.value, 1, 12, 2);
+        state.rawTestNote = null;
+        renderAll();
+      } else if (e.target.classList.contains('js-seg-dur')) {
+        const idx = parseInt(e.target.dataset.idx, 10);
+        state.segments[idx].duration_clips = clampInt(e.target.value, 0, 12, 1);
+        state.rawTestNote = null;
+        renderAll();
+      }
+    });
+
+    document.addEventListener('change', (e) => {
+      if (e.target.classList.contains('js-bridging-active')) {
+        state.isActive = e.target.checked;
+        renderAll();
+      } else if (e.target.classList.contains('js-seg-role')) {
+        const idx = parseInt(e.target.dataset.idx, 10);
+        state.segments[idx].role = e.target.value;
+        renderAll();
+      } else if (e.target.id === 'pillarVisualStyle') {
+        state.visualStyle = e.target.value;
+        renderAll();
+      } else if (e.target.id === 'mulPromoStyle') {
+        state.promoStyle = e.target.value;
+        renderAll();
+      } else if (e.target.id === 'presetBridgingMode') {
+        state.bridgingMode = e.target.value;
+        renderAll();
+      } else if (e.target.id === 'pillarBridgingMethod') {
+        state.pillarMethod = e.target.value;
+        renderAll();
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      const clipBtn = e.target.closest('.clip-node');
+      if (clipBtn) {
+        state.selectedClip = parseInt(clipBtn.dataset.clip, 10);
+        renderAll();
+        return;
+      }
+
+      if (e.target.classList.contains('js-pattern')) {
+        applyQuickPattern(e.target.dataset.pattern);
+        return;
+      }
+
+      if (e.target.classList.contains('js-seg-add')) {
+        if (state.segments.length >= MAX_SEGMENTS) return;
+        const plan = resolveBridgePlan(state.segments, state.totalClips, { isActive: true });
+        const last = plan.segments[plan.segments.length - 1];
+        const nextAt = Math.min(state.totalClips, last.end_clip + 2);
+        state.segments.push({ at_clip: nextAt, duration_clips: 1, role: 'recall' });
+        state.rawTestNote = null;
+        renderAll();
+        return;
+      }
+
+      if (e.target.classList.contains('js-seg-remove')) {
+        const idx = parseInt(e.target.dataset.idx, 10);
+        if (state.segments.length > 1) {
+          state.segments.splice(idx, 1);
+          if (state.segments[0]) state.segments[0].role = 'intro';
+          state.rawTestNote = null;
+          renderAll();
+        }
+        return;
+      }
+
+      const tc = e.target.closest('[data-testcase]');
+      if (tc) {
+        const mode = tc.dataset.testcase;
+        const msgBox = document.getElementById('edgeCaseResult');
+        state.isActive = true;
+        if (mode === 'adjacent') {
+          state.totalClips = 7;
+          state.segments = [
+            { at_clip: 2, duration_clips: 1, role: 'intro' },
+            { at_clip: 3, duration_clips: 1, role: 'recall' },
+            { at_clip: 6, duration_clips: 1, role: 'recall' }
+          ];
+          msgBox.innerHTML = '<span>⚡</span><div><strong>Auto-Merge Diterapkan:</strong> Input <code>[{2, dur 1}, {3, dur 1}, {6, dur 1}]</code> digabung menjadi Klip 2–3 (Intro) dan Klip 6 (Recall) karena tidak ada jeda minimal 1 klip.</div>';
+        } else if (mode === 'zero_middle') {
+          state.totalClips = 7;
+          state.segments = [
+            { at_clip: 2, duration_clips: 0, role: 'intro' },
+            { at_clip: 6, duration_clips: 1, role: 'recall' }
+          ];
+          msgBox.innerHTML = '<span>🚫</span><div><strong>Clamp Durasi 0 Diterapkan:</strong> Input <code>dur 0</code> pada segmen ke-1 diclamp menjadi <code>1</code> karena bukan segmen terakhir.</div>';
+        } else if (mode === 'zero_tail') {
+          state.totalClips = 7;
+          state.segments = [
+            { at_clip: 2, duration_clips: 1, role: 'intro' },
+            { at_clip: 5, duration_clips: 0, role: 'recall' }
+          ];
+          msgBox.innerHTML = '<span>∞</span><div><strong>Durasi 0 di Akhir Valid:</strong> Segmen ke-2 mulai Klip 5 dengan <code>duration_clips = 0</code> membentang hingga akhir video (Klip 5–7).</div>';
+        } else if (mode === 'out_of_range') {
+          state.totalClips = 6;
+          state.segments = [
+            { at_clip: 2, duration_clips: 1, role: 'intro' },
+            { at_clip: 9, duration_clips: 1, role: 'recall' }
+          ];
+          msgBox.innerHTML = '<span>📏</span><div><strong>Out-of-Range Dibuang:</strong> Segmen Klip 9 dibuang karena total video hanya 6 klip.</div>';
+        }
+        renderAll();
+      }
+    });
+
+    // Initial render
+    renderAll();
+  </script>
+</body>
+</html>
+

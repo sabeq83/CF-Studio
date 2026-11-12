@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { resolveBridgePlan, readBridgeInputs, describeBridgePlan } from '@/lib/bridging/bridge-plan';
 
 export default function ImportPlannerModal({
   isOpen,
@@ -506,7 +507,9 @@ export default function ImportPlannerModal({
               <div>
                 <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: 2 }}>Product Bridging</span>
                 <span style={{ fontSize: '0.84rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                  {pConfig.product_bridging?.is_bridging_active ? `Aktif di Klip ${pConfig.product_bridging.bridge_at_clip || 3}` : 'Nonaktif'}
+                  {pConfig.product_bridging?.is_bridging_active
+                    ? describeBridgePlan(resolveBridgePlan(readBridgeInputs(pConfig.product_bridging, pConfig.visual_engine, { defaultActive: true })))
+                    : 'Nonaktif'}
                 </span>
               </div>
               <div style={{ gridColumn: 'span 2' }}>

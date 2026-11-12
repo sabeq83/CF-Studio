@@ -6,6 +6,7 @@ import { useEffect, useState, useRef, Fragment } from 'react';
 import { useParams } from 'next/navigation';
 import { getDemographicLabel, getVisualOverrideLabel, parseVisualOverrides } from '../../../lib/campaign-config-labels';
 import { MINIMAX_ENGLISH_VOICES, ELEVENLABS_ID_VOICES, ELEVENLABS_EN_VOICES, ELEVENLABS_MODELS } from '@/lib/voice-constants';
+import { resolveBridgePlan, readBridgeInputs, describeBridgePlan } from '@/lib/bridging/bridge-plan';
 
 const writeToClipboard = (text) => {
   if (typeof window !== 'undefined') {
@@ -1303,9 +1304,12 @@ export default function PillarCampaignDetailPage() {
         )}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {scenes.map((scene, index) => {
+          {(() => {
+            const pillarDetailPlan = resolveBridgePlan(readBridgeInputs(campaign || {}, {}, { defaultActive: false }));
+            return scenes.map((scene, index) => {
             const vo = voiceover.find(v => v.scene === scene.scene) || {};
-            const isBridge = campaign?.visual_mode === 'hybrid_lock' && campaign?.is_bridging_active && scene.scene === campaign.bridge_at_clip;
+            const isBridge = campaign?.visual_mode === 'hybrid_lock' && pillarDetailPlan.isProductClip(scene.scene);
+            const bridgeRole = isBridge ? pillarDetailPlan.zoneOf(scene.scene) : null;
 
             return (
               <div
@@ -1322,7 +1326,7 @@ export default function PillarCampaignDetailPage() {
                     <span style={{ background: isBridge ? 'var(--status-info)' : 'var(--bg-secondary)', color: isBridge ? 'var(--text-primary)' : 'var(--text-primary)', padding: '2px 8px', borderRadius: 4, fontSize: '0.75rem' }}>
                       Scene {scene.scene}
                     </span>
-                    {isBridge && <span style={{ color: 'var(--status-info)', fontSize: '0.75rem', fontWeight: 'bold' }}>[🌉 TITIK BRIDGE PRODUK]</span>}
+                    {isBridge && <span style={{ color: 'var(--status-info)', fontSize: '0.75rem', fontWeight: 'bold' }}>{bridgeRole === 'recall' ? '[🔁 RECALL PRODUK]' : '[🌉 TITIK BRIDGE PRODUK]'}</span>}
                   </div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                     Durasi: {scene.duration}
@@ -1353,7 +1357,8 @@ export default function PillarCampaignDetailPage() {
                 </div>
               </div>
             );
-          })}
+          });
+          })()}
         </div>
       </div>
     );
@@ -1366,6 +1371,7 @@ export default function PillarCampaignDetailPage() {
     } catch {
       return <p style={{ color: 'var(--danger)' }}>Gagal menguraikan hasil generator JSON.</p>;
     }
+    const pillarPromptBridgePlan = resolveBridgePlan(readBridgeInputs(campaign || {}, {}, { defaultActive: false }));
 
     const t2v = parsed.t2v_prompts || [];
     const t2i = parsed.t2i_prompts || [];
@@ -1383,7 +1389,7 @@ export default function PillarCampaignDetailPage() {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {clipsList.map(cNum => {
-          const isBridge = campaign?.visual_mode === 'hybrid_lock' && campaign?.is_bridging_active && cNum === campaign.bridge_at_clip;
+          const isBridge = campaign?.visual_mode === 'hybrid_lock' && pillarPromptBridgePlan.isProductClip(cNum);
 
           let displayPrompts = [];
           if (isHybrid) {
@@ -2493,7 +2499,9 @@ export default function PillarCampaignDetailPage() {
                 <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', marginRight: 4 }}>⚡ Lompat Cepat:</span>
                 {plan.map((p, pidx) => {
                   const isActive = (activeClipIndex[item.id] !== undefined ? activeClipIndex[item.id] : 0) === pidx;
-                  const isBridgeClip = campaign?.visual_mode === 'hybrid_lock' && campaign?.is_bridging_active && Number(p.clip_index) === Number(campaign.bridge_at_clip);
+                  const jumpBridgePlan = resolveBridgePlan(readBridgeInputs(campaign || {}, {}, { defaultActive: false }));
+                  const isBridgeClip = campaign?.visual_mode === 'hybrid_lock' && jumpBridgePlan.isProductClip(p.clip_index || (pidx + 1));
+                  const jumpZone = isBridgeClip ? jumpBridgePlan.zoneOf(p.clip_index || (pidx + 1)) : null;
                   return (
                     <button
                       key={pidx}
@@ -2515,7 +2523,7 @@ export default function PillarCampaignDetailPage() {
                         transition: 'all 0.15s ease'
                       }}
                     >
-                      Klip #{p.clip_index || (pidx + 1)} {isBridgeClip ? '🌉' : ''}
+                      Klip #{p.clip_index || (pidx + 1)} {isBridgeClip ? (jumpZone === 'recall' ? '🔁' : '🌉') : ''}
                     </button>
                   );
                 })}
@@ -2524,7 +2532,9 @@ export default function PillarCampaignDetailPage() {
 
             {/* Creative Clip Plans list */}
             {plan.map((p, idx) => {
-              const isBridge = campaign?.visual_mode === 'hybrid_lock' && campaign?.is_bridging_active && Number(p.clip_index) === Number(campaign.bridge_at_clip);
+              const clipBridgePlan = resolveBridgePlan(readBridgeInputs(campaign || {}, {}, { defaultActive: false }));
+              const isBridge = campaign?.visual_mode === 'hybrid_lock' && clipBridgePlan.isProductClip(p.clip_index || (idx + 1));
+              const clipBridgeZone = isBridge ? clipBridgePlan.zoneOf(p.clip_index || (idx + 1)) : null;
               const isExpanded = (activeClipIndex[item.id] !== undefined ? activeClipIndex[item.id] : 0) === idx;
 
               return (
@@ -2546,7 +2556,7 @@ export default function PillarCampaignDetailPage() {
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span>{isExpanded ? '▼' : '▶'} Aset Klip #{p.clip_index || (idx + 1)}</span>
-                      {isBridge && <span style={{ fontSize: '0.72rem', fontWeight: 'bold', color: 'var(--status-info)' }}>🌉 BRIDGE TRANSISI PRODUK</span>}
+                      {isBridge && <span style={{ fontSize: '0.72rem', fontWeight: 'bold', color: 'var(--status-info)' }}>{clipBridgeZone === 'recall' ? '🔁 BRIDGE RECALL PRODUK' : '🌉 BRIDGE TRANSISI PRODUK'}</span>}
                     </div>
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
                       {isExpanded ? 'Tutup Aset' : 'Buka Aset'}
@@ -3625,11 +3635,22 @@ export default function PillarCampaignDetailPage() {
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>Klip Target Promosi</span>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>Klip Ke-{campaign.bridge_at_clip || 2}</span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>
+                    {(() => {
+                      const infoPlan = resolveBridgePlan(readBridgeInputs(campaign || {}, {}, { defaultActive: Boolean(campaign?.is_bridging_active === 1 || campaign?.is_bridging_active === true) }));
+                      return infoPlan.active ? describeBridgePlan(infoPlan) : `Klip Ke-${campaign.bridge_at_clip || 2}`;
+                    })()}
+                  </span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>Durasi Bridge</span>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{campaign.bridge_duration_clips || 1} Klip</span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>
+                    {(() => {
+                      const infoPlan = resolveBridgePlan(readBridgeInputs(campaign || {}, {}, { defaultActive: Boolean(campaign?.is_bridging_active === 1 || campaign?.is_bridging_active === true) }));
+                      if (infoPlan.active && infoPlan.segments.length > 1) return `${infoPlan.productClips.length} Klip (${infoPlan.segments.length} Segmen)`;
+                      return `${campaign.bridge_duration_clips !== undefined ? campaign.bridge_duration_clips : 1} Klip`;
+                    })()}
+                  </span>
                 </div>
                 <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>Instruksi Transisi Bridge</span>
