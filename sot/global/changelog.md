@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.41.4 — Add Searchable Content Planner Picker and Consumed Status Badges to OPC Ingest Modal (12/11/2026)
+- Searchable Content Planner Drawer with real-time title and brand query filtering
+- Status badges distinguishing Belum Dipakai (Ready) vs Sudah Terpakai (Consumed)
+- Quick filter chips for instant filtering by consumption status
+- Preserves full multi-row selection and 100% preset config inheritance
+
 ## V2.41.3 — Simplifikasi Modal Ingest Content Planner ke OPC Studio (12/11/2026)
 - Refaktorisasi ImportPlannerModal ke model preset-centric 1-screen tanpa 5 accordion manual
 - Pilihan Sumber Planner dan checklist baris dinamis yang fleksibel

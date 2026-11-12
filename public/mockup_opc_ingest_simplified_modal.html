@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mockup: Simplified Ingest ke OPC Modal — Content Planner</title>
+  <title>Mockup: Simplified Ingest ke OPC Modal — Searchable Planner & Badges</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -279,13 +279,13 @@
       border: 1px solid var(--border-strong);
       border-radius: var(--radius-lg);
       width: 100%;
-      max-width: 720px;
+      max-width: 740px;
       box-shadow: var(--shadow-modal);
       overflow: hidden;
       animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       display: flex;
       flex-direction: column;
-      max-height: 92vh;
+      max-height: 94vh;
     }
 
     @keyframes fadeIn {
@@ -375,8 +375,10 @@
       box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.2);
     }
 
-    /* Dynamic Planner Selector & Rows Section */
-    .planner-selection-container {
+    /* =========================================
+       SEARCHABLE PLANNER PICKER & BADGES
+       ========================================= */
+    .planner-picker-container {
       background: var(--surface-raised);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-sm);
@@ -386,10 +388,188 @@
       gap: 12px;
     }
 
+    /* Active Selected Planner Box */
+    .active-planner-summary-card {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .active-planner-summary-card:hover {
+      background: var(--surface-hover);
+      border-color: var(--action-primary);
+    }
+
+    .active-planner-info {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .active-planner-title {
+      font-size: 0.92rem;
+      font-weight: 750;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .active-planner-meta {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Search & Filter Dropdown Box */
+    .planner-search-dropdown {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .search-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .search-input-wrapper input {
+      width: 100%;
+      padding-left: 36px;
+      font-size: 0.85rem;
+    }
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      pointer-events: none;
+    }
+
+    /* Filter Chips */
+    .filter-chips-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .chip-btn {
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .chip-btn.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border-color: var(--action-primary);
+      font-weight: 700;
+    }
+    .chip-btn:hover:not(.active) {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+    }
+
+    /* Planner List Scrollable */
+    .planner-list-scroll {
+      max-height: 200px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .planner-item-card {
+      padding: 10px 12px;
+      border-radius: 6px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.12s ease;
+    }
+    .planner-item-card:hover {
+      background: var(--surface-interactive);
+      border-color: var(--border-strong);
+      transform: translateX(2px);
+    }
+    .planner-item-card.selected {
+      border-color: var(--action-primary);
+      background: var(--surface-interactive);
+    }
+
+    .planner-item-left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .planner-item-title {
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .planner-item-meta {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    /* Badges */
+    .badge-status {
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .badge-status.ready {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+    }
+    .badge-status.consumed {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border: 1px solid var(--status-warning);
+    }
+
+    /* Rows Controls & List */
     .planner-row-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding-top: 4px;
+      border-top: 1px solid var(--border-subtle);
     }
 
     .btn-toggle-rows {
@@ -410,16 +590,15 @@
     }
 
     .source-rows-pill {
-      background: var(--status-success-soft);
-      color: var(--status-success);
-      border: 1px solid var(--status-success);
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid var(--status-info);
       padding: 3px 10px;
       border-radius: 999px;
       font-size: 0.74rem;
       font-weight: 700;
     }
 
-    /* Rows Collapsible Checklist Box */
     .rows-checklist-box {
       background: var(--surface);
       border: 1px solid var(--border-subtle);
@@ -428,7 +607,7 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      max-height: 180px;
+      max-height: 160px;
       overflow-y: auto;
     }
 
@@ -526,7 +705,6 @@
       border: 1px solid var(--border-strong);
     }
 
-
     .modal-footer {
       padding: 16px 24px;
       background: var(--surface-raised);
@@ -573,54 +751,6 @@
       transform: translateY(-1px);
     }
 
-    .comparison-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-top: 16px;
-    }
-
-    .comp-box {
-      background: var(--surface);
-      border-radius: var(--radius-md);
-      padding: 20px;
-      border: 1px solid var(--border-subtle);
-    }
-    .comp-box.old {
-      border-color: var(--status-danger-soft);
-    }
-    .comp-box.new {
-      border-color: var(--status-success);
-    }
-
-    .comp-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 14px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--border-subtle);
-    }
-
-    .comp-title {
-      font-size: 1rem;
-      font-weight: 700;
-    }
-
-    .comp-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      font-size: 0.84rem;
-      color: var(--text-secondary);
-    }
-    .comp-list li {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-    }
-
     .toast {
       position: fixed;
       bottom: 24px;
@@ -651,7 +781,7 @@
   <header class="top-bar">
     <div class="brand-title">
       <span>🧬 MAKNA Flow Studio</span>
-      <span class="badge-opc">REVISED: FLEXIBLE PLANNER & ROWS SELECTION</span>
+      <span class="badge-opc">REVISED: SEARCHABLE PLANNER &amp; CONSUMED BADGES</span>
     </div>
     <div class="nav-actions">
       <button class="btn-toggle-theme" onclick="toggleTheme()">
@@ -665,13 +795,10 @@
     <!-- Tab Navigation -->
     <div class="tab-nav">
       <button class="tab-btn active" onclick="switchTab('simulation')">
-        <span>🚀</span> Simulasi Modal Baru (Interaktif)
+        <span>🚀</span> Simulasi Modal Baru (Search &amp; Badges)
       </button>
-      <button class="tab-btn" onclick="switchTab('comparison')">
-        <span>⚖️</span> Perbandingan (Lama vs Baru)
-      </button>
-      <button class="tab-btn" onclick="switchTab('architecture')">
-        <span>📐</span> Arsitektur Data & Payload
+      <button class="tab-btn" onclick="switchTab('features')">
+        <span>✨</span> Detail Fitur Search &amp; Status Badges
       </button>
     </div>
 
@@ -682,8 +809,8 @@
       <div class="planner-card-mockup">
         <div class="planner-header">
           <div>
-            <h1 class="planner-title">📋 Content Planner Hub: Multi-Planner Ready</h1>
-            <p class="planner-subtitle">Pilih planner dan ingest baris konten ke OPC Studio tanpa konfigurasi accordion berulang.</p>
+            <h1 class="planner-title">📋 Content Planner Hub: Searchable Planner &amp; Consumption Status</h1>
+            <p class="planner-subtitle">Cari dan pilih Content Planner, pantau badge status pemakaian, dan ingest langsung ke OPC Studio.</p>
           </div>
           <button class="btn-ingest-trigger" onclick="openModal()">
             <span>🌱</span> Ingest ke OPC Studio
@@ -697,7 +824,7 @@
               <th>Planner Asal</th>
               <th>Pilar Konten</th>
               <th>Topik / Hook Utama</th>
-              <th>Status Riset</th>
+              <th>Status Pemakaian</th>
             </tr>
           </thead>
           <tbody>
@@ -706,67 +833,106 @@
               <td><span style="font-weight: 700; color: var(--action-primary);">Cerita Dokter</span></td>
               <td><strong>Mitos vs Fakta</strong></td>
               <td>Kerokan pas masuk angin bikin sembuh atau bahaya? dr. Aisyah bongkar!</td>
-              <td><span style="color: var(--status-success); font-weight: 600;">✓ Ready</span></td>
-            </tr>
-            <tr>
-              <td><input type="checkbox" checked disabled></td>
-              <td><span style="font-weight: 700; color: var(--action-primary);">Cerita Dokter</span></td>
-              <td><strong>Sinyal Tubuh</strong></td>
-              <td>Leher belakang sering kaku? Waspada alarm kolesterol & pembuluh darah</td>
-              <td><span style="color: var(--status-success); font-weight: 600;">✓ Ready</span></td>
+              <td><span class="badge-status ready">● Belum Dipakai (Ready)</span></td>
             </tr>
             <tr>
               <td><input type="checkbox" checked disabled></td>
               <td><span style="font-weight: 700; color: var(--status-warning);">Dapur Botani</span></td>
               <td><strong>Resep Sehat</strong></td>
               <td>Seduhan madu bawang fermentasi pagi hari untuk bersihkan darah</td>
-              <td><span style="color: var(--status-success); font-weight: 600;">✓ Ready</span></td>
+              <td><span class="badge-status consumed">✓ Sudah Terpakai (OPC #2089)</span></td>
             </tr>
             <tr>
               <td><input type="checkbox" checked disabled></td>
               <td><span style="font-weight: 700; color: var(--status-info);">NutriBake</span></td>
               <td><strong>Baking Rendah Gula</strong></td>
               <td>Tart cokelat vegan 4 bahan tanpa oven dan tanpa gula rafinasi</td>
-              <td><span style="color: var(--status-success); font-weight: 600;">✓ Ready</span></td>
+              <td><span class="badge-status ready">● Belum Dipakai (Ready)</span></td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <!-- MODAL SIMULASI BARU DENGAN PLANNER & ROWS SELECTION FLEKSIBEL -->
+      <!-- MODAL SIMULASI BARU DENGAN SEARCHABLE PLANNER & CONSUMED BADGES -->
       <div id="ingest-modal" class="modal-backdrop">
         <div class="modal-dialog">
           
           <div class="modal-header">
             <div class="modal-header-text">
               <h2><span>🌱</span> Ingest Planner ke OPC Studio</h2>
-              <p>Pilih Planner dan baris konten yang tersedia, lalu tentukan Operator Preset produksi.</p>
+              <p>Pilih Planner dan baris konten, seluruh pengaturan teknis otomatis diambil dari Operator Preset.</p>
             </div>
             <button class="btn-close" onclick="closeModal()">✕</button>
           </div>
 
           <div class="modal-body">
             
-            <!-- 1. Sumber Planner Fleksibel (Bisa Dipilih & Tidak Locked) -->
+            <!-- 1. SEARCHABLE PLANNER PICKER WITH BADGES -->
             <div class="form-group">
-              <label class="form-label" for="planner-select">
+              <label class="form-label">
                 <span>1. Pilih Sumber Content Planner *</span>
-                <span style="color: var(--action-primary); font-size: 0.74rem;">🔓 Bebas Pilih Planner</span>
+                <span style="color: var(--action-primary); font-size: 0.74rem;">🔍 Search &amp; Status Filter</span>
               </label>
               
-              <div class="planner-selection-container">
-                <select id="planner-select" class="form-select" onchange="handlePlannerChange(this.value)">
-                  <option value="pln_cerita_dokter" selected>🩺 Cerita Dokter — Edukasi Herbal & Madu (5 Baris Tersedia)</option>
-                  <option value="pln_dapur_botani">🌿 Dapur Botani — Resep Sehat Alami Ramadhan (4 Baris Tersedia)</option>
-                  <option value="pln_nutribake">🥐 NutriBake — Sensory ASMR Healthy Pastry (3 Baris Tersedia)</option>
-                  <option value="pln_jasa_insulasi">🏗️ Jasa Insulasi ID — Solusi Redam Panas & Suara (3 Baris Tersedia)</option>
-                </select>
+              <div class="planner-picker-container">
+                
+                <!-- Kartu Planner Aktif Terpilih (Clickable trigger) -->
+                <div class="active-planner-summary-card" onclick="togglePlannerPickerDrawer()">
+                  <div class="active-planner-info">
+                    <div class="active-planner-title">
+                      <span id="active-p-title">🩺 Cerita Dokter — Edukasi Herbal &amp; Madu</span>
+                      <span id="active-p-badge" class="badge-status ready">● Belum Dipakai</span>
+                    </div>
+                    <div class="active-planner-meta">
+                      <span id="active-p-brand">Brand: Cerita Dokter</span>
+                      <span>•</span>
+                      <span id="active-p-total-rows">5 Baris Tersedia</span>
+                    </div>
+                  </div>
+                  <button type="button" class="btn-toggle-rows" style="pointer-events: none;">
+                    <span id="drawer-arrow-icon">🔍 Ganti / Cari ▼</span>
+                  </button>
+                </div>
+
+                <!-- Dropdown Pencarian & Filter List Planner (Expandable) -->
+                <div id="planner-search-drawer" class="planner-search-dropdown" style="display: none;">
+                  
+                  <!-- Input Search -->
+                  <div class="search-input-wrapper">
+                    <span class="search-icon">🔍</span>
+                    <input 
+                      id="planner-search-box"
+                      type="text" 
+                      class="form-input" 
+                      placeholder="Ketik untuk mencari planner, brand, atau topik..."
+                      oninput="handleSearchPlanner(this.value)"
+                    >
+                  </div>
+
+                  <!-- Filter Chips -->
+                  <div class="filter-chips-row">
+                    <button type="button" class="chip-btn active" id="chip-all" onclick="filterByStatus('all')">
+                      Semua (<span id="count-all">5</span>)
+                    </button>
+                    <button type="button" class="chip-btn" id="chip-ready" onclick="filterByStatus('ready')">
+                      ● Belum Dipakai (<span id="count-ready">3</span>)
+                    </button>
+                    <button type="button" class="chip-btn" id="chip-consumed" onclick="filterByStatus('consumed')">
+                      ✓ Sudah Terpakai (<span id="count-consumed">2</span>)
+                    </button>
+                  </div>
+
+                  <!-- List Planner Scrollable -->
+                  <div class="planner-list-scroll" id="planner-items-list">
+                    <!-- Item dirender via JS -->
+                  </div>
+
+                </div>
 
                 <!-- Header Rows & Toggle Checklist -->
                 <div class="planner-row-header">
                   <div style="display: flex; align-items: center; gap: 8px;">
                     <span class="source-rows-pill" id="selected-rows-badge">5 dari 5 Baris Terpilih</span>
-                    <span style="font-size: 0.74rem; color: var(--text-muted);" id="planner-brand-tag">Brand: Cerita Dokter</span>
                   </div>
                   <div style="display: flex; gap: 6px;">
                     <button type="button" class="btn-toggle-rows" onclick="toggleAllRowsSelection()">
@@ -870,67 +1036,45 @@
 
     </div>
 
-    <!-- TAB 2: PERBANDINGAN LAMA VS BARU -->
-    <div id="tab-comparison" style="display: none;">
-      <h2 style="font-size: 1.3rem; margin-bottom: 8px;">Perbandingan Alur Pengguna (User Experience)</h2>
+    <!-- TAB 2: DETAIL FITUR PENCARIAN & STATUS BADGES -->
+    <div id="tab-features" style="display: none;">
+      <h2 style="font-size: 1.3rem; margin-bottom: 8px;">Detail Fitur Search &amp; Consumption Badges</h2>
       <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 20px;">
-        Mengapa menghapus Accordion 1 s/d 5 membuat platform jauh lebih stabil, cepat, dan konsisten seperti Auto-Pipeline.
+        Solusi cerdas untuk membedakan Content Planner yang masih baru versus yang sudah pernah diproduksi ke kampanye video.
       </p>
 
-      <div class="comparison-grid">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         
-        <div class="comp-box old">
-          <div class="comp-header">
-            <span class="comp-title" style="color: var(--status-danger);">❌ Modal Lama (5 Accordion Penuh)</span>
-            <span style="font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; background: var(--status-danger-soft); color: var(--status-danger); font-weight: 700;">30+ INPUT MANUAL</span>
-          </div>
-          <ul class="comp-list">
-            <li><span>⚠️</span> <strong>Terlalu Banyak Form</strong>: Membuka 5 accordion (Strategy, Aesthetics, Bridging, Visual Identity, Workflow) dengan lebih dari 30 input yang melelahkan pengguna.</li>
-            <li><span>⚠️</span> <strong>Konflik State (Race Condition)</strong>: Data teks default Planner menimpa pengaturan preset yang baru saja dipilih user.</li>
-            <li><span>⚠️</span> <strong>Visual Identity Gagal Terpilih</strong>: Komponen selector VI tidak sinkron otomatis dengan preset operator, sering fallback ke <em>hands_only_muslimah</em>.</li>
-            <li><span>⚠️</span> <strong>Peluang Human-Error Tinggi</strong>: Salah mengubah 1 dropdown (seperti rasio atau model veo) membuat video gagal render di worker GPU.</li>
+        <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 20px;">
+          <h3 style="font-size: 1rem; font-weight: 700; color: var(--action-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+            <span>🔍</span> Real-Time Search &amp; Quick Filter
+          </h3>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: 0.84rem; color: var(--text-secondary);">
+            <li><span>✓</span> <strong>Instant Search Bar</strong>: Mengetik kata kunci (misal "dokter", "garlibee", "baking") langsung memfilter daftar planner secara instan tanpa reload.</li>
+            <li><span>✓</span> <strong>Filter Chips Cepat</strong>: Tombol tab mini untuk menyaring daftar: <em>Semua</em>, <em>Belum Dipakai</em>, dan <em>Sudah Terpakai</em>.</li>
+            <li><span>✓</span> <strong>Satu Klik Ganti</strong>: Mengklik salah satu kartu planner otomatis mengupdate nama kampanye, baris resep/ide, dan rekomendasi preset.</li>
           </ul>
         </div>
 
-        <div class="comp-box new">
-          <div class="comp-header">
-            <span class="comp-title" style="color: var(--status-success);">✅ Usulan Baru (Lean &amp; Flexible Ingest)</span>
-            <span style="font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; background: var(--status-success-soft); color: var(--status-success); font-weight: 700;">PLANNER FLEKSIBEL + PRESET</span>
+        <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 20px;">
+          <h3 style="font-size: 1rem; font-weight: 700; color: var(--status-success); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+            <span>🏷️</span> Sistem Badge Status Pemakaian
+          </h3>
+          <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.84rem;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="badge-status ready">● Belum Dipakai (Ready)</span>
+              <span style="color: var(--text-secondary);">Planner baru yang belum pernah di-ingest ke kampanye OPC mana pun.</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="badge-status consumed">✓ Sudah Terpakai</span>
+              <span style="color: var(--text-secondary);">Planner yang sudah pernah di-ingest (disertai info ID kampanye OPC sebelumnya).</span>
+            </div>
+            <div style="margin-top: 6px; padding: 10px; background: var(--surface-raised); border-radius: var(--radius-sm); font-size: 0.78rem; color: var(--text-muted);">
+              💡 <strong>Keuntungan</strong>: Pengguna tidak bingung apakah sebuah planner sudah diproduksi atau belum, sekaligus menghindari duplikasi produksi video tanpa sengaja.
+            </div>
           </div>
-          <ul class="comp-list">
-            <li><span>🔓</span> <strong>Sumber Planner Fleksibel</strong>: Tidak terkunci! Pengguna bebas memilih planner yang tersedia dan memilah baris mana saja yang ingin di-ingest.</li>
-            <li><span>⚡</span> <strong>Cepat &amp; Bersih</strong>: Pengguna hanya perlu memilih <strong>Planner</strong>, memastikan <strong>Nama Kampanye</strong>, dan memilih <strong>Operator Preset</strong> (selesai dalam 5 detik).</li>
-            <li><span>🎯</span> <strong>100% Konsisten seperti Auto-Pipeline</strong>: Seluruh parameter teknis diambil langsung dari preset terpilih tanpa risiko tertimpa state lokal form.</li>
-            <li><span>👁️</span> <strong>Live Preset Snapshot Card</strong>: Menampilkan ringkasan visual, voice, dan engine secara transparan sehingga pengguna yakin sebelum submit.</li>
-          </ul>
         </div>
 
-      </div>
-    </div>
-
-    <!-- TAB 3: ARSITEKTUR TEKNIS -->
-    <div id="tab-architecture" style="display: none;">
-      <h2 style="font-size: 1.3rem; margin-bottom: 8px;">Arsitektur Data &amp; Alur Eksekusi</h2>
-      <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 20px;">
-        Payload yang dikirimkan ke endpoint <code>POST /api/v2/pillar-campaigns</code> saat tombol Ingest diklik:
-      </p>
-
-      <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 18px; margin-bottom: 20px;">
-        <h3 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 10px; color: var(--action-primary);">Struktur Payload Bersih (Clean Request Body):</h3>
-        <pre style="background: var(--input-bg); border: 1px solid var(--border-subtle); padding: 14px; border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.8rem; overflow-x: auto; color: var(--text-primary);">
-{
-  "planner_id": "pln_cerita_dokter", // Sesuai planner yang dipilih user dari dropdown
-  "campaign_name": "OPC - Cerita Dokter - Batch 12 Nov 2026",
-  "operator_preset_key": "dr_aisyah_3d_pixar",
-  "initial_status": "queued", // "draft" atau "queued"
-  "row_ids": [101, 102, 103, 104, 105], // Baris-baris yang dicentang user
-  
-  // Backend secara otomatis mem-pull config lengkap dari database operator_presets:
-  // - visual_identity_preset_id: "dr_aisyah_3d_pixar_v1"
-  // - visual_engine: { video_model: "veo_31_lite", clip_duration: 8, aspect_ratio: "9:16" }
-  // - basic_strategy: { voice_provider: "minimax", voice_persona: "..." }
-  // - workflow: { enable_tts: true, enable_glabs: true, enable_ffmpeg: true }
-}</pre>
       </div>
     </div>
 
@@ -946,12 +1090,14 @@
   </div>
 
   <script>
-    // DATA MOCK PLANNER & BARISNYA
-    const PLANNER_DATABASE = {
-      pln_cerita_dokter: {
+    // DATA MOCK PLANNER LENGKAP DENGAN STATUS PEMAKAIAN (is_consumed)
+    const PLANNER_DATABASE = [
+      {
         id: 'pln_cerita_dokter',
         name: 'Cerita Dokter — Edukasi Herbal & Madu',
         brand: 'Cerita Dokter',
+        isConsumed: false,
+        consumedInfo: null,
         defaultPreset: 'dr_aisyah_3d_pixar',
         rows: [
           { id: 101, title: 'Kerokan pas masuk angin bikin sembuh atau bahaya? dr. Aisyah bongkar!' },
@@ -961,10 +1107,25 @@
           { id: 105, title: 'Untuk ibu yang lelah luar biasa: tubuhmu juga butuh istirahat' }
         ]
       },
-      pln_dapur_botani: {
+      {
+        id: 'pln_garlibee_kolesterol',
+        name: 'GarliBee — Terapi Alami Kolesterol & Jantung',
+        brand: 'Cerita Dokter',
+        isConsumed: false,
+        consumedInfo: null,
+        defaultPreset: 'dr_aisyah_3d_pixar',
+        rows: [
+          { id: 151, title: 'Kenapa bawang hitam fermentasi ampuh melenturkan plak pembuluh darah?' },
+          { id: 152, title: 'Perbedaan bawang putih mentah vs bawang hitam yang diuji lab' },
+          { id: 153, title: 'Rutinitas 1 sendok madu garlic sebelum sarapan untuk daya tahan tubuh' }
+        ]
+      },
+      {
         id: 'pln_dapur_botani',
         name: 'Dapur Botani — Resep Sehat Alami Ramadhan',
         brand: 'Dapur Botani',
+        isConsumed: true,
+        consumedInfo: 'OPC #2089',
         defaultPreset: 'dapurbotani_syari',
         rows: [
           { id: 201, title: 'Seduhan madu bawang fermentasi pagi hari untuk detox alami' },
@@ -973,10 +1134,12 @@
           { id: 204, title: 'Infused water ketumbar untuk redakan hipertensi' }
         ]
       },
-      pln_nutribake: {
+      {
         id: 'pln_nutribake',
         name: 'NutriBake — Sensory ASMR Healthy Pastry',
         brand: 'NutriBake',
+        isConsumed: false,
+        consumedInfo: null,
         defaultPreset: 'nutribake_flash',
         rows: [
           { id: 301, title: 'Tart cokelat vegan 4 bahan tanpa oven dan tanpa gula rafinasi' },
@@ -984,10 +1147,12 @@
           { id: 303, title: 'Cookies jahe rempah madu untuk teman minum teh sore' }
         ]
       },
-      pln_jasa_insulasi: {
+      {
         id: 'pln_jasa_insulasi',
         name: 'Jasa Insulasi ID — Solusi Redam Panas & Suara',
         brand: 'Jasa Insulasi ID',
+        isConsumed: true,
+        consumedInfo: 'OPC #2075',
         defaultPreset: 'stickman_business',
         rows: [
           { id: 401, title: 'Kenapa atap rumah bunyi bising saat hujan lebat? Ini solusinya' },
@@ -995,9 +1160,8 @@
           { id: 403, title: 'Bandingkan glasswool vs rockwool: mana yang lebih tahan api?' }
         ]
       }
-    };
+    ];
 
-    // DATA MOCK OPERATOR PRESETS
     const PRESET_MOCK_DATA = {
       dr_aisyah_3d_pixar: {
         id: 'dr_aisyah_3d_pixar_v1',
@@ -1040,11 +1204,125 @@
     let activePlannerId = 'pln_cerita_dokter';
     let selectedRowIds = [];
     let isChecklistVisible = true;
+    let isDrawerOpen = false;
+    let activeFilterStatus = 'all'; // 'all' | 'ready' | 'consumed'
+    let searchQuery = '';
 
-    function renderChecklist(plannerKey) {
-      const planner = PLANNER_DATABASE[plannerKey];
+    function renderPlannerList() {
+      const container = document.getElementById('planner-items-list');
+      container.innerHTML = '';
+
+      let filtered = PLANNER_DATABASE.filter(p => {
+        // Status filter
+        if (activeFilterStatus === 'ready' && p.isConsumed) return false;
+        if (activeFilterStatus === 'consumed' && !p.isConsumed) return false;
+        
+        // Search query
+        if (searchQuery.trim()) {
+          const q = searchQuery.toLowerCase();
+          const matchName = p.name.toLowerCase().includes(q);
+          const matchBrand = p.brand.toLowerCase().includes(q);
+          return matchName || matchBrand;
+        }
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div style="padding: 16px; text-align: center; color: var(--text-muted); font-size: 0.8rem;">Tidak ditemukan planner yang sesuai.</div>';
+        return;
+      }
+
+      filtered.forEach(p => {
+        const isSelected = p.id === activePlannerId;
+        const item = document.createElement('div');
+        item.className = `planner-item-card ${isSelected ? 'selected' : ''}`;
+        item.onclick = () => selectPlanner(p.id);
+
+        const badgeHtml = p.isConsumed
+          ? `<span class="badge-status consumed">✓ Sudah Terpakai ${p.consumedInfo ? `(${p.consumedInfo})` : ''}</span>`
+          : `<span class="badge-status ready">● Belum Dipakai</span>`;
+
+        item.innerHTML = `
+          <div class="planner-item-left">
+            <div class="planner-item-title">${p.name}</div>
+            <div class="planner-item-meta">Brand: ${p.brand} • ${p.rows.length} Baris Tersedia</div>
+          </div>
+          <div>${badgeHtml}</div>
+        `;
+        container.appendChild(item);
+      });
+
+      // Update counters
+      const totalAll = PLANNER_DATABASE.length;
+      const totalReady = PLANNER_DATABASE.filter(p => !p.isConsumed).length;
+      const totalConsumed = PLANNER_DATABASE.filter(p => p.isConsumed).length;
+      document.getElementById('count-all').innerText = totalAll;
+      document.getElementById('count-ready').innerText = totalReady;
+      document.getElementById('count-consumed').innerText = totalConsumed;
+    }
+
+    function togglePlannerPickerDrawer() {
+      const drawer = document.getElementById('planner-search-drawer');
+      const arrow = document.getElementById('drawer-arrow-icon');
+      isDrawerOpen = !isDrawerOpen;
+      drawer.style.display = isDrawerOpen ? 'flex' : 'none';
+      arrow.innerText = isDrawerOpen ? 'Tutup Pencarian ▲' : '🔍 Ganti / Cari ▼';
+      if (isDrawerOpen) {
+        renderPlannerList();
+        setTimeout(() => document.getElementById('planner-search-box').focus(), 50);
+      }
+    }
+
+    function handleSearchPlanner(query) {
+      searchQuery = query;
+      renderPlannerList();
+    }
+
+    function filterByStatus(status) {
+      activeFilterStatus = status;
+      document.getElementById('chip-all').classList.toggle('active', status === 'all');
+      document.getElementById('chip-ready').classList.toggle('active', status === 'ready');
+      document.getElementById('chip-consumed').classList.toggle('active', status === 'consumed');
+      renderPlannerList();
+    }
+
+    function selectPlanner(plannerId) {
+      activePlannerId = plannerId;
+      const planner = PLANNER_DATABASE.find(p => p.id === plannerId);
       if (!planner) return;
 
+      // Update summary card
+      document.getElementById('active-p-title').innerText = planner.name;
+      document.getElementById('active-p-brand').innerText = `Brand: ${planner.brand}`;
+      document.getElementById('active-p-total-rows').innerText = `${planner.rows.length} Baris Tersedia`;
+
+      const badge = document.getElementById('active-p-badge');
+      if (planner.isConsumed) {
+        badge.className = 'badge-status consumed';
+        badge.innerText = `✓ Sudah Terpakai ${planner.consumedInfo ? `(${planner.consumedInfo})` : ''}`;
+      } else {
+        badge.className = 'badge-status ready';
+        badge.innerText = '● Belum Dipakai (Ready)';
+      }
+
+      // Render rows
+      renderChecklist(planner);
+
+      // Auto-suggest nama kampanye
+      const today = '12 Nov 2026';
+      document.getElementById('campaign-name-input').value = `OPC - ${planner.brand} - Batch ${today}`;
+
+      // Auto-switch preset
+      if (planner.defaultPreset) {
+        document.getElementById('preset-select').value = planner.defaultPreset;
+        handlePresetChange(planner.defaultPreset);
+      }
+
+      // Close drawer
+      togglePlannerPickerDrawer();
+    }
+
+    function renderChecklist(planner) {
       const container = document.getElementById('rows-checklist-container');
       container.innerHTML = '';
 
@@ -1062,7 +1340,6 @@
       });
 
       updateSelectedRowsBadge();
-      document.getElementById('planner-brand-tag').innerText = `Brand: ${planner.brand}`;
     }
 
     function handleRowToggle(rowId, isChecked) {
@@ -1075,7 +1352,7 @@
     }
 
     function updateSelectedRowsBadge() {
-      const planner = PLANNER_DATABASE[activePlannerId];
+      const planner = PLANNER_DATABASE.find(p => p.id === activePlannerId);
       const total = planner ? planner.rows.length : 0;
       const count = selectedRowIds.length;
       const badge = document.getElementById('selected-rows-badge');
@@ -1086,7 +1363,7 @@
     }
 
     function toggleAllRowsSelection() {
-      const planner = PLANNER_DATABASE[activePlannerId];
+      const planner = PLANNER_DATABASE.find(p => p.id === activePlannerId);
       if (!planner) return;
 
       const checkboxes = document.querySelectorAll('#rows-checklist-container input[type="checkbox"]');
@@ -1108,24 +1385,6 @@
       isChecklistVisible = !isChecklistVisible;
       container.style.display = isChecklistVisible ? 'flex' : 'none';
       icon.innerText = isChecklistVisible ? '▲' : '▼';
-    }
-
-    function handlePlannerChange(plannerKey) {
-      activePlannerId = plannerKey;
-      const planner = PLANNER_DATABASE[plannerKey];
-      if (!planner) return;
-
-      renderChecklist(plannerKey);
-
-      // Auto-suggest nama kampanye
-      const today = '12 Nov 2026';
-      document.getElementById('campaign-name-input').value = `OPC - ${planner.brand} - Batch ${today}`;
-
-      // Auto-switch recommended preset
-      if (planner.defaultPreset) {
-        document.getElementById('preset-select').value = planner.defaultPreset;
-        handlePresetChange(planner.defaultPreset);
-      }
     }
 
     function handlePresetChange(key) {
@@ -1159,13 +1418,11 @@
 
     function switchTab(tabId) {
       document.getElementById('tab-simulation').style.display = tabId === 'simulation' ? 'block' : 'none';
-      document.getElementById('tab-comparison').style.display = tabId === 'comparison' ? 'block' : 'none';
-      document.getElementById('tab-architecture').style.display = tabId === 'architecture' ? 'block' : 'none';
+      document.getElementById('tab-features').style.display = tabId === 'features' ? 'block' : 'none';
 
       const buttons = document.querySelectorAll('.tab-btn');
       buttons[0].classList.toggle('active', tabId === 'simulation');
-      buttons[1].classList.toggle('active', tabId === 'comparison');
-      buttons[2].classList.toggle('active', tabId === 'architecture');
+      buttons[1].classList.toggle('active', tabId === 'features');
     }
 
     function openModal() {
@@ -1175,7 +1432,6 @@
     function closeModal() {
       document.getElementById('ingest-modal').style.display = 'none';
     }
-
 
     function showToast(title, desc, icon = '🎉') {
       const t = document.getElementById('toast');
@@ -1212,8 +1468,10 @@
       }
     }
 
-    // Inisialisasi awal saat load
-    renderChecklist('pln_cerita_dokter');
+    // Inisialisasi
+    const initialP = PLANNER_DATABASE[0];
+    renderChecklist(initialP);
+    renderPlannerList();
   </script>
 </body>
 </html>

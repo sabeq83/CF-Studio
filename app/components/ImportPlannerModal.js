@@ -20,6 +20,11 @@ export default function ImportPlannerModal({
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Search & Filter States
+  const [searchPlannerQuery, setSearchPlannerQuery] = useState('');
+  const [plannerStatusFilter, setPlannerStatusFilter] = useState('all'); // 'all' | 'ready' | 'consumed'
+  const [isPlannerPickerOpen, setIsPlannerPickerOpen] = useState(false);
+
   useEffect(() => {
     if (!isOpen) return;
     loadInitialData();
@@ -29,7 +34,7 @@ export default function ImportPlannerModal({
     try {
       setLoading(true);
       const [plannersRes, presetsRes] = await Promise.all([
-        fetch('/api/content-planner?exclude_consumed=true').then(r => r.json()).catch(() => ({ success: false })),
+        fetch('/api/content-planner?is_archived=false').then(r => r.json()).catch(() => ({ success: false })),
         fetch('/api/v2/operator-presets').then(r => r.json()).catch(() => ({ success: false }))
       ]);
 
@@ -177,6 +182,19 @@ export default function ImportPlannerModal({
   const isAllSelected = selectedRowIds.length === totalRows && totalRows > 0;
   const pConfig = selectedPreset?.config || {};
 
+  const filteredPlanners = planners.filter(p => {
+    if (plannerStatusFilter === 'ready' && p.is_consumed) return false;
+    if (plannerStatusFilter === 'consumed' && !p.is_consumed) return false;
+    if (searchPlannerQuery.trim()) {
+      const q = searchPlannerQuery.toLowerCase();
+      const title = (p.title || p.product_name || '').toLowerCase();
+      const brand = (p.account_name || p.brand_profile_name || '').toLowerCase();
+      const focus = (p.planner_focus || '').toLowerCase();
+      return title.includes(q) || brand.includes(q) || focus.includes(q);
+    }
+    return true;
+  });
+
   return (
     <div style={{
       position: 'fixed', inset: 0, background: 'var(--overlay-backdrop)',
@@ -213,21 +231,170 @@ export default function ImportPlannerModal({
           <div>
             <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
               <span>1. Pilih Sumber Content Planner *</span>
-              <span style={{ color: 'var(--action-primary)', fontSize: '0.74rem' }}>🔓 Bebas Pilih Planner</span>
+              <span style={{ color: 'var(--action-primary)', fontSize: '0.74rem' }}>🔍 Search & Badges Aktif</span>
             </label>
             <div style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm, 8px)', padding: '14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <select
-                value={selectedPlannerId}
-                onChange={e => handlePlannerChange(e.target.value)}
-                style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', padding: '10px 12px', borderRadius: 'var(--radius-sm, 8px)', fontSize: '0.88rem', outline: 'none' }}
+              
+              {/* Active Planner Summary Card */}
+              <div
+                onClick={() => setIsPlannerPickerOpen(prev => !prev)}
+                style={{
+                  background: 'var(--surface)',
+                  border: '1px solid ' + (isPlannerPickerOpen ? 'var(--action-primary)' : 'var(--border-strong)'),
+                  borderRadius: 'var(--radius-sm, 8px)',
+                  padding: '10px 14px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
               >
-                {planners.length === 0 && <option value="">Tidak ada planner aktif</option>}
-                {planners.map(p => (
-                  <option key={p.id} value={p.id}>
-                    {p.title || p.product_name} ({p.row_count || p.rows?.length || 0} Baris Tersedia)
-                  </option>
-                ))}
-              </select>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0, paddingRight: 10 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '0.9rem', fontWeight: 750, color: 'var(--text-primary)' }}>
+                      {selectedPlanner ? (selectedPlanner.title || selectedPlanner.product_name) : 'Pilih Content Planner'}
+                    </span>
+                    {selectedPlanner && (
+                      selectedPlanner.is_consumed ? (
+                        <span style={{ background: 'var(--status-warning-soft)', color: 'var(--status-warning)', border: '1px solid var(--status-warning)', padding: '2px 8px', borderRadius: 999, fontSize: '0.7rem', fontWeight: 700 }}>
+                          ✓ Sudah Terpakai{selectedPlanner.consumed_owner_id ? ` (${selectedPlanner.consumed_owner_id})` : ''}
+                        </span>
+                      ) : (
+                        <span style={{ background: 'var(--status-success-soft)', color: 'var(--status-success)', border: '1px solid var(--status-success)', padding: '2px 8px', borderRadius: 999, fontSize: '0.7rem', fontWeight: 700 }}>
+                          ● Belum Dipakai (Ready)
+                        </span>
+                      )
+                    )}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    Brand: {selectedPlanner?.account_name || selectedPlanner?.brand_profile_name || 'Umum'} • {totalRows} Baris Konten
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  style={{
+                    background: 'var(--surface-interactive)',
+                    border: '1px solid var(--border-subtle)',
+                    color: 'var(--text-primary)',
+                    padding: '6px 12px',
+                    borderRadius: 6,
+                    fontSize: '0.76rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {isPlannerPickerOpen ? 'Tutup ▲' : 'Ganti Planner ▼'}
+                </button>
+              </div>
+
+              {/* Collapsible Search & Filter Drawer */}
+              {isPlannerPickerOpen && (
+                <div style={{ background: 'var(--surface)', border: '1px solid var(--border-strong)', borderRadius: 'var(--radius-sm, 8px)', padding: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {/* Search Input */}
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <input
+                      type="text"
+                      value={searchPlannerQuery}
+                      onChange={e => setSearchPlannerQuery(e.target.value)}
+                      placeholder="🔍 Ketik judul planner, brand, atau topik..."
+                      style={{ width: '100%', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', padding: '8px 30px 8px 12px', borderRadius: 6, fontSize: '0.84rem', outline: 'none' }}
+                    />
+                    {searchPlannerQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setSearchPlannerQuery('')}
+                        style={{ position: 'absolute', right: 8, background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.85rem' }}
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Filter Chips */}
+                  <div style={{ display: 'flex', gap: 6, alignItems: 'center', overflowX: 'auto', paddingBottom: 2 }}>
+                    {[
+                      { key: 'all', label: `Semua (${planners.length})` },
+                      { key: 'ready', label: `● Belum Dipakai (${planners.filter(p => !p.is_consumed).length})` },
+                      { key: 'consumed', label: `✓ Sudah Terpakai (${planners.filter(p => p.is_consumed).length})` }
+                    ].map(f => (
+                      <button
+                        key={f.key}
+                        type="button"
+                        onClick={() => setPlannerStatusFilter(f.key)}
+                        style={{
+                          padding: '4px 10px',
+                          borderRadius: 999,
+                          fontSize: '0.72rem',
+                          fontWeight: plannerStatusFilter === f.key ? 700 : 500,
+                          cursor: 'pointer',
+                          border: '1px solid ' + (plannerStatusFilter === f.key ? 'var(--action-primary)' : 'var(--border-subtle)'),
+                          background: plannerStatusFilter === f.key ? 'var(--action-primary)' : 'var(--surface-raised)',
+                          color: plannerStatusFilter === f.key ? 'var(--on-action-primary)' : 'var(--text-secondary)',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Scrollable Planner List */}
+                  <div style={{ maxHeight: 190, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {filteredPlanners.length === 0 ? (
+                      <div style={{ padding: 14, textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+                        Tidak ada planner yang sesuai dengan kriteria pencarian.
+                      </div>
+                    ) : (
+                      filteredPlanners.map(p => {
+                        const isSelected = p.id === selectedPlannerId;
+                        return (
+                          <div
+                            key={p.id}
+                            onClick={() => {
+                              handlePlannerChange(p.id);
+                              setIsPlannerPickerOpen(false);
+                            }}
+                            style={{
+                              padding: '9px 12px',
+                              borderRadius: 6,
+                              background: isSelected ? 'var(--surface-interactive)' : 'var(--surface-raised)',
+                              border: '1px solid ' + (isSelected ? 'var(--action-primary)' : 'var(--border-subtle)'),
+                              cursor: 'pointer',
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              gap: 10,
+                              transition: 'all 0.1s ease'
+                            }}
+                          >
+                            <div style={{ minWidth: 0 }}>
+                              <div style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {p.title || p.product_name}
+                              </div>
+                              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                                Brand: {p.account_name || p.brand_profile_name || 'Umum'} • {p.row_count || 0} Baris Tersedia
+                              </div>
+                            </div>
+                            <div>
+                              {p.is_consumed ? (
+                                <span style={{ background: 'var(--status-warning-soft)', color: 'var(--status-warning)', border: '1px solid var(--status-warning)', padding: '2px 8px', borderRadius: 999, fontSize: '0.68rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                                  ✓ Sudah Terpakai
+                                </span>
+                              ) : (
+                                <span style={{ background: 'var(--status-success-soft)', color: 'var(--status-success)', border: '1px solid var(--status-success)', padding: '2px 8px', borderRadius: 999, fontSize: '0.68rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                                  ● Belum Dipakai
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Rows Count & Controls */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
