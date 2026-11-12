@@ -254,3 +254,60 @@ test('5. resolveImageBufferFromInput decodes data-URI PNG safely', async () => {
   assert.equal(detectImageMime(buffer), 'image/png');
   assert.equal(filename, 'sample.png');
 });
+
+test('6. cf_submit_custom_storyboard accepts preset_key alone without requiring manual video_dna or auto_sync override', async () => {
+  const { client, calls, close } = await setupTestMcpClient(async () => ({ success: true, campaign_id: 'cst_preset_1' }));
+  try {
+    await client.callTool({
+      name: 'cf_submit_custom_storyboard',
+      arguments: {
+        preset_key: 'multiplier_nutribake_produk',
+        product_id: 'prd_123',
+        title: 'Single Preset Storyboard',
+        scenes: [
+          {
+            scene_index: 1,
+            voiceover_text: 'Bosan camilan manis yang bikin bersalah?',
+            visual_prompt: 'Close up ripe bananas on ceramic plate --ar 9:16'
+          }
+        ]
+      }
+    });
+
+    const singleCall = calls[0];
+    assert.equal(singleCall.path, '/api/v2/recipes/autonomous-pipeline');
+    assert.equal(singleCall.opts.body.pipeline_type, 'custom_storyboard');
+    assert.equal(singleCall.opts.body.storyboard.preset_key, 'multiplier_nutribake_produk');
+    assert.equal(singleCall.opts.body.storyboard.product_id, 'prd_123');
+    assert.equal(singleCall.opts.body.storyboard.video_dna, undefined);
+    assert.equal(singleCall.opts.body.storyboard.auto_sync_contentflow, undefined);
+
+    await client.callTool({
+      name: 'cf_submit_custom_storyboard',
+      arguments: {
+        preset_key: 'nutribake_kampanye_produk_02',
+        brand_id: 'brd_1',
+        items: [
+          {
+            title: 'Batch Item 1',
+            scenes: [
+              {
+                scene_index: 1,
+                voiceover_text: 'Scene 1 text',
+                visual_prompt: 'Scene 1 visual'
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const batchCall = calls[1];
+    assert.equal(batchCall.opts.body.pipeline_type, 'custom_storyboard');
+    assert.equal(batchCall.opts.body.preset_key, 'nutribake_kampanye_produk_02');
+    assert.equal(batchCall.opts.body.brand_id, 'brd_1');
+    assert.equal(batchCall.opts.body.items.length, 1);
+  } finally {
+    await close();
+  }
+});

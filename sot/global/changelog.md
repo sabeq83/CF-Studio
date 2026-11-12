@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.43.1 — Dynamic Multiplier Bridging, Smooth Copywriting & Custom Storyboard Preset (13/11/2026)
+- Propagate dynamic bridge_at_clip and bridge_duration_clips across multiplier-pairing.js, prompts.js, and re-multiplier-worker.js without hardcoding
+- Integrate Dynamic Story Curve, sentence integrity rules, and autopilot hybrid_lock T2I start frame transitions
+- Add full preset_key inheritance to cf_submit_custom_storyboard MCP tool, autonomous-pipeline API, and custom-storyboard-pipeline.js
+
 ## V2.43.0 — MCP Parity Upgrade & Custom Storyboard E2E (12/11/2026)
 - Upgrade operatorClient FormData/error diagnostics, server.mjs 15mb limit, and withTenantContext auth for brand-profiles and threads-series
 - Add photo support to products POST and image endpoints plus cf_upload_product_photo and cf_regenerate_product_photo MCP tools

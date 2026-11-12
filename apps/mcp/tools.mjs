@@ -803,11 +803,12 @@ export function createCfStudioServer(rawRequest) {
 
   const singleStoryboardFields = {
     brand_id: z.string().max(100).optional(),
+    preset_key: z.string().trim().min(1).max(100).optional(),
     product_id: z.string().max(100).optional(),
     product_name: z.string().max(300).optional(),
     require_product_photo: z.boolean().optional(),
     enable_social_post: z.boolean().optional(),
-    auto_sync_contentflow: z.boolean().default(true),
+    auto_sync_contentflow: z.boolean().optional(),
     visual_identity_preset_id: z.string().max(100).optional(),
     bridge_at_clip: z.number().int().min(1).max(12).optional(),
     bridge_duration_clips: z.number().int().min(1).max(12).optional(),
@@ -821,7 +822,7 @@ export function createCfStudioServer(rawRequest) {
   // Engine 6: Custom Storyboard Submission (Claude / External AI to Video Pipeline + Batch up to 12)
   register(
     'cf_submit_custom_storyboard',
-    'Submit 1 or a batch (up to 12) of custom storyboards with full product binding, ElevenLabs/MiniMax/Gemini voice DNA, Visual Identity, and auto ContentFlow sync.',
+    'Submit 1 or a batch (up to 12) of custom storyboards. Provide preset_key (from cf_list_presets) + title + scenes (and optional product_id/brand_id) to inherit all voice, Visual Identity, bridging, and workflow settings automatically without passing manual video_dna config.',
     {
       idempotency_key: z.string().trim().min(1).max(128).optional(),
       ...singleStoryboardFields,
@@ -841,6 +842,7 @@ export function createCfStudioServer(rawRequest) {
           body: {
             pipeline_type: 'custom_storyboard',
             brand_id: storyboard.brand_id,
+            preset_key: storyboard.preset_key,
             execution_mode,
             idempotency_key,
             items

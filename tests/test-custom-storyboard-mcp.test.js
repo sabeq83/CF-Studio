@@ -240,3 +240,98 @@ test('5. executeCustomStoryboardPipeline enforces photo guard and batch max 12 l
     /Maksimal 12 custom storyboard/
   );
 });
+
+test('6. executeCustomStoryboardPipeline inherits full configuration from preset_key without manual video_dna', async () => {
+  const db = getDb();
+  const createdCampaignIds = [];
+
+  try {
+    // Test 1: Minimal payload with ONLY preset_key, title, scenes (using built-in preset 'product_campaign')
+    const minimalPayload = {
+      preset_key: 'product_campaign',
+      title: 'Minimal Preset Storyboard Test',
+      scenes: [
+        {
+          scene_index: 1,
+          voiceover_text: 'Masih bingung cara menjaga dapur tetap rapi?',
+          visual_prompt: 'Warm sunlit kitchen tabletop with minimalist stoneware --ar 9:16'
+        },
+        {
+          scene_index: 2,
+          voiceover_text: 'Cobain langkah praktis ini setiap pagi!',
+          visual_prompt: 'Hands arranging herbal spices neatly in jars --ar 9:16'
+        }
+      ]
+    };
+
+    const res = await executeCustomStoryboardPipeline({
+      storyboard: minimalPayload,
+      tenantId: 'default_tenant',
+      executionMode: 'creative_review'
+    });
+    createdCampaignIds.push(res.campaign_id);
+
+    assert.equal(res.success, true);
+    assert.equal(res.preset_key, 'product_campaign');
+    assert.equal(res.voice_provider, 'minimax');
+    assert.equal(res.voice_persona, 'Indonesian_casual_reporter_vv2');
+    assert.equal(res.bridge_at_clip, 3);
+    assert.equal(res.bridge_duration_clips, 1);
+
+    const campaign = await db.prepare('SELECT * FROM pillar_campaigns WHERE id = ?').get(res.campaign_id);
+    assert.equal(campaign.voice_provider, 'minimax');
+    assert.equal(campaign.voice_persona, 'Indonesian_casual_reporter_vv2');
+    assert.equal(campaign.target_demographic, 'custom');
+    assert.equal(Number(campaign.clip_duration), 8);
+    assert.equal(Number(campaign.bridge_at_clip), 3);
+    assert.equal(Number(campaign.bridge_duration_clips), 1);
+
+    // Test 2: Batch cascade of preset_key + optional single override
+    const batchRes = await executeCustomStoryboardBatch({
+      items: [
+        {
+          title: 'Batch Preset Item 1',
+          video_dna: { clip_duration: 5 },
+          scenes: [
+            {
+              scene_index: 1,
+              voiceover_text: 'Cerita pembuka editorial singkat.',
+              visual_prompt: 'Cozy reading corner morning sunlight --ar 9:16'
+            }
+          ]
+        }
+      ],
+      presetKey: 'brand_editorial_campaign',
+      tenantId: 'default_tenant',
+      executionMode: 'creative_review'
+    });
+
+    assert.equal(batchRes.success, true);
+    assert.equal(batchRes.count, 1);
+    const batchCid = batchRes.created[0].campaign_id;
+    createdCampaignIds.push(batchCid);
+    assert.equal(batchRes.created[0].preset_key, 'brand_editorial_campaign');
+
+    const batchCampaign = await db.prepare('SELECT * FROM pillar_campaigns WHERE id = ?').get(batchCid);
+    assert.equal(batchCampaign.voice_provider, 'minimax');
+    assert.equal(Number(batchCampaign.clip_duration), 5); // explicit override respected
+
+    // Test 3: Unknown preset_key throws descriptive error
+    await assert.rejects(
+      async () => executeCustomStoryboardPipeline({
+        storyboard: {
+          preset_key: 'nonexistent_preset_xyz',
+          title: 'Invalid Preset',
+          scenes: [{ voiceover_text: 'Test', visual_prompt: 'Test --ar 9:16' }]
+        },
+        tenantId: 'default_tenant'
+      }),
+      /Preset "nonexistent_preset_xyz" tidak ditemukan/
+    );
+  } finally {
+    for (const cid of createdCampaignIds) {
+      await db.prepare('DELETE FROM pillar_campaign_items WHERE campaign_id = ?').run(cid);
+      await db.prepare('DELETE FROM pillar_campaigns WHERE id = ?').run(cid);
+    }
+  }
+});

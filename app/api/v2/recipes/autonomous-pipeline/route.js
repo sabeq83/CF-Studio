@@ -168,13 +168,18 @@ export const POST = withTenantContext(async (request, _context, user) => {
         result = await executeCustomStoryboardBatch({
           items: storyboardItems,
           brandId: body.brand_id || body.brandId || body.storyboard?.brand_id || null,
+          presetKey: body.preset_key || body.presetKey || body.storyboard?.preset_key || null,
           tenantId,
           executionMode: body.execution_mode || body.executionMode || 'full_autopilot',
           idempotencyKey
         });
       } else {
+        const rawStoryboard = body.storyboard || body;
         result = await executeCustomStoryboardPipeline({
-          storyboard: body.storyboard || body,
+          storyboard: {
+            ...rawStoryboard,
+            preset_key: rawStoryboard.preset_key || rawStoryboard.presetKey || body.preset_key || body.presetKey || null
+          },
           tenantId,
           executionMode: body.execution_mode || body.executionMode || 'full_autopilot',
           idempotencyKey
