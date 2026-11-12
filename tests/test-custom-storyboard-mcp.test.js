@@ -10,7 +10,7 @@ process.env.NODE_ENV = 'test';
 
 import test, { after } from 'node:test';
 import assert from 'node:assert/strict';
-import { executeCustomStoryboardPipeline } from '../lib/custom-storyboard-pipeline.js';
+import { executeCustomStoryboardPipeline, executeCustomStoryboardBatch } from '../lib/custom-storyboard-pipeline.js';
 import { getDb } from '../lib/db.js';
 
 after(() => {
@@ -134,4 +134,109 @@ test('3. executeCustomStoryboardPipeline supports creative_review mode without a
   const db = getDb();
   const item = await db.prepare('SELECT workflow_status FROM pillar_campaign_items WHERE id = ?').get(result.item_id);
   assert.equal(item.workflow_status, 'ready_for_review');
+});
+
+test('4. executeCustomStoryboardPipeline binds product+photo, opens ElevenLabs video_dna, enables social+contentflow sync, and enforces idempotencyKey', async () => {
+  const db = getDb();
+  const prodId = `prd_test_cs_${Date.now()}`;
+  const cleanPhotoPath = `/uploads/products/default_tenant/clean/${prodId}.png`;
+  const createdCampaignIds = [];
+
+  await db.prepare(`
+    INSERT INTO product_extractions (id, tenant_id, product_name, clean_photo_url, affiliate_link)
+    VALUES (?, 'default_tenant', ?, ?, ?)
+  `).run(prodId, 'Serum Matcha Test', cleanPhotoPath, 'https://shopee.co.id/test-product');
+
+  try {
+    const idemKey = `idem_cs_${Date.now()}`;
+    const payload = {
+      title: 'Storyboard Produk ElevenLabs E2E',
+      product_id: prodId,
+      require_product_photo: true,
+      enable_social_post: true,
+      auto_sync_contentflow: true,
+      video_dna: {
+        aspect_ratio: '9:16',
+        visual_mode: 'hybrid_lock',
+        voice_provider: 'elevenlabs',
+        voice_persona: 'putri_maharani',
+        elevenlabs_model: 'eleven_multilingual_v2',
+        elevenlabs_stability: 0.6,
+        elevenlabs_similarity_boost: 0.85,
+        target_language: 'id-ID',
+        words_per_clip: 16,
+        clip_duration: 6
+      },
+      scenes: [
+        {
+          scene_index: 1,
+          voiceover_text: 'Lihat hasil pemakaian serum matcha selama 7 hari.',
+          visual_prompt: 'Hand holding Serum Matcha bottle cleanly on bright studio desk --ar 9:16',
+          duration_seconds: 6
+        }
+      ]
+    };
+
+    const res1 = await executeCustomStoryboardPipeline({
+      storyboard: payload,
+      tenantId: 'default_tenant',
+      executionMode: 'creative_review',
+      idempotencyKey: idemKey
+    });
+    createdCampaignIds.push(res1.campaign_id);
+
+    assert.equal(res1.success, true);
+    assert.equal(res1.product_id, prodId);
+    assert.equal(res1.product_ref_image_path, cleanPhotoPath);
+    assert.equal(res1.voice_provider, 'elevenlabs');
+    assert.equal(res1.auto_sync_contentflow, true);
+    assert.equal(res1.enable_social_post, true);
+
+    const campaign = await db.prepare('SELECT * FROM pillar_campaigns WHERE id = ?').get(res1.campaign_id);
+    assert.equal(campaign.target_product_id, prodId);
+    assert.equal(campaign.product_ref_image_path, cleanPhotoPath);
+    assert.equal(Number(campaign.is_bridging_active), 1);
+    assert.equal(Number(campaign.enable_social_post), 1);
+    assert.equal(Number(campaign.auto_sync_contentflow), 1);
+    assert.equal(campaign.voice_provider, 'elevenlabs');
+    assert.equal(campaign.voice_persona, 'putri_maharani');
+
+    const res2 = await executeCustomStoryboardPipeline({
+      storyboard: payload,
+      tenantId: 'default_tenant',
+      executionMode: 'creative_review',
+      idempotencyKey: idemKey
+    });
+    assert.equal(res2.idempotent, true);
+    assert.equal(res2.campaign_id, res1.campaign_id);
+  } finally {
+    for (const cid of createdCampaignIds) {
+      await db.prepare('DELETE FROM pillar_campaign_items WHERE campaign_id = ?').run(cid);
+      await db.prepare('DELETE FROM pillar_campaigns WHERE id = ?').run(cid);
+    }
+    await db.prepare('DELETE FROM product_extractions WHERE id = ?').run(prodId);
+  }
+});
+
+test('5. executeCustomStoryboardPipeline enforces photo guard and batch max 12 limit', async () => {
+  await assert.rejects(
+    async () => executeCustomStoryboardPipeline({
+      storyboard: {
+        title: 'No Photo Guard',
+        require_product_photo: true,
+        scenes: [{ voiceover_text: 'Hi', visual_prompt: 'Test --ar 9:16' }]
+      },
+      tenantId: 'default_tenant'
+    }),
+    /require_product_photo aktif/
+  );
+
+  const thirteen = Array.from({ length: 13 }, (_, idx) => ({
+    title: `Item ${idx + 1}`,
+    scenes: [{ voiceover_text: 'Hi', visual_prompt: 'Test --ar 9:16' }]
+  }));
+  await assert.rejects(
+    async () => executeCustomStoryboardBatch({ items: thirteen, tenantId: 'default_tenant' }),
+    /Maksimal 12 custom storyboard/
+  );
 });

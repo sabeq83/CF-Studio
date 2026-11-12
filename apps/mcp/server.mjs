@@ -20,7 +20,7 @@ export function createHttpApp({ request, baseUrl, bearerToken, allowedHosts = ['
   });
   app.get('/health', (_req, res) => res.json({ status: 'ok', service: 'cf-studio-mcp' }));
 
-  app.use(express.json({ limit: '64kb' }));
+  app.use(express.json({ limit: '15mb' }));
 
   // Helper untuk menjalankan sesi MCP Streamable HTTP
   const handleMcpSession = async (req, res, clientRequest) => {

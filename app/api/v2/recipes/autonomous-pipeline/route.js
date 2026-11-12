@@ -158,11 +158,28 @@ export const POST = withTenantContext(async (request, _context, user) => {
 
     let result;
     if (pipelineType === 'custom_storyboard') {
-      result = await executeCustomStoryboardPipeline({
-        storyboard: body.storyboard || body,
-        tenantId,
-        executionMode: body.execution_mode || body.executionMode || 'full_autopilot'
-      });
+      const idempotencyKey = request.headers.get('idempotency-key') || body.idempotency_key || null;
+      const storyboardItems = Array.isArray(body.items) ? body.items : (Array.isArray(body.storyboard?.items) ? body.storyboard.items : null);
+      if (Array.isArray(storyboardItems) && storyboardItems.length > 0) {
+        if (storyboardItems.length > 12) {
+          return NextResponse.json({ success: false, error: 'Maksimal 12 custom storyboard per batch request.' }, { status: 400 });
+        }
+        const { executeCustomStoryboardBatch } = await import('../../../../../lib/custom-storyboard-pipeline.js');
+        result = await executeCustomStoryboardBatch({
+          items: storyboardItems,
+          brandId: body.brand_id || body.brandId || body.storyboard?.brand_id || null,
+          tenantId,
+          executionMode: body.execution_mode || body.executionMode || 'full_autopilot',
+          idempotencyKey
+        });
+      } else {
+        result = await executeCustomStoryboardPipeline({
+          storyboard: body.storyboard || body,
+          tenantId,
+          executionMode: body.execution_mode || body.executionMode || 'full_autopilot',
+          idempotencyKey
+        });
+      }
     } else if (pipelineType === 'product_campaign') {
       result = await executeAutonomousProductPipeline({
         brandId: body.brand_id || body.brandId,
@@ -175,6 +192,8 @@ export const POST = withTenantContext(async (request, _context, user) => {
         tenantId,
         overrides: {
           visual_identity_preset_id: body.visual_identity_preset_id || null,
+          ...(body.voice_provider ? { voice_provider: body.voice_provider } : {}),
+          ...(body.voice_persona ? { voice_persona: body.voice_persona } : {}),
           ...affiliateOverride,
           ...(body.overrides || {})
         }

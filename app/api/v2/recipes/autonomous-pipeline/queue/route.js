@@ -11,7 +11,7 @@ export const GET = withTenantContext(async (request, _ctx, user) => {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status') || 'all';
     const limit = parseInt(searchParams.get('limit') || '50', 10);
-    const tenantId = user?.tenant_id || 'default_tenant';
+    const tenantId = user?.tenantId || user?.tenant_id || 'default_tenant';
 
     const [summary, jobs] = await Promise.all([
       getPipelineQueueSummary(tenantId),
@@ -35,7 +35,7 @@ export const GET = withTenantContext(async (request, _ctx, user) => {
 export const POST = withTenantContext(async (request, _ctx, user) => {
   try {
     const body = await request.json();
-    const tenantId = user?.tenant_id || 'default_tenant';
+    const tenantId = user?.tenantId || user?.tenant_id || 'default_tenant';
     const { action, job_id } = body;
 
     if (action === 'cancel') {

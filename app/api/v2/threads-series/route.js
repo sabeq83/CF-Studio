@@ -1,25 +1,16 @@
 import { NextResponse } from 'next/server';
-import { getCurrentUser, isTenantMenuDisabled } from '@/lib/auth';
+import { withTenantContext, isTenantMenuDisabled } from '@/lib/auth';
 import { pgQuery } from '@/lib/db-pg';
 import { executeAutonomousThreadsSeriesPipeline } from '@/lib/threads-series-pipeline';
 
 export const dynamic = 'force-dynamic';
 
-function getTenantId(req) {
-  const user = getCurrentUser(req);
-  if (user && user.tenantId && user.tenantId !== '__none__') {
-    return user.tenantId;
-  }
-  return process.env.DEFAULT_TENANT_ID || 'default_tenant';
-}
-
-export async function GET(req) {
+export const GET = withTenantContext(async (req, _ctx, user) => {
   try {
-    const user = getCurrentUser(req);
     if (isTenantMenuDisabled(user, 'threads_labs')) {
       return NextResponse.json({ success: false, error: 'Akses ditolak: Modul Threads Labs dinonaktifkan untuk tenant ini.' }, { status: 403 });
     }
-    const tenantId = getTenantId(req);
+    const tenantId = user?.tenantId || process.env.DEFAULT_TENANT_ID || 'default_tenant';
     const { searchParams } = new URL(req.url);
     const limit = Math.min(Number(searchParams.get('limit') || 30), 100);
 
@@ -39,15 +30,14 @@ export async function GET(req) {
     console.error('[API Threads Series GET Error]:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
-export async function POST(req) {
+export const POST = withTenantContext(async (req, _ctx, user) => {
   try {
-    const user = getCurrentUser(req);
     if (isTenantMenuDisabled(user, 'threads_labs')) {
       return NextResponse.json({ success: false, error: 'Akses ditolak: Modul Threads Labs dinonaktifkan untuk tenant ini.' }, { status: 403 });
     }
-    const tenantId = getTenantId(req);
+    const tenantId = user?.tenantId || process.env.DEFAULT_TENANT_ID || 'default_tenant';
     const body = await req.json();
 
     const result = await executeAutonomousThreadsSeriesPipeline({
@@ -76,4 +66,4 @@ export async function POST(req) {
     console.error('[API Threads Series POST Error]:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 400 });
   }
-}
+});

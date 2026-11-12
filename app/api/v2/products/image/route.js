@@ -4,7 +4,7 @@ import fs from 'fs';
 import { withTenantContext } from '@/lib/auth';
 import { getActiveTenantId } from '@/lib/tenant-context';
 import { getProductById, updateProduct } from '@/lib/product-repository';
-import { saveRawProductImage, saveCleanProductImage } from '@/lib/product-image-storage';
+import { saveRawProductImage, saveCleanProductImage, resolveImageBufferFromInput } from '@/lib/product-image-storage';
 import { validateRawProductImage } from '@/lib/product-validation';
 
 export const dynamic = 'force-dynamic';
@@ -70,13 +70,42 @@ export const GET = withTenantContext(async (request) => {
 export const POST = withTenantContext(async (request) => {
   try {
     const tenantId = getActiveTenantId();
-    const formData = await request.formData();
-    const file = formData.get('file');
-    const productId = formData.get('productId');
-    const type = formData.get('type'); // 'raw' atau 'clean'
+    const contentType = request.headers.get('content-type') || '';
 
-    if (!file || !productId || !type) {
-      return NextResponse.json({ success: false, error: 'Missing file, productId, or type' }, { status: 400 });
+    let productId;
+    let type;
+    let activePhoto;
+    let buffer;
+    let filename = 'upload';
+
+    if (contentType.includes('application/json')) {
+      const body = await request.json();
+      productId = body.productId || body.product_id;
+      type = body.type || 'raw';
+      activePhoto = body.active_photo;
+      if (!productId || (!body.photo_base64 && !body.photo_url)) {
+        return NextResponse.json({ success: false, error: 'Missing productId or photo_base64/photo_url' }, { status: 400 });
+      }
+      const resolved = await resolveImageBufferFromInput({
+        photoBase64: body.photo_base64,
+        photoUrl: body.photo_url,
+        filename: body.filename || 'upload'
+      });
+      buffer = resolved.buffer;
+      filename = resolved.filename;
+    } else {
+      const formData = await request.formData();
+      const file = formData.get('file');
+      productId = formData.get('productId');
+      type = formData.get('type'); // 'raw' atau 'clean'
+      activePhoto = formData.get('active_photo');
+
+      if (!file || !productId || !type) {
+        return NextResponse.json({ success: false, error: 'Missing file, productId, or type' }, { status: 400 });
+      }
+      const bytes = await file.arrayBuffer();
+      buffer = Buffer.from(bytes);
+      filename = file.name || 'upload';
     }
 
     // Pada pipeline baru: hanya 'raw', 'clean', dan alias 'cleaned' yang valid
@@ -95,11 +124,8 @@ export const POST = withTenantContext(async (request) => {
       return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 });
     }
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
     // Validasi magic bytes
-    const { valid, mimeType, error: imgError } = validateRawProductImage(buffer, file.name || '');
+    const { valid, mimeType, error: imgError } = validateRawProductImage(buffer, filename);
     if (!valid) {
       return NextResponse.json({ success: false, error: imgError }, { status: 400 });
     }
@@ -108,7 +134,7 @@ export const POST = withTenantContext(async (request) => {
     const updateData = {};
 
     if (type === 'raw') {
-      stored = await saveRawProductImage({ tenantId, productId, buffer, originalName: file.name || 'upload' });
+      stored = await saveRawProductImage({ tenantId, productId, buffer, originalName: filename });
       updateData.raw_photo_url = stored.relativePath;
       updateData.photo_url = stored.relativePath;
       updateData.raw_photo_sha256 = stored.sha256;
@@ -120,6 +146,10 @@ export const POST = withTenantContext(async (request) => {
       updateData.cleaned_photo_url = stored.relativePath; // mirror compatibility
       updateData.photo_url = stored.relativePath;
       updateData.photo_status = 'needs_review';
+    }
+
+    if (activePhoto === 'clean_photo_url' || activePhoto === 'raw_photo_url') {
+      updateData.active_photo = activePhoto;
     }
 
     await updateProduct(productId, updateData);

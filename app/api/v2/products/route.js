@@ -8,7 +8,7 @@ import {
   validateSingleProductCreate,
   validateRawProductImage
 } from '@/lib/product-validation';
-import { saveRawProductImage } from '@/lib/product-image-storage';
+import { saveRawProductImage, resolveImageBufferFromInput } from '@/lib/product-image-storage';
 import { pgQuery } from '@/lib/db-pg';
 import { listProductCatalog } from '@/lib/product-catalog-service';
 
@@ -137,7 +137,7 @@ export const POST = withTenantContext(async (req) => {
     }
 
     // ----------------------------------------------------------------
-    // Mode legacy: application/json (integrasi lama, aturan foto tidak wajib)
+    // Mode JSON: integrasi MCP / API dengan dukungan opsional photo_base64 atau photo_url
     // ----------------------------------------------------------------
     const body = await req.json();
 
@@ -145,8 +145,34 @@ export const POST = withTenantContext(async (req) => {
       return NextResponse.json({ success: false, error: 'Product Name wajib diisi.' }, { status: 400 });
     }
 
+    const productId = body.id || `pe_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+    let rawPhotoRelPath = body.raw_photo_url || null;
+    let rawPhotoSha256 = null;
+
+    if (body.photo_base64 || body.photo_url) {
+      const { buffer, filename } = await resolveImageBufferFromInput({
+        photoBase64: body.photo_base64,
+        photoUrl: body.photo_url,
+        filename: body.photo_filename || 'product_upload'
+      });
+      const imgValidation = validateRawProductImage(buffer, filename);
+      if (!imgValidation.valid) {
+        return NextResponse.json({ success: false, error: imgValidation.error }, { status: 400 });
+      }
+      const saved = await saveRawProductImage({
+        tenantId,
+        productId,
+        buffer,
+        originalName: filename
+      });
+      rawPhotoRelPath = saved.relativePath;
+      rawPhotoSha256 = saved.sha256;
+    }
+
+    const shouldAutoClean = Boolean(rawPhotoRelPath && body.auto_enrich_clean_photo === true);
+
     const data = {
-      id: body.id || undefined,
+      id: productId,
       input_source: body.source_url || 'Manual',
       is_url: body.source_url ? 1 : 0,
       product_name: body.product_name,
@@ -158,17 +184,18 @@ export const POST = withTenantContext(async (req) => {
       raw_response: body.raw_response || 'Manual entry',
       category: body.category || null,
       tags: body.tags || null,
-      photo_url: body.photo_url || null,
+      photo_url: rawPhotoRelPath || body.photo_url || null,
       source_url: body.source_url || null,
       affiliate_link: body.affiliate_link || '',
       raw_description: body.raw_description || body.product_description || '',
-      raw_photo_url: body.raw_photo_url || null,
+      raw_photo_url: rawPhotoRelPath,
+      ...(rawPhotoSha256 ? { raw_photo_sha256: rawPhotoSha256 } : {}),
       clean_photo_url: body.clean_photo_url || null,
       // cleaned_photo_url mirrors clean untuk compatibility
       cleaned_photo_url: body.cleaned_photo_url || body.clean_photo_url || null,
       // generated_photo_url dipertahankan untuk data lama tetapi tidak ditulis untuk produk baru
       generated_photo_url: body.generated_photo_url || null,
-      active_photo: body.active_photo || null,
+      active_photo: body.active_photo || (rawPhotoRelPath ? 'raw_photo_url' : null),
       is_in_packaging: body.is_in_packaging ? 1 : 0,
       packaging_status: body.packaging_status || (body.is_in_packaging ? 'packaged' : 'unpackaged'),
       packaging_type: body.packaging_type || null,
@@ -178,13 +205,19 @@ export const POST = withTenantContext(async (req) => {
       product_truth: body.product_truth || null,
       geometric_truth: body.geometric_truth || null,
       enrichment_status: 'pending',
-      photo_status: 'approved',
+      photo_status: shouldAutoClean ? 'pending' : 'approved',
       import_status: 'completed',
       extraction_status: 'pending'
     };
 
     const product = await createProduct(data);
-    return NextResponse.json({ success: true, id: product.id, data: product }, { status: 201 });
+    return NextResponse.json({
+      success: true,
+      id: product.id,
+      data: product,
+      photo_uploaded: Boolean(rawPhotoRelPath),
+      clean_photo_queued: shouldAutoClean
+    }, { status: 201 });
   } catch (error) {
     console.error('Products POST Error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: error.status || 500 });

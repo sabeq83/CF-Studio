@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.43.0 — MCP Parity Upgrade & Custom Storyboard E2E (12/11/2026)
+- Upgrade operatorClient FormData/error diagnostics, server.mjs 15mb limit, and withTenantContext auth for brand-profiles and threads-series
+- Add photo support to products POST and image endpoints plus cf_upload_product_photo and cf_regenerate_product_photo MCP tools
+- Bring full 1-click and scheduled UI parity for Product Video, Multiplier+Product v2.42.2, batch schedules, and FIFO queue tools
+- Fix Custom Storyboard G1-G9 gaps with batch 12, idempotency, cf_get/approve/publish_storyboard, fixed Repliz contract, Brand Profile, ContentFlow, Threads Series, and Deconstruct status tools
+
 ## V2.42.2 — Adopsi Multiplier 1 Blueprint + 1 Produk ke Auto Pipeline (12/11/2026)
 - Tambah Product Bridging + pencarian produk pada Auto Pipeline 1-Klik & Modal Jadwal (1 Produk Andalan, Multi-Produk Bergilir, Tanpa Produk Spesifik)
 - Perbaiki resolusi bridgingMode & product_snapshot_json pada autonomous-engine.js serta dukung angle product-aware di multiplier-angle-generator.js
