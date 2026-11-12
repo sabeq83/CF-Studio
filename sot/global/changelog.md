@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.42.1 — ElevenLabs TTS on Pillar & RE Campaign Fase 2 (Single Narrator) (12/11/2026)
+- Tambah opsi ElevenLabs TTS (Ultra-Realistic) pada dropdown Voice Provider di halaman detail Pillar Campaign dan RE Campaign Fase 2
+- Voice Persona catalog 14 suara ID dan 14 suara EN otomatis sesuai target bahasa kampanye
+- Selector ElevenLabs Model (Multilingual v2, Turbo v2.5, Flash v2.5) dan sliders Stability & Similarity Boost
+- Pillar Campaign Approval lib: persist kolom elevenlabs_model, elevenlabs_stability, elevenlabs_similarity_boost dengan lazy ALTER TABLE
+- Fix endpoint test-elevenlabs: smart fallback ke GET /v1/models saat scoped key tidak punya user_read permission
+
 ## V2.42.0 — Integrasi ElevenLabs TTS Engine untuk Multi-Tenant Settings dan Operator Presets (12/11/2026)
 - Isolasi kredensial elevenlabs_api_key per-tenant di settings dengan zero leakage
 - Katalog 28 voice persona resmi (14 Indonesia & 14 English) dengan fine-tuning sliders

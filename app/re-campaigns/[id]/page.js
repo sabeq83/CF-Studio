@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { getVisualOverrideLabel, parseVisualOverrides } from '../../../lib/campaign-config-labels';
 import { useEffect, useState, Fragment } from 'react';
 import { useParams } from 'next/navigation';
-import { GEMINI_VOICES, MINIMAX_VOICES, MINIMAX_ENGLISH_VOICES } from '@/lib/voice-constants';
+import { GEMINI_VOICES, MINIMAX_VOICES, MINIMAX_ENGLISH_VOICES, ELEVENLABS_ID_VOICES, ELEVENLABS_EN_VOICES, ELEVENLABS_MODELS } from '@/lib/voice-constants';
 
 const writeToClipboard = (text) => {
   if (typeof window !== 'undefined') {
@@ -2850,6 +2850,9 @@ export default function RECampaignDetailPage() {
               voice_persona: settings.voice_persona,
               voice_speed: settings.voice_speed,
               voice_volume: settings.voice_volume,
+              elevenlabs_model: settings.elevenlabs_model || 'eleven_multilingual_v2',
+              elevenlabs_stability: settings.elevenlabs_stability ?? 0.5,
+              elevenlabs_similarity_boost: settings.elevenlabs_similarity_boost ?? 0.75,
               ffmpeg_video_scale: settings.ffmpeg_video_scale,
               ffmpeg_sfx_volume: settings.ffmpeg_sfx_volume,
               ffmpeg_bgm_volume: settings.ffmpeg_bgm_volume,
@@ -2897,6 +2900,9 @@ export default function RECampaignDetailPage() {
               voice_persona: settings.voice_persona,
               voice_speed: settings.voice_speed,
               voice_volume: settings.voice_volume,
+              elevenlabs_model: settings.elevenlabs_model || 'eleven_multilingual_v2',
+              elevenlabs_stability: settings.elevenlabs_stability ?? 0.5,
+              elevenlabs_similarity_boost: settings.elevenlabs_similarity_boost ?? 0.75,
               ffmpeg_video_scale: settings.ffmpeg_video_scale,
               ffmpeg_sfx_volume: settings.ffmpeg_sfx_volume,
               ffmpeg_bgm_volume: settings.ffmpeg_bgm_volume,
@@ -3894,6 +3900,8 @@ export default function RECampaignDetailPage() {
                             if (!GEMINI_VOICES.some(v => v.id === settings.voice_persona)) {
                               updateSettingField('voice_persona', 'Kore');
                             }
+                          } else if (prov === 'elevenlabs') {
+                            updateSettingField('voice_persona', campaign?.target_language === 'en-US' ? 'UgBBYS2sOqTuMpoF3BR0' : 'zmqLb9Ysr8fUvDD7hXK8');
                           } else {
                             const validVoices = campaign?.target_language === 'en-US' ? MINIMAX_ENGLISH_VOICES : MINIMAX_VOICES;
                             if (!validVoices.some(v => v.id === settings.voice_persona)) {
@@ -3905,6 +3913,7 @@ export default function RECampaignDetailPage() {
                       >
                         <option value="gemini">Google Gemini TTS</option>
                         <option value="minimax">MiniMax Speech</option>
+                        <option value="elevenlabs">✨ ElevenLabs TTS (Ultra-Realistic)</option>
                       </select>
                       {campaign.enable_audio_segment === 1 && voiceCast && voiceCast.length > 0 && (
                         <div style={{ fontSize: '0.65rem', color: '#ff7675', marginTop: '4px', fontWeight: 600 }}>
@@ -3914,24 +3923,55 @@ export default function RECampaignDetailPage() {
                     </div>
 
                     {campaign.enable_audio_segment !== 1 ? (
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 600 }}>Voice Persona</label>
-                        <select
-                          disabled={isReadOnly}
-                          value={settings.voice_persona || 'Kore'}
-                          onChange={(e) => updateSettingField('voice_persona', e.target.value)}
-                          style={{ width: '100%', padding: '6px 8px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '4px', fontSize: '0.75rem' }}
-                        >
-                          {settings.voice_provider === 'gemini' ? (
-                            GEMINI_VOICES.map(v => (
-                              <option key={v.id} value={v.id}>{v.avatar} {v.name} - {v.desc}</option>
-                            ))
-                          ) : (
-                            (campaign.target_language === 'en-US' ? MINIMAX_ENGLISH_VOICES : MINIMAX_VOICES).map(v => (
-                              <option key={v.id} value={v.id}>{v.avatar} {v.name} - {v.desc}</option>
-                            ))
-                          )}
-                        </select>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 600 }}>Voice Persona</label>
+                          <select
+                            disabled={isReadOnly}
+                            value={settings.voice_persona || 'Kore'}
+                            onChange={(e) => updateSettingField('voice_persona', e.target.value)}
+                            style={{ width: '100%', padding: '6px 8px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '4px', fontSize: '0.75rem' }}
+                          >
+                            {settings.voice_provider === 'gemini' ? (
+                              GEMINI_VOICES.map(v => (
+                                <option key={v.id} value={v.id}>{v.avatar} {v.name} - {v.desc}</option>
+                              ))
+                            ) : settings.voice_provider === 'elevenlabs' ? (
+                              (campaign.target_language === 'en-US' ? ELEVENLABS_EN_VOICES : ELEVENLABS_ID_VOICES).map(v => (
+                                <option key={v.id} value={v.id}>{v.avatar} {v.name} - {v.desc}</option>
+                              ))
+                            ) : (
+                              (campaign.target_language === 'en-US' ? MINIMAX_ENGLISH_VOICES : MINIMAX_VOICES).map(v => (
+                                <option key={v.id} value={v.id}>{v.avatar} {v.name} - {v.desc}</option>
+                              ))
+                            )}
+                          </select>
+                        </div>
+                        {settings.voice_provider === 'elevenlabs' && (
+                          <>
+                            <div>
+                              <label style={{ display: 'block', fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 600 }}>ElevenLabs Model</label>
+                              <select
+                                disabled={isReadOnly}
+                                value={settings.elevenlabs_model || 'eleven_multilingual_v2'}
+                                onChange={(e) => updateSettingField('elevenlabs_model', e.target.value)}
+                                style={{ width: '100%', padding: '6px 8px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '4px', fontSize: '0.75rem' }}
+                              >
+                                {ELEVENLABS_MODELS.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                              </select>
+                            </div>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                              <div style={{ flex: 1 }}>
+                                <label style={{ display: 'block', fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: '2px', fontWeight: 600 }}>Stability ({Number(settings.elevenlabs_stability ?? 0.5).toFixed(2)})</label>
+                                <input type="range" min="0.0" max="1.0" step="0.05" disabled={isReadOnly} value={settings.elevenlabs_stability ?? 0.5} onChange={(e) => updateSettingField('elevenlabs_stability', Number(e.target.value))} style={{ width: '100%' }} />
+                              </div>
+                              <div style={{ flex: 1 }}>
+                                <label style={{ display: 'block', fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: '2px', fontWeight: 600 }}>Similarity Boost ({Number(settings.elevenlabs_similarity_boost ?? 0.75).toFixed(2)})</label>
+                                <input type="range" min="0.0" max="1.0" step="0.05" disabled={isReadOnly} value={settings.elevenlabs_similarity_boost ?? 0.75} onChange={(e) => updateSettingField('elevenlabs_similarity_boost', Number(e.target.value))} style={{ width: '100%' }} />
+                              </div>
+                            </div>
+                          </>
+                        )}
                       </div>
                     ) : (
                       <div style={{ marginTop: '4px', borderTop: '1px solid var(--surface-interactive)', paddingTop: '10px' }}>

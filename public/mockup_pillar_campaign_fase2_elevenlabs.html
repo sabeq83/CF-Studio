@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup - Detail Kampanye Pilar: Fase 2 Workflow & Production Settings (ElevenLabs TTS)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --link-hover: #a5f3fc;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-purple: #c084fc;
+      --status-purple-soft: rgba(192, 132, 252, 0.14);
+      --shadow-card: 0 4px 18px rgba(0, 0, 0, 0.35);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --canvas: #f8fafc;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f1f5f9;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --input-bg: #f8fafc;
+      --overlay-subtle: rgba(0, 0, 0, 0.04);
+      --overlay-backdrop: rgba(15, 23, 42, 0.5);
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --text-disabled: #94a3b8;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --action-primary: #0d9488;
+      --action-primary-hover: #14b8a6;
+      --on-action-primary: #ffffff;
+      --link: #0284c7;
+      --link-hover: #0369a1;
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.12);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.12);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.12);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.12);
+      --status-purple: #9333ea;
+      --status-purple-soft: rgba(147, 51, 234, 0.12);
+      --shadow-card: 0 4px 18px rgba(0, 0, 0, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 24px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+
+    /* Top Banner / Theme Switcher */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid var(--border-subtle);
+    }
+    .badge-success {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+    }
+    .badge-purple {
+      background: var(--status-purple-soft);
+      color: var(--status-purple);
+    }
+    .btn-toggle-theme {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      padding: 6px 14px;
+      border-radius: var(--radius-xs);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Campaign Header */
+    .campaign-header {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-card);
+    }
+    .campaign-header h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .campaign-meta {
+      display: flex;
+      gap: 16px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+    }
+    .campaign-meta strong {
+      color: var(--text-secondary);
+    }
+
+    /* Simulation Control Toolbar */
+    .sim-bar {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .sim-bar-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sim-bar-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.75rem;
+    }
+    .sim-select {
+      background: var(--input-bg);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      padding: 5px 10px;
+      font-size: 0.75rem;
+      outline: none;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 8px;
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: var(--surface-interactive);
+      color: var(--action-primary);
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* Storyboard Preview Card (Compact) */
+    .storyboard-summary {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+    }
+    .storyboard-summary h3 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .clips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+    .clip-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      padding: 12px;
+      font-size: 0.75rem;
+    }
+    .clip-badge {
+      font-weight: 700;
+      color: var(--action-primary);
+      margin-bottom: 4px;
+      display: block;
+    }
+    .clip-vo {
+      color: var(--text-secondary);
+      font-style: italic;
+      line-height: 1.4;
+      margin-top: 4px;
+      background: var(--overlay-subtle);
+      padding: 6px 8px;
+      border-radius: 4px;
+      border-left: 3px solid var(--action-primary);
+    }
+
+    /* Workflow & Production Settings Box (THE MAIN TARGET) */
+    .settings-box {
+      background: var(--surface);
+      border: 2px solid var(--action-primary);
+      border-radius: var(--radius-md);
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-card);
+      position: relative;
+    }
+    .settings-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--action-primary);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .settings-group {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Switch Component */
+    .switch-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 38px;
+      height: 20px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: var(--border-strong);
+      transition: var(--transition);
+      border-radius: 20px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: var(--transition);
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: var(--action-primary);
+    }
+    input:checked + .slider:before {
+      transform: translateX(18px);
+      background-color: var(--on-action-primary);
+    }
+    .switch-label {
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* TTS Panel */
+    .tts-panel {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .form-select, .form-input {
+      width: 100%;
+      padding: 8px 12px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      border-radius: var(--radius-xs);
+      font-size: 0.8rem;
+      outline: none;
+      transition: var(--transition);
+    }
+    .form-select:focus, .form-input:focus {
+      border-color: var(--action-primary);
+    }
+
+    /* Provider Callout */
+    .provider-callout {
+      padding: 10px 14px;
+      border-radius: var(--radius-xs);
+      font-size: 0.74rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      line-height: 1.4;
+    }
+    .provider-callout-elevenlabs {
+      background: var(--status-purple-soft);
+      border: 1px solid var(--status-purple);
+      color: var(--text-primary);
+    }
+    .provider-callout-minimax {
+      background: var(--status-info-soft);
+      border: 1px solid var(--status-info);
+      color: var(--text-primary);
+    }
+    .provider-callout-gemini {
+      background: var(--status-success-soft);
+      border: 1px solid var(--status-success);
+      color: var(--text-primary);
+    }
+
+    /* Sliders Row */
+    .sliders-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-top: 4px;
+    }
+    .range-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .range-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .range-val {
+      color: var(--action-primary);
+      font-family: var(--font-mono);
+      font-weight: 700;
+    }
+    input[type=range] {
+      accent-color: var(--action-primary);
+      cursor: pointer;
+    }
+
+    /* Multi Voice Cast Box */
+    .voicecast-box {
+      border-top: 1px dashed var(--border-subtle);
+      padding-top: 14px;
+      margin-top: 6px;
+    }
+    .voicecast-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .voicecast-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 10px;
+    }
+    .voicecast-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      padding: 10px 12px;
+    }
+    .voicecast-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .voicecast-char-name {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--action-primary);
+    }
+    .voicecast-char-role {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+    }
+
+    /* Video & Motion Controls */
+    .secondary-settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    /* Action Footer Buttons */
+    .actions-bar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 12px;
+      margin-top: 24px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 10px 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+      border: 1px solid transparent;
+    }
+    .btn-secondary {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      border-color: var(--border-subtle);
+    }
+    .btn-secondary:hover {
+      background: var(--surface-hover);
+    }
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+    }
+
+    /* Toast Notification */
+    #toast {
+      visibility: hidden;
+      min-width: 280px;
+      background-color: var(--surface-raised);
+      color: var(--text-primary);
+      text-align: center;
+      border-radius: var(--radius-sm);
+      padding: 12px 20px;
+      position: fixed;
+      z-index: 9999;
+      bottom: 30px;
+      right: 30px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border: 1px solid var(--action-primary);
+      box-shadow: var(--shadow-card);
+      opacity: 0;
+      transition: opacity 0.3s, bottom 0.3s;
+    }
+    #toast.show {
+      visibility: visible;
+      opacity: 1;
+      bottom: 40px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Top Bar with Theme Toggle -->
+    <div class="top-bar">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span class="badge badge-purple">✨ MAKNA Flow v2.42.0</span>
+        <span class="badge badge-success">● Staging Active</span>
+      </div>
+      <button class="btn-toggle-theme" onclick="toggleTheme()">
+        <span id="theme-icon">☀️</span> <span id="theme-text">Light Mode</span>
+      </button>
+    </div>
+
+    <!-- Campaign Header -->
+    <div class="campaign-header">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; flex-wrap: wrap; gap: 10px;">
+        <h1>
+          <span>📦</span>
+          <span>Review Produk: Sunscreen UV Barrier Glowing</span>
+        </h1>
+        <span class="badge badge-purple" style="font-size: 0.78rem; padding: 6px 12px;">
+          ● Ready For Review (Fase 1 Selesai)
+        </span>
+      </div>
+      <div class="campaign-meta">
+        <div>ID: <strong style="font-family: var(--font-mono);">#PC-8821</strong></div>
+        <div>Target Market: <strong id="meta-target-lang">Indonesia (id-ID)</strong></div>
+        <div>Total Klip: <strong>4 Scene</strong></div>
+        <div>Multi-Voice Dialog: <strong id="meta-dialog-status">Aktif (2 Karakter)</strong></div>
+      </div>
+    </div>
+
+    <!-- Interactive Simulation Switcher -->
+    <div class="sim-bar">
+      <div class="sim-bar-label">
+        <span>🧪 Simulator Interaktif:</span>
+        <span style="font-size: 0.72rem; font-weight: normal; color: var(--text-muted);">Uji respon form Fase 2 terhadap bahasa dan model secara instan</span>
+      </div>
+      <div class="sim-bar-controls">
+        <label>Target Bahasa:
+          <select id="sim-lang-select" class="sim-select" onchange="changeLanguage(this.value)">
+            <option value="id-ID" selected>🇮🇩 Bahasa Indonesia (id-ID)</option>
+            <option value="en-US">🇺🇸 English US (en-US)</option>
+          </select>
+        </label>
+        <label>Multi-Voice Segment:
+          <select id="sim-multivoice-select" class="sim-select" onchange="toggleMultiVoice(this.value)">
+            <option value="1" selected>✅ Aktif (Host & Dokter)</option>
+            <option value="0">❌ Non-aktif (Single Narator)</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <div class="tabs">
+      <button class="tab-btn active">🎬 Storyboard & Production (Fase 2)</button>
+      <button class="tab-btn">📊 Visual Prompts</button>
+      <button class="tab-btn">📱 Social Media Package</button>
+      <button class="tab-btn">📜 System Logs</button>
+    </div>
+
+    <!-- Storyboard Summary Preview -->
+    <div class="storyboard-summary">
+      <h3>📋 Naskah Voice-Over Storyboard (Fase 1 Selesai)</h3>
+      <div class="clips-grid">
+        <div class="clip-card">
+          <span class="clip-badge">Klip #1 (Hook)</span>
+          <div style="font-size: 0.68rem; color: var(--text-muted);">Host • 0.0s - 3.2s</div>
+          <div class="clip-vo">"Panas terik bikin kulit kusam dan terbakar? Jangan sampai salah pilih proteksi ya!"</div>
+        </div>
+        <div class="clip-card">
+          <span class="clip-badge">Klip #2 (Problem & Edu)</span>
+          <div style="font-size: 0.68rem; color: var(--text-muted);">Dokter Kulit • 3.2s - 7.5s</div>
+          <div class="clip-vo">"Sinar UV itu menembus kaca. Perlu filter ceramide yang mengunci kelembapan."</div>
+        </div>
+        <div class="clip-card">
+          <span class="clip-badge">Klip #3 (Demo & Bukti)</span>
+          <div style="font-size: 0.68rem; color: var(--text-muted);">Host • 7.5s - 11.8s</div>
+          <div class="clip-vo">"Teksturnya seringan air, cepat meresap tanpa ada white cast sama sekali!"</div>
+        </div>
+        <div class="clip-card">
+          <span class="clip-badge">Klip #4 (CTA & Promo)</span>
+          <div style="font-size: 0.68rem; color: var(--text-muted);">Host • 11.8s - 15.0s</div>
+          <div class="clip-vo">"Klik keranjang kuning sekarang mumpung lagi diskon flash sale 40%!"</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- MAIN FOCUS: Workflow & Production Settings (Fase 2) Form -->
+    <!-- ======================================================== -->
+    <div class="settings-box">
+      <div class="settings-title">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span>⚙️</span>
+          <span>Workflow & Production Settings (Fase 2)</span>
+        </div>
+        <span class="badge badge-purple" id="provider-badge">ElevenLabs Engine Ready</span>
+      </div>
+
+      <div class="settings-group">
+
+        <!-- 1. TTS Toggle Switch -->
+        <div class="switch-container">
+          <label class="switch">
+            <input type="checkbox" id="enable_tts" checked onchange="toggleTtsSection(this.checked)">
+            <span class="slider"></span>
+          </label>
+          <span class="switch-label">Generate TTS (Audio Voiceover Otomatis)</span>
+        </div>
+
+        <!-- 2. TTS Configuration Container -->
+        <div class="tts-panel" id="tts-panel-container">
+
+          <!-- Provider Select Row -->
+          <div class="form-group">
+            <label class="form-label">Voice Provider (Mesin Sintesis Suara)</label>
+            <select class="form-select" id="voice_provider" onchange="handleProviderChange(this.value)">
+              <option value="gemini">Google Gemini TTS (Built-in Multimodal)</option>
+              <option value="minimax">MiniMax Speech (HD Neural Voice)</option>
+              <option value="elevenlabs" selected>✨ ElevenLabs TTS Engine (Ultra-Realistic Studio AI)</option>
+            </select>
+          </div>
+
+          <!-- Dynamic Provider Callout / Status Info -->
+          <div id="provider-callout-box" class="provider-callout provider-callout-elevenlabs">
+            <span style="font-size: 1.2rem;">🎙️</span>
+            <div>
+              <strong>ElevenLabs Ultra-Realistic Engine Aktif.</strong> Menghasilkan artikulasi suara sangat jernih, intonasi emosional presisi, dan logat otentik lokal (Bahasa Indonesia & Global). Multi-tenant isolation aktif via Settings.
+            </div>
+          </div>
+
+          <!-- ElevenLabs Specific Model Selector (Tampil jika provider === elevenlabs) -->
+          <div class="form-group" id="elevenlabs-model-group">
+            <label class="form-label">ElevenLabs Model</label>
+            <select class="form-select" id="elevenlabs_model">
+              <option value="eleven_multilingual_v2" selected>Multilingual v2 (Rekomendasi ID/EN - Artikulasi & Emosi Tertinggi)</option>
+              <option value="eleven_turbo_v2_5">Turbo v2.5 (Ultra-Fast 300ms Low Latency)</option>
+              <option value="eleven_flash_v2_5">Flash v2.5 (Super Ringan & Hemat Quota)</option>
+            </select>
+          </div>
+
+          <!-- Single Voice Persona Dropdown (Jika single-voice / non-dialog) -->
+          <div class="form-group" id="single-voice-group">
+            <label class="form-label" id="voice-persona-label">Voice Persona (Karakter Suara Narator Utama)</label>
+            <select class="form-select" id="voice_persona" onchange="handleVoicePersonaChange(this.value)">
+              <!-- Populated by JS based on language and provider -->
+            </select>
+          </div>
+
+          <!-- Custom Voice ID Input (Jika user pilih Custom Voice ID) -->
+          <div class="form-group" id="custom-voice-group" style="display: none;">
+            <label class="form-label">Custom Voice ID (ElevenLabs Cloned Voice / Voice Library ID)</label>
+            <input type="text" class="form-input" id="custom_voice_id" placeholder="Contoh: 21m00Tcm4TlvDq8ikWAM" style="font-family: var(--font-mono);">
+            <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 2px;">
+              Masukkan Voice ID kloningan Anda sendiri dari ElevenLabs VoiceLab.
+            </div>
+          </div>
+
+          <!-- Multi-Voice Cast Configuration (Tampil jika multi-voice segment aktif) -->
+          <div class="voicecast-box" id="voicecast-container">
+            <div class="voicecast-title">
+              <span>🎭 Voice Cast Configuration (Multi-Voice Dialog Per Karakter)</span>
+            </div>
+            <div class="voicecast-grid">
+              <!-- Character 1 -->
+              <div class="voicecast-card">
+                <div class="voicecast-card-header">
+                  <span class="voicecast-char-name">Host / Presenter</span>
+                  <span class="voicecast-char-role">Karakter #1 (Utama)</span>
+                </div>
+                <label class="form-label" style="font-size: 0.65rem;">Pilihan Suara Karakter</label>
+                <select class="form-select" id="cast-char-1">
+                  <!-- Populated by JS -->
+                </select>
+              </div>
+
+              <!-- Character 2 -->
+              <div class="voicecast-card">
+                <div class="voicecast-card-header">
+                  <span class="voicecast-char-name">Dokter Kulit / Reviewer</span>
+                  <span class="voicecast-char-role">Karakter #2 (Pakar)</span>
+                </div>
+                <label class="form-label" style="font-size: 0.65rem;">Pilihan Suara Karakter</label>
+                <select class="form-select" id="cast-char-2">
+                  <!-- Populated by JS -->
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sliders: Speed, Volume, Stability, Similarity Boost -->
+          <div class="sliders-grid">
+            <div class="range-wrap">
+              <div class="range-label">
+                <span>Kecepatan (Speed)</span>
+                <span class="range-val" id="speed-val">1.0x</span>
+              </div>
+              <input type="range" id="voice_speed" min="0.5" max="2.0" step="0.05" value="1.0" oninput="document.getElementById('speed-val').innerText = Number(this.value).toFixed(2) + 'x'">
+            </div>
+
+            <div class="range-wrap">
+              <div class="range-label">
+                <span>Volume Audio</span>
+                <span class="range-val" id="volume-val">1.0x</span>
+              </div>
+              <input type="range" id="voice_volume" min="0.0" max="2.0" step="0.1" value="1.0" oninput="document.getElementById('volume-val').innerText = Number(this.value).toFixed(1) + 'x'">
+            </div>
+
+            <div class="range-wrap" id="stability-wrap">
+              <div class="range-label">
+                <span>Stability (ElevenLabs)</span>
+                <span class="range-val" id="stability-val">0.50</span>
+              </div>
+              <input type="range" id="elevenlabs_stability" min="0.0" max="1.0" step="0.05" value="0.5" oninput="document.getElementById('stability-val').innerText = Number(this.value).toFixed(2)">
+            </div>
+
+            <div class="range-wrap" id="similarity-wrap">
+              <div class="range-label">
+                <span>Similarity Boost</span>
+                <span class="range-val" id="similarity-val">0.75</span>
+              </div>
+              <input type="range" id="elevenlabs_similarity" min="0.0" max="1.0" step="0.05" value="0.75" oninput="document.getElementById('similarity-val').innerText = Number(this.value).toFixed(2)">
+            </div>
+          </div>
+
+        </div> <!-- /tts-panel -->
+
+        <!-- Secondary Controls: G-Labs & FFmpeg -->
+        <div class="secondary-settings-grid">
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div class="switch-container">
+              <label class="switch">
+                <input type="checkbox" id="enable_glabs" checked>
+                <span class="slider"></span>
+              </label>
+              <span class="switch-label" style="font-size: 0.78rem;">Generate Video Klip (G-Labs I2V)</span>
+            </div>
+            <div style="font-size: 0.7rem; color: var(--text-muted); padding-left: 48px;">
+              Klip dirender menggunakan ComfyUI / Seedance di Node 2.
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div class="switch-container">
+              <label class="switch">
+                <input type="checkbox" id="enable_ffmpeg" checked>
+                <span class="slider"></span>
+              </label>
+              <span class="switch-label" style="font-size: 0.78rem;">Auto-Stitch Final (FFmpeg Engine)</span>
+            </div>
+            <div style="font-size: 0.7rem; color: var(--text-muted); padding-left: 48px;">
+              Smart Audio-Video sync, crossfade transition, BGM & SFX mixing.
+            </div>
+          </div>
+        </div>
+
+      </div> <!-- /settings-group -->
+
+      <!-- Action Footer Buttons -->
+      <div class="actions-bar">
+        <button type="button" class="btn btn-secondary" onclick="simulateSaveDraft()">
+          <span>💾</span>
+          <span>Simpan Perubahan (Save Draft)</span>
+        </button>
+        <button type="button" class="btn btn-primary" onclick="simulateApprove()">
+          <span>🚀</span>
+          <span>Approve & Proceed to Production</span>
+        </button>
+      </div>
+
+    </div> <!-- /settings-box -->
+
+  </div> <!-- /container -->
+
+  <!-- Toast Notification -->
+  <div id="toast">Toast message</div>
+
+  <script>
+    // 28 Official ElevenLabs Voices Catalog
+    const ELEVENLABS_ID_VOICES = [
+      // 7 Pria
+      { id: 'zmqLb9Ysr8fUvDD7hXK8', name: 'Zan', gender: 'Male', avatar: '👨', desc: 'Conversational, hangat, serak natural' },
+      { id: 'TMvmhlKUioQA4U7LOoko', name: 'Andi', gender: 'Male', avatar: '👨‍💼', desc: 'Jelas, ramah, tenang & engaging' },
+      { id: 'q8qwd1jY2jS3AWOBeq25', name: 'Pratama', gender: 'Male', avatar: '⚡', desc: 'Percaya diri, energik & tegas' },
+      { id: 'X8n8hOy3e8VLQnHTUcc5', name: 'Bram', gender: 'Male', avatar: '🎙️', desc: 'Karismatik, komersial & berbobot' },
+      { id: 'plgKUYgnlZ1DCNh54DwJ', name: 'Dakocan', gender: 'Male', avatar: '☕', desc: 'Santai, bersahabat, podcast/vlog' },
+      { id: 'd888tBvGmQT2u05J1xTv', name: 'Ahmad', gender: 'Male', avatar: '🕌', desc: 'Tenang, santun, religius & edukatif' },
+      { id: 'ACRfKVNOAnzVitkYerdl', name: 'Mizan', gender: 'Male', avatar: '🏛️', desc: 'Berwibawa, dokumenter & narasi sejarah' },
+      // 7 Wanita
+      { id: 'I7sakys8pBZ1Z5f0UhT9', name: 'Putri Maharani', gender: 'Female', avatar: '👑', desc: 'Elegan, premium, kosmetik & luxury' },
+      { id: 'U3dExJoUNcmTY5H6GMuG', name: 'Maya', gender: 'Female', avatar: '👩‍🦰', desc: 'Cerah, ramah, marketing & iklan' },
+      { id: 'zd0hd2egR1Q6EzSLTzCp', name: 'Naya', gender: 'Female', avatar: '🌸', desc: 'Lembut, empati tinggi & self-care' },
+      { id: 'o5s6XRBkPSTD4syv6mZg', name: 'Arunika', gender: 'Female', avatar: '👩‍💼', desc: 'Penyiar TV nasional, tajam & kredibel' },
+      { id: 'RbNgJzKAV7jpYJNtCBpj', name: 'Citra', gender: 'Female', avatar: '👩', desc: 'Lembut, ramah, resep dapur & kuliner' },
+      { id: 'LcvlyuBGMjj1h4uAtQjo', name: 'Ratih', gender: 'Female', avatar: '✨', desc: 'Santai, natural, unboxing & review' },
+      { id: 'vkW2LzXraZVeZ5G7Yv7c', name: 'Dila', gender: 'Female', avatar: '🎙️', desc: 'Gaya presenter, energik & menjaga atensi' }
+    ];
+
+    const ELEVENLABS_EN_VOICES = [
+      // 7 Male
+      { id: 'UgBBYS2sOqTuMpoF3BR0', name: 'Mark', gender: 'Male', avatar: '🧑', desc: 'Conversational young adult American male' },
+      { id: 'NOpBlnGInO9m6vDvFkFC', name: 'Grandpa Spuds', gender: 'Male', avatar: '👴', desc: 'Wise, warm older male storyteller' },
+      { id: 'IRHApOXLvnW57QJPQH2P', name: 'Adam (Brooding)', gender: 'Male', avatar: '🕶️', desc: 'Dark, intense dramatic trailer narrator' },
+      { id: 'EkK5I93UQWFDigLMpZcX', name: 'JM', gender: 'Male', avatar: '🎧', desc: 'Husky deep bass, audiobooks & docs' },
+      { id: 'wBXNqKUATyqu0RtYt25i', name: 'Adam (Classic)', gender: 'Male', avatar: '📻', desc: 'Commanding, rich broadcast tone' },
+      { id: 'yl2ZDV1MzN4HbQJbMihG', name: 'Alex', gender: 'Male', avatar: '⚡', desc: 'Upbeat YouTube & TikTok shorts creator' },
+      { id: 'ZthjuvLPty3kTMaNKVKb', name: 'Jackson', gender: 'Male', avatar: '🧔', desc: 'Confident, reliable narration' },
+      // 7 Female
+      { id: 'r1KmysJdVYZjJCm4mL3b', name: 'Jessica', gender: 'Female', avatar: '👩', desc: 'Classic conversational American female' },
+      { id: 'tnSpp4vdxKPjI9w0GnoV', name: 'Hope', gender: 'Female', avatar: '✨', desc: 'Upbeat, cheerful, bright social media' },
+      { id: '56AoDkrOh6qfVPDXZ7Pt', name: 'Cassidy', gender: 'Female', avatar: '🎯', desc: 'Crisp, direct, clear business tips' },
+      { id: 'kPzsL2i3teMYv0FxEYQ6', name: 'Brittney', gender: 'Female', avatar: '🌸', desc: 'Young, vibrant, fashion & youth culture' },
+      { id: 'Z3R5wn05IrDiVCyEkUrK', name: 'Arabella', gender: 'Female', avatar: '🎭', desc: 'Emotive, storytelling, warm narration' },
+      { id: 'lxYfHSkYm1EzQzGhdbfc', name: 'Jessica Anne Bogart', gender: 'Female', avatar: '🎙️', desc: 'VO Pro, confident commercial & luxury' },
+      { id: 'DODLEQrClDo8wCz460ld', name: 'Lauren B', gender: 'Female', avatar: '☕', desc: 'Comforting, friendly, healthcare & guides' }
+    ];
+
+    const GEMINI_VOICES = [
+      { id: 'Kore', name: 'Kore (Female)', avatar: '👩', desc: 'Standard Female (Skincare/Cosmetic)' },
+      { id: 'Fenrir', name: 'Fenrir (Male)', avatar: '🧔', desc: 'Deep/Heavy Male (Otomotif/High-End)' },
+      { id: 'Puck', name: 'Puck (Male)', avatar: '👦', desc: 'Ceria, Playful (Makanan/Promo Kilat)' },
+      { id: 'Charon', name: 'Charon (Male)', avatar: '👨', desc: 'Formal, News Style (Review Tech/Finansial)' },
+      { id: 'Aoede', name: 'Aoede (Female)', avatar: '👩‍🎨', desc: 'Artistik, Ekspresif (Fashion/Seni)' }
+    ];
+
+    const MINIMAX_VOICES = [
+      { id: 'Indonesian_casual_reporter_vv2', name: 'Casual Reporter', avatar: '👨', desc: 'Laki-laki (Casual Reporter - Vv2)' },
+      { id: 'Indonesian_compelling_storyteller_vv2', name: 'Compelling Storyteller', avatar: '👨', desc: 'Laki-laki (Storyteller - Vv2)' },
+      { id: 'Indonesian_expressive_podcaster_vv2', name: 'Expressive Podcaster', avatar: '👨', desc: 'Laki-laki (Podcaster - Vv2)' },
+      { id: 'Indonesian_intellectual_commentator_vv2', name: 'Intellectual Commentator', avatar: '👩', desc: 'Perempuan (Commentator - Vv2)' },
+      { id: 'Indonesian_professional_anchor_vv2', name: 'Professional Anchor', avatar: '👔', desc: 'Perempuan (Professional Anchor - Vv2)' }
+    ];
+
+    let currentLang = 'id-ID';
+    let isMultiVoice = true;
+
+    function populateVoices() {
+      const provider = document.getElementById('voice_provider').value;
+      const personaSelect = document.getElementById('voice_persona');
+      const cast1Select = document.getElementById('cast-char-1');
+      const cast2Select = document.getElementById('cast-char-2');
+
+      personaSelect.innerHTML = '';
+      if (cast1Select) cast1Select.innerHTML = '';
+      if (cast2Select) cast2Select.innerHTML = '';
+
+      let voices = [];
+      if (provider === 'elevenlabs') {
+        voices = currentLang === 'en-US' ? ELEVENLABS_EN_VOICES : ELEVENLABS_ID_VOICES;
+      } else if (provider === 'gemini') {
+        voices = GEMINI_VOICES;
+      } else {
+        voices = MINIMAX_VOICES;
+      }
+
+      // Populate Single Voice
+      voices.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v.id;
+        opt.textContent = `${v.avatar} ${v.name} - ${v.desc}`;
+        personaSelect.appendChild(opt);
+      });
+
+      if (provider === 'elevenlabs') {
+        const customOpt = document.createElement('option');
+        customOpt.value = 'custom';
+        customOpt.textContent = '✨ [Custom Voice ID] Gunakan Kloningan Suara Sendiri';
+        personaSelect.appendChild(customOpt);
+      }
+
+      // Populate Cast 1 & 2
+      if (cast1Select && cast2Select) {
+        voices.forEach((v, idx) => {
+          const opt1 = document.createElement('option');
+          opt1.value = v.id;
+          opt1.textContent = `${v.avatar} ${v.name}`;
+          cast1Select.appendChild(opt1);
+
+          const opt2 = document.createElement('option');
+          opt2.value = v.id;
+          opt2.textContent = `${v.avatar} ${v.name}`;
+          cast2Select.appendChild(opt2);
+        });
+
+        // Default cast selection
+        if (voices.length > 1) {
+          cast1Select.selectedIndex = 0;
+          cast2Select.selectedIndex = Math.min(1, voices.length - 1);
+        }
+      }
+    }
+
+    function handleProviderChange(provider) {
+      const callout = document.getElementById('provider-callout-box');
+      const elevenlabsModelGroup = document.getElementById('elevenlabs-model-group');
+      const stabilityWrap = document.getElementById('stability-wrap');
+      const similarityWrap = document.getElementById('similarity-wrap');
+      const badge = document.getElementById('provider-badge');
+
+      if (provider === 'elevenlabs') {
+        callout.className = 'provider-callout provider-callout-elevenlabs';
+        callout.innerHTML = `
+          <span style="font-size: 1.2rem;">🎙️</span>
+          <div>
+            <strong>ElevenLabs Ultra-Realistic Engine Aktif.</strong> Menghasilkan artikulasi suara sangat jernih, intonasi emosional presisi, dan logat otentik lokal (${currentLang === 'en-US' ? 'English US' : 'Bahasa Indonesia'}). Multi-tenant isolation aktif via Settings.
+          </div>
+        `;
+        elevenlabsModelGroup.style.display = 'flex';
+        stabilityWrap.style.display = 'flex';
+        similarityWrap.style.display = 'flex';
+        badge.textContent = 'ElevenLabs Engine Ready';
+        badge.className = 'badge badge-purple';
+      } else if (provider === 'minimax') {
+        callout.className = 'provider-callout provider-callout-minimax';
+        callout.innerHTML = `
+          <span style="font-size: 1.2rem;">⚡</span>
+          <div>
+            <strong>MiniMax Speech HD Aktif.</strong> Sintesis neural cepat dan natural untuk konten media sosial komersial & affiliate.
+          </div>
+        `;
+        elevenlabsModelGroup.style.display = 'none';
+        stabilityWrap.style.display = 'none';
+        similarityWrap.style.display = 'none';
+        badge.textContent = 'MiniMax Engine Active';
+        badge.className = 'badge';
+      } else {
+        callout.className = 'provider-callout provider-callout-gemini';
+        callout.innerHTML = `
+          <span style="font-size: 1.2rem;">🤖</span>
+          <div>
+            <strong>Google Gemini TTS Aktif.</strong> Sintesis suara terintegrasi langsung via Gemini Cloud API.
+          </div>
+        `;
+        elevenlabsModelGroup.style.display = 'none';
+        stabilityWrap.style.display = 'none';
+        similarityWrap.style.display = 'none';
+        badge.textContent = 'Gemini TTS Active';
+        badge.className = 'badge badge-success';
+      }
+
+      populateVoices();
+      handleVoicePersonaChange(document.getElementById('voice_persona').value);
+      // Jaga visibilitas single/multi-voice setelah voice list diisi ulang
+      applyMultiVoiceVisibility();
+    }
+
+    function handleVoicePersonaChange(val) {
+      const customGroup = document.getElementById('custom-voice-group');
+      if (val === 'custom') {
+        customGroup.style.display = 'flex';
+      } else {
+        customGroup.style.display = 'none';
+      }
+    }
+
+    function applyMultiVoiceVisibility() {
+      // Pastikan visibilitas single vs multi-voice selalu sinkron
+      document.getElementById('voicecast-container').style.display = isMultiVoice ? 'block' : 'none';
+      document.getElementById('single-voice-group').style.display = isMultiVoice ? 'none' : 'flex';
+    }
+
+    function toggleTtsSection(enabled) {
+      const panel = document.getElementById('tts-panel-container');
+      panel.style.display = enabled ? 'flex' : 'none';
+    }
+
+    function changeLanguage(lang) {
+      currentLang = lang;
+      document.getElementById('meta-target-lang').innerText = lang === 'en-US' ? 'English US (en-US)' : 'Indonesia (id-ID)';
+      handleProviderChange(document.getElementById('voice_provider').value);
+      showToast(`Bahasa diganti ke: ${lang === 'en-US' ? 'English (14 Suara EN)' : 'Bahasa Indonesia (14 Suara ID)'}`);
+    }
+
+    function toggleMultiVoice(enabled) {
+      isMultiVoice = enabled === '1';
+      applyMultiVoiceVisibility();
+      document.getElementById('meta-dialog-status').innerText = isMultiVoice ? 'Aktif (2 Karakter)' : 'Non-aktif (Single Narator)';
+      if (enabled !== '__init__') {
+        showToast(isMultiVoice ? '🎭 Mode Multi-Voice Dialog Diaktifkan' : '🎙️ Mode Single Narator Diaktifkan');
+      }
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme') || 'dark';
+      const target = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', target);
+      document.getElementById('theme-icon').textContent = target === 'dark' ? '☀️' : '🌙';
+      document.getElementById('theme-text').textContent = target === 'dark' ? 'Light Mode' : 'Dark Mode';
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.className = 'show';
+      setTimeout(() => {
+        toast.className = toast.className.replace('show', '');
+      }, 3000);
+    }
+
+    function simulateSaveDraft() {
+      const prov = document.getElementById('voice_provider').value;
+      const speed = document.getElementById('voice_speed').value;
+      showToast(`💾 Draft Berhasil Disimpan! Provider: ${prov.toUpperCase()} (${speed}x speed)`);
+    }
+
+    function simulateApprove() {
+      const prov = document.getElementById('voice_provider').value;
+      showToast(`🚀 Disetujui! Memulai pipeline produksi Fase 2 dengan engine ${prov.toUpperCase()}...`);
+    }
+
+    // Initial setup on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      // Set multi-voice dulu SEBELUM populateVoices
+      isMultiVoice = true;
+      document.getElementById('sim-multivoice-select').value = '1';
+      // Populate provider + voice list, lalu paksa ulang visibilitas
+      handleProviderChange('elevenlabs');
+      applyMultiVoiceVisibility();
+      document.getElementById('meta-dialog-status').innerText = 'Aktif (2 Karakter)';
+    });
+  </script>
+</body>
+</html>
+
