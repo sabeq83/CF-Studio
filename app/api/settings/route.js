@@ -25,6 +25,7 @@ export const GET = withTenantContext(async (request, _context, user) => {
     const tenantId = user.tenantId || user.tenant_id || 'default_tenant';
     const apiKey = await getSetting('gemini_api_key', false);
     const minimaxKey = await getSetting('minimax_api_key', false);
+    const elevenlabsKey = await getSetting('elevenlabs_api_key', false);
     const webhookKey = await getSetting('webhook_api_key', false);
     const nextcloudPassword = await getSetting('nextcloud_app_password', false);
     const fbToken = await getSetting('fb_page_token', false);
@@ -47,6 +48,8 @@ export const GET = withTenantContext(async (request, _context, user) => {
         minimax_api_key: maskSecret(minimaxKey) || null,
         has_minimax_key: !!minimaxKey,
         minimax_group_id: await getSetting('minimax_group_id', false) || '',
+        elevenlabs_api_key: maskSecret(elevenlabsKey) || null,
+        has_elevenlabs_key: !!elevenlabsKey,
         webhook_api_key: maskSecret(webhookKey),
         has_webhook_key: !!webhookKey,
         webhook_host: await getSetting('webhook_host') || '100.64.70.61',
@@ -116,7 +119,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
       webhook_delay_enabled, webhook_delay_min, webhook_delay_max, webhook_t2i_pattern,
       drive_target_folder, drive_glabs_folder_id, drive_re_markdown_folder_id, master_re_sheet_id, drive_product_photo_folder,
       storage_provider, nextcloud_url, nextcloud_username, nextcloud_app_password, nextcloud_target_folder,
-      minimax_api_key, minimax_group_id, save_to_local_storage, local_storage_path,
+      minimax_api_key, minimax_group_id, elevenlabs_api_key, save_to_local_storage, local_storage_path,
       fb_page_id, fb_page_ids, fb_page_token, fb_server_url, scraper_headless_enabled, scraper_use_cdp, scraper_chrome_profile, ytdlp_cookies_from_browser,
       contentflow_api_key, contentflow_api_url,
       product_photo_provider, product_photo_gemini_model, product_photo_glabs_model, product_photo_auto_approve,
@@ -145,6 +148,9 @@ export const POST = withTenantContext(async (request, _context, user) => {
     }
     if (minimax_group_id !== undefined) {
       await setSetting('minimax_group_id', minimax_group_id);
+    }
+    if (isNewSecret(elevenlabs_api_key)) {
+      await setSetting('elevenlabs_api_key', elevenlabs_api_key);
     }
     if (google_client_id) {
       await setSetting('google_client_id', google_client_id);

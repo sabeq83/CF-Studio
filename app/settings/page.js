@@ -55,6 +55,15 @@ export default function SettingsPage() {
   const [editingMinimax, setEditingMinimax] = useState(false);
   const [savingMinimax, setSavingMinimax] = useState(false);
 
+  // ElevenLabs TTS Config
+  const [elevenlabsApiKey, setElevenlabsApiKey] = useState('');
+  const [maskedElevenlabsKey, setMaskedElevenlabsKey] = useState('');
+  const [hasElevenlabsKey, setHasElevenlabsKey] = useState(false);
+  const [editingElevenlabs, setEditingElevenlabs] = useState(false);
+  const [savingElevenlabs, setSavingElevenlabs] = useState(false);
+  const [testingElevenlabs, setTestingElevenlabs] = useState(false);
+  const [elevenlabsTestResult, setElevenlabsTestResult] = useState(null);
+
   // Gemini API Tier, Model Selection & Caching
   const [geminiApiTier, setGeminiApiTier] = useState('paid');
   const [geminiContextCaching, setGeminiContextCaching] = useState('on');
@@ -190,7 +199,7 @@ export default function SettingsPage() {
   }
 
   function collapseAllCards() {
-    const allKeys = ['gemini_config', 'pool_manager', 'minimax', 'cloud_storage', 'cloudflare_r2', 'google_workspace', 'kb', 'glabs_webhook', 'marketplace_scraper', 'facebook_page', 'repliz_config'];
+    const allKeys = ['gemini_config', 'pool_manager', 'minimax', 'elevenlabs', 'cloud_storage', 'cloudflare_r2', 'google_workspace', 'kb', 'glabs_webhook', 'marketplace_scraper', 'facebook_page', 'repliz_config'];
     const next = {};
     allKeys.forEach(k => next[k] = true);
     setCollapsedCards(next);
@@ -279,6 +288,8 @@ export default function SettingsPage() {
       setHasKey(data.data.has_api_key);
       setMaskedMinimaxKey(data.data.minimax_api_key || '');
       setHasMinimaxKey(data.data.has_minimax_key);
+      setMaskedElevenlabsKey(data.data.elevenlabs_api_key || '');
+      setHasElevenlabsKey(data.data.has_elevenlabs_key);
       setMaskedWebhookKey(data.data.webhook_api_key || '');
       setHasWebhookKey(data.data.has_webhook_key);
       setWebhookHost(data.data.webhook_host || '100.117.59.92');
@@ -662,6 +673,55 @@ export default function SettingsPage() {
       showToast(e.message, 'error');
     }
     setSavingMinimax(false);
+  }
+
+  async function saveElevenlabsSettings() {
+    if (!elevenlabsApiKey.trim()) return;
+    setSavingElevenlabs(true);
+    try {
+      const res = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ elevenlabs_api_key: elevenlabsApiKey }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('ElevenLabs API Key berhasil disimpan untuk tenant ini');
+        setElevenlabsApiKey('');
+        setEditingElevenlabs(false);
+        fetchSettings();
+      } else {
+        showToast(data.error, 'error');
+      }
+    } catch (e) {
+      showToast(e.message, 'error');
+    }
+    setSavingElevenlabs(false);
+  }
+
+  async function testElevenlabsConnection() {
+    setTestingElevenlabs(true);
+    setElevenlabsTestResult(null);
+    try {
+      const res = await fetch('/api/settings/test-elevenlabs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          api_key: elevenlabsApiKey.trim() || undefined,
+          use_stored: !elevenlabsApiKey.trim()
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setElevenlabsTestResult(data);
+        showToast('Koneksi ElevenLabs berhasil!');
+      } else {
+        showToast(data.error || 'Gagal menguji ElevenLabs API', 'error');
+      }
+    } catch (e) {
+      showToast(e.message, 'error');
+    }
+    setTestingElevenlabs(false);
   }
 
   async function saveGeminiSettings() {
@@ -1832,6 +1892,82 @@ export default function SettingsPage() {
                   {savingMinimax ? '⏳ Saving...' : '💾 Save MiniMax Config'}
                 </button>
               </div>
+            </div>
+          ))}
+
+          {/* 3B. CARD: ElevenLabs TTS AI Configuration */}
+          {renderCollapsibleCard('elevenlabs', 'ai', 'ElevenLabs TTS AI Configuration', '🔊', (
+            <div>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '14px' }}>
+                Setiap tenant menginput API Key ElevenLabs masing-masing. Terisolasi ketat pada <code>tenant_settings</code> (Zero Data Leakage).
+              </p>
+              <div className="form-group">
+                <label className="form-label">ElevenLabs API Key</label>
+                {hasElevenlabsKey && !editingElevenlabs ? (
+                  <div>
+                    <div className="api-key-group">
+                      <div className="form-input" style={{ display: 'flex', alignItems: 'center', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', fontSize: '0.82rem', cursor: 'default' }}>
+                        {maskedElevenlabsKey}
+                      </div>
+                      <button className="btn btn-secondary" onClick={() => { setEditingElevenlabs(true); setElevenlabsApiKey(''); }}>✏️ Ganti</button>
+                    </div>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--status-success)', marginTop: '6px' }}>✓ ElevenLabs API Key aktif tersimpan untuk tenant ini</p>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="api-key-group">
+                      <input
+                        type="password"
+                        className="form-input"
+                        placeholder="Masukkan ElevenLabs API Key (sk_...)"
+                        value={elevenlabsApiKey}
+                        onChange={e => setElevenlabsApiKey(e.target.value)}
+                        autoFocus={editingElevenlabs}
+                      />
+                      {hasElevenlabsKey && <button className="btn btn-secondary" onClick={() => { setEditingElevenlabs(false); setElevenlabsApiKey(''); }}>Batal</button>}
+                    </div>
+                    {hasElevenlabsKey && <p style={{ fontSize: '0.75rem', color: 'var(--status-warning)', marginTop: '6px' }}>⚠ Masukkan key baru untuk mengganti yang lama</p>}
+                  </div>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginTop: '16px' }}>
+                <button
+                  className="btn btn-primary"
+                  onClick={saveElevenlabsSettings}
+                  disabled={savingElevenlabs || !elevenlabsApiKey.trim()}
+                >
+                  {savingElevenlabs ? '⏳ Saving...' : '💾 Save ElevenLabs Config'}
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={testElevenlabsConnection}
+                  disabled={testingElevenlabs || (!hasElevenlabsKey && !elevenlabsApiKey.trim())}
+                >
+                  {testingElevenlabs ? '⏳ Menguji...' : '⚡ Uji Koneksi API'}
+                </button>
+              </div>
+
+              {elevenlabsTestResult && (
+                <div style={{ marginTop: '14px', background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm, 8px)', padding: '12px 14px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)' }}>📊 Status Kuota ElevenLabs</span>
+                    <span style={{ fontSize: '0.72rem', padding: '2px 8px', borderRadius: 4, background: 'var(--status-info-soft)', color: 'var(--status-info)', fontWeight: 700 }}>
+                      Tier: {elevenlabsTestResult.tier}
+                    </span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, fontSize: '0.78rem' }}>
+                    <div>
+                      <span style={{ color: 'var(--text-muted)' }}>Karakter Terpakai: </span>
+                      <strong style={{ color: 'var(--text-primary)' }}>{elevenlabsTestResult.character_count?.toLocaleString()}</strong>
+                    </div>
+                    <div>
+                      <span style={{ color: 'var(--text-muted)' }}>Batas Karakter: </span>
+                      <strong style={{ color: 'var(--status-success)' }}>{elevenlabsTestResult.character_limit?.toLocaleString()}</strong>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
 

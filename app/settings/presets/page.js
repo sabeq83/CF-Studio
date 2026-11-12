@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/Sidebar';
 import VisualIdentitySelector from '../../components/VisualIdentitySelector';
 import { getWordsPerClipOptions, getDefaultWordsPerClip, VIDEO_MODELS } from '@/lib/words-per-clip-presets';
-import { GEMINI_VOICES, MINIMAX_VOICES, MINIMAX_ENGLISH_VOICES } from '@/lib/voice-constants';
+import { GEMINI_VOICES, MINIMAX_VOICES, MINIMAX_ENGLISH_VOICES, ELEVENLABS_ID_VOICES, ELEVENLABS_EN_VOICES, ELEVENLABS_MODELS } from '@/lib/voice-constants';
 import { GOOGLE_VOICE_PERSONAS } from '@/lib/veo-native-audio';
 
 const initialForm = {
@@ -66,6 +66,10 @@ const initialForm = {
   voice_speed: 1.0,
   voice_volume: 1.0,
   tts_model_quality: 'speech-2.8-turbo',
+  elevenlabs_model: 'eleven_multilingual_v2',
+  elevenlabs_stability: 0.50,
+  elevenlabs_similarity_boost: 0.75,
+  elevenlabs_custom_voice_id: '',
   enable_glabs: true,
   enable_ffmpeg: true,
   ffmpeg_sync_option: 'smart_sync',
@@ -152,6 +156,10 @@ function mapPresetToForm(p) {
     voice_speed: Number(bs.voice_speed ?? 1.0),
     voice_volume: Number(bs.voice_volume ?? 1.0),
     tts_model_quality: bs.tts_model_quality || 'speech-2.8-turbo',
+    elevenlabs_model: bs.elevenlabs_model || wf.elevenlabs_model || 'eleven_multilingual_v2',
+    elevenlabs_stability: Number(bs.elevenlabs_stability ?? wf.elevenlabs_stability ?? 0.50),
+    elevenlabs_similarity_boost: Number(bs.elevenlabs_similarity_boost ?? wf.elevenlabs_similarity_boost ?? 0.75),
+    elevenlabs_custom_voice_id: bs.elevenlabs_custom_voice_id || wf.elevenlabs_custom_voice_id || '',
     enable_glabs: Boolean(wf.enable_glabs),
     enable_ffmpeg: Boolean(wf.enable_ffmpeg),
     ffmpeg_sync_option: wf.ffmpeg_sync_option || 'smart_sync',
@@ -191,6 +199,10 @@ function mapFormToPayload(f) {
         voice_speed: Number(f.voice_speed),
         voice_volume: Number(f.voice_volume),
         tts_model_quality: f.tts_model_quality,
+        elevenlabs_model: f.elevenlabs_model || 'eleven_multilingual_v2',
+        elevenlabs_stability: Number(f.elevenlabs_stability ?? 0.50),
+        elevenlabs_similarity_boost: Number(f.elevenlabs_similarity_boost ?? 0.75),
+        elevenlabs_custom_voice_id: f.elevenlabs_custom_voice_id || '',
         target_language: f.target_language,
         target_demographic: f.target_demographic,
         target_demographic_custom: f.target_demographic_custom || '',
@@ -239,6 +251,12 @@ function mapFormToPayload(f) {
         enable_native_ambience: Boolean(f.enable_native_ambience),
         anti_music_guardrail: Boolean(f.anti_music_guardrail),
         enable_tts: Boolean(f.enable_tts),
+        voice_provider: f.voice_provider,
+        voice_persona: f.voice_persona,
+        elevenlabs_model: f.elevenlabs_model || 'eleven_multilingual_v2',
+        elevenlabs_stability: Number(f.elevenlabs_stability ?? 0.50),
+        elevenlabs_similarity_boost: Number(f.elevenlabs_similarity_boost ?? 0.75),
+        elevenlabs_custom_voice_id: f.elevenlabs_custom_voice_id || '',
         enable_glabs: Boolean(f.enable_glabs),
         enable_ffmpeg: Boolean(f.enable_ffmpeg),
         ffmpeg_sync_option: f.ffmpeg_sync_option || 'smart_sync',
@@ -377,6 +395,10 @@ export default function PresetsPage() {
   };
 
   const getVoices = () => {
+    if (form.voice_provider === 'elevenlabs') {
+      const isEn = String(form.target_language || '').toLowerCase().startsWith('en');
+      return isEn ? ELEVENLABS_EN_VOICES : ELEVENLABS_ID_VOICES;
+    }
     if (form.voice_provider === 'gemini') return GEMINI_VOICES;
     if (form.target_language === 'en-US') return MINIMAX_ENGLISH_VOICES;
     return MINIMAX_VOICES;
@@ -1237,9 +1259,18 @@ export default function PresetsPage() {
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 }}>
                           <label className="form-label">
                             TTS Provider
-                            <select className="form-select" value={form.voice_provider} onChange={e => setForm({ ...form, voice_provider: e.target.value })}>
+                            <select className="form-select" value={form.voice_provider} onChange={e => {
+                              const newProvider = e.target.value;
+                              let newPersona = form.voice_persona;
+                              if (newProvider === 'elevenlabs') {
+                                const isEn = String(form.target_language || '').toLowerCase().startsWith('en');
+                                newPersona = isEn ? 'UgBBYS2sOqTuMpoF3BR0' : 'zmqLb9Ysr8fUvDD7hXK8';
+                              }
+                              setForm({ ...form, voice_provider: newProvider, voice_persona: newPersona });
+                            }}>
                               <option value="minimax">MiniMax VO Engine</option>
                               <option value="gemini">Gemini TTS Engine</option>
+                              <option value="elevenlabs">ElevenLabs TTS Engine (Ultra-Realistic)</option>
                             </select>
                           </label>
                           <label className="form-label">
@@ -1250,14 +1281,64 @@ export default function PresetsPage() {
                               ))}
                             </select>
                           </label>
-                          <label className="form-label">
-                            TTS Model Quality
-                            <select className="form-select" value={form.tts_model_quality} onChange={e => setForm({ ...form, tts_model_quality: e.target.value })}>
-                              <option value="speech-2.8-turbo">Speech 2.8 Turbo</option>
-                              <option value="speech-2.8-standard">Speech 2.8 Standard</option>
-                            </select>
-                          </label>
+                          {form.voice_provider === 'elevenlabs' ? (
+                            <label className="form-label">
+                              ElevenLabs Model
+                              <select className="form-select" value={form.elevenlabs_model || 'eleven_multilingual_v2'} onChange={e => setForm({ ...form, elevenlabs_model: e.target.value })}>
+                                <option value="eleven_multilingual_v2">Multilingual v2 (Rekomendasi ID/EN)</option>
+                                <option value="eleven_turbo_v2_5">Turbo v2.5 (Ultra-Fast 300ms)</option>
+                                <option value="eleven_flash_v2_5">Flash v2.5 (Super Ringan)</option>
+                              </select>
+                            </label>
+                          ) : (
+                            <label className="form-label">
+                              TTS Model Quality
+                              <select className="form-select" value={form.tts_model_quality} onChange={e => setForm({ ...form, tts_model_quality: e.target.value })}>
+                                <option value="speech-2.8-turbo">Speech 2.8 Turbo</option>
+                                <option value="speech-2.8-standard">Speech 2.8 Standard</option>
+                              </select>
+                            </label>
+                          )}
                         </div>
+
+                        {form.voice_provider === 'elevenlabs' && (
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 }}>
+                            <label className="form-label">
+                              Custom Voice ID (VoiceLab)
+                              <input
+                                type="text"
+                                className="form-input"
+                                placeholder="Opsional: Voice ID Kloningan"
+                                value={form.elevenlabs_custom_voice_id || ''}
+                                onChange={e => setForm({ ...form, elevenlabs_custom_voice_id: e.target.value })}
+                              />
+                            </label>
+                            <label className="form-label">
+                              Voice Stability ({form.elevenlabs_stability ?? 0.50})
+                              <input
+                                type="range"
+                                min="0.0"
+                                max="1.0"
+                                step="0.05"
+                                value={form.elevenlabs_stability ?? 0.50}
+                                onChange={e => setForm({ ...form, elevenlabs_stability: parseFloat(e.target.value) })}
+                                style={{ width: '100%' }}
+                              />
+                            </label>
+                            <label className="form-label">
+                              Similarity Boost ({form.elevenlabs_similarity_boost ?? 0.75})
+                              <input
+                                type="range"
+                                min="0.0"
+                                max="1.0"
+                                step="0.05"
+                                value={form.elevenlabs_similarity_boost ?? 0.75}
+                                onChange={e => setForm({ ...form, elevenlabs_similarity_boost: parseFloat(e.target.value) })}
+                                style={{ width: '100%' }}
+                              />
+                            </label>
+                          </div>
+                        )}
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                           <label className="form-label">
                             Voice Speed ({form.voice_speed}x)

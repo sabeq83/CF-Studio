@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.42.0 — Integrasi ElevenLabs TTS Engine untuk Multi-Tenant Settings dan Operator Presets (12/11/2026)
+- Isolasi kredensial elevenlabs_api_key per-tenant di settings dengan zero leakage
+- Katalog 28 voice persona resmi (14 Indonesia & 14 English) dengan fine-tuning sliders
+- Modul pemanggil API ElevenLabs TTS di lib/elevenlabs-tts.js dan koneksi ke pipeline scheduler
+- Antarmuka kartu konfigurasi dan uji koneksi API di settings serta editor preset
+
 ## V2.41.4 — Add Searchable Content Planner Picker and Consumed Status Badges to OPC Ingest Modal (12/11/2026)
 - Searchable Content Planner Drawer with real-time title and brand query filtering
 - Status badges distinguishing Belum Dipakai (Ready) vs Sudah Terpakai (Consumed)
