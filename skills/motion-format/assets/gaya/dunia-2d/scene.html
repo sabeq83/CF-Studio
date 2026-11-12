@@ -1,0 +1,717 @@
+<!--@TITLE Dunia 2D Bertekstur — contoh: Bromo, gunung di tengah lautan pasir-->
+<!--@RASIO 9:16-->
+<!--@HEAD-->
+<!-- =====================================================================================
+  GAYA "DUNIA 2D BERTEKSTUR" · contoh adegan pembuka 9,6 dtk (9:16)
+  Dunia berlapis digambar ulang SETIAP frame di <canvas>. Tiga tombol utama (blok [1]):
+    VARIAN  = CARA MELUKIS : 'anime' | 'noir' | 'catair' | 'ukiran'
+    SUASANA = PALET+CAHAYA : anime → 'fajar' | 'siang' | 'malam' · noir → 'malam'
+                             catair → 'pagi' | 'siang' · ukiran → 'kertas'
+    DIAGRAM = true → contoh "diagram di dalam dunia" (berkas cahaya, molekul, partikel, panah)
+  Coba di browser: index.html?v=anime&s=siang · ?v=noir · ?diagram=1&s=siang
+  Cari blok dengan teks penanda, BUKAN nomor baris:
+    [1] PILIH GAYA         [2] PALET SIAP PAKAI     [3] ALAT WARNA & NOISE
+    [4] TEKSTUR & KUAS     [5] BENTUK GENERIK       [6] DAFTAR DUNIA  ← ganti ini untuk topik baru
+    [7] KAMERA             [8] GAMBAR & PASCA       [9] DIAGRAM DI DALAM DUNIA
+    [10] TEKS              [11] SCENE
+  Topik baru biasanya cukup: ubah [6] (lapisan apa saja, warna, posisi), teks [10], kamera [7].
+  Blok [3] [4] [5] [8] [9] dipakai apa adanya.
+===================================================================================== -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@800&family=Zen+Maru+Gothic:wght@700&family=Eczar:wght@800&family=Bitter:wght@800&family=Gilda+Display&family=Alegreya+Sans:wght@800&family=IM+Fell+English+SC&family=Spectral:wght@700&display=swap">
+<style>
+#stage{background:#000}
+#dunia{position:absolute;inset:0}
+.kicker,.judul{position:absolute;left:0;width:100%;text-align:center;opacity:0}
+.kicker{font-size:34px;letter-spacing:.55em;text-indent:.55em}
+.judul{line-height:.98}
+.judul .j1{display:block;font-size:86px}
+.judul .j2{display:block;font-size:148px;margin-top:14px}
+/* anime: serif mincho hangat */
+.v-anime .kicker{font-family:'Zen Maru Gothic';color:#FFE1B8;text-shadow:0 2px 10px rgba(60,20,60,.6)}
+.v-anime .judul{font-family:'Shippori Mincho B1';font-weight:800;color:#FFF5E6;
+  text-shadow:0 3px 0 rgba(70,30,70,.45),0 6px 22px rgba(50,20,60,.7),0 0 70px rgba(255,170,120,.45)}
+.v-anime .judul .j2{color:#FFD889}
+.s-siang.v-anime .kicker{color:#FFFFFF;text-shadow:0 2px 8px rgba(10,40,90,.7)}
+.s-siang.v-anime .judul{color:#FFFFFF;text-shadow:0 3px 0 rgba(15,45,100,.55),0 8px 26px rgba(10,40,90,.65)}
+.s-siang.v-anime .judul .j2{color:#FFE27A}
+.s-malam.v-anime .judul{text-shadow:0 3px 0 rgba(0,0,0,.5),0 0 50px rgba(140,160,255,.45)}
+/* noir: slab tebal, putih dingin + bayangan tinta */
+.v-noir .kicker{font:800 32px 'Bitter';color:#C3D0DC}
+.v-noir .judul{font-family:'Eczar';font-weight:800;color:#EEF2F5;text-shadow:6px 7px 0 #04060B,0 0 40px rgba(0,0,0,.8)}
+.v-noir .judul .j2{color:#FFC84A}
+/* cat air: display serif tinta di kertas */
+.v-catair .kicker{font:800 32px 'Alegreya Sans';color:#5B77AE}
+.v-catair .judul{font-family:'Gilda Display';color:#2B2B35;text-shadow:0 0 18px #F4EFE4,0 0 40px #F4EFE4}
+.v-catair .judul .j2{color:#A4553A}
+/* ukiran: huruf cetak lama */
+.v-ukiran .kicker{font:700 32px 'Spectral';color:#B5442A}
+.v-ukiran .judul{font-family:'IM Fell English SC';color:#2B1D14;text-shadow:0 0 14px #E9DCC0,0 0 30px #E9DCC0}
+.v-ukiran .judul .j2{color:#B5442A}
+/* subtitle 'pil' diubah jadi kotak sesuai varian (mesin memberi gaya inline → !important) */
+.v-noir #mfSub .sf>span{background:#EEF2F5!important;border:5px solid #04060B;border-radius:0!important;
+  box-shadow:11px 11px 0 #04060B;transform:rotate(-.8deg)}
+.v-noir #mfSub .sw[style*="color"]{background:#FFC84A;color:#04060B!important;padding:0 .1em}
+.v-catair #mfSub .sf>span{background:rgba(251,247,238,.93)!important;border-radius:6px 18px 8px 16px!important;
+  box-shadow:0 6px 18px rgba(60,50,40,.25)}
+.v-ukiran #mfSub .sf>span{background:#F1E6CC!important;border-radius:0!important;outline:3px solid #2B1D14;
+  outline-offset:-10px;box-shadow:0 0 0 3px #2B1D14}
+.v-catair #mfLab text,.v-ukiran #mfLab text{stroke:rgba(240,232,214,.92)!important}
+</style>
+<!--@BODY-->
+<div id="dunia"></div>
+<div class="kicker" id="tKick">JAWA TIMUR</div>
+<div class="judul" id="tJudul"><span class="j1">Gunung di tengah</span><span class="j2">lautan pasir</span></div>
+<!--@SCRIPT-->
+/* ==== [1] PILIH GAYA ==== */
+const DIAGRAM = q.has('diagram');                         // contoh diagram sains (blok [9]); proyek sains: true
+const VARIAN = q.get('v') || 'anime';                     // cara melukis
+const SUASANA = q.get('s') || (DIAGRAM ? 'siang' : 'fajar');  // palet + cahaya (lihat [2])
+
+/* ==== [2] PALET SIAP PAKAI ==== */
+// Kunci warna bersifat UMUM (dipakai di [6] lewat nama): langit · puncakJauh · bukitJauh · bukitTengah · dataran
+// garisDataran · air · subjekA · subjekB · alur · lubang · dekat · depan · asap · kabut · awan/awanG
+// Cahaya: surya [x,y,r] (x < 540 = cahaya dari kiri) · sinarKuat · mekar · noda · vin · bulan · bintang
+// Diagram ([9]): dgCahaya · dgPartikel · dgPanah · dgGaris (garis tepi gelap supaya terbaca di langit pucat)
+const PALET = {
+  'anime-fajar': {langit: [[0, '#1E2753'], [.27, '#4A4C8C'], [.47, '#B97498'], [.6, '#F2A47C'], [.7, '#FFDDA4']],
+    surya: [205, 700, 62], inti: '#FFF7E0', halo: '#FFB877', sinar: '#FFD6A0', sinarKuat: 1.1, mekar: .32, noda: .5,
+    vin: 'rgba(34,14,44,.6)', awan: '#FFD9BE', awanG: '#7A5C92',
+    puncakJauh: '#8A84B3', bukitJauh: '#6F6A9D', bukitTengah: '#55598B', dataran: '#A48A94', garisDataran: '#F6CFA6',
+    air: '#6C6A9C', subjekA: '#5D5677', lubang: '#2A2640', subjekB: '#44556B', alur: '#2B364A',
+    dekat: '#25263F', depan: '#121325', asap: '#F6EAE6', kabut: '#F6D2C2', tinta: '#121325', rim: '#FFBF86',
+    aksen: '#FFD27A', lampu: '#FFD27A', dgCahaya: '#FFF1C9', dgPartikel: '#3D7BFF', dgPanah: '#FFD23F', dgGaris: '#1B1430'},
+  'anime-siang': {langit: [[0, '#2A64B8'], [.3, '#4D8FD6'], [.55, '#93C4EC'], [.7, '#DDF0F8']],
+    surya: [215, 330, 56], inti: '#FFFFF4', halo: '#FFF3C4', sinar: '#FFF6D8', sinarKuat: .55, mekar: .16, noda: .3,
+    vin: 'rgba(10,40,80,.32)', awan: '#FFFFFF', awanG: '#8FAACB',
+    puncakJauh: '#8DAED2', bukitJauh: '#7EA6C6', bukitTengah: '#5E93A6', dataran: '#C9B48F', garisDataran: '#F2E2BE',
+    air: '#3F86C4', subjekA: '#7D7471', lubang: '#3A302C', subjekB: '#4E7A5E', alur: '#2F5240',
+    dekat: '#2F5D45', depan: '#1C3828', asap: '#FFFFFF', kabut: '#E6F2F8', tinta: '#14261C', rim: '#FFF4D2',
+    aksen: '#FFD23F', lampu: '#FFD23F', dgCahaya: '#FFF4B8', dgPartikel: '#1E56FF', dgPanah: '#FF7A1A', dgGaris: '#0B1B3A'},
+  'anime-malam': {langit: [[0, '#070B1E'], [.3, '#121B3F'], [.55, '#26305E'], [.7, '#3E4878']], bulan: 1, bintang: 1,
+    surya: [800, 380, 44], inti: '#F4F1E0', halo: '#8EA2D8', sinar: '#B8C6F0', sinarKuat: .4, mekar: .3, noda: .4,
+    vin: 'rgba(0,0,10,.65)', awan: '#6E7CB0', awanG: '#1A2142',
+    puncakJauh: '#3A4475', bukitJauh: '#2D3664', bukitTengah: '#222A52', dataran: '#3A4068', garisDataran: '#8C9AD0',
+    air: '#1E2752', subjekA: '#262B4C', lubang: '#0B0E1E', subjekB: '#1B2342', alur: '#0D1128',
+    dekat: '#10142C', depan: '#070918', asap: '#C8CFEA', kabut: '#5A6699', tinta: '#070918', rim: '#A9B8F0',
+    aksen: '#FFC870', lampu: '#FFC870', dgCahaya: '#FFE6A8', dgPartikel: '#7FA8FF', dgPanah: '#FFC870', dgGaris: '#05070F'},
+  'noir-malam': {langit: [[0, '#04060B'], [.3, '#0A1426'], [.55, '#11223B'], [.7, '#1E2F49']], bulan: 1, bintang: 1,
+    surya: [235, 470, 46], inti: '#EEF2F5', halo: '#6A83A0', sinar: '#9FB4CC', sinarKuat: .5,
+    vin: 'rgba(0,0,0,.72)', awan: '#8FA6C0', awanG: '#16233A',
+    puncakJauh: '#2A3A54', bukitJauh: '#1D2B42', bukitTengah: '#142034', dataran: '#3B4F6C', garisDataran: '#8AA2C0',
+    air: '#1B2A42', subjekA: '#101A2B', lubang: '#04060B', subjekB: '#0C1422', alur: '#04060B',
+    dekat: '#060A12', depan: '#020306', asap: '#B9C7D6', kabut: '#6A83A0', tinta: '#04060B', rim: '#8FA6C0',
+    aksen: '#FFC84A', lampu: '#FFC84A', dgCahaya: '#EEF2F5', dgPartikel: '#9FC0E8', dgPanah: '#FFC84A', dgGaris: '#04060B'},
+  'catair-pagi': {langit: [[0, '#7F9CC8'], [.42, '#BACBDF'], [.66, '#F2D3A6']], kertas: '#F4EFE4',
+    surya: [215, 660, 70], inti: '#F2C46A', halo: '#E9A85A', sinar: '#F2D3A6',
+    vin: 'rgba(120,80,60,.25)', awan: '#FCFAF4', awanG: '#AFBBD0',
+    puncakJauh: '#A6B3CC', bukitJauh: '#90A3C2', bukitTengah: '#7A8FB2', dataran: '#DCC29C', garisDataran: '#B98F6A',
+    air: '#7FA0C8', subjekA: '#9A8781', lubang: '#5A4A4A', subjekB: '#6D8C7B', alur: '#3F5D53',
+    dekat: '#3D4C66', depan: '#2B2B35', asap: '#E4E2E0', kabut: '#FBF8F1', tinta: '#2B2B35', rim: '#F4E2B8',
+    aksen: '#A4553A', lampu: '#D9783E', dgCahaya: '#F2C46A', dgPartikel: '#3E64B0', dgPanah: '#A4553A', dgGaris: '#2B2B35'},
+  'catair-siang': {langit: [[0, '#5D86C4'], [.45, '#A9C4E2'], [.7, '#E6EEF2']], kertas: '#F5F1E8',
+    surya: [215, 360, 60], inti: '#F7D77A', halo: '#F2C46A', sinar: '#F7E6B0',
+    vin: 'rgba(80,90,110,.2)', awan: '#FFFFFF', awanG: '#9FB3D0',
+    puncakJauh: '#9DB2D0', bukitJauh: '#8AA8C4', bukitTengah: '#6E97A6', dataran: '#D8C49C', garisDataran: '#B7966C',
+    air: '#5C8CC4', subjekA: '#9A8E86', lubang: '#4F443F', subjekB: '#6E9A6E', alur: '#3E6447',
+    dekat: '#3F6450', depan: '#26322C', asap: '#E8E8E8', kabut: '#FAFAF6', tinta: '#26322C', rim: '#FFF2C8',
+    aksen: '#B5523A', lampu: '#D9783E', dgCahaya: '#F2C46A', dgPartikel: '#2E58B8', dgPanah: '#C0502E', dgGaris: '#26322C'},
+  'ukiran-kertas': {kertas: '#E9DCC0', surya: [215, 680, 60], inti: '#B5442A', halo: '#B5442A', sinar: '#B5442A',
+    vin: 'rgba(80,45,15,.5)', awan: '#F3E9D2', awanG: '#9C8E78',
+    puncakJauh: '#C2B8A4', bukitJauh: '#ADA28E', bukitTengah: '#8E8272', dataran: '#D2C7B0', garisDataran: '#8E8272',
+    air: '#B3A891', subjekA: '#706559', lubang: '#2B1D14', subjekB: '#5C5247', alur: '#2B1D14',
+    dekat: '#3B3129', depan: '#2A2019', asap: '#F3E9D2', kabut: '#E9DCC0', tinta: '#2B1D14', rim: '#E9DCC0',
+    aksen: '#B5442A', lampu: '#B5442A', dgCahaya: '#B5442A', dgPartikel: '#2B1D14', dgPanah: '#B5442A', dgGaris: '#2B1D14'}
+};
+const BAWAAN = {anime: 'fajar', noir: 'malam', catair: 'pagi', ukiran: 'kertas'};
+const V = VARIAN, PAL = PALET[V + '-' + SUASANA] || PALET[V + '-' + BAWAAN[V]];
+const MALAM = !!PAL.bulan, KERTAS = !!PAL.kertas;
+const KIRI = PAL.surya[0] < 540, RX = KIRI ? 14 : -14;        // arah cahaya → sisi rim & sisi bayangan
+$('#stage').classList.add('v-' + V, 's-' + (PALET[V + '-' + SUASANA] ? SUASANA : BAWAAN[V]));
+
+/* ==== [3] ALAT WARNA & NOISE ==== */
+const hx = h => { h = h.replace('#', '');
+  return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]; };
+const rgba = (h, a) => { const c = hx(h); return `rgba(${c[0]},${c[1]},${c[2]},${a})`; };
+const mix = (a, b, k) => { const A = hx(a), B = hx(b);
+  const f = i => Math.round(A[i] + (B[i] - A[i]) * k).toString(16).padStart(2, '0'); return '#' + f(0) + f(1) + f(2); };
+const lum = h => { const c = hx(h); return (c[0] * .3 + c[1] * .59 + c[2] * .11) / 255; };
+const vn = (x, s = 0) => { const i = Math.floor(x), f = x - i, u = f * f * (3 - 2 * f);
+  return lerp(hash(i + s * 71.3), hash(i + 1 + s * 71.3), u); };
+const fbm = (x, s = 0) => vn(x, s) * .55 + vn(x * 2.1, s + 3) * .27 + vn(x * 4.3, s + 7) * .13 + vn(x * 9.1, s + 11) * .05;
+const frac = x => x - Math.floor(x);
+const TAU = Math.PI * 2;
+const warnaDari = w => PAL[w] || w;                       // 'dekat' → PAL.dekat · '#123456' tetap
+
+/* ==== [4] TEKSTUR & KUAS (dipakai ulang; jangan diubah) ==== */
+// kertas(): kertas berserat + bercak foxing, dipanggang sekali, ditimpa 'multiply' di pasca.
+function kertas(seed, base, foxing = .5) {
+  const c = kanvas(540, 960), x = c.getContext('2d'), r = rng(seed);
+  x.fillStyle = base; x.fillRect(0, 0, 540, 960);
+  const lo = kanvas(30, 54), lx = lo.getContext('2d'), d = lx.createImageData(30, 54);
+  for (let i = 0; i < d.data.length; i += 4) {
+    const v = 200 + r() * 55; d.data[i] = d.data[i + 1] = v; d.data[i + 2] = v - 12; d.data[i + 3] = 255; }
+  lx.putImageData(d, 0, 0); x.globalCompositeOperation = 'multiply'; x.globalAlpha = .35;
+  x.imageSmoothingQuality = 'high'; x.drawImage(lo, 0, 0, 540, 960);
+  x.globalAlpha = .07; x.strokeStyle = '#6b5638'; x.lineWidth = .7;                       // serat
+  for (let i = 0; i < 700; i++) {
+    const a = r() * 540, b = r() * 960, l = 6 + r() * 22, g = r() * TAU; x.beginPath(); x.moveTo(a, b);
+    x.quadraticCurveTo(a + Math.cos(g) * l, b + Math.sin(g) * l * .3, a + Math.cos(g + .4) * l * 2, b + Math.sin(g + .4) * l * .6);
+    x.stroke(); }
+  x.globalAlpha = 1;
+  for (let i = 0; i < 30 * foxing; i++) {
+    const a = r() * 540, b = r() * 960, rr = 3 + r() * 16, g = x.createRadialGradient(a, b, 0, a, b, rr);
+    g.addColorStop(0, 'rgba(150,100,50,.22)'); g.addColorStop(1, 'rgba(150,100,50,0)');
+    x.fillStyle = g; x.fillRect(a - rr, b - rr, rr * 2, rr * 2); }
+  const im = x.getImageData(0, 0, 540, 960), p = im.data;
+  for (let i = 0; i < p.length; i += 4) { const v = (r() - .5) * 16; p[i] += v; p[i + 1] += v; p[i + 2] += v; }
+  x.putImageData(im, 0, 0); return c;
+}
+// noda(): bercak pigmen abu-putih (granulasi cat air / belang kuas). Ditimpa 'multiply' / 'soft-light'.
+function noda(seed) {
+  const c = kanvas(512, 512), x = c.getContext('2d'), r = rng(seed);
+  x.fillStyle = '#fff'; x.fillRect(0, 0, 512, 512);
+  [[16, .5], [64, .35], [256, .25]].forEach(([n, a]) => {
+    const s = kanvas(n, n), sx = s.getContext('2d'), d = sx.createImageData(n, n);
+    for (let i = 0; i < d.data.length; i += 4) {
+      const v = 150 + r() * 105; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; }
+    sx.putImageData(d, 0, 0); x.globalCompositeOperation = 'multiply'; x.globalAlpha = a; x.drawImage(s, 0, 0, 512, 512); });
+  return c;
+}
+// kuas(): garis tinta bertirus (lebar berubah = tekanan). pts = [[x,y],...]
+function kuas(c, pts, w, o = {}) {
+  const n = pts.length; if (n < 2) return; const A = [], B = [], sd = o.sd || 1;
+  for (let i = 0; i < n; i++) {
+    const a = pts[Math.max(0, i - 1)], b = pts[Math.min(n - 1, i + 1)], dx = b[0] - a[0], dy = b[1] - a[1];
+    const m = Math.hypot(dx, dy) || 1, k = i / (n - 1), tir = o.tirus === false ? 1 : Math.min(1, k * 6, (1 - k) * 6);
+    const hw = w * .5 * (.25 + .75 * tir) * (.6 + .8 * vn(i * .18, sd));
+    A.push([pts[i][0] - dy / m * hw, pts[i][1] + dx / m * hw]); B.push([pts[i][0] + dy / m * hw, pts[i][1] - dx / m * hw]); }
+  c.beginPath(); c.moveTo(A[0][0], A[0][1]); A.forEach(p => c.lineTo(p[0], p[1]));
+  for (let i = n - 1; i >= 0; i--) c.lineTo(B[i][0], B[i][1]); c.closePath();
+  c.fillStyle = o.warna || PAL.tinta; c.globalAlpha = o.a ?? 1; c.fill(); c.globalAlpha = 1;
+}
+// arsir(): garis ukir sejajar (sedikit melengkung). nada 0 terang .. 1 gelap; >.5 diberi arah silang.
+function arsir(c, P, nada, sudut, bb, jarak = 7, bengkok = 18) {
+  if (nada < .05) return; c.save(); c.clip(P); c.strokeStyle = PAL.tinta; c.lineCap = 'round';
+  const cx = (bb[0] + bb[2]) / 2, cy = (bb[1] + bb[3]) / 2, R = Math.hypot(bb[2] - bb[0], bb[3] - bb[1]) / 2 + 10;
+  const lewat = (a, lw) => { c.lineWidth = lw; c.beginPath(); const ca = Math.cos(a), sa = Math.sin(a);
+    for (let s = -R; s <= R; s += jarak) { const px = cx - sa * s, py = cy + ca * s; c.moveTo(px - ca * R, py - sa * R);
+      c.quadraticCurveTo(px + sa * bengkok, py - ca * bengkok, px + ca * R, py + sa * R); }
+    c.stroke(); };
+  lewat(sudut, Math.min(jarak * .8, .35 + nada * jarak * .55));
+  if (nada > .5) lewat(sudut + 1.05, (nada - .5) * jarak * .7);
+  c.restore();
+}
+// rasterTitik(): titik cetak heksagonal dari luminans layar; terbesar di nada tengah.
+const RT = kanvas(156, 276), RTX = RT.getContext('2d', {willReadFrequently: true});
+function rasterTitik(c, sel = 7, warna = 'rgb(58,70,96)', kuat = .55) {
+  const w = Math.ceil(W / sel), h = Math.ceil(H / sel); RTX.drawImage(c.canvas, 0, 0, w, h);
+  const d = RTX.getImageData(0, 0, w, h).data;
+  c.save(); c.globalCompositeOperation = 'multiply'; c.globalAlpha = kuat; c.fillStyle = warna; c.beginPath();
+  for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) {
+    const k = (j * w + i) * 4, L = (d[k] * .3 + d[k + 1] * .59 + d[k + 2] * .11) / 255, f = 4 * L * (1 - L);
+    if (f < .08) continue; const r = sel * .62 * Math.sqrt(f), x = i * sel + (j & 1 ? sel / 2 : 0), y = j * sel;
+    c.moveTo(x + r, y); c.arc(x, y, r, 0, TAU); }
+  c.fill(); c.restore();
+}
+// mekar(): bloom murah (salinan kecil diburamkan lalu 'screen').
+const MK = kanvas(216, 384), MKX = MK.getContext('2d');
+function mekar(c, kuat = .3, blur = 6) {
+  MKX.filter = 'none'; MKX.clearRect(0, 0, 216, 384); MKX.filter = `blur(${blur}px)`; MKX.drawImage(c.canvas, 0, 0, 216, 384);
+  c.save(); c.globalCompositeOperation = 'screen'; c.globalAlpha = kuat; c.drawImage(MK, 0, 0, W, H); c.restore(); }
+// sinarDewa(): berkas cahaya dari sumber (koordinat layar), arah mengikuti sisi cahaya.
+function sinarDewa(c, x, y, t, warna, kuat, a0 = .15, a1 = 1.45, n = 15, sd = 3) {
+  if (kuat <= 0) return; c.save(); c.globalCompositeOperation = 'screen';
+  for (let i = 0; i < n; i++) {
+    let a = lerp(a0, a1, (i + hash(i + sd)) / n) + nz(t * .25, i + sd) * .035; if (!KIRI) a = Math.PI - a;
+    const w = .01 + hash(i * 3 + sd) * .03, L = 1900, k = kuat * (.35 + .65 * hash(i * 7 + sd)) * (.75 + .25 * Math.sin(t * .8 + i));
+    const g = c.createLinearGradient(x, y, x + Math.cos(a) * L, y + Math.sin(a) * L);
+    g.addColorStop(0, rgba(warna, 0)); g.addColorStop(.06, rgba(warna, .2 * k));
+    g.addColorStop(.5, rgba(warna, .045 * k)); g.addColorStop(1, rgba(warna, 0));
+    c.fillStyle = g; c.beginPath(); c.moveTo(x, y); c.lineTo(x + Math.cos(a - w) * L, y + Math.sin(a - w) * L);
+    c.lineTo(x + Math.cos(a + w) * L, y + Math.sin(a + w) * L); c.fill(); }
+  c.restore();
+}
+// pendar(): cahaya bulat. Dicatat ke GL, digambar SETELAH pasca supaya bersih. GLK meredupkan saat awan menutup.
+let GL = [], GLK = 1;
+function pendar(c, x, y, r, warna, a = 1, tetap) { const m = c.getTransform(), s = Math.hypot(m.a, m.b);
+  GL.push([m.a * x + m.c * y + m.e, m.b * x + m.d * y + m.f, r * s, warna, a * (tetap ? 1 : GLK)]); }
+function gambarPendar(c) { c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.globalCompositeOperation = KERTAS ? 'multiply' : 'screen';
+  GL.forEach(([x, y, r, w, a]) => { const g = c.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, rgba(KERTAS ? w : '#FFFFFF', a)); g.addColorStop(.18, rgba(w, a * .8)); g.addColorStop(1, rgba(w, 0));
+    c.fillStyle = g; c.fillRect(x - r, y - r, r * 2, r * 2); });
+  c.restore(); }
+// bantu(): gambar kelompok bentuk OPAK di kanvas bantu lalu tempel sekali dengan alpha → tanpa jahitan.
+const BUF = kanvas(W, H), BX = BUF.getContext('2d');
+function bantu(c, a, fn) { if (a <= .01) return;
+  BX.setTransform(1, 0, 0, 1, 0, 0); BX.globalAlpha = 1; BX.globalCompositeOperation = 'source-over'; BX.clearRect(0, 0, W, H);
+  BX.setTransform(c.getTransform()); fn(BX);
+  c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.globalAlpha = a; c.drawImage(BUF, 0, 0); c.restore(); }
+// kabut(): pita kabut bergradien + gumpalan hanyut.
+function kabut(c, y, h, warna, t, sd, a = 1, laju = 14) {
+  if (a <= 0) return; const g = c.createLinearGradient(0, y - h, 0, y + h);
+  g.addColorStop(0, rgba(warna, 0)); g.addColorStop(.5, rgba(warna, .5 * a)); g.addColorStop(1, rgba(warna, 0));
+  c.fillStyle = g; c.fillRect(-900, y - h, 3900, h * 2);
+  for (let k = 0; k < 9; k++) {
+    const w = 420 + hash(sd + k) * 520, x = frac(hash(sd * 3 + k) + t * laju * (.6 + hash(k + sd)) / 3900) * 3900 - 900;
+    const yy = y + (hash(k * 7 + sd) - .5) * h * .7;
+    c.save(); c.translate(x, yy); c.scale(1, .2); const rg = c.createRadialGradient(0, 0, 0, 0, 0, w / 2);
+    rg.addColorStop(0, rgba(warna, .42 * a)); rg.addColorStop(1, rgba(warna, 0)); c.fillStyle = rg; c.fillRect(-w / 2, -w / 2, w, w);
+    c.restore(); }
+}
+function vinyet(c, warna, dalam = .42) {
+  const g = c.createRadialGradient(W / 2, H * .48, H * dalam * .5, W / 2, H * .48, H * .78);
+  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, warna); c.fillStyle = g; c.fillRect(0, 0, W, H); }
+const bbOf = (pts, yb) => { let a = 1e9, b = 1e9, cc = -1e9, d = -1e9;
+  pts.forEach(p => { a = Math.min(a, p[0]); b = Math.min(b, p[1]); cc = Math.max(cc, p[0]); d = Math.max(d, p[1]); });
+  return [a, b, cc, Math.max(d, yb ?? d)]; };
+const NODA = noda(11), KTS = KERTAS ? kertas(5, PAL.kertas, V === 'ukiran' ? 1 : .3) : null;
+
+// cat(): "KUAS VARIAN" — melukis Path2D P berwarna col dengan cara varian aktif.
+//   o.rim 0..1 sisi terang ke arah cahaya · o.rimWarna · o.gelap [[x,y]..] poligon sisi bayangan
+//   o.garis titik punggung (garis tepi) · o.bb [x0,y0,x1,y1] kotak (arsir/noda/gradien) · o.pudar px|false
+//   o.awan true = volume awan · o.sudut arah arsir · o.jarak rapat arsir · o.lebar tebal tinta
+function cat(c, P, col, o = {}) {
+  if (V === 'anime' || V === 'noir') {
+    if (o.rim) { c.fillStyle = o.rimWarna || mix(col, PAL.rim, o.rim); c.fill(P);
+      c.save(); c.clip(P); c.translate(o.rx ?? RX, o.ry ?? 5); c.fillStyle = col; c.fill(P); c.restore(); }
+    else { c.fillStyle = col; c.fill(P); }
+    if (o.bb) { const b = o.bb, awan = o.awan, y0 = awan ? lerp(b[1], b[3], .3) : b[1] + 40;
+      const y1 = awan ? b[3] : b[1] + (o.pudar || 380), w = awan ? PAL.awanG : PAL.kabut, g = c.createLinearGradient(0, y0, 0, y1);
+      g.addColorStop(0, rgba(w, 0)); g.addColorStop(1, rgba(w, awan ? .55 : MALAM ? .16 : .3));
+      if (o.pudar !== false || awan) { c.save(); c.clip(P); c.fillStyle = g; c.fillRect(b[0] - 50, y0, b[2] - b[0] + 100, y1 - y0 + 2); c.restore(); } }
+    if (o.gelap) { c.save(); c.clip(P); c.fillStyle = rgba(MALAM ? '#000000' : PAL.tinta, V === 'noir' ? .45 : .28);
+      c.beginPath(); o.gelap.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.fill(); c.restore(); }
+    if (V === 'noir' && o.garis) kuas(c, o.garis, o.lebar ?? 6, {sd: o.sd});
+  } else if (V === 'catair') {
+    c.save(); c.globalAlpha = .86; c.fillStyle = col; c.fill(P); c.globalAlpha = .22; c.translate(4, -5); c.fill(P); c.restore();
+    if (o.bb && o.awan) { const b = o.bb, g = c.createLinearGradient(0, lerp(b[1], b[3], .35), 0, b[3]);
+      g.addColorStop(0, rgba(PAL.awanG, 0)); g.addColorStop(1, rgba(PAL.awanG, .7));
+      c.save(); c.clip(P); c.fillStyle = g; c.fill(P); c.restore(); }
+    else if (o.bb) { const b = o.bb; c.save(); c.clip(P); c.globalCompositeOperation = 'multiply'; c.globalAlpha = .55;
+      c.drawImage(NODA, b[0], b[1], Math.max(300, b[2] - b[0]), Math.max(300, b[3] - b[1]));
+      if (o.pudar !== false) { const g = c.createLinearGradient(0, b[1], 0, b[1] + (o.pudar || 420));
+        g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(1, rgba(PAL.kertas, .55));
+        c.globalCompositeOperation = 'source-over'; c.globalAlpha = 1; c.fillStyle = g; c.fill(P); }
+      c.restore(); }
+    if (o.garis) { c.save(); c.lineJoin = 'round'; c.strokeStyle = mix(col, '#2B2B35', .45);
+      [[9, .1], [2.4, .45]].forEach(([w, a]) => { c.lineWidth = w; c.globalAlpha = a; c.beginPath();
+        o.garis.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.stroke(); });
+      c.restore(); }
+  } else {                                                                     // ukiran
+    c.fillStyle = mix(PAL.kertas, col, .18); c.fill(P);
+    if (o.bb) arsir(c, P, Math.pow(1 - lum(col), 1.15) * 1.1, o.sudut ?? -.35, o.bb, o.jarak ?? 7);
+    if (o.garis) { c.save(); c.strokeStyle = PAL.tinta; c.lineWidth = o.lebar ? o.lebar * .5 : 2.6; c.lineJoin = 'round';
+      c.beginPath(); o.garis.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.stroke(); c.restore(); }
+  }
+}
+// gumpal(): awan/asap = gabungan lingkaran (satu Path2D). o.sy pipih · o.bayang · o.garisAwan (0 = tanpa garis)
+function gumpal(c, bulat, col, a = 1, o = {}) {
+  if (a <= .01) return; const P = new Path2D(), sy = o.sy || 1; let bb = [1e9, 1e9, -1e9, -1e9];
+  bulat.forEach(([x, y, r]) => { P.moveTo(x + r, y); P.ellipse(x, y, r, r * sy, 0, 0, TAU);
+    bb = [Math.min(bb[0], x - r), Math.min(bb[1], y - r * sy), Math.max(bb[2], x + r), Math.max(bb[3], y + r * sy)]; });
+  const dasar = (V === 'anime' || V === 'noir') ? mix(col, PAL.awanG, o.bayang ?? .45) : col;
+  c.save(); c.globalAlpha = a;
+  if (V === 'ukiran') { c.strokeStyle = PAL.tinta; c.lineWidth = o.garisAwan || 1.5; c.stroke(P); c.fillStyle = col; c.fill(P);
+    c.clip(P); arsir(c, P, .42, .25, bb, 6, 6); c.fillStyle = col; c.beginPath();            // arsir hanya di sabit bawah
+    bulat.forEach(([x, y, r]) => { c.moveTo(x + r * .92, y - r * sy * .3); c.ellipse(x, y - r * sy * .3, r * .92, r * sy * .9, 0, 0, TAU); });
+    c.fill(); }
+  else { if (V === 'noir' && o.garisAwan !== 0) { c.strokeStyle = PAL.tinta; c.lineWidth = (o.garisAwan ?? 4) * 1.4; c.stroke(P); }
+    cat(c, P, dasar, Object.assign({rim: 1, rimWarna: col, rx: RX * .7, ry: 18, bb, pudar: false, awan: true, sudut: .2, jarak: 8}, o)); }
+  c.restore();
+}
+
+/* ==== [5] BENTUK GENERIK (bukit, gunung, dataran, danau, kota, pohon, orang, asap) ==== */
+// Semua koordinat = koordinat lapisan saat kamera diam (layar 1080×1920). Lebar dibuat −900..2900 (aman untuk 16:9).
+function punggung(sd, y0, amp, fr, x0 = -900, x1 = 2900, st = 10, miring = 0) { const P = [];
+  for (let x = x0; x <= x1; x += st) P.push([x, y0 - amp * (fbm(x * fr, sd) - .45) * 2 + miring * (x - 540)]); return P; }
+function bentuk(pts, yb = 2700) { const P = new Path2D(); P.moveTo(pts[0][0], yb); pts.forEach(p => P.lineTo(p[0], p[1]));
+  P.lineTo(pts[pts.length - 1][0], yb); P.closePath(); return P; }
+// kerucut gunung: lereng cekung (cekung < 1), puncak bisa terpotong (kawah 0..0,3)
+function kerucut(cx, py, by, hw, ex, sd, kawah = 0, st = 6) { const P = [];
+  for (let x = cx - hw * 1.25; x <= cx + hw * 1.25; x += st) { const d = Math.abs(x - cx) / hw;
+    const y = d < kawah ? py + (fbm(x * .05, sd) - .5) * 10 : py + (by - py) * Math.pow(Math.min(1, (d - kawah) / (1 - kawah)), ex);
+    P.push([x, y + (fbm(x * .03, sd + 2) - .5) * 9 * Math.min(1, d * 3)]); }
+  return P; }
+const yPada = (pts, x) => { for (let i = 1; i < pts.length; i++) if (pts[i][0] >= x) { const a = pts[i - 1], b = pts[i];
+  return lerp(a[1], b[1], (x - a[0]) / (b[0] - a[0])); } return pts[pts.length - 1][1]; };
+const sekali = (L, k, fn) => L[k] || (L[k] = fn());           // geometri dihitung sekali per lapisan
+function pohon(c, o, t) {   // o: {x, y, h, s, jenis:'cemara'|'bulat', warna}
+  const {x, y, h, s} = o, ay = nz(t * .5, s) * .012, col = warnaDari(o.warna || 'dekat');
+  if (o.jenis === 'bulat') { c.fillStyle = col; c.fillRect(x - 5, y - h * .5, 10, h * .5);
+    const r = h * .22; gumpal(c, [[x, y - h * .62, r], [x - r * .8, y - h * .5, r * .75], [x + r * .8, y - h * .52, r * .8],
+      [x + nz(t * .4, s) * 3, y - h * .82, r * .8]], col, 1, {bayang: 0, rimWarna: mix(col, PAL.rim, .5), garisAwan: 2}); return; }
+  const P = new Path2D(); P.rect(x - 4, y - h * .9, 8, h * .9);
+  for (let j = 0; j < 8; j++) { const u = j / 8, ty = y - h * (.22 + .78 * u), w = h * (.24 * (1 - u * .8) + .03);
+    const sx = x + Math.sin(ay * 60 + j) * 2 + ay * h * u;
+    P.moveTo(sx - w, ty + h * .07); P.quadraticCurveTo(sx - w * .3, ty - h * .07, sx, ty - h * .09);
+    P.quadraticCurveTo(sx + w * .3, ty - h * .07, sx + w, ty + h * .07);
+    for (let k = 10; k >= 0; k--) P.lineTo(sx - w + w * 2 * k / 10, ty + h * .07 + (k % 2 ? h * .035 : 0) + Math.sin(k * 1.7 + j) * 3);
+    P.closePath(); }
+  cat(c, P, col, {rim: .55, rx: RX * .5, ry: 9, bb: [x - h * .3, y - h, x + h * .3, y], sudut: .9, jarak: 6});
+}
+function orang(c, x, y, s, t, o = {}) {   // siluet tampak belakang-samping, TANPA wajah. o.pose: 'berdiri'|'menunjuk'
+  const P = new Path2D(), b = Math.sin(t * 1.3) * 1.2, arah = o.hadap ?? 1;
+  const X = dx => x + dx * s * arah, Y = dy => y + dy * s;
+  P.arc(X(2), Y(-178) + b, 16 * s, 0, TAU);
+  P.moveTo(X(-22), Y(-150) + b); P.quadraticCurveTo(X(0), Y(-166) + b, X(24), Y(-150) + b);
+  P.lineTo(X(21), Y(-84)); P.lineTo(X(-20), Y(-84)); P.closePath();
+  P.moveTo(X(-38), Y(-148) + b); P.lineTo(X(-18), Y(-148) + b); P.lineTo(X(-18), Y(-96)); P.lineTo(X(-38), Y(-96)); P.closePath();
+  P.moveTo(X(-18), Y(-86)); P.lineTo(X(-2), Y(-86)); P.lineTo(X(-9), y); P.lineTo(X(-21), y); P.closePath();
+  P.moveTo(X(2), Y(-86)); P.lineTo(X(19), Y(-86)); P.lineTo(X(20), y); P.lineTo(X(7), y); P.closePath();
+  if (o.pose === 'menunjuk') { P.moveTo(X(16), Y(-150) + b); P.lineTo(X(70), Y(-222)); P.lineTo(X(78), Y(-214)); P.lineTo(X(24), Y(-136) + b); P.closePath(); }
+  else { P.moveTo(X(18), Y(-146) + b); P.lineTo(X(30), Y(-100)); P.lineTo(X(22), Y(-96)); P.lineTo(X(12), Y(-130) + b); P.closePath(); }
+  cat(c, P, PAL.tinta, {rim: .95, rx: RX * .3, ry: 3, bb: [x - 40, y - 200, x + 40, y], sudut: .8, jarak: 5});
+  if (MALAM) pendar(c, X(4), Y(-184), 60, PAL.lampu, .9);              // lampu kepala = satu warna hangat
+}
+// asap(): gumpalan lahir terus menerus (fungsi t), digambar opak di bantu(), puncak kolom melarut.
+function asap(c, cx, cy, t, o) {
+  const {n = 20, laju = .09, naik = 500, geser = -300, r0 = 24, r1 = 100, sd = 8, a = 1} = o, B = [];
+  for (let k = 0; k < n; k++) { const u = frac(t * laju + k / n + hash(k + sd) * .03), w = Math.pow(u, 1.4);
+    B.push([cx + geser * w + nz(t * .4 + k, sd) * 18 * u, cy - naik * u, lerp(r0, r1, Math.sqrt(u)) * (.8 + .4 * hash(k * 5 + sd)),
+      Math.pow(Math.sin(Math.PI * Math.min(1, u * 1.15)), .6)]); }
+  bantu(c, a * (V === 'catair' ? .85 : V === 'ukiran' ? 1 : .9), b => {
+    B.sort((p, q) => q[1] - p[1]).forEach(([x, y, r, al]) => { const rr = r * Math.min(1, al * 1.6 + .25);
+      gumpal(b, [[x, y, rr], [x + rr * .55, y + rr * .25, rr * .62], [x - rr * .5, y + rr * .3, rr * .58]], PAL.asap, 1,
+        {rx: RX * .85, ry: 10, bayang: .5, jarak: 6, garisAwan: V === 'noir' ? 0 : 1.6}); });
+    const g = b.createLinearGradient(0, cy - naik, 0, cy - naik * .35);
+    g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+    b.globalCompositeOperation = 'destination-out'; b.fillStyle = g; b.fillRect(cx - 900, cy - naik - 300, 1800, naik * .65 + 300);
+    b.globalCompositeOperation = 'source-over'; });
+}
+// GAMBAR[jenis](c, L, t): satu fungsi per jenis lapisan. L = satu baris di DUNIA ([6]).
+const GAMBAR = {
+  langit(c, L, t) { langit(c, t); },
+  bukit(c, L, t) {          // {y, amp, fr, sd, miring, warna, rim, pohon:[{x,h,jenis}], semak:n}
+    const pts = sekali(L, '_p', () => punggung(L.sd ?? 1, L.y, L.amp ?? 50, L.fr ?? .004, -900, 2900, 10, L.miring ?? 0));
+    cat(c, bentuk(pts), warnaDari(L.warna), {rim: L.rim ?? .5, garis: pts, bb: sekali(L, '_b', () => bbOf(pts, L.y + 900)),
+      sudut: L.sudut ?? .3, lebar: L.lebar ?? 4, pudar: L.pudar});
+    (L.semak || []).forEach(([x, r]) => { const y = yPada(pts, x) + 6, col = warnaDari(L.warna);
+      gumpal(c, [[x, y, r], [x + r * .8, y + r * .3, r * .7], [x - r * .8, y + r * .35, r * .6]], col, 1,
+        {rimWarna: mix(col, PAL.rim, .6), bayang: 0, rx: RX * .6, ry: 6, jarak: 5}); });
+    (L.pohon || []).forEach((o, i) => pohon(c, Object.assign({y: yPada(pts, o.x) + 8, s: i + 1, warna: L.warna}, o), t));
+  },
+  gunung(c, L, t) {         // {cx, puncak, kaki, lebar, cekung, kawah, alur:{n,dari}, asap:{...}, warna}
+    const pts = sekali(L, '_p', () => kerucut(L.cx, L.puncak, L.kaki, L.lebar, L.cekung ?? .75, L.sd ?? 3, L.kawah ?? 0));
+    const s = KIRI ? 1 : -1, x0 = L.cx + s * L.lebar * Math.max(.005, (L.kawah ?? 0) * .5);
+    const gelap = [[x0, L.puncak - 5], [L.cx + s * L.lebar * .17, L.kaki + 70], [L.cx + s * L.lebar * 2, L.kaki + 70], [L.cx + s * L.lebar * 2, L.puncak - 80]];
+    const col = warnaDari(L.warna);
+    cat(c, bentuk(pts, L.kaki + 50), col, {rim: L.rim ?? .6, gelap, garis: pts, bb: sekali(L, '_b', () => bbOf(pts, L.kaki + 50)),
+      sudut: L.sudut ?? -.5, lebar: L.lebar > 400 ? 5 : 6});
+    if (L.alur) { const al = sekali(L, '_a', () => Array.from({length: L.alur.n}, (_, i) => { const a = (i + .5) / L.alur.n * 2 - 1, P = [];
+        for (let u = L.alur.dari ?? .05; u <= 1.001; u += .05) { const x = L.cx + a * L.lebar * u; P.push([x + Math.sin(u * 9 + i) * 3, yPada(pts, x) + 3]); }
+        return {a, P}; }));
+      al.forEach(({a, P}) => { const terang = KIRI ? a < 0 : a > 0;
+        kuas(c, P, 3 + 6 * Math.abs(a) * (L.alur.tebal ?? 1), {warna: terang ? mix(col, PAL.rim, V === 'ukiran' ? 0 : .4) : PAL.alur,
+          a: terang ? .5 : .85, sd: a * 9}); }); }
+    if (L.kawah) { c.fillStyle = PAL.lubang; c.beginPath(); c.ellipse(L.cx, L.puncak + 3, L.lebar * L.kawah * .9, 11, 0, 0, TAU); c.fill(); }
+    if (L.asap) asap(c, L.cx, L.puncak, t, L.asap);
+  },
+  dataran(c, L, t) {        // {y, warna, riak:true} — pasir, ladang, salju; riak = guratan perspektif
+    const P = new Path2D(); P.rect(-900, L.y, 3900, 1700);
+    cat(c, P, warnaDari(L.warna), {bb: [-900, L.y, 3000, L.y + 640], sudut: .02, jarak: 8, pudar: V === 'catair' ? 600 : false});
+    if (!KERTAS) { const sx = L.terangX ?? 330, g = c.createRadialGradient(sx, L.y + 90, 0, sx, L.y + 90, 700);
+      g.addColorStop(0, rgba(PAL.garisDataran, MALAM ? .25 : .55)); g.addColorStop(1, rgba(PAL.garisDataran, 0));
+      c.save(); c.translate(0, L.y + 90); c.scale(1, .35); c.translate(0, -L.y - 90); c.fillStyle = g; c.fillRect(-500, L.y - 600, 1700, 1400); c.restore(); }
+    if (L.riak === false) return;
+    const R = sekali(L, '_r', () => { const r = rng(L.sd ?? 9); return Array.from({length: 170}, () => { const k = Math.pow(r(), 1.6);
+      return [r() * 3000 - 900, L.y + 6 + k * 420, 30 + k * 160 + r() * 40, .8 + k * 3]; }); });
+    c.save(); c.strokeStyle = rgba(PAL.garisDataran, V === 'ukiran' ? .9 : MALAM ? .3 : .42); c.lineCap = 'round';
+    R.forEach(([x, y, l, w]) => { c.lineWidth = w; c.beginPath(); c.moveTo(x, y); c.quadraticCurveTo(x + l / 2, y - w * 2.5, x + l, y); c.stroke(); });
+    c.restore();
+  },
+  danau(c, L, t) {          // {y, warna:'air'} — pantulan langit, kilau matahari bergetar, riak bergeser
+    const P = new Path2D(), col = warnaDari(L.warna || 'air'); P.rect(-900, L.y, 3900, 1700);
+    cat(c, P, col, {bb: [-900, L.y, 3000, L.y + 700], sudut: 0, jarak: 6, pudar: false});
+    if (!KERTAS) { const hz = PAL.langit[PAL.langit.length - 1][1], g = c.createLinearGradient(0, L.y, 0, L.y + 380);
+      g.addColorStop(0, rgba(hz, .75)); g.addColorStop(1, rgba(hz, 0)); c.fillStyle = g; c.fillRect(-900, L.y, 3900, 380); }
+    const sx = L.kilauX ?? PAL.surya[0];
+    c.save(); c.lineCap = 'round';
+    for (let i = 0; i < 46; i++) { const k = i / 46, y = L.y + 4 + Math.pow(k, 1.5) * 520, w = 10 + k * 90 + hash(i) * 40;
+      const x = sx + nz(t * 1.5, i) * (20 + k * 120), a = (.35 + .65 * Math.abs(Math.sin(t * 3 + i * 1.7))) * (1 - k * .6);
+      c.strokeStyle = rgba(V === 'ukiran' ? PAL.tinta : PAL.inti, a * (KERTAS ? .5 : .8)); c.lineWidth = 2 + k * 4;
+      c.beginPath(); c.moveTo(x - w / 2, y); c.lineTo(x + w / 2, y); c.stroke(); }
+    c.strokeStyle = rgba(V === 'ukiran' ? PAL.tinta : mix(col, '#FFFFFF', .45), .4);
+    for (let i = 0; i < 60; i++) { const k = hash(i * 3), y = L.y + 10 + Math.pow(k, 1.4) * 600, l = 40 + k * 200;
+      const x = frac(hash(i) + t * (.004 + k * .006)) * 3200 - 900; c.lineWidth = 1 + k * 2.5;
+      c.beginPath(); c.moveTo(x, y); c.quadraticCurveTo(x + l / 2, y - 3 - k * 4, x + l, y); c.stroke(); }
+    c.restore();
+  },
+  kota(c, L, t) {           // {y, n, tinggi, lebar, sd, warna} — siluet gedung + jendela (menyala bila malam)
+    const B = sekali(L, '_g', () => { const r = rng(L.sd ?? 5), out = []; let x = L.x0 ?? -200;
+      while (x < (L.x1 ?? 1300)) { const w = (L.lebar ?? 70) * (.6 + r() * .9), h = (L.tinggi ?? 220) * (.3 + r() * .9);
+        out.push([x, w, h, r()]); x += w + r() * 8; } return out; });
+    const P = new Path2D(); B.forEach(([x, w, h]) => P.rect(x, L.y - h, w, h + 900));
+    const col = warnaDari(L.warna || 'bukitTengah');
+    cat(c, P, col, {rim: .5, bb: [L.x0 ?? -200, L.y - (L.tinggi ?? 220) * 1.2, L.x1 ?? 1300, L.y + 300], sudut: 1.2, jarak: 6});
+    c.fillStyle = MALAM ? PAL.lampu : rgba(PAL.tinta, .25);
+    B.forEach(([x, w, h, k]) => { for (let yy = L.y - h + 14; yy < L.y - 12; yy += 22) for (let xx = x + 8; xx < x + w - 10; xx += 16) {
+      const on = hash(xx * 3.1 + yy * 7.7 + k) < (MALAM ? .35 : .5); if (on) c.fillRect(xx, yy, 7, 10); } });
+  },
+  batu(c, L, t) {           // {titik:[[x,y]...], tokoh:{x,y,s,pose}} — tempat tokoh berdiri
+    const P = new Path2D(); L.titik.forEach((p, i) => i ? P.lineTo(p[0], p[1]) : P.moveTo(p[0], p[1]));
+    const last = L.titik[L.titik.length - 1]; P.lineTo(last[0], 2400); P.lineTo(L.titik[0][0], 2400); P.closePath();
+    cat(c, P, PAL.tinta, {rim: .7, pudar: false, garis: L.titik, bb: bbOf(L.titik, 1900), sudut: -.8, jarak: 5});
+    if (L.tokoh) orang(c, L.tokoh.x, L.tokoh.y, L.tokoh.s ?? 1, t, L.tokoh);
+  },
+  rumput(c, L, t) {         // {y} — kaki depan + bilah rumput bergoyang
+    const pts = sekali(L, '_p', () => punggung(57, L.y, 60, .009, -900, 2900, 12));
+    cat(c, bentuk(pts), warnaDari(L.warna || 'depan'), {pudar: false, garis: pts, bb: sekali(L, '_b', () => bbOf(pts, 2600)), sudut: .5, jarak: 5});
+    const R = sekali(L, '_r', () => { const r = rng(4); return Array.from({length: 150}, (_, i) => { const x = -400 + i * 13 + r() * 9;
+      return [x, yPada(pts, x) + 10, 60 + r() * 120, r() * 6]; }); });
+    c.fillStyle = warnaDari(L.warna || 'depan'); c.beginPath();
+    R.forEach(([x, y, h, f]) => { const sw = nz(t * .9 + f, f) * 14 + 8; c.moveTo(x - 5, y);
+      c.quadraticCurveTo(x + sw * .3, y - h * .6, x + sw, y - h); c.quadraticCurveTo(x + sw * .3 + 2, y - h * .5, x + 5, y); });
+    c.fill(); if (!KERTAS) { c.strokeStyle = rgba(PAL.rim, MALAM ? .18 : .3); c.lineWidth = 1.5; c.stroke(); }
+  }
+};
+
+/* ==== [6] DAFTAR DUNIA (ganti untuk topik baru) ==== */
+// Satu baris = satu lapisan, urut BELAKANG → DEPAN. p = paralaks (0 langit, ±.1 jauh, ±.35 tengah, .7–.85 dekat, 1.15 depan).
+// warna = nama kunci palet [2]. kabut: [y, tebal, benih, kuat, laju] digambar setelah lapisan. ekstra(c,t,L) = benda khusus.
+// Contoh topik lain: langit + bukit jauh + danau (y 1150) + kota (y 1150, p .3) + bukit dekat + batu/tokoh + rumput.
+function jip(c, x, y, s, arah, t, sd) {   // benda khusus contoh Bromo: jip melintas + debu
+  for (let k = 0; k < 9; k++) { const u = k / 9;
+    gumpal(c, [[x - arah * (20 + k * 22) * s, y - 6 * s - u * 22 * s + nz(t + k, sd) * 4, (6 + k * 3) * s]],
+      mix(PAL.dataran, PAL.kabut, .5), (1 - u) * .3, {rim: .3, garisAwan: 1}); }
+  c.fillStyle = PAL.tinta; c.fillRect(x - 15 * s, y - 12 * s, 30 * s, 9 * s); c.fillRect(x - 9 * s * arah - 6 * s, y - 19 * s, 15 * s, 8 * s);
+  c.fillStyle = PAL.lampu; c.fillRect(x + arah * 14 * s - 2 * s, y - 10 * s, 4 * s, 3 * s);
+  if (MALAM) pendar(c, x + arah * 18 * s, y - 9 * s, 30 * s, PAL.lampu, .9);
+}
+const TOKOH = {x: 150, y: 1384, s: 1.12, pose: DIAGRAM ? 'menunjuk' : 'berdiri'};
+const DUNIA = [
+  {jenis: 'langit', p: .03},
+  {jenis: 'gunung', p: .07, warna: 'puncakJauh', cx: 890, puncak: 585, kaki: 1000, lebar: 560, cekung: .8, sd: 4, kawah: .02, rim: .45,
+    asap: {n: 10, laju: .05, naik: 210, geser: -300, r0: 14, r1: 52, sd: 5, a: .7}},
+  {jenis: 'bukit', p: .12, warna: 'bukitJauh', y: 925, amp: 55, fr: .0035, sd: 9, rim: .35, sudut: -.1, lebar: 3.5, kabut: [990, 80, 2, .8]},
+  {jenis: 'bukit', p: .2, warna: 'bukitTengah', y: 1000, amp: 70, fr: .006, sd: 13, miring: -.03, sudut: .45, lebar: 4.5},
+  {jenis: 'dataran', p: .3, warna: 'dataran', y: 1060, kabut: [1075, 60, 4, .7, 22],
+    ekstra: (c, t) => { jip(c, 120 + t * 34, 1112, 1, 1, t, 3); jip(c, 700 - t * 26, 1205, 1.3, -1, t, 6); }},
+  {jenis: 'gunung', p: .34, warna: 'subjekA', cx: 712, puncak: 935, kaki: 1135, lebar: 430, cekung: .78, sd: 21, kawah: .22, rim: .7,
+    alur: {n: 16, dari: .3, tebal: .6}, asap: {n: 26, laju: .085, naik: 560, geser: -330, r0: 26, r1: 105, sd: 8},
+    ekstra: (c, t) => { if (MALAM) for (let i = 0; i < 6; i++) { const u = frac(i / 6 + hash(i) * .08 + t * .02);   // lampu pendaki
+      pendar(c, lerp(560, 652, u) + Math.sin(u * 20) * 6, lerp(1130, 950, u), 9, PAL.lampu, .9); } }},
+  {jenis: 'gunung', p: .38, warna: 'subjekB', cx: 360, puncak: 845, kaki: 1165, lebar: 330, cekung: .72, sd: 31, alur: {n: 22},
+    sudut: .7, kabut: [1160, 70, 7, .95, 30]},
+  {jenis: 'bukit', p: .7, warna: 'dekat', y: 1430, amp: 55, sd: 41, miring: -.1, rim: .6, lebar: 7, pudar: V === 'catair' ? 420 : false,
+    semak: [[350, 22], [404, 18], [455, 26], [510, 20], [560, 24], [612, 17], [660, 28], [715, 21], [762, 25]],
+    pohon: [{x: 790, h: 360}, {x: 872, h: 290}, {x: 955, h: 430}, {x: 1040, h: 255}, {x: 1130, h: 350}, {x: -60, h: 300}]},
+  {jenis: 'batu', p: .85, titik: [[-40, 1520], [10, 1404], [70, 1382], [190, 1376], [262, 1392], [300, 1450], [330, 1560]], tokoh: TOKOH},
+  {jenis: 'rumput', p: 1.15, y: 1790}
+];
+// lautan awan pembuka (hook): di layar, tidak ikut kamera. Matikan: AWAN_PEMBUKA = null
+const AWAN_PEMBUKA = {mulai: .1, selesai: 2.4, pudar: [1.5, 2.3]};
+const R0 = rng(77), G = {};
+G.awanDpn = [0, 1, 2, 3, 4].map(k => ({k, b: Array.from({length: 15 - k * 2}, (_, i) => { const n = 15 - k * 2;
+  return [(i + .5) / n * 1500 - 210 + (R0() - .5) * 70, 860 + k * 240 + (R0() - .5) * 70 - Math.sin(i * 2.3) * 34, 56 + k * 52 + R0() * 46]; })}));
+G.awanLgt = [[300, 430, 1.3], [880, 330, 1.0], [700, 790, 1.6], [40, 800, 1.1], [980, 560, .8]].map(([x, y, s]) => ({x, y,
+  b: Array.from({length: 14}, () => [(R0() - .5) * 560 * s, (R0() - .5) * 30, 26 + R0() * 46 * s])}));
+G.bintang = Array.from({length: 70}, () => [R0() * 1300 - 100, R0() * 780, .6 + R0() * 1.8, R0() * 6]);
+
+/* ==== [7] KAMERA ==== */
+// lapis(c,p,fn): gambar fn pada kedalaman p. layar(x,y,p): posisi di layar (untuk label/diagram yang menempel).
+const CAM = {x: 0, y: 0, z: 1}, PUSAT = [560, 1150];
+function lapis(c, p, fn) { const s = 1 + (CAM.z - 1) * p; c.save(); c.translate(PUSAT[0], PUSAT[1]); c.scale(s, s);
+  c.translate(-PUSAT[0] - CAM.x * p, -PUSAT[1] - CAM.y * p); fn(); c.restore(); }
+function layar(x, y, p) { const s = 1 + (CAM.z - 1) * p; return [PUSAT[0] + (x - PUSAT[0] - CAM.x * p) * s, PUSAT[1] + (y - PUSAT[1] - CAM.y * p) * s]; }
+function kamera(t) {   // turun dari langit (0–2,5) → dolly pelan + geser (2,5–8,4) → menyelam ke depan (8,4–9,6)
+  const a = E.io(seg(t, 0, 2.5)), b = seg(t, 2.5, 8.4), d = E.in(seg(t, 8.4, 9.6));
+  CAM.y = lerp(-430, 0, a) + nz(t * .3, 2) * 6 + d * 60;
+  CAM.x = lerp(0, DIAGRAM ? 20 : 55, E.s(b)) * (1 - d) + nz(t * .3, 1) * 8;
+  CAM.z = lerp(1.2, 1, a) + (DIAGRAM ? .04 : .1) * E.s(b) + .7 * d;
+}
+
+/* ==== [8] GAMBAR & PASCA ==== */
+const CV = kanvas(W, H, $('#dunia')), X = CV.getContext('2d');
+function langit(c, t) {
+  if (KERTAS) { c.fillStyle = PAL.kertas; c.fillRect(-900, -900, 3900, 2900); }
+  if (V === 'ukiran') { c.strokeStyle = PAL.tinta;                               // langit ukir: garis menipis ke cakrawala
+    for (let y = -500; y < 980; y += 9) { c.lineWidth = Math.max(.25, 2.2 * (1 - (y + 500) / 1400)); c.beginPath();
+      c.moveTo(-900, y); c.lineTo(3000, y + Math.sin(y * .02) * 4); c.stroke(); } }
+  else { const g = c.createLinearGradient(0, -600, 0, 1100);
+    PAL.langit.forEach(([k, w]) => g.addColorStop(Math.min(1, k * 1.25), V === 'catair' ? rgba(w, .75) : w));
+    c.fillStyle = g; c.fillRect(-900, -900, 3900, 2100);
+    if (V === 'catair') { c.save(); c.globalCompositeOperation = 'multiply'; c.globalAlpha = .28; c.drawImage(NODA, -300, -600, 1700, 1700); c.restore(); } }
+  if (PAL.bintang) G.bintang.forEach(([x, y, r, f]) => { c.globalAlpha = .4 + .6 * Math.abs(Math.sin(t * 1.4 + f));
+    c.fillStyle = '#DDE6F0'; c.fillRect(x, y, r, r); });
+  c.globalAlpha = 1;
+  if (V !== 'ukiran') for (let i = 0; i < 7; i++) {                              // awan serat (cirrus)
+    const y = 120 + i * 48 + hash(i) * 30, x = -300 + hash(i + 4) * 900 + t * (8 + i * 2), pts = [];
+    for (let u = 0; u <= 1; u += .05) pts.push([x + u * (500 + hash(i + 8) * 500), y + Math.sin(u * 3 + i) * 10]);
+    kuas(c, pts, 5 + hash(i + 2) * 8, {warna: MALAM ? mix(PAL.langit[2][1], '#FFFFFF', .1) : PAL.awan, a: MALAM ? .5 : .35, sd: i + 20}); }
+  const [sx, sy, sr] = PAL.surya;                                               // matahari / bulan
+  if (V === 'ukiran') { c.strokeStyle = PAL.aksen; c.lineWidth = 2.2; c.fillStyle = PAL.kertas; c.beginPath(); c.arc(sx, sy, sr, 0, TAU); c.fill(); c.stroke();
+    c.beginPath(); for (let i = 0; i < 44; i++) { const a = i / 44 * TAU + t * .03, l = i % 2 ? 40 : 90;
+      c.moveTo(sx + Math.cos(a) * (sr + 12), sy + Math.sin(a) * (sr + 12)); c.lineTo(sx + Math.cos(a) * (sr + 12 + l), sy + Math.sin(a) * (sr + 12 + l)); }
+    c.stroke(); }
+  else { const g = c.createRadialGradient(sx, sy, 0, sx, sy, sr * 7);
+    g.addColorStop(0, rgba(PAL.halo, V === 'catair' ? .5 : .75)); g.addColorStop(1, rgba(PAL.halo, 0));
+    c.fillStyle = g; c.fillRect(sx - sr * 7, sy - sr * 7, sr * 14, sr * 14);
+    c.fillStyle = PAL.inti; c.beginPath(); c.arc(sx, sy, sr, 0, TAU); c.fill();
+    if (!KERTAS) pendar(c, sx, sy, sr * 4.5, PAL.halo, .6, 1); }
+  G.awanLgt.forEach((a, i) => { const dx = t * (6 + i * 3);
+    gumpal(c, a.b.map(([x, y, r]) => [a.x + x + dx, a.y + y, r]), PAL.awan, 1, {sy: .45, rx: RX * .45, ry: -10, bayang: .5, jarak: 9, garisAwan: 2.5}); });
+}
+function dunia(c, t) {
+  DUNIA.forEach(L => lapis(c, L.p, () => { GAMBAR[L.jenis](c, L, t);
+    if (L.kabut) kabut(c, L.kabut[0], L.kabut[1], PAL.kabut, t, L.kabut[2] ?? 3, L.kabut[3] ?? .8, L.kabut[4] ?? 14);
+    if (L.ekstra) L.ekstra(c, t, L); }));
+}
+function awanPembuka(c, t) {   // 5 baris lautan awan, jauh → dekat, menyibak ke bawah & ke samping
+  const A = AWAN_PEMBUKA; if (!A) return; const e = E.io(seg(t, A.mulai, A.selesai)), a = 1 - seg(t, A.pudar[0], A.pudar[1]); if (a <= 0) return;
+  bantu(c, a, b => G.awanDpn.forEach(({k, b: B}) => { const tur = e * (380 + k * 380), buka = e * (240 + k * 150);
+    gumpal(b, B.map(([x, y, r]) => [x + Math.sign(x - 540) * buka + nz(t * .3, k + x) * 10, y + tur, r]), mix(PAL.awan, PAL.awanG, k * .1), 1,
+      {sy: .6, rx: RX * .85, ry: 16 + k * 4, bayang: .55 + k * .04, garisAwan: 3.5}); }));
+}
+function pasca(c, t) {   // tekstur permukaan per varian; sinar/mekar/vinyet dibaca dari palet
+  c.save(); c.setTransform(1, 0, 0, 1, 0, 0);
+  const [sx, sy] = layar(PAL.surya[0], PAL.surya[1], .03), kuat = .55 + .45 * E.out(seg(t, .1, 1.6)), yk = layar(0, 1500, .7)[1];
+  c.save(); c.beginPath(); c.rect(0, 0, W, yk); c.clip();                       // sinar tidak menyapu kaki depan
+  const nr = V === 'noir', ks = (PAL.sinarKuat ?? 1) * (nr ? 1 : kuat);
+  if (V === 'anime' || nr) sinarDewa(c, sx, sy, t, PAL.sinar, ks, nr ? .35 : .15, nr ? 1.3 : 1.45, nr ? 9 : 15);
+  c.restore();
+  if (V === 'anime') { mekar(c, PAL.mekar ?? .3); c.globalCompositeOperation = 'soft-light'; c.globalAlpha = PAL.noda ?? .5;
+    c.drawImage(NODA, -40, -40, W + 80, H + 80); c.globalAlpha = 1; c.globalCompositeOperation = 'source-over'; vinyet(c, PAL.vin); }
+  if (V === 'noir') { rasterTitik(c); vinyet(c, PAL.vin, .36); }
+  if (KERTAS) { c.globalCompositeOperation = 'multiply'; c.drawImage(KTS, 0, 0, W, H); c.globalCompositeOperation = 'source-over'; vinyet(c, PAL.vin, .5); }
+  gambarPendar(c); c.restore();
+}
+function tutup(c, p, t) {   // transisi khas tiap varian (p 0→1)
+  if (p <= 0) return; c.save(); c.setTransform(1, 0, 0, 1, 0, 0);
+  if (V === 'anime') {                                                           // hembusan pasir/cahaya dari kanan
+    const xf = lerp(W * 1.25, -W * .7, E.io(p)), g = c.createLinearGradient(xf, 0, xf + 700, 0), w = MALAM ? '#2A3366' : '#F7D6B0';
+    g.addColorStop(0, rgba(w, 0)); g.addColorStop(.4, rgba(w, .85)); g.addColorStop(1, w); c.fillStyle = g; c.fillRect(xf, 0, W * 2, H);
+    c.strokeStyle = MALAM ? 'rgba(180,200,255,.6)' : 'rgba(255,240,215,.8)'; c.lineCap = 'round';
+    for (let i = 0; i < 60; i++) { const y = hash(i) * H, x = xf + hash(i + 9) * 500 - 150, l = 60 + hash(i + 3) * 220;
+      c.lineWidth = 1 + hash(i + 5) * 3; c.beginPath(); c.moveTo(x, y); c.lineTo(x + l, y - l * .08); c.stroke(); }
+  } else if (V === 'noir') {                                                     // cipratan tinta
+    const R = E.in(p) * 1500, P = new Path2D();
+    for (let i = 0; i <= 90; i++) { const a = i / 90 * TAU, r = R * (.72 + .5 * vn(i * .42, 3) + .12 * Math.sin(i * 1.7));
+      i ? P.lineTo(W * .5 + Math.cos(a) * r, H * .55 + Math.sin(a) * r) : P.moveTo(W * .5 + r, H * .55); }
+    c.fillStyle = PAL.tinta; c.fill(P);
+    for (let i = 0; i < 14; i++) { const a = hash(i) * TAU, d = R * (1.05 + hash(i + 2) * .4), r = R * .04 * hash(i + 4) + 4;
+      c.beginPath(); c.arc(W * .5 + Math.cos(a) * d, H * .55 + Math.sin(a) * d, r, 0, TAU); c.fill(); }
+  } else if (V === 'catair') {                                                   // satu tetes cat mekar
+    const R = E.out(p) * 1450, P = new Path2D();
+    for (let i = 0; i <= 80; i++) { const a = i / 80 * TAU, r = R * (.88 + .18 * vn(i * .6 + p * 3, 5));
+      i ? P.lineTo(560 + Math.cos(a) * r, 1180 + Math.sin(a) * r) : P.moveTo(560 + r, 1180); }
+    c.globalAlpha = .92; c.fillStyle = '#5B77AE'; c.fill(P);
+    c.save(); c.clip(P); c.globalCompositeOperation = 'multiply'; c.drawImage(NODA, 0, 0, W, H); c.restore();
+    c.globalAlpha = .5; c.strokeStyle = '#2E4677'; c.lineWidth = 7; c.stroke(P);
+  } else {                                                                       // tirai arsiran turun
+    const ye = E.io(p) * 2100 - 100, P = new Path2D(); P.moveTo(0, -10);
+    for (let x = 0; x <= W; x += 20) P.lineTo(x, ye + Math.sin(x * .02) * 30); P.lineTo(W, -10); P.closePath();
+    c.fillStyle = PAL.kertas; c.fill(P); arsir(c, P, .95, .6, [0, 0, W, H], 6, 0);
+    c.strokeStyle = PAL.aksen; c.lineWidth = 4; c.beginPath(); for (let x = 0; x <= W; x += 20) c.lineTo(x, ye + Math.sin(x * .02) * 30); c.stroke();
+  }
+  c.restore();
+}
+
+/* ==== [9] DIAGRAM DI DALAM DUNIA (topik sains) ==== */
+// Digambar SETELAH pasca, di koordinat LAYAR (pakai layar(x,y,p) agar menempel ke benda). Aturan terbaca:
+// · benda penjelas BESAR: partikel r ≥ 14, molekul atom r ≥ 30, panah tebal ≥ 14 · · selalu bergaris tepi gelap dgGaris
+// · warnanya kontras dengan latar (biru di langit biru → beri cincin putih + garis gelap) · bergerak, bukan titik diam
+// · JANGAN titik putih kecil di langit biru: terbaca sebagai salju/bintang.
+function titikJelas(c, x, y, r, isi, a = 1) {      // partikel yang terbaca di latar apa pun
+  if (a <= .01) return; c.save(); c.globalAlpha = a;
+  const g = c.createRadialGradient(x, y, r * .6, x, y, r * 2.6); g.addColorStop(0, rgba(isi, .45)); g.addColorStop(1, rgba(isi, 0));
+  c.fillStyle = g; c.fillRect(x - r * 2.6, y - r * 2.6, r * 5.2, r * 5.2);
+  c.beginPath(); c.arc(x, y, r, 0, TAU); c.fillStyle = isi; c.fill();
+  c.lineWidth = Math.max(3, r * .28); c.strokeStyle = PAL.dgGaris; c.stroke();
+  c.beginPath(); c.arc(x, y, r + c.lineWidth * .9, 0, TAU); c.lineWidth = 2.5; c.strokeStyle = 'rgba(255,255,255,.85)'; c.stroke();
+  c.fillStyle = 'rgba(255,255,255,.75)'; c.beginPath(); c.arc(x - r * .35, y - r * .35, r * .28, 0, TAU); c.fill(); c.restore(); }
+function molekul(c, x, y, s, t, a = 1, warna = mix(PAL.dgCahaya, '#FFFFFF', .2)) {   // molekul dua atom (N₂/O₂) bergoyang
+  if (a <= .01) return; const ang = .5 + Math.sin(t * 2.2) * .35, d = 30 * s, ax = Math.cos(ang) * d, ay = Math.sin(ang) * d;
+  c.save(); c.globalAlpha = a; c.lineCap = 'round'; c.strokeStyle = PAL.dgGaris; c.lineWidth = 18 * s;
+  c.beginPath(); c.moveTo(x - ax, y - ay); c.lineTo(x + ax, y + ay); c.stroke(); c.restore();
+  titikJelas(c, x - ax, y - ay, 32 * s, warna, a); titikJelas(c, x + ax, y + ay, 32 * s, warna, a); }
+function berkasCahaya(c, x0, y0, x1, y1, t, o = {}) {   // berkas tebal + denyut berjalan dari sumber ke sasaran
+  const k = o.k ?? 1; if (k <= 0) return; const ex = lerp(x0, x1, k), ey = lerp(y0, y1, k), w = o.lebar ?? 34;
+  const dx = ex - x0, dy = ey - y0, m = Math.hypot(dx, dy) || 1, nx = -dy / m, ny = dx / m;
+  c.save(); c.globalAlpha = o.a ?? 1;
+  c.beginPath(); c.moveTo(x0 + nx * w * .3, y0 + ny * w * .3); c.lineTo(ex + nx * w / 2, ey + ny * w / 2);
+  c.lineTo(ex - nx * w / 2, ey - ny * w / 2); c.lineTo(x0 - nx * w * .3, y0 - ny * w * .3); c.closePath();
+  c.lineWidth = 6; c.strokeStyle = rgba(PAL.dgGaris, .55); c.stroke();
+  const g = c.createLinearGradient(x0, y0, ex, ey); g.addColorStop(0, rgba(PAL.dgCahaya, .95)); g.addColorStop(1, rgba(PAL.dgCahaya, .7));
+  c.fillStyle = g; c.fill();
+  c.setLineDash([26, 54]); c.lineDashOffset = -t * 260; c.lineCap = 'round'; c.lineWidth = w * .35; c.strokeStyle = 'rgba(255,255,255,.9)';
+  c.beginPath(); c.moveTo(x0, y0); c.lineTo(ex, ey); c.stroke(); c.restore(); }
+function panahEnergi(c, pts, t, o = {}) {   // panah tebal bergaris tepi, tergambar sepanjang jalur (o.k 0..1)
+  const k = o.k ?? 1; if (k <= 0 || pts.length < 2) return; const L = [0];
+  for (let i = 1; i < pts.length; i++) L.push(L[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+  const target = L[L.length - 1] * k, P = [pts[0]]; let ujung = pts[0], arah = [1, 0];
+  for (let i = 1; i < pts.length; i++) { if (L[i] <= target) { P.push(pts[i]); ujung = pts[i]; }
+    else { const f = (target - L[i - 1]) / (L[i] - L[i - 1]); ujung = [lerp(pts[i - 1][0], pts[i][0], f), lerp(pts[i - 1][1], pts[i][1], f)]; P.push(ujung); }
+    arah = [pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]]; if (L[i] > target) break; }
+  const w = o.tebal ?? 16, m = Math.hypot(arah[0], arah[1]) || 1, ux = arah[0] / m, uy = arah[1] / m, kep = w * 2.2;
+  const jalur = cc => { cc.beginPath(); P.forEach((p, i) => i ? cc.lineTo(p[0], p[1]) : cc.moveTo(p[0], p[1])); };
+  const kepala = () => { c.beginPath(); c.moveTo(ujung[0] + ux * kep * .8, ujung[1] + uy * kep * .8);
+    c.lineTo(ujung[0] - ux * kep * .5 - uy * kep * .7, ujung[1] - uy * kep * .5 + ux * kep * .7);
+    c.lineTo(ujung[0] - ux * kep * .5 + uy * kep * .7, ujung[1] - uy * kep * .5 - ux * kep * .7); c.closePath(); };
+  c.save(); c.lineCap = 'round'; c.lineJoin = 'round'; c.globalAlpha = o.a ?? 1;
+  jalur(c); c.lineWidth = w + 10; c.strokeStyle = PAL.dgGaris; c.stroke(); kepala(); c.lineWidth = 10; c.stroke();
+  jalur(c); c.lineWidth = w; c.strokeStyle = o.warna || PAL.dgPanah; c.stroke(); kepala(); c.fillStyle = o.warna || PAL.dgPanah; c.fill();
+  jalur(c); c.setLineDash([20, 44]); c.lineDashOffset = -t * 180; c.lineWidth = w * .35; c.strokeStyle = 'rgba(255,255,255,.75)'; c.stroke();
+  c.restore(); }
+function pencar(c, x, y, t, t0, o = {}) {   // gelombang partikel memencar ke segala arah dari (x,y), berulang tiap o.jeda dtk
+  const n = o.n ?? 10, jeda = o.jeda ?? .9, umur = o.umur ?? 1.7, laju = o.laju ?? 300, r = o.r ?? 15;
+  for (let g = 0; g < 12; g++) { const lahir = t0 + g * jeda, u = (t - lahir) / umur; if (u < 0 || u > 1) continue;
+    for (let i = 0; i < n; i++) { const a = (i + .5) / n * TAU + g * .7 + hash(i + g * 13) * .4, d = laju * umur * E.out(u) * (.7 + .3 * hash(i * 3 + g));
+      const px = x + Math.cos(a) * d, py = y + Math.sin(a) * d, al = Math.min(1, u * 6) * (1 - Math.pow(u, 3));
+      c.save(); c.globalAlpha = al * .55; c.strokeStyle = o.warna || PAL.dgPartikel; c.lineWidth = r * .7; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(px - Math.cos(a) * r * 2.6, py - Math.sin(a) * r * 2.6); c.lineTo(px, py); c.stroke(); c.restore();
+      titikJelas(c, px, py, r, o.warna || PAL.dgPartikel, al); } } }
+// Contoh pemakaian (DIAGRAM = true): "kenapa langit biru" — cahaya matahari menabrak molekul udara, biru memencar ke mata.
+const DG = {mol: [600, 560]};
+function diagramContoh(c, t) {
+  if (!DIAGRAM) return; c.save(); c.setTransform(1, 0, 0, 1, 0, 0);
+  const [sx, sy] = layar(PAL.surya[0], PAL.surya[1], .03), [mx, my] = DG.mol, hilang = 1 - seg(t, 8.3, 8.6);
+  berkasCahaya(c, sx, sy, mx, my, t, {k: E.out(seg(t, 3.3, 3.9)), a: hilang});
+  molekul(c, mx, my, 1.3, t, Math.min(E.out(seg(t, 3.5, 3.9)), hilang));
+  if (t < 8.6) pencar(c, mx, my, t, 4.0, {n: 9, jeda: 1.0, umur: 1.8, laju: 260, r: 16});
+  const [ox, oy] = layar(TOKOH.x + 4, TOKOH.y - 182 * TOKOH.s, .85);
+  panahEnergi(c, [[mx - 20, my + 50], [mx - 120, my + 300], [ox + 160, oy - 260], [ox + 30, oy - 30]], t,
+    {k: E.io(seg(t, 5.4, 6.3)), a: hilang, tebal: 18});
+  c.restore();
+}
+
+/* ==== [10] TEKS: judul, label, subtitle ==== */
+const KICK = $('#tKick'), JUD = $('#tJudul'); KICK.style.top = (AMAN.atas + 40) + 'px'; JUD.style.top = (AMAN.atas + 110) + 'px';
+if (DIAGRAM) { KICK.textContent = 'SAINS SEHARI-HARI'; JUD.innerHTML = '<span class="j1">Kenapa</span><span class="j2">langit biru?</span>'; }
+const LW = {anime: ['#FFE7B0', '#FFFFFF'], noir: ['#C3D0DC', '#EEF2F5'], catair: ['#2B2B35', '#2B2B35'], ukiran: ['#2B1D14', '#2B1D14']}[V];
+const LBL = DIAGRAM
+  ? [[label({teks: 'molekul udara', dx: 110, dy: -330, warna: LW[0], warnaTeks: LW[1], ukuran: 50}), 3.8, 8.3, () => [DG.mol[0] + 40, DG.mol[1] - 30]],
+     [label({teks: 'biru terpencar', dx: 120, dy: 230, warna: LW[0], warnaTeks: LW[1], ukuran: 50}), 4.7, 8.3, () => [DG.mol[0] + 190, DG.mol[1] + 90]]]
+  : [[label({teks: 'Gunung Bromo', dx: 120, dy: -400, warna: LW[0], warnaTeks: LW[1], ukuran: 50}), 5.35, 8.3, () => layar(712, 932, .34)],
+     [label({teks: 'lautan pasir', dx: -140, dy: 120, warna: LW[0], warnaTeks: LW[1], ukuran: 50}), 6.75, 8.3, () => layar(470, 1240, .3)]];
+const SUBV = {anime: {gaya: 'polos', font: "700 62px 'Zen Maru Gothic'", aksen: PAL.aksen},
+  noir: {gaya: 'pil', font: "800 56px 'Bitter'", warna: '#0B1020', aksen: '#B07A10'},
+  catair: {gaya: 'pil', font: "800 60px 'Alegreya Sans'", warna: '#2B2B35', aksen: PAL.aksen},
+  ukiran: {gaya: 'pil', font: "700 56px 'Spectral'", warna: '#2B1D14', aksen: '#B5442A'}}[V];
+// waktu kata contoh (VO perkiraan); judul 0,6–2,3 = kalimat VO pertama (tanpa subtitle). Proyek nyata: `mf.py kata`.
+const kataDari = (s, t0, t1) => { const w = s.split(' '), d = (t1 - t0) / w.length; return w.map((x, i) => ({w: x, t0: t0 + i * d, t1: t0 + (i + .9) * d})); };
+const KATA = DIAGRAM
+  ? [...kataDari('Cahaya matahari menabrak molekul udara.', 2.7, 4.3), ...kataDari('Warna biru paling mudah terpencar,', 4.5, 6.0),
+     ...kataDari('ke segala arah, sampai ke mata kita.', 6.1, 8.2)]
+  : [...kataDari('Di Jawa Timur,', 2.7, 3.55), ...kataDari('ada gunung yang terus berasap,', 3.7, 5.15), ...kataDari('namanya Bromo.', 5.3, 6.2),
+     ...kataDari('Tapi pasir seluas ini datang dari mana?', 6.5, 8.6)];
+if (KERTAS) grainOn(.16, 'multiply'); else grainOn(MALAM ? .28 : .14);
+
+/* ==== [11] SCENE ==== */
+const SCENE = {
+  dur: 9.6,
+  kata: KATA,
+  sub: Object.assign({y: .795, maks: 4, kunci: DIAGRAM ? ['biru', 'terpencar', 'molekul'] : ['bromo', 'pasir', 'berasap']}, SUBV),
+  audio: {vo: [], sfx: [], music: null},
+  build(tl) {
+    tl.to(KICK, {opacity: 1, duration: .6, ease: 'power2.out'}, .35);
+    wIn(tl, JUD, .6, {st: .17, d: .7});
+    wOut(tl, JUD, 3.3); tl.to(KICK, {opacity: 0, duration: .4}, 3.3);
+  },
+  frame(t) {
+    kamera(t); GL = []; GLK = AWAN_PEMBUKA ? seg(t, 1.6, 2.5) : 1;
+    X.setTransform(1, 0, 0, 1, 0, 0); X.globalAlpha = 1; X.globalCompositeOperation = 'source-over';
+    X.fillStyle = PAL.kertas || '#000'; X.fillRect(0, 0, W, H);
+    dunia(X, t); awanPembuka(X, t); pasca(X, t); diagramContoh(X, t); tutup(X, seg(t, 8.45, 9.55), t);
+    LBL.forEach(([L, a, b, pos]) => { const p = pos(); L.atur(t, a, b, p[0], p[1]); });
+  }
+};

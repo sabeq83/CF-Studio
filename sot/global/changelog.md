@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.41.3 — Simplifikasi Modal Ingest Content Planner ke OPC Studio (12/11/2026)
+- Refaktorisasi ImportPlannerModal ke model preset-centric 1-screen tanpa 5 accordion manual
+- Pilihan Sumber Planner dan checklist baris dinamis yang fleksibel
+- Live Preset Snapshot Card untuk inspeksi parameter produksi secara transparan
+- Backend auto-hydration operator preset pada lib/pillar-campaign-ingest.js
+
 ## V2.41.2 — Guardrail Syari Faceless & Anti-Face Leak Fix (12/11/2026)
 - Camera framing enforcer & modular biometric anchor
 - Refaktorisasi syari_classic back-view dan hands-only

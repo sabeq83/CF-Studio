@@ -1,0 +1,266 @@
+<!--@TITLE Paru-paru · contoh gaya Tubuh Manusia Anime-->
+<!--@RASIO 9:16-->
+<!--@HEAD-->
+<!-- =====================================================================================
+  GAYA: TUBUH MANUSIA ANIME · contoh adegan pembuka 9 dtk (topik contoh: paru-paru bernapas)
+  Organ dilukis dengan KODE di canvas seperti ilustrasi anime: gradasi 4+ warna, pita bayangan
+  bertepi tegas (cel), garis tepi tebal-tipis, cahaya tepi (rim), pantulan hangat dari bawah,
+  kilau basah + bintang kilau. Latar langit senja ungu-peach + awan bergumpal. Tanpa wajah/mata.
+
+  PETA FILE (cari judul bagian "== N."):
+   1. PALET .................. warna organ, langit, awan, partikel. Ganti di sini dulu.
+   2. LATAR LANGIT ........... langit senja, bintang, matahari rendah, sinar, awan 3 lapis (sprite).
+   3. KUAS ANIME ............. organ(), band(), pipa(), kilau(), bintang() — JANGAN dibongkar,
+                               cukup dipanggil. Inilah yang membuat hasilnya "anime", bukan diagram.
+   4. BENTUK ORGAN ........... Path2D organ dalam koordinat lokal (0,0 = tengah organ).
+                               Untuk topik baru: GANTI bagian ini (bentuk, celah/lipatan, saluran, pohon).
+   5. ALIRAN ................. partikel bercahaya yang menempuh jalur (udara/darah/makanan).
+   6. KAMERA ................. tabel KAM: [detik, skala, fokusX, fokusY, putar°]. Close-up → tarik mundur.
+   7. LABEL .................. pil label + garis penunjuk yang menempel ke titik organ.
+   8. frame(t) ............... urutan menggambar per frame.
+   9. SCENE .................. durasi, kata subtitle contoh, audio (kosong).
+  Teks HTML (judul, chip, label) ada di bagian BODY. Semua gerak = fungsi dari t.
+  JANGAN menulis tanda penanda bagian (at-HEAD/at-BODY/at-SCRIPT) di dalam komentar: perakit memotong file di situ.
+===================================================================================== -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Murecho:wght@600;800;900&family=RocknRoll+One&display=swap">
+<style>
+#stage{background:#2a1a5c}
+#cv{position:absolute;left:0;top:0;width:1080px;height:1920px}
+/* judul: RocknRoll One, gradasi putih→peach, bayangan keras + pendar */
+#ttl{position:absolute;left:0;right:0;top:236px;text-align:center;z-index:30;pointer-events:none}
+#tW{font:400 138px/1 'RocknRoll One',sans-serif;letter-spacing:10px;padding-left:10px;white-space:nowrap;
+  filter:drop-shadow(0 6px 0 rgba(60,14,60,.55)) drop-shadow(0 0 26px rgba(255,150,130,.55)) drop-shadow(0 10px 30px rgba(30,6,40,.6))}
+#tW span{display:inline-block;opacity:0;background:linear-gradient(180deg,#ffffff 0%,#fff3e4 48%,#ffc39e 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;will-change:transform,opacity,filter}
+#tLine{width:600px;height:3px;margin:20px auto 0;background:linear-gradient(90deg,rgba(255,220,190,0),rgba(255,240,220,.95),rgba(255,220,190,0));transform:scaleX(0)}
+#tC{display:inline-block;margin-top:20px;padding:12px 34px 15px;border-radius:999px;background:rgba(40,12,52,.66);border:2px solid rgba(255,214,180,.45);
+  font:800 50px/1.1 Murecho,sans-serif;color:#fff4ea;white-space:nowrap;opacity:0;box-shadow:0 10px 30px rgba(20,4,30,.35)}
+#tC b{font-weight:900;color:#ffd27a}
+/* label: pil gelap kecil + titik warna; garisnya digambar di canvas */
+.lab{position:absolute;left:0;top:0;z-index:35;white-space:nowrap;opacity:0;font:800 46px/1 Murecho,sans-serif;color:#fff6ee;
+  padding:13px 28px 15px 56px;border-radius:999px;background:rgba(36,10,48,.78);border:2px solid rgba(255,214,180,.38);box-shadow:0 8px 22px rgba(20,4,30,.4)}
+.lab::before{content:'';position:absolute;left:22px;top:50%;width:18px;height:18px;margin-top:-9px;border-radius:50%;background:var(--c,#ffd27a);box-shadow:0 0 10px var(--c,#ffd27a)}
+/* subtitle pil gelap (bawaan mesin, warnanya disamakan dengan gaya) */
+#mfSub .sf>span{background:rgba(36,10,46,.78)!important;border:2px solid rgba(255,214,180,.32);box-shadow:0 10px 30px rgba(20,2,20,.45)}
+</style>
+<!--@BODY-->
+<canvas id="cv" width="1080" height="1920"></canvas>
+<div id="ttl"><div id="tW">PARU-PARU</div><div id="tLine"></div><div id="tC">ratusan juta <b>kantong udara</b></div></div>
+<div class="lab" id="lb0" style="--c:#9fe8ff">trakea</div>
+<div class="lab" id="lb1" style="--c:#ffd27a">bronkus</div>
+<div class="lab" id="lb2" style="--c:#ff9db0">lobus atas</div>
+<!--@SCRIPT-->
+/* ================= 1. PALET =================
+   Organ: minimal 5 nada (terang, dasar, gelap, bayangan 1, bayangan 2) + rim + pantulan + kilau.
+   Garis tepi JANGAN hitam: pakai warna tua dari keluarga organ. Font ada di bagian HEAD (RocknRoll One + Murecho). */
+const OUT='#4a1034';                       // garis tepi
+const PARU={lit:'#ffc1c9',base:'#f27393',dark:'#b8406e',sh1:'#922f6c',sh2:'#4e1248',rim:'#ffe4c4',bounce:'#ff9878',hi:'#fff0f0'};
+const RAWAN={lit:'#ffe6ea',base:'#f2b2c2',dark:'#cf7c9c',sh1:'#a25486',sh2:'#5e2a62',rim:'#ffe6cc',bounce:'#ffa888',hi:'#fff8f8'};
+const LANGIT=[[0,'#120d36'],[.24,'#2a2270'],[.46,'#563a96'],[.62,'#9a58a6'],[.76,'#e07f9c'],[.88,'#ffb289'],[1,'#ffdcae']];
+const AWAN_T={atas:'#fff0d6',tengah:'#f7aab4',bawah:'#9a78c4'};      // awan dekat (puncak keemasan)
+const AWAN_J={atas:'#ffc8bc',tengah:'#c47aa8',bawah:'#5a429a'};      // awan jauh (lebih ungu)
+const AIR_IN='160,236,255',AIR_OUT='255,200,150';                      // partikel udara masuk / keluar
+const LX=-.6,LY=-.8;                                                   // arah cahaya utama: kiri atas
+
+/* ---------- kanvas kerja ---------- */
+const X=$('#cv').getContext('2d');
+const cx2=(w=W,h=H)=>kanvas(w,h).getContext('2d');
+const HC=cx2(),LC=cx2(),SC=cx2(),BL=cx2(270,480);
+const ID=c=>c.setTransform(1,0,0,1,0,0);
+function clr(c){ID(c);c.globalCompositeOperation='source-over';c.globalAlpha=1;c.filter='none';c.clearRect(0,0,c.canvas.width,c.canvas.height);}
+const P2=d=>new Path2D(d),TAU=Math.PI*2,G=(x,m,s)=>Math.exp(-(((x-m)/s)**2));
+let T=new DOMMatrix(),SS=1;                 // transform organ aktif + skala kamera (untuk tebal garis & blur)
+
+/* ================= 2. LATAR LANGIT ================= */
+/* awan kumulus anime: gumpal bulat, tiap gumpal punya puncak terang + bayangan bawah; bawahnya memudar */
+function awanSprite(sc,seed,P,n=14){const w=Math.ceil(1240*sc),h=Math.ceil(800*sc),c=cx2(w,h),cx=w/2,cy=380*sc,R=rng(seed),bl=[];
+  for(let i=0;i<n;i++){const a=R()*Math.PI;bl.push([cx+(R()-.5)*620*sc,cy-Math.sin(a)*160*sc*R(),(55+R()*105)*sc]);}
+  for(let i=0;i<5;i++)bl.push([cx+(i-2)*175*sc,cy+100*sc+R()*30*sc,(150+R()*50)*sc]);
+  const u=new Path2D();bl.forEach(([x,y,r])=>{u.moveTo(x+r,y);u.arc(x,y,r,0,TAU);});           // satu siluet gabungan, satu gradasi
+  const g=c.createLinearGradient(0,cy-300*sc,0,cy+260*sc);g.addColorStop(0,P.atas);g.addColorStop(.42,P.tengah);g.addColorStop(1,P.bawah);c.fillStyle=g;c.fill(u);
+  c.save();c.clip(u);bl.sort((a,b)=>b[1]-a[1]);
+  for(const [x,y,r] of bl){if(y<cy+40*sc){c.save();c.filter=`blur(${(10*sc).toFixed(1)}px)`;c.strokeStyle='rgba(80,48,140,.12)';c.lineWidth=r*.24;   // celah gelap di bawah gumpal
+      c.beginPath();c.arc(x,y+r*.06,r,Math.PI*.12,Math.PI*.88);c.stroke();c.restore();}
+    const q=c.createRadialGradient(x-r*.3,y-r*.55,0,x-r*.25,y-r*.45,r*.9);q.addColorStop(0,'rgba(255,248,228,.5)');q.addColorStop(1,'rgba(255,248,228,0)');c.fillStyle=q;c.fillRect(x-r,y-r,2*r,2*r);}
+  c.restore();
+  const e=cx2(w,h);e.fillStyle='rgba(255,250,234,.9)';e.fill(u);e.globalCompositeOperation='destination-out';e.filter=`blur(${(5*sc).toFixed(1)}px)`;e.translate(-4*sc,12*sc);e.fill(u);   // tepi atas terang hanya di siluet
+  c.drawImage(e.canvas,0,0);
+  c.globalCompositeOperation='destination-in';const f=c.createLinearGradient(0,cy+40*sc,0,h);f.addColorStop(0,'#000');f.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=f;c.fillRect(0,0,w,h);
+  return c.canvas;}
+const BG=cx2(1240,2140);
+(function(){const c=BG,w=1240,h=2140;let g=c.createLinearGradient(0,0,0,h);LANGIT.forEach(([k,col])=>g.addColorStop(k,col));c.fillStyle=g;c.fillRect(0,0,w,h);
+  const R=rng(3);for(let i=0;i<420;i++){const x=R()*w,y=Math.pow(R(),1.7)*1300,s=R();c.globalAlpha=(.2+.7*R())*(1-y/1400);c.fillStyle=s>.9?'#ffe6c8':'#ffffff';
+    c.beginPath();c.arc(x,y,s>.96?2.2:s>.8?1.4:.8,0,TAU);c.fill();}c.globalAlpha=1;
+  const rad=(x,y,r,col)=>{const q=c.createRadialGradient(x,y,0,x,y,r);q.addColorStop(0,col);q.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=q;c.fillRect(0,0,w,h);};
+  rad(380,1760,980,'rgba(255,226,170,.7)');rad(1000,700,700,'rgba(160,100,230,.22)');rad(160,500,600,'rgba(110,80,220,.18)');})();
+/* daftar awan: [sprite, x awal, y atas, kecepatan px/dtk, lapis 0=jauh 1=tengah 2=depan] */
+const AWAN=[[awanSprite(.6,21,AWAN_J,10),180,1110,5,0],[awanSprite(.66,33,AWAN_J,10),900,1170,6,0],[awanSprite(.5,45,AWAN_J,9),1500,1210,5,0],
+  [awanSprite(1.05,5,AWAN_T),60,1330,10,1],[awanSprite(1.15,9,AWAN_T),860,1370,11,1],[awanSprite(.95,13,AWAN_T),1560,1350,10,1],
+  [awanSprite(1.45,17,AWAN_T),-120,1610,20,2],[awanSprite(1.55,27,AWAN_T),900,1650,22,2]];
+function langit(t,C){const p=(C.s-1)*.04;
+  X.save();X.translate(540,1100);X.scale(1+p,1+p);X.translate(-540,-1100);X.drawImage(BG.canvas,-80+nz(t*.2,1)*14,-110+nz(t*.2,2)*10);X.restore();
+  X.save();X.globalCompositeOperation='screen';const a0=-1.98+.03*Math.sin(t*.3);           // sinar senja dari matahari rendah
+  for(let i=0;i<8;i++){const a=a0+i*.15,al=.035+.025*(i%2)+.012*Math.sin(t*.9+i);X.fillStyle=`rgba(255,206,160,${al})`;X.beginPath();X.moveTo(300,1700);
+    X.lineTo(300+2600*Math.cos(a-.035),1700+2600*Math.sin(a-.035));X.lineTo(300+2600*Math.cos(a+.035),1700+2600*Math.sin(a+.035));X.fill();}X.restore();}
+function awan(t,C,lapis){const k=1+(C.s-1)*[.03,.08,.2][lapis];X.save();X.translate(540,1400);X.scale(k,k);X.translate(-540,-1400);
+  if(lapis===2)X.filter='blur(5px)';
+  for(const [img,x0,y,sp,l] of AWAN){if(l!==lapis)continue;const w=img.width,span=W+w,x=((x0+w/2-t*sp)%span+span)%span-w/2;X.drawImage(img,x-w/2,y);}   // x0 = pusat awan di detik 0; lewat tepi kiri → muncul lagi di kanan
+  X.restore();}
+
+/* ================= 3. KUAS ANIME =================
+   band(): pita warna = bentuk dikurangi salinannya yang digeser (+ blur). Geser ke arah cahaya → pita di sisi bayangan.
+   organ(path, palet, {k, g, tex, isi}) = gradasi dasar + 2 pita bayangan + pita terang cel + rim + pantulan hangat + tekstur + isi(c). */
+const NZ=(()=>{const n=256,c=cx2(n,n),d=c.createImageData(n,n),R=rng(11);for(let i=0;i<d.data.length;i+=4){const v=90+R()*120;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=255;}
+  c.putImageData(d,0,0);const c2=cx2(n,n);c2.filter='blur(1.1px)';c2.drawImage(c.canvas,0,0);return X.createPattern(c2.canvas,'repeat');})();
+function band(path,col,ox,oy,blur,al=1,comp='source-atop'){
+  clr(SC);SC.setTransform(T);SC.fillStyle=col;SC.fill(path);
+  SC.globalCompositeOperation='destination-out';SC.filter=`blur(${Math.max(.3,blur*SS).toFixed(2)}px)`;SC.translate(ox,oy);SC.fill(path);
+  SC.filter='none';SC.globalCompositeOperation='source-over';
+  LC.save();ID(LC);LC.globalCompositeOperation=comp;LC.globalAlpha=al;LC.drawImage(SC.canvas,0,0);LC.restore();}
+function organ(path,P,o={}){const k=o.k||60,lw=(o.lw||3)/Math.sqrt(SS);
+  clr(LC);LC.setTransform(T);LC.lineJoin='round';
+  LC.save();LC.translate(-LX*lw*1.6,-LY*lw*1.6);LC.lineWidth=lw*2.8;LC.strokeStyle=OUT;LC.stroke(path);LC.restore();   // garis tebal di sisi bayangan
+  LC.lineWidth=lw*1.5;LC.strokeStyle=OUT;LC.stroke(path);
+  const g=LC.createLinearGradient(...o.g);g.addColorStop(0,P.lit);g.addColorStop(.45,P.base);g.addColorStop(1,P.dark);LC.fillStyle=g;LC.fill(path);
+  band(path,P.sh1,LX*k,LY*k,k*.06,.88);                                // bayangan inti (tepi tegas = cel)
+  band(path,P.sh2,LX*k*.3,LY*k*.3,k*.12,.78);                          // bayangan tepi paling gelap
+  band(path,P.hi,-LX*k*1.5,-LY*k*1.5,k*.04,.2,'screen');                 // pita terang cel di sisi cahaya
+  band(path,P.bounce,0,-k*.4,k*.25,.32,'screen');                       // pantulan hangat dari awan di bawah
+  band(path,P.rim,-k*.06,k*.01,k*.025,1,'screen');                      // rim light tipis di tepi kanan
+  LC.save();LC.setTransform(T);LC.clip(path);
+  if(o.tex){NZ.setTransform(new DOMMatrix().scale(.7));LC.save();ID(LC);LC.globalCompositeOperation='overlay';LC.globalAlpha=o.tex;LC.fillStyle=NZ;LC.fillRect(0,0,W,H);LC.restore();}
+  if(o.isi)o.isi(LC);LC.restore();
+  ID(HC);HC.drawImage(LC.canvas,0,0);}
+/* pipa: bentuk tabung dari garis tengah kubik [x0,y0,c1x,c1y,c2x,c2y,x1,y1] + lebar awal/akhir */
+const bez=(p,u)=>{const v=1-u;return[v*v*v*p[0]+3*v*v*u*p[2]+3*v*u*u*p[4]+u*u*u*p[6],v*v*v*p[1]+3*v*v*u*p[3]+3*v*u*u*p[5]+u*u*u*p[7]];};
+function pipa(seg,w0,w1,n=36){const L=[],Rr=[];for(let i=0;i<=n;i++){const u=i/n,q=bez(seg,u),a=bez(seg,Math.max(0,u-.01)),b=bez(seg,Math.min(1,u+.01));
+  let nx=-(b[1]-a[1]),ny=b[0]-a[0];const l=Math.hypot(nx,ny)||1;const w=lerp(w0,w1,u)/2;L.push([q[0]+nx/l*w,q[1]+ny/l*w]);Rr.push([q[0]-nx/l*w,q[1]-ny/l*w]);}
+  const p=new Path2D();p.moveTo(...L[0]);L.forEach(v=>p.lineTo(...v));Rr.reverse().forEach(v=>p.lineTo(...v));p.closePath();return p;}
+/* kilau basah: 2–3 guratan pendek + titik tajam (koordinat lokal) */
+function kilau(c,titik,gurat){c.save();c.filter=`blur(${(2.4*SS).toFixed(1)}px)`;c.lineCap='round';
+  for(const s of gurat){c.strokeStyle='rgba(255,242,246,.62)';c.lineWidth=s[6]||12;c.beginPath();c.moveTo(s[0],s[1]);c.quadraticCurveTo(s[2],s[3],s[4],s[5]);c.stroke();}
+  c.filter='none';c.fillStyle='rgba(255,255,255,.95)';for(const s of titik){c.beginPath();c.ellipse(s[0],s[1],s[2],s[3],s[4],0,TAU);c.fill();}c.restore();}
+const DOT=(()=>{const c=cx2(64,64),g=c.createRadialGradient(32,32,0,32,32,32);g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(.2,'rgba(255,236,240,.75)');g.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=g;c.fillRect(0,0,64,64);return c.canvas;})();
+function bintang(c,x,y,r,al){if(al<=.01)return;c.save();c.globalAlpha=al;c.globalCompositeOperation='lighter';c.drawImage(DOT,x-r*1.3,y-r*1.3,r*2.6,r*2.6);c.fillStyle='#fff';c.beginPath();
+  c.moveTo(x,y-r*2.2);c.quadraticCurveTo(x+r*.14,y-r*.14,x+r*2.2,y);c.quadraticCurveTo(x+r*.14,y+r*.14,x,y+r*2.2);c.quadraticCurveTo(x-r*.14,y+r*.14,x-r*2.2,y);c.quadraticCurveTo(x-r*.14,y-r*.14,x,y-r*2.2);c.fill();c.restore();}
+
+/* ================= 4. BENTUK ORGAN (ganti bagian ini untuk organ lain) =================
+   Koordinat lokal, tampak depan, (0,0) = tengah dada. Kiri layar = paru-paru KANAN pemilik tubuh (3 lobus). */
+const PKA=P2('M -150 -400 C -236 -398 -306 -326 -344 -214 C -398 -70 -440 96 -442 256 C -444 326 -414 372 -362 366 C -290 340 -178 300 -84 322 C -52 262 -60 150 -70 66 C -80 4 -52 -40 -62 -96 C -74 -206 -88 -338 -150 -400 Z');
+const PKI=P2('M 150 -400 C 236 -398 306 -326 344 -214 C 402 -70 440 98 446 270 C 448 340 410 382 358 372 C 298 352 232 334 184 342 C 150 348 122 318 142 268 C 162 222 194 170 150 124 C 112 84 72 42 66 -20 C 62 -60 82 -80 72 -122 C 62 -222 92 -352 150 -400 Z');
+const CELAH=[[-430,120,-330,60,-200,20,-80,40],[-300,-260,-300,-80,-240,120,-150,310],[352,-250,330,-60,260,140,180,340]];   // fisura antar lobus
+const TRAKEA=pipa([0,-585,2,-480,-2,-360,0,-252],78,82);
+const BRK_KA=pipa([0,-262,-40,-218,-70,-160,-92,-96],66,50),BRK_KI=pipa([0,-262,48,-226,98,-176,124,-112],60,44);
+/* tekstur dinding: bercak lobulus + jaring halus tak beraturan (terbaca saat close-up, samar saat jauh) */
+const TEKS=(()=>{const R=rng(19),b1=new Path2D(),b2=new Path2D(),jr=new Path2D(),s=30,pt={};
+  for(let i=0;i<240;i++){const x=(R()-.5)*900,y=-420+R()*820,r=10+R()*30;(R()<.5?b1:b2).moveTo(x+r,y);(i%2?b1:b2).arc(x,y,r,0,TAU);}
+  for(let j=-16;j<=15;j++)for(let i=-17;i<=17;i++){pt[i+','+j]=[i*s*1.5+(R()-.5)*s*.9,j*s*1.73+(i&1?s*.86:0)+(R()-.5)*s*.9];}
+  for(let j=-16;j<15;j++)for(let i=-17;i<17;i++){const a=pt[i+','+j];for(const n of [pt[(i+1)+','+j],pt[i+','+(j+1)]]){if(!n||R()<.28)continue;
+    jr.moveTo(...a);jr.quadraticCurveTo((a[0]+n[0])/2+(R()-.5)*12,(a[1]+n[1])/2+(R()-.5)*12,...n);}}
+  return{b1,b2,jr};})();
+/* pohon bronkus (bercahaya tembus pandang di dalam paru) */
+function pohon(x,y,a,len,w,d,R,out,induk){const x2=x+Math.cos(a)*len,y2=y+Math.sin(a)*len,b=(R()-.5)*.5*len,me={x,y,x2,y2,w,d,anak:[],qx:(x+x2)/2-Math.sin(a)*b,qy:(y+y2)/2+Math.cos(a)*b};   // cabang melengkung, bukan zig-zag
+ out.push(me);if(induk)induk.anak.push(me);
+  if(d<5){const sp=.36+R()*.22;pohon(x2,y2,a-sp,len*(.7+R()*.1),w*.7,d+1,R,out,me);pohon(x2,y2,a+sp*(.8+R()*.4),len*(.68+R()*.1),w*.68,d+1,R,out,me);}return me;}
+const POHON=[],AKAR=[];
+{const R=rng(7);[[-92,-96,[-1.9,3.0,2.2]],[124,-112,[-1.24,.14,.95]]].forEach(([x,y,arah])=>arah.forEach(a=>AKAR.push(pohon(x,y,a,118,24,0,R,POHON,null))));}
+const CABANG=[-1,1].map(sisi=>[0,1,2,3,4,5].map(d=>{const p=new Path2D();POHON.forEach(s=>{if(s.d===d&&Math.sign(s.x2)===sisi){p.moveTo(s.x,s.y);p.quadraticCurveTo(s.qx,s.qy,s.x2,s.y2);}});return p;}));
+/* gerak napas: 0 = buang habis, 1 = tarik penuh. Periode 4,6 dtk */
+const napas=t=>.5-.5*Math.cos(TAU*(t+.35)/4.6);
+
+/* ================= 5. ALIRAN (partikel udara: trakea → bronkus → cabang, maju saat tarik napas, mundur saat buang) ================= */
+const RUTE=(()=>{const R=rng(23),out=[];for(let i=0;i<110;i++){const ak=AKAR[(R()<.5?3:0)+Math.floor(R()*3)],pts=[[0,-600],[0,-262],[ak.x,ak.y]];
+  let n=ak;const tambah=n=>{pts.push([(n.x+2*n.qx+n.x2)/4,(n.y+2*n.qy+n.y2)/4],[n.x2,n.y2]);};tambah(n);while(n.anak.length){n=n.anak[R()<.5?0:1];tambah(n);}
+  const cum=[0];for(let j=1;j<pts.length;j++)cum.push(cum[j-1]+Math.hypot(pts[j][0]-pts[j-1][0],pts[j][1]-pts[j-1][1]));
+  out.push({pts,cum,len:cum[cum.length-1],off:-.4+R()*.7,span:.75+R()*.35,s:R(),j:(R()-.5)*16});}return out;})();
+function posRute(r,u){const d=clamp(u)*r.len,c=r.cum;let i=1;while(i<c.length-1&&c[i]<d)i++;const k=(d-c[i-1])/((c[i]-c[i-1])||1),a=r.pts[i-1],b=r.pts[i];return[lerp(a[0],b[0],k),lerp(a[1],b[1],k)];}
+function aliran(t,M,vis){if(vis<=.01)return;const b=napas(t),db=napas(t+.05)-b,col=db>0?AIR_IN:AIR_OUT;
+  X.save();X.globalCompositeOperation='lighter';
+  for(const r of RUTE){const u=r.off+b*r.span;if(u<=0||u>=1)continue;const [x,y]=posRute(r,u),q=M.transformPoint(new DOMPoint(x+r.j*u,y));
+    const al=vis*sstep(0,.08,u)*(1-sstep(.5,.9,u))*clamp(Math.abs(db)*50,.3,1)*.85,s=(3.2+3*r.s)*(1-.45*u)*Math.sqrt(SS);
+    X.globalAlpha=al*.7;X.drawImage(DOT,q.x-s*2,q.y-s*2,s*4,s*4);X.globalAlpha=1;X.fillStyle=`rgba(${col},${al})`;X.beginPath();X.arc(q.x,q.y,s*.5,0,TAU);X.fill();}
+  X.restore();}
+const DEBU=(()=>{const R=rng(77),a=[];for(let i=0;i<80;i++)a.push({x:R()*1080,y:R()*1920,z:.3+R()*1.4,s:2+R()*5,ph:R()*6,vy:-(10+R()*36)});return a;})();
+function debu(t,C,depan){X.save();X.globalCompositeOperation='lighter';if(depan)X.filter='blur(3px)';
+  for(const m of DEBU){if((m.z>1)!==depan)continue;const f=1+(C.s-1)*m.z*.25,y=((m.y+m.vy*t)%1980+1980)%1980-30,x=m.x+12*Math.sin(t*.8+m.ph);
+    const sx=540+(x-540)*f,sy=1000+(y-1000)*f,s=m.s*(depan?2.2:1)*f;X.globalAlpha=(.25+.4*Math.sin(t*2.1+m.ph*3)**2)*(depan?.5:.8);X.drawImage(DOT,sx-s*2,sy-s*2,s*4,s*4);}
+  X.restore();}
+
+/* ================= 6. KAMERA: [detik, skala, fokusX, fokusY (lokal), putar°] =================
+   Pola wajib gaya ini: buka CLOSE-UP dinding organ di sisi bayangan + rim light (bukan bola/gelembung), lalu tarik mundur ke organ utuh. */
+const KAM=[[0,3.3,360,-40,7],[.45,3.18,356,-36,6.5],[3.5,.84,0,-62,0],[9,.88,0,-72,0]];
+function kamera(t){let i=0;while(i<KAM.length-2&&t>KAM[i+1][0])i++;const a=KAM[i],b=KAM[i+1],k=E.io(clamp((t-a[0])/(b[0]-a[0])));
+  const s=lerp(a[1],b[1],k),fx=lerp(a[2],b[2],k),fy=lerp(a[3],b[3],k),r=lerp(a[4],b[4],k)+.6*nz(t*.4,3);
+  return{s,fx,fy,r,cx:540+nz(t*.35,1)*6,cy:lerp(900,1015,sstep(.45,3.5,t))+nz(t*.3,2)*5};}
+
+/* ================= 7. LABEL (pil HTML + garis canvas, menempel ke titik lokal organ) ================= */
+/* Label ≥44 px. Tata dalam 2 baris di celah antara chip judul dan puncak organ (y ±560 & ±655), kiri/kanan trakea,
+   supaya pil tidak menimpa organ; garisnya saja yang menunjuk ke titik organ. kiri:true = pil menempel tepi kiri zona aman. */
+const LAB=[{el:$('#lb0'),p:[22,-470],kiri:false,y:560,a:4.9},{el:$('#lb1'),p:[96,-160],kiri:false,y:655,a:5.5},{el:$('#lb2'),p:[-220,-320],kiri:true,y:560,a:6.1}];
+function pasangLabel(t,M){LAB.forEach(L=>{const k=E.out(seg(t,L.a,L.a+.5)),q=M.transformPoint(new DOMPoint(...L.p));const el=L.el,w=el.offsetWidth,h=el.offsetHeight;
+  const ly=L.y,lx=L.kiri?AMAN.kiri:AMAN.kanan-w;el.style.opacity=E.out(seg(t,L.a+.2,L.a+.55));
+  el.style.transform=`translate(${lx}px,${ly-h/2+(1-k)*14}px)`;if(k<=0)return;const ex=L.kiri?lx+w:lx,ey=ly;
+  X.save();X.strokeStyle='rgba(255,240,226,.9)';X.lineWidth=3;X.lineCap='round';X.beginPath();X.moveTo(q.x,q.y);X.lineTo(lerp(q.x,ex,k),lerp(q.y,ey,k));X.stroke();
+  X.fillStyle='#fff6ee';X.beginPath();X.arc(q.x,q.y,7,0,TAU);X.fill();X.globalAlpha=.35;X.beginPath();X.arc(q.x,q.y,16+4*Math.sin(t*4),0,TAU);X.fill();X.restore();});}
+
+/* ================= 8. frame(t) ================= */
+function paru(t,C){const b=napas(t);clr(HC);
+  const T0=new DOMMatrix().translate(C.cx,C.cy).rotate(C.r).scale(C.s).translate(-C.fx,-C.fy);SS=C.s;
+  const kemb=(px,py,sx,sy)=>T0.translate(px,py).scale(sx,sy).translate(-px,-py);     // paru mengembang dari hilus
+  const denyut=(t*2.4+1.2)%8-1.5;                                                         // denyut cahaya yang berjalan di cabang
+  const isiParu=sisi=>c=>{                                                           // detail di dalam paru (sudah ter-clip)
+    c.save();c.globalCompositeOperation='multiply';c.filter=`blur(${(5*SS).toFixed(1)}px)`;c.fillStyle='rgba(206,96,140,.16)';c.fill(TEKS.b1);c.fillStyle='rgba(236,150,170,.12)';c.fill(TEKS.b2);
+    c.filter=`blur(${(.9*SS).toFixed(1)}px)`;c.lineCap='round';c.strokeStyle='rgba(150,56,100,.13)';c.lineWidth=2;c.stroke(TEKS.jr);
+    c.globalCompositeOperation='screen';c.translate(-1.4,-1.8);c.strokeStyle='rgba(255,226,232,.07)';c.lineWidth=1.6;c.stroke(TEKS.jr);c.restore();
+    c.save();c.globalCompositeOperation='screen';c.lineCap='round';                    // pohon bronkus tembus pandang + denyut cahaya
+    CABANG[sisi<0?0:1].forEach((p,d)=>{const nyala=.06+.4*G(d,denyut,.8)*sstep(0,.2,napas(t+.4)-napas(t));const w=24*Math.pow(.69,d);
+      c.filter=`blur(${(5*SS).toFixed(1)}px)`;c.strokeStyle=`rgba(255,206,228,${nyala*.8})`;c.lineWidth=w+10;c.stroke(p);
+      c.filter=`blur(${(.8*SS).toFixed(1)}px)`;c.strokeStyle=`rgba(255,240,246,${nyala*.55})`;c.lineWidth=Math.max(1.5,w*.22);c.stroke(p);});c.restore();
+    for(const sg of CELAH){if(Math.sign(sg[0])!==sisi)continue;c.save();c.lineCap='round';c.save();c.filter=`blur(${(7*SS).toFixed(1)}px)`;c.translate(7,11);c.strokeStyle='rgba(96,20,84,.26)';c.lineWidth=30;c.beginPath();c.moveTo(sg[0],sg[1]);c.bezierCurveTo(...sg.slice(2));c.stroke();c.restore();c.filter=`blur(${(.6*SS).toFixed(1)}px)`;c.strokeStyle='rgba(90,22,78,.55)';c.lineWidth=4.5;c.beginPath();c.moveTo(sg[0],sg[1]);c.bezierCurveTo(...sg.slice(2));c.stroke();
+      c.translate(-3,-4);c.strokeStyle='rgba(255,232,236,.5)';c.lineWidth=3;c.beginPath();c.moveTo(sg[0],sg[1]);c.bezierCurveTo(...sg.slice(2));c.stroke();c.restore();}
+    const ao=c.createRadialGradient(sisi*70,-60,30,sisi*70,-60,180);ao.addColorStop(0,'rgba(90,20,70,.36)');ao.addColorStop(1,'rgba(90,20,70,0)');c.globalCompositeOperation='multiply';c.fillStyle=ao;c.fillRect(-460,-420,920,820);  // bayangan di hilus
+    c.globalCompositeOperation='source-over';
+    if(sisi<0)kilau(c,[[-262,-262,13,6,-1],[-372,40,6,3,-1.3],[-300,-336,6,3,-.7]],[[-322,-200,-312,-262,-276,-310,12],[-414,90,-418,50,-410,10,9],[-230,262,-262,276,-296,290,8]]);
+    else kilau(c,[[214,-300,11,5,-.6],[300,-120,7,3.5,-.9],[228,180,6,3,-.4]],[[184,-330,226,-340,262,-312,12],[300,-180,318,-150,326,-108,10],[214,140,226,166,246,186,9]]);};
+  T=kemb(-80,-60,1+.035*b,1+.06*b);organ(PKA,PARU,{k:90,g:[-380,-380,-60,360],tex:.18,isi:isiParu(-1)});
+  T=kemb(90,-60,1+.035*b,1+.06*b);organ(PKI,PARU,{k:90,g:[60,-390,420,380],tex:.18,isi:isiParu(1)});
+  T=T0;const cincin=c=>{c.save();c.lineCap='round';for(let y=-566;y<-262;y+=25){c.strokeStyle='rgba(120,48,104,.38)';c.lineWidth=4;c.beginPath();c.moveTo(-40,y+9);c.quadraticCurveTo(0,y+19,40,y+9);c.stroke();
+      c.strokeStyle='rgba(255,236,242,.42)';c.lineWidth=3;c.beginPath();c.moveTo(-36,y+1);c.quadraticCurveTo(-6,y+10,28,y+1);c.stroke();}
+    kilau(c,[[-20,-430,6,3,-1.5]],[[-22,-548,-25,-500,-22,-452,8]]);c.restore();};
+  organ(BRK_KA,RAWAN,{k:24,lw:2.6,g:[-100,-260,0,-90]});organ(BRK_KI,RAWAN,{k:24,lw:2.6,g:[0,-260,130,-100]});
+  organ(TRAKEA,RAWAN,{k:34,lw:2.6,g:[-40,-580,40,-250],isi:cincin});
+  ID(HC);HC.setTransform(T0);HC.fillStyle='#fbdde6';HC.beginPath();HC.ellipse(0,-586,39,11,0,0,TAU);HC.fill();     // mulut trakea
+  HC.fillStyle='#5a2458';HC.beginPath();HC.ellipse(0,-584,30,7,0,0,TAU);HC.fill();HC.lineWidth=2.4/Math.sqrt(SS);HC.strokeStyle=OUT;HC.beginPath();HC.ellipse(0,-586,39,11,0,0,TAU);HC.stroke();ID(HC);
+  return T0;}
+function frame(t){const C=kamera(t),b=napas(t);ID(X);X.globalCompositeOperation='source-over';X.globalAlpha=1;X.filter='none';
+  langit(t,C);awan(t,C,0);awan(t,C,1);debu(t,C,false);
+  const T0=paru(t,C),pc=T0.transformPoint(new DOMPoint(0,0));
+  {const r=560*C.s,q=X.createRadialGradient(pc.x,pc.y,0,pc.x,pc.y,r);q.addColorStop(0,`rgba(255,150,170,${.2+.1*b})`);q.addColorStop(1,'rgba(255,120,160,0)');X.fillStyle=q;X.fillRect(0,0,W,H);}  // pendar di belakang organ
+  X.save();X.globalCompositeOperation='screen';X.filter=`blur(${(26*Math.min(C.s,1.6)).toFixed(1)}px)`;X.globalAlpha=.14;X.drawImage(HC.canvas,0,0);X.restore();
+  X.drawImage(HC.canvas,0,0);
+  aliran(t,T0,sstep(2.2,3.4,t));
+  clr(BL);BL.filter='brightness(.9) contrast(3)';BL.drawImage(HC.canvas,0,0,270,480);BL.filter='none';                  // bloom murah dari versi kecil
+  X.save();X.globalCompositeOperation='screen';X.filter='blur(10px)';X.globalAlpha=.32;X.drawImage(BL.canvas,0,0,W,H);X.restore();
+  [[-262,-262,0],[214,-300,.4],[-20,-430,.7],[300,-120,.2],[228,180,.55]].forEach(([x,y,o])=>{const p=T0.transformPoint(new DOMPoint(x,y)),ph=(t*.9+o)%1;bintang(X,p.x,p.y,(6+3*b)*Math.sqrt(C.s),Math.sin(Math.PI*ph)**3*.95);});
+  awan(t,C,2);debu(t,C,true);pasangLabel(t,T0);
+  {let q=X.createRadialGradient(540,1000,420,540,1000,1300);q.addColorStop(0,'rgba(0,0,0,0)');q.addColorStop(1,'rgba(14,4,30,.55)');X.fillStyle=q;X.fillRect(0,0,W,H);     // vignet
+   q=X.createLinearGradient(0,0,0,640);q.addColorStop(0,'rgba(16,8,40,.7)');q.addColorStop(1,'rgba(16,8,40,0)');X.globalAlpha=sstep(3,3.6,t);X.fillStyle=q;X.fillRect(0,0,W,640);X.globalAlpha=1;}  // gelapkan area judul
+  judul(t);}
+function judul(t){$$('#tW span').forEach((e,i)=>{const k=sstep(3.3+i*.055,3.8+i*.055,t);e.style.opacity=k;e.style.transform=`translateY(${(1-k)*40}px) scale(${1+(1-k)*.25})`;e.style.filter=`blur(${(1-k)*12}px)`;});
+  $('#tLine').style.transform=`scaleX(${E.out(seg(t,3.75,4.3))})`;const c=E.back(seg(t,4.0,4.5));$('#tC').style.opacity=seg(t,4.0,4.25);$('#tC').style.transform=`translateY(${(1-c)*24}px) scale(${.9+.1*c})`;
+  $('#ttl').style.transform=`scale(${1+.008*napas(t)})`;}
+
+/* ================= 9. SCENE ================= */
+const SCENE={
+  dur:9,
+  // CONTOH waktu kata (biar subtitle terlihat). Proyek nyata: hapus, isi VO, lalu `mf.py kata <proyek>`.
+  kata:[{w:'Coba',t0:.6,t1:.9},{w:'tarik',t0:.9,t1:1.2},{w:'napas',t0:1.2,t1:1.6},{w:'dalam-dalam.',t0:1.6,t1:2.4},
+        {w:'Udaranya',t0:2.9,t1:3.4},{w:'sedang',t0:3.4,t1:3.7},{w:'mengalir',t0:3.7,t1:4.2},
+        {w:'ke',t0:4.5,t1:4.6},{w:'ratusan',t0:4.6,t1:5.0},{w:'juta',t0:5.0,t1:5.3},{w:'kantong',t0:5.3,t1:5.7},{w:'kecil',t0:5.7,t1:6.1},
+        {w:'di',t0:6.4,t1:6.5},{w:'dalam',t0:6.5,t1:6.8},{w:'paru-parumu.',t0:6.8,t1:7.7}],
+  // kunci = kata yang diberi warna aksen (tanda baca diabaikan mesin). Kata yang belum diucapkan otomatis redup di gaya 'pil'.
+  sub:{gaya:'pil',maks:4,y:.775,font:"800 54px Murecho",warna:'#FFF6EE',aksen:'#FFD27A',kunci:['napas','ratusan','juta','paru-parumu']},
+  audio:{vo:[],sfx:[],music:null},
+  build(tl){grainOn(.08,'overlay');const e=$('#tW');e.innerHTML=[...e.textContent].map(ch=>`<span>${ch}</span>`).join('');},
+  frame
+};

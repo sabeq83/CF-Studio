@@ -1,0 +1,95 @@
+<!--@TITLE Contoh adegan 3D — ganti dengan judul videomu-->
+<!--@RASIO 9:16-->
+<!--@HEAD-->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;800&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+#stage{background:#0e1220}
+#gl{position:absolute;left:0;top:0;display:block}
+#vig{position:absolute;inset:0;pointer-events:none;z-index:4;background:radial-gradient(ellipse at 50% 45%,rgba(0,0,0,0) 55%,rgba(0,0,0,.55) 100%)}
+.judul{position:absolute;left:0;width:100%;text-align:center;font:800 112px/1.02 'Sora',sans-serif;color:#FFF7EA;opacity:0;z-index:6;
+  text-shadow:0 3px 3px rgba(10,8,6,.85),0 0 30px rgba(10,8,6,.7)}
+</style>
+<!--@BODY-->
+<div id="vig"></div>
+<div class="judul" id="tJudul">Menara<br>Penjaga Pantai</div>
+<!--@SCRIPT-->
+/* ============ CONTOH 3D (8 detik) — pola dasar three.js Motion Format ============
+   - three.js r128 dari cdnjs (sudah di @HEAD). Renderer preserveDrawingBuffer:true (wajib untuk render MP4).
+   - Warna hex -> C('#hex') (sudah dikonversi ke linear). Tone mapping ACES + sRGB output.
+   - Cahaya terarah + bayangan nyata + kabut. Kamera SELALU bergerak, dihitung dari t.
+   - Tekstur prosedural dibuat SEKALI dengan canvas (teksturKanvas). Tidak ada aset luar wajib.
+   - Untuk gaya khusus (isometrik dibongkar, sejarah sinematik) mulai dari assets/gaya/<id>/scene.html. */
+const C = h => new THREE.Color(h).convertSRGBToLinear(), V = (x, y, z) => new THREE.Vector3(x, y, z), DEG = Math.PI / 180;
+const REN = new THREE.WebGLRenderer({antialias: true, preserveDrawingBuffer: true});
+REN.setPixelRatio(1); REN.setSize(W, H); REN.domElement.id = 'gl'; $('#stage').prepend(REN.domElement);
+REN.outputEncoding = THREE.sRGBEncoding; REN.toneMapping = THREE.ACESFilmicToneMapping; REN.toneMappingExposure = 1.05;
+REN.shadowMap.enabled = true; REN.shadowMap.type = THREE.PCFSoftShadowMap;
+const scene = new THREE.Scene(); scene.background = C('#E9B98A'); scene.fog = new THREE.Fog(C('#E9B98A'), 40, 140);
+const cam = new THREE.PerspectiveCamera(TEGAK ? 42 : 30, W / H, .1, 400);
+
+function teksturKanvas(w, h, lukis, ulang = [1, 1]) { const c = kanvas(w, h), x = c.getContext('2d'); lukis(x, w, h);
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(...ulang); t.encoding = THREE.sRGBEncoding; t.anisotropy = 8; return t; }
+
+// --- cahaya: matahari rendah (hangat) + langit (dingin) ---
+const sun = new THREE.DirectionalLight(C('#FFD9A8'), 3.2); sun.position.set(-30, 26, 18); sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048); Object.assign(sun.shadow.camera, {left: -30, right: 30, top: 30, bottom: -30, far: 120}); sun.shadow.bias = -.0004;
+scene.add(sun, new THREE.HemisphereLight(C('#9EC3FF'), C('#5A3A2A'), .9));
+
+// --- tanah bertekstur ---
+const pasir = teksturKanvas(512, 512, (x, w, h) => { const r = rng(3); x.fillStyle = '#C9A27A'; x.fillRect(0, 0, w, h);
+  for (let i = 0; i < 9000; i++) { const v = 150 + r() * 70 | 0; x.fillStyle = `rgba(${v},${v * .8 | 0},${v * .6 | 0},.35)`; x.fillRect(r() * w, r() * h, 2, 2); } }, [24, 24]);
+const tanah = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.MeshStandardMaterial({map: pasir, roughness: .95}));
+tanah.rotation.x = -Math.PI / 2; tanah.receiveShadow = true; scene.add(tanah);
+
+// --- objek utama: menara bergaris dengan batu bertekstur (ganti dengan objek topikmu) ---
+const batu = teksturKanvas(256, 512, (x, w, h) => { const r = rng(9); x.fillStyle = '#EDE3D2'; x.fillRect(0, 0, w, h);
+  for (let y = 0; y < h; y += 32) for (let xx = (y / 32 % 2) * 24; xx < w; xx += 48) { x.fillStyle = `hsl(35,${15 + r() * 10}%,${78 + r() * 10}%)`; x.fillRect(xx + 2, y + 2, 44, 28); }
+  for (let i = 0; i < 4; i++) { x.fillStyle = 'rgba(190,40,40,.85)'; x.fillRect(0, 90 + i * 110, w, 34); } });
+const menara = new THREE.Group(); scene.add(menara);
+const badan = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 3.1, 18, 48, 1), new THREE.MeshStandardMaterial({map: batu, roughness: .7}));
+badan.position.y = 9; badan.castShadow = badan.receiveShadow = true; menara.add(badan);
+const besi = new THREE.MeshStandardMaterial({color: C('#2B2F3A'), roughness: .4, metalness: .6});
+const balkon = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, .5, 32), besi); balkon.position.y = 18.2; balkon.castShadow = true; menara.add(balkon);
+const kaca = new THREE.Mesh(new THREE.CylinderGeometry(1.7, 1.7, 2.2, 24, 1, true), new THREE.MeshStandardMaterial({color: C('#FFF4D6'), emissive: C('#FFD98A'), emissiveIntensity: 1.4, transparent: true, opacity: .85}));
+kaca.position.y = 19.6; menara.add(kaca);
+const atap = new THREE.Mesh(new THREE.ConeGeometry(2.1, 1.8, 24), besi); atap.position.y = 21.6; atap.castShadow = true; menara.add(atap);
+const lampu = new THREE.Mesh(new THREE.SphereGeometry(.9, 24, 16), new THREE.MeshBasicMaterial({color: C('#FFF1C4')})); lampu.position.y = 19.6; menara.add(lampu);
+const sorot = new THREE.Mesh(new THREE.ConeGeometry(4, 60, 32, 1, true), new THREE.MeshBasicMaterial({color: C('#FFE9B0'), transparent: true, opacity: .12, depthWrite: false, side: THREE.DoubleSide}));
+sorot.geometry.translate(0, -30, 0); sorot.rotation.z = Math.PI / 2; sorot.position.y = 19.6; menara.add(sorot);
+
+// --- batu karang tersebar (InstancedMesh untuk elemen berulang) ---
+const R = rng(5), N = 160, karang = new THREE.InstancedMesh(new THREE.DodecahedronGeometry(1, 0), new THREE.MeshStandardMaterial({color: C('#6B5A4C'), roughness: 1}), N);
+const m4 = new THREE.Matrix4(), q4 = new THREE.Quaternion(), s3 = V(1, 1, 1);
+for (let i = 0; i < N; i++) { const a = R() * 6.28, d = 6 + R() * 50, s = .4 + R() * 1.8;
+  q4.setFromEuler(new THREE.Euler(R() * 3, R() * 3, R() * 3)); s3.set(s, s * .7, s); m4.compose(V(Math.cos(a) * d, s * .25, Math.sin(a) * d), q4, s3); karang.setMatrixAt(i, m4); }
+karang.castShadow = karang.receiveShadow = true; scene.add(karang);
+
+// --- debu melayang (posisi analitis dari t) ---
+const nd = 400, pg = new THREE.BufferGeometry(), pos = new Float32Array(nd * 3), dasar = Array.from({length: nd}, () => [R() * 60 - 30, R() * 26, R() * 60 - 30, R() * 6]);
+pg.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+const debu = new THREE.Points(pg, new THREE.PointsMaterial({color: C('#FFE7C2'), size: .12, transparent: true, opacity: .7, depthWrite: false})); scene.add(debu);
+
+const JUD = $('#tJudul'); JUD.style.top = (AMAN.atas + 90) + 'px';
+const L1 = label({dx: 170, dy: -150, teks: 'lampu 1.000 watt', warna: '#FFE08A'});
+const proj = V(0, 0, 0);
+
+const SCENE = {
+  dur: 8,
+  sub: {font: "800 64px 'Sora'", aksen: '#FFD27A'},
+  audio: {vo: [], sfx: [], music: null},
+  build(tl) { wIn(tl, JUD, .3, {st: .1}); wOut(tl, JUD, 3.2); },
+  frame(t) {
+    // kamera: crane naik + orbit pelan, selalu bergerak
+    const k = E.io(seg(t, 0, 8)), ang = (-35 + 50 * k) * DEG, dist = 46 - 14 * k, tinggi = 6 + 16 * k;
+    cam.position.set(Math.sin(ang) * dist, tinggi + nz(t * .4, 1) * .25, Math.cos(ang) * dist);
+    cam.lookAt(0, 11 + 4 * k, 0);
+    sorot.rotation.y = t * 1.1;
+    for (let i = 0; i < nd; i++) { const d = dasar[i]; pos[i * 3] = d[0] + Math.sin(t * .3 + d[3]) * 1.5; pos[i * 3 + 1] = (d[1] + t * .4 + d[3]) % 26; pos[i * 3 + 2] = d[2] + Math.cos(t * .25 + d[3]) * 1.5; }
+    pg.attributes.position.needsUpdate = true;
+    REN.render(scene, cam);
+    // label menempel ke titik 3D: proyeksikan posisi lampu ke layar
+    proj.set(0, 19.6, 0).project(cam);
+    L1.atur(t, 4.2, 7.6, (proj.x * .5 + .5) * W, (-proj.y * .5 + .5) * H);
+  }
+};

@@ -1,0 +1,431 @@
+<!--@TITLE Selat Malaka · jalur kapal tersibuk-->
+<!--@RASIO 9:16-->
+<!--@HEAD-->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pathway+Extreme:opsz,wdth,wght@8..72,75..100,500..900&family=Radio+Canada:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<!-- garis pantai dunia (Natural Earth). WAJIB disalin ke folder proyek: lihat references/gaya/peta-relief.md -->
+<script src="daratan-50m.js"></script>
+<style>
+#stage{background:#0a1426}
+#angkasa{position:absolute;inset:0;background:radial-gradient(90% 55% at 50% 50%,#17305a 0%,#0b1730 55%,#050a16 100%)}
+#langit{position:absolute;inset:0;opacity:0;background:linear-gradient(180deg,#3d6680 0%,#86a6b0 34%,#c5c8b8 70%,#d6c6a2 100%)}
+#gl,#ov,#awan{position:absolute;left:0;top:0}
+#tilt{position:absolute;inset:0;pointer-events:none;opacity:0}
+#tilt i{position:absolute;left:0;right:0;height:430px;backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+#tilt .a{top:0;-webkit-mask-image:linear-gradient(#000 20%,transparent);mask-image:linear-gradient(#000 20%,transparent)}
+#tilt .b{bottom:0;-webkit-mask-image:linear-gradient(transparent,#000 80%);mask-image:linear-gradient(transparent,#000 80%)}
+#scrimA{position:absolute;left:0;right:0;top:0;height:560px;background:linear-gradient(180deg,rgba(5,16,28,.55),rgba(5,16,28,0));pointer-events:none}
+#scrimB{position:absolute;left:-160px;top:0;width:1000px;height:560px;background:radial-gradient(closest-side,rgba(5,16,28,.5),rgba(5,16,28,0));pointer-events:none;opacity:0}
+#vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 80% 70% at 50% 48%,rgba(0,0,0,0) 60%,rgba(3,10,20,.5) 100%)}
+.kick{position:absolute;left:0;right:0;text-align:center;font:700 40px/1 'Pathway Extreme';font-stretch:88%;letter-spacing:.12em;color:#fff6e6;opacity:0;
+  text-shadow:0 2px 0 rgba(6,20,32,.6),0 4px 22px rgba(4,16,28,.75)}
+.kick .ln{display:block;margin:22px auto 0;height:3px;width:0;background:#c98a2c;border-radius:2px}
+#judul{position:absolute;left:0;right:0;text-align:center;font:900 94px/1 'Pathway Extreme';font-stretch:90%;letter-spacing:.02em;color:#fffaf0;opacity:0;white-space:nowrap;
+  text-shadow:0 4px 0 rgba(20,40,50,.55),0 10px 30px rgba(6,22,34,.7),0 0 60px rgba(6,22,34,.4)}
+.pul{position:absolute;left:0;top:0;font:700 50px/1.08 'Radio Canada';letter-spacing:.22em;color:#fffaf0;white-space:nowrap;text-align:center;opacity:0;
+  text-shadow:0 2px 0 rgba(16,28,10,.6),0 4px 18px rgba(0,0,0,.65)}
+#hit{position:absolute;left:84px;top:0;color:#fff8ec;opacity:0;text-shadow:0 3px 0 rgba(6,20,32,.5),0 6px 26px rgba(4,16,28,.8)}
+#hit .cap{font:700 46px/1 'Radio Canada';letter-spacing:.14em}
+#hit .num{font:800 168px/1 'Pathway Extreme';font-stretch:90%;margin-top:8px;white-space:nowrap}
+#hit .ket{font:600 54px/1 'Radio Canada';color:#ffc76e;margin-top:10px}
+#galat{position:absolute;left:60px;right:60px;top:760px;font:700 46px/1.3 'Radio Canada';color:#ffd6c2;text-align:center;display:none}
+</style>
+<!--@BODY-->
+<div id="angkasa"></div><div id="langit"></div>
+<canvas id="gl"></canvas>
+<canvas id="ov"></canvas>
+<div id="tilt"><i class="a"></i><i class="b"></i></div>
+<canvas id="awan"></canvas>
+<div id="scrimA"></div><div id="scrimB"></div><div id="vig"></div>
+<div class="pul" id="pSum">SUMATRA</div>
+<div class="pul" id="pMal">SEMENANJUNG<br>MALAYA</div>
+<div class="kick" id="kick1">JALUR LAUT TERSIBUK DI DUNIA<span class="ln"></span></div>
+<div class="kick" id="kick2">SUMATRA · MALAYSIA · SINGAPURA<span class="ln"></span></div>
+<div id="judul">SELAT MALAKA</div>
+<div id="hit"><div class="cap">KAPAL LEWAT</div><div class="num"><span id="nv">0</span></div><div class="ket">setiap tahun</div></div>
+<div id="galat">File <b>daratan-50m.js</b> belum ada di folder proyek.<br>Salin dari assets/gaya/peta-relief/ (lihat resep).</div>
+<!--@SCRIPT-->
+/* =====================================================================================
+   GAYA · PETA RELIEF SINEMATIK — contoh pembuka "Selat Malaka: jalur kapal tersibuk" (9 dtk)
+   Butuh file data daratan-50m.js DI FOLDER PROYEK (garis pantai Natural Earth, domain publik):
+     cp "<folder-skill>/assets/gaya/peta-relief/daratan-50m.js" <proyek>/      (mf.py baru hanya menyalin scene.html)
+   Aman untuk 9:16 dan 16:9 (kanvas ikut W×H, teks ikut AMAN). Panggang ±0,5–1 dtk saat muat; 1 frame ±0,1 dtk.
+   Peta isi file ini:
+   [A] TOPIK   — wilayah relief, punggung gunung, gunung api, paparan dangkal, jalur, titik label.
+                 >>> Untuk topik baru, ganti terutama bagian ini + teks di @BODY + SCENE.kata. <<<
+   [B] DATA    — baca window.DARATAN (cincin lon/lat) + noise & jarak (EDT) buatan sendiri.
+   [C] PANGGANG RELIEF — sekali saat muat: tinggi (m) -> bayangan bukit + AO + bayangan jatuh +
+                 warna darat/laut bergradasi kedalaman + gema garis pantai -> 1 tekstur RGBA.
+   [D] BOLA DUNIA — tekstur equirectangular dari data yang sama, atmosfer, rotasi ke lon/lat.
+   [E] MEDAN 3D — mesh tinggi + shader (kilau laut, garis pantai bercahaya, bayangan awan, kabut).
+   [F] KAMERA  — kunci waktu {t, lon, lat, jarak, arah, miring} dihaluskan Catmull-Rom.
+   [G] LAPIS 2D — jalur dunia di bola, jalur kapal + kapal bergerak, awan transisi.
+   [H] SCENE   — waktu teks, label, subtitle contoh, frame(t).
+   Semua gerak = fungsi t. Tanpa Math.random tak berbenih.
+   ===================================================================================== */
+const DEG = Math.PI / 180;
+
+/* ---------------- [A] TOPIK ---------------- */
+const WIL = {lon0: 93.5, lon1: 108, lat0: -4, lat1: 10, ppd: 104};      // kotak relief (derajat) + piksel per derajat panggangan
+const LONC = (WIL.lon0 + WIL.lon1) / 2, LATC = (WIL.lat0 + WIL.lat1) / 2, KX = Math.cos(LATC * Math.PI / 180);   // KX: 1° bujur menyempit jauh dari khatulistiwa
+const SKALA_TINGGI = .00017;                                             // 1 m -> unit dunia (1 unit = 1°). Dilebih-lebihkan ±19×
+const LERENG_BAYANG = 2.2;                                               // lereng dipertajam KHUSUS untuk bayangan bukit (bukan bentuk)
+const MATAHARI = [-.55, .62, .56];                                       // x=timur, y=atas, z=selatan (dari barat daya, sore)
+// punggung pegunungan: [[titik lon,lat..], tinggi m, lebar °]
+const PUNGGUNG = [
+  [[[95.4, 5.3], [96.6, 4.4], [97.6, 3.3], [98.6, 2.1], [99.5, .7], [100.4, -.7], [101.3, -2.0], [102.3, -3.3], [103.3, -4.2]], 1900, .38],
+  [[[101.0, 6.3], [101.35, 5.1], [101.65, 3.9], [102.0, 3.0], [102.4, 2.4]], 1300, .3],
+  [[[102.2, 5.4], [102.5, 4.6], [102.9, 3.9]], 900, .3],
+  [[[98.7, 9.8], [98.9, 8.6], [99.4, 7.4], [100.3, 6.6]], 900, .3]];
+const GUNUNG = [[97.2, 3.75, 3400], [98.39, 3.17, 2460], [98.52, 3.23, 2200], [99.98, .08, 2900], [100.47, -.38, 2890],
+  [100.68, -.48, 2600], [101.26, -1.7, 3805], [102.62, -3.52, 2400], [102.23, 4.63, 2187], [96.45, 4.85, 2600]];
+// paparan dangkal (Paparan Sunda), perkiraan tangan dari peta batimetri
+const PAPARAN = [[99.5, 11], [98.0, 9.0], [97.7, 7.4], [97.0, 6.3], [95.7, 5.95], [95.1, 5.7], [95.6, 4.5], [96.9, 3.0], [98.3, 1.6],
+  [99.4, .2], [100.3, -1.1], [101.2, -2.5], [102.4, -3.9], [103.6, -5.2], [110, -5.2], [110, 11]];
+// jalur kapal utama (garis tengah), barat laut -> tenggara; dan jalur cabang yang bergabung
+const JALUR = [[94.2, 6.9], [95.2, 6.4], [97.0, 5.8], [98.6, 4.6], [100.0, 3.5], [101.0, 2.7], [102.0, 2.05], [102.9, 1.45],
+  [103.55, 1.15], [103.85, 1.17], [104.2, 1.22], [104.5, 1.4], [105.4, 2.3], [106.6, 3.5], [107.8, 4.8]];
+const CABANG = [[[93.5, 5.2], [94.6, 5.9], [95.6, 6.2]], [[107.8, 2.0], [106.4, 2.3], [105.3, 2.2]], [[105.6, -3.6], [105.2, -1.6], [104.8, .3], [104.45, 1.25]]];
+const TITIK = {sum: [101.9, 1.0], mal: [102.95, 2.75], sing: [103.82, 1.33], sempit: [103.74, 1.13]};
+const PELABUHAN = [[103.82, 1.27], [101.36, 3.0], [103.55, 1.36], [104.0, 1.13], [100.35, 5.4]];   // cahaya kota/pelabuhan
+// jalur dunia di bola (masuk ke selat)
+const DUNIA = [[[-5, 36], [12, 37.2], [32, 31.6], [32.6, 29.6], [38, 21], [43.4, 12.6], [52, 12.4], [66, 9], [80.5, 5.6], [90, 5.9], [95.4, 6.2]],
+  [[50.5, 26.6], [56.5, 26.2], [60, 22], [68, 15], [78, 6.4], [88, 5.8], [95.4, 6.2]],
+  [[18, -35.5], [36, -32], [52, -20], [70, -6], [85, 2.6], [95.4, 6.2]],
+  [[104.3, 1.3], [107, 4.2], [110.5, 9], [114.5, 16.5], [118.5, 21], [121.8, 30.8]],
+  [[104.3, 1.3], [109.5, 6], [117, 13.5], [126, 25], [135, 33.4], [139.8, 35.2]],
+  [[104.3, 1.3], [108, -2], [114, -5.5], [118, -8.6], [118, -20], [116, -31.5]]];
+
+/* ---------------- [B] DATA + matematika kecil ---------------- */
+function bacaDaratan() {
+  const D = window.DARATAN; if (!D) return null; const s = D.skala;
+  return D.cincin.map(str => { const a = str.split(','), p = []; let x = 0, y = 0, x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+    for (let i = 0; i < a.length; i += 2) { x += +a[i]; y += +a[i + 1]; const lo = x / s, la = y / s; p.push([lo, la]);
+      if (lo < x0) x0 = lo; if (lo > x1) x1 = lo; if (la < y0) y0 = la; if (la > y1) y1 = la; }
+    p.kotak = [x0, y0, x1, y1]; return p; });
+}
+const hh = (i, j, s) => { let h = (Math.imul(i, 374761393) + Math.imul(j, 668265263) + Math.imul(s, 982451653)) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+function vn(x, y, s) { const i = Math.floor(x), j = Math.floor(y), fx = x - i, fy = y - j, u = fx * fx * (3 - 2 * fx), v = fy * fy * (3 - 2 * fy);
+  const a = hh(i, j, s), b = hh(i + 1, j, s), c = hh(i, j + 1, s), d = hh(i + 1, j + 1, s); return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v; }
+function fbm(x, y, s, o) { let v = 0, a = .5; for (let k = 0; k < o; k++) { v += a * vn(x, y, s + k * 17); x *= 2.03; y *= 2.03; a *= .5; } return v; }
+function rdg(x, y, s, o) { let v = 0, a = .5; for (let k = 0; k < o; k++) { let n = 1 - Math.abs(vn(x, y, s + k * 31) * 2 - 1); v += a * n * n; x *= 2.1; y *= 2.1; a *= .5; } return v; }
+// jarak ke piksel bertanda terdekat (transformasi jarak eksak 2 lintasan), satuan piksel
+function jarak(tanda, w, h) {
+  const BIG = 1e12, g = new Float64Array(w * h), n = Math.max(w, h), f = new Float64Array(n), d = new Float64Array(n), v = new Int32Array(n), z = new Float64Array(n + 1);
+  for (let i = 0; i < w * h; i++) g[i] = tanda[i] ? 0 : BIG;
+  const satu = len => { let k = 0; v[0] = 0; z[0] = -1e30; z[1] = 1e30;
+    for (let q = 1; q < len; q++) { let s; for (;;) { const p = v[k]; s = ((f[q] + q * q) - (f[p] + p * p)) / (2 * q - 2 * p); if (s <= z[k]) k--; else break; }
+      k++; v[k] = q; z[k] = s; z[k + 1] = 1e30; }
+    k = 0; for (let q = 0; q < len; q++) { while (z[k + 1] < q) k++; const p = v[k]; d[q] = (q - p) * (q - p) + f[p]; } };
+  for (let x = 0; x < w; x++) { for (let y = 0; y < h; y++) f[y] = g[y * w + x]; satu(h); for (let y = 0; y < h; y++) g[y * w + x] = d[y]; }
+  const o = new Float32Array(w * h);
+  for (let y = 0; y < h; y++) { for (let x = 0; x < w; x++) f[x] = g[y * w + x]; satu(w); for (let x = 0; x < w; x++) o[y * w + x] = Math.sqrt(d[x]); }
+  return o;
+}
+function kabur(a, w, h, r) { const t = new Float32Array(w * h), o = new Float32Array(w * h), n = 2 * r + 1;
+  for (let y = 0; y < h; y++) { const b = y * w; let s = 0; for (let x = -r; x <= r; x++) s += a[b + clamp(x, 0, w - 1)];
+    for (let x = 0; x < w; x++) { t[b + x] = s / n; s += a[b + Math.min(w - 1, x + r + 1)] - a[b + Math.max(0, x - r)]; } }
+  for (let x = 0; x < w; x++) { let s = 0; for (let y = -r; y <= r; y++) s += t[clamp(y, 0, h - 1) * w + x];
+    for (let y = 0; y < h; y++) { o[y * w + x] = s / n; s += t[Math.min(h - 1, y + r + 1) * w + x] - t[Math.max(0, y - r) * w + x]; } }
+  return o; }
+const mix3 = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
+const hx = s => [parseInt(s.slice(1, 3), 16) / 255, parseInt(s.slice(3, 5), 16) / 255, parseInt(s.slice(5, 7), 16) / 255];
+
+/* ---------------- [C] PANGGANG RELIEF ---------------- */
+const GW = Math.round((WIL.lon1 - WIL.lon0) * WIL.ppd), GH = Math.round((WIL.lat1 - WIL.lat0) * WIL.ppd), N = GW * GH, PPD = WIL.ppd;
+const gx = lon => (lon - WIL.lon0) * PPD, gy = lat => (WIL.lat1 - lat) * PPD;
+const WARNA = {   // palet panggangan (ganti di sini untuk palet alternatif)
+  hutan: hx('#2b5226'), hutan2: hx('#41702d'), kebun: hx('#8a9450'), sawah: hx('#9aa65a'), tinggi: hx('#6d6447'), batu: hx('#8c8270'), pasir: hx('#d8c99a'),
+  dangkal: hx('#4fb7bd'), paparan: hx('#1f7f9c'), dalam: hx('#0f3c66'), palung: hx('#0a2547'), buih: hx('#d9f4ee')};
+const G = {};
+function panggang(DAR) {
+  const c = kanvas(GW, GH), x = c.getContext('2d'); x.fillStyle = '#fff'; x.beginPath();
+  DAR.forEach(p => { const k = p.kotak; if (k[2] < WIL.lon0 - 1 || k[0] > WIL.lon1 + 1 || k[3] < WIL.lat0 - 1 || k[1] > WIL.lat1 + 1) return;
+    p.forEach((q, i) => i ? x.lineTo(gx(q[0]), gy(q[1])) : x.moveTo(gx(q[0]), gy(q[1]))); x.closePath(); });
+  x.fill('evenodd');
+  const la = x.getImageData(0, 0, GW, GH).data, darA = new Float32Array(N), darat = new Uint8Array(N), laut = new Uint8Array(N);
+  for (let i = 0; i < N; i++) { darA[i] = la[i * 4 + 3] / 255; darat[i] = darA[i] > .5 ? 1 : 0; laut[i] = 1 - darat[i]; }
+  const c2 = kanvas(GW, GH), x2 = c2.getContext('2d'); x2.filter = 'blur(10px)'; x2.fillStyle = '#fff'; x2.beginPath();
+  PAPARAN.forEach((q, i) => i ? x2.lineTo(gx(q[0]), gy(q[1])) : x2.moveTo(gx(q[0]), gy(q[1]))); x2.fill();
+  const pa = x2.getImageData(0, 0, GW, GH).data, luarPap = new Uint8Array(N); for (let i = 0; i < N; i++) luarPap[i] = pa[i * 4 + 3] > 127 ? 1 : 0;
+  const dLaut = jarak(laut, GW, GH), dDarat = jarak(darat, GW, GH), dPap = jarak(luarPap, GW, GH);
+  // punggung + gunung api
+  const tam = new Float32Array(N);
+  PUNGGUNG.forEach(([pts, Hm, w]) => { for (let i = 1; i < pts.length; i++) { const [ax, ay] = pts[i - 1], [bx, by] = pts[i], R = w * 2.6, dx = bx - ax, dy = by - ay, L2 = dx * dx + dy * dy;
+    const c0 = Math.max(0, gx(Math.min(ax, bx) - R) | 0), c1 = Math.min(GW - 1, gx(Math.max(ax, bx) + R) | 0), r0 = Math.max(0, gy(Math.max(ay, by) + R) | 0), r1 = Math.min(GH - 1, gy(Math.min(ay, by) - R) | 0);
+    for (let r = r0; r <= r1; r++) { const lat = WIL.lat1 - (r + .5) / PPD; for (let k = c0; k <= c1; k++) { const lon = WIL.lon0 + (k + .5) / PPD;
+      const u = clamp(((lon - ax) * dx + (lat - ay) * dy) / L2), ex = lon - ax - dx * u, ey = lat - ay - dy * u, q = (ex * ex + ey * ey) / (w * w); if (q > 7) continue;
+      const v = Hm * Math.exp(-q), id = r * GW + k; if (v > tam[id]) tam[id] = v; } } } });
+  GUNUNG.forEach(([vx, vy, Hm]) => { const R = .5, c0 = Math.max(0, gx(vx - R) | 0), c1 = Math.min(GW - 1, gx(vx + R) | 0), r0 = Math.max(0, gy(vy + R) | 0), r1 = Math.min(GH - 1, gy(vy - R) | 0);
+    for (let r = r0; r <= r1; r++) { const lat = WIL.lat1 - (r + .5) / PPD; for (let k = c0; k <= c1; k++) { const lon = WIL.lon0 + (k + .5) / PPD, d = Math.hypot(lon - vx, lat - vy) / R; if (d >= 1) continue;
+      const a = Math.atan2(lat - vy, lon - vx), alur = .5 + .5 * Math.sin(a * 15 + vn(a * 2 + vx, d * 4, 4) * 5);
+      const v = (Hm * .6 * Math.pow(1 - d, 2.4) + Hm * .2 * Math.exp(-d * d * 16)) * (1 - .16 * alur * Math.sin(Math.PI * Math.min(1, d * 1.3))), id = r * GW + k; if (v > tam[id]) tam[id] = v; } } });
+  // tinggi (m): darat positif, laut = -kedalaman
+  const hm = new Float32Array(N);
+  for (let r = 0; r < GH; r++) { const lat = WIL.lat1 - (r + .5) / PPD; for (let k = 0; k < GW; k++) { const i = r * GW + k, lon = WIL.lon0 + (k + .5) / PPD;
+    if (darat[i]) { const ds = dLaut[i] / PPD, n = fbm(lon * 1.6, lat * 1.6, 11, 4), rn = rdg(lon * 2.4, lat * 2.4, 5, 4), m = sstep(0, .3, ds);
+      let h = 6 + (150 + 260 * n) * (1 - Math.exp(-ds / .45)); h += tam[i] * (.5 + .8 * rn) * m + 380 * rn * rn * m; h += 70 * (fbm(lon * 11, lat * 11, 3, 2) - .5) * m; hm[i] = Math.max(2, h); }
+    else { const dl = dDarat[i] / PPD, n = fbm(lon * .9, lat * .9, 7, 3), sh = pa[i * 4 + 3] / 255;
+      const dk = 14 + 80 * (1 - Math.exp(-dl / .6)) + (n - .5) * 24, dd = 200 + 3600 * (1 - Math.exp(-(dPap[i] / PPD) / 1.2)) * (.8 + .4 * n); hm[i] = -lerp(dd, dk, sh); } } }
+  // tinggi visual (unit dunia) + bayangan jatuh (setengah resolusi) + AO
+  const hv = new Float32Array(N); for (let i = 0; i < N; i++) hv[i] = Math.max(0, hm[i]) * SKALA_TINGGI; G.hv = hv;
+  const L = new THREE.Vector3(...MATAHARI).normalize(), px = 1 / PPD, SW = GW >> 1, SHh = GH >> 1, hs = new Float32Array(SW * SHh);
+  for (let r = 0; r < SHh; r++) for (let k = 0; k < SW; k++) { const i = r * 2 * GW + k * 2; hs[r * SW + k] = Math.max(hv[i], hv[i + 1], hv[i + GW], hv[i + GW + 1]); }
+  const hl = Math.hypot(L.x, L.z), sx = L.x / hl, sz = L.z / hl, naik = L.y / hl * 2 * px, bay = new Float32Array(SW * SHh);
+  for (let r = 0; r < SHh; r++) for (let k = 0; k < SW; k++) { const h0 = hs[r * SW + k]; let occ = 0;
+    for (let s = 1; s < 60; s++) { const xx = Math.round(k + sx * s), zz = Math.round(r + sz * s); if (xx < 0 || zz < 0 || xx >= SW || zz >= SHh) break;
+      const d = hs[zz * SW + xx] - (h0 + naik * s); if (d > 0) { occ = Math.max(occ, Math.min(1, d * 40)); if (occ >= 1) break; } }
+    bay[r * SW + k] = 1 - occ; }
+  const ao = kabur(hv, GW, GH, Math.round(.22 * PPD)), bayK = kabur(bay, SW, SHh, 1);
+  // warna akhir per piksel -> tekstur RGBA (A = air)
+  const tx = new Uint8Array(N * 4), amb = hx('#6b7a8f'), mat = hx('#fff0d6');
+  for (let r = 0; r < GH; r++) { const lat = WIL.lat1 - (r + .5) / PPD, rl = clamp(r, 1, GH - 2); for (let k = 0; k < GW; k++) {
+    const i = r * GW + k, lon = WIL.lon0 + (k + .5) / PPD, kl = clamp(k, 1, GW - 2), h = hm[i];
+    const dx = LERENG_BAYANG * (hv[rl * GW + kl + 1] - hv[rl * GW + kl - 1]) / (2 * px * KX), dz = LERENG_BAYANG * (hv[(rl + 1) * GW + kl] - hv[(rl - 1) * GW + kl]) / (2 * px), nl = Math.hypot(dx, 1, dz);
+    const lam = Math.max(0, (-dx * L.x + L.y - dz * L.z) / nl), sd = bayK[Math.min(SHh - 1, r >> 1) * SW + Math.min(SW - 1, k >> 1)], oc = clamp(1 - (ao[i] - hv[i]) * 7, .45, 1);
+    const halus = fbm(lon * 30, lat * 30, 21, 2);
+    let col, air = Math.round((1 - darA[i]) * 255);
+    if (h > 0) { const n = fbm(lon * 2.2 + 3, lat * 2.2, 13, 3), kb = sstep(.52, .62, fbm(lon * 7, lat * 7, 17, 3)) * (1 - sstep(150, 500, h));
+      col = mix3(WARNA.hutan, WARNA.hutan2, n); col = mix3(col, WARNA.kebun, kb * .8); col = mix3(col, WARNA.sawah, sstep(.55, .75, fbm(lon * .7 + 9, lat * .7, 29, 3)) * (1 - sstep(40, 300, h)) * .7);
+      col = mix3(col, WARNA.tinggi, sstep(900, 1900, h)); col = mix3(col, WARNA.batu, sstep(2300, 3300, h));
+      col = mix3(WARNA.pasir, col, sstep(3, 26, h) * sstep(.4, 1.6, dLaut[i]));
+      const lit = lam * sd; col = col.map((v, j) => v * (amb[j] * oc * .85 + mat[j] * 1.05 * lit) * (.92 + .16 * halus)); }
+    else { const d = -h, dl = dDarat[i] / PPD;
+      col = mix3(WARNA.dangkal, WARNA.paparan, sstep(18, 80, d)); col = mix3(col, WARNA.dalam, sstep(110, 900, d)); col = mix3(col, WARNA.palung, sstep(1500, 3800, d));
+      col = mix3(col, WARNA.buih, Math.exp(-dl / .028) * .55);                                    // pantai bercahaya
+      const gema = [.12, .26, .45].reduce((s, e, j) => s + Math.exp(-Math.pow((dl - e) / .012, 2)) * (.16 - j * .035), 0);   // gema garis pantai
+      col = mix3(col, WARNA.buih, gema); const sh = .78 + .22 * sd; col = col.map(v => v * sh * (.96 + .08 * halus)); }
+    const o = ((GH - 1 - r) * GW + k) * 4; tx[o] = clamp(col[0]) * 255; tx[o + 1] = clamp(col[1]) * 255; tx[o + 2] = clamp(col[2]) * 255; tx[o + 3] = air; } }
+  const T = new THREE.DataTexture(tx, GW, GH, THREE.RGBAFormat); T.magFilter = THREE.LinearFilter; T.minFilter = THREE.LinearMipmapLinearFilter;
+  T.generateMipmaps = true; T.anisotropy = 8; T.needsUpdate = true; G.T = T; G.L = L;
+}
+function tinggiDi(lon, lat) { const fx = clamp(gx(lon) - .5, 0, GW - 1.001), fy = clamp(gy(lat) - .5, 0, GH - 1.001), x0 = fx | 0, y0 = fy | 0, a = fx - x0, b = fy - y0, h = G.hv, i = y0 * GW + x0;
+  return lerp(lerp(h[i], h[i + 1], a), lerp(h[i + GW], h[i + GW + 1], a), b); }
+const keDunia = (lon, lat, y = 0) => new THREE.Vector3((lon - LONC) * KX, y, -(lat - LATC));
+
+/* ---------------- [D]+[E] three.js: bola dunia + medan ---------------- */
+const R3 = {};
+const GLSL_NOISE = `float hs(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float vz(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hs(i),hs(i+vec2(1,0)),f.x),mix(hs(i+vec2(0,1)),hs(i+vec2(1,1)),f.x),f.y);}
+float fb(vec2 p){float v=0.,a=.5;for(int k=0;k<4;k++){v+=a*vz(p);p*=2.07;a*=.5;}return v;}`;
+function teksturBola(DAR) {
+  const w = 4096, h = 2048, c = kanvas(w, h), x = c.getContext('2d'), X = lon => (lon + 180) / 360 * w, Y = lat => (90 - lat) / 180 * h;
+  const og = x.createLinearGradient(0, 0, 0, h); og.addColorStop(0, '#1b3d63'); og.addColorStop(.5, '#0f3a68'); og.addColorStop(1, '#1b3d63'); x.fillStyle = og; x.fillRect(0, 0, w, h);
+  // cincin yang melintasi garis 180° diputus (kalau tidak, muncul garis lurus melintang di bola)
+  const jalur = () => { x.beginPath(); DAR.forEach(p => { p.forEach((q, i) => i && Math.abs(q[0] - p[i - 1][0]) < 180 ? x.lineTo(X(q[0]), Y(q[1])) : x.moveTo(X(q[0]), Y(q[1]))); }); };
+  x.save(); x.filter = 'blur(16px)'; x.fillStyle = 'rgba(70,170,190,.55)'; jalur(); x.fill('evenodd'); x.restore();          // laut dangkal di tepi benua
+  x.save(); jalur(); x.clip('evenodd');
+  const lg = x.createLinearGradient(0, 0, 0, h);
+  [[0, '#eef3f5'], [.12, '#e4ecef'], [.19, '#6d7d55'], [.27, '#4e6a3a'], [.34, '#a8996a'], [.4, '#c9ad78'], [.46, '#3f6a30'], [.54, '#335f2a'], [.6, '#b9a06e'], [.66, '#8a8a5c'], [.74, '#5d7448'], [.86, '#e8eef0'], [1, '#f4f7f8']]
+    .forEach(([o, c]) => lg.addColorStop(o, c)); x.fillStyle = lg; x.fillRect(0, 0, w, h);
+  const r = rng(4); for (let i = 0; i < 40000; i++) { const v = r(); x.fillStyle = v < .5 ? 'rgba(20,40,10,.10)' : 'rgba(255,240,200,.07)'; const s = 4 + r() * 22; x.fillRect(r() * w, r() * h, s, s * .7); }
+  x.restore(); x.lineWidth = 2; x.strokeStyle = 'rgba(225,250,245,.55)'; jalur(); x.stroke();
+  const t = new THREE.CanvasTexture(c); t.anisotropy = 8; return t;
+}
+function siapkanGL(DAR) {
+  const ren = new THREE.WebGLRenderer({canvas: $('#gl'), antialias: true, alpha: true, preserveDrawingBuffer: true});
+  ren.setPixelRatio(1); ren.setSize(W, H, false); ren.setClearColor(0x000000, 0); R3.ren = ren;
+  R3.cam = new THREE.PerspectiveCamera(30, W / H, .01, 400);
+  // --- bola dunia ---
+  const sb = new THREE.Scene(); R3.sb = sb; const UB = {tB: {value: teksturBola(DAR)}, uSun: {value: new THREE.Vector3(-.5, .45, .75).normalize()}};
+  const bola = new THREE.Mesh(new THREE.SphereGeometry(1, 128, 96), new THREE.ShaderMaterial({uniforms: UB,
+    vertexShader: `varying vec2 vUv;varying vec3 vN,vV;void main(){vUv=uv;vec4 w=modelMatrix*vec4(position,1.);vN=normalize(mat3(modelMatrix)*normal);vV=normalize(cameraPosition-w.xyz);gl_Position=projectionMatrix*viewMatrix*w;}`,
+    fragmentShader: `uniform sampler2D tB;uniform vec3 uSun;varying vec2 vUv;varying vec3 vN,vV;void main(){vec3 c=texture2D(tB,vUv).rgb;float l=max(dot(vN,uSun),0.);
+      vec3 col=c*(.28+1.05*smoothstep(-.15,.6,l));float fr=pow(1.-max(dot(vN,vV),0.),2.5);col=mix(col,vec3(.55,.8,1.),fr*.55);
+      vec3 hv=normalize(uSun+vV);float laut=step(c.b,c.r*.8+.25)<.5?1.:0.;col+=vec3(1.,.9,.75)*pow(max(dot(vN,hv),0.),60.)*.35*laut;gl_FragColor=vec4(col,1.);}`}));
+  const atm = new THREE.Mesh(new THREE.SphereGeometry(1.09, 96, 64), new THREE.ShaderMaterial({side: THREE.BackSide, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    vertexShader: `varying vec3 vN,vV;void main(){vec4 w=modelMatrix*vec4(position,1.);vN=normalize(mat3(modelMatrix)*normal);vV=normalize(cameraPosition-w.xyz);gl_Position=projectionMatrix*viewMatrix*w;}`,
+    fragmentShader: `varying vec3 vN,vV;void main(){float k=pow(smoothstep(0.,.42,-dot(vN,vV)),2.2);gl_FragColor=vec4(vec3(.42,.72,1.)*k*.9,k);}`}));
+  const putarX = new THREE.Group(), putarY = new THREE.Group(); putarY.add(bola); putarX.add(putarY); sb.add(putarX, atm); R3.putarX = putarX; R3.putarY = putarY;
+  // --- medan relief ---
+  const sm = new THREE.Scene(); R3.sm = sm; const MW = WIL.lon1 - WIL.lon0, MH = WIL.lat1 - WIL.lat0;
+  const U = {tW: {value: G.T}, uT: {value: 0}, uPantai: {value: 0}, uCam: {value: new THREE.Vector3()}, uSun: {value: G.L}, uKabut: {value: new THREE.Color('#a9bcbd')}, uJauh: {value: 8}};
+  R3.U = U;
+  const geo = new THREE.PlaneGeometry(MW * KX, MH, 580, 560); geo.rotateX(-Math.PI / 2); const pos = geo.attributes.position, uv = geo.attributes.uv;
+  for (let i = 0; i < pos.count; i++) pos.setY(i, tinggiDi(WIL.lon0 + uv.getX(i) * MW, WIL.lat0 + uv.getY(i) * MH));
+  geo.computeBoundingSphere();
+  const FR = `uniform sampler2D tW;uniform float uT,uPantai,uJauh;uniform vec3 uCam,uSun,uKabut;varying vec2 vUv;varying vec3 vW;` + GLSL_NOISE + `
+    void main(){vec4 c=texture2D(tW,vUv);vec3 col=c.rgb;float m=c.a;
+      if(m>.01){vec2 p=vW.xz*34.;float a=fb(p+vec2(uT*.5,uT*.22)),b=fb(p*1.6-vec2(uT*.35,uT*.4)+7.);vec3 nr=normalize(vec3((a-.5)*.5,1.,(b-.5)*.5));
+        vec3 v=normalize(uCam-vW),h=normalize(v+uSun);col+=vec3(1.,.92,.76)*pow(max(dot(nr,h),0.),90.)*.8*m;
+        col+=vec3(.05,.07,.08)*(a-.5)*m;}
+      {vec2 q=vW.xz*64.;float b0=fb(q),bx=fb(q+vec2(.35,0.)),bz=fb(q+vec2(0.,.35));float jauh=1.-smoothstep(.004,.02,fwidth(vW.x));   // relief mikro darat
+       vec3 bn=normalize(vec3(-(bx-b0)*2.6,1.,-(bz-b0)*2.6));col*=mix(1.,(1.+.75*(dot(bn,uSun)-uSun.y))*(.93+.14*fb(q*2.3)),(1.-m)*jauh);}
+      float fw=max(fwidth(m),1e-4);float gl=1.-smoothstep(.3,1.5,abs(m-.5)/fw);col=mix(col,vec3(.93,1.,.96),gl*uPantai);
+      vec2 pc=vW.xz*.55+vec2(uT*.035,uT*.012);float cl=smoothstep(.52,.72,fb(pc)*.65+fb(pc*2.7+3.)*.35);col*=1.-.32*cl;
+      float d=length(vW-uCam);col=mix(col,uKabut,smoothstep(uJauh*.55,uJauh*1.7,d)*.75);gl_FragColor=vec4(col,1.);}`;
+  const medan = new THREE.Mesh(geo, new THREE.ShaderMaterial({uniforms: U, extensions: {derivatives: true},
+    vertexShader: `varying vec2 vUv;varying vec3 vW;void main(){vUv=uv;vec4 w=modelMatrix*vec4(position,1.);vW=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}`, fragmentShader: FR}));
+  sm.add(medan);
+  // laut luar (di balik tepi kotak relief) supaya tepi tidak terlihat
+  const luar = new THREE.Mesh(new THREE.PlaneGeometry(400, 400).rotateX(-Math.PI / 2), new THREE.ShaderMaterial({uniforms: U,
+    vertexShader: `varying vec3 vW;void main(){vec4 w=modelMatrix*vec4(position,1.);vW=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}`,
+    fragmentShader: `uniform vec3 uCam,uKabut;uniform float uJauh;varying vec3 vW;void main(){vec3 c=vec3(.06,.2,.36);float d=length(vW-uCam);gl_FragColor=vec4(mix(c,uKabut,smoothstep(uJauh*.55,uJauh*1.7,d)*.75),1.);}`}));
+  luar.position.y = -.004; sm.add(luar);
+}
+
+/* ---------------- [F] KAMERA ---------------- */
+// bola: [t, lon tengah, lat tengah, jarak dari pusat bola]
+const KB = [[0, 64, 10, 7.2], [1.2, 84, 7, 4.2], [2.6, 101, 3.2, 1.45]];
+// medan: [t, lon sasaran, lat sasaran, jarak, arah (° dari utara, + = ke timur), miring ke bawah (°)]
+const KM = [[2.3, 100.6, 3.2, 24, -20, 86], [4.6, 101.4, 2.7, 15, -34, 66], [6.8, 102.9, 1.9, 9.0, -46, 50], [9, 103.5, 1.5, 6.6, -52, 43]];
+function kurva(K, t) {   // Catmull-Rom pada nilai kunci, waktu tidak seragam -> selalu mulus, tidak berhenti di kunci
+  if (t <= K[0][0]) return K[0].slice(1); if (t >= K[K.length - 1][0]) return K[K.length - 1].slice(1);
+  let i = 0; while (K[i + 1][0] < t) i++; const a = K[Math.max(0, i - 1)], b = K[i], c = K[i + 1], d = K[Math.min(K.length - 1, i + 2)], u = (t - b[0]) / (c[0] - b[0]);
+  return b.slice(1).map((_, j) => { const p0 = a[j + 1], p1 = b[j + 1], p2 = c[j + 1], p3 = d[j + 1], m1 = (p2 - p0) / 2, m2 = (p3 - p1) / 2;
+    return (2 * u * u * u - 3 * u * u + 1) * p1 + (u * u * u - 2 * u * u + u) * m1 + (-2 * u * u * u + 3 * u * u) * p2 + (u * u * u - u * u) * m2; });
+}
+function kameraBola(t) { const k = E.io(seg(t, 0, 2.6)), tt = k * 2.6, [lon, lat, dj] = kurva(KB, tt), cam = R3.cam;
+  R3.putarY.rotation.y = -Math.PI / 2 - lon * DEG; R3.putarX.rotation.x = lat * DEG;
+  cam.position.set(nz(t * .5, 3) * .01, nz(t * .5, 4) * .01, dj); cam.near = Math.max(.01, (dj - 1) * .3); cam.far = dj + 2; cam.up.set(0, 1, 0); cam.lookAt(0, 0, 0); cam.updateProjectionMatrix(); }
+function kameraMedan(t) { const [lon, lat, dj, arah, mir] = kurva(KM, t), cam = R3.cam, a = (arah + nz(t * .3, 1) * .6) * DEG, m = (mir + nz(t * .3, 2) * .5) * DEG;
+  const sas = keDunia(lon, lat, 0), f = new THREE.Vector3(Math.sin(a) * Math.cos(m), -Math.sin(m), -Math.cos(a) * Math.cos(m));
+  cam.position.copy(sas).addScaledVector(f, -dj); cam.up.set(Math.sin(a), 1, -Math.cos(a)).normalize();   // arah tatap + atas: tanpa lompatan saat kamera tegak lurus
+  cam.near = dj * .03; cam.far = dj * 6; cam.lookAt(sas); cam.updateProjectionMatrix(); R3.U.uCam.value.copy(cam.position); R3.U.uJauh.value = dj * 1.15; }
+const _v = new THREE.Vector3();
+function layar(v) { _v.copy(v).project(R3.cam); return {x: (_v.x * .5 + .5) * W, y: (-_v.y * .5 + .5) * H, ok: _v.z < 1 && _v.z > -1}; }
+
+/* ---------------- [G] LAPIS 2D: jalur, kapal, awan ---------------- */
+['#gl', '#ov', '#awan'].forEach(id => { const c = $(id); c.width = W; c.height = H; c.style.width = W + 'px'; c.style.height = H + 'px'; });
+const OV = $('#ov').getContext('2d'), AW = $('#awan').getContext('2d');
+function rapat(pts, langkah) { const o = []; for (let i = 1; i < pts.length; i++) { const [ax, ay] = pts[i - 1], [bx, by] = pts[i], n = Math.max(1, Math.ceil(Math.hypot(bx - ax, by - ay) / langkah));
+  for (let k = i === 1 ? 0 : 1; k <= n; k++) o.push([lerp(ax, bx, k / n), lerp(ay, by, k / n)]); } return o; }
+function geser(pts, d) { return pts.map((p, i) => { const a = pts[Math.max(0, i - 1)], b = pts[Math.min(pts.length - 1, i + 1)], dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1;
+  return [p[0] - dy / l * d, p[1] + dx / l * d]; }); }
+const JR = rapat(JALUR, .04), LAJUR = [geser(JR, .055), geser(JR, -.055).reverse()], CB = CABANG.map(c => rapat(c, .05));
+const panjang = p => p.reduce((s, q, i) => i ? s + Math.hypot(q[0] - p[i - 1][0], q[1] - p[i - 1][1]) : 0, 0);
+LAJUR.forEach(p => p.pj = panjang(p)); CB.forEach(p => p.pj = panjang(p));
+const KAPAL = []; { const r = rng(11); for (let i = 0; i < 64; i++) KAPAL.push({j: i % 2, u: r(), v: .022 + r() * .014, w: .8 + r() * .5});
+  for (let i = 0; i < 15; i++) KAPAL.push({c: i % 3, u: r(), v: .05 + r() * .03, w: .7 + r() * .4}); }
+function titikDi(pts, u) { const f = clamp(u) * (pts.length - 1), i = Math.min(pts.length - 2, f | 0), k = f - i; return [lerp(pts[i][0], pts[i + 1][0], k), lerp(pts[i][1], pts[i + 1][1], k)]; }
+function garisLayar(pts, sampai, y = .002) { const o = []; const n = Math.max(2, Math.round(pts.length * sampai)); for (let i = 0; i < n; i++) { const p = pts[i]; o.push(layar(keDunia(p[0], p[1], y))); } return o; }
+function goresan(ps, lebar, warna, dash, off) { OV.beginPath(); ps.forEach((p, i) => i ? OV.lineTo(p.x, p.y) : OV.moveTo(p.x, p.y)); OV.lineWidth = lebar; OV.strokeStyle = warna;
+  OV.setLineDash(dash || []); OV.lineDashOffset = off || 0; OV.stroke(); OV.setLineDash([]); }
+function gambarJalurMedan(t, muncul, kpl) {
+  if (muncul <= 0) return; OV.lineCap = OV.lineJoin = 'round';
+  const ps = garisLayar(JR, muncul); OV.globalAlpha = .9;
+  goresan(ps, 20, 'rgba(255,190,90,.16)'); goresan(ps, 8, 'rgba(255,205,120,.35)'); goresan(ps, 3, '#fff1cf', [18, 16], -t * 60);
+  CB.forEach(c => { const q = garisLayar(c, muncul); goresan(q, 7, 'rgba(255,205,120,.22)'); goresan(q, 2, 'rgba(255,241,207,.8)', [10, 12], -t * 50); });
+  OV.globalAlpha = 1; if (kpl <= 0) return;
+  KAPAL.forEach((s, i) => { const pts = s.c != null ? CB[s.c] : LAJUR[s.j], u = (s.u + t * s.v) % 1, a = titikDi(pts, u), b = titikDi(pts, u + .004);
+    const P = layar(keDunia(a[0], a[1], .002)), Q = layar(keDunia(b[0], b[1], .002)); if (!P.ok) return;
+    const dx = Q.x - P.x, dy = Q.y - P.y, l = Math.hypot(dx, dy) || 1, ux = dx / l, uy = dy / l, sk = clamp(l / (.004 * pts.pj) * .08 * s.w, 7, 26), ud = clamp(u * 12, 0, 1) * clamp((1 - u) * 12, 0, 1);
+    OV.globalAlpha = kpl * ud;
+    const g = OV.createLinearGradient(P.x, P.y, P.x - ux * sk * 4, P.y - uy * sk * 4); g.addColorStop(0, 'rgba(235,252,255,.75)'); g.addColorStop(1, 'rgba(235,252,255,0)');
+    OV.strokeStyle = g; OV.lineWidth = sk * .45; OV.beginPath(); OV.moveTo(P.x, P.y); OV.lineTo(P.x - ux * sk * 4, P.y - uy * sk * 4); OV.stroke();
+    OV.fillStyle = 'rgba(255,200,110,.28)'; OV.beginPath(); OV.arc(P.x, P.y, sk * .9, 0, 7); OV.fill();
+    OV.strokeStyle = i % 5 ? '#fff6e2' : '#ffc76e'; OV.lineWidth = sk * .42; OV.beginPath(); OV.moveTo(P.x - ux * sk * .5, P.y - uy * sk * .5); OV.lineTo(P.x + ux * sk * .5, P.y + uy * sk * .5); OV.stroke(); });
+  OV.globalAlpha = 1;
+}
+function gambarTitik(t, k) {   // cahaya pelabuhan berdenyut + cincin "titik tersempit"
+  if (k <= 0) return;
+  PELABUHAN.forEach((q, i) => { const P = layar(keDunia(q[0], q[1], .004)); if (!P.ok) return; const r = 26 + 6 * Math.sin(t * 3 + i * 2);
+    const g = OV.createRadialGradient(P.x, P.y, 0, P.x, P.y, r * 2); g.addColorStop(0, 'rgba(255,240,200,.95)'); g.addColorStop(.25, 'rgba(255,196,110,.55)'); g.addColorStop(1, 'rgba(255,170,70,0)');
+    OV.globalAlpha = k; OV.fillStyle = g; OV.beginPath(); OV.arc(P.x, P.y, r * 2, 0, 7); OV.fill(); });
+  const S = layar(keDunia(TITIK.sempit[0], TITIK.sempit[1], .004)), m = sstep(6.6, 7.1, t);
+  if (S.ok && m > 0) for (let j = 0; j < 2; j++) { const u = (t * .7 + j * .5) % 1; OV.globalAlpha = m * (1 - u); OV.strokeStyle = '#ffc76e'; OV.lineWidth = 4;
+    OV.beginPath(); OV.ellipse(S.x, S.y, 30 + 90 * u, (30 + 90 * u) * .6, 0, 0, 7); OV.stroke(); }
+  OV.globalAlpha = 1; }
+function bolaKeLayar(lon, lat) { const v = new THREE.Vector3(Math.cos(lat * DEG) * Math.cos(lon * DEG), Math.sin(lat * DEG), -Math.cos(lat * DEG) * Math.sin(lon * DEG)).multiplyScalar(1.004);
+  R3.putarY.localToWorld(v); const n = v.clone().normalize(), vis = n.dot(R3.cam.position.clone().sub(v).normalize()); const s = layar(v); s.vis = clamp(vis * 6); return s; }
+function slerpLL(a, b, k) { const A = new THREE.Vector3().setFromSphericalCoords(1, (90 - a[1]) * DEG, a[0] * DEG), B = new THREE.Vector3().setFromSphericalCoords(1, (90 - b[1]) * DEG, b[0] * DEG);
+  const om = Math.acos(clamp(A.dot(B), -1, 1)); if (om < 1e-5) return a; const s = Math.sin(om), v = A.multiplyScalar(Math.sin((1 - k) * om) / s).add(B.multiplyScalar(Math.sin(k * om) / s));
+  return [Math.atan2(v.x, v.z) / DEG, 90 - Math.acos(clamp(v.y, -1, 1)) / DEG]; }
+const DUNIA_R = DUNIA.map(r => { const o = []; for (let i = 1; i < r.length; i++) for (let k = i === 1 ? 0 : 1; k <= 12; k++) o.push(slerpLL(r[i - 1], r[i], k / 12)); return o; });
+function gambarJalurBola(t) {
+  const muncul = E.out(seg(t, .35, 1.9)); if (muncul <= 0) return bolaKeLayar(100.5, 3.4); OV.lineCap = OV.lineJoin = 'round';
+  DUNIA_R.forEach((r, ri) => { const masuk = ri < 3, n = Math.round(r.length * muncul), ps = []; for (let i = 0; i < n; i++) { const q = masuk ? r[i] : r[i]; ps.push(bolaKeLayar(q[0], q[1])); }
+    for (let i = 1; i < ps.length; i++) { const a = ps[i - 1], b = ps[i], al = Math.min(a.vis, b.vis); if (al <= 0) continue; OV.globalAlpha = al;
+      OV.strokeStyle = 'rgba(255,190,90,.3)'; OV.lineWidth = 12; OV.beginPath(); OV.moveTo(a.x, a.y); OV.lineTo(b.x, b.y); OV.stroke();
+      OV.strokeStyle = '#ffe2a6'; OV.lineWidth = 3.2; OV.beginPath(); OV.moveTo(a.x, a.y); OV.lineTo(b.x, b.y); OV.stroke(); }
+    for (let j = 0; j < 3; j++) { const u = ((t * .35 + j / 3 + ri * .17) % 1), idx = masuk ? u : 1 - u, q = r[Math.min(r.length - 1, Math.round(idx * (r.length - 1)))];
+      if (idx > muncul) continue; const s = bolaKeLayar(q[0], q[1]); if (s.vis <= 0) continue; OV.globalAlpha = s.vis; OV.fillStyle = '#fffaf0';
+      OV.beginPath(); OV.arc(s.x, s.y, 5.5, 0, 7); OV.fill(); } });
+  const S = bolaKeLayar(100.5, 3.4); OV.globalAlpha = S.vis * muncul; const rr = 26 + 10 * Math.sin(t * 6);
+  const g = OV.createRadialGradient(S.x, S.y, 0, S.x, S.y, rr * 2.4); g.addColorStop(0, 'rgba(255,236,190,.95)'); g.addColorStop(.3, 'rgba(255,190,90,.5)'); g.addColorStop(1, 'rgba(255,170,60,0)');
+  OV.fillStyle = g; OV.beginPath(); OV.arc(S.x, S.y, rr * 2.4, 0, 7); OV.fill(); OV.globalAlpha = 1; return S;
+}
+// awan transisi: gumpalan dipanggang sekali, digambar membesar saat kamera menembus
+const PUFF = []; { const r = rng(23); for (let k = 0; k < 4; k++) { const c = kanvas(512, 512), x = c.getContext('2d');
+  const B = Array.from({length: 40}, () => { const a = r() * 6.28, d = r() * 150; return [256 + Math.cos(a) * d, 256 + Math.sin(a) * d * .7, 46 + r() * 70]; });
+  [[.28, 'rgba(58,80,108,', .5], [-.18, 'rgba(222,232,240,', .34]].forEach(([oy, w, al]) => B.forEach(([px, py, rr]) => {   // bawah gelap kebiruan, atas terang
+    const g = x.createRadialGradient(px, py + rr * oy, 0, px, py + rr * oy, rr * (oy > 0 ? 1 : .8)); g.addColorStop(0, w + al + ')'); g.addColorStop(.65, w + al * .4 + ')'); g.addColorStop(1, w + '0)');
+    x.fillStyle = g; x.fillRect(0, 0, 512, 512); }));
+  PUFF.push(c); } }
+const AWAN = []; { const r = rng(31); for (let i = 0; i < 30; i++) AWAN.push({a: r() * 6.28, d: .1 + r() * .9, s: .9 + r() * 1.4, k: i % 4, o: r()}); }
+function gambarAwan(t) { AW.clearRect(0, 0, W, H); const tutup = sstep(1.7, 2.2, t) * (1 - sstep(2.5, 3.0, t));
+  if (t > 2.6) for (let i = 0; i < 4; i++) { const s = 1300 + i * 260, px = ((i * 397 + t * (38 + i * 14)) % (W + s)) - s / 2, py = H * (.14 + i * .22);   // kabut tipis lewat di depan lensa
+    AW.globalAlpha = .13 * sstep(2.6, 3.4, t); AW.drawImage(PUFF[i], px - s / 2, py - s / 2, s, s * .55); }
+  AW.globalAlpha = 1; if (tutup <= 0) return;
+  const z = Math.exp((t - 2.4) * 2.4), v = AW.createRadialGradient(W / 2, H * .48, 0, W / 2, H * .48, H * .7);   // dip ke biru laut gelap, BUKAN kilatan putih
+  v.addColorStop(0, 'rgba(22,58,92,1)'); v.addColorStop(1, 'rgba(6,20,38,1)'); AW.globalAlpha = sstep(.35, 1, tutup) * .9; AW.fillStyle = v; AW.fillRect(0, 0, W, H);
+  AWAN.forEach(c => { const rr = c.d * 900 * z, px = W / 2 + Math.cos(c.a) * rr, py = H * .48 + Math.sin(c.a) * rr * 1.5, s = 900 * c.s * (.6 + .5 * z);
+    AW.globalAlpha = clamp(tutup * 1.3) * (.6 + .3 * c.o); AW.drawImage(PUFF[c.k], px - s / 2, py - s / 2, s, s); });
+  AW.globalAlpha = 1; }
+
+/* ---------------- [H] TEKS, LABEL, SCENE ---------------- */
+const K1 = $('#kick1'), K2 = $('#kick2'), JUD = $('#judul'), HIT = $('#hit');
+[K1, K2, JUD].forEach(e => { e.style.left = AMAN.kiri + 'px'; e.style.right = (W - AMAN.kanan) + 'px'; });   // teks kepala di dalam zona aman
+K1.style.top = (AMAN.atas + 10) + 'px'; HIT.style.top = (AMAN.bawah - 290) + 'px'; $('#scrimB').style.top = (AMAN.bawah - 360) + 'px'; K2.style.top = (AMAN.atas + 10) + 'px'; JUD.style.top = (AMAN.atas + 96) + 'px';
+const L_SEL = label({dx: 150, dy: -200, teks: 'Selat Malaka', warna: '#ffc76e', ukuran: 54});
+const L_SG = label({dx: 130, dy: -190, teks: 'SINGAPURA', warna: '#fff1cf', ukuran: 46});
+function tempel(el, lon, lat, t, a, b, dy = 0) { const p = layar(keDunia(lon, lat, tinggiDi(lon, lat) + .02)), k = E.out(seg(t, a, a + .6)) * (1 - seg(t, b, b + .3));
+  const w2 = el.offsetWidth / 2, x = clamp(p.x, AMAN.kiri + w2, AMAN.kanan - w2);   // tetap di zona aman walau titiknya di luar layar
+  el.style.opacity = k; el.style.transform = `translate(${x - w2}px,${p.y - el.offsetHeight / 2 + dy + (1 - k) * 24}px)`; }
+// SUBTITLE PINDAH KE RUANG KOSONG: tiap frasa memilih slot yang paling jauh dari label/judul/penghitung
+// pada detik frasa itu muncul (dihitung dari kamera di detik itu -> deterministik, aman untuk render acak).
+const SLOT = []; (TEGAK ? [.38, .5, .62] : [.3, .5, .7]).forEach(x => (TEGAK ? [.3, .38, .46, .54, .62] : [.42, .52, .62, .72]).forEach(y => SLOT.push([x, y])));
+const PILIH = new Map();
+function halangan(t) {   // titik-titik yang harus dijauhi subtitle pada detik t
+  const hal = []; kameraMedan(Math.max(2.5, t));
+  [[TITIK.sum, 4.0], [TITIK.mal, 4.3], [TITIK.sing, 6.0]].forEach(([q, a]) => { if (t < a - .3) return; const p = layar(keDunia(q[0], q[1], .01)), x = clamp(p.x, AMAN.kiri + 170, AMAN.kanan - 90);
+    hal.push([x - 170, p.y], [x, p.y], [x + 170, p.y]); });
+  hal.push([W / 2, AMAN.atas + 150], [W / 2 - 260, AMAN.atas + 150], [W / 2 + 260, AMAN.atas + 150]); if (t > 5.2) hal.push([300, AMAN.bawah - 180], [560, AMAN.bawah - 180]);
+  return hal; }
+function slotSub(f) {
+  if (!PILIH.size) { let sebelum = null;           // dihitung SEKALI untuk semua frasa, berurutan -> hasil sama walau frame dirender acak
+    SUB.frasa.forEach(fr => { const hal = [fr.a + .1, (fr.a + fr.b) / 2, fr.b].flatMap(halangan); let best = SLOT[0], skor = -1;
+      SLOT.forEach(s => { const x = s[0] * W, y = s[1] * H; let m = 1e9; hal.forEach(h => m = Math.min(m, Math.hypot((x - h[0]) * .5, (y - h[1]) * 1.3)));
+        if (s === sebelum) m *= .7; if (m > skor) { skor = m; best = s; } });
+      PILIH.set(fr, best); sebelum = best; }); }
+  return PILIH.get(f); }
+
+const SCENE = {
+  dur: 9,
+  // contoh waktu kata. Proyek nyata: hapus, lalu `mf.py kata <proyek>` setelah VO ada.
+  kata: [{w: 'Lebih', t0: 3.3, t1: 3.55}, {w: 'dari', t0: 3.55, t1: 3.75}, {w: '90.000', t0: 3.8, t1: 4.55}, {w: 'kapal', t0: 4.6, t1: 5.0},
+    {w: 'lewat', t0: 5.25, t1: 5.5}, {w: 'selat', t0: 5.5, t1: 5.85}, {w: 'sempit', t0: 5.85, t1: 6.3}, {w: 'ini', t0: 6.3, t1: 6.6},
+    {w: 'setiap', t0: 6.95, t1: 7.3}, {w: 'tahun.', t0: 7.3, t1: 7.9}],
+  sub: {gaya: 'polos', maks: 3, font: "800 70px 'Pathway Extreme'", warna: '#fffaf0', aksen: '#ffc76e', kunci: ['90000', 'sempit'],
+    y: (t, f) => { const s = slotSub(f); if (G.siap) kameraMedan(Math.max(2.5, t)); return {x: W * s[0], y: H * s[1]}; }},
+  audio: {vo: [], sfx: [], music: null},
+  muat() {
+    const DAR = bacaDaratan();
+    if (!DAR) { $('#galat').style.display = 'block'; __errs.push('daratan-50m.js tidak ditemukan di folder proyek (salin dari assets/gaya/peta-relief/)'); return; }
+    panggang(DAR); siapkanGL(DAR); G.siap = true; grainOn(.16);
+  },
+  build(tl) {
+    wIn(tl, K1, .25, {st: .05}); tl.to('#kick1 .ln', {width: 300, duration: .6, ease: 'power2.out'}, .6); wOut(tl, K1, 2.05);
+    wIn(tl, K2, 3.0, {st: .05}); tl.to('#kick2 .ln', {width: 260, duration: .6, ease: 'power2.out'}, 3.3);
+    wIn(tl, JUD, 3.15, {st: .12, b: 16});
+  },
+  frame(t) {
+    if (!G.siap) return;
+    const bolaFase = t < 2.45; OV.clearRect(0, 0, W, H);
+    $('#angkasa').style.opacity = bolaFase ? 1 : 0; $('#langit').style.opacity = bolaFase ? 0 : 1;
+    $('#tilt').style.opacity = bolaFase ? 0 : sstep(2.6, 3.6, t); $('#scrimB').style.opacity = sstep(5.2, 5.8, t);
+    if (bolaFase) {
+      kameraBola(t); R3.ren.render(R3.sb, R3.cam); const S = gambarJalurBola(t);
+      L_SEL.atur(t, 1.15, 2.0, S.x, S.y);
+    } else {
+      L_SEL.atur(t, 1.15, 2.0);
+      kameraMedan(t); R3.U.uT.value = t; R3.U.uPantai.value = .55 * sstep(2.8, 4, t); R3.ren.render(R3.sm, R3.cam);
+      gambarTitik(t, sstep(3.4, 4.2, t)); gambarJalurMedan(t, E.io(seg(t, 2.7, 4.6)), sstep(3.2, 4.0, t));
+      const sg = layar(keDunia(TITIK.sing[0], TITIK.sing[1], .01)); L_SG.atur(t, 6.0, 99, sg.x, sg.y);
+    }
+    tempel($('#pSum'), ...TITIK.sum, t, 4.0, 99); tempel($('#pMal'), ...TITIK.mal, t, 4.3, 99);
+    gambarAwan(t);
+    const kh = E.out(seg(t, 5.3, 5.8)); HIT.style.opacity = kh; HIT.style.transform = `translateY(${(1 - kh) * 30}px)`;
+    $('#nv').textContent = (Math.round(90000 * E.out(seg(t, 5.3, 7.2)) / 100) * 100).toLocaleString('id-ID') + (t > 7.2 ? '+' : '');
+  }
+};

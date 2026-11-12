@@ -1,0 +1,70 @@
+<!--@TITLE Contoh adegan 2D — ganti dengan judul videomu-->
+<!--@RASIO 9:16-->
+<!--@HEAD-->
+<!-- Font: SELALU pilih dari gaya yang dipakai (references/gaya/*.md), bukan default. Ini hanya contoh. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&display=swap">
+<style>
+#stage{background:#1b1430}
+#dunia{position:absolute;inset:0;transform-origin:50% 55%}
+.judul{position:absolute;left:0;width:100%;text-align:center;font:800 120px/1 'Bricolage Grotesque',sans-serif;color:#FFF4E2;opacity:0;
+  letter-spacing:-.02em;text-shadow:0 4px 4px rgba(20,10,30,.8),0 0 50px rgba(20,10,30,.6)}
+.judul em{font-style:normal;color:#FFC857}
+</style>
+<!--@BODY-->
+<div id="dunia"></div>
+<div class="judul" id="tJudul">Kenapa langit <em>senja</em> merah?</div>
+<!--@SCRIPT-->
+/* ============ CONTOH 2D (8 detik) — pola yang dipakai semua adegan 2D Motion Format ============
+   1) Dunia digambar di <canvas> PER FRAME dari t (latar berlapis + objek + partikel).
+   2) Kamera = transform pada #dunia (push-in, geser, goyang halus), bukan objek diam.
+   3) Teks: judul masuk per kata (wIn), label penunjuk (label()), subtitle per kata (SCENE.kata / kata.js).
+   Ganti isi gambar(), teks, dan waktu. Pertahankan: semua dari t, tanpa Math.random tak berbenih. */
+const cv = kanvas(W, H, $('#dunia')), x = cv.getContext('2d');
+const R = rng(42), BINTANG = Array.from({length: 90}, () => ({x: R() * W, y: R() * H * .55, r: .6 + R() * 2.2, f: R() * 6}));
+const AWAN = Array.from({length: 7}, (_, i) => ({y: H * (.18 + .07 * i), w: 380 + R() * 420, s: 14 + R() * 26, o: R() * W}));
+
+function gambar(t) {
+  // lapis 1: langit bergradasi yang bergeser warnanya pelan
+  const k = sstep(0, 8, t), g = x.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, `hsl(${255 - 25 * k},45%,${14 + 6 * k}%)`); g.addColorStop(.55, `hsl(${15 + 10 * k},80%,${48 + 6 * k}%)`); g.addColorStop(1, '#2a1630');
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  // lapis 2: matahari + halo
+  const sy = H * (.58 + .04 * k), hg = x.createRadialGradient(W / 2, sy, 0, W / 2, sy, 520);
+  hg.addColorStop(0, 'rgba(255,214,140,.95)'); hg.addColorStop(.18, 'rgba(255,170,90,.55)'); hg.addColorStop(1, 'rgba(255,120,80,0)');
+  x.fillStyle = hg; x.fillRect(0, 0, W, H);
+  x.fillStyle = '#FFE3A8'; x.beginPath(); x.arc(W / 2, sy, 120, 0, 7); x.fill();
+  // lapis 3: bintang berkedip (deterministik)
+  BINTANG.forEach(b => { x.globalAlpha = (1 - k) * (.4 + .6 * Math.abs(Math.sin(t * 1.7 + b.f))); x.fillStyle = '#fff'; x.beginPath(); x.arc(b.x, b.y, b.r, 0, 7); x.fill(); });
+  x.globalAlpha = 1;
+  // lapis 4: awan bergumpal yang melintas (posisi = fungsi t)
+  AWAN.forEach((a, i) => { const ax = ((a.o + t * a.s) % (W + a.w)) - a.w;
+    x.fillStyle = `rgba(${255 - i * 8},${150 + i * 6},${130 + i * 10},.28)`;
+    for (let j = 0; j < 5; j++) { x.beginPath(); x.ellipse(ax + j * a.w / 5, a.y + Math.sin(j * 1.9) * 18, a.w / 4, 34 + 10 * Math.sin(j), 0, 0, 7); x.fill(); } });
+  // lapis 5: siluet bukit depan (paralaks)
+  x.fillStyle = '#1a0f22'; x.beginPath(); x.moveTo(0, H);
+  for (let i = 0; i <= 40; i++) { const px = i / 40 * W; x.lineTo(px, H * .74 + Math.sin(i * .7 + 1) * 40 + Math.sin(i * .23) * 70); }
+  x.lineTo(W, H); x.fill();
+}
+
+const JUD = $('#tJudul'); JUD.style.top = (AMAN.atas + 120) + 'px';
+const L1 = label({x: W / 2 + 90, y: H * .6 - 60, dx: 170, dy: -220, teks: 'cahaya merah', warna: '#FFC857'});
+
+const SCENE = {
+  dur: 8,
+  // Contoh waktu kata. Di proyek nyata: hapus baris ini, jalankan `mf.py kata <proyek>` setelah VO ada.
+  kata: [{w:'Saat',t0:3.0,t1:3.3},{w:'matahari',t0:3.3,t1:3.8},{w:'rendah,',t0:3.8,t1:4.3},{w:'cahaya',t0:4.6,t1:5.0},{w:'biru',t0:5.0,t1:5.3},
+         {w:'tersebar',t0:5.3,t1:5.8},{w:'habis.',t0:5.8,t1:6.4},{w:'Tinggal',t0:6.6,t1:6.95},{w:'merahnya.',t0:6.95,t1:7.6}],
+  sub: {gaya: 'polos', font: "800 66px 'Bricolage Grotesque'", aksen: '#FFC857', kunci: ['biru', 'merahnya']},
+  audio: {vo: [], sfx: [], music: null},   // isi setelah suara dibuat: {src:'assets/audio/vo-01.mp3', at:0.4, teks:'...'}
+  build(tl) {
+    wIn(tl, JUD, .4, {st: .08});
+    wOut(tl, JUD, 2.7);
+  },
+  frame(t) {
+    gambar(t);
+    // kamera: push-in pelan + goyang halus
+    const s = 1.04 + .08 * E.io(seg(t, 0, 8));
+    $('#dunia').style.transform = `translate(${nz(t * .3, 1) * 8}px,${nz(t * .3, 2) * 6}px) scale(${s})`;
+    L1.atur(t, 4.6, 7.4);
+  }
+};

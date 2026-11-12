@@ -1,0 +1,637 @@
+<!--@TITLE Kopi Teras — contoh promo produk-->
+<!--@RASIO 9:16-->
+<!--@HEAD-->
+<!-- =====================================================================================
+  GAYA: PROMO PRODUK & IKLAN · contoh 9,6 dtk · arah visual "hangat lokal"
+  Produk fiktif: Es Kopi Susu Gula Aren "Kopi Teras". Urutan (semua detik ada di WAKTU, bagian 1):
+    hook   HOOK/MASALAH  close-up produk (es jatuh / remah jatuh / kilau), lampu dingin, kalimat dihentak per kata
+    buka   BUKA          kamera ditarik mundur cepat (blur), cahaya jendela masuk
+    produk PRODUK        produk berputar 2.5D di meja, bahan mengorbit, nama 2 baris
+    bukti  BUKTI         pil bukti (angka asli murid) atau keunggulan + 2 label
+    tawar  PENAWARAN     produk melayang naik + kartu: 'harga' (coret -> turun) atau 'promo' (beli 2 gratis 1, gratis ongkir)
+    cta    CTA           HP naik, produk terbang masuk menu, jari mengetuk, logo + handle
+  PRODUK BARU = CUKUP UBAH BAGIAN 1: MEREK, TEKS, PRODUK (bentuk 'gelas'|'kantong'|'botol'|'kotak', efek hook
+  'es'|'remah'|'kilau', bahan mengorbit, warna kemasan, tulisan), PENAWARAN, LATAR (warna dinding, meja 'tegel'|'kayu'),
+  WAKTU (perpanjang ke 15/30 dtk cukup geser angka di sini). Foto murid: <proyek>/assets/gambar/produk.png (PNG transparan)
+  menggantikan produk kode; logo: assets/gambar/logo.png. TANPA FOTO: pilih bentuk yang paling mirip + warna kemasan.
+  Bagian lain: 2 alat · 3 produk kode · 4 latar & meja · 5 bahan · 6 kamera · 7 HP & lapis layar · 8 SCENE.
+  ATURAN: jangan pernah menaruh komentar // di tengah ekspresi; komentar hanya setelah ; atau di baris sendiri.
+===================================================================================== -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap">
+<style>
+#stage{background:#1a110c;--tua:#2A1A12;--krem:#F8EBD8;--aksen:#E2913A;--aksen2:#3E6B4A;--emas:#FFD08A}
+.lapis{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:0 0}
+#cvLatar{position:absolute;left:-80px;top:-110px}
+#meja{position:absolute;left:-460px;top:1296px;width:2000px;height:1150px;transform-origin:50% 0;transform:perspective(760px) rotateX(63deg)}
+#meja canvas{width:100%;height:100%;display:block}
+#meja:before{content:'';position:absolute;left:0;right:0;top:-10px;height:16px;background:linear-gradient(#f3d9b8,#b98a5e);z-index:1}
+#cvBayang{position:absolute;left:0;top:0}
+#produkBox{position:absolute;left:0;top:0;width:620px;height:1054px;transform-origin:310px 0}
+#produkBox canvas{width:100%;height:100%;display:block;filter:drop-shadow(-14px 22px 26px rgba(40,14,0,.35))}
+.bahan{position:absolute;left:0;top:0;width:130px;height:130px;margin:-65px 0 0 -65px}
+#cvDepan,#cvUI{position:absolute;left:0;top:0;pointer-events:none}
+#cvDepan{z-index:30}#cvUI{z-index:60}
+#vignet{position:absolute;inset:0;z-index:31;pointer-events:none;background:radial-gradient(ellipse 85% 62% at 50% 46%,rgba(0,0,0,0) 52%,rgba(20,6,0,.55) 100%)}
+/* teks: hook 170, pengantar 72, nama 124/144, harga 230, label 46, pil 44, teks kecil >= 30 */
+.tk{position:absolute;left:0;width:100%;text-align:center;opacity:0;z-index:50;color:var(--krem)}
+.disp{font-family:'Caprasimo',serif;line-height:1.02;text-shadow:0 6px 0 rgba(42,26,18,.5),0 14px 34px rgba(20,8,0,.55);-webkit-text-stroke:2px rgba(42,26,18,.35)}
+.ui{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;text-shadow:0 3px 2px rgba(20,8,0,.85),0 0 22px rgba(20,8,0,.6)}
+.sorot{--k:0%;padding:0 .14em;background:linear-gradient(var(--aksen),var(--aksen)) no-repeat 0 62%/var(--k) 74%;color:#FFF6E6}
+.pil{position:absolute;left:50%;transform:translateX(-50%);white-space:nowrap;opacity:0;z-index:50;font:700 44px 'Plus Jakarta Sans';color:var(--krem);
+  background:rgba(42,26,18,.84);padding:14px 32px;border-radius:60px;box-shadow:0 12px 30px rgba(20,8,0,.35)}
+.pil b{color:var(--emas)}
+#pPromo{left:70px;transform:none;top:192px;background:var(--aksen2);font-weight:800;font-size:42px;letter-spacing:.03em}
+/* kartu penawaran */
+#kartu{position:absolute;left:100px;top:1050px;width:880px;height:500px;border-radius:52px;background:var(--krem);opacity:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  box-shadow:0 30px 70px rgba(30,10,0,.45),inset 0 -8px 0 rgba(42,26,18,.08);color:var(--tua);text-align:center;font-family:'Plus Jakarta Sans'}
+#kartu .lama{font-weight:600;font-size:36px;color:#8a6a55}
+#kartu .lama span{position:relative;display:inline-block;margin-left:12px;font-weight:800;font-size:62px;color:#6e5242}
+#kartu .lama i{position:absolute;left:-6px;right:-6px;top:52%;height:10px;border-radius:9px;background:#C0392B;transform-origin:0 50%;transform:scaleX(0)}
+#kartu .baru{font-family:'Caprasimo';color:#B8561C;line-height:1;white-space:nowrap}
+#kartu .baru small{font-size:92px;vertical-align:58%;margin-right:6px}
+#kartu .baru b{font-weight:400;font-size:230px;display:inline-block}
+#kartu .atas{font:800 72px/1 'Plus Jakarta Sans';color:var(--tua)}
+#kartu .besar{font:400 168px/1 'Caprasimo';color:#B8561C;margin-top:8px;white-space:nowrap}
+#kartu .bawah{font:700 40px/1 'Plus Jakarta Sans';color:#6e5242;margin-top:16px}
+#kartu .waktu{display:inline-block;margin-top:14px;padding:12px 30px;border-radius:40px;background:var(--tua);color:var(--krem);font-weight:700;font-size:40px;opacity:0}
+#kartu .waktu b{color:var(--emas);font-variant-numeric:tabular-nums}
+#lencana{position:absolute;left:676px;top:290px;width:280px;height:280px;opacity:0;z-index:51}
+#lencana div{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--tua);font:800 38px/1 'Plus Jakarta Sans';text-align:center}
+#lencana div b{font:400 88px/1 'Caprasimo';margin-top:4px}
+/* HP mockup (teks UI >= 30 px) */
+#hp{position:absolute;left:220px;top:0;width:640px;height:1300px;opacity:0;z-index:45;transform-origin:50% 0}
+#hp .bingkai{position:absolute;inset:0;border-radius:98px;padding:16px;background:linear-gradient(140deg,#5b4638,#1c120c 38%,#2b1d15 70%,#6a5242);
+  box-shadow:0 70px 120px rgba(25,8,0,.6),inset 0 0 0 3px rgba(255,235,210,.18)}
+#hp .layar{position:relative;width:100%;height:100%;border-radius:82px;overflow:hidden;background:#FFF8EE;font-family:'Plus Jakarta Sans';color:var(--tua)}
+#hp .pulau{position:absolute;top:22px;left:50%;width:170px;height:50px;margin-left:-85px;border-radius:30px;background:#0d0806}
+#hp .jam{position:absolute;left:56px;top:28px;font-weight:700;font-size:30px}
+#hp .kepala{position:absolute;left:34px;right:34px;top:100px;height:96px;display:flex;align-items:center;gap:16px}
+#hp .kepala .nm{font-weight:800;font-size:38px;line-height:1.05;white-space:nowrap}
+#hp .kepala .nm small{display:block;font-weight:600;font-size:30px;color:#8a6a55}
+#hp .troli{margin-left:auto;position:relative;width:70px;height:70px;flex:none;border-radius:24px;background:#F3E3CC;display:flex;align-items:center;justify-content:center}
+#hp .troli i{position:absolute;right:-8px;top:-8px;width:38px;height:38px;border-radius:20px;background:#C0392B;color:#fff;font:800 24px/38px 'Plus Jakarta Sans';text-align:center;font-style:normal;transform:scale(0)}
+#hp .menu{position:absolute;left:28px;right:28px;top:222px;height:400px;border-radius:44px;background:#fff;box-shadow:0 14px 40px rgba(60,30,10,.12);display:flex;gap:22px;padding:22px}
+#hp .foto{position:relative;width:212px;height:356px;flex:none;border-radius:30px;background:radial-gradient(circle at 50% 62%,#F6C98C,#D98A4A 70%,#B8642C)}
+#thumb{position:absolute;left:0;top:0;width:212px;height:356px;opacity:0}
+#hp .info{padding-top:8px;text-align:left}
+#hp .info .nm{font-weight:800;font-size:36px;line-height:1.12}
+#hp .info .rt{margin-top:12px;font-weight:700;font-size:30px;color:#8a6a55;line-height:1.15}
+#hp .info s{display:block;margin-top:16px;font-weight:600;font-size:30px;color:#a08670}
+#hp .info .hg{font-weight:800;font-size:48px;color:#B8561C;line-height:1.1}
+#hp .opsi{position:absolute;left:28px;right:28px;top:646px;display:flex;gap:14px}
+#hp .opsi span{flex:1;text-align:center;padding:14px 0;border-radius:30px;background:#F3E3CC;font-weight:700;font-size:30px}
+#hp .opsi .on{background:var(--tua);color:var(--krem)}
+#hp .tombol{position:absolute;left:36px;right:36px;top:760px;height:112px;border-radius:58px;background:var(--aksen);color:#fff;font-weight:800;font-size:38px}
+#hp .tombol span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:12px}
+#hp .tombol .t2{opacity:0}
+#hp .antar{position:absolute;left:0;right:0;top:900px;text-align:center;font-weight:600;font-size:30px;color:#8a6a55}
+.logo{display:inline-block;vertical-align:middle}
+#tDi .logo{margin-right:16px;vertical-align:-14px}
+</style>
+<!--@BODY-->
+<!-- Teks diisi dari TEKS di bagian 1 @SCRIPT (jangan tulis kalimat di sini). -->
+<div id="latarL" class="lapis"><canvas id="cvLatar" width="1240" height="2140"></canvas></div>
+<div id="dunia" class="lapis">
+  <div id="meja"><canvas id="cvMeja" width="1600" height="920"></canvas></div>
+  <canvas id="cvBayang" width="1080" height="1920"></canvas>
+  <div id="bahanBelakang"></div>
+  <div id="produkBox"><canvas id="cvProduk" width="1400" height="2380"></canvas></div>
+  <div id="bahanDepan"></div>
+</div>
+<canvas id="cvDepan" width="1080" height="1920"></canvas>
+<div id="vignet"></div>
+<div class="tk ui" id="tJam" style="top:200px;font-size:72px"></div>
+<div class="tk disp" id="tNgantuk" style="top:292px;font-size:170px"></div>
+<div class="tk disp" id="tNama" style="top:196px;font-size:124px"></div>
+<div class="tk disp" id="tAren" style="top:322px;font-size:144px;color:var(--emas)"></div>
+<div class="pil" id="pBukti" style="top:500px"></div>
+<div class="pil" id="pPromo"></div>
+<div id="lencana"><svg viewBox="0 0 280 280" width="280" height="280"><path id="bintang" fill="#FFD08A" stroke="#2A1A12" stroke-width="6"/></svg><div id="lencanaIsi"></div></div>
+<div id="kartu"></div>
+<div id="hp"><div class="bingkai"><div class="layar">
+  <div class="pulau"></div><div class="jam">14.05</div>
+  <div class="kepala"><span class="logo" id="hpLogo"></span><div class="nm" id="hpToko"></div>
+    <div class="troli"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#2A1A12" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.4 11h10.2L20 7H6.2"/><circle cx="9" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/></svg><i>1</i></div></div>
+  <div class="menu"><div class="foto"><canvas id="thumb" width="424" height="712"></canvas></div><div class="info" id="hpInfo"></div></div>
+  <div class="opsi" id="hpOpsi"></div>
+  <div class="tombol"><span class="t1" id="hpT1"></span><span class="t2" id="hpT2"></span></div>
+  <div class="antar" id="hpAntar"></div>
+</div></div></div>
+<div class="tk disp" id="tPesan" style="top:228px;font-size:104px"></div>
+<div class="tk ui" id="tDi" style="top:362px;font-size:64px"></div>
+<canvas id="cvUI" width="1080" height="1920"></canvas>
+<!--@SCRIPT-->
+/* == 1. ISI YANG DIGANTI PER VIDEO (produk baru = ubah bagian ini saja) ================= */
+const MEREK = {nama: 'Kopi Teras', handle: '@kopiteras', toko: 'Teras Rasa · 1,2 km',
+  tua: '#2A1A12', krem: '#F8EBD8', aksen: '#E2913A', aksen2: '#3E6B4A', emas: '#FFD08A'};
+const TEKS = {
+  pengantar: 'Jam 2 siang,', hook: 'masih', kunci: 'ngantuk?',
+  nama1: 'Es Kopi Susu', nama2: 'Gula Aren',
+  bukti: '<b>★ 4,9</b> · 2.300+ gelas terjual',
+  label1: 'gula aren', label2: 'susu segar',
+  pilPromo: 'PROMO MINGGU INI', ajakan: 'Pesan sekarang',
+  menu: 'Es Kopi Susu Gula Aren', menuInfo: '★ 4,9 · 2.300+ terjual', opsi: ['Normal', 'Kurang manis'],
+  tombol: 'Pesan sekarang', sukses: '✓ Masuk keranjang', antar: 'Diantar ± 15 menit'};
+// bukti/menuInfo: HANYA angka asli dari murid. Tidak ada data -> tulis keunggulan, mis. '<b>Renyah</b> · tanpa pengawet'.
+// label1/label2: maks ±10 huruf (ukuran 46 px).
+const PRODUK = {
+  bentuk: 'gelas',                       // 'gelas' | 'kantong' | 'botol' | 'kotak'  (diabaikan bila ada foto)
+  hook: 'es',                            // 'es' = es jatuh + cipratan · 'remah' = isi[0] berjatuhan + remah · 'kilau' = kilau + bintang
+  isi: ['biji', 'aren', 'es'],           // bahan mengorbit/melintas: 'biji' 'aren' 'es' 'keripik' 'daun' 'tetes'
+  tulisan: ['KOPI', 'TERAS'],            // tulisan di stiker/label kemasan kode
+  warna: {badan: '#E8B931', badan2: '#B9771C', label: '#FFF4D6', teks: '#4A2A12', isi: '#F2C14E'},   // kemasan kode
+  titik: null};                          // null = titik bawaan bentuk. Foto: {puncak:[x,y], label1:[x,y], label2:[x,y]} pecahan kanvas 1000x1700
+const PENAWARAN = {jenis: 'harga', lama: 28, baru: 18, satuan: 'rb', hemat: '35%', batas: '02:14'};
+// Tanpa harga normal asli? JANGAN mengarang. Pakai: {jenis:'promo', atas:'Beli 2', besar:'GRATIS 1', bawah:'Rp15.000 / bungkus', lencana:'PROMO'}
+// atau {jenis:'promo', atas:'Pesan hari ini', besar:'GRATIS ONGKIR', bawah:null, lencana:null}. lama/hemat/batas boleh null -> bagiannya hilang.
+const LATAR = {dingin: ['#10171E', '#1C2731', '#27333E', '#151C23'], hangat: ['#6E321D', '#B65F33', '#D08A52', '#9C5530'],
+  cahaya: '255,214,150', meja: 'tegel'};   // meja: 'tegel' | 'kayu'
+const WAKTU = {hook: 0, kunci: .5, buka: 1.6, produk: 2.2, bukti: 3.35, tawar: 5.0, cta: 7.4, dur: 9.6};
+// 15 dtk misalnya: {hook:0, kunci:.5, buka:1.6, produk:2.2, bukti:5.5, tawar:8.5, cta:12, dur:15}
+const FOTO_PRODUK = 'assets/gambar/produk.png', FOTO_LOGO = 'assets/gambar/logo.png';
+const BOX = {top: 450, sc: 1.1, alas: 450 + 1592 * .62 * 1.1};   // kotak produk 620x1054 di dunia: puncak, skala, garis alas
+
+/* == 2. ALAT KECIL ===================================================================== */
+const hx = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const campur = (a, b, k) => { const A = hx(a), B = hx(b); return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * k))})`; };
+const muatGambar = src => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = src; });
+let FOTO = null, LOGO = null;
+const logoSVG = s => `<svg viewBox="0 0 100 100" width="${s}" height="${s}"><circle cx="50" cy="50" r="48" fill="${MEREK.tua}"/>
+  <path d="M19 47 L50 21 L81 47" fill="none" stroke="${MEREK.aksen}" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M33 51 h32 l-4 27 h-24z" fill="${MEREK.krem}"/><path d="M65 56 q11 0 11 9 q0 10 -13 10" fill="none" stroke="${MEREK.krem}" stroke-width="5"/></svg>`;
+(function isiTeks() {                     // TEKS & PENAWARAN -> HTML (sebelum build memecah kata)
+  $('#tJam').textContent = TEKS.pengantar;
+  $('#tNgantuk').innerHTML = `${TEKS.hook}<br><span class="sorot">${TEKS.kunci}</span>`;
+  $('#tNama').textContent = TEKS.nama1; $('#tAren').textContent = TEKS.nama2;
+  $('#pBukti').innerHTML = TEKS.bukti || ''; $('#pPromo').textContent = TEKS.pilPromo; $('#tPesan').textContent = TEKS.ajakan;
+  $('#tDi').innerHTML = `<span class="logo" id="ctaLogo"></span>di <span style="color:var(--emas)">${MEREK.handle}</span>`;
+  $('#hpToko').innerHTML = `${MEREK.nama}<small>${MEREK.toko}</small>`;
+  const P = PENAWARAN, rp = n => 'Rp' + (n * 1000).toLocaleString('id-ID');
+  $('#hpInfo').innerHTML = `<div class="nm">${TEKS.menu}</div><div class="rt">${TEKS.menuInfo || ''}</div>` +
+    (P.jenis === 'harga' ? (P.lama ? `<s>${rp(P.lama)}</s>` : '') + `<div class="hg">${rp(P.baru)}</div>` : `<div class="hg" style="font-size:32px;margin-top:14px;white-space:nowrap">${P.atas} ${P.besar}</div>`);
+  $('#hpOpsi').innerHTML = TEKS.opsi.map((o, i) => `<span class="${i ? '' : 'on'}">${o}</span>`).join('');
+  $('#hpT1').textContent = TEKS.tombol; $('#hpT2').textContent = TEKS.sukses; $('#hpAntar').textContent = TEKS.antar;
+  $('#kartu').innerHTML = P.jenis === 'harga'
+    ? (P.lama ? `<div class="lama">harga normal <span>${rp(P.lama)}<i></i></span></div>` : '') +
+      `<div class="baru"><small>Rp</small><b id="hBaru">${P.lama || P.baru}${P.satuan}</b></div>` + (P.batas ? `<div class="waktu" id="hWaktu">⏱ berakhir dalam <b id="hDetik"></b></div>` : '')
+    : `<div class="atas">${P.atas}</div><div class="besar" id="hBesar">${P.besar}</div>` + (P.bawah ? `<div class="bawah">${P.bawah}</div>` : '');
+  const lc = P.jenis === 'harga' ? (P.hemat ? `HEMAT<b>${P.hemat}</b>` : '') : (P.lencana ? `<b style="font-size:50px">${P.lencana}</b>` : '');
+  $('#lencanaIsi').innerHTML = lc; if (!lc) $('#lencana').style.display = 'none';
+  if (!TEKS.bukti) $('#pBukti').style.display = 'none';
+})();
+
+/* == 3. PRODUK KODE (gelas · kantong · botol · kotak) + foto + efek hook ================= */
+const PC = $('#cvProduk'), px = PC.getContext('2d'), LQ = kanvas(250, 425);   // LQ = cairan 1/4 resolusi (pusaran lembut)
+const TITIK_BENTUK = {gelas: {puncak: [.52, .432], label1: [.43, .875], label2: [.5, .66]}, kantong: {puncak: [.5, .3], label1: [.4, .68], label2: [.6, .85]},
+  botol: {puncak: [.5, .2], label1: [.42, .66], label2: [.58, .86]}, kotak: {puncak: [.48, .45], label1: [.4, .7], label2: [.6, .86]}};
+const TITIK = PRODUK.titik || TITIK_BENTUK[PRODUK.bentuk];
+const G = {cx: 500, top: 630, bot: 1570, rx: 300, rxB: 222, ry: 44, ryB: 30, muka: 735};
+const hw = y => G.rx - (y - G.top) / (G.bot - G.top) * (G.rx - G.rxB);
+const R0 = rng(11);
+const EMBUN = Array.from({length: 90}, () => ({u: R0() * 1.84 - .92, y: G.muka + 30 + R0() * (G.bot - G.muka - 90), r: 2.5 + R0() * 7.5, v: R0() < .14 ? 25 + R0() * 50 : 0}));
+const ES = [{x: 395, y: 742, s: 128, a: .32}, {x: 588, y: 728, s: 146, a: -.28}, {x: 470, y: 800, s: 116, a: .85}, {x: 668, y: 790, s: 104, a: .12}];
+const CIPRAT = Array.from({length: 30}, () => ({a: -Math.PI / 2 + (R0() - .5) * 2.4, v: 380 + R0() * 520, r: 5 + R0() * 11, w: R0()}));
+const KW = PRODUK.warna;
+
+function kubusEs(c, x, y, s, a, al = 1) {
+  c.save(); c.translate(x, y); c.rotate(a); c.globalAlpha = al;
+  c.beginPath(); c.roundRect(-s / 2, -s / 2, s, s, s * .22);
+  const g = c.createLinearGradient(-s / 2, -s / 2, s / 2, s / 2); g.addColorStop(0, 'rgba(255,255,255,.75)'); g.addColorStop(.45, 'rgba(235,225,210,.32)'); g.addColorStop(1, 'rgba(160,120,90,.45)');
+  c.fillStyle = g; c.fill(); c.lineWidth = 9; c.strokeStyle = 'rgba(255,255,255,.22)'; c.stroke(); c.lineWidth = 3; c.strokeStyle = 'rgba(255,255,255,.7)'; c.stroke();
+  const ig = c.createRadialGradient(s * .1, s * .12, 0, s * .1, s * .12, s * .4); ig.addColorStop(0, 'rgba(120,80,50,.35)'); ig.addColorStop(1, 'rgba(120,80,50,0)');
+  c.fillStyle = ig; c.fillRect(-s / 2, -s / 2, s, s);
+  c.beginPath(); c.roundRect(-s * .3, -s * .3, s * .6, s * .6, s * .14); c.strokeStyle = 'rgba(255,255,255,.28)'; c.lineWidth = 6; c.stroke();
+  c.fillStyle = 'rgba(255,255,255,.9)'; c.beginPath(); c.ellipse(-s * .2, -s * .24, s * .12, s * .05, -.5, 0, 7); c.fill();
+  c.restore();
+}
+function tulisanLabel(c, x, y, lebar, warnaTeks) {   // dua baris tulisan merek, dikecilkan otomatis agar muat
+  c.save(); c.fillStyle = warnaTeks; c.textAlign = 'center'; c.textBaseline = 'middle';
+  PRODUK.tulisan.forEach((s, i) => { let f = i ? 54 : 96; c.font = `${f}px 'Caprasimo'`; const w = c.measureText(s).width; if (w > lebar) { f *= lebar / w; c.font = `${f}px 'Caprasimo'`; }
+    c.fillText(s, x, y + (i ? 92 : 0)); });
+  c.restore();
+}
+function lapisCahaya(c, rot, x0, x1, y0, y1, gelap = .42) {   // terang kiri (jendela) -> gelap kanan, ikut putaran
+  const sh = c.createLinearGradient(x0, 0, x1, 0);
+  sh.addColorStop(0, 'rgba(255,236,210,.34)'); sh.addColorStop(clamp(.28 + rot * .08, .05, .9), 'rgba(255,255,255,0)'); sh.addColorStop(.72, 'rgba(40,15,0,0)'); sh.addColorStop(1, `rgba(40,12,0,${gelap})`);
+  c.fillStyle = sh; c.fillRect(x0, y0, x1 - x0, y1 - y0);
+}
+
+function gelasKode(t, rot) {
+  const c = px, laju = 1 + 2.4 * (1 - sstep(WAKTU.buka - .4, WAKTU.buka + .8, t)), sw = rot * 70;
+  c.save(); c.beginPath();
+  c.ellipse(G.cx, G.muka, hw(G.muka) - 12, G.ry * .85, 0, Math.PI, 0, false);
+  c.lineTo(G.cx + G.rxB - 10, G.bot); c.ellipse(G.cx, G.bot, G.rxB - 10, G.ryB, 0, 0, Math.PI, false); c.closePath(); c.clip();
+  const g = c.createLinearGradient(0, G.muka, 0, G.bot + 30);
+  [[0, '#4A2914'], [.2, '#6B4026'], [.31, '#B48760'], [.40, '#E8D2B2'], [.66, '#F2E3CB'], [.76, '#C98F57'], [.85, '#8A4A1C'], [1, '#55270B']].forEach(s => g.addColorStop(...s));
+  c.fillStyle = g; c.fillRect(0, G.muka - 60, 1000, G.bot - G.muka + 120);
+  const q = LQ.getContext('2d'); q.clearRect(0, 0, 250, 425); q.save(); q.scale(.25, .25); q.lineCap = 'round';
+  for (let i = 0; i < 7; i++) {            // awan kopi menyebar di susu
+    const x = G.cx - 200 + i * 66 + 30 * Math.sin(t * .5 * laju + i), y = G.muka + 250 + 60 * Math.sin(i * 2.1) + 25 * Math.sin(t * .7 + i);
+    const r = q.createRadialGradient(x, y, 0, x, y, 110); r.addColorStop(0, 'rgba(110,66,38,.45)'); r.addColorStop(1, 'rgba(110,66,38,0)'); q.fillStyle = r; q.fillRect(x - 110, y - 110, 220, 220); }
+  for (let i = 0; i < 7; i++) {            // pusaran: kopi turun ke susu, susu naik ke kopi
+    const turun = i % 2 === 0, x0 = G.cx - 230 + i * 76 + 22 * Math.sin(i * 4.1), ph = i * 1.9, L = (170 + 110 * Math.sin(i * 2.3) + 70 * Math.sin(t * .9 * laju + ph)) * (turun ? 1 : -.75);
+    const y0 = turun ? G.muka + 200 + 30 * Math.sin(i * 3.7) : G.muka + 340;
+    q.strokeStyle = turun ? 'rgba(96,56,30,.5)' : 'rgba(246,232,210,.45)'; q.lineWidth = 38 + 30 * Math.abs(Math.sin(i * 1.3));
+    q.beginPath(); q.moveTo(x0, y0);
+    q.bezierCurveTo(x0 + 55 * Math.sin(t * laju * .8 + ph), y0 + L * .4, x0 - 60 * Math.sin(t * laju * .6 + ph * 1.3), y0 + L * .7, x0 + 34 * Math.sin(t * laju + ph), y0 + L); q.stroke();
+  }
+  for (let i = 0; i < 6; i++) {            // gula aren naik pelan
+    const x0 = G.cx - 170 + i * 68, y0 = G.bot - 120, L = 90 + 40 * Math.sin(t * .7 + i * 2);
+    q.strokeStyle = 'rgba(150,80,30,.22)'; q.lineWidth = 70; q.beginPath(); q.moveTo(x0, y0);
+    q.quadraticCurveTo(x0 + 40 * Math.sin(t * .8 + i), y0 - L * .6, x0 - 20 * Math.sin(t * .6 + i), y0 - L); q.stroke();
+  }
+  q.restore(); c.imageSmoothingQuality = 'high'; c.drawImage(LQ, 0, 0, 1000, 1700);
+  lapisCahaya(c, rot, G.cx - 300, G.cx + 300, G.muka - 60, G.bot + 60);
+  c.restore();
+  c.save(); c.beginPath(); c.ellipse(G.cx, G.muka, hw(G.muka) - 12, G.ry * .85, 0, 0, 7);
+  const sg = c.createRadialGradient(G.cx - 40, G.muka - 10, 10, G.cx, G.muka, 290); sg.addColorStop(0, '#A87650'); sg.addColorStop(.6, '#74482A'); sg.addColorStop(1, '#4A2914');
+  c.fillStyle = sg; c.fill(); c.clip();
+  c.strokeStyle = 'rgba(240,215,180,.35)'; c.lineWidth = 7;
+  for (let i = 0; i < 3; i++) { c.beginPath(); c.ellipse(G.cx, G.muka, 70 + i * 70, 10 + i * 9, 0, t * laju * .8 + i * 2, t * laju * .8 + i * 2 + 2.2); c.stroke(); }
+  c.restore();
+  c.save(); c.lineCap = 'round'; c.strokeStyle = MEREK.aksen2; c.lineWidth = 36;
+  c.beginPath(); c.moveTo(612, G.muka + 6); c.lineTo(742, 318); c.stroke();
+  c.strokeStyle = 'rgba(255,255,255,.35)'; c.lineWidth = 8; c.beginPath(); c.moveTo(603, G.muka - 6); c.lineTo(731, 322); c.stroke();
+  c.fillStyle = '#26402c'; c.beginPath(); c.ellipse(742, 318, 18, 9, -.38, 0, 7); c.fill(); c.restore();
+  ES.forEach((e, i) => kubusEs(px, e.x, e.y + Math.sin(t * 1.6 + i) * 4, e.s, e.a + Math.sin(t * .8 + i) * .04));
+  c.save();
+  c.beginPath(); c.moveTo(G.cx - G.rx, G.top); c.lineTo(G.cx - G.rxB, G.bot); c.ellipse(G.cx, G.bot, G.rxB, G.ryB, 0, Math.PI, 0, true);
+  c.lineTo(G.cx + G.rx, G.top); c.ellipse(G.cx, G.top, G.rx, G.ry, 0, 0, Math.PI, false); c.closePath();
+  c.fillStyle = 'rgba(255,255,255,.06)'; c.fill(); c.clip();
+  [[-205, 30, .34], [-150, 11, .5], [215, 16, .22]].forEach(([dx, w, a]) => {     // garis kilap mengikuti putaran
+    const x1 = G.cx + dx + sw, x2 = G.cx + dx * (G.rxB / G.rx) + sw * .8, gg = c.createLinearGradient(0, G.top, 0, G.bot);
+    gg.addColorStop(0, `rgba(255,255,255,${a})`); gg.addColorStop(.7, `rgba(255,255,255,${a * .6})`); gg.addColorStop(1, 'rgba(255,255,255,0)');
+    c.fillStyle = gg; c.beginPath(); c.moveTo(x1, G.top + 20); c.lineTo(x1 + w, G.top + 20); c.lineTo(x2 + w * .8, G.bot - 40); c.lineTo(x2, G.bot - 40); c.fill();
+  });
+  EMBUN.forEach(d => {                     // embun dingin, sebagian menetes
+    let y = d.y; if (d.v) y = G.muka + 30 + ((d.y - G.muka + d.v * t) % (G.bot - G.muka - 60));
+    const x = G.cx + d.u * hw(y) + sw * .3;
+    c.fillStyle = 'rgba(60,30,10,.18)'; c.beginPath(); c.ellipse(x, y + 1.5, d.r, d.r * (d.v ? 1.5 : 1.1), 0, 0, 7); c.fill();
+    c.fillStyle = 'rgba(255,255,255,.55)'; c.beginPath(); c.ellipse(x - d.r * .3, y - d.r * .35, d.r * .38, d.r * .3, 0, 0, 7); c.fill();
+  });
+  c.restore();
+  c.save(); c.lineWidth = 5;
+  c.strokeStyle = 'rgba(255,255,255,.75)'; c.beginPath(); c.moveTo(G.cx - G.rx, G.top); c.lineTo(G.cx - G.rxB, G.bot); c.stroke();
+  c.strokeStyle = 'rgba(255,255,255,.4)'; c.beginPath(); c.moveTo(G.cx + G.rx, G.top); c.lineTo(G.cx + G.rxB, G.bot); c.stroke();
+  c.strokeStyle = 'rgba(255,255,255,.45)'; c.lineWidth = 6; c.beginPath(); c.ellipse(G.cx, G.top, G.rx, G.ry, 0, Math.PI, 0, false); c.stroke();
+  c.strokeStyle = 'rgba(255,255,255,.95)'; c.lineWidth = 9; c.beginPath(); c.ellipse(G.cx, G.top, G.rx, G.ry, 0, 0, Math.PI, false); c.stroke();
+  c.strokeStyle = 'rgba(80,40,15,.35)'; c.lineWidth = 4; c.beginPath(); c.ellipse(G.cx, G.bot, G.rxB, G.ryB, 0, 0, Math.PI, false); c.stroke();
+  c.restore();
+  c.save(); c.translate(G.cx - rot * 80, 1185); c.scale(1 - Math.abs(rot) * .28, 1);   // stiker logo, ikut "melengkung"
+  c.fillStyle = MEREK.tua; c.beginPath(); c.arc(0, 0, 112, 0, 7); c.fill();
+  c.strokeStyle = MEREK.krem; c.lineWidth = 5; c.beginPath(); c.arc(0, 0, 98, 0, 7); c.stroke();
+  c.strokeStyle = MEREK.aksen; c.lineWidth = 9; c.lineCap = c.lineJoin = 'round'; c.beginPath(); c.moveTo(-44, -38); c.lineTo(0, -72); c.lineTo(44, -38); c.stroke();
+  c.fillStyle = MEREK.krem; c.textAlign = 'center'; c.font = "44px 'Caprasimo'"; PRODUK.tulisan.forEach((s, i) => c.fillText(s, 0, 4 + i * 46, 170));
+  c.restore();
+}
+
+const KERUT = Array.from({length: 9}, (_, i) => ({x: 230 + i * 66 + R0() * 30, w: 14 + R0() * 34, a: .07 + R0() * .16}));
+function kantongKode(t, rot) {             // kemasan berdiri (standing pouch): segel bergerigi, zip, jendela isi
+  const c = px, L = 200, R = 800, T = 470, B = 1590, sw = rot * 60;
+  const badan = () => { c.beginPath(); c.moveTo(L + 8, T); c.lineTo(R - 8, T); c.bezierCurveTo(R + 14, T + 420, R + 26, B - 320, R - 6, B - 46); c.quadraticCurveTo(R - 22, B, R - 96, B);
+    c.lineTo(L + 96, B); c.quadraticCurveTo(L + 22, B, L + 6, B - 46); c.bezierCurveTo(L - 26, B - 320, L - 14, T + 420, L + 8, T); c.closePath(); };
+  c.save(); badan();
+  const g = c.createLinearGradient(L, 0, R, 0); g.addColorStop(0, KW.badan2); g.addColorStop(clamp(.3 + rot * .08, .1, .6), KW.badan); g.addColorStop(.7, KW.badan); g.addColorStop(1, KW.badan2);
+  c.fillStyle = g; c.fill(); c.clip();
+  KERUT.forEach((k, i) => { const x = k.x + sw * (1 + i * .08); c.fillStyle = `rgba(255,255,255,${k.a})`; c.beginPath(); c.moveTo(x, T); c.quadraticCurveTo(x + 30 * Math.sin(i * 2.3), (T + B) / 2, x - 10, B); c.lineTo(x - 10 + k.w, B); c.quadraticCurveTo(x + k.w + 30 * Math.sin(i * 2.3), (T + B) / 2, x + k.w, T); c.fill(); });
+  c.fillStyle = 'rgba(0,0,0,.16)'; c.fillRect(L - 40, T, R - L + 80, 96);
+  c.strokeStyle = 'rgba(255,255,255,.28)'; c.lineWidth = 4; for (let x = L; x < R; x += 16) { c.beginPath(); c.moveTo(x, T + 10); c.lineTo(x, T + 84); c.stroke(); }
+  c.strokeStyle = 'rgba(0,0,0,.25)'; c.lineWidth = 6; c.beginPath(); c.moveTo(L, T + 132); c.lineTo(R, T + 132); c.stroke();
+  c.strokeStyle = 'rgba(255,255,255,.35)'; c.lineWidth = 3; c.beginPath(); c.moveTo(L, T + 138); c.lineTo(R, T + 138); c.stroke();
+  c.save(); c.translate(500 - rot * 55, 0); c.scale(1 - Math.abs(rot) * .14, 1);
+  c.fillStyle = KW.label; c.beginPath(); c.roundRect(-235, 700, 470, 690, 46); c.fill();
+  tulisanLabel(c, 0, 800, 410, KW.teks);
+  c.save(); c.beginPath(); c.ellipse(0, 1190, 175, 135, 0, 0, 7); c.fillStyle = KW.isi; c.fill(); c.clip();
+  for (let i = 0; i < 16; i++) { const a = i * 2.39, r = 34 + (i % 5) * 26, x = Math.cos(a) * r * 1.2, y = 1190 + Math.sin(a) * r * .9;
+    c.fillStyle = i % 3 ? 'rgba(200,130,30,.55)' : 'rgba(255,240,180,.7)'; c.beginPath(); c.ellipse(x, y, 62, 40, a, 0, 7); c.fill();
+    c.strokeStyle = 'rgba(140,80,20,.45)'; c.lineWidth = 4; c.stroke(); }
+  c.restore();
+  c.strokeStyle = KW.teks; c.lineWidth = 6; c.beginPath(); c.ellipse(0, 1190, 175, 135, 0, 0, 7); c.stroke();
+  c.restore();
+  lapisCahaya(c, rot, L - 30, R + 30, T, B, .5);
+  const gb = c.createLinearGradient(0, B - 140, 0, B); gb.addColorStop(0, 'rgba(0,0,0,0)'); gb.addColorStop(1, 'rgba(30,10,0,.35)'); c.fillStyle = gb; c.fillRect(L - 40, B - 140, R - L + 80, 140);
+  c.restore();
+  c.save(); badan(); c.strokeStyle = 'rgba(255,255,255,.45)'; c.lineWidth = 4; c.stroke(); c.restore();
+}
+
+function botolKode(t, rot) {               // botol: tutup, leher, cairan bergelembung, label melingkar
+  const c = px, sw = rot * 60, L = 300, R = 700, B = 1590;
+  const badan = () => { c.beginPath(); c.moveTo(435, 470); c.lineTo(435, 560); c.bezierCurveTo(435, 640, L, 660, L, 760); c.lineTo(L, B - 60); c.quadraticCurveTo(L, B, L + 60, B);
+    c.lineTo(R - 60, B); c.quadraticCurveTo(R, B, R, B - 60); c.lineTo(R, 760); c.bezierCurveTo(R, 660, 565, 640, 565, 560); c.lineTo(565, 470); c.closePath(); };
+  c.save(); badan(); c.clip();
+  const g = c.createLinearGradient(0, 600, 0, B); g.addColorStop(0, KW.isi); g.addColorStop(1, KW.badan2); c.fillStyle = g; c.fillRect(0, 610, 1000, 1000);
+  c.fillStyle = 'rgba(255,255,255,.12)'; c.fillRect(0, 470, 1000, 140);
+  for (let i = 0; i < 18; i++) { const y = B - ((i * 97 + t * (60 + i * 7)) % 900), x = 340 + (i * 53) % 320 + Math.sin(t * 2 + i) * 6;
+    c.strokeStyle = 'rgba(255,255,255,.55)'; c.lineWidth = 2.5; c.beginPath(); c.arc(x, y, 5 + i % 4 * 2, 0, 7); c.stroke(); }
+  c.save(); c.translate(500 - rot * 50, 0); c.scale(1 - Math.abs(rot) * .12, 1);
+  c.fillStyle = KW.label; c.fillRect(-210, 930, 420, 430); c.fillStyle = KW.badan; c.fillRect(-210, 930, 420, 26); c.fillRect(-210, 1334, 420, 26);
+  tulisanLabel(c, 0, 1080, 360, KW.teks); c.restore();
+  lapisCahaya(c, rot, L, R, 470, B, .45);
+  [[-150, 34, .45], [-95, 12, .6], [150, 16, .25]].forEach(([d, w, a]) => { c.fillStyle = `rgba(255,255,255,${a})`; c.fillRect(500 + d + sw, 700, w, B - 780); });
+  c.restore();
+  c.save(); badan(); c.strokeStyle = 'rgba(255,255,255,.6)'; c.lineWidth = 5; c.stroke(); c.restore();
+  const tg = c.createLinearGradient(420, 0, 580, 0); tg.addColorStop(0, MEREK.tua); tg.addColorStop(.35, '#6a5242'); tg.addColorStop(1, MEREK.tua);
+  c.fillStyle = tg; c.beginPath(); c.roundRect(420, 330, 160, 150, 18); c.fill();
+  c.strokeStyle = 'rgba(255,255,255,.18)'; c.lineWidth = 3; for (let x = 432; x < 575; x += 14) { c.beginPath(); c.moveTo(x, 345); c.lineTo(x, 465); c.stroke(); }
+}
+
+function kotakKode(t, rot) {               // kotak 2.5D: muka depan + sisi + atas (sisi melebar mengikuti putaran)
+  const c = px, L = 270, R = 730, T = 760, B = 1590, s = 60 + 50 * rot, d = 70;
+  c.fillStyle = KW.badan2; c.beginPath(); c.moveTo(R, T); c.lineTo(R + s, T - d); c.lineTo(R + s, B - d); c.lineTo(R, B); c.fill();
+  c.fillStyle = 'rgba(0,0,0,.25)'; c.fill();
+  c.fillStyle = campur(KW.badan, '#ffffff', .35); c.beginPath(); c.moveTo(L, T); c.lineTo(L + s, T - d); c.lineTo(R + s, T - d); c.lineTo(R, T); c.fill();
+  c.save(); c.beginPath(); c.rect(L, T, R - L, B - T); c.clip();
+  const g = c.createLinearGradient(0, T, 0, B); g.addColorStop(0, KW.badan); g.addColorStop(1, KW.badan2); c.fillStyle = g; c.fillRect(L, T, R - L, B - T);
+  c.fillStyle = KW.label; c.beginPath(); c.roundRect(L + 34, T + 60, R - L - 68, 330, 34); c.fill();
+  tulisanLabel(c, 500, T + 170, R - L - 120, KW.teks);
+  c.save(); c.beginPath(); c.roundRect(L + 60, T + 440, R - L - 120, 300, 30); c.fillStyle = KW.isi; c.fill(); c.clip();
+  for (let i = 0; i < 14; i++) { c.fillStyle = i % 2 ? 'rgba(160,90,30,.4)' : 'rgba(255,240,200,.5)'; c.beginPath(); c.arc(L + 90 + (i * 71) % 300, T + 480 + (i * 47) % 240, 46, 0, 7); c.fill(); }
+  c.restore();
+  lapisCahaya(c, rot, L, R, T, B, .38);
+  c.restore();
+  c.strokeStyle = 'rgba(255,255,255,.5)'; c.lineWidth = 4; c.strokeRect(L, T, R - L, B - T);
+}
+
+function fotoProduk() {                     // foto murid: dimuat utuh, rata bawah
+  const kot = [90, 260, 820, 1360], k = Math.min(kot[2] / FOTO.width, kot[3] / FOTO.height), w = FOTO.width * k, h = FOTO.height * k;
+  px.drawImage(FOTO, kot[0] + (kot[2] - w) / 2, kot[1] + kot[3] - h, w, h);
+}
+
+function efekHook(t) {                      // es jatuh + cipratan / remah berjatuhan / bintang kilau (di puncak produk)
+  const c = px, bx = TITIK.puncak[0] * 1000, by = TITIK.puncak[1] * 1700, T0 = WAKTU.hook + .3, u = t - T0;
+  if (PRODUK.hook === 'es') {
+    if (t < T0) kubusEs(c, bx - 10, lerp(-40, by + 8, E.in(seg(t, T0 - .55, T0))), 132, .5 + t * 2.4);
+    else if (t < WAKTU.produk + .2) kubusEs(c, bx - 10, by + 14 + Math.exp(-5 * u) * Math.sin(u * 18) * 16, 132, 1.22 + Math.min(u, .3) * .6);
+    if (u < 0 || u > 1.3) return;
+    c.save(); c.globalAlpha = 1 - seg(u, .5, .9); c.strokeStyle = 'rgba(248,232,205,.9)'; c.lineWidth = 8 * (1 - seg(u, 0, .6));
+    c.beginPath(); c.ellipse(bx, by + 4, 60 + 150 * E.out(seg(u, 0, .6)), 10 + 18 * E.out(seg(u, 0, .6)), 0, 0, 7); c.stroke(); c.restore();
+    CIPRAT.forEach(p => { const x = bx + Math.cos(p.a) * p.v * u * .8, y = by - Math.sin(-p.a) * p.v * u + 900 * u * u;
+      if (y > by + 20) return; c.fillStyle = p.w < .5 ? 'rgba(130,85,50,.95)' : 'rgba(245,228,200,.95)';
+      c.beginPath(); c.ellipse(x, y, p.r * .8, p.r * (1 + u * 1.3), Math.atan2(1800 * u - p.v * Math.sin(-p.a), p.v * Math.cos(p.a)) + Math.PI / 2, 0, 7); c.fill();
+      c.fillStyle = 'rgba(255,255,255,.7)'; c.beginPath(); c.arc(x - p.r * .25, y - p.r * .3, p.r * .25, 0, 7); c.fill(); });
+  } else if (PRODUK.hook === 'remah') {
+    for (let i = 0; i < 6; i++) { const ta = T0 - .45 + i * .12, k = seg(t, ta - .4, ta), ui = t - ta, sp = SPRITE[PRODUK.isi[0]].s;
+      let x = bx - 180 + i * 72, y = lerp(-120, by - 30, E.in(k)), a = i + t * 3;
+      if (ui > 0) { x += (i - 2.5) * 140 * ui; y = by - 30 - 520 * ui + 1500 * ui * ui; a = i + ta * 3 + ui * 6; if (y > by + 500) continue; }
+      c.save(); c.translate(x, y); c.rotate(a); c.drawImage(sp, -85, -85, 170, 170); c.restore(); }
+    if (u > 0 && u < 1.1) CIPRAT.forEach((p, i) => { const x = bx + Math.cos(p.a) * p.v * u * .9, y = by - Math.sin(-p.a) * p.v * u * .8 + 1200 * u * u;
+      c.globalAlpha = 1 - seg(u, .6, 1.1); c.fillStyle = i % 2 ? KW.isi : KW.badan2; c.beginPath(); c.ellipse(x, y, p.r * 1.1, p.r * .7, i, 0, 7); c.fill(); c.globalAlpha = 1; });
+  } else {
+    for (let i = 0; i < 7; i++) { const k = seg(t, T0 - .3 + i * .17, T0 + .4 + i * .17), s = Math.sin(Math.PI * k) * (26 + i % 3 * 14); if (s <= 0) continue;
+      const x = 180 + (i * 233) % 640, y = 420 + (i * 389) % 1050; c.save(); c.translate(x, y); c.rotate(k * 1.5); c.fillStyle = '#FFF8E6';
+      c.beginPath(); for (let j = 0; j < 8; j++) { const r = j % 2 ? s * .22 : s, a = j * Math.PI / 4; c.lineTo(Math.cos(a) * r, Math.sin(a) * r); } c.fill(); c.restore(); }
+  }
+}
+
+function kilau(t) {                         // sapuan cahaya hanya di piksel produk (source-atop)
+  const jadwal = [[WAKTU.produk + .1, .75], [WAKTU.tawar - .7, .7], [WAKTU.tawar + 1.42, .6]];
+  if (PRODUK.hook !== 'es') jadwal.push([WAKTU.hook + .15, .7]);
+  jadwal.forEach(([a, d]) => { const k = seg(t, a, a + d); if (k <= 0 || k >= 1) return;
+    px.save(); px.globalCompositeOperation = 'source-atop'; px.translate(lerp(-200, 1200, E.io(k)), 900); px.rotate(.38);
+    const g = px.createLinearGradient(-110, 0, 110, 0); g.addColorStop(0, 'rgba(255,250,235,0)'); g.addColorStop(.5, 'rgba(255,250,235,.6)'); g.addColorStop(1, 'rgba(255,250,235,0)');
+    px.fillStyle = g; px.fillRect(-110, -1300, 220, 2600); px.restore(); });
+}
+
+const BENTUK = {gelas: gelasKode, kantong: kantongKode, botol: botolKode, kotak: kotakKode};
+function gambarProduk(t, rot, hangat) {
+  px.setTransform(1.4, 0, 0, 1.4, 0, 0); px.clearRect(0, 0, 1000, 1700);
+  if (FOTO) fotoProduk(); else BENTUK[PRODUK.bentuk](t, rot);
+  if (hangat > 0) { px.save(); px.globalCompositeOperation = 'source-atop'; px.globalAlpha = .2 * hangat; px.drawImage(CH, -700 + rot * 60, -900, 2400, 4150); px.restore(); }
+  kilau(t); efekHook(t);
+}
+
+/* == 4. LATAR & MEJA =================================================================== */
+const LC = $('#cvLatar'), lx = LC.getContext('2d'), CH = kanvas(310, 535), ch = CH.getContext('2d');   // CH = cahaya 1/4 resolusi -> tepi lembut
+const R1 = rng(5), DEBU = Array.from({length: 60}, () => ({x: R1() * 1240, y: R1() * 1500, r: 1 + R1() * 2.6, f: R1() * 9}));
+const DAUN = Array.from({length: 16}, () => ({x: 150 + R1() * 150, y: 40 + R1() * 210, rx: 18 + R1() * 22, ry: 8 + R1() * 8, a: R1() * 3}));
+function gambarLatar(t, hangat, naik = 0) {
+  const c = lx, w = 1240, h = 2140, g = c.createLinearGradient(0, 0, 0, h);
+  [0, .45, .7, 1].forEach((s, i) => g.addColorStop(s, campur(LATAR.dingin[i], LATAR.hangat[i], hangat)));
+  c.fillStyle = g; c.fillRect(0, 0, w, h);
+  const gy = lerp(1150, 720, naik), r = c.createRadialGradient(620, gy, 30, 620, gy, 760 - 120 * naik);   // lampu belakang produk, ikut naik
+  r.addColorStop(0, `rgba(${hangat > .5 ? LATAR.cahaya : '90,130,165'},${.3 + .1 * hangat})`); r.addColorStop(1, 'rgba(0,0,0,0)');
+  c.fillStyle = r; c.fillRect(0, 0, w, h);
+  const q = ch; q.clearRect(0, 0, 310, 535); q.save();
+  q.translate(lerp(-90, 0, E.out(seg(t, WAKTU.buka, WAKTU.buka + .9))) + nz(t * .25, 2) * 6, 0);
+  const A = [18, 92], B = [200, 58], C2 = [222, 300], D = [36, 336];
+  const P = (u, v) => [lerp(lerp(A[0], B[0], u), lerp(D[0], C2[0], u), v), lerp(lerp(A[1], B[1], u), lerp(D[1], C2[1], u), v)];
+  for (let i = 0; i < 9; i++) { const v0 = i / 9 + .012, v1 = (i + 1) / 9 - .03;      // bilah jendela nako
+    for (const [u0, u1] of [[0, .47], [.53, 1]]) { const p = [P(u0, v0), P(u1, v0), P(u1, v1), P(u0, v1)];
+      q.fillStyle = `rgba(${hangat > .5 ? LATAR.cahaya : '120,165,205'},${.75 - i * .03})`; q.beginPath(); q.moveTo(...p[0]); p.slice(1).forEach(pp => q.lineTo(...pp)); q.fill(); } }
+  q.globalCompositeOperation = 'destination-out'; q.fillStyle = 'rgba(0,0,0,.8)';
+  DAUN.forEach((d, i) => { q.save(); q.translate(d.x + nz(t * .6, i) * 7, d.y + nz(t * .5, i + 9) * 4); q.rotate(d.a + nz(t * .4, i) * .2); q.beginPath(); q.ellipse(0, 0, d.rx, d.ry, 0, 0, 7); q.fill(); q.restore(); });
+  q.restore();
+  c.save(); c.globalAlpha = .2 + .8 * hangat - .2 * Math.sin(Math.PI * seg(hangat, .35, .65)); c.globalCompositeOperation = 'screen'; c.imageSmoothingQuality = 'high';
+  c.drawImage(CH, 0, 0, w, h); c.globalAlpha = hangat * .5; c.drawImage(CH, -40, -30, w + 80, h + 60);
+  c.globalCompositeOperation = 'lighter'; c.globalAlpha = .07 * hangat;
+  for (let i = 0; i < 3; i++) { c.fillStyle = `rgb(${LATAR.cahaya})`; c.beginPath(); c.moveTo(-200, -100); c.lineTo(900 + i * 160, 1500 + i * 40); c.lineTo(700 + i * 160, 1700 + i * 60); c.fill(); }
+  c.restore();
+  c.fillStyle = `rgba(255,236,200,${.25 + .45 * hangat})`;
+  DEBU.forEach(d => { const y = (d.y - t * 22 + 1500) % 1500 + 150, x = d.x + nz(t * .4, d.f) * 30; c.globalAlpha = .4 + .6 * Math.abs(Math.sin(t * 1.3 + d.f)); c.beginPath(); c.arc(x, y, d.r, 0, 7); c.fill(); });
+  c.globalAlpha = 1;
+}
+(function meja() {                          // permukaan meja, digambar sekali: tegel kunci atau papan kayu
+  const c = $('#cvMeja').getContext('2d'), r0 = rng(8);
+  if (LATAR.meja === 'kayu') {
+    for (let j = 0; j < 8; j++) { const y = j * 118, tone = .85 + r0() * .2;
+      c.fillStyle = campur('#6E4426', '#A8754A', tone - .6); c.fillRect(0, y, 1600, 118);
+      for (let k = 0; k < 14; k++) { c.strokeStyle = `rgba(${r0() < .5 ? '60,30,12' : '210,160,110'},.22)`; c.lineWidth = 2 + r0() * 3; c.beginPath();
+        const yy = y + 8 + r0() * 100; c.moveTo(0, yy); for (let x = 0; x <= 1600; x += 80) c.lineTo(x, yy + Math.sin(x * .004 + k) * 6); c.stroke(); }
+      c.fillStyle = 'rgba(30,12,4,.6)'; c.fillRect(0, y, 1600, 4); }
+  } else {
+    const s = 128, z = s / 200; c.fillStyle = '#E2D0B2'; c.fillRect(0, 0, 1600, 920);
+    for (let i = 0; i < 13; i++) for (let j = 0; j < 8; j++) { const x = i * s, y = j * s;
+      c.globalAlpha = .82 + r0() * .18; c.fillStyle = '#A65440'; [[0, 0], [s, 0], [s, s], [0, s]].forEach(([a, b]) => { c.beginPath(); c.arc(x + a, y + b, 50 * z, 0, 7); c.fill(); });
+      c.fillStyle = '#E2D0B2'; [[0, 0], [s, 0], [s, s], [0, s]].forEach(([a, b]) => { c.beginPath(); c.arc(x + a, y + b, 31 * z, 0, 7); c.fill(); });
+      c.fillStyle = '#58705A'; for (let k = 0; k < 4; k++) { c.save(); c.translate(x + s / 2, y + s / 2); c.rotate(k * Math.PI / 2 + Math.PI / 4); c.beginPath(); c.ellipse(0, -36 * z, 15 * z, 33 * z, 0, 0, 7); c.fill(); c.restore(); }
+      c.fillStyle = '#A65440'; c.beginPath(); c.arc(x + s / 2, y + s / 2, 12 * z, 0, 7); c.fill(); c.globalAlpha = 1;
+      c.strokeStyle = 'rgba(90,50,30,.4)'; c.lineWidth = 3; c.strokeRect(x, y, s, s); }
+  }
+  c.save(); c.globalCompositeOperation = 'screen'; c.rotate(-.12);                 // pantulan jendela di permukaan mengilap
+  for (let i = 0; i < 4; i++) { const g = c.createLinearGradient(0, 0, 0, 120); g.addColorStop(0, 'rgba(255,214,160,0)'); g.addColorStop(.5, 'rgba(255,214,160,.24)'); g.addColorStop(1, 'rgba(255,214,160,0)');
+    c.fillStyle = g; c.translate(0, i ? 70 : 60); c.fillRect(120 + i * 20, 0, 900, 120); }
+  c.restore();
+  const g = c.createLinearGradient(0, 0, 0, 920); g.addColorStop(0, 'rgba(40,15,0,.35)'); g.addColorStop(.25, 'rgba(255,220,170,.08)'); g.addColorStop(1, 'rgba(30,10,0,.55)');
+  c.fillStyle = g; c.fillRect(0, 0, 1600, 920);
+  const r = rng(3); for (let i = 0; i < 5000; i++) { c.fillStyle = `rgba(${r() < .5 ? '255,255,255' : '60,30,10'},.07)`; c.fillRect(r() * 1600, r() * 920, 2, 2); }
+})();
+const BC = $('#cvBayang'), bx = BC.getContext('2d'), PANTUL = kanvas(500, 420), pc = PANTUL.getContext('2d');
+function bayangan(cx, alas, lepas, hangat, al, top, sc) {
+  bx.clearRect(0, 0, 1080, 1920); if (al <= 0) return;
+  const k = 620 * sc / 1000, gap = (top + 1592 * k) - alas;            // pantulan samar: produk dibalik, dipipihkan, memudar
+  pc.clearRect(0, 0, 500, 420); pc.save(); pc.translate(0, 800); pc.scale(.5, -.5); pc.drawImage(PC, 0, 0, 1000, 1700); pc.restore();
+  pc.globalCompositeOperation = 'destination-in'; const f = pc.createLinearGradient(0, 0, 0, 420);
+  f.addColorStop(0, 'rgba(0,0,0,1)'); f.addColorStop(.7, 'rgba(0,0,0,0)'); pc.fillStyle = f; pc.fillRect(0, 0, 500, 420); pc.globalCompositeOperation = 'source-over';
+  const ap = .2 * al * (1 - Math.min(1, Math.max(0, gap) / 90));
+  if (ap > .005) { bx.save(); bx.globalAlpha = ap; bx.drawImage(PANTUL, cx - 310 * sc, alas - 6, 620 * sc, 840 * k * .45); bx.restore(); }
+  const elips = (x, y, rx, ry, a, rot = 0) => { bx.save(); bx.translate(x, y); bx.rotate(rot); bx.scale(1, ry / rx);
+    const g = bx.createRadialGradient(0, 0, 0, 0, 0, rx); g.addColorStop(0, `rgba(35,12,0,${a})`); g.addColorStop(1, 'rgba(35,12,0,0)');
+    bx.fillStyle = g; bx.beginPath(); bx.arc(0, 0, rx, 0, 7); bx.fill(); bx.restore(); };
+  elips(cx + 150, alas + 4, 330 * (1 - .3 * lepas), 70, .4 * hangat * al * (1 - lepas), .05);
+  elips(cx, alas, 250 * (1 - .35 * lepas), 40, .7 * al * (1 - .7 * lepas));
+  elips(cx, alas + 2, 150 * (1 - .35 * lepas), 16, .55 * al * (1 - .9 * lepas));
+}
+
+/* == 5. BAHAN (sprite kode, dipakai orbit, benda melintas, efek hook, konfeti) ============ */
+function sprite(jenis) { const c = kanvas(260, 260), x = c.getContext('2d'); x.translate(130, 130);
+  if (jenis === 'biji') { x.rotate(.5); const g = x.createRadialGradient(-20, -24, 6, 0, 0, 96); g.addColorStop(0, '#9A5E36'); g.addColorStop(1, '#2E160A');
+    x.fillStyle = g; x.beginPath(); x.ellipse(0, 0, 92, 66, 0, 0, 7); x.fill();
+    x.strokeStyle = '#1E0E05'; x.lineWidth = 11; x.lineCap = 'round'; x.beginPath(); x.moveTo(-70, 8); x.bezierCurveTo(-30, -26, 30, 30, 70, -8); x.stroke();
+    x.fillStyle = 'rgba(255,220,180,.35)'; x.beginPath(); x.ellipse(-30, -36, 34, 12, -.3, 0, 7); x.fill(); }
+  else if (jenis === 'aren') { x.rotate(-.25); x.fillStyle = '#5E2D0E'; x.beginPath(); x.ellipse(0, 34, 96, 38, 0, 0, 7); x.fill(); x.fillRect(-96, -20, 192, 54);
+    const g = x.createRadialGradient(-20, -30, 6, 0, -20, 100); g.addColorStop(0, '#C77A36'); g.addColorStop(1, '#7E3E14');
+    x.fillStyle = g; x.beginPath(); x.ellipse(0, -20, 96, 38, 0, 0, 7); x.fill();
+    const r = rng(4); for (let i = 0; i < 70; i++) { x.fillStyle = `rgba(${r() < .5 ? '255,210,150' : '60,25,5'},.4)`; x.beginPath(); x.arc((r() - .5) * 170, -20 + (r() - .5) * 60, 2 + r() * 3, 0, 7); x.fill(); } }
+  else if (jenis === 'keripik') { const r = rng(6); x.rotate(.3); x.beginPath(); for (let i = 0; i <= 24; i++) { const a = i / 24 * Math.PI * 2, rr = 100 + (r() - .5) * 16; x.lineTo(Math.cos(a) * rr, Math.sin(a) * rr * .72); }
+    const g = x.createRadialGradient(-20, -16, 8, 0, 0, 110); g.addColorStop(0, '#FBE08A'); g.addColorStop(.7, '#E9B44C'); g.addColorStop(1, '#B9771C'); x.fillStyle = g; x.fill();
+    x.strokeStyle = 'rgba(150,90,20,.35)'; x.lineWidth = 4; for (let i = 0; i < 5; i++) { x.beginPath(); x.ellipse(0, 0, 18 + i * 17, (18 + i * 17) * .72, 0, 0, 7); x.stroke(); }
+    for (let i = 0; i < 26; i++) { x.fillStyle = 'rgba(140,80,20,.4)'; x.beginPath(); x.arc((r() - .5) * 160, (r() - .5) * 110, 2 + r() * 4, 0, 7); x.fill(); } }
+  else if (jenis === 'daun') { x.rotate(-.6); const g = x.createLinearGradient(-100, 0, 100, 0); g.addColorStop(0, '#2F6B3A'); g.addColorStop(1, '#6FA650');
+    x.fillStyle = g; x.beginPath(); x.moveTo(-110, 0); x.quadraticCurveTo(0, -80, 110, 0); x.quadraticCurveTo(0, 80, -110, 0); x.fill();
+    x.strokeStyle = 'rgba(230,255,200,.5)'; x.lineWidth = 5; x.beginPath(); x.moveTo(-100, 0); x.lineTo(100, 0); x.stroke(); }
+  else if (jenis === 'tetes') { const g = x.createRadialGradient(-20, 10, 4, 0, 20, 90); g.addColorStop(0, 'rgba(255,255,255,.9)'); g.addColorStop(1, 'rgba(160,210,240,.35)');
+    x.fillStyle = g; x.beginPath(); x.moveTo(0, -100); x.bezierCurveTo(60, -20, 80, 30, 0, 90); x.bezierCurveTo(-80, 30, -60, -20, 0, -100); x.fill(); x.strokeStyle = 'rgba(255,255,255,.8)'; x.lineWidth = 4; x.stroke(); }
+  else kubusEs(x, 0, 0, 170, .3);
+  return c; }
+const SPRITE = {}; ['biji', 'aren', 'es', 'keripik', 'daun', 'tetes'].forEach(j => { const s = sprite(j), b = kanvas(260, 260), bb = b.getContext('2d'); bb.filter = 'blur(7px)'; bb.drawImage(s, 0, 0); SPRITE[j] = {s, b}; });
+const BAHAN = Array.from({length: 8}, (_, i) => { const j = PRODUK.isi[i % PRODUK.isi.length], el = kanvas(260, 260); el.getContext('2d').drawImage(SPRITE[j].s, 0, 0);
+  el.className = 'bahan'; $('#bahanBelakang').appendChild(el);
+  return {el, a0: i / 8 * Math.PI * 2 + .3, y: 1010 + (i % 4) * 95, s: j === 'biji' ? .62 : .78, sp: (i % 2 ? 1 : -1) * (.6 + i * .1)}; });
+function bahanFrame(t, cx) {
+  const muncul = seg(t, WAKTU.produk - .15, WAKTU.produk + .4), pergi = seg(t, WAKTU.tawar - .15, WAKTU.tawar + .25);
+  BAHAN.forEach((b, i) => { const th = b.a0 + (t - WAKTU.produk + .2) * .55, z = Math.sin(th), k = E.back(clamp(muncul * 1.6 - i * .08)) * (1 - E.in(pergi));
+    const depan = z > 0, wadah = depan ? $('#bahanDepan') : $('#bahanBelakang'); if (b.el.parentNode !== wadah) wadah.appendChild(b.el);
+    const x = cx + Math.cos(th) * 420, y = b.y + z * 60 - (1 - k) * 80, sc = b.s * (.72 + .32 * z) * k;
+    b.el.style.opacity = k > .01 ? Math.min(1, k * 2) * (depan ? 1 : .8) : 0;
+    b.el.style.filter = `blur(${(depan ? z * 2.5 : -z * 3.5).toFixed(1)}px) brightness(${depan ? 1 : .8})`;
+    b.el.style.transform = `translate(${x}px,${y}px) rotate(${t * b.sp}rad) scale(${sc})`; });
+}
+
+/* == 6. KAMERA: satu fungsi, tiga lapis (latar 0.35 · dunia 1 · layar 0) ================ */
+const LAPIS = [[$('#latarL'), .35], [$('#dunia'), 1]];
+let CAM = {fx: 540, fy: 960, s: 1, rot: 0};
+function kamera(t) {
+  const a = E.io(seg(t, WAKTU.buka, WAKTU.produk)), u = t - WAKTU.kunci - .08, hentak = u > 0 ? Math.exp(-9 * u) * Math.sin(u * 46) : 0;
+  let s = lerp(1.95 + .2 * seg(t, WAKTU.hook, WAKTU.buka), 1, a);
+  s *= 1 + .05 * E.io(seg(t, WAKTU.produk, WAKTU.tawar - .05)) - .05 * E.io(seg(t, WAKTU.tawar - .05, WAKTU.tawar + .6)) + .02 * E.io(seg(t, WAKTU.cta + .2, WAKTU.dur));
+  const bidikY = BOX.top + TITIK.puncak[1] * 1054 * BOX.sc;   // hook: bidik puncak produk
+  const fx = 540 + lerp(nz(t * .9, 1) * 8, 0, a) + nz(t * .35, 3) * 10 * a + hentak * 12;
+  const fy = lerp(bidikY, 960, a) + nz(t * .35, 4) * 8 * a + hentak * 7;
+  return {fx, fy, s, rot: lerp(nz(t * .7, 5) * .9, 0, a) + nz(t * .3, 6) * .3 * a, blur: Math.sin(Math.PI * seg(t, WAKTU.buka, WAKTU.produk)) * 9};
+}
+function pasangLapis(c) { LAPIS.forEach(([el, d]) => { const sd = 1 + (c.s - 1) * d, fx = W / 2 + (c.fx - W / 2) * d, fy = H / 2 + (c.fy - H / 2) * d;
+  el.style.transform = `translate(${W / 2}px,${H / 2}px) rotate(${c.rot * d}deg) scale(${sd}) translate(${-fx}px,${-fy}px)`; }); }
+function keLayar(x, y) { const c = CAM, r = c.rot * Math.PI / 180, X = (x - c.fx) * c.s, Y = (y - c.fy) * c.s;
+  return [W / 2 + X * Math.cos(r) - Y * Math.sin(r), H / 2 + X * Math.sin(r) + Y * Math.cos(r)]; }
+
+/* == 7. HP MOCKUP + LAPIS LAYAR ======================================================== */
+const UI = $('#cvUI'), ux = UI.getContext('2d'), DP = $('#cvDepan'), dx = DP.getContext('2d'), TH = $('#thumb'), tx = TH.getContext('2d');
+const HP = {x: 220, y: 600, layar: 16};
+const KARTU_FOTO = {x: HP.x + HP.layar + 28 + 22, y: HP.y + HP.layar + 222 + 22, w: 212, h: 356};
+const TOMBOL = [540, HP.y + HP.layar + 760 + 56];
+const R2 = rng(21), BOKEH = Array.from({length: 11}, () => ({x: R2() * 1080, y: R2() * 1920, r: 30 + R2() * 70, a: .08 + R2() * .14, f: R2() * 9}));
+const LINTAS = Array.from({length: 6}, (_, i) => ({j: PRODUK.isi[i % PRODUK.isi.length], y: 420 + i * 260 + R2() * 90, v: 900 + R2() * 700, o: R2() * 1400, s: .9 + R2() * .9}));
+const DAUN_DEPAN = (() => { const c = kanvas(720, 720), x = c.getContext('2d'); x.filter = 'blur(9px)'; x.translate(360, 360);
+  x.fillStyle = '#1F3324'; x.beginPath(); x.ellipse(0, 0, 300, 220, -.5, 0, 7); x.fill();
+  x.globalCompositeOperation = 'destination-out'; x.lineWidth = 22; x.lineCap = 'round';
+  for (let i = -4; i <= 4; i++) { if (!i) continue; const a = -.5 + i * .3 + (i > 0 ? 1.6 : -1.6); x.beginPath(); x.moveTo(Math.cos(a) * 120, Math.sin(a) * 90); x.lineTo(Math.cos(a) * 330, Math.sin(a) * 250); x.stroke(); }
+  x.globalCompositeOperation = 'source-over'; x.strokeStyle = '#3B5A40'; x.lineWidth = 10; x.beginPath(); x.moveTo(-280, 170); x.lineTo(250, -150); x.stroke(); return c; })();
+const KONFETI = Array.from({length: 10}, (_, i) => ({a: -Math.PI / 2 + (i / 9 - .5) * 2.4 + (R2() - .5) * .3, v: 850 + R2() * 550, sp: (R2() - .5) * 14, s: .18 + R2() * .14}));
+function lapisDepan(t, hangat) {
+  dx.clearRect(0, 0, 1080, 1920);
+  BOKEH.forEach(b => { const x = b.x + nz(t * .3, b.f) * 60, y = (b.y - t * 18 + 1920) % 1920, g = dx.createRadialGradient(x, y, 0, x, y, b.r);
+    g.addColorStop(0, `rgba(255,205,150,${b.a * (.3 + .7 * hangat)})`); g.addColorStop(.75, `rgba(255,190,130,${b.a * .6 * (.3 + .7 * hangat)})`); g.addColorStop(1, 'rgba(255,190,130,0)');
+    dx.fillStyle = g; dx.beginPath(); dx.arc(x, y, b.r, 0, 7); dx.fill(); });
+  const dk = sstep(WAKTU.buka + .3, WAKTU.buka + 1, t) * (1 - .6 * seg(t, WAKTU.cta - .1, WAKTU.cta + .4));   // daun kabur di depan
+  if (dk > 0) { dx.save(); dx.globalAlpha = .92 * dk; dx.translate(1010 + nz(t * .5, 3) * 14 + (1 - dk) * 200, 120 + nz(t * .4, 4) * 10); dx.rotate(.5 + nz(t * .3, 5) * .05); dx.drawImage(DAUN_DEPAN, -360, -360); dx.restore();
+    dx.save(); dx.globalAlpha = .85 * dk; dx.translate(-30 - (1 - dk) * 200 + nz(t * .45, 6) * 12, 1880); dx.rotate(-2.4 + nz(t * .3, 7) * .05); dx.scale(.8, .8); dx.drawImage(DAUN_DEPAN, -360, -360); dx.restore(); }
+  const k = 1 - seg(t, WAKTU.buka - .15, WAKTU.buka + .4);      // benda melintas dekat kamera saat hook
+  if (k > 0) LINTAS.forEach((l, i) => { const x = 1300 - ((l.o + t * l.v) % 1700), sz = 260 * l.s;
+    dx.save(); dx.globalAlpha = k * .9; dx.translate(x, l.y + Math.sin(t * 2 + i) * 30); dx.rotate(t * (i % 2 ? 2 : -2.5)); dx.drawImage(SPRITE[l.j].b, -sz / 2, -sz / 2, sz, sz); dx.restore(); });
+}
+
+/* == 8. SCENE ========================================================================== */
+const L1 = label({x: 490, y: 1440, dx: -40, dy: 140, teks: TEKS.label1, warna: MEREK.emas, ukuran: 46, font: "'Plus Jakarta Sans'"});
+const L2 = label({x: 560, y: 1230, dx: 20, dy: 300, teks: TEKS.label2, warna: MEREK.emas, ukuran: 46, font: "'Plus Jakarta Sans'"});
+const pop = (tl, el, at, o = {}) => tl.fromTo(el, {opacity: 0, scale: o.s ?? .6, y: o.y ?? 30, filter: 'blur(14px)'}, {opacity: 1, scale: 1, y: 0, filter: 'blur(0px)', duration: o.d ?? .4, ease: 'back.out(1.8)', immediateRender: false}, at);
+const out = (tl, el, at) => tl.to(el, {opacity: 0, scale: .85, y: -20, filter: 'blur(10px)', duration: .22, ease: 'power2.in'}, at);
+const T = WAKTU;
+
+const SCENE = {
+  dur: T.dur,
+  sub: {gaya: 'mati'},
+  audio: {vo: [], sfx: [], music: null},
+  muat() { return Promise.all([muatGambar(FOTO_PRODUK).then(i => FOTO = i), muatGambar(FOTO_LOGO).then(i => LOGO = i)]).then(() => {
+    const isi = s => LOGO ? `<img src="${FOTO_LOGO}" style="width:${s}px;height:${s}px;object-fit:contain">` : logoSVG(s);
+    $('#hpLogo').innerHTML = isi(72); $('#ctaLogo').innerHTML = isi(80);
+    const p = []; for (let i = 0; i < 32; i++) { const r = i % 2 ? 112 : 136, a = i / 32 * Math.PI * 2; p.push((140 + Math.cos(a) * r).toFixed(1) + ',' + (140 + Math.sin(a) * r).toFixed(1)); }
+    $('#bintang').setAttribute('d', 'M' + p.join('L') + 'Z'); }); },
+  build(tl) {
+    wIn(tl, $('#tJam'), T.hook + .04, {st: .07, d: .45});                       // HOOK: per kata, kata kunci dihentak
+    const ng = W8($('#tNgantuk')), nk = $$('.sorot .wi', $('#tNgantuk')), biasa = ng.filter(w => !nk.includes(w));
+    tl.set('#tNgantuk', {autoAlpha: 1}, T.hook + .2);
+    tl.fromTo(biasa, {yPercent: 70, opacity: 0, filter: 'blur(12px)'}, {yPercent: 0, opacity: 1, filter: 'blur(0px)', duration: .4, ease: 'power3.out', stagger: .07}, T.hook + .24);
+    tl.fromTo(nk, {scale: 2.3, opacity: 0, filter: 'blur(18px)'}, {scale: 1, opacity: 1, filter: 'blur(0px)', duration: .3, ease: 'back.out(1.6)', stagger: .08}, T.kunci);
+    wOut(tl, $('#tJam'), T.buka - .22); wOut(tl, $('#tNgantuk'), T.buka - .18, {y: -40, d: .28});
+    wIn(tl, $('#tNama'), T.produk - .08, {st: .08}); wIn(tl, $('#tAren'), T.produk + .2, {st: .1, sy: 1.5});   // PRODUK + BUKTI
+    pop(tl, '#pBukti', T.bukti); wOut(tl, $('#tNama'), T.tawar - .1); wOut(tl, $('#tAren'), T.tawar - .05); out(tl, '#pBukti', T.tawar - .08);
+    pop(tl, '#pPromo', T.tawar + .25, {s: .8});                                  // PENAWARAN
+    tl.fromTo('#kartu', {opacity: 0, y: 160, scale: .9}, {opacity: 1, y: 0, scale: 1, duration: .5, ease: 'back.out(1.5)'}, T.tawar + .28);
+    if ($('#hBesar')) tl.fromTo('#hBesar', {scale: 2, opacity: 0, filter: 'blur(16px)'}, {scale: 1, opacity: 1, filter: 'blur(0px)', duration: .35, ease: 'back.out(1.7)'}, T.tawar + .75);
+    if ($('#hWaktu')) pop(tl, '#hWaktu', T.tawar + 1.42, {s: .7});
+    tl.fromTo('#lencana', {opacity: 0, scale: 0, rotation: -140}, {opacity: 1, scale: 1, rotation: -12, duration: .5, ease: 'back.out(2)'}, T.tawar + 1.08);
+    out(tl, '#pPromo', T.cta - .1); tl.to('#kartu', {opacity: 0, y: 220, scale: .9, duration: .3, ease: 'power2.in'}, T.cta - .08); out(tl, '#lencana', T.cta - .1);
+    wIn(tl, $('#tPesan'), T.cta + .28, {st: .1}); wIn(tl, $('#tDi'), T.cta + .58, {st: .07});   // CTA
+    tl.fromTo('#hp .troli i', {scale: 0}, {scale: 1, duration: .35, ease: 'back.out(3)'}, T.cta + 1.24);
+    tl.to('#hp .t1', {opacity: 0, y: -30, duration: .18}, T.cta + 1.16); tl.fromTo('#hp .t2', {opacity: 0, y: 30}, {opacity: 1, y: 0, duration: .25, ease: 'back.out(2)'}, T.cta + 1.2);
+    tl.to('#hp .tombol', {backgroundColor: MEREK.aksen2, duration: .2}, T.cta + 1.16);
+  },
+  frame(t) {
+    const hangat = sstep(T.buka + .02, T.buka + .75, t);
+    CAM = kamera(t); pasangLapis(CAM);
+    $('#dunia').style.filter = `blur(${CAM.blur.toFixed(1)}px) saturate(${lerp(.62, 1, hangat).toFixed(3)}) brightness(${lerp(.8, 1, hangat).toFixed(3)})`;
+    $('#latarL').style.filter = CAM.blur > .1 ? `blur(${(CAM.blur * .6).toFixed(1)}px)` : 'none';
+    // posisi produk: di meja -> melayang naik (penawaran) -> terbang ke HP (CTA)
+    const naik = E.back(seg(t, T.tawar, T.tawar + .6)), sc = lerp(BOX.sc, .85, naik), cx = 540;
+    const top = lerp(BOX.top, 168, naik) + Math.sin((t - T.tawar - .5) * 2.3) * 10 * seg(t, T.tawar + .5, T.tawar + 1.1);
+    const ry = t < T.produk ? -6 + nz(t, 7) * 3 * (1 - seg(t, T.buka, T.produk)) : 13 * Math.sin((t - T.produk) * 1.05) * (1 - seg(t, T.tawar - .1, T.tawar + .6)) + nz(t * .5, 8) * 2;
+    const rot = clamp(ry / 13, -1, 1);
+    gambarLatar(t, hangat, naik);
+    gambarProduk(t, rot, hangat);
+    const terbang = t >= T.cta + .22;
+    $('#produkBox').style.transform = `translate(${cx - 310}px,${top}px) scale(${sc}) perspective(1800px) rotateY(${ry.toFixed(2)}deg)`;
+    $('#produkBox').style.opacity = terbang ? 0 : 1;
+    bayangan(cx, BOX.alas, naik, hangat, 1 - seg(t, T.cta, T.cta + .4), top, sc);
+    bahanFrame(t, cx);
+    lapisDepan(t, hangat);
+    const tt = p => keLayar(cx - 310 * sc + p[0] * 620 * sc, top + p[1] * 1054 * sc);   // label menempel ke titik produk
+    L1.atur(t, T.bukti - .4, T.tawar - .15, ...tt(TITIK.label1)); L2.atur(t, T.bukti - .15, T.tawar - .15, ...tt(TITIK.label2));
+    $('#tNgantuk .sorot').style.setProperty('--k', (E.out(seg(t, T.kunci + .12, T.kunci + .42)) * (1 - E.in(seg(t, T.buka - .14, T.buka + .02))) * 100).toFixed(1) + '%');
+    const P = PENAWARAN, coret = $('#kartu .lama i'), hb = $('#hBaru');
+    if (coret) coret.style.transform = `scaleX(${E.io(seg(t, T.tawar + .62, T.tawar + .88))})`;
+    if (hb) { const kh = P.lama ? seg(t, T.tawar + .9, T.tawar + 1.4) : 1;
+      hb.textContent = Math.round(lerp(P.lama || P.baru, P.baru, E.out(kh))) + P.satuan;
+      hb.style.filter = kh > 0 && kh < 1 ? 'blur(3px)' : 'none';
+      hb.style.transform = `translateY(${kh > 0 && kh < 1 ? Math.sin(t * 80) * 6 : 0}px) scale(${1 + .14 * Math.sin(Math.PI * seg(t, T.tawar + 1.4, T.tawar + 1.7))})`; }
+    if ($('#hDetik')) $('#hDetik').textContent = P.batas + ':' + String(59 - Math.floor(t) % 60).padStart(2, '0');
+    $('#lencana svg').style.transform = `rotate(${t * 25}deg)`;
+    const hk = E.out(seg(t, T.cta, T.cta + .58)), hp = $('#hp');            // HP naik, produk terbang ke menu, jari mengetuk
+    hp.style.opacity = t > T.cta ? 1 : 0;
+    hp.style.transform = `translateY(${lerp(1400, HP.y, hk)}px) perspective(1600px) rotateX(${lerp(28, 0, hk)}deg)`;
+    if (t > T.cta + .5) { tx.clearRect(0, 0, 424, 712); tx.drawImage(PC, -12, 0, 448, 762); }
+    TH.style.opacity = seg(t, T.cta + .66, T.cta + .76);
+    ux.clearRect(0, 0, 1080, 1920);
+    if (terbang && t < T.cta + .76) { const k = E.io(seg(t, T.cta + .22, T.cta + .7)), a0 = keLayar(cx - 310 * sc, top), w0 = 620 * sc * CAM.s;
+      const x = lerp(a0[0], KARTU_FOTO.x - 6, k), y = lerp(a0[1], KARTU_FOTO.y, k), w = lerp(w0, 224, k);
+      ux.save(); ux.globalAlpha = 1 - seg(t, T.cta + .68, T.cta + .76); ux.translate(x + w / 2, y); ux.rotate(Math.sin(Math.PI * k) * -.25); ux.drawImage(PC, -w / 2, 0, w, w * 1.7); ux.restore(); }
+    const jm = E.out(seg(t, T.cta + .72, T.cta + 1.08)), tekan = Math.sin(Math.PI * seg(t, T.cta + 1.08, T.cta + 1.22)), pergi = E.in(seg(t, T.cta + 1.6, T.cta + 2));
+    if (t > T.cta + .72 && pergi < 1) { const jx = lerp(820, TOMBOL[0] + 60, jm) + pergi * 300, jy = lerp(1760, TOMBOL[1] + 10, jm) + pergi * 260;
+      const rp = seg(t, T.cta + 1.12, T.cta + 1.7); if (rp > 0 && rp < 1) { ux.strokeStyle = `rgba(255,255,255,${(1 - rp) * .9})`; ux.lineWidth = 8; ux.beginPath(); ux.arc(TOMBOL[0] + 60, TOMBOL[1] + 10, 40 + 190 * E.out(rp), 0, 7); ux.stroke(); }
+      ux.fillStyle = 'rgba(255,255,255,.42)'; ux.strokeStyle = 'rgba(255,255,255,.95)'; ux.lineWidth = 5;
+      ux.beginPath(); ux.arc(jx, jy, 46 * (1 - .22 * tekan), 0, 7); ux.fill(); ux.stroke(); }
+    const ub = t - T.cta - 1.2, ks = SPRITE[PRODUK.isi[0]].s;
+    if (ub > 0 && ub < 1.2) KONFETI.forEach(b => { const x = TOMBOL[0] + Math.cos(b.a) * b.v * ub, y = TOMBOL[1] - 40 + Math.sin(b.a) * b.v * ub + 1700 * ub * ub;
+      ux.save(); ux.globalAlpha = 1 - seg(ub, .7, 1.2); ux.translate(x, y); ux.rotate(b.sp * ub); ux.drawImage(ks, -130 * b.s, -130 * b.s, 260 * b.s, 260 * b.s); ux.restore(); });
+  }
+};
+grainOn(.16, 'overlay');
