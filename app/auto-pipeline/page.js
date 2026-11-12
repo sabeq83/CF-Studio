@@ -8,6 +8,7 @@ import AutoPipelineQueueDrawer from '../components/AutoPipelineQueueDrawer';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { GRID_LAYOUT_COORDINATES } from '@/lib/core/GridCoordinates';
+import { buildMultiplierSchedulePairs } from '@/lib/multiplier-pairing';
 
 const LAYOUT_PRESET_METADATA = {
   3: [
@@ -244,6 +245,9 @@ export default function AutoPipelinePage() {
   const [selectedAngleIndex, setSelectedAngleIndex] = useState(0);
   const [loadingAngles, setLoadingAngles] = useState(false);
   const [blueprintSearchQuery, setBlueprintSearchQuery] = useState('');
+  const [instantMultiplierBridgingMode, setInstantMultiplierBridgingMode] = useState('select_existing'); // 'none' | 'select_existing'
+  const [instantMultiplierProductId, setInstantMultiplierProductId] = useState('');
+  const [instantMultiplierProductSearch, setInstantMultiplierProductSearch] = useState('');
 
   // Recipe Labs (Text & Photo Composite Grid) State (Tab 1)
   const [instantTargetLanguage, setInstantTargetLanguage] = useState('en_US');
@@ -304,6 +308,9 @@ export default function AutoPipelinePage() {
   const [schedBlueprintId, setSchedBlueprintId] = useState('');
   const [selectedBlueprintIds, setSelectedBlueprintIds] = useState([]);
   const [schedBlueprintSearchQuery, setSchedBlueprintSearchQuery] = useState('');
+  const [schedMultiplierPairMode, setSchedMultiplierPairMode] = useState('one_product'); // 'one_product' | 'multi_product' | 'no_product'
+  const [schedMultiplierProductIds, setSchedMultiplierProductIds] = useState([]);
+  const [schedMultiplierProductSearch, setSchedMultiplierProductSearch] = useState('');
   const [schedImagesPerRecipe, setSchedImagesPerRecipe] = useState(4);
   const [schedLayoutId, setSchedLayoutId] = useState('4_editorial_split');
   const [schedRecipeAspectRatio, setSchedRecipeAspectRatio] = useState('3:4');
@@ -864,11 +871,15 @@ export default function AutoPipelinePage() {
     return () => clearTimeout(handler);
   }, [schedBlueprintSearchQuery, isScheduleModalOpen, schedCampaignType]);
 
-  async function generateMultiplierAnglesForBlueprint(bpId) {
+  async function generateMultiplierAnglesForBlueprint(bpId, explicitProdId = null) {
     if (!bpId) return;
     setLoadingAngles(true);
     try {
-      const res = await fetch(`/api/v2/recipes/autonomous-pipeline?action=get_multiplier_angles&blueprint_id=${encodeURIComponent(bpId)}`);
+      const prodId = explicitProdId !== null
+        ? explicitProdId
+        : (instantMultiplierBridgingMode === 'select_existing' ? (instantMultiplierProductId || catalogProducts[0]?.id || '') : '');
+      const prodParam = prodId ? `&product_id=${encodeURIComponent(prodId)}` : '';
+      const res = await fetch(`/api/v2/recipes/autonomous-pipeline?action=get_multiplier_angles&blueprint_id=${encodeURIComponent(bpId)}${prodParam}`);
       const data = await res.json();
       if (data.success && Array.isArray(data.angles) && data.angles.length > 0) {
         setMultiplierAngles(data.angles);
@@ -1020,10 +1031,20 @@ export default function AutoPipelinePage() {
         showToast('Pilih Blueprint video referensi Deconstruct Lab terlebih dahulu.', 'error');
         return;
       }
+      if (instantMultiplierBridgingMode === 'select_existing') {
+        targetProductId = instantMultiplierProductId || (catalogProducts[0]?.id || null);
+        if (!targetProductId) {
+          showToast('Pilih produk dari katalog atau ganti mode ke Tanpa Produk Spesifik.', 'error');
+          return;
+        }
+      }
       if (executionMode === 'manual_review' && multiplierAngles.length > 0) {
         targetChosenAngle = multiplierAngles[selectedAngleIndex] || multiplierAngles[0];
       }
-      targetTopic = targetChosenAngle?.title || 'Multiplier Remix Hook';
+      const bpObj = blueprints.find(b => b.id === targetDeconstructId);
+      const prodObj = targetProductId ? catalogProducts.find(p => p.id === targetProductId) : null;
+      const baseTitle = targetChosenAngle?.title || bpObj?.core_problem || 'Multiplier Remix Hook';
+      targetTopic = prodObj ? `${baseTitle} × ${prodObj.product_name}` : baseTitle;
       targetCategory = 'multiplier';
     } else if (instantCampaignType === 'recipe_labs') {
       if (!recipeLabsTopic || !recipeLabsTopic.trim()) {
@@ -1075,6 +1096,8 @@ export default function AutoPipelinePage() {
           target_language: instantCampaignType === 'recipe_labs' ? instantTargetLanguage : undefined,
           recipe_classification: instantCampaignType === 'recipe_labs' ? instantRecipeClassification : undefined,
           product_id: targetProductId,
+          bridging_mode: instantCampaignType === 'multiplier_campaign' ? (targetProductId ? 'select_existing' : 'none') : undefined,
+          product_aware_angle: instantCampaignType === 'multiplier_campaign' ? true : undefined,
           product_title: targetTopic,
           promotion_context: instantPromotionContext.trim() || null,
           selected_cep: selectedCep,
@@ -1422,11 +1445,14 @@ export default function AutoPipelinePage() {
     setSelectedPillars([]);
     setSelectedBlueprintIds(blueprints.length > 0 ? [blueprints[0].id] : []);
     setSchedBlueprintId(blueprints[0]?.id || '');
+    setSchedMultiplierPairMode('one_product');
+    setSchedMultiplierProductIds(catalogProducts.length > 0 ? [catalogProducts[0].id] : []);
     setSchedEditorialMode('pillar');
     setSchedEditorialKeywordsText('');
     setProductSearchQuery('');
     setPillarSearchQuery('');
     setSchedBlueprintSearchQuery('');
+    setSchedMultiplierProductSearch('');
 
     const matched = matchAccountsToBrand(replizAccounts, currentBrand?.brand_name);
     setSchedReplizAccountIds(matched.map(a => a.id));
@@ -1481,8 +1507,17 @@ export default function AutoPipelinePage() {
       const bpId = sched.target_item_id || schedCfg.blueprint_id;
       setSelectedBlueprintIds([bpId]);
       setSchedBlueprintId(bpId);
+      if (schedCfg.product_id && schedCfg.bridging_mode !== 'none') {
+        setSchedMultiplierPairMode('one_product');
+        setSchedMultiplierProductIds([schedCfg.product_id]);
+      } else {
+        setSchedMultiplierPairMode('no_product');
+        setSchedMultiplierProductIds([]);
+      }
     } else {
       setSelectedBlueprintIds([]);
+      setSchedMultiplierPairMode('one_product');
+      setSchedMultiplierProductIds([]);
     }
 
     if (pType === 'product_campaign' && sched.target_item_id) {
@@ -1530,6 +1565,7 @@ export default function AutoPipelinePage() {
     setProductSearchQuery('');
     setPillarSearchQuery('');
     setSchedBlueprintSearchQuery('');
+    setSchedMultiplierProductSearch('');
 
     fetchPresetsForModalBrand(sched.brand_id, pType);
     setReplizSearchQuery('');
@@ -1587,6 +1623,9 @@ export default function AutoPipelinePage() {
       if (!editingSchedule && selectedBlueprintIds.length === 0) {
         return showToast('Pilih minimal 1 blueprint acuan video untuk dijadwalkan.', 'error');
       }
+      if (!editingSchedule && schedMultiplierPairMode !== 'no_product' && schedMultiplierProductIds.length === 0) {
+        return showToast('Pilih minimal 1 produk dari katalog atau pilih mode Tanpa Produk Spesifik.', 'error');
+      }
     }
 
     setSavingSchedule(true);
@@ -1614,8 +1653,11 @@ export default function AutoPipelinePage() {
           }
         } else if (schedCampaignType === 'multiplier_campaign') {
           targetId = schedBlueprintId || editingSchedule.target_item_id || (blueprints[0]?.id || null);
+          const editProdId = schedMultiplierPairMode !== 'no_product' ? (schedMultiplierProductIds[0] || null) : null;
           const bpObj = blueprints.find(b => b.id === targetId);
-          targetTitle = bpObj?.original_caption || bpObj?.source_url || 'Winning Blueprint';
+          const prodObj = editProdId ? catalogProducts.find(p => p.id === editProdId) : null;
+          const bpTitle = bpObj?.core_problem || bpObj?.original_caption || bpObj?.source_url || 'Winning Blueprint';
+          targetTitle = prodObj ? `${bpTitle} × ${prodObj.product_name}` : bpTitle;
           schedTopicVal = targetTitle;
         }
 
@@ -1634,7 +1676,15 @@ export default function AutoPipelinePage() {
                   visual_identity_preset_id: schedViId
                 }
               : (schedCampaignType === 'multiplier_campaign'
-                  ? { blueprint_id: targetId, execution_mode: 'full_autopilot', generate_recipe: schedGenerateRecipe, visual_identity_preset_id: schedViId }
+                  ? {
+                      blueprint_id: targetId,
+                      product_id: schedMultiplierPairMode !== 'no_product' ? (schedMultiplierProductIds[0] || null) : null,
+                      bridging_mode: schedMultiplierPairMode !== 'no_product' && schedMultiplierProductIds[0] ? 'select_existing' : 'none',
+                      product_aware_angle: true,
+                      execution_mode: 'full_autopilot',
+                      generate_recipe: schedGenerateRecipe,
+                      visual_identity_preset_id: schedViId
+                    }
                   : (schedCampaignType === 'recipe_labs'
                       ? { 
                           images_per_recipe: schedImagesPerRecipe, 
@@ -1905,12 +1955,22 @@ export default function AutoPipelinePage() {
           const data = await res.json();
           if (!data.success) throw new Error(data.error || 'Gagal membuat jadwal batch resep');
           showToast(`Berhasil membuat ${items.length} baris jadwal resep kuliner independen! 🍳`);
-        } else if (schedCampaignType === 'multiplier_campaign' && selectedBlueprintIds.length > 1) {
-          // BATCH MULTIPLIER: 1 Blueprint = 1 Baris Jadwal Mandiri
+        } else if (
+          schedCampaignType === 'multiplier_campaign' &&
+          (selectedBlueprintIds.length > 1 || (schedMultiplierPairMode === 'multi_product' && schedMultiplierProductIds.length > 1))
+        ) {
+          // BATCH MULTIPLIER: 1 Pasangan (Blueprint × Produk) = 1 Baris Jadwal Mandiri
+          const pairs = buildMultiplierSchedulePairs({
+            blueprintIds: selectedBlueprintIds,
+            productIds: schedMultiplierProductIds,
+            pairingMode: schedMultiplierPairMode
+          });
           const customNameBase = schedName.trim();
-          const items = selectedBlueprintIds.map((bpId, idx) => {
-            const bpObj = blueprints.find(b => b.id === bpId);
+          const items = pairs.map((pair, idx) => {
+            const bpObj = blueprints.find(b => b.id === pair.blueprintId);
+            const prodObj = pair.productId ? catalogProducts.find(p => p.id === pair.productId) : null;
             const bpTitle = bpObj?.core_problem || bpObj?.original_caption || bpObj?.source_url || 'Winning Blueprint';
+            const pairTitle = prodObj ? `${bpTitle} × ${prodObj.product_name}` : bpTitle;
             let itemDays = schedDays;
             let itemTargetDate = schedTargetDate;
             if (schedMode === 'specific_date') {
@@ -1923,16 +1983,16 @@ export default function AutoPipelinePage() {
               itemDays = [schedDays[idx % schedDays.length]];
             }
             const itemScheduleName = customNameBase
-              ? (customNameBase.toLowerCase().includes(bpTitle.toLowerCase()) ? customNameBase : `${customNameBase} - ${bpTitle}`)
-              : `Multiplier: ${bpTitle} — ${schedGenTime} WIB`;
+              ? (customNameBase.toLowerCase().includes(pairTitle.toLowerCase()) ? customNameBase : `${customNameBase} - ${pairTitle}`)
+              : `Multiplier: ${pairTitle} — ${schedGenTime} WIB`;
             return {
               name: itemScheduleName,
               brand_id: schedBrandId,
               preset_key: schedPresetKey,
               pipeline_type: 'multiplier_campaign',
-              target_item_id: bpId,
-              target_item_title: bpTitle,
-              topic: bpTitle,
+              target_item_id: pair.blueprintId,
+              target_item_title: pairTitle,
+              topic: pairTitle,
               category: 'multiplier',
               recipe_count: 1,
               generation_time: schedGenTime,
@@ -1944,7 +2004,10 @@ export default function AutoPipelinePage() {
               auto_publish_enabled: schedAutoPublish,
               timezone: 'Asia/Jakarta',
               pipeline_config: {
-                blueprint_id: bpId,
+                blueprint_id: pair.blueprintId,
+                product_id: pair.productId || null,
+                bridging_mode: pair.productId ? 'select_existing' : 'none',
+                product_aware_angle: true,
                 execution_mode: 'full_autopilot',
                 generate_recipe: schedGenerateRecipe,
                 post_link_affiliate: schedPostAffiliateLink
@@ -2053,8 +2116,11 @@ export default function AutoPipelinePage() {
             }
           } else if (schedCampaignType === 'multiplier_campaign') {
             targetId = (selectedBlueprintIds.length > 0 ? selectedBlueprintIds[0] : schedBlueprintId) || (blueprints[0]?.id || null);
+            const singleProdId = schedMultiplierPairMode !== 'no_product' ? (schedMultiplierProductIds[0] || null) : null;
             const bpObj = blueprints.find(b => b.id === targetId);
-            targetTitle = bpObj?.core_problem || bpObj?.core_solution || bpObj?.original_caption || bpObj?.source_url || 'Winning Blueprint';
+            const prodObj = singleProdId ? catalogProducts.find(p => p.id === singleProdId) : null;
+            const bpTitle = bpObj?.core_problem || bpObj?.core_solution || bpObj?.original_caption || bpObj?.source_url || 'Winning Blueprint';
+            targetTitle = prodObj ? `${bpTitle} × ${prodObj.product_name}` : bpTitle;
             finalTopic = targetTitle;
             finalCategory = 'multiplier';
             if (!finalName) finalName = `Multiplier: ${targetTitle} — ${schedGenTime} WIB`;
@@ -2088,7 +2154,15 @@ export default function AutoPipelinePage() {
                     visual_identity_preset_id: schedViIdSingle 
                   }
                 : (schedCampaignType === 'multiplier_campaign'
-                    ? { blueprint_id: targetId, execution_mode: 'full_autopilot', generate_recipe: schedGenerateRecipe, visual_identity_preset_id: schedViIdSingle }
+                    ? {
+                        blueprint_id: targetId,
+                        product_id: schedMultiplierPairMode !== 'no_product' ? (schedMultiplierProductIds[0] || null) : null,
+                        bridging_mode: schedMultiplierPairMode !== 'no_product' && schedMultiplierProductIds[0] ? 'select_existing' : 'none',
+                        product_aware_angle: true,
+                        execution_mode: 'full_autopilot',
+                        generate_recipe: schedGenerateRecipe,
+                        visual_identity_preset_id: schedViIdSingle
+                      }
                     : (schedCampaignType === 'recipe_labs'
                         ? { 
                             images_per_recipe: schedImagesPerRecipe, 
@@ -2451,6 +2525,40 @@ export default function AutoPipelinePage() {
     if (!instantPillarSearch.trim()) return true;
     return p.toLowerCase().includes(instantPillarSearch.toLowerCase().trim());
   });
+
+  function filterProductsByQuery(list, query) {
+    if (!query || !query.trim()) return list;
+    const q = query.toLowerCase().trim();
+    return list.filter(p =>
+      (p.product_name && p.product_name.toLowerCase().includes(q)) ||
+      (p.category && p.category.toLowerCase().includes(q)) ||
+      (p.unique_selling_point && p.unique_selling_point.toLowerCase().includes(q))
+    );
+  }
+
+  const filteredInstantMultiplierProducts = filterProductsByQuery(catalogProducts, instantMultiplierProductSearch);
+  const filteredSchedMultiplierProducts = filterProductsByQuery(catalogProducts, schedMultiplierProductSearch);
+
+  function toggleSchedMultiplierProduct(prodId) {
+    if (editingSchedule || schedMultiplierPairMode === 'one_product') {
+      setSchedMultiplierProductIds([prodId]);
+      return;
+    }
+    setSchedMultiplierProductIds(prev => {
+      if (prev.includes(prodId)) {
+        return prev.length > 1 ? prev.filter(id => id !== prodId) : prev;
+      }
+      return [...prev, prodId];
+    });
+  }
+
+  const schedMultiplierPairs = !editingSchedule
+    ? buildMultiplierSchedulePairs({
+        blueprintIds: selectedBlueprintIds,
+        productIds: schedMultiplierProductIds,
+        pairingMode: schedMultiplierPairMode
+      })
+    : [];
 
   return (
     <div className="app-layout" style={{ display: 'flex', minHeight: '100vh', background: 'var(--canvas)' }}>
@@ -4119,6 +4227,231 @@ export default function AutoPipelinePage() {
                         );
                       });
                     })()}
+                  </div>
+
+                  {/* STEP 2B: PRODUCT BRIDGING OPSIONAL (1 BLUEPRINT + 1 PRODUK) */}
+                  <div style={{
+                    background: 'var(--surface)',
+                    border: '1.5px solid var(--status-success)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '0.95rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.75rem'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                        <span style={{ fontSize: '1rem' }}>🛍️</span>
+                        <strong style={{ fontSize: '0.84rem', color: 'var(--text-primary)' }}>
+                          Product Bridging (1 Blueprint + 1 Produk — Mencontek Cerita X untuk Produk Y)
+                        </strong>
+                      </div>
+                      <span style={{
+                        fontSize: '0.68rem',
+                        fontWeight: 700,
+                        padding: '0.15rem 0.55rem',
+                        borderRadius: 9999,
+                        background: 'var(--status-success-soft)',
+                        color: 'var(--status-success)',
+                        border: '1px solid var(--status-success)'
+                      }}>
+                        Opsional · Multiplier Lab Parity
+                      </span>
+                    </div>
+
+                    {/* Toggle Mode Bridging */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '0.6rem' }}>
+                      <div
+                        onClick={() => {
+                          setInstantMultiplierBridgingMode('none');
+                          if (executionMode === 'manual_review' && instantBlueprintId) {
+                            generateMultiplierAnglesForBlueprint(instantBlueprintId, '');
+                          }
+                        }}
+                        style={{
+                          padding: '0.65rem 0.85rem',
+                          borderRadius: 'var(--radius-sm)',
+                          background: instantMultiplierBridgingMode === 'none' ? 'var(--surface-interactive)' : 'var(--surface-raised)',
+                          border: instantMultiplierBridgingMode === 'none' ? '1.5px solid var(--status-purple)' : '1px solid var(--border-subtle)',
+                          cursor: 'pointer',
+                          transition: 'var(--transition)'
+                        }}
+                      >
+                        <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)' }}>🧬 Tanpa Produk Spesifik</div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '2px' }}>Pure storytelling / edukasi murni sesuai blueprint.</div>
+                      </div>
+                      <div
+                        onClick={() => {
+                          setInstantMultiplierBridgingMode('select_existing');
+                          const resolvedId = instantMultiplierProductId || catalogProducts[0]?.id || '';
+                          if (!instantMultiplierProductId && resolvedId) setInstantMultiplierProductId(resolvedId);
+                          if (executionMode === 'manual_review' && instantBlueprintId && resolvedId) {
+                            generateMultiplierAnglesForBlueprint(instantBlueprintId, resolvedId);
+                          }
+                        }}
+                        style={{
+                          padding: '0.65rem 0.85rem',
+                          borderRadius: 'var(--radius-sm)',
+                          background: instantMultiplierBridgingMode === 'select_existing' ? 'var(--surface-interactive)' : 'var(--surface-raised)',
+                          border: instantMultiplierBridgingMode === 'select_existing' ? '1.5px solid var(--status-success)' : '1px solid var(--border-subtle)',
+                          cursor: 'pointer',
+                          transition: 'var(--transition)'
+                        }}
+                      >
+                        <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)' }}>🛍️ Pasangkan Produk Katalog</div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '2px' }}>Gunakan alur cerita blueprint untuk mempromosikan 1 produk.</div>
+                      </div>
+                    </div>
+
+                    {instantMultiplierBridgingMode === 'select_existing' && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem' }}>
+                          <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                            Cari &amp; Pilih Produk Target ({catalogProducts.length} produk tersedia):
+                          </span>
+                          {instantMultiplierProductSearch && (
+                            <button
+                              type="button"
+                              onClick={() => setInstantMultiplierProductSearch('')}
+                              style={{ background: 'none', border: 'none', color: 'var(--status-success)', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}
+                            >
+                              Reset Filter Produk
+                            </button>
+                          )}
+                        </div>
+                        <div style={{ position: 'relative' }}>
+                          <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '0.82rem' }}>🔍</span>
+                          <input
+                            type="text"
+                            value={instantMultiplierProductSearch}
+                            onChange={(e) => setInstantMultiplierProductSearch(e.target.value)}
+                            placeholder="Cari nama produk, brand, atau kategori..."
+                            style={{
+                              width: '100%',
+                              height: '36px',
+                              boxSizing: 'border-box',
+                              background: 'var(--input-bg)',
+                              border: '1px solid var(--border-subtle)',
+                              borderRadius: 'var(--radius-sm)',
+                              padding: '0 30px 0 30px',
+                              color: 'var(--text-primary)',
+                              fontSize: '0.8rem',
+                              outline: 'none'
+                            }}
+                          />
+                        </div>
+
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+                          gap: '0.5rem',
+                          maxHeight: '175px',
+                          overflowY: 'auto',
+                          paddingRight: '4px'
+                        }}>
+                          {loadingProducts ? (
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', padding: '0.75rem' }}>Memuat katalog produk...</div>
+                          ) : filteredInstantMultiplierProducts.length === 0 ? (
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', padding: '0.75rem' }}>Tidak ada produk cocok di katalog.</div>
+                          ) : filteredInstantMultiplierProducts.map((prod) => {
+                            const activeProdId = instantMultiplierProductId || catalogProducts[0]?.id;
+                            const isSelected = activeProdId === prod.id;
+                            const imgUrl = prod.clean_photo_url || prod.photo_url;
+                            return (
+                              <div
+                                key={prod.id}
+                                onClick={() => {
+                                  setInstantMultiplierProductId(prod.id);
+                                  if (executionMode === 'manual_review' && instantBlueprintId) {
+                                    generateMultiplierAnglesForBlueprint(instantBlueprintId, prod.id);
+                                  }
+                                }}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '0.6rem',
+                                  padding: '0.5rem 0.65rem',
+                                  borderRadius: 'var(--radius-sm)',
+                                  background: isSelected ? 'var(--surface-interactive)' : 'var(--surface-raised)',
+                                  border: isSelected ? '1.5px solid var(--status-success)' : '1px solid var(--border-subtle)',
+                                  cursor: 'pointer',
+                                  transition: 'var(--transition)'
+                                }}
+                              >
+                                <div style={{
+                                  width: '36px',
+                                  height: '36px',
+                                  borderRadius: 'var(--radius-xs)',
+                                  background: 'var(--surface)',
+                                  border: '1px solid var(--border-subtle)',
+                                  overflow: 'hidden',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  flexShrink: 0
+                                }}>
+                                  {imgUrl ? (
+                                    <img src={imgUrl} alt={prod.product_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                  ) : (
+                                    <span>🛍️</span>
+                                  )}
+                                </div>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={prod.product_name}>
+                                    {prod.product_name}
+                                  </div>
+                                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {prod.category || 'Produk Katalog'}
+                                  </div>
+                                </div>
+                                <div style={{
+                                  width: '18px',
+                                  height: '18px',
+                                  borderRadius: '50%',
+                                  border: isSelected ? '1.5px solid var(--status-success)' : '1.5px solid var(--border-strong)',
+                                  background: isSelected ? 'var(--status-success)' : 'transparent',
+                                  color: isSelected ? 'var(--on-action-primary)' : 'transparent',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontSize: '0.65rem',
+                                  fontWeight: 900,
+                                  flexShrink: 0
+                                }}>
+                                  ✓
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {(() => {
+                          const selBp = blueprints.find(b => b.id === (instantBlueprintId || blueprints[0]?.id));
+                          const selProd = catalogProducts.find(p => p.id === (instantMultiplierProductId || catalogProducts[0]?.id));
+                          if (!selBp || !selProd) return null;
+                          return (
+                            <div style={{
+                              background: 'var(--status-success-soft)',
+                              border: '1px solid var(--status-success)',
+                              borderRadius: 'var(--radius-xs)',
+                              padding: '0.5rem 0.75rem',
+                              fontSize: '0.74rem',
+                              color: 'var(--text-primary)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              flexWrap: 'wrap',
+                              gap: '0.4rem'
+                            }}>
+                              <span>
+                                <strong>Pasangan Aktif (1 Blueprint + 1 Produk):</strong> Cerita <em>{(selBp.core_problem || selBp.original_caption || 'Blueprint').slice(0, 40)}</em> ➔ Produk <strong>{selProd.product_name}</strong>
+                              </span>
+                              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--status-success)' }}>Product-Aware Hook ON</span>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    )}
                   </div>
 
                   {/* Skenario Angle Box */}
@@ -7371,8 +7704,258 @@ export default function AutoPipelinePage() {
                       )}
                     </div>
 
+                    {/* B. TARGET PRODUK PASANGAN (1 BLUEPRINT + 1 PRODUK) */}
+                    <div style={{
+                      background: 'var(--surface)',
+                      border: '1px solid var(--status-success)',
+                      borderRadius: 'var(--radius-sm)',
+                      padding: '0.85rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.65rem'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem' }}>
+                        <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                          <span>🛍️</span>
+                          <span>Target Produk Pasangan (Product Bridging)</span>
+                        </label>
+                        {schedMultiplierPairMode !== 'no_product' && (
+                          <span style={{
+                            fontSize: '0.68rem',
+                            fontWeight: 700,
+                            padding: '0.12rem 0.5rem',
+                            borderRadius: 9999,
+                            background: 'var(--status-success-soft)',
+                            color: 'var(--status-success)',
+                            border: '1px solid var(--status-success)'
+                          }}>
+                            {schedMultiplierProductIds.length} Produk Dipilih
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Mode Pasangan Produk */}
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '0.5rem' }}>
+                        {[
+                          { key: 'one_product', icon: '🎯', title: '1 Produk Andalan', desc: editingSchedule ? 'Pasangkan ke 1 produk katalog.' : 'Semua blueprint tercentang memasarkan 1 produk ini.' },
+                          ...(!editingSchedule ? [{ key: 'multi_product', icon: '🔁', title: 'Multi-Produk Bergilir', desc: 'Kombinasi N Blueprint × M Produk berjeda stagger.' }] : []),
+                          { key: 'no_product', icon: '🧬', title: 'Tanpa Produk Spesifik', desc: 'Mode cerita/edukasi murni sesuai blueprint.' }
+                        ].map((modeOpt) => {
+                          const isActive = schedMultiplierPairMode === modeOpt.key;
+                          return (
+                            <div
+                              key={modeOpt.key}
+                              onClick={() => {
+                                setSchedMultiplierPairMode(modeOpt.key);
+                                if (modeOpt.key === 'one_product' && schedMultiplierProductIds.length > 1) {
+                                  setSchedMultiplierProductIds([schedMultiplierProductIds[0]]);
+                                } else if (modeOpt.key === 'one_product' && schedMultiplierProductIds.length === 0 && catalogProducts.length > 0) {
+                                  setSchedMultiplierProductIds([catalogProducts[0].id]);
+                                } else if (modeOpt.key === 'multi_product' && schedMultiplierProductIds.length < 2 && catalogProducts.length > 1) {
+                                  setSchedMultiplierProductIds(catalogProducts.slice(0, 2).map(p => p.id));
+                                }
+                              }}
+                              style={{
+                                padding: '0.55rem 0.7rem',
+                                borderRadius: 'var(--radius-xs)',
+                                background: isActive ? 'var(--surface-interactive)' : 'var(--surface-raised)',
+                                border: isActive ? '1.5px solid var(--status-success)' : '1px solid var(--border-subtle)',
+                                cursor: 'pointer',
+                                transition: 'var(--transition)'
+                              }}
+                            >
+                              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                                {modeOpt.icon} {modeOpt.title}
+                              </div>
+                              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '2px', lineHeight: 1.3 }}>
+                                {modeOpt.desc}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {schedMultiplierPairMode !== 'no_product' && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem' }}>
+                            <div style={{ position: 'relative', flex: 1, minWidth: '200px' }}>
+                              <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '0.78rem' }}>🔍</span>
+                              <input
+                                type="text"
+                                value={schedMultiplierProductSearch}
+                                onChange={(e) => setSchedMultiplierProductSearch(e.target.value)}
+                                placeholder="Cari nama produk, kategori, atau USP..."
+                                style={{
+                                  width: '100%',
+                                  height: '34px',
+                                  boxSizing: 'border-box',
+                                  background: 'var(--input-bg)',
+                                  border: '1px solid var(--border-subtle)',
+                                  borderRadius: 'var(--radius-xs)',
+                                  padding: '0 0.75rem 0 28px',
+                                  fontSize: '0.78rem',
+                                  color: 'var(--text-primary)',
+                                  outline: 'none'
+                                }}
+                              />
+                            </div>
+                            {!editingSchedule && schedMultiplierPairMode === 'multi_product' && (
+                              <div style={{ display: 'flex', gap: '0.45rem', alignItems: 'center', fontSize: '0.72rem' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => setSchedMultiplierProductIds(filteredSchedMultiplierProducts.map(p => p.id))}
+                                  style={{ background: 'none', border: 'none', color: 'var(--action-primary)', cursor: 'pointer', textDecoration: 'underline', fontWeight: 600 }}
+                                >
+                                  Pilih Semua
+                                </button>
+                                <span style={{ color: 'var(--border-strong)' }}>|</span>
+                                <button
+                                  type="button"
+                                  onClick={() => { if (catalogProducts[0]) setSchedMultiplierProductIds([catalogProducts[0].id]); }}
+                                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', textDecoration: 'underline', fontWeight: 600 }}
+                                >
+                                  Reset ke 1 Produk
+                                </button>
+                              </div>
+                            )}
+                          </div>
+
+                          <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))',
+                            gap: '0.45rem',
+                            maxHeight: '165px',
+                            overflowY: 'auto',
+                            paddingRight: '4px'
+                          }}>
+                            {loadingProducts ? (
+                              <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', padding: '0.6rem' }}>Memuat produk katalog...</div>
+                            ) : filteredSchedMultiplierProducts.length === 0 ? (
+                              <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', padding: '0.6rem' }}>Tidak ada produk yang sesuai filter.</div>
+                            ) : filteredSchedMultiplierProducts.map((prod) => {
+                              const isProdChecked = schedMultiplierProductIds.includes(prod.id);
+                              const imgUrl = prod.clean_photo_url || prod.photo_url;
+                              return (
+                                <div
+                                  key={prod.id}
+                                  onClick={() => toggleSchedMultiplierProduct(prod.id)}
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.55rem',
+                                    padding: '0.45rem 0.65rem',
+                                    borderRadius: 'var(--radius-xs)',
+                                    background: isProdChecked ? 'var(--surface-interactive)' : 'var(--surface-raised)',
+                                    border: isProdChecked ? '1.5px solid var(--status-success)' : '1px solid var(--border-subtle)',
+                                    cursor: 'pointer',
+                                    transition: 'var(--transition)'
+                                  }}
+                                >
+                                  <div style={{
+                                    width: '32px',
+                                    height: '32px',
+                                    borderRadius: 'var(--radius-xs)',
+                                    background: 'var(--surface)',
+                                    border: '1px solid var(--border-subtle)',
+                                    overflow: 'hidden',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    flexShrink: 0
+                                  }}>
+                                    {imgUrl ? (
+                                      <img src={imgUrl} alt={prod.product_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    ) : (
+                                      <span style={{ fontSize: '0.9rem' }}>🛍️</span>
+                                    )}
+                                  </div>
+                                  <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div style={{ fontSize: '0.76rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={prod.product_name}>
+                                      {prod.product_name}
+                                    </div>
+                                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                      {prod.category || 'Produk Katalog'}
+                                    </div>
+                                  </div>
+                                  <div style={{
+                                    width: '16px',
+                                    height: '16px',
+                                    borderRadius: '50%',
+                                    border: isProdChecked ? '1.5px solid var(--status-success)' : '1.5px solid var(--border-strong)',
+                                    background: isProdChecked ? 'var(--status-success)' : 'transparent',
+                                    color: isProdChecked ? 'var(--on-action-primary)' : 'transparent',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '0.6rem',
+                                    fontWeight: 900,
+                                    flexShrink: 0
+                                  }}>
+                                    ✓
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {!editingSchedule && schedMultiplierPairs.length > 0 && (
+                        <div style={{
+                          background: 'var(--surface-raised)',
+                          border: '1px solid var(--border-subtle)',
+                          borderRadius: 'var(--radius-xs)',
+                          padding: '0.55rem 0.7rem',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.35rem'
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.74rem' }}>
+                            <strong style={{ color: 'var(--text-primary)' }}>📋 Pratinjau Daftar Jadwal Terbentuk</strong>
+                            <span style={{ fontWeight: 700, color: 'var(--action-primary)' }}>{schedMultiplierPairs.length} Baris Jadwal Mandiri</span>
+                          </div>
+                          <div style={{ maxHeight: '115px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                            {schedMultiplierPairs.map((pair, idx) => {
+                              const bpObj = blueprints.find(b => b.id === pair.blueprintId);
+                              const prodObj = pair.productId ? catalogProducts.find(p => p.id === pair.productId) : null;
+                              const bpTitle = (bpObj?.core_problem || bpObj?.original_caption || 'Blueprint').slice(0, 32);
+                              const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+                              let schedTag = `${schedGenTime} WIB`;
+                              if (schedMode === 'specific_date' && schedTargetDate) {
+                                const d = new Date(schedTargetDate);
+                                if (schedStaggerCalendar) d.setDate(d.getDate() + idx);
+                                schedTag = `📅 ${d.toISOString().slice(0, 10)} · ${schedGenTime} WIB`;
+                              } else if (schedStaggerDays && schedDays.length > 0) {
+                                schedTag = `🔄 Tiap ${dayNames[schedDays[idx % schedDays.length]]} · ${schedGenTime} WIB`;
+                              }
+                              return (
+                                <div key={`${pair.blueprintId}-${pair.productId || 'none'}-${idx}`} style={{
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'center',
+                                  padding: '0.3rem 0.5rem',
+                                  background: 'var(--surface)',
+                                  border: '1px solid var(--border-subtle)',
+                                  borderRadius: 'var(--radius-xs)',
+                                  fontSize: '0.7rem',
+                                  gap: '0.4rem',
+                                  flexWrap: 'wrap'
+                                }}>
+                                  <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
+                                    <strong style={{ color: 'var(--action-primary)' }}>#{idx + 1}</strong> 🎬 {bpTitle}
+                                    {prodObj ? <span style={{ color: 'var(--status-success)', fontWeight: 700 }}> ➔ 🛍️ {prodObj.product_name}</span> : <span style={{ color: 'var(--text-muted)' }}> (Pure Storytelling)</span>}
+                                  </span>
+                                  <span style={{ color: 'var(--status-info)', fontWeight: 700 }}>{schedTag}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
                     <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', background: 'var(--surface)', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border-subtle)' }}>
-                      💡 <strong>Autopilot Bebas Repetisi:</strong> Setiap hari mesin akan membaca riwayat hook yang telah diproduksi (<code>excluded_history</code>), merumuskan variasi sudut pandang baru dengan Gemini AI, memilih Rank #1, dan langsung merender video klip untuk publikasi otomatis.
+                      💡 <strong>Autopilot Bebas Repetisi:</strong> Setiap hari mesin akan membaca riwayat hook yang telah diproduksi (<code>excluded_history</code>), merumuskan variasi sudut pandang baru dengan Gemini AI yang selaras dengan produk pasangan, memilih Rank #1, dan langsung merender video klip untuk publikasi otomatis.
                     </div>
                   </div>
                 )}
@@ -8322,7 +8905,15 @@ export default function AutoPipelinePage() {
                     }}
                   >
                     <span>💾</span>
-                    <span>{savingSchedule ? 'Menyimpan...' : (editingSchedule ? 'Simpan Perubahan' : 'Buat Jadwal')}</span>
+                    <span>
+                      {savingSchedule
+                        ? 'Menyimpan...'
+                        : (editingSchedule
+                            ? 'Simpan Perubahan'
+                            : (schedCampaignType === 'multiplier_campaign' && schedMultiplierPairs.length > 1
+                                ? `Buat ${schedMultiplierPairs.length} Jadwal Batch`
+                                : 'Buat Jadwal'))}
+                    </span>
                   </button>
                 </div>
               </form>

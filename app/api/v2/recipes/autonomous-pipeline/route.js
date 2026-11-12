@@ -58,9 +58,11 @@ export const GET = withTenantContext(async (request, _ctx, user) => {
     // Sub-action: Preview dynamic angles untuk Multiplier Blueprint
     if (action === 'get_multiplier_angles') {
       const blueprintId = searchParams.get('blueprint_id') || searchParams.get('deconstruct_asset_id');
+      const productId = searchParams.get('product_id') || null;
       const { generateDynamicMultiplierAngles } = await import('../../../../../lib/multiplier-angle-generator.js');
       const angles = await generateDynamicMultiplierAngles({
         blueprintId,
+        productId,
         angleCount: 3,
         tenantId
       });
@@ -128,6 +130,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
       const { generateDynamicMultiplierAngles } = await import('../../../../../lib/multiplier-angle-generator.js');
       const angles = await generateDynamicMultiplierAngles({
         blueprintId: body.blueprint_id || body.deconstruct_asset_id,
+        productId: body.product_id || body.productId || null,
         angleCount: 3,
         tenantId
       });
@@ -195,21 +198,27 @@ export const POST = withTenantContext(async (request, _context, user) => {
         }
       });
     } else if (pipelineType === 'multiplier_campaign') {
+      const resolvedMultiplierProductId = body.bridging_mode === 'none'
+        ? null
+        : (body.product_id || body.productId || null);
       result = await executeAutonomousMultiplierPipeline({
         brandId: body.brand_id || body.brandId,
         deconstructAssetId: body.deconstruct_asset_id || body.blueprint_id || body.deconstructAssetId,
-        productId: body.product_id || body.productId,
+        productId: resolvedMultiplierProductId,
         presetKey: body.preset_key || body.presetKey || 'multiplier_deconstruct_remix',
         executionMode: body.execution_mode || body.executionMode || 'full_autopilot',
         selectedAngle: body.selected_angle || body.selectedAngle || null,
         tenantId,
         overrides: {
           visual_identity_preset_id: body.visual_identity_preset_id || null,
+          bridging_mode: resolvedMultiplierProductId ? (body.bridging_mode || 'select_existing') : 'none',
+          product_aware_angle: body.product_aware_angle !== false,
           enable_motion_text: body.enable_motion_text,
           motion_text_style: body.motion_text_style,
           video_transition: body.video_transition,
           transition_duration: body.transition_duration,
           ...affiliateOverride,
+          is_bridging_active: Boolean(resolvedMultiplierProductId),
           ...recipeOverride,
           ...(body.overrides || {})
         }

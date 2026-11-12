@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup 99% Replica — Auto Pipeline Video Multiplier (1 Blueprint + 1 Produk)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --accent-glow: rgba(45, 212, 191, 0.28);
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-purple: #c084fc;
+      --status-purple-soft: rgba(192, 132, 252, 0.14);
+      --status-rose: #fb7185;
+      --status-rose-soft: rgba(251, 113, 133, 0.14);
+      --shadow-card: 0 4px 18px rgba(0, 0, 0, 0.35);
+      --shadow-modal: 0 20px 50px rgba(0, 0, 0, 0.65);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f8fafc;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f1f5f9;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --input-bg: #f8fafc;
+      --overlay-subtle: rgba(0, 0, 0, 0.04);
+      --overlay-backdrop: rgba(15, 23, 42, 0.5);
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --text-disabled: #94a3b8;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --action-primary: #0d9488;
+      --action-primary-hover: #14b8a6;
+      --on-action-primary: #ffffff;
+      --accent-glow: rgba(13, 148, 136, 0.22);
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.12);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.12);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.12);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.12);
+      --status-purple: #9333ea;
+      --status-purple-soft: rgba(147, 51, 234, 0.12);
+      --status-rose: #e11d48;
+      --status-rose-soft: rgba(225, 29, 72, 0.12);
+      --shadow-card: 0 4px 18px rgba(0, 0, 0, 0.08);
+      --shadow-modal: 0 20px 50px rgba(15, 23, 42, 0.18);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font-sans);
+      background: var(--canvas);
+      color: var(--text-primary);
+      padding: 1.5rem;
+      line-height: 1.45;
+    }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* Sticky Top Mockup Switcher Bar */
+    .mockup-nav {
+      position: sticky;
+      top: 0.75rem;
+      z-index: 100;
+      background: var(--surface);
+      border: 1.5px solid var(--action-primary);
+      border-radius: var(--radius-md);
+      padding: 0.75rem 1.15rem;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .view-tabs {
+      display: flex;
+      gap: 0.45rem;
+      background: var(--surface-raised);
+      padding: 0.25rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .view-tab {
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-weight: 700;
+      font-size: 0.82rem;
+      padding: 0.45rem 0.95rem;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .view-tab.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    .new-feature-callout {
+      border: 1.5px dashed var(--status-success);
+      background: var(--surface);
+      border-radius: var(--radius-sm);
+      padding: 0.95rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    #toast {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 99999;
+      background: var(--surface-raised);
+      border: 1.5px solid var(--action-primary);
+      color: var(--text-primary);
+      padding: 0.75rem 1.15rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 700;
+      box-shadow: var(--shadow-modal);
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.25s;
+    }
+    #toast.show { opacity: 1; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- TOP MOCKUP TOOLBAR -->
+  <div class="mockup-nav">
+    <div style="display:flex;align-items:center;gap:0.65rem;flex-wrap:wrap;">
+      <span style="font-size:0.72rem;font-weight:800;padding:0.2rem 0.6rem;border-radius:9999px;background:var(--status-purple-soft);color:var(--status-purple);border:1px solid var(--status-purple);">
+        REPLIKA 99% AUTO PIPELINE UI
+      </span>
+      <strong style="font-size:0.9rem;">Adopsi 1 Blueprint + 1 Produk (Multiplier Lab ➔ Auto Pipeline)</strong>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:0.65rem;flex-wrap:wrap;">
+      <div class="view-tabs">
+        <button type="button" class="view-tab active" id="btn-view-instant" onclick="switchView('instant')">
+          ⚡ 1. Eksekusi 1-Klik Instan
+        </button>
+        <button type="button" class="view-tab" id="btn-view-schedule" onclick="switchView('schedule')">
+          ⏰ 2. Modal Buat Jadwal Rutin / Tanggal
+        </button>
+      </div>
+      <button
+        type="button"
+        onclick="toggleTheme()"
+        style="background:var(--surface-raised);border:1px solid var(--border-subtle);color:var(--text-primary);padding:0.45rem 0.85rem;border-radius:var(--radius-sm);font-size:0.78rem;font-weight:700;cursor:pointer;"
+      >
+        🌗 Light / Dark
+      </button>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- VIEW 1: EKSEKUSI 1-KLIK INSTAN MULTI-CAMPAIGN (99% REPLICA)             -->
+  <!-- ======================================================================= -->
+  <section id="view-instant" style="
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    box-shadow: var(--shadow-card);
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  ">
+    <!-- Section Header with Preset Manager Direct Link -->
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;">
+      <div>
+        <div style="font-size:1.18rem;font-weight:800;color:var(--text-primary);display:flex;align-items:center;gap:0.55rem;">
+          <span>⚡</span>
+          <span>Eksekusi 1-Klik Instan Multi-Campaign</span>
+        </div>
+        <div style="font-size:0.82rem;color:var(--text-muted);margin-top:0.25rem;">
+          Pilih tipe kampanye, tentukan target (Produk Katalog, Pilar Brand, atau Resep), lalu produksi video final otomatis dalam 1 kali klik.
+        </div>
+      </div>
+
+      <a href="#preset" onclick="showToast('Membuka Preset Manager...');return false;" style="
+        font-size:0.78rem;font-weight:600;color:var(--action-primary);text-decoration:none;
+        display:inline-flex;align-items:center;gap:0.4rem;padding:0.45rem 0.95rem;
+        border-radius:var(--radius-sm);background:var(--surface-raised);border:1px solid var(--border-subtle);
+      ">
+        <span>🎛️</span>
+        <span>Kelola di Preset Manager</span>
+      </a>
+    </div>
+
+    <!-- STEP 1: CAMPAIGN TYPE SELECTOR CARDS -->
+    <div style="display:flex;flex-direction:column;gap:0.45rem;">
+      <label style="font-size:0.84rem;font-weight:700;color:var(--text-secondary);">
+        1. Pilih Tipe Kampanye
+      </label>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:0.85rem;">
+        <div style="background:var(--surface-raised);border:1.5px solid var(--border-subtle);border-radius:var(--radius-md);padding:0.95rem 1.15rem;display:flex;flex-direction:column;gap:0.35rem;opacity:0.75;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="display:flex;align-items:center;gap:0.5rem;"><span style="font-size:1.35rem;">🛍️</span><strong style="font-size:0.92rem;">Video Produk</strong></div>
+            <span style="font-size:0.68rem;font-weight:800;padding:0.15rem 0.55rem;border-radius:9999px;background:var(--border-subtle);color:var(--text-muted);">PILIH</span>
+          </div>
+          <span style="font-size:0.74rem;color:var(--text-muted);line-height:1.35;">Promosi produk katalog, showcase USP &amp; unboxing 1-pass</span>
+        </div>
+
+        <div style="background:var(--surface-raised);border:1.5px solid var(--border-subtle);border-radius:var(--radius-md);padding:0.95rem 1.15rem;display:flex;flex-direction:column;gap:0.35rem;opacity:0.75;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="display:flex;align-items:center;gap:0.5rem;"><span style="font-size:1.35rem;">📖</span><strong style="font-size:0.92rem;">Video Editorial</strong></div>
+            <span style="font-size:0.68rem;font-weight:800;padding:0.15rem 0.55rem;border-radius:9999px;background:var(--border-subtle);color:var(--text-muted);">PILIH</span>
+          </div>
+          <span style="font-size:0.74rem;color:var(--text-muted);line-height:1.35;">Pilar brand, hook tension &amp; storytelling edukatif 1-pass</span>
+        </div>
+
+        <div style="background:var(--surface-raised);border:1.5px solid var(--border-subtle);border-radius:var(--radius-md);padding:0.95rem 1.15rem;display:flex;flex-direction:column;gap:0.35rem;opacity:0.75;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="display:flex;align-items:center;gap:0.5rem;"><span style="font-size:1.35rem;">🍳</span><strong style="font-size:0.92rem;">Video Resep</strong></div>
+            <span style="font-size:0.68rem;font-weight:800;padding:0.15rem 0.55rem;border-radius:9999px;background:var(--border-subtle);color:var(--text-muted);">PILIH</span>
+          </div>
+          <span style="font-size:0.74rem;color:var(--text-muted);line-height:1.35;">Food reels &amp; cooking guide 4-babak 1-pass</span>
+        </div>
+
+        <!-- ACTIVE: VIDEO MULTIPLIER -->
+        <div style="background:var(--surface-interactive);border:1.5px solid var(--status-purple);box-shadow:0 0 0 1px var(--status-purple);border-radius:var(--radius-md);padding:0.95rem 1.15rem;display:flex;flex-direction:column;gap:0.35rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="display:flex;align-items:center;gap:0.5rem;"><span style="font-size:1.35rem;">🔀</span><strong style="font-size:0.92rem;color:var(--status-purple);">Video Multiplier</strong></div>
+            <span style="font-size:0.68rem;font-weight:800;padding:0.15rem 0.55rem;border-radius:9999px;background:var(--status-purple);color:#ffffff;">AKTIF</span>
+          </div>
+          <span style="font-size:0.74rem;color:var(--text-muted);line-height:1.35;">Remix angle &amp; hook dari video referensi pemenang</span>
+        </div>
+
+        <div style="background:var(--surface-raised);border:1.5px solid var(--border-subtle);border-radius:var(--radius-md);padding:0.95rem 1.15rem;display:flex;flex-direction:column;gap:0.35rem;opacity:0.75;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="display:flex;align-items:center;gap:0.5rem;"><span style="font-size:1.35rem;">🖼️</span><strong style="font-size:0.92rem;">Resep Teks &amp; Foto</strong></div>
+            <span style="font-size:0.68rem;font-weight:800;padding:0.15rem 0.55rem;border-radius:9999px;background:var(--border-subtle);color:var(--text-muted);">PILIH</span>
+          </div>
+          <span style="font-size:0.74rem;color:var(--text-muted);line-height:1.35;">Naskah resep FB + Foto AI dalam susunan grid komposit</span>
+        </div>
+
+        <div style="background:var(--surface-raised);border:1.5px solid var(--border-subtle);border-radius:var(--radius-md);padding:0.95rem 1.15rem;display:flex;flex-direction:column;gap:0.35rem;opacity:0.75;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="display:flex;align-items:center;gap:0.5rem;"><span style="font-size:1.35rem;">🧵</span><strong style="font-size:0.92rem;">Threads Series</strong></div>
+            <span style="font-size:0.68rem;font-weight:800;padding:0.15rem 0.55rem;border-radius:9999px;background:var(--border-subtle);color:var(--text-muted);">PILIH</span>
+          </div>
+          <span style="font-size:0.74rem;color:var(--text-muted);line-height:1.35;">Kultwit autopilot 3–5 part + Foto G-Labs atau Text-Only</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: BRAND PROFILE, PRESET VIDEO & EXECUTION MODE -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));gap:1rem;">
+      <div style="display:flex;flex-direction:column;gap:0.45rem;">
+        <label style="font-size:0.82rem;font-weight:600;color:var(--text-secondary);">2. Brand Profile</label>
+        <select style="height:42px;background:var(--input-bg);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:0 0.85rem;font-size:0.88rem;color:var(--text-primary);outline:none;">
+          <option>Cerita Dokter (@ceritadokter)</option>
+          <option>Dapur Botani (@dapurbotani)</option>
+          <option>HabitFolk (@habitfolk)</option>
+        </select>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:0.45rem;">
+        <label style="font-size:0.82rem;font-weight:600;color:var(--text-secondary);display:flex;justify-content:space-between;align-items:center;">
+          <span>3. Preset Video</span>
+          <span style="font-size:0.68rem;font-weight:700;color:var(--status-success);background:var(--status-success-soft);padding:0.1rem 0.4rem;border-radius:var(--radius-xs);">Preset-Driven</span>
+        </label>
+        <select style="height:42px;background:var(--input-bg);border:1.5px solid var(--action-primary);border-radius:var(--radius-sm);padding:0 0.85rem;font-size:0.88rem;font-weight:700;color:var(--text-primary);outline:none;">
+          <option>Multiplier Deconstruct Remix (4 Klip × 8s)</option>
+          <option>Cerita Dokter — Pixar 3D Educational</option>
+        </select>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:0.45rem;">
+        <label style="font-size:0.82rem;font-weight:600;color:var(--text-secondary);">4. Mode Eksekusi</label>
+        <select id="inst-exec-mode" onchange="renderInstantAngles()" style="height:42px;background:var(--input-bg);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:0 0.85rem;font-size:0.88rem;color:var(--text-primary);outline:none;">
+          <option value="full_autopilot">⚡ Full Autopilot (Langsung Produksi Video)</option>
+          <option value="manual_review">⏸️ Manual Review (Jeda di Storyboard Approval)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- READ-ONLY PRESET INSPECTOR CARD -->
+    <div style="background:var(--surface-raised);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:1.15rem;display:flex;flex-direction:column;gap:0.9rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;border-bottom:1px solid var(--border-subtle);padding-bottom:0.65rem;">
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <span style="font-size:1.1rem;">📋</span>
+          <span style="font-size:0.88rem;font-weight:700;color:var(--text-primary);">
+            Rincian Bawaan Preset Terpilih:
+            <span style="color:var(--action-primary);margin-left:0.35rem;">Multiplier Deconstruct Remix</span>
+          </span>
+        </div>
+        <span style="font-size:0.68rem;font-weight:700;background:var(--status-info-soft);color:var(--status-info);border:1px solid var(--status-info);padding:0.15rem 0.55rem;border-radius:9999px;">
+          🔒 Dikunci &amp; Dikelola oleh Preset Manager
+        </span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(210px, 1fr));gap:0.75rem;">
+        <div style="background:var(--surface);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:0.65rem 0.8rem;display:flex;flex-direction:column;gap:0.2rem;">
+          <span style="font-size:0.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Format Klip &amp; Durasi</span>
+          <span style="font-size:0.85rem;font-weight:700;">🎬 4 Klip × 8 detik (~32s)</span>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:0.65rem 0.8rem;display:flex;flex-direction:column;gap:0.2rem;">
+          <span style="font-size:0.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Model AI &amp; Voice-Over</span>
+          <span style="font-size:0.85rem;font-weight:700;">🤖 Google Veo Omni • 🎙️ Putri Maharani (id-ID)</span>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:0.65rem 0.8rem;display:flex;flex-direction:column;gap:0.2rem;">
+          <span style="font-size:0.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Finishing Subtitel</span>
+          <span style="font-size:0.85rem;font-weight:700;">🟡 Floating Putih ➔ Kuning (Bottom)</span>
+        </div>
+        <div style="background:var(--surface);border:1.5px solid var(--status-purple);border-radius:var(--radius-sm);padding:0.65rem 0.8rem;display:flex;flex-direction:column;gap:0.2rem;">
+          <span style="font-size:0.68rem;font-weight:700;color:var(--status-purple);text-transform:uppercase;">Identitas Visual (VI) Preset</span>
+          <span style="font-size:0.85rem;font-weight:700;color:var(--status-purple);">🧬 dr_aisyah_3d_pixar_v1</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3D: MULTIPLIER CAMPAIGN (Winning Blueprint + Product Pairing) -->
+    <div style="background:var(--surface-raised);border:1.5px solid var(--status-purple);border-radius:var(--radius-md);padding:1.15rem;display:flex;flex-direction:column;gap:0.95rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+        <div style="font-size:0.88rem;font-weight:800;color:var(--text-primary);display:flex;align-items:center;gap:0.45rem;">
+          <span>🔀</span>
+          <span>Pilih Blueprint Video Pemenang (Deconstruct Lab):</span>
+        </div>
+        <span style="font-size:0.72rem;font-weight:700;padding:0.2rem 0.65rem;border-radius:9999px;background:var(--status-purple-soft);color:var(--status-purple);border:1px solid var(--status-purple);">
+          Winning Hook Engine
+        </span>
+      </div>
+
+      <!-- Search Blueprint -->
+      <div style="display:flex;flex-direction:column;gap:0.45rem;">
+        <div style="position:relative;">
+          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.85rem;">🔍</span>
+          <input
+            type="text"
+            id="inst-bp-search"
+            oninput="renderInstantBlueprints()"
+            placeholder="Cari blueprint (ID URL misal 1476160110888470, topik, atau niche)..."
+            style="width:100%;height:38px;background:var(--surface);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:0 32px;color:var(--text-primary);font-size:0.84rem;outline:none;"
+          />
+        </div>
+        <div style="display:flex;align-items:center;gap:0.35rem;flex-wrap:wrap;">
+          <span style="font-size:0.72rem;color:var(--text-muted);font-weight:600;">Quick:</span>
+          <button type="button" onclick="setInstBpQuick('1476160110888470')" style="background:var(--surface);color:var(--text-secondary);border:1px solid var(--border-subtle);border-radius:999px;padding:0.15rem 0.55rem;font-size:0.7rem;font-weight:600;cursor:pointer;">1476160110888470</button>
+          <button type="button" onclick="setInstBpQuick('Health')" style="background:var(--surface);color:var(--text-secondary);border:1px solid var(--border-subtle);border-radius:999px;padding:0.15rem 0.55rem;font-size:0.7rem;font-weight:600;cursor:pointer;">Health</button>
+          <button type="button" onclick="setInstBpQuick('Skincare')" style="background:var(--surface);color:var(--text-secondary);border:1px solid var(--border-subtle);border-radius:999px;padding:0.15rem 0.55rem;font-size:0.7rem;font-weight:600;cursor:pointer;">Skincare</button>
+          <button type="button" onclick="setInstBpQuick('Cooking')" style="background:var(--surface);color:var(--text-secondary);border:1px solid var(--border-subtle);border-radius:999px;padding:0.15rem 0.55rem;font-size:0.7rem;font-weight:600;cursor:pointer;">Cooking</button>
+          <button type="button" onclick="setInstBpQuick('')" style="background:none;color:var(--status-danger);border:none;font-size:0.7rem;cursor:pointer;text-decoration:underline;">Reset</button>
+        </div>
+      </div>
+
+      <!-- Blueprints Scroll List -->
+      <div id="inst-bp-list" style="max-height:185px;overflow-y:auto;display:flex;flex-direction:column;gap:0.45rem;padding-right:4px;"></div>
+
+      <!-- =============================================================== -->
+      <!-- FITUR BARU DI 1-KLIK: PASANGKAN DENGAN PRODUK (1 BP + 1 PRODUK) -->
+      <!-- =============================================================== -->
+      <div class="new-feature-callout">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+          <div style="display:flex;align-items:center;gap:0.45rem;font-size:0.84rem;font-weight:800;color:var(--text-primary);">
+            <span>🛍️</span>
+            <span>Pasangkan Cerita Blueprint dengan Produk (1 Blueprint + 1 Produk):</span>
+            <span style="font-size:0.65rem;font-weight:800;padding:0.1rem 0.45rem;border-radius:9999px;background:var(--status-success-soft);color:var(--status-success);border:1px solid var(--status-success);">BARU • ADOPSI MULTIPLIER LAB</span>
+          </div>
+          <div style="display:flex;background:var(--surface-raised);padding:0.2rem;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);gap:0.25rem;">
+            <button type="button" id="inst-mode-product" onclick="setInstBridgingMode('product')" style="padding:0.3rem 0.7rem;border:none;border-radius:var(--radius-xs);font-size:0.74rem;font-weight:700;cursor:pointer;background:var(--status-success);color:#ffffff;">
+              🛍️ Pasangkan Produk Y (Bridging)
+            </button>
+            <button type="button" id="inst-mode-story" onclick="setInstBridgingMode('story')" style="padding:0.3rem 0.7rem;border:none;border-radius:var(--radius-xs);font-size:0.74rem;font-weight:700;cursor:pointer;background:transparent;color:var(--text-secondary);">
+              📖 Pure Storytelling (Tanpa Produk)
+            </button>
+          </div>
+        </div>
+
+        <div id="inst-product-picker-box" style="display:flex;flex-direction:column;gap:0.65rem;">
+          <!-- Search Product -->
+          <div style="position:relative;">
+            <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.85rem;">🔍</span>
+            <input
+              type="text"
+              id="inst-prod-search"
+              oninput="renderInstantProducts()"
+              placeholder="Cari produk katalog (nama atau kategori)..."
+              style="width:100%;height:38px;background:var(--surface-raised);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:0 10px 0 32px;color:var(--text-primary);font-size:0.84rem;outline:none;"
+            />
+          </div>
+
+          <!-- Products Grid (Exact same styling as Video Produk) -->
+          <div id="inst-prod-list" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(235px, 1fr));gap:0.6rem;max-height:210px;overflow-y:auto;padding-right:4px;"></div>
+
+          <!-- Live Pairing Banner -->
+          <div id="inst-pair-summary" style="background:var(--surface-raised);border:1px solid var(--border-strong);border-radius:var(--radius-xs);padding:0.6rem 0.8rem;font-size:0.76rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;"></div>
+        </div>
+      </div>
+
+      <!-- Skenario Angle Box -->
+      <div style="background:var(--surface);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:0.85rem;display:flex;flex-direction:column;gap:0.65rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.45rem;">
+          <div id="inst-angle-title" style="font-size:0.82rem;font-weight:700;color:var(--text-primary);">
+            💡 Skenario Angle: AI Auto-Select Rank #1 (Bebas Repetisi &amp; Sinkron Produk)
+          </div>
+          <button type="button" id="inst-regen-angle-btn" onclick="showToast('⚡ Meracik 3 opsi angle baru yang menjembatani blueprint ke produk...')" class="hidden" style="background:var(--status-purple-soft);color:var(--status-purple);border:1px solid var(--status-purple);padding:0.25rem 0.65rem;border-radius:var(--radius-xs);font-size:0.72rem;font-weight:700;cursor:pointer;">
+            ⚡ Regenerate Opsi Angle Baru
+          </button>
+        </div>
+        <div id="inst-angle-body"></div>
+      </div>
+    </div>
+
+    <!-- Checkbox Toggle Ekstraksi Resep Lengkap untuk Multiplier -->
+    <div style="display:flex;align-items:flex-start;gap:0.65rem;background:var(--surface-raised);padding:0.75rem 1rem;border-radius:var(--radius-sm);border:1px solid var(--status-purple);">
+      <input type="checkbox" id="instantRecipeCheck" checked style="width:18px;height:18px;accent-color:var(--status-purple);cursor:pointer;margin-top:2px;" />
+      <div>
+        <label for="instantRecipeCheck" style="font-size:0.82rem;font-weight:700;color:var(--text-primary);cursor:pointer;display:block;">
+          🍳 Hasilkan Resep / Racikan Lengkap di Caption (Bahan, Takaran &amp; Langkah)
+        </label>
+        <span style="font-size:0.72rem;color:var(--text-muted);line-height:1.4;display:block;margin-top:2px;">
+          Saat aktif, AI wajib menyusun teks resep terperinci (bahan, takaran presisi, langkah pembuatan, khasiat sehat) yang sinkron dengan video referensi dekonstruksi.
+        </span>
+      </div>
+    </div>
+
+    <!-- Checkbox Toggle Smart Affiliate untuk 1-Klik -->
+    <div style="display:flex;align-items:flex-start;gap:0.65rem;background:var(--surface-raised);padding:0.75rem 1rem;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);">
+      <input type="checkbox" id="instantAffiliateCheck" checked style="width:18px;height:18px;accent-color:var(--action-primary);cursor:pointer;margin-top:2px;" />
+      <div>
+        <label for="instantAffiliateCheck" style="font-size:0.82rem;font-weight:700;color:var(--text-primary);cursor:pointer;display:block;">
+          🛒 Sertakan Rekomendasi Produk &amp; Affiliate (Shopee FB &amp; Link di Bio)
+        </label>
+        <span style="font-size:0.72rem;color:var(--text-muted);line-height:1.4;display:block;margin-top:2px;">
+          Otomatis mencocokkan produk brand dan menghasilkan CTA adaptif (FB: link Shopee aktif, Non-FB: Link di Bio). Uncheck jika ingin video viral 1-klik murni edukasi tanpa jualan.
+        </span>
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <div style="padding-top:0.25rem;">
+      <button type="button" onclick="launchInstantDemo()" style="
+        background:var(--action-primary);color:var(--on-action-primary);border:none;
+        padding:0.9rem 1.85rem;border-radius:var(--radius-md);font-size:0.95rem;font-weight:700;
+        display:inline-flex;align-items:center;gap:0.6rem;cursor:pointer;box-shadow:0 4px 16px var(--accent-glow);
+      ">
+        <span>🔀 Luncurkan Multiplier Angle Remix (Winning Blueprint)</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ======================================================================= -->
+  <!-- VIEW 2: MODAL BUAT JADWAL RUTIN AUTO PIPELINE BARU (99% REPLICA)        -->
+  <!-- ======================================================================= -->
+  <section id="view-schedule" class="hidden" style="display:flex;justify-content:center;padding:0.5rem 0 2rem 0;">
+    <div style="
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-modal);
+      width: 100%;
+      max-width: 720px;
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.15rem;
+    ">
+      <!-- Modal Header -->
+      <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:0.75rem;border-bottom:1px solid var(--border-subtle);">
+        <div style="font-size:1.15rem;font-weight:800;color:var(--text-primary);display:flex;align-items:center;gap:0.5rem;">
+          <span>⏰</span>
+          <span>Buat Jadwal Rutin Auto Pipeline Baru</span>
+        </div>
+        <button type="button" onclick="switchView('instant')" style="background:transparent;border:none;font-size:1.25rem;color:var(--text-muted);cursor:pointer;">✕</button>
+      </div>
+
+      <!-- STEP 1: Pilihan Tipe Kampanye (Multi-Campaign Selector) -->
+      <div style="display:flex;flex-direction:column;gap:0.45rem;">
+        <label style="font-size:0.82rem;font-weight:700;color:var(--text-secondary);">Pilih Tipe Kampanye</label>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(135px, 1fr));gap:0.65rem;">
+          <div style="background:var(--surface);border:1.5px solid var(--border-subtle);border-radius:var(--radius-sm);padding:0.75rem 0.85rem;display:flex;flex-direction:column;gap:0.25rem;opacity:0.7;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="display:flex;align-items:center;gap:0.45rem;"><span style="font-size:1.25rem;">🛍️</span><strong style="font-size:0.84rem;">Video Produk</strong></div>
+              <span style="width:16px;height:16px;border-radius:50%;border:1.5px solid var(--border-strong);"></span>
+            </div>
+            <span style="font-size:0.7rem;color:var(--text-muted);">Promosi produk katalog &amp; unboxing</span>
+          </div>
+
+          <div style="background:var(--surface);border:1.5px solid var(--border-subtle);border-radius:var(--radius-sm);padding:0.75rem 0.85rem;display:flex;flex-direction:column;gap:0.25rem;opacity:0.7;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="display:flex;align-items:center;gap:0.45rem;"><span style="font-size:1.25rem;">📖</span><strong style="font-size:0.84rem;">Video Editorial</strong></div>
+              <span style="width:16px;height:16px;border-radius:50%;border:1.5px solid var(--border-strong);"></span>
+            </div>
+            <span style="font-size:0.7rem;color:var(--text-muted);">Pilar konten brand &amp; storytelling</span>
+          </div>
+
+          <div style="background:var(--surface);border:1.5px solid var(--border-subtle);border-radius:var(--radius-sm);padding:0.75rem 0.85rem;display:flex;flex-direction:column;gap:0.25rem;opacity:0.7;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="display:flex;align-items:center;gap:0.45rem;"><span style="font-size:1.25rem;">🍳</span><strong style="font-size:0.84rem;">Video Resep</strong></div>
+              <span style="width:16px;height:16px;border-radius:50%;border:1.5px solid var(--border-strong);"></span>
+            </div>
+            <span style="font-size:0.7rem;color:var(--text-muted);">Cooking guide &amp; food reel 4-klip</span>
+          </div>
+
+          <!-- SELECTED: VIDEO MULTIPLIER -->
+          <div style="background:var(--surface-interactive);border:1.5px solid var(--status-purple);border-radius:var(--radius-sm);padding:0.75rem 0.85rem;display:flex;flex-direction:column;gap:0.25rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="display:flex;align-items:center;gap:0.45rem;"><span style="font-size:1.25rem;">🔀</span><strong style="font-size:0.84rem;color:var(--status-purple);">Video Multiplier</strong></div>
+              <span style="width:16px;height:16px;border-radius:50%;background:var(--status-purple);border:1.5px solid var(--status-purple);color:#ffffff;display:flex;align-items:center;justify-content:center;font-size:0.62rem;font-weight:900;">✓</span>
+            </div>
+            <span style="font-size:0.7rem;color:var(--text-muted);">Remix angle hook dari referensi</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: Brand Profile & Preset Video -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:1rem;">
+        <div style="display:flex;flex-direction:column;gap:0.35rem;">
+          <label style="font-size:0.82rem;font-weight:700;color:var(--text-secondary);">1. Brand Profile</label>
+          <select style="height:42px;background:var(--input-bg);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:0 0.85rem;font-size:0.88rem;color:var(--text-primary);outline:none;">
+            <option>Cerita Dokter (@ceritadokter)</option>
+            <option>Dapur Botani (@dapurbotani)</option>
+            <option>HabitFolk (@habitfolk)</option>
+          </select>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:0.35rem;">
+          <label style="font-size:0.82rem;font-weight:700;color:var(--text-secondary);display:flex;justify-content:space-between;">
+            <span>2. Preset Konfigurasi Video</span>
+            <span style="font-size:0.68rem;color:var(--status-success);">Preset-Driven</span>
+          </label>
+          <select style="height:42px;background:var(--input-bg);border:1.5px solid var(--action-primary);border-radius:var(--radius-sm);padding:0 0.85rem;font-size:0.88rem;font-weight:700;color:var(--text-primary);outline:none;">
+            <optgroup label="⭐ Preset Khusus Cerita Dokter (2)">
+              <option>Cerita Dokter — Multiplier Remix 4 Klip</option>
+              <option>Cerita Dokter — Pixar 3D Educational</option>
+            </optgroup>
+          </select>
+        </div>
+      </div>
+
+      <!-- Preset Target Language & Voice Info Banner -->
+      <div style="background:var(--surface-raised);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:0.65rem 0.85rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;font-size:0.75rem;">
+        <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+          <span style="padding:0.2rem 0.55rem;border-radius:999px;background:var(--status-info-soft);color:var(--status-info);border:1px solid var(--border-subtle);font-weight:700;">
+            🇮🇩 Bahasa Indonesia (id-ID)
+          </span>
+          <span style="color:var(--text-secondary);">
+            TTS: <strong style="color:var(--text-primary);">Putri Maharani (ElevenLabs)</strong>
+          </span>
+          <span style="padding:0.2rem 0.55rem;border-radius:999px;background:var(--status-purple-soft);color:var(--status-purple);border:1px solid var(--status-purple);font-weight:700;">
+            🧬 VI: dr_aisyah_3d_pixar_v1
+          </span>
+        </div>
+        <span style="color:var(--text-muted);font-size:0.72rem;">
+          ⚡ AI otomatis menyusun Voice-Over &amp; Hook dalam bahasa &amp; tone preset ini
+        </span>
+      </div>
+
+      <!-- UNIVERSAL: Nama Pengenal Jadwal -->
+      <div style="display:flex;flex-direction:column;gap:0.35rem;">
+        <label style="font-size:0.82rem;font-weight:700;color:var(--text-secondary);display:flex;justify-content:space-between;">
+          <span>Nama Pengenal Jadwal</span>
+          <span style="font-size:0.7rem;color:var(--text-muted);">Wajib diisi</span>
+        </label>
+        <input
+          type="text"
+          id="sched-name"
+          value="Multiplier - Cerita Dokter - Batch 1"
+          style="height:42px;background:var(--input-bg);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:0 0.85rem;font-size:0.88rem;color:var(--text-primary);outline:none;"
+        />
+        <span id="sched-batch-hint" style="font-size:0.7rem;color:var(--text-muted);">
+          💡 Mode Batch Multiplier: Nama blueprint &amp; produk yang dipasangkan akan otomatis ditambahkan ke nama pengenal di atas.
+        </span>
+      </div>
+
+      <!-- 3D. MULTIPLIER: Nama Jadwal, Target Blueprint Video & Pairing Produk -->
+      <div style="background:var(--surface-raised);border:1.5px solid var(--status-purple);border-radius:var(--radius-md);padding:1rem;display:flex;flex-direction:column;gap:0.9rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <strong style="font-size:0.86rem;color:var(--text-primary);">
+            🔀 Konfigurasi Jadwal Rutin Multiplier
+          </strong>
+          <span style="font-size:0.72rem;padding:0.15rem 0.5rem;border-radius:9999px;background:var(--status-purple-soft);color:var(--status-purple);font-weight:800;">
+            Autopilot Angle Remix
+          </span>
+        </div>
+
+        <!-- Pilih Blueprint Video Acuan -->
+        <div style="display:flex;flex-direction:column;gap:0.35rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <label style="font-size:0.82rem;font-weight:700;color:var(--text-secondary);">
+              1. Pilih Blueprint Video Acuan (Deconstruct Lab)
+            </label>
+            <button type="button" onclick="document.getElementById('sched-bp-search').value='';renderSchedBlueprints();" style="background:none;border:none;color:var(--status-purple);font-size:0.72rem;font-weight:700;cursor:pointer;">
+              Reset Filter
+            </button>
+          </div>
+          <div style="position:relative;">
+            <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.8rem;">🔍</span>
+            <input
+              type="text"
+              id="sched-bp-search"
+              oninput="renderSchedBlueprints()"
+              placeholder="Ketik ID URL (misal: 1476160110888470), niche, atau topik..."
+              style="width:100%;height:36px;background:var(--input-bg);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:0 0.75rem 0 30px;font-size:0.8rem;color:var(--text-primary);outline:none;margin-bottom:0.35rem;"
+            />
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.4rem;font-size:0.75rem;">
+            <span id="sched-bp-badge" style="font-weight:700;background:var(--status-info-soft);color:var(--status-info);padding:0.15rem 0.55rem;border-radius:var(--radius-full);border:1px solid var(--status-info);">
+              2 Blueprint Dipilih (Mode Batch ⚡)
+            </span>
+            <div style="display:flex;gap:0.45rem;align-items:center;">
+              <button type="button" onclick="selectAllSchedBp()" style="background:none;border:none;color:var(--action-primary);cursor:pointer;text-decoration:underline;font-weight:600;font-size:0.75rem;">Pilih Semua</button>
+              <span style="color:var(--border-strong);">|</span>
+              <button type="button" onclick="selectTop1SchedBp()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;text-decoration:underline;font-weight:600;font-size:0.75rem;">Pilih Rank #1 Saja</button>
+            </div>
+          </div>
+
+          <div id="sched-bp-list" style="max-height:200px;overflow-y:auto;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:0.5rem;display:flex;flex-direction:column;gap:0.45rem;background:var(--surface);"></div>
+        </div>
+
+        <!-- =============================================================== -->
+        <!-- FITUR BARU DI SKEDUL: PASANGKAN DENGAN PRODUK KATALOG           -->
+        <!-- =============================================================== -->
+        <div class="new-feature-callout">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+            <div style="display:flex;align-items:center;gap:0.4rem;font-size:0.82rem;font-weight:800;color:var(--text-primary);">
+              <span>🛍️</span>
+              <span>2. Pasangkan dengan Produk Katalog (1 Blueprint + 1 Produk):</span>
+              <span style="font-size:0.64rem;font-weight:800;padding:0.1rem 0.45rem;border-radius:9999px;background:var(--status-success-soft);color:var(--status-success);border:1px solid var(--status-success);">BARU</span>
+            </div>
+          </div>
+
+          <!-- 3 Mode Pairing di Skedul -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(185px, 1fr));gap:0.5rem;">
+            <button type="button" id="sp-mode-one" onclick="setSchedPairMode('one_product')" style="text-align:left;padding:0.55rem 0.7rem;border-radius:var(--radius-sm);border:1.5px solid var(--status-success);background:var(--surface-interactive);color:var(--text-primary);cursor:pointer;">
+              <div style="font-size:0.78rem;font-weight:800;color:var(--status-success);">🛍️ 1 Produk Andalan</div>
+              <div style="font-size:0.68rem;color:var(--text-muted);margin-top:2px;">N Blueprint × 1 Produk (Semua cerita memasarkan produk ini)</div>
+            </button>
+            <button type="button" id="sp-mode-multi" onclick="setSchedPairMode('multi_product')" style="text-align:left;padding:0.55rem 0.7rem;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--surface-raised);color:var(--text-primary);cursor:pointer;">
+              <div style="font-size:0.78rem;font-weight:800;">🔁 Multi-Produk Bergilir</div>
+              <div style="font-size:0.68rem;color:var(--text-muted);margin-top:2px;">Pasangkan Blueprint dengan beberapa Produk Katalog</div>
+            </button>
+            <button type="button" id="sp-mode-none" onclick="setSchedPairMode('no_product')" style="text-align:left;padding:0.55rem 0.7rem;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--surface-raised);color:var(--text-primary);cursor:pointer;">
+              <div style="font-size:0.78rem;font-weight:800;">📖 Tanpa Produk Spesifik</div>
+              <div style="font-size:0.68rem;color:var(--text-muted);margin-top:2px;">Pure Storytelling / Auto Brand Match di caption</div>
+            </button>
+          </div>
+
+          <div id="sched-prod-picker-wrap" style="display:flex;flex-direction:column;gap:0.6rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+              <span id="sched-prod-badge" style="font-size:0.72rem;font-weight:700;padding:0.15rem 0.55rem;border-radius:9999px;background:var(--status-success-soft);color:var(--status-success);border:1px solid var(--status-success);">
+                1 Produk Dipilih
+              </span>
+              <div id="sched-prod-bulk-btns" class="hidden" style="display:flex;gap:0.45rem;font-size:0.74rem;">
+                <button type="button" onclick="selectAllSchedProd()" style="background:none;border:none;color:var(--action-primary);cursor:pointer;text-decoration:underline;font-weight:600;">Pilih Semua</button>
+                <span style="color:var(--border-strong);">|</span>
+                <button type="button" onclick="clearSchedProd()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;text-decoration:underline;font-weight:600;">Hapus Pilihan</button>
+              </div>
+            </div>
+
+            <!-- Search box Produk -->
+            <div style="position:relative;">
+              <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.85rem;">🔍</span>
+              <input
+                type="text"
+                id="sched-prod-search"
+                oninput="renderSchedProducts()"
+                placeholder="Cari produk katalog (nama atau kategori)..."
+                style="width:100%;height:36px;background:var(--input-bg);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:0 10px 0 32px;color:var(--text-primary);font-size:0.82rem;outline:none;"
+              />
+            </div>
+
+            <!-- Scrollable Products Grid (99% Replica dari Video Produk) -->
+            <div id="sched-prod-list" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(205px, 1fr));gap:0.55rem;max-height:195px;overflow-y:auto;padding-right:4px;"></div>
+
+            <!-- Ringkasan Baris Jadwal Pasangan yang Akan Dibuat -->
+            <div style="background:var(--surface-raised);border:1px solid var(--border-subtle);border-radius:var(--radius-xs);padding:0.6rem 0.75rem;display:flex;flex-direction:column;gap:0.4rem;">
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.75rem;font-weight:700;">
+                <span style="color:var(--text-primary);">📋 Pratinjau Baris Jadwal Multiplier yang Akan Dibuat:</span>
+                <span id="sched-pairs-count-badge" style="color:var(--status-purple);">2 Baris Jadwal Mandiri</span>
+              </div>
+              <div id="sched-pairs-preview" style="display:flex;flex-direction:column;gap:0.3rem;max-height:120px;overflow-y:auto;font-size:0.73rem;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="font-size:0.74rem;color:var(--text-secondary);background:var(--surface);padding:0.5rem 0.75rem;border-radius:var(--radius-xs);border:1px solid var(--border-subtle);">
+          💡 <strong>Autopilot Bebas Repetisi:</strong> Setiap hari mesin akan membaca riwayat hook yang telah diproduksi (<code>excluded_history</code>), merumuskan variasi sudut pandang baru dengan Gemini AI yang menjembatani cerita Blueprint ke Produk terpilih, memilih Rank #1, dan langsung merender video klip untuk publikasi otomatis.
+        </div>
+      </div>
+
+      <!-- STEP 4: Dua Waktu Terpisah (Jam Pembuatan & Jam Publish - Format 24 Jam WIB) -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:1rem;background:var(--surface-raised);padding:1rem;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);">
+        <div style="display:flex;flex-direction:column;gap:0.35rem;">
+          <label style="font-size:0.82rem;font-weight:700;color:var(--status-info);">
+            ⚙️ Jam Pembuatan Video (Format 24 Jam WIB)
+          </label>
+          <input type="time" id="sched-gen-time" value="05:00" onchange="renderSchedPairsPreview()" style="height:42px;background:var(--input-bg);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:0 0.85rem;font-size:1.05rem;font-weight:700;color:var(--text-primary);outline:none;" />
+          <span style="font-size:0.7rem;color:var(--text-muted);">
+            Contoh: <strong>05:00</strong> (Pagi) atau <strong>17:00</strong> (Sore WIB). AI otomatis memproduksi video pada jam ini
+          </span>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:0.35rem;">
+          <label style="font-size:0.82rem;font-weight:700;color:var(--status-success);">
+            🚀 Jam Publish Repliz (Format 24 Jam WIB)
+          </label>
+          <input type="time" id="sched-pub-time" value="09:00" style="height:42px;background:var(--input-bg);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:0 0.85rem;font-size:1.05rem;font-weight:700;color:var(--text-primary);outline:none;" />
+          <span style="font-size:0.7rem;color:var(--text-muted);">
+            Contoh: <strong>09:00</strong> (Pagi) atau <strong>21:30</strong> (Malam WIB). Video diteruskan ke antrean Repliz untuk jam ini
+          </span>
+        </div>
+      </div>
+
+      <!-- 6. Mode Penjadwalan & Hari / Tanggal (99% Replica) -->
+      <div style="display:flex;flex-direction:column;gap:0.65rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+          <label style="font-size:0.82rem;font-weight:700;color:var(--text-secondary);">Pilih Mode Penjadwalan:</label>
+          <div style="display:flex;background:var(--surface);padding:0.2rem;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);gap:0.25rem;">
+            <button type="button" id="btn-mode-recurring" onclick="setSchedMode('recurring')" style="padding:0.35rem 0.75rem;border:none;border-radius:var(--radius-xs);font-size:0.78rem;font-weight:700;cursor:pointer;background:var(--action-primary);color:var(--on-action-primary);">
+              🔄 Rutin Mingguan
+            </button>
+            <button type="button" id="btn-mode-date" onclick="setSchedMode('specific_date')" style="padding:0.35rem 0.75rem;border:none;border-radius:var(--radius-xs);font-size:0.78rem;font-weight:700;cursor:pointer;background:transparent;color:var(--text-secondary);">
+              📅 Tanggal Spesifik
+            </button>
+          </div>
+        </div>
+
+        <!-- Rutin Mingguan Box -->
+        <div id="box-recurring" style="background:var(--surface-raised);padding:0.85rem;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);display:flex;flex-direction:column;gap:0.55rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+            <span style="font-size:0.78rem;font-weight:700;color:var(--text-secondary);">Hari Rutin Eksekusi:</span>
+            <span id="active-days-label" style="font-size:0.72rem;color:var(--status-info);">Aktif: Sen, Sel, Rab, Kam, Jum, Sab, Min</span>
+          </div>
+          <div id="days-buttons-wrap" style="display:flex;gap:0.45rem;flex-wrap:wrap;"></div>
+
+          <div style="margin-top:0.25rem;padding:0.5rem 0.75rem;background:var(--surface);border-radius:var(--radius-xs);border:1px dashed var(--action-primary);display:flex;flex-direction:column;gap:0.25rem;">
+            <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.78rem;font-weight:700;color:var(--text-primary);cursor:pointer;">
+              <input type="checkbox" id="stagger-days-check" checked onchange="renderSchedPairsPreview()" style="cursor:pointer;accent-color:var(--action-primary);" />
+              ⚡ Auto-Stagger Hari Rutin (Sebar 1 baris batch per hari aktif secara bergiliran)
+            </label>
+            <span style="font-size:0.72rem;color:var(--text-muted);">
+              Mencegah seluruh pasangan dieksekusi di hari yang sama.
+            </span>
+          </div>
+        </div>
+
+        <!-- Tanggal Spesifik Box -->
+        <div id="box-specific-date" class="hidden" style="background:var(--surface-raised);padding:0.85rem;border-radius:var(--radius-sm);border:1px solid var(--border-strong);display:flex;flex-direction:column;gap:0.65rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+            <span style="font-size:0.78rem;font-weight:700;color:var(--text-secondary);">Pilih Tanggal Kalender Eksekusi:</span>
+            <span style="font-size:0.7rem;font-weight:700;background:var(--status-warning-soft);color:var(--status-warning);padding:0.15rem 0.5rem;border-radius:var(--radius-full);">
+              One-Time Execution 🎯
+            </span>
+          </div>
+          <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+            <input type="date" id="sched-target-date" value="2026-11-13" onchange="renderSchedPairsPreview()" style="height:38px;background:var(--input-bg);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:0 0.75rem;font-size:0.84rem;color:var(--text-primary);font-weight:700;outline:none;" />
+            <div style="display:flex;gap:0.35rem;flex-wrap:wrap;">
+              <button type="button" onclick="setQuickDate(0)" style="padding:0.35rem 0.65rem;background:var(--surface-interactive);border:1px solid var(--border-subtle);border-radius:var(--radius-xs);font-size:0.74rem;font-weight:600;color:var(--text-secondary);cursor:pointer;">Hari Ini</button>
+              <button type="button" onclick="setQuickDate(1)" style="padding:0.35rem 0.65rem;background:var(--surface-interactive);border:1px solid var(--border-subtle);border-radius:var(--radius-xs);font-size:0.74rem;font-weight:600;color:var(--text-secondary);cursor:pointer;">Besok</button>
+              <button type="button" onclick="setQuickDate(3)" style="padding:0.35rem 0.65rem;background:var(--surface-interactive);border:1px solid var(--border-subtle);border-radius:var(--radius-xs);font-size:0.74rem;font-weight:600;color:var(--text-secondary);cursor:pointer;">+3 Hari</button>
+              <button type="button" onclick="setQuickDate(7)" style="padding:0.35rem 0.65rem;background:var(--surface-interactive);border:1px solid var(--border-subtle);border-radius:var(--radius-xs);font-size:0.74rem;font-weight:600;color:var(--text-secondary);cursor:pointer;">+7 Hari</button>
+              <button type="button" onclick="setQuickDate(14)" style="padding:0.35rem 0.65rem;background:var(--surface-interactive);border:1px solid var(--border-subtle);border-radius:var(--radius-xs);font-size:0.74rem;font-weight:600;color:var(--text-secondary);cursor:pointer;">+14 Hari</button>
+            </div>
+          </div>
+
+          <div style="margin-top:0.25rem;padding:0.5rem 0.75rem;background:var(--surface);border-radius:var(--radius-xs);border:1px dashed var(--action-primary);display:flex;flex-direction:column;gap:0.35rem;">
+            <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.78rem;font-weight:700;color:var(--text-primary);cursor:pointer;">
+              <input type="checkbox" id="stagger-cal-check" checked onchange="renderSchedPairsPreview()" style="cursor:pointer;accent-color:var(--action-primary);" />
+              ⚡ Auto-Stagger Kalender (+1 Hari per baris batch)
+            </label>
+            <span style="font-size:0.72rem;color:var(--text-muted);">
+              Tiap pasangan batch akan disebar ke tanggal berurutan mulai dari tanggal terpilih.
+            </span>
+          </div>
+
+          <span style="font-size:0.72rem;color:var(--text-muted);">
+            💡 <strong>Karakteristik Tanggal Spesifik:</strong> Pipeline hanya dieksekusi <strong>1 kali</strong> pada tanggal tersebut. Setelah selesai dikirim ke Repliz, status otomatis menjadi <strong>Selesai (Completed)</strong>.
+          </span>
+        </div>
+      </div>
+
+      <!-- 7. Multi-Platform Repliz Publishing Selector (99% Replica) -->
+      <div style="display:flex;flex-direction:column;gap:0.45rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+          <label style="font-size:0.82rem;font-weight:700;color:var(--text-secondary);">
+            Target Multi-Platform Repliz (Pilih Akun Tujuan):
+          </label>
+          <span style="font-size:0.68rem;font-weight:700;color:var(--action-primary);background:var(--surface-interactive);padding:0.15rem 0.55rem;border-radius:9999px;">
+            3 Akun Terpilih
+          </span>
+        </div>
+
+        <div style="background:var(--surface-raised);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:1rem;">
+          <div style="display:flex;gap:0.65rem;margin-bottom:0.75rem;flex-wrap:wrap;">
+            <div style="flex:1;min-width:220px;position:relative;">
+              <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.9rem;">🔍</span>
+              <input type="text" placeholder="Cari nama akun platform (misal: Cerita Dokter, Botani, HabitFolk)..." style="width:100%;height:38px;background:var(--surface);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:0 12px 0 34px;color:var(--text-primary);font-size:0.82rem;outline:none;" />
+            </div>
+            <button type="button" onclick="showToast('🔄 Menyinkronkan akun dari Repliz...')" style="background:var(--surface);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:0 12px;height:38px;color:var(--text-secondary);font-size:0.78rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+              <span>🔄</span><span>Sinkronkan Ulang dari Repliz</span>
+            </button>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));gap:0.65rem;">
+            <div style="background:var(--surface-interactive);border:1.5px solid var(--action-primary);border-radius:var(--radius-sm);padding:10px 12px;display:flex;flex-direction:column;gap:6px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;font-weight:700;color:var(--status-info);">
+                  <span>📘</span><span>Facebook</span>
+                  <span style="font-size:0.62rem;color:var(--action-primary);background:var(--surface-interactive);border:1px solid var(--action-primary);padding:0 4px;border-radius:4px;font-weight:800;">Brand</span>
+                </div>
+                <div style="width:18px;height:18px;border-radius:50%;background:var(--action-primary);color:var(--on-action-primary);display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:900;">✓</div>
+              </div>
+              <div style="font-size:0.82rem;font-weight:700;">Cerita Dokter Official</div>
+              <div style="font-size:0.68rem;color:var(--status-success);display:flex;align-items:center;gap:4px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--status-success);"></span><span>Terhubung di Repliz</span></div>
+            </div>
+
+            <div style="background:var(--surface-interactive);border:1.5px solid var(--action-primary);border-radius:var(--radius-sm);padding:10px 12px;display:flex;flex-direction:column;gap:6px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;font-weight:700;color:var(--status-purple);">
+                  <span>🎵</span><span>TikTok</span>
+                  <span style="font-size:0.62rem;color:var(--action-primary);background:var(--surface-interactive);border:1px solid var(--action-primary);padding:0 4px;border-radius:4px;font-weight:800;">Brand</span>
+                </div>
+                <div style="width:18px;height:18px;border-radius:50%;background:var(--action-primary);color:var(--on-action-primary);display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:900;">✓</div>
+              </div>
+              <div style="font-size:0.82rem;font-weight:700;">@ceritadokter.id</div>
+              <div style="font-size:0.68rem;color:var(--status-success);display:flex;align-items:center;gap:4px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--status-success);"></span><span>Terhubung di Repliz</span></div>
+            </div>
+
+            <div style="background:var(--surface-interactive);border:1.5px solid var(--action-primary);border-radius:var(--radius-sm);padding:10px 12px;display:flex;flex-direction:column;gap:6px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;font-weight:700;color:var(--status-rose);">
+                  <span>📸</span><span>Instagram</span>
+                  <span style="font-size:0.62rem;color:var(--action-primary);background:var(--surface-interactive);border:1px solid var(--action-primary);padding:0 4px;border-radius:4px;font-weight:800;">Brand</span>
+                </div>
+                <div style="width:18px;height:18px;border-radius:50%;background:var(--action-primary);color:var(--on-action-primary);display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:900;">✓</div>
+              </div>
+              <div style="font-size:0.82rem;font-weight:700;">@ceritadokter</div>
+              <div style="font-size:0.68rem;color:var(--status-success);display:flex;align-items:center;gap:4px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--status-success);"></span><span>Terhubung di Repliz</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8. Auto-Publish Toggle Checkbox (EXACT REPLICA) -->
+      <div style="display:flex;align-items:center;gap:0.65rem;background:var(--surface-raised);padding:0.75rem 1rem;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);">
+        <input type="checkbox" id="autoPublishCheck" checked style="width:18px;height:18px;accent-color:var(--action-primary);cursor:pointer;" />
+        <label for="autoPublishCheck" style="font-size:0.82rem;font-weight:600;color:var(--text-primary);cursor:pointer;">
+          Otomatis teruskan video ke Repliz setelah selesai di-render oleh FFmpeg
+        </label>
+      </div>
+
+      <!-- 🍳 Toggle Kontrol Ekstraksi Resep Lengkap untuk Multiplier (EXACT REPLICA) -->
+      <div style="display:flex;align-items:flex-start;gap:0.65rem;background:var(--surface-raised);padding:0.75rem 1rem;border-radius:var(--radius-sm);border:1px solid var(--status-purple);">
+        <input type="checkbox" id="schedRecipeCheck" checked style="width:18px;height:18px;accent-color:var(--status-purple);cursor:pointer;margin-top:2px;" />
+        <div>
+          <label for="schedRecipeCheck" style="font-size:0.82rem;font-weight:700;color:var(--text-primary);cursor:pointer;display:block;">
+            🍳 Hasilkan Resep / Racikan Lengkap di Caption (Bahan, Takaran &amp; Langkah)
+          </label>
+          <span style="font-size:0.72rem;color:var(--text-muted);line-height:1.4;display:block;margin-top:2px;">
+            Saat aktif, AI wajib menyusun teks resep terperinci (bahan, takaran presisi, langkah pembuatan, khasiat sehat) yang sinkron dengan video referensi dekonstruksi.
+          </span>
+        </div>
+      </div>
+
+      <!-- 🛒 Toggle Kontrol Post Link Affiliate Shopee & Link di Bio (EXACT REPLICA) -->
+      <div style="display:flex;align-items:flex-start;gap:0.65rem;background:var(--surface-raised);padding:0.75rem 1rem;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);">
+        <input type="checkbox" id="postAffiliateCheck" checked style="width:18px;height:18px;accent-color:var(--action-primary);cursor:pointer;margin-top:2px;" />
+        <div>
+          <label for="postAffiliateCheck" style="font-size:0.82rem;font-weight:700;color:var(--text-primary);cursor:pointer;display:block;">
+            🛒 Sertakan Rekomendasi Produk &amp; Affiliate (Shopee FB &amp; Link di Bio)
+          </label>
+          <span style="font-size:0.72rem;color:var(--text-muted);line-height:1.4;display:block;margin-top:2px;">
+            Secara cerdas menyisipkan link Shopee aktif ke Facebook dan mengarahkan ke Link di Bio untuk Instagram, TikTok, Shorts &amp; Threads. Uncheck untuk jadwal konten murni edukasi tanpa jualan.
+          </span>
+        </div>
+      </div>
+
+      <!-- Modal Action Buttons -->
+      <div style="display:flex;justify-content:flex-end;gap:0.65rem;margin-top:0.5rem;padding-top:0.85rem;border-top:1px solid var(--border-subtle);">
+        <button type="button" onclick="switchView('instant')" style="background:var(--surface);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:0.6rem 1.15rem;font-size:0.84rem;font-weight:600;color:var(--text-secondary);cursor:pointer;">
+          Batal
+        </button>
+        <button type="button" onclick="saveScheduleDemo()" style="background:var(--action-primary);border:none;border-radius:var(--radius-sm);padding:0.6rem 1.45rem;font-size:0.84rem;font-weight:700;color:var(--on-action-primary);cursor:pointer;display:inline-flex;align-items:center;gap:0.45rem;">
+          <span>💾</span>
+          <span id="btn-save-sched-label">Buat Jadwal</span>
+        </button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  const BLUEPRINTS = [
+    { id: 'bp_1476160110888470', reelId: '1476160110888470', niche: 'Health', title: 'Minuman Jahe Lemon Pagi Hari untuk Imunitas Tubuh', subtitle: 'Hook Kontras Kebiasaan Pagi + Takaran Racikan Alami' },
+    { id: 'bp_9823411200192831', reelId: '9823411200192831', niche: 'Health', title: 'Tanda Tubuh Kekurangan Vitamin D & Sering Lelah Bangun Tidur', subtitle: 'Gejala Tersembunyi + Solusi Nutrisi Harian' },
+    { id: 'bp_5541928374615243', reelId: '5541928374615243', niche: 'Skincare', title: 'Kesalahan Pakai Sunscreen yang Bikin Wajah Tetap Kusam', subtitle: 'Problem-Agitate-Solve 2 Jari Sunscreen' },
+    { id: 'bp_3310928374651920', reelId: '3310928374651920', niche: 'Cooking', title: 'Sarapan Sehat 5 Menit Tinggi Protein Tanpa Ribet', subtitle: 'Fast-Paced Cooking Step-by-Step' }
+  ];
+
+  const PRODUCTS = [
+    { id: 'prod_madu_hutan', name: 'Madu Hutan Murni Raw Honey 500g', category: 'Kesehatan & Imun' },
+    { id: 'prod_propolis', name: 'British Propolis Extract Original', category: 'Suplemen & Herbal' },
+    { id: 'prod_vit_d3k2', name: 'Vitamin D3 + K2 5000 IU Softgel', category: 'Vitamin & Suplemen' },
+    { id: 'prod_sunscreen_uv', name: 'Sunscreen UV Barrier Glowing SPF50+', category: 'Skincare' },
+    { id: 'prod_chia_seed', name: 'Organic Chia Seeds Mexico 250g', category: 'Superfood & Diet' }
+  ];
+
+  const SAMPLE_ANGLES = [
+    { title: 'Rahasia Racikan Pagi Anti-Tumbang Saat Cuaca Ekstrem', hook_text: 'Sering bersin dan lemas tiap pagi? Jangan cuma minum air hangat biasa!', vo_preview: 'Tambahkan 1 sendok Madu Hutan Murni ke seduhan jahe hangatmu setelah uapnya turun agar enzim alaminya tetap utuh.' },
+    { title: 'Kesalahan Seduh Jahe yang Merusak Khasiat Alaminya', hook_text: '80% orang menyeduh jahe dan madu dengan air mendidih, padahal itu keliru!', vo_preview: 'Air mendidih merusak nutrisi aktif. Tunggu hangat kuku, baru campurkan Madu Hutan Murni untuk imunitas keluarga.' },
+    { title: '3 Bahan Dapur Pengganti Suplemen Mahal di Pagi Hari', hook_text: 'Cukup 3 bahan di meja dapur ini, badan segar seharian tanpa ngantuk!', vo_preview: 'Jahe geprek, perasan lemon, dan Madu Hutan Murni—kombinasi simpel sebelum mulai aktivitas.' }
+  ];
+
+  // State 1-Klik
+  let instBlueprintId = BLUEPRINTS[0].id;
+  let instBridgingMode = 'product'; // 'product' | 'story'
+  let instProductId = PRODUCTS[0].id;
+  let instSelectedAngleIdx = 0;
+
+  // State Modal Jadwal
+  let schedBlueprintIds = [BLUEPRINTS[0].id, BLUEPRINTS[1].id];
+  let schedPairMode = 'one_product'; // 'one_product' | 'multi_product' | 'no_product'
+  let schedProductIds = [PRODUCTS[0].id];
+  let schedMode = 'recurring';
+  let schedDays = [1, 2, 3, 4, 5, 6, 0];
+
+  function toggleTheme() {
+    const html = document.documentElement;
+    html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'show';
+    setTimeout(() => { t.className = ''; }, 3200);
+  }
+
+  function switchView(v) {
+    document.getElementById('view-instant').classList.toggle('hidden', v !== 'instant');
+    document.getElementById('view-schedule').classList.toggle('hidden', v !== 'schedule');
+    document.getElementById('btn-view-instant').classList.toggle('active', v === 'instant');
+    document.getElementById('btn-view-schedule').classList.toggle('active', v === 'schedule');
+    if (v === 'schedule') {
+      renderSchedBlueprints();
+      renderSchedProducts();
+      renderSchedDays();
+      renderSchedPairsPreview();
+    }
+  }
+
+  // ================= 1-KLIK INSTANT FUNCTIONS =================
+  function setInstBpQuick(q) {
+    document.getElementById('inst-bp-search').value = q;
+    renderInstantBlueprints();
+  }
+
+  function renderInstantBlueprints() {
+    const q = (document.getElementById('inst-bp-search').value || '').toLowerCase().trim();
+    const list = BLUEPRINTS.filter(b => !q || (b.reelId + ' ' + b.niche + ' ' + b.title + ' ' + b.subtitle).toLowerCase().includes(q));
+    const el = document.getElementById('inst-bp-list');
+    if (list.length === 0) {
+      el.innerHTML = `<div style="text-align:center;padding:1rem;color:var(--text-muted);font-size:0.8rem;border:1px dashed var(--border-subtle);border-radius:var(--radius-sm);">🔍 Tidak ada blueprint yang cocok dengan "${q}"</div>`;
+      return;
+    }
+    el.innerHTML = list.map(bp => {
+      const isSel = instBlueprintId === bp.id;
+      return `
+        <div onclick="instBlueprintId='${bp.id}';renderInstantBlueprints();renderInstantPairSummary();" style="
+          display:flex;align-items:center;gap:0.75rem;padding:0.55rem 0.75rem;border-radius:var(--radius-sm);
+          background:${isSel ? 'var(--surface-interactive)' : 'var(--surface)'};
+          border:${isSel ? '1.5px solid var(--status-purple)' : '1px solid var(--border-subtle)'};
+          cursor:pointer;
+        ">
+          <div style="width:38px;height:38px;background:var(--surface-raised);border:1px solid var(--border-subtle);border-radius:var(--radius-xs);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">🎬</div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:2px;">
+              <span style="font-family:monospace;font-size:0.68rem;padding:0.1rem 0.35rem;border-radius:var(--radius-xs);background:var(--surface-interactive);color:var(--status-info);font-weight:700;">ID: ${bp.reelId}</span>
+              <span style="font-size:0.65rem;padding:0.1rem 0.35rem;border-radius:var(--radius-xs);background:var(--status-purple-soft);color:var(--status-purple);font-weight:700;">${bp.niche}</span>
+            </div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${bp.title}</div>
+            <div style="font-size:0.7rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${bp.subtitle}</div>
+          </div>
+          <span style="color:${isSel ? 'var(--status-purple)' : 'var(--text-muted)'};font-weight:800;font-size:0.9rem;">${isSel ? '✓' : '○'}</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function setInstBridgingMode(m) {
+    instBridgingMode = m;
+    const btnP = document.getElementById('inst-mode-product');
+    const btnS = document.getElementById('inst-mode-story');
+    btnP.style.background = m === 'product' ? 'var(--status-success)' : 'transparent';
+    btnP.style.color = m === 'product' ? '#ffffff' : 'var(--text-secondary)';
+    btnS.style.background = m === 'story' ? 'var(--action-primary)' : 'transparent';
+    btnS.style.color = m === 'story' ? 'var(--on-action-primary)' : 'var(--text-secondary)';
+    document.getElementById('inst-product-picker-box').classList.toggle('hidden', m !== 'product');
+    renderInstantPairSummary();
+  }
+
+  function renderInstantProducts() {
+    const q = (document.getElementById('inst-prod-search').value || '').toLowerCase().trim();
+    const list = PRODUCTS.filter(p => !q || (p.name + ' ' + p.category).toLowerCase().includes(q));
+    const el = document.getElementById('inst-prod-list');
+    if (list.length === 0) {
+      el.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:1rem;color:var(--text-muted);font-size:0.8rem;border:1px dashed var(--border-subtle);border-radius:var(--radius-sm);">Tidak ada produk yang cocok dengan "${q}"</div>`;
+      return;
+    }
+    el.innerHTML = list.map(p => {
+      const isSel = instProductId === p.id;
+      return `
+        <div onclick="instProductId='${p.id}';renderInstantProducts();renderInstantPairSummary();" style="
+          background:${isSel ? 'var(--surface-interactive)' : 'var(--surface)'};
+          border:${isSel ? '1.5px solid var(--status-success)' : '1px solid var(--border-subtle)'};
+          border-radius:var(--radius-sm);padding:0.6rem 0.75rem;cursor:pointer;display:flex;align-items:center;gap:0.65rem;
+        ">
+          <div style="width:38px;height:38px;border-radius:var(--radius-xs);background:var(--surface-raised);border:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.1rem;">🛍️</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:0.8rem;font-weight:700;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${p.name}">${p.name}</div>
+            <div style="font-size:0.68rem;color:var(--text-muted);">${p.category}</div>
+          </div>
+          <div style="width:18px;height:18px;border-radius:50%;border:1.5px solid ${isSel ? 'var(--status-success)' : 'var(--border-strong)'};background:${isSel ? 'var(--status-success)' : 'transparent'};color:${isSel ? '#ffffff' : 'transparent'};display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:900;flex-shrink:0;">✓</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderInstantPairSummary() {
+    const bp = BLUEPRINTS.find(b => b.id === instBlueprintId) || BLUEPRINTS[0];
+    const pr = PRODUCTS.find(p => p.id === instProductId) || PRODUCTS[0];
+    const el = document.getElementById('inst-pair-summary');
+    if (!el) return;
+    el.innerHTML = `
+      <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+        <span style="color:var(--text-muted);font-weight:600;">Pasangan Aktif:</span>
+        <strong style="color:var(--status-purple);">🎬 ${bp.title}</strong>
+        <span style="color:var(--text-muted);">➔</span>
+        <strong style="color:var(--status-success);">🛍️ ${pr.name}</strong>
+      </div>
+      <span style="font-size:0.7rem;color:var(--action-primary);font-weight:700;">✓ Bridging Produk di Klip Pivot</span>
+    `;
+  }
+
+  function renderInstantAngles() {
+    const mode = document.getElementById('inst-exec-mode').value;
+    const titleEl = document.getElementById('inst-angle-title');
+    const btnEl = document.getElementById('inst-regen-angle-btn');
+    const bodyEl = document.getElementById('inst-angle-body');
+    if (mode === 'full_autopilot') {
+      titleEl.textContent = '💡 Skenario Angle: AI Auto-Select Rank #1 (Bebas Repetisi & Sinkron Produk)';
+      btnEl.classList.add('hidden');
+      bodyEl.innerHTML = `
+        <p style="font-size:0.76rem;color:var(--text-secondary);margin:0;line-height:1.45;">
+          Mesin akan memeriksa tabel riwayat <code>excluded_history</code> agar hook tidak pernah duplikat, merumuskan variasi sudut pandang yang menjembatani cerita Blueprint ke Produk terpilih, otomatis memilih <strong>Angle Rank #1</strong>, dan langsung memproses produksi video tanpa jeda manual.
+        </p>
+      `;
+    } else {
+      titleEl.textContent = '💡 Skenario Angle: Kurasi 3 Opsi Angle Pilihan Anda';
+      btnEl.classList.remove('hidden');
+      bodyEl.innerHTML = `<div style="display:flex;flex-direction:column;gap:0.5rem;">` + SAMPLE_ANGLES.map((a, idx) => {
+        const isSel = instSelectedAngleIdx === idx;
+        return `
+          <div onclick="instSelectedAngleIdx=${idx};renderInstantAngles();" style="
+            padding:0.65rem 0.85rem;border-radius:var(--radius-sm);
+            background:${isSel ? 'var(--status-purple-soft)' : 'var(--surface-raised)'};
+            border:${isSel ? '1.5px solid var(--status-purple)' : '1px solid var(--border-subtle)'};
+            cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:0.65rem;
+          ">
+            <div>
+              <div style="display:flex;align-items:center;gap:0.45rem;">
+                <span style="font-size:0.66rem;font-weight:800;background:var(--status-purple);color:#ffffff;padding:0.1rem 0.45rem;border-radius:9999px;">RANK ${idx + 1}</span>
+                <strong style="font-size:0.82rem;color:var(--text-primary);">${a.title}</strong>
+              </div>
+              <p style="font-size:0.73rem;color:var(--text-secondary);margin:0.3rem 0 0.15rem 0;"><strong>Hook (0-3s):</strong> "${a.hook_text}"</p>
+              <p style="font-size:0.7rem;color:var(--text-muted);margin:0;font-style:italic;">Narasi VO: "${a.vo_preview}"</p>
+            </div>
+            <span style="color:${isSel ? 'var(--status-purple)' : 'var(--text-muted)'};font-weight:800;font-size:0.9rem;">${isSel ? '✓' : '○'}</span>
+          </div>
+        `;
+      }).join('') + `</div>`;
+    }
+  }
+
+  function launchInstantDemo() {
+    const bp = BLUEPRINTS.find(b => b.id === instBlueprintId);
+    const pr = PRODUCTS.find(p => p.id === instProductId);
+    if (instBridgingMode === 'product') {
+      showToast(`🚀 Meluncurkan Multiplier: "${bp.title.slice(0, 28)}..." ➔ Produk "${pr.name}"!`);
+    } else {
+      showToast(`🚀 Meluncurkan Multiplier Pure Storytelling: "${bp.title.slice(0, 32)}..."!`);
+    }
+  }
+
+  // ================= MODAL JADWAL FUNCTIONS =================
+  function renderSchedBlueprints() {
+    const q = (document.getElementById('sched-bp-search').value || '').toLowerCase().trim();
+    const list = BLUEPRINTS.filter(b => !q || (b.reelId + ' ' + b.niche + ' ' + b.title).toLowerCase().includes(q));
+    document.getElementById('sched-bp-badge').textContent = `${schedBlueprintIds.length} Blueprint Dipilih ${schedBlueprintIds.length > 1 ? '(Mode Batch ⚡)' : ''}`;
+    const el = document.getElementById('sched-bp-list');
+    el.innerHTML = list.map(bp => {
+      const isChecked = schedBlueprintIds.includes(bp.id);
+      return `
+        <div onclick="toggleSchedBp('${bp.id}')" style="
+          display:flex;align-items:center;justify-content:space-between;padding:0.55rem 0.75rem;
+          border-radius:var(--radius-xs);
+          background:${isChecked ? 'var(--surface-interactive)' : 'transparent'};
+          border:${isChecked ? '1px solid var(--action-primary)' : '1px solid var(--border-subtle)'};
+          cursor:pointer;
+        ">
+          <div style="display:flex;flex-direction:column;gap:0.15rem;padding-right:0.5rem;">
+            <span style="font-size:0.82rem;font-weight:700;color:var(--text-primary);">${bp.title}</span>
+            <span style="font-size:0.7rem;color:var(--text-muted);">[${bp.niche}] Reel ID: ${bp.reelId} • Viral Hook Score: Rank #1</span>
+          </div>
+          <input type="checkbox" ${isChecked ? 'checked' : ''} readonly style="width:16px;height:16px;accent-color:var(--action-primary);cursor:pointer;flex-shrink:0;" />
+        </div>
+      `;
+    }).join('');
+  }
+
+  function toggleSchedBp(id) {
+    if (schedBlueprintIds.includes(id)) {
+      if (schedBlueprintIds.length > 1) schedBlueprintIds = schedBlueprintIds.filter(x => x !== id);
+    } else {
+      schedBlueprintIds.push(id);
+    }
+    renderSchedBlueprints();
+    renderSchedPairsPreview();
+  }
+
+  function selectAllSchedBp() {
+    schedBlueprintIds = BLUEPRINTS.map(b => b.id);
+    renderSchedBlueprints();
+    renderSchedPairsPreview();
+  }
+
+  function selectTop1SchedBp() {
+    schedBlueprintIds = [BLUEPRINTS[0].id];
+    renderSchedBlueprints();
+    renderSchedPairsPreview();
+  }
+
+  function setSchedPairMode(m) {
+    schedPairMode = m;
+    const modes = [
+      { id: 'sp-mode-one', key: 'one_product' },
+      { id: 'sp-mode-multi', key: 'multi_product' },
+      { id: 'sp-mode-none', key: 'no_product' }
+    ];
+    modes.forEach(item => {
+      const btn = document.getElementById(item.id);
+      const active = item.key === m;
+      btn.style.border = active ? '1.5px solid var(--status-success)' : '1px solid var(--border-subtle)';
+      btn.style.background = active ? 'var(--surface-interactive)' : 'var(--surface-raised)';
+    });
+
+    if (m === 'one_product' && schedProductIds.length > 1) {
+      schedProductIds = [schedProductIds[0]];
+    } else if (m === 'multi_product' && schedProductIds.length < 2) {
+      schedProductIds = [PRODUCTS[0].id, PRODUCTS[1].id];
+    }
+
+    document.getElementById('sched-prod-picker-wrap').classList.toggle('hidden', m === 'no_product');
+    document.getElementById('sched-prod-bulk-btns').classList.toggle('hidden', m !== 'multi_product');
+    renderSchedProducts();
+    renderSchedPairsPreview();
+  }
+
+  function renderSchedProducts() {
+    const q = (document.getElementById('sched-prod-search').value || '').toLowerCase().trim();
+    const list = PRODUCTS.filter(p => !q || (p.name + ' ' + p.category).toLowerCase().includes(q));
+    document.getElementById('sched-prod-badge').textContent = `${schedProductIds.length} Produk Dipilih`;
+    const el = document.getElementById('sched-prod-list');
+    el.innerHTML = list.map(prod => {
+      const isChecked = schedProductIds.includes(prod.id);
+      return `
+        <div onclick="toggleSchedProd('${prod.id}')" style="
+          background:${isChecked ? 'var(--surface-interactive)' : 'var(--surface)'};
+          border:${isChecked ? '1.5px solid var(--status-success)' : '1px solid var(--border-subtle)'};
+          border-radius:var(--radius-sm);padding:0.55rem 0.7rem;cursor:pointer;display:flex;align-items:center;gap:0.6rem;
+        ">
+          <div style="width:36px;height:36px;border-radius:var(--radius-xs);background:var(--surface-raised);border:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.05rem;">🛍️</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:0.78rem;font-weight:700;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${prod.name}">${prod.name}</div>
+            <div style="font-size:0.66rem;color:var(--text-muted);">${prod.category}</div>
+          </div>
+          <div style="width:18px;height:18px;border-radius:50%;border:1.5px solid ${isChecked ? 'var(--status-success)' : 'var(--border-strong)'};background:${isChecked ? 'var(--status-success)' : 'transparent'};color:${isChecked ? '#ffffff' : 'transparent'};display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:900;flex-shrink:0;">✓</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function toggleSchedProd(id) {
+    if (schedPairMode === 'one_product') {
+      schedProductIds = [id];
+    } else {
+      if (schedProductIds.includes(id)) {
+        if (schedProductIds.length > 1) schedProductIds = schedProductIds.filter(x => x !== id);
+      } else {
+        schedProductIds.push(id);
+      }
+    }
+    renderSchedProducts();
+    renderSchedPairsPreview();
+  }
+
+  function selectAllSchedProd() {
+    schedProductIds = PRODUCTS.map(p => p.id);
+    renderSchedProducts();
+    renderSchedPairsPreview();
+  }
+
+  function clearSchedProd() {
+    schedProductIds = [PRODUCTS[0].id];
+    renderSchedProducts();
+    renderSchedPairsPreview();
+  }
+
+  function buildSchedPairs() {
+    const bps = BLUEPRINTS.filter(b => schedBlueprintIds.includes(b.id));
+    const prs = PRODUCTS.filter(p => schedProductIds.includes(p.id));
+    if (schedPairMode === 'no_product') {
+      return bps.map(b => ({ bp: b, prod: null }));
+    }
+    if (schedPairMode === 'one_product') {
+      const targetProd = prs[0] || PRODUCTS[0];
+      return bps.map(b => ({ bp: b, prod: targetProd }));
+    }
+    // multi_product: pasangkan (jika 1 BP x N Produk -> semua produk; jika N BP x M Produk -> kombinasi / giliran)
+    const pairs = [];
+    bps.forEach(b => {
+      prs.forEach(p => pairs.push({ bp: b, prod: p }));
+    });
+    return pairs;
+  }
+
+  function setSchedMode(m) {
+    schedMode = m;
+    const bRec = document.getElementById('btn-mode-recurring');
+    const bDate = document.getElementById('btn-mode-date');
+    bRec.style.background = m === 'recurring' ? 'var(--action-primary)' : 'transparent';
+    bRec.style.color = m === 'recurring' ? 'var(--on-action-primary)' : 'var(--text-secondary)';
+    bDate.style.background = m === 'specific_date' ? 'var(--action-primary)' : 'transparent';
+    bDate.style.color = m === 'specific_date' ? 'var(--on-action-primary)' : 'var(--text-secondary)';
+    document.getElementById('box-recurring').classList.toggle('hidden', m !== 'recurring');
+    document.getElementById('box-specific-date').classList.toggle('hidden', m !== 'specific_date');
+    renderSchedPairsPreview();
+  }
+
+  function renderSchedDays() {
+    const days = [
+      { idx: 1, label: 'Sen' }, { idx: 2, label: 'Sel' }, { idx: 3, label: 'Rab' },
+      { idx: 4, label: 'Kam' }, { idx: 5, label: 'Jum' }, { idx: 6, label: 'Sab' }, { idx: 0, label: 'Min' }
+    ];
+    const mapName = { 1: 'Sen', 2: 'Sel', 3: 'Rab', 4: 'Kam', 5: 'Jum', 6: 'Sab', 0: 'Min' };
+    document.getElementById('active-days-label').textContent = 'Aktif: ' + schedDays.map(d => mapName[d]).join(', ');
+    document.getElementById('days-buttons-wrap').innerHTML = days.map(d => {
+      const isSel = schedDays.includes(d.idx);
+      return `
+        <button type="button" onclick="toggleSchedDay(${d.idx})" style="
+          padding:0.45rem 0.85rem;border-radius:var(--radius-sm);
+          border:${isSel ? '1px solid var(--action-primary)' : '1px solid var(--border-subtle)'};
+          background:${isSel ? 'var(--action-primary)' : 'var(--surface)'};
+          color:${isSel ? 'var(--on-action-primary)' : 'var(--text-secondary)'};
+          font-weight:700;font-size:0.8rem;cursor:pointer;
+        ">${d.label}</button>
+      `;
+    }).join('');
+  }
+
+  function toggleSchedDay(idx) {
+    if (schedDays.includes(idx)) {
+      if (schedDays.length > 1) schedDays = schedDays.filter(d => d !== idx);
+    } else {
+      schedDays.push(idx);
+    }
+    renderSchedDays();
+    renderSchedPairsPreview();
+  }
+
+  function setQuickDate(offsetDays) {
+    const d = new Date(2026, 10, 12);
+    d.setDate(d.getDate() + offsetDays);
+    document.getElementById('sched-target-date').value = d.toISOString().slice(0, 10);
+    renderSchedPairsPreview();
+  }
+
+  function renderSchedPairsPreview() {
+    const pairs = buildSchedPairs();
+    const mapName = { 1: 'Senin', 2: 'Selasa', 3: 'Rabu', 4: 'Kamis', 5: 'Jumat', 6: 'Sabtu', 0: 'Minggu' };
+    const genTime = document.getElementById('sched-gen-time').value || '05:00';
+    const staggerDays = document.getElementById('stagger-days-check')?.checked;
+    const staggerCal = document.getElementById('stagger-cal-check')?.checked;
+    const baseDateStr = document.getElementById('sched-target-date')?.value || '2026-11-13';
+
+    const badge = document.getElementById('sched-pairs-count-badge');
+    if (badge) badge.textContent = `${pairs.length} Baris Jadwal Mandiri`;
+    const btnLbl = document.getElementById('btn-save-sched-label');
+    if (btnLbl) btnLbl.textContent = pairs.length > 1 ? `Buat ${pairs.length} Jadwal Batch` : 'Buat Jadwal';
+
+    const previewEl = document.getElementById('sched-pairs-preview');
+    if (!previewEl) return;
+
+    previewEl.innerHTML = pairs.map((item, idx) => {
+      let schedInfo = '';
+      if (schedMode === 'specific_date') {
+        const d = new Date(baseDateStr);
+        if (staggerCal) d.setDate(d.getDate() + idx);
+        schedInfo = `📅 ${d.toISOString().slice(0, 10)} (${genTime} WIB)`;
+      } else {
+        const dayLabel = staggerDays && schedDays.length > 0
+          ? mapName[schedDays[idx % schedDays.length]]
+          : 'Hari Aktif';
+        schedInfo = `🔄 Tiap ${dayLabel} (${genTime} WIB)`;
+      }
+      return `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:0.35rem 0.55rem;background:var(--surface);border:1px solid var(--border-subtle);border-radius:var(--radius-xs);gap:0.5rem;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;">
+            <span style="font-weight:800;color:var(--action-primary);">#${idx + 1}</span>
+            <span style="color:var(--text-primary);font-weight:600;">🎬 ${item.bp.title.slice(0, 32)}...</span>
+            ${item.prod ? `<span style="color:var(--text-muted);">➔</span><span style="color:var(--status-success);font-weight:700;">🛍️ ${item.prod.name}</span>` : `<span style="color:var(--text-muted);">(Pure Storytelling)</span>`}
+          </div>
+          <span style="font-size:0.68rem;color:var(--status-info);font-weight:700;">${schedInfo}</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function saveScheduleDemo() {
+    const pairs = buildSchedPairs();
+    showToast(`💾 Berhasil membuat ${pairs.length} baris jadwal multiplier video independen! 🔀`);
+  }
+
+  // Init
+  renderInstantBlueprints();
+  renderInstantProducts();
+  renderInstantPairSummary();
+  renderInstantAngles();
+</script>
+</body>
+</html>

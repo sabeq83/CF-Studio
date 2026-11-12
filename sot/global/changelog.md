@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.42.2 — Adopsi Multiplier 1 Blueprint + 1 Produk ke Auto Pipeline (12/11/2026)
+- Tambah Product Bridging + pencarian produk pada Auto Pipeline 1-Klik & Modal Jadwal (1 Produk Andalan, Multi-Produk Bergilir, Tanpa Produk Spesifik)
+- Perbaiki resolusi bridgingMode & product_snapshot_json pada autonomous-engine.js serta dukung angle product-aware di multiplier-angle-generator.js
+- Tambah helper lib/multiplier-pairing.js dan unit test tests/multiplier-pairing.test.js
+
 ## V2.42.1 — ElevenLabs TTS on Pillar & RE Campaign Fase 2 (Single Narrator) (12/11/2026)
 - Tambah opsi ElevenLabs TTS (Ultra-Realistic) pada dropdown Voice Provider di halaman detail Pillar Campaign dan RE Campaign Fase 2
 - Voice Persona catalog 14 suara ID dan 14 suara EN otomatis sesuai target bahasa kampanye
