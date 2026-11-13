@@ -39,7 +39,7 @@
       position: absolute;
       left: 6cqw;
       right: 6cqw;
-      top: 33cqh;
+      top: 20cqh;
       text-align: center;
       font-family: var(--f-punch);
       text-transform: uppercase;
@@ -71,7 +71,7 @@
       position: absolute;
       left: 5cqw;
       right: 5cqw;
-      top: 40cqh;
+      top: 45cqh;
       text-align: center;
       font-family: var(--f-punch);
       text-transform: uppercase;
@@ -88,6 +88,11 @@
       right: 6cqw;
       top: var(--sub-top, 69cqh);
       transform: translateY(-50%);
+      display: flex;
+      justify-content: center;
+      align-items: baseline;
+      flex-wrap: nowrap;
+      gap: 1.9cqw;
       text-align: center;
       font-family: var(--f-sub);
       font-weight: 900;
@@ -102,7 +107,7 @@
     }
     .sub span {
       display: inline-block;
-      margin: 0 0.7cqw;
+      margin: 0;
     }
     .sub span.on {
       color: var(--active-word);
@@ -329,7 +334,7 @@
           span.className = isOn ? 'on' : '';
           span.textContent = String(item.w || '');
           return span.outerHTML;
-        }).join('');
+        }).join(' ');
       };
     })();
   </script>

@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.44.5 — Finishing Pass Fase 1: Playwright HTML Overlay, ElevenLabs Timestamps, Gemini Finishing Plan & SFX Mix (13/11/2026)
+- Tambah migrasi kolom PostgreSQL word_timings_json/caption_mode/finishing_template/loudness_target
+- Aktifkan ElevenLabs with-timestamps + Tier 1-3 word alignment router & on-demand DB backfill
+- Tambah validator & schema opsional finishing_plan di prompt Gemini dengan guard klaim medis herbal
+- Implementasi renderer Playwright deterministic base-caption.html + SFX pop/whoosh sidechain mix & fallback Sharp/SVG
+
 ## V2.44.4 — Finishing Pass Fase 0: OFL Fonts, Herbal Hook Guard, Tier-3 Alignment, Global Overlay & Loudnorm -14 (13/11/2026)
 - Tambah font OFL lokal (Anton, Montserrat Black/ExtraBold, Inter) + loader Fontconfig dan pengukuran TTF
 - Tambah guard medis herbal + fitHookCard dan sanitasi ketat overlay markup
