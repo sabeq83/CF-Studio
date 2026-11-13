@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.44.6 — Finishing Pass Fase 2: Data Extractor, 3x Camera Zoompan, Calm Wellness & Recipe Pop Templates, dan Preset Propagation (13/11/2026)
+- Tambah lib/finishing-data-extractor.js (resep max 4 chips + overflow, product card faktual, CTA & save prompt terparameter)
+- Tambah lib/camera-motion-engine.js (3x Lanczos zoompan, shake 0.35s, punch-in, flash putih, public/sfx/tick.wav)
+- Implementasi templates/finishing/calm-wellness.html dan recipe-pop.html bebas hardcode (R6.6) dengan zona aman TikTok
+- Propagasi finishing_template, caption_mode, dan loudness_target ke preset.workflow, 7 jalur R8.3, MCP tools, UI presets, dan mockup Staging
+- Verifikasi unit test 4/6/8 klip, build Next.js, dan smoke test Staging 3 video (-14.8..-14.9 LUFS)
+
 ## V2.44.5 — Finishing Pass Fase 1: Playwright HTML Overlay, ElevenLabs Timestamps, Gemini Finishing Plan & SFX Mix (13/11/2026)
 - Tambah migrasi kolom PostgreSQL word_timings_json/caption_mode/finishing_template/loudness_target
 - Aktifkan ElevenLabs with-timestamps + Tier 1-3 word alignment router & on-demand DB backfill
