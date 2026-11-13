@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
+import { FINISHING_TEMPLATE_IDS } from '../../lib/finishing-template-registry.js';
 
 async function resolvePhotoInput({ photo_base64, photo_url, photo_file_path, filename }) {
   if (photo_base64) {
@@ -516,7 +517,7 @@ export function createCfStudioServer(rawRequest) {
       bridge_segments: z.array(bridgeSegmentSchema).max(3).optional(),
       voice_provider: z.enum(['gemini', 'minimax', 'elevenlabs']).optional(),
       voice_persona: z.string().max(120).optional(),
-      finishing_template: z.enum(['none', 'calm_wellness', 'recipe_pop']).optional(),
+      finishing_template: z.enum(FINISHING_TEMPLATE_IDS).optional(),
       caption_mode: z.enum(['hybrid', 'keyword_only', 'full']).optional(),
       loudness_target: z.number().min(-24).max(-6).optional(),
       preset_key: z.string().max(100).default('product_campaign'),
@@ -588,7 +589,7 @@ export function createCfStudioServer(rawRequest) {
       idempotency_key: z.string().trim().min(1).max(128).optional(),
       brand_id: z.string().max(100).optional(),
       content_pillar: z.string().trim().min(1).max(300),
-      finishing_template: z.enum(['none', 'calm_wellness', 'recipe_pop']).optional(),
+      finishing_template: z.enum(FINISHING_TEMPLATE_IDS).optional(),
       caption_mode: z.enum(['hybrid', 'keyword_only', 'full']).optional(),
       loudness_target: z.number().min(-24).max(-6).optional(),
       preset_key: z.string().max(100).default('brand_editorial_campaign'),
@@ -613,7 +614,7 @@ export function createCfStudioServer(rawRequest) {
       category: z.enum(['makanan_utama', 'masakan', 'minuman', 'dessert', 'kue', 'camilan']).default('makanan_utama'),
       recipe_count: z.number().int().min(1).max(10).default(1),
       enable_motion_text: z.boolean().default(true),
-      finishing_template: z.enum(['none', 'calm_wellness', 'recipe_pop']).optional(),
+      finishing_template: z.enum(FINISHING_TEMPLATE_IDS).optional(),
       caption_mode: z.enum(['hybrid', 'keyword_only', 'full']).optional(),
       loudness_target: z.number().min(-24).max(-6).optional(),
       preset_key: z.string().max(100).optional(),
@@ -671,7 +672,7 @@ export function createCfStudioServer(rawRequest) {
       bridge_at_clip: z.number().int().min(1).max(12).optional(),
       bridge_duration_clips: z.number().int().min(0).max(12).optional(),
       bridge_segments: z.array(bridgeSegmentSchema).max(3).optional(),
-      finishing_template: z.enum(['none', 'calm_wellness', 'recipe_pop']).optional(),
+      finishing_template: z.enum(FINISHING_TEMPLATE_IDS).optional(),
       caption_mode: z.enum(['hybrid', 'keyword_only', 'full']).optional(),
       loudness_target: z.number().min(-24).max(-6).optional(),
       preset_key: z.string().max(100).default('multiplier_deconstruct_remix'),
@@ -804,7 +805,7 @@ export function createCfStudioServer(rawRequest) {
     motion_text_position: z.string().default('bottom'),
     video_transition: z.string().default('cut'),
     transition_duration: z.number().default(0.5),
-    finishing_template: z.enum(['none', 'calm_wellness', 'recipe_pop']).optional(),
+    finishing_template: z.enum(FINISHING_TEMPLATE_IDS).optional(),
     caption_mode: z.enum(['hybrid', 'keyword_only', 'full']).optional(),
     loudness_target: z.number().min(-24).max(-6).optional(),
     enable_sfx: z.boolean().optional(),

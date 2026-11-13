@@ -1,8 +1,8 @@
-# Finishing Pass Implementation Plan & Execution Tracker (`v2.45.x`) — `(Revisi 01)`
+# Finishing Pass Implementation Plan & Execution Tracker (`v2.45.x`) — `(Revisi 02)`
 
-Dokumen ini adalah rencana teknis & tracker eksekusi bertahap untuk mengimplementasikan seluruh usulan di [`USULAN_FINISHING_VIDEO_CFSTUDIO.md`](file:///Users/sabeqmmursyid/_cfstudio/USULAN_FINISHING_VIDEO_CFSTUDIO.md) dan [`antigravity_finishing_pass_instructions.md`](file:///Users/sabeqmmursyid/_cfstudio/antigravity_finishing_pass_instructions.md), yang telah diselaraskan penuh dengan [`antigravity_finishing_pass_revisi_01.md`](file:///Users/sabeqmmursyid/_cfstudio/antigravity_finishing_pass_revisi_01.md) (`R1`–`R8`), [`antigravity_finishing_pass_cek_ulang.md`](file:///Users/sabeqmmursyid/_cfstudio/antigravity_finishing_pass_cek_ulang.md), [`mockup_finishing_preview.html`](file:///Users/sabeqmmursyid/_cfstudio/mockup_finishing_preview.html), dan bundel referensi [`plans/finishing-pass-reference/`](file:///Users/sabeqmmursyid/_cfstudio/plans/finishing-pass-reference/overlay.html).
+Dokumen ini adalah rencana teknis & tracker eksekusi bertahap untuk mengimplementasikan seluruh usulan di [`USULAN_FINISHING_VIDEO_CFSTUDIO.md`](file:///Users/sabeqmmursyid/_cfstudio/USULAN_FINISHING_VIDEO_CFSTUDIO.md), [`USULAN_TEMPLATE_FINISHING_TAMBAHAN.md`](file:///Users/sabeqmmursyid/_cfstudio/USULAN_TEMPLATE_FINISHING_TAMBAHAN.md), dan [`antigravity_finishing_pass_instructions.md`](file:///Users/sabeqmmursyid/_cfstudio/antigravity_finishing_pass_instructions.md), yang telah diselaraskan penuh dengan [`antigravity_finishing_pass_revisi_01.md`](file:///Users/sabeqmmursyid/_cfstudio/antigravity_finishing_pass_revisi_01.md) (`R1`–`R8`), [`antigravity_finishing_pass_revisi_02.md`](file:///Users/sabeqmmursyid/_cfstudio/antigravity_finishing_pass_revisi_02.md) (`R9`–`R13`), [`antigravity_finishing_pass_cek_ulang.md`](file:///Users/sabeqmmursyid/_cfstudio/antigravity_finishing_pass_cek_ulang.md), [`mockup_finishing_preview.html`](file:///Users/sabeqmmursyid/_cfstudio/mockup_finishing_preview.html), [`mockup_finishing_templates_v3.html`](file:///Users/sabeqmmursyid/_cfstudio/mockup_finishing_templates_v3.html), dan bundel referensi [`plans/finishing-pass-reference/`](file:///Users/sabeqmmursyid/_cfstudio/plans/finishing-pass-reference/overlay.html).
 
-> Setiap seksi atau butir task yang diubah/ditambahkan dari revisi ditandai jelas dengan **`(Revisi 01)`**.
+> Setiap seksi atau butir task yang diubah/ditambahkan dari revisi ditandai jelas dengan **`(Revisi 01)`** atau **`(Revisi 02)`**. Fase 0, Fase 1, dan Fase 2 telah **selesai & dirilis** (`v2.44.4` → `v2.44.6`).
 
 ---
 
@@ -56,13 +56,36 @@ Audit codebase, schema DB PostgreSQL (`staging` & `public`), Nextcloud bundle, d
      5. [`apps/mcp/tools.mjs`](file:///Users/sabeqmmursyid/_cfstudio/apps/mcp/tools.mjs#L503-L860) (`cf_create_preset`, `cf_update_preset`, `cf_get_preset_detail`, `cf_submit_custom_storyboard` line 793; sedangkan `cf_create_product_video`, `cf_create_editorial_video`, `cf_create_recipe_video`, `cf_create_multiplier_video` belum mengekspos `finishing_template`/`caption_mode`/`loudness_target`).
      6. [`app/settings/presets/page.js`](file:///Users/sabeqmmursyid/_cfstudio/app/settings/presets/page.js#L87-L288) (`DEFAULT_FORM`, `mapPresetToForm`, `mapFormToPayload`, UI lines 1445–1525).
      7. [`app/pillar-campaigns/[id]/page.js`](file:///Users/sabeqmmursyid/_cfstudio/app/pillar-campaigns/[id]/page.js#L178-L212) (`178-212, 1715-2025, 3169-3245`), [`lib/pillar-campaign-approval.js:93-141`](file:///Users/sabeqmmursyid/_cfstudio/lib/pillar-campaign-approval.js#L93-L141), dan [`app/api/v2/pillar-campaigns/items/[itemId]/voiceover/route.js:13-52`](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/pillar-campaigns/items/[itemId]/voiceover/route.js#L13-L52).
-     - **Gap yang ditemukan**: tabel `re_campaigns` di [`lib/db-pg.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/db-pg.js) saat ini **tidak memiliki** kolom `video_transition`, `enable_motion_text`, `motion_text_style`, `finishing_template`, `caption_mode`, maupun `loudness_target`.
+     - **Gap yang ditemukan**: tabel `re_campaigns` di [`lib/db-pg.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/db-pg.js) saat ini **tidak memiliki** kolom `video_transition`, `enable_motion_text`, `motion_text_style`, `finishing_template`, `caption_mode`, maupun `loudness_target`. *(Sudah dimigrasikan pada Fase 1 `v2.44.5`.)*
+
+8. **Audit R10, R11, & R12 (Pasca-Rilis Fase 2 `v2.44.6`) — `(Revisi 02)`**:
+   - **Audit Tipe Kolom `clip_index` PostgreSQL (`dev`, `staging`, `public`)**:
+     - Hasil kueri langsung ke `information_schema.columns` (`100.78.186.123:5432/maknaflow_db`) menunjukkan kolom `tts_studio_clips.clip_index` dan `glabs_tasks.clip_index` pada **ketiga schema (`dev`, `staging`, `public`) bertipe `bigint` (`int8`)**, bukan `text`/`varchar`. Artinya `ORDER BY clip_index ASC` di PostgreSQL sudah mengurutkan secara numerik.
+     - Kueri utama `processTtsStudioMuxing()` ([`lib/db.js:2029,2048`](file:///Users/sabeqmmursyid/_cfstudio/lib/db.js#L2029)) sudah memakai `ORDER BY clip_index ASC`, namun beberapa kueri sync cloud ([`lib/scheduler-processors.js:3196,3311,3343,4136,4292,4355,4396,9059,9107`](file:///Users/sabeqmmursyid/_cfstudio/lib/scheduler-processors.js#L3196), [`lib/drive-sync-helper.js:103,208,324,440`](file:///Users/sabeqmmursyid/_cfstudio/lib/drive-sync-helper.js#L103), [`lib/nextcloud-sync-helper.js:106,192,298,394`](file:///Users/sabeqmmursyid/_cfstudio/lib/nextcloud-sync-helper.js#L106)) belum menyertakan `ORDER BY clip_index ASC`. Tetap diwajibkan sort numerik defensif `ORDER BY clip_index::int ASC` / `Number(clip.clip_index)` di layer JS & validasi indeks eksplisit pada `processTtsStudioMuxing()`.
+   - **Audit Asal Urutan `visual_clip_paths` di Semua Pipeline (`R10`)**:
+     - **OPC / Pillar (`lib/scheduler-processors.js:6667-6685`)**: inisialisasi array fixed-slot `localPaths = Array(taskIds.length).fill(null)` lalu pengisian per slot indeks `i` (`localPaths[i]`).
+     - **RE Campaign (`lib/scheduler-processors.js:3416-3436`)**: sama, fixed-slot `Array(taskIds.length).fill(null)` berdasarkan urutan `visual_tasks_json`.
+     - **Multiplier (`lib/re-multiplier-worker.js:1273-1301`)**: iterasi `for (let i = 0; i < prompts.length; i++)` membangun `mult_clip_${task.id}_${i}.mp4` terurut.
+     - **Sheets Autopilot (`lib/sheets-autopilot-worker.js:1992`)**: mengambil `glabs_tasks ... ORDER BY clip_index ASC`.
+     - **Celah Bug Pasca-Concat / Mux**: [`processTtsStudioMuxing()`](file:///Users/sabeqmmursyid/_cfstudio/lib/video-studio-processor.js#L884-L887) saat ini **hanya memeriksa `videoPaths.length !== completedClips.length`**, belum memeriksa kesesuaian nomor klip pada nama file (jika video/audio memakai akhiran nomor klip seperti `*_clip_01.mp4` vs `clip_11.mp3`), belum mencocokkan panjang audio probed vs metadata durasi (`±0.3s`), dan langsung melempar exception gagal total alih-alih jatuh aman ke render tanpa finishing pass. Referensi [`plans/finishing-pass-reference/build_base.py:8`](file:///Users/sabeqmmursyid/_cfstudio/plans/finishing-pass-reference/build_base.py#L8) juga membuktikan regex `(\d+)\.(?:mp3|mp4)$` wajib mengecualikan angka ekstensi (`3`/`4` pada `.mp3`/`.mp4`).
+   - **Audit Duplikasi Hardcoded Template IDs (`R11`)**:
+     - Daftar template saat ini masih tersebar di **5 lokasi terpisah**:
+       1. [`lib/finishing-overlay-renderer.js:8-20`](file:///Users/sabeqmmursyid/_cfstudio/lib/finishing-overlay-renderer.js#L8-L20) (`resolveFinishingTemplatePath` `if/else` manual).
+       2. [`lib/video-studio-processor.js:988`](file:///Users/sabeqmmursyid/_cfstudio/lib/video-studio-processor.js#L988) (`isRichTemplate = resolvedTemplate === 'calm_wellness' || resolvedTemplate === 'recipe_pop'`).
+       3. [`lib/finishing-data-extractor.js:386-406`](file:///Users/sabeqmmursyid/_cfstudio/lib/finishing-data-extractor.js#L386-L406) (`suggestFinishingTemplate` masih memaksa default fallback `'calm_wellness'` untuk kategori umum di line 405!).
+       4. [`app/settings/presets/page.js:1559-1561, 1596, 1613`](file:///Users/sabeqmmursyid/_cfstudio/app/settings/presets/page.js#L1559-L1561) (`<option>` hardcoded).
+       5. [`apps/mcp/tools.mjs:519, 591, 616, 674, 807`](file:///Users/sabeqmmursyid/_cfstudio/apps/mcp/tools.mjs#L519) (`z.enum(['none', 'calm_wellness', 'recipe_pop'])`).
+     - Diperbaiki menjadi satu registry terpusat [`lib/finishing-template-registry.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/finishing-template-registry.js) pada **Fase 2c-0**.
+   - **Audit Kolom `brand_profiles` & Tier-3 Timing (`R12.1`–`R12.4`)**:
+     - Kolom aktual `brand_profiles` saat ini (`dev`/`staging`/`public`): `id`, `brand_name`, `tone_of_voice`, `visual_signature`, `color_palette`, `forbidden_elements`, `brand_slogan_or_cta`, `raw_guideline_text`, `guideline_filename`, `created_at`, `storage_provider`, `nextcloud_target_folder`, `drive_target_folder`, `drive_glabs_folder_id`, `webhook_host`, `webhook_port`, `webhook_api_key`, `tenant_id`, `nextcloud_parent_folder`, `drive_parent_folder`, `editorial_brand_context`, `editorial_content_goal`, `editorial_content_pillars_json`. Belum memiliki field logo transparan, warna merek (`brand_color`), tagline, CTA default per platform, teks safety/disclaimer, nama presenter/tim, maupun lokasi opsional (`R12.1`).
+     - [`lib/word-alignment-engine.js:145-230`](file:///Users/sabeqmmursyid/_cfstudio/lib/word-alignment-engine.js#L145-L230) sudah memetakan jeda hening, namun logika fallback-nya belum menerapkan snap tanda baca (`, . ? ! :`) eksplisit dengan batas jarak `< 0.9s` seperti fungsi `derive()` pada [`mockup_finishing_templates_v3.html`](file:///Users/sabeqmmursyid/_cfstudio/mockup_finishing_templates_v3.html) (`R12.3`).
+     - Untuk cacat teks render AI video (`opc_2107` klip 4 `"Solusi Tinemal ID mark"`), mekanisme tambal merek [`R12.4`] memakai input eksplisit `brandPatch` (`clipIndex` + area/gaya `x-patch`) tanpa OCR otomatis.
 
 ---
 
-## Execution Task List (Tracker Resmi) — `(Revisi 01)`
+## Execution Task List (Tracker Resmi) — `(Revisi 02)`
 
-> **Aturan Kontrol (`R5`)**: Kerjakan **satu fase per rilis** (`Fase 0 → Fase 1 → Fase 2 → Fase 2b → Fase 3`). Dilarang menggabungkan fase atau mencentang task sebelum verifikasi selesai.
+> **Aturan Kontrol (`R5`, `R9`–`R13`)**: Kerjakan **satu fase/sub-fase per rilis** (`Fase 0 ✅ → Fase 1 ✅ → Fase 2 ✅ → Fase 2c-0 → Fase 2c-1 → Fase 2c-2 → Fase 2c-3 → Fase 2c-4 → Fase 2c-5 → Fase 2c-6 → Fase 3`). **Fase 2b dibatalkan (`R9`)**. Dilarang menggabungkan fase/sub-fase atau mencentang task sebelum verifikasi selesai.
 
 ### Tracker Fase 0 — Perbaikan Cepat Sharp/SVG + Safety Hook + Tier-3 Alignment `(Revisi 01)` (Target Rilis #1)
 - [x] **F0-T1**: Pasang font OFL lokal (`Anton-Regular.ttf`, `Montserrat-Black.ttf`, `Montserrat-ExtraBold.ttf`, `Inter-Bold.ttf`) di `public/fonts/` + buat `public/fonts/fonts.conf` & [`lib/motion-font-loader.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/motion-font-loader.js) (`FONTCONFIG_FILE`), verifikasi Sharp/librsvg merender Anton & Montserrat nyata.
@@ -103,22 +126,61 @@ Audit codebase, schema DB PostgreSQL (`staging` & `public`), Nextcloud bundle, d
 - [x] **F2-T4 `(Revisi 01)`**: Tambahkan `finishing_template`, `caption_mode`, `loudness_target` pada **`preset.workflow`** di [`lib/operator-presets.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/operator-presets.js), seluruh 7 jalur propagasi **`R8.3`** (termasuk MCP tools `cf_create_*` / `cf_*_preset` & DB `re_campaigns`), dan UI [`app/settings/presets/page.js`](file:///Users/sabeqmmursyid/_cfstudio/app/settings/presets/page.js) (ikuti SOP mockup HTML Staging & `app/theme.css`, plus peringatan hint bila preset `finishing_template` tidak cocok dengan `campaign_kinds`). Jangan simpan `accentColor`, teks label, CTA, maupun flag herbal di preset.
 - [x] **F2-T5 `(Revisi 01)`**: Verifikasi Fase 2: unit test variasi **4 / 6 / 8 klip**, resep **8 bahan** (maks 4 chip + `"+4 bahan lain"`), resep kosong, grep `templates/finishing/` bersih dari string terlarang **`R6.6`**, test propagasi preset `override -> preset -> default`, build Next.js, deploy Staging, smoke test **`opc_2117`**, **`mul_261113_qt67yl`**, dan **minimal 1 video ke-3 dari akun/produk berbeda** (mis. `sasyahouse` / `nutribake` / `solusi thermal id`). Catat durasi capture + composite → Rilis **Fase 2**.
 
-### Tracker Fase 2b — Batch Re-Finishing Video Lama yang Belum Dipublish `(Revisi 01)` (Target Rilis #4, Terpisah Setelah Fase 2)
-- [ ] **F2b-T1**: Tambah kolom tracking di `content_flow_items` ([`lib/db-pg.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/db-pg.js)): `finishing_version INTEGER DEFAULT 0`, `finishing_applied_at TIMESTAMP WITH TIME ZONE`, `finishing_source TEXT`, `finishing_status TEXT` (`idle` | `processing` | `completed` | `failed`), serta migration `publishing_jobs` check compatibility.
-- [ ] **F2b-T2**: Perbarui [`lib/nextcloud-helper.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/nextcloud-helper.js) untuk menambah `downloadFileFromNextcloud()`, `copyFileInNextcloud()` (untuk backup `*_final_v0.mp4`), `listNextcloudFolder()`, dan resolver path WebDAV folder per tipe (`opc`, `re`, `multiplier`).
-- [ ] **F2b-T3**: Perbarui [`lib/auto-pipeline-scheduler-runner.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/auto-pipeline-scheduler-runner.js#L404-L411) untuk mengecualikan item dengan `finishing_status = 'processing'` saat memilih kandidat Repliz auto-publish (cegah race condition).
-- [ ] **F2b-T4**: Buat modul [`lib/contentflow-refinish-service.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/contentflow-refinish-service.js) (`refinishContentFlowItems({ dryRun = true, limit = 10, filter, finishingTemplate, captionMode, force })`):
-  - Enforced filter kelayakan **`R7.1`** (`pipeline_status = 'Completed'`, semua 6 status platform `'Not Published'`, `NOT EXISTS` di `publishing_jobs` untuk status APA PUN, seluruh `*_publish_date` kosong, `finishing_version` NULL/0 kecuali `force`, kecualikan `source_type = 'recipe'` non-video, verifikasi ketersediaan klip mentah + VO lokal atau Nextcloud bundle).
-  - Alur **`R7.2`**: set `finishing_status = 'processing'` → siapkan klip + VO → backup lokal & Nextcloud `*_final_v0.mp4` sebelum menimpa → jalankan finishing pass → overwrite lokal + Nextcloud `*_final.mp4` → update `finishing_version`, `finishing_applied_at`, `finishing_source`, `finishing_status = 'completed'`. Jika gagal, kembalikan status & file lama tetap utuh; **auto-stop bila 3 item gagal beruntun**.
-- [ ] **F2b-T5**: Ekspos MCP tool read/write **`cf_refinish_content_flow`** di [`apps/mcp/tools.mjs`](file:///Users/sabeqmmursyid/_cfstudio/apps/mcp/tools.mjs) (default `dry_run: true`, `limit: 10`) dan endpoint internal pendukungnya.
-- [ ] **F2b-T6**: Verifikasi Fase 2b: unit test eligibility guard (`publishing_jobs` berstatus `cancelled`/`failed`/`queued`/`scheduled` tetap ditolak!), circuit breaker 3 gagal beruntun, idempotency, smoke test `dryRun=true` lalu `dryRun=false` (limit 1–2 item uji Staging lengkap dengan verifikasi backup `*_final_v0.mp4` di Nextcloud) → Rilis **Fase 2b**.
+### Tracker Fase 2b — Batch Re-Finishing Video Lama `(Revisi 02)`
+Fase 2b dibatalkan (Revisi 02, R9). Seluruh task `F2b-T1`–`F2b-T6`, [`lib/contentflow-refinish-service.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/contentflow-refinish-service.js), tool MCP `cf_refinish_content_flow`, kolom `content_flow_items.finishing_*`, helper download/copy Nextcloud batch, dan filter `finishing_status` di scheduler tidak dikerjakan (`R7` & `R8.6` gugur).
 
-### Tracker Fase 3 — Finalisasi Template per Niche + Preview UI + Pengukuran Performa `(Revisi 01)` (Target Rilis #5)
-- [ ] **F3-T1 `(Revisi 01)`**: Finalisasi variasi template HTML per niche (`templates/finishing/calm-wellness.html`, `recipe-pop.html`, + ekstensi preset/tipografi/animasi terparameter yang tetap mematuhi `R6.2`–`R6.4`). **Tidak membangun jalur Remotion `FinishingPass.jsx` kecuali laporan benchmark membuktikan kebutuhan.**
-- [ ] **F3-T2 `(Revisi 01)`**: Buat komponen **UI Live Preview** di halaman Campaign Detail ([`app/pillar-campaigns/[id]/page.js`](file:///Users/sabeqmmursyid/_cfstudio/app/pillar-campaigns/[id]/page.js)) / Preset ([`app/settings/presets/page.js`](file:///Users/sabeqmmursyid/_cfstudio/app/settings/presets/page.js)) yang memuat **template HTML yang sama persis** (via iframe terisolasi memanggil `loadTimeline()` + scrubber `renderAt(t)`), lengkap dengan override form `finishing_template`, `caption_mode`, `loudness_target` pada detail campaign (dibuatkan mockup HTML Staging & pakai token `app/theme.css` terlebih dahulu).
-- [ ] **F3-T3 `(Revisi 01)`**: Audit performa menyeluruh pada Staging Mac Mini (ukur durasi capture Playwright + composite FFmpeg untuk sampel 4, 6, dan 8 klip / ~24s, ~36s, ~48s).
+### Tracker Fase 2c-0 — Pengaman Urutan & Pasangan Klip (`R10`) + Registry Template Terpusat (`R11`) `(Revisi 02)` (Target Rilis #4 — Wajib Sebelum Template Baru)
+- [x] **F2c0-T1 (`R10`)**: Tambahkan sort numerik defensif di seluruh pembacaan klip audio ([`lib/db.js:2029,2048`](file:///Users/sabeqmmursyid/_cfstudio/lib/db.js#L2029), [`lib/scheduler-processors.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/scheduler-processors.js), [`lib/drive-sync-helper.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/drive-sync-helper.js), [`lib/nextcloud-sync-helper.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/nextcloud-sync-helper.js)) dan helper ekstraksi nomor klip aman dari nama file (`parseClipNumberFromPath` dengan regex mengecualikan ekstensi seperti `/(\d+)\.(?:mp3|mp4|wav|mov)$/i`).
+- [x] **F2c0-T2 (`R10`)**: Tambahkan pre-check & safety guard pasangan klip di [`processTtsStudioMuxing()`](file:///Users/sabeqmmursyid/_cfstudio/lib/video-studio-processor.js#L860-L920):
+  - Pastikan jumlah video == jumlah klip TTS == jumlah naskah VO.
+  - Jika path video/audio mencantumkan nomor klip (`clip_01`, `scene_c01`, `vo_c01`, dll.), cocokkan pasangan indeks klip sebelum muxing.
+  - Verifikasi durasi audio terukur (`getMediaDuration`) terhadap metadata durasi TTS dalam toleransi `±0.3s` bila tersedia.
+  - **Aturan Fail-Safe (`R10`)**: bila ditemukan ketidakcocokan apa pun, **batalkan tahap finishing pass (lanjut render base video tanpa finishing + catat log warning detail pasangan mana yang tidak cocok)** — jangan pernah membiarkan video ter-render dengan subtitle salah klip dan jangan gagal total.
+- [x] **F2c0-T3 (`R11`)**: Buat satu registry terpusat [`lib/finishing-template-registry.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/finishing-template-registry.js) sebagai single source of truth (`id`, `file`, `label`, `description`, `layers`, `finishingPlanFields`, `suggestFor`, `compliance`), lalu ubah seluruh konsumen agar membaca langsung dari registry tanpa daftar hardcoded:
+  - [`lib/finishing-overlay-renderer.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/finishing-overlay-renderer.js) (`resolveFinishingTemplatePath`)
+  - [`lib/video-studio-processor.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/video-studio-processor.js#L988) (`isRichTemplate` / layer routing)
+  - [`lib/finishing-data-extractor.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/finishing-data-extractor.js#L386-L406) (`suggestFinishingTemplate` diperbaiki: kembalikan `null` jika tidak ada template yang cocok, tidak lagi fallback paksa ke `'calm_wellness'`)
+  - [`app/settings/presets/page.js`](file:///Users/sabeqmmursyid/_cfstudio/app/settings/presets/page.js#L1559) (opsi `<select>` & hint dinamis dari registry)
+  - [`apps/mcp/tools.mjs`](file:///Users/sabeqmmursyid/_cfstudio/apps/mcp/tools.mjs#L519) (`z.enum(TEMPLATE_IDS)` dinamis)
+- [x] **F2c0-T4 (`R10`, `R11`)**: Unit test lengkap untuk 10+ klip (`*_audio_clip_01.mp3`, `*_audio_clip_11.mp3`, `*_audio_clip_21.mp3`, `*_video_clip_1.mp4`..`10.mp4`, `*_scene_c01.mp4`, `*_vo_c01.mp3`), mismatch trigger skip finishing (render sukses tanpa finishing), test menambah 1 entri dummy ke [`lib/finishing-template-registry.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/finishing-template-registry.js) otomatis muncul di UI presets & MCP schema tanpa menyentuh file lain, `npm run build` → Rilis **Fase 2c-0** (`1` rilis).
+
+### Tracker Fase 2c-1 — Shared Brand Layers (`R12.1`), Speech-Interval Timing (`R12.3`), & Brand Patch (`R12.4`) `(Revisi 02)` (Target Rilis #5)
+- [ ] **F2c1-T1 (`R12.1`)**: Tambah kolom/field Brand Profile di `brand_profiles` ([`lib/db-pg.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/db-pg.js), [`lib/db.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/db.js), API & UI Brand Settings jika diperlukan): `logo_url` (logo transparan), `brand_color` (aksen merek), `brand_tagline`, `default_cta_tiktok`, `default_cta_facebook`, `default_cta_youtube`, `safety_notice_text` (disclaimer), `presenter_name`, `presenter_role`, `brand_location` (opsional), + teruskan ke `timeline.brand` dari `resolvePreRenderFinishingMeta`.
+- [ ] **F2c1-T2 (`R12.1`, `R12.4`)**: Buat modul shared HTML/CSS/JS [`templates/finishing/shared-layers.js`](file:///Users/sabeqmmursyid/_cfstudio/templates/finishing/shared-layers.js) & token CSS bersama untuk `x-wm` (watermark pojok), `x-end` (brand end card 1.5–2s), `x-lower` (lower-third nama/peran tim/presenter), `x-patch` (patch penutup teks AI rusak seperti `opc_2107` klip 4 via parameter eksplisit operator/`finishing_plan` per klip & area, bukan OCR otomatis), serta tabel label terlokalisasi (`target_language`: `'id'` / `'en'`, misal `BEFORE`/`AFTER` atau `MYTH`/`FACT` vs `SEBELUM`/`SESUDAH` atau `MITOS`/`FAKTA` mengikuti [`USULAN_TEMPLATE_FINISHING_TAMBAHAN.md`](file:///Users/sabeqmmursyid/_cfstudio/USULAN_TEMPLATE_FINISHING_TAMBAHAN.md) & [`mockup_finishing_templates_v3.html`](file:///Users/sabeqmmursyid/_cfstudio/mockup_finishing_templates_v3.html)). Catatan audit `R6.6`: nol hardcoded string merek/produk di `templates/finishing/`.
+- [ ] **F2c1-T3 (`R12.3`)**: Perbarui fallback Tier 3 pada [`lib/word-alignment-engine.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/word-alignment-engine.js) agar menyelaraskan algoritma `derive()` dari [`mockup_finishing_templates_v3.html`](file:///Users/sabeqmmursyid/_cfstudio/mockup_finishing_templates_v3.html): distribusi bobot kata hanya di atas interval bicara aktif `sp` (`silencedetect`, skip segmen hening), serta snap batas kalimat/klausa (`,`, `.`, `?`, `!`, `:`) ke jeda hening terdekat bila jaraknya `< 0.9s`. Pertahankan Tier 1 & Tier 2 tetap prioritas pertama.
+- [ ] **F2c1-T4**: Verifikasi Fase 2c-1: unit test shared layers (`x-wm`, `x-end`, `x-lower`, `x-patch`, label `id`/`en`), unit test Tier 3 speech-interval + `< 0.9s` punctuation snap, uji regresi memastikan output `calm_wellness` & `recipe_pop` tetap identik saat tidak memakai shared extensions, `npm run build` → Rilis **Fase 2c-1** (`1` rilis).
+
+### Tracker Fase 2c-2 — Template #1 `tips_listicle` (Sasyahouse) `(Revisi 02)` (Target Rilis #6)
+- [ ] **F2c2-T1 (`R12.1`, `R12.2`)**: Tambah [`templates/finishing/tips-listicle.html`](file:///Users/sabeqmmursyid/_cfstudio/templates/finishing/tips-listicle.html) (`x-tip` slide-in kiri bawah bebas safe zone, `x-recap` daftar poin di akhir video, `x-loc` label lokasi opsional, `x-end`, punch aksen maksimal 10% kata).
+- [ ] **F2c2-T2 (`R12.2`)**: Tambah dukungan `finishing_plan.tips` & `finishing_plan.punch_display` di [`lib/prompts.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/prompts.js) (**khusus preset yang memakai template `tips_listicle`**) + validator `tips` (≤6 kata per tip) & `R6.6` guard di [`lib/finishing-plan-validator.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/finishing-plan-validator.js) + daftarkan di [`lib/finishing-template-registry.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/finishing-template-registry.js).
+- [ ] **F2c2-T3 (`R12.5`)**: Verifikasi Fase 2c-2: unit test validator (`tips` valid + `tips` invalid diskip aman), regresi `calm_wellness`/`recipe_pop`, `R6.6` grep bersih, deploy Staging, render video Sasyahouse nyata, contact sheet `0.5s` vs tab `Tips` mockup v3, dan cek sinkronisasi audio manual ≥5 titik (`±0.2s`) → Rilis **Fase 2c-2** (`1` rilis).
+
+### Tracker Fase 2c-3 — Template #2 `ramuan_ritual` (Siasat Sehat, Nutriblend, Dapur Botani Herbal) `(Revisi 02)` (Target Rilis #7)
+- [ ] **F2c3-T1 (`R12.1`, `R12.2`)**: Tambah [`templates/finishing/ramuan-ritual.html`](file:///Users/sabeqmmursyid/_cfstudio/templates/finishing/ramuan-ritual.html) (`x-time` timing badges mis. `SEBELUM TIDUR`/`PAGI PERUT KOSONG`/`DIAMKAN ...`, chip bahan + takaran faktual dari `new_caption`/VO, `ProductCard` opsional non-klaim, disclaimer wajib `x-notice`, dan `x-end`).
+- [ ] **F2c3-T2 (`R12.2`, `R12.1`)**: Tambah dukungan `finishing_plan.timing_badges` (**khusus preset `ramuan_ritual`**) di [`lib/prompts.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/prompts.js) & [`lib/finishing-plan-validator.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/finishing-plan-validator.js); aktifkan **strictest claim block pada hook & punch template ini terlepas dari `category` produk** (blokir: `lemak`, `metabolisme`, `detoks`, `ginjal`, `gula darah`, `kolesterol`, `visceral`, dll. via `isHerbalMedicalClaimPhrase`), lalu daftarkan di registry.
+- [ ] **F2c3-T3 (`R12.5`)**: Verifikasi Fase 2c-3: unit test strict claim block pada `ramuan_ritual` meskipun `isHerbalProduct=false` + test `timing_badges` invalid diskip, `R6.6` grep bersih, regresi `calm_wellness`/`recipe_pop`, deploy Staging & render video akun herbal nyata + contact sheet `0.5s` + cek sinkronisasi ≥5 titik (`±0.2s`) → Rilis **Fase 2c-3** (`1` rilis).
+
+### Tracker Fase 2c-4 — Template #3 `problem_solution` (Ruang Akustik ID) `(Revisi 02)` (Target Rilis #8)
+- [ ] **F2c4-T1 (`R12.1`, `R12.2`)**: Tambah [`templates/finishing/problem-solution.html`](file:///Users/sabeqmmursyid/_cfstudio/templates/finishing/problem-solution.html) (`x-chapter` pill fase `MASALAH`/`PENYEBAB`/`SOLUSI`/`HASIL` + `x-chapter-track`, `x-callout` label titik masalah dengan leader line, `x-lower` presenter, CTA konsultasi dari brand profile, `x-end`).
+- [ ] **F2c4-T2 (`R12.2`)**: Tambah `finishing_plan.chapters` & `finishing_plan.callouts` (**khusus preset `problem_solution`**) di [`lib/prompts.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/prompts.js) & validator skip-layer di [`lib/finishing-plan-validator.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/finishing-plan-validator.js) + daftarkan di registry.
+- [ ] **F2c4-T3 (`R12.5`)**: Verifikasi Fase 2c-4: unit test `chapters`/`callouts` + regresi `calm_wellness`/`recipe_pop` + `R6.6` grep bersih, deploy Staging, render video Ruang Akustik ID nyata + contact sheet `0.5s` vs tab `Problem -> Solusi` mockup v3 + cek sinkronisasi ≥5 titik (`±0.2s`) → Rilis **Fase 2c-4** (`1` rilis).
+
+### Tracker Fase 2c-5 — Template #4 `angka_banding` (Solusi Thermal ID) `(Revisi 02)` (Target Rilis #9)
+- [ ] **F2c5-T1 (`R12.1`, `R12.2`)**: Tambah [`templates/finishing/angka-banding.html`](file:///Users/sabeqmmursyid/_cfstudio/templates/finishing/angka-banding.html) (counter/meter angka hanya jika angka nyata terdeteksi di VO atau data produk — dilarang mengarang metrik/dB/persen/°C; `x-compare` split card kiri vs kanan, `x-chips` + foot label, CTA daftar harga, `x-patch` eksplisit, `x-end`).
+- [ ] **F2c5-T2 (`R12.2`)**: Tambah `finishing_plan.compare` & `finishing_plan.numbers` (**khusus preset `angka_banding`**) dengan guard ketat anti-angka palsu (verifikasi angka benar-benar ada di VO bersih atau data produk) di [`lib/finishing-plan-validator.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/finishing-plan-validator.js) + `lib/prompts.js` + daftarkan di registry.
+- [ ] **F2c5-T3 (`R12.5`)**: Verifikasi Fase 2c-5: unit test penolakan angka/klaim fiktif (`numbers` tanpa dasar di VO/produk ditolak & diskip) + regresi `calm_wellness`/`recipe_pop` + `R6.6` grep bersih, deploy Staging, render video Solusi Thermal ID nyata + contact sheet `0.5s` vs tab `Angka & Banding` mockup v3 + cek sinkronisasi ≥5 titik (`±0.2s`) → Rilis **Fase 2c-5** (`1` rilis).
+
+### Tracker Fase 2c-6 — Template #5 `mitos_fakta` (Siasat Sehat, Dapur Botani, Ruang Akustik ID) `(Revisi 02)` (Target Rilis #10)
+- [ ] **F2c6-T1 (`R12.1`, `R12.2`)**: Tambah [`templates/finishing/mitos-fakta.html`](file:///Users/sabeqmmursyid/_cfstudio/templates/finishing/mitos-fakta.html) (hook pertanyaan `hook.question`, stempel `x-stamp` `MITOS ❌` / `FAKTA ✅` atau i18n sesuai `target_language`, bar alasan `KENAPA?`, CTA + `x-end`).
+- [ ] **F2c6-T2 (`R12.2`)**: Tambah `finishing_plan.myth_fact` (**khusus preset `mitos_fakta`**) di [`lib/prompts.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/prompts.js) & validator [`lib/finishing-plan-validator.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/finishing-plan-validator.js) (**klaim kesehatan di `FAKTA` wajib lulus `isHerbalMedicalClaimPhrase`** — tidak boleh lolos sebagai penjelasan alasan) + daftarkan di registry.
+- [ ] **F2c6-T3 (`R12.5`)**: Verifikasi Fase 2c-6: unit test `myth_fact` & compliance claim block pada `FAKTA` + regresi `calm_wellness`/`recipe_pop` + `R6.6` grep bersih, deploy Staging, render video akun nyata + contact sheet `0.5s` vs tab `Mitos vs Fakta` mockup v3 + cek sinkronisasi ≥5 titik (`±0.2s`) → Rilis **Fase 2c-6** (`1` rilis).
+
+### Tracker Fase 3 — Preview UI Seluruh 7 Template + Pengukuran Performa + Finalisasi `(Revisi 02)` (Target Rilis #11, Setelah Fase 2c)
+- [ ] **F3-T1 `(Revisi 02)`**: Finalisasi ke-7 template HTML terdaftar di [`lib/finishing-template-registry.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/finishing-template-registry.js) (`calm_wellness`, `recipe_pop`, `tips_listicle`, `ramuan_ritual`, `problem_solution`, `angka_banding`, `mitos_fakta`) dengan audit konsistensi token visual, bahasa (`id`/`en`), dan TikTok/Reels safe zones (`R6.2`–`R6.4`). **Tidak membangun jalur Remotion `FinishingPass.jsx` kecuali laporan benchmark membuktikan kebutuhan.**
+- [ ] **F3-T2 `(Revisi 02)`**: Buat komponen **UI Live Preview** di halaman Campaign Detail ([`app/pillar-campaigns/[id]/page.js`](file:///Users/sabeqmmursyid/_cfstudio/app/pillar-campaigns/[id]/page.js)) / Preset ([`app/settings/presets/page.js`](file:///Users/sabeqmmursyid/_cfstudio/app/settings/presets/page.js)) yang membaca daftar dari registry untuk memuat **seluruh 7 template HTML** secara langsung (via iframe terisolasi memanggil `loadTimeline()` + scrubber `renderAt(t)`), lengkap dengan override form `finishing_template`, `caption_mode`, `loudness_target` pada detail campaign (dibuatkan mockup HTML Staging & pakai token `app/theme.css` terlebih dahulu).
+- [ ] **F3-T3 `(Revisi 02)`**: Audit performa menyeluruh pada Staging Mac Mini mencakup **ketujuh template** (terutama template terberat: **`tips_listicle` dengan recap** dan **`problem_solution` dengan callout** pada sampel 4, 6, dan 8 klip / ~24s, ~36s, ~48s).
   - **Aturan Keputusan (`R3.3`)**: Jika rata-rata render finishing > **3× durasi video**, laporkan hasil benchmark & usulan Remotion/optimasi ke user terlebih dahulu sebelum menulis kode Remotion apa pun.
-- [ ] **F3-T4**: Verifikasi Fase 3 (`npm run build`, smoke test UI preview + override + contact sheet multi-akun + benchmark performa + audit LUFS `-14 ± 1`) → Rilis **Fase 3**.
+- [ ] **F3-T4 `(Revisi 02)`**: Verifikasi Fase 3 (`npm run build`, smoke test UI preview seluruh 7 template + override + benchmark durasi render multi-template + audit LUFS `-14 ± 1`) → Rilis **Fase 3**.
 
 ---
 
@@ -336,42 +398,127 @@ export async function generateMotionTextFrames(options) {
 
 ---
 
-### FASE 2b — Code Sebelum & Code Sesudah `(Revisi 01)` — Batch Re-Finishing R7
+### FASE 2b — DIBATALKAN `(Revisi 02, R9)`
 
-1. **[`lib/db-pg.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/db-pg.js)**: tambah `finishing_version`, `finishing_applied_at`, `finishing_source`, `finishing_status` di `content_flow_items`.
-2. **[`lib/nextcloud-helper.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/nextcloud-helper.js)**: tambah `downloadFileFromNextcloud()`, `copyFileInNextcloud()`, `listNextcloudFolder()` memakai WebDAV `client` yang sudah ada.
-3. **[`lib/auto-pipeline-scheduler-runner.js:404-411`](file:///Users/sabeqmmursyid/_cfstudio/lib/auto-pipeline-scheduler-runner.js#L404-L411)**: tambah filter `AND COALESCE(finishing_status, 'idle') != 'processing'`.
-4. **[`lib/contentflow-refinish-service.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/contentflow-refinish-service.js)** (baru) + MCP **`cf_refinish_content_flow`** di [`apps/mcp/tools.mjs`](file:///Users/sabeqmmursyid/_cfstudio/apps/mcp/tools.mjs):
-   - Default `dryRun = true`, `limit = 10`, circuit breaker stop jika 3 gagal beruntun.
-   - Wajib cek kelayakan `R7.1`: `pipeline_status = 'Completed'`, 6 platform `'Not Published'`, zero rows di `publishing_jobs` status APA PUN, seluruh `*_publish_date` kosong, kecualikan `source_type = 'recipe'`, verifikasi bundle klip mentah + VO lokal atau Nextcloud.
-   - Backup `*_final_v0.mp4` sebelum menimpa `*_final.mp4` di Nextcloud & lokal.
+> **Fase 2b dibatalkan (Revisi 02, R9).** `R7` dan `R8.6` sudah tidak berlaku; tidak ada migrasi `content_flow_items.finishing_*`, tidak ada `lib/contentflow-refinish-service.js`, dan tidak ada `cf_refinish_content_flow`.
 
 ---
 
-### FASE 3 — Code Sebelum & Code Sesudah `(Revisi 01)` — Finalisasi Template, Live Preview UI, & Benchmark
+### FASE 2c-0 — Code Sebelum & Code Sesudah `(Revisi 02)` — Pengaman Urutan Klip (`R10`) + Registry Template Terpusat (`R11`)
 
-1. **Template HTML Niche & Preview UI (`app/pillar-campaigns/[id]/page.js`, `app/settings/presets/page.js`)**:
-   - Tambahkan kontrol override per campaign (`finishing_template`, `caption_mode`, `loudness_target`) + komponen Preview interaktif berbasis iframe template HTML yang sama persis (`window.loadTimeline` + slider `window.renderAt(t)`). Buat mockup HTML Staging terlebih dahulu sebelum ubah `.js`/`.jsx`.
-2. **Audit Performa (`R3.3`)**:
-   - Catat durasi total render Playwright + 3x zoompan + ffmpeg composite pada video uji 4, 6, dan 8 klip. Jika rasio rata-rata > **3× durasi video**, hentikan dan laporkan data benchmark beserta opsi Remotion ke pengguna. **Tidak membuat** `FinishingPass.jsx` / `renderFinishingPassVideo()` pada tahap ini.
+#### 1. Pengaman Urutan & Pasangan Klip di [`lib/video-studio-processor.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/video-studio-processor.js) & Kueri Klip
+**Code Sebelum (`lib/video-studio-processor.js:879-890`):**
+```js
+  const completedClips = batchData.clips.filter(c => c.status === 'completed');
+  if (completedClips.length === 0) {
+    throw new Error(`Batch TTS Studio '${batchId}' tidak memiliki klip berstatus 'completed'.`);
+  }
+
+  if (videoPaths.length !== completedClips.length) {
+    throw new Error(`Jumlah video (${videoPaths.length}) tidak sama dengan audio TTS (${completedClips.length}) untuk batch '${batchId}'.`);
+  }
+  const pairCount = videoPaths.length;
+```
+**Code Sesudah (`(Revisi 02, R10)`):**
+- Sort numerik eksplisit di JS & kueri DB (`completedClips.sort((a, b) => Number(a.clip_index) - Number(b.clip_index))`, ditambah `ORDER BY clip_index ASC` di [`lib/scheduler-processors.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/scheduler-processors.js), [`lib/drive-sync-helper.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/drive-sync-helper.js), [`lib/nextcloud-sync-helper.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/nextcloud-sync-helper.js)).
+- Tambah helper `parseClipNumberFromPath(filePath)` memakai regex mengecualikan ekstensi (mis. `/(\d+)\.(?:mp3|mp4|wav|mov)$/i`, serta pola `_clip_(\d+)`, `_c(\d+)`) agar `clip_01.mp4` vs `clip_11.mp3` vs `clip_21.mp3` tidak tertukar dengan angka ekstensi `.mp3`/`.mp4`.
+- Jalankan `verifyClipPairIntegrity({ videoPaths, completedClips, resolveLocalPath, getMediaDuration })` **sebelum muxing & finishing**:
+  1. Cek jumlah `videoPaths.length === completedClips.length` dan tiap klip memiliki teks VO (`source_text` non-kosong bila finishing aktif).
+  2. Bila pasangan path video & audio sama-sama mengandung nomor klip, pastikan nomor/urutannya selaras per indeks pasangan.
+  3. Bila metadata durasi audio TTS tersedia pada record klip, verifikasi terhadap `getMediaDuration(audioPath)` dalam batas **`±0.3s`**.
+  4. Bila terjadi ketidakcocokan, **batalkan overlay finishing (`finishingGuardReason = ...`) + cetak `console.warn` detail pasangan bermasalah**, lalu render video bersih **tanpa overlay finishing** (tidak menggagalkan job secara total).
+
+#### 2. Registry Template Terpusat [`lib/finishing-template-registry.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/finishing-template-registry.js) (`R11`)
+**Code Sebelum (`v2.44.6`, tersebar di 4+ file):**
+- [`lib/finishing-overlay-renderer.js:8-20`](file:///Users/sabeqmmursyid/_cfstudio/lib/finishing-overlay-renderer.js#L8-L20): `resolveFinishingTemplatePath()` mengecek `'calm_wellness'` dan `'recipe_pop'` dengan `if`.
+- [`lib/video-studio-processor.js:988`](file:///Users/sabeqmmursyid/_cfstudio/lib/video-studio-processor.js#L988): `const isRichTemplate = resolvedTemplate === 'calm_wellness' || resolvedTemplate === 'recipe_pop';`
+- [`lib/finishing-data-extractor.js:386-406`](file:///Users/sabeqmmursyid/_cfstudio/lib/finishing-data-extractor.js#L386-L406): `suggestFinishingTemplate()` mengembalikan `'calm_wellness'` secara paksa di baris 405 saat kategori tidak dikenali.
+- [`app/settings/presets/page.js:1559-1561`](file:///Users/sabeqmmursyid/_cfstudio/app/settings/presets/page.js#L1559-L1561) & [`apps/mcp/tools.mjs:519,591,616,674,807`](file:///Users/sabeqmmursyid/_cfstudio/apps/mcp/tools.mjs#L519): `<option>` dan `z.enum(['none', 'calm_wellness', 'recipe_pop'])` hardcoded.
+
+**Code Sesudah (`(Revisi 02, R11)`):**
+```js
+// lib/finishing-template-registry.js (single source of truth)
+export const FINISHING_TEMPLATE_REGISTRY = [
+  {
+    id: 'none',
+    file: 'base-caption.html',
+    label: 'None — Legacy / Caption Dasar',
+    description: 'Subtitle & Hook Card dasar tanpa overlay template khusus.',
+    layers: { recipe: false, product: false, cameraMotion: false, sharedBrand: false },
+    finishingPlanFields: ['hook', 'punches'],
+    suggestFor: [],
+    compliance: { strictHerbalBlock: false }
+  },
+  {
+    id: 'calm_wellness',
+    file: 'calm-wellness.html',
+    label: 'Calm Wellness — Editorial Serif & Product Card',
+    // ...
+  },
+  {
+    id: 'recipe_pop',
+    file: 'recipe-pop.html',
+    label: 'Recipe Pop — Chips Bahan + Step Cards + Tick SFX',
+    // ...
+  }
+];
+export const FINISHING_TEMPLATE_IDS = FINISHING_TEMPLATE_REGISTRY.map(t => t.id);
+export function getFinishingTemplateMeta(id) { ... }
+export function suggestFinishingTemplate(record = {}) {
+  // Jika cocok pattern niche -> return template.id; jika tidak ada yang cocok -> return null!
+}
+```
+- Seluruh 5 file konsumen di atas membaca langsung dari [`lib/finishing-template-registry.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/finishing-template-registry.js) tanpa daftar template hardcoded tambahan.
 
 ---
 
-## Kriteria Verifikasi Minimum per Rilis — `(Revisi 01)`
+### FASE 2c-1 s/d 2c-6 — Code Sebelum & Code Sesudah `(Revisi 02)` — Shared Layer & 5 Template Baru (`R12`)
 
-| Verifikasi | Fase 0 | Fase 1 | Fase 2 | Fase 2b | Fase 3 |
-|---|---|---|---|---|---|
-| Render ulang `opc_2117` & `mul_261113_qt67yl` + contact sheet `0.5s` | Wajib | Wajib | Wajib | — | Wajib |
-| Video ke-3 akun/produk berbeda + variasi 4 / 6 / 8 klip | — | — | Wajib | — | Wajib |
-| Loudness output `-14 ± 1 LUFS` | Wajib | Wajib | Wajib | Wajib | Wajib |
-| Zero tag markup (`<#`, `#>`, `[...]`, `(breath)`) | Wajib | Wajib | Wajib | Wajib | Wajib |
-| Unit test `fitHookCard`: `opc_2117` → `null`, `mul_261113_qt67yl` max 2 baris/`null` | Wajib | Wajib | Wajib | — | — |
-| Tier-3 `silencedetect` + zero teks bertumpuk/ghosting | Wajib | Wajib | Wajib | — | Wajib |
-| Playwright HTML lifecycle (`browser.close()` di `finally`) + fallback ke Sharp/SVG | — | Wajib | Wajib | Wajib | Wajib |
-| Akurasi punch `±0.15s` dari VO (min. 5 punch) & unit test invalid `finishing_plan` | — | Wajib | Wajib | — | — |
-| Unit test campaign lama (`caption_mode` NULL → `'full'`) | Wajib | Wajib | Wajib | — | — |
-| Uji 8 bahan (maks 4 chip + `"+4 bahan lain"`), resep kosong, & grep `templates/finishing/` zero hardcoded string `R6.6` | — | — | Wajib | — | Wajib |
-| Propagasi preset (`override -> preset -> default`) 7 jalur `R8.3` | — | — | Wajib | — | Wajib |
-| Audit bundle Nextcloud, `dryRun=true`, backup `*_final_v0.mp4`, reject item yg ada di `publishing_jobs`, stop 3x fail | — | — | — | Wajib | — |
-| Preview UI memakai HTML template sama + benchmark durasi render (rasio ≤ 3× atau lapor user) | — | — | — | — | Wajib |
-| `npm run build` + smoke test Staging | Wajib | Wajib | Wajib | Wajib | Wajib |
+#### 1. Shared Brand Layers, Brand Profile Fields (`R12.1`), Tier-3 Speech-Interval Timing (`R12.3`), & Brand Patch (`R12.4`) — **Fase 2c-1**
+- **Migrasi Kolom `brand_profiles` ([`lib/db-pg.js:870-896`](file:///Users/sabeqmmursyid/_cfstudio/lib/db-pg.js#L870-L896))**:
+  - Tambah idempoten: `logo_url TEXT`, `brand_color TEXT`, `brand_tagline TEXT`, `default_cta_tiktok TEXT`, `default_cta_facebook TEXT`, `default_cta_youtube TEXT`, `safety_notice_text TEXT`, `presenter_name TEXT`, `presenter_role TEXT`, `brand_location TEXT`.
+  - Di [`lib/tiktok-compliance-service.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/tiktok-compliance-service.js) (`resolvePreRenderFinishingMeta`), isi `finishingMeta.brand` dari `brand_profiles` agar template menerima logo, warna, tagline, CTA platform, safety notice, presenter, dan lokasi secara generik.
+- **Shared HTML Layer (`templates/finishing/shared-layers.js`)**:
+  - Komponen CSS/DOM selaras [`mockup_finishing_templates_v3.html`](file:///Users/sabeqmmursyid/_cfstudio/mockup_finishing_templates_v3.html): `x-wm` (watermark pojok), `x-end` (end card merek 1.5–2s), `x-lower` (lower-third nama/peran tim/presenter), `x-patch` (patch penutup teks AI rusak per `clipIndex` & area eksplisit operator/`finishing_plan`), serta helper i18n label berdasarkan `target_language` (`'id'`/`'en'`, misal `BEFORE`/`AFTER`, `MYTH`/`FACT`, `WHY?`, `RECAP` untuk Bahasa Inggris vs Bahasa Indonesia).
+- **Tier-3 Speech-Interval + Punctuation Snap [`lib/word-alignment-engine.js:145-230`](file:///Users/sabeqmmursyid/_cfstudio/lib/word-alignment-engine.js#L145-L230) (`R12.3`)**:
+  - **Code Sebelum**: membagi kata per klausa bila jumlah klausa == jumlah speech island; jika tidak cocok, meratakan bobot kata di sepanjang speech island tanpa snap tanda baca eksplisit.
+  - **Code Sesudah**: mengadopsi algoritma `derive()` pada [`mockup_finishing_templates_v3.html`](file:///Users/sabeqmmursyid/_cfstudio/mockup_finishing_templates_v3.html): distribusi bobot hanya di dalam interval bicara `sp` (skip keheningan), dan untuk setiap batas tanda baca (`,`, `.`, `?`, `!`, `:`), lakukan snap ke batas akhir jeda `sp` terdekat apabila selisih waktunya `< 0.9s`.
+
+#### 2. Perluasan Opsional `finishing_plan` per Template (`R12.2`) & 5 Template Baru — **Fase 2c-2 s/d 2c-6**
+Setiap field tambahan pada `finishing_plan` **HANYA** diinjeksikan ke prompt [`lib/prompts.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/prompts.js) jika preset campaign memakai template terkait, dan seluruhnya melewati validator ketat di [`lib/finishing-plan-validator.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/finishing-plan-validator.js) (invalid → skip layer + warning):
+
+| Fase | Template ID (`file`) | Target Akun / Domain | Field Opsional `finishing_plan` (`R12.2`) | Guardrail Wajib (`R6.6`, `R12.1`) |
+|---|---|---|---|---|
+| **2c-2** | `tips_listicle` (`tips-listicle.html`) | Sasyahouse | `tips` (`<= 6` kata/tip, recap akhir), `punch_display`, opsional `brand_patch` | Bebas safe zone; total kata dengan punch maksimal `10%` |
+| **2c-3** | `ramuan_ritual` (`ramuan-ritual.html`) | Siasat Sehat, Nutriblend, Dapur Botani Herbal | `timing_badges` (`SEBELUM TIDUR`, `PAGI PERUT KOSONG`, `DIAMKAN ...`) | **Strictest claim block** pada hook & punch terlepas dari `category` produk (`lemak`, `metabolisme`, `detoks`, `ginjal`, `gula darah`, `kolesterol`, `visceral`, dll.) + `x-notice` wajib |
+| **2c-4** | `problem_solution` (`problem-solution.html`) | Ruang Akustik ID | `chapters` (`MASALAH`, `PENYEBAB`, `SOLUSI`, `HASIL`), `callouts` (`label`, titik fokus) | Track progres fase + callout leader line bebas safe zone + CTA konsultasi |
+| **2c-5** | `angka_banding` (`angka-banding.html`) | Solusi Thermal ID | `compare` (VS 2 sisi), `numbers` (counter/meter) | `numbers` **ditolak otomatis** bila angka tidak ditemukan di VO bersih atau data produk nyata (`anti fake metrics`) |
+| **2c-6** | `mitos_fakta` (`mitos-fakta.html`) | Siasat Sehat, Dapur Botani, Ruang Akustik ID | `myth_fact` (`question`, `myth`, `fact`, `why`) | Klaim kesehatan pada bagian `fact`/`why` **wajib lulus `isHerbalMedicalClaimPhrase`** |
+
+---
+
+### FASE 3 — Code Sebelum & Code Sesudah `(Revisi 02)` — Live Preview UI 7 Template & Benchmark
+
+1. **Preview UI Interaktif (`app/pillar-campaigns/[id]/page.js`, `app/settings/presets/page.js`) (`R13`)**:
+   - Tambahkan kontrol override per campaign (`finishing_template`, `caption_mode`, `loudness_target`) + komponen Preview interaktif berbasis iframe yang memuat daftar template langsung dari [`lib/finishing-template-registry.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/finishing-template-registry.js) untuk **seluruh 7 template** (`window.loadTimeline` + scrubber `window.renderAt(t)`). Buat mockup HTML Staging + token `app/theme.css` terlebih dahulu sebelum edit React.
+2. **Audit Performa Menyeluruh 7 Template (`R3.3`, `R13`)**:
+   - Catat durasi total render Playwright + 3x zoompan + ffmpeg composite pada video uji 4, 6, dan 8 klip untuk ketujuh template, termasuk template terberat (**`tips_listicle` dengan recap** dan **`problem_solution` dengan callout**). Jika rasio rata-rata > **3× durasi video**, hentikan dan laporkan data benchmark beserta opsi Remotion ke pengguna. **Tidak membuat** `FinishingPass.jsx` / `renderFinishingPassVideo()` pada tahap ini.
+
+---
+
+## Kriteria Verifikasi Minimum per Rilis — `(Revisi 02)`
+
+| Verifikasi | Fase 0 ✅ | Fase 1 ✅ | Fase 2 ✅ | Fase 2b | Fase 2c-0 | Fase 2c-1..6 (per template) | Fase 3 |
+|---|---|---|---|---|---|---|---|
+| Render ulang `opc_2117` & `mul_261113_qt67yl` + contact sheet `0.5s` | Wajib ✅ | Wajib ✅ | Wajib ✅ | Batal | — | Regresi `calm_wellness` & `recipe_pop` | Wajib |
+| Test 10+ klip numbering (`01/11/21`, `.mp3`/`.mp4` guard) & skip-finishing on mismatch | — | — | — | Batal | Wajib | — | — |
+| Test tambah dummy template ke registry -> muncul otomatis di UI & MCP | — | — | — | Batal | Wajib | — | — |
+| Video nyata dari akun target + contact sheet `0.5s` vs tab `mockup_finishing_templates_v3.html` | — | — | Wajib ✅ | Batal | — | Wajib (per template) | Wajib (7 template) |
+| Cek manual sinkronisasi audio min. `5` titik (`±0.2s` lip/voice vs overlay) | — | — | — | Batal | — | Wajib (per template) | Wajib |
+| Loudness output `-14 ± 1 LUFS` | Wajib ✅ | Wajib ✅ | Wajib ✅ | Batal | Wajib | Wajib | Wajib |
+| Zero tag markup (`<#`, `#>`, `[...]`, `(breath)`) | Wajib ✅ | Wajib ✅ | Wajib ✅ | Batal | Wajib | Wajib | Wajib |
+| Unit test compliance (`fitHookCard`, herbal claim block, `ramuan_ritual` strict, `angka_banding` anti-angka fiktif, `mitos_fakta`) + invalid skip-layer | Wajib ✅ | Wajib ✅ | Wajib ✅ | Batal | — | Wajib (per template) | — |
+| Grep `templates/finishing/` bersih string hardcoded merek/produk (`R6.6`) | — | — | Wajib ✅ | Batal | — | Wajib | Wajib |
+| Playwright HTML lifecycle (`browser.close()` di `finally`) + fallback Sharp/SVG | — | Wajib ✅ | Wajib ✅ | Batal | Wajib | Wajib | Wajib |
+| Preview UI memuat seluruh 7 template dari registry + benchmark terberat (`tips_listicle` recap, `problem_solution` callout) rasio ≤ `3×` | — | — | — | Batal | — | — | Wajib |
+| `npm run build` + smoke test Staging | Wajib ✅ | Wajib ✅ | Wajib ✅ | Batal | Wajib | Wajib | Wajib |

@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.44.7 — Finishing Pass Fase 2c-0: Pengaman Klip R10 & Registry Template R11 (13/11/2026)
+- Tambah clip-pair-guard (parseClipNumberFromPath bebas ekstensi, sort numerik clip_index, cek durasi +/-0.3s, fail-safe skip finishing tanpa gagal total)
+- Tambah finishing-template-registry terpusat untuk renderer, extractor (suggestFinishingTemplate null-default), processor, UI Presets, & MCP tools
+- Perbarui finishing_pass_implementation_plan.md sesuai Revisi 02 R9-R13 (pembatalan Fase 2b, urutan Fase 2c-0..2c-6 & Fase 3)
+
 ## V2.44.6 — Finishing Pass Fase 2: Data Extractor, 3x Camera Zoompan, Calm Wellness & Recipe Pop Templates, dan Preset Propagation (13/11/2026)
 - Tambah lib/finishing-data-extractor.js (resep max 4 chips + overflow, product card faktual, CTA & save prompt terparameter)
 - Tambah lib/camera-motion-engine.js (3x Lanczos zoompan, shake 0.35s, punch-in, flash putih, public/sfx/tick.wav)

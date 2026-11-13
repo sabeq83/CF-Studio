@@ -356,9 +356,10 @@ test('F2-T2 & F2-T3: Zero hardcoded strings (R6.6) in templates & E2E camera mot
 
 test('F2-T4: Operator presets default finishing_template=none, caption_mode=hybrid, loudness_target=-14 without forbidden style literals & propagate cleanly', async () => {
   const presets = listOperatorPresets();
-  assert.ok(presets.length >= 5);
+  const systemPresets = presets.filter(p => p.is_system);
+  assert.ok(systemPresets.length >= 5);
   const forbiddenWorkflowKeys = ['accentColor', 'accent_color', 'ctaText', 'cta_text', 'isHerbalProduct', 'is_herbal_product', 'brandText'];
-  for (const p of presets) {
+  for (const p of systemPresets) {
     const wf = p?.config?.workflow || {};
     assert.equal(wf.finishing_template, 'none', `Preset ${p.key} must default finishing_template='none'`);
     assert.equal(wf.caption_mode, 'hybrid', `Preset ${p.key} must default caption_mode='hybrid'`);
@@ -393,7 +394,9 @@ test('F2-T4: Operator presets default finishing_template=none, caption_mode=hybr
   assert.equal(preOverride.captionText, 'Deskripsi campaign');
 
   assert.equal(suggestFinishingTemplate({ finishing_template: 'none' }), 'none');
-  assert.equal(suggestFinishingTemplate({ preset_key: 'product_hard_sell', generate_recipe: 1 }), 'calm_wellness');
+  assert.equal(suggestFinishingTemplate({ preset_key: 'product_hard_sell', generate_recipe: 1 }), null);
+  assert.equal(suggestFinishingTemplate({ preset_key: 'unknown_preset', campaign_kind: 'unknown' }), null);
+  assert.equal(suggestFinishingTemplate({ campaign_kind: 'brand_editorial' }), 'calm_wellness');
   assert.equal(suggestFinishingTemplate({ campaign_kind: 'recipe_campaign' }), 'recipe_pop');
 
   // Verify 7 R8.3 pipeline paths contain parameter propagation

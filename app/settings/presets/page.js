@@ -8,6 +8,7 @@ import { normalizeBridgePayload } from '@/lib/bridging/bridge-plan';
 import { getWordsPerClipOptions, getDefaultWordsPerClip, VIDEO_MODELS } from '@/lib/words-per-clip-presets';
 import { GEMINI_VOICES, MINIMAX_VOICES, MINIMAX_ENGLISH_VOICES, ELEVENLABS_ID_VOICES, ELEVENLABS_EN_VOICES, ELEVENLABS_MODELS } from '@/lib/voice-constants';
 import { GOOGLE_VOICE_PERSONAS } from '@/lib/veo-native-audio';
+import { FINISHING_TEMPLATE_REGISTRY, getFinishingTemplateMeta } from '@/lib/finishing-template-registry';
 
 const initialForm = {
   key: '',
@@ -1556,9 +1557,11 @@ export default function PresetsPage() {
                         value={form.finishing_template || 'none'}
                         onChange={e => setForm({ ...form, finishing_template: e.target.value })}
                       >
-                        <option value="none">None — Legacy FFmpeg ASS Only</option>
-                        <option value="calm_wellness">Calm Wellness — Editorial Serif &amp; Product Card</option>
-                        <option value="recipe_pop">Recipe Pop — Chips Bahan + Step Cards + Tick SFX</option>
+                        {FINISHING_TEMPLATE_REGISTRY.map(tpl => (
+                          <option key={tpl.id} value={tpl.id}>
+                            {tpl.label}
+                          </option>
+                        ))}
                       </select>
                     </label>
                   </div>
@@ -1593,39 +1596,53 @@ export default function PresetsPage() {
                   </div>
                 </div>
 
-                {form.finishing_template === 'recipe_pop' && !(form.campaign_kinds || []).some(k => k === 'recipe_campaign' || k === 'multiplier_campaign') && (
-                  <div
-                    style={{
-                      marginTop: '10px',
-                      padding: '10px 12px',
-                      borderRadius: '8px',
-                      background: 'var(--status-warning-soft)',
-                      border: '1px solid var(--status-warning)',
-                      color: 'var(--text-primary)',
-                      fontSize: '12px',
-                      lineHeight: 1.45
-                    }}
-                  >
-                    ⚠️ <strong>Peringatan Kompatibilitas Campaign:</strong> Template <code>recipe_pop</code> paling cocok untuk <code>recipe_campaign</code> atau <code>multiplier_campaign</code> ber-resep. Pada campaign tanpa data resep, chip bahan &amp; langkah akan disembunyikan otomatis.
-                  </div>
-                )}
-
-                {form.finishing_template === 'calm_wellness' && (form.campaign_kinds || []).includes('recipe_campaign') && (
-                  <div
-                    style={{
-                      marginTop: '10px',
-                      padding: '10px 12px',
-                      borderRadius: '8px',
-                      background: 'var(--status-info-soft)',
-                      border: '1px solid var(--status-info)',
-                      color: 'var(--text-primary)',
-                      fontSize: '12px',
-                      lineHeight: 1.45
-                    }}
-                  >
-                    ℹ️ <strong>Info Template:</strong> Preset ini mencakup <code>recipe_campaign</code>. Jika ingin menampilkan chip bahan &amp; step cards resep, gunakan <code>recipe_pop</code>.
-                  </div>
-                )}
+                {(() => {
+                  const selectedTplMeta = getFinishingTemplateMeta(form.finishing_template || 'none');
+                  const kinds = form.campaign_kinds || [];
+                  const compatKinds = selectedTplMeta?.compatibilityCampaignKinds || [];
+                  if (selectedTplMeta?.id === 'none' || compatKinds.length === 0) return null;
+                  const matches = kinds.some(k => compatKinds.includes(k));
+                  if (!matches) {
+                    return (
+                      <div
+                        style={{
+                          marginTop: '10px',
+                          padding: '10px 12px',
+                          borderRadius: '8px',
+                          background: 'var(--status-warning-soft)',
+                          border: '1px solid var(--status-warning)',
+                          color: 'var(--text-primary)',
+                          fontSize: '12px',
+                          lineHeight: 1.45
+                        }}
+                      >
+                        ⚠️ <strong>Peringatan Kompatibilitas Campaign:</strong> Template <code>{selectedTplMeta.id}</code> paling cocok untuk <code>{compatKinds.join(', ')}</code>. Elemen yang tidak tersedia pada data campaign akan disembunyikan otomatis.
+                      </div>
+                    );
+                  }
+                  const betterRecipes = FINISHING_TEMPLATE_REGISTRY.find(
+                    t => t.id !== selectedTplMeta.id && t.layers?.recipe && kinds.some(k => (t.compatibilityCampaignKinds || []).includes(k))
+                  );
+                  if (betterRecipes && !selectedTplMeta.layers?.recipe && kinds.includes('recipe_campaign')) {
+                    return (
+                      <div
+                        style={{
+                          marginTop: '10px',
+                          padding: '10px 12px',
+                          borderRadius: '8px',
+                          background: 'var(--status-info-soft)',
+                          border: '1px solid var(--status-info)',
+                          color: 'var(--text-primary)',
+                          fontSize: '12px',
+                          lineHeight: 1.45
+                        }}
+                      >
+                        ℹ️ <strong>Info Template:</strong> Preset ini mencakup <code>recipe_campaign</code>. Untuk menampilkan layer bahan &amp; langkah resep, Anda juga dapat memakai <code>{betterRecipes.id}</code>.
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
               </div>
 
             </div>
