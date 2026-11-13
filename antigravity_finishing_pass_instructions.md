@@ -4,6 +4,8 @@
 
 > **Revisi 02 berlaku (setelah v2.44.6):** baca `antigravity_finishing_pass_revisi_02.md`. Fase 2b dibatalkan, ditambah pengaman urutan klip, registry template, dan Fase 2c (lima template baru).
 
+> **Revisi 03 berlaku (setelah v2.44.19):** baca `antigravity_finishing_pass_revisi_03.md`. Fase 4: caption maks 3 kata dengan font besar, layer subtitle disatukan di `shared-layers.js`, dan perbaikan default `caption_mode` di override campaign.
+
 ## Mandat
 
 Implementasikan usulan di `USULAN_FINISHING_VIDEO_CFSTUDIO.md` (root repo) (terutama bagian 4, 4b dan 5) di repo ini, bertahap per fase, tanpa memperluas scope.
