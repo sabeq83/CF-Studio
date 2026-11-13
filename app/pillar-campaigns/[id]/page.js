@@ -7,7 +7,7 @@ import { useParams } from 'next/navigation';
 import { getDemographicLabel, getVisualOverrideLabel, parseVisualOverrides } from '../../../lib/campaign-config-labels';
 import { MINIMAX_ENGLISH_VOICES, ELEVENLABS_ID_VOICES, ELEVENLABS_EN_VOICES, ELEVENLABS_MODELS } from '@/lib/voice-constants';
 import { resolveBridgePlan, readBridgeInputs, describeBridgePlan } from '@/lib/bridging/bridge-plan';
-import { FINISHING_TEMPLATE_REGISTRY, getFinishingTemplateMeta } from '@/lib/finishing-template-registry';
+import { FINISHING_TEMPLATE_REGISTRY, getFinishingTemplateMeta, getEffectiveFinishingOverride, buildFinishingOverridePatch } from '@/lib/finishing-template-registry';
 import FinishingTemplatePreview from '../../components/FinishingTemplatePreview';
 
 const writeToClipboard = (text) => {
@@ -150,12 +150,13 @@ export default function PillarCampaignDetailPage() {
   const [quickVoTransition, setQuickVoTransition] = useState('cut');
   const [quickVoEnableMotion, setQuickVoEnableMotion] = useState(true);
 
-  // Finishing Pass override state (F3-T2)
+  // Finishing Pass override state (F3-T2 + R19)
   const [finishingOverride, setFinishingOverride] = useState({
     finishing_template: 'none',
-    caption_mode: 'hybrid',
+    caption_mode: 'full',
     loudness_target: -14
   });
+  const finishingDirtyRef = useRef(false);
   const [savingFinishing, setSavingFinishing] = useState(false);
 
   const handleOpenQuickVoModal = (item) => {
@@ -325,14 +326,14 @@ export default function PillarCampaignDetailPage() {
       }
       const data = await res.json();
       setCampaign(data.campaign);
-      setFinishingOverride({
-        finishing_template: data.campaign?.finishing_template || 'none',
-        caption_mode: data.campaign?.caption_mode || 'hybrid',
-        loudness_target:
-          data.campaign?.loudness_target !== undefined && data.campaign?.loudness_target !== null
-            ? Number(data.campaign.loudness_target)
-            : -14
-      });
+      if (!finishingDirtyRef.current) {
+        const effFinishing = getEffectiveFinishingOverride(data.campaign);
+        setFinishingOverride({
+          finishing_template: effFinishing.finishing_template,
+          caption_mode: effFinishing.caption_mode,
+          loudness_target: effFinishing.loudness_target
+        });
+      }
       try {
         const parsed = data.campaign.voice_cast_json
           ? JSON.parse(data.campaign.voice_cast_json)?.characters || []
@@ -432,22 +433,21 @@ export default function PillarCampaignDetailPage() {
 
   const handleSaveFinishingOverride = async () => {
     if (!campaign) return;
+    const changedPayload = buildFinishingOverridePatch(campaign, finishingOverride);
+    if (Object.keys(changedPayload).length === 0) return;
     setSavingFinishing(true);
     try {
       const res = await fetch(`/api/v2/pillar-campaigns/${campaign.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          finishing_template: finishingOverride.finishing_template,
-          caption_mode: finishingOverride.caption_mode,
-          loudness_target: Number(finishingOverride.loudness_target)
-        })
+        body: JSON.stringify(changedPayload)
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         throw new Error(data.error || 'Gagal menyimpan Finishing Pass Override');
       }
-      showToast(`Finishing Pass (${finishingOverride.finishing_template}) berhasil disimpan!`);
+      finishingDirtyRef.current = false;
+      showToast(`Finishing Pass (${changedPayload.finishing_template || finishingOverride.finishing_template}) berhasil disimpan!`);
       fetchDetail();
     } catch (err) {
       showToast(err.message, 'error');
@@ -3748,23 +3748,35 @@ export default function PillarCampaignDetailPage() {
               </div>
             </details>
 
-            {/* Accordion E: Finishing Pass Override & Live Preview (F3-T2) */}
+            {/* Accordion E: Finishing Pass Override & Live Preview (F3-T2 + R19) */}
+            {(() => {
+              const effBaseline = getEffectiveFinishingOverride(campaign);
+              const changedPatch = buildFinishingOverridePatch(campaign, finishingOverride);
+              const isDirty = Object.keys(changedPatch).length > 0;
+              const selectedMeta = getFinishingTemplateMeta(finishingOverride.finishing_template || 'none');
+              const cKind = campaign?.campaign_kind || 'brand_editorial';
+              const compat = selectedMeta?.compatibilityCampaignKinds || [];
+              const isCompat = selectedMeta?.id === 'none' || compat.length === 0 || compat.includes(cKind);
+              return (
             <details open style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
               <summary style={{ padding: '16px 20px', fontWeight: 600, fontSize: '0.92rem', cursor: 'pointer', outline: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-interactive)' }}>
                 <span>🎬 Finishing Pass Override &amp; Live Preview (7 Templates)</span>
                 <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '3px 10px', borderRadius: '999px', background: 'var(--status-info-soft)', color: 'var(--status-info)' }}>
-                  {finishingOverride.finishing_template} • {finishingOverride.caption_mode} • {finishingOverride.loudness_target} LUFS
+                  {finishingOverride.finishing_template} • {finishingOverride.caption_mode}{effBaseline.caption_mode_is_default && finishingOverride.caption_mode === effBaseline.caption_mode ? ' (default)' : ''} • {finishingOverride.loudness_target} LUFS
                 </span>
               </summary>
               <div style={{ padding: '20px', borderTop: '1px solid var(--border)', background: 'var(--overlay-subtle)', display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '6px' }}>
-                      Template Finishing
+                      Template Finishing {effBaseline.finishing_template_is_default && <span style={{ fontWeight: 500, textTransform: 'none', color: 'var(--text-muted)' }}>· default</span>}
                     </label>
                     <select
                       value={finishingOverride.finishing_template}
-                      onChange={(e) => setFinishingOverride((prev) => ({ ...prev, finishing_template: e.target.value }))}
+                      onChange={(e) => {
+                        finishingDirtyRef.current = true;
+                        setFinishingOverride((prev) => ({ ...prev, finishing_template: e.target.value }));
+                      }}
                       style={{ width: '100%', padding: '9px 10px', borderRadius: '6px', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '0.84rem' }}
                     >
                       {FINISHING_TEMPLATE_REGISTRY.map((tpl) => (
@@ -3777,11 +3789,14 @@ export default function PillarCampaignDetailPage() {
 
                   <div>
                     <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '6px' }}>
-                      Caption Mode
+                      Caption Mode {effBaseline.caption_mode_is_default && <span style={{ fontWeight: 500, textTransform: 'none', color: 'var(--status-info)' }}>· default (campaign lama)</span>}
                     </label>
                     <select
                       value={finishingOverride.caption_mode}
-                      onChange={(e) => setFinishingOverride((prev) => ({ ...prev, caption_mode: e.target.value }))}
+                      onChange={(e) => {
+                        finishingDirtyRef.current = true;
+                        setFinishingOverride((prev) => ({ ...prev, caption_mode: e.target.value }));
+                      }}
                       style={{ width: '100%', padding: '9px 10px', borderRadius: '6px', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '0.84rem' }}
                     >
                       <option value="hybrid">hybrid — 1 Baris Karaoke + Keyword Punch</option>
@@ -3792,11 +3807,14 @@ export default function PillarCampaignDetailPage() {
 
                   <div>
                     <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '6px' }}>
-                      Target Loudness (LUFS)
+                      Target Loudness (LUFS) {effBaseline.loudness_target_is_default && <span style={{ fontWeight: 500, textTransform: 'none', color: 'var(--text-muted)' }}>· default</span>}
                     </label>
                     <select
                       value={String(finishingOverride.loudness_target)}
-                      onChange={(e) => setFinishingOverride((prev) => ({ ...prev, loudness_target: Number(e.target.value) }))}
+                      onChange={(e) => {
+                        finishingDirtyRef.current = true;
+                        setFinishingOverride((prev) => ({ ...prev, loudness_target: Number(e.target.value) }));
+                      }}
                       style={{ width: '100%', padding: '9px 10px', borderRadius: '6px', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '0.84rem' }}
                     >
                       <option value="-14">-14 LUFS (Standar TikTok &amp; Reels)</option>
@@ -3806,43 +3824,31 @@ export default function PillarCampaignDetailPage() {
                   </div>
                 </div>
 
-                {(() => {
-                  const selectedMeta = getFinishingTemplateMeta(finishingOverride.finishing_template || 'none');
-                  const cKind = campaign?.campaign_kind || 'brand_editorial';
-                  const compat = selectedMeta?.compatibilityCampaignKinds || [];
-                  const isDirty =
-                    (campaign?.finishing_template || 'none') !== finishingOverride.finishing_template ||
-                    (campaign?.caption_mode || 'hybrid') !== finishingOverride.caption_mode ||
-                    Number(campaign?.loudness_target ?? -14) !== Number(finishingOverride.loudness_target);
-                  const isCompat = selectedMeta?.id === 'none' || compat.length === 0 || compat.includes(cKind);
-                  return (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '8px', background: isCompat ? 'var(--status-info-soft)' : 'var(--status-warning-soft)', border: `1px solid ${isCompat ? 'var(--status-info)' : 'var(--status-warning)'}`, fontSize: '0.78rem', color: 'var(--text-primary)' }}>
-                      <div>
-                        {isCompat ? (
-                          <span>✅ Template <code>{selectedMeta?.id}</code> kompatibel dengan <code>{cKind}</code>.</span>
-                        ) : (
-                          <span>⚠️ Template <code>{selectedMeta?.id}</code> disarankan untuk <code>{compat.join(', ')}</code>; layer kosong disembunyikan otomatis.</span>
-                        )}
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        {isDirty && (
-                          <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: '999px', background: 'var(--status-warning-soft)', color: 'var(--status-warning)' }}>
-                            Perubahan belum disimpan
-                          </span>
-                        )}
-                        <button
-                          type="button"
-                          className="btn btn-primary"
-                          disabled={savingFinishing || !isDirty}
-                          onClick={handleSaveFinishingOverride}
-                          style={{ padding: '7px 14px', fontSize: '0.8rem', fontWeight: 700 }}
-                        >
-                          {savingFinishing ? 'Menyimpan...' : '💾 Simpan Override'}
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })()}
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '8px', background: isCompat ? 'var(--status-info-soft)' : 'var(--status-warning-soft)', border: `1px solid ${isCompat ? 'var(--status-info)' : 'var(--status-warning)'}`, fontSize: '0.78rem', color: 'var(--text-primary)' }}>
+                  <div>
+                    {isCompat ? (
+                      <span>✅ Template <code>{selectedMeta?.id}</code> kompatibel dengan <code>{cKind}</code>.</span>
+                    ) : (
+                      <span>⚠️ Template <code>{selectedMeta?.id}</code> disarankan untuk <code>{compat.join(', ')}</code>; layer kosong disembunyikan otomatis.</span>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {isDirty && (
+                      <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: '999px', background: 'var(--status-warning-soft)', color: 'var(--status-warning)' }}>
+                        Perubahan belum disimpan
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      disabled={savingFinishing || !isDirty}
+                      onClick={handleSaveFinishingOverride}
+                      style={{ padding: '7px 14px', fontSize: '0.8rem', fontWeight: 700 }}
+                    >
+                      {savingFinishing ? 'Menyimpan...' : '💾 Simpan Override'}
+                    </button>
+                  </div>
+                </div>
 
                 <FinishingTemplatePreview
                   finishingTemplate={finishingOverride.finishing_template}
@@ -3859,6 +3865,8 @@ export default function PillarCampaignDetailPage() {
                 />
               </div>
             </details>
+              );
+            })()}
 
           </div>
 

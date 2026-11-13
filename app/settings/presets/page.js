@@ -8,7 +8,7 @@ import { normalizeBridgePayload } from '@/lib/bridging/bridge-plan';
 import { getWordsPerClipOptions, getDefaultWordsPerClip, VIDEO_MODELS } from '@/lib/words-per-clip-presets';
 import { GEMINI_VOICES, MINIMAX_VOICES, MINIMAX_ENGLISH_VOICES, ELEVENLABS_ID_VOICES, ELEVENLABS_EN_VOICES, ELEVENLABS_MODELS } from '@/lib/voice-constants';
 import { GOOGLE_VOICE_PERSONAS } from '@/lib/veo-native-audio';
-import { FINISHING_TEMPLATE_REGISTRY, getFinishingTemplateMeta } from '@/lib/finishing-template-registry';
+import { FINISHING_TEMPLATE_REGISTRY, getFinishingTemplateMeta, getEffectiveFinishingOverride } from '@/lib/finishing-template-registry';
 import FinishingTemplatePreview from '../../components/FinishingTemplatePreview';
 
 const initialForm = {
@@ -190,9 +190,15 @@ function mapPresetToForm(p) {
     motion_text_position: wf.motion_text_position || 'bottom',
     video_transition: wf.video_transition || 'cut',
     transition_duration: Number(wf.transition_duration ?? 0.5),
-    finishing_template: wf.finishing_template || 'none',
-    caption_mode: wf.caption_mode || 'hybrid',
-    loudness_target: Number(wf.loudness_target ?? -14)
+    ...(() => {
+      const effectiveWf = getEffectiveFinishingOverride(wf);
+      return {
+        finishing_template: effectiveWf.finishing_template,
+        caption_mode: effectiveWf.caption_mode,
+        loudness_target: effectiveWf.loudness_target,
+        _wf_caption_mode_is_default: effectiveWf.caption_mode_is_default
+      };
+    })()
   };
 }
 
@@ -293,7 +299,7 @@ function mapFormToPayload(f) {
         video_transition: f.video_transition || 'cut',
         transition_duration: Number(f.transition_duration ?? 0.5),
         finishing_template: f.finishing_template || 'none',
-        caption_mode: f.caption_mode || 'hybrid',
+        ...(f.caption_mode && !f._wf_caption_mode_is_default ? { caption_mode: f.caption_mode } : {}),
         loudness_target: Number(f.loudness_target ?? -14)
       }
     }
@@ -1569,11 +1575,11 @@ export default function PresetsPage() {
 
                   <div>
                     <label className="form-label">
-                      Mode Subtitle / Caption Overlay
+                      Mode Subtitle / Caption Overlay {form._wf_caption_mode_is_default && <span style={{ fontWeight: 500, color: 'var(--status-info)', fontSize: '0.78em' }}>· default (preset lama)</span>}
                       <select
                         className="form-select"
-                        value={form.caption_mode || 'hybrid'}
-                        onChange={e => setForm({ ...form, caption_mode: e.target.value })}
+                        value={form.caption_mode || 'full'}
+                        onChange={e => setForm({ ...form, caption_mode: e.target.value, _wf_caption_mode_is_default: false })}
                       >
                         <option value="hybrid">Hybrid — Keyword Punch + Subtitles Ringkas</option>
                         <option value="keyword_only">Keyword Only — Hook &amp; Keyword Punch Saja</option>
@@ -1647,7 +1653,7 @@ export default function PresetsPage() {
 
                 <FinishingTemplatePreview
                   finishingTemplate={form.finishing_template || 'none'}
-                  captionMode={form.caption_mode || 'hybrid'}
+                  captionMode={form.caption_mode || 'full'}
                   loudnessTarget={form.loudness_target !== undefined ? Number(form.loudness_target) : -14}
                   targetLanguage={form.target_language || 'id-ID'}
                   motionStyle={form.motion_text_style || 'floating_white_yellow'}

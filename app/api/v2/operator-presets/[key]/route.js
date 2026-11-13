@@ -9,6 +9,7 @@ import {
   PRESET_ALIASES
 } from '@/lib/operator-presets';
 import { getSetting, setSetting } from '@/lib/db';
+import { parseFinishingOverrideFields } from '@/lib/finishing-template-registry';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,6 +56,13 @@ export const PUT = withTenantContext(async (request, { params }, user) => {
   const config = body.config;
   if (!config || typeof config !== 'object' || Array.isArray(config)) {
     return NextResponse.json({ success: false, error: 'Config wajib object JSON.' }, { status: 400 });
+  }
+  if (config.workflow && typeof config.workflow === 'object') {
+    const parsedWf = parseFinishingOverrideFields(config.workflow, { allowNull: true });
+    if (parsedWf.error) {
+      return NextResponse.json({ success: false, error: parsedWf.error }, { status: parsedWf.status || 400 });
+    }
+    config.workflow = { ...config.workflow, ...parsedWf.updates };
   }
   all[key] = {
     ...config,

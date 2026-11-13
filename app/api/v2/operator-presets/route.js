@@ -9,6 +9,7 @@ import {
   PRESET_ALIASES
 } from '@/lib/operator-presets';
 import { getSetting, setSetting } from '@/lib/db';
+import { parseFinishingOverrideFields } from '@/lib/finishing-template-registry';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,6 +39,15 @@ function normalize(body, current = {}) {
     const e = new Error('Config preset wajib berupa object JSON.');
     e.status = 400;
     throw e;
+  }
+  if (config.workflow && typeof config.workflow === 'object') {
+    const parsedWf = parseFinishingOverrideFields(config.workflow, { allowNull: true });
+    if (parsedWf.error) {
+      const e = new Error(parsedWf.error);
+      e.status = 400;
+      throw e;
+    }
+    config.workflow = { ...config.workflow, ...parsedWf.updates };
   }
   return {
     ...config,

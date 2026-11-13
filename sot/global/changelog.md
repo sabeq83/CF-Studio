@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.44.20 — Fase 4-T0 (R19): Perbaikan Default caption_mode & Diff-Only Override Campaign (13/11/2026)
+- Tampilkan nilai efektif caption_mode (kosong/NULL -> full dengan label default campaign lama) & diff-only PATCH di Campaign Detail dan Operator Presets
+- Tolak string kosong (400) untuk caption_mode/finishing_template/loudness_target pada PATCH/PUT campaign & presets tanpa fallback tersembunyi ke hybrid; terima null eksplisit untuk reset default
+- Unit test & regresi lengkap F4-T0 (R19.1-R19.5) 42/42 pass
+
 ## V2.44.19 — Fase 3 Finishing Pass Live Preview, Lokalisasi Template & Staging Benchmark (13/11/2026)
 - Finalisasi safe-zone right:15cqw dan lokalisasi id/en 7 template finishing plus finishing-data-extractor
 - UI Live Preview iframe terisolasi 7+1 template dengan timeline scrubber di Campaign Detail Accordion E & Operator Presets + endpoint aman /api/v2/finishing/templates + PATCH override

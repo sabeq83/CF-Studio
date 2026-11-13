@@ -1,12 +1,12 @@
-# Finishing Pass Implementation Plan & Execution Tracker (`v2.45.x`) — `(Revisi 02)`
+# Finishing Pass Implementation Plan & Execution Tracker (`v2.45.x`) — `(Revisi 03)`
 
-Dokumen ini adalah rencana teknis & tracker eksekusi bertahap untuk mengimplementasikan seluruh usulan di [`USULAN_FINISHING_VIDEO_CFSTUDIO.md`](file:///Users/sabeqmmursyid/_cfstudio/USULAN_FINISHING_VIDEO_CFSTUDIO.md), [`USULAN_TEMPLATE_FINISHING_TAMBAHAN.md`](file:///Users/sabeqmmursyid/_cfstudio/USULAN_TEMPLATE_FINISHING_TAMBAHAN.md), dan [`antigravity_finishing_pass_instructions.md`](file:///Users/sabeqmmursyid/_cfstudio/antigravity_finishing_pass_instructions.md), yang telah diselaraskan penuh dengan [`antigravity_finishing_pass_revisi_01.md`](file:///Users/sabeqmmursyid/_cfstudio/antigravity_finishing_pass_revisi_01.md) (`R1`–`R8`), [`antigravity_finishing_pass_revisi_02.md`](file:///Users/sabeqmmursyid/_cfstudio/antigravity_finishing_pass_revisi_02.md) (`R9`–`R13`), [`antigravity_finishing_pass_cek_ulang.md`](file:///Users/sabeqmmursyid/_cfstudio/antigravity_finishing_pass_cek_ulang.md), [`mockup_finishing_preview.html`](file:///Users/sabeqmmursyid/_cfstudio/mockup_finishing_preview.html), [`mockup_finishing_templates_v3.html`](file:///Users/sabeqmmursyid/_cfstudio/mockup_finishing_templates_v3.html), dan bundel referensi [`plans/finishing-pass-reference/`](file:///Users/sabeqmmursyid/_cfstudio/plans/finishing-pass-reference/overlay.html).
+Dokumen ini adalah rencana teknis & tracker eksekusi bertahap untuk mengimplementasikan seluruh usulan di [`USULAN_FINISHING_VIDEO_CFSTUDIO.md`](file:///Users/sabeqmmursyid/_cfstudio/USULAN_FINISHING_VIDEO_CFSTUDIO.md), [`USULAN_TEMPLATE_FINISHING_TAMBAHAN.md`](file:///Users/sabeqmmursyid/_cfstudio/USULAN_TEMPLATE_FINISHING_TAMBAHAN.md), dan [`antigravity_finishing_pass_instructions.md`](file:///Users/sabeqmmursyid/_cfstudio/antigravity_finishing_pass_instructions.md), yang telah diselaraskan penuh dengan [`antigravity_finishing_pass_revisi_01.md`](file:///Users/sabeqmmursyid/_cfstudio/antigravity_finishing_pass_revisi_01.md) (`R1`–`R8`), [`antigravity_finishing_pass_revisi_02.md`](file:///Users/sabeqmmursyid/_cfstudio/antigravity_finishing_pass_revisi_02.md) (`R9`–`R13`), [`antigravity_finishing_pass_revisi_03.md`](file:///Users/sabeqmmursyid/_cfstudio/antigravity_finishing_pass_revisi_03.md) (`R14`–`R19`), [`antigravity_finishing_pass_cek_ulang.md`](file:///Users/sabeqmmursyid/_cfstudio/antigravity_finishing_pass_cek_ulang.md), [`mockup_finishing_preview.html`](file:///Users/sabeqmmursyid/_cfstudio/mockup_finishing_preview.html), [`mockup_finishing_templates_v3.html`](file:///Users/sabeqmmursyid/_cfstudio/mockup_finishing_templates_v3.html), [`mockup_caption_styles.html`](file:///Users/sabeqmmursyid/_cfstudio/mockup_caption_styles.html), dan bundel referensi [`plans/finishing-pass-reference/`](file:///Users/sabeqmmursyid/_cfstudio/plans/finishing-pass-reference/overlay.html).
 
-> Setiap seksi atau butir task yang diubah/ditambahkan dari revisi ditandai jelas dengan **`(Revisi 01)`** atau **`(Revisi 02)`**. Fase 0, Fase 1, dan Fase 2 telah **selesai & dirilis** (`v2.44.4` → `v2.44.6`).
+> Setiap seksi atau butir task yang diubah/ditambahkan dari revisi ditandai jelas dengan **`(Revisi 01)`**, **`(Revisi 02)`**, atau **`(Revisi 03)`**. Fase 0, Fase 1, Fase 2, Fase 2c-0..6, dan Fase 3 telah **selesai & dirilis** (`v2.44.4` → `v2.44.19`).
 
 ---
 
-## 0. Hasil Audit Awal & Audit Ulang (`v2.44.3` / `d5a2793`) — `(Revisi 01)`
+## 0. Hasil Audit Awal & Audit Ulang (`v2.44.3` → `v2.44.19`) — `(Revisi 01–03)`
 
 Audit codebase, schema DB PostgreSQL (`staging` & `public`), Nextcloud bundle, dan runtime host Mac Mini Staging (`100.95.245.55`):
 
@@ -81,11 +81,25 @@ Audit codebase, schema DB PostgreSQL (`staging` & `public`), Nextcloud bundle, d
      - [`lib/word-alignment-engine.js:145-230`](file:///Users/sabeqmmursyid/_cfstudio/lib/word-alignment-engine.js#L145-L230) sudah memetakan jeda hening, namun logika fallback-nya belum menerapkan snap tanda baca (`, . ? ! :`) eksplisit dengan batas jarak `< 0.9s` seperti fungsi `derive()` pada [`mockup_finishing_templates_v3.html`](file:///Users/sabeqmmursyid/_cfstudio/mockup_finishing_templates_v3.html) (`R12.3`).
      - Untuk cacat teks render AI video (`opc_2107` klip 4 `"Solusi Tinemal ID mark"`), mekanisme tambal merek [`R12.4`] memakai input eksplisit `brandPatch` (`clipIndex` + area/gaya `x-patch`) tanpa OCR otomatis.
 
+9. **Audit Caption Refresh & Bug `caption_mode` Override (`v2.44.19`) — `(Revisi 03)`**:
+   - **Audit Bug `caption_mode` Campaign Lama (`R19`)**:
+     - [`app/pillar-campaigns/[id]/page.js:154-158,328-335`](file:///Users/sabeqmmursyid/_cfstudio/app/pillar-campaigns/[id]/page.js#L154-L158) menginisialisasi dan menyinkronkan `finishingOverride.caption_mode` dengan `data.campaign?.caption_mode || 'hybrid'`, padahal [`resolveCampaignCaptionMode()`](file:///Users/sabeqmmursyid/_cfstudio/lib/finishing-plan-validator.js#L122-L129) dan [`resolvePreRenderFinishingMeta()`](file:///Users/sabeqmmursyid/_cfstudio/lib/tiktok-compliance-service.js#L351-L354) memperlakukan `caption_mode` kosong/`NULL` sebagai **`'full'`** (kompatibilitas campaign lama Revisi 01).
+     - [`handleSaveFinishingOverride`](file:///Users/sabeqmmursyid/_cfstudio/app/pillar-campaigns/[id]/page.js#L433-L457) selalu mengirim ketiga field (`finishing_template`, `caption_mode`, `loudness_target`) sekaligus meskipun user hanya mengganti `finishing_template`.
+     - [`app/api/v2/pillar-campaigns/[id]/route.js:138-158`](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/pillar-campaigns/[id]/route.js#L138-L158) mengubah string kosong (`""`) menjadi default tersembunyi (`String(body.finishing_template || 'none')` dan `String(body.caption_mode || 'hybrid')`, serta `Number("") -> 0` yang baru terblokir range `-24..-6`). Akibatnya, membuka campaign lama (`caption_mode IS NULL`) lalu mengganti `finishing_template` diam-diam menimpa DB `caption_mode` dari `NULL` (`'full'`) menjadi `'hybrid'`.
+     - **Audit Jalur Terkait (`R19.4`)**: [`app/settings/presets/page.js:95-97,193-195,1558-1595`](file:///Users/sabeqmmursyid/_cfstudio/app/settings/presets/page.js#L193-L195) (`wf.caption_mode || 'hybrid'`), [`app/api/v2/operator-presets/[key]/route.js:54-68`](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/operator-presets/[key]/route.js#L54-L68) (`PUT` menerima `config.workflow` tanpa menolak `""`), [`app/api/v2/re-campaigns/[id]/route.js`](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/re-campaigns/[id]/route.js) (belum mengekspos finishing override), serta [`apps/mcp/tools.mjs:520-522,592-594,617-619,675-677,808-810`](file:///Users/sabeqmmursyid/_cfstudio/apps/mcp/tools.mjs#L520-L522) (sudah memakai `z.enum(...).optional()`, otomatis menolak `""`).
+   - **Audit Duplikasi CSS & Logika Subtitle di 8 File Template (`R14`)**:
+     - CSS `.sub`, `.sub.pill-mode`, `.sub.minimal-mode` serta aturan pengecilan font `joinedLen` (`if (joinedLen > 22) ...`) saat ini tersalin di **ketujuh template terregistrasi + `base-caption.html` (total 8 file)**.
+     - Lima template baru (`tips-listicle.html`, `ramuan-ritual.html`, `problem-solution.html`, `angka-banding.html`, `mitos-fakta.html`) sudah memuat `<style id="shared-layers-css"></style>` dan `<script src="./shared-layers.js"></script>`; [`recipe-pop.html`](file:///Users/sabeqmmursyid/_cfstudio/templates/finishing/recipe-pop.html) sudah memuat `<script src="./shared-layers.js"></script>` tanpa `<style id="shared-layers-css"></style>`; sedangkan [`base-caption.html`](file:///Users/sabeqmmursyid/_cfstudio/templates/finishing/base-caption.html) dan [`calm-wellness.html`](file:///Users/sabeqmmursyid/_cfstudio/templates/finishing/calm-wellness.html) belum memuat `shared-layers.js`.
+     - Posisi `.sub` saat ini: `69cqh` (`base-caption`, `calm-wellness`, `recipe-pop`), `71cqh` (`tips-listicle`, `ramuan-ritual`), `72.5cqh` (`problem-solution`, `angka-banding`, `mitos-fakta`), dan `right: 15cqw` di ke-7 template finishing vs `right: 6cqw` di `base-caption.html`.
+   - **Audit Engine Chunking & Jalur Render (`R15`, `R16`, `R17`)**:
+     - [`chunkCaptionWords()`](file:///Users/sabeqmmursyid/_cfstudio/lib/motion-text-engine.js#L62-L105) memakai batas lama `2–4` kata (`>= 4` kata / `> 15` huruf) tanpa daftar kata sambung (`CONNECT`), tanpa proteksi frasa (`PROTECT`), tanpa penggabungan potongan `< 0.45s`, dan tanpa guard lebar teks `> 88cqw`.
+     - Seluruh konsumen [`chunkCaptionWords`](file:///Users/sabeqmmursyid/_cfstudio/lib/motion-text-engine.js#L62-L105) berada di [`lib/finishing-overlay-renderer.js:102`](file:///Users/sabeqmmursyid/_cfstudio/lib/finishing-overlay-renderer.js#L102) (Playwright utama), [`lib/motion-text-engine.js:406`](file:///Users/sabeqmmursyid/_cfstudio/lib/motion-text-engine.js#L406) (`renderGlobalTimelineOverlay` fallback Sharp/SVG), dan [`lib/motion-text-engine.js:577`](file:///Users/sabeqmmursyid/_cfstudio/lib/motion-text-engine.js#L577) (`generateMotionTextFrames` legacy/YouTube), ditambah [`lib/finishing-preview-builder.js:17-42`](file:///Users/sabeqmmursyid/_cfstudio/lib/finishing-preview-builder.js#L17-L42) (`buildSampleWordsAndChunks` pada Live Preview browser).
+
 ---
 
-## Execution Task List (Tracker Resmi) — `(Revisi 02)`
+## Execution Task List (Tracker Resmi) — `(Revisi 03)`
 
-> **Aturan Kontrol (`R5`, `R9`–`R13`)**: Kerjakan **satu fase/sub-fase per rilis** (`Fase 0 ✅ → Fase 1 ✅ → Fase 2 ✅ → Fase 2c-0 → Fase 2c-1 → Fase 2c-2 → Fase 2c-3 → Fase 2c-4 → Fase 2c-5 → Fase 2c-6 → Fase 3`). **Fase 2b dibatalkan (`R9`)**. Dilarang menggabungkan fase/sub-fase atau mencentang task sebelum verifikasi selesai.
+> **Aturan Kontrol (`R5`, `R9`–`R19`)**: Kerjakan **satu fase/sub-fase per rilis** (`Fase 0 ✅ → Fase 1 ✅ → Fase 2 ✅ → Fase 2c-0 ✅ → Fase 2c-1 ✅ → Fase 2c-2 ✅ → Fase 2c-3 ✅ → Fase 2c-4 ✅ → Fase 2c-5 ✅ → Fase 2c-6 ✅ → Fase 3 ✅ → Fase 4-T0 → Fase 4`). **Fase 2b dibatalkan (`R9`)**. **Fase 4-T0 (`R19`)** direncanakan sebagai rilis terpisah pertama karena berdiri sendiri dan menutup bug `caption_mode` pada `v2.44.19`. Dilarang menggabungkan fase di luar rencana atau mencentang task sebelum verifikasi selesai.
 
 ### Tracker Fase 0 — Perbaikan Cepat Sharp/SVG + Safety Hook + Tier-3 Alignment `(Revisi 01)` (Target Rilis #1)
 - [x] **F0-T1**: Pasang font OFL lokal (`Anton-Regular.ttf`, `Montserrat-Black.ttf`, `Montserrat-ExtraBold.ttf`, `Inter-Bold.ttf`) di `public/fonts/` + buat `public/fonts/fonts.conf` & [`lib/motion-font-loader.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/motion-font-loader.js) (`FONTCONFIG_FILE`), verifikasi Sharp/librsvg merender Anton & Montserrat nyata.
@@ -180,7 +194,22 @@ Fase 2b dibatalkan (Revisi 02, R9). Seluruh task `F2b-T1`–`F2b-T6`, [`lib/cont
 - [x] **F3-T2 `(Revisi 02)`**: Buat komponen **UI Live Preview** di halaman Campaign Detail ([`app/pillar-campaigns/[id]/page.js`](file:///Users/sabeqmmursyid/_cfstudio/app/pillar-campaigns/[id]/page.js)) / Preset ([`app/settings/presets/page.js`](file:///Users/sabeqmmursyid/_cfstudio/app/settings/presets/page.js)) yang membaca daftar dari registry untuk memuat **seluruh 7 template HTML** secara langsung (via iframe terisolasi memanggil `loadTimeline()` + scrubber `renderAt(t)`), lengkap dengan override form `finishing_template`, `caption_mode`, `loudness_target` pada detail campaign (dibuatkan mockup HTML Staging & pakai token `app/theme.css` terlebih dahulu).
 - [x] **F3-T3 `(Revisi 02)`**: Audit performa menyeluruh pada Staging Mac Mini mencakup **ketujuh template** (terutama template terberat: **`tips_listicle` dengan recap** dan **`problem_solution` dengan callout** pada sampel 4, 6, dan 8 klip / ~24s, ~36s, ~48s).
   - **Aturan Keputusan (`R3.3`)**: Rata-rata render finishing terukur di Mac Mini Staging **2.153×** (maks **2.246×**) **<= 3× durasi video**, sehingga pipeline Playwright Chromium + FFmpeg dipertahankan tanpa membangun jalur Remotion `FinishingPass.jsx`.
-- [x] **F3-T4 `(Revisi 02)`**: Verifikasi Fase 3 (`npm run build`, smoke test UI preview seluruh 7 template + override + benchmark durasi render multi-template + audit LUFS `-14 ± 1`) → Rilis **Fase 3**.
+- [x] **F3-T4 `(Revisi 02)`**: Verifikasi Fase 3 (`npm run build`, smoke test UI preview seluruh 7 template + override + benchmark durasi render multi-template + audit LUFS `-14 ± 1`) → Rilis **Fase 3** (`v2.44.19`).
+
+### Tracker Fase 4-T0 — Perbaikan Default `caption_mode` di Override Campaign `(Revisi 03)` (Target Rilis #12 — Rilis Pertama Terpisah)
+- [x] **F4-T0-1 `(Revisi 03, R19.1, R19.2)`**: Perbarui [`app/pillar-campaigns/[id]/page.js`](file:///Users/sabeqmmursyid/_cfstudio/app/pillar-campaigns/%5Bid%5D/page.js) agar menampilkan nilai efektif sesungguhnya untuk campaign lama (`caption_mode` kosong/`NULL` → `'full'` via [`resolveCampaignCaptionMode()`](file:///Users/sabeqmmursyid/_cfstudio/lib/finishing-plan-validator.js#L122-L129)) lengkap dengan keterangan kecil **`"default (campaign lama)"`**, serta ubah `handleSaveFinishingOverride` agar **hanya mengirim field yang benar-benar diubah** user pada body `PATCH`.
+- [x] **F4-T0-2 `(Revisi 03, R19.3, R19.4)`**: Perbarui [`app/api/v2/pillar-campaigns/[id]/route.js`](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/pillar-campaigns/%5Bid%5D/route.js) (**Keputusan Resmi R19.3**: string kosong `""` pada `caption_mode`, `finishing_template`, dan `loudness_target` **ditolak HTTP `400`**; kirim `null` eksplisit untuk kembali ke `NULL`/default; zero fallback tersembunyi ke `'hybrid'` / `'none'`). Audit & selaraskan jalur terkait [`app/settings/presets/page.js`](file:///Users/sabeqmmursyid/_cfstudio/app/settings/presets/page.js), [`app/api/v2/operator-presets/[key]/route.js`](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/operator-presets/%5Bkey%5D/route.js), [`app/api/v2/re-campaigns/[id]/route.js`](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/re-campaigns/%5Bid%5D/route.js), dan [`apps/mcp/tools.mjs`](file:///Users/sabeqmmursyid/_cfstudio/apps/mcp/tools.mjs).
+- [x] **F4-T0-3 `(Revisi 03, R19.5)`**: Uji regresi & verifikasi Fase 4-T0 (`caption_mode IS NULL` → buka detail campaign → ubah hanya `finishing_template` → simpan → DB `caption_mode` tetap `NULL` & render efektif tetap `'full'`; `PATCH` `caption_mode: ""` → `400`; `npm run build` + Staging deploy) → Rilis **Fase 4-T0** (`v2.44.20`).
+
+### Tracker Fase 4 — Caption Refresh (2–3 Kata, Font Besar, Satu Sumber) `(Revisi 03)` (Target Rilis #13, Setelah Fase 4-T0)
+- [ ] **F4-T1 `(Revisi 03, R14)`**: Pindahkan seluruh CSS subtitle (`.sub`, `.new.s-yellow`, `.new.s-pill`, `.new.s-minimal`, `.band` gradasi tipis, animasi masuk `0.12s`) dan fungsi bersama **`renderSubtitle(oSub, timeline, t, opts)`** (serta opsional `oBand` / `--sub-top`) ke [`templates/finishing/shared-layers.js`](file:///Users/sabeqmmursyid/_cfstudio/templates/finishing/shared-layers.js). Hapus CSS `.sub*`, logika render subtitle inline, dan seluruh aturan pengecilan font `joinedLen` dari **seluruh 8 file template** (`base-caption.html`, `calm-wellness.html`, `recipe-pop.html`, `tips-listicle.html`, `ramuan-ritual.html`, `problem-solution.html`, `angka-banding.html`, `mitos-fakta.html`); pertahankan default `top: 69cqh` dengan override parameter per template + safe-zone `right: 15cqw` (pada 7 template finishing).
+- [ ] **F4-T2 `(Revisi 03, R15)`**: Ganti [`chunkCaptionWords()`](file:///Users/sabeqmmursyid/_cfstudio/lib/motion-text-engine.js#L62-L105) mengikuti `chunkNew()` di [`mockup_caption_styles.html`](file:///Users/sabeqmmursyid/_cfstudio/mockup_caption_styles.html): maks **3 kata** & maks **16 karakter**, selalu putus di batas klip, putus setelah `[,.?!:]` kecuali kata sambung, konstanta terpusat kata sambung (`id` tanpa `ini`/`itu` + `en`), geser trailing kata sambung ke potongan berikut bila muat, **frasa terlindungi** (`PROTECT`, sampai 4 kata bila utuh) dengan helper `collectProtectedSubtitlePhrases()` pada **seluruh jalur render (`R15.5`)**, gabungkan potongan `< 0.45s` dalam klip yang sama (`<= 3` kata / `<= 18` huruf; kata tunggal `< 0.3s` boleh gabung hingga 4 kata), serta post-render guard `> 88cqw` potong berdasarkan kata (hanya kata tunggal terlalu lebar yang dikecilkan sampai batas bawah `6cqw`).
+- [ ] **F4-T3 `(Revisi 03, R16, R17)`**: Implementasikan tiga gaya baru (**nama gaya & `caption_mode` tetap sama untuk kompatibilitas preset/campaign lama**):
+  - `floating_white_yellow`: Montserrat 900 kapital **7.6cqw**, stroke hitam `0.75cqw`, solid shadow `0 0.9cqw 0 rgba(0,0,0,0.55)`, warna kata aktif aksen brand atau default `#ffd23f`.
+  - `floating_black_on_white`: **satu `.pill` putih per potongan**, Montserrat 900 kapital **7cqw**, radius `2.4cqw`, solid shadow `0 1.2cqw 0 rgba(0,0,0,0.45)`, kata aktif disorot kotak aksen di dalam pill (dengan pengecekan kontras teks gelap di atas warna aksen `R16`).
+  - `minimal_white`: Montserrat 800 **huruf normal (`text-transform: none`)**, **6.8cqw**, putih tanpa stroke di atas gradasi gelap `.band` (`56–84cqh`, puncak opasitas `0.55`), kata aktif diberi garis bawah `0.9cqw` warna aksen (hapus kartu putih & efek ketik).
+  - Animasi masuk `0.12s` (`scale(0.9 -> 1.0)` + opacity `0.3 -> 1.0`) fungsi murni terhadap `t` sesuai `renderAt(t)`; selaraskan fallback Sharp/SVG [`renderSubtitleChunkSvg()`](file:///Users/sabeqmmursyid/_cfstudio/lib/motion-text-engine.js#L255-L341) (`R17.2`) dan [`lib/finishing-preview-builder.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/finishing-preview-builder.js); uji ulang tabrakan CTA / notice / recap di zona `R6.4` (`R17.3`).
+- [ ] **F4-T4 `(Revisi 03, R18)`**: Verifikasi Fase 4: unit test `chunkCaptionWords` kalimat nyata (`opc_2107` Solusi Thermal, `opc_1756` Sasyahouse, `mul_261113_nfrdfh` Siasat Sehat + 0 potongan > 3 kata kecuali frasa terlindungi / kata tunggal `< 0.3s` + zero trailing connector + `collectProtectedSubtitlePhrases` tiap jalur), grep seluruh 8 template HTML nol aturan ukuran subtitle / `joinedLen` di luar `shared-layers.js`, uji render Playwright + Sharp semua 3 gaya dengan lebar teks `<= 88cqw` + cek tabrakan `tips_listicle`, `ramuan_ritual`, dan `recipe_pop`, deploy Staging & render ke-3 gaya di 3 video + contact sheet `0.5s`, `npm run build` → Rilis **Fase 4**.
 
 ---
 
@@ -506,19 +535,332 @@ Setiap field tambahan pada `finishing_plan` **HANYA** diinjeksikan ke prompt [`l
 
 ---
 
-## Kriteria Verifikasi Minimum per Rilis — `(Revisi 02)`
+### FASE 4-T0 — Code Sebelum & Code Sesudah `(Revisi 03, R19)` — Perbaikan Default `caption_mode` di Override Campaign (Rilis Pertama Terpisah)
 
-| Verifikasi | Fase 0 ✅ | Fase 1 ✅ | Fase 2 ✅ | Fase 2b | Fase 2c-0 | Fase 2c-1..6 (per template) | Fase 3 |
-|---|---|---|---|---|---|---|---|
-| Render ulang `opc_2117` & `mul_261113_qt67yl` + contact sheet `0.5s` | Wajib ✅ | Wajib ✅ | Wajib ✅ | Batal | — | Regresi `calm_wellness` & `recipe_pop` | Wajib |
-| Test 10+ klip numbering (`01/11/21`, `.mp3`/`.mp4` guard) & skip-finishing on mismatch | — | — | — | Batal | Wajib | — | — |
-| Test tambah dummy template ke registry -> muncul otomatis di UI & MCP | — | — | — | Batal | Wajib | — | — |
-| Video nyata dari akun target + contact sheet `0.5s` vs tab `mockup_finishing_templates_v3.html` | — | — | Wajib ✅ | Batal | — | Wajib (per template) | Wajib (7 template) |
-| Cek manual sinkronisasi audio min. `5` titik (`±0.2s` lip/voice vs overlay) | — | — | — | Batal | — | Wajib (per template) | Wajib |
-| Loudness output `-14 ± 1 LUFS` | Wajib ✅ | Wajib ✅ | Wajib ✅ | Batal | Wajib | Wajib | Wajib |
-| Zero tag markup (`<#`, `#>`, `[...]`, `(breath)`) | Wajib ✅ | Wajib ✅ | Wajib ✅ | Batal | Wajib | Wajib | Wajib |
-| Unit test compliance (`fitHookCard`, herbal claim block, `ramuan_ritual` strict, `angka_banding` anti-angka fiktif, `mitos_fakta`) + invalid skip-layer | Wajib ✅ | Wajib ✅ | Wajib ✅ | Batal | — | Wajib (per template) | — |
-| Grep `templates/finishing/` bersih string hardcoded merek/produk (`R6.6`) | — | — | Wajib ✅ | Batal | — | Wajib | Wajib |
-| Playwright HTML lifecycle (`browser.close()` di `finally`) + fallback Sharp/SVG | — | Wajib ✅ | Wajib ✅ | Batal | Wajib | Wajib | Wajib |
-| Preview UI memuat seluruh 7 template dari registry + benchmark terberat (`tips_listicle` recap, `problem_solution` callout) rasio ≤ `3×` | — | — | — | Batal | — | — | Wajib |
-| `npm run build` + smoke test Staging | Wajib ✅ | Wajib ✅ | Wajib ✅ | Batal | Wajib | Wajib | Wajib |
+#### 1. [`app/pillar-campaigns/[id]/page.js`](file:///Users/sabeqmmursyid/_cfstudio/app/pillar-campaigns/[id]/page.js) — Tampilkan Nilai Efektif & Kirim Field yang Berubah Saja (`R19.1`, `R19.2`)
+**Code Sebelum (`app/pillar-campaigns/[id]/page.js:154-158, 328-335, 433-456, 3813-3816` pada `v2.44.19`):**
+```js
+  const [finishingOverride, setFinishingOverride] = useState({
+    finishing_template: 'none',
+    caption_mode: 'hybrid',
+    loudness_target: -14
+  });
+...
+      setFinishingOverride({
+        finishing_template: data.campaign?.finishing_template || 'none',
+        caption_mode: data.campaign?.caption_mode || 'hybrid',
+        loudness_target:
+          data.campaign?.loudness_target !== undefined && data.campaign?.loudness_target !== null
+            ? Number(data.campaign.loudness_target)
+            : -14
+      });
+...
+  const handleSaveFinishingOverride = async () => {
+    ...
+        body: JSON.stringify({
+          finishing_template: finishingOverride.finishing_template,
+          caption_mode: finishingOverride.caption_mode,
+          loudness_target: Number(finishingOverride.loudness_target)
+        })
+```
+**Code Sesudah (`(Revisi 03)`):**
+```js
+function getEffectiveCampaignFinishing(c) {
+  const rawTpl = String(c?.finishing_template ?? '').trim().toLowerCase();
+  const rawCap = String(c?.caption_mode ?? '').trim().toLowerCase();
+  const rawLoud = c?.loudness_target;
+  const hasLoud = rawLoud !== null && rawLoud !== undefined && String(rawLoud).trim() !== '' && Number.isFinite(Number(rawLoud));
+  return {
+    finishing_template: rawTpl || 'none',
+    finishing_template_is_default: !rawTpl,
+    caption_mode: ['hybrid', 'keyword_only', 'full'].includes(rawCap) ? rawCap : 'full', // R19.1: kosong/NULL => 'full'
+    caption_mode_is_default: !rawCap,
+    loudness_target: hasLoud ? Number(rawLoud) : -14,
+    loudness_target_is_default: !hasLoud
+  };
+}
+...
+  const baselineFinishing = getEffectiveCampaignFinishing(campaign);
+  const changedPayload = {};
+  if (finishingOverride.finishing_template !== baselineFinishing.finishing_template) {
+    changedPayload.finishing_template = finishingOverride.finishing_template;
+  }
+  if (finishingOverride.caption_mode !== baselineFinishing.caption_mode) {
+    changedPayload.caption_mode = finishingOverride.caption_mode;
+  }
+  if (Number(finishingOverride.loudness_target) !== baselineFinishing.loudness_target) {
+    changedPayload.loudness_target = Number(finishingOverride.loudness_target);
+  }
+  // PATCH hanya mengirim changedPayload (field yang tidak disentuh tidak dikirim -> DB NULL tetap NULL)
+```
+- UI Accordion E menambahkan keterangan kecil `"default (campaign lama)"` pada label/select `Caption Mode` bila `caption_mode` campaign masih `NULL`/kosong (`'full'`), serta `"default"` pada `finishing_template` (`none`) / `loudness_target` (`-14`) bila bernilai `NULL`/kosong.
+
+#### 2. [`app/api/v2/pillar-campaigns/[id]/route.js`](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/pillar-campaigns/%5Bid%5D/route.js) — Tolak String Kosong & Keputusan R19.3 (`R19.3`, `R19.4`)
+> **Keputusan Resmi `R19.3`**: String kosong (`""`) untuk `caption_mode` **ditolak HTTP `400`** (`Invalid caption_mode`). Jika caller ingin mengembalikan override ke default campaign lama (`NULL`), caller wajib mengirim **`null` secara eksplisit** (`caption_mode: null` → disimpan sebagai `NULL`). Aturan yang sama berlaku untuk `finishing_template` dan `loudness_target` (`R19.4`): tolak `""` dengan `400`, terima `null` untuk reset ke default/NULL, dan **tidak ada fallback tersembunyi ke `'hybrid'` / `'none'` / `-14`**.
+
+**Code Sebelum (`app/api/v2/pillar-campaigns/[id]/route.js:138-158`):**
+```js
+    if (body.finishing_template !== undefined) {
+      const normalizedTpl = String(body.finishing_template || 'none').trim().toLowerCase();
+      if (!FINISHING_TEMPLATE_IDS.includes(normalizedTpl)) {
+        return NextResponse.json({ error: `Invalid finishing_template: ${normalizedTpl}` }, { status: 400 });
+      }
+      updates.finishing_template = normalizedTpl;
+    }
+    if (body.caption_mode !== undefined) {
+      const normalizedCap = String(body.caption_mode || 'hybrid').trim().toLowerCase();
+      if (!['hybrid', 'keyword_only', 'full'].includes(normalizedCap)) {
+        return NextResponse.json({ error: `Invalid caption_mode: ${normalizedCap}` }, { status: 400 });
+      }
+      updates.caption_mode = normalizedCap;
+    }
+    if (body.loudness_target !== undefined) {
+      const numLoud = Number(body.loudness_target);
+      if (!Number.isFinite(numLoud) || numLoud < -24 || numLoud > -6) {
+        return NextResponse.json({ error: 'loudness_target must be between -24 and -6 LUFS' }, { status: 400 });
+      }
+      updates.loudness_target = numLoud;
+    }
+```
+**Code Sesudah (`(Revisi 03, R19.3, R19.4)`):**
+```js
+    if (body.finishing_template !== undefined) {
+      if (body.finishing_template === null) {
+        updates.finishing_template = null;
+      } else {
+        const normalizedTpl = String(body.finishing_template).trim().toLowerCase();
+        if (!normalizedTpl || !FINISHING_TEMPLATE_IDS.includes(normalizedTpl)) {
+          return NextResponse.json({ error: `Invalid finishing_template: ${normalizedTpl || '(empty)'}` }, { status: 400 });
+        }
+        updates.finishing_template = normalizedTpl;
+      }
+    }
+    if (body.caption_mode !== undefined) {
+      if (body.caption_mode === null) {
+        updates.caption_mode = null;
+      } else {
+        const normalizedCap = String(body.caption_mode).trim().toLowerCase();
+        if (!normalizedCap || !['hybrid', 'keyword_only', 'full'].includes(normalizedCap)) {
+          return NextResponse.json({ error: `Invalid caption_mode: ${normalizedCap || '(empty)'}` }, { status: 400 });
+        }
+        updates.caption_mode = normalizedCap;
+      }
+    }
+    if (body.loudness_target !== undefined) {
+      if (body.loudness_target === null) {
+        updates.loudness_target = null;
+      } else if (typeof body.loudness_target === 'string' && body.loudness_target.trim() === '') {
+        return NextResponse.json({ error: 'Invalid loudness_target: (empty)' }, { status: 400 });
+      } else {
+        const numLoud = Number(body.loudness_target);
+        if (!Number.isFinite(numLoud) || numLoud < -24 || numLoud > -6) {
+          return NextResponse.json({ error: 'loudness_target must be between -24 and -6 LUFS' }, { status: 400 });
+        }
+        updates.loudness_target = numLoud;
+      }
+    }
+```
+- **Audit R19.4 (`app/settings/presets/page.js`, `app/api/v2/operator-presets/[key]/route.js`, `apps/mcp/tools.mjs`)**:
+  - [`app/settings/presets/page.js`](file:///Users/sabeqmmursyid/_cfstudio/app/settings/presets/page.js): saat membuka preset kustom lama (`wf.caption_mode` kosong/undefined), `mapPresetToForm()` menampilkan nilai efektif `resolveCampaignCaptionMode(wf)` (`'full'` + label `"default (preset lama)"`) alih-alih diam-diam mengganti ke `'hybrid'`, sedangkan 5 preset sistem tetap memakai nilai eksplisit `wf.caption_mode`.
+  - [`app/api/v2/operator-presets/route.js`](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/operator-presets/route.js) & [`app/api/v2/operator-presets/[key]/route.js`](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/operator-presets/%5Bkey%5D/route.js): tolak string kosong `""` pada `config.workflow.finishing_template`, `caption_mode`, `loudness_target` dengan `400`.
+  - [`apps/mcp/tools.mjs`](file:///Users/sabeqmmursyid/_cfstudio/apps/mcp/tools.mjs): tool `cf_create_*` dan `cf_submit_custom_storyboard` sudah menggunakan `.optional()` dengan `z.enum(...)` & `z.number().min(-24).max(-6)` sehingga menolak `""` dan hanya meneruskan field bila eksplisit. Tambahkan validasi ketat `workflow.caption_mode` / `finishing_template` pada `cf_create_preset` / `cf_update_preset` via API route di atas.
+
+---
+
+### FASE 4 — Code Sebelum & Code Sesudah `(Revisi 03, R14–R18)` — Caption Refresh (2–3 Kata, Font Besar, Satu Sumber)
+
+#### 1. Daftar 8 File Template yang Layer Subtitle-nya Dipindah ke [`templates/finishing/shared-layers.js`](file:///Users/sabeqmmursyid/_cfstudio/templates/finishing/shared-layers.js) (`R14`)
+
+| # | File Template | Status `shared-layers.js` Sebelum | Perubahan Wajib (`R14`) | `--sub-top` & `--sub-right` |
+|---|---|---|---|---|
+| 1 | [`templates/finishing/base-caption.html`](file:///Users/sabeqmmursyid/_cfstudio/templates/finishing/base-caption.html) | Belum memuat `shared-layers.js` | Tambah `<style id="shared-layers-css">` + `<script src="./shared-layers.js">`, hapus CSS `.sub*`, `joinedLen`, dan DOM loop inline | `top: 69cqh`, `right: 6cqw` |
+| 2 | [`templates/finishing/calm-wellness.html`](file:///Users/sabeqmmursyid/_cfstudio/templates/finishing/calm-wellness.html) | Belum memuat `shared-layers.js` | Tambah `<style id="shared-layers-css">` + `<script src="./shared-layers.js">`, hapus CSS `.sub*`, `joinedLen`, dan DOM loop inline | `top: 69cqh`, `right: 15cqw` |
+| 3 | [`templates/finishing/recipe-pop.html`](file:///Users/sabeqmmursyid/_cfstudio/templates/finishing/recipe-pop.html) | Baru `<script>`, belum `<style id="shared-layers-css">` | Tambah `<style id="shared-layers-css">`, inject CSS bersama, hapus CSS `.sub*`, `joinedLen`, dan DOM loop inline | `top: 69cqh`, `right: 15cqw` |
+| 4 | [`templates/finishing/tips-listicle.html`](file:///Users/sabeqmmursyid/_cfstudio/templates/finishing/tips-listicle.html) | Sudah memuat CSS+JS `shared-layers.js` | Hapus CSS `.sub*`, `joinedLen`, & DOM loop inline → panggil `SL.renderSubtitle(...)` (sembunyi saat `endOn`) | `top: 71cqh`, `right: 15cqw` |
+| 5 | [`templates/finishing/ramuan-ritual.html`](file:///Users/sabeqmmursyid/_cfstudio/templates/finishing/ramuan-ritual.html) | Sudah memuat CSS+JS `shared-layers.js` | Hapus CSS `.sub*`, `joinedLen`, & DOM loop inline → panggil `SL.renderSubtitle(...)` (sembunyi saat `endOn`) | `top: 71cqh`, `right: 15cqw` |
+| 6 | [`templates/finishing/problem-solution.html`](file:///Users/sabeqmmursyid/_cfstudio/templates/finishing/problem-solution.html) | Sudah memuat CSS+JS `shared-layers.js` | Hapus CSS `.sub*`, `joinedLen`, & DOM loop inline → panggil `SL.renderSubtitle(...)` (sembunyi saat `endOn`) | `top: 72.5cqh`, `right: 15cqw` |
+| 7 | [`templates/finishing/angka-banding.html`](file:///Users/sabeqmmursyid/_cfstudio/templates/finishing/angka-banding.html) | Sudah memuat CSS+JS `shared-layers.js` | Hapus CSS `.sub*`, `joinedLen`, & DOM loop inline → panggil `SL.renderSubtitle(...)` (sembunyi saat `endOn`) | `top: 72.5cqh`, `right: 15cqw` |
+| 8 | [`templates/finishing/mitos-fakta.html`](file:///Users/sabeqmmursyid/_cfstudio/templates/finishing/mitos-fakta.html) | Sudah memuat CSS+JS `shared-layers.js` | Hapus CSS `.sub*`, `joinedLen`, & DOM loop inline → panggil `SL.renderSubtitle(...)` (sembunyi saat `endOn`) | `top: 72.5cqh`, `right: 15cqw` |
+
+**Code Sebelum (tersalin di 8 template, contoh [`base-caption.html:85-153, 293-338`](file:///Users/sabeqmmursyid/_cfstudio/templates/finishing/base-caption.html#L85-L153)):**
+```css
+    .sub { position: absolute; left: 6cqw; right: 6cqw; top: var(--sub-top, 69cqh); ... font-size: var(--sub-size, 6.6cqw); ... }
+    .sub.pill-mode span { background: #ffffff; ... font-size: 0.85em; margin: 0 0.7cqw; }
+    .sub.minimal-mode { font-size: 5cqw; background: rgba(255,255,255,0.92); color: #0f172a; ... }
+```
+```js
+    const joinedLen = visibleIndices.map((idx) => words[idx]?.w || '').join(' ').length;
+    let subCqw = '6.6cqw';
+    if (joinedLen > 22) subCqw = '4.9cqw';
+    else if (joinedLen > 17) subCqw = '5.6cqw';
+    else if (joinedLen > 14) subCqw = '6.1cqw';
+    oSub.style.setProperty('--sub-size', subCqw);
+    oSub.innerHTML = visibleIndices.map(...).join(' ');
+```
+**Code Sesudah ([`templates/finishing/shared-layers.js`](file:///Users/sabeqmmursyid/_cfstudio/templates/finishing/shared-layers.js) & panggilan ringkas di 8 template — `R14`, `R16`):**
+```css
+/* Disimpan tunggal di SUBTITLE_LAYERS_CSS dalam templates/finishing/shared-layers.js */
+.sub {
+  position: absolute;
+  left: var(--sub-left, 6cqw);
+  right: var(--sub-right, 15cqw);
+  top: var(--sub-top, 69cqh);
+  transform: translateY(-50%);
+  display: flex; justify-content: center; align-items: baseline; flex-wrap: nowrap;
+  white-space: nowrap; text-align: center;
+  --accent-active: var(--active-word, var(--accent, #ffd23f));
+}
+.sub.s-yellow {
+  font-family: var(--f-sub); font-weight: 900; font-size: 7.6cqw; line-height: 1.05;
+  text-transform: uppercase; color: #ffffff;
+  -webkit-text-stroke: 0.75cqw #000000; paint-order: stroke fill;
+  text-shadow: 0 0.9cqw 0 rgba(0, 0, 0, 0.55); gap: 2.2cqw;
+}
+.sub.s-yellow span.on { color: var(--accent-active); }
+.sub.s-pill { gap: 0; }
+.sub.s-pill .pill {
+  display: inline-flex; gap: 1.8cqw; align-items: baseline;
+  background: #ffffff; color: #0d0e11; border-radius: 2.4cqw;
+  padding: 1.4cqw 3.2cqw 1.6cqw; box-shadow: 0 1.2cqw 0 rgba(0, 0, 0, 0.45);
+  font-family: var(--f-sub); font-weight: 900; font-size: 7cqw; line-height: 1.05;
+  text-transform: uppercase;
+}
+.sub.s-pill .pill span { padding: 0 1cqw; border-radius: 1.2cqw; margin: 0 -1cqw; }
+.sub.s-pill .pill span.on { background: var(--accent-active); color: var(--pill-on-fg, #0d0e11); }
+.sub-band {
+  position: absolute; left: 0; right: 0; top: 56cqh; height: 28cqh; pointer-events: none;
+  background: linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,0.55) 45%, rgba(0,0,0,0.55) 70%, rgba(0,0,0,0));
+}
+.sub.s-minimal {
+  font-family: var(--f-sub); font-weight: 800; font-size: 6.8cqw; line-height: 1.1;
+  text-transform: none; color: #ffffff;
+  text-shadow: 0 0.4cqw 1.6cqw rgba(0, 0, 0, 0.55); gap: 2cqw;
+}
+.sub.s-minimal span { border-bottom: 0.9cqw solid transparent; padding-bottom: 0.3cqw; }
+.sub.s-minimal span.on { border-bottom-color: var(--accent-active); }
+```
+```js
+// Di templates/finishing/shared-layers.js:
+function renderSubtitle(oSub, timeline, t, {
+  style = timeline?.config?.style || 'floating_white_yellow',
+  captionMode = timeline?.config?.captionMode || 'full',
+  activePunch = null,
+  hidden = false,
+  bandEl = null,
+  subTop = null,
+  subLeft = null,
+  subRight = null
+} = {}) {
+  // 1. Apply class s-yellow | s-pill | s-minimal & CSS posisi (--sub-top, --sub-right)
+  // 2. Hormati hidden || captionMode === 'keyword_only' || (captionMode === 'hybrid' && activePunch)
+  // 3. Temukan activeChunk, saring punchWordSet jika captionMode === 'hybrid'
+  // 4. Render 1 .pill untuk s-pill, atau inline spans untuk s-yellow / s-minimal (tanpa joinedLen shrink!)
+  // 5. Terapkan singleWordScale bila chunk.singleWordFontScale diset (kata tunggal > 88cqw, min 6cqw — R15.7)
+  // 6. Animasi masuk 0.12s murni terhadap (t - activeChunk.s): scale(0.9 + 0.1*k), opacity min(1, 0.3 + k)
+  // 7. Toggle bandEl.hidden = !(style === 'minimal_white' && visible)
+}
+```
+- **Catatan Kontras Aksen (`R16`)**: Di `shared-layers.js`, saat `style === 'floating_black_on_white'`, hitung luminance warna aksen (`--accent-active`): bila warna brand terlalu gelap sehingga kontras teks `#0d0e11` rendah, gunakan `--pill-on-fg: #ffffff` (atau cerahkan chip highlight) agar teks kata aktif tetap terbaca tajam.
+
+#### 2. [`lib/motion-text-engine.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/motion-text-engine.js) — Aturan Pemotongan Baru `chunkCaptionWords()` (`R15`) & Sumber Frasa Terlindungi per Jalur Render (`R15.5`)
+
+**Code Sebelum (`lib/motion-text-engine.js:62-105` pada `v2.44.19`):**
+```js
+export function chunkCaptionWords(words = []) {
+  if (!Array.isArray(words) || words.length === 0) return [];
+  const chunks = [];
+  let cur = [];
+
+  for (let i = 0; i < words.length; i++) {
+    ...
+    if (cur.length >= 2 && candidateJoined.length > 16) {
+      chunks.push(cur);
+      cur = [];
+    }
+    cur.push(normalizedItem);
+    ...
+    if (
+      /[,.?!]$/.test(cleanWord) ||
+      cur.length >= 4 ||
+      (cur.length >= 2 && joined.length > 15) ||
+      hasClipBoundary
+    ) {
+      chunks.push(cur);
+      cur = [];
+    }
+  }
+  ...
+  return chunks;
+}
+```
+**Code Sesudah (`(Revisi 03, R15)` — mengacu `chunkNew()` pada [`mockup_caption_styles.html:189-229`](file:///Users/sabeqmmursyid/_cfstudio/mockup_caption_styles.html#L189-L229)):**
+```js
+export const SUBTITLE_CONNECTOR_WORDS = new Set([
+  // ID (tanpa 'ini' / 'itu' — R15.4: "Di titik ini," harus tetap utuh)
+  'dan', 'atau', 'di', 'ke', 'dari', 'per', 'untuk', 'yang', 'dengan', 'saat',
+  'karena', 'agar', 'serta', 'tanpa', 'jadi', 'sebelum', 'sesudah', 'seperti',
+  'tapi', 'kalau',
+  // EN
+  'and', 'or', 'the', 'to', 'of', 'in', 'for', 'with'
+]);
+
+export function collectProtectedSubtitlePhrases({
+  brand = null,
+  productData = null,
+  productCard = null,
+  finishingPlan = null,
+  planCheck = null,
+  recipe = null,
+  extraPhrases = []
+} = {}) {
+  // Ekstrak otomatis 2..4 kata (normalized) tanpa hardcoded brand manual (R15.5):
+  // - Nama produk/material/brand: productData.product_name / nama_produk / tags / spesifikasi, productCard.name, brand.name
+  // - Frasa lolos validasi finishing_plan: punches[].phrase, callouts[].trigger, compare[].left/right.title, numbers[].trigger, timingBadges[].trigger
+  // - Label bahan resep: kata inti recipe.ingredients.items[].label (tanpa angka takaran bila berdiri sebagai frasa inti, mis. "jahe merah")
+}
+
+export function chunkCaptionWords(words = [], options = {}) {
+  // 1. Batas dasar: maxWords = 3, maxChars = 16, break di batas klip (x.c !== cur[0].c)
+  // 2. Putus setelah [, . ? ! :] kecuali kata saat ini ada di SUBTITLE_CONNECTOR_WORDS
+  // 3. Putus SEBELUM kata sambung jika cur.length >= 2
+  // 4. Protected phrases (R15.5, 2..4 kata): jika memecah di posisi sekarang akan memotong frasa terlindungi,
+  //    pindahkan kata awal frasa ke potongan baru dan izinkan potongan tunggal frasa terlindungi hingga 4 kata
+  // 5. Post-pass trailing connector: jika potongan berakhir di kata sambung (length > 1) & klip sama &
+  //    potongan berikutnya < 3 kata dan gabungannya <= 16 char, geser kata sambung ke awal potongan berikut
+  // 6. Merge potongan < 0.45s di klip yang sama (coba tetangga sesudah dulu lalu sebelum) jika <= 3 kata & <= 18 char
+  //    (pengecualian R15.6: 1 kata berdurasi < 0.3s boleh bergabung sampai total 4 kata)
+  // 7. Width guard > 88cqw (R15.7): ukur dengan measureFontTextWidth() sesuai ukuran gaya (7.6cqw / 7cqw / 6.8cqw);
+  //    jika chunk > 1 kata dan lebar > 88cqw -> belah pada batas kata (dengan perlindungan akhir connector tidak yatim);
+  //    hanya JIKA 1 kata tunggal masih > 88cqw, hitung singleWordFontCqw (min 6cqw) pada kata tersebut.
+}
+```
+
+**Pemetaan Sumber Data Frasa Terlindungi (`R15.5`) untuk Tiap Jalur Render:**
+
+| Jalur Render | Titik Masuk Kode | Sumber Produk / Material / Brand | Sumber `finishing_plan` Tervalidasi | Sumber Label Bahan Resep |
+|---|---|---|---|---|
+| **1. Playwright Finishing Pass Utama** (OPC, RE, Multiplier, Sheets) | [`processTtsStudioMuxing`](file:///Users/sabeqmmursyid/_cfstudio/lib/video-studio-processor.js#L1039-L1109) → [`buildPhase1Timeline`](file:///Users/sabeqmmursyid/_cfstudio/lib/finishing-overlay-renderer.js#L22-L125) | `productData` (`product_name`, `spesifikasi_produk`, `tags`, `name`), `productCard?.name`, `brand?.name` | `planCheck.punches[].phrase`, `planCheck.callouts[].trigger`, `planCheck.compare[].left.title` & `right.title`, `planCheck.numbers[].trigger`, `planCheck.timingBadges[].trigger` | `recipe?.ingredients?.items[].label` (kata inti dari `extractRecipeOverlayData`) |
+| **2. Fallback Sharp/SVG Global Timeline** | [`processTtsStudioMuxing` catch block](file:///Users/sabeqmmursyid/_cfstudio/lib/video-studio-processor.js#L1132-L1145) → [`renderGlobalTimelineOverlay`](file:///Users/sabeqmmursyid/_cfstudio/lib/motion-text-engine.js#L380-L412) | Diteruskan via argumen baru `protectedPhrases` dari `collectProtectedSubtitlePhrases({ brand, productData, productCard, finishingPlan: validatedPlan, recipe })` (jika `isRichTemplate` false tetap ekstrak produk/brand + resep bila ada + `validateFinishingPlan`) | Sama dengan jalur utama melalui hasil validasi `finishingPlan` (`punches`, `callouts`, `compare`, `numbers`, `timingBadges`) | `extractRecipeOverlayData` jika tersedia / `recipe` |
+| **3. Legacy Per-Clip / YouTube Timeline** | [`generateMotionTextFrames`](file:///Users/sabeqmmursyid/_cfstudio/lib/motion-text-engine.js#L535-L583) | Menerima opsional `options.protectedPhrases` (dari `productData` / `brandName` pemanggil bila ada) | Kosong kecuali caller meneruskan `finishingPlan` tervalidasi | Kosong kecuali caller meneruskan `recipe` |
+| **4. Live Preview UI (Browser)** | [`buildPreviewTimeline`](file:///Users/sabeqmmursyid/_cfstudio/lib/finishing-preview-builder.js#L17-L140) | `productName`, `productSpec`, `brandName` dari props campaign/preset | `punches[].phrase`, `compare`, `numbers`, `callouts`, `timingBadges` sample preview | Label bahan sampel pada `recipe` |
+
+#### 3. Spesifikasi 3 Gaya (`R16`), Fallback Sharp/SVG (`R17.2`), & Audit Anti-Tabrakan (`R17.3`)
+- **Sharp/SVG [`renderSubtitleChunkSvg()`](file:///Users/sabeqmmursyid/_cfstudio/lib/motion-text-engine.js#L255-L341) (`R17.2`)**:
+  - **`floating_white_yellow`**: naik dari `0.066 * width` ke **`Math.round(width * 0.076)`** (`7.6cqw`), stroke hitam proporsional `Math.round(width * 0.0075 * 2)` (`0.75cqw`), tanpa pengecilan multi-kata (kecuali 1 kata tunggal melebihi `88cqw` sampai batas `0.06 * width` = `6cqw`), warna kata aktif `#ffd23f` atau `activeWordColor` brand.
+  - **`floating_black_on_white`**: ubah dari multi-kotak per kata (`pills` per token) menjadi **satu pill putih tunggal** (`rx = Math.round(width * 0.024)`) untuk seluruh potongan dengan font **`Math.round(width * 0.07)`** (`7cqw`), kata aktif disorot dengan kotak persegi bulat aksen di dalam pill tersebut.
+  - **`minimal_white`**: ubah dari kartu putih pekat menjadi **gradasi gelap tipis** (56–84% tinggi frame, puncak opasitas `0.55`), teks **huruf normal (`fontSize = Math.round(width * 0.068)` = `6.8cqw`, Montserrat ExtraBold `800`)**, putih tanpa stroke, dengan **garis bawah warna aksen** pada kata aktif.
+- **Audit Tabrakan Layer (`R17.3`, `R18`)**:
+  - Periksa jarak vertikal antara `.sub` (font baru `6.8–7.6cqw` + pill padding) dengan `.cta` (`47–56cqh`), `.x-notice` (`60.5cqh`), `.x-lower` (`57cqh`), `.x-recap` (`15cqh..`), dan `.save-card` di **`tips_listicle`**, **`ramuan_ritual`**, dan **`recipe_pop`**, agar tidak ada tumpang tindih pada kondisi pill/subtitle aktif (zona aman `R6.4`).
+
+---
+
+## Kriteria Verifikasi Minimum per Rilis — `(Revisi 03)`
+
+| Verifikasi | Fase 0–3 ✅ | Fase 2b | Fase 4-T0 (`R19`) | Fase 4 (`R14`–`R18`) |
+|---|---|---|---|---|
+| Render ulang `opc_2117` & `mul_261113_qt67yl` + contact sheet `0.5s` | Wajib ✅ | Batal | — | Wajib (+ `opc_1756`, 3 video x 3 gaya) |
+| Override campaign lama (`caption_mode IS NULL`) ganti `finishing_template` saja → DB `caption_mode` tetap `NULL` & render `'full'`; kirim `""` → `400` | — | Batal | Wajib | Regresi |
+| Unit test `chunkCaptionWords()` (`opc_2107`, `opc_1756`, `mul_261113_nfrdfh`, ≤3 kata, zero trailing connector, `<0.45s` merge, `R15.5` per jalur render, `>88cqw` split) | — | Batal | — | Wajib |
+| Grep seluruh 8 template HTML bersih dari CSS `.sub` ukuran font & aturan `joinedLen` (hanya di `shared-layers.js`) | — | Batal | — | Wajib |
+| Pengukuran frame Playwright & Sharp: lebar potongan `<= 88cqw` + cek tabrakan `tips_listicle`, `ramuan_ritual`, `recipe_pop` | — | Batal | — | Wajib |
+| `npm run build` + smoke test Staging | Wajib ✅ | Batal | Wajib | Wajib |

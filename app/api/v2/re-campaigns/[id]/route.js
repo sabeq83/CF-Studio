@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { getReCampaign, listReCampaignItems, getReCampaignStats, getDb } from '../../../../../lib/db';
 import { withTenantContext } from '../../../../../lib/auth';
+import { parseFinishingOverrideFields } from '../../../../../lib/finishing-template-registry';
 
 export const GET = withTenantContext(async (request, { params }) => {
   try {
@@ -174,6 +175,11 @@ export const PATCH = withTenantContext(async (request, { params }) => {
     if (body.voice_cast_json !== undefined) {
       updates.voice_cast_json = body.voice_cast_json || null;
     }
+    const finishingParsed = parseFinishingOverrideFields(body, { allowNull: true });
+    if (finishingParsed.error) {
+      return NextResponse.json({ error: finishingParsed.error }, { status: finishingParsed.status });
+    }
+    Object.assign(updates, finishingParsed.updates);
     
     if (Object.keys(updates).length === 0) {
       return NextResponse.json({ error: 'No valid update fields' }, { status: 400 });
