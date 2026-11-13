@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup UI — Preview Caption Adaptif Afiliasi (FB vs Non-FB) | MAKNA Flow</title>
+  <style>
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --radius-xs: 6px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --surface-subtle: #0c121e;
+      --input-bg: #0c1422;
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --border-color: #26354a;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --surface-subtle: #f7f9fc;
+      --input-bg: #ffffff;
+      --overlay-backdrop: rgba(15, 23, 42, 0.54);
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --border-color: #d8e0ea;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --link: #075ea8;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --focus-ring: #6d4ed6;
+      --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+      --shadow-modal: 0 26px 80px rgba(31, 45, 61, 0.22);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px;
+      background: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+    }
+
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-card);
+    }
+
+    .topbar h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .topbar p {
+      margin: 4px 0 0;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    button, select, input, textarea {
+      font-family: inherit;
+    }
+
+    button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    .btn-secondary {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-xs);
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+      background: var(--surface-hover);
+    }
+
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      border-radius: var(--radius-xs);
+      padding: 9px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (max-width: 920px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin: 0 0 14px;
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+    }
+
+    .control {
+      width: 100%;
+      background: var(--input-bg);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      padding: 8px 10px;
+      font-size: 12px;
+    }
+
+    .toggle-box {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      cursor: pointer;
+    }
+
+    .toggle-box input {
+      margin-top: 2px;
+      cursor: pointer;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .badge-info { background: var(--status-info-soft); color: var(--status-info); }
+    .badge-success { background: var(--status-success-soft); color: var(--status-success); }
+    .badge-warning { background: var(--status-warning-soft); color: var(--status-warning); }
+    .badge-danger { background: var(--status-danger-soft); color: var(--status-danger); }
+
+    .resolution-summary {
+      padding: 12px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .mono {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      word-break: break-all;
+      color: var(--link);
+    }
+
+    .modal-shell {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-modal);
+      overflow: hidden;
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 18px;
+      background: var(--surface-raised);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .modal-head h2 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .modal-body {
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .account-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .account-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: var(--radius-xs);
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .account-pill.active {
+      border-color: var(--action-primary);
+      background: var(--status-info-soft);
+    }
+
+    .preview-panel {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+
+    .preview-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--surface-subtle);
+    }
+
+    .tab-group {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: var(--surface-interactive);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border-color: var(--action-primary);
+    }
+
+    .preview-body {
+      padding: 12px;
+      white-space: pre-wrap;
+      font-size: 12px;
+      color: var(--text-primary);
+      line-height: 1.55;
+      background: var(--input-bg);
+      min-height: 110px;
+    }
+
+    .preview-foot {
+      padding: 8px 12px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .alert-inline {
+      padding: 9px 12px;
+      border-radius: var(--radius-xs);
+      font-size: 11px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .alert-warning {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border: 1px solid var(--border-strong);
+    }
+
+    .alert-success {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .modal-foot {
+      padding: 14px 18px;
+      border-top: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div>
+        <h1>Simulasi Presisi Link Afiliasi &amp; Preview Caption `PublishingScheduler`</h1>
+        <p>Simulasi aturan <strong>Brand-First + Global Fallback</strong> serta pemisahan otomatis Caption Facebook vs Non-FB untuk jalur Auto Pipeline Schedule &amp; 1-Klik ContentFlow.</p>
+      </div>
+      <div class="btn-row">
+        <button class="btn-secondary" id="toggleModeBtn" type="button">Mode Modal: Single</button>
+        <button class="btn-secondary" id="themeToggleBtn" type="button">Tema: Dark</button>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Panel Kiri: Simulasi Konteks Produk & Brand -->
+      <div class="card">
+        <h2 class="card-title">1. Konteks Generasi (Upstream)</h2>
+
+        <div class="field">
+          <label for="brandSelect">Brand Profile Terpilih</label>
+          <select id="brandSelect" class="control">
+            <option value="brand_dapurbotani">Dapur Botani Official (Brand A)</option>
+            <option value="brand_herbalnusantara">Herbal Nusantara (Brand B)</option>
+            <option value="brand_tanpa_override">Klinik Alami (Belum Ada Link Brand)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="productSelect">Produk Terpilih (`product_id`)</label>
+          <select id="productSelect" class="control">
+            <option value="prod_garlibee">GarliBee Madu Bawang Lanang</option>
+            <option value="prod_minyakzaitun">Minyak Zaitun Extra Virgin (Web Resmi)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="toggle-box" for="affiliateToggle">
+            <input type="checkbox" id="affiliateToggle" checked />
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--text-primary)">Sertakan Rekomendasi Produk &amp; Affiliate</div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Jika dicentang, `post_link_affiliate: true` mengisi CTA ber-link hanya ke Facebook dan CTA Link di Bio ke IG/TikTok. Jika tidak dicentang, seluruh caption bersih tanpa link/CTA penjualan.</div>
+            </div>
+          </label>
+        </div>
+
+        <div class="resolution-summary" id="resolutionSummary"></div>
+      </div>
+
+      <!-- Panel Kanan: Preview Modal PublishingScheduler -->
+      <div class="modal-shell">
+        <div class="modal-head">
+          <h2 id="modalHeading">Jadwalkan Publikasi Konten (ContentFlow)</h2>
+          <span class="badge badge-info" id="sourceBadge">Jalur 1-Klik → ContentFlow</span>
+        </div>
+
+        <div class="modal-body">
+          <div class="field" style="margin-bottom:0">
+            <label>Pilih Akun Tujuan Publikasi</label>
+            <div class="account-pills" id="accountPills"></div>
+          </div>
+
+          <div id="bulkBanner" class="alert-inline alert-warning" style="display:none">
+            <span>Mode Bulk (2 konten): <strong>Caption Asli Masing-Masing Video</strong> — setiap item otomatis resolves `caption_facebook` (ber-link afiliasi brand) untuk akun Facebook dan `caption_bio` untuk IG/TikTok.</span>
+          </div>
+
+          <div class="field" style="margin-bottom:0">
+            <label style="display:flex;justify-content:space-between;align-items:center">
+              <span>Caption &amp; Tag Dasar <span style="color:var(--link);font-weight:400">(Autoload dari Video)</span></span>
+              <button type="button" class="btn-secondary" id="resetCaptionBtn" style="padding:3px 8px;font-size:10px">Reset ke Caption AI</button>
+            </label>
+            <textarea id="baseCaptionInput" rows="4" class="control"></textarea>
+          </div>
+
+          <div id="manualEditNotice" class="alert-inline alert-warning" style="display:none">
+            <span>Anda mengedit caption secara manual — sistem akan memakai teks yang Anda ketik tanpa menimpa dengan CTA otomatis.</span>
+            <button type="button" class="btn-secondary" id="restoreAutoBtn" style="padding:4px 8px;font-size:10px">Gunakan Lagi Adaptif AI</button>
+          </div>
+
+          <!-- Komponen Preview Baru untuk PublishingScheduler -->
+          <div class="preview-panel">
+            <div class="preview-header">
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                <strong style="font-size:12px">Preview Caption Terkirim Per Platform</strong>
+                <span class="badge" id="previewStatusBadge">Deterministik</span>
+              </div>
+              <div class="tab-group">
+                <button type="button" class="tab-btn active" data-tab="facebook">Facebook (FB Link)</button>
+                <button type="button" class="tab-btn" data-tab="nonfb">IG / TikTok / Non-FB (Bio)</button>
+              </div>
+            </div>
+            <div class="preview-body" id="previewBody"></div>
+            <div class="preview-foot">
+              <span id="previewExplain"></span>
+              <span class="mono" id="payloadFlagInfo"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-foot">
+          <div style="font-size:11px;color:var(--text-muted)">
+            Payload ke <code>/api/v2/publishing/jobs</code> membawa <code class="mono">caption_facebook</code> &amp; <code class="mono">caption_bio</code> saat tidak diedit manual.
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn-secondary" id="simulateSaveBtn">Simulasikan Payload JSON</button>
+            <button type="button" class="btn-primary" id="submitMockBtn">Jadwalkan Sekarang</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="payloadInspectorCard" style="display:none">
+      <h2 class="card-title">Inspeksi Payload API Terkirim</h2>
+      <pre id="payloadInspector" class="mono" style="margin:0;white-space:pre-wrap;background:var(--input-bg);padding:12px;border-radius:var(--radius-xs);border:1px solid var(--border-subtle)"></pre>
+    </div>
+  </div>
+
+  <script>
+    const MOCK_DATA = {
+      brands: {
+        brand_dapurbotani: { name: 'Dapur Botani Official', code: 'brand_a' },
+        brand_herbalnusantara: { name: 'Herbal Nusantara', code: 'brand_b' },
+        brand_tanpa_override: { name: 'Klinik Alami', code: 'none' }
+      },
+      products: {
+        prod_garlibee: {
+          name: 'GarliBee Madu Bawang Lanang',
+          globalLink: 'https://shopee.co.id/garlibee-global-store-sample',
+          brandLinks: {
+            brand_dapurbotani: 'https://shopee.co.id/dapurbotani-garlibee-sample',
+            brand_herbalnusantara: 'https://shopee.co.id/herbalnusantara-garlibee-sample'
+          },
+          baseStory: 'Rutinitas pagi terasa jauh lebih ringan kalau metabolisme dan energi harian terjaga sejak bangun tidur.\n\nSalah satu kebiasaan simpel yang konsisten dilakukan adalah konsumsi madu bawang fermentasi sebelum beraktivitas.',
+          hashtags: ['#DapurBotani', '#GarliBee', '#RutinitasPagi', '#HidupSehat']
+        },
+        prod_minyakzaitun: {
+          name: 'Minyak Zaitun Extra Virgin',
+          globalLink: 'https://toko.example-brand.test/zaitun-extra-virgin',
+          brandLinks: {
+            brand_dapurbotani: 'https://dapurbotani.example-brand.test/zaitun-organik',
+            brand_herbalnusantara: ''
+          },
+          baseStory: 'Memilih lemak sehat untuk menu keluarga membantu menjaga keseimbangan nutrisi tanpa mengurangi cita rasa masakan rumah.',
+          hashtags: ['#MinyakZaitun', '#MasakSehat', '#KeluargaSehat']
+        }
+      },
+      accounts: [
+        { id: 'acc_fb', name: 'Dapur Botani FB Page', platform: 'facebook' },
+        { id: 'acc_ig', name: '@dapurbotani.id', platform: 'instagram' },
+        { id: 'acc_tt', name: '@dapurbotani_tiktok', platform: 'tiktok' }
+      ]
+    };
+
+    const state = {
+      brandId: 'brand_dapurbotani',
+      productId: 'prod_garlibee',
+      affiliateEnabled: true,
+      selectedAccounts: ['acc_fb', 'acc_ig'],
+      activePreviewTab: 'facebook',
+      bulkMode: false,
+      manualEdited: false,
+      manualText: '',
+      theme: 'dark'
+    };
+
+    function isShopeeUrl(url) {
+      return /shopee\.co\.id|shope\.ee/i.test(url || '');
+    }
+
+    function resolveAffiliateSimulation() {
+      const product = MOCK_DATA.products[state.productId];
+      const brand = MOCK_DATA.brands[state.brandId];
+      const brandLink = product.brandLinks[state.brandId] || '';
+      const resolvedLink = brandLink || product.globalLink || '';
+      const source = brandLink
+        ? `brand_product (${brand.name})`
+        : 'product_extractions (Global Fallback)';
+
+      const tagsStr = product.hashtags.join(' ');
+      if (!state.affiliateEnabled) {
+        const clean = `${product.baseStory}\n\n${tagsStr}`;
+        return {
+          product,
+          brand,
+          resolvedLink: '',
+          source: 'affiliate_disabled (Toggle OFF)',
+          captionBase: clean,
+          captionFacebook: clean,
+          captionBio: clean
+        };
+      }
+
+      const fbCtaLine = isShopeeUrl(resolvedLink)
+        ? `Beli ${product.name} asli di Shopee resmi kami di sini:`
+        : `Dapatkan ${product.name} asli selengkapnya di sini:`;
+      const captionFacebook = `${product.baseStory}\n\n🛒 Rekomendasi Produk Resmi:\n${fbCtaLine}\n${resolvedLink}\n\n${tagsStr}`;
+      const captionBio = `${product.baseStory}\n\n👉 Info Bahan/Produk:\nProduk rekomendasi (${product.name}) bisa kamu cek langsung di Link di Bio ya! ✨\n\n${tagsStr}`;
+
+      return {
+        product,
+        brand,
+        resolvedLink,
+        source,
+        captionBase: `${product.baseStory}\n\n${tagsStr}`,
+        captionFacebook,
+        captionBio
+      };
+    }
+
+    function renderAccounts() {
+      const container = document.getElementById('accountPills');
+      container.innerHTML = '';
+      MOCK_DATA.accounts.forEach((acc) => {
+        const active = state.selectedAccounts.includes(acc.id);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `account-pill ${active ? 'active' : ''}`;
+        btn.textContent = `${active ? '✓ ' : ''}${acc.name} (${acc.platform.toUpperCase()})`;
+        btn.onclick = () => {
+          if (active && state.selectedAccounts.length > 1) {
+            state.selectedAccounts = state.selectedAccounts.filter((id) => id !== acc.id);
+          } else if (!active) {
+            state.selectedAccounts = [...state.selectedAccounts, acc.id];
+          }
+          render();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function render() {
+      const sim = resolveAffiliateSimulation();
+      const summaryEl = document.getElementById('resolutionSummary');
+      summaryEl.innerHTML = `
+        <div><strong>Produk Terkunci:</strong> ${sim.product.name}</div>
+        <div><strong>Brand Kampanye:</strong> ${sim.brand.name}</div>
+        <div><strong>Sumber Resolusi:</strong> <span class="badge ${state.affiliateEnabled ? 'badge-success' : 'badge-warning'}">${sim.source}</span></div>
+        <div><strong>Link Afiliasi Final:</strong> <div class="mono">${sim.resolvedLink || '(Kosong — Tidak menyisipkan link atau CTA)'}</div></div>
+      `;
+
+      renderAccounts();
+
+      const textarea = document.getElementById('baseCaptionInput');
+      if (!state.manualEdited) {
+        textarea.value = sim.captionBase;
+      }
+
+      document.getElementById('manualEditNotice').style.display = state.manualEdited ? 'flex' : 'none';
+      document.getElementById('bulkBanner').style.display = state.bulkMode ? 'flex' : 'none';
+      document.getElementById('modalHeading').textContent = state.bulkMode
+        ? 'Jadwalkan Publikasi Massal (2 Video ContentFlow)'
+        : 'Jadwalkan Publikasi Konten (ContentFlow)';
+
+      const previewBody = document.getElementById('previewBody');
+      const statusBadge = document.getElementById('previewStatusBadge');
+      const explainEl = document.getElementById('previewExplain');
+      const flagEl = document.getElementById('payloadFlagInfo');
+
+      document.querySelectorAll('.tab-btn').forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.tab === state.activePreviewTab);
+      });
+
+      if (state.manualEdited) {
+        previewBody.textContent = state.manualText;
+        statusBadge.className = 'badge badge-warning';
+        statusBadge.textContent = 'Manual Override';
+        explainEl.textContent = 'User mengedit caption manual -> caption_facebook & caption_bio dikirim null.';
+        flagEl.textContent = 'caption_override=true';
+      } else if (!state.affiliateEnabled) {
+        previewBody.textContent = sim.captionBase;
+        statusBadge.className = 'badge badge-danger';
+        statusBadge.textContent = 'Affiliate OFF (Edukasi Bersih)';
+        explainEl.textContent = 'affiliate_disabled=true -> FB & Non-FB sama-sama bebas link/CTA jualan.';
+        flagEl.textContent = 'affiliate_disabled=true';
+      } else if (state.activePreviewTab === 'facebook') {
+        previewBody.textContent = sim.captionFacebook;
+        statusBadge.className = 'badge badge-success';
+        statusBadge.textContent = 'Facebook: Link Brand Terpasang';
+        explainEl.textContent = `Khusus target platform "facebook" -> memakai link dari ${sim.source}.`;
+        flagEl.textContent = 'target=facebook (caption_facebook)';
+      } else {
+        previewBody.textContent = sim.captionBio;
+        statusBadge.className = 'badge badge-info';
+        statusBadge.textContent = 'Non-FB: CTA Link di Bio';
+        explainEl.textContent = 'Instagram / TikTok / Shorts -> tanpa URL mentah agar aman dari penalti link.';
+        flagEl.textContent = 'target=non-fb (caption_bio)';
+      }
+    }
+
+    document.getElementById('brandSelect').addEventListener('change', (e) => {
+      state.brandId = e.target.value;
+      render();
+    });
+
+    document.getElementById('productSelect').addEventListener('change', (e) => {
+      state.productId = e.target.value;
+      state.manualEdited = false;
+      render();
+    });
+
+    document.getElementById('affiliateToggle').addEventListener('change', (e) => {
+      state.affiliateEnabled = e.target.checked;
+      render();
+    });
+
+    document.getElementById('baseCaptionInput').addEventListener('input', (e) => {
+      const sim = resolveAffiliateSimulation();
+      state.manualText = e.target.value;
+      state.manualEdited = e.target.value !== sim.captionBase;
+      render();
+    });
+
+    document.getElementById('resetCaptionBtn').addEventListener('click', () => {
+      state.manualEdited = false;
+      render();
+    });
+
+    document.getElementById('restoreAutoBtn').addEventListener('click', () => {
+      state.manualEdited = false;
+      render();
+    });
+
+    document.querySelectorAll('.tab-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        state.activePreviewTab = btn.dataset.tab;
+        render();
+      });
+    });
+
+    document.getElementById('toggleModeBtn').addEventListener('click', (e) => {
+      state.bulkMode = !state.bulkMode;
+      e.target.textContent = `Mode Modal: ${state.bulkMode ? 'Bulk (2 Konten)' : 'Single'}`;
+      render();
+    });
+
+    document.getElementById('themeToggleBtn').addEventListener('click', (e) => {
+      state.theme = state.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', state.theme);
+      e.target.textContent = `Tema: ${state.theme === 'dark' ? 'Dark' : 'Light'}`;
+    });
+
+    function showPayload() {
+      const sim = resolveAffiliateSimulation();
+      const payload = {
+        endpoint: state.bulkMode ? 'POST /api/v2/publishing/bulk-jobs' : 'POST /api/v2/publishing/jobs',
+        account_ids: state.selectedAccounts,
+        caption: state.manualEdited ? state.manualText : sim.captionBase,
+        caption_facebook: state.manualEdited ? null : sim.captionFacebook,
+        caption_bio: state.manualEdited ? null : sim.captionBio,
+        caption_override: state.manualEdited,
+        product_id: state.productId,
+        brand_profile_id: state.brandId
+      };
+      document.getElementById('payloadInspectorCard').style.display = 'block';
+      document.getElementById('payloadInspector').textContent = JSON.stringify(payload, null, 2);
+    }
+
+    document.getElementById('simulateSaveBtn').addEventListener('click', showPayload);
+    document.getElementById('submitMockBtn').addEventListener('click', showPayload);
+
+    render();
+  </script>
+</body>
+</html>
+

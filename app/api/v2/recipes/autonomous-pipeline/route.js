@@ -158,6 +158,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
           items: storyboardItems,
           brandId: body.brand_id || body.brandId || body.storyboard?.brand_id || null,
           presetKey: body.preset_key || body.presetKey || body.storyboard?.preset_key || null,
+          promptMode: body.prompt_mode || body.promptMode || body.storyboard?.prompt_mode || null,
           tenantId,
           executionMode: body.execution_mode || body.executionMode || 'full_autopilot',
           idempotencyKey

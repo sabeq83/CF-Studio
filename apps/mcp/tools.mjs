@@ -769,6 +769,9 @@ export function createCfStudioServer(rawRequest) {
     aspect_ratio: z.enum(['9:16', '16:9', '1:1']).default('9:16'),
     visual_style: z.string().default('Cinematic'),
     visual_mode: z.enum(['hybrid_lock', 'pure_t2v']).default('hybrid_lock'),
+    video_model: z.enum(['veo_31_lite', 'omni_flash']).optional(),
+    face_visibility: z.string().optional(),
+    narrative_mode: z.string().optional(),
     voice_provider: z.enum(['gemini', 'minimax', 'elevenlabs']).default('gemini'),
     voice_persona: z.string().default('Aoede'),
     elevenlabs_model: z.string().optional(),
@@ -782,6 +785,8 @@ export function createCfStudioServer(rawRequest) {
     clip_duration: z.number().min(1).max(15).optional(),
     target_ai_engine: z.string().default('Google Veo (8s)'),
     visual_identity_preset_id: z.string().max(100).optional(),
+    enable_audio_segment: z.boolean().optional(),
+    sfx_setting: z.string().optional(),
     enable_motion_text: z.boolean().default(true),
     motion_text_style: z.string().default('floating_white_yellow'),
     motion_text_position: z.string().default('bottom'),
@@ -800,11 +805,20 @@ export function createCfStudioServer(rawRequest) {
   const storyboardSceneSchema = z.object({
     scene_index: z.number().int().min(1).max(12).optional(),
     voiceover_text: z.string().trim().min(1),
-    visual_prompt: z.string().trim().min(1),
+    visual_action: z.string().trim().min(1).optional(),
+    visual_description: z.string().trim().min(1).optional(),
+    visual_prompt: z.string().trim().min(1).optional(),
+    scene_role: z.enum(['hook', 'problem', 'mechanism', 'intro_product', 'gap', 'recall_product', 'cta', 'conclusion']).optional(),
+    setting_hint: z.string().max(300).optional(),
+    product_visible: z.boolean().optional(),
+    audio_mood: z.string().max(200).optional(),
     i2v_prompt: z.string().optional(),
     camera_movement: z.string().optional(),
     duration_seconds: z.number().min(1).max(15).default(8)
-  });
+  }).refine(
+    s => Boolean(s.visual_action || s.visual_description || s.visual_prompt),
+    { message: 'Setiap scene wajib mengisi minimal salah satu dari visual_action, visual_description, atau visual_prompt.' }
+  );
 
   const storyboardSocialSchema = z.object({
     title: z.string().optional(),
@@ -817,12 +831,20 @@ export function createCfStudioServer(rawRequest) {
   const singleStoryboardFields = {
     brand_id: z.string().max(100).optional(),
     preset_key: z.string().trim().min(1).max(100).optional(),
+    prompt_mode: z.enum(['gemini_engineer', 'direct_passthrough']).default('gemini_engineer'),
     product_id: z.string().max(100).optional(),
     product_name: z.string().max(300).optional(),
     require_product_photo: z.boolean().optional(),
     enable_social_post: z.boolean().optional(),
     auto_sync_contentflow: z.boolean().optional(),
+    post_link_affiliate: z.boolean().optional(),
     visual_identity_preset_id: z.string().max(100).optional(),
+    content_pillar: z.string().max(200).optional(),
+    creative_brief: z.string().max(1000).optional(),
+    narrative_mode: z.string().max(80).optional(),
+    ai_directive: z.string().max(1000).optional(),
+    mandatory_outro_line: z.string().max(300).optional(),
+    is_bridging_active: z.boolean().optional(),
     bridge_at_clip: z.number().int().min(1).max(12).optional(),
     bridge_duration_clips: z.number().int().min(0).max(12).optional(),
     bridge_segments: z.array(bridgeSegmentSchema).max(3).optional(),
@@ -836,7 +858,7 @@ export function createCfStudioServer(rawRequest) {
   // Engine 6: Custom Storyboard Submission (Claude / External AI to Video Pipeline + Batch up to 12)
   register(
     'cf_submit_custom_storyboard',
-    'Submit 1 or a batch (up to 12) of custom storyboards. Provide preset_key (from cf_list_presets) + title + scenes (and optional product_id/brand_id) to inherit all voice, Visual Identity, bridging, and workflow settings automatically without passing manual video_dna config.',
+    'Submit 1 or a batch (up to 12) of custom storyboards. In default prompt_mode="gemini_engineer", send preset_key + title + scenes (voiceover_text, visual_action/visual_description, optional camera_movement/scene_role/setting_hint/product_visible/audio_mood) + optional product_id/brand_id/creative_brief; Gemini AI locks your VO and engineers full t2i/i2v prompts before Start Frame & Veo rendering. Use prompt_mode="direct_passthrough" only for raw pre-engineered prompts.',
     {
       idempotency_key: z.string().trim().min(1).max(128).optional(),
       ...singleStoryboardFields,
@@ -857,6 +879,7 @@ export function createCfStudioServer(rawRequest) {
             pipeline_type: 'custom_storyboard',
             brand_id: storyboard.brand_id,
             preset_key: storyboard.preset_key,
+            prompt_mode: storyboard.prompt_mode,
             execution_mode,
             idempotency_key,
             items

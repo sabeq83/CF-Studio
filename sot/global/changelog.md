@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.44.2 — Custom Storyboard Gemini Prompt Engineer Workflow (13/11/2026)
+- Default prompt_mode gemini_engineer pada MCP cf_submit_custom_storyboard dengan penyimpanan storyboard tervalidasi
+- Tambahkan buildCustomStoryboardPromptEngineerPrompt di lib/prompts.js untuk mengunci VO dan durasi sambil menyusun T2I, I2V, DNA, dan paket sosmed via Gemini AI
+- Integrasikan processPillarGenerator, review_state approved untuk full_autopilot di Start Frame checkpoint, dan verifikasi unit test
+
 ## V2.44.1 — Fix Product Campaign Bridging Decoupling & Multi-Segment Curve (13/11/2026)
 - Pisahkan toggle post_link_affiliate dari is_bridging_active pada product_campaign
 - Aktifkan multi-segment bridging pada Dynamic Story Curve dan contoh prompt T2I/I2V/VO product_campaign
