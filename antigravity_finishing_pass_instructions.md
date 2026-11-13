@@ -2,6 +2,8 @@
 
 > **Revisi 01 berlaku:** baca `antigravity_finishing_pass_revisi_01.md` sebelum mengerjakan apa pun. Revisi itu mengubah hook card Fase 0 (compliance + auto-fit), timing subtitle Fase 0, dan renderer layer animasi (template HTML + Playwright, menggantikan Sharp/SVG Fase 2 dan Remotion Fase 3), aturan agar template bersifat umum (R6), re-finish backlog ContentFlow (R7), dan penempatan pilihan template di preset (R8).
 
+> **Revisi 02 berlaku (setelah v2.44.6):** baca `antigravity_finishing_pass_revisi_02.md`. Fase 2b dibatalkan, ditambah pengaman urutan klip, registry template, dan Fase 2c (lima template baru).
+
 ## Mandat
 
 Implementasikan usulan di `USULAN_FINISHING_VIDEO_CFSTUDIO.md` (root repo) (terutama bagian 4, 4b dan 5) di repo ini, bertahap per fase, tanpa memperluas scope.
