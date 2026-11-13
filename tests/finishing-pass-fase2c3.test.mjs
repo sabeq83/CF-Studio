@@ -210,12 +210,11 @@ test('F2c3-T1 & T3 (R6.6, R12.5): templates/finishing passes R6.6 grep, ramuan-r
     recipe: {
       hasRecipe: true,
       ingredients: {
-        header: 'BAHAN',
-        s: 1.9,
-        e: 6.5,
+        until: 6.5,
+        totalCount: 2,
         items: [
-          { text: '1 ruas rimpang segar', s: 2.0 },
-          { text: '250 ml air hangat', s: 2.6 }
+          { label: '1 ruas rimpang segar', s: 2.0 },
+          { label: '250 ml air hangat', s: 2.6 }
         ]
       }
     },

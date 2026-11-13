@@ -84,10 +84,16 @@
       position: absolute;
       left: 4.5cqw;
       top: 13cqh;
-      max-width: 44cqw;
+      max-width: 46cqw;
       display: grid;
       gap: 1.3cqw;
       justify-items: start;
+    }
+    #oIngList {
+      display: grid;
+      gap: 1.3cqw;
+      justify-items: start;
+      width: 100%;
     }
     .ing .hd {
       font-family: var(--f-sub);
@@ -433,6 +439,11 @@
         return 1 + (c + 1) * Math.pow(cl - 1, 3) + c * Math.pow(cl - 1, 2);
       }
 
+      function easeOut(x) {
+        const cl = Math.min(Math.max(x, 0), 1);
+        return 1 - Math.pow(1 - cl, 3);
+      }
+
       function applyPop(el, t, s, e, inDur, outDur, rotDeg) {
         const lt = t - s;
         const rt = e - t;
@@ -529,10 +540,12 @@
             oProdImg.src = pc.imageUrl;
             oProdImg.hidden = false;
           } else {
+            oProdImg.removeAttribute('src');
             oProdImg.hidden = true;
           }
-          if (pc.badgeLabel) {
-            oProdTag.textContent = pc.badgeLabel;
+          const tagTxt = pc.tag || pc.badgeLabel || '';
+          if (tagTxt) {
+            oProdTag.textContent = tagTxt;
             oProdTag.hidden = false;
           } else {
             oProdTag.hidden = true;
@@ -593,25 +606,31 @@
           applyPop(oHook, time, 0, hookEnd, 0.24, 0.16, 0);
         }
 
-        // Concise ingredient chips (left safe zone >= 13cqh)
+        // Concise ingredient chips (left safe zone >= 13cqh; aligns with extractRecipeOverlayData { until, items: [{ label, s }], totalCount, overflowLabel })
         const ing = T.recipe?.ingredients;
         const ingItems = Array.isArray(ing?.items) ? ing.items : [];
+        const ingStart = Number(ing?.s ?? ingItems[0]?.s ?? 0);
+        const ingEnd = Number(ing?.until || ing?.e || dur);
+        const unlocked = ingItems.filter((it) => time >= Number(it?.s || 0));
         const ingVisible = Boolean(
-          !endOn && !showHook && ing && ingItems.length > 0 && time >= Number(ing.s || 0) && time <= Number(ing.e || dur)
+          !endOn && !showHook && ing && unlocked.length > 0 && time >= ingStart && time <= ingEnd
         );
         oIng.hidden = !ingVisible;
         if (ingVisible) {
-          const unlocked = ingItems.filter((it) => time >= Number(it.s || 0));
+          const totalDisplay = Number(ing.totalCount || ingItems.length);
+          const hdBase = ing.header || labels.ingredientsHeader || 'BAHAN';
+          oIngHd.textContent = `${hdBase} ${unlocked.length}/${totalDisplay}`;
           const displayItems = unlocked.slice(0, 4);
-          const key = displayItems.map((it) => `${it.text}:${time - it.s < 0.8 ? 1 : 0}`).join('|');
-          if (oIngList.dataset.k !== key) {
-            oIngList.dataset.k = key;
-            oIngList.innerHTML = displayItems.map((it) => {
-              const isNew = time - Number(it.s || 0) < 0.85;
-              return `<div class="it${isNew ? ' new' : ''}"><span class="ck">✓</span><span>${escapeHtml(it.text)}</span></div>`;
-            }).join('');
-          }
-          if (unlocked.length > 4) {
+          oIngList.innerHTML = displayItems.map((it, idx) => {
+            const labelTxt = it?.label || it?.text || it?.raw || '';
+            const isNew = idx === displayItems.length - 1 && (time - Number(it?.s || 0)) < 0.7;
+            const slideX = ((1 - easeOut((time - Number(it?.s || 0)) / 0.28)) * -50).toFixed(2);
+            return `<div class="it${isNew ? ' new' : ''}" style="transform:translateX(${slideX}cqw)"><span class="ck">✓</span><span>${escapeHtml(labelTxt)}</span></div>`;
+          }).join('');
+          if (ing.overflowLabel) {
+            oIngMore.textContent = ing.overflowLabel;
+            oIngMore.hidden = false;
+          } else if (unlocked.length > 4) {
             oIngMore.textContent = `+${unlocked.length - 4}`;
             oIngMore.hidden = false;
           } else {
