@@ -84,12 +84,15 @@ const initialForm = {
   upload_spreadsheet: false,
   auto_sync_contentflow: true,
 
-  // Section 6: finishing video (FFmpeg Motion Text & Transitions)
+  // Section 6: finishing video (FFmpeg Motion Text, Transitions & Finishing Pass)
   enable_motion_text: true,
   motion_text_style: 'floating_white_yellow',
   motion_text_position: 'bottom',
   video_transition: 'cut',
-  transition_duration: 0.5
+  transition_duration: 0.5,
+  finishing_template: 'none',
+  caption_mode: 'hybrid',
+  loudness_target: -14
 };
 
 function mapPresetToForm(p) {
@@ -184,7 +187,10 @@ function mapPresetToForm(p) {
     motion_text_style: wf.motion_text_style || 'floating_white_yellow',
     motion_text_position: wf.motion_text_position || 'bottom',
     video_transition: wf.video_transition || 'cut',
-    transition_duration: Number(wf.transition_duration ?? 0.5)
+    transition_duration: Number(wf.transition_duration ?? 0.5),
+    finishing_template: wf.finishing_template || 'none',
+    caption_mode: wf.caption_mode || 'hybrid',
+    loudness_target: Number(wf.loudness_target ?? -14)
   };
 }
 
@@ -283,7 +289,10 @@ function mapFormToPayload(f) {
         motion_text_style: f.motion_text_style || 'floating_white_yellow',
         motion_text_position: f.motion_text_position || 'bottom',
         video_transition: f.video_transition || 'cut',
-        transition_duration: Number(f.transition_duration ?? 0.5)
+        transition_duration: Number(f.transition_duration ?? 0.5),
+        finishing_template: f.finishing_template || 'none',
+        caption_mode: f.caption_mode || 'hybrid',
+        loudness_target: Number(f.loudness_target ?? -14)
       }
     }
   };
@@ -1526,6 +1535,95 @@ export default function PresetsPage() {
                         </select>
                       </label>
                     </div>
+                  </div>
+                )}
+
+                <div
+                  style={{
+                    marginTop: '14px',
+                    paddingTop: '14px',
+                    borderTop: '1px solid var(--border-subtle)',
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                    gap: '12px'
+                  }}
+                >
+                  <div>
+                    <label className="form-label">
+                      Template Finishing Pass (Playwright + Camera Zoom)
+                      <select
+                        className="form-select"
+                        value={form.finishing_template || 'none'}
+                        onChange={e => setForm({ ...form, finishing_template: e.target.value })}
+                      >
+                        <option value="none">None — Legacy FFmpeg ASS Only</option>
+                        <option value="calm_wellness">Calm Wellness — Editorial Serif &amp; Product Card</option>
+                        <option value="recipe_pop">Recipe Pop — Chips Bahan + Step Cards + Tick SFX</option>
+                      </select>
+                    </label>
+                  </div>
+
+                  <div>
+                    <label className="form-label">
+                      Mode Subtitle / Caption Overlay
+                      <select
+                        className="form-select"
+                        value={form.caption_mode || 'hybrid'}
+                        onChange={e => setForm({ ...form, caption_mode: e.target.value })}
+                      >
+                        <option value="hybrid">Hybrid — Keyword Punch + Subtitles Ringkas</option>
+                        <option value="keyword_only">Keyword Only — Hook &amp; Keyword Punch Saja</option>
+                        <option value="full">Full — Subtitle Baris Lengkap (Legacy Mode)</option>
+                      </select>
+                    </label>
+                  </div>
+
+                  <div>
+                    <label className="form-label">
+                      Target Loudness Audio (LUFS)
+                      <select
+                        className="form-select"
+                        value={form.loudness_target !== undefined ? String(form.loudness_target) : '-14'}
+                        onChange={e => setForm({ ...form, loudness_target: Number(e.target.value) })}
+                      >
+                        <option value="-14">-14 LUFS (Standar TikTok &amp; Reels)</option>
+                        <option value="-16">-16 LUFS (Calm / Shorts)</option>
+                      </select>
+                    </label>
+                  </div>
+                </div>
+
+                {form.finishing_template === 'recipe_pop' && !(form.campaign_kinds || []).some(k => k === 'recipe_campaign' || k === 'multiplier_campaign') && (
+                  <div
+                    style={{
+                      marginTop: '10px',
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      background: 'var(--status-warning-soft)',
+                      border: '1px solid var(--status-warning)',
+                      color: 'var(--text-primary)',
+                      fontSize: '12px',
+                      lineHeight: 1.45
+                    }}
+                  >
+                    ⚠️ <strong>Peringatan Kompatibilitas Campaign:</strong> Template <code>recipe_pop</code> paling cocok untuk <code>recipe_campaign</code> atau <code>multiplier_campaign</code> ber-resep. Pada campaign tanpa data resep, chip bahan &amp; langkah akan disembunyikan otomatis.
+                  </div>
+                )}
+
+                {form.finishing_template === 'calm_wellness' && (form.campaign_kinds || []).includes('recipe_campaign') && (
+                  <div
+                    style={{
+                      marginTop: '10px',
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      background: 'var(--status-info-soft)',
+                      border: '1px solid var(--status-info)',
+                      color: 'var(--text-primary)',
+                      fontSize: '12px',
+                      lineHeight: 1.45
+                    }}
+                  >
+                    ℹ️ <strong>Info Template:</strong> Preset ini mencakup <code>recipe_campaign</code>. Jika ingin menampilkan chip bahan &amp; step cards resep, gunakan <code>recipe_pop</code>.
                   </div>
                 )}
               </div>

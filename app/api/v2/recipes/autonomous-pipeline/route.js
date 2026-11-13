@@ -189,6 +189,9 @@ export const POST = withTenantContext(async (request, _context, user) => {
           visual_identity_preset_id: body.visual_identity_preset_id || null,
           ...(body.voice_provider ? { voice_provider: body.voice_provider } : {}),
           ...(body.voice_persona ? { voice_persona: body.voice_persona } : {}),
+          ...(body.finishing_template !== undefined ? { finishing_template: body.finishing_template } : {}),
+          ...(body.caption_mode !== undefined ? { caption_mode: body.caption_mode } : {}),
+          ...(body.loudness_target !== undefined ? { loudness_target: Number(body.loudness_target) } : {}),
           ...affiliateOverride,
           ...(body.overrides || {})
         }
@@ -207,6 +210,9 @@ export const POST = withTenantContext(async (request, _context, user) => {
           visual_identity_preset_id: body.visual_identity_preset_id || null,
           use_brand_pillars: body.use_brand_pillars !== undefined ? Boolean(body.use_brand_pillars) : !isKeywordMode,
           keyword: body.keyword || (isKeywordMode ? (body.content_pillar || body.pillar_title || body.topic) : null),
+          ...(body.finishing_template !== undefined ? { finishing_template: body.finishing_template } : {}),
+          ...(body.caption_mode !== undefined ? { caption_mode: body.caption_mode } : {}),
+          ...(body.loudness_target !== undefined ? { loudness_target: Number(body.loudness_target) } : {}),
           ...affiliateOverride,
           ...(body.overrides || {})
         }
@@ -231,6 +237,9 @@ export const POST = withTenantContext(async (request, _context, user) => {
           motion_text_style: body.motion_text_style,
           video_transition: body.video_transition,
           transition_duration: body.transition_duration,
+          ...(body.finishing_template !== undefined ? { finishing_template: body.finishing_template } : {}),
+          ...(body.caption_mode !== undefined ? { caption_mode: body.caption_mode } : {}),
+          ...(body.loudness_target !== undefined ? { loudness_target: Number(body.loudness_target) } : {}),
           ...affiliateOverride,
           is_bridging_active: Boolean(resolvedMultiplierProductId),
           ...recipeOverride,
@@ -301,6 +310,9 @@ export const POST = withTenantContext(async (request, _context, user) => {
         enableMotionText: isMotionEnabled,
         motionTextStyle: body.motion_text_style || body.motionTextStyle || 'floating_white_yellow',
         overrides: {
+          ...(body.finishing_template !== undefined ? { finishing_template: body.finishing_template } : {}),
+          ...(body.caption_mode !== undefined ? { caption_mode: body.caption_mode } : {}),
+          ...(body.loudness_target !== undefined ? { loudness_target: Number(body.loudness_target) } : {}),
           ...affiliateOverride,
           ...recipeOverride,
           ...(body.overrides || {})

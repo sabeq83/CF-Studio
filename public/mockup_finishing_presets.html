@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MAKNA Flow — Mockup Finishing Pass Presets (Section 6)</title>
+  <style>
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --input-bg: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --input-bg: #ffffff;
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --focus-ring: #6d4ed6;
+      --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font-sans);
+      background: var(--canvas);
+      color: var(--text-primary);
+      line-height: 1.5;
+      padding: 24px;
+    }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      box-shadow: var(--shadow-card);
+    }
+    .title {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .subtitle {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .btn {
+      border: 1px solid var(--border-strong);
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border-color: transparent;
+    }
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--status-info-soft);
+      color: var(--status-info);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .form-label {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .form-select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-strong);
+      background: var(--input-bg);
+      color: var(--text-primary);
+      font-size: 13px;
+    }
+    .form-select:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+    .kind-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 16px;
+      padding: 12px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+    }
+    .kind-row label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-primary);
+      cursor: pointer;
+    }
+    .alert {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      display: none;
+      border: 1px solid var(--border-subtle);
+    }
+    .alert.visible { display: block; }
+    .alert-warning {
+      background: var(--status-warning-soft);
+      border-color: var(--status-warning);
+      color: var(--text-primary);
+    }
+    .alert-info {
+      background: var(--status-info-soft);
+      border-color: var(--status-info);
+      color: var(--text-primary);
+    }
+    .preview-box {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-secondary);
+      white-space: pre-wrap;
+    }
+    .help-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div>
+        <h1 class="title">Section 6 — Finishing Video &amp; Playwright Template Overlay</h1>
+        <p class="subtitle">Simulasi Preset &amp; Propagasi Parameter Finishing Pass (Light/Dark Semantic Tokens)</p>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button id="toggleThemeBtn" class="btn" type="button">Ganti Mode Terang / Gelap</button>
+        <button id="simulateOverrideBtn" class="btn btn-primary" type="button">Simulasikan Override Per-Campaign</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <strong>Konfigurasi Preset (`preset.config.workflow`)</strong>
+        <span class="badge" id="themeBadge">Dark Mode Active</span>
+      </div>
+
+      <div class="kind-row">
+        <strong style="font-size:13px; color:var(--text-secondary); margin-right:6px;">Digunakan untuk Campaign:</strong>
+        <label><input type="checkbox" class="kind-cb" value="product_campaign" checked /> Product Campaign</label>
+        <label><input type="checkbox" class="kind-cb" value="brand_editorial" /> Brand Editorial</label>
+        <label><input type="checkbox" class="kind-cb" value="recipe_campaign" /> Recipe Campaign</label>
+        <label><input type="checkbox" class="kind-cb" value="multiplier_campaign" /> Multiplier Remix</label>
+      </div>
+
+      <div class="grid">
+        <label class="form-label">
+          Template Finishing Pass (Playwright + Camera Zoom)
+          <select id="finishingTemplate" class="form-select">
+            <option value="none">None — Legacy FFmpeg ASS Only (Default Aman)</option>
+            <option value="calm_wellness">Calm Wellness — Serif Editorial + Product Card</option>
+            <option value="recipe_pop">Recipe Pop — Chips Bahan (Max 4) + Step Cards + Tick SFX</option>
+          </select>
+          <span class="help-text">Bebas hardcode merek/resep: teks &amp; badge diambil 100% dari metadata campaign.</span>
+        </label>
+
+        <label class="form-label">
+          Mode Subtitle / Caption Overlay
+          <select id="captionMode" class="form-select">
+            <option value="hybrid">Hybrid — Keyword Punch + Subtitles Ringkas (Default Preset Baru)</option>
+            <option value="keyword_only">Keyword Punch Only — Hook &amp; Punch Kata Kunci Saja</option>
+            <option value="full">Full — Subtitle Lengkap (Fallback Campaign Legacy NULL)</option>
+          </select>
+        </label>
+
+        <label class="form-label">
+          Target Loudness Audio (EBU R128)
+          <select id="loudnessTarget" class="form-select">
+            <option value="-14">-14 LUFS — Standar TikTok &amp; Reels</option>
+            <option value="-16">-16 LUFS — Calm Editorial / YouTube Shorts</option>
+          </select>
+        </label>
+      </div>
+
+      <div id="compatWarning" class="alert alert-warning">
+        <strong>Peringatan Kompatibilitas Campaign:</strong> Template <code>recipe_pop</code> dirancang untuk konten resep/kuliner atau Multiplier ber-resep, sedangkan preset ini belum mencentang <code>recipe_campaign</code> / <code>multiplier_campaign</code>. Saat dijalankan di campaign tanpa resep, slot bahan &amp; langkah akan disembunyikan otomatis.
+      </div>
+      <div id="calmInfo" class="alert alert-info">
+        <strong>Catatan Editorial:</strong> Template <code>calm_wellness</code> menampilkan Hook Card, Keyword Punch, Product Card faktual, Save Prompt, &amp; CTA tanpa daftar bahan resep.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <strong>Payload Preset &amp; Resolusi Prioritas (`override &gt; preset &gt; default`)</strong>
+      </div>
+      <div id="payloadPreview" class="preview-box"></div>
+    </div>
+  </div>
+
+  <script>
+    const htmlEl = document.documentElement;
+    const toggleBtn = document.getElementById('toggleThemeBtn');
+    const themeBadge = document.getElementById('themeBadge');
+    const tplEl = document.getElementById('finishingTemplate');
+    const capEl = document.getElementById('captionMode');
+    const lufsEl = document.getElementById('loudnessTarget');
+    const compatWarn = document.getElementById('compatWarning');
+    const calmInfo = document.getElementById('calmInfo');
+    const previewEl = document.getElementById('payloadPreview');
+    const simBtn = document.getElementById('simulateOverrideBtn');
+    let overrideActive = false;
+
+    function render() {
+      const kinds = Array.from(document.querySelectorAll('.kind-cb:checked')).map(c => c.value);
+      const tpl = tplEl.value;
+      const hasRecipeKind = kinds.includes('recipe_campaign') || kinds.includes('multiplier_campaign');
+      compatWarn.classList.toggle('visible', tpl === 'recipe_pop' && !hasRecipeKind);
+      calmInfo.classList.toggle('visible', tpl === 'calm_wellness');
+
+      const presetWf = {
+        finishing_template: tpl,
+        caption_mode: capEl.value,
+        loudness_target: Number(lufsEl.value)
+      };
+      const overrideObj = overrideActive ? { finishing_template: 'calm_wellness', caption_mode: 'keyword_only' } : {};
+      const resolved = {
+        finishing_template: overrideObj.finishing_template ?? presetWf.finishing_template ?? 'none',
+        caption_mode: overrideObj.caption_mode ?? presetWf.caption_mode ?? 'hybrid',
+        loudness_target: overrideObj.loudness_target ?? presetWf.loudness_target ?? -14
+      };
+      previewEl.textContent = JSON.stringify({
+        campaign_kinds: kinds,
+        preset_workflow: presetWf,
+        campaign_override: overrideActive ? overrideObj : null,
+        resolved_effective_config: resolved,
+        forbidden_keys_in_preset: ['accentColor', 'ctaText', 'isHerbalProduct', 'brandText']
+      }, null, 2);
+    }
+
+    toggleBtn.addEventListener('click', () => {
+      const next = htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      htmlEl.setAttribute('data-theme', next);
+      themeBadge.textContent = next === 'dark' ? 'Dark Mode Active' : 'Light Mode Active';
+    });
+
+    simBtn.addEventListener('click', () => {
+      overrideActive = !overrideActive;
+      simBtn.textContent = overrideActive ? 'Matikan Override Per-Campaign' : 'Simulasikan Override Per-Campaign';
+      render();
+    });
+
+    document.querySelectorAll('.kind-cb, #finishingTemplate, #captionMode, #loudnessTarget').forEach(el => {
+      el.addEventListener('change', render);
+    });
+    render();
+  </script>
+</body>
+</html>
+
