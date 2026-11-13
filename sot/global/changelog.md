@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.44.22 — Fix Pillar G-Labs Zombie Polling Loop on Expired 404 Clips & Scheduler Active Item Guard (14/11/2026)
+- Deteksi HTTP 404/410 pada downloadAndUploadPillarClip dan downloadAndUploadReClip serta invalidasi cache glabs_tasks yang sudah expired di G-Labs Worker
+- Normalisasi respons HTTP 404 pada getTaskStatus di lib/webhook-client.js menjadi status failed (TASK_NOT_FOUND)
+- Validasi keberadaan file klip fisik di public/temp sebelum me-reuse completed task pada processPillarGlabs
+- Perbaikan penempatan flag hasActiveItem pada lib/campaign-scheduler.js agar item ready_for_review tidak memblokir Auto-Retry item lain yang sudah approved
+
 ## V2.44.21 — Fase 4 Caption Refresh 3 gaya shared-layers dan chunker Revisi 03 R14-R18 (13/11/2026)
 - Ekstrak shared subtitle chunker 2-3 kata maks 16 karakter dengan frasa terlindungi dan width guard <=88cqw pada seluruh 4 jalur render
 - Satukan CSS dan renderSubtitle pada shared-layers.js serta bersihkan 8 template HTML dari CSS sub dan joinedLen
