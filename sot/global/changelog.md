@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.44.10 — Finishing Pass Fase 2c-3: Template ramuan_ritual & Strict Compliance (13/11/2026)
+- Tambah template ramuan-ritual.html dengan badge x-time, chip bahan hangat, ProductCard non-klaim opsional, x-notice wajib & x-end
+- Aktifkan timing_badges di finishing_plan khusus ramuan_ritual dan strictest claim block tanpa memandang kategori produk
+- Tambahkan unit test Fase 2c-3 dengan R6.6 grep bersih, capture Chromium & regresi calm_wellness/recipe_pop
+
 ## V2.44.9 — Finishing Pass Fase 2c-2: Template tips_listicle (R12.2) (13/11/2026)
 - Tambah template HTML tips-listicle.html (x-tip slide-in safe zone, x-recap akhir, x-loc opsional, shared layers x-wm/x-end/x-lower/x-patch, 10% punch budget, nol hardcoded string R6.6)
 - Daftarkan tips_listicle di centralized finishing-template-registry.js beserta prioritas suggestFinishingTemplate spesifik
