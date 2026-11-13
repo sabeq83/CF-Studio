@@ -1,0 +1,428 @@
+<meta charset="utf-8">
+<title>Finishing Pass Preview</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: editing-suite. Template tabs, two phones (before / proposal) + layer panel, multi-track timeline. Single dark look on purpose (video tools are dark). */
+:root{
+  --bg:#101214; --panel:#171a1d; --line:#272b30; --fg:#e8e6e1; --muted:#8d939a;
+  --accent:#f2b632;
+  --t-hook:#f2b632; --t-sub:#d9d6cf; --t-punch:#ff6b4a; --t-prod:#7fd18b; --t-cta:#5ab4ff; --t-cam:#b593ff; --t-sfx:#8d939a; --t-ing:#ffd27a; --t-step:#f39ac0; --t-save:#9fe3d9;
+  --f-ui:"Inter",system-ui,-apple-system,sans-serif;
+  --f-punch:"Anton","Impact","Arial Narrow Bold",sans-serif;
+  --f-sub:"Montserrat","Arial Black",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-ui);font-size:14px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-block:28px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:20px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+h1{font-weight:700;font-size:22px;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.meta{color:var(--muted);font-size:13px}
+.meta b{color:var(--fg);font-weight:600}
+.chip{font-family:var(--f-mono);font-size:11px;padding:3px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.tabs a{color:var(--muted);text-decoration:none;padding:8px 12px 10px;font-weight:600;font-size:13.5px;border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;gap:8px;align-items:baseline}
+.tabs a small{font-weight:500;font-size:11.5px;color:var(--muted)}
+.tabs a[aria-current="page"]{color:var(--fg);border-bottom-color:var(--accent)}
+.tabs a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.stage{display:grid;grid-template-columns:minmax(0,230px) minmax(0,340px) minmax(0,1fr);gap:22px;align-items:start}
+@media (max-width:960px){.stage{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.panel{grid-column:1/-1}}
+@media (max-width:560px){.stage{grid-template-columns:minmax(0,1fr)}.col-before{order:2}}
+.col{display:grid;gap:10px;min-width:0}
+.label{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.label b{color:var(--fg);font-weight:600}
+.phone{position:relative;width:100%;max-width:100%;aspect-ratio:9/16;border-radius:22px;overflow:hidden;background:#000;border:1px solid var(--line);container-type:size}
+.phone video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform-origin:50% 45%}
+.col-before .phone{max-width:230px}
+.ov{position:absolute;inset:0;pointer-events:none}
+/* overlays (cqw/cqh so they scale with the 720x1280 frame) */
+.progress{position:absolute;left:0;top:0;height:.9cqw;background:var(--accent);width:0}
+.flash{position:absolute;inset:0;background:#fff;opacity:0}
+.hook{position:absolute;left:6cqw;right:6cqw;top:30cqh;text-align:center;font-family:var(--f-punch);text-transform:uppercase;line-height:.95;color:#fff;transform-origin:50% 50%}
+.hook .l1{display:block;font-size:13cqw;-webkit-text-stroke:.5cqw #000;paint-order:stroke fill;text-shadow:0 1.2cqw 2.4cqw rgba(0,0,0,.55)}
+.hook .l2{display:inline-block;margin-top:2cqw;font-size:15cqw;background:var(--accent);color:#111;padding:1cqw 3cqw 0;transform:rotate(-2.5deg)}
+.sub{position:absolute;left:8cqw;right:8cqw;top:69cqh;text-align:center;font-family:var(--f-sub);font-weight:900;font-size:6.6cqw;line-height:1.15;text-transform:uppercase;color:#fff;-webkit-text-stroke:.55cqw #000;paint-order:stroke fill;text-shadow:0 .6cqw 1.6cqw rgba(0,0,0,.6)}
+.sub span{display:inline-block;margin:0 .6cqw}
+.sub span.on{color:var(--accent);transform:scale(1.08)}
+.punch{position:absolute;left:4cqw;right:4cqw;top:40cqh;text-align:center;font-family:var(--f-punch);text-transform:uppercase;font-size:16cqw;line-height:.92;transform-origin:50% 50%;-webkit-text-stroke:.6cqw #000;paint-order:stroke fill;text-shadow:0 1.4cqw 0 rgba(0,0,0,.45)}
+.prod{position:absolute;left:5cqw;top:13cqh;display:flex;align-items:center;gap:2.6cqw;background:#fff;color:#111;border-radius:3cqw;padding:2cqw 3.6cqw 2cqw 2cqw;box-shadow:0 2cqw 5cqw rgba(0,0,0,.4);max-width:80cqw}
+.prod img{width:17cqw;height:17cqw;object-fit:contain;border-radius:2cqw;background:#fff}
+.prod .pn{font-family:var(--f-sub);font-weight:900;font-size:4.2cqw;line-height:1.05}
+.prod .pd{font-size:2.6cqw;color:#555;margin-top:.8cqw}
+.prod .tag{display:inline-block;font-weight:700;font-size:2.4cqw;background:var(--accent);color:#111;border-radius:1cqw;padding:.3cqw 1.4cqw;margin-bottom:.8cqw}
+.cta{position:absolute;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:1.5cqw}
+.cta.down{flex-direction:column-reverse}
+.cta .arrow{font-family:var(--f-punch);font-size:12cqw;color:var(--accent);-webkit-text-stroke:.5cqw #000;paint-order:stroke fill;line-height:1}
+.cta .pill{font-family:var(--f-sub);font-weight:900;font-size:5.4cqw;text-transform:uppercase;background:var(--accent);color:#111;padding:1.6cqw 4.4cqw;border-radius:99cqw;box-shadow:0 1.4cqw 0 #000}
+.ing{position:absolute;left:4.5cqw;top:12cqh;display:grid;gap:1.6cqw;justify-items:start}
+.ing .hd{font-family:var(--f-sub);font-weight:900;font-size:3cqw;letter-spacing:.12em;color:#fff;background:rgba(20,12,8,.72);padding:.8cqw 2.2cqw;border-radius:1.2cqw}
+.ing .it{display:flex;align-items:center;gap:1.8cqw;background:#fff8ee;color:#2a1a10;font-family:var(--f-sub);font-weight:800;font-size:4.2cqw;padding:1.4cqw 3cqw 1.4cqw 1.6cqw;border-radius:99cqw;box-shadow:0 1.2cqw 3cqw rgba(0,0,0,.35)}
+.ing .it .ck{width:5.2cqw;height:5.2cqw;border-radius:50%;background:#5a3420;color:#fff;display:grid;place-items:center;font-size:3.2cqw;font-family:var(--f-ui);font-weight:700}
+.ing .it.new{background:var(--accent);color:#1d120a}
+.step{position:absolute;right:4.5cqw;top:12cqh;text-align:right;font-family:var(--f-sub);font-weight:900;color:#fff}
+.step .n{display:inline-block;background:#2a1a10;border:.5cqw solid #fff;border-radius:2cqw;padding:.8cqw 2.4cqw;font-size:4cqw;letter-spacing:.06em}
+.step .t{display:block;margin-top:1.2cqw;font-size:3.3cqw;-webkit-text-stroke:.4cqw #000;paint-order:stroke fill;text-transform:uppercase}
+.save{position:absolute;left:0;right:0;top:56cqh;display:flex;justify-content:center}
+.save span{background:rgba(255,255,255,.94);color:#111;font-family:var(--f-sub);font-weight:800;font-size:4.2cqw;padding:1.6cqw 4cqw;border-radius:99cqw;box-shadow:0 1.2cqw 3cqw rgba(0,0,0,.35)}
+.safe{position:absolute;inset:0}
+.safe i{position:absolute;background:repeating-linear-gradient(45deg,rgba(255,80,80,.28) 0 6px,rgba(255,80,80,.08) 6px 12px);border:1px dashed rgba(255,120,120,.7)}
+.safe em{position:absolute;font:600 2.6cqw var(--f-ui);color:#ffb3a6;font-style:normal}
+.bigplay{position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.25);border:0;color:#fff;cursor:pointer;pointer-events:auto}
+.bigplay span{width:18cqw;height:18cqw;border-radius:50%;background:var(--accent);display:grid;place-items:center;color:#111;font-size:7cqw;padding-left:1cqw}
+.bigplay:focus-visible{outline:3px solid var(--accent);outline-offset:-6px}
+.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+button.btn{font:600 13px var(--f-ui);background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer}
+button.btn:hover{border-color:#3a4047}
+button.btn.primary{background:var(--accent);color:#111;border-color:var(--accent)}
+button.btn:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.time{font-family:var(--f-mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;margin-left:auto}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:16px;min-width:0}
+.panel h2,.tl h2{margin:0;font-size:13px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600}
+.layers{display:grid;gap:2px}
+.layer{display:grid;grid-template-columns:auto 10px minmax(0,1fr);gap:10px;align-items:start;padding:7px 6px;border-radius:8px;cursor:pointer}
+.layer:hover{background:#1d2125}
+.layer input{margin:3px 0 0;accent-color:var(--accent)}
+.layer .sw{width:10px;height:10px;border-radius:3px;margin-top:5px}
+.layer b{font-weight:600;display:block}
+.layer small{color:var(--muted);font-size:12.5px;display:block}
+.notes{display:grid;gap:8px;font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
+.notes p{margin:0}
+.notes b{color:var(--fg);font-weight:600}
+.tl{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px 16px;display:grid;gap:8px}
+.tl-scroll{overflow-x:auto}
+.tl-grid{position:relative;min-width:640px;display:grid;grid-template-columns:78px minmax(0,1fr);row-gap:5px;column-gap:10px;cursor:pointer;user-select:none}
+.tl-name{font-size:11.5px;color:var(--muted);height:20px;display:flex;align-items:center}
+.tl-track{position:relative;height:20px;background:#121417;border-radius:5px}
+.tl-track .ev{position:absolute;top:3px;bottom:3px;border-radius:4px;opacity:.9;font:600 10px var(--f-ui);color:#111;overflow:hidden;white-space:nowrap;padding:0 4px;line-height:14px}
+.tl-track .tick{position:absolute;top:2px;bottom:2px;width:3px;border-radius:2px}
+.tl-ruler{position:relative;height:16px;font-family:var(--f-mono);font-size:10px;color:var(--muted)}
+.tl-ruler span{position:absolute;transform:translateX(-50%)}
+.tl-clips{position:relative;height:20px}
+.tl-clips .clip{position:absolute;top:0;bottom:0;border:1px solid var(--line);border-radius:5px;font-size:10.5px;color:var(--muted);padding:2px 6px;overflow:hidden;white-space:nowrap}
+.playhead{position:absolute;top:0;bottom:0;width:2px;background:#fff;pointer-events:none;box-shadow:0 0 0 1px rgba(0,0,0,.5)}
+.tl-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+@media (prefers-reduced-motion:reduce){.sub span.on{transform:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Finishing Pass Preview</h1>
+      <div class="meta" id="meta"></div>
+    </div>
+    <span class="chip">mockup · bukan render final</span>
+  </header>
+
+  <nav class="tabs" aria-label="Template">
+    <a href="#resep" data-p="resep">Resep <small>nutribake · brownies cocoa</small></a>
+    <a href="#wellness" data-p="wellness">Wellness <small>dapurbotani · GarliBee</small></a>
+  </nav>
+
+  <div class="stage">
+    <div class="col col-before">
+      <div class="label"><span><b>Sekarang</b> · as-is</span><span id="lufsBefore"></span></div>
+      <div class="phone"><video id="vBefore" playsinline preload="metadata" controls></video></div>
+    </div>
+
+    <div class="col col-after">
+      <div class="label"><span><b>Usulan</b> · finishing pass</span><span>-14 LUFS</span></div>
+      <div class="phone" id="phone">
+        <video id="v" playsinline preload="auto"></video>
+        <div class="ov">
+          <div class="flash" id="oFlash"></div>
+          <div class="ing" id="oIng" hidden></div>
+          <div class="step" id="oStep" hidden><span class="n"></span><span class="t"></span></div>
+          <div class="prod" id="oProd" hidden>
+            <img alt="">
+            <div><span class="tag"></span><div class="pn"></div><div class="pd"></div></div>
+          </div>
+          <div class="hook" id="oHook" hidden><span class="l1"></span><span class="l2"></span></div>
+          <div class="save" id="oSave" hidden><span></span></div>
+          <div class="punch" id="oPunch" hidden></div>
+          <div class="cta" id="oCta" hidden><div class="arrow"></div><div class="pill"></div></div>
+          <div class="sub" id="oSub"></div>
+          <div class="progress" id="oProg"></div>
+          <div class="safe" id="oSafe" hidden>
+            <i style="left:0;right:0;top:0;height:8cqh"></i><em style="left:3cqw;top:2.5cqh">UI atas</em>
+            <i style="right:0;width:15cqw;top:45cqh;height:40cqh"></i><em style="right:1cqw;top:46cqh">ikon</em>
+            <i style="left:0;right:0;bottom:0;height:13cqh"></i><em style="left:3cqw;bottom:9cqh">caption, nama akun, keranjang</em>
+          </div>
+          <button class="bigplay" id="bigplay" aria-label="Putar video usulan"><span>▶</span></button>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="btn primary" id="bPlay">▶ Putar</button>
+        <button class="btn" id="bBoth" title="Putar kedua video dari awal, suara dari versi usulan">Bandingkan</button>
+        <span class="time" id="tm"></span>
+      </div>
+    </div>
+
+    <aside class="panel">
+      <h2>Layer</h2>
+      <div class="layers" id="layers"></div>
+      <div class="notes" id="notes"></div>
+    </aside>
+  </div>
+
+  <section class="tl">
+    <div class="tl-head"><h2>Timeline finishing</h2><span class="meta">Klik di timeline untuk lompat ke detik itu</span></div>
+    <div class="tl-scroll"><div class="tl-grid" id="tl"></div></div>
+  </section>
+</div>
+
+<script>
+(() => {
+  // ---------- project data (taken from the real ContentFlow items and their TTS clips) ----------
+  const cum = a => a.reduce((o,d)=>{o.push(+(o[o.length-1]+d).toFixed(3));return o;},[0]);
+  const PROJECTS = {
+    resep: {
+      meta: '<b>nutribake</b> · Premix Cocoa Powder Premium · item multiplier_mul_261113_qt67yl · template <b>recipe_pop</b>',
+      before: 'recipe_before.mp4', base: 'recipe_base.mp4', lufsBefore: '-24 LUFS', accent: '#ffcc3d',
+      dur: 21.01, clips: cum([2.212,2.595,3.396,2.549,6.231,4.0]),
+      clipNames: ['Pisang','Telur','Cocoa','Aduk','Tuang','Hasil'],
+      segs: [
+        {c:0,s:.194,e:1.678,text:'Punya banyak pisang matang di rumah?'},
+        {c:1,s:.162,e:2.063,text:'Campur dengan telur ayam segar pilihan.'},
+        {c:2,s:.166,e:1.408,text:'Tambahkan bubuk kakao'},
+        {c:2,s:1.498,e:2.875,text:'berkualitas untuk adonannya.'},
+        {c:3,s:.162,e:2.066,text:'Cukup aduk sampai rata semua bahan.'},
+        {c:4,s:.167,e:2.656,text:'Kuncinya pakai Premix Cocoa Powder Premium.'},
+        {c:4,s:4.068,e:5.690,text:'Tanpa tambahan gula sama sekali.'},
+        {c:5,s:.115,e:1.022,text:'Hasilnya fudgy,'},
+        {c:5,s:1.195,e:3.516,text:'wangi, dan produk ori ada di keranjang ya!'}
+      ],
+      hook: {l1:'Brownies tanpa gula', l2:'cuma 3 bahan', s:0, e:2.15, top:33, hidesSub:false, fs1:8.6, fs2:11},
+      punches: [['tanpa tambahan gula','benefit'],['fudgy','result']],
+      ingredients: {until: 10.65, items: [
+        {word:'pisang', label:'2 pisang matang'},
+        {word:'telur', label:'1 butir telur'},
+        {word:'kakao', label:'3 sdm cocoa powder'}]},
+      steps: ['Lumatkan','Masukkan telur','Ayak cocoa','Aduk rata','Tuang & panggang',null],
+      save: {s:8.45, e:10.6, text:'📌 Simpan dulu, resep lengkap di caption'},
+      prod: {img:'cocoa.jpg', alt:'Kemasan Premix Cocoa Powder Premium', tag:'BAHAN KUNCI', name:'Premix Cocoa<br>Powder Premium', desc:'Tanpa gula · 100 gram', word:'premix', end:16.95, top:28},
+      cta: {word:'produk', text:'Cek keranjang kuning', arrow:'▼', dir:'down', top:47},
+      notes: [
+        '<b>Daftar bahan</b> diambil dari <b>recipe_text_markdown</b> yang sudah ada di ContentFlow. Tiap bahan muncul saat VO menyebutnya, lalu menumpuk jadi checklist. Penonton resep sering menjeda untuk melihat bahan, dan itu menambah durasi tonton.',
+        '<b>Penanda langkah</b> mengikuti urutan klip, jadi penonton tahu sudah sampai mana.',
+        '<b>Ajakan simpan</b> muncul di tengah video. Untuk konten resep, jumlah save adalah sinyal kuat di TikTok dan Reels.',
+        'Tag jeda <b>&lt;#1.0#&gt;</b> yang bocor di video lama tidak muncul di sini karena subtitle diambil dari teks VO yang sudah dibersihkan.',
+        'Klip AI aslinya 8 detik, di sini dipotong mengikuti panjang VO supaya tempo lebih cepat.'
+      ]
+    },
+    wellness: {
+      meta: '<b>dapurbotani</b> · Garlibee Madu Bawang Lanang · item opc_2117 · template <b>calm_wellness + keyword punch</b>',
+      before: 'before.mp4', base: 'base.mp4', lufsBefore: '-24 LUFS', accent: '#f2b632',
+      dur: 16.1, clips: [0,3.1115,7.92965,12.44594,16.068],
+      clipNames: ['Hasil lab','Rutinitas','Madu & bawang','CTA'],
+      segs: [
+        {c:0,s:.167,e:2.876,text:'Hasil lab kolesterol naik lagi padahal sudah jaga makan?'},
+        {c:1,s:.170,e:1.958,text:'Padahal rutinitas harian sudah diatur,'},
+        {c:1,s:2.063,e:4.449,text:'tapi tubuh tetap butuh dukungan ekstra.'},
+        {c:2,s:.174,e:4.283,text:'Membiasakan konsumsi madu mentah dan bawang lanang pilihan bantu jaga kebugaran.'},
+        {c:3,s:.183,e:3.342,text:'Yuk mulai langkah sehatmu hari ini, link pembelian aku taruh di Bio ya!'}
+      ],
+      hook: {l1:'Hasil lab', l2:'naik lagi?', s:0, e:1.75, top:30, hidesSub:true},
+      punches: [['jaga makan','problem'],['dukungan ekstra','benefit'],['madu mentah','product'],['bawang lanang','product'],['hari ini','cta']],
+      prod: {img:'product.png', alt:'Toples GarliBee', tag:'YANG AKU PAKAI', name:'GarliBee Madu<br>Bawang Lanang', desc:'Pangan olahan, bukan obat', word:'madu', end:12.39},
+      cta: {word:'link', text:'Link di bio', arrow:'▲', dir:'up', top:20},
+      notes: [
+        '<b>Keyword punch</b> mengikuti kata yang diucapkan VO, maksimal 2 per klip, 1 detik lalu hilang. Kata <b>"kolesterol"</b> sengaja tidak dijadikan punch karena ini produk herbal: punch hanya untuk kata non-klaim.',
+        '<b>Subtitle</b> tampil per potongan 2–4 kata, bukan kalimat yang terus menumpuk, dan disembunyikan saat punch muncul supaya layar tidak penuh.',
+        '<b>Audio</b> sudah dinormalisasi ke -14 LUFS. Saat dibandingkan, versi sekarang terdengar jauh lebih pelan.',
+        'Waktu kata di mockup ini dihitung dari jeda di audio VO. Versi produksi memakai timestamp dari TTS atau whisper.cpp, jadi lebih presisi.'
+      ]
+    }
+  };
+  const PCOL = {problem:'#ffffff', benefit:'#9df27a', product:'#f2b632', cta:'#ffe14d', result:'#ffcc3d'};
+  const ALL_LAYERS = [
+    {id:'hook', name:'Hook card', desc:'Judul besar di frame 0, dari field hook. Jadi thumbnail juga.', col:'var(--t-hook)', on:true},
+    {id:'sub', name:'Subtitle per potongan', desc:'2–4 kata, kata aktif berwarna.', col:'var(--t-sub)', on:true},
+    {id:'punch', name:'Keyword punch', desc:'Kata kunci besar, warna per jenis.', col:'var(--t-punch)', on:true},
+    {id:'ing', name:'Daftar bahan', desc:'Bahan muncul saat disebut VO, menumpuk jadi checklist.', col:'var(--t-ing)', on:true, needs:'ingredients'},
+    {id:'step', name:'Penanda langkah', desc:'LANGKAH 1/5 di pojok kanan atas.', col:'var(--t-step)', on:true, needs:'steps'},
+    {id:'save', name:'Ajakan simpan', desc:'Dorong penonton menyimpan video.', col:'var(--t-save)', on:true, needs:'save'},
+    {id:'prod', name:'Kartu produk', desc:'Muncul saat VO menyebut produk.', col:'var(--t-prod)', on:true},
+    {id:'cta', name:'CTA animasi', desc:'Panah ke keranjang atau bio saat VO menyebutnya.', col:'var(--t-cta)', on:true},
+    {id:'cam', name:'Gerak kamera', desc:'Zoom pelan + punch-in saat kata kunci.', col:'var(--t-cam)', on:true},
+    {id:'flash', name:'Flash di cut', desc:'Kilatan 0,1 detik di pergantian klip.', col:'#ffffff', on:true},
+    {id:'prog', name:'Progress bar', desc:'Garis tipis di atas.', col:'var(--accent)', on:true},
+    {id:'sfx', name:'Efek suara', desc:'Pop/whoosh pada punch, bahan dan cut.', col:'var(--t-sfx)', on:true},
+    {id:'safe', name:'Zona aman TikTok', desc:'Area yang tertutup UI aplikasi.', col:'#ff7a6a', on:false}
+  ];
+  const on = {}; ALL_LAYERS.forEach(l => on[l.id] = l.on);
+
+  const $ = id => document.getElementById(id);
+  const v = $('v'), vb = $('vBefore');
+  const oHook=$('oHook'), oSub=$('oSub'), oPunch=$('oPunch'), oProd=$('oProd'), oCta=$('oCta'), oProg=$('oProg'), oFlash=$('oFlash'), oSafe=$('oSafe'), oIng=$('oIng'), oStep=$('oStep'), oSave=$('oSave');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const norm = w => w.toLowerCase().replace(/[^\p{L}\p{N}]/gu,'');
+
+  let P, D;   // current project + derived timeline
+  function derive(p){
+    const W = [];
+    p.segs.forEach(sg => {
+      const ws = sg.text.split(/\s+/), wt = ws.map(w => norm(w).length + 1.6), tot = wt.reduce((a,b)=>a+b,0);
+      let t = p.clips[sg.c] + sg.s; const span = sg.e - sg.s;
+      ws.forEach((w,i) => { const d = span*wt[i]/tot; W.push({w, s:t, e:t+d, c:sg.c}); t += d; });
+    });
+    const find = ph => { const q = ph.split(' ').map(norm); for (let i=0;i<W.length;i++) if (q.every((x,k)=>W[i+k] && norm(W[i+k].w)===x)) return i; return -1; };
+    const CH = []; let cur = [];
+    W.forEach((x,i) => { cur.push(i); const len = cur.map(j=>W[j].w).join(' ').length;
+      if (/[,.?!]$/.test(x.w) || cur.length>=4 || (cur.length>=2 && len>15) || (W[i+1] && W[i+1].c!==x.c)) { CH.push(cur); cur=[]; } });
+    if (cur.length) CH.push(cur);
+    const PUNCH = p.punches.map(([ph,type]) => { const i = find(ph), n = ph.split(' ').length;
+      return {text:ph.toUpperCase()+(type==='problem'?'?':type==='result'?'!':''), type, s:W[i].s-.04, e:Math.max(W[i+n-1].e+.35, W[i].s+1.0), wi:i, n}; });
+    const PW = new Set(); PUNCH.forEach(x => { for (let k=0;k<x.n;k++) PW.add(x.wi+k); });
+    const PROD = {s:W[find(p.prod.word)].s+.1, e:p.prod.end};
+    const CTA = {s:W[find(p.cta.word)].s-.05, e:p.dur};
+    const ING = p.ingredients ? p.ingredients.items.map(it => ({...it, s:W[find(it.word)].s})) : [];
+    const STEPS = p.steps ? p.steps.map((t,i)=> t ? {s:p.clips[i]+.05, e:p.clips[i+1]-.02, n:i+1, total:p.steps.filter(Boolean).length, t} : null).filter(Boolean) : [];
+    const SFX = [...PUNCH.map(x=>({t:x.s,k:'pop'})), ...p.clips.slice(1,-1).map(t=>({t,k:'whoosh'})), {t:p.hook.s+.02,k:'whoosh'}, {t:PROD.s,k:'pop'}, ...ING.map(x=>({t:x.s,k:'tick'}))];
+    return {W, CH, PUNCH, PW, PROD, CTA, ING, STEPS, SFX};
+  }
+
+  // ---------- animation helpers ----------
+  const backOut = x => { const c=1.9; x=Math.min(Math.max(x,0),1); return 1 + (c+1)*Math.pow(x-1,3) + c*Math.pow(x-1,2); };
+  const easeOut = x => 1 - Math.pow(1-Math.min(Math.max(x,0),1),3);
+  function popAnim(el, t, s, e, inDur=.2, outDur=.14, rot=0){
+    const lt = t - s, rt = e - t; let sc = reduce ? 1 : backOut(lt/inDur), op = Math.min(1, lt/.06);
+    if (rt < outDur){ const k = Math.max(rt,0)/outDur; op = Math.min(op, k); sc *= .9 + .1*k; }
+    el.style.opacity = op; el.style.transform = `scale(${sc}) rotate(${rot}deg)`;
+  }
+  const inR = (t,a) => t >= a.s && t < a.e;
+
+  function render(t){
+    const {W, CH, PUNCH, PW, PROD, CTA, ING, STEPS} = D;
+    const hookOn = on.hook && inR(t,P.hook); oHook.hidden = !hookOn; if (hookOn) popAnim(oHook, t, P.hook.s, P.hook.e, .28, .18);
+    const p = on.punch ? PUNCH.find(x => inR(t,x)) : null; oPunch.hidden = !p;
+    if (p){ oPunch.textContent = p.text; oPunch.style.color = PCOL[p.type]; popAnim(oPunch, t, p.s, p.e, .2, .15, p.type==='problem' ? -3 : 2);
+      if (p.type==='problem' && !reduce && t-p.s<.3) oPunch.style.transform += ` translateX(${Math.sin((t-p.s)*90)*1.2}cqw)`; }
+    let html = '';
+    if (on.sub && !(hookOn && P.hook.hidesSub) && !p){
+      const ch = CH.find(c => t >= W[c[0]].s - .05 && t < W[c[c.length-1]].e + .12);
+      if (ch) html = ch.filter(i => !PW.has(i)).map(i => `<span class="${t>=W[i].s && t<W[i].e+.05 ? 'on':''}">${W[i].w.replace(/[<>&]/g,'')}</span>`).join(' ');
+    }
+    if (oSub.innerHTML !== html) oSub.innerHTML = html;
+    // ingredients
+    const ingOn = on.ing && ING.length && t >= ING[0].s && t < P.ingredients.until; oIng.hidden = !ingOn;
+    if (ingOn){ const shown = ING.filter(x => t >= x.s); const key = shown.length + '|' + (t - shown[shown.length-1].s < .6);
+      if (oIng.dataset.k !== key){ oIng.dataset.k = key;
+        oIng.innerHTML = `<div class="hd">BAHAN ${shown.length}/${ING.length}</div>` + shown.map((x,i) => `<div class="it${i===shown.length-1 && t-x.s<.6?' new':''}"><span class="ck">✓</span>${x.label}</div>`).join(''); }
+      [...oIng.querySelectorAll('.it')].forEach((el,i) => { const lt = t - ING[i].s; el.style.transform = reduce ? '' : `translateX(${(1-easeOut(lt/.3))*-60}cqw)`; });
+      const rt = P.ingredients.until - t; oIng.style.opacity = Math.min(1, rt/.25);
+    } else oIng.dataset.k = '';
+    // step badge
+    const st = on.step ? STEPS.find(x => inR(t,x)) : null; oStep.hidden = !st;
+    if (st){ oStep.querySelector('.n').textContent = `LANGKAH ${st.n}/${st.total}`; oStep.querySelector('.t').textContent = st.t; popAnim(oStep, t, st.s, st.e, .22, .1); }
+    // save prompt
+    const sv = on.save && P.save && inR(t,P.save) && !p; oSave.hidden = !sv; if (sv) popAnim(oSave, t, P.save.s, P.save.e, .25, .2);
+    // product card
+    const pr = on.prod && inR(t,PROD); oProd.hidden = !pr;
+    if (pr){ const lt=t-PROD.s, rt=PROD.e-t; oProd.style.transform = `translateX(${reduce?0:(1-easeOut(lt/.35))*-110}cqw)`; oProd.style.opacity = Math.min(1, rt/.2); }
+    // CTA
+    const ca = on.cta && inR(t,CTA); oCta.hidden = !ca;
+    if (ca){ popAnim(oCta, t, CTA.s, CTA.e+1, .25); const dir = P.cta.dir==='down' ? 1 : -1;
+      oCta.querySelector('.arrow').style.transform = reduce?'':`translateY(${dir*Math.abs(Math.sin((t-CTA.s)*6))*3}cqw)`; }
+    // camera
+    let sc = 1, ty = 0; const C = P.clips;
+    if (on.cam){ const ci = Math.max(0, C.findIndex((c,i)=> t>=c && t<C[i+1])); const cl = (t - C[ci])/((C[ci+1]||P.dur)-C[ci]); sc = 1 + .045*Math.min(cl,1);
+      PUNCH.forEach(x => { const d = t - x.s; if (d>=0 && d<.9) sc += .07 * (d<.12 ? easeOut(d/.12) : Math.exp(-(d-.12)*3.2)); });
+      if (t < .35 && !reduce) ty = Math.sin(t*70)*.6; }
+    v.style.transform = reduce ? '' : `scale(${sc.toFixed(4)}) translateY(${ty}%)`;
+    let fl = 0; if (on.flash) C.slice(1,-1).forEach(c => { const d=t-c; if (d>=0 && d<.12) fl = .55*(1-d/.12); });
+    oFlash.style.opacity = fl;
+    oProg.style.width = on.prog ? (t/P.dur*100)+'%' : '0'; oSafe.hidden = !on.safe;
+    playhead.style.left = (t/P.dur*100)+'%';
+    $('tm').textContent = `${t.toFixed(2)} / ${P.dur.toFixed(2)} s`;
+  }
+
+  // ---------- SFX (synthesized with WebAudio) ----------
+  let ac = null; const ensureAC = () => { if (!ac) { try { ac = new (window.AudioContext||window.webkitAudioContext)(); } catch(e){} } if (ac && ac.state==='suspended') ac.resume(); };
+  function sfx(kind){ if (!ac || !on.sfx) return; const now = ac.currentTime;
+    if (kind==='pop' || kind==='tick'){ const o=ac.createOscillator(), g=ac.createGain(); const f0 = kind==='tick'?1500:900, f1 = kind==='tick'?700:160, len = kind==='tick'?.06:.12;
+      o.type='sine'; o.frequency.setValueAtTime(f0,now); o.frequency.exponentialRampToValueAtTime(f1,now+len*.75);
+      g.gain.setValueAtTime(.0001,now); g.gain.exponentialRampToValueAtTime(kind==='tick'?.14:.22,now+.008); g.gain.exponentialRampToValueAtTime(.0001,now+len); o.connect(g).connect(ac.destination); o.start(now); o.stop(now+len+.02); }
+    else { const len=.28, b=ac.createBuffer(1, ac.sampleRate*len, ac.sampleRate), d=b.getChannelData(0); for (let i=0;i<d.length;i++) d[i]=(Math.random()*2-1);
+      const s=ac.createBufferSource(); s.buffer=b; const f=ac.createBiquadFilter(); f.type='bandpass'; f.Q.value=1.2; f.frequency.setValueAtTime(300,now); f.frequency.exponentialRampToValueAtTime(3500,now+len);
+      const g=ac.createGain(); g.gain.setValueAtTime(.0001,now); g.gain.exponentialRampToValueAtTime(.12,now+.1); g.gain.exponentialRampToValueAtTime(.0001,now+len); s.connect(f).connect(g).connect(ac.destination); s.start(now); }
+  }
+
+  // ---------- layers panel ----------
+  function buildLayers(){
+    const box = $('layers'); box.innerHTML = '';
+    ALL_LAYERS.filter(l => !l.needs || P[l.needs]).forEach(l => { const lab = document.createElement('label'); lab.className='layer';
+      lab.innerHTML = `<input type="checkbox" id="ly-${l.id}" ${on[l.id]?'checked':''}><span class="sw" style="background:${l.col}"></span><span><b>${l.name}</b><small>${l.desc}</small></span>`;
+      lab.querySelector('input').addEventListener('change', e => { on[l.id] = e.target.checked; render(v.currentTime); });
+      box.appendChild(lab); });
+  }
+
+  // ---------- timeline ----------
+  const tl = $('tl');
+  const playhead = document.createElement('div'); playhead.className='playhead';
+  const phWrap = document.createElement('div'); phWrap.style.cssText='position:absolute;top:0;bottom:0;left:88px;right:0;pointer-events:none'; phWrap.appendChild(playhead);
+  function buildTimeline(){
+    const {W, CH, PUNCH, PROD, CTA, ING, STEPS, SFX} = D; const pct = t => (t/P.dur*100)+'%';
+    tl.innerHTML = '';
+    const row = (name, inner) => { const n = document.createElement('div'); n.className='tl-name'; n.textContent=name; const tr = document.createElement('div'); tr.className='tl-track'; tr.innerHTML = inner; tl.append(n, tr); };
+    const bar = (a,b,col,txt='') => `<div class="ev" style="left:${pct(a)};width:${pct(b-a)};background:${col}" title="${txt}">${txt}</div>`;
+    { const n=document.createElement('div'); const r=document.createElement('div'); r.className='tl-ruler';
+      for (let s=0;s<=Math.floor(P.dur);s+=2) r.innerHTML += `<span style="left:${pct(s)}">${s}s</span>`; tl.append(n, r); }
+    { const n=document.createElement('div'); n.className='tl-name'; n.textContent='Klip AI'; const r=document.createElement('div'); r.className='tl-clips';
+      P.clipNames.forEach((x,i)=> r.innerHTML += `<div class="clip" style="left:${pct(P.clips[i])};width:calc(${pct((P.clips[i+1]||P.dur)-P.clips[i])} - 3px)">${i+1} · ${x}</div>`); tl.append(n, r); }
+    row('Hook', bar(P.hook.s,P.hook.e,'var(--t-hook)',(P.hook.l1+' '+P.hook.l2).toUpperCase()));
+    row('Subtitle', CH.map(c=>bar(W[c[0]].s, W[c[c.length-1]].e, 'var(--t-sub)')).join(''));
+    row('Punch', PUNCH.map(x=>bar(x.s,x.e,PCOL[x.type]==='#ffffff'?'#e8e6e1':PCOL[x.type],x.text)).join(''));
+    if (ING.length) row('Bahan', ING.map(x=>bar(x.s,P.ingredients.until,'var(--t-ing)',x.label)).join(''));
+    if (STEPS.length) row('Langkah', STEPS.map(x=>bar(x.s,x.e,'var(--t-step)',`${x.n} · ${x.t}`)).join(''));
+    if (P.save) row('Simpan', bar(P.save.s,P.save.e,'var(--t-save)','Simpan'));
+    row('Produk', bar(PROD.s,PROD.e,'var(--t-prod)','Kartu produk'));
+    row('CTA', bar(CTA.s,CTA.e,'var(--t-cta)',P.cta.text));
+    row('Kamera', PUNCH.map(x=>`<div class="tick" style="left:${pct(x.s)};background:var(--t-cam)"></div>`).join('') + bar(0,P.dur,'rgba(181,147,255,.18)'));
+    row('SFX', SFX.map(x=>`<div class="tick" style="left:${pct(x.t)};background:${x.k==='whoosh'?'var(--t-sfx)':'var(--t-punch)'}"></div>`).join(''));
+    tl.appendChild(phWrap);
+  }
+  tl.addEventListener('click', e => { const r = phWrap.getBoundingClientRect(); const x = (e.clientX - r.left)/r.width; if (x<0||x>1) return; started = true; big.hidden = true; v.currentTime = x*P.dur; lastT = v.currentTime; render(v.currentTime); });
+
+  // ---------- project switching (hash routing: #resep / #wellness) ----------
+  function load(id){
+    if (!PROJECTS[id]) id = 'resep';
+    P = PROJECTS[id]; D = derive(P);
+    document.documentElement.style.setProperty('--accent', P.accent);
+    document.querySelectorAll('.tabs a').forEach(a => { if (a.dataset.p===id) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
+    $('meta').innerHTML = P.meta; $('lufsBefore').textContent = P.lufsBefore;
+    $('notes').innerHTML = P.notes.map(n => `<p>${n}</p>`).join('');
+    oHook.style.top = P.hook.top + 'cqh';
+    oHook.querySelector('.l1').style.fontSize = (P.hook.fs1 || 13) + 'cqw'; oHook.querySelector('.l2').style.fontSize = (P.hook.fs2 || 15) + 'cqw'; oHook.querySelector('.l1').textContent = P.hook.l1; oHook.querySelector('.l2').textContent = P.hook.l2;
+    oProd.style.top = (P.prod.top || 13) + 'cqh';
+    const im = oProd.querySelector('img'); im.src = P.prod.img; im.alt = P.prod.alt;
+    oProd.querySelector('.tag').textContent = P.prod.tag; oProd.querySelector('.pn').innerHTML = P.prod.name; oProd.querySelector('.pd').textContent = P.prod.desc;
+    oCta.className = 'cta' + (P.cta.dir==='down' ? ' down' : ''); oCta.style.top = P.cta.top + 'cqh'; oCta.querySelector('.arrow').textContent = P.cta.arrow; oCta.querySelector('.pill').textContent = P.cta.text;
+    if (P.save) oSave.querySelector('span').textContent = P.save.text;
+    v.pause(); vb.pause(); started = false; lastT = 0;
+    v.src = P.base; vb.src = P.before; vb.muted = false;
+    v.addEventListener('loadeddata', () => { if (!started) v.currentTime = Math.min(.7, P.hook.e - .3); }, {once:true});
+    buildLayers(); buildTimeline(); sync(); render(0);
+  }
+
+  // ---------- playback ----------
+  let lastT = 0, started = false;
+  function tick(){ const t = v.currentTime;
+    if (!v.paused && t > lastT && t - lastT < .3) D.SFX.forEach(x => { if (x.t > lastT && x.t <= t) sfx(x.k); });
+    lastT = t; render(t); requestAnimationFrame(tick); }
+  const bPlay = $('bPlay'), big = $('bigplay');
+  function sync(){ bPlay.textContent = v.paused ? '▶ Putar' : '❚❚ Jeda'; big.hidden = !v.paused || started; }
+  const toggle = () => { ensureAC(); if (v.paused) { if (!started || v.ended || v.currentTime >= P.dur-.05) { v.currentTime = 0; lastT = 0; } started = true; v.play(); } else v.pause(); };
+  bPlay.addEventListener('click', toggle); big.addEventListener('click', toggle);
+  v.addEventListener('play', sync); v.addEventListener('pause', sync); v.addEventListener('ended', sync);
+  $('bBoth').addEventListener('click', () => { ensureAC(); v.currentTime = 0; vb.currentTime = 0; vb.muted = true; lastT = 0; started = true; v.play(); vb.play(); });
+  document.addEventListener('keydown', e => { if (e.code==='Space' && e.target===document.body) { e.preventDefault(); toggle(); } });
+
+  const route = () => load((location.hash || '#resep').slice(1));
+  window.addEventListener('hashchange', route);
+  route(); requestAnimationFrame(tick);
+})();
+</script>
