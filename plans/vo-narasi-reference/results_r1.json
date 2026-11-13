@@ -1,0 +1,441 @@
+{
+ "akustik_keyword": {
+  "meta": {
+   "clips": 4,
+   "wpc": "17-19 kata",
+   "pillar": "cara agar suara tidak keluar kamar",
+   "hook": "Susah tidur malam karena suara bising tembus dinding kamar",
+   "taskType": "BRAND_EDITORIAL_CREATIVE",
+   "kind": "brand_editorial",
+   "product": null,
+   "prod_vo": [
+    "Susah tidur malam karena suara bising tembus dinding kamar",
+    "Padahal, kebocoran suara seperti ini biasanya terjadi karena massa dinding yang kurang padat.",
+    "Nah, untuk mengatasinya dibutuhkan kombinasi material insulasi yang tepat guna meredam getaran.",
+    "Hasilnya, kamar tidur jadi jauh lebih tenang dan nyaman untuk beristirahat, komen di bawah ya!"
+   ]
+  },
+  "m_old": [
+   "gemini-3.6-flash"
+  ],
+  "old": [
+   "Susah tidur malam karena suara bising tembus dinding kamar? Solusinya bukan cuma menutup jendela rapat-rapat, lho.",
+   "Masalahnya, gelombang suara frekuensi rendah dari kendaraan luar bisa dengan mudah menembus pori-pori dinding bata yang polos.",
+   "Nah, memasang material Rockwool Slab di dalam partisi dinding efektif menyerap energi bising secara maksimal dan senyap.",
+   "Hasilnya, kamar tidur jadi jauh lebih tenang dan waktu istirahat malam kamu terasa lebih maksimal, komen di bawah ya!"
+  ],
+  "m_payload": [
+   "gemini-2.5-flash"
+  ],
+  "payload": {
+   "search_intent": "Bagaimana cara meredam suara bising agar tidak masuk dan mengganggu tidur di kamar?",
+   "search_answer": "Meredam suara bising dari luar kamar memerlukan penutupan celah yang menyebabkan kebocoran suara serta mempertimbangkan material insulasi.",
+   "takeaways": [
+    {
+     "point": "Identifikasi sumber kebocoran suara utama di kamar tidur Anda.",
+     "anchor": "celah bawah pintu, sela kusen jendela, atau lubang ventilasi yang tidak tertutup rapat",
+     "anchor_type": "titik",
+     "source": "pengetahuan_umum"
+    },
+    {
+     "point": "Untuk penanganan awal, minimalkan celah di pintu dan jendela yang memungkinkan suara masuk.",
+     "anchor": "membiarkan celah bawah pintu terbuka lebar; perbaiki dengan memasang door sweep atau menyumbat sementara menggunakan kain tebal.",
+     "anchor_type": "kesalahan",
+     "source": "pengetahuan_umum"
+    }
+   ],
+   "needs_data": []
+  },
+  "patch": [
+   "ok:connective",
+   "ok:storytelling-mid",
+   "ok:storytelling-end",
+   "ok:scene2-hint",
+   "ok:contract"
+  ],
+  "m_new": [
+   "gemini-2.5-flash"
+  ],
+  "new": [
+   "Susah tidur malam karena suara bising tembus dinding kamar. Situasi ini memang seringkali mengganggu istirahat dan kenyamanan.",
+   "Meredam suara bising butuh penutupan celah kebocoran. Identifikasi sumber utama seperti celah bawah pintu, sela kusen jendela, atau lubang ventilasi.",
+   "Untuk penanganan awal, minimalkan celah. Pasang door sweep di bawah pintu atau sumbat sementara pakai kain tebal.",
+   "Langkah kecil ini efektif mengurangi kebisingan dan membuat istirahat Anda lebih tenang. Komen di bawah ya!"
+  ],
+  "promptLen": {
+   "old": 32087,
+   "new": 33001
+  }
+ },
+ "thermal_harga_roll": {
+  "meta": {
+   "clips": 4,
+   "wpc": "17-19 kata",
+   "pillar": "harga bubble foil per roll",
+   "hook": "Bingung harga bubble foil per roll? Ada rahasia yang tak terduga!",
+   "taskType": "BRAND_EDITORIAL_CREATIVE",
+   "kind": "brand_editorial",
+   "product": null,
+   "prod_vo": [
+    "Bingung harga bubble foil per roll? Ada rahasia yang tak terduga!",
+    "Padahal, variasi harga yang terlihat di pasaran seringkali ditentukan oleh kerapatan lapisan dan ketebalan materialnya.",
+    "Nah, memahami perbedaan spesifikasi ini membantu bangunan mendapatkan perlindungan termal yang optimal dan efisien.",
+    "Bagaimana pengalaman dalam memilih insulasi untuk bangunan Anda? komen di bawah ya!"
+   ]
+  },
+  "m_old": [
+   "gemini-2.5-flash"
+  ],
+  "old": [
+   "Bingung harga bubble foil per roll? Ada rahasia yang tak terduga! Harga beda, kualitasnya pun ternyata tak sama lho.",
+   "Padahal, perbedaan harga itu seringkali mencerminkan ketebalan, lapisan foil, dan gelembung udara di dalamnya. Ini kunci performa insulasi.",
+   "Nah, material bubble foil berkualitas punya lapisan foil lebih padat dan gelembung lebih besar. Ini penentu efektivitas penahan panas.",
+   "Makanya, jangan cuma lihat harga ya! Pertimbangkan kualitas untuk kenyamanan optimal dan investasi jangka panjang. Yuk, komen di bawah ya!"
+  ],
+  "m_payload": [
+   "gemini-2.5-flash"
+  ],
+  "payload": {
+   "search_intent": "Mengapa harga bubble foil per roll berbeda-beda, dan bagaimana memilih yang sesuai kualitas?",
+   "search_answer": "Harga bubble foil ditentukan ketebalan, kualitas material, jumlah lapisan, dan ukuran roll; hitung kebutuhan berdasarkan luas area atap.",
+   "takeaways": [
+    {
+     "point": "Sebelum membeli, pastikan Anda memahami spesifikasi bubble foil agar tidak salah pilih dan kualitasnya sesuai kebutuhan.",
+     "anchor": "Perhatikan ketebalan insulasi, jumlah lapisan (single/double bubble), dan jenis material pelapis (pure aluminum/metalized film).",
+     "anchor_type": "kriteria",
+     "source": "pengetahuan_umum"
+    },
+    {
+     "point": "Hindari pemborosan atau kekurangan material dengan menghitung kebutuhan bubble foil Anda secara akurat.",
+     "anchor": "Ukur luas area atap atau dinding yang akan dipasang insulasi, lalu tambahkan 5-10% untuk potongan dan overlap.",
+     "anchor_type": "takaran",
+     "source": "pengetahuan_umum"
+    }
+   ],
+   "needs_data": []
+  },
+  "patch": [
+   "ok:connective",
+   "ok:storytelling-mid",
+   "ok:storytelling-end",
+   "ok:scene2-hint",
+   "ok:contract"
+  ],
+  "m_new": [
+   "gemini-2.5-flash",
+   "gemini-3.5-flash-lite"
+  ],
+  "new": [
+   "Bingung harga bubble foil per roll? Ada rahasia yang tak terduga!",
+   "Sebelum membeli, pastikan Anda memahami spesifikasi bubble foil agar kualitasnya sesuai kebutuhan.",
+   "Perhatikan ketebalan insulasi, jumlah lapisan, serta jenis material pelapis yang digunakan pada setiap roll.",
+   "Hindari pemborosan material dengan menghitung luas area atap secara akurat, komen di bawah ya!"
+  ],
+  "promptLen": {
+   "old": 33908,
+   "new": 34923
+  }
+ },
+ "garlibee_produk": {
+  "meta": {
+   "clips": 6,
+   "wpc": "8-9 kata",
+   "pillar": "Problem-Solution Based",
+   "hook": "Menjaga kesehatan jantung keluarga dimulai dari kebiasaan kecil setiap pagi",
+   "taskType": "PRODUCT_CAMPAIGN_CREATIVE",
+   "kind": "product_campaign",
+   "product": "Garlibee Madu Bawang Lanang",
+   "prod_vo": [
+    "Menjaga kesehatan jantung keluarga dimulai dari kebiasaan kecil setiap pagi.",
+    "Padahal rutinitas padat sering membuat niat sehat ini kerap tertunda.",
+    "Padahal tubuh memerlukan dukungan harian yang praktis dan konsisten.",
+    "Di sinilah pentingnya memilih asupan alami yang mudah diserap tubuh.",
+    "GarliBee memadukan bawang lanang dan madu mentah murni pilihan.",
+    "Mulai langkah sehatmu hari ini dengan kebaikan alami, link pembelian aku taruh di Bio ya!"
+   ]
+  },
+  "m_old": [
+   "gemini-3.5-flash-lite",
+   "gemini-3.5-flash-lite"
+  ],
+  "old": [
+   "Menjaga kesehatan jantung keluarga dimulai dari kebiasaan kecil setiap pagi.",
+   "Padahal, rutinitas padat sering membuat persiapan sarapan sehat terabaikan.",
+   "Di titik inilah kebiasaan merawat tubuh secara konsisten sangat dibutuhkan.",
+   "Aktivitas harian pun terasa jauh lebih ringan dan menenangkan.",
+   "Nikmati kebaikan madu mentah dan bawang lanang pilihan dalam GarliBee.",
+   "Mendampingi kebugaran keluarga setiap hari, link pembelian aku taruh di Bio ya!"
+  ],
+  "m_payload": [
+   "gemini-3.5-flash-lite"
+  ],
+  "payload": {
+   "search_intent": "Bagaimana cara praktis mengonsumsi bawang lanang dan madu untuk rutinitas pagi hari?",
+   "search_answer": "Konsumsi satu siung bawang lanang dan satu sendok madu mentah setiap hari secara rutin.",
+   "takeaways": [
+    {
+     "point": "Ambil satu siung bawang lanang dan satu sendok madu dari jar.",
+     "anchor": "satu siung dan satu sendok",
+     "anchor_type": "angka",
+     "source": "data_produk"
+    },
+    {
+     "point": "Pastikan proses fermentasi alami telah berjalan minimal 3 bulan sebelum dikonsumsi.",
+     "anchor": "minimal 3 bulan",
+     "anchor_type": "durasi",
+     "source": "data_produk"
+    },
+    {
+     "point": "Simpan produk di tempat bersuhu ruang untuk menjaga kualitasnya.",
+     "anchor": "suhu ruang",
+     "anchor_type": "titik",
+     "source": "data_produk"
+    },
+    {
+     "point": "Hindari meletakkan jar di tempat yang terkena sinar matahari langsung.",
+     "anchor": "hindarkan dari sinar matahari langsung",
+     "anchor_type": "kesalahan",
+     "source": "data_produk"
+    }
+   ],
+   "needs_data": []
+  },
+  "patch": [
+   "ok:connective",
+   "ok:storytelling-mid",
+   "ok:storytelling-end",
+   "ok:scene2-hint",
+   "ok:contract"
+  ],
+  "m_new": [
+   "gemini-3.5-flash-lite"
+  ],
+  "new": [
+   "Menjaga kesehatan jantung keluarga dimulai dari kebiasaan kecil setiap pagi.",
+   "Ambil satu siung bawang lanang dan satu sendok madu dari jar.",
+   "Pastikan proses fermentasi alami telah berjalan minimal 3 bulan sebelum dikonsumsi.",
+   "Simpan produk di tempat bersuhu ruang untuk menjaga kualitasnya.",
+   "Hindari meletakkan jar di tempat yang terkena sinar matahari langsung.",
+   "Tubuh bugar setiap hari, link pembelian aku taruh di Bio ya!"
+  ],
+  "promptLen": {
+   "old": 52334,
+   "new": 53236
+  }
+ },
+ "sasya_rantau": {
+  "meta": {
+   "clips": 8,
+   "wpc": "10-11 kata",
+   "pillar": "Anak Rantau 101",
+   "hook": "Dari yang tadinya serba canggung pas nyampe Malang, sampai akhirnya hafal ritme hidup mandiri.",
+   "taskType": "PRODUCT_CAMPAIGN_CREATIVE",
+   "kind": "generic",
+   "product": null,
+   "prod_vo": [
+    "Dari yang tadinya serba canggung pas nyampe Malang, sampai akhirnya hafal ritme hidup mandiri.",
+    "Awal merantau memang menuntut adaptasi kebiasaan baru di lingkungan kampus.",
+    "Mulai dari mengatur jadwal kuliah harian hingga belanja kebutuhan bulanan.",
+    "Kuncinya ada pada konsistensi membangun kebiasaan rapi di dalam kamar.",
+    "Mempersiapkan segala perlengkapan sebelum beraktivitas membuat langkah terasa lebih tenang.",
+    "Ruang tinggal yang tertata rapi mendukung fokus belajar jadi maksimal.",
+    "Perjalanan mandiri pun perlahan terasa lebih nyaman dan sangat berharga.",
+    "Bagaimana awal cerita kalian merantau, tulis pendapat kalian di komen ya!"
+   ]
+  },
+  "m_old": [
+   "gemini-3.5-flash-lite"
+  ],
+  "old": [
+   "Dari yang tadinya serba canggung pas nyampe Malang, sampai akhirnya hafal ritme hidup mandiri.",
+   "Padahal dulu, urusan kecil seperti mengatur waktu kuliah dan istirahat terasa begitu melelahkan.",
+   "Belum lagi beradaptasi dengan lingkungan baru yang sama sekali asing dari kebiasaan rumah.",
+   "Tapi seiring berjalan waktu, proses belajar mandiri justru membentuk ketenangan dalam diri kita.",
+   "Kuncinya ada pada pemilihan ruang hidup yang mendukung kenyamanan dan fokus belajar setiap hari.",
+   "Di SasyaHouse Sigura-gura Malang, setiap sudut dirancang khusus untuk menemani perjalanan sukses mahasiswi.",
+   "Fasilitas lengkap dan suasana tenang membuat hari-hari merantau terasa seperti di rumah sendiri.",
+   "Bagaimana pengalaman adaptasi merantaumu? tulis pendapat kalian di komen ya!"
+  ],
+  "m_payload": [
+   "gemini-3.5-flash-lite"
+  ],
+  "payload": {
+   "search_intent": "Bagaimana cara beradaptasi bagi mahasiswi rantau yang awalnya pemalu agar bisa mandiri di Malang?",
+   "search_answer": "Adaptasi mandiri dimulai dari membiasakan diri mengurus kebutuhan harian sendiri tanpa bergantung pada orang lain.",
+   "takeaways": [
+    {
+     "point": "Kenali lingkungan sekitar tempat tinggal secara mandiri.",
+     "anchor": "Langkah pertama: susur radius seratus meter dari lokasi kost.",
+     "anchor_type": "urutan",
+     "source": "pengetahuan_umum"
+    },
+    {
+     "point": "Atur jadwal kegiatan harian agar hidup lebih terarah.",
+     "anchor": "Alokasikan waktu khusus tiga puluh menit setiap malam untuk evaluasi.",
+     "anchor_type": "durasi",
+     "source": "pengetahuan_umum"
+    },
+    {
+     "point": "Kelola keuangan pribadi dengan disiplin ketat.",
+     "anchor": "Kesalahan umum: mencampur uang makan dan belanja bulanan tanpa pencatatan.",
+     "anchor_type": "kesalahan",
+     "source": "pengetahuan_umum"
+    },
+    {
+     "point": "Bangun komunikasi aktif dengan sesama mahasiswi rantau.",
+     "anchor": "Titik kumpul: area komunal kost atau ruang baca kampus.",
+     "anchor_type": "titik",
+     "source": "data_brand"
+    },
+    {
+     "point": "Tentukan prioritas dalam menghadapi masalah akademik maupun sosial.",
+     "anchor": "Gunakan kriteria mendesak dan penting untuk menyelesaikan masalah.",
+     "anchor_type": "kriteria",
+     "source": "pengetahuan_umum"
+    },
+    {
+     "point": "Latih mental untuk berani mengambil keputusan sendiri.",
+     "anchor": "Langkah akhir: putuskan satu hal penting tanpa meminta persetujuan orang tua.",
+     "anchor_type": "urutan",
+     "source": "pengetahuan_umum"
+    }
+   ],
+   "needs_data": []
+  },
+  "patch": [
+   "ok:connective",
+   "ok:storytelling-mid",
+   "ok:storytelling-end",
+   "ok:scene2-hint",
+   "ok:contract"
+  ],
+  "m_new": [
+   "gemini-3.5-flash-lite"
+  ],
+  "new": [
+   "Dari yang tadinya serba canggung pas nyampe Malang, sampai akhirnya hafal ritme hidup mandiri.",
+   "Langkah pertama dimulai dengan menyusur radius seratus meter dari lokasi kost.",
+   "Alokasikan waktu khusus tiga puluh menit setiap malam untuk evaluasi kegiatan harian.",
+   "Kesalahan umum yang sering terjadi adalah mencampur uang makan dan belanja bulanan.",
+   "Gunakan area komunal kost atau ruang baca kampus sebagai titik kumpul diskusi.",
+   "Gunakan kriteria mendesak dan penting untuk menyelesaikan setiap masalah akademik.",
+   "Langkah akhir adalah memutuskan satu hal penting tanpa meminta persetujuan orang tua.",
+   "Adaptasi terbaik lahir dari keberanian menghadapi hari baru, tulis pendapat kalian di komen ya!"
+  ],
+  "promptLen": {
+   "old": 36827,
+   "new": 38173
+  }
+ },
+ "siasat_mul_kulit": {
+  "meta": {
+   "wpc": "17-19 kata",
+   "source": [
+    "Rahasia tanpa skincare mahal. Campurkan satu sendok pati jagung dalam wadah bersih.",
+    "Tambahkan madu murni serta minyak zaitun berkualitas tinggi. Aduk perlahan hingga teksturnya menjadi lembut seperti krim.",
+    "Balurkan pada kulit kusam secara merata. Mau resep sehat lainnya? Follow dan komen mau di bawah ini ya."
+   ],
+   "prod_vo": [
+    "Bongkar rahasia kulit cerah natural tanpa skincare mahal yang bikin boncos kantong!",
+    "Campurkan bahan pilihan dengan madu murni serta minyak zaitun berkualitas tinggi secara perlahan.",
+    "Balurkan merata ke seluruh wajah dan mau resep sehat lainnya? jangan lupa follow & komen mau ya!"
+   ]
+  },
+  "m_old": [],
+  "old": [
+   "Bongkar rahasia kulit cerah natural tanpa skincare mahal yang bikin dompet boncos dan kering!",
+   "Campurkan pati jagung pilihan dengan madu murni serta minyak zaitun hingga teksturnya lembut krim.",
+   "Balurkan secara merata untuk nutrisi harian kulit sehat. mau resep sehat lainnya? jangan lupa follow & komen mau ya!"
+  ],
+  "patch": [
+   "ok:mul-storytelling",
+   "ok:mul-contract@### FORMAT OUTPUT"
+  ],
+  "m_new": [],
+  "new": [
+   "Bongkar rahasia kulit cerah natural tanpa skincare mahal yang bikin boncos! Campurkan satu sendok pati jagung.",
+   "Tambahkan satu sendok madu murni serta satu sendok teh minyak zaitun. Aduk perlahan sampai lembut.",
+   "Balurkan pada kulit secara merata dan rasakan kesegarannya. mau resep sehat lainnya? jangan lupa follow & komen mau ya!"
+  ],
+  "lock": {
+   "ingredients": [
+    {
+     "name": "pati jagung",
+     "amount": "1 sendok makan"
+    },
+    {
+     "name": "madu murni",
+     "amount": "1 sendok makan"
+    },
+    {
+     "name": "minyak zaitun",
+     "amount": "1 sendok teh"
+    }
+   ],
+   "timed_steps": [
+    "Campurkan pati jagung, madu murni, dan minyak zaitun dalam mangkuk kaca",
+    "Aduk perlahan hingga teksturnya menjadi lembut seperti krim",
+    "Balurkan pada kulit kusam secara merata"
+   ]
+  },
+  "on_screen": null
+ },
+ "botani_mul_adas": {
+  "meta": {
+   "wpc": "17-19 kata",
+   "source": [
+    "Baju terasa makin sempit? Badan berat sulit bergerak? Diet crash tidak berhasil? Ada satu-satunya solusi alami yang dipercaya dapat membantu meluruhkan semua lemak membandelmu.",
+    "Ambil satu sendok biji adas, satu sendok biji karam, dan satu sendok biji jintan. Tambahkan segelas air, rendam semalaman ya.",
+    "Keesokan harinya rebus hingga menyusut setengah.",
+    "Saring dan minum pagi hari saat perut kosong. Mau resep kesehatan lainnya? Jangan lupa follow dan komen 'mau' di bawah ini ya."
+   ],
+   "prod_vo": [
+    "Stop nyiksa diri pakai crash diet yang bikin lemas! Ganti kopi pagi kamu sama 3 rempah alami ini...",
+    "Ambil satu sendok biji adas, biji kapulaga, dan biji jintan. Seduh dengan air hangat setiap pagi.",
+    "Nikmati selagi hangat untuk bakar lemak perut secara alami. mau resep sehat lainnya? follow, share, dan komen mau ya!"
+   ]
+  },
+  "m_old": [],
+  "old": [
+   "Stop nyiksa diri pakai crash diet yang bikin lemas! Ganti kopi pagi kamu sama 3 rempah alami ini sekarang.",
+   "Campurkan biji adas, karam, dan jintan ke dalam segelas air hangat untuk merangsang metabolisme aktif tubuhmu.",
+   "Minum rutin setiap pagi tanpa rasa lapar berlebih. mau resep sehat lainnya? follow, share, dan komen mau ya!"
+  ],
+  "patch": [
+   "ok:mul-storytelling",
+   "ok:mul-contract@### FORMAT OUTPUT"
+  ],
+  "m_new": [],
+  "new": [
+   "Stop nyiksa diri pakai crash diet yang bikin lemas! Ganti kopi pagi kamu pakai biji adas, biji karam, dan biji jintan.",
+   "Ambil segelas air, rendam semalaman ya. Keesokan harinya rebus racikan rempah ini hingga menyusut setengah bagian airnya.",
+   "Saring dan minum saat perut kosong pagi hari. mau resep sehat lainnya? follow, share, dan komen mau ya!"
+  ],
+  "lock": {
+   "ingredients": [
+    {
+     "name": "biji adas",
+     "amount": "satu sendok"
+    },
+    {
+     "name": "biji karam",
+     "amount": "satu sendok"
+    },
+    {
+     "name": "biji jintan",
+     "amount": "satu sendok"
+    },
+    {
+     "name": "air",
+     "amount": "segelas"
+    }
+   ],
+   "timed_steps": [
+    "rendam semalaman ya",
+    "rebus hingga menyusut setengah",
+    "saring dan minum pagi hari saat perut kosong"
+   ]
+  },
+  "on_screen": null
+ }
+}
