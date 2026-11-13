@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.44.18 — Implement Fase 2c-6 mitos_fakta finishing template (13/11/2026)
+- Add templates/finishing/mitos-fakta.html with question hook badge, MITOS/FAKTA x-stamp, KENAPA reason bar, i18n labels, and RGBA end card
+- Add finishing_plan.myth_fact schema in prompt builders, strict FAKTA isHerbalMedicalClaimPhrase medical-claim guard in validator, and timeline/SFX mapping
+- Register mitos_fakta in FINISHING_TEMPLATE_REGISTRY and add Fase 2c-6 unit tests
+
 ## V2.44.17 — Preserve 720x1280 x-end bounds with clip-path RGBA transparency (13/11/2026)
 - Use clip-path: inset(0 0 1px 0) with inset: 0 in .x-end so Chromium preserves PNG RGBA while keeping exact 720x1280 bounding box
 
