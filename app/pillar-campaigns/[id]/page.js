@@ -145,7 +145,7 @@ export default function PillarCampaignDetailPage() {
   const [quickVoSaving, setQuickVoSaving] = useState(false);
   const [quickVoToast, setQuickVoToast] = useState(null);
   const [quickVoMotionStyle, setQuickVoMotionStyle] = useState('floating_white_yellow');
-  const [quickVoTransition, setQuickVoTransition] = useState('fade');
+  const [quickVoTransition, setQuickVoTransition] = useState('cut');
   const [quickVoEnableMotion, setQuickVoEnableMotion] = useState(true);
 
   const handleOpenQuickVoModal = (item) => {
@@ -176,7 +176,7 @@ export default function PillarCampaignDetailPage() {
     setQuickVoScenes(scenes);
     setQuickVoAutoRemux(true);
     setQuickVoMotionStyle(campaign?.motion_text_style || 'floating_white_yellow');
-    setQuickVoTransition(campaign?.video_transition || 'fade');
+    setQuickVoTransition(campaign?.video_transition || 'cut');
     setQuickVoEnableMotion(campaign?.enable_motion_text !== 0);
     setQuickVoModalOpen(true);
   };
@@ -1718,7 +1718,7 @@ export default function PillarCampaignDetailPage() {
             motion_hook_effect: campaign.motion_hook_effect || 'pop_bounce',
             motion_story_effect: campaign.motion_story_effect || 'typewriter',
             motion_cta_effect: campaign.motion_cta_effect || 'pop_bounce',
-            video_transition: campaign.video_transition || 'fade',
+            video_transition: campaign.video_transition || 'cut',
             transition_duration: campaign.transition_duration !== undefined ? Number(campaign.transition_duration) : 0.5,
           }
         }));
@@ -1957,7 +1957,7 @@ export default function PillarCampaignDetailPage() {
             motion_hook_effect: settings.motion_hook_effect || campaign.motion_hook_effect || 'pop_bounce',
             motion_story_effect: settings.motion_story_effect || campaign.motion_story_effect || 'typewriter',
             motion_cta_effect: settings.motion_cta_effect || campaign.motion_cta_effect || 'pop_bounce',
-            video_transition: settings.video_transition || campaign.video_transition || 'fade',
+            video_transition: settings.video_transition || campaign.video_transition || 'cut',
             transition_duration: settings.transition_duration !== undefined ? Number(settings.transition_duration) : (campaign.transition_duration || 0.5),
             selected_vo_version: activeVoVersion,
             review_revision: item.review_revision
@@ -2018,7 +2018,7 @@ export default function PillarCampaignDetailPage() {
             motion_hook_effect: settings.motion_hook_effect || campaign.motion_hook_effect || 'pop_bounce',
             motion_story_effect: settings.motion_story_effect || campaign.motion_story_effect || 'typewriter',
             motion_cta_effect: settings.motion_cta_effect || campaign.motion_cta_effect || 'pop_bounce',
-            video_transition: settings.video_transition || campaign.video_transition || 'fade',
+            video_transition: settings.video_transition || campaign.video_transition || 'cut',
             transition_duration: settings.transition_duration !== undefined ? Number(settings.transition_duration) : (campaign.transition_duration || 0.5),
             only_save: true,
             selected_vo_version: activeVoVersion,
@@ -3220,7 +3220,7 @@ export default function PillarCampaignDetailPage() {
                           <div>
                             <select
                               disabled={isReadOnly}
-                              value={settings.video_transition || 'fade'}
+                              value={settings.video_transition || 'cut'}
                               onChange={(e) => updateSettingField('video_transition', e.target.value)}
                               style={{ width: '100%', padding: '5px 8px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '4px', fontSize: '0.7rem' }}
                             >

@@ -306,7 +306,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
           ...(body.overrides || {})
         },
         motionTextPosition: body.motion_text_position || body.motionTextPosition || 'bottom',
-        videoTransition: body.video_transition || body.videoTransition || 'fade',
+        videoTransition: body.video_transition || body.videoTransition || 'cut',
         transitionDuration: Number(body.transition_duration || body.transitionDuration || 0.5),
         tenantId
       });

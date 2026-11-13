@@ -88,7 +88,7 @@ const initialForm = {
   enable_motion_text: true,
   motion_text_style: 'floating_white_yellow',
   motion_text_position: 'bottom',
-  video_transition: 'fade',
+  video_transition: 'cut',
   transition_duration: 0.5
 };
 
@@ -183,7 +183,7 @@ function mapPresetToForm(p) {
     enable_motion_text: wf.enable_motion_text !== undefined ? Boolean(wf.enable_motion_text) : true,
     motion_text_style: wf.motion_text_style || 'floating_white_yellow',
     motion_text_position: wf.motion_text_position || 'bottom',
-    video_transition: wf.video_transition || 'fade',
+    video_transition: wf.video_transition || 'cut',
     transition_duration: Number(wf.transition_duration ?? 0.5)
   };
 }
@@ -282,7 +282,7 @@ function mapFormToPayload(f) {
         enable_motion_text: Boolean(f.enable_motion_text),
         motion_text_style: f.motion_text_style || 'floating_white_yellow',
         motion_text_position: f.motion_text_position || 'bottom',
-        video_transition: f.video_transition || 'fade',
+        video_transition: f.video_transition || 'cut',
         transition_duration: Number(f.transition_duration ?? 0.5)
       }
     }
@@ -1498,7 +1498,7 @@ export default function PresetsPage() {
                         Pilihan Efek Transisi Video
                         <select
                           className="form-select"
-                          value={form.video_transition || 'fade'}
+                          value={form.video_transition || 'cut'}
                           onChange={e => setForm({ ...form, video_transition: e.target.value })}
                         >
                           <option value="fade">Fade — Smooth Dissolve (Default)</option>

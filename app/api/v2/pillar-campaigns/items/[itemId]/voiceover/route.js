@@ -20,7 +20,7 @@ export const GET = withTenantContext(async (request, { params }) => {
       visual_status: item.visual_status,
       enable_motion_text: campaign?.enable_motion_text !== undefined ? campaign.enable_motion_text : 1,
       motion_text_style: campaign?.motion_text_style || 'floating_white_yellow',
-      video_transition: campaign?.video_transition || 'fade'
+      video_transition: campaign?.video_transition || 'cut'
     });
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

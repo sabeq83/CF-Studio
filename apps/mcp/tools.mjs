@@ -790,7 +790,7 @@ export function createCfStudioServer(rawRequest) {
     enable_motion_text: z.boolean().default(true),
     motion_text_style: z.string().default('floating_white_yellow'),
     motion_text_position: z.string().default('bottom'),
-    video_transition: z.string().default('fade'),
+    video_transition: z.string().default('cut'),
     transition_duration: z.number().default(0.5),
     enable_sfx: z.boolean().optional(),
     enable_bgm: z.boolean().optional(),
