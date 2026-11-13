@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.44.15 — Fase 2c-5 Polish: Anti-Collision Hook/Punch & Video Stream tpad Align (13/11/2026)
+- Tambah guard !showHook pada activePunch di angka-banding.html
+- Tambahkan videoDuration stream probe dan tpad stop_mode=clone pada video-studio-processor.js agar x-end tampil penuh saat audio lebih panjang dari video
+
 ## V2.44.14 — Fase 2c-5: Template Finishing angka_banding (13/11/2026)
 - Tambah template angka-banding.html dengan x-compare, x-chips, dan counter x-num kondisional
 - Tambah schema & guard ketat anti-angka palsu untuk compare, numbers, dan chips di finishing-plan-validator.js

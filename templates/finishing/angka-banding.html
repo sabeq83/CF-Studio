@@ -646,9 +646,9 @@
           applyPop(oNum, time, activeNum.s, activeNum.e, 0.22, 0.14, 0);
         }
 
-        // 4. Keyword Punch
+        // 4. Keyword Punch (avoid colliding with Hook Card or End Card)
         const punches = Array.isArray(T.punches) ? T.punches : [];
-        const activePunch = !endOn ? punches.find((p) => time >= p.s && time < p.e) : null;
+        const activePunch = (!endOn && !showHook) ? punches.find((p) => time >= p.s && time < p.e) : null;
         oPunch.hidden = !activePunch;
         if (activePunch) {
           const txt = String(activePunch.displayText || activePunch.phrase || '').toUpperCase();
