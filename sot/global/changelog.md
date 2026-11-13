@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.44.8 — Finishing Pass Fase 2c-1: Shared Brand Layers, Tier-3 Speech Timing R12.3, & Brand Patch R12.4 (13/11/2026)
+- Tambah 10 field Brand Profile R12.1 (logo_url, brand_color, brand_tagline, default_cta per platform, safety_notice_text, presenter, lokasi) hingga timeline.brand
+- Tambah templates/finishing/shared-layers.js (x-wm, x-end, x-lower, x-patch, x-notice, i18n id/en, zero hardcoded string R6.6)
+- Selaraskan fallback Tier-3 word-alignment-engine.js R12.3 pada interval sp dengan snap tanda baca <0.9s
+- Tambah validator finishing_plan.brand_patch eksplisit R12.4 + unit test Fase 2c-1 & regresi calm_wellness/recipe_pop
+
 ## V2.44.7 — Finishing Pass Fase 2c-0: Pengaman Klip R10 & Registry Template R11 (13/11/2026)
 - Tambah clip-pair-guard (parseClipNumberFromPath bebas ekstensi, sort numerik clip_index, cek durasi +/-0.3s, fail-safe skip finishing tanpa gagal total)
 - Tambah finishing-template-registry terpusat untuk renderer, extractor (suggestFinishingTemplate null-default), processor, UI Presets, & MCP tools

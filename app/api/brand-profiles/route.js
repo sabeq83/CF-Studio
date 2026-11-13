@@ -16,7 +16,9 @@ export async function GET(req) {
     if (currentUser.role === 'admin' || currentUser.role === 'superadmin') {
       brands = await tenantContext.run(currentUser.tenantId, () => db.prepare(`
         SELECT id, brand_name, tone_of_voice, visual_signature, color_palette, forbidden_elements, brand_slogan_or_cta,
-               editorial_brand_context, editorial_content_goal, editorial_content_pillars_json, guideline_filename, created_at
+               editorial_brand_context, editorial_content_goal, editorial_content_pillars_json, guideline_filename, created_at,
+               logo_url, brand_color, brand_tagline, default_cta_tiktok, default_cta_facebook, default_cta_youtube,
+               safety_notice_text, presenter_name, presenter_role, brand_location
         FROM brand_profiles 
         WHERE tenant_id = ?
         ORDER BY brand_name ASC
@@ -25,7 +27,9 @@ export async function GET(req) {
       // Regular user: return assigned brand profiles within active tenant
       brands = await tenantContext.run(currentUser.tenantId, () => db.prepare(`
         SELECT bp.id, bp.brand_name, bp.tone_of_voice, bp.visual_signature, bp.color_palette, bp.forbidden_elements, bp.brand_slogan_or_cta,
-               bp.editorial_brand_context, bp.editorial_content_goal, bp.editorial_content_pillars_json, bp.guideline_filename, bp.created_at
+               bp.editorial_brand_context, bp.editorial_content_goal, bp.editorial_content_pillars_json, bp.guideline_filename, bp.created_at,
+               bp.logo_url, bp.brand_color, bp.brand_tagline, bp.default_cta_tiktok, bp.default_cta_facebook, bp.default_cta_youtube,
+               bp.safety_notice_text, bp.presenter_name, bp.presenter_role, bp.brand_location
         FROM brand_profiles bp
         JOIN user_brands ub ON bp.id = ub.brand_id
         WHERE ub.user_id = ? AND bp.tenant_id = ?

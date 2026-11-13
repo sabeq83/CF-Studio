@@ -47,6 +47,16 @@ export const POST = withTenantContext(async (req, _ctx, user) => {
       webhook_host: body.webhook_host,
       webhook_port: body.webhook_port,
       webhook_api_key: body.webhook_api_key,
+      logo_url: body.logo_url,
+      brand_color: body.brand_color,
+      brand_tagline: body.brand_tagline,
+      default_cta_tiktok: body.default_cta_tiktok,
+      default_cta_facebook: body.default_cta_facebook,
+      default_cta_youtube: body.default_cta_youtube,
+      safety_notice_text: body.safety_notice_text,
+      presenter_name: body.presenter_name,
+      presenter_role: body.presenter_role,
+      brand_location: body.brand_location,
       ...editorial,
     });
 
