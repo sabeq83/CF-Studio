@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getPillarCampaign, listPillarCampaignItems, getDb, updatePillarCampaign, deletePillarCampaign } from '../../../../../lib/db';
 import path from 'path';
 import { withTenantContext } from '../../../../../lib/auth';
+import { FINISHING_TEMPLATE_IDS } from '../../../../../lib/finishing-template-registry';
 
 export const GET = withTenantContext(async (request, { params }, user) => {
   try {
@@ -133,6 +134,27 @@ export const PATCH = withTenantContext(async (request, { params }, user) => {
     }
     if (body.voice_cast_json !== undefined) {
       updates.voice_cast_json = body.voice_cast_json || null;
+    }
+    if (body.finishing_template !== undefined) {
+      const normalizedTpl = String(body.finishing_template || 'none').trim().toLowerCase();
+      if (!FINISHING_TEMPLATE_IDS.includes(normalizedTpl)) {
+        return NextResponse.json({ error: `Invalid finishing_template: ${normalizedTpl}` }, { status: 400 });
+      }
+      updates.finishing_template = normalizedTpl;
+    }
+    if (body.caption_mode !== undefined) {
+      const normalizedCap = String(body.caption_mode || 'hybrid').trim().toLowerCase();
+      if (!['hybrid', 'keyword_only', 'full'].includes(normalizedCap)) {
+        return NextResponse.json({ error: `Invalid caption_mode: ${normalizedCap}` }, { status: 400 });
+      }
+      updates.caption_mode = normalizedCap;
+    }
+    if (body.loudness_target !== undefined) {
+      const numLoud = Number(body.loudness_target);
+      if (!Number.isFinite(numLoud) || numLoud < -24 || numLoud > -6) {
+        return NextResponse.json({ error: 'loudness_target must be between -24 and -6 LUFS' }, { status: 400 });
+      }
+      updates.loudness_target = numLoud;
     }
     
     if (Object.keys(updates).length === 0) {

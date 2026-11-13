@@ -7,6 +7,8 @@ import { useParams } from 'next/navigation';
 import { getDemographicLabel, getVisualOverrideLabel, parseVisualOverrides } from '../../../lib/campaign-config-labels';
 import { MINIMAX_ENGLISH_VOICES, ELEVENLABS_ID_VOICES, ELEVENLABS_EN_VOICES, ELEVENLABS_MODELS } from '@/lib/voice-constants';
 import { resolveBridgePlan, readBridgeInputs, describeBridgePlan } from '@/lib/bridging/bridge-plan';
+import { FINISHING_TEMPLATE_REGISTRY, getFinishingTemplateMeta } from '@/lib/finishing-template-registry';
+import FinishingTemplatePreview from '../../components/FinishingTemplatePreview';
 
 const writeToClipboard = (text) => {
   if (typeof window !== 'undefined') {
@@ -147,6 +149,14 @@ export default function PillarCampaignDetailPage() {
   const [quickVoMotionStyle, setQuickVoMotionStyle] = useState('floating_white_yellow');
   const [quickVoTransition, setQuickVoTransition] = useState('cut');
   const [quickVoEnableMotion, setQuickVoEnableMotion] = useState(true);
+
+  // Finishing Pass override state (F3-T2)
+  const [finishingOverride, setFinishingOverride] = useState({
+    finishing_template: 'none',
+    caption_mode: 'hybrid',
+    loudness_target: -14
+  });
+  const [savingFinishing, setSavingFinishing] = useState(false);
 
   const handleOpenQuickVoModal = (item) => {
     let scenes = [];
@@ -315,6 +325,14 @@ export default function PillarCampaignDetailPage() {
       }
       const data = await res.json();
       setCampaign(data.campaign);
+      setFinishingOverride({
+        finishing_template: data.campaign?.finishing_template || 'none',
+        caption_mode: data.campaign?.caption_mode || 'hybrid',
+        loudness_target:
+          data.campaign?.loudness_target !== undefined && data.campaign?.loudness_target !== null
+            ? Number(data.campaign.loudness_target)
+            : -14
+      });
       try {
         const parsed = data.campaign.voice_cast_json
           ? JSON.parse(data.campaign.voice_cast_json)?.characters || []
@@ -410,6 +428,32 @@ export default function PillarCampaignDetailPage() {
       voice_cast_json: JSON.stringify({ characters: voiceCast })
     });
     showToast('Voice Cast berhasil disimpan!');
+  };
+
+  const handleSaveFinishingOverride = async () => {
+    if (!campaign) return;
+    setSavingFinishing(true);
+    try {
+      const res = await fetch(`/api/v2/pillar-campaigns/${campaign.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          finishing_template: finishingOverride.finishing_template,
+          caption_mode: finishingOverride.caption_mode,
+          loudness_target: Number(finishingOverride.loudness_target)
+        })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || 'Gagal menyimpan Finishing Pass Override');
+      }
+      showToast(`Finishing Pass (${finishingOverride.finishing_template}) berhasil disimpan!`);
+      fetchDetail();
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setSavingFinishing(false);
+    }
   };
   async function triggerManualStep(itemId, step) {
     let confirmation;
@@ -3701,6 +3745,118 @@ export default function PillarCampaignDetailPage() {
                     </div>
                   </div>
                 )}
+              </div>
+            </details>
+
+            {/* Accordion E: Finishing Pass Override & Live Preview (F3-T2) */}
+            <details open style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
+              <summary style={{ padding: '16px 20px', fontWeight: 600, fontSize: '0.92rem', cursor: 'pointer', outline: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-interactive)' }}>
+                <span>🎬 Finishing Pass Override &amp; Live Preview (7 Templates)</span>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '3px 10px', borderRadius: '999px', background: 'var(--status-info-soft)', color: 'var(--status-info)' }}>
+                  {finishingOverride.finishing_template} • {finishingOverride.caption_mode} • {finishingOverride.loudness_target} LUFS
+                </span>
+              </summary>
+              <div style={{ padding: '20px', borderTop: '1px solid var(--border)', background: 'var(--overlay-subtle)', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '6px' }}>
+                      Template Finishing
+                    </label>
+                    <select
+                      value={finishingOverride.finishing_template}
+                      onChange={(e) => setFinishingOverride((prev) => ({ ...prev, finishing_template: e.target.value }))}
+                      style={{ width: '100%', padding: '9px 10px', borderRadius: '6px', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '0.84rem' }}
+                    >
+                      {FINISHING_TEMPLATE_REGISTRY.map((tpl) => (
+                        <option key={tpl.id} value={tpl.id}>
+                          {tpl.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '6px' }}>
+                      Caption Mode
+                    </label>
+                    <select
+                      value={finishingOverride.caption_mode}
+                      onChange={(e) => setFinishingOverride((prev) => ({ ...prev, caption_mode: e.target.value }))}
+                      style={{ width: '100%', padding: '9px 10px', borderRadius: '6px', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '0.84rem' }}
+                    >
+                      <option value="hybrid">hybrid — 1 Baris Karaoke + Keyword Punch</option>
+                      <option value="keyword_only">keyword_only — Hook &amp; Keyword Punch Saja</option>
+                      <option value="full">full — Subtitle Kalimat Penuh</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '6px' }}>
+                      Target Loudness (LUFS)
+                    </label>
+                    <select
+                      value={String(finishingOverride.loudness_target)}
+                      onChange={(e) => setFinishingOverride((prev) => ({ ...prev, loudness_target: Number(e.target.value) }))}
+                      style={{ width: '100%', padding: '9px 10px', borderRadius: '6px', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '0.84rem' }}
+                    >
+                      <option value="-14">-14 LUFS (Standar TikTok &amp; Reels)</option>
+                      <option value="-16">-16 LUFS (Editorial Calm / Shorts)</option>
+                      <option value="-12">-12 LUFS (Punchy Promo)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {(() => {
+                  const selectedMeta = getFinishingTemplateMeta(finishingOverride.finishing_template || 'none');
+                  const cKind = campaign?.campaign_kind || 'brand_editorial';
+                  const compat = selectedMeta?.compatibilityCampaignKinds || [];
+                  const isDirty =
+                    (campaign?.finishing_template || 'none') !== finishingOverride.finishing_template ||
+                    (campaign?.caption_mode || 'hybrid') !== finishingOverride.caption_mode ||
+                    Number(campaign?.loudness_target ?? -14) !== Number(finishingOverride.loudness_target);
+                  const isCompat = selectedMeta?.id === 'none' || compat.length === 0 || compat.includes(cKind);
+                  return (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '8px', background: isCompat ? 'var(--status-info-soft)' : 'var(--status-warning-soft)', border: `1px solid ${isCompat ? 'var(--status-info)' : 'var(--status-warning)'}`, fontSize: '0.78rem', color: 'var(--text-primary)' }}>
+                      <div>
+                        {isCompat ? (
+                          <span>✅ Template <code>{selectedMeta?.id}</code> kompatibel dengan <code>{cKind}</code>.</span>
+                        ) : (
+                          <span>⚠️ Template <code>{selectedMeta?.id}</code> disarankan untuk <code>{compat.join(', ')}</code>; layer kosong disembunyikan otomatis.</span>
+                        )}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {isDirty && (
+                          <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: '999px', background: 'var(--status-warning-soft)', color: 'var(--status-warning)' }}>
+                            Perubahan belum disimpan
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          className="btn btn-primary"
+                          disabled={savingFinishing || !isDirty}
+                          onClick={handleSaveFinishingOverride}
+                          style={{ padding: '7px 14px', fontSize: '0.8rem', fontWeight: 700 }}
+                        >
+                          {savingFinishing ? 'Menyimpan...' : '💾 Simpan Override'}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                <FinishingTemplatePreview
+                  finishingTemplate={finishingOverride.finishing_template}
+                  captionMode={finishingOverride.caption_mode}
+                  loudnessTarget={finishingOverride.loudness_target}
+                  targetLanguage={campaign?.target_language || 'id-ID'}
+                  brandName={campaign?.brand_name || campaign?.account_name || ''}
+                  brandTagline={campaign?.brand_profile_desc || ''}
+                  hookTitle={campaign?.campaign_name || ''}
+                  productName={campaign?.product_name || ''}
+                  productSpec={campaign?.product_usp || ''}
+                  motionStyle={campaign?.motion_text_style || 'floating_white_yellow'}
+                  motionPosition={campaign?.motion_text_position || 'bottom'}
+                />
               </div>
             </details>
 

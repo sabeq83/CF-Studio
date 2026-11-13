@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.44.19 — Fase 3 Finishing Pass Live Preview, Lokalisasi Template & Staging Benchmark (13/11/2026)
+- Finalisasi safe-zone right:15cqw dan lokalisasi id/en 7 template finishing plus finishing-data-extractor
+- UI Live Preview iframe terisolasi 7+1 template dengan timeline scrubber di Campaign Detail Accordion E & Operator Presets + endpoint aman /api/v2/finishing/templates + PATCH override
+- Audit benchmark 7 template Mac Mini Staging M4 (rata-rata 2.153x <= 3.0x, tanpa perlu Remotion) & mockup interactive F3-T2
+
 ## V2.44.18 — Implement Fase 2c-6 mitos_fakta finishing template (13/11/2026)
 - Add templates/finishing/mitos-fakta.html with question hook badge, MITOS/FAKTA x-stamp, KENAPA reason bar, i18n labels, and RGBA end card
 - Add finishing_plan.myth_fact schema in prompt builders, strict FAKTA isHerbalMedicalClaimPhrase medical-claim guard in validator, and timeline/SFX mapping

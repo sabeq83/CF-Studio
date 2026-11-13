@@ -18,6 +18,7 @@ export function middleware(req) {
     pathname.startsWith('/api/media-proxy') ||   // Public media proxy for Repliz downloads
     pathname.startsWith('/temp/') ||              // Temp file serving (public)
     pathname.startsWith('/mockup') ||            // HTML Mockup previews
+    pathname.startsWith('/fonts/') ||            // Bundled OFL fonts for finishing preview iframes
     pathname.startsWith('/images/') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon') ||

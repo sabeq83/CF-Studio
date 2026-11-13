@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup Fase 3 — Finishing Pass Live Preview &amp; Campaign Override (7 Template)</title>
+  <style>
+    /* Semantic Design Tokens mirrored 1:1 from app/theme.css */
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --input-bg: #ffffff;
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --status-neutral: #6548bd;
+      --status-neutral-soft: #f0ecfb;
+      --focus-ring: #6d4ed6;
+      --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+      --shadow-modal: 0 26px 80px rgba(31, 45, 61, 0.22);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font-sans);
+      background: var(--canvas);
+      color: var(--text-primary);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 12px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: var(--shadow-card);
+    }
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .badge-info { background: var(--status-info-soft); color: var(--status-info); }
+    .badge-success { background: var(--status-success-soft); color: var(--status-success); }
+    .badge-warning { background: var(--status-warning-soft); color: var(--status-warning); }
+    .badge-neutral { background: var(--status-neutral-soft); color: var(--status-neutral); }
+
+    .toolbar-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .seg-group {
+      display: inline-flex;
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 3px;
+      gap: 3px;
+    }
+    .seg-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+    .seg-btn:hover { color: var(--text-primary); background: var(--surface-hover); }
+    .seg-btn.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    .container {
+      max-width: 1320px;
+      margin: 22px auto 48px;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(320px, 420px);
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 980px) {
+      .container { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+    }
+    .card + .card { margin-top: 16px; }
+    .card-hd {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .card-title {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .card-sub {
+      margin: 3px 0 0;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+    }
+
+    /* Template selector cards */
+    .tpl-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .tpl-card {
+      text-align: left;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      font-family: inherit;
+      color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .tpl-card:hover {
+      border-color: var(--border-strong);
+      background: var(--surface-interactive);
+    }
+    .tpl-card.selected {
+      border-color: var(--action-primary);
+      background: var(--surface-interactive);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--action-primary) 28%, transparent);
+    }
+    .tpl-card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      font-weight: 700;
+      font-size: 0.86rem;
+    }
+    .tpl-id {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+    .tpl-desc {
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+    .layer-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: auto;
+      padding-top: 4px;
+    }
+    .layer-pill {
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 5px;
+      background: var(--surface-hover);
+      color: var(--text-secondary);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(195px, 1fr));
+      gap: 12px;
+    }
+    .field label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+    .field select,
+    .field input {
+      width: 100%;
+      background: var(--input-bg);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 9px 11px;
+      font-family: inherit;
+      font-size: 0.84rem;
+    }
+    .field select:focus,
+    .field input:focus {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 1px;
+    }
+    .hint {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 5px;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-subtle);
+    }
+    .btn {
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.83rem;
+      font-weight: 600;
+      padding: 9px 15px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn:hover { background: var(--surface-hover); border-color: var(--border-strong); }
+    .btn-primary {
+      background: var(--action-primary);
+      border-color: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .btn-primary:hover { background: var(--action-primary-hover); }
+
+    .compat-banner {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.79rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid color-mix(in srgb, var(--status-info) 28%, transparent);
+    }
+    .compat-banner.warn {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border-color: color-mix(in srgb, var(--status-warning) 30%, transparent);
+    }
+
+    /* Right column: Interactive 9:16 Preview Stage */
+    .preview-panel {
+      position: sticky;
+      top: 76px;
+    }
+    .phone-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 318px;
+      margin: 0 auto;
+      aspect-ratio: 9 / 16;
+      border-radius: 24px;
+      overflow: hidden;
+      border: 3px solid var(--border-strong);
+      background: #0b1220;
+      box-shadow: var(--shadow-modal);
+    }
+    .phone-bg-video {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 30% 25%, rgba(45, 212, 191, 0.24), transparent 52%),
+        radial-gradient(circle at 75% 68%, rgba(96, 165, 250, 0.22), transparent 55%),
+        linear-gradient(165deg, #16233a 0%, #0d1526 52%, #111b2d 100%);
+    }
+    .phone-bg-grid {
+      position: absolute;
+      inset: 0;
+      opacity: 0.14;
+      background-image: linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+    iframe#previewFrame {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: transparent;
+      display: block;
+    }
+
+    /* Optional TikTok/Reels safe-zone overlay inspector */
+    .safezone-guide {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      pointer-events: none;
+      display: none;
+    }
+    .safezone-guide.visible { display: block; }
+    .sz-right {
+      position: absolute;
+      top: 14%;
+      right: 0;
+      width: 14.5%;
+      bottom: 18%;
+      border-left: 1.5px dashed var(--status-danger);
+      background: rgba(244, 63, 94, 0.14);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      writing-mode: vertical-rl;
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: #fecdd3;
+      letter-spacing: 0.04em;
+    }
+    .sz-bottom {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 18%;
+      border-top: 1.5px dashed var(--status-warning);
+      background: rgba(251, 191, 36, 0.12);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 8px;
+      font-size: 0.64rem;
+      font-weight: 700;
+      color: #fde68a;
+    }
+    .sz-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 11%;
+      border-bottom: 1.5px dashed var(--status-info);
+      background: rgba(96, 165, 250, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: #bfdbfe;
+    }
+
+    .scrubber-box {
+      margin-top: 14px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px;
+    }
+    .scrubber-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .scrubber-top input[type="range"] {
+      flex: 1;
+      accent-color: var(--action-primary);
+    }
+    .time-readout {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      min-width: 78px;
+      text-align: right;
+    }
+    .marker-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    .marker-btn {
+      font-family: inherit;
+      font-size: 0.71rem;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface);
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+    .marker-btn:hover { background: var(--surface-hover); color: var(--text-primary); }
+    .marker-btn.active {
+      border-color: var(--action-primary);
+      color: var(--action-primary);
+      background: var(--status-success-soft);
+    }
+
+    .meta-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 0.78rem;
+    }
+    .meta-table td {
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .meta-table td:first-child { color: var(--text-muted); }
+    .meta-table td:last-child { text-align: right; font-weight: 600; color: var(--text-primary); }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 60;
+      background: var(--surface-raised);
+      border: 1px solid var(--action-primary);
+      color: var(--text-primary);
+      padding: 10px 16px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-modal);
+      font-size: 0.84rem;
+      font-weight: 600;
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+      transition: all 0.2s ease;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-title">
+      <span>MAKNA Flow</span>
+      <span class="badge badge-info">Mockup UI Fase 3</span>
+      <span class="badge badge-success">7 Rich Templates + Safe-Zone</span>
+    </div>
+
+    <div class="toolbar-actions">
+      <div class="seg-group" role="tablist" aria-label="Surface Switcher">
+        <button class="seg-btn active" data-surface="campaign" type="button">Campaign Detail Override</button>
+        <button class="seg-btn" data-surface="preset" type="button">Operator Presets Default</button>
+      </div>
+
+      <div class="seg-group" aria-label="Language Preview">
+        <button class="seg-btn active" data-lang="id-ID" type="button">id-ID</button>
+        <button class="seg-btn" data-lang="en-US" type="button">en-US</button>
+      </div>
+
+      <button class="btn" id="btnSafeZone" type="button">Safe-Zone Guide: ON</button>
+      <button class="btn" id="btnTheme" type="button">Theme: Dark</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Left Column: Configuration Panel -->
+    <section>
+      <div class="card">
+        <div class="card-hd">
+          <div>
+            <h1 class="card-title" id="panelHeading">Finishing Pass Override — Campaign #248 (Product &amp; Editorial)</h1>
+            <p class="card-sub" id="panelSub">
+              Pilih template finishing dari <code>FINISHING_TEMPLATE_REGISTRY</code>, atur caption &amp; loudness audio, lalu pratinjau langsung frame demi frame di viewport 9:16 sebelum render server.
+            </p>
+          </div>
+          <span class="badge badge-neutral" id="surfaceStatusBadge">Override Tersimpan</span>
+        </div>
+
+        <div class="tpl-grid" id="tplGrid"></div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="selCaptionMode">Caption Mode</label>
+            <select id="selCaptionMode">
+              <option value="hybrid">hybrid — 1 Baris Karaoke + Keyword Punch (Rekomendasi)</option>
+              <option value="keyword_only">keyword_only — Fokus Keyword Punch Besar</option>
+              <option value="full">full — Subtitle Kalimat Penuh</option>
+            </select>
+            <div class="hint">Menjaga keterbacaan teks &amp; rasio kata punch &le; 10% VO.</div>
+          </div>
+
+          <div class="field">
+            <label for="selLoudness">Audio Loudness Target</label>
+            <select id="selLoudness">
+              <option value="-14">-14 LUFS — TikTok / Reels Standard (Default)</option>
+              <option value="-16">-16 LUFS — Balanced Editorial / YouTube Shorts</option>
+              <option value="-12">-12 LUFS — Punchy Promo</option>
+            </select>
+            <div class="hint">Diterapkan via FFmpeg <code>loudnorm</code> + mix SFX micro-tick/whoosh.</div>
+          </div>
+
+          <div class="field" id="campaignKindField">
+            <label for="selCampaignKind">Simulasi Campaign Kind</label>
+            <select id="selCampaignKind">
+              <option value="brand_editorial">brand_editorial (Editorial / Edukasi)</option>
+              <option value="recipe_campaign">recipe_campaign (Resep &amp; Seduhan)</option>
+              <option value="product_campaign">product_campaign (Fokus Produk)</option>
+              <option value="multiplier_campaign">multiplier_campaign (Video Multiplier)</option>
+            </select>
+            <div class="hint">Untuk menguji indikator kecocokan template vs jenis campaign.</div>
+          </div>
+        </div>
+
+        <div class="compat-banner" id="compatBanner">
+          <span id="compatText">Template cocok dengan jenis campaign aktif.</span>
+          <span class="badge badge-info" id="compatSpecBadge">30fps • 720x1280</span>
+        </div>
+
+        <div class="btn-row">
+          <div style="font-size: 0.78rem; color: var(--text-muted);" id="saveEndpointHint">
+            Target API React nanti: <code>PATCH /api/v2/pillar-campaigns/[id]</code> (field: <code>finishing_template</code>, <code>caption_mode</code>, <code>loudness_target</code>)
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn" id="btnReset" type="button">Reset Default</button>
+            <button class="btn btn-primary" id="btnSave" type="button">Simpan Override Finishing</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd">
+          <div>
+            <h2 class="card-title">Kontrak Iframe Isolasi (`window.loadTimeline` + `window.renderAt(t)`)</h2>
+            <p class="card-sub">
+              Komponen React akan menggunakan arsitektur isolasi iframe yang sama agar CSS setiap template (`1080x1920` / `9:16 cqw/cqh`) tetap identik 100% dengan output Playwright Chromium di server.
+            </p>
+          </div>
+        </div>
+        <table class="meta-table">
+          <tbody>
+            <tr>
+              <td>Selected Template ID</td>
+              <td id="metaTplId">calm_wellness</td>
+            </tr>
+            <tr>
+              <td>Template File</td>
+              <td id="metaTplFile">calm-wellness.html</td>
+            </tr>
+            <tr>
+              <td>Active Rich Layers</td>
+              <td id="metaLayers">cameraMotion, product</td>
+            </tr>
+            <tr>
+              <td>finishingPlanFields</td>
+              <td id="metaPlanFields">hook, punches</td>
+            </tr>
+            <tr>
+              <td>Right-Rail Safe Zone</td>
+              <td id="metaSafeZone">right: 15cqw (86cqw+ Clear)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Right Column: 9:16 Live Preview -->
+    <aside class="preview-panel">
+      <div class="card">
+        <div class="card-hd" style="margin-bottom: 10px;">
+          <div>
+            <h2 class="card-title">Live Interactive Preview (9:16)</h2>
+            <p class="card-sub" id="previewSubtitle">Scrub timeline untuk memeriksa Hook, Layer, Punch &amp; End Card</p>
+          </div>
+          <button class="btn" id="btnPlayPause" type="button">Play</button>
+        </div>
+
+        <div class="phone-wrap">
+          <div class="phone-bg-video"></div>
+          <div class="phone-bg-grid"></div>
+          <iframe id="previewFrame" title="Finishing Template Live Preview" sandbox="allow-scripts allow-same-origin"></iframe>
+
+          <div class="safezone-guide visible" id="safezoneGuide">
+            <div class="sz-top">TOP BAR SAFE AREA (0–11%)</div>
+            <div class="sz-right">TIKTOK RIGHT RAIL (86–100%)</div>
+            <div class="sz-bottom">BOTTOM CAPTION / UI ZONE (82–100%)</div>
+          </div>
+        </div>
+
+        <div class="scrubber-box">
+          <div class="scrubber-top">
+            <input id="timeScrubber" type="range" min="0" max="24" step="0.05" value="0.6" aria-label="Timeline Scrubber" />
+            <div class="time-readout" id="timeReadout">0.60s / 24.0s</div>
+          </div>
+          <div class="marker-row" id="markerRow"></div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <div class="toast" id="toast">Perubahan preview tersimpan (Simulasi Mockup).</div>
+
+  <script>
+    (function () {
+      const REGISTRY = [
+        {
+          id: 'none',
+          file: 'base-caption.html',
+          name: 'None — Base Caption',
+          desc: 'Subtitle & Hook Card dasar tanpa overlay template khusus.',
+          layers: [],
+          fields: ['hook', 'punches'],
+          compat: ['brand_editorial', 'recipe_campaign', 'product_campaign', 'multiplier_campaign']
+        },
+        {
+          id: 'calm_wellness',
+          file: 'calm-wellness.html',
+          name: 'Calm Wellness',
+          desc: 'Overlay editorial bersih dengan Product Card faktual & Save Prompt.',
+          layers: ['product', 'cameraMotion'],
+          fields: ['hook', 'punches'],
+          compat: ['brand_editorial', 'product_campaign', 'multiplier_campaign']
+        },
+        {
+          id: 'recipe_pop',
+          file: 'recipe-pop.html',
+          name: 'Recipe Pop',
+          desc: 'Chip bahan resep (maks 4 + +N), kartu langkah dinamis, Save Prompt & Tick SFX.',
+          layers: ['recipe', 'product', 'cameraMotion'],
+          fields: ['hook', 'punches'],
+          compat: ['recipe_campaign', 'multiplier_campaign']
+        },
+        {
+          id: 'tips_listicle',
+          file: 'tips-listicle.html',
+          name: 'Tips Listicle',
+          desc: 'Daftar tips bernomor (TIP 1/N), angka kunci punch_display, lokasi & Rekap akhir.',
+          layers: ['tips', 'sharedBrand', 'cameraMotion'],
+          fields: ['hook', 'punches', 'punch_display', 'tips', 'brand_patch'],
+          compat: ['brand_editorial', 'product_campaign', 'multiplier_campaign']
+        },
+        {
+          id: 'ramuan_ritual',
+          file: 'ramuan-ritual.html',
+          name: 'Ramuan Ritual',
+          desc: 'Kartu bahan & takaran hangat, badge waktu (x-time), disclaimer non-klaim.',
+          layers: ['recipe', 'timingBadges', 'sharedBrand', 'cameraMotion'],
+          fields: ['hook', 'punches', 'timing_badges', 'brand_patch'],
+          compat: ['brand_editorial', 'product_campaign', 'recipe_campaign', 'multiplier_campaign']
+        },
+        {
+          id: 'problem_solution',
+          file: 'problem-solution.html',
+          name: 'Problem Solution',
+          desc: 'Pill fase MASALAH -> HASIL, progress track 4 langkah, callout & lower-third.',
+          layers: ['chapters', 'callouts', 'sharedBrand', 'cameraMotion'],
+          fields: ['hook', 'punches', 'chapters', 'callouts', 'brand_patch'],
+          compat: ['brand_editorial', 'product_campaign', 'multiplier_campaign']
+        },
+        {
+          id: 'angka_banding',
+          file: 'angka-banding.html',
+          name: 'Angka & Banding',
+          desc: 'Komparasi 2 kolom A vs B, chip pilihan & animasi counter angka dari VO.',
+          layers: ['compare', 'numbers', 'chips', 'sharedBrand', 'cameraMotion'],
+          fields: ['hook', 'punches', 'compare', 'numbers', 'chips', 'brand_patch'],
+          compat: ['brand_editorial', 'product_campaign', 'multiplier_campaign']
+        },
+        {
+          id: 'mitos_fakta',
+          file: 'mitos-fakta.html',
+          name: 'Mitos vs Fakta',
+          desc: 'Hook pertanyaan frame 0, stempel MITOS/FAKTA, bar alasan KENAPA & end card.',
+          layers: ['mythFact', 'sharedBrand', 'cameraMotion'],
+          fields: ['hook', 'punches', 'myth_fact', 'brand_patch'],
+          compat: ['brand_editorial', 'product_campaign', 'recipe_campaign', 'multiplier_campaign']
+        }
+      ];
+
+      const MARKERS = [
+        { label: '0.6s Hook', t: 0.6 },
+        { label: '4.2s Layer Utama', t: 4.2 },
+        { label: '9.5s Highlight', t: 9.5 },
+        { label: '14.5s Punch', t: 14.5 },
+        { label: '20.2s CTA', t: 20.2 },
+        { label: '22.8s End Card', t: 22.8 }
+      ];
+
+      const state = {
+        surface: 'campaign',
+        theme: 'dark',
+        lang: 'id-ID',
+        safeZone: true,
+        templateId: 'tips_listicle',
+        captionMode: 'hybrid',
+        loudness: '-14',
+        campaignKind: 'brand_editorial',
+        dirty: false,
+        t: 0.6,
+        playing: false,
+        rafId: null,
+        lastTs: 0
+      };
+
+      const elGrid = document.getElementById('tplGrid');
+      const elFrame = document.getElementById('previewFrame');
+      const elScrub = document.getElementById('timeScrubber');
+      const elReadout = document.getElementById('timeReadout');
+      const elMarkerRow = document.getElementById('markerRow');
+      const elToast = document.getElementById('toast');
+
+      function showToast(msg) {
+        elToast.textContent = msg;
+        elToast.classList.add('show');
+        clearTimeout(showToast._timer);
+        showToast._timer = setTimeout(() => elToast.classList.remove('show'), 2200);
+      }
+
+      // Self-contained template sandbox srcdoc implementing identical loadTimeline(T) & renderAt(t) API
+      const SANDBOX_HTML = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: transparent; font-family: 'Inter', system-ui, sans-serif; }
+  .phone {
+    position: relative; width: 100%; height: 100%;
+    container-type: inline-size; color: #f8fafc;
+    --accent: #2dd4bf;
+  }
+  .wm {
+    position: absolute; top: 3.4cqh; left: 4.5cqw;
+    display: inline-flex; align-items: center; gap: 1.8cqw;
+    padding: 1.2cqw 2.4cqw; border-radius: 999px;
+    background: rgba(15, 23, 42, 0.72); border: 1px solid rgba(255,255,255,0.18);
+    font-size: 3cqw; font-weight: 700;
+  }
+  .wm-dot {
+    width: 4.5cqw; height: 4.5cqw; border-radius: 50%;
+    background: var(--accent); color: #042f2e; display: inline-flex;
+    align-items: center; justify-content: center; font-size: 2.3cqw; font-weight: 800;
+  }
+  .hook {
+    position: absolute; left: 5cqw; right: 15cqw; top: 19cqh;
+    background: rgba(15, 23, 42, 0.86); border: 1.5px solid var(--accent);
+    border-radius: 3.2cqw; padding: 3.5cqw 4cqw; text-align: center;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.45);
+  }
+  .hook .eye { font-size: 2.7cqw; letter-spacing: 0.08em; font-weight: 800; color: var(--accent); margin-bottom: 1.2cqw; text-transform: uppercase; }
+  .hook .title { font-size: 5.8cqw; font-weight: 800; line-height: 1.15; }
+  .layer-box {
+    position: absolute; left: 5cqw; right: 15cqw; top: 15cqh;
+    display: flex; flex-direction: column; gap: 2.2cqw;
+  }
+  .pill-badge {
+    align-self: flex-start;
+    background: var(--accent); color: #042f2e;
+    font-size: 3cqw; font-weight: 800; padding: 1.2cqw 2.8cqw; border-radius: 999px;
+  }
+  .glass-card {
+    background: rgba(15, 23, 42, 0.84); border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 3cqw; padding: 3.2cqw; box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  }
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2cqw; }
+  .cmp-col {
+    background: rgba(15, 23, 42, 0.88); border-radius: 2.6cqw; padding: 2.8cqw;
+    border: 1.5px solid rgba(74, 222, 128, 0.65);
+  }
+  .cmp-col.bad { border-color: rgba(251, 113, 133, 0.65); }
+  .big-num { font-size: 11cqw; font-weight: 900; color: var(--accent); line-height: 1; }
+  .stamp {
+    display: inline-block; padding: 1.4cqw 3.8cqw; border-radius: 2cqw;
+    font-size: 6cqw; font-weight: 900; letter-spacing: 0.06em;
+    border: 0.8cqw solid currentColor; transform: rotate(-4deg);
+  }
+  .stamp.mitos { color: #fb7185; background: rgba(136, 19, 55, 0.55); }
+  .stamp.fakta { color: #4ade80; background: rgba(6, 78, 59, 0.6); }
+  .punch {
+    position: absolute; left: 5cqw; right: 15cqw; top: 44cqh;
+    text-align: center; font-size: 8.4cqw; font-weight: 900; text-transform: uppercase;
+    color: var(--accent); text-shadow: 0 4px 18px rgba(0,0,0,0.85);
+    -webkit-text-stroke: 0.3cqw #020617; paint-order: stroke fill;
+  }
+  .cta {
+    position: absolute; left: 5cqw; right: 15cqw; top: 53cqh; text-align: center;
+  }
+  .cta-pill {
+    display: inline-block; background: var(--accent); color: #042f2e;
+    font-weight: 900; font-size: 4cqw; padding: 2.4cqw 5cqw; border-radius: 999px;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.45);
+  }
+  .sub {
+    position: absolute; left: 5cqw; right: 15cqw; top: 71.5cqh; transform: translateY(-50%);
+    text-align: center; font-size: 4.9cqw; font-weight: 900; text-transform: uppercase;
+    color: #fff; text-shadow: 0 3px 10px rgba(0,0,0,0.85);
+  }
+  .sub .on { color: var(--accent); }
+  .sub.full { font-size: 3.7cqw; text-transform: none; background: rgba(15,23,42,0.78); padding: 2cqw 3cqw; border-radius: 2cqw; }
+  .endcard {
+    position: absolute; inset: 0; background: rgba(8, 12, 20, 0.92);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 8cqw; text-align: center; gap: 3cqw;
+  }
+  .progress { position: absolute; left: 0; bottom: 0; height: 0.7cqh; background: var(--accent); width: 0%; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+  <div class="phone" id="phone">
+    <div class="wm" id="oWm" hidden><span class="wm-dot">SC</span><span id="oWmName">Studio Contoh</span></div>
+    <div class="hook" id="oHook" hidden>
+      <div class="eye" id="oHookEye"></div>
+      <div class="title" id="oHookTitle"></div>
+    </div>
+    <div class="layer-box" id="oLayer" hidden></div>
+    <div class="punch" id="oPunch" hidden></div>
+    <div class="cta" id="oCta" hidden><div class="cta-pill" id="oCtaText"></div></div>
+    <div class="sub" id="oSub" hidden></div>
+    <div class="endcard" id="oEnd" hidden>
+      <div class="wm-dot" style="width:14cqw;height:14cqw;font-size:6cqw;">SC</div>
+      <div style="font-size:5.4cqw;font-weight:800;" id="oEndBrand">Studio Contoh</div>
+      <div style="font-size:3.5cqw;color:#cbd5e1;" id="oEndTag"></div>
+      <div class="cta-pill" id="oEndCta"></div>
+    </div>
+    <div class="progress" id="oProg"></div>
+  </div>
+  <script>
+    let T = null;
+    const $ = (id) => document.getElementById(id);
+    window.loadTimeline = function(timeline) {
+      T = timeline;
+      const accent = T?.config?.accent || '#2dd4bf';
+      $('phone').style.setProperty('--accent', accent);
+      $('oWmName').textContent = T?.brand?.name || 'Studio Contoh';
+      $('oEndBrand').textContent = T?.brand?.name || 'Studio Contoh';
+      $('oEndTag').textContent = T?.brand?.tagline || '';
+      $('oEndCta').textContent = T?.cta?.text || 'LINK IN BIO';
+      return true;
+    };
+    window.renderAt = function(time) {
+      if (!T) return;
+      const dur = T.duration || 24;
+      const t = Math.max(0, Math.min(dur, Number(time) || 0));
+      $('oProg').style.width = ((t / dur) * 100).toFixed(2) + '%';
+
+      const inEnd = t >= dur - 2.2 && T.template !== 'none' && T.template !== 'calm_wellness' && T.template !== 'recipe_pop';
+      $('oEnd').hidden = !inEnd;
+      $('oWm').hidden = inEnd || T.template === 'none' || T.template === 'calm_wellness' || T.template === 'recipe_pop';
+
+      const inHook = !inEnd && t < 1.8;
+      $('oHook').hidden = !inHook;
+      if (inHook) {
+        $('oHookEye').textContent = T.hookCard.eyebrow;
+        $('oHookTitle').textContent = T.hookCard.title;
+      }
+
+      const inPunch = !inEnd && t >= 13.8 && t < 15.8;
+      $('oPunch').hidden = !inPunch;
+      if (inPunch) {
+        $('oPunch').textContent = T.punchText;
+      }
+
+      const inCta = !inEnd && t >= 19.2 && t < dur - 2.2;
+      $('oCta').hidden = !inCta;
+      if (inCta) $('oCtaText').textContent = T.cta.text;
+
+      // Render template-specific layer preview between 1.8 and 19.2
+      const showLayer = !inEnd && !inHook && t >= 1.8 && t < 19.2 && T.template !== 'none';
+      const elL = $('oLayer');
+      elL.hidden = !showLayer;
+      if (showLayer) {
+        elL.innerHTML = T.renderLayer(t, inPunch);
+      }
+
+      // Caption rendering respecting captionMode
+      const elSub = $('oSub');
+      if (inEnd || T.captionMode === 'keyword_only' && !inPunch) {
+        elSub.hidden = true;
+      } else {
+        elSub.hidden = false;
+        elSub.className = 'sub' + (T.captionMode === 'full' ? ' full' : '');
+        const segIdx = Math.min(T.captions.length - 1, Math.floor((t / dur) * T.captions.length));
+        const words = T.captions[segIdx].split(' ');
+        const activeIdx = Math.floor(((t * 2.5) % words.length));
+        elSub.innerHTML = T.captionMode === 'full'
+          ? T.captions[segIdx]
+          : words.slice(0, 3).map((w, i) => '<span class="' + (i === (activeIdx % 3) ? 'on' : '') + '">' + w + '</span>').join(' ');
+      }
+    };
+  <` + `/script>
+</body>
+</html>`;
+
+      function buildTimelinePayload() {
+        const isEn = state.lang === 'en-US';
+        const tpl = state.templateId;
+        const hookTitle = tpl === 'mitos_fakta'
+          ? (isEn ? 'Does A Strict Routine Really Work?' : 'Benarkah Pola Ketat Langsung Efektif?')
+          : (isEn ? '3 Practical Ways For Calm Focus' : '3 Cara Praktis Atur Fokus Harian');
+        const eyebrow = isEn ? 'DAILY GUIDE' : 'PANDUAN PRAKTIS';
+        const punchText = isEn ? 'CONSISTENT DAILY HABIT' : 'KONSISTEN TIAP HARI';
+        const ctaText = isEn ? 'CHECK LINK IN BIO' : 'CEK LINK DI BIO';
+        const captions = isEn
+          ? ['Start morning with clear rhythm', 'Compare gentle method vs rushed pace', 'Consistent tiny steps build lasting comfort']
+          : ['Mulai pagi dengan ritme terarah', 'Bandingkan metode bertahap dan tergesa', 'Langkah kecil konsisten lebih tahan lama'];
+
+        const renderLayer = (t, inPunch) => {
+          if (tpl === 'calm_wellness') {
+            return `<div class="pill-badge">${isEn ? 'EDITORIAL CARD' : 'KARTU PRODUK FAKTUAL'}</div>
+              <div class="glass-card">
+                <div style="font-size:2.7cqw;color:var(--accent);font-weight:700;">${isEn ? 'FEATURED ITEM' : 'PRODUK PILIHAN'}</div>
+                <div style="font-size:4.2cqw;font-weight:800;margin-top:0.8cqw;">${isEn ? 'Herbal Blend Pack 100g' : 'Racikan Seduh Kemasan 100g'}</div>
+                <div style="font-size:3cqw;color:#cbd5e1;margin-top:0.8cqw;">${isEn ? 'Natural aroma without artificial sweetener' : 'Aroma alami tanpa pemanis buatan'}</div>
+              </div>`;
+          }
+          if (tpl === 'recipe_pop') {
+            if (t < 8) {
+              return `<div class="pill-badge">${isEn ? 'INGREDIENTS 3/5' : 'BAHAN 3/5'}</div>
+                <div class="glass-card" style="display:flex;flex-direction:column;gap:1.2cqw;font-size:3.2cqw;">
+                  <div>✓ ${isEn ? 'Fresh sliced ginger (10g)' : '1 ruas jahe segar iris tipis'}</div>
+                  <div>✓ ${isEn ? 'Warm water (250ml)' : '250 ml air hangat 70°C'}</div>
+                  <div>✓ ${isEn ? 'Raw honey (1 tsp)' : '1 sdt madu murni pilihan'}</div>
+                  <div style="color:var(--accent);font-weight:700;">${isEn ? '+2 more' : '+2 bahan lain'}</div>
+                </div>`;
+            }
+            return `<div class="pill-badge">${isEn ? 'STEP 2/4' : 'LANGKAH 2/4'}</div>
+              <div class="glass-card" style="font-size:4cqw;font-weight:700;">
+                ${isEn ? 'Steep gently for 3 minutes before serving warm.' : 'Diamkan sejenak 3 menit sebelum disajikan hangat.'}
+              </div>`;
+          }
+          if (tpl === 'tips_listicle') {
+            if (t > 16) {
+              return `<div class="pill-badge">${isEn ? 'QUICK RECAP' : 'REKAP SINGKAT'}</div>
+                <div class="glass-card" style="font-size:3.1cqw;display:flex;flex-direction:column;gap:1.1cqw;">
+                  <div>1. ${isEn ? 'Prepare morning glass early' : 'Siapkan gelas hangat di pagi hari'}</div>
+                  <div>2. ${isEn ? 'Keep 10-minute screen-free pause' : 'Jeda 10 menit tanpa layar'}</div>
+                  <div>3. ${isEn ? 'Repeat on steady daily schedule' : 'Ulangi di jam yang sama setiap hari'}</div>
+                </div>`;
+            }
+            const stepN = t < 7 ? 1 : (t < 12 ? 2 : 3);
+            return `<div class="pill-badge">TIP ${stepN}/3</div>
+              <div class="glass-card">
+                <div style="font-size:4.2cqw;font-weight:800;">${isEn ? 'Keep a steady 10-minute pause' : 'Jaga jeda tenang sepuluh menit'}</div>
+                ${!inPunch ? '<div class="big-num" style="margin-top:1.8cqw;">10 MIN</div>' : ''}
+              </div>`;
+          }
+          if (tpl === 'ramuan_ritual') {
+            return `<div class="pill-badge">⏱️ ${isEn ? 'STEEP 5 MINUTES' : 'DIAMKAN 5 MENIT'}</div>
+              <div class="glass-card">
+                <div style="font-size:3.8cqw;font-weight:800;">${isEn ? 'Evening Warm Ritual' : 'Seduhan Hangat Sore Hari'}</div>
+                <div style="font-size:2.9cqw;color:#fde68a;margin-top:1.6cqw;">* ${isEn ? 'Supportive daily wellness habit, not medical treatment.' : 'Kebiasaan kebugaran harian, bukan pengganti nasihat medis.'}</div>
+              </div>`;
+          }
+          if (tpl === 'problem_solution') {
+            const ph = t < 6 ? (isEn ? '1. PROBLEM' : '1. MASALAH') : (t < 11 ? (isEn ? '2. CAUSE' : '2. PENYEBAB') : (t < 16 ? (isEn ? '3. SOLUTION' : '3. SOLUSI') : (isEn ? '4. RESULT' : '4. HASIL')));
+            return `<div class="pill-badge">${ph}</div>
+              <div class="glass-card" style="border-left:4px solid var(--accent);">
+                <div style="font-size:3.2cqw;font-weight:800;color:var(--accent);">${isEn ? 'CALLOUT POINT' : 'TITIK PERHATIAN'}</div>
+                <div style="font-size:3.9cqw;font-weight:700;margin-top:0.8cqw;">${isEn ? 'Seal edge gaps tightly' : 'Tutup celah sisi agar gema berkurang'}</div>
+              </div>`;
+          }
+          if (tpl === 'angka_banding') {
+            if (t < 10) {
+              return `<div class="pill-badge">${isEn ? 'METRIC FROM VO' : 'ANGKA DARI VO'}</div>
+                <div class="glass-card">
+                  <div class="big-num">35%</div>
+                  <div style="font-size:3.5cqw;font-weight:700;margin-top:1cqw;">${isEn ? 'Better Daily Efficiency' : 'Efisiensi Suhu Ruangan'}</div>
+                </div>`;
+            }
+            return `<div class="pill-badge">${isEn ? 'COMPARISON' : 'PERBANDINGAN'}</div>
+              <div class="compare-grid">
+                <div class="cmp-col">
+                  <div style="font-size:3.3cqw;font-weight:800;color:#4ade80;">${isEn ? 'INSULATED' : 'LAPIS FOIL'}</div>
+                  <div style="font-size:2.7cqw;color:#cbd5e1;margin-top:0.8cqw;">${isEn ? 'Cooler indoors' : 'Lebih sejuk'}</div>
+                </div>
+                <div class="cmp-col bad">
+                  <div style="font-size:3.3cqw;font-weight:800;color:#fb7185;">${isEn ? 'UNLINED' : 'POLOS'}</div>
+                  <div style="font-size:2.7cqw;color:#cbd5e1;margin-top:0.8cqw;">${isEn ? 'Heat traps fast' : 'Cepat gerah'}</div>
+                </div>
+              </div>`;
+          }
+          if (tpl === 'mitos_fakta') {
+            const isFact = t >= 8.5;
+            return `<div><span class="stamp ${isFact ? 'fakta' : 'mitos'}">${isFact ? (isEn ? 'FACT' : 'FAKTA') : (isEn ? 'MYTH' : 'MITOS')}</span></div>
+              <div class="glass-card" style="margin-top:1.5cqw;">
+                <div style="font-size:2.8cqw;color:var(--accent);font-weight:800;">${isEn ? 'WHY?' : 'KENAPA?'}</div>
+                <div style="font-size:3.6cqw;font-weight:700;margin-top:0.8cqw;">
+                  ${isFact
+                    ? (isEn ? 'Gradual daily habits stay steady longer' : 'Perubahan bertahap jauh lebih mudah dijaga')
+                    : (isEn ? 'Instant drastic changes rarely last' : 'Pola drastis sering terhenti di pekan pertama')}
+                </div>
+              </div>`;
+          }
+          return '';
+        };
+
+        return {
+          template: tpl,
+          captionMode: state.captionMode,
+          duration: 24,
+          config: { accent: '#2dd4bf' },
+          brand: {
+            name: 'Studio Contoh',
+            tagline: isEn ? 'Structured Video Finishing' : 'Panduan Praktis Harian'
+          },
+          hookCard: { eyebrow, title: hookTitle },
+          punchText,
+          cta: { text: ctaText },
+          captions,
+          renderLayer
+        };
+      }
+
+      function syncIframe() {
+        const win = elFrame.contentWindow;
+        if (!win || typeof win.loadTimeline !== 'function') return;
+        win.loadTimeline(buildTimelinePayload());
+        win.renderAt(state.t);
+      }
+
+      function renderTemplateCards() {
+        elGrid.innerHTML = '';
+        for (const tpl of REGISTRY) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'tpl-card' + (tpl.id === state.templateId ? ' selected' : '');
+          const pills = (tpl.layers.length ? tpl.layers : ['ass_basic']).map(
+            (l) => `<span class="layer-pill">${l}</span>`
+          ).join('');
+          btn.innerHTML = `
+            <div class="tpl-card-head">
+              <span>${tpl.name}</span>
+              <span class="tpl-id">${tpl.id}</span>
+            </div>
+            <div class="tpl-desc">${tpl.desc}</div>
+            <div class="layer-pills">${pills}</div>`;
+          btn.addEventListener('click', () => {
+            state.templateId = tpl.id;
+            state.dirty = true;
+            updateUI();
+            syncIframe();
+          });
+          elGrid.appendChild(btn);
+        }
+      }
+
+      function renderMarkers() {
+        elMarkerRow.innerHTML = '';
+        for (const mk of MARKERS) {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'marker-btn' + (Math.abs(state.t - mk.t) < 0.7 ? ' active' : '');
+          b.textContent = mk.label;
+          b.addEventListener('click', () => {
+            state.t = mk.t;
+            elScrub.value = String(mk.t);
+            updateTimeUI();
+          });
+          elMarkerRow.appendChild(b);
+        }
+      }
+
+      function updateTimeUI() {
+        elReadout.textContent = state.t.toFixed(2) + 's / 24.0s';
+        const win = elFrame.contentWindow;
+        if (win && typeof win.renderAt === 'function') {
+          win.renderAt(state.t);
+        }
+        renderMarkers();
+      }
+
+      function updateUI() {
+        renderTemplateCards();
+        const meta = REGISTRY.find((r) => r.id === state.templateId) || REGISTRY[0];
+        document.getElementById('metaTplId').textContent = meta.id;
+        document.getElementById('metaTplFile').textContent = meta.file;
+        document.getElementById('metaLayers').textContent = meta.layers.length ? meta.layers.join(', ') : 'legacy ffmpeg ass';
+        document.getElementById('metaPlanFields').textContent = meta.fields.join(', ');
+        document.getElementById('metaSafeZone').textContent = meta.id === 'none' ? 'FFmpeg ASS MarginR' : 'right: 15cqw (86cqw+ Clear)';
+
+        const statusBadge = document.getElementById('surfaceStatusBadge');
+        statusBadge.textContent = state.dirty ? 'Belum Disimpan' : (state.surface === 'campaign' ? 'Override Tersimpan' : 'Preset Default Aktif');
+        statusBadge.className = 'badge ' + (state.dirty ? 'badge-warning' : 'badge-neutral');
+
+        document.getElementById('panelHeading').textContent = state.surface === 'campaign'
+          ? 'Finishing Pass Override — Campaign #248 (Product & Editorial)'
+          : 'Operator Preset Studio — Default Finishing Settings';
+        document.getElementById('saveEndpointHint').innerHTML = state.surface === 'campaign'
+          ? 'Target API React: <code>PATCH /api/v2/pillar-campaigns/[id]</code> (<code>finishing_template</code>, <code>caption_mode</code>, <code>loudness_target</code>)'
+          : 'Target API React: <code>POST /api/v2/presets</code> (<code>workflow.finishing_template</code>, <code>caption_mode</code>, <code>loudness_target</code>)';
+        document.getElementById('campaignKindField').style.display = state.surface === 'campaign' ? 'block' : 'none';
+
+        const isCompat = meta.compat.includes(state.campaignKind);
+        const banner = document.getElementById('compatBanner');
+        const cText = document.getElementById('compatText');
+        if (state.surface === 'preset') {
+          banner.className = 'compat-banner';
+          cText.textContent = 'Template ini akan menjadi default untuk campaign baru yang memakai preset ini.';
+        } else if (isCompat) {
+          banner.className = 'compat-banner';
+          cText.textContent = `Cocok: Template "${meta.id}" kompatibel dengan ${state.campaignKind}.`;
+        } else {
+          banner.className = 'compat-banner warn';
+          cText.textContent = `Catatan: Template "${meta.id}" disarankan untuk ${meta.compat.join(', ')} (override manual tetap diizinkan).`;
+        }
+        document.getElementById('compatSpecBadge').textContent = `${state.captionMode} • ${state.loudness} LUFS`;
+      }
+
+      // Wire controls
+      document.querySelectorAll('[data-surface]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('[data-surface]').forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.surface = btn.dataset.surface;
+          updateUI();
+        });
+      });
+
+      document.querySelectorAll('[data-lang]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('[data-lang]').forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.lang = btn.dataset.lang;
+          syncIframe();
+        });
+      });
+
+      document.getElementById('btnTheme').addEventListener('click', (e) => {
+        state.theme = state.theme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', state.theme);
+        e.currentTarget.textContent = 'Theme: ' + (state.theme === 'dark' ? 'Dark' : 'Light');
+      });
+
+      document.getElementById('btnSafeZone').addEventListener('click', (e) => {
+        state.safeZone = !state.safeZone;
+        document.getElementById('safezoneGuide').classList.toggle('visible', state.safeZone);
+        e.currentTarget.textContent = 'Safe-Zone Guide: ' + (state.safeZone ? 'ON' : 'OFF');
+      });
+
+      document.getElementById('selCaptionMode').addEventListener('change', (e) => {
+        state.captionMode = e.target.value;
+        state.dirty = true;
+        updateUI();
+        syncIframe();
+      });
+
+      document.getElementById('selLoudness').addEventListener('change', (e) => {
+        state.loudness = e.target.value;
+        state.dirty = true;
+        updateUI();
+      });
+
+      document.getElementById('selCampaignKind').addEventListener('change', (e) => {
+        state.campaignKind = e.target.value;
+        updateUI();
+      });
+
+      document.getElementById('btnSave').addEventListener('click', () => {
+        state.dirty = false;
+        updateUI();
+        showToast(`Disimpan: template=${state.templateId}, caption=${state.captionMode}, loudness=${state.loudness} LUFS`);
+      });
+
+      document.getElementById('btnReset').addEventListener('click', () => {
+        state.templateId = 'none';
+        state.captionMode = 'hybrid';
+        state.loudness = '-14';
+        state.dirty = false;
+        document.getElementById('selCaptionMode').value = 'hybrid';
+        document.getElementById('selLoudness').value = '-14';
+        updateUI();
+        syncIframe();
+        showToast('Direset ke default operator preset (none, hybrid, -14 LUFS).');
+      });
+
+      elScrub.addEventListener('input', (e) => {
+        state.t = Number(e.target.value);
+        updateTimeUI();
+      });
+
+      const elPlay = document.getElementById('btnPlayPause');
+      function stepPlay(ts) {
+        if (!state.playing) return;
+        if (!state.lastTs) state.lastTs = ts;
+        const dt = (ts - state.lastTs) / 1000;
+        state.lastTs = ts;
+        state.t = (state.t + dt) % 24;
+        elScrub.value = state.t.toFixed(2);
+        updateTimeUI();
+        state.rafId = requestAnimationFrame(stepPlay);
+      }
+
+      elPlay.addEventListener('click', () => {
+        state.playing = !state.playing;
+        elPlay.textContent = state.playing ? 'Pause' : 'Play';
+        if (state.playing) {
+          state.lastTs = 0;
+          state.rafId = requestAnimationFrame(stepPlay);
+        } else {
+          cancelAnimationFrame(state.rafId);
+        }
+      });
+
+      elFrame.addEventListener('load', syncIframe);
+      elFrame.srcdoc = SANDBOX_HTML;
+      updateUI();
+      renderMarkers();
+    })();
+  </script>
+</body>
+</html>
+

@@ -9,6 +9,7 @@ import { getWordsPerClipOptions, getDefaultWordsPerClip, VIDEO_MODELS } from '@/
 import { GEMINI_VOICES, MINIMAX_VOICES, MINIMAX_ENGLISH_VOICES, ELEVENLABS_ID_VOICES, ELEVENLABS_EN_VOICES, ELEVENLABS_MODELS } from '@/lib/voice-constants';
 import { GOOGLE_VOICE_PERSONAS } from '@/lib/veo-native-audio';
 import { FINISHING_TEMPLATE_REGISTRY, getFinishingTemplateMeta } from '@/lib/finishing-template-registry';
+import FinishingTemplatePreview from '../../components/FinishingTemplatePreview';
 
 const initialForm = {
   key: '',
@@ -1643,6 +1644,15 @@ export default function PresetsPage() {
                   }
                   return null;
                 })()}
+
+                <FinishingTemplatePreview
+                  finishingTemplate={form.finishing_template || 'none'}
+                  captionMode={form.caption_mode || 'hybrid'}
+                  loudnessTarget={form.loudness_target !== undefined ? Number(form.loudness_target) : -14}
+                  targetLanguage={form.target_language || 'id-ID'}
+                  motionStyle={form.motion_text_style || 'floating_white_yellow'}
+                  motionPosition={form.motion_text_position || 'bottom'}
+                />
               </div>
 
             </div>

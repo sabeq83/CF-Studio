@@ -327,6 +327,7 @@
       transform: scale(1.05);
     }
   </style>
+  <script src="./shared-layers.js"></script>
 </head>
 <body>
   <div class="phone" id="phone">
@@ -389,6 +390,8 @@
       const oSub = $('oSub');
       const oProg = $('oProg');
       const dynamicFonts = $('dynamic-fonts');
+      const SL = window.FinishingSharedLayers || null;
+      let labels = SL ? SL.getLocalizedLabels('id-ID') : { ingredientsHeader: 'BAHAN', stepLabel: 'LANGKAH' };
 
       const PUNCH_COLORS = {
         benefit: '#9df27a',
@@ -429,6 +432,7 @@
         const cfg = T.config || {};
         oPhone.style.width = `${Number(cfg.width) || 720}px`;
         oPhone.style.height = `${Number(cfg.height) || 1280}px`;
+        labels = SL ? SL.getLocalizedLabels(cfg.targetLanguage || T.brand?.targetLanguage || 'id-ID') : { ingredientsHeader: 'BAHAN', stepLabel: 'LANGKAH' };
 
         if (cfg.accentColor) {
           document.documentElement.style.setProperty('--accent', cfg.accentColor);
@@ -563,7 +567,7 @@
           const totalDisplay = Number(ing.totalCount || ingItems.length);
           const hd = document.createElement('div');
           hd.className = 'hd';
-          hd.textContent = `BAHAN ${shown.length}/${totalDisplay}`;
+          hd.textContent = `${labels.ingredientsHeader || 'BAHAN'} ${shown.length}/${totalDisplay}`;
           const chipsHtml = shown.map((x, idx) => {
             const isNew = idx === shown.length - 1 && (time - x.s) < 0.55;
             const slideX = ((1 - easeOut((time - x.s) / 0.3)) * -60).toFixed(2);
@@ -596,7 +600,7 @@
         const showStep = Boolean(activeStep && !activePunch && !showHook);
         oStep.hidden = !showStep;
         if (showStep) {
-          oStepNum.textContent = activeStep.badge || `LANGKAH ${activeStep.n}/${activeStep.total}`;
+          oStepNum.textContent = activeStep.badge || `${labels.stepLabel || 'LANGKAH'} ${activeStep.n}/${activeStep.total}`;
           oStepTxt.textContent = activeStep.t || '';
           applyPop(oStep, time, activeStep.s, activeStep.e, 0.22, 0.1, 0);
         }
