@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.44.13 — Fase 2c-4 Polish: CTA Brand Profile, x-end Brand Normalization & Layout problem_solution (13/11/2026)
+- Teruskan customCtaText brand dan normalisasi brand.name ke buildPhase1Timeline di lib/video-studio-processor.js
+- Rapikan wrapping CTA pill dan spacing kata subtitle di problem-solution.html
+
 ## V2.44.12 — Fase 2c-4: Template Finishing problem_solution (13/11/2026)
 - Tambah template problem-solution.html dengan x-chapter, x-chapter-track, x-callout leader line, dan x-lower/CTA/x-end
 - Tambah schema dan validator VO-grounded chapters & callouts khusus problem_solution
