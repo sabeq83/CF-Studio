@@ -40,7 +40,7 @@
     }
     .x-lower {
       left: 5cqw;
-      top: 57cqh;
+      top: 54.5cqh;
       display: flex;
       align-items: stretch;
       background: rgba(10, 14, 18, 0.86);
@@ -108,7 +108,7 @@
     .x-notice {
       left: 8cqw;
       right: 8cqw;
-      top: 60.5cqh;
+      top: 58cqh;
       text-align: center;
       font-family: var(--f-ui);
       font-size: 3cqw;
@@ -170,6 +170,101 @@
       padding: 1.8cqw 4.4cqw;
       border-radius: 99cqw;
       margin-top: 1.6cqw;
+    }
+    .sub-band {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 56cqh;
+      height: 28cqh;
+      background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0),
+        rgba(0, 0, 0, 0.55) 45%,
+        rgba(0, 0, 0, 0.55) 70%,
+        rgba(0, 0, 0, 0)
+      );
+      pointer-events: none;
+      z-index: 4;
+    }
+    .sub {
+      position: absolute;
+      left: var(--sub-left, 6cqw);
+      right: var(--sub-right, 15cqw);
+      top: var(--sub-top, 71cqh);
+      transform: translateY(-50%);
+      transform-origin: 50% 50%;
+      display: flex;
+      justify-content: center;
+      align-items: baseline;
+      flex-wrap: nowrap;
+      text-align: center;
+      white-space: nowrap;
+      z-index: 5;
+    }
+    .sub.s-yellow {
+      font-family: var(--f-sub);
+      font-weight: 900;
+      font-size: var(--sub-size, 7.6cqw);
+      line-height: 1.05;
+      text-transform: uppercase;
+      color: #ffffff;
+      -webkit-text-stroke: 0.75cqw #000000;
+      paint-order: stroke fill;
+      text-shadow: 0 0.9cqw 0 rgba(0, 0, 0, 0.55);
+      gap: 2.2cqw;
+    }
+    .sub.s-yellow span {
+      display: inline-block;
+    }
+    .sub.s-yellow span.on {
+      color: var(--sub-accent-text, var(--accent, #ffd23f));
+    }
+    .sub.s-pill {
+      gap: 0;
+    }
+    .sub.s-pill .pill {
+      display: inline-flex;
+      gap: 1.8cqw;
+      align-items: baseline;
+      background: #ffffff;
+      color: #0d0e11;
+      border-radius: 2.4cqw;
+      padding: 1.4cqw 3.2cqw 1.6cqw;
+      box-shadow: 0 1.2cqw 0 rgba(0, 0, 0, 0.45);
+      font-family: var(--f-sub);
+      font-weight: 900;
+      font-size: var(--sub-size, 7cqw);
+      line-height: 1.05;
+      text-transform: uppercase;
+    }
+    .sub.s-pill .pill span {
+      display: inline-block;
+      padding: 0 1cqw;
+      border-radius: 1.2cqw;
+      margin: 0 -1cqw;
+    }
+    .sub.s-pill .pill span.on {
+      background: var(--sub-accent-bg, var(--accent, #ffd23f));
+      color: var(--pill-on-fg, #0d0e11);
+    }
+    .sub.s-minimal {
+      font-family: var(--f-sub);
+      font-weight: 800;
+      font-size: var(--sub-size, 6.8cqw);
+      line-height: 1.1;
+      text-transform: none;
+      color: #ffffff;
+      text-shadow: 0 0.4cqw 1.6cqw rgba(0, 0, 0, 0.55);
+      gap: 2cqw;
+    }
+    .sub.s-minimal span {
+      display: inline-block;
+      border-bottom: 0.9cqw solid transparent;
+      padding-bottom: 0.3cqw;
+    }
+    .sub.s-minimal span.on {
+      border-bottom-color: var(--sub-accent-text, var(--accent, #ffd23f));
     }
   `;
 
@@ -432,6 +527,166 @@
     return state;
   }
 
+  function parseHexRgb(hexStr) {
+    const raw = String(hexStr || '').trim().replace(/^#/, '');
+    if (/^[0-9a-fA-F]{3}$/.test(raw)) {
+      return [
+        parseInt(raw[0] + raw[0], 16),
+        parseInt(raw[1] + raw[1], 16),
+        parseInt(raw[2] + raw[2], 16)
+      ];
+    }
+    if (/^[0-9a-fA-F]{6}$/.test(raw)) {
+      return [
+        parseInt(raw.slice(0, 2), 16),
+        parseInt(raw.slice(2, 4), 16),
+        parseInt(raw.slice(4, 6), 16)
+      ];
+    }
+    return null;
+  }
+
+  function relativeLuminance(rgb) {
+    if (!rgb) return null;
+    const toLin = (c) => {
+      const s = c / 255;
+      return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+    };
+    return 0.2126 * toLin(rgb[0]) + 0.7152 * toLin(rgb[1]) + 0.0722 * toLin(rgb[2]);
+  }
+
+  function resolveSubtitleAccentPalette(cfg = {}, rootDoc = null) {
+    let rawColor = String(cfg.activeWordColor || cfg.activeWord || cfg.accentColor || cfg.accent || '').trim();
+    if (!rawColor && rootDoc && typeof getComputedStyle === 'function') {
+      rawColor = getComputedStyle(rootDoc.documentElement).getPropertyValue('--accent').trim();
+    }
+    if (!rawColor) rawColor = '#ffd23f';
+    const lum = relativeLuminance(parseHexRgb(rawColor));
+    return {
+      pillBg: rawColor,
+      pillFg: lum !== null && lum < 0.22 ? '#ffffff' : '#0d0e11',
+      textAccent: lum !== null && lum < 0.22 ? '#ffd23f' : rawColor
+    };
+  }
+
+  function resolveSubtitleStyleClass(style) {
+    const s = String(style || 'floating_white_yellow').trim().toLowerCase();
+    if (s === 'floating_black_on_white' || s === 'pill') return 's-pill';
+    if (s === 'minimal_white' || s === 'minimal') return 's-minimal';
+    return 's-yellow';
+  }
+
+  function ensureSubtitleBand(oSub, explicitBand) {
+    if (explicitBand) return explicitBand;
+    if (!oSub || !oSub.parentNode || typeof document === 'undefined') return null;
+    const existing = oSub.parentNode.querySelector('.sub-band');
+    if (existing) return existing;
+    const band = document.createElement('div');
+    band.className = 'sub-band';
+    band.hidden = true;
+    oSub.parentNode.insertBefore(band, oSub);
+    return band;
+  }
+
+  function configureSubtitleLayer(oSub, cfg = {}, opts = {}) {
+    if (!oSub) return null;
+    const styleClass = resolveSubtitleStyleClass(opts.style || cfg.style);
+    oSub.className = `sub ${styleClass}`;
+    if (opts.subTop) oSub.style.setProperty('--sub-top', opts.subTop);
+    if (opts.subLeft) oSub.style.setProperty('--sub-left', opts.subLeft);
+    if (opts.subRight) oSub.style.setProperty('--sub-right', opts.subRight);
+    const palette = resolveSubtitleAccentPalette(cfg, typeof document !== 'undefined' ? document : null);
+    oSub.style.setProperty('--sub-accent-bg', palette.pillBg);
+    oSub.style.setProperty('--pill-on-fg', palette.pillFg);
+    oSub.style.setProperty('--sub-accent-text', palette.textAccent);
+    return ensureSubtitleBand(oSub, opts.bandEl);
+  }
+
+  function renderSubtitle(oSub, timeline, time, opts = {}) {
+    if (!oSub) return false;
+    const cfg = timeline?.config || {};
+    const styleKey = opts.style || cfg.style || 'floating_white_yellow';
+    const styleClass = resolveSubtitleStyleClass(styleKey);
+    const captionMode = opts.captionMode || cfg.captionMode || 'full';
+    const activePunch = opts.activePunch ?? null;
+    const hidden = Boolean(opts.hidden);
+    const bandEl = configureSubtitleLayer(oSub, cfg, { ...opts, style: styleKey });
+
+    if (hidden || captionMode === 'keyword_only' || (captionMode === 'hybrid' && activePunch)) {
+      oSub.hidden = true;
+      oSub.innerHTML = '';
+      if (bandEl) bandEl.hidden = true;
+      return false;
+    }
+
+    const chunks = Array.isArray(timeline?.chunks) ? timeline.chunks : [];
+    const words = Array.isArray(timeline?.words) ? timeline.words : [];
+    const punchWordSet = new Set(timeline?.punchWordIndices || []);
+    const activeChunk = chunks.find((ch) => time >= ch.s - 0.03 && time <= ch.e + 0.08);
+    if (!activeChunk || !Array.isArray(activeChunk.indices)) {
+      oSub.hidden = true;
+      oSub.innerHTML = '';
+      if (bandEl) bandEl.hidden = true;
+      return false;
+    }
+
+    const visibleIndices = captionMode === 'hybrid'
+      ? activeChunk.indices.filter((idx) => !punchWordSet.has(idx))
+      : activeChunk.indices;
+
+    if (visibleIndices.length === 0) {
+      oSub.hidden = true;
+      oSub.innerHTML = '';
+      if (bandEl) bandEl.hidden = true;
+      return false;
+    }
+
+    // Never shrink multi-word chunks; only allow pre-computed singleWordFontCqw (min 6cqw, R15.7)
+    const firstWordObj = words[visibleIndices[0]];
+    const singleCqw = visibleIndices.length === 1
+      ? (activeChunk.fontCqw || activeChunk.singleWordFontCqw || firstWordObj?.singleWordFontCqw || null)
+      : null;
+    if (singleCqw && Number.isFinite(Number(singleCqw))) {
+      oSub.style.setProperty('--sub-size', `${Math.max(6, Number(singleCqw)).toFixed(2)}cqw`);
+    } else {
+      oSub.style.removeProperty('--sub-size');
+    }
+
+    const spansHtml = visibleIndices.map((idx) => {
+      const item = words[idx];
+      if (!item) return '';
+      const isOn = time >= item.s && time <= item.e + 0.04;
+      const wordText = String(item.w || '');
+      return `<span class="${isOn ? 'on' : ''}">${escHtml(wordText)}</span>`;
+    }).filter(Boolean).join(styleClass === 's-pill' ? '' : ' ');
+
+    if (!spansHtml) {
+      oSub.hidden = true;
+      oSub.innerHTML = '';
+      if (bandEl) bandEl.hidden = true;
+      return false;
+    }
+
+    oSub.hidden = false;
+    if (styleClass === 's-pill') {
+      oSub.innerHTML = `<div class="pill">${spansHtml}</div>`;
+    } else {
+      oSub.innerHTML = spansHtml;
+    }
+
+    if (bandEl) {
+      bandEl.hidden = styleClass !== 's-minimal';
+    }
+
+    // Pure t-driven 0.12s entrance animation (R16.5 / mockup_caption_styles.html:303)
+    const lt = Math.max(0, time - activeChunk.s);
+    const k = Math.min(1, Math.max(0, lt / 0.12));
+    const sc = 0.9 + 0.1 * k;
+    oSub.style.transform = `translateY(-50%) scale(${sc.toFixed(4)})`;
+    oSub.style.opacity = String(Math.min(1, 0.3 + k));
+    return true;
+  }
+
   return {
     SHARED_LAYERS_CSS,
     I18N_DICTIONARY,
@@ -440,6 +695,10 @@
     resolveBrandPatchRect,
     resolveBrandPatchesList,
     resolveSharedLayerState,
-    renderSharedLayersDom
+    renderSharedLayersDom,
+    resolveSubtitleStyleClass,
+    resolveSubtitleAccentPalette,
+    configureSubtitleLayer,
+    renderSubtitle
   };
 });

@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <style id="dynamic-fonts"></style>
+  <style id="shared-layers-css"></style>
   <style>
     :root {
       --accent: #ffcc3d;
@@ -82,76 +83,8 @@
       paint-order: stroke fill;
       text-shadow: 0 1.3cqw 0 rgba(0, 0, 0, 0.5);
     }
-    .sub {
-      position: absolute;
-      left: 6cqw;
-      right: 6cqw;
-      top: var(--sub-top, 69cqh);
-      transform: translateY(-50%);
-      display: flex;
-      justify-content: center;
-      align-items: baseline;
-      flex-wrap: nowrap;
-      gap: 1.9cqw;
-      text-align: center;
-      font-family: var(--f-sub);
-      font-weight: 900;
-      font-size: var(--sub-size, 6.6cqw);
-      line-height: 1.15;
-      text-transform: uppercase;
-      color: #ffffff;
-      white-space: nowrap;
-      -webkit-text-stroke: 0.55cqw #000000;
-      paint-order: stroke fill;
-      text-shadow: 0 0.6cqw 1.5cqw rgba(0, 0, 0, 0.68);
-    }
-    .sub span {
-      display: inline-block;
-      margin: 0;
-    }
-    .sub span.on {
-      color: var(--active-word);
-      transform: scale(1.06);
-    }
-    .sub.pill-mode span {
-      background: #ffffff;
-      color: #0d0e11;
-      -webkit-text-stroke: 0;
-      text-shadow: none;
-      padding: 0.8cqw 2.1cqw;
-      border-radius: 1.4cqw;
-      margin: 0 0.7cqw;
-      font-size: 0.85em;
-      box-shadow: 0 0.8cqw 2cqw rgba(0, 0, 0, 0.45);
-    }
-    .sub.pill-mode span.on {
-      background: var(--active-word);
-      color: #0d0e11;
-      transform: scale(1.05);
-    }
-    .sub.minimal-mode {
-      font-family: var(--f-ui);
-      font-weight: 700;
-      font-size: 5cqw;
-      text-transform: none;
-      -webkit-text-stroke: 0;
-      text-shadow: none;
-      background: rgba(255, 255, 255, 0.92);
-      color: #0f172a;
-      border-radius: 1.8cqw;
-      padding: 1.6cqw 3cqw;
-      left: 8cqw;
-      right: 8cqw;
-      box-shadow: 0 1cqw 2.4cqw rgba(0, 0, 0, 0.35);
-    }
-    .sub.minimal-mode span.on {
-      color: #0f172a;
-      background: var(--active-word);
-      padding: 0.2cqw 0.8cqw;
-      border-radius: 0.8cqw;
-      transform: none;
-    }
   </style>
+  <script src="./shared-layers.js"></script>
 </head>
 <body>
   <div class="phone" id="phone">
@@ -175,6 +108,11 @@
       const oSub = $('oSub');
       const oProg = $('oProg');
       const dynamicFonts = $('dynamic-fonts');
+      const sharedCssEl = $('shared-layers-css');
+      const SL = window.FinishingSharedLayers || null;
+      if (sharedCssEl && SL?.SHARED_LAYERS_CSS) {
+        sharedCssEl.textContent = SL.SHARED_LAYERS_CSS;
+      }
 
       const PUNCH_COLORS = {
         benefit: '#9df27a',
@@ -230,11 +168,12 @@
         let subTop = '69cqh';
         if (pos === 'top') subTop = '16cqh';
         else if (pos === 'center') subTop = '50cqh';
-        document.documentElement.style.setProperty('--sub-top', subTop);
-
-        oSub.className = 'sub';
-        if (cfg.style === 'floating_black_on_white') oSub.classList.add('pill-mode');
-        else if (cfg.style === 'minimal_white') oSub.classList.add('minimal-mode');
+        oSub.dataset.subTop = subTop;
+        if (SL?.configureSubtitleLayer) {
+          SL.configureSubtitleLayer(oSub, cfg, { subTop, subRight: '6cqw' });
+        } else {
+          document.documentElement.style.setProperty('--sub-top', subTop);
+        }
 
         const hc = T.hookCard;
         if (hc && hc.l1) {
@@ -290,51 +229,15 @@
           applyPop(oPunch, time, activePunch.s, activePunch.e, 0.18, 0.14, 2);
         }
 
-        // 4. Subtitle Layer (respects captionMode: 'hybrid' | 'keyword_only' | 'full')
-        if (captionMode === 'keyword_only' || (captionMode === 'hybrid' && activePunch)) {
-          oSub.hidden = true;
-          oSub.innerHTML = '';
-          return;
+        // 4. Subtitle Layer (shared renderer — R14, R16)
+        if (SL?.renderSubtitle) {
+          SL.renderSubtitle(oSub, T, time, {
+            captionMode,
+            activePunch,
+            subTop: oSub.dataset.subTop || '69cqh',
+            subRight: '6cqw'
+          });
         }
-
-        const chunks = Array.isArray(T.chunks) ? T.chunks : [];
-        const words = Array.isArray(T.words) ? T.words : [];
-        const punchWordSet = new Set(T.punchWordIndices || []);
-
-        const activeChunk = chunks.find((ch) => time >= ch.s - 0.03 && time <= ch.e + 0.08);
-        if (!activeChunk || !Array.isArray(activeChunk.indices)) {
-          oSub.hidden = true;
-          oSub.innerHTML = '';
-          return;
-        }
-
-        const visibleIndices = captionMode === 'hybrid'
-          ? activeChunk.indices.filter((idx) => !punchWordSet.has(idx))
-          : activeChunk.indices;
-
-        if (visibleIndices.length === 0) {
-          oSub.hidden = true;
-          oSub.innerHTML = '';
-          return;
-        }
-
-        const joinedLen = visibleIndices.map((idx) => words[idx]?.w || '').join(' ').length;
-        let subCqw = '6.6cqw';
-        if (joinedLen > 22) subCqw = '4.9cqw';
-        else if (joinedLen > 17) subCqw = '5.6cqw';
-        else if (joinedLen > 14) subCqw = '6.1cqw';
-        oSub.style.setProperty('--sub-size', subCqw);
-
-        oSub.hidden = false;
-        oSub.innerHTML = visibleIndices.map((idx) => {
-          const item = words[idx];
-          if (!item) return '';
-          const isOn = time >= item.s && time <= item.e + 0.04;
-          const span = document.createElement('span');
-          span.className = isOn ? 'on' : '';
-          span.textContent = String(item.w || '');
-          return span.outerHTML;
-        }).join(' ');
       };
     })();
   </script>

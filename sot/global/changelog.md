@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.44.21 — Fase 4 Caption Refresh 3 gaya shared-layers dan chunker Revisi 03 R14-R18 (13/11/2026)
+- Ekstrak shared subtitle chunker 2-3 kata maks 16 karakter dengan frasa terlindungi dan width guard <=88cqw pada seluruh 4 jalur render
+- Satukan CSS dan renderSubtitle pada shared-layers.js serta bersihkan 8 template HTML dari CSS sub dan joinedLen
+- Selaraskan 3 gaya floating_white_yellow floating_black_on_white dan minimal_white pada Playwright SVG dan preview builder
+
 ## V2.44.20 — Fase 4-T0 (R19): Perbaikan Default caption_mode & Diff-Only Override Campaign (13/11/2026)
 - Tampilkan nilai efektif caption_mode (kosong/NULL -> full dengan label default campaign lama) & diff-only PATCH di Campaign Detail dan Operator Presets
 - Tolak string kosong (400) untuk caption_mode/finishing_template/loudness_target pada PATCH/PUT campaign & presets tanpa fallback tersembunyi ke hybrid; terima null eksplisit untuk reset default
