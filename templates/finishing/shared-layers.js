@@ -121,7 +121,11 @@
     }
     .x-notice b { color: var(--accent); }
     .x-end {
-      inset: 0;
+      /* Sisakan 1px transparan di tepi bawah agar Chromium tetap mengekspor PNG RGBA (bukan RGB24) saat end-card menutupi layar, sehingga demuxer image2 FFmpeg tidak memotong frame x-end. */
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 1px;
       background: var(--brand, #16222c);
       display: flex;
       flex-direction: column;

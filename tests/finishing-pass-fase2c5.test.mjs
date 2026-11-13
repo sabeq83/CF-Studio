@@ -286,7 +286,13 @@ test('F2c5-T1 & T3 (R6.6, R12.5): templates/finishing passes R6.6 grep, angka-ba
     assert.ok(fs.existsSync(res.imagePattern.replace('%05d', '00001')));
     assert.ok(fs.existsSync(res.imagePattern.replace('%05d', '00075')));
     assert.ok(fs.existsSync(res.imagePattern.replace('%05d', '00110')));
-    assert.ok(fs.existsSync(res.imagePattern.replace('%05d', String(res.frameCount - 1).padStart(5, '0'))));
+    const lastFramePath = res.imagePattern.replace('%05d', String(res.frameCount - 1).padStart(5, '0'));
+    assert.ok(fs.existsSync(lastFramePath));
+    // PNG IHDR color type at byte 25 MUST stay 6 (RGBA) on x-end frames so FFmpeg image2 does not drop trailing frames
+    const firstPng = fs.readFileSync(res.imagePattern.replace('%05d', '00001'));
+    const endPng = fs.readFileSync(lastFramePath);
+    assert.equal(firstPng[25], 6, 'First frame PNG must use RGBA color type (6)');
+    assert.equal(endPng[25], 6, 'End-card frame PNG must retain RGBA color type (6)');
 
     // Verified real number counter capture
     const tlWithNum = buildPhase1Timeline({

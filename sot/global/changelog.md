@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.44.16 — Fix RGBA alpha preservation on x-end finishing overlay frames (13/11/2026)
+- Keep 1px bottom transparency in .x-end so Chromium preserves PNG RGBA format for FFmpeg image2
+- Add IHDR colorType RGBA regression check for first and end-card frames in Fase 2c-5 tests
+
 ## V2.44.15 — Fase 2c-5 Polish: Anti-Collision Hook/Punch & Video Stream tpad Align (13/11/2026)
 - Tambah guard !showHook pada activePunch di angka-banding.html
 - Tambahkan videoDuration stream probe dan tpad stop_mode=clone pada video-studio-processor.js agar x-end tampil penuh saat audio lebih panjang dari video
