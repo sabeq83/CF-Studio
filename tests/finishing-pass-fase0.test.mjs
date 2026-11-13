@@ -172,6 +172,19 @@ test('F0-T3: chunkCaptionWords creates 2-4 word chunks without leaked tags', () 
       assert.equal(hasLeakedOverlayMarkup(item.w), false);
     }
   }
+
+  // Long 4-word Indonesian phrase must split cleanly before exceeding ~16 chars so edges never clip
+  const longPhraseChunks = chunkCaptionWords([
+    { w: 'madu', s: 0, e: 0.4, c: 2 },
+    { w: 'mentah', s: 0.4, e: 0.8, c: 2 },
+    { w: 'dan', s: 0.8, e: 1.1, c: 2 },
+    { w: 'bawang', s: 1.1, e: 1.5, c: 2 },
+    { w: 'lanang', s: 1.5, e: 1.9, c: 2 },
+    { w: 'pilihan', s: 1.9, e: 2.3, c: 2 }
+  ]);
+  for (const ch of longPhraseChunks) {
+    assert.ok(ch.map(x => x.w).join(' ').length <= 16, `Chunk too wide: ${ch.map(x => x.w).join(' ')}`);
+  }
 });
 
 test('F0-T3: alignClipWordsTier3 splits around ffmpeg silencedetect gaps & applies weights', async () => {

@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.44.4 — Finishing Pass Fase 0: OFL Fonts, Herbal Hook Guard, Tier-3 Alignment, Global Overlay & Loudnorm -14 (13/11/2026)
+- Tambah font OFL lokal (Anton, Montserrat Black/ExtraBold, Inter) + loader Fontconfig dan pengukuran TTF
+- Tambah guard medis herbal + fitHookCard dan sanitasi ketat overlay markup
+- Pindah overlay ke timeline global post-concat/xfade + Tier-3 silencedetect word alignment dan subtitle width guard
+- Terapkan EBU R128 loudnorm -14 LUFS dan default transisi cut untuk campaign/preset baru
+
 ## V2.44.3 — Disable MiniMax Pause & Micro-Acting Tags on Non-HD Autopipeline (13/11/2026)
 - Tambahkan helper lib/tts-text-sanitizer.js untuk kontrol tag <#detik#> & interjeksi serta sanitasi downstream
 - Batasi MINIMAX_MICRO_ACTING_MANDATE hanya untuk speech-2.8-hd di prompts.js (nonaktif di default turbo 1-Klik & Skedul)
