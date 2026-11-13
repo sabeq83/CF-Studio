@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.44.14 — Fase 2c-5: Template Finishing angka_banding (13/11/2026)
+- Tambah template angka-banding.html dengan x-compare, x-chips, dan counter x-num kondisional
+- Tambah schema & guard ketat anti-angka palsu untuk compare, numbers, dan chips di finishing-plan-validator.js
+- Tambah unit test dan Playwright Chromium capture Fase 2c-5
+
 ## V2.44.13 — Fase 2c-4 Polish: CTA Brand Profile, x-end Brand Normalization & Layout problem_solution (13/11/2026)
 - Teruskan customCtaText brand dan normalisasi brand.name ke buildPhase1Timeline di lib/video-studio-processor.js
 - Rapikan wrapping CTA pill dan spacing kata subtitle di problem-solution.html

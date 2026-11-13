@@ -1,0 +1,724 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style id="dynamic-fonts"></style>
+  <style id="shared-layers-css"></style>
+  <style>
+    :root {
+      --accent: #ff8a1f;
+      --accent-soft: #ffb057;
+      --active-word: #fff066;
+      --brand: #1c2430;
+      --f-punch: "Anton", Impact, sans-serif;
+      --f-sub: "Montserrat", "Arial Black", sans-serif;
+      --f-ui: "Inter", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: transparent !important;
+      overflow: hidden;
+    }
+    .phone {
+      position: relative;
+      width: 720px;
+      height: 1280px;
+      overflow: hidden;
+      container-type: size;
+      background: transparent;
+    }
+    .layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .flash {
+      position: absolute;
+      inset: 0;
+      background: #ffffff;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .progress {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 0.9cqw;
+      width: 0;
+      background: var(--accent);
+    }
+    .hook {
+      position: absolute;
+      left: 5cqw;
+      right: 15cqw;
+      top: 22cqh;
+      text-align: center;
+      font-family: var(--f-punch);
+      text-transform: uppercase;
+      letter-spacing: 0.015em;
+      transform-origin: 50% 50%;
+    }
+    .hook span {
+      display: block;
+      -webkit-text-stroke: 0.7cqw #000000;
+      paint-order: stroke fill;
+      text-shadow: 0 1.4cqw 0 rgba(0, 0, 0, 0.55);
+    }
+    .hook .l1 {
+      color: #ffffff;
+      font-size: var(--hook-l1-size, 10cqw);
+      line-height: 0.95;
+    }
+    .hook .l2 {
+      color: var(--accent);
+      font-size: var(--hook-l2-size, 11.5cqw);
+      line-height: 0.94;
+      margin-top: 0.6cqw;
+    }
+
+    /* Comparison Split Card A vs B (safe zones: right 15cqw clear for TikTok icons) */
+    .x-compare {
+      position: absolute;
+      left: 5cqw;
+      right: 15cqw;
+      top: 16cqh;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: stretch;
+      gap: 1.8cqw;
+      transform-origin: 50% 0;
+    }
+    .x-compare .col {
+      border-radius: 2.2cqw;
+      padding: 2.2cqw 2cqw;
+      text-align: center;
+      box-shadow: 0 1.3cqw 2.8cqw rgba(0, 0, 0, 0.42);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .x-compare .col.good {
+      background: #ffffff;
+      color: #111111;
+    }
+    .x-compare .col.bad {
+      background: rgba(20, 22, 26, 0.92);
+      color: #ffffff;
+      border: 0.25cqw solid rgba(255, 255, 255, 0.14);
+    }
+    .x-compare .mk {
+      font-family: var(--f-punch);
+      font-size: 7.8cqw;
+      line-height: 1;
+    }
+    .x-compare .col.good .mk { color: #1f9d55; }
+    .x-compare .col.bad .mk { color: #ff5a4a; }
+    .x-compare b {
+      display: block;
+      font-family: var(--f-sub);
+      font-weight: 900;
+      font-size: 3.7cqw;
+      line-height: 1.08;
+      margin-top: 0.8cqw;
+      text-transform: uppercase;
+    }
+    .x-compare .col.good b { color: #111111; }
+    .x-compare .col.bad b { color: #ffffff; }
+    .x-compare span {
+      display: block;
+      font-family: var(--f-ui);
+      font-weight: 600;
+      font-size: 2.8cqw;
+      line-height: 1.2;
+      margin-top: 0.7cqw;
+    }
+    .x-compare .col.good span { color: #444444; }
+    .x-compare .col.bad span { color: #cfd6dc; }
+    .x-compare .vs {
+      align-self: center;
+      font-family: var(--f-punch);
+      font-size: 6.2cqw;
+      color: #ffffff;
+      -webkit-text-stroke: 0.4cqw #000000;
+      paint-order: stroke fill;
+      text-shadow: 0 0.8cqw 1.8cqw rgba(0, 0, 0, 0.55);
+    }
+
+    /* Sequential Material / Cost Chips */
+    .x-chips {
+      position: absolute;
+      left: 5cqw;
+      right: 15cqw;
+      top: 17.5cqh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.6cqw;
+      transform-origin: 50% 0;
+    }
+    .x-chips .row {
+      display: flex;
+      gap: 1.8cqw;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .x-chips .c {
+      font-family: var(--f-sub);
+      font-weight: 900;
+      font-size: 4.3cqw;
+      color: #111111;
+      background: #ffffff;
+      border-bottom: 1cqw solid var(--accent);
+      padding: 1.2cqw 2.8cqw;
+      border-radius: 1.5cqw;
+      box-shadow: 0 1cqw 2.6cqw rgba(0, 0, 0, 0.38);
+      text-transform: uppercase;
+      transition: transform 0.12s ease-out, opacity 0.12s ease-out;
+    }
+    .x-chips .c.wait {
+      opacity: 0.38;
+      transform: scale(0.94);
+    }
+    .x-chips .c.on {
+      opacity: 1;
+      background: var(--accent);
+      color: #111111;
+      border-bottom-color: #ffffff;
+      transform: scale(1.04);
+    }
+    .x-chips .ft {
+      font-family: var(--f-sub);
+      font-weight: 800;
+      font-size: 3.4cqw;
+      color: #ffffff;
+      background: rgba(10, 14, 18, 0.88);
+      padding: 0.9cqw 2.8cqw;
+      border-radius: 99cqw;
+      border: 0.25cqw solid rgba(255, 255, 255, 0.18);
+    }
+
+    /* Animated Counter / Meter (rendered STRICTLY if verified real numbers exist) */
+    .x-num {
+      position: absolute;
+      left: 6cqw;
+      right: 15cqw;
+      top: 17cqh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(10, 14, 18, 0.9);
+      border: 0.35cqw solid var(--accent);
+      border-radius: 2.4cqw;
+      padding: 2.2cqw 3.2cqw;
+      box-shadow: 0 1.4cqw 3.2cqw rgba(0, 0, 0, 0.45);
+      transform-origin: 50% 0;
+    }
+    .x-num .lbl {
+      font-family: var(--f-ui);
+      font-weight: 800;
+      font-size: 3.1cqw;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #e2e8f0;
+      text-align: center;
+    }
+    .x-num .val {
+      font-family: var(--f-punch);
+      font-size: 11cqw;
+      line-height: 1.02;
+      color: var(--accent);
+      -webkit-text-stroke: 0.4cqw #000000;
+      paint-order: stroke fill;
+      margin-top: 0.4cqw;
+    }
+    .x-num .meter {
+      width: 100%;
+      height: 1.4cqw;
+      border-radius: 99cqw;
+      background: rgba(255, 255, 255, 0.16);
+      overflow: hidden;
+      margin-top: 1.2cqw;
+    }
+    .x-num .meter-fill {
+      height: 100%;
+      border-radius: 99cqw;
+      background: linear-gradient(90deg, var(--accent), var(--active-word));
+      width: 0%;
+    }
+
+    .punch {
+      position: absolute;
+      left: 5cqw;
+      right: 15cqw;
+      top: 43cqh;
+      text-align: center;
+      font-family: var(--f-punch);
+      text-transform: uppercase;
+      font-size: var(--punch-size, 15cqw);
+      line-height: 0.94;
+      transform-origin: 50% 50%;
+      -webkit-text-stroke: 0.65cqw #000000;
+      paint-order: stroke fill;
+      text-shadow: 0 1.3cqw 0 rgba(0, 0, 0, 0.5);
+    }
+    .cta {
+      position: absolute;
+      left: 6cqw;
+      right: 15cqw;
+      top: 52cqh;
+      display: flex;
+      flex-direction: column-reverse;
+      align-items: center;
+      gap: 1.2cqw;
+    }
+    .cta .arrow {
+      font-family: var(--f-punch);
+      font-size: 9cqw;
+      color: var(--accent);
+      -webkit-text-stroke: 0.45cqw #000000;
+      paint-order: stroke fill;
+      line-height: 1;
+    }
+    .cta .pill {
+      font-family: var(--f-sub);
+      font-weight: 900;
+      font-size: 3.5cqw;
+      line-height: 1.22;
+      text-align: center;
+      max-width: 100%;
+      white-space: normal;
+      text-transform: uppercase;
+      background: var(--accent);
+      color: #111111;
+      padding: 1.3cqw 3.4cqw;
+      border-radius: 3.2cqw;
+      box-shadow: 0 1cqw 0 #000000;
+    }
+    .sub {
+      position: absolute;
+      left: 6cqw;
+      right: 15cqw;
+      top: var(--sub-top, 72.5cqh);
+      transform: translateY(-50%);
+      display: flex;
+      justify-content: center;
+      align-items: baseline;
+      flex-wrap: nowrap;
+      gap: 2.4cqw;
+      text-align: center;
+      font-family: var(--f-sub);
+      font-weight: 900;
+      font-size: var(--sub-size, 6.4cqw);
+      line-height: 1.15;
+      text-transform: uppercase;
+      color: #ffffff;
+      white-space: nowrap;
+      -webkit-text-stroke: 0.55cqw #000000;
+      paint-order: stroke fill;
+      text-shadow: 0 0.6cqw 1.5cqw rgba(0, 0, 0, 0.68);
+    }
+    .sub span { display: inline-block; margin: 0; }
+    .sub span.on { color: var(--active-word); transform: scale(1.06); }
+    .sub.pill-mode span {
+      background: #ffffff;
+      color: #0d0e11;
+      -webkit-text-stroke: 0;
+      text-shadow: none;
+      padding: 0.8cqw 2cqw;
+      border-radius: 1.4cqw;
+      font-size: 0.85em;
+      box-shadow: 0 0.8cqw 2cqw rgba(0, 0, 0, 0.45);
+    }
+    .sub.pill-mode span.on {
+      background: var(--active-word);
+      color: #0d0e11;
+      transform: scale(1.05);
+    }
+    .sub.minimal-mode {
+      font-family: var(--f-ui);
+      font-weight: 700;
+      font-size: 4.8cqw;
+      text-transform: none;
+      -webkit-text-stroke: 0;
+      text-shadow: none;
+      background: rgba(255, 255, 255, 0.92);
+      color: #0f172a;
+      border-radius: 1.8cqw;
+      padding: 1.5cqw 2.8cqw;
+      box-shadow: 0 1cqw 2.4cqw rgba(0, 0, 0, 0.35);
+    }
+    .sub.minimal-mode span.on {
+      color: #0f172a;
+      background: var(--active-word);
+      padding: 0.2cqw 0.8cqw;
+      border-radius: 0.8cqw;
+      transform: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone" id="phone">
+    <div class="flash" id="oFlash"></div>
+    <div class="hook" id="oHook" hidden>
+      <span class="l1" id="oHookL1"></span>
+      <span class="l2" id="oHookL2"></span>
+    </div>
+    <div class="x-compare" id="oCompare" hidden>
+      <div class="col" id="oCmpLeftCol">
+        <div class="mk" id="oCmpLeftMk"></div>
+        <b id="oCmpLeftTitle"></b>
+        <span id="oCmpLeftSub"></span>
+      </div>
+      <div class="vs" id="oCmpVs">VS</div>
+      <div class="col" id="oCmpRightCol">
+        <div class="mk" id="oCmpRightMk"></div>
+        <b id="oCmpRightTitle"></b>
+        <span id="oCmpRightSub"></span>
+      </div>
+    </div>
+    <div class="x-chips" id="oChips" hidden>
+      <div class="row" id="oChipsRow"></div>
+      <span class="ft" id="oChipsFoot" hidden></span>
+    </div>
+    <div class="x-num" id="oNum" hidden>
+      <div class="lbl" id="oNumLabel" hidden></div>
+      <div class="val" id="oNumVal"></div>
+      <div class="meter"><div class="meter-fill" id="oNumFill"></div></div>
+    </div>
+    <div class="punch" id="oPunch" hidden></div>
+    <div class="cta" id="oCta" hidden>
+      <div class="arrow" id="oCtaArrow"></div>
+      <div class="pill" id="oCtaPill"></div>
+    </div>
+    <div class="sub" id="oSub" hidden></div>
+    <div class="layer" id="oPatch" hidden></div>
+    <div class="layer" id="oBrand" hidden></div>
+    <div class="progress" id="oProg"></div>
+  </div>
+
+  <script src="./shared-layers.js"></script>
+  <script>
+    (function () {
+      const $ = (id) => document.getElementById(id);
+      const oPhone = $('phone');
+      const oFlash = $('oFlash');
+      const oHook = $('oHook');
+      const oHookL1 = $('oHookL1');
+      const oHookL2 = $('oHookL2');
+      const oCompare = $('oCompare');
+      const oCmpLeftCol = $('oCmpLeftCol');
+      const oCmpLeftMk = $('oCmpLeftMk');
+      const oCmpLeftTitle = $('oCmpLeftTitle');
+      const oCmpLeftSub = $('oCmpLeftSub');
+      const oCmpRightCol = $('oCmpRightCol');
+      const oCmpRightMk = $('oCmpRightMk');
+      const oCmpRightTitle = $('oCmpRightTitle');
+      const oCmpRightSub = $('oCmpRightSub');
+      const oChips = $('oChips');
+      const oChipsRow = $('oChipsRow');
+      const oChipsFoot = $('oChipsFoot');
+      const oNum = $('oNum');
+      const oNumLabel = $('oNumLabel');
+      const oNumVal = $('oNumVal');
+      const oNumFill = $('oNumFill');
+      const oPunch = $('oPunch');
+      const oCta = $('oCta');
+      const oCtaArrow = $('oCtaArrow');
+      const oCtaPill = $('oCtaPill');
+      const oSub = $('oSub');
+      const oPatch = $('oPatch');
+      const oBrand = $('oBrand');
+      const oProg = $('oProg');
+      const dynamicFonts = $('dynamic-fonts');
+      const sharedCssEl = $('shared-layers-css');
+      const SL = window.FinishingSharedLayers || null;
+
+      if (SL && sharedCssEl) {
+        sharedCssEl.textContent = SL.SHARED_LAYERS_CSS || '';
+      }
+
+      const PUNCH_COLORS = {
+        problem: '#ffffff',
+        warning: '#ff6b6b',
+        benefit: '#9df27a',
+        result: '#ffcc3d',
+        number: '#ffcc3d',
+        hook: '#ff8a1f'
+      };
+
+      let T = null;
+
+      function backOut(x) {
+        const c = 1.85;
+        const cl = Math.min(Math.max(x, 0), 1);
+        return 1 + (c + 1) * Math.pow(cl - 1, 3) + c * Math.pow(cl - 1, 2);
+      }
+
+      function applyPop(el, t, s, e, inDur, outDur, rotDeg) {
+        const lt = t - s;
+        const rt = e - t;
+        let sc = backOut(lt / inDur);
+        let op = Math.min(1, Math.max(0, lt / 0.06));
+        if (rt < outDur) {
+          const k = Math.max(rt, 0) / outDur;
+          op = Math.min(op, k);
+          sc *= 0.9 + 0.1 * k;
+        }
+        el.style.opacity = String(op);
+        el.style.transform = `scale(${sc.toFixed(4)}) rotate(${rotDeg || 0}deg)`;
+      }
+
+      function formatCounterValue(val) {
+        const n = Number(val);
+        if (!Number.isFinite(n)) return '';
+        if (Math.abs(n) >= 1000 && Number.isInteger(Math.round(n))) {
+          return Math.round(n).toLocaleString('id-ID');
+        }
+        if (Number.isInteger(n)) return String(n);
+        return n.toFixed(1).replace(/\.0$/, '');
+      }
+
+      window.loadTimeline = function (timeline) {
+        T = timeline || { config: {}, words: [], chunks: [], punches: [], compare: [], numbers: [], chips: [] };
+        const cfg = T.config || {};
+        oPhone.style.width = `${Number(cfg.width) || 720}px`;
+        oPhone.style.height = `${Number(cfg.height) || 1280}px`;
+
+        const customAccent = T.brand?.accentColor || (cfg.accentColor && cfg.accentColor !== '#ffcc3d' ? cfg.accentColor : '');
+        if (customAccent) {
+          document.documentElement.style.setProperty('--accent', customAccent);
+          document.documentElement.style.setProperty('--accent-soft', customAccent);
+        }
+        if (cfg.activeWordColor) {
+          document.documentElement.style.setProperty('--active-word', cfg.activeWordColor);
+        }
+        if (T.brand?.color) {
+          document.documentElement.style.setProperty('--brand', T.brand.color);
+        }
+
+        if (cfg.fontBaseUrl) {
+          const base = String(cfg.fontBaseUrl).replace(/\/+$/, '');
+          dynamicFonts.textContent = `
+            @font-face { font-family: "Anton"; src: url("${base}/Anton-Regular.ttf") format("truetype"); font-weight: 400; font-style: normal; }
+            @font-face { font-family: "Montserrat"; src: url("${base}/Montserrat-ExtraBold.ttf") format("truetype"); font-weight: 800; font-style: normal; }
+            @font-face { font-family: "Montserrat"; src: url("${base}/Montserrat-Black.ttf") format("truetype"); font-weight: 900; font-style: normal; }
+            @font-face { font-family: "Inter"; src: url("${base}/Inter-Bold.ttf") format("truetype"); font-weight: 700; font-style: normal; }
+          `;
+        }
+
+        const pos = cfg.position || 'bottom';
+        let subTop = '72.5cqh';
+        if (pos === 'top') subTop = '16cqh';
+        else if (pos === 'center') subTop = '50cqh';
+        document.documentElement.style.setProperty('--sub-top', subTop);
+
+        oSub.className = 'sub';
+        if (cfg.style === 'floating_black_on_white') oSub.classList.add('pill-mode');
+        else if (cfg.style === 'minimal_white') oSub.classList.add('minimal-mode');
+
+        const hc = T.hookCard;
+        if (hc && hc.l1) {
+          oHook.style.setProperty('--hook-l1-size', `${((hc.l1Ratio || 0.10) * 100).toFixed(2)}cqw`);
+          oHook.style.setProperty('--hook-l2-size', `${((hc.l2Ratio || 0.115) * 100).toFixed(2)}cqw`);
+          oHookL1.textContent = hc.l1;
+          if (hc.l2) {
+            oHookL2.textContent = hc.l2;
+            oHookL2.hidden = false;
+          } else {
+            oHookL2.textContent = '';
+            oHookL2.hidden = true;
+          }
+        } else {
+          oHook.hidden = true;
+        }
+
+        const ca = T.cta;
+        if (ca && ca.text) {
+          oCtaPill.textContent = ca.text;
+          oCtaArrow.textContent = ca.arrowDir || '▼';
+        } else {
+          oCta.hidden = true;
+        }
+        return true;
+      };
+
+      window.renderAt = function (t) {
+        if (!T) return;
+        const dur = Math.max(0.1, Number(T.config?.duration) || 1);
+        const captionMode = T.config?.captionMode || 'full';
+        const time = Math.min(Math.max(0, Number(t) || 0), dur);
+
+        oProg.style.width = `${((time / dur) * 100).toFixed(3)}%`;
+        let flashOp = 0;
+        for (const cutT of (T.clipCuts || [])) {
+          const d = time - Number(cutT);
+          if (d >= 0 && d < 0.12) {
+            flashOp = 0.52 * (1 - d / 0.12);
+            break;
+          }
+        }
+        oFlash.style.opacity = flashOp.toFixed(4);
+
+        const brandState = SL
+          ? SL.renderSharedLayersDom({ oBrandRoot: oBrand, oPatchRoot: oPatch, timeline: T, time })
+          : { endCard: null };
+        const endOn = Boolean(brandState.endCard);
+
+        const hookEnd = Number(T.config?.hookDuration) || 1.75;
+        const showHook = Boolean(!endOn && T.hookCard && T.hookCard.l1 && time >= 0 && time < hookEnd);
+        oHook.hidden = !showHook;
+        if (showHook) {
+          applyPop(oHook, time, 0, hookEnd, 0.24, 0.16, 0);
+        }
+
+        // 1. Comparison Split Card (A vs B)
+        const compareList = Array.isArray(T.compare) ? T.compare : [];
+        const activeCompare = (!endOn && !showHook)
+          ? compareList.find((c) => time >= c.s && time < c.e)
+          : null;
+        oCompare.hidden = !activeCompare;
+        if (activeCompare) {
+          const l = activeCompare.left || {};
+          const r = activeCompare.right || {};
+          oCmpLeftCol.className = `col ${l.good !== false ? 'good' : 'bad'}`;
+          oCmpLeftMk.textContent = l.good !== false ? '✓' : '✗';
+          if (oCmpLeftTitle.textContent !== String(l.title || '')) oCmpLeftTitle.textContent = String(l.title || '');
+          if (oCmpLeftSub.textContent !== String(l.sub || '')) oCmpLeftSub.textContent = String(l.sub || '');
+
+          oCmpRightCol.className = `col ${r.good ? 'good' : 'bad'}`;
+          oCmpRightMk.textContent = r.good ? '✓' : '✗';
+          if (oCmpRightTitle.textContent !== String(r.title || '')) oCmpRightTitle.textContent = String(r.title || '');
+          if (oCmpRightSub.textContent !== String(r.sub || '')) oCmpRightSub.textContent = String(r.sub || '');
+
+          applyPop(oCompare, time, activeCompare.s, activeCompare.e, 0.24, 0.15, 0);
+        }
+
+        // 2. Sequential Material / Cost Chips (yield if compare card active)
+        const chipsList = Array.isArray(T.chips) ? T.chips : [];
+        const activeChips = (!endOn && !showHook && !activeCompare)
+          ? chipsList.find((g) => time >= g.s && time < g.e)
+          : null;
+        oChips.hidden = !activeChips;
+        if (activeChips) {
+          const items = Array.isArray(activeChips.items) ? activeChips.items : [];
+          oChipsRow.innerHTML = items.map((it) => {
+            const span = document.createElement('span');
+            const isRevealed = time >= Number(it.s || 0);
+            const isActiveNow = isRevealed && (time - Number(it.s || 0)) < 1.35;
+            span.className = `c ${isRevealed ? (isActiveNow ? 'on' : '') : 'wait'}`;
+            span.textContent = String(it.label || '');
+            return span.outerHTML;
+          }).join('');
+          if (activeChips.foot) {
+            if (oChipsFoot.textContent !== activeChips.foot) oChipsFoot.textContent = activeChips.foot;
+            oChipsFoot.hidden = false;
+          } else {
+            oChipsFoot.hidden = true;
+          }
+          applyPop(oChips, time, activeChips.s, activeChips.e, 0.22, 0.14, 0);
+        }
+
+        // 3. Verified Real-Number Counter & Meter (NEVER shown unless T.numbers has validated data)
+        const numList = Array.isArray(T.numbers) ? T.numbers : [];
+        const activeNum = (!endOn && !showHook && !activeCompare && !activeChips)
+          ? numList.find((n) => time >= n.s && time < n.e)
+          : null;
+        oNum.hidden = !activeNum;
+        if (activeNum) {
+          if (activeNum.label) {
+            if (oNumLabel.textContent !== activeNum.label) oNumLabel.textContent = activeNum.label;
+            oNumLabel.hidden = false;
+          } else {
+            oNumLabel.hidden = true;
+          }
+          const fromV = Number(activeNum.fromValue) || 0;
+          const toV = Number(activeNum.value) || 0;
+          const ramp = Math.min(1, Math.max(0, (time - activeNum.s) / 0.85));
+          const eased = 1 - Math.pow(1 - ramp, 3);
+          const cur = fromV + (toV - fromV) * eased;
+          const unitStr = activeNum.unit ? ` ${activeNum.unit}` : '';
+          oNumVal.textContent = `${formatCounterValue(cur)}${unitStr}`;
+          oNumFill.style.width = `${Math.round(eased * 100)}%`;
+          applyPop(oNum, time, activeNum.s, activeNum.e, 0.22, 0.14, 0);
+        }
+
+        // 4. Keyword Punch
+        const punches = Array.isArray(T.punches) ? T.punches : [];
+        const activePunch = !endOn ? punches.find((p) => time >= p.s && time < p.e) : null;
+        oPunch.hidden = !activePunch;
+        if (activePunch) {
+          const txt = String(activePunch.displayText || activePunch.phrase || '').toUpperCase();
+          const cLen = txt.length;
+          let pSize = '15cqw';
+          if (cLen > 24) pSize = '10.6cqw';
+          else if (cLen > 18) pSize = '12.2cqw';
+          else if (cLen > 13) pSize = '13.6cqw';
+          oPunch.style.setProperty('--punch-size', pSize);
+          oPunch.textContent = txt;
+          oPunch.style.color = PUNCH_COLORS[activePunch.type] || '#ffffff';
+          const rot = activePunch.type === 'problem' ? -2.5 : (activePunch.type === 'number' ? 0 : 2);
+          applyPop(oPunch, time, activePunch.s, activePunch.e, 0.18, 0.14, rot);
+        }
+
+        const ca = T.cta;
+        const showCta = Boolean(!endOn && !activePunch && !showHook && ca && ca.text && time >= ca.s && time <= ca.e);
+        oCta.hidden = !showCta;
+        if (showCta) {
+          applyPop(oCta, time, ca.s, Math.max(ca.e, ca.s + 1), 0.24, 0.15, 0);
+          const bounceY = Math.abs(Math.sin((time - ca.s) * 6)) * 2.4;
+          oCtaArrow.style.transform = `translateY(${bounceY.toFixed(2)}cqw)`;
+        }
+
+        if (endOn || captionMode === 'keyword_only' || (captionMode === 'hybrid' && activePunch)) {
+          oSub.hidden = true;
+          oSub.innerHTML = '';
+          return;
+        }
+
+        const chunks = Array.isArray(T.chunks) ? T.chunks : [];
+        const words = Array.isArray(T.words) ? T.words : [];
+        const punchWordSet = new Set(T.punchWordIndices || []);
+        const activeChunk = chunks.find((ch) => time >= ch.s - 0.03 && time <= ch.e + 0.08);
+        if (!activeChunk || !Array.isArray(activeChunk.indices)) {
+          oSub.hidden = true;
+          oSub.innerHTML = '';
+          return;
+        }
+
+        const visibleIndices = captionMode === 'hybrid'
+          ? activeChunk.indices.filter((idx) => !punchWordSet.has(idx))
+          : activeChunk.indices;
+
+        if (visibleIndices.length === 0) {
+          oSub.hidden = true;
+          oSub.innerHTML = '';
+          return;
+        }
+
+        const joinedLen = visibleIndices.map((idx) => words[idx]?.w || '').join(' ').length;
+        let subCqw = '6.4cqw';
+        if (joinedLen > 22) subCqw = '4.8cqw';
+        else if (joinedLen > 17) subCqw = '5.5cqw';
+        else if (joinedLen > 14) subCqw = '6.0cqw';
+        oSub.style.setProperty('--sub-size', subCqw);
+
+        oSub.hidden = false;
+        oSub.innerHTML = visibleIndices.map((idx) => {
+          const item = words[idx];
+          if (!item) return '';
+          const isOn = time >= item.s && time <= item.e + 0.04;
+          const span = document.createElement('span');
+          span.className = isOn ? 'on' : '';
+          span.textContent = String(item.w || '');
+          return span.outerHTML;
+        }).join(' ');
+      };
+    })();
+  </script>
+</body>
+</html>
+
