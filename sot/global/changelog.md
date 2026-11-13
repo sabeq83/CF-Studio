@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.44.11 — Finishing Pass Fase 2c-3: Fix Chip Binding ramuan_ritual & Verifikasi Staging (13/11/2026)
+- Selaraskan binding chip bahan ramuan-ritual.html ke format it.label & ing.until dari extractRecipeOverlayData serta tambahkan grid gap #oIngList
+- Teruskan label fallback pada finishing-overlay-renderer.js dan perbarui fixture unit test Fase 2c-3
+- Tuntaskan verifikasi render Staging item herbal 2117 dengan contact sheet 0.5s, loudness -14.8 LUFS, dan cek sinkronisasi 6 titik (0.000s-0.0001s)
+
 ## V2.44.10 — Finishing Pass Fase 2c-3: Template ramuan_ritual & Strict Compliance (13/11/2026)
 - Tambah template ramuan-ritual.html dengan badge x-time, chip bahan hangat, ProductCard non-klaim opsional, x-notice wajib & x-end
 - Aktifkan timing_badges di finishing_plan khusus ramuan_ritual dan strictest claim block tanpa memandang kategori produk
