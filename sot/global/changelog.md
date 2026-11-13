@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.44.1 — Fix Product Campaign Bridging Decoupling & Multi-Segment Curve (13/11/2026)
+- Pisahkan toggle post_link_affiliate dari is_bridging_active pada product_campaign
+- Aktifkan multi-segment bridging pada Dynamic Story Curve dan contoh prompt T2I/I2V/VO product_campaign
+- Dukung resolusi campaignKind dari campaign_type dan tambah unit test regresi bridging Clip 2 & 5
+
 ## V2.44.0 — Multi-Segment Product Bridging (Multiplier & Pillar) (13/11/2026)
 - Central bridge-plan & zone prompt resolver with pre/intro/gap/recall/post zoning and single-segment snapshot parity
 - Multi-segment BridgeSegmentsEditor UI across Multiplier, Pillar, and Operator Presets plus pillar_campaigns.bridge_segments schema support

@@ -13,6 +13,7 @@ import {
   resolveBrandRecipePreset
 } from '../../../../../lib/autonomous-engine.js';
 import { listOperatorPresetsForCampaignKind, hydrateOperatorPresetCache } from '../../../../../lib/operator-presets.js';
+import { resolveAutonomousPipelineAffiliateOverrides } from '../../../../../lib/bridging/bridge-plan.js';
 import { GRID_LAYOUT_COORDINATES } from '../../../../../lib/core/GridCoordinates.js';
 
 export const GET = withTenantContext(async (request, _ctx, user) => {
@@ -137,19 +138,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
       return NextResponse.json({ success: true, angles });
     }
 
-    const isEditorialOrLabs = pipelineType === 'editorial_campaign' || pipelineType === 'recipe_labs';
-    const isAffiliateEnabled = body.post_link_affiliate !== undefined
-      ? Boolean(body.post_link_affiliate)
-      : (!isEditorialOrLabs);
-    const isBridgingActive = body.is_bridging_active !== undefined
-      ? Boolean(body.is_bridging_active)
-      : (isEditorialOrLabs ? false : isAffiliateEnabled);
-
-    const affiliateOverride = {
-      post_link_affiliate: isAffiliateEnabled,
-      is_affiliate_enabled: isAffiliateEnabled,
-      is_bridging_active: isBridgingActive
-    };
+    const affiliateOverride = resolveAutonomousPipelineAffiliateOverrides(body, pipelineType);
 
     const isRecipeEnabled = body.generate_recipe !== undefined
       ? Boolean(body.generate_recipe)
