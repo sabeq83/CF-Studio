@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.44.17 — Preserve 720x1280 x-end bounds with clip-path RGBA transparency (13/11/2026)
+- Use clip-path: inset(0 0 1px 0) with inset: 0 in .x-end so Chromium preserves PNG RGBA while keeping exact 720x1280 bounding box
+
 ## V2.44.16 — Fix RGBA alpha preservation on x-end finishing overlay frames (13/11/2026)
 - Keep 1px bottom transparency in .x-end so Chromium preserves PNG RGBA format for FFmpeg image2
 - Add IHDR colorType RGBA regression check for first and end-card frames in Fase 2c-5 tests
