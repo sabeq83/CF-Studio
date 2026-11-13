@@ -333,3 +333,4 @@ test('4. MCP cf_submit_custom_storyboard accepts visual_action + creative contex
   assert.equal(calls[0].opts.body.storyboard.scenes[0].visual_action, 'Macro gelas teh hangat mengepul di meja kayu');
   assert.equal(calls[0].opts.body.storyboard.scenes[0].scene_role, 'hook');
 });
+

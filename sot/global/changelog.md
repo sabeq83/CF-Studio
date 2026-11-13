@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.44.3 — Disable MiniMax Pause & Micro-Acting Tags on Non-HD Autopipeline (13/11/2026)
+- Tambahkan helper lib/tts-text-sanitizer.js untuk kontrol tag <#detik#> & interjeksi serta sanitasi downstream
+- Batasi MINIMAX_MICRO_ACTING_MANDATE hanya untuk speech-2.8-hd di prompts.js (nonaktif di default turbo 1-Klik & Skedul)
+- Bersihkan tag TTS dari Motion Text/Subtitle, fallback Gemini/ElevenLabs TTS, ekspor Markdown, dan verifikasi unit test
+
 ## V2.44.2 — Custom Storyboard Gemini Prompt Engineer Workflow (13/11/2026)
 - Default prompt_mode gemini_engineer pada MCP cf_submit_custom_storyboard dengan penyimpanan storyboard tervalidasi
 - Tambahkan buildCustomStoryboardPromptEngineerPrompt di lib/prompts.js untuk mengunci VO dan durasi sambil menyusun T2I, I2V, DNA, dan paket sosmed via Gemini AI
