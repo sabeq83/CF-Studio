@@ -175,8 +175,11 @@ test('F2c0-T2 & T4 (R10): processTtsStudioMuxing skips finishing (never fails to
 });
 
 test('F2c0-T3 & T4 (R11): centralized registry drives extractor, renderer, UI Presets, & MCP Zod enums', () => {
-  // 1. Existing IDs match cleanly
-  assert.deepEqual(FINISHING_TEMPLATE_IDS, ['none', 'calm_wellness', 'recipe_pop']);
+  // 1. Existing IDs & registry alignment match cleanly
+  assert.deepEqual(FINISHING_TEMPLATE_IDS, FINISHING_TEMPLATE_REGISTRY.map((entry) => entry.id));
+  for (const baseId of ['none', 'calm_wellness', 'recipe_pop']) {
+    assert.ok(FINISHING_TEMPLATE_IDS.includes(baseId));
+  }
   assert.equal(resolveFinishingTemplateFile('calm_wellness'), 'calm-wellness.html');
   assert.equal(resolveFinishingTemplateFile('recipe_pop'), 'recipe-pop.html');
   assert.equal(isRichFinishingTemplate('none'), false);

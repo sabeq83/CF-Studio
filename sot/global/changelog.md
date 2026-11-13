@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.44.9 — Finishing Pass Fase 2c-2: Template tips_listicle (R12.2) (13/11/2026)
+- Tambah template HTML tips-listicle.html (x-tip slide-in safe zone, x-recap akhir, x-loc opsional, shared layers x-wm/x-end/x-lower/x-patch, 10% punch budget, nol hardcoded string R6.6)
+- Daftarkan tips_listicle di centralized finishing-template-registry.js beserta prioritas suggestFinishingTemplate spesifik
+- Tambah finishing_plan.tips (<=6 kata + VO grounding), punch_display, dan skema prompt bersyarat pada 4 builder lib/prompts.js
+- Tambah unit test finishing-pass-fase2c2.test.mjs + verifikasi lengkap 27/27 test dan Next.js production build
+
 ## V2.44.8 — Finishing Pass Fase 2c-1: Shared Brand Layers, Tier-3 Speech Timing R12.3, & Brand Patch R12.4 (13/11/2026)
 - Tambah 10 field Brand Profile R12.1 (logo_url, brand_color, brand_tagline, default_cta per platform, safety_notice_text, presenter, lokasi) hingga timeline.brand
 - Tambah templates/finishing/shared-layers.js (x-wm, x-end, x-lower, x-patch, x-notice, i18n id/en, zero hardcoded string R6.6)
