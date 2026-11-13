@@ -182,6 +182,10 @@
       tipLabel: 'TIP',
       stepLabel: 'LANGKAH',
       ingredientsHeader: 'BAHAN',
+      chapterProblem: 'MASALAH',
+      chapterCause: 'PENYEBAB',
+      chapterSolution: 'SOLUSI',
+      chapterResult: 'HASIL',
       vsLabel: 'VS',
       savePromptTitle: 'Simpan & Bagikan',
       defaultCta: 'CEK LINK DI BIO'
@@ -196,6 +200,10 @@
       tipLabel: 'TIP',
       stepLabel: 'STEP',
       ingredientsHeader: 'INGREDIENTS',
+      chapterProblem: 'PROBLEM',
+      chapterCause: 'CAUSE',
+      chapterSolution: 'SOLUTION',
+      chapterResult: 'RESULT',
       vsLabel: 'VS',
       savePromptTitle: 'Save & Share',
       defaultCta: 'LINK IN BIO'

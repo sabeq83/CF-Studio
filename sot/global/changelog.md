@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.44.12 — Fase 2c-4: Template Finishing problem_solution (13/11/2026)
+- Tambah template problem-solution.html dengan x-chapter, x-chapter-track, x-callout leader line, dan x-lower/CTA/x-end
+- Tambah schema dan validator VO-grounded chapters & callouts khusus problem_solution
+- Tambah test unit dan capture Playwright Fase 2c-4
+
 ## V2.44.11 — Finishing Pass Fase 2c-3: Fix Chip Binding ramuan_ritual & Verifikasi Staging (13/11/2026)
 - Selaraskan binding chip bahan ramuan-ritual.html ke format it.label & ing.until dari extractRecipeOverlayData serta tambahkan grid gap #oIngList
 - Teruskan label fallback pada finishing-overlay-renderer.js dan perbarui fixture unit test Fase 2c-3

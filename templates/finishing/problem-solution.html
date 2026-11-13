@@ -1,0 +1,580 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style id="dynamic-fonts"></style>
+  <style id="shared-layers-css"></style>
+  <style>
+    :root {
+      --accent: #22c3d6;
+      --accent-soft: #6be0ed;
+      --active-word: #fff066;
+      --brand: #0e2a33;
+      --f-punch: "Anton", Impact, sans-serif;
+      --f-sub: "Montserrat", "Arial Black", sans-serif;
+      --f-ui: "Inter", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: transparent !important;
+      overflow: hidden;
+    }
+    .phone {
+      position: relative;
+      width: 720px;
+      height: 1280px;
+      overflow: hidden;
+      container-type: size;
+      background: transparent;
+    }
+    .layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .flash {
+      position: absolute;
+      inset: 0;
+      background: #ffffff;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .progress {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 0.9cqw;
+      width: 0;
+      background: var(--accent);
+    }
+    .hook {
+      position: absolute;
+      left: 6cqw;
+      right: 15cqw;
+      top: 22cqh;
+      text-align: center;
+      font-family: var(--f-punch);
+      text-transform: uppercase;
+      line-height: 0.96;
+      color: #ffffff;
+      transform-origin: 50% 50%;
+    }
+    .hook .l1 {
+      display: block;
+      font-size: var(--hook-l1-size, 9.6cqw);
+      letter-spacing: 0.01em;
+      -webkit-text-stroke: 0.52cqw #000000;
+      paint-order: stroke fill;
+      text-shadow: 0 1cqw 2cqw rgba(0, 0, 0, 0.65);
+    }
+    .hook .l2 {
+      display: inline-block;
+      margin-top: 1.8cqw;
+      font-size: var(--hook-l2-size, 11.2cqw);
+      background: var(--accent);
+      color: #071920;
+      padding: 1cqw 3.2cqw 0.35cqw;
+      border-radius: 1.2cqw;
+      transform: rotate(-1.5deg);
+      box-shadow: 0 1.1cqw 2.4cqw rgba(0, 0, 0, 0.42);
+    }
+    .x-chapter {
+      position: absolute;
+      left: 4.5cqw;
+      top: 12.5cqh;
+      display: flex;
+      align-items: center;
+      gap: 1.6cqw;
+      font-family: var(--f-sub);
+      font-weight: 900;
+      font-size: 4.4cqw;
+      letter-spacing: 0.08em;
+      color: #ffffff;
+      background: var(--c, #e5484d);
+      padding: 1cqw 3cqw 1cqw 1.8cqw;
+      border-radius: 1.6cqw;
+      box-shadow: 0 1.2cqw 0 rgba(0, 0, 0, 0.45);
+      transform-origin: 0% 50%;
+    }
+    .x-chapter b {
+      display: grid;
+      place-items: center;
+      width: 5.4cqw;
+      height: 5.4cqw;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.28);
+      font-size: 3.2cqw;
+    }
+    .x-chapter-track {
+      position: absolute;
+      left: 4.5cqw;
+      top: 19cqh;
+      display: flex;
+      gap: 1cqw;
+    }
+    .x-chapter-track span {
+      width: 6cqw;
+      height: 1cqw;
+      border-radius: 1cqw;
+      background: rgba(255, 255, 255, 0.35);
+    }
+    .x-chapter-track span.on {
+      background: #ffffff;
+    }
+    .x-callout {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transform-origin: 50% 100%;
+    }
+    .x-callout .lb {
+      font-family: var(--f-sub);
+      font-weight: 900;
+      font-size: 4.5cqw;
+      color: #111827;
+      background: #ffffff;
+      padding: 1.2cqw 3.2cqw;
+      border-radius: 1.4cqw;
+      box-shadow: 0 1.2cqw 3cqw rgba(0, 0, 0, 0.4);
+      white-space: nowrap;
+      text-align: center;
+    }
+    .x-callout .lb small {
+      display: block;
+      margin-top: 0.2cqw;
+      font-family: var(--f-ui);
+      font-weight: 600;
+      font-size: 2.65cqw;
+      color: #4b5563;
+      text-align: center;
+    }
+    .x-callout .ln {
+      width: 0.6cqw;
+      height: 13cqh;
+      background: #ffffff;
+      box-shadow: 0 0 1cqw rgba(0, 0, 0, 0.5);
+    }
+    .x-callout .dot {
+      width: 3cqw;
+      height: 3cqw;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 0.8cqw solid var(--accent);
+      box-shadow: 0 0.4cqw 1.2cqw rgba(0, 0, 0, 0.45);
+    }
+    .punch {
+      position: absolute;
+      left: 5cqw;
+      right: 15cqw;
+      top: 43cqh;
+      text-align: center;
+      font-family: var(--f-punch);
+      text-transform: uppercase;
+      font-size: var(--punch-size, 15cqw);
+      line-height: 0.94;
+      transform-origin: 50% 50%;
+      -webkit-text-stroke: 0.65cqw #000000;
+      paint-order: stroke fill;
+      text-shadow: 0 1.3cqw 0 rgba(0, 0, 0, 0.5);
+    }
+    .cta {
+      position: absolute;
+      left: 6cqw;
+      right: 15cqw;
+      top: 56cqh;
+      display: flex;
+      flex-direction: column-reverse;
+      align-items: center;
+      gap: 1.4cqw;
+    }
+    .cta .arrow {
+      font-family: var(--f-punch);
+      font-size: 10cqw;
+      color: var(--accent);
+      -webkit-text-stroke: 0.45cqw #000000;
+      paint-order: stroke fill;
+      line-height: 1;
+    }
+    .cta .pill {
+      font-family: var(--f-sub);
+      font-weight: 900;
+      font-size: 4.3cqw;
+      text-transform: uppercase;
+      background: var(--accent);
+      color: #071920;
+      padding: 1.4cqw 3.8cqw;
+      border-radius: 99cqw;
+      box-shadow: 0 1.2cqw 0 #000000;
+    }
+    .sub {
+      position: absolute;
+      left: 6cqw;
+      right: 15cqw;
+      top: var(--sub-top, 71cqh);
+      transform: translateY(-50%);
+      display: flex;
+      justify-content: center;
+      align-items: baseline;
+      flex-wrap: nowrap;
+      gap: 1.9cqw;
+      text-align: center;
+      font-family: var(--f-sub);
+      font-weight: 900;
+      font-size: var(--sub-size, 6.4cqw);
+      line-height: 1.15;
+      text-transform: uppercase;
+      color: #ffffff;
+      white-space: nowrap;
+      -webkit-text-stroke: 0.55cqw #000000;
+      paint-order: stroke fill;
+      text-shadow: 0 0.6cqw 1.5cqw rgba(0, 0, 0, 0.68);
+    }
+    .sub span { display: inline-block; margin: 0; }
+    .sub span.on { color: var(--active-word); transform: scale(1.06); }
+    .sub.pill-mode span {
+      background: #ffffff;
+      color: #0d0e11;
+      -webkit-text-stroke: 0;
+      text-shadow: none;
+      padding: 0.8cqw 2cqw;
+      border-radius: 1.4cqw;
+      font-size: 0.85em;
+      box-shadow: 0 0.8cqw 2cqw rgba(0, 0, 0, 0.45);
+    }
+    .sub.pill-mode span.on {
+      background: var(--active-word);
+      color: #0d0e11;
+      transform: scale(1.05);
+    }
+    .sub.minimal-mode {
+      font-family: var(--f-ui);
+      font-weight: 700;
+      font-size: 4.8cqw;
+      text-transform: none;
+      -webkit-text-stroke: 0;
+      text-shadow: none;
+      background: rgba(255, 255, 255, 0.92);
+      color: #0f172a;
+      border-radius: 1.8cqw;
+      padding: 1.5cqw 2.8cqw;
+      box-shadow: 0 1cqw 2.4cqw rgba(0, 0, 0, 0.35);
+    }
+    .sub.minimal-mode span.on {
+      color: #0f172a;
+      background: var(--active-word);
+      padding: 0.2cqw 0.8cqw;
+      border-radius: 0.8cqw;
+      transform: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone" id="phone">
+    <div class="flash" id="oFlash"></div>
+    <div class="hook" id="oHook" hidden>
+      <span class="l1" id="oHookL1"></span>
+      <span class="l2" id="oHookL2"></span>
+    </div>
+    <div class="x-chapter" id="oChapter" hidden>
+      <b id="oChapNum">1</b>
+      <span id="oChapLabel"></span>
+    </div>
+    <div class="x-chapter-track" id="oChapTrack" hidden>
+      <span></span><span></span><span></span><span></span>
+    </div>
+    <div class="x-callout" id="oCallout" hidden>
+      <div class="lb"><span id="oCalloutText"></span><small id="oCalloutSub" hidden></small></div>
+      <div class="ln" id="oCalloutLine"></div>
+      <div class="dot"></div>
+    </div>
+    <div class="punch" id="oPunch" hidden></div>
+    <div class="cta" id="oCta" hidden>
+      <div class="arrow" id="oCtaArrow"></div>
+      <div class="pill" id="oCtaPill"></div>
+    </div>
+    <div class="sub" id="oSub" hidden></div>
+    <div class="layer" id="oPatch" hidden></div>
+    <div class="layer" id="oBrand" hidden></div>
+    <div class="progress" id="oProg"></div>
+  </div>
+
+  <script src="./shared-layers.js"></script>
+  <script>
+    (function () {
+      const $ = (id) => document.getElementById(id);
+      const oPhone = $('phone');
+      const oFlash = $('oFlash');
+      const oHook = $('oHook');
+      const oHookL1 = $('oHookL1');
+      const oHookL2 = $('oHookL2');
+      const oChapter = $('oChapter');
+      const oChapNum = $('oChapNum');
+      const oChapLabel = $('oChapLabel');
+      const oChapTrack = $('oChapTrack');
+      const oCallout = $('oCallout');
+      const oCalloutText = $('oCalloutText');
+      const oCalloutSub = $('oCalloutSub');
+      const oCalloutLine = $('oCalloutLine');
+      const oPunch = $('oPunch');
+      const oCta = $('oCta');
+      const oCtaArrow = $('oCtaArrow');
+      const oCtaPill = $('oCtaPill');
+      const oSub = $('oSub');
+      const oPatch = $('oPatch');
+      const oBrand = $('oBrand');
+      const oProg = $('oProg');
+      const dynamicFonts = $('dynamic-fonts');
+      const sharedCssEl = $('shared-layers-css');
+      const SL = window.FinishingSharedLayers || null;
+
+      if (SL && sharedCssEl) {
+        sharedCssEl.textContent = SL.SHARED_LAYERS_CSS || '';
+      }
+
+      const PUNCH_COLORS = {
+        problem: '#ffffff',
+        warning: '#ff6b6b',
+        benefit: '#9df27a',
+        result: '#ffcc3d',
+        number: '#ffcc3d',
+        hook: '#22c3d6'
+      };
+
+      let T = null;
+
+      function backOut(x) {
+        const c = 1.9;
+        const cl = Math.min(Math.max(x, 0), 1);
+        return 1 + (c + 1) * Math.pow(cl - 1, 3) + c * Math.pow(cl - 1, 2);
+      }
+
+      function applyPop(el, t, s, e, inDur, outDur, rotDeg, extraTranslate = '') {
+        const lt = t - s;
+        const rt = e - t;
+        let sc = backOut(lt / inDur);
+        let op = Math.min(1, Math.max(0, lt / 0.06));
+        if (rt < outDur) {
+          const k = Math.max(rt, 0) / outDur;
+          op = Math.min(op, k);
+          sc *= 0.9 + 0.1 * k;
+        }
+        el.style.opacity = String(op);
+        el.style.transform = `${extraTranslate}scale(${sc.toFixed(4)}) rotate(${rotDeg || 0}deg)`;
+      }
+
+      window.loadTimeline = function (timeline) {
+        T = timeline || { config: {}, words: [], chunks: [], punches: [], chapters: [], callouts: [] };
+        const cfg = T.config || {};
+        oPhone.style.width = `${Number(cfg.width) || 720}px`;
+        oPhone.style.height = `${Number(cfg.height) || 1280}px`;
+
+        const customAccent = T.brand?.accentColor || (cfg.accentColor && cfg.accentColor !== '#ffcc3d' ? cfg.accentColor : '');
+        if (customAccent) {
+          document.documentElement.style.setProperty('--accent', customAccent);
+          document.documentElement.style.setProperty('--accent-soft', customAccent);
+        }
+        if (cfg.activeWordColor) {
+          document.documentElement.style.setProperty('--active-word', cfg.activeWordColor);
+        }
+        if (T.brand?.color) {
+          document.documentElement.style.setProperty('--brand', T.brand.color);
+        }
+
+        if (cfg.fontBaseUrl) {
+          const base = String(cfg.fontBaseUrl).replace(/\/+$/, '');
+          dynamicFonts.textContent = `
+            @font-face { font-family: "Anton"; src: url("${base}/Anton-Regular.ttf") format("truetype"); font-weight: 400; font-style: normal; }
+            @font-face { font-family: "Montserrat"; src: url("${base}/Montserrat-ExtraBold.ttf") format("truetype"); font-weight: 800; font-style: normal; }
+            @font-face { font-family: "Montserrat"; src: url("${base}/Montserrat-Black.ttf") format("truetype"); font-weight: 900; font-style: normal; }
+            @font-face { font-family: "Inter"; src: url("${base}/Inter-Bold.ttf") format("truetype"); font-weight: 700; font-style: normal; }
+          `;
+        }
+
+        const pos = cfg.position || 'bottom';
+        let subTop = '71cqh';
+        if (pos === 'top') subTop = '16cqh';
+        else if (pos === 'center') subTop = '50cqh';
+        document.documentElement.style.setProperty('--sub-top', subTop);
+
+        oSub.className = 'sub';
+        if (cfg.style === 'floating_black_on_white') oSub.classList.add('pill-mode');
+        else if (cfg.style === 'minimal_white') oSub.classList.add('minimal-mode');
+
+        const hc = T.hookCard;
+        if (hc && hc.l1) {
+          oHook.style.setProperty('--hook-l1-size', `${((hc.l1Ratio || 0.096) * 100).toFixed(2)}cqw`);
+          oHook.style.setProperty('--hook-l2-size', `${((hc.l2Ratio || 0.112) * 100).toFixed(2)}cqw`);
+          oHookL1.textContent = hc.l1;
+          if (hc.l2) {
+            oHookL2.textContent = hc.l2;
+            oHookL2.hidden = false;
+          } else {
+            oHookL2.textContent = '';
+            oHookL2.hidden = true;
+          }
+        } else {
+          oHook.hidden = true;
+        }
+
+        const ca = T.cta;
+        if (ca && ca.text) {
+          oCtaPill.textContent = ca.text;
+          oCtaArrow.textContent = ca.arrowDir || '▼';
+        } else {
+          oCta.hidden = true;
+        }
+        return true;
+      };
+
+      window.renderAt = function (t) {
+        if (!T) return;
+        const dur = Math.max(0.1, Number(T.config?.duration) || 1);
+        const captionMode = T.config?.captionMode || 'full';
+        const time = Math.min(Math.max(0, Number(t) || 0), dur);
+
+        oProg.style.width = `${((time / dur) * 100).toFixed(3)}%`;
+        let flashOp = 0;
+        for (const cutT of (T.clipCuts || [])) {
+          const d = time - Number(cutT);
+          if (d >= 0 && d < 0.12) {
+            flashOp = 0.52 * (1 - d / 0.12);
+            break;
+          }
+        }
+        oFlash.style.opacity = flashOp.toFixed(4);
+
+        const brandState = SL
+          ? SL.renderSharedLayersDom({ oBrandRoot: oBrand, oPatchRoot: oPatch, timeline: T, time })
+          : { endCard: null };
+        const endOn = Boolean(brandState.endCard);
+
+        const hookEnd = Number(T.config?.hookDuration) || 1.75;
+        const showHook = Boolean(!endOn && T.hookCard && T.hookCard.l1 && time >= 0 && time < hookEnd);
+        oHook.hidden = !showHook;
+        if (showHook) {
+          applyPop(oHook, time, 0, hookEnd, 0.24, 0.16, 0);
+        }
+
+        // Narrative Chapter Pill + 4-step progress track (safe top-left)
+        const chapters = Array.isArray(T.chapters) ? T.chapters : [];
+        const activeChap = (!endOn && !showHook)
+          ? chapters.find((ch) => time >= ch.s && time < ch.e)
+          : null;
+        oChapter.hidden = !activeChap;
+        oChapTrack.hidden = !activeChap;
+        if (activeChap) {
+          oChapter.style.setProperty('--c', activeChap.color || '#e5484d');
+          const nStr = String(activeChap.n || 1);
+          if (oChapNum.textContent !== nStr) oChapNum.textContent = nStr;
+          if (oChapLabel.textContent !== activeChap.label) oChapLabel.textContent = activeChap.label;
+          const bars = oChapTrack.children;
+          for (let i = 0; i < bars.length; i++) {
+            bars[i].className = i < Number(activeChap.n || 1) ? 'on' : '';
+          }
+          applyPop(oChapter, time, activeChap.s, activeChap.e, 0.2, 0.14, 0);
+        }
+
+        // VO-grounded Material/Problem Callout with leader line
+        const callouts = Array.isArray(T.callouts) ? T.callouts : [];
+        const activeCallout = (!endOn && !showHook)
+          ? callouts.find((co) => time >= co.s && time < co.e)
+          : null;
+        oCallout.hidden = !activeCallout;
+        if (activeCallout) {
+          oCallout.style.left = `${Number(activeCallout.x || 50)}cqw`;
+          oCallout.style.top = `${Number(activeCallout.y || 27)}cqh`;
+          oCalloutLine.style.height = `${Number(activeCallout.line || 13)}cqh`;
+          if (oCalloutText.textContent !== activeCallout.text) oCalloutText.textContent = activeCallout.text;
+          if (activeCallout.sub) {
+            if (oCalloutSub.textContent !== activeCallout.sub) oCalloutSub.textContent = activeCallout.sub;
+            oCalloutSub.hidden = false;
+          } else {
+            oCalloutSub.hidden = true;
+          }
+          applyPop(oCallout, time, activeCallout.s, activeCallout.e, 0.22, 0.14, 0, 'translateX(-50%) ');
+        }
+
+        // Keyword Punch (problem shake vs solution pop)
+        const punches = Array.isArray(T.punches) ? T.punches : [];
+        const activePunch = !endOn ? punches.find((p) => time >= p.s && time < p.e) : null;
+        oPunch.hidden = !activePunch;
+        if (activePunch) {
+          const txt = String(activePunch.displayText || activePunch.phrase || '').toUpperCase();
+          const cLen = txt.length;
+          let pSize = '15cqw';
+          if (cLen > 24) pSize = '10.6cqw';
+          else if (cLen > 18) pSize = '12.2cqw';
+          else if (cLen > 13) pSize = '13.6cqw';
+          oPunch.style.setProperty('--punch-size', pSize);
+          oPunch.textContent = txt;
+          oPunch.style.color = PUNCH_COLORS[activePunch.type] || '#ffffff';
+          const isProb = activePunch.type === 'problem' || activePunch.type === 'warning';
+          const rot = isProb ? -3 : 2;
+          const shake = isProb && (time - activePunch.s) < 0.3
+            ? `translateX(${(Math.sin((time - activePunch.s) * 90) * 1.2).toFixed(2)}cqw) `
+            : '';
+          applyPop(oPunch, time, activePunch.s, activePunch.e, 0.18, 0.14, rot, shake);
+        }
+
+        const ca = T.cta;
+        const showCta = Boolean(!endOn && !activePunch && !showHook && ca && ca.text && time >= ca.s && time <= ca.e);
+        oCta.hidden = !showCta;
+        if (showCta) {
+          applyPop(oCta, time, ca.s, Math.max(ca.e, ca.s + 1), 0.24, 0.15, 0);
+          const bounceY = Math.abs(Math.sin((time - ca.s) * 6)) * 2.4;
+          oCtaArrow.style.transform = `translateY(${bounceY.toFixed(2)}cqw)`;
+        }
+
+        if (endOn || captionMode === 'keyword_only' || (captionMode === 'hybrid' && activePunch)) {
+          oSub.hidden = true;
+          oSub.innerHTML = '';
+          return;
+        }
+
+        const chunks = Array.isArray(T.chunks) ? T.chunks : [];
+        const words = Array.isArray(T.words) ? T.words : [];
+        const punchWordSet = new Set(T.punchWordIndices || []);
+        const activeChunk = chunks.find((ch) => time >= ch.s - 0.03 && time <= ch.e + 0.08);
+        if (!activeChunk || !Array.isArray(activeChunk.indices)) {
+          oSub.hidden = true;
+          oSub.innerHTML = '';
+          return;
+        }
+
+        const visibleIndices = captionMode === 'hybrid'
+          ? activeChunk.indices.filter((idx) => !punchWordSet.has(idx))
+          : activeChunk.indices;
+
+        if (visibleIndices.length === 0) {
+          oSub.hidden = true;
+          oSub.innerHTML = '';
+          return;
+        }
+
+        const joinedLen = visibleIndices.map((idx) => words[idx]?.w || '').join(' ').length;
+        let subCqw = '6.4cqw';
+        if (joinedLen > 22) subCqw = '4.8cqw';
+        else if (joinedLen > 17) subCqw = '5.5cqw';
+        else if (joinedLen > 14) subCqw = '6.0cqw';
+        oSub.style.setProperty('--sub-size', subCqw);
+
+        oSub.hidden = false;
+        oSub.innerHTML = visibleIndices.map((idx) => {
+          const item = words[idx];
+          if (!item) return '';
+          const isOn = time >= item.s && time <= item.e + 0.04;
+          const span = document.createElement('span');
+          span.className = isOn ? 'on' : '';
+          span.textContent = String(item.w || '');
+          return span.outerHTML;
+        }).join(' ');
+      };
+    })();
+  </script>
+</body>
+</html>
+
