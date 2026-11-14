@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.48.8 — Fix G-Labs reference asset .results URL ingestion (14/11/2026)
+- Read G-Labs .results array and direct HTTP URLs in refreshReferenceAssetGeneration (extractProviderImageUrl)
+
 ## V2.48.7 — Sidebar Universe Manager, Reference Asset Prompt Fix, and Stylized 3D Start-Frame Ref Wiring (14/11/2026)
 - Restore Universe Manager (/settings/universes) and rename Multiplier Labs in Sidebar
 - Fix reference-asset-prompt-builder for stylized 3D characters and config_json

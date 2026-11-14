@@ -6,6 +6,7 @@ import path from 'node:path';
 
 import { menuKeyMap, navItems, PLANNING_SECTION_HREFS } from '../lib/sidebar-nav.js';
 import { buildReferenceAssetPrompt } from '../lib/reference-asset-prompt-builder.js';
+import { extractProviderImageUrl } from '../lib/reference-asset-service.js';
 import {
   extractClipCharacterIds,
   hasStylizedUniverseLink,
@@ -295,5 +296,22 @@ test('Part D1-D4: extractClipCharacterIds, resolveClipReferenceImagesAsync (with
   for (const clipBeat of anglePlan.clips) {
     assert.equal(clipBeat.visualMode, 'stylized_3d_character');
   }
+
+  // 6. extractProviderImageUrl handles G-Labs .results array with full HTTP URLs cleanly
+  const fullUrl = extractProviderImageUrl(
+    { status: 'completed' },
+    { results: ['http://100.64.70.61:8765/api/files/20261114_test.jpg'] },
+    '8a97a38e',
+    () => 'SHOULD_NOT_BE_CALLED'
+  );
+  assert.equal(fullUrl, 'http://100.64.70.61:8765/api/files/20261114_test.jpg');
+
+  const relUrl = extractProviderImageUrl(
+    { status: 'completed', files: ['frame_01.png'] },
+    {},
+    'task_rel',
+    (file, id) => `http://host/api/files/${id}/${file}`
+  );
+  assert.equal(relUrl, 'http://host/api/files/task_rel/frame_01.png');
 });
 

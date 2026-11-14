@@ -1,0 +1,153 @@
+{
+  "id": "vi_mwfzpljm_bf15cfe9",
+  "tenant_id": "default_tenant",
+  "preset_key": "kawan_rumah_affiliate",
+  "label": "Kawan Rumah (Si Wajan, Sponge, Sapu)",
+  "description": "Pixar-style 3D talking household objects: Si Wajan (main), Sponge, Sapu. Cozy Indonesian kitchen counter beside the sink, cream/terracotta/sage palette. Dialogue between characters, no humans. Affiliate home products.",
+  "config_json": {
+    "label": "Kawan Rumah (Si Wajan, Sponge, Sapu)",
+    "style": {
+      "preset_key": "stylized_3d_character",
+      "aspect_ratio": "9:16",
+      "custom_description": "Pixar-style 3D animation, warm cream, terracotta and sage green palette, satisfying ASMR macro cleaning close-ups, clean before-after transformation. During dialogue use two-shot or over-the-shoulder framing: the speaking character gestures expressively while the listening character visibly reacts."
+    },
+    "camera": {
+      "framing": "object_or_animal",
+      "movement": "subtle_handheld",
+      "lens_look": "natural_50mm",
+      "perspective": "third_person",
+      "depth_of_field": "shallow"
+    },
+    "subject": {
+      "kind": "stylized_3d_character",
+      "faceless_mode": "not_applicable",
+      "universe_name": null,
+      "universe_slug": null,
+      "character_keys": [
+        "si_wajan",
+        "sponge",
+        "sapu"
+      ],
+      "character_count": 3,
+      "demographic_key": "custom",
+      "face_visibility": "allowed",
+      "population_mode": "group",
+      "custom_description": "Exactly three recurring Pixar-style 3D household characters with locked designs. (1) Si Wajan (main): round non-stick frying pan with matte black body and terracotta wooden handle used like an arm, big expressive cartoon eyes, small mouth, rosy cheeks. (2) Sponge: rectangular dish sponge, soft yellow top layer and rough sage-green scrub side, small round eyes, wide friendly smile. (3) Sapu: traditional Indonesian ijuk broom with sage-green handle and brown fiber bristles bound with twine, thick expressive eyebrows, cheeky grin. Keep each character's colors, shape and proportions identical in every clip. No humans and no human hands in frame. No other talking objects.",
+      "universe_profile_id": null
+    },
+    "lighting": {
+      "contrast": "soft",
+      "character": "",
+      "preset_key": "window_daylight",
+      "color_temperature": "warm_neutral",
+      "custom_description": "Soft warm window daylight, gentle bounce fill, cheerful homey mood"
+    },
+    "wardrobe": {
+      "mode": "fixed",
+      "palette": [],
+      "material": "",
+      "preset_key": "not_applicable",
+      "accessories": [],
+      "primary_color": "",
+      "sleeve_policy": "not_applicable",
+      "secondary_color": "",
+      "custom_description": ""
+    },
+    "rendering": {
+      "finish": "glossy_pixar",
+      "geometry": "stylized_rounded",
+      "textures": [
+        "soft_plastic",
+        "clean_ceramic"
+      ],
+      "shadow_style": "soft_ambient"
+    },
+    "guardrails": {
+      "extra_people": "prohibited",
+      "identity_drift": "prohibited",
+      "wardrobe_drift": "prohibited",
+      "face_visibility": "allowed",
+      "reflection_face": "allowed",
+      "intentional_crowd": "allowed_faceless",
+      "unintended_people": "prohibited",
+      "required_negative_prompts": [
+        "photorealistic human face",
+        "brand logos",
+        "text watermark",
+        "distorted product shape",
+        "human hands",
+        "people",
+        "extra unnamed characters",
+        "realistic photo"
+      ]
+    },
+    "composition": {
+      "safe_zone": "vertical_social_ui",
+      "negative_space": "required",
+      "primary_idea_count": 1,
+      "primary_subject_count": 3
+    },
+    "description": "Pixar-style 3D talking household objects: Si Wajan (main), Sponge, Sapu. Cozy Indonesian kitchen counter beside the sink, cream/terracotta/sage palette. Dialogue between characters, no humans. Affiliate home products.",
+    "environment": {
+      "props": [
+        "cleaning tools",
+        "storage organizers",
+        "kitchen utensils"
+      ],
+      "policy": "brand_locked",
+      "preset_key": "custom",
+      "material_palette": [
+        "warm cream",
+        "terracotta",
+        "sage green",
+        "light oak"
+      ],
+      "fallback_location": "",
+      "background_density": "minimal",
+      "custom_description": "Cozy Indonesian kitchen counter beside the sink as the main set where all three characters fit together (Si Wajan on the counter or stove, Sponge at the sink edge, Sapu leaning at the end of the counter); occasional living room corner for Sapu scenes; consistent warm cream, terracotta and sage palette"
+    },
+    "schema_mode": "legacy",
+    "mode_routing": {
+      "hook": "stylized_3d_character",
+      "context": "stylized_3d_character",
+      "mechanism": "isometric_society",
+      "conclusion": "stylized_3d_character",
+      "consequence": "stylized_3d_character",
+      "evidence_reveal": "commercial_product_cinematic"
+    },
+    "style_limits": {
+      "max_3d_clips": 1,
+      "allow_cartoon": false,
+      "allow_3d_only_angles": [
+        "scientific_proof",
+        "intellectual_flex",
+        "problem_you_didnt_know",
+        "one_feature_obsession"
+      ]
+    },
+    "schema_version": "2",
+    "metaphor_engine": {
+      "mode": "off",
+      "enabled": false,
+      "pattern": "problem_to_character_to_product_solution",
+      "hands_policy": "zero_hands",
+      "lighting_arc": "none",
+      "product_entry": "after_bridge",
+      "compact_prompts": false
+    },
+    "visual_language": {
+      "primary_style": "stylized_3d_character",
+      "disabled_styles": [],
+      "supporting_styles": [
+        "isometric_society",
+        "commercial_product_cinematic"
+      ]
+    },
+    "signature_accents": []
+  },
+  "status": "active",
+  "version": 2,
+  "created_by": "opcred_antigravity_ide",
+  "created_at": "2026-11-13T22:53:38.466Z",
+  "updated_at": "2026-11-14T06:35:21.072Z"
+}
