@@ -1,5 +1,13 @@
 # Changelog
 
+## V2.45.1 — Koreksi Narasi VO v2.45.0 (K1-K5) & Penahan Item VO Terblokir (14/11/2026)
+- Content Editor planner hanya berjalan saat vo_content_contract on (tidak ada panggilan Gemini tambahan saat flag off)
+- Badge & alasan blokir klaim kesehatan / VO di bawah standar di UI Pillar & Multiplier, edit VO membuka blokir
+- Mode narasi saat flag off identik dengan v2.44.22
+- Deteksi niche herbal/kesehatan terpadu (substring, pilar editorial, knowledge_domain)
+- fallback finishing_plan multiplier hanya saat flag on
+- Scheduler menahan item VO terblokir walau full_autopilot; Simpan VO hanya mereset item terblokir
+
 ## V2.45.0 — Perbaikan Kualitas Narasi VO End-to-End (Fase V0-V5) (14/11/2026)
 - Tambah flag vo_content_contract dan vo_quality_gate default off beserta filter klaim herbal terpusat dan perbaikan compliance Multiplier (Fase V0)
 - Implementasi Content Payload Layer di Content Planner & worker fallback plus blok kontrak VO bahasa-sadar id-ID/en-US, Tips/Tutorial, dan Source Recipe Contract Multiplier (Fase V1-V3)
