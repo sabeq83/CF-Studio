@@ -1450,26 +1450,26 @@ export default function SettingsPage() {
                       <label className="form-label">🛡️ Model Khusus Start Frame Visual QC (`start_frame_visual_qc_model`)</label>
                       <select
                         className="form-input"
-                        value={['', 'gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-3.1-flash-lite', 'gemini-3.6-flash'].includes(startFrameQcModel) ? startFrameQcModel : '__custom'}
+                        value={['', 'gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.6-flash'].includes(startFrameQcModel) ? startFrameQcModel : '__custom'}
                         onChange={(e) => {
-                          if (e.target.value === '__custom') setStartFrameQcModel('gemini-2.5-flash');
+                          if (e.target.value === '__custom') setStartFrameQcModel('gemini-3.1-flash-lite');
                           else setStartFrameQcModel(e.target.value);
                         }}
                         style={{ background: 'var(--input-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
                       >
                         <option value="">Default (Ikuti Cascade Compliance / Storyboard)</option>
-                        <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite (Hemat Kuota Free Pool — RPD Terpisah)</option>
+                        <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite (Hemat Kuota Free Pool — RPD Terpisah)</option>
                         <option value="gemini-2.5-flash">gemini-2.5-flash (Akurasi Vision Seimbang — RPD Terpisah)</option>
-                        <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite (Ringan & Cepat — RPD Terpisah)</option>
+                        <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (Ringan & Stabil — RPD Terpisah)</option>
                         <option value="gemini-3.6-flash">gemini-3.6-flash (Model Storyboard Utama)</option>
                         <option value="__custom">Custom QC Model ID...</option>
                       </select>
-                      {!['', 'gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-3.1-flash-lite', 'gemini-3.6-flash'].includes(startFrameQcModel) && (
+                      {!['', 'gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.6-flash'].includes(startFrameQcModel) && (
                         <input
                           type="text"
                           className="form-input"
                           style={{ marginTop: '8px', background: 'var(--input-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
-                          placeholder="Contoh: gemini-2.5-flash-lite"
+                          placeholder="Contoh: gemini-3.1-flash-lite"
                           value={startFrameQcModel}
                           onChange={e => setStartFrameQcModel(e.target.value)}
                         />

@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.48.1 — Fix Batch QC shadow_diff args and verified QC model options (14/11/2026)
+- Fix named object args in compareBatchVsPerClipQc call for live shadow_diff
+- Replace 404 gemini-2.5-flash-lite dropdown option with live-verified gemini-3.1-flash-lite
+- Add standalone mockup_fitur_eksperimen.html
+
 ## V2.48.0 — K7 Scene Director Polish, Batch Visual QC, Per-Model Key Pool & PT Reset (14/11/2026)
 - K7.1-K7.8: Polish Scene Director (action verbs, hook_only metaphor, wardrobe reference image, chest-down framing, night curtains, pre-bridge kitchen jar ban, planner-driven QC, strip UI metadata tags)
 - K7.9: Mode Batch Start Frame Visual QC + konsistensi lintas klip + mode shadow perbandingan per-klip

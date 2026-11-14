@@ -223,6 +223,9 @@ test('K7.9: compareBatchVsPerClipQc computes shadow diff across #2133, #2139, #2
   assert.equal(diff.agreement_count, 5);
   assert.equal(diff.disagreement_count, 1);
   assert.equal(diff.disagreements[0].clip_index, 3);
+
+  const schedSrc = fs.readFileSync(new URL('../lib/scheduler-processors.js', import.meta.url), 'utf8');
+  assert.match(schedSrc, /compareBatchVsPerClipQc\(\s*\{\s*perClipVerdicts,/);
 });
 
 test('K7.7 & K7.5: Planner-Driven QC Rubric accepts planned home room props & background screen faces while blocking foreground defects', () => {
