@@ -374,5 +374,5 @@ Pemanggil di `lib/prompts.js:2156`:
 - [x] T9. `tests/metaphor-policy-prompt.test.js` + seluruh regresi & snapshot + `npm run build`
 - [x] T10. (Opsional) Badge UI policy di `app/pillar-campaigns/[id]/page.js`
 - [x] T11. Buat `f2-prompt-diff.md` (flag off vs on)
-- [ ] T12. (Atas persetujuan) Rilis + deploy staging + VI test `dapurbotani_metaphor_world_test`
-- [ ] T13. Uji batch 6–7 baris di staging, contact sheet, laporan perbandingan
+- [x] T12. (Atas persetujuan) Rilis + deploy staging + VI test `dapurbotani_metaphor_world_test`
+- [x] T13. Uji batch 6–7 baris di staging, contact sheet, laporan perbandingan

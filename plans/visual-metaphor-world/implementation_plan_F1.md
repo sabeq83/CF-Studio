@@ -343,5 +343,5 @@ Tambahkan migrasi `migrateMetaphorKitUsage` dengan pola advisory lock yang sama 
 - [x] T8. Integrasi `buildMetaphorWorldKitSection` di `lib/prompts.js:2312`
 - [x] T9. (Opsional, sesuai keputusan 3) Teks badge kit di `app/pillar-campaigns/[id]/page.js:2395`
 - [x] T10. Jalankan tes regresi + `npm run build`
-- [ ] T11. (Atas persetujuan) Rilis + migrasi schema staging + deploy staging + nyalakan flag di `default_tenant`
-- [ ] T12. Uji 7 baris DapurBotani di staging, contact sheet, laporan perbandingan
+- [x] T11. (Atas persetujuan) Rilis + migrasi schema staging + deploy staging + nyalakan flag di `default_tenant`
+- [x] T12. Uji 7 baris DapurBotani di staging, contact sheet, laporan perbandingan

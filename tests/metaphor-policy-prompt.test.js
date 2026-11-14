@@ -5,7 +5,12 @@ process.env.ENABLE_BACKGROUND_SERVICES = 'false';
 import test, { after } from 'node:test';
 import assert from 'node:assert/strict';
 import { getKit, toLegacyMetaphorShape } from '../lib/metaphor-world-kits.js';
-import { resolveMetaphorPolicy, presenceTruthTuple, hasAnyMetaphorPolicyOverride } from '../lib/metaphor-policy.js';
+import {
+  resolveMetaphorPolicy,
+  presenceTruthTuple,
+  hasAnyMetaphorPolicyOverride,
+  POSITIVE_CLEAN_SCENE_CONTEXT_TUPLE
+} from '../lib/metaphor-policy.js';
 import { validateAndNormalizeVisualIdentity } from '../lib/visual-identity-contract.js';
 import { buildVisualIdentityPromptSection } from '../lib/visual-identity-allocator.js';
 import { buildOrganicPillarPrompt } from '../lib/prompts.js';
@@ -119,8 +124,8 @@ test('buildOrganicPillarPrompt reflects all 4 Metaphor Policy switches + F1 kit 
   assert.ok(promptOn.includes(kit.lighting_arc.to), 'Prompt must inject lighting arc end');
   assert.ok(promptOn.includes('Klip 1: tetap object-only hook'), 'Clip 1 must remain object-only hook even when hands_policy=modest_hands_active');
   assert.ok(
-    promptOn.includes('strictly no product shown, strictly no bottle, jar, or commercial packaging'),
-    'Pre-bridge geometric product ban must stay intact'
+    promptOn.includes(POSITIVE_CLEAN_SCENE_CONTEXT_TUPLE),
+    'Pre-bridge positive clean-scene framing must replace negative bottle/jar tuple'
   );
 
   // Check that the metaphoric mandate & tuple sections no longer emit "ABSOLUTELY ZERO HANDS"
@@ -212,7 +217,8 @@ test('applyPromptReplacements handles Clip 1 object-only vs Clip 2 modest hands 
     wardrobePresets: { linen_sage: 'Loose sage linen modest sleeves' },
     lightingPresets: { golden_hour: 'Warm golden light' }
   });
-  assert.ok(clip1Out.includes('ABSOLUTELY ZERO HANDS'), 'Clip 1 must remain 100% object-only even when hands_policy=modest_hands_active');
+  assert.ok(clip1Out.includes('unattended standalone still-life objects only'), 'Clip 1 must remain positive object-only even when hands_policy=modest_hands_active');
+  assert.ok(!clip1Out.includes('ABSOLUTELY ZERO HANDS'));
   assert.ok(!clip1Out.includes('(Wardrobe:'), 'Clip 1 object-only must strip wardrobe');
   assert.ok(clip1Out.includes(kit.lighting_arc.from), 'Clip 1 pre-bridge lighting follows arc.from');
 
@@ -222,10 +228,10 @@ test('applyPromptReplacements handles Clip 1 object-only vs Clip 2 modest hands 
     wardrobePresets: { linen_sage: 'Loose sage linen modest sleeves' },
     lightingPresets: { golden_hour: 'Warm golden light' }
   });
-  assert.equal(clip2Out.includes(presenceTruthTuple(policyOn, 'pre')), true);
+  assert.equal(clip2Out.includes('Modest female hands only'), true);
   assert.ok(!clip2Out.includes('ABSOLUTELY ZERO HANDS'), 'Clip 2 pre-bridge with modest_hands_active must allow modest hands');
-  assert.ok(clip2Out.includes('(Wardrobe: Loose sage linen modest sleeves)'), 'Clip 2 pre-bridge must retain Wardrobe when modest hands active');
-  assert.ok(clip2Out.includes('strictly no product shown'), 'Clip 2 pre-bridge must still ban product');
+  assert.ok(clip2Out.includes('(Wardrobe:') && clip2Out.includes('wrist cuffs'), 'Clip 2 pre-bridge must retain Wardrobe with covered wrist cuffs when modest hands active');
+  assert.ok(clip2Out.includes('plain unlabelled vessels only'), 'Clip 2 pre-bridge must use positive clean-surface framing');
   assert.ok(clip2Out.includes(kit.lighting_arc.from), 'Clip 2 pre-bridge lighting follows arc.from');
 
   const clip6Out = applyPromptReplacements(baseInput, 6, {
@@ -270,7 +276,9 @@ test('buildOpcStartFrameRequest preserves modest hands on Clip 2+, keeps Clip 1 
     productLoader: mockProductLoader
   });
   const clip1Prompt = reqClip1.providerRequest.prompt;
-  assert.ok(clip1Prompt.includes('ABSOLUTELY ZERO HANDS'), 'Clip 1 start-frame prompt must stay pure object-only');
+  assert.ok(clip1Prompt.includes('unattended standalone still-life objects only'), 'Clip 1 start-frame prompt must stay pure positive object-only');
+  assert.ok(!clip1Prompt.includes('hands only'), 'Clip 1 start-frame prompt must NEVER inject hands only');
+  assert.ok(!clip1Prompt.includes('ABSOLUTELY ZERO HANDS'));
   assert.ok(!clip1Prompt.includes('(Wardrobe:'), 'Clip 1 start-frame prompt strips Wardrobe');
   assert.ok(clip1Prompt.includes('glass conduit'), 'Pre-bridge jar/bottle noun sanitization still applies');
 
@@ -283,8 +291,8 @@ test('buildOpcStartFrameRequest preserves modest hands on Clip 2+, keeps Clip 1 
   });
   const clip2InitialPrompt = reqClip2Initial.providerRequest.prompt;
   assert.ok(!clip2InitialPrompt.includes('ABSOLUTELY ZERO HANDS'), 'Clip 2 start-frame with modest_hands_active must NOT inject ABSOLUTELY ZERO HANDS');
-  assert.ok(clip2InitialPrompt.includes(presenceTruthTuple(policyOn, 'pre')), 'Clip 2 initial keeps modest hands');
-  assert.ok(clip2InitialPrompt.includes('(Wardrobe: sage linen modest sleeves)'), 'Clip 2 start-frame keeps Wardrobe');
+  assert.ok(clip2InitialPrompt.includes('Modest female hands only') && clip2InitialPrompt.includes('exactly two hands visible'), 'Clip 2 initial keeps modest two hands');
+  assert.ok(clip2InitialPrompt.includes('(Wardrobe:') && clip2InitialPrompt.includes('wrist cuffs'), 'Clip 2 start-frame keeps modest Wardrobe with visible cuffs');
   assert.ok(clip2InitialPrompt.includes('glass conduit'), 'Pre-bridge jar/bottle sanitization still applies on Clip 2');
 
   // Case 2: Recovery / regen run where campaign does NOT carry resolved_metaphor_policy, only item.result_json does
@@ -299,6 +307,6 @@ test('buildOpcStartFrameRequest preserves modest hands on Clip 2+, keeps Clip 1 
     productLoader: mockProductLoader
   });
   const clip2RecoveryPrompt = reqClip2Recovery.providerRequest.prompt;
-  assert.ok(clip2RecoveryPrompt.includes(presenceTruthTuple(policyOn, 'pre')), 'Recovery path reading item.result_json must keep modest hands');
+  assert.ok(clip2RecoveryPrompt.includes('Modest female hands only') && clip2RecoveryPrompt.includes('exactly two hands visible'), 'Recovery path reading item.result_json must keep modest hands');
   assert.ok(!clip2RecoveryPrompt.includes('ABSOLUTELY ZERO HANDS'));
 });

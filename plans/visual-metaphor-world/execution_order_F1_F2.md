@@ -39,10 +39,10 @@
 - [x] E3. (Opsional) Badge UI kit + policy di `app/pillar-campaigns/[id]/page.js` (F1-T9 + F2-T10)
 
 ### Tahap F — Rilis & uji staging (hanya atas persetujuan eksplisit)
-- [ ] F1. `npm run release-non-interactive -- --type minor --title "Metaphor World Kit + Metaphor Policy (F1+F2)" --points "..."`
-- [ ] F2. Migrasi `metaphor_kit_usage` di schema `staging` → deploy staging atomic (full SHA)
-- [ ] F3. Nyalakan `metaphor_kit_engine=on` **hanya** di `default_tenant`; buat VI test `dapurbotani_metaphor_world_test` (VI asli tidak diubah)
-- [ ] F4. Batch 6–7 baris DapurBotani → cek kit berbeda, sticky, tangan syar'i, latar per video, tidak ada botol pre-bridge, tanpa 3D → contact sheet + laporan
+- [x] F1. `npm run release-non-interactive -- --type minor --title "Metaphor World Kit + Metaphor Policy (F1+F2)" --points "..."`
+- [x] F2. Migrasi `metaphor_kit_usage` di schema `staging` → deploy staging atomic (full SHA)
+- [x] F3. Nyalakan `metaphor_kit_engine=on` **hanya** di `default_tenant`; buat VI test `dapurbotani_metaphor_world_test` (VI asli tidak diubah)
+- [x] F4. Batch 6–7 baris DapurBotani → cek kit berbeda, sticky, tangan syar'i, latar per video, tidak ada botol pre-bridge, tanpa 3D → contact sheet + laporan
 
 ## Titik keputusan yang masih terbuka (dari F1 & F2)
 | # | Keputusan | Default yang akan saya pakai bila Anda setuju |

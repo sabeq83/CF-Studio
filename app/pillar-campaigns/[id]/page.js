@@ -2510,17 +2510,54 @@ export default function PillarCampaignDetailPage() {
                     }
                   </button>
                 </div>
+                {(item.start_frame_status === 'needs_review' || parsedResult?.start_frame_qc) && (
+                  <div
+                    style={{
+                      marginTop: '8px',
+                      marginBottom: '6px',
+                      padding: '8px 10px',
+                      borderRadius: '6px',
+                      border: '1px solid var(--border-subtle)',
+                      background: item.start_frame_status === 'needs_review' ? 'var(--status-danger-soft)' : 'var(--surface-subtle)',
+                      color: 'var(--text-primary)',
+                      fontSize: '0.72rem',
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: '8px',
+                      alignItems: 'center',
+                      justifyContent: 'space-between'
+                    }}
+                  >
+                    <div>
+                      <strong>
+                        {item.start_frame_status === 'needs_review'
+                          ? '⚠️ Start Frame Needs Review (G-Labs Render Ditahan)'
+                          : `🛡️ Visual QC (${parsedResult?.start_frame_qc?.mode || 'report_only'})`}
+                      </strong>
+                      {item.review_reason && (
+                        <span style={{ color: 'var(--status-danger)', marginLeft: '6px' }}>{item.review_reason}</span>
+                      )}
+                    </div>
+                    {parsedResult?.start_frame_qc && (
+                      <div style={{ color: 'var(--text-secondary)', fontSize: '0.68rem' }}>
+                        Pass: {parsedResult.start_frame_qc.passed_count || 0} | Fail: {parsedResult.start_frame_qc.failed_count || 0} | Vision calls: {parsedResult.start_frame_qc.calls || 0} | Retries: {parsedResult.start_frame_qc.retries || 0}
+                      </div>
+                    )}
+                  </div>
+                )}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '16px', marginTop: '10px' }}>
                   {plan.map((p, idx) => {
                     const clipImgPath = t2iImages[idx];
-                    const taskKey = `${item.id}_${p.clip_index || (idx + 1)}`;
+                    const clipNum = p.clip_index || (idx + 1);
+                    const clipQc = parsedResult?.start_frame_qc?.clips?.[String(clipNum)] || null;
+                    const taskKey = `${item.id}_${clipNum}`;
                     const isRegenerating = regeneratingT2I[taskKey];
                     const hasT2iPrompt = !!p.t2i_prompt;
 
                     return (
                       <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center', background: 'var(--overlay-subtle)', padding: '10px', borderRadius: '6px', border: '1px solid var(--surface-interactive)' }}>
                         <div style={{ fontWeight: '700', fontSize: '0.72rem', color: 'var(--accent-light)' }}>
-                          Klip #{p.clip_index || (idx + 1)}
+                          Klip #{clipNum}
                         </div>
                         <div style={{ width: '100%', height: '180px', position: 'relative', borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--border-subtle)' }}>
                           {clipImgPath ? (
@@ -2531,6 +2568,42 @@ export default function PillarCampaignDetailPage() {
                             </div>
                           )}
                         </div>
+                        {clipQc && (
+                          <div
+                            title={(clipQc.reasons || []).join(' | ')}
+                            style={{
+                              width: '100%',
+                              padding: '4px 6px',
+                              borderRadius: '4px',
+                              fontSize: '0.62rem',
+                              lineHeight: 1.3,
+                              border: '1px solid var(--border-subtle)',
+                              background: clipQc.needs_review
+                                ? 'var(--status-danger-soft)'
+                                : clipQc.pass
+                                  ? 'var(--status-success-soft)'
+                                  : 'var(--status-warning-soft)',
+                              color: clipQc.needs_review
+                                ? 'var(--status-danger)'
+                                : clipQc.pass
+                                  ? 'var(--status-success)'
+                                  : 'var(--status-warning)'
+                            }}
+                          >
+                            <div style={{ fontWeight: '600' }}>
+                              {clipQc.needs_review
+                                ? '⚠️ Needs Review'
+                                : clipQc.pass
+                                  ? `✓ QC Pass${clipQc.attempts > 1 ? ` (Retry x${clipQc.attempts - 1})` : ''}`
+                                  : '⚡ QC Flagged'}
+                            </div>
+                            {Array.isArray(clipQc.reasons) && clipQc.reasons.length > 0 && (
+                              <div style={{ color: 'var(--text-secondary)', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {clipQc.reasons[0]}
+                              </div>
+                            )}
+                          </div>
+                        )}
                         {hasT2iPrompt && (
                           <>
                             <input

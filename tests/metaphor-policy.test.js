@@ -8,6 +8,7 @@ import {
   metaphorMandateHeader,
   LEGACY_PRESENCE_TRUTH_TUPLE,
   MODEST_HANDS_PRESENCE_TRUTH_TUPLE,
+  POSITIVE_CLIP1_OBJECT_PRESENCE_TUPLE,
 } from '../lib/metaphor-policy.js';
 import { validateAndNormalizeVisualIdentity } from '../lib/visual-identity-contract.js';
 import { buildVisualIdentityComplianceReport } from '../lib/visual-identity-ai-contract.js';
@@ -89,8 +90,8 @@ test('resolveMetaphorPolicy: keempat switch aktif dengan kit lengkap', () => {
   assert.equal(p.objectWorld, kit.object_world);
   assert.deepEqual(p.handVariant, kit.hand_variant);
 
-  // Klip 1 tetap object-only walau tangan aktif; pre klip 2+ memakai modest hands
-  assert.equal(presenceTruthTuple(p, 'clip1'), LEGACY_PRESENCE_TRUTH_TUPLE);
+  // Klip 1 tetap object-only (positive framing pada F2.1) walau tangan aktif; pre klip 2+ memakai modest hands
+  assert.equal(presenceTruthTuple(p, 'clip1'), POSITIVE_CLIP1_OBJECT_PRESENCE_TUPLE);
   assert.equal(presenceTruthTuple(p, 'pre'), MODEST_HANDS_PRESENCE_TRUTH_TUPLE);
   assert.equal(environmentTuple(p, 'fallback'), kit.environment);
 });

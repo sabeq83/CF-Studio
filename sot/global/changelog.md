@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.46.1 — Metaphor World Kit Anti-Hallucination & Start-Frame Visual QC (F2.1) (14/11/2026)
+- Positive framing prompt hygiene, penghapusan negasi membandel, perbaikan sanitizeImagePrompt dan opsi compact_prompts
+- Klip 1 murni objek tanpa hands-only injection, Klip 2-6 tepat 2 tangan 1 orang dengan manset tertutup plus rotasi warna baju & sudut kamera
+- Klip 4-5 anti-drift kuliner, pemulihan Hero Product Finale Klip 6, dan reaksi kit adaptif product_form serta kontras lighting 4300K ke 5600K
+- Tambah Start-Frame Visual QC Gate (lib/start-frame-visual-qc.js) dengan Gemini Vision, setting start_frame_visual_qc per tenant, auto-retry maks 2x, dan badge UI semantic tokens
+
 ## V2.46.0 — Metaphor World Kit + Metaphor Policy (F1+F2) (14/11/2026)
 - Tambah 28 Metaphor World Kit (lib/metaphor-world-kits.js) + deteksi multi-topik + rotasi anti-repeat window 6 video di balik flag metaphor_kit_engine
 - Tambah tabel dan migrasi idempoten metaphor_kit_usage plus resolver explicit, sticky, dan LRU fallback aman
