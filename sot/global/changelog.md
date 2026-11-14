@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.47.1 — Prevent Metaphor Kit Engine from hijacking Cinematic Scene Director campaigns (14/11/2026)
+- Only engage Metaphor Kit auto-detection under Scene Director when visual_style is metaphoric_faceless, metaphor_kit_key is specified, or environment.policy is metaphor_driven
+- Set metaphor_engine.enabled=false in K6 Identity Card v3 presets (DapurBotani, SiasatSehat, NutriBlend)
+- Update prompt test assertion to verify Cinematic Scene Director resists stale resolved_metaphor_policy overrides
+
 ## V2.47.0 — Planner Scene Director (K1-K6) & Brand Identity Cards with R1-R6 fixes (14/11/2026)
 - Add deterministic Scene Brief extractor (K1), 30 Strategic Angle visual formats (K3), and Scene Director prompt hierarchy behind planner_scene_director flag
 - Add K6 Brand Identity Card v3 presets (DapurBotani, SiasatSehat, NutriBlend), catalog strip-location, and Diversity Guard report_only telemetry (K2, K4, K5, K6)

@@ -129,7 +129,11 @@ test('Flag planner_scene_director OFF keeps legacy prompt byte-for-byte identica
 });
 
 test('Flag planner_scene_director ON enforces hierarchy, 0 3D on Minimalist (2055), and bedroom night mood', () => {
-  const campOn = makeCampaign(ROW_2055, { planner_scene_director: 'on' });
+  const campOn = makeCampaign(ROW_2055, {
+    planner_scene_director: 'on',
+    resolved_health_metaphor: { kit_key: 'pipes', kit: { key: 'pipes', object_world: 'clogged pipes' } },
+    resolved_metaphor_policy: { active: true, lightingArc: { from: 'dark', to: 'bright' } }
+  });
   const prompt = buildOrganicPillarPrompt(
     [],
     campOn,
