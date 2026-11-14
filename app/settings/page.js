@@ -71,6 +71,9 @@ export default function SettingsPage() {
   const [geminiModelPrimary, setGeminiModelPrimary] = useState('gemini-3.6-flash');
   const [geminiModelFallback, setGeminiModelFallback] = useState('gemini-3.6-flash');
   const [geminiCustomModel, setGeminiCustomModel] = useState('');
+  const [startFrameQcModel, setStartFrameQcModel] = useState('');
+  const [startFrameQcBatch, setStartFrameQcBatch] = useState('off');
+  const [geminiQuotaBrake, setGeminiQuotaBrake] = useState('on');
   const [savingGeminiConfig, setSavingGeminiConfig] = useState(false);
 
   // Gemini API Pool Manager
@@ -320,6 +323,9 @@ export default function SettingsPage() {
         setGeminiCustomModel(primary);
       }
       setGeminiModelFallback(data.data.gemini_model_fallback || 'gemini-3.6-flash');
+      setStartFrameQcModel(data.data.start_frame_visual_qc_model || '');
+      setStartFrameQcBatch(data.data.start_frame_visual_qc_batch || 'off');
+      setGeminiQuotaBrake(data.data.gemini_quota_brake || 'on');
 
       setFbPageId(data.data.fb_page_id || '');
       setFbPageIds(data.data.fb_page_ids || '');
@@ -737,6 +743,9 @@ export default function SettingsPage() {
           gemini_smart_routing: geminiSmartRouting,
           gemini_model_primary: activePrimaryModel,
           gemini_model_fallback: geminiModelFallback,
+          start_frame_visual_qc_model: startFrameQcModel.trim(),
+          start_frame_visual_qc_batch: startFrameQcBatch,
+          gemini_quota_brake: geminiQuotaBrake,
         }),
       });
       const data = await res.json();
@@ -1435,6 +1444,79 @@ export default function SettingsPage() {
                     </div>
                   )}
 
+                  {/* Start Frame Visual QC Model & Batch Mode (K7.9 & K7.10) */}
+                  <div style={{ background: 'var(--surface-subtle)', border: '1px solid var(--border-subtle)', borderRadius: '10px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label className="form-label">🛡️ Model Khusus Start Frame Visual QC (`start_frame_visual_qc_model`)</label>
+                      <select
+                        className="form-input"
+                        value={['', 'gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-3.1-flash-lite', 'gemini-3.6-flash'].includes(startFrameQcModel) ? startFrameQcModel : '__custom'}
+                        onChange={(e) => {
+                          if (e.target.value === '__custom') setStartFrameQcModel('gemini-2.5-flash');
+                          else setStartFrameQcModel(e.target.value);
+                        }}
+                        style={{ background: 'var(--input-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
+                      >
+                        <option value="">Default (Ikuti Cascade Compliance / Storyboard)</option>
+                        <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite (Hemat Kuota Free Pool — RPD Terpisah)</option>
+                        <option value="gemini-2.5-flash">gemini-2.5-flash (Akurasi Vision Seimbang — RPD Terpisah)</option>
+                        <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite (Ringan & Cepat — RPD Terpisah)</option>
+                        <option value="gemini-3.6-flash">gemini-3.6-flash (Model Storyboard Utama)</option>
+                        <option value="__custom">Custom QC Model ID...</option>
+                      </select>
+                      {!['', 'gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-3.1-flash-lite', 'gemini-3.6-flash'].includes(startFrameQcModel) && (
+                        <input
+                          type="text"
+                          className="form-input"
+                          style={{ marginTop: '8px', background: 'var(--input-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
+                          placeholder="Contoh: gemini-2.5-flash-lite"
+                          value={startFrameQcModel}
+                          onChange={e => setStartFrameQcModel(e.target.value)}
+                        />
+                      )}
+                      <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '4px', marginBottom: 0 }}>
+                        Kuota Google AI Studio dihitung per model. Memisahkan model QC menjaga jatah RPD model Storyboard tidak ikut habis oleh Vision QC.
+                      </p>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                      <div>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>Mode Batch Start Frame Visual QC (`start_frame_visual_qc_batch`)</span>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                          Jika aktif (`on`), inspeksi semua klip dalam 1 video dilakukan dalam 1x panggilan Vision QC sekaligus mengecek konsistensi warna & lokasi antar-klip.
+                        </div>
+                      </div>
+                      <select
+                        className="form-input"
+                        style={{ width: 'auto', minWidth: '185px', background: 'var(--input-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
+                        value={startFrameQcBatch}
+                        onChange={e => setStartFrameQcBatch(e.target.value)}
+                      >
+                        <option value="off">Off (Per-Klip — Default)</option>
+                        <option value="shadow">Shadow (Batch + Per-Klip Uji Banding)</option>
+                        <option value="on">On (1x Batch per Video)</option>
+                      </select>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap', paddingTop: '10px', borderTop: '1px solid var(--border-subtle)' }}>
+                      <div>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>Rem Kuota Harian Free Pool 15% (`gemini_quota_brake`)</span>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                          Menahan item baru saat sisa kuota Free Pool &lt;15% untuk mencegah error 429 beruntun. Reset harian Google mengikuti tengah malam Pacific Time ({poolSummary.reset_wib || '14:00 / 15:00 WIB'}). Retry 503/429 ikut dihitung agar pencatatan aplikasi lebih konservatif dari dashboard Google.
+                        </div>
+                      </div>
+                      <select
+                        className="form-input"
+                        style={{ width: 'auto', minWidth: '185px', background: 'var(--input-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
+                        value={geminiQuotaBrake}
+                        onChange={e => setGeminiQuotaBrake(e.target.value)}
+                      >
+                        <option value="on">On (Aktif — Default)</option>
+                        <option value="off">Off (Nonaktif / Izinkan Lanjut)</option>
+                      </select>
+                    </div>
+                  </div>
+
                   {/* 3. SMART MODULE-BASED MODEL ROUTING MATRIX (PAID TIER) */}
                   {geminiApiTier === 'paid' && (
                     <div style={{ background: 'var(--surface-subtle)', border: '1px solid var(--border-subtle)', borderRadius: '10px', padding: '14px', marginBottom: '8px' }}>
@@ -1642,10 +1724,33 @@ export default function SettingsPage() {
                       transition: 'width 0.5s ease',
                     }} />
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                    <span>🔑 {poolSummary.active_keys || 0} active keys in pool</span>
-                    <span>Total Pool capacity: {poolSummary.total_capacity || 0} queries/day</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '0.72rem', color: 'var(--text-muted)', flexWrap: 'wrap', gap: '6px' }}>
+                    <span>🔑 {poolSummary.active_keys || 0} active keys ({poolSummary.model_name || 'gemini-3.6-flash'}) · Hari kuota PT: {poolSummary.quota_date_pt || '-'} (Reset: {poolSummary.reset_wib || '15:00 WIB'})</span>
+                    <span>Total Pool capacity: {poolSummary.total_capacity || 0} queries/day (termasuk retry)</span>
                   </div>
+                  {poolSummary.by_model && Object.keys(poolSummary.by_model).length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '12px', paddingTop: '10px', borderTop: '1px solid var(--border-subtle)' }}>
+                      {Object.values(poolSummary.by_model).map((mStat) => {
+                        const isLow = mStat.total_capacity > 0 && (mStat.remaining / mStat.total_capacity) < 0.15;
+                        return (
+                          <div
+                            key={mStat.model_name}
+                            style={{
+                              padding: '4px 10px',
+                              borderRadius: '6px',
+                              fontSize: '0.7rem',
+                              fontFamily: 'var(--font-mono)',
+                              background: isLow ? 'var(--status-danger-soft)' : 'var(--surface-raised)',
+                              color: isLow ? 'var(--status-danger)' : 'var(--text-secondary)',
+                              border: '1px solid var(--border-subtle)'
+                            }}
+                          >
+                            {mStat.model_name}: {mStat.total_used}/{mStat.total_capacity} ({Math.round((mStat.remaining_ratio ?? 1) * 100)}% left){isLow ? ' ⚠️ Brake <15%' : ''}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
 

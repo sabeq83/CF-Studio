@@ -333,3 +333,88 @@ dan pada `dynamicPromptFields` (non-metaphor, schema v2, lines 2869–2938):
   - `tests/scene-diversity-guard.test.js`: batch seragam memicu warning (`>=3` sama atau `>70%` lokasi sama) sementara batch bervariasi lolos bersih.
 - Seluruh unit test F1, F2, F2.1, F2.2, QC, compliance + AST UI `no-undef` check + `npm run build` dijalankan & dipastikan lulus 100%.
 - Artefak perbandingan prompt: [`plans/planner-scene-director/prompt-diff.md`](file:///Users/sabeqmmursyid/_cfstudio/plans/planner-scene-director/prompt-diff.md).
+
+---
+
+## K7: Polish Scene Director sebelum Produksi (`K7.1` – `K7.12`)
+
+> **Urutan Prioritas Eksekusi:** `K7.11` ➔ `K7.10` + `K7.12` ➔ `K7.9` ➔ `K7.1` s/d `K7.8` ➔ Verifikasi Tes Lokal & Build.
+> **Boundary Flag:** Seluruh perilaku khusus Scene Director tetap ter-gating di belakang `planner_scene_director = 'on'` (default `'off'`). `start_frame_visual_qc_batch` default `'off'`.
+
+### Execution Task List (K7)
+
+- [x] **K7.11 — Fix VO Audit Postgres `bigint` & DB Whitelist** (`lib/scheduler-processors.js`, `lib/db.js`, `app/pillar-campaigns/[id]/page.js`)
+- [x] **K7.10 — Quota & Pool Management: Per-(key, model) Usage, Count Every HTTP Attempt, Dedicated QC Model, 15% Quota Brake & Settings UI** (`lib/db.js`, `lib/db-pg.js`, `lib/gemini.js`, `lib/scheduler-processors.js`, `app/api/settings/route.js`, `app/api/keys/route.js`, `app/settings/page.js`, `app/pillar-campaigns/[id]/page.js`)
+- [x] **K7.12 — Observability: Structured `[GEMINI_CALL]` Log & Complete `recordAiTokenUsage` Coverage** (`lib/gemini.js`, `lib/tiktok-compliance-service.js`, `lib/gemini-tts-batch.js`, `lib/gemini-8s-tts.js`, `lib/start-frame-visual-qc.js`)
+- [x] **K7.9 — Visual QC Batch + Consistency Check + Retry Compare-to-Passing + Shadow Diff (`start_frame_visual_qc_batch`)** (`lib/start-frame-visual-qc.js`, `lib/scheduler-processors.js`, `app/pillar-campaigns/[id]/page.js`)
+- [x] **K7.1 — Action-Verb Enforcement & Passive-Pose Limit (`max 1`, never clip 1/2/last)** (`lib/angle-visual-formats.js`, `lib/prompts.js`, `lib/scene-diversity-guard.js`)
+- [x] **K7.2 — Metaphor Engine `mode = 'hook_only'` for Scene Director** (`lib/visual-identity-contract.js`, `lib/visual-identity-system-presets.js`, `lib/metaphor-policy.js`, `lib/visual-identity-allocator.js`, `lib/prompts.js`, `lib/scheduler-processors.js`)
+- [x] **K7.3 — Wardrobe Color-Locking + 1 Neutral "Hands + Garment" `wardrobe_reference_image` per Video** (`lib/visual-identity-system-presets.js`, `lib/metaphor-policy.js`, `lib/scheduler-processors.js`, `lib/opc-start-frame-request.js`)
+- [x] **K7.4 — Chest-Down Below-Shoulders Framing + Clean `3d_bio_cellular` (No Clothed Torso / HUD Text)** (`lib/prompts.js`, `lib/opc-start-frame-request.js`, `lib/visual-identity-allocator.js`)
+- [x] **K7.5 — Tight Night Lighting Lock (Dark Windows/Curtains + Warm Practical Lamp) & `time_of_day_mismatch` Check** (`lib/scene-brief.js`, `lib/prompts.js`, `lib/start-frame-visual-qc.js`)
+- [x] **K7.6 — Ban Jars/Glass Bottles in Pre-Bridge Kitchen/Pantry/Dining Backgrounds** (`lib/scene-brief.js`, `lib/prompts.js`, `lib/opc-start-frame-request.js`)
+- [x] **K7.7 — Planner-Driven Start Frame QC Rubric (`environment_policy === 'planner_driven'`)** (`lib/start-frame-visual-qc.js`)
+- [x] **K7.8 — Strip `[CAMERA FRAMING: …]` & Internal Injection Tags from Storyboard UI Descriptions** (`lib/scheduler-processors.js`, `app/pillar-campaigns/[id]/page.js`)
+- [x] **K7-Verify — Run Full K7 + Existing Unit Tests & `npm run build` (Stop Before Release/Deploy)**
+
+---
+
+### K7 Before & After Snippets per Area
+
+#### A. K7.11 — VO Audit Bug & Whitelist
+**Code Sebelum (`lib/scheduler-processors.js:5972-6006`, `lib/db.js:2499-2512`, `app/pillar-campaigns/[id]/page.js:2279`):**
+```js
+// lib/scheduler-processors.js
+if (campaign.enable_vo_audit === 1) {
+  ...
+  updatePillarCampaignItem(item.id, {
+    compliance_status: ..., compliance_score: ..., compliance_log_json: ...,
+    original_voiceover_json: JSON.stringify(parsed.voiceover), // after mutating parsed.voiceover!
+  });
+}
+// lib/db.js -> allowed[] omits compliance_status, compliance_score, compliance_log_json, rewritten_voiceover_json, original_voiceover_json, active_vo_version
+// app/pillar-campaigns/[id]/page.js
+{campaign.enable_vo_audit === 1 && item.compliance_status && (
+```
+**Code Sesudah:**
+```js
+const isCampaignFlagEnabled = (v) => v === true || Number(v) === 1;
+if (isCampaignFlagEnabled(campaign.enable_vo_audit)) {
+  const preAuditVoiceover = JSON.parse(JSON.stringify(parsed.voiceover || []));
+  ...
+  await updatePillarCampaignItem(item.id, { ...complianceFields, original_voiceover_json: JSON.stringify(preAuditVoiceover) });
+}
+// lib/db.js: add all 6 compliance/vo columns to allowed[]
+// app/pillar-campaigns/[id]/page.js: {isFlagOn(campaign.enable_vo_audit) && item.compliance_status && ( ...
+```
+
+#### B. K7.10 & K7.12 — Per-Model Quota Pool, Full HTTP Counting, 15% Brake & `[GEMINI_CALL]` Telemetry
+**Code Sebelum (`lib/db.js:21,906-1027`, `lib/gemini.js:548-649,1036-1063`):**
+- `api_key_usages` ber-key `(date, key_id)` tanpa membedakan model.
+- `executeWithKeyPool` hanya memanggil `incrementKeyUsage` saat sukses; attempt gagal `503`/`404`/`429` sebelum rotasi tidak tercatat.
+- `generateWithImage`, `callGeminiJson` (Compliance), dan `callGeminiTtsApi` / TTS batch tidak mencetak log `[GEMINI_CALL]` seragam maupun mencatat `recordAiTokenUsage`.
+**Code Sesudah:**
+- `lib/db-pg.js` + `lib/db.js`: tambah kolom `model_name TEXT NOT NULL DEFAULT 'gemini-3.6-flash'` + unique index `(date, key_id, model_name)` di `api_key_usages`, plus `getAvailableApiKey({ cost, excludedIds, modelName })`, `incrementKeyUsage(keyId, cost, modelName)`, dan `getPoolQuotaStatus({ modelName, thresholdRatio: 0.15 })`.
+- `lib/gemini.js`: tambah helper trace & `recordGeminiHttpAttempt(...)` yang memanggil `incrementKeyUsage` pada setiap request HTTP nyata (sukses/gagal/rotasi), log `[GEMINI_CALL] module=... model=... key_id=... attempt=... http_status=... tokens=...ms=...`, serta melengkapi `recordAiTokenUsage` pada Vision QC, Compliance, dan TTS.
+- `lib/scheduler-processors.js`: rem kuota 15% (`getPoolQuotaStatus`) menahan pickup item Pending Free Pool secara bersih (`Ditahan: kuota Gemini harian <15%`) tanpa menaikkan `retry_count`.
+- `app/api/settings/route.js` + `app/api/keys/route.js` + `app/settings/page.js`: tambah `start_frame_visual_qc_model` (default mengikuti cascade / model QC terpisah) dan ringkasan kuota per model di Pool Manager.
+
+#### C. K7.9 — Start Frame Visual QC Batch + Consistency + Shadow Mode
+**Code Sebelum (`lib/start-frame-visual-qc.js`, `lib/scheduler-processors.js:6399-6466`):**
+- `evaluateAndRecordStartFrameQc` hanya menginspeksi 1 gambar per panggilan Gemini Vision (`6 klip = 6+ vision calls`).
+**Code Sesudah:**
+- Tambah `START_FRAME_QC_BATCH_SETTING_KEY = 'start_frame_visual_qc_batch'` (`'off'` default) dan `evaluateBatchStartFramesQc(...)` (`1` call multi-image untuk seluruh klip + cek konsistensi warna baju & lokasi antar-klip).
+- Saat `retry` klip gagal, kirim `clipGagal` + `1 clipLulus` untuk verifikasi konsistensi; fallback ke per-clip jika batch gagal parsing/timeout; dukung fungsi pembanding `compareBatchVsPerClipQc` untuk uji staging shadow mode.
+
+#### D. K7.1 – K7.8 — Prompt, Wardrobe, Framing, Night, Kitchen Jars, QC Rubric & UI Metadata
+**Code Sebelum (`lib/prompts.js`, `lib/opc-start-frame-request.js`, `lib/scene-brief.js`, `lib/start-frame-visual-qc.js`, `lib/scheduler-processors.js`):**
+- K7.1: Silent kinetics memberi contoh `"tangan diam di samping objek"`.
+- K7.2: `metaphor_engine` preset tidak punya mode `'hook_only'`.
+- K7.3: Wardrobe hanya berupa teks prompt tanpa 1 reference image kain+tangan latar netral.
+- K7.4: Framing kadang masih menampilkan bahu/dada atas (`cropped tightly below the chest`) dan klip 3D kadang memunculkan torso berpakaian / label HUD teks.
+- K7.5: Adegan malam tidak mengunci tirai gelap/jendela buram malam + lampu hangat.
+- K7.6: Dapur/pantry pre-bridge bebas menampilkan toples bumbu/botol berlabel.
+- K7.7: Rubric QC selalu memakai lensa Metaphor World / Studio Void meski `environment.policy === 'planner_driven'`.
+- K7.8: Tag `[CAMERA FRAMING: …]` bisa ikut tersimpan dan tampil di UI `storyboard[*].visual_description`.
+**Code Sesudah:**
+- Perbarui 8 modul terkait sesuai spesifikasi K7.1–K7.8 (ter-gating aman pada flag/policy) serta fungsi `stripInternalVisualPromptTags()` pada `scheduler-processors.js` dan defensif di `app/pillar-campaigns/[id]/page.js`.

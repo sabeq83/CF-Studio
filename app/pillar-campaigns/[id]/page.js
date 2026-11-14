@@ -10,6 +10,7 @@ import { resolveBridgePlan, readBridgeInputs, describeBridgePlan } from '@/lib/b
 import { FINISHING_TEMPLATE_REGISTRY, getFinishingTemplateMeta, getEffectiveFinishingOverride, buildFinishingOverridePatch } from '@/lib/finishing-template-registry';
 import FinishingTemplatePreview from '../../components/FinishingTemplatePreview';
 import { isPillarItemBlocked, getPillarItemBlockInfo, getPillarItemStatusInfo } from '@/lib/vo-status-ui';
+import { stripInternalVisualPromptTags } from '@/lib/scene-brief';
 
 const writeToClipboard = (text) => {
   if (typeof window !== 'undefined') {
@@ -1289,7 +1290,7 @@ export default function PillarCampaignDetailPage() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                   <div>
                     <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 2 }}>DESKRIPSI ADEGAN VISUAL</div>
-                    <p style={{ fontSize: '0.85rem', margin: 0, lineHeight: 1.4 }}>{scene.visual_description}</p>
+                    <p style={{ fontSize: '0.85rem', margin: 0, lineHeight: 1.4 }}>{stripInternalVisualPromptTags(scene.visual_description || '')}</p>
                     {scene.camera_movement && (
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 6 }}>
                         🎥 Gerakan: <i>{scene.camera_movement}</i>
@@ -2068,6 +2069,15 @@ export default function PillarCampaignDetailPage() {
     return (
       <div style={{ color: 'var(--text-primary)', fontSize: '0.82rem', textAlign: 'left' }}>
         {/* Status Banners */}
+        {String(item.generation_progress || '').includes('Ditahan:') && (
+          <div style={{ background: 'var(--status-warning-soft)', border: '1px solid var(--status-warning)', color: 'var(--status-warning)', padding: '14px 18px', borderRadius: '8px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px', lineHeight: 1.5 }}>
+            <span style={{ fontSize: '1.3rem' }}>⏸️</span>
+            <div>
+              <strong style={{ display: 'block', marginBottom: '2px', color: 'var(--text-primary)' }}>Antrean Ditahan Sementara (Rem Kuota 15%)</strong>
+              <span>{item.generation_progress}</span>
+            </div>
+          </div>
+        )}
         {item.workflow_status === 'ready_for_review' && (
           <div style={{ background: 'rgba(230, 126, 34, 0.08)', border: '1px solid rgba(230, 126, 34, 0.3)', color: 'var(--status-warning)', padding: '16px 20px', borderRadius: '8px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px', lineHeight: 1.5 }}>
             <span style={{ fontSize: '1.4rem' }}>⏳</span>
@@ -2276,7 +2286,12 @@ export default function PillarCampaignDetailPage() {
         })()}
 
         {/* TikTok Safe Compliance Report & VO Selector */}
-        {campaign.enable_vo_audit === 1 && item.compliance_status && (
+        {Number(campaign.enable_vo_audit) === 1 && item.compliance_status && (() => {
+          const complianceNorm = String(item.compliance_status || '').toUpperCase();
+          const complianceScoreNum = Number.isFinite(Number(item.compliance_score))
+            ? Number(item.compliance_score)
+            : (String(item.compliance_score || '').toLowerCase() === 'high' ? 85 : String(item.compliance_score || '').toLowerCase() === 'medium' ? 55 : 15);
+          return (
           <div style={{
             background: 'var(--bg-glass)',
             border: '1px solid var(--border)',
@@ -2302,29 +2317,29 @@ export default function PillarCampaignDetailPage() {
                   textTransform: 'uppercase',
                   padding: '4px 10px',
                   borderRadius: '20px',
-                  background: item.compliance_status === 'PASS'
+                  background: complianceNorm === 'PASS'
                     ? 'var(--status-success-soft)'
-                    : item.compliance_status === 'REVISE'
-                      ? 'rgba(241, 196, 15, 0.15)'
+                    : complianceNorm === 'REVISE'
+                      ? 'var(--status-warning-soft)'
                       : 'var(--status-danger-soft)',
-                  color: item.compliance_status === 'PASS'
+                  color: complianceNorm === 'PASS'
                     ? 'var(--status-success)'
-                    : item.compliance_status === 'REVISE'
+                    : complianceNorm === 'REVISE'
                       ? 'var(--status-warning)'
                       : 'var(--status-danger)',
                   border: `1px solid ${
-                    item.compliance_status === 'PASS'
+                    complianceNorm === 'PASS'
                       ? 'var(--status-success)'
-                      : item.compliance_status === 'REVISE'
+                      : complianceNorm === 'REVISE'
                         ? 'var(--status-warning)'
                         : 'var(--status-danger)'
                   }`
                 }}>
-                  {item.compliance_status}
+                  {complianceNorm || item.compliance_status}
                 </span>
 
                 {/* Risk Score */}
-                {item.compliance_score !== undefined && (
+                {item.compliance_score !== undefined && item.compliance_score !== null && (
                   <span style={{
                     fontSize: '0.7rem',
                     fontWeight: '700',
@@ -2332,9 +2347,9 @@ export default function PillarCampaignDetailPage() {
                     borderRadius: '20px',
                     background: 'var(--surface-interactive)',
                     border: '1px solid var(--border)',
-                    color: item.compliance_score < 30 ? 'var(--status-success)' : item.compliance_score < 70 ? 'var(--status-warning)' : 'var(--status-danger)'
+                    color: complianceScoreNum < 30 ? 'var(--status-success)' : complianceScoreNum < 70 ? 'var(--status-warning)' : 'var(--status-danger)'
                   }}>
-                    Skor Risiko: {item.compliance_score}/100
+                    Skor Risiko: {complianceScoreNum}/100
                   </span>
                 )}
               </div>
@@ -2427,7 +2442,8 @@ export default function PillarCampaignDetailPage() {
               </div>
             </div>
           </div>
-        )}
+          );
+        })()}
 
         {/* Tab Headers */}
         <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '10px', marginBottom: '20px', overflowX: 'auto' }}>
@@ -2578,15 +2594,33 @@ export default function PillarCampaignDetailPage() {
                       <strong>
                         {item.start_frame_status === 'needs_review'
                           ? '⚠️ Start Frame Needs Review (G-Labs Render Ditahan)'
-                          : `🛡️ Visual QC (${parsedResult?.start_frame_qc?.mode || 'report_only'})`}
+                          : `🛡️ Visual QC (${parsedResult?.start_frame_qc?.mode || 'report_only'}${parsedResult?.start_frame_qc?.batch_enabled ? ' · Batch' : ''})`}
                       </strong>
                       {item.review_reason && (
                         <span style={{ color: 'var(--status-danger)', marginLeft: '6px' }}>{item.review_reason}</span>
                       )}
                     </div>
                     {parsedResult?.start_frame_qc && (
-                      <div style={{ color: 'var(--text-secondary)', fontSize: '0.68rem' }}>
-                        Pass: {parsedResult.start_frame_qc.passed_count || 0} | Fail: {parsedResult.start_frame_qc.failed_count || 0} | Vision calls: {parsedResult.start_frame_qc.calls || 0} | Retries: {parsedResult.start_frame_qc.retries || 0}
+                      <div style={{ color: 'var(--text-secondary)', fontSize: '0.68rem', display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+                        <span>
+                          Pass: {parsedResult.start_frame_qc.passed_count || 0} | Fail: {parsedResult.start_frame_qc.failed_count || 0} | Vision calls: {parsedResult.start_frame_qc.calls || 0} | Retries: {parsedResult.start_frame_qc.retries || 0}
+                        </span>
+                        {parsedResult.start_frame_qc.cross_clip_consistency && (
+                          <span style={{
+                            padding: '1px 6px',
+                            borderRadius: '4px',
+                            background: (parsedResult.start_frame_qc.cross_clip_consistency.wardrobe_color_same_all_clips && parsedResult.start_frame_qc.cross_clip_consistency.location_consistent)
+                              ? 'var(--status-success-soft)'
+                              : 'var(--status-warning-soft)',
+                            color: (parsedResult.start_frame_qc.cross_clip_consistency.wardrobe_color_same_all_clips && parsedResult.start_frame_qc.cross_clip_consistency.location_consistent)
+                              ? 'var(--status-success)'
+                              : 'var(--status-warning)'
+                          }}>
+                            {(parsedResult.start_frame_qc.cross_clip_consistency.wardrobe_color_same_all_clips && parsedResult.start_frame_qc.cross_clip_consistency.location_consistent)
+                              ? 'Konsisten Antar-Klip'
+                              : 'Outlier Konsistensi'}
+                          </span>
+                        )}
                       </div>
                     )}
                   </div>

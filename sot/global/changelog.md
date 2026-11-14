@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.48.0 — K7 Scene Director Polish, Batch Visual QC, Per-Model Key Pool & PT Reset (14/11/2026)
+- K7.1-K7.8: Polish Scene Director (action verbs, hook_only metaphor, wardrobe reference image, chest-down framing, night curtains, pre-bridge kitchen jar ban, planner-driven QC, strip UI metadata tags)
+- K7.9: Mode Batch Start Frame Visual QC + konsistensi lintas klip + mode shadow perbandingan per-klip
+- K7.10 & Pra-Rilis: Quota pool per-(key_id, model_name), tanggal kuota America/Los_Angeles (auto-DST), model QC terpisah, saklar gemini_quota_brake <15% dengan info reset WIB, dan perhitungan seluruh retry HTTP
+- K7.11-K7.12: Perbaikan whitelist DB & flag bigint Postgres pada VO Audit serta observability penuh [GEMINI_CALL] dan token meter
+- PERHATIAN DEPLOY PRODUCTION: Migrasi otomatis tabel api_key_usages (tambah model_name, hapus PK lama date+key_id, buat unique index api_key_usages_date_key_model_uq) akan ikut berjalan otomatis di schema public saat Production dideploy nanti (Production tidak disentuh pada rilis Staging ini).
+
 ## V2.47.1 — Prevent Metaphor Kit Engine from hijacking Cinematic Scene Director campaigns (14/11/2026)
 - Only engage Metaphor Kit auto-detection under Scene Director when visual_style is metaphoric_faceless, metaphor_kit_key is specified, or environment.policy is metaphor_driven
 - Set metaphor_engine.enabled=false in K6 Identity Card v3 presets (DapurBotani, SiasatSehat, NutriBlend)

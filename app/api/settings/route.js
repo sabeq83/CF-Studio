@@ -45,6 +45,10 @@ export const GET = withTenantContext(async (request, _context, user) => {
         gemini_smart_routing: await getSetting('gemini_smart_routing') || 'on',
         gemini_model_primary: await getSetting('gemini_model_primary') || 'gemini-3.7-flash',
         gemini_model_fallback: await getSetting('gemini_model_fallback') || 'gemini-3.6-flash',
+        start_frame_visual_qc: await getSetting('start_frame_visual_qc') || 'off',
+        start_frame_visual_qc_batch: await getSetting('start_frame_visual_qc_batch') || 'off',
+        start_frame_visual_qc_model: await getSetting('start_frame_visual_qc_model') || '',
+        gemini_quota_brake: await getSetting('gemini_quota_brake') || 'on',
         minimax_api_key: maskSecret(minimaxKey) || null,
         has_minimax_key: !!minimaxKey,
         minimax_group_id: await getSetting('minimax_group_id', false) || '',
@@ -114,7 +118,9 @@ export const POST = withTenantContext(async (request, _context, user) => {
       return NextResponse.json({ success: false, error: 'Hanya Admin tenant yang dapat mengelola credential.' }, { status: 403 });
     }
     const body = await request.json();
-    const { gemini_api_key, gemini_api_tier, gemini_context_caching, gemini_smart_routing, gemini_model_primary, gemini_model_fallback, google_client_id, google_client_secret,
+    const { gemini_api_key, gemini_api_tier, gemini_context_caching, gemini_smart_routing, gemini_model_primary, gemini_model_fallback,
+      start_frame_visual_qc, start_frame_visual_qc_batch, start_frame_visual_qc_model, gemini_quota_brake,
+      google_client_id, google_client_secret,
       webhook_api_key, webhook_host, webhook_port, webhook_image_model, webhook_video_model,
       webhook_delay_enabled, webhook_delay_min, webhook_delay_max, webhook_t2i_pattern,
       drive_target_folder, drive_glabs_folder_id, drive_re_markdown_folder_id, master_re_sheet_id, drive_product_photo_folder,
@@ -142,6 +148,22 @@ export const POST = withTenantContext(async (request, _context, user) => {
     }
     if (gemini_model_fallback !== undefined) {
       await setSetting('gemini_model_fallback', gemini_model_fallback);
+    }
+    if (start_frame_visual_qc !== undefined) {
+      await setSetting('start_frame_visual_qc', start_frame_visual_qc);
+    }
+    if (start_frame_visual_qc_batch !== undefined) {
+      const normalizedBatch = String(start_frame_visual_qc_batch || 'off').trim().toLowerCase();
+      await setSetting(
+        'start_frame_visual_qc_batch',
+        ['on', 'shadow', 'off'].includes(normalizedBatch) ? normalizedBatch : 'off'
+      );
+    }
+    if (start_frame_visual_qc_model !== undefined) {
+      await setSetting('start_frame_visual_qc_model', String(start_frame_visual_qc_model || '').trim());
+    }
+    if (gemini_quota_brake !== undefined) {
+      await setSetting('gemini_quota_brake', gemini_quota_brake === 'off' ? 'off' : 'on');
     }
     if (isNewSecret(minimax_api_key)) {
       await setSetting('minimax_api_key', minimax_api_key);

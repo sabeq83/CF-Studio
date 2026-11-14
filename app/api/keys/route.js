@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
-import { getAllApiKeys, addApiKey, addApiKeysBulk, updateApiKey, deleteApiKey, deleteInvalidApiKeys, markApiKeyStatus, getPoolSummary } from '@/lib/db';
+import { getAllApiKeys, addApiKey, addApiKeysBulk, updateApiKey, deleteApiKey, deleteInvalidApiKeys, markApiKeyStatus, getPoolSummary, getSetting } from '@/lib/db';
 import { testGeminiConnection } from '@/lib/gemini';
 import { requireTenantAdmin } from '@/lib/auth';
 
 export async function GET(request) {
   try {
     requireTenantAdmin(request);
-    const keys = await getAllApiKeys();
-    const pool = await getPoolSummary();
+    const primaryModel = (await getSetting('gemini_model_primary')) || 'gemini-3.6-flash';
+    const keys = await getAllApiKeys({ modelName: primaryModel });
+    const pool = await getPoolSummary({ modelName: primaryModel });
 
     // Mask API keys for security
     const maskedKeys = keys.map(k => ({
