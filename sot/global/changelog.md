@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.48.11 — Fix deferred start frame checkpoint, approval pause gate preservation, and 3D VI allocation (15/11/2026)
+- Defer start_frame_status checkpoint as pending during creative review instead of failing
+- Preserve voice_segments and post-storyboard pause gates (visuals/tts/ffmpeg) in approvePillarCampaignItem
+- Keep all clips stylized_3d_character when stylized 3D character VI has legacy mode_routing
+
 ## V2.48.10 — Fix autonomous pipeline preset VI and audio segment hydration (15/11/2026)
 - Avoid overwriting preset visual_identity_preset_id with null in autonomous-pipeline API
 - Forward operator_preset_key, enable_audio_segment, enable_glabs, and approval_mode from presets in autonomous-engine

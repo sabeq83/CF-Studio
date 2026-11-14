@@ -402,3 +402,30 @@ test('Autonomous pipeline preserves preset VI, operator_preset_key, and audio se
   assert.equal(routeSource.includes('visual_identity_preset_id: body.visual_identity_preset_id || null'), false);
 });
 
+test('Stylized 3D VI keeps all 5 clips stylized_3d_character even with legacy mode_routing', () => {
+  const promptText = buildVisualIdentityPromptSection({
+    structured: {
+      label: 'Kawan Rumah',
+      subject: {
+        kind: 'stylized_3d_character',
+        universe_slug: 'kawan-rumah',
+        face_visibility: 'allowed'
+      },
+      visual_language: {
+        primary_style: 'stylized_3d_character',
+        supporting_styles: ['isometric_society', 'commercial_product_cinematic']
+      },
+      mode_routing: {
+        hook: 'stylized_3d_character',
+        context: 'stylized_3d_character',
+        mechanism: 'isometric_society',
+        evidence_reveal: 'commercial_product_cinematic',
+        conclusion: 'stylized_3d_character'
+      }
+    }
+  }, 5);
+  assert.ok(promptText.includes('Mode Visual: "stylized_3d_character"'));
+  assert.equal(promptText.includes('Mode Visual: "commercial_product_cinematic"'), false);
+  assert.equal(promptText.includes('Mode Visual: "isometric_society"'), false);
+});
+
