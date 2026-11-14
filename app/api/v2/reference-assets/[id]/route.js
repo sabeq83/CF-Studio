@@ -5,7 +5,8 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withTenantContext(async (req, { params }, user) => {
   try {
-    const asset = await getReferenceAsset(params.id);
+    const { id } = await params;
+    const asset = await getReferenceAsset(id);
     if (!asset) {
       return new Response(JSON.stringify({ success: false, error: 'Asset not found' }), {
         status: 404,
@@ -26,7 +27,8 @@ export const GET = withTenantContext(async (req, { params }, user) => {
 
 export const DELETE = withTenantContext(async (req, { params }, user) => {
   try {
-    const result = await archiveReferenceAsset(params.id, user?.id || user?.email || 'user');
+    const { id } = await params;
+    const result = await archiveReferenceAsset(id, user?.id || user?.email || 'user');
     return new Response(JSON.stringify({ success: true, data: result }), {
       status: 200,
       headers: { 'content-type': 'application/json' }

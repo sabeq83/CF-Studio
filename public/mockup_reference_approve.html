@@ -1,0 +1,1013 @@
+<!doctype html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mockup Perbaikan Approve & Set Active — MAKNA Flow</title>
+  <style>
+    /* MAKNA Flow semantic theme tokens (mirrors app/theme.css) */
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --radius-xs: 6px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --input-bg: #ffffff;
+      --overlay-subtle: rgba(30, 41, 59, 0.08);
+      --overlay-backdrop: rgba(15, 23, 42, 0.54);
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --status-neutral: #6548bd;
+      --status-neutral-soft: #f0ecfb;
+      --focus-ring: #6d4ed6;
+      --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+      --shadow-modal: 0 26px 80px rgba(31, 45, 61, 0.22);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: var(--font-sans);
+      background: var(--canvas);
+      color: var(--text-primary);
+      line-height: 1.5;
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+    }
+
+    .toolbar-banner {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .toolbar-title h1 {
+      margin: 0 0 4px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--action-primary);
+    }
+
+    .toolbar-title p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .select-control {
+      background: var(--input-bg);
+      color: var(--text-primary);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-xs);
+      padding: 8px 12px;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    .btn {
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      border-radius: var(--radius-xs);
+      padding: 8px 14px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s ease, opacity 0.15s ease;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: var(--surface-hover);
+    }
+
+    .btn:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border-color: var(--action-primary);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--action-primary-hover);
+      border-color: var(--action-primary-hover);
+    }
+
+    .btn-danger {
+      background: var(--status-danger-soft);
+      color: var(--status-danger);
+      border-color: var(--status-danger);
+    }
+
+    .btn:focus-visible,
+    .select-control:focus-visible,
+    textarea:focus-visible,
+    input:focus-visible {
+      outline: 3px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    .context-strip {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.8rem;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .pill-info {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border-color: var(--status-info);
+    }
+
+    .pill-success {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border-color: var(--status-success);
+    }
+
+    .pill-warning {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border-color: var(--status-warning);
+    }
+
+    .pill-danger {
+      background: var(--status-danger-soft);
+      color: var(--status-danger);
+      border-color: var(--status-danger);
+    }
+
+    .registry-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .registry-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .registry-header h2 {
+      margin: 0;
+      font-size: 1.08rem;
+      font-weight: 800;
+      color: var(--action-primary);
+    }
+
+    .role-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-bottom: 12px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .role-tab {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      padding: 6px 14px;
+      border-radius: var(--radius-xs);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .role-tab.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border-color: var(--action-primary);
+    }
+
+    .parent-sync-box {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      margin-bottom: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.78rem;
+    }
+
+    .parent-sync-box code {
+      background: var(--input-bg);
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      font-size: 0.72rem;
+    }
+
+    .grid-two {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .active-panel {
+      background: var(--surface-raised);
+      border: 2px solid var(--status-success);
+      border-radius: var(--radius);
+      padding: 16px;
+    }
+
+    .drafts-panel {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 16px;
+    }
+
+    .panel-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .empty-active {
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 16px;
+      background: var(--overlay-subtle);
+      border: 1px dashed var(--border-strong);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-size: 0.82rem;
+    }
+
+    .active-img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--input-bg);
+      margin-bottom: 10px;
+    }
+
+    .draft-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .draft-item {
+      display: flex;
+      gap: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+    }
+
+    .draft-thumb {
+      width: 84px;
+      height: 84px;
+      flex-shrink: 0;
+      object-fit: cover;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border-subtle);
+      background: var(--input-bg);
+    }
+
+    .draft-meta {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-width: 0;
+    }
+
+    .draft-prompt {
+      margin: 4px 0 8px;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .alert-box {
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .alert-danger {
+      background: var(--status-danger-soft);
+      border-color: var(--status-danger);
+      color: var(--status-danger);
+    }
+
+    .alert-warning {
+      background: var(--status-warning-soft);
+      border-color: var(--status-warning);
+      color: var(--text-primary);
+    }
+
+    .alert-info {
+      background: var(--status-info-soft);
+      border-color: var(--status-info);
+      color: var(--text-secondary);
+    }
+
+    .alert-success {
+      background: var(--status-success-soft);
+      border-color: var(--status-success);
+      color: var(--status-success);
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay-backdrop);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 9999;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-modal);
+      width: 100%;
+      max-width: 480px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .modal-card h3 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--action-primary);
+    }
+
+    .modal-preview-strip {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+    }
+
+    .modal-preview-strip img {
+      width: 56px;
+      height: 56px;
+      object-fit: cover;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .field-label {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    .field-textarea {
+      width: 100%;
+      background: var(--input-bg);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      padding: 10px;
+      font-family: inherit;
+      font-size: 0.78rem;
+      resize: vertical;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Simulation Controls -->
+    <div class="toolbar-banner">
+      <div class="toolbar-title">
+        <h1>Mockup Perbaikan: Approve & Set Active (`character_sheet`)</h1>
+        <p>Simulasi interaksi perbaikan modal error, loading state, attestation non-human/3D mascot, dan sinkronisasi state parent.</p>
+      </div>
+      <div class="controls-row">
+        <select id="scenarioSelect" class="select-control" aria-label="Pilih skenario">
+          <option value="univ_char">Universe Manager: Si Wajan (Mascot 3D)</option>
+          <option value="vi_stylized">Visual Identity: Kawan Rumah 3D (Stylized)</option>
+          <option value="vi_human">Visual Identity: DapurBotani (Human Faceless)</option>
+        </select>
+        <select id="modeSelect" class="select-control" aria-label="Pilih mode simulasi">
+          <option value="fixed_ok">Sesudah Perbaikan (Sukses 200 OK)</option>
+          <option value="fixed_err">Sesudah Perbaikan (Simulasi API 400 Terlihat di Modal)</option>
+          <option value="before_bug">Sebelum Perbaikan (Error Tersembunyi + Params Bug)</option>
+        </select>
+        <button id="themeToggle" type="button" class="btn">🌓 Toggle Light/Dark</button>
+        <button id="resetBtn" type="button" class="btn">↺ Reset Draft</button>
+      </div>
+    </div>
+
+    <div class="context-strip">
+      <div>
+        <strong>Konteks Halaman:</strong>
+        <span id="contextLabel"></span>
+      </div>
+      <div id="attestationRuleBadge" class="pill pill-info"></div>
+    </div>
+
+    <!-- ReferenceAssetManager Card -->
+    <section class="registry-card">
+      <div class="registry-header">
+        <h2>🖼️ Visual Reference Registry</h2>
+        <span id="apiNotice" class="pill pill-info">POST /api/v2/reference-assets/[id]/approve</span>
+      </div>
+
+      <div class="role-tabs" id="roleTabs"></div>
+
+      <!-- Background actionError (in Before Bug mode, modal error leaks here BEHIND the modal) -->
+      <div id="outerActionError" class="alert-box alert-danger hidden" style="margin-bottom: 16px;"></div>
+
+      <!-- Toast inside demo for fixed flow -->
+      <div id="successBanner" class="alert-box alert-success hidden" style="margin-bottom: 16px;"></div>
+
+      <!-- Parent state sync indicator (relevant for Universe Manager Character Form) -->
+      <div id="parentSyncBox" class="parent-sync-box">
+        <div>
+          <strong>Sinkronisasi Form Karakter (`charFormData.reference_image_path`):</strong>
+          <code id="parentPathCode">null</code>
+        </div>
+        <span id="parentSyncBadge" class="pill pill-warning">Belum Ada Active Asset</span>
+      </div>
+
+      <div class="grid-two">
+        <div class="active-panel">
+          <div class="panel-label">
+            <span style="color: var(--status-success);">ACTIVE APPROVED</span>
+            <span id="activeVersionText" style="color: var(--text-muted);"></span>
+          </div>
+          <div id="activeSlot"></div>
+        </div>
+
+        <div class="drafts-panel">
+          <div class="panel-label">
+            <span style="color: var(--text-secondary);">VERSIONS & ALTERNATIVES</span>
+            <span id="draftCountText" style="color: var(--text-muted);"></span>
+          </div>
+          <div id="draftList" class="draft-list"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Review Modal -->
+  <div id="reviewModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card">
+      <h3 id="modalTitle">📝 Review Reference Asset Draft</h3>
+
+      <div class="modal-preview-strip">
+        <img id="modalThumb" alt="Preview draft" />
+        <div>
+          <div id="modalAssetId" style="font-size: 0.75rem; font-weight: 700;"></div>
+          <div id="modalAssetRole" style="font-size: 0.72rem; color: var(--text-muted);"></div>
+        </div>
+      </div>
+
+      <!-- Error inside modal (Fixed UX) -->
+      <div id="modalErrorBox" class="alert-box alert-danger hidden"></div>
+
+      <!-- Conditional Attestation vs Non-human notice -->
+      <label id="attestationLabel" class="alert-box alert-warning hidden" style="display: flex; gap: 10px; align-items: flex-start; cursor: pointer;">
+        <input id="attestationCheckbox" type="checkbox" style="margin-top: 2px;" />
+        <span>
+          <strong>Faceless Policy Attestation:</strong> Saya menjamin bahwa gambar subjek manusia ini bebas dari fitur wajah lengkap (mata/hidung/mulut) sesuai kepatuhan faceless video.
+        </span>
+      </label>
+
+      <div id="nonHumanNotice" class="alert-box alert-info hidden">
+        🎭 Subjek non-manusia / Stylized 3D — <strong>Faceless Policy Attestation</strong> tidak diwajibkan untuk karakter/maskot ini.
+      </div>
+
+      <label class="field-label">
+        Review Notes (Optional)
+        <textarea id="reviewNotes" class="field-textarea" rows="3" placeholder="Catatan persetujuan atau alasan revisi..."></textarea>
+      </label>
+
+      <div class="modal-actions">
+        <button id="modalApproveBtn" type="button" class="btn btn-primary" style="flex: 1;">Approve & Set Active</button>
+        <button id="modalRejectBtn" type="button" class="btn btn-danger" style="flex: 1;">Reject Draft</button>
+        <button id="modalCancelBtn" type="button" class="btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const FALLBACK_SVG = (label) =>
+      'data:image/svg+xml;utf8,' +
+      encodeURIComponent(
+        `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="220" viewBox="0 0 320 220">
+          <rect width="320" height="220" fill="#162235"/>
+          <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#b6c2d2" font-family="sans-serif" font-size="14" font-weight="700">${label}</text>
+        </svg>`
+      );
+
+    const SCENARIOS = {
+      univ_char: {
+        title: 'Universe Manager → Edit Character: Si Wajan (Kawan Rumah, mascot_object)',
+        ownerType: 'character',
+        roles: ['identity', 'wardrobe', 'character_sheet'],
+        activeRole: 'character_sheet',
+        requiresAttestation: false,
+        showParentSync: true,
+        drafts: [
+          {
+            id: 'ref_mwgijsy8_1b1e91fe',
+            version: 1,
+            status: 'draft',
+            public_path: '/uploads/reference-assets/default_tenant/character/14bf5c57-8172-45d6-9612-dcc4817b3102/character_sheet/v1/1eaf3da1e3db8a28.jpg',
+            sha256: '1eaf3da1e3db8a2877bc9011',
+            width: 1024,
+            height: 1024,
+            prompt: 'Character turnaround sheet of Si Wajan, anthropomorphized dark carbon steel frying pan 3D mascot...'
+          },
+          {
+            id: 'ref_mwgik3th_31c99aab',
+            version: 2,
+            status: 'draft',
+            public_path: '/uploads/reference-assets/default_tenant/character/14bf5c57-8172-45d6-9612-dcc4817b3102/character_sheet/v2/a9ec2efbb2181fd8.jpg',
+            sha256: 'a9ec2efbb2181fd889aa2204',
+            width: 1024,
+            height: 1024,
+            prompt: 'Character turnaround sheet of Si Wajan (v2), matte dark pan, warm wooden handle...'
+          }
+        ]
+      },
+      vi_stylized: {
+        title: 'Visual Identity Studio → Kawan Rumah 3D Dialog (style: stylized_3d_character)',
+        ownerType: 'visual_identity',
+        roles: ['visual_style', 'location', 'wardrobe', 'palette_sheet', 'character_sheet'],
+        activeRole: 'character_sheet',
+        requiresAttestation: false,
+        showParentSync: false,
+        drafts: [
+          {
+            id: 'ref_mwgin15k_720b0eff',
+            version: 1,
+            status: 'draft',
+            public_path: '/uploads/reference-assets/default_tenant/visual_identity/vi_mwfzpljm_bf15cfe9/character_sheet/v1/3971e511aa3ada1f.jpg',
+            sha256: '3971e511aa3ada1faa210012',
+            width: 1024,
+            height: 1024,
+            prompt: 'Group character lineup sheet on plain warm cream background: Si Wajan, Sponge, and Sapu...'
+          },
+          {
+            id: 'ref_mwgincrt_650b744b',
+            version: 2,
+            status: 'draft',
+            public_path: '/uploads/reference-assets/default_tenant/visual_identity/vi_mwfzpljm_bf15cfe9/character_sheet/v2/3b1e930940f3181d.jpg',
+            sha256: '3b1e930940f3181dbb559203',
+            width: 1024,
+            height: 1024,
+            prompt: 'Group character lineup sheet (v2) on warm cream background...'
+          }
+        ]
+      },
+      vi_human: {
+        title: 'Visual Identity Studio → DapurBotani (subject.kind: human, faceless)',
+        ownerType: 'visual_identity',
+        roles: ['visual_style', 'location', 'wardrobe', 'palette_sheet', 'character_sheet'],
+        activeRole: 'character_sheet',
+        requiresAttestation: true,
+        showParentSync: false,
+        drafts: [
+          {
+            id: 'ref_demo_human_v1',
+            version: 1,
+            status: 'draft',
+            public_path: '',
+            sha256: '84c90312fa80be41c112',
+            width: 1024,
+            height: 1024,
+            prompt: 'Editorial faceless culinary hands over teak kitchen counter, soft daylight...'
+          }
+        ]
+      }
+    };
+
+    let state = {
+      scenarioKey: 'univ_char',
+      mode: 'fixed_ok',
+      approvedAsset: null,
+      drafts: [],
+      approvingAsset: null,
+      parentRefPath: null
+    };
+
+    const el = (id) => document.getElementById(id);
+
+    function cloneScenario(key) {
+      const s = SCENARIOS[key];
+      state.scenarioKey = key;
+      state.approvedAsset = null;
+      state.drafts = s.drafts.map(d => ({ ...d }));
+      state.approvingAsset = null;
+      state.parentRefPath = null;
+      el('outerActionError').classList.add('hidden');
+      el('successBanner').classList.add('hidden');
+      render();
+    }
+
+    function applyImgSrc(img, asset) {
+      const fallback = FALLBACK_SVG(`Draft v${asset.version}`);
+      if (!asset.public_path) {
+        img.src = fallback;
+        return;
+      }
+      img.src = asset.public_path;
+      img.onerror = () => {
+        img.onerror = null;
+        img.src = fallback;
+      };
+    }
+
+    function render() {
+      const scenario = SCENARIOS[state.scenarioKey];
+      const isBeforeBug = state.mode === 'before_bug';
+
+      el('contextLabel').textContent = scenario.title;
+
+      const ruleBadge = el('attestationRuleBadge');
+      if (isBeforeBug) {
+        ruleBadge.className = 'pill pill-danger';
+        ruleBadge.textContent = 'Bug: params.id undefined + Attestation dipaksa wajib + Error di belakang modal';
+      } else if (scenario.requiresAttestation) {
+        ruleBadge.className = 'pill pill-warning';
+        ruleBadge.textContent = 'Human Faceless: Checkbox Attestation Wajib';
+      } else {
+        ruleBadge.className = 'pill pill-success';
+        ruleBadge.textContent = 'Stylized 3D / Mascot: Attestation Tidak Wajib';
+      }
+
+      // Tabs
+      const tabsEl = el('roleTabs');
+      tabsEl.innerHTML = '';
+      scenario.roles.forEach(role => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'role-tab' + (role === scenario.activeRole ? ' active' : '');
+        b.textContent = role.replace('_', ' ');
+        tabsEl.appendChild(b);
+      });
+
+      // Parent sync box
+      const syncBox = el('parentSyncBox');
+      syncBox.classList.toggle('hidden', !scenario.showParentSync);
+      if (scenario.showParentSync) {
+        el('parentPathCode').textContent = state.parentRefPath || 'null';
+        const syncBadge = el('parentSyncBadge');
+        if (state.parentRefPath) {
+          syncBadge.className = 'pill pill-success';
+          syncBadge.textContent = 'Synced ✓ Save Character Aman';
+        } else {
+          syncBadge.className = 'pill pill-warning';
+          syncBadge.textContent = 'Belum Ada Active Asset';
+        }
+      }
+
+      // Active slot
+      const activeSlot = el('activeSlot');
+      activeSlot.innerHTML = '';
+      if (state.approvedAsset) {
+        el('activeVersionText').textContent = `v${state.approvedAsset.version}`;
+        const wrap = document.createElement('div');
+        const img = document.createElement('img');
+        img.className = 'active-img';
+        img.alt = 'Active approved reference';
+        applyImgSrc(img, state.approvedAsset);
+        wrap.appendChild(img);
+
+        const meta = document.createElement('div');
+        meta.style.cssText = 'display:flex;justify-content:space-between;font-size:0.72rem;color:var(--text-muted);margin-bottom:8px;';
+        meta.innerHTML = `<span>SHA256: ${state.approvedAsset.sha256.slice(0, 14)}...</span><span>${state.approvedAsset.width}x${state.approvedAsset.height}</span>`;
+        wrap.appendChild(meta);
+
+        if (state.approvedAsset.review_notes) {
+          const notes = document.createElement('div');
+          notes.className = 'alert-box alert-info';
+          notes.style.marginBottom = '10px';
+          notes.textContent = 'Notes: ' + state.approvedAsset.review_notes;
+          wrap.appendChild(notes);
+        }
+
+        const archiveBtn = document.createElement('button');
+        archiveBtn.type = 'button';
+        archiveBtn.className = 'btn btn-danger';
+        archiveBtn.style.width = '100%';
+        archiveBtn.textContent = 'Archive Active Asset';
+        archiveBtn.onclick = () => {
+          state.approvedAsset = null;
+          if (!isBeforeBug && scenario.showParentSync) {
+            state.parentRefPath = null;
+          }
+          el('successBanner').classList.add('hidden');
+          render();
+        };
+        wrap.appendChild(archiveBtn);
+        activeSlot.appendChild(wrap);
+      } else {
+        el('activeVersionText').textContent = '';
+        activeSlot.innerHTML = `<div class="empty-active">No active approved reference.</div>`;
+      }
+
+      // Draft list
+      const draftList = el('draftList');
+      draftList.innerHTML = '';
+      el('draftCountText').textContent = `${state.drafts.length} draft`;
+      state.drafts.forEach(asset => {
+        const card = document.createElement('div');
+        card.className = 'draft-item';
+
+        const img = document.createElement('img');
+        img.className = 'draft-thumb';
+        img.alt = `Draft v${asset.version}`;
+        applyImgSrc(img, asset);
+        card.appendChild(img);
+
+        const right = document.createElement('div');
+        right.className = 'draft-meta';
+        right.innerHTML = `
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+              <strong style="font-size:0.82rem;">v${asset.version}</strong>
+              <span class="pill pill-info">${asset.status}</span>
+            </div>
+            <p class="draft-prompt">${asset.prompt}</p>
+          </div>
+        `;
+
+        if (asset.status === 'draft') {
+          const btns = document.createElement('div');
+          btns.style.cssText = 'display:flex;gap:8px;';
+          const approveOpen = document.createElement('button');
+          approveOpen.type = 'button';
+          approveOpen.className = 'btn btn-primary';
+          approveOpen.style.flex = '1';
+          approveOpen.textContent = 'Review & Approve';
+          approveOpen.onclick = () => openModal(asset);
+          btns.appendChild(approveOpen);
+          right.appendChild(btns);
+        }
+        card.appendChild(right);
+        draftList.appendChild(card);
+      });
+    }
+
+    function openModal(asset) {
+      const scenario = SCENARIOS[state.scenarioKey];
+      const isBeforeBug = state.mode === 'before_bug';
+
+      state.approvingAsset = asset;
+      el('modalTitle').textContent = `📝 Review Reference Asset Draft (v${asset.version})`;
+      el('modalAssetId').textContent = asset.id;
+      el('modalAssetRole').textContent = `owner: ${scenario.ownerType} · role: ${scenario.activeRole}`;
+      applyImgSrc(el('modalThumb'), asset);
+      el('reviewNotes').value = '';
+      el('attestationCheckbox').checked = false;
+      el('modalErrorBox').classList.add('hidden');
+      el('modalErrorBox').textContent = '';
+      el('outerActionError').classList.add('hidden');
+
+      const showCheckbox = isBeforeBug ? true : scenario.requiresAttestation;
+      el('attestationLabel').classList.toggle('hidden', !showCheckbox);
+      el('nonHumanNotice').classList.toggle('hidden', showCheckbox);
+
+      setModalLoading(false);
+      el('reviewModal').classList.add('open');
+    }
+
+    function closeModal() {
+      state.approvingAsset = null;
+      el('reviewModal').classList.remove('open');
+    }
+
+    function setModalLoading(loading, label) {
+      el('modalApproveBtn').disabled = loading;
+      el('modalRejectBtn').disabled = loading;
+      el('modalCancelBtn').disabled = loading;
+      el('modalApproveBtn').textContent = loading ? (label || 'Approving...') : 'Approve & Set Active';
+    }
+
+    el('modalApproveBtn').onclick = () => {
+      if (!state.approvingAsset) return;
+      const scenario = SCENARIOS[state.scenarioKey];
+      const mode = state.mode;
+      const checked = el('attestationCheckbox').checked;
+      const notes = el('reviewNotes').value.trim();
+
+      el('modalErrorBox').classList.add('hidden');
+      el('outerActionError').classList.add('hidden');
+
+      if (mode === 'before_bug') {
+        // Reproduces exact bug: silent failure behind modal backdrop
+        el('outerActionError').textContent = '⚠️ Error: Asset not found (params.id undefined — tertutup modal backdrop!)';
+        el('outerActionError').classList.remove('hidden');
+        return;
+      }
+
+      setModalLoading(true, 'Approving...');
+      setTimeout(() => {
+        setModalLoading(false);
+
+        if (mode === 'fixed_err') {
+          el('modalErrorBox').textContent = '⚠️ Error: Simulasi HTTP 400 dari /approve — sekarang pesan error terlihat jelas DI DALAM modal!';
+          el('modalErrorBox').classList.remove('hidden');
+          return;
+        }
+
+        if (scenario.requiresAttestation && !checked) {
+          el('modalErrorBox').textContent = '⚠️ Error: Faceless compliance attestation is required for this asset.';
+          el('modalErrorBox').classList.remove('hidden');
+          return;
+        }
+
+        const approved = { ...state.approvingAsset, status: 'approved', review_notes: notes };
+        if (state.approvedAsset) {
+          state.drafts.push({ ...state.approvedAsset, status: 'archived' });
+        }
+        state.drafts = state.drafts.filter(d => d.id !== approved.id);
+        state.approvedAsset = approved;
+
+        if (scenario.showParentSync) {
+          state.parentRefPath = approved.public_path || `/uploads/reference-assets/.../${approved.id}.jpg`;
+        }
+
+        el('successBanner').textContent = `✅ Berhasil: Draft v${approved.version} (${approved.id}) kini ACTIVE APPROVED.`;
+        el('successBanner').classList.remove('hidden');
+        closeModal();
+        render();
+      }, 450);
+    };
+
+    el('modalRejectBtn').onclick = () => {
+      if (!state.approvingAsset) return;
+      if (state.mode === 'before_bug') {
+        el('outerActionError').textContent = '⚠️ Error: Asset not found (reject params.id undefined — tertutup modal backdrop!)';
+        el('outerActionError').classList.remove('hidden');
+        return;
+      }
+      const targetId = state.approvingAsset.id;
+      state.drafts = state.drafts.map(d => (d.id === targetId ? { ...d, status: 'rejected' } : d));
+      closeModal();
+      render();
+    };
+
+    el('modalCancelBtn').onclick = closeModal;
+    el('scenarioSelect').onchange = (e) => cloneScenario(e.target.value);
+    el('modeSelect').onchange = (e) => { state.mode = e.target.value; render(); };
+    el('resetBtn').onclick = () => cloneScenario(state.scenarioKey);
+    el('themeToggle').onclick = () => {
+      const root = document.documentElement;
+      root.setAttribute('data-theme', root.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+    };
+
+    cloneScenario('univ_char');
+  </script>
+</body>
+</html>
+

@@ -948,6 +948,22 @@ export default function UniverseManagerPage() {
                       ownerId={editingId}
                       universeId={selectedUniverse.id}
                       allowedRoles={['identity', 'wardrobe', 'character_sheet']}
+                      requiresAttestation={
+                        selectedUniverse.universe_type === 'human' ||
+                        ['faceless', 'back_view', 'silhouette', 'hands_only'].includes(charFormData.depiction_mode)
+                      }
+                      onAssetUpdated={({ action, asset }) => {
+                        if (action === 'approve' && asset?.public_path && (asset.asset_role === 'identity' || asset.asset_role === 'character_sheet')) {
+                          setCharFormData(prev => ({
+                            ...prev,
+                            reference_image: asset.public_path,
+                            reference_image_path: asset.public_path
+                          }));
+                        }
+                        if (action === 'approve' || action === 'archive') {
+                          fetchCharacters(selectedUniverse.id);
+                        }
+                      }}
                     />
                   )}
 

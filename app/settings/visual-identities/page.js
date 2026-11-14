@@ -23,7 +23,8 @@ import {
   RENDERING_FINISHES,
   SHADOW_STYLES,
   NEGATIVE_SPACE_OPTIONS,
-  SAFE_ZONE_OPTIONS
+  SAFE_ZONE_OPTIONS,
+  isStylizedCharacterVisualConfig
 } from '../../../lib/visual-identity-contract';
 import {
   DEFAULT_VISUAL_STYLE,
@@ -1166,6 +1167,10 @@ export default function VisualIdentityStudioPage() {
                   ownerType="visual_identity"
                   ownerId={editingPreset.id}
                   allowedRoles={['visual_style', 'location', 'wardrobe', 'palette_sheet', 'character_sheet']}
+                  requiresAttestation={
+                    !isStylizedCharacterVisualConfig({ visualOverrides: config }) &&
+                    ['human', 'blank_face_3d'].includes(config.subject?.kind || 'human')
+                  }
                 />
               )}
 

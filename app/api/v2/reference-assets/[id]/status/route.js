@@ -5,7 +5,8 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withTenantContext(async (req, { params }, user) => {
   try {
-    const result = await refreshReferenceAssetGeneration(params.id, user?.id || user?.email || 'user');
+    const { id } = await params;
+    const result = await refreshReferenceAssetGeneration(id, user?.id || user?.email || 'user');
     return new Response(JSON.stringify({ success: true, data: result }), {
       status: 200,
       headers: { 'content-type': 'application/json' }

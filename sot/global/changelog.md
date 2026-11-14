@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.48.9 — Fix Approve & Set Active Reference Asset Modal, Async Params & Attestation (15/11/2026)
+- Fix Next.js 16 await params across reference-assets/[id] API routes
+- Display inline errors and loading state inside ReferenceAssetManager review modal with Semantic CSS Tokens
+- Allow stylized 3D and mascot characters/VIs to approve without human faceless checkbox
+- Sync parent character reference_image_path and archive parity for character_sheet
+
 ## V2.48.8 — Fix G-Labs reference asset .results URL ingestion (14/11/2026)
 - Read G-Labs .results array and direct HTTP URLs in refreshReferenceAssetGeneration (extractProviderImageUrl)
 

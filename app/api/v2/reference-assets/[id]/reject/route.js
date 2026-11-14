@@ -5,8 +5,9 @@ export const dynamic = 'force-dynamic';
 
 export const POST = withTenantContext(async (req, { params }, user) => {
   try {
+    const { id } = await params;
     const body = await req.json();
-    const result = await rejectReferenceAsset(params.id, body, user?.id || user?.email || 'user');
+    const result = await rejectReferenceAsset(id, body, user?.id || user?.email || 'user');
     
     return new Response(JSON.stringify({ success: true, data: result }), {
       status: 200,

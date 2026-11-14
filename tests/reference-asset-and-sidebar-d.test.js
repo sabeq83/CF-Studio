@@ -8,6 +8,10 @@ import { menuKeyMap, navItems, PLANNING_SECTION_HREFS } from '../lib/sidebar-nav
 import { buildReferenceAssetPrompt } from '../lib/reference-asset-prompt-builder.js';
 import { extractProviderImageUrl } from '../lib/reference-asset-service.js';
 import {
+  requiresFacelessAttestation,
+  validateApprovalAttestation
+} from '../lib/reference-asset-contract.js';
+import {
   extractClipCharacterIds,
   hasStylizedUniverseLink,
   resolveClipReferenceImagesAsync
@@ -313,5 +317,52 @@ test('Part D1-D4: extractClipCharacterIds, resolveClipReferenceImagesAsync (with
     (file, id) => `http://host/api/files/${id}/${file}`
   );
   assert.equal(relUrl, 'http://host/api/files/task_rel/frame_01.png');
+});
+
+test('Approval routes await Next.js 16 params and attestation skips stylized/mascot subjects', () => {
+  const dynamicRoutes = [
+    'app/api/v2/reference-assets/[id]/approve/route.js',
+    'app/api/v2/reference-assets/[id]/reject/route.js',
+    'app/api/v2/reference-assets/[id]/status/route.js',
+    'app/api/v2/reference-assets/[id]/route.js'
+  ];
+
+  for (const relPath of dynamicRoutes) {
+    const src = fs.readFileSync(path.resolve(process.cwd(), relPath), 'utf8');
+    assert.match(src, /await\s+params/, `${relPath} must await params`);
+    assert.doesNotMatch(src, /\bparams\.id\b/, `${relPath} must not access params.id synchronously`);
+  }
+
+  // Stylized mascot character sheet should NOT require faceless human attestation
+  const mascotAsset = { owner_type: 'character', asset_role: 'character_sheet', metadata_json: {} };
+  const mascotContext = {
+    owner: { depiction_mode: 'normal' },
+    universe: { universe_type: 'mascot_object' }
+  };
+  assert.equal(requiresFacelessAttestation(mascotAsset, mascotContext), false);
+  assert.doesNotThrow(() => validateApprovalAttestation(mascotAsset, false, mascotContext));
+
+  // Stylized 3D Visual Identity character sheet should NOT require faceless human attestation
+  const stylizedViAsset = { owner_type: 'visual_identity', asset_role: 'character_sheet', metadata_json: {} };
+  const stylizedViContext = {
+    viConfig: {
+      subject: { kind: 'stylized_3d_character', universe_slug: 'kawan-rumah' },
+      visual_language: { primary_style: 'stylized_3d_character' }
+    }
+  };
+  assert.equal(requiresFacelessAttestation(stylizedViAsset, stylizedViContext), false);
+  assert.doesNotThrow(() => validateApprovalAttestation(stylizedViAsset, false, stylizedViContext));
+
+  // Human faceless character / VI still requires attestation
+  const humanViAsset = { owner_type: 'visual_identity', asset_role: 'character_sheet', metadata_json: {} };
+  const humanViContext = {
+    viConfig: {
+      subject: { kind: 'human', faceless_mode: 'hands_only' },
+      visual_language: { primary_style: 'cinematic_realistic' }
+    }
+  };
+  assert.equal(requiresFacelessAttestation(humanViAsset, humanViContext), true);
+  assert.throws(() => validateApprovalAttestation(humanViAsset, false, humanViContext), /Faceless compliance attestation/);
+  assert.doesNotThrow(() => validateApprovalAttestation(humanViAsset, true, humanViContext));
 });
 
