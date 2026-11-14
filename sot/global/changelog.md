@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.48.7 — Sidebar Universe Manager, Reference Asset Prompt Fix, and Stylized 3D Start-Frame Ref Wiring (14/11/2026)
+- Restore Universe Manager (/settings/universes) and rename Multiplier Labs in Sidebar
+- Fix reference-asset-prompt-builder for stylized 3D characters and config_json
+- Resolve per-clip character and lineup start-frame references for VI stylized 3D + Universe without max_3d_clips clamp
+
 ## V2.48.6 — Fix stylized 3D character visual pipeline & enable_audio_segment (14/11/2026)
 - Bypass Scene Director, POV human hands framing, and faceless QC for stylized 3D character VIs
 - Normalize DB string enable_audio_segment and expose voice_segments schema for multi-voice character dialog
