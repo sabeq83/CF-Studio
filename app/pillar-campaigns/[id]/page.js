@@ -1224,6 +1224,30 @@ export default function PillarCampaignDetailPage() {
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {parsed.resolved_scene_brief && (
+          <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border-color)', padding: 14, borderRadius: 8, fontSize: '0.82rem', display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+              <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>🎬 Scene Director Brief</span>
+              {parsed.diversity_guard && (
+                <span style={{
+                  fontSize: '0.72rem',
+                  fontWeight: 600,
+                  padding: '2px 8px',
+                  borderRadius: 999,
+                  background: parsed.diversity_guard.status === 'warning' ? 'var(--status-warning-soft)' : 'var(--status-info-soft)',
+                  color: parsed.diversity_guard.status === 'warning' ? 'var(--status-warning)' : 'var(--status-info)'
+                }}>
+                  {parsed.diversity_guard.status === 'warning'
+                    ? `⚠️ Diversity Guard (${parsed.diversity_guard.warnings?.[0]?.message || 'Perlu variasi lokasi'})`
+                    : `✓ Diversity OK (${parsed.diversity_guard.stats?.total_checked || 1} video)`}
+                </span>
+              )}
+            </div>
+            <div style={{ color: 'var(--text-muted)' }}>
+              <strong>Lokasi:</strong> {parsed.resolved_scene_brief.location} · <strong>Waktu:</strong> {parsed.resolved_scene_brief.time_of_day || 'Netral'} · <strong>Angle:</strong> {parsed.resolved_scene_brief.angle_label}
+            </div>
+          </div>
+        )}
         {parsed.analysis_summary && (
           <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border-color)', padding: 16, borderRadius: 8, fontSize: '0.85rem' }}>
             <div style={{ fontWeight: 600, marginBottom: 4, color: 'var(--accent-color)' }}>Ringkasan Strategi Konten Organik:</div>

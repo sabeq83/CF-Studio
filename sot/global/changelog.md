@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.47.0 — Planner Scene Director (K1-K6) & Brand Identity Cards with R1-R6 fixes (14/11/2026)
+- Add deterministic Scene Brief extractor (K1), 30 Strategic Angle visual formats (K3), and Scene Director prompt hierarchy behind planner_scene_director flag
+- Add K6 Brand Identity Card v3 presets (DapurBotani, SiasatSehat, NutriBlend), catalog strip-location, and Diversity Guard report_only telemetry (K2, K4, K5, K6)
+- Apply review fixes R1-R6: split product mentions into bridge-only action guide, prevent toples prop leak, brighten DapurBotani night mood, add cafe/car/prayer/kids/study locations and raw ID translation
+
 ## V2.46.4 — Longgarkan filter kata lemak konteks kuliner tanpa melonggarkan klaim medis/pelangsing (14/11/2026)
 - Hapus token tunggal lemak dari STRICT_RAMUAN_CLAIM_TOKENS_RE dan ganti dengan daftar frasa klaim medis/pelangsing lengkap
 - Tambahkan unit test untuk memastikan frasa kuliner seperti sisa lemak harian lolos sementara melunturkan lemak perut dan timbunan lemak tubuh tetap diblokir
