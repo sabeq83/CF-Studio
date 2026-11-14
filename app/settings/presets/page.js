@@ -9,6 +9,14 @@ import { getWordsPerClipOptions, getDefaultWordsPerClip, VIDEO_MODELS } from '@/
 import { GEMINI_VOICES, MINIMAX_VOICES, MINIMAX_ENGLISH_VOICES, ELEVENLABS_ID_VOICES, ELEVENLABS_EN_VOICES, ELEVENLABS_MODELS } from '@/lib/voice-constants';
 import { GOOGLE_VOICE_PERSONAS } from '@/lib/veo-native-audio';
 import { FINISHING_TEMPLATE_REGISTRY, getFinishingTemplateMeta, getEffectiveFinishingOverride } from '@/lib/finishing-template-registry';
+import {
+  VO_CONTENT_CONTRACT_OPTIONS,
+  VO_QUALITY_GATE_OPTIONS,
+  DEFAULT_VO_CONTENT_CONTRACT,
+  DEFAULT_VO_QUALITY_GATE,
+  normalizeVoContentContract,
+  normalizeVoQualityGate
+} from '@/lib/vo-contract-registry';
 import FinishingTemplatePreview from '../../components/FinishingTemplatePreview';
 
 const initialForm = {
@@ -94,7 +102,9 @@ const initialForm = {
   transition_duration: 0.5,
   finishing_template: 'none',
   caption_mode: 'hybrid',
-  loudness_target: -14
+  loudness_target: -14,
+  vo_content_contract: DEFAULT_VO_CONTENT_CONTRACT,
+  vo_quality_gate: DEFAULT_VO_QUALITY_GATE
 };
 
 function mapPresetToForm(p) {
@@ -196,7 +206,9 @@ function mapPresetToForm(p) {
         finishing_template: effectiveWf.finishing_template,
         caption_mode: effectiveWf.caption_mode,
         loudness_target: effectiveWf.loudness_target,
-        _wf_caption_mode_is_default: effectiveWf.caption_mode_is_default
+        _wf_caption_mode_is_default: effectiveWf.caption_mode_is_default,
+        vo_content_contract: normalizeVoContentContract(wf.vo_content_contract),
+        vo_quality_gate: normalizeVoQualityGate(wf.vo_quality_gate)
       };
     })()
   };
@@ -300,7 +312,9 @@ function mapFormToPayload(f) {
         transition_duration: Number(f.transition_duration ?? 0.5),
         finishing_template: f.finishing_template || 'none',
         ...(f.caption_mode && !f._wf_caption_mode_is_default ? { caption_mode: f.caption_mode } : {}),
-        loudness_target: Number(f.loudness_target ?? -14)
+        loudness_target: Number(f.loudness_target ?? -14),
+        vo_content_contract: normalizeVoContentContract(f.vo_content_contract),
+        vo_quality_gate: normalizeVoQualityGate(f.vo_quality_gate)
       }
     }
   };
@@ -862,6 +876,7 @@ export default function PresetsPage() {
                         <select className="form-select" value={form.narrative_mode} onChange={e => setForm({ ...form, narrative_mode: e.target.value })}>
                           <option value="auto">Auto (AI Decision)</option>
                           <option value="Storytelling">Storytelling</option>
+                          <option value="Tips/Tutorial">Tips / Tutorial</option>
                           <option value="Problem-Solution">Problem-Solution</option>
                           <option value="Educational">Educational</option>
                           <option value="Promo-Hook">Promo-Hook</option>
@@ -1598,6 +1613,36 @@ export default function PresetsPage() {
                       >
                         <option value="-14">-14 LUFS (Standar TikTok &amp; Reels)</option>
                         <option value="-16">-16 LUFS (Calm / Shorts)</option>
+                      </select>
+                    </label>
+                  </div>
+
+                  <div>
+                    <label className="form-label">
+                      VO Content Contract
+                      <select
+                        className="form-select"
+                        value={form.vo_content_contract || DEFAULT_VO_CONTENT_CONTRACT}
+                        onChange={e => setForm({ ...form, vo_content_contract: e.target.value })}
+                      >
+                        {VO_CONTENT_CONTRACT_OPTIONS.map(opt => (
+                          <option key={opt.id} value={opt.id}>{opt.label}</option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+
+                  <div>
+                    <label className="form-label">
+                      VO Quality Gate
+                      <select
+                        className="form-select"
+                        value={form.vo_quality_gate || DEFAULT_VO_QUALITY_GATE}
+                        onChange={e => setForm({ ...form, vo_quality_gate: e.target.value })}
+                      >
+                        {VO_QUALITY_GATE_OPTIONS.map(opt => (
+                          <option key={opt.id} value={opt.id}>{opt.label}</option>
+                        ))}
                       </select>
                     </label>
                   </div>

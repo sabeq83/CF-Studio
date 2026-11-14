@@ -2005,6 +2005,91 @@ function CampaignDetailPageContent() {
                                       );
                                     })()}
 
+                                    {/* V4 VO Quality Gate Badge & Auto-Rewrite */}
+                                    {(task.vo_quality_score_json || (task.vo_quality_status && task.vo_quality_status !== 'skipped')) && (() => {
+                                      let vq = null;
+                                      try {
+                                        vq = typeof task.vo_quality_score_json === 'string'
+                                          ? JSON.parse(task.vo_quality_score_json)
+                                          : task.vo_quality_score_json;
+                                      } catch (_) {}
+                                      const vqStatus = task.vo_quality_status || vq?.status || 'pass';
+                                      const isPass = vqStatus === 'pass' || vqStatus === 'pass_after_rewrite';
+                                      const isBlocked = vqStatus === 'blocked';
+                                      const badgeBg = isPass ? 'var(--status-success-soft)' : (isBlocked ? 'var(--status-danger-soft)' : 'var(--status-warning-soft)');
+                                      const badgeColor = isPass ? 'var(--status-success)' : (isBlocked ? 'var(--status-danger)' : 'var(--status-warning)');
+                                      return (
+                                        <div style={{
+                                          background: 'var(--surface-raised)',
+                                          border: `1px solid ${badgeColor}`,
+                                          borderRadius: '10px',
+                                          padding: '12px 16px',
+                                          marginTop: 12,
+                                          display: 'flex',
+                                          flexDirection: 'column',
+                                          gap: '8px'
+                                        }}>
+                                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                                              <strong style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>📊 VO Quality Gate (V4)</strong>
+                                              <span style={{
+                                                fontSize: '0.7rem',
+                                                fontWeight: 700,
+                                                textTransform: 'uppercase',
+                                                padding: '2px 8px',
+                                                borderRadius: '14px',
+                                                background: badgeBg,
+                                                color: badgeColor,
+                                                border: `1px solid ${badgeColor}`
+                                              }}>
+                                                {vqStatus}
+                                              </span>
+                                              {typeof vq?.score === 'number' && (
+                                                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                                                  Skor: {vq.score}/100
+                                                </span>
+                                              )}
+                                            </div>
+                                            <button
+                                              type="button"
+                                              className="btn btn-primary btn-sm"
+                                              disabled={actionLoading[task.id]}
+                                              onClick={async () => {
+                                                try {
+                                                  setActionLoading(prev => ({ ...prev, [task.id]: true }));
+                                                  const res = await fetch('/api/v2/vo-quality/rewrite', {
+                                                    method: 'POST',
+                                                    headers: { 'Content-Type': 'application/json' },
+                                                    body: JSON.stringify({ target_type: 'multiplier_task', id: task.id })
+                                                  });
+                                                  const data = await res.json();
+                                                  if (data.success) {
+                                                    showToast(`VO Multiplier diperbaiki (${data.vo_quality_status}, skor ${data.vo_quality_score_json?.score ?? '-'})`);
+                                                    await fetchTasks();
+                                                  } else {
+                                                    showToast(data.error || 'Gagal memperbaiki VO', 'error');
+                                                  }
+                                                } catch (e) {
+                                                  showToast(e.message, 'error');
+                                                } finally {
+                                                  setActionLoading(prev => ({ ...prev, [task.id]: false }));
+                                                }
+                                              }}
+                                            >
+                                              ✨ Perbaiki VO Otomatis
+                                            </button>
+                                          </div>
+                                          {Array.isArray(vq?.reasons) && vq.reasons.length > 0 && (
+                                            <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                                              {vq.reasons.map((r, rIdx) => (
+                                                <li key={rIdx}>{r}</li>
+                                              ))}
+                                            </ul>
+                                          )}
+                                        </div>
+                                      );
+                                    })()}
+
                                     {/* Action buttons */}
                                     <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', borderTop: '1px solid var(--border)', paddingTop: 16, marginTop: 16 }}>
                                       <button

@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.45.0 — Perbaikan Kualitas Narasi VO End-to-End (Fase V0-V5) (14/11/2026)
+- Tambah flag vo_content_contract dan vo_quality_gate default off beserta filter klaim herbal terpusat dan perbaikan compliance Multiplier (Fase V0)
+- Implementasi Content Payload Layer di Content Planner & worker fallback plus blok kontrak VO bahasa-sadar id-ID/en-US, Tips/Tutorial, dan Source Recipe Contract Multiplier (Fase V1-V3)
+- Implementasi validator vo-quality-validator, quality gate warn/enforce dengan 1x auto-rewrite, API analitik/rewrite VO, MCP cf_get_vo_quality_report, dan UI review berbasis semantic CSS tokens (Fase V4)
+- Tambah field fakta produk V5 (cara_pakai, takaran_label, penyimpanan, rasa_tekstur, fakta_produksi), pemisahan instruksi pemakaian vs fakta produksi, serta kontrak parameter langkah resep konkret dan anti-filler (Fase V5)
+
 ## V2.44.22 — Fix Pillar G-Labs Zombie Polling Loop on Expired 404 Clips & Scheduler Active Item Guard (14/11/2026)
 - Deteksi HTTP 404/410 pada downloadAndUploadPillarClip dan downloadAndUploadReClip serta invalidasi cache glabs_tasks yang sudah expired di G-Labs Worker
 - Normalisasi respons HTTP 404 pada getTaskStatus di lib/webhook-client.js menjadi status failed (TASK_NOT_FOUND)

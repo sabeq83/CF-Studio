@@ -122,6 +122,7 @@ export const PUT = withTenantContext(async (req, { params }) => {
         'is_in_packaging', 'packaging_status', 'packaging_type', 'packaging_notes',
         'i2v_action_prompt', 't2i_prompt', 'clean_photo_t2i_prompt',
         'product_truth', 'geometric_truth', 'photo_provider',
+        'cara_pakai', 'takaran_label', 'penyimpanan', 'rasa_tekstur', 'fakta_produksi',
         'enrichment_status', 'photo_status', 'extraction_status',
         'enrichment_error', 'photo_error', 'page'
       ]);
@@ -153,6 +154,7 @@ export const PUT = withTenantContext(async (req, { params }) => {
       'generated_photo_url', 'active_photo', 'is_in_packaging', 'packaging_status',
       'packaging_type', 'packaging_notes', 'i2v_action_prompt', 't2i_prompt',
       'clean_photo_t2i_prompt', 'product_truth', 'geometric_truth',
+      'cara_pakai', 'takaran_label', 'penyimpanan', 'rasa_tekstur', 'fakta_produksi',
       'enrichment_status', 'photo_status', 'photo_provider', 'photo_task_id',
       'enrichment_error', 'photo_error', 'page'
     ];

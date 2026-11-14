@@ -3,6 +3,7 @@ import path from 'node:path';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { FINISHING_TEMPLATE_IDS } from '../../lib/finishing-template-registry.js';
+import { VO_CONTENT_CONTRACT_VALUES, VO_QUALITY_GATE_VALUES } from '../../lib/vo-contract-registry.js';
 
 async function resolvePhotoInput({ photo_base64, photo_url, photo_file_path, filename }) {
   if (photo_base64) {
@@ -520,6 +521,8 @@ export function createCfStudioServer(rawRequest) {
       finishing_template: z.enum(FINISHING_TEMPLATE_IDS).optional(),
       caption_mode: z.enum(['hybrid', 'keyword_only', 'full']).optional(),
       loudness_target: z.number().min(-24).max(-6).optional(),
+      vo_content_contract: z.enum(VO_CONTENT_CONTRACT_VALUES).optional(),
+      vo_quality_gate: z.enum(VO_QUALITY_GATE_VALUES).optional(),
       preset_key: z.string().max(100).default('product_campaign'),
       execution_mode: z.enum(['full_autopilot', 'creative_review']).default('full_autopilot')
     },
@@ -592,6 +595,8 @@ export function createCfStudioServer(rawRequest) {
       finishing_template: z.enum(FINISHING_TEMPLATE_IDS).optional(),
       caption_mode: z.enum(['hybrid', 'keyword_only', 'full']).optional(),
       loudness_target: z.number().min(-24).max(-6).optional(),
+      vo_content_contract: z.enum(VO_CONTENT_CONTRACT_VALUES).optional(),
+      vo_quality_gate: z.enum(VO_QUALITY_GATE_VALUES).optional(),
       preset_key: z.string().max(100).default('brand_editorial_campaign'),
       execution_mode: z.enum(['full_autopilot', 'creative_review']).default('full_autopilot')
     },
@@ -617,6 +622,8 @@ export function createCfStudioServer(rawRequest) {
       finishing_template: z.enum(FINISHING_TEMPLATE_IDS).optional(),
       caption_mode: z.enum(['hybrid', 'keyword_only', 'full']).optional(),
       loudness_target: z.number().min(-24).max(-6).optional(),
+      vo_content_contract: z.enum(VO_CONTENT_CONTRACT_VALUES).optional(),
+      vo_quality_gate: z.enum(VO_QUALITY_GATE_VALUES).optional(),
       preset_key: z.string().max(100).optional(),
       execution_mode: z.enum(['full_autopilot', 'creative_review']).default('full_autopilot')
     },
@@ -675,6 +682,8 @@ export function createCfStudioServer(rawRequest) {
       finishing_template: z.enum(FINISHING_TEMPLATE_IDS).optional(),
       caption_mode: z.enum(['hybrid', 'keyword_only', 'full']).optional(),
       loudness_target: z.number().min(-24).max(-6).optional(),
+      vo_content_contract: z.enum(VO_CONTENT_CONTRACT_VALUES).optional(),
+      vo_quality_gate: z.enum(VO_QUALITY_GATE_VALUES).optional(),
       preset_key: z.string().max(100).default('multiplier_deconstruct_remix'),
       execution_mode: z.enum(['full_autopilot', 'creative_review']).default('full_autopilot')
     },
@@ -808,6 +817,8 @@ export function createCfStudioServer(rawRequest) {
     finishing_template: z.enum(FINISHING_TEMPLATE_IDS).optional(),
     caption_mode: z.enum(['hybrid', 'keyword_only', 'full']).optional(),
     loudness_target: z.number().min(-24).max(-6).optional(),
+    vo_content_contract: z.enum(VO_CONTENT_CONTRACT_VALUES).optional(),
+    vo_quality_gate: z.enum(VO_QUALITY_GATE_VALUES).optional(),
     enable_sfx: z.boolean().optional(),
     enable_bgm: z.boolean().optional(),
     ffmpeg_sfx_volume: z.number().optional(),
@@ -1465,14 +1476,36 @@ export function createCfStudioServer(rawRequest) {
 
   register(
     'cf_update_preset',
-    'Update an existing custom operator preset.',
+    'Update an existing custom operator preset (supports workflow VO flags vo_content_contract & vo_quality_gate).',
     {
       key: z.string().regex(/^[a-z0-9][a-z0-9_-]{2,63}$/),
       label: z.string().max(200).optional(),
+      vo_content_contract: z.enum(VO_CONTENT_CONTRACT_VALUES).optional(),
+      vo_quality_gate: z.enum(VO_QUALITY_GATE_VALUES).optional(),
       config: z.record(z.any()).optional()
     },
     false,
-    ({ key, ...args }) => request(`/api/v2/operator-presets/${encodeURIComponent(key)}`, { method: 'PUT', body: args })
+    async ({ key, vo_content_contract, vo_quality_gate, config, ...args }) => {
+      let nextConfig = config;
+      if ((vo_content_contract !== undefined || vo_quality_gate !== undefined)) {
+        if (!nextConfig) {
+          const current = await request(`/api/v2/operator-presets/${encodeURIComponent(key)}`);
+          nextConfig = current?.preset ? { ...current.preset } : {};
+        }
+        nextConfig = {
+          ...nextConfig,
+          workflow: {
+            ...(nextConfig.workflow || {}),
+            ...(vo_content_contract !== undefined ? { vo_content_contract } : {}),
+            ...(vo_quality_gate !== undefined ? { vo_quality_gate } : {})
+          }
+        };
+      }
+      return request(`/api/v2/operator-presets/${encodeURIComponent(key)}`, {
+        method: 'PUT',
+        body: { ...args, ...(nextConfig ? { config: nextConfig } : {}) }
+      });
+    }
   );
 
   // 8. Viral Deconstruction & Review (Pilar 4 & 5: Viral Blueprint & Review)
@@ -1696,6 +1729,21 @@ export function createCfStudioServer(rawRequest) {
     {},
     true,
     () => request('/api/v2/dashboard/stats')
+  );
+
+  register(
+    'cf_get_vo_quality_report',
+    'Get weekly VO quality gate analytics report aggregated per brand (pass rate, anchor ratio, vague words, claim hits, top reasons).',
+    {
+      days: z.number().int().min(1).max(90).default(7),
+      brand: z.string().max(120).optional()
+    },
+    true,
+    ({ days, brand }) => {
+      const qs = new URLSearchParams({ days: String(days || 7) });
+      if (brand) qs.set('brand', brand);
+      return request(`/api/v2/analytics/vo-quality?${qs.toString()}`);
+    }
   );
 
   // ==========================================

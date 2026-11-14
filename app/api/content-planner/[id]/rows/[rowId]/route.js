@@ -23,8 +23,14 @@ export const PATCH = withTenantContext(async (request, { params }, user) => {
       'pillar', 'category_cep', 'ws_matrix', 'context', 'vfo', 'strategic_angle',
       'hook', 'visual_action', 'product', 'is_locked',
       'main_character', 'supporting_characters', 'story_premise', 'pet_problem',
-      'product_role', 'product_reveal_beat', 'universe_profile'
+      'product_role', 'product_reveal_beat', 'universe_profile', 'content_payload_json'
     ];
+
+    if (body.content_payload !== undefined && body.content_payload_json === undefined) {
+      body.content_payload_json = typeof body.content_payload === 'string'
+        ? body.content_payload
+        : JSON.stringify(body.content_payload);
+    }
 
     const updates = [];
     const values = [];

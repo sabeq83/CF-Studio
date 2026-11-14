@@ -2197,6 +2197,113 @@ export default function PillarCampaignDetailPage() {
           </div>
         )}
 
+        {/* V4 VO Quality Gate Report & Auto-Rewrite */}
+        {(item.vo_quality_score_json || (item.vo_quality_status && item.vo_quality_status !== 'skipped')) && (() => {
+          let vq = null;
+          try {
+            vq = typeof item.vo_quality_score_json === 'string'
+              ? JSON.parse(item.vo_quality_score_json)
+              : item.vo_quality_score_json;
+          } catch (_) {}
+          const status = item.vo_quality_status || vq?.status || 'pass';
+          const isPass = status === 'pass' || status === 'pass_after_rewrite';
+          const isBlocked = status === 'blocked';
+          const badgeBg = isPass ? 'var(--status-success-soft)' : (isBlocked ? 'var(--status-danger-soft)' : 'var(--status-warning-soft)');
+          const badgeColor = isPass ? 'var(--status-success)' : (isBlocked ? 'var(--status-danger)' : 'var(--status-warning)');
+          return (
+            <div style={{
+              background: 'var(--surface-raised)',
+              border: `1px solid ${badgeColor}`,
+              borderRadius: '12px',
+              padding: '16px 20px',
+              marginBottom: '20px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                  <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>📊 VO Quality Gate (V4)</strong>
+                  <span style={{
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    padding: '3px 10px',
+                    borderRadius: '20px',
+                    background: badgeBg,
+                    color: badgeColor,
+                    border: `1px solid ${badgeColor}`
+                  }}>
+                    {status}
+                  </span>
+                  {typeof vq?.score === 'number' && (
+                    <span style={{
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      padding: '3px 10px',
+                      borderRadius: '20px',
+                      background: 'var(--surface-interactive)',
+                      color: 'var(--text-primary)',
+                      border: '1px solid var(--border-subtle)'
+                    }}>
+                      Skor: {vq.score}/100
+                    </span>
+                  )}
+                  {vq?.metrics && (
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                      Anchor: {Math.round((vq.metrics.anchor_ratio || 0) * 100)}% · Samar: {vq.metrics.vague_without_anchor ?? 0} · Kata maks: {vq.metrics.max_words_per_clip ?? 0}
+                    </span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  disabled={Boolean(triggering[`vq_${item.id}`]) || isReadOnly}
+                  onClick={async () => {
+                    try {
+                      setTriggering(prev => ({ ...prev, [`vq_${item.id}`]: true }));
+                      const res = await fetch('/api/v2/vo-quality/rewrite', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ target_type: 'pillar_item', id: item.id })
+                      });
+                      const data = await res.json();
+                      if (data.success) {
+                        setToast({ type: 'success', msg: `VO diperbaiki (${data.vo_quality_status}, skor ${data.vo_quality_score_json?.score ?? '-'})` });
+                        await fetchDetail();
+                      } else {
+                        setToast({ type: 'error', msg: data.error || 'Gagal memperbaiki VO' });
+                      }
+                    } catch (e) {
+                      setToast({ type: 'error', msg: e.message });
+                    } finally {
+                      setTriggering(prev => ({ ...prev, [`vq_${item.id}`]: false }));
+                    }
+                  }}
+                  style={{
+                    background: 'var(--action-primary)',
+                    color: 'var(--on-action-primary)',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '7px 14px',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    cursor: triggering[`vq_${item.id}`] ? 'wait' : 'pointer'
+                  }}
+                >
+                  {triggering[`vq_${item.id}`] ? '⏳ Memperbaiki VO...' : '✨ Perbaiki VO Otomatis'}
+                </button>
+              </div>
+              {Array.isArray(vq?.reasons) && vq.reasons.length > 0 && (
+                <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  {vq.reasons.map((r, rIdx) => (
+                    <li key={rIdx}>{r}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          );
+        })()}
+
         {/* TikTok Safe Compliance Report & VO Selector */}
         {campaign.enable_vo_audit === 1 && item.compliance_status && (
           <div style={{

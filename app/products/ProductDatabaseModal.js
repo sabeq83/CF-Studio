@@ -37,6 +37,11 @@ export default function ProductDatabaseModal({
     clean_photo_t2i_prompt: product?.clean_photo_t2i_prompt || '',
     product_truth: product?.product_truth || '',
     geometric_truth: product?.geometric_truth || '',
+    cara_pakai: product?.cara_pakai || '',
+    takaran_label: product?.takaran_label || '',
+    penyimpanan: product?.penyimpanan || '',
+    rasa_tekstur: product?.rasa_tekstur || '',
+    fakta_produksi: product?.fakta_produksi || '',
     photo_provider: product?.photo_provider || 'system_default',
   });
 
@@ -85,6 +90,11 @@ export default function ProductDatabaseModal({
           clean_photo_t2i_prompt: p.clean_photo_t2i_prompt || '',
           product_truth: p.product_truth || '',
           geometric_truth: p.geometric_truth || '',
+          cara_pakai: p.cara_pakai || '',
+          takaran_label: p.takaran_label || '',
+          penyimpanan: p.penyimpanan || '',
+          rasa_tekstur: p.rasa_tekstur || '',
+          fakta_produksi: p.fakta_produksi || '',
           photo_provider: p.photo_provider || 'system_default',
         });
       }
@@ -196,6 +206,11 @@ export default function ProductDatabaseModal({
         clean_photo_t2i_prompt: formData.clean_photo_t2i_prompt.trim() || null,
         product_truth: formData.product_truth.trim() || null,
         geometric_truth: formData.geometric_truth.trim() || null,
+        cara_pakai: formData.cara_pakai.trim() || null,
+        takaran_label: formData.takaran_label.trim() || null,
+        penyimpanan: formData.penyimpanan.trim() || null,
+        rasa_tekstur: formData.rasa_tekstur.trim() || null,
+        fakta_produksi: formData.fakta_produksi.trim() || null,
         photo_provider: formData.photo_provider !== 'system_default' ? formData.photo_provider : null,
       };
       payload.set('product', JSON.stringify(productPayload));
@@ -660,6 +675,141 @@ export default function ProductDatabaseModal({
                         resize: 'vertical'
                       }}
                     />
+                  </div>
+
+                  {/* V5: VO Narration Truth Fields (Opsional — Anti-Halusinasi Narasi) */}
+                  <div
+                    style={{
+                      marginTop: '6px',
+                      padding: '14px',
+                      borderRadius: 'var(--radius-md)',
+                      background: 'var(--surface-subtle)',
+                      border: '1px solid var(--border-subtle)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '12px'
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)' }}>
+                        Fakta Pemakaian &amp; Narasi VO (V5 — Opsional)
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                        Pisahkan tindakan penonton (Cara Pakai &amp; Takaran) dari Fakta Produksi brand agar narasi VO tidak mengarang angka atau mencampur proses pabrik sebagai langkah penonton.
+                      </div>
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px', color: 'var(--text-secondary)' }}>
+                        Cara Pakai (Tindakan Penonton)
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.cara_pakai}
+                        onChange={e => setFormData({ ...formData, cara_pakai: e.target.value })}
+                        placeholder="Contoh: Ambil 1 sendok teh madu beserta 1 siung bawang tunggal, langsung konsumsi"
+                        style={{
+                          width: '100%',
+                          padding: '9px 12px',
+                          borderRadius: 'var(--radius-sm)',
+                          border: '1px solid var(--border-subtle)',
+                          background: 'var(--input-bg)',
+                          color: 'var(--text-primary)',
+                          fontSize: '13px',
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px', color: 'var(--text-secondary)' }}>
+                          Takaran Label
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.takaran_label}
+                          onChange={e => setFormData({ ...formData, takaran_label: e.target.value })}
+                          placeholder="Contoh: 1-2 siung/hari (sesuai label)"
+                          style={{
+                            width: '100%',
+                            padding: '9px 12px',
+                            borderRadius: 'var(--radius-sm)',
+                            border: '1px solid var(--border-subtle)',
+                            background: 'var(--input-bg)',
+                            color: 'var(--text-primary)',
+                            fontSize: '13px',
+                            outline: 'none'
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px', color: 'var(--text-secondary)' }}>
+                          Penyimpanan
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.penyimpanan}
+                          onChange={e => setFormData({ ...formData, penyimpanan: e.target.value })}
+                          placeholder="Contoh: Tutup rapat di suhu ruang"
+                          style={{
+                            width: '100%',
+                            padding: '9px 12px',
+                            borderRadius: 'var(--radius-sm)',
+                            border: '1px solid var(--border-subtle)',
+                            background: 'var(--input-bg)',
+                            color: 'var(--text-primary)',
+                            fontSize: '13px',
+                            outline: 'none'
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px', color: 'var(--text-secondary)' }}>
+                          Rasa &amp; Tekstur
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.rasa_tekstur}
+                          onChange={e => setFormData({ ...formData, rasa_tekstur: e.target.value })}
+                          placeholder="Contoh: Manis legit karamel, lembut dikunyah"
+                          style={{
+                            width: '100%',
+                            padding: '9px 12px',
+                            borderRadius: 'var(--radius-sm)',
+                            border: '1px solid var(--border-subtle)',
+                            background: 'var(--input-bg)',
+                            color: 'var(--text-primary)',
+                            fontSize: '13px',
+                            outline: 'none'
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px', color: 'var(--text-secondary)' }}>
+                          Fakta Produksi Brand (Anchor Only)
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.fakta_produksi}
+                          onChange={e => setFormData({ ...formData, fakta_produksi: e.target.value })}
+                          placeholder="Contoh: Difermentasi minimal 3 bulan dalam madu hutan mentah"
+                          style={{
+                            width: '100%',
+                            padding: '9px 12px',
+                            borderRadius: 'var(--radius-sm)',
+                            border: '1px solid var(--border-subtle)',
+                            background: 'var(--input-bg)',
+                            color: 'var(--text-primary)',
+                            fontSize: '13px',
+                            outline: 'none'
+                          }}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}

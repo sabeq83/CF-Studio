@@ -10,6 +10,7 @@ import {
 } from '@/lib/operator-presets';
 import { getSetting, setSetting } from '@/lib/db';
 import { parseFinishingOverrideFields } from '@/lib/finishing-template-registry';
+import { parseVoOverrideFields } from '@/lib/vo-contract-registry';
 
 export const dynamic = 'force-dynamic';
 
@@ -62,7 +63,11 @@ export const PUT = withTenantContext(async (request, { params }, user) => {
     if (parsedWf.error) {
       return NextResponse.json({ success: false, error: parsedWf.error }, { status: parsedWf.status || 400 });
     }
-    config.workflow = { ...config.workflow, ...parsedWf.updates };
+    const parsedVo = parseVoOverrideFields(config.workflow, { allowNull: true });
+    if (parsedVo.error) {
+      return NextResponse.json({ success: false, error: parsedVo.error }, { status: parsedVo.status || 400 });
+    }
+    config.workflow = { ...config.workflow, ...parsedWf.updates, ...parsedVo.updates };
   }
   all[key] = {
     ...config,

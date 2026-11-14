@@ -10,6 +10,7 @@ import {
 } from '@/lib/operator-presets';
 import { getSetting, setSetting } from '@/lib/db';
 import { parseFinishingOverrideFields } from '@/lib/finishing-template-registry';
+import { parseVoOverrideFields } from '@/lib/vo-contract-registry';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,7 +48,13 @@ function normalize(body, current = {}) {
       e.status = 400;
       throw e;
     }
-    config.workflow = { ...config.workflow, ...parsedWf.updates };
+    const parsedVo = parseVoOverrideFields(config.workflow, { allowNull: true });
+    if (parsedVo.error) {
+      const e = new Error(parsedVo.error);
+      e.status = 400;
+      throw e;
+    }
+    config.workflow = { ...config.workflow, ...parsedWf.updates, ...parsedVo.updates };
   }
   return {
     ...config,

@@ -984,10 +984,90 @@ export default function ContentPlannerWorkbench() {
                           )}
                         </td>
 
-                        {/* Column 9: Product / Content Subject */}
+                        {/* Column 9: Product / Content Subject + Content Payload Takeaways */}
                         <td style={{ padding: '12px', fontWeight: 600, color: 'var(--text-primary)' }}>
                           {planner?.planner_focus === 'brand_editorial' ? (row.content_subject || row.context) : (row.product_reference || row.product)}
                           {planner?.planner_focus === 'brand_editorial' && <div style={{ marginTop: '4px', fontSize: '10px', color: 'var(--text-muted)' }}>{row.cta_type || 'save'} · {row.commercial_intent || 'none'}</div>}
+                          {(() => {
+                            const cp = parseJsonSafe(row.content_payload_json, null);
+                            const isEditingPayload = editingCell?.rowId === row.id && editingCell?.field === 'content_payload_json';
+                            if (isEditingPayload) {
+                              let draftObj = parseJsonSafe(cellValue, { search_intent: '', search_answer: '', takeaways: [], needs_data: [] });
+                              if (!draftObj || typeof draftObj !== 'object') draftObj = { search_intent: '', search_answer: '', takeaways: [], needs_data: [] };
+                              const updateDraft = (patch) => setCellValue(JSON.stringify({ ...draftObj, ...patch }));
+                              return (
+                                <div style={{ marginTop: '8px', padding: '8px', background: 'var(--surface-raised)', border: '1px solid var(--border-strong)', borderRadius: '6px', fontWeight: 400, fontSize: '11px' }}>
+                                  <div style={{ marginBottom: '6px', fontWeight: 700, color: 'var(--text-primary)' }}>Edit Isi Konten (V1)</div>
+                                  <label style={{ display: 'block', color: 'var(--text-muted)', marginBottom: '2px' }}>Search Answer (&le;20 kata)</label>
+                                  <textarea
+                                    rows={2}
+                                    value={draftObj.search_answer || ''}
+                                    onChange={e => updateDraft({ search_answer: e.target.value })}
+                                    style={{ width: '100%', background: 'var(--input-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)', borderRadius: '4px', padding: '4px', marginBottom: '6px' }}
+                                  />
+                                  <label style={{ display: 'block', color: 'var(--text-muted)', marginBottom: '2px' }}>Takeaways (1 baris = Poin | Anchor)</label>
+                                  <textarea
+                                    rows={3}
+                                    value={(draftObj.takeaways || []).map(t => `${t.point || ''} | ${t.anchor || ''}`).join('\n')}
+                                    onChange={e => {
+                                      const parsedList = e.target.value.split('\n').slice(0, 3).map((line, i) => {
+                                        const [pt, ...rest] = line.split('|');
+                                        const prev = (draftObj.takeaways || [])[i] || {};
+                                        return {
+                                          point: (pt || '').trim(),
+                                          anchor: rest.join('|').trim(),
+                                          anchor_type: prev.anchor_type || 'kriteria',
+                                          source: prev.source || 'pengetahuan_umum'
+                                        };
+                                      }).filter(x => x.point || x.anchor);
+                                      updateDraft({ takeaways: parsedList });
+                                    }}
+                                    style={{ width: '100%', background: 'var(--input-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)', borderRadius: '4px', padding: '4px' }}
+                                  />
+                                  <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
+                                    <button onClick={() => handleCellSave(row.id, 'content_payload_json')} style={{ background: 'var(--action-primary)', border: 'none', color: 'var(--on-action-primary)', padding: '3px 8px', borderRadius: '4px', fontSize: '11px', cursor: 'pointer' }}>Simpan</button>
+                                    <button onClick={() => setEditingCell(null)} style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', padding: '3px 8px', borderRadius: '4px', fontSize: '11px', cursor: 'pointer' }}>Batal</button>
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return (
+                              <div style={{ marginTop: '8px', paddingTop: '6px', borderTop: '1px dashed var(--border-subtle)', fontWeight: 400, fontSize: '11px' }}>
+                                {cp ? (
+                                  <>
+                                    {cp.search_answer && (
+                                      <div style={{ color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                                        <strong style={{ color: 'var(--text-primary)' }}>Jawab:</strong> {cp.search_answer}
+                                      </div>
+                                    )}
+                                    {Array.isArray(cp.takeaways) && cp.takeaways.length > 0 && (
+                                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', color: 'var(--text-muted)' }}>
+                                        {cp.takeaways.slice(0, 3).map((t, ti) => (
+                                          <div key={ti}>• {t.point} <span style={{ color: 'var(--status-info)' }}>({t.anchor})</span></div>
+                                        ))}
+                                      </div>
+                                    )}
+                                    {Array.isArray(cp.needs_data) && cp.needs_data.length > 0 && (
+                                      <div style={{ marginTop: '3px', color: 'var(--status-warning)', fontSize: '10px' }}>Butuh data: {cp.needs_data.join(', ')}</div>
+                                    )}
+                                  </>
+                                ) : (
+                                  <span style={{ color: 'var(--text-muted)', fontSize: '10px' }}>Isi VO belum disusun</span>
+                                )}
+                                <div style={{ marginTop: '4px' }}>
+                                  <button
+                                    onClick={() => {
+                                      setEditingCell({ rowId: row.id, field: 'content_payload_json' });
+                                      setCellValue(JSON.stringify(cp || { search_intent: '', search_answer: '', takeaways: [], needs_data: [] }));
+                                    }}
+                                    style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 0, fontSize: '11px' }}
+                                  >
+                                    ✏️ Edit Takeaways &amp; Jawaban
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })()}
                         </td>
 
                         {/* Actions Column */}

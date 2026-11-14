@@ -3,6 +3,7 @@ import { getPillarCampaign, listPillarCampaignItems, getDb, updatePillarCampaign
 import path from 'path';
 import { withTenantContext } from '../../../../../lib/auth';
 import { parseFinishingOverrideFields } from '../../../../../lib/finishing-template-registry';
+import { parseVoOverrideFields } from '../../../../../lib/vo-contract-registry';
 
 export const GET = withTenantContext(async (request, { params }, user) => {
   try {
@@ -139,7 +140,11 @@ export const PATCH = withTenantContext(async (request, { params }, user) => {
     if (finishingParsed.error) {
       return NextResponse.json({ error: finishingParsed.error }, { status: finishingParsed.status });
     }
-    Object.assign(updates, finishingParsed.updates);
+    const voParsed = parseVoOverrideFields(body, { allowNull: true });
+    if (voParsed.error) {
+      return NextResponse.json({ error: voParsed.error }, { status: voParsed.status });
+    }
+    Object.assign(updates, finishingParsed.updates, voParsed.updates);
     
     if (Object.keys(updates).length === 0) {
       return NextResponse.json({ error: 'No valid update fields' }, { status: 400 });
