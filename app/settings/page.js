@@ -2,6 +2,7 @@
 
 import Sidebar from '../components/Sidebar';
 import { useEffect, useState, useRef } from 'react';
+import ExperimentSettingsPanel from './components/ExperimentSettingsPanel';
 
 export default function SettingsPage() {
   const [kbs, setKbs] = useState([]);
@@ -71,9 +72,6 @@ export default function SettingsPage() {
   const [geminiModelPrimary, setGeminiModelPrimary] = useState('gemini-3.6-flash');
   const [geminiModelFallback, setGeminiModelFallback] = useState('gemini-3.6-flash');
   const [geminiCustomModel, setGeminiCustomModel] = useState('');
-  const [startFrameQcModel, setStartFrameQcModel] = useState('');
-  const [startFrameQcBatch, setStartFrameQcBatch] = useState('off');
-  const [geminiQuotaBrake, setGeminiQuotaBrake] = useState('on');
   const [savingGeminiConfig, setSavingGeminiConfig] = useState(false);
 
   // Gemini API Pool Manager
@@ -149,7 +147,7 @@ export default function SettingsPage() {
   const [savingScraperConfig, setSavingScraperConfig] = useState(false);
 
   // Category Tabs & Collapsible Cards State
-  const [activeTab, setActiveTab] = useState('all'); // 'all' | 'ai' | 'storage' | 'automation'
+  const [activeTab, setActiveTab] = useState('all'); // 'all' | 'ai' | 'experiments' | 'storage' | 'automation'
   const [collapsedCards, setCollapsedCards] = useState({});
   const [currentTenantId, setCurrentTenantId] = useState('default_tenant');
 
@@ -164,6 +162,13 @@ export default function SettingsPage() {
     fetchPool();
     if (typeof window !== 'undefined') {
       setAppOrigin(window.location.origin);
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const tabParam = params.get('tab');
+        if (['all', 'ai', 'experiments', 'storage', 'automation'].includes(tabParam)) {
+          setActiveTab(tabParam);
+        }
+      } catch (e) {}
       try {
         const saved = localStorage.getItem('makna_settings_collapsed_cards');
         if (saved) setCollapsedCards(JSON.parse(saved));
@@ -323,9 +328,6 @@ export default function SettingsPage() {
         setGeminiCustomModel(primary);
       }
       setGeminiModelFallback(data.data.gemini_model_fallback || 'gemini-3.6-flash');
-      setStartFrameQcModel(data.data.start_frame_visual_qc_model || '');
-      setStartFrameQcBatch(data.data.start_frame_visual_qc_batch || 'off');
-      setGeminiQuotaBrake(data.data.gemini_quota_brake || 'on');
 
       setFbPageId(data.data.fb_page_id || '');
       setFbPageIds(data.data.fb_page_ids || '');
@@ -743,9 +745,6 @@ export default function SettingsPage() {
           gemini_smart_routing: geminiSmartRouting,
           gemini_model_primary: activePrimaryModel,
           gemini_model_fallback: geminiModelFallback,
-          start_frame_visual_qc_model: startFrameQcModel.trim(),
-          start_frame_visual_qc_batch: startFrameQcBatch,
-          gemini_quota_brake: geminiQuotaBrake,
         }),
       });
       const data = await res.json();
@@ -1239,6 +1238,7 @@ export default function SettingsPage() {
               {[
                 { id: 'all', label: '🌐 Semua Pengaturan' },
                 { id: 'ai', label: '🤖 Engine & AI Services' },
+                { id: 'experiments', label: '🧪 Fitur Eksperimen' },
                 { id: 'storage', label: '☁️ Storage & Cloud' },
                 { id: 'automation', label: '⚙️ Otomasi & Integrasi' }
               ].map(tab => (
@@ -1254,25 +1254,31 @@ export default function SettingsPage() {
               ))}
             </div>
 
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button
-                type="button"
-                onClick={expandAllCards}
-                className="btn btn-sm btn-secondary"
-                style={{ fontSize: '0.75rem', padding: '5px 10px' }}
-              >
-                📂 Buka Semua
-              </button>
-              <button
-                type="button"
-                onClick={collapseAllCards}
-                className="btn btn-sm btn-secondary"
-                style={{ fontSize: '0.75rem', padding: '5px 10px' }}
-              >
-                📁 Lipat Semua
-              </button>
-            </div>
+            {activeTab !== 'experiments' && (
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={expandAllCards}
+                  className="btn btn-sm btn-secondary"
+                  style={{ fontSize: '0.75rem', padding: '5px 10px' }}
+                >
+                  📂 Buka Semua
+                </button>
+                <button
+                  type="button"
+                  onClick={collapseAllCards}
+                  className="btn btn-sm btn-secondary"
+                  style={{ fontSize: '0.75rem', padding: '5px 10px' }}
+                >
+                  📁 Lipat Semua
+                </button>
+              </div>
+            )}
           </div>
+
+          {activeTab === 'experiments' && (
+            <ExperimentSettingsPanel onToast={showToast} onQuotaRefresh={fetchPool} />
+          )}
 
           {/* 1. CARD: Gemini API Configuration */}
           {renderCollapsibleCard('gemini_config', 'ai', 'Gemini API Configuration', '🔑', (
@@ -1444,77 +1450,37 @@ export default function SettingsPage() {
                     </div>
                   )}
 
-                  {/* Start Frame Visual QC Model & Batch Mode (K7.9 & K7.10) */}
-                  <div style={{ background: 'var(--surface-subtle)', border: '1px solid var(--border-subtle)', borderRadius: '10px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <div className="form-group" style={{ margin: 0 }}>
-                      <label className="form-label">🛡️ Model Khusus Start Frame Visual QC (`start_frame_visual_qc_model`)</label>
-                      <select
-                        className="form-input"
-                        value={['', 'gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.6-flash'].includes(startFrameQcModel) ? startFrameQcModel : '__custom'}
-                        onChange={(e) => {
-                          if (e.target.value === '__custom') setStartFrameQcModel('gemini-3.1-flash-lite');
-                          else setStartFrameQcModel(e.target.value);
-                        }}
-                        style={{ background: 'var(--input-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
-                      >
-                        <option value="">Default (Ikuti Cascade Compliance / Storyboard)</option>
-                        <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite (Hemat Kuota Free Pool — RPD Terpisah)</option>
-                        <option value="gemini-2.5-flash">gemini-2.5-flash (Akurasi Vision Seimbang — RPD Terpisah)</option>
-                        <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (Ringan & Stabil — RPD Terpisah)</option>
-                        <option value="gemini-3.6-flash">gemini-3.6-flash (Model Storyboard Utama)</option>
-                        <option value="__custom">Custom QC Model ID...</option>
-                      </select>
-                      {!['', 'gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.6-flash'].includes(startFrameQcModel) && (
-                        <input
-                          type="text"
-                          className="form-input"
-                          style={{ marginTop: '8px', background: 'var(--input-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
-                          placeholder="Contoh: gemini-3.1-flash-lite"
-                          value={startFrameQcModel}
-                          onChange={e => setStartFrameQcModel(e.target.value)}
-                        />
-                      )}
-                      <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '4px', marginBottom: 0 }}>
-                        Kuota Google AI Studio dihitung per model. Memisahkan model QC menjaga jatah RPD model Storyboard tidak ikut habis oleh Vision QC.
-                      </p>
-                    </div>
-
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                      <div>
-                        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>Mode Batch Start Frame Visual QC (`start_frame_visual_qc_batch`)</span>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                          Jika aktif (`on`), inspeksi semua klip dalam 1 video dilakukan dalam 1x panggilan Vision QC sekaligus mengecek konsistensi warna & lokasi antar-klip.
-                        </div>
+                  {/* Redirect callout to dedicated Fitur Eksperimen tab (single source of truth) */}
+                  <div
+                    style={{
+                      background: 'var(--surface-raised)',
+                      border: '1px solid var(--border-subtle)',
+                      borderLeft: '4px solid var(--action-primary)',
+                      borderRadius: '10px',
+                      padding: '14px 16px',
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      gap: '12px'
+                    }}
+                  >
+                    <div style={{ flex: '1 1 280px', minWidth: 0 }}>
+                      <div style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>
+                        🧪 Pemeriksa Gambar Otomatis, Rem Kuota & Fitur Eksperimen
                       </div>
-                      <select
-                        className="form-input"
-                        style={{ width: 'auto', minWidth: '185px', background: 'var(--input-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
-                        value={startFrameQcBatch}
-                        onChange={e => setStartFrameQcBatch(e.target.value)}
-                      >
-                        <option value="off">Off (Per-Klip — Default)</option>
-                        <option value="shadow">Shadow (Batch + Per-Klip Uji Banding)</option>
-                        <option value="on">On (1x Batch per Video)</option>
-                      </select>
-                    </div>
-
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap', paddingTop: '10px', borderTop: '1px solid var(--border-subtle)' }}>
-                      <div>
-                        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>Rem Kuota Harian Free Pool 15% (`gemini_quota_brake`)</span>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                          Menahan item baru saat sisa kuota Free Pool &lt;15% untuk mencegah error 429 beruntun. Reset harian Google mengikuti tengah malam Pacific Time ({poolSummary.reset_wib || '14:00 / 15:00 WIB'}). Retry 503/429 ikut dihitung agar pencatatan aplikasi lebih konservatif dari dashboard Google.
-                        </div>
+                      <div style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                        Pengaturan Sutradara Adegan, Mesin Metafora, Model & Mode Pemeriksa Gambar, serta Rem Kuota Harian sekarang dipusatkan di tab khusus agar lebih mudah dibaca per akun.
                       </div>
-                      <select
-                        className="form-input"
-                        style={{ width: 'auto', minWidth: '185px', background: 'var(--input-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
-                        value={geminiQuotaBrake}
-                        onChange={e => setGeminiQuotaBrake(e.target.value)}
-                      >
-                        <option value="on">On (Aktif — Default)</option>
-                        <option value="off">Off (Nonaktif / Izinkan Lanjut)</option>
-                      </select>
                     </div>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => setActiveTab('experiments')}
+                      style={{ whiteSpace: 'nowrap' }}
+                    >
+                      Atur di 🧪 Fitur Eksperimen →
+                    </button>
                   </div>
 
                   {/* 3. SMART MODULE-BASED MODEL ROUTING MATRIX (PAID TIER) */}

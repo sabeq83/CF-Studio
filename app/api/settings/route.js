@@ -3,13 +3,20 @@ import { getSetting, setSetting } from '@/lib/db';
 import { testGeminiConnection } from '@/lib/gemini';
 import { getCurrentUser, withTenantContext } from '@/lib/auth';
 import { isNewSecret, maskSecret } from '@/lib/secret-values';
+import {
+  canEditExperimentSettings,
+  EXPERIMENT_SETTING_KEYS,
+  EXPERIMENT_UNSET_DEFAULTS,
+  validateExperimentSettingsPayload,
+  saveTenantExperimentSettings
+} from '@/lib/experiment-settings';
 
 function requireSettingsAdmin(request) {
   const user = getCurrentUser(request);
   if (!user) {
     const error = new Error('Unauthorized'); error.status = 401; throw error;
   }
-  if (user.role !== 'admin') {
+  if (!canEditExperimentSettings(user.role)) {
     const error = new Error('Hanya Admin tenant yang dapat mengelola credential.'); error.status = 403; throw error;
   }
   return user;
@@ -17,7 +24,7 @@ function requireSettingsAdmin(request) {
 
 export const GET = withTenantContext(async (request, _context, user) => {
   try {
-    if (user.role !== 'admin') {
+    if (!canEditExperimentSettings(user.role)) {
       return NextResponse.json({ success: false, error: 'Hanya Admin tenant yang dapat mengelola credential.' }, { status: 403 });
     }
     const { ensureDbCachesLoaded } = await import('@/lib/db');
@@ -45,10 +52,13 @@ export const GET = withTenantContext(async (request, _context, user) => {
         gemini_smart_routing: await getSetting('gemini_smart_routing') || 'on',
         gemini_model_primary: await getSetting('gemini_model_primary') || 'gemini-3.7-flash',
         gemini_model_fallback: await getSetting('gemini_model_fallback') || 'gemini-3.6-flash',
-        start_frame_visual_qc: await getSetting('start_frame_visual_qc') || 'off',
-        start_frame_visual_qc_batch: await getSetting('start_frame_visual_qc_batch') || 'off',
-        start_frame_visual_qc_model: await getSetting('start_frame_visual_qc_model') || '',
-        gemini_quota_brake: await getSetting('gemini_quota_brake') || 'on',
+        planner_scene_director: (await getSetting('planner_scene_director', false)) ?? EXPERIMENT_UNSET_DEFAULTS.planner_scene_director,
+        metaphor_kit_engine: (await getSetting('metaphor_kit_engine', false)) ?? EXPERIMENT_UNSET_DEFAULTS.metaphor_kit_engine,
+        start_frame_visual_qc: (await getSetting('start_frame_visual_qc', false)) ?? EXPERIMENT_UNSET_DEFAULTS.start_frame_visual_qc,
+        start_frame_visual_qc_batch: (await getSetting('start_frame_visual_qc_batch', false)) ?? EXPERIMENT_UNSET_DEFAULTS.start_frame_visual_qc_batch,
+        start_frame_visual_qc_model: (await getSetting('start_frame_visual_qc_model', false)) ?? EXPERIMENT_UNSET_DEFAULTS.start_frame_visual_qc_model,
+        gemini_quota_brake: (await getSetting('gemini_quota_brake', false)) ?? EXPERIMENT_UNSET_DEFAULTS.gemini_quota_brake,
+        compact_prompts: (await getSetting('compact_prompts', false)) ?? EXPERIMENT_UNSET_DEFAULTS.compact_prompts,
         minimax_api_key: maskSecret(minimaxKey) || null,
         has_minimax_key: !!minimaxKey,
         minimax_group_id: await getSetting('minimax_group_id', false) || '',
@@ -114,12 +124,11 @@ export const GET = withTenantContext(async (request, _context, user) => {
 
 export const POST = withTenantContext(async (request, _context, user) => {
   try {
-    if (user.role !== 'admin') {
+    if (!canEditExperimentSettings(user.role)) {
       return NextResponse.json({ success: false, error: 'Hanya Admin tenant yang dapat mengelola credential.' }, { status: 403 });
     }
     const body = await request.json();
     const { gemini_api_key, gemini_api_tier, gemini_context_caching, gemini_smart_routing, gemini_model_primary, gemini_model_fallback,
-      start_frame_visual_qc, start_frame_visual_qc_batch, start_frame_visual_qc_model, gemini_quota_brake,
       google_client_id, google_client_secret,
       webhook_api_key, webhook_host, webhook_port, webhook_image_model, webhook_video_model,
       webhook_delay_enabled, webhook_delay_min, webhook_delay_max, webhook_t2i_pattern,
@@ -130,6 +139,20 @@ export const POST = withTenantContext(async (request, _context, user) => {
       contentflow_api_key, contentflow_api_url,
       product_photo_provider, product_photo_gemini_model, product_photo_glabs_model, product_photo_auto_approve,
       repliz_api_url, repliz_access_key, repliz_secret_key, repliz_media_staging_provider, repliz_drive_folder_id } = body;
+
+    const hasExperimentKeys = EXPERIMENT_SETTING_KEYS.some((k) => body[k] !== undefined);
+    if (hasExperimentKeys) {
+      const expValidation = validateExperimentSettingsPayload(body);
+      if (!expValidation.valid) {
+        return NextResponse.json({
+          success: false,
+          error: expValidation.errors[0] || 'Nilai pengaturan eksperimen tidak valid.',
+          details: expValidation.errors
+        }, { status: 400 });
+      }
+      const tenantId = user.tenantId || user.tenant_id || 'default_tenant';
+      await saveTenantExperimentSettings({ tenantId, actor: user, updates: expValidation.values });
+    }
     
     if (isNewSecret(gemini_api_key)) {
       await setSetting('gemini_api_key', gemini_api_key);
@@ -148,22 +171,6 @@ export const POST = withTenantContext(async (request, _context, user) => {
     }
     if (gemini_model_fallback !== undefined) {
       await setSetting('gemini_model_fallback', gemini_model_fallback);
-    }
-    if (start_frame_visual_qc !== undefined) {
-      await setSetting('start_frame_visual_qc', start_frame_visual_qc);
-    }
-    if (start_frame_visual_qc_batch !== undefined) {
-      const normalizedBatch = String(start_frame_visual_qc_batch || 'off').trim().toLowerCase();
-      await setSetting(
-        'start_frame_visual_qc_batch',
-        ['on', 'shadow', 'off'].includes(normalizedBatch) ? normalizedBatch : 'off'
-      );
-    }
-    if (start_frame_visual_qc_model !== undefined) {
-      await setSetting('start_frame_visual_qc_model', String(start_frame_visual_qc_model || '').trim());
-    }
-    if (gemini_quota_brake !== undefined) {
-      await setSetting('gemini_quota_brake', gemini_quota_brake === 'off' ? 'off' : 'on');
     }
     if (isNewSecret(minimax_api_key)) {
       await setSetting('minimax_api_key', minimax_api_key);

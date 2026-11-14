@@ -295,3 +295,38 @@ test('K7.7 & K7.5: Planner-Driven QC Rubric accepts planned home room props & ba
   assert.equal(failForearm.pass, false);
 });
 
+test('Regression #2159: scheduler-processors allows reassigning parsed on Batch QC on mode', () => {
+  const schedPath = path.join(process.cwd(), 'lib', 'scheduler-processors.js');
+  const source = fs.readFileSync(schedPath, 'utf8');
+
+  assert.equal(
+    source.includes('const parsed = sanitizeAiDirectiveLeak('),
+    false,
+    'parsed declared with const would throw TypeError on parsed = mergeBatchStartFrameQcTelemetry(...)'
+  );
+  assert.equal(
+    source.includes('let parsed = sanitizeAiDirectiveLeak('),
+    true,
+    'parsed must be declared with let so Batch QC on telemetry can be reassigned'
+  );
+
+  const mergeIdx = source.indexOf('parsed = mergeBatchStartFrameQcTelemetry(');
+  const persistIdx = source.indexOf('await updatePillarCampaignItem(item.id, { result_json: JSON.stringify(parsed) });', mergeIdx);
+  assert.ok(mergeIdx !== -1 && persistIdx !== -1 && persistIdx > mergeIdx, 'Batch QC telemetry must be persisted after merge');
+
+  let parsed = { storyboard: [] };
+  parsed = mergeBatchStartFrameQcTelemetry(parsed, {
+    mode: 'report_only',
+    verdictsByClip: {
+      1: { pass: true, reasons: [], metrics: { hand_count: 0 } },
+      2: { pass: true, reasons: [], metrics: { hand_count: 2 } }
+    },
+    crossClipConsistency: { consistent: true, outliers: [] },
+    callsUsed: 1,
+    fallbackToPerClip: false
+  });
+  assert.equal(parsed.start_frame_qc.batch_enabled, true);
+  assert.equal(parsed.start_frame_qc.passed_count, 2);
+  assert.equal(parsed.start_frame_qc.calls, 1);
+});
+
