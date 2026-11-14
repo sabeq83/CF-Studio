@@ -99,6 +99,28 @@ for rel in data logs public/uploads public/temp; do
 done`;
 }
 
+/**
+ * Retensi release: `keep` = jumlah TOTAL release yang disimpan, termasuk release aktif
+ * dan previous (rollback). Sebelumnya active/previous tidak dihitung sehingga tersimpan keep+2.
+ * Kegagalan menghapus satu release hanya menjadi warning agar deploy yang sudah sehat tidak dianggap gagal.
+ * Membutuhkan variabel shell: releases, active, previous, keep, source_root.
+ */
+export function buildReleasePruneSnippet() {
+  return `kept=0
+if test -n "$active" && test -d "$active"; then kept=$((kept + 1)); fi
+if test -n "$previous" && test "$previous" != "$active" && test -d "$previous"; then kept=$((kept + 1)); fi
+for candidate in $(find "$releases" -mindepth 1 -maxdepth 1 -type d -print | sort -r); do
+  if test "$candidate" = "$active" || test "$candidate" = "$previous"; then continue; fi
+  if test "$kept" -lt "$keep"; then kept=$((kept + 1)); continue; fi
+  if git -C "$source_root" worktree remove --force "$candidate"; then
+    echo "pruned_release=$(basename "$candidate")"
+  else
+    echo "warning: gagal menghapus release lama $candidate" >&2
+  fi
+done
+git -C "$source_root" worktree prune || true`;
+}
+
 export function buildDeployScript({ sha, keep, config = DEV_ATOMIC_CONFIG } = {}) {
   if (!/^[0-9a-f]{40}$/i.test(sha || '')) throw new Error('Deploy membutuhkan immutable 40-character Git SHA.');
   const c = config;
@@ -200,12 +222,7 @@ printf '{"environment":"${c.environment}","release_id":"%s","git_sha":"%s","prev
   "$release_id" "$sha" "$previous" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$release/deployment-manifest.json"
 active="$(readlink "$current")"
 trap cleanup ERR
-count=0
-for candidate in $(find "$releases" -mindepth 1 -maxdepth 1 -type d -print | sort -r); do
-  if test "$candidate" = "$active" || test "$candidate" = "$previous"; then continue; fi
-  count=$((count + 1))
-  if test "$count" -gt "$keep"; then git -C "$source_root" worktree remove --force "$candidate"; fi
-done
+${buildReleasePruneSnippet()}
 echo "deployment_success=true"
 echo "release_id=$release_id"
 echo "git_sha=$sha"

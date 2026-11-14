@@ -12,7 +12,7 @@ export const DEV_ATOMIC_CONFIG = Object.freeze({
   apiPort: 7020,
   schema: 'dev',
   pm2Apps: ['maknaflow-dev-ui', 'maknaflow-dev-api'],
-  defaultRetention: 5,
+  defaultRetention: 3,
   confirmationFlag: '--confirm-dev',
   sshOptions: ['-o', 'ServerAliveInterval=15', '-o', 'ServerAliveCountMax=10', '-o', 'ConnectTimeout=30']
 });
@@ -31,7 +31,7 @@ export const STAGING_ATOMIC_CONFIG = Object.freeze({
   apiPort: 7010,
   schema: 'staging',
   pm2Apps: ['maknaflow-staging-ui', 'maknaflow-staging-api', 'maknaflow-staging-mcp'],
-  defaultRetention: 5,
+  defaultRetention: 3,
   confirmationFlag: '--confirm-staging',
   sshOptions: ['-o', 'ServerAliveInterval=15', '-o', 'ServerAliveCountMax=10', '-o', 'ConnectTimeout=30']
 });

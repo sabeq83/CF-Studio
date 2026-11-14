@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseAtomicArgs, buildBootstrapScript, buildDeployScript, buildRollbackScript } from '../scripts/lib/macmini-atomic.js';
+import { parseAtomicArgs, buildBootstrapScript, buildDeployScript, buildRollbackScript, buildReleasePruneSnippet } from '../scripts/lib/macmini-atomic.js';
 import { STAGING_ATOMIC_CONFIG } from '../scripts/lib/macmini-dev-atomic-config.js';
 
 const SHA = 'a'.repeat(40);
@@ -82,4 +82,42 @@ test('rollback only targets Dev atomic releases and checks both Dev endpoints', 
   assert.match(script, /recover_active_release/);
   assert.match(script, /memulihkan release asal dev/);
   assert.doesNotMatch(script, /maknaflow-staging|maknaflow-production/);
+});
+
+async function runPrune({ releaseNames, active, previous, keep }) {
+  const { mkdtempSync, mkdirSync, readdirSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { join } = await import('node:path');
+  const { execFileSync } = await import('node:child_process');
+  const root = mkdtempSync(join(tmpdir(), 'prune-test-'));
+  const releases = join(root, 'releases');
+  mkdirSync(releases);
+  for (const name of releaseNames) mkdirSync(join(releases, name));
+  // git palsu: "worktree remove --force <dir>" menghapus direktori, "worktree prune" no-op
+  const script = `set -euo pipefail
+git() { if test "$3" = worktree && test "$4" = remove; then rm -rf "$6"; fi; return 0; }
+releases='${releases}'
+source_root='${root}'
+active='${active ? join(releases, active) : ''}'
+previous='${previous ? join(releases, previous) : ''}'
+keep=${keep}
+${buildReleasePruneSnippet()}`;
+  execFileSync('bash', ['-c', script], { stdio: 'pipe' });
+  return readdirSync(releases).sort();
+}
+
+test('release retention keeps exactly `keep` releases in total, including active and previous', async () => {
+  const names = ['r1', 'r2', 'r3', 'r4', 'r5', 'r6', 'r7'];
+  assert.deepEqual(await runPrune({ releaseNames: names, active: 'r7', previous: 'r6', keep: 3 }), ['r5', 'r6', 'r7']);
+  assert.deepEqual(await runPrune({ releaseNames: names, active: 'r7', previous: 'r6', keep: 2 }), ['r6', 'r7']);
+});
+
+test('release retention never removes an older previous release used for rollback', async () => {
+  const names = ['r1', 'r2', 'r3', 'r4', 'r5'];
+  assert.deepEqual(await runPrune({ releaseNames: names, active: 'r5', previous: 'r1', keep: 3 }), ['r1', 'r4', 'r5']);
+});
+
+test('release retention defaults to 3 releases for dev and staging', () => {
+  assert.equal(parseAtomicArgs(['--environment', 'staging']).keep, 3);
+  assert.equal(parseAtomicArgs(['--environment', 'dev']).keep, 3);
 });
