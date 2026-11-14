@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.48.5 — D-0a + D-0b: Pengaman Klaim Dialog & Skincare BPOM (14/11/2026)
+- D-0a: rewriteViolatingVoSentences dan gerbang pre-TTS memeriksa voice_segments serta teks bebas label speaker
+- D-0b: Tambah resolveIsSkincareTarget dan daftar klaim terlarang skincare/kosmetik BPOM beserta tes positif dan negatif
+
 ## V2.48.4 — Fix Planner Orphan Lock Rollback & Preset Bridging Validation (14/11/2026)
 - Lepas otomatis lock reserved jika ingest OPC gagal sebelum kampanye tercipta dan pulihkan lock reserved yatim (>30s)
 - Jalankan seluruh validasi preset, produk, brand, dan bridge_segments sebelum mengambil lock content_planner_consumptions

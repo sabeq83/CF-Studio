@@ -25,7 +25,7 @@
 2. **Uji D-0 Kawan Rumah** (fitur yang sudah ada). **Berhenti dan lapor** agar pengguna menilai apakah dialog enak ditonton, sebelum lanjut ke perbaikan besar.
 3. Setelah pengguna setuju: D-1 → D-2 → D-3 → D-5 → D-4/D-6 → D-8 → D-7 → tes D-9.
 4. Uji D-1 (Oyen + Dropy), lalu lapor.
-5. Panel: tambahkan saklar dialog ke **🧪 Fitur Eksperimen** (Bagian 5).
+5. UI: pengaturan dialog di **Preset**, daftar pemeran di **VI**, mockup dulu (Bagian 5). **Bukan** di panel Fitur Eksperimen.
 
 ---
 
@@ -85,7 +85,7 @@ Laporkan engine mana saja yang bisa memakai `audio_engine_mode = native_veo`, da
 |---|---|---|
 | **D-1** | Gaya dialog fleksibel | Tambah `dialogue_style`: `character_monolog` · `duet` · `ensemble` · `hybrid`. Aturan "tepat 2 karakter, monolog dilarang" (prompts.js ±1049/1064/1384/2187/2202) **hanya** untuk `duet`/`ensemble`. `voice_segments` boleh 1–3 giliran. `hybrid` = mayoritas monolog karakter utama dengan maks 1–2 klip berisi balasan. |
 | **D-2** | Saklar terpisah | Flag baru `dialogue_mode` (off/on) per campaign/preset. `enable_audio_segment` lama tetap berfungsi seperti sekarang (kompatibilitas). Dialog tidak harus mematikan batch TTS Gemini bila provider Minimax. |
-| **D-3** | Daftar pemeran tetap | `voice_cast_json` bisa disimpan di **preset** dan/atau **VI**. Campaign mewarisi bila kosong. AI hanya boleh memakai `character_id` dari cast. Validasi seperti `validateAllowedSpeakers` (YouTube Studio); karakter karangan ditolak/diganti. Varian OTONOM (AI mengarang 3–4 karakter) tidak dipakai bila cast ada. Pemilihan suara bergiliran (`minimax-tts.js` ±395) hanya fallback terakhir. |
+| **D-3** | Daftar pemeran tetap | `voice_cast_json` disimpan di **preset** (bukan VI; lihat Bagian 5). Campaign mewarisi dari preset bila kosong. AI hanya boleh memakai `character_id` dari cast. Validasi seperti `validateAllowedSpeakers` (YouTube Studio); karakter karangan ditolak/diganti. Varian OTONOM (AI mengarang 3–4 karakter) tidak dipakai bila cast ada. Pemilihan suara bergiliran (`minimax-tts.js` ±395) hanya fallback terakhir. |
 | **D-5** | Label tidak terucap | Hapus `[X]:` sebelum TTS tunggal, audit VO, regex klaim, dan motion text. Subtitle boleh menampilkan nama/warna pembicara (opsional, default mati). Monolog 1 giliran tetap memakai suara karakter dari cast, **bukan** suara narator default. |
 | **D-4** | Waktu bicara cukup | Mode dialog: default klip 8 detik. Batas kata dihitung per giliran (≈ 2,3 kata/detik, Indonesia). Validasi: segmen terlalu panjang → dipendekkan saat storyboard. |
 | **D-6** | Jeda antargiliran | Sisipkan hening 150–250 ms saat `concat` segmen. |
@@ -104,16 +104,26 @@ Laporkan engine mana saja yang bisa memakai `audio_engine_mode = native_veo`, da
 
 ---
 
-## 5. Panel Fitur Eksperimen
-Tambahkan kartu **"E. Dialog Karakter"** di tab 🧪 Fitur Eksperimen, mengikuti aturan panel yang sudah disetujui (bahasa sederhana, tanpa nama teknis, semantic CSS token):
+## 5. Letak pengaturan di UI (keputusan pengguna 2026-11-14)
 
-| Fitur | Pilihan | Penjelasan untuk pengguna |
+> Dialog adalah **pilihan gaya konten per akun/strategi**, bukan eksperimen sistem.
+> Panel 🧪 Fitur Eksperimen berlaku untuk **seluruh tenant**. Kalau dialog dinyalakan di sana, DapurBotani, SiasatSehat, dan NutriBlend (yang memakai narator) ikut terpengaruh.
+> Karena itu dialog **tidak** diletakkan di panel.
+
+| Pengaturan | Tempat | Isi |
 |---|---|---|
-| Dialog karakter | Mati / Nyala | "Karakter di video berbicara dengan suara masing-masing, bukan narator." |
-| Gaya bicara | Bicara sendiri / Berdua / Ramai-ramai / Campuran | "Bicara sendiri cocok untuk diary; Ramai-ramai untuk barang-barang yang saling curhat." |
-| Daftar pemeran | Tautan ke VI/preset | "Atur nama karakter dan suaranya di Identitas Visual." |
+| Dialog nyala/mati + gaya bicara | **Preset** (`app/settings/presets/page.js`, dekat centang "Audio Segment" yang sudah ada) | Saklar "Dialog karakter" (Mati/Nyala) dan pilihan "Gaya bicara": Bicara sendiri / Berdua / Ramai-ramai / Campuran. Disimpan sebagai `dialogue_mode` + `dialogue_style` di config preset. |
+| Daftar pemeran + suara (voice persona) tiap karakter | **Preset**, di bagian suara yang sama dengan `voice_persona` / `google_voice_persona` narator yang sudah ada (keputusan pengguna 2026-11-14) | Per karakter: `id`, nama, suara Minimax (pilih dari daftar + tombol dengar contoh), cadangan suara Gemini, deskripsi watak/gaya bicara (`descriptive_voice_prompt`, disiapkan untuk Cara C). Disimpan sebagai `voice_cast_json` di config preset. Campaign mewarisi dari preset bila kosong. Sediakan tombol **"Salin pemeran dari preset lain"**, agar suara Oyen sama di preset promo dan edukasi. |
+| Wujud karakter (gambar referensi) | **Identitas Visual (VI)** | `character_refs: [{id, image_path, visual_desc}]` (D-7). `id` harus sama dengan `id` di `voice_cast_json` preset. Bila ada karakter di preset tanpa gambar di VI (atau sebaliknya), tampilkan peringatan. |
+| Panel 🧪 Fitur Eksperimen | **Tidak ada kartu dialog** | Opsional: satu saklar pengaman tenant "Izinkan fitur dialog" (default Mati) selama tahap uji. Bila Mati, pengaturan dialog di preset diabaikan. Saklar ini dihapus setelah fitur stabil. |
 
-Mockup HTML dulu (SOP), sinkronkan ke staging, lalu tunggu persetujuan.
+Ketentuan UI:
+- Bahasa sederhana, tanpa nama teknis di bawah judul (keputusan panel yang sama).
+- Hanya semantic CSS token.
+- Centang lama "Audio Segment" diberi keterangan singkat agar tidak membingungkan, misalnya "Pengaturan lama — untuk dialog gunakan 'Dialog karakter'". Jangan dihapus, demi kompatibilitas.
+- Bila preset menyalakan dialog tetapi daftar pemeran kosong, tampilkan peringatan: "Preset ini belum punya daftar pemeran".
+
+**Mockup HTML dulu (SOP):** `public/mockup_dialog_karakter.html` berisi tampilan bagian dialog + pemeran/suara di preset dan bagian gambar karakter di VI. Sinkronkan ke staging, lalu **tunggu persetujuan** sebelum menulis React.
 
 ---
 
