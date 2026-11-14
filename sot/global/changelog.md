@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.46.2 — Hotfix crash parsedResult halaman detail pillar campaign (F2.2-H1) (14/11/2026)
+- Deklarasikan parsedResult secara aman di cakupan Storyboard app/pillar-campaigns/[id]/page.js agar detail campaign tidak ReferenceError
+- Tambahkan unit test AST no-undef untuk mencegah variabel tidak terdeklarasi terulang
+
 ## V2.46.1 — Metaphor World Kit Anti-Hallucination & Start-Frame Visual QC (F2.1) (14/11/2026)
 - Positive framing prompt hygiene, penghapusan negasi membandel, perbaikan sanitizeImagePrompt dan opsi compact_prompts
 - Klip 1 murni objek tanpa hands-only injection, Klip 2-6 tepat 2 tangan 1 orang dengan manset tertutup plus rotasi warna baju & sudut kamera

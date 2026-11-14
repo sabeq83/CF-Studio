@@ -2425,13 +2425,21 @@ export default function PillarCampaignDetailPage() {
         {/* Tab Content Panels */}
         {activeTab === 'concept' && renderConcept(item)}
 
-        {activeTab === 'storyboard' && (
+        {activeTab === 'storyboard' && (() => {
+          let parsedResult = {};
+          try {
+            parsedResult = typeof item?.result_json === 'string'
+              ? JSON.parse(item.result_json || '{}')
+              : (item?.result_json || {});
+          } catch (_) {
+            parsedResult = {};
+          }
+          return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginBottom: '24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
               <h4 style={{ margin: 0, fontWeight: '700', fontSize: '0.9rem', color: 'var(--text-primary)' }}>📖 Storyboard & Rencana Visual Baru</h4>
               {(() => {
-                let parsedRes = {};
-                try { parsedRes = JSON.parse(item.result_json || '{}'); } catch {}
+                const parsedRes = parsedResult;
                 const meta = parsedRes.resolved_health_metaphor;
                 const metaPolicy = parsedRes.resolved_metaphor_policy;
                 const policyTags = [];
@@ -2994,7 +3002,8 @@ export default function PillarCampaignDetailPage() {
               </div>
             </div>
           </div>
-        )}
+          );
+        })()}
 
         {activeTab === 'assets' && (
           <div style={{
