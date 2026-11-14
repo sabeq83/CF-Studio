@@ -121,6 +121,25 @@ test('V0-2 Centralized Claim Filter: catches 5 real medical claim sentences & re
     assert.equal(isHerbalMedicalClaimPhrase(s, { strict: true }), true);
   }
 
+  // Culinary / everyday food metaphor references to "lemak" must NOT trigger false positives,
+  // while slimming/medical claim phrases with "lemak" MUST remain strictly blocked.
+  const safeCulinarySentences = [
+    'Habis makan gorengan dan sisa lemak harian, perut sering terasa penuh.',
+    'Kalau menu harian penuh makanan berlemak dan santan, badan gampang terasa berat.',
+    'Lapisan minyak dan lemak di permukaan air keruh perlahan jernih di mangkuk kaca.'
+  ];
+  for (const s of safeCulinarySentences) {
+    assert.deepEqual(findVoClaimViolations(s, { strict: true }), [], `Safe culinary phrase should pass: ${s}`);
+  }
+
+  const unsafeFatClaims = [
+    'Ramuan ini cepat melunturkan lemak perut dalam seminggu.',
+    'Ampuh membuang timbunan lemak tubuh dan menurunkan lemak membandel.'
+  ];
+  for (const s of unsafeFatClaims) {
+    assert.ok(findVoClaimViolations(s, { strict: true }).length > 0, `Slimming claim must stay blocked: ${s}`);
+  }
+
   // Finishing plan validator shares exact centralized rule (zero duplication)
   const warnings = [];
   const rejectedPatch = validateBrandPatchSpec(

@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.46.4 — Longgarkan filter kata lemak konteks kuliner tanpa melonggarkan klaim medis/pelangsing (14/11/2026)
+- Hapus token tunggal lemak dari STRICT_RAMUAN_CLAIM_TOKENS_RE dan ganti dengan daftar frasa klaim medis/pelangsing lengkap
+- Tambahkan unit test untuk memastikan frasa kuliner seperti sisa lemak harian lolos sementara melunturkan lemak perut dan timbunan lemak tubuh tetap diblokir
+
 ## V2.46.3 — Hotfix F2.2 Visual QC, Framing Chest-Down, Wardrobe Konsisten & Loop TTS-FFmpeg (14/11/2026)
 - Perbaiki rubrik Start-Frame Visual QC Clip 3 dan Clip 6 (expectsProduct=true) agar produk dan bahan alami tidak false positive
 - Perketat framing eye_level_side dan three_quarter_front chest-down fokus tangan serta pastikan wardrobe solid plain selalu disuntikkan dan diverifikasi QC
