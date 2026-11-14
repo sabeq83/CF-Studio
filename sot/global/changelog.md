@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.48.6 — Fix stylized 3D character visual pipeline & enable_audio_segment (14/11/2026)
+- Bypass Scene Director, POV human hands framing, and faceless QC for stylized 3D character VIs
+- Normalize DB string enable_audio_segment and expose voice_segments schema for multi-voice character dialog
+
 ## V2.48.5 — D-0a + D-0b: Pengaman Klaim Dialog & Skincare BPOM (14/11/2026)
 - D-0a: rewriteViolatingVoSentences dan gerbang pre-TTS memeriksa voice_segments serta teks bebas label speaker
 - D-0b: Tambah resolveIsSkincareTarget dan daftar klaim terlarang skincare/kosmetik BPOM beserta tes positif dan negatif
