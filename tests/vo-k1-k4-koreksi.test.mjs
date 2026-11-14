@@ -356,3 +356,12 @@ test('K2c: Scheduler menahan item VO terblokir walau full_autopilot', async () =
   const ttsIdx = src.indexOf('// 2. TTS Stage (Bikin TTS Sampai Selesai)');
   assert.ok(guardIdx > 0 && blockedIdx > guardIdx && ttsIdx > blockedIdx, 'guard blokir VO harus berada setelah approval guard dan sebelum tahap TTS');
 });
+
+test('K4b: NutriBlend diperlakukan sebagai niche kesehatan dari nama brand saja (semua jalur)', async () => {
+  const { resolveIsHerbalOrHealthTarget, findVoClaimViolations } = await import('../lib/tiktok-compliance-service.js');
+  for (const brandName of ['nutriblend', 'NutriBlend', 'Nutri Blend', 'nutriblend.id']) {
+    assert.equal(resolveIsHerbalOrHealthTarget({ brandName }), true, brandName);
+  }
+  assert.equal(resolveIsHerbalOrHealthTarget({ brandName: 'nutriblend', productName: 'Blender Portable USB', category: 'Elektronik' }), false);
+  assert.deepEqual(findVoClaimViolations('Smoothie bayam pisang ini bantu turunkan kolesterol', { strict: true }), ['kolesterol']);
+});
