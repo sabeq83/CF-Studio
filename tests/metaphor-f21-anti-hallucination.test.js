@@ -283,3 +283,45 @@ test('Part D & E: 28 kits mendukung product_form (honey_garlic/powder/capsule) t
   assert.ok(!allocSection.includes('Moody organic directional golden morning window light (3500K)'), 'Baseline warm 3500K light must be suppressed when lighting_arc active');
 });
 
+test('F2.2-H3 & H4: Chest-down framing pada eye_level_side & three_quarter_front + solid plain wardrobe selalu disuntikkan ke Clip 4-5 meski tag awal hilang', async () => {
+  const sideAngle = METAPHOR_CAMERA_ANGLES.find(a => a.key === 'eye_level_side');
+  const frontAngle = METAPHOR_CAMERA_ANGLES.find(a => a.key === 'three_quarter_front');
+  const overheadAngle = METAPHOR_CAMERA_ANGLES.find(a => a.key === 'overhead_top_down');
+  assert.ok(sideAngle.prompt.includes('chest-down'));
+  assert.ok(sideAngle.prompt.includes('below shoulders'));
+  assert.ok(frontAngle.prompt.includes('chest-down'));
+  assert.ok(frontAngle.prompt.includes('below shoulders'));
+  assert.equal(overheadAngle.prompt, '90-degree overhead flat-lay top-down macro angle');
+
+  for (const w of MODEST_WARDROBE_ROTATION) {
+    assert.ok(w.description.includes('solid plain'), `Wardrobe ${w.key} must specify solid plain`);
+    assert.ok(w.description.includes('no pattern, no print'), `Wardrobe ${w.key} must exclude patterns/prints`);
+  }
+
+  // Simulasi kasus #2136 Clips 4-5: prompt T2I awal tanpa tag (Wardrobe: ...) maupun (Presence Truth: ...)
+  const kit = getKit('kitchen_drain_oil');
+  const vso = makeTestVi({ allSwitchesOn: true });
+  const policy = resolveMetaphorPolicy({ viConfig: vso.structured, isMetaphoricFaceless: true, kit });
+  const campaign = {
+    id: 'camp_f22_h4',
+    product_id: garlibeeProduct.id,
+    is_bridging_active: 1,
+    bridge_at_clip: 3,
+    bridge_duration_clips: 1,
+    target_clips_count: 6,
+    visual_style: 'metaphoric_faceless',
+    resolved_metaphor_policy: policy
+  };
+  const variety = resolveVideoVariety('item_2136_sim');
+  const clip4Req = await buildOpcStartFrameRequest({
+    campaign,
+    item: { id: 'item_2136_sim', result_json: '{}' },
+    clipIndex: 4,
+    prompt: '(Object Anchor: clear glass bowl on pale ceramic tabletop) (Scene Context: water turns crystal clear)',
+    productLoader: async () => garlibeeProduct
+  });
+  assert.ok(clip4Req.providerRequest.prompt.includes('chest-down'));
+  assert.ok(clip4Req.providerRequest.prompt.includes(`(Wardrobe: ${variety.wardrobeDesc})`), 'Must inject solid plain wardrobe even when LLM omitted (Wardrobe: ...)');
+  assert.ok(clip4Req.providerRequest.prompt.includes('Presence Truth:'), 'Must inject Presence Truth even when LLM omitted it');
+});
+

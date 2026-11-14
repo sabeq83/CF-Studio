@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.46.3 — Hotfix F2.2 Visual QC, Framing Chest-Down, Wardrobe Konsisten & Loop TTS-FFmpeg (14/11/2026)
+- Perbaiki rubrik Start-Frame Visual QC Clip 3 dan Clip 6 (expectsProduct=true) agar produk dan bahan alami tidak false positive
+- Perketat framing eye_level_side dan three_quarter_front chest-down fokus tangan serta pastikan wardrobe solid plain selalu disuntikkan dan diverifikasi QC
+- Perbaiki loop Batch TTS Studio null (#2140) pada stage execution, scheduler, FFmpeg pre-flight, dan tampilkan alasan error di UI
+- Tetapkan compact_prompts default off (H6)
+
 ## V2.46.2 — Hotfix crash parsedResult halaman detail pillar campaign (F2.2-H1) (14/11/2026)
 - Deklarasikan parsedResult secara aman di cakupan Storyboard app/pillar-campaigns/[id]/page.js agar detail campaign tidak ReferenceError
 - Tambahkan unit test AST no-undef untuk mencegah variabel tidak terdeklarasi terulang

@@ -216,3 +216,149 @@ test('Part G4: retry hint positive hygiene + telemetry counter calls/retries/nee
   assert.equal(ctxHero.isPreBridge, false);
 });
 
+test('F2.2-H2: Clip 3 & Clip 6 expectsProduct=true mengizinkan produk & bahan (madu/bawang), sedangkan Clip 1/2 tetap fail', () => {
+  const clip3Ctx = deriveQcContext({
+    campaign: {
+      visual_style: 'metaphoric_faceless',
+      product_id: 'p_garlibee',
+      product_name: 'GarliBee',
+      is_bridging_active: 1,
+      bridge_at_clip: 3,
+      bridge_duration_clips: 1,
+      target_clips_count: 6,
+      resolved_metaphor_policy: { active: true, productEntry: 'inside_metaphor', handsPolicy: 'modest_hands_active', objectWorld: 'keruh berminyak di mangkuk kaca' }
+    },
+    item: {
+      result_json: JSON.stringify({
+        resolved_health_metaphor: {
+          kit: {
+            object_world: 'mangkuk kaca dengan lapisan minyak dan sedimen',
+            beats: {
+              bridge: 'Botol GarliBee dan cengkih bawang tunggal madu hadir bersih di meja',
+              result: 'Air kembali jernih berkilau di samping botol GarliBee dan madu murni'
+            }
+          }
+        }
+      })
+    },
+    clipIndex: 3
+  });
+  assert.equal(clip3Ctx.expectsProduct, true);
+  assert.equal(clip3Ctx.isPreBridge, false);
+  assert.ok(clip3Ctx.cleanResultWorld.includes('jernih'));
+
+  const heroPrompt = buildStartFrameQcPrompt({
+    clipIndex: 6,
+    totalClips: 6,
+    ...clip3Ctx,
+    expectsProduct: true,
+    isPreBridge: false
+  });
+  assert.ok(heroPrompt.includes('expects_product=true'));
+  assert.ok(heroPrompt.includes('pre_bridge_product=false'));
+  assert.ok(heroPrompt.includes(clip3Ctx.cleanResultWorld));
+  assert.ok(!heroPrompt.includes('lapisan minyak dan sedimen'));
+
+  const clip3WithProduct = evaluateQcChecklistVerdict({
+    hand_count: 1,
+    awkward_anatomy: false,
+    visible_face: false,
+    exposed_forearm: false,
+    pre_bridge_product: false,
+    foreign_objects: false,
+    weird_text_watermark: false,
+    metaphor_alignment_score: 0.91,
+    reasons: []
+  }, clip3Ctx);
+  assert.equal(clip3WithProduct.pass, true);
+  assert.equal(clip3WithProduct.metrics.pre_bridge_product, false);
+
+  // Defensive check: even if Vision model flips pre_bridge_product=true on Clip 6 hero, verdict refuses false-positive fail
+  const clip6Defensive = evaluateQcChecklistVerdict({
+    hand_count: 1,
+    awkward_anatomy: false,
+    visible_face: false,
+    exposed_forearm: false,
+    pre_bridge_product: true,
+    foreign_objects: false,
+    weird_text_watermark: false,
+    metaphor_alignment_score: 0.88,
+    reasons: ['Pre-bridge frame shows commercial bottle/jar packaging']
+  }, { ...clip3Ctx, clipIndex: 6, expectsProduct: true, isPreBridge: false });
+  assert.equal(clip6Defensive.pass, true);
+  assert.equal(clip6Defensive.metrics.pre_bridge_product, false);
+
+  // Clip 1 & Clip 2 pre-bridge MUST still fail when product appears
+  for (const preIdx of [1, 2]) {
+    const preVerdict = evaluateQcChecklistVerdict({
+      hand_count: preIdx === 1 ? 0 : 1,
+      awkward_anatomy: false,
+      visible_face: false,
+      exposed_forearm: false,
+      pre_bridge_product: true,
+      foreign_objects: false,
+      weird_text_watermark: false,
+      metaphor_alignment_score: 0.85,
+      reasons: []
+    }, { clipIndex: preIdx, isPreBridge: true, expectsProduct: false, expectsObjectOnly: preIdx === 1, handsPolicy: 'modest_hands_active' });
+    assert.equal(preVerdict.pass, false);
+    assert.equal(preVerdict.metrics.pre_bridge_product, true);
+  }
+});
+
+test('F2.2-H4: Visual QC mendeteksi wardrobe_color_match=false pada Clip 2+ tangan aktif dan mengabaikannya pada Clip 1 object-only', () => {
+  const ctxClip4 = deriveQcContext({
+    campaign: {
+      visual_style: 'metaphoric_faceless',
+      product_id: 'p_garlibee',
+      is_bridging_active: 1,
+      bridge_at_clip: 3,
+      bridge_duration_clips: 1,
+      target_clips_count: 6,
+      resolved_metaphor_policy: { active: true, productEntry: 'inside_metaphor', handsPolicy: 'modest_hands_active' }
+    },
+    item: {
+      id: 'item_wardrobe_qc',
+      result_json: JSON.stringify({
+        resolved_wardrobe_color: { key: 'sage', label: 'Sage Green Linen' }
+      })
+    },
+    clipIndex: 4
+  });
+  assert.equal(ctxClip4.expectedWardrobeLabel, 'Sage Green Linen');
+
+  const promptClip4 = buildStartFrameQcPrompt({ clipIndex: 4, totalClips: 6, ...ctxClip4 });
+  assert.ok(promptClip4.includes('Sage Green Linen'));
+  assert.ok(promptClip4.includes('wardrobe_color_match'));
+
+  const mismatchVerdict = evaluateQcChecklistVerdict({
+    hand_count: 2,
+    awkward_anatomy: false,
+    visible_face: false,
+    exposed_forearm: false,
+    wardrobe_color_match: false,
+    pre_bridge_product: false,
+    foreign_objects: false,
+    weird_text_watermark: false,
+    metaphor_alignment_score: 0.9,
+    reasons: []
+  }, ctxClip4);
+  assert.equal(mismatchVerdict.pass, false);
+  assert.equal(mismatchVerdict.metrics.wardrobe_color_match, false);
+  assert.ok(mismatchVerdict.reasons.some(r => /wardrobe|sage green/i.test(r)));
+
+  const clip1Ignored = evaluateQcChecklistVerdict({
+    hand_count: 0,
+    awkward_anatomy: false,
+    visible_face: false,
+    exposed_forearm: false,
+    wardrobe_color_match: false,
+    pre_bridge_product: false,
+    foreign_objects: false,
+    weird_text_watermark: false,
+    metaphor_alignment_score: 0.95,
+    reasons: []
+  }, { ...ctxClip4, clipIndex: 1, expectsObjectOnly: true, isPreBridge: true });
+  assert.equal(clip1Ignored.pass, true);
+});
+

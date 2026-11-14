@@ -135,6 +135,14 @@ export const PATCH = withTenantContext(async (request, { params }) => {
 
     await updatePillarCampaignItem(itemId, updateFields);
 
+    if (resetStatus) {
+      try {
+        const { resetStageExecution } = await import('@/lib/pillar-stage-execution-service');
+        await resetStageExecution({ itemId: item.id, stage: 'tts' });
+        await resetStageExecution({ itemId: item.id, stage: 'ffmpeg_upload' });
+      } catch (_) {}
+    }
+
     // Make sure campaign status is 'running' if it's currently paused and we did a reset
     if (resetStatus) {
       const campaign = await db.prepare('SELECT * FROM pillar_campaigns WHERE id = ?').get(item.campaign_id);

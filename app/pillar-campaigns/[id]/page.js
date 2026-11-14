@@ -2079,7 +2079,21 @@ export default function PillarCampaignDetailPage() {
             <span style={{ fontSize: '1.4rem' }}>❌</span>
             <div>
               <strong style={{ display: 'block', marginBottom: '2px', color: 'var(--text-primary)' }}>Produksi Gagal / Terhenti</strong>
-              Terjadi kegagalan saat memproses tahapan produksi (TTS, Video G-Labs, atau FFmpeg). Anda dapat mengedit storyboard di bawah ini, mengunggah Start Frame pengganti, lalu klik tombol <strong>"Approve & Proceed to Production"</strong> untuk merender ulang video.
+              Terjadi kegagalan saat memproses tahapan produksi (TTS, Video G-Labs, atau FFmpeg). Anda dapat mengedit storyboard di bawah ini, mengunggah Start Frame pengganti, lalu klik tombol <strong>&quot;Approve &amp; Proceed to Production&quot;</strong> untuk merender ulang video.
+              {item.review_reason && (
+                <div style={{
+                  marginTop: '8px',
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border-subtle)',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.78rem',
+                  fontWeight: 600
+                }}>
+                  Detail Penyebab: {item.review_reason}
+                </div>
+              )}
             </div>
           </div>
         )}
