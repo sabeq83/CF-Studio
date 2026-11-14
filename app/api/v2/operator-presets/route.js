@@ -6,6 +6,7 @@ import {
   getCustomOperatorPresets,
   hydrateOperatorPresetCache,
   normalizePresetCampaignKinds,
+  validateAndNormalizePresetProductBridging,
   PRESET_ALIASES
 } from '@/lib/operator-presets';
 import { getSetting, setSetting } from '@/lib/db';
@@ -55,6 +56,15 @@ function normalize(body, current = {}) {
       throw e;
     }
     config.workflow = { ...config.workflow, ...parsedWf.updates, ...parsedVo.updates };
+  }
+  const bridgingCheck = validateAndNormalizePresetProductBridging(config);
+  if (bridgingCheck.error) {
+    const e = new Error(bridgingCheck.error);
+    e.status = 400;
+    throw e;
+  }
+  if (config.product_bridging) {
+    config.product_bridging = bridgingCheck.product_bridging;
   }
   return {
     ...config,

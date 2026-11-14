@@ -134,6 +134,10 @@ export default function ImportPlannerModal({
       alert('Nama Kampanye OPC wajib diisi.');
       return;
     }
+    if (presetBridgeErrors.length > 0) {
+      alert(`Preset memiliki segmen Product Bridging bermasalah: ${presetBridgeErrors[0]}\n\nSilakan perbaiki di Kelola Preset terlebih dahulu sebelum ingest.`);
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -182,6 +186,10 @@ export default function ImportPlannerModal({
   const totalRows = selectedPlanner?.rows?.length || 0;
   const isAllSelected = selectedRowIds.length === totalRows && totalRows > 0;
   const pConfig = selectedPreset?.config || {};
+  const presetBridgePlan = pConfig.product_bridging?.is_bridging_active
+    ? resolveBridgePlan(readBridgeInputs(pConfig.product_bridging, pConfig.visual_engine, { defaultActive: true }))
+    : null;
+  const presetBridgeErrors = presetBridgePlan?.errors || [];
 
   const filteredPlanners = planners.filter(p => {
     if (plannerStatusFilter === 'ready' && p.is_consumed) return false;
@@ -506,12 +514,26 @@ export default function ImportPlannerModal({
               </div>
               <div>
                 <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: 2 }}>Product Bridging</span>
-                <span style={{ fontSize: '0.84rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                  {pConfig.product_bridging?.is_bridging_active
-                    ? describeBridgePlan(resolveBridgePlan(readBridgeInputs(pConfig.product_bridging, pConfig.visual_engine, { defaultActive: true })))
+                <span style={{ fontSize: '0.84rem', fontWeight: 600, color: presetBridgeErrors.length > 0 ? 'var(--status-danger)' : 'var(--text-primary)' }}>
+                  {presetBridgePlan
+                    ? describeBridgePlan(presetBridgePlan)
                     : 'Nonaktif'}
                 </span>
               </div>
+              {presetBridgeErrors.length > 0 && (
+                <div style={{
+                  gridColumn: 'span 2',
+                  padding: '10px 12px',
+                  borderRadius: 'var(--radius-xs, 6px)',
+                  background: 'var(--status-danger-soft)',
+                  border: '1px solid var(--status-danger)',
+                  color: 'var(--status-danger)',
+                  fontSize: '0.76rem',
+                  lineHeight: 1.45
+                }}>
+                  <strong>⚠️ Konfigurasi Bridging Preset Bermasalah:</strong> {presetBridgeErrors[0]} — buka <em>Kelola Preset</em> untuk merapikan segmen klip sebelum ingest.
+                </div>
+              )}
               <div style={{ gridColumn: 'span 2' }}>
                 <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: 2 }}>Automated Workflow Pipeline</span>
                 <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>

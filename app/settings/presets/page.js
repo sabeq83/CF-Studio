@@ -414,6 +414,22 @@ export default function PresetsPage() {
     e.preventDefault();
     if (!form.key || !form.label) return setMessage('Key dan Label wajib diisi.');
     if (!form.campaign_kinds.length) return setMessage('Pilih minimal satu jenis campaign.');
+    if (form.is_bridging_active) {
+      const bridgeNorm = normalizeBridgePayload({
+        is_bridging_active: true,
+        bridge_at_clip: form.bridge_at_clip,
+        bridge_duration_clips: form.bridge_duration_clips,
+        bridge_segments: form.bridge_segments
+      }, {}, {
+        targetClips: Number(form.target_clips_count || 4),
+        defaultActive: true,
+        singleZoneOnly: form.visual_style === 'investigative_faceless'
+      });
+      if (bridgeNorm.errors.length > 0) {
+        setActiveAccordion(2);
+        return setMessage(`Pengaturan Product Bridging tidak valid: ${bridgeNorm.errors[0]}`);
+      }
+    }
     setBusy(true);
     try {
       const body = mapFormToPayload(form);

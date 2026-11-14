@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.48.4 — Fix Planner Orphan Lock Rollback & Preset Bridging Validation (14/11/2026)
+- Lepas otomatis lock reserved jika ingest OPC gagal sebelum kampanye tercipta dan pulihkan lock reserved yatim (>30s)
+- Jalankan seluruh validasi preset, produk, brand, dan bridge_segments sebelum mengambil lock content_planner_consumptions
+- Validasi product_bridging.bridge_segments pada API/UI Operator Preset serta tampilkan peringatan dan blokir submit di ImportPlannerModal
+
 ## V2.48.3 — Panel Fitur Eksperimen & Fix Batch QC On Mode (14/11/2026)
 - Tambah tab Pengaturan Fitur Eksperimen per-tenant dengan guard role Admin/Owner, validasi whitelist, reset per-kartu/semua, audit trail, dan meteran kuota harian
 - Pusatkan pengaturan Start Frame QC & Rem Kuota ke tab Fitur Eksperimen (hapus duplikasi di Engine & AI Services)

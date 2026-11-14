@@ -6,6 +6,7 @@ import {
   isSystemOperatorPreset,
   hydrateOperatorPresetCache,
   normalizePresetCampaignKinds,
+  validateAndNormalizePresetProductBridging,
   PRESET_ALIASES
 } from '@/lib/operator-presets';
 import { getSetting, setSetting } from '@/lib/db';
@@ -68,6 +69,13 @@ export const PUT = withTenantContext(async (request, { params }, user) => {
       return NextResponse.json({ success: false, error: parsedVo.error }, { status: parsedVo.status || 400 });
     }
     config.workflow = { ...config.workflow, ...parsedWf.updates, ...parsedVo.updates };
+  }
+  const bridgingCheck = validateAndNormalizePresetProductBridging(config);
+  if (bridgingCheck.error) {
+    return NextResponse.json({ success: false, error: bridgingCheck.error }, { status: 400 });
+  }
+  if (config.product_bridging) {
+    config.product_bridging = bridgingCheck.product_bridging;
   }
   all[key] = {
     ...config,
