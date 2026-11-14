@@ -1,11 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import {
   buildOpcStartFrameRequest,
   resolveOpcStartFrameModel,
   computeStartFrameFingerprint
 } from '../lib/opc-start-frame-request.js';
+import { fileToBase64 } from '../lib/cartoon-reference-resolver.js';
 
 const TINY_PNG_DATA_URL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aW0QAAAAASUVORK5CYII=';
 
@@ -132,5 +135,23 @@ test('Audit updater and fallback logging support effective_model and request_fin
   assert.match(adapterSrc, /\[StartFrame Model\] Clip/);
   assert.match(adapterSrc, /rebuildFingerprintForModel/);
   assert.match(webhookSrc, /taskFallbackInfoMap/);
+});
+
+test('fileToBase64 resolves leading-slash public web paths under <cwd>/public', () => {
+  const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'cf-ref-path-'));
+  try {
+    const refDir = path.join(tmpRoot, 'public', 'uploads', 'reference-assets', 't1', 'character', 'v3');
+    fs.mkdirSync(refDir, { recursive: true });
+    const imgPath = path.join(refDir, 'si_wajan.jpg');
+    fs.writeFileSync(imgPath, Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10]));
+
+    const b64 = fileToBase64('/uploads/reference-assets/t1/character/v3/si_wajan.jpg', tmpRoot);
+    assert.ok(b64 && b64.startsWith('data:image/jpeg;base64,'), 'Must resolve /uploads/... relative to <cwd>/public');
+
+    const b64Query = fileToBase64('/uploads/reference-assets/t1/character/v3/si_wajan.jpg?v=123', tmpRoot);
+    assert.equal(b64Query, b64, 'Must strip URL query string when resolving local upload path');
+  } finally {
+    fs.rmSync(tmpRoot, { recursive: true, force: true });
+  }
 });
 

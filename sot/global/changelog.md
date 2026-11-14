@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.48.14 — Fix leading-slash web path resolution in character reference resolver (15/11/2026)
+- Fix fileToBase64 in cartoon-reference-resolver.js so /uploads/... web paths fall back to <cwd>/public
+- Add regression test for leading-slash upload paths in start-frame-model-selection.test.js
+
 ## V2.48.13 — Selectable Start Frame G-Labs model and V-1 dialog mockup (15/11/2026)
 - Select nano_banana_pro for stylized 3D or multi-character Start Frames with quota fallback logging and model-aware fingerprint
 - Add V-1 public/mockup_dialog_karakter.html preview for dialog and voice cast settings
