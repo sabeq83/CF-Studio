@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.46.0 — Metaphor World Kit + Metaphor Policy (F1+F2) (14/11/2026)
+- Tambah 28 Metaphor World Kit (lib/metaphor-world-kits.js) + deteksi multi-topik + rotasi anti-repeat window 6 video di balik flag metaphor_kit_engine
+- Tambah tabel dan migrasi idempoten metaphor_kit_usage plus resolver explicit, sticky, dan LRU fallback aman
+- Tambah 4 switch Metaphor Policy (environment.policy, hands_policy, product_entry, lighting_arc) pada Visual Identity Contract dan lib/metaphor-policy.js
+- Integrasi konsisten di processPillarGenerator, prompts.js, visual-identity-allocator.js, applyPromptReplacements, opc-start-frame-request.js, dan badge UI OPC
+- Verifikasi gate kualitas Tahap E: 21/21 tes baru lulus, 44/44 tes regresi inti lulus, prompt diff DapurBotani, dan npm run build lulus
+
 ## V2.45.2 — NutriBlend Masuk Niche Kesehatan untuk Filter Klaim VO (14/11/2026)
 - Brand NutriBlend terdeteksi sebagai niche kesehatan dari nama brand di jalur planner, TTS pilar, dan multiplier
 - Produk elektronik/alat dapur NutriBlend tetap tidak dianggap herbal

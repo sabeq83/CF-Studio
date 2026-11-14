@@ -2433,11 +2433,28 @@ export default function PillarCampaignDetailPage() {
                 let parsedRes = {};
                 try { parsedRes = JSON.parse(item.result_json || '{}'); } catch {}
                 const meta = parsedRes.resolved_health_metaphor;
-                if (!meta) return null;
+                const metaPolicy = parsedRes.resolved_metaphor_policy;
+                const policyTags = [];
+                if (metaPolicy?.active) {
+                  if (metaPolicy.handsPolicy === 'modest_hands_active') policyTags.push('🙌 tangan aktif');
+                  if (metaPolicy.environmentPolicy === 'metaphor_driven') policyTags.push('🌍 latar metafora');
+                  if (metaPolicy.productEntry === 'inside_metaphor') policyTags.push('📦 produk di metafora');
+                  if (metaPolicy.lightingArc) policyTags.push('💡 arc');
+                }
+                if (!meta && policyTags.length === 0) return null;
                 return (
-                  <span style={{ fontSize: '0.72rem', fontWeight: 600, padding: '4px 10px', borderRadius: '6px', background: 'var(--surface-interactive)', border: '1px solid var(--accent)', color: 'var(--accent-light)' }}>
-                    🎭 Metafora Objek: {meta.label} ({meta.archetype_label})
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
+                    {meta && (
+                      <span style={{ fontSize: '0.72rem', fontWeight: 600, padding: '4px 10px', borderRadius: '6px', background: 'var(--surface-interactive)', border: '1px solid var(--accent)', color: 'var(--accent-light)' }}>
+                        🎭 Metafora Objek: {meta.label} ({meta.archetype_label}){meta.kit_key ? ` · Kit: ${meta.kit_key}${meta.selection_mode === 'explicit' ? ' · dipilih manual' : ''}` : ''}
+                      </span>
+                    )}
+                    {policyTags.length > 0 && (
+                      <span style={{ fontSize: '0.72rem', fontWeight: 600, padding: '4px 10px', borderRadius: '6px', background: 'var(--surface-interactive)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>
+                        {policyTags.join(' · ')}
+                      </span>
+                    )}
+                  </div>
                 );
               })()}
             </div>
