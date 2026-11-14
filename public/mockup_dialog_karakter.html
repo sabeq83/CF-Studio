@@ -1,0 +1,1193 @@
+<!doctype html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mockup Pengaturan Dialog &amp; Pemeran Karakter — MAKNA Flow</title>
+  <style>
+    /* MAKNA Flow semantic theme tokens (mirrors app/theme.css) */
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --radius-xs: 6px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --input-bg: #ffffff;
+      --overlay-subtle: rgba(30, 41, 59, 0.08);
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --status-neutral: #6548bd;
+      --status-neutral-soft: #f0ecfb;
+      --focus-ring: #6548bd;
+      --shadow-card: 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font-sans);
+      background: var(--canvas);
+      color: var(--text-primary);
+      line-height: 1.5;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 14px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .topbar-left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .topbar-title {
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .topbar-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+    }
+
+    .pill-info {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border-color: var(--status-info);
+    }
+
+    .pill-success {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border-color: var(--status-success);
+    }
+
+    .pill-warning {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border-color: var(--status-warning);
+    }
+
+    .pill-neutral {
+      background: var(--status-neutral-soft);
+      color: var(--status-neutral);
+      border-color: var(--status-neutral);
+    }
+
+    .container {
+      max-width: 1080px;
+      margin: 24px auto;
+      padding: 0 20px 60px;
+      display: grid;
+      gap: 20px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      padding: 9px 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface);
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border-color: var(--action-primary);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+      display: grid;
+      gap: 16px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .card-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin: 2px 0 0;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    @media (max-width: 820px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .input, .select, .textarea {
+      width: 100%;
+      padding: 9px 11px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border-subtle);
+      background: var(--input-bg);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .input:focus, .select:focus, .textarea:focus, button:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 1px;
+    }
+
+    .help-text {
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--text-muted);
+    }
+
+    .switch-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      flex-wrap: wrap;
+    }
+
+    .switch-toggle {
+      display: inline-flex;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 999px;
+      padding: 3px;
+      gap: 4px;
+    }
+
+    .switch-opt {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .switch-opt.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    .style-pills {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    @media (max-width: 780px) {
+      .style-pills { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    .style-card {
+      text-align: left;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      cursor: pointer;
+      display: grid;
+      gap: 2px;
+    }
+
+    .style-card.active {
+      border-color: var(--action-primary);
+      background: var(--surface-interactive);
+    }
+
+    .style-card strong { font-size: 13px; }
+    .style-card span { font-size: 11px; color: var(--text-muted); }
+
+    .fieldset {
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      padding: 18px;
+      display: grid;
+      gap: 16px;
+      margin: 0;
+    }
+
+    .fieldset legend {
+      padding: 0 10px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .cast-box {
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      background: var(--surface-raised);
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .cast-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .cast-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border-strong);
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .btn:hover { background: var(--surface-hover); }
+
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border-color: var(--action-primary);
+    }
+
+    .btn-primary:hover { background: var(--action-primary-hover); }
+
+    .btn-sm { padding: 6px 10px; font-size: 12px; }
+
+    .btn-danger {
+      color: var(--status-danger);
+      background: var(--status-danger-soft);
+      border-color: var(--status-danger);
+    }
+
+    .cast-row {
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      padding: 12px 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .cast-main {
+      display: grid;
+      grid-template-columns: 190px 1fr 1.35fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    @media (max-width: 880px) {
+      .cast-main { grid-template-columns: 1fr; }
+    }
+
+    .char-id-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      padding: 2px 7px;
+      margin-top: 3px;
+    }
+
+    .cast-advanced {
+      border-top: 1px dashed var(--border-subtle);
+      padding-top: 12px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .alert {
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .alert-warning {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border: 1px solid var(--status-warning);
+    }
+
+    .alert-info {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid var(--status-info);
+    }
+
+    .alert-success {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+    }
+
+    .audio-preview-toast {
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--status-info);
+      background: var(--status-info-soft);
+      color: var(--text-primary);
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .vi-char-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .vi-char-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .vi-thumb {
+      height: 110px;
+      border-radius: var(--radius-xs);
+      border: 1px dashed var(--border-strong);
+      background: var(--surface-interactive);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-align: center;
+      padding: 8px;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title">
+        <span>🎭 Mockup Pengaturan Dialog &amp; Pemeran Karakter</span>
+        <span class="pill pill-info">Preset: Kawan Rumah 3D</span>
+        <span class="pill pill-neutral">Staging Preview</span>
+      </div>
+      <div class="topbar-sub">Simulasi interaktif sebelum implementasi React (Bagian 5 &amp; V-1) — coba ubah saklar dialog, TTS provider, tambah pemeran, dan dengarkan contoh suara.</div>
+    </div>
+    <div class="topbar-actions">
+      <button type="button" class="btn" id="themeToggleBtn">☀️ Mode Terang / Gelap</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <nav class="tabs" aria-label="Navigasi Halaman Mockup">
+      <button type="button" class="tab-btn active" data-tab="preset">1. Halaman Preset (Strategi &amp; Pemeran Suara)</button>
+      <button type="button" class="tab-btn" data-tab="vi">2. Halaman Identitas Visual (Wujud Karakter)</button>
+    </nav>
+
+    <!-- TAB 1: HALAMAN PRESET -->
+    <section id="tab-preset" style="display: grid; gap: 18px;">
+      <!-- Card 1: Dialog Switch & Gaya Bicara -->
+      <article class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">1. Alur Cerita &amp; Pengaturan Dialog</h2>
+            <p class="card-desc">Tentukan apakah karakter di preset ini hanya dinarasikan oleh pembicara tunggal atau berdialog antarkarakter.</p>
+          </div>
+          <span class="pill pill-success" id="dialogStatusBadge">Dialog karakter: Nyala</span>
+        </div>
+
+        <div class="switch-box">
+          <div>
+            <div style="font-size: 14px; font-weight: 700;">Dialog karakter</div>
+            <div class="help-text">Nyalakan agar karakter di dalam video dapat berbicara langsung atau bergantian. Matikan untuk akun dengan narator tunggal.</div>
+          </div>
+          <div class="switch-toggle" role="group" aria-label="Dialog karakter">
+            <button type="button" class="switch-opt" id="dialogOffBtn">Mati</button>
+            <button type="button" class="switch-opt active" id="dialogOnBtn">Nyala</button>
+          </div>
+        </div>
+
+        <div id="dialogueStyleBlock" style="display: grid; gap: 8px;">
+          <div style="font-size: 13px; font-weight: 600; color: var(--text-secondary);">Gaya bicara</div>
+          <div class="style-pills" id="stylePills">
+            <button type="button" class="style-card" data-style="character_monolog">
+              <strong>Bicara sendiri</strong>
+              <span>1 karakter utama berbicara</span>
+            </button>
+            <button type="button" class="style-card" data-style="duet">
+              <strong>Berdua</strong>
+              <span>Dialog 2 karakter tiap klip</span>
+            </button>
+            <button type="button" class="style-card active" data-style="ensemble">
+              <strong>Ramai-ramai</strong>
+              <span>2–3 karakter bergantian dalam 1 tim</span>
+            </button>
+            <button type="button" class="style-card" data-style="hybrid">
+              <strong>Campuran</strong>
+              <span>Tokoh utama dominan + sesekali disahut</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="grid-2" style="align-items: start; border-top: 1px solid var(--border-subtle); padding-top: 12px;">
+          <label class="field" style="flex-direction: row; align-items: flex-start; gap: 10px;">
+            <input type="checkbox" checked style="margin-top: 3px;" />
+            <span>
+              <span style="display: block;">Audio Segment</span>
+              <span class="help-text">Pengaturan lama — untuk dialog gunakan &lsquo;Dialog karakter&rsquo;.</span>
+            </span>
+          </label>
+          <div class="field">
+            <span>Identitas Visual Tersambung</span>
+            <div class="input" style="display: flex; justify-content: space-between; align-items: center;">
+              <span>Kawan Rumah (Si Wajan, Sponge, Sapu)</span>
+              <span class="pill pill-info">Universe: Kawan Rumah</span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Card 2: TTS Audio Engine + Pemeran & Suara -->
+      <article class="card">
+        <fieldset class="fieldset">
+          <legend>🔊 Pengaturan Mesin Suara (TTS Audio Engine Settings)</legend>
+
+          <div class="grid-3">
+            <label class="field">
+              <span>Penyedia Suara (TTS Provider)</span>
+              <select class="select" id="providerSelect">
+                <option value="elevenlabs" selected>ElevenLabs (Ultra-Realistis)</option>
+                <option value="minimax">MiniMax VO Engine</option>
+                <option value="gemini">Gemini TTS Engine</option>
+              </select>
+              <span class="help-text">Ubah pilihan ini untuk membandingkan daftar suara ElevenLabs ↔ MiniMax ↔ Gemini tanpa kehilangan pilihan masing-masing.</span>
+            </label>
+
+            <label class="field">
+              <span>Suara Narator Bawaan</span>
+              <select class="select" id="narratorVoiceSelect">
+                <option value="zmqLb9Ysr8fUvDD7hXK8">Zan — Santai, hangat (Cadangan)</option>
+                <option value="plgKUYgnlZ1DCNh54DwJ">Dakocan — Ekspresif, ceria</option>
+                <option value="RbNgJzKAV7jpYJNtCBpj">Citra — Lembut, ramah</option>
+              </select>
+              <span class="help-text">Dipakai saat Dialog karakter mati atau sebagai cadangan terakhir.</span>
+            </label>
+
+            <label class="field" id="modelSelectWrap">
+              <span id="modelSelectLabel">Model ElevenLabs</span>
+              <select class="select" id="modelSelect">
+                <option value="eleven_multilingual_v2">Multilingual v2 (Rekomendasi ID/EN)</option>
+                <option value="eleven_turbo_v2_5">Turbo v2.5 (Cepat)</option>
+                <option value="eleven_flash_v2_5">Flash v2.5 (Ringan)</option>
+              </select>
+            </label>
+          </div>
+
+          <div id="elevenGlobalSliders" class="grid-3">
+            <label class="field">
+              <span>ID Suara Khusus Narator (Opsional)</span>
+              <input type="text" class="input" placeholder="Contoh: YOUR_CUSTOM_VOICE_ID" />
+            </label>
+            <label class="field">
+              <span>Kestabilan Bawaan (0.40)</span>
+              <input type="range" min="0" max="1" step="0.05" value="0.4" />
+              <span class="help-text">Nilai 0.35–0.45 lebih ekspresif untuk karakter kartun.</span>
+            </label>
+            <label class="field">
+              <span>Kemiripan Suara (0.75)</span>
+              <input type="range" min="0" max="1" step="0.05" value="0.75" />
+            </label>
+          </div>
+
+          <!-- Kotak Pemeran & Suara (Muncul hanya saat Dialog karakter = Nyala) -->
+          <div id="castPanel" class="cast-box">
+            <div class="cast-toolbar">
+              <div>
+                <div style="font-size: 14px; font-weight: 700;">🎭 Pemeran &amp; Suara</div>
+                <div class="help-text" id="castProviderHint">Mesin suara mengikuti pilihan di atas: <strong>ElevenLabs</strong></div>
+              </div>
+              <div class="cast-actions">
+                <button type="button" class="btn btn-sm" id="loadUniverseBtn">⬇ Ambil dari Universe: Kawan Rumah</button>
+                <select class="select" id="copyPresetSelect" style="width: auto; padding: 6px 10px; font-size: 12px;">
+                  <option value="">⧉ Salin dari preset lain ▾</option>
+                  <option value="promo_kw">Kawan Rumah — Promo Hemat (3 pemeran)</option>
+                  <option value="edu_kw">Kawan Rumah — Edukasi Dapur (3 pemeran)</option>
+                  <option value="empty">Preset Kosong (Uji peringatan)</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="audioToast" class="audio-preview-toast hidden"></div>
+
+            <div id="castRows" style="display: grid; gap: 10px;"></div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button type="button" class="btn btn-sm btn-primary" id="addMissingCastBtn">+ Tambah pemeran (simulasi selisih Universe)</button>
+                <button type="button" class="btn btn-sm" id="clearCastBtn">Kosongkan daftar</button>
+              </div>
+              <button type="button" class="btn btn-sm" id="toggleAllAdvBtn">▸ Buka semua pengaturan lanjutan</button>
+            </div>
+
+            <div id="castWarnings" style="display: grid; gap: 8px;"></div>
+          </div>
+
+          <div id="castDisabledNotice" class="alert alert-info hidden">
+            ℹ️ Dialog karakter sedang <strong>Mati</strong>. Kotak Pemeran &amp; Suara disembunyikan dan seluruh video menggunakan Suara Narator Bawaan.
+          </div>
+        </fieldset>
+      </article>
+    </section>
+
+    <!-- TAB 2: HALAMAN IDENTITAS VISUAL (VI) -->
+    <section id="tab-vi" class="hidden" style="display: grid; gap: 18px;">
+      <article class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Wujud Karakter &amp; Gambar Acuan (Kawan Rumah)</h2>
+            <p class="card-desc">Daftar wujud karakter yang terhubung ke Identitas Visual ini. Kode karakter harus cocok dengan daftar pemeran di Preset.</p>
+          </div>
+          <span class="pill pill-info">Model Gambar Awal Karakter: Nano Banana Pro</span>
+        </div>
+
+        <div id="viSyncAlert" class="alert alert-success"></div>
+
+        <div class="vi-char-grid" id="viCharGrid"></div>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    const UNIVERSE_CHARACTERS = [
+      { id: 'si_wajan', name: 'Si Wajan', role: 'Tokoh utama', persona: 'Curhat, lucu', sample: 'Halo, aku Si Wajan! Malam-malam jangan lupa bersihin minyak ya.' },
+      { id: 'sponge', name: 'Sponge', role: 'Pendamping', persona: 'Menenangkan', sample: 'Tenang aja Wajan, busa lembutku siap bantu tanpa bikin lecet.' },
+      { id: 'sapu', name: 'Sapu', role: 'Sahabat jahil', persona: 'Ceplas-ceplos, jahil', sample: 'Halah, bilang aja males nyuci piring sebelum tidur!' }
+    ];
+
+    const VOICES_BY_PROVIDER = {
+      elevenlabs: [
+        { id: 'plgKUYgnlZ1DCNh54DwJ', label: 'Dakocan — Laki-laki, ekspresif, ceria (TikTok)' },
+        { id: 'RbNgJzKAV7jpYJNtCBpj', label: 'Citra — Perempuan, lembut, ramah (Dapur)' },
+        { id: 'zmqLb9Ysr8fUvDD7hXK8', label: 'Zan — Laki-laki, santai, serak natural' },
+        { id: 'q8qwd1jY2jS3AWOBeq25', label: 'Pratama — Laki-laki, percaya diri, energik' },
+        { id: 'zd0hd2egR1Q6EzSLTzCp', label: 'Naya — Perempuan, lembut, empatik' },
+        { id: 'vkW2LzXraZVeZ5G7Yv7c', label: 'Dila — Perempuan, gaya presenter energik' }
+      ],
+      minimax: [
+        { id: 'Indonesian_energetic_streamer_vv2', label: 'Energetic Streamer — Laki-laki, enerjik' },
+        { id: 'Indonesian_intellectual_commentator_vv2', label: 'Intellectual Commentator — Laki-laki, tenang' },
+        { id: 'Indonesian_crisp_reporter_vv2', label: 'Crisp Reporter — Perempuan, lugas' },
+        { id: 'Indonesian_casual_reporter_vv2', label: 'Casual Reporter — Laki-laki, santai' },
+        { id: 'Indonesian_professional_anchor_vv2', label: 'Professional Anchor — Perempuan, rapi' }
+      ],
+      gemini: [
+        { id: 'Puck', label: 'Puck — Playful & Muda' },
+        { id: 'Callirrhoe', label: 'Callirrhoe — Perempuan, cerdas & ringan' },
+        { id: 'Aoede', label: 'Aoede — Perempuan, ekspresif & hangat' },
+        { id: 'Orus', label: 'Orus — Laki-laki, tegas & jelas' },
+        { id: 'Kore', label: 'Kore — Perempuan, tenang & lembut' }
+      ]
+    };
+
+    const EXTRA_UNLINKED_CHAR = {
+      id: 'kulkas',
+      name: 'Kulkas',
+      persona: 'Kalem, suka komentar dingin',
+      minimax_voice_id: 'Indonesian_casual_reporter_vv2',
+      elevenlabs_voice_id: 'q8qwd1jY2jS3AWOBeq25',
+      elevenlabs_stability: 0.4,
+      elevenlabs_custom_voice_id: '',
+      gemini_voice_id: 'Orus',
+      descriptive_voice_prompt: 'Suara tenang agak dalam seperti kulkas besar',
+      openAdv: false
+    };
+
+    function defaultCast() {
+      return [
+        {
+          id: 'si_wajan',
+          name: 'Si Wajan',
+          persona: 'Curhat, lucu',
+          minimax_voice_id: 'Indonesian_energetic_streamer_vv2',
+          elevenlabs_voice_id: 'plgKUYgnlZ1DCNh54DwJ',
+          elevenlabs_stability: 0.4,
+          elevenlabs_custom_voice_id: '',
+          gemini_voice_id: 'Puck',
+          descriptive_voice_prompt: 'Ceria, ekspresif, suka mengeluh dengan nada lucu',
+          openAdv: false
+        },
+        {
+          id: 'sponge',
+          name: 'Sponge',
+          persona: 'Menenangkan',
+          minimax_voice_id: 'Indonesian_intellectual_commentator_vv2',
+          elevenlabs_voice_id: 'RbNgJzKAV7jpYJNtCBpj',
+          elevenlabs_stability: 0.45,
+          elevenlabs_custom_voice_id: '',
+          gemini_voice_id: 'Callirrhoe',
+          descriptive_voice_prompt: 'Lembut, menenangkan, ramah seperti teman dapur',
+          openAdv: false
+        },
+        {
+          id: 'sapu',
+          name: 'Sapu',
+          persona: 'Ceplas-ceplos, jahil',
+          minimax_voice_id: 'Indonesian_crisp_reporter_vv2',
+          elevenlabs_voice_id: 'zmqLb9Ysr8fUvDD7hXK8',
+          elevenlabs_stability: 0.35,
+          elevenlabs_custom_voice_id: '',
+          gemini_voice_id: 'Aoede',
+          descriptive_voice_prompt: 'Santai, serak natural, ceplas-ceplos',
+          openAdv: false
+        }
+      ];
+    }
+
+    const state = {
+      dialogueMode: true,
+      dialogueStyle: 'ensemble',
+      provider: 'elevenlabs',
+      cast: defaultCast(),
+      previewCache: new Set()
+    };
+
+    function voiceFieldForProvider(p) {
+      if (p === 'minimax') return 'minimax_voice_id';
+      if (p === 'gemini') return 'gemini_voice_id';
+      return 'elevenlabs_voice_id';
+    }
+
+    function providerLabel(p) {
+      if (p === 'minimax') return 'MiniMax VO Engine';
+      if (p === 'gemini') return 'Gemini TTS Engine';
+      return 'ElevenLabs';
+    }
+
+    function render() {
+      const dialogBadge = document.getElementById('dialogStatusBadge');
+      dialogBadge.textContent = state.dialogueMode ? 'Dialog karakter: Nyala' : 'Dialog karakter: Mati';
+      dialogBadge.className = 'pill ' + (state.dialogueMode ? 'pill-success' : 'pill-warning');
+      document.getElementById('dialogOnBtn').classList.toggle('active', state.dialogueMode);
+      document.getElementById('dialogOffBtn').classList.toggle('active', !state.dialogueMode);
+      document.getElementById('dialogueStyleBlock').classList.toggle('hidden', !state.dialogueMode);
+      document.getElementById('castPanel').classList.toggle('hidden', !state.dialogueMode);
+      document.getElementById('castDisabledNotice').classList.toggle('hidden', state.dialogueMode);
+
+      document.querySelectorAll('.style-card').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.style === state.dialogueStyle);
+      });
+
+      document.getElementById('elevenGlobalSliders').classList.toggle('hidden', state.provider !== 'elevenlabs');
+      document.getElementById('modelSelectLabel').textContent = state.provider === 'elevenlabs' ? 'Model ElevenLabs' : 'Kualitas Model TTS';
+      document.getElementById('castProviderHint').innerHTML =
+        'Mesin suara mengikuti penyedia di atas: <strong>' + providerLabel(state.provider) + '</strong> (pilihan suara provider lain tetap tersimpan)';
+
+      const fieldKey = voiceFieldForProvider(state.provider);
+      const voiceOpts = VOICES_BY_PROVIDER[state.provider];
+      const castRowsEl = document.getElementById('castRows');
+      castRowsEl.innerHTML = '';
+
+      state.cast.forEach((char, idx) => {
+        const row = document.createElement('div');
+        row.className = 'cast-row';
+
+        const optionsHtml = voiceOpts.map(v =>
+          `<option value="${v.id}" ${char[fieldKey] === v.id ? 'selected' : ''}>${v.label}</option>`
+        ).join('');
+
+        const geminiOpts = VOICES_BY_PROVIDER.gemini.map(v =>
+          `<option value="${v.id}" ${char.gemini_voice_id === v.id ? 'selected' : ''}>${v.label}</option>`
+        ).join('');
+
+        const minimaxOpts = VOICES_BY_PROVIDER.minimax.map(v =>
+          `<option value="${v.id}" ${char.minimax_voice_id === v.id ? 'selected' : ''}>${v.label}</option>`
+        ).join('');
+
+        row.innerHTML = `
+          <div class="cast-main">
+            <div>
+              <div style="font-size: 13px; font-weight: 700;">${char.name}</div>
+              <div class="char-id-tag" title="Kode karakter dikunci dari Universe agar selalu cocok dengan gambar">🔒 ${char.id}</div>
+            </div>
+            <input type="text" class="input persona-input" data-idx="${idx}" value="${char.persona}" placeholder="Watak singkat..." />
+            <select class="select main-voice-select" data-idx="${idx}">${optionsHtml}</select>
+            <div style="display: flex; gap: 6px; align-items: center;">
+              <button type="button" class="btn btn-sm play-sample-btn" data-idx="${idx}" title="Putar contoh suara">▶ Contoh</button>
+              <button type="button" class="btn btn-sm adv-toggle-btn" data-idx="${idx}">${char.openAdv ? '▾ Lanjutan' : '▸ Lanjutan'}</button>
+              <button type="button" class="btn btn-sm btn-danger remove-cast-btn" data-idx="${idx}" title="Hapus pemeran">✕</button>
+            </div>
+          </div>
+          <div class="cast-advanced ${char.openAdv ? '' : 'hidden'}">
+            <div class="grid-3">
+              <label class="field">
+                <span>ID Suara Khusus (Opsional)</span>
+                <input type="text" class="input custom-el-input" data-idx="${idx}" value="${char.elevenlabs_custom_voice_id || ''}" placeholder="YOUR_CUSTOM_VOICE_ID" />
+                <span class="help-text">Menimpa pilihan suara ElevenLabs di atas bila diisi.</span>
+              </label>
+              <label class="field">
+                <span>Kestabilan ElevenLabs (<span class="stab-val">${Number(char.elevenlabs_stability).toFixed(2)}</span>)</span>
+                <input type="range" min="0" max="1" step="0.05" class="stab-slider" data-idx="${idx}" value="${char.elevenlabs_stability}" />
+                <span class="help-text">Disarankan 0.35–0.45 agar intonasi karakter hidup.</span>
+              </label>
+              <label class="field">
+                <span>Gaya Bicara Singkat</span>
+                <input type="text" class="input desc-voice-input" data-idx="${idx}" value="${char.descriptive_voice_prompt || ''}" placeholder="Deskripsi gaya bicara..." />
+              </label>
+            </div>
+            <div class="grid-2">
+              <label class="field">
+                <span>Suara Cadangan Gemini</span>
+                <select class="select gemini-bak-select" data-idx="${idx}">${geminiOpts}</select>
+              </label>
+              <label class="field">
+                <span>Suara MiniMax Tersimpan</span>
+                <select class="select minimax-bak-select" data-idx="${idx}">${minimaxOpts}</select>
+              </label>
+            </div>
+          </div>
+        `;
+        castRowsEl.appendChild(row);
+      });
+
+      bindRowEvents();
+      renderWarnings();
+      renderViTab();
+    }
+
+    function renderWarnings() {
+      const box = document.getElementById('castWarnings');
+      const warnings = [];
+
+      if (state.cast.length === 0) {
+        warnings.push('⚠ Preset ini belum punya daftar pemeran.');
+      }
+
+      const universeIds = new Set(UNIVERSE_CHARACTERS.map(c => c.id));
+      const castIds = new Set(state.cast.map(c => c.id));
+
+      state.cast.forEach(c => {
+        if (!universeIds.has(c.id)) {
+          warnings.push(`⚠ "${c.id}" belum punya gambar acuan di Universe.`);
+        }
+      });
+
+      UNIVERSE_CHARACTERS.forEach(u => {
+        if (state.cast.length > 0 && !castIds.has(u.id)) {
+          warnings.push(`⚠ "${u.name}" ada di Universe Kawan Rumah, tetapi belum masuk daftar pemeran preset.`);
+        }
+      });
+
+      const fieldKey = voiceFieldForProvider(state.provider);
+      const seenVoice = new Map();
+      state.cast.forEach(c => {
+        const vId = c[fieldKey];
+        if (seenVoice.has(vId)) {
+          const prevName = seenVoice.get(vId);
+          warnings.push(`⚠ ${prevName} dan ${c.name} memakai suara yang sama pada ${providerLabel(state.provider)}.`);
+        } else {
+          seenVoice.set(vId, c.name);
+        }
+      });
+
+      box.innerHTML = warnings.map(w => `<div class="alert alert-warning">${w}</div>`).join('');
+    }
+
+    function renderViTab() {
+      const castMap = new Map(state.cast.map(c => [c.id, c]));
+      const viGrid = document.getElementById('viCharGrid');
+      const syncAlert = document.getElementById('viSyncAlert');
+
+      const missingInVi = state.cast.filter(c => !UNIVERSE_CHARACTERS.some(u => u.id === c.id));
+      if (state.cast.length === 0) {
+        syncAlert.className = 'alert alert-warning';
+        syncAlert.textContent = '⚠ Daftar pemeran di Preset masih kosong.';
+      } else if (missingInVi.length > 0) {
+        syncAlert.className = 'alert alert-warning';
+        syncAlert.textContent = '⚠ Ada pemeran di Preset tanpa gambar acuan di VI/Universe: ' + missingInVi.map(m => m.id).join(', ');
+      } else {
+        syncAlert.className = 'alert alert-success';
+        syncAlert.textContent = `✓ Seluruh ${state.cast.length} pemeran Preset cocok dengan gambar acuan karakter di Universe Kawan Rumah.`;
+      }
+
+      viGrid.innerHTML = UNIVERSE_CHARACTERS.map(u => {
+        const matched = castMap.get(u.id);
+        return `
+          <div class="vi-char-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 6px;">
+              <strong>${u.name}</strong>
+              <span class="pill pill-success">✓ v3 Aktif</span>
+            </div>
+            <div class="vi-thumb">
+              <div style="font-weight: 700;">Referensi Gambar 3D</div>
+              <div class="char-id-tag">${u.id}</div>
+            </div>
+            <div style="font-size: 12px; color: var(--text-secondary);">Peran: ${u.role}</div>
+            <div class="pill ${matched ? 'pill-info' : 'pill-warning'}">
+              ${matched ? `✓ Suara preset: ${matched.persona}` : '⚠ Belum dipilih di pemeran preset'}
+            </div>
+          </div>
+        `;
+      }).join('') + `
+        <div class="vi-char-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 6px;">
+            <strong>VI Lineup (Bertiga)</strong>
+            <span class="pill pill-success">✓ v3 Aktif</span>
+          </div>
+          <div class="vi-thumb">
+            <div style="font-weight: 700;">Skala &amp; Jajaran 3 Karakter</div>
+            <div class="char-id-tag">vi_mwfzpljm_bf15cfe9</div>
+          </div>
+          <div style="font-size: 12px; color: var(--text-secondary);">Acuan komposisi multi-karakter per klip.</div>
+          <div class="pill pill-neutral">Start Frame: Nano Banana Pro</div>
+        </div>
+      `;
+    }
+
+    function bindRowEvents() {
+      const fieldKey = voiceFieldForProvider(state.provider);
+
+      document.querySelectorAll('.persona-input').forEach(el => {
+        el.addEventListener('input', e => {
+          state.cast[Number(e.target.dataset.idx)].persona = e.target.value;
+          renderViTab();
+        });
+      });
+
+      document.querySelectorAll('.main-voice-select').forEach(el => {
+        el.addEventListener('change', e => {
+          state.cast[Number(e.target.dataset.idx)][fieldKey] = e.target.value;
+          renderWarnings();
+        });
+      });
+
+      document.querySelectorAll('.gemini-bak-select').forEach(el => {
+        el.addEventListener('change', e => {
+          state.cast[Number(e.target.dataset.idx)].gemini_voice_id = e.target.value;
+          if (state.provider === 'gemini') render();
+        });
+      });
+
+      document.querySelectorAll('.minimax-bak-select').forEach(el => {
+        el.addEventListener('change', e => {
+          state.cast[Number(e.target.dataset.idx)].minimax_voice_id = e.target.value;
+          if (state.provider === 'minimax') render();
+        });
+      });
+
+      document.querySelectorAll('.custom-el-input').forEach(el => {
+        el.addEventListener('input', e => {
+          state.cast[Number(e.target.dataset.idx)].elevenlabs_custom_voice_id = e.target.value;
+        });
+      });
+
+      document.querySelectorAll('.desc-voice-input').forEach(el => {
+        el.addEventListener('input', e => {
+          state.cast[Number(e.target.dataset.idx)].descriptive_voice_prompt = e.target.value;
+        });
+      });
+
+      document.querySelectorAll('.stab-slider').forEach(el => {
+        el.addEventListener('input', e => {
+          const val = parseFloat(e.target.value);
+          state.cast[Number(e.target.dataset.idx)].elevenlabs_stability = val;
+          e.target.closest('.field').querySelector('.stab-val').textContent = val.toFixed(2);
+        });
+      });
+
+      document.querySelectorAll('.adv-toggle-btn').forEach(el => {
+        el.addEventListener('click', e => {
+          const idx = Number(e.target.dataset.idx);
+          state.cast[idx].openAdv = !state.cast[idx].openAdv;
+          render();
+        });
+      });
+
+      document.querySelectorAll('.remove-cast-btn').forEach(el => {
+        el.addEventListener('click', e => {
+          const idx = Number(e.target.dataset.idx);
+          state.cast.splice(idx, 1);
+          render();
+        });
+      });
+
+      document.querySelectorAll('.play-sample-btn').forEach(el => {
+        el.addEventListener('click', e => {
+          const idx = Number(e.target.dataset.idx);
+          const c = state.cast[idx];
+          const field = voiceFieldForProvider(state.provider);
+          const vObj = VOICES_BY_PROVIDER[state.provider].find(v => v.id === c[field]);
+          const cacheKey = `${state.provider}:${c.id}:${c[field]}`;
+          const fromCache = state.previewCache.has(cacheKey);
+          state.previewCache.add(cacheKey);
+
+          const uInfo = UNIVERSE_CHARACTERS.find(u => u.id === c.id);
+          const line = uInfo ? uInfo.sample : `Halo, aku ${c.name}!`;
+
+          const toast = document.getElementById('audioToast');
+          toast.classList.remove('hidden');
+          toast.innerHTML = `
+            <div>
+              <strong>🔊 Contoh Suara ${c.name}</strong> (${vObj ? vObj.label : c[field]}):
+              <em>"${line}"</em>
+            </div>
+            <span class="pill ${fromCache ? 'pill-success' : 'pill-info'}">
+              ${fromCache ? 'Diputar dari cache sementara (hemat kuota)' : 'Simulasi uji suara'}
+            </span>
+          `;
+
+          if ('speechSynthesis' in window) {
+            try {
+              window.speechSynthesis.cancel();
+              const utter = new SpeechSynthesisUtterance(line);
+              utter.lang = 'id-ID';
+              window.speechSynthesis.speak(utter);
+            } catch (_) {}
+          }
+        });
+      });
+    }
+
+    document.getElementById('themeToggleBtn').addEventListener('click', () => {
+      const root = document.documentElement;
+      const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      root.setAttribute('data-theme', next);
+    });
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const target = btn.dataset.tab;
+        document.getElementById('tab-preset').classList.toggle('hidden', target !== 'preset');
+        document.getElementById('tab-vi').classList.toggle('hidden', target !== 'vi');
+      });
+    });
+
+    document.getElementById('dialogOnBtn').addEventListener('click', () => {
+      state.dialogueMode = true;
+      render();
+    });
+
+    document.getElementById('dialogOffBtn').addEventListener('click', () => {
+      state.dialogueMode = false;
+      render();
+    });
+
+    document.querySelectorAll('.style-card').forEach(card => {
+      card.addEventListener('click', () => {
+        state.dialogueStyle = card.dataset.style;
+        render();
+      });
+    });
+
+    document.getElementById('providerSelect').addEventListener('change', e => {
+      state.provider = e.target.value;
+      render();
+    });
+
+    document.getElementById('loadUniverseBtn').addEventListener('click', () => {
+      state.cast = defaultCast();
+      render();
+    });
+
+    document.getElementById('clearCastBtn').addEventListener('click', () => {
+      state.cast = [];
+      render();
+    });
+
+    document.getElementById('addMissingCastBtn').addEventListener('click', () => {
+      if (!state.cast.some(c => c.id === 'kulkas')) {
+        state.cast.push({ ...EXTRA_UNLINKED_CHAR });
+      }
+      render();
+    });
+
+    document.getElementById('toggleAllAdvBtn').addEventListener('click', () => {
+      const anyClosed = state.cast.some(c => !c.openAdv);
+      state.cast.forEach(c => { c.openAdv = anyClosed; });
+      render();
+    });
+
+    document.getElementById('copyPresetSelect').addEventListener('change', e => {
+      const v = e.target.value;
+      if (!v) return;
+      if (v === 'empty') {
+        state.cast = [];
+      } else {
+        state.cast = defaultCast();
+      }
+      e.target.value = '';
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>
+
