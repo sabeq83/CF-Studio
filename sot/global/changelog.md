@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.48.12 — Preserve approved item state across start frame checkpoint completion (15/11/2026)
+- Preserve review_state=approved and workflow_status=production_processing in finalizeStartFrameCheckpoint when an approved item finishes Start Frames
+
 ## V2.48.11 — Fix deferred start frame checkpoint, approval pause gate preservation, and 3D VI allocation (15/11/2026)
 - Defer start_frame_status checkpoint as pending during creative review instead of failing
 - Preserve voice_segments and post-storyboard pause gates (visuals/tts/ffmpeg) in approvePillarCampaignItem

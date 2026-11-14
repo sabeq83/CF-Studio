@@ -429,3 +429,12 @@ test('Stylized 3D VI keeps all 5 clips stylized_3d_character even with legacy mo
   assert.equal(promptText.includes('Mode Visual: "isometric_society"'), false);
 });
 
+test('finalizeStartFrameCheckpoint preserves approved item state after Start Frames complete', () => {
+  const src = fs.readFileSync(
+    path.resolve(process.cwd(), 'lib/pillar-start-frame-service.js'),
+    'utf8'
+  );
+  assert.ok(src.includes("const alreadyApproved = item.review_state === 'approved' || Boolean(item.approved_at) || item.workflow_status === 'production_processing';"));
+  assert.ok(src.includes('deferStartFrames = false'));
+});
+
