@@ -1,4 +1,4 @@
-process.env.PG_SEARCH_PATH = 'dev,public';
+process.env.PG_SEARCH_PATH = 'dev';
 process.env.DISABLE_AUTO_MIGRATIONS = 'true';
 
 import test from 'node:test';

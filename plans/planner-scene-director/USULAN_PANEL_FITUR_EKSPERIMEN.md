@@ -1,6 +1,6 @@
 # Usulan: Panel "🧪 Fitur Eksperimen" di Settings
 
-> Tanggal: 2026-11-14 · Status: USULAN UI (belum ada perubahan kode)
+> Tanggal: 2026-11-14 · Status: **MOCKUP DISETUJUI PENGGUNA (2026-11-14)**. Langkah 2 (React + API + tes) boleh dikerjakan **setelah K7.1 selesai**. Acuan desain: `public/mockup_fitur_eksperimen.html` versi rilis `v2.48.1` (nama teknis disembunyikan).
 > Tujuan: pengguna (marketer) bisa menyalakan, mematikan, dan membatalkan sendiri fitur-fitur baru per akun (tenant), tanpa agent dan tanpa menyentuh database.
 > Sesuai SOP: **buat mockup HTML dulu** (`public/mockup_fitur_eksperimen.html`), sinkronkan ke staging (`http://100.95.245.55:5010/mockup_fitur_eksperimen.html`), tunggu review pengguna, baru tulis kode React.
 

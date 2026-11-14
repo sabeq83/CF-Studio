@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.48.2 — K7.1 Jalur B wardrobe lock, night lighting, heart claim & test DB guard (14/11/2026)
+- K7.1-A: fix JPEG-bytes wardrobe_ref MIME detection & enforce locked Wardrobe + Lock Priority on Jalur B C2-C6
+- K7.1-B: strip daylight phrases and lock night interior lighting across T2I/I2V & Batch QC
+- K7.1-C: close enclitic claim suffix loophole, storyboard heart prevention & 1x targeted VO auto-rewrite
+- K7.1-D: fail-loudly local test DB schema guard against empty/public PG_SEARCH_PATH (additive api_key_usages.model_name kept)
+
 ## V2.48.1 — Fix Batch QC shadow_diff args and verified QC model options (14/11/2026)
 - Fix named object args in compareBatchVsPerClipQc call for live shadow_diff
 - Replace 404 gemini-2.5-flash-lite dropdown option with live-verified gemini-3.1-flash-lite
