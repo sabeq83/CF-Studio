@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.45.2 — NutriBlend Masuk Niche Kesehatan untuk Filter Klaim VO (14/11/2026)
+- Brand NutriBlend terdeteksi sebagai niche kesehatan dari nama brand di jalur planner, TTS pilar, dan multiplier
+- Produk elektronik/alat dapur NutriBlend tetap tidak dianggap herbal
+
 ## V2.45.1 — Koreksi Narasi VO v2.45.0 (K1-K5) & Penahan Item VO Terblokir (14/11/2026)
 - Content Editor planner hanya berjalan saat vo_content_contract on (tidak ada panggilan Gemini tambahan saat flag off)
 - Badge & alasan blokir klaim kesehatan / VO di bawah standar di UI Pillar & Multiplier, edit VO membuka blokir
