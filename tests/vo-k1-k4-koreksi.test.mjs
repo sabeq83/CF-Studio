@@ -329,3 +329,30 @@ test('K5: resolvePreRenderFinishingMeta gates bridging.finishing_plan behind vo_
   assert.ok(onMeta.finishingPlan && Array.isArray(onMeta.finishingPlan.tips));
 });
 
+
+test('K2b: Simpan VO pada item normal waiting_approval (tidak diblokir) tidak mereset TTS / status', () => {
+  const normalItem = {
+    workflow_status: 'waiting_approval',
+    tts_status: 'pending',
+    review_state: 'changes_requested',
+    result_json: JSON.stringify({ voiceover: [{ scene: 1, narration: 'lama' }] }),
+    new_video_plan_json: '[]'
+  };
+  const { updateFields } = buildVoiceoverSaveUpdates(normalItem, {
+    voiceover: [{ scene: 1, narration: 'baru' }],
+    auto_trigger_remux: false
+  });
+  assert.equal(updateFields.workflow_status, undefined);
+  assert.equal(updateFields.tts_status, undefined);
+  assert.equal(updateFields.review_state, undefined);
+  assert.ok(updateFields.result_json.includes('baru'));
+});
+
+test('K2c: Scheduler menahan item VO terblokir walau full_autopilot', async () => {
+  const fs = await import('node:fs');
+  const src = fs.readFileSync(new URL('../lib/campaign-scheduler.js', import.meta.url), 'utf8');
+  const guardIdx = src.indexOf('if (!isOpcFullAutopilot && !isOpcApprovedForProduction)');
+  const blockedIdx = src.indexOf('if (isPillarItemBlocked(currentItem))');
+  const ttsIdx = src.indexOf('// 2. TTS Stage (Bikin TTS Sampai Selesai)');
+  assert.ok(guardIdx > 0 && blockedIdx > guardIdx && ttsIdx > blockedIdx, 'guard blokir VO harus berada setelah approval guard dan sebelum tahap TTS');
+});
