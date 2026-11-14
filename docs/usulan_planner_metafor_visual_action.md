@@ -220,3 +220,83 @@ Langkah aman:
 
 ### 10c. Dampak ke rencana KB
 Instant Factory & Sheets Autopilot keluar dari daftar penyederhanaan KB (bagian 9) karena akan dihapus.
+
+---
+
+# BAGIAN 3 — Visual Style Preset vs Planner (cek 15 Nov 2026)
+
+## 11. Temuan
+
+### 11a. Daftar pilihan tidak sama
+| Tempat | Pilihan Visual Style |
+|---|---|
+| Content Planner (`PlannerConfigurationForm.js`) | Cinematic, **Metafora Faceless**, **Investigasi Faceless**, UGC, Macrophotography |
+| Form OPC (`PillarConfigurationForm.js`) | sama dengan Planner |
+| Menu Presets → 2. Aesthetics & Visual (`app/settings/presets/page.js:989`) | Cinematic, UGC, Macrophotography saja |
+
+Nilai yang ada di data preset tapi tidak ada di dropdown preset: `investigative_faceless` (preset "Garlibee Pin Board"), `Food Porn`, `photorealistic_culinary`, `Realistic`, `Explainer 2D Motion`. Saat preset seperti ini dibuka, dropdown tampil "Cinematic", padahal nilai tersimpannya berbeda (menyesatkan).
+
+### 11b. Saat ingest, gaya visual planner TIDAK dipakai
+`lib/pillar-campaign-ingest.js:208`:
+```js
+const ingestVisualStyle = globalSettings.visual_style || (isRecipeCampaign ? 'photorealistic_culinary' : 'Cinematic');
+```
+- `globalSettings` diisi dari preset (Import Planner Modal, ContentFlow Studio, Autonomous Engine, Operator Worker).
+- `planner.visual_style` tidak dibaca sama sekali.
+- Payload per baris (`row_creative_payload`) juga tidak membawa `visual_style`.
+
+Hanya form OPC yang mengisi gaya dari planner (`PillarConfigurationForm.js:516`), tapi bila preset dipilih setelahnya, gaya ditimpa preset (`:249`) tanpa peringatan.
+
+### 11c. Dampak ke storyboard — YA, berpengaruh
+Storyboard menentukan mode metafora dari `campaign.visual_style`, `rowPayload.visual_style`, `metaphor_kit_key`, atau environment Visual Identity (`lib/prompts.js` ±baris 1950). Jika kampanye tersimpan "Cinematic":
+- KB `OBJECT_METAPHOR_STORYTELLING_KB` tidak dimuat.
+- Mandat metafora (objek klip 1, presence truth, dll.) tidak aktif.
+- Hook metafora dari planner hanya terbawa sebagai teks, visualnya digarap sebagai Cinematic biasa.
+
+### 11d. Bukti di data staging
+| Gaya planner | Gaya kampanye OPC | Jumlah |
+|---|---|---|
+| metaphoric_faceless | metaphoric_faceless | 4 (dibuat lewat form OPC, dipilih manual) |
+| metaphoric_faceless | **Cinematic** | 1 — `opc_261108_hllhah` dari `pln_5873d99a` |
+| UGC | Cinematic | 1 |
+
+Catatan:
+- `pln_7d6363e0` belum di-ingest. Jika di-ingest lewat Import Modal + preset sekarang, storyboard-nya akan jalan sebagai Cinematic.
+- Preset "Dapurbotani Garlibee MetaforF1F2 - Reveal 2x" tersimpan dengan Visual Style **Cinematic** walau namanya "Metafor".
+
+## 12. Usulan Tambahan
+
+### U7 — Pisahkan dua konsep yang sekarang tercampur dalam satu field (rekomendasi utama)
+"Visual Style" saat ini mencampur dua hal berbeda:
+| Konsep baru | Isi | Pemilik |
+|---|---|---|
+| `creative_approach` (Pendekatan Kreatif) | standar / metafora_faceless / investigasi_faceless | **Planner** (karena menentukan cara menulis hook & alur) |
+| `visual_look` (Tampilan Visual) | Cinematic / UGC / Macrophotography / Food Porn / photorealistic_culinary / dll. | **Preset** (karena soal produksi/render) |
+
+Dengan begitu planner dan preset tidak lagi saling menimpa: metafora + tampilan Macrophotography bisa jalan bersamaan.
+Kompatibilitas: nilai lama `metaphoric_faceless` / `investigative_faceless` dipetakan ke `creative_approach`, sisanya ke `visual_look`.
+
+### U8 — Perbaikan cepat (sebelum U7): aturan prioritas saat ingest
+Urutan: pilihan manual pengguna di form ingest → **gaya planner bila metafora/investigasi** → gaya preset → default.
+- Bawa `visual_style` ke payload per baris (`row_creative_payload`), karena storyboard sudah membaca `rowPayload.visual_style` lebih dulu (row-first).
+- Berlaku untuk semua jalur ingest: Import Planner Modal, form OPC, ContentFlow Studio, Autonomous Engine, Operator Worker.
+
+### U9 — Satu katalog Visual Style untuk semua dropdown
+Buat satu sumber daftar (mis. `lib/visual-style-catalog.js`) yang dipakai: form Planner, form OPC, menu Presets, dan validasi ingest. Bila nilai tersimpan tidak dikenal, tampilkan apa adanya ("Nilai lama: Food Porn"), jangan diam-diam tampil "Cinematic".
+
+### U10 — Peringatan di layar saat ada konflik
+Di Import Planner Modal dan form OPC: bila gaya planner ≠ gaya preset, tampilkan info "Planner memakai Metafora, preset memakai Cinematic — yang dipakai: Metafora". Di form OPC, memilih preset tidak boleh diam-diam menimpa gaya metafora/investigasi dari planner.
+
+### U11 — Rapikan data yang sudah ada (tanpa ubah kode)
+- Cek ulang preset "Dapurbotani Garlibee MetaforF1F2 - Reveal 2x" (nama Metafor, gaya Cinematic).
+- `opc_261108_hllhah`: storyboard-nya dibuat sebagai Cinematic; regenerate bila memang ingin metafora.
+- Sementara U8 belum jadi: ingest planner metafora lewat form OPC dan pastikan pilihan Visual Style tetap "Metafora" setelah memilih preset.
+
+### Uji
+1. Ingest planner metafora lewat Import Modal dengan preset Cinematic → kampanye & payload baris harus `metaphoric_faceless`, storyboard memuat KB metafora.
+2. Sama, lewat form OPC dengan urutan pilih planner lalu preset, dan sebaliknya.
+3. Planner Cinematic + preset Macrophotography → tetap Macrophotography (perilaku lama tidak berubah).
+4. Buka preset "Garlibee Pin Board" di menu Presets → dropdown menampilkan Investigasi, bukan Cinematic.
+
+### File terkait
+`app/settings/presets/page.js`, `app/components/ImportPlannerModal.js`, `app/components/campaign-forms/PillarConfigurationForm.js`, `app/components/campaign-forms/PlannerConfigurationForm.js`, `lib/pillar-campaign-ingest.js`, `lib/contentflow-studio-adapters.js`, `lib/autonomous-engine.js`, `lib/operator-content-worker.js`, `lib/prompts.js` (deteksi metafora).

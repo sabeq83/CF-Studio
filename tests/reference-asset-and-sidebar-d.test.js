@@ -366,3 +366,39 @@ test('Approval routes await Next.js 16 params and attestation skips stylized/mas
   assert.doesNotThrow(() => validateApprovalAttestation(humanViAsset, true, humanViContext));
 });
 
+test('Autonomous pipeline preserves preset VI, operator_preset_key, and audio segment flags', async () => {
+  const { buildPresetHydratedGlobalFields } = await import('../lib/operator-presets.js');
+  const fields = buildPresetHydratedGlobalFields({
+    effectivePresetKey: 'kawan_rumah_3d_dialog',
+    executionMode: 'creative_review',
+    overrides: {},
+    presetConfig: {
+      basic_strategy: {
+        enable_audio_segment: true,
+        sfx_setting: 'without_sfx',
+        enable_vo_audit: 1,
+        nextcloud_parent_folder: '/MAKNA_Assets/KawanRumah'
+      },
+      workflow: {
+        approval_mode: 'storyboard',
+        enable_glabs: true,
+        scheduler_pause_at: 'visuals'
+      }
+    }
+  });
+
+  assert.equal(fields.operator_preset_key, 'kawan_rumah_3d_dialog');
+  assert.equal(fields.preset_key, 'kawan_rumah_3d_dialog');
+  assert.equal(fields.enable_audio_segment, 1);
+  assert.equal(fields.enable_glabs, 1);
+  assert.equal(fields.approval_mode, 'storyboard');
+  assert.equal(fields.scheduler_pause_at, 'visuals');
+  assert.equal(fields.enable_vo_audit, 1);
+
+  const routeSource = fs.readFileSync(
+    path.resolve(process.cwd(), 'app/api/v2/recipes/autonomous-pipeline/route.js'),
+    'utf8'
+  );
+  assert.equal(routeSource.includes('visual_identity_preset_id: body.visual_identity_preset_id || null'), false);
+});
+

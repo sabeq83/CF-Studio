@@ -186,7 +186,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
         executionMode: body.execution_mode || body.executionMode || 'full_autopilot',
         tenantId,
         overrides: {
-          visual_identity_preset_id: body.visual_identity_preset_id || null,
+          ...(body.visual_identity_preset_id ? { visual_identity_preset_id: body.visual_identity_preset_id } : {}),
           ...(body.voice_provider ? { voice_provider: body.voice_provider } : {}),
           ...(body.voice_persona ? { voice_persona: body.voice_persona } : {}),
           ...(body.finishing_template !== undefined ? { finishing_template: body.finishing_template } : {}),
@@ -207,7 +207,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
         executionMode: body.execution_mode || body.executionMode || 'full_autopilot',
         tenantId,
         overrides: {
-          visual_identity_preset_id: body.visual_identity_preset_id || null,
+          ...(body.visual_identity_preset_id ? { visual_identity_preset_id: body.visual_identity_preset_id } : {}),
           use_brand_pillars: body.use_brand_pillars !== undefined ? Boolean(body.use_brand_pillars) : !isKeywordMode,
           keyword: body.keyword || (isKeywordMode ? (body.content_pillar || body.pillar_title || body.topic) : null),
           ...(body.finishing_template !== undefined ? { finishing_template: body.finishing_template } : {}),
@@ -230,7 +230,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
         selectedAngle: body.selected_angle || body.selectedAngle || null,
         tenantId,
         overrides: {
-          visual_identity_preset_id: body.visual_identity_preset_id || null,
+          ...(body.visual_identity_preset_id ? { visual_identity_preset_id: body.visual_identity_preset_id } : {}),
           bridging_mode: resolvedMultiplierProductId ? (body.bridging_mode || 'select_existing') : 'none',
           product_aware_angle: body.product_aware_angle !== false,
           enable_motion_text: body.enable_motion_text,

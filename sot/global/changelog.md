@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.48.10 — Fix autonomous pipeline preset VI and audio segment hydration (15/11/2026)
+- Avoid overwriting preset visual_identity_preset_id with null in autonomous-pipeline API
+- Forward operator_preset_key, enable_audio_segment, enable_glabs, and approval_mode from presets in autonomous-engine
+- Fallback to preset_key during pillar-campaign-ingest preset hydration
+
 ## V2.48.9 — Fix Approve & Set Active Reference Asset Modal, Async Params & Attestation (15/11/2026)
 - Fix Next.js 16 await params across reference-assets/[id] API routes
 - Display inline errors and loading state inside ReferenceAssetManager review modal with Semantic CSS Tokens
