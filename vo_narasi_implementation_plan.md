@@ -9,7 +9,7 @@
 - [score.py](file:///Users/sabeqmmursyid/_cfstudio/plans/vo-narasi-reference/score.py)
 - Pola Referensi Rencana: [finishing_pass_implementation_plan.md](file:///Users/sabeqmmursyid/_cfstudio/finishing_pass_implementation_plan.md)
 
-**Status Dokumen**: Menunggu review & persetujuan pengguna (Tahap Dokumentasi & Audit Read-Only — **belum ada perubahan kode, database, pengaturan preset, atau rilis**).
+**Status Dokumen**: Diimplementasi di `v2.45.0`, belum di-deploy; koreksi `v2.45.1` (K1–K5) selesai diimplementasikan di branch `fix/vo-v2451` (menunggu review & persetujuan pengguna untuk merge/rilis/deploy).
 
 ---
 
@@ -785,3 +785,19 @@ Mengikuti SOP Semantic CSS Tokens (`var(--status-success-soft)`, `var(--status-w
 2. **A/B Uji Coba Nyata pada Staging (Setelah seluruh Fase V0–V5 terpasang & disetujui deploy ke Staging)**:
    - Jalankan ulang benchmark menggunakan `node plans/vo-narasi-reference/harness.mjs` dan `python3 plans/vo-narasi-reference/score.py` terhadap 6 kasus referensi (Habitfolk EN, Garlibee Produk ID, Resep ID 6-klip, Keyword Editorial ID, Multiplier ID, & Custom Storyboard) untuk memverifikasi penurunan `VAGUE`, `MARK`, nol `CLAIM`, serta kepatuhan `wmax` dan jumlah klip.
    - Aktivasi bertahap hanya per **1–2 preset/brand uji coba** di Staging sambil memantau laporan mingguan `GET /api/v2/analytics/vo-quality` sebelum memperluas `vo_content_contract = 'on'` dan `vo_quality_gate = 'warn' -> 'enforce'`.
+
+---
+
+## 8. Tracker Koreksi Pasca-Audit `v2.45.1` (`fix/vo-v2451`)
+
+- [x] **K1 — Flag Gate Content Editor Step di Content Planner** ([`lib/content-planner-engine.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/content-planner-engine.js), [`lib/autonomous-engine.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/autonomous-engine.js)):
+  - Ekstrak `runPlannerContentEditorStep()` dan selesaikan flag efektif lewat [`resolveEffectiveVoSettings()`](file:///Users/sabeqmmursyid/_cfstudio/lib/vo-contract-registry.js). Jika `vo_content_contract !== 'on'`, lakukan `0` Gemini call dan biarkan `content_payload_json = null`. Filter hook V0-2 tetap aktif untuk brand/produk herbal/kesehatan.
+  - Propagasikan `vo_content_contract`, `vo_quality_gate`, dan `operator_preset_key` ke `createDraftContentPlanner()` di seluruh jalur `autonomous-engine.js`.
+- [x] **K2 — Permukaan UI, Clear-on-Edit, dan Resume Alur Item Diblokir V0-2 & V4** ([`lib/vo-status-ui.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/vo-status-ui.js), [`app/api/v2/pillar-campaigns/items/[itemId]/voiceover/route.js`](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/pillar-campaigns/items/%5BitemId%5D/voiceover/route.js), [`lib/pillar-campaign-approval.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/pillar-campaign-approval.js), [`app/pillar-campaigns/[id]/page.js`](file:///Users/sabeqmmursyid/_cfstudio/app/pillar-campaigns/%5Bid%5D/page.js), [`app/pillar-campaigns/page.js`](file:///Users/sabeqmmursyid/_cfstudio/app/pillar-campaigns/page.js), [`app/api/v2/pillar-campaigns/route.js`](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/pillar-campaigns/route.js), [`app/api/v2/pillar-campaigns/[id]/route.js`](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/pillar-campaigns/%5Bid%5D/route.js), [`app/multiplier-lab/[id]/page.js`](file:///Users/sabeqmmursyid/_cfstudio/app/multiplier-lab/%5Bid%5D/page.js)):
+  - Status `vo_claim_blocked`, `paused_compliance`, dan `vo_quality_blocked` kini tampil dengan label `🚫 Diblokir: klaim kesehatan` / `⚠️ VO di bawah standar`, alasan `review_reason` terlihat di row & detail/modal, naskah dapat diedit & disetujui, serta `PATCH .../voiceover` dan `approvePillarCampaignItem()` mereset `tts_status: 'pending'` dan membersihkan `review_state`/`review_reason`.
+- [x] **K3 — Restorasi `autoDetectNarrativeMode()` saat `vo_content_contract` OFF** ([`lib/pillar-campaign-ingest.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/pillar-campaign-ingest.js)):
+  - Saat `vo_content_contract` OFF, `autoDetectNarrativeMode()` hanya membaca `pillar`, `category_cep`, `vfo`, dan `strategic_angle` (identik dengan baseline `7e4d5b4`), tidak lagi ikut membaca `context` / `content_subject`.
+- [x] **K4 — Penyeragaman & Penguatan Target Detektor Herbal/Kesehatan V0-2** ([`lib/tiktok-compliance-service.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/tiktok-compliance-service.js)):
+  - Daftar keyword `HERBAL_HEALTH_TOKENS` dan `NON_HERBAL_PRODUCT_TOKENS` disatukan dengan substring match case-insensitive (tanpa `\b`) sehingga `'siasatsehat'`, `'Siasat Sehat'`, maupun `'Garlickys Bumbu Rempah Dapur'` terdeteksi, sementara produk cookware/alat dapur (`Oita Pengasah Pisau Dapur 4in1`) tidak false-positive meskipun bertag `'dapurbotani'`. Parameter `knowledgeDomain` dan `editorialPillars` ikut dihubungkan dari sumber yang sudah ada tanpa menambah kolom DB.
+- [x] **K5 — Penyelarasan Dokumentasi Plan & Gate `bridging.finishing_plan`** ([`vo_narasi_implementation_plan.md`](file:///Users/sabeqmmursyid/_cfstudio/vo_narasi_implementation_plan.md), [`lib/tiktok-compliance-service.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/tiktok-compliance-service.js), [`lib/re-multiplier-worker.js`](file:///Users/sabeqmmursyid/_cfstudio/lib/re-multiplier-worker.js)):
+  - Catatan perubahan scope: pada `v2.45.0`, fallback `bridging?.finishing_plan` di `resolvePreRenderFinishingMeta()` dan pengisian `bridging.finishing_plan` di `re-multiplier-worker.js` sempat aktif tanpa mengecek `vo_content_contract`. Pada `v2.45.1`, fallback dan pengisian `bridging.finishing_plan` dari V3 kini di-gate di `vo_content_contract === 'on'` dan didokumentasikan secara eksplisit di sini.

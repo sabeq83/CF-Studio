@@ -2552,12 +2552,42 @@ export default function OrganicPillarPage() {
                                 padding: '3px 8px', borderRadius: 4, fontSize: '0.68rem', fontWeight: 600,
                                 background: isDone ? 'var(--status-success-soft)' : 'var(--surface-interactive)',
                                 color: isDone ? 'var(--status-success)' : 'var(--text-muted)',
-                                border: `1px solid ${isDone ? 'rgba(16,185,129,0.4)' : 'var(--border-subtle)'}`
+                                border: `1px solid ${isDone ? 'var(--status-success)' : 'var(--border-subtle)'}`
                               }}>
                                 {isDone ? '✓ ' : ''}{st.label} {pct}%
                               </span>
                             );
                           })}
+                          {Number(c.stats.claim_blocked || 0) > 0 && (
+                            <span style={{
+                              padding: '3px 8px', borderRadius: 4, fontSize: '0.68rem', fontWeight: 700,
+                              background: 'var(--status-danger-soft)',
+                              color: 'var(--status-danger)',
+                              border: '1px solid var(--status-danger)'
+                            }}>
+                              🚫 {c.stats.claim_blocked} diblokir klaim
+                            </span>
+                          )}
+                          {Number(c.stats.quality_blocked || 0) > 0 && (
+                            <span style={{
+                              padding: '3px 8px', borderRadius: 4, fontSize: '0.68rem', fontWeight: 700,
+                              background: 'var(--status-warning-soft)',
+                              color: 'var(--status-warning)',
+                              border: '1px solid var(--status-warning)'
+                            }}>
+                              ⚠️ {c.stats.quality_blocked} VO perlu perbaikan
+                            </span>
+                          )}
+                          {Number(c.stats.generate_failed || 0) > 0 && (
+                            <span style={{
+                              padding: '3px 8px', borderRadius: 4, fontSize: '0.68rem', fontWeight: 700,
+                              background: 'var(--status-danger-soft)',
+                              color: 'var(--status-danger)',
+                              border: '1px solid var(--status-danger)'
+                            }}>
+                              ❌ {c.stats.generate_failed} gagal generate
+                            </span>
+                          )}
                         </div>
                       )}
 

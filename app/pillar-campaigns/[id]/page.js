@@ -9,6 +9,7 @@ import { MINIMAX_ENGLISH_VOICES, ELEVENLABS_ID_VOICES, ELEVENLABS_EN_VOICES, ELE
 import { resolveBridgePlan, readBridgeInputs, describeBridgePlan } from '@/lib/bridging/bridge-plan';
 import { FINISHING_TEMPLATE_REGISTRY, getFinishingTemplateMeta, getEffectiveFinishingOverride, buildFinishingOverridePatch } from '@/lib/finishing-template-registry';
 import FinishingTemplatePreview from '../../components/FinishingTemplatePreview';
+import { isPillarItemBlocked, getPillarItemBlockInfo, getPillarItemStatusInfo } from '@/lib/vo-status-ui';
 
 const writeToClipboard = (text) => {
   if (typeof window !== 'undefined') {
@@ -185,7 +186,7 @@ export default function PillarCampaignDetailPage() {
 
     setQuickVoItem(item);
     setQuickVoScenes(scenes);
-    setQuickVoAutoRemux(true);
+    setQuickVoAutoRemux(Boolean(item.visual_status === 'completed' && item.visual_clip_paths));
     setQuickVoMotionStyle(campaign?.motion_text_style || 'floating_white_yellow');
     setQuickVoTransition(campaign?.video_transition || 'cut');
     setQuickVoEnableMotion(campaign?.enable_motion_text !== 0);
@@ -352,7 +353,7 @@ export default function PillarCampaignDetailPage() {
         const nextTabs = { ...prevTabs };
         (data.items || []).forEach(item => {
           if (!nextTabs[item.id]) {
-            nextTabs[item.id] = (item.workflow_status === 'ready_for_review' || item.workflow_status === 'production_processing' || item.workflow_status === 'completed') ? 'storyboard' : 'concept';
+            nextTabs[item.id] = (item.workflow_status === 'ready_for_review' || item.workflow_status === 'production_processing' || item.workflow_status === 'completed' || isPillarItemBlocked(item)) ? 'storyboard' : 'concept';
           }
         });
         return nextTabs;
@@ -684,123 +685,7 @@ export default function PillarCampaignDetailPage() {
   };
 
   function renderItemStatus(item, campaign) {
-    let text = 'Fase 1 : Pending';
-    let color = 'var(--text-muted)';
-    let bg = 'var(--surface-interactive)';
-    let pulse = false;
-
-    const pauseAt = campaign?.scheduler_pause_at;
-
-    // 1. Errors
-    if (
-      item.generation_status === 'failed' ||
-      item.tts_status === 'failed' ||
-      item.visual_status === 'failed' ||
-      item.ffmpeg_status === 'failed' ||
-      item.upload_status === 'failed' ||
-      item.social_post_status === 'failed'
-    ) {
-      text = '⚠️ Error / Failed';
-      color = 'var(--status-danger)';
-      bg = 'var(--status-danger-soft)';
-    }
-    // 2. Pause states
-    else if (pauseAt === 'tts' && item.generation_status === 'completed' && item.tts_status === 'pending' && item.workflow_status === 'ready_for_review') {
-      text = '⏸️ Fase 2 : Paused (Review Script)';
-      color = 'var(--status-warning)';
-      bg = 'rgba(243, 156, 18, 0.1)';
-    } else if (pauseAt === 'visuals' && item.tts_status === 'completed' && item.visual_status === 'pending') {
-      text = '⏸️ Fase 2 : Paused (Review Prompts)';
-      color = 'var(--status-warning)';
-      bg = 'rgba(243, 156, 18, 0.1)';
-    } else if (pauseAt === 'ffmpeg' && item.visual_status === 'completed' && item.ffmpeg_status === 'pending') {
-      text = '⏸️ Fase 2 : Paused (Review Clips)';
-      color = 'var(--status-warning)';
-      bg = 'rgba(243, 156, 18, 0.1)';
-    } else if (pauseAt === 'social' && item.ffmpeg_status === 'completed' && item.social_post_status === 'pending') {
-      text = '⏸️ Fase 2 : Paused (Ready to Post)';
-      color = 'var(--status-warning)';
-      bg = 'rgba(243, 156, 18, 0.1)';
-    }
-    // 2.5 Start Frame Generation (Batch / Single)
-    else if (
-      item.workflow_status === 'start_frames_processing' ||
-      item.start_frame_status === 'processing' ||
-      ['queued', 'running'].includes(item.regenerate_start_frames_status) ||
-      batchRegeneratingSF[item.id]
-    ) {
-      text = item.regenerate_start_frames_progress
-        ? `⚡ Fase 1 : Generate Start Frame (${item.regenerate_start_frames_progress})`
-        : '⚡ Fase 1 : Generate Start Frame';
-      color = 'var(--status-success)';
-      bg = 'var(--status-success-soft)';
-      pulse = true;
-    }
-    // 3. Active processing states
-    else if (item.generation_status === 'processing') {
-      text = item.generation_progress ? `⚡ Fase 1 : ${item.generation_progress}` : '⚡ Fase 1 : AI Generation';
-      color = 'var(--accent-light)';
-      bg = 'var(--status-info-soft)';
-      pulse = true;
-    } else if (item.generation_status === 'pending_sourcing') {
-      text = '⚡ Fase 1 : JIT Product Sourcing';
-      color = 'var(--status-neutral)';
-      bg = 'rgba(155, 89, 182, 0.1)';
-      pulse = true;
-    } else if (item.generation_status === 'pending') {
-      text = '⏳ Fase 1 : Queue for Generation';
-      color = 'var(--text-muted)';
-    } else if (item.tts_status === 'processing') {
-      text = '⚡ Fase 2 : Generate TTS';
-      color = 'var(--accent-light)';
-      bg = 'var(--status-info-soft)';
-      pulse = true;
-    } else if (item.tts_status === 'pending' && item.generation_status === 'completed' && item.workflow_status === 'production_processing') {
-      text = '⏳ Fase 2 : Queue for TTS';
-      color = 'var(--text-muted)';
-    } else if (item.visual_status === 'processing') {
-      text = '⚡ Fase 2 : Generate Video';
-      color = 'var(--status-neutral)';
-      bg = 'rgba(155, 89, 182, 0.1)';
-      pulse = true;
-    } else if (item.visual_status === 'pending' && item.tts_status === 'completed') {
-      text = '⏳ Fase 2 : Queue for Video';
-      color = 'var(--text-muted)';
-    } else if (item.ffmpeg_status === 'processing') {
-      text = '⚡ Fase 2 : FFMPEG Process';
-      color = 'var(--status-info)';
-      bg = 'var(--status-info-soft)';
-      pulse = true;
-    } else if (item.ffmpeg_status === 'pending' && item.visual_status === 'completed') {
-      text = '⏳ Fase 2 : Queue for FFmpeg';
-      color = 'var(--text-muted)';
-    } else if (item.upload_status === 'uploading') {
-      text = '⚡ Fase 2 : Uploading Assets';
-      color = 'var(--status-info)';
-      bg = 'var(--status-info-soft)';
-      pulse = true;
-    } else if (item.social_post_status === 'processing') {
-      text = '⚡ Fase 2 : Social Posting';
-      color = 'var(--status-warning)';
-      bg = 'rgba(230, 126, 34, 0.1)';
-      pulse = true;
-    }
-    // 3.5 Paused Review
-    else if (item.workflow_status === 'ready_for_review') {
-      text = '⏸️ Fase 2 : Paused (Ready for Review)';
-      color = 'var(--status-warning)';
-      bg = 'rgba(243, 156, 18, 0.1)';
-    }
-    // 4. Completed states
-    else if (item.social_post_status === 'completed' || item.upload_status === 'completed') {
-      text = '✅ Fase 2 : Completed';
-      color = 'var(--success)';
-      bg = 'var(--status-success-soft)';
-    } else if (item.generation_status === 'completed') {
-      text = '✅ Fase 1 : Completed';
-      color = 'var(--success)';
-      bg = 'var(--status-success-soft)';
-    }
+    const { text, color, bg, pulse } = getPillarItemStatusInfo(item, campaign, batchRegeneratingSF);
 
     return (
       <span style={{
@@ -1812,7 +1697,9 @@ export default function PillarCampaignDetailPage() {
       item.ffmpeg_status === 'failed' ||
       item.upload_status === 'failed' ||
       item.social_post_status === 'failed';
-    const canEditStoryboard = item.workflow_status === 'ready_for_review' || isProductionFailed;
+    const isBlockedVo = isPillarItemBlocked(item);
+    const blockInfo = getPillarItemBlockInfo(item);
+    const canEditStoryboard = item.workflow_status === 'ready_for_review' || isProductionFailed || isBlockedVo;
     const isReadOnly = !canEditStoryboard;
 
     const updateDnaField = (field, value) => {
@@ -2194,6 +2081,52 @@ export default function PillarCampaignDetailPage() {
               <strong style={{ display: 'block', marginBottom: '2px', color: 'var(--text-primary)' }}>Produksi Gagal / Terhenti</strong>
               Terjadi kegagalan saat memproses tahapan produksi (TTS, Video G-Labs, atau FFmpeg). Anda dapat mengedit storyboard di bawah ini, mengunggah Start Frame pengganti, lalu klik tombol <strong>"Approve & Proceed to Production"</strong> untuk merender ulang video.
             </div>
+          </div>
+        )}
+
+        {isBlockedVo && blockInfo && (
+          <div style={{
+            background: blockInfo.bg,
+            border: `1px solid ${blockInfo.border}`,
+            color: blockInfo.color,
+            padding: '16px 20px',
+            borderRadius: '8px',
+            marginBottom: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '12px',
+            lineHeight: 1.5
+          }}>
+            <div style={{ flex: 1, minWidth: '240px' }}>
+              <strong style={{ display: 'block', marginBottom: '4px', color: 'var(--text-primary)' }}>
+                {blockInfo.text}
+              </strong>
+              <div style={{ color: 'var(--text-primary)', fontSize: '0.8rem' }}>
+                {item.review_reason || blockInfo.title}
+              </div>
+              <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginTop: '4px' }}>
+                Edit naskah VO pada scene terkait di bawah (atau lewat Quick Edit VO), lalu simpan / klik <strong>"Approve &amp; Proceed to Production"</strong> untuk melanjutkan produksi TTS.
+              </div>
+            </div>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => handleOpenQuickVoModal(item)}
+              style={{
+                padding: '8px 14px',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                borderRadius: '6px',
+                border: `1px solid ${blockInfo.border}`,
+                background: 'var(--surface-raised)',
+                color: blockInfo.color,
+                cursor: 'pointer'
+              }}
+            >
+              ✏️ Edit Naskah VO
+            </button>
           </div>
         )}
 
@@ -3109,7 +3042,7 @@ export default function PillarCampaignDetailPage() {
         {activeTab === 'logs' && renderLogs(item)}
 
         {/* Workflow & Production Settings Form */}
-        {(item.workflow_status === 'ready_for_review' || isProductionFailed) && activeTab === 'storyboard' && (
+        {(item.workflow_status === 'ready_for_review' || isProductionFailed || isBlockedVo) && activeTab === 'storyboard' && (
           <>
             <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--surface-interactive)', borderRadius: '8px', padding: '16px 20px', marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={{ fontWeight: '700', fontSize: '0.8rem', color: 'var(--accent-light)' }}>⚙️ Workflow & Production Settings (Fase 2)</div>
@@ -3980,7 +3913,28 @@ export default function PillarCampaignDetailPage() {
 
 
           {/* CAMPAIGN ITEMS GENERATION DETAIL SECTION */}
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 600, margin: '32px 0 16px 0' }}>📦 Item Produksi Video</h2>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, margin: '32px 0 16px 0' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 600, margin: 0 }}>📦 Item Produksi Video</h2>
+            {stats && (Number(stats.claim_blocked || 0) > 0 || Number(stats.quality_blocked || 0) > 0 || Number(stats.generate_failed || 0) > 0) && (
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {Number(stats.claim_blocked || 0) > 0 && (
+                  <span style={{ padding: '4px 10px', borderRadius: 6, fontSize: '0.75rem', fontWeight: 700, background: 'var(--status-danger-soft)', color: 'var(--status-danger)', border: '1px solid var(--status-danger)' }}>
+                    🚫 {stats.claim_blocked} diblokir klaim
+                  </span>
+                )}
+                {Number(stats.quality_blocked || 0) > 0 && (
+                  <span style={{ padding: '4px 10px', borderRadius: 6, fontSize: '0.75rem', fontWeight: 700, background: 'var(--status-warning-soft)', color: 'var(--status-warning)', border: '1px solid var(--status-warning)' }}>
+                    ⚠️ {stats.quality_blocked} VO di bawah standar
+                  </span>
+                )}
+                {Number(stats.generate_failed || 0) > 0 && (
+                  <span style={{ padding: '4px 10px', borderRadius: 6, fontSize: '0.75rem', fontWeight: 700, background: 'var(--status-danger-soft)', color: 'var(--status-danger)', border: '1px solid var(--status-danger)' }}>
+                    ❌ {stats.generate_failed} gagal generate
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
 
           {items.length === 0 ? (
             <div className="card">
@@ -4042,6 +3996,16 @@ export default function PillarCampaignDetailPage() {
                           </td>
                           <td style={{ padding: '14px 16px' }}>
                             {renderItemStatus(item, campaign)}
+                            {isPillarItemBlocked(item) && item.review_reason && (
+                              <div style={{
+                                marginTop: 6,
+                                fontSize: '0.72rem',
+                                lineHeight: 1.4,
+                                color: getPillarItemBlockInfo(item)?.color || 'var(--status-warning)'
+                              }}>
+                                {item.review_reason}
+                              </div>
+                            )}
                           </td>
                           <td style={{ padding: '14px 16px' }}>
                             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'flex-end' }}>
@@ -4234,6 +4198,25 @@ export default function PillarCampaignDetailPage() {
                   flex: 1
                 }}
               >
+                {quickVoItem?.review_reason && (
+                  <div
+                    style={{
+                      background: getPillarItemBlockInfo(quickVoItem)?.bg || 'var(--status-danger-soft)',
+                      border: `1px solid ${getPillarItemBlockInfo(quickVoItem)?.border || 'var(--status-danger)'}`,
+                      borderRadius: 'var(--radius-sm, 6px)',
+                      padding: '10px 14px',
+                      fontSize: '0.8rem',
+                      color: 'var(--text-primary)',
+                      lineHeight: 1.45
+                    }}
+                  >
+                    <strong style={{ display: 'block', marginBottom: 2, color: getPillarItemBlockInfo(quickVoItem)?.color || 'var(--status-danger)' }}>
+                      {getPillarItemBlockInfo(quickVoItem)?.text || '⚠️ VO Perlu Perbaikan'}
+                    </strong>
+                    <span>{quickVoItem.review_reason}</span>
+                  </div>
+                )}
+
                 <div
                   style={{
                     background: 'var(--surface-subtle)',
@@ -4397,9 +4380,13 @@ export default function PillarCampaignDetailPage() {
                       type="checkbox"
                       checked={quickVoAutoRemux}
                       onChange={(e) => setQuickVoAutoRemux(e.target.checked)}
-                      disabled={quickVoSaving}
+                      disabled={quickVoSaving || quickVoItem?.visual_status !== 'completed'}
                     />
-                    <span>Langsung trigger <strong>TTS &amp; Re-mux otomatis</strong></span>
+                    <span>
+                      {quickVoItem?.visual_status === 'completed'
+                        ? <>Langsung trigger <strong>TTS &amp; Re-mux otomatis</strong></>
+                        : <>Simpan &amp; buka blokir VO (visual belum selesai — siap untuk TTS/Approve)</>}
+                    </span>
                   </label>
 
                   <div style={{ display: 'flex', gap: '10px' }}>

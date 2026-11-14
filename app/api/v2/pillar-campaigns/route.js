@@ -33,7 +33,9 @@ export const GET = withTenantContext(async (request, _context, user) => {
           SUM(CASE WHEN generation_status = 'completed' THEN 1 ELSE 0 END) as generated,
           SUM(CASE WHEN generation_status = 'failed' THEN 1 ELSE 0 END) as generate_failed,
           SUM(CASE WHEN tts_status = 'completed' THEN 1 ELSE 0 END) as tts_completed,
-          SUM(CASE WHEN visual_status = 'completed' THEN 1 ELSE 0 END) as visual_completed
+          SUM(CASE WHEN visual_status = 'completed' THEN 1 ELSE 0 END) as visual_completed,
+          SUM(CASE WHEN tts_status = 'paused_compliance' OR review_state = 'vo_claim_blocked' THEN 1 ELSE 0 END) as claim_blocked,
+          SUM(CASE WHEN review_state = 'vo_quality_blocked' THEN 1 ELSE 0 END) as quality_blocked
         FROM pillar_campaign_items WHERE campaign_id = ?
       `).get(c.id);
       return { ...c, stats };

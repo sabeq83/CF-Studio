@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { normalizeAudioConfig, syncAudioConfigKeyValue } from '@/lib/multiplier-audio-config';
 import { GEMINI_VOICES, MINIMAX_VOICES, MINIMAX_ENGLISH_VOICES } from '@/lib/voice-constants';
 import { resolveBridgePlan, readBridgeInputs } from '@/lib/bridging/bridge-plan';
+import { getMultiplierWaitingBadge } from '@/lib/vo-status-ui';
 
 function renderPhaseBadge(task) {
   let text = '⚡ Fase 1 : Pending';
@@ -58,10 +59,19 @@ function renderPhaseBadge(task) {
         border = 'var(--status-success-soft)';
         isPulse = true;
       } else {
-        text = '⏸️ Fase 2 : Paused (Ready for Review)';
-        color = 'var(--status-warning)';
-        bg = 'var(--status-warning-soft)';
-        border = 'var(--status-warning-soft)';
+        const waitingBadge = getMultiplierWaitingBadge(task);
+        if (waitingBadge) {
+          text = waitingBadge.text;
+          color = waitingBadge.color;
+          bg = waitingBadge.bg;
+          border = waitingBadge.border;
+          isPulse = waitingBadge.isPulse;
+        } else {
+          text = '⏸️ Fase 2 : Paused (Ready for Review)';
+          color = 'var(--status-warning)';
+          bg = 'var(--status-warning-soft)';
+          border = 'var(--status-warning-soft)';
+        }
       }
       break;
     case 'generating_audio':
@@ -1118,6 +1128,16 @@ function CampaignDetailPageContent() {
                       </td>
                       <td style={{ padding: '14px 16px' }}>
                         {renderPhaseBadge(task)}
+                        {task.status === 'waiting_approval' && task.error_message && (
+                          <div style={{
+                            marginTop: 6,
+                            fontSize: '0.72rem',
+                            lineHeight: 1.4,
+                            color: getMultiplierWaitingBadge(task)?.blockKind === 'claim' ? 'var(--status-danger)' : 'var(--status-warning)'
+                          }}>
+                            {task.error_message}
+                          </div>
+                        )}
                       </td>
                       <td style={{ padding: '14px 16px', textAlign: 'right' }}>
                         <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', alignItems: 'center' }}>
@@ -1165,6 +1185,27 @@ function CampaignDetailPageContent() {
                               </div>
                               {renderPipelineStatus(task)}
                             </div>
+
+                            {task.status === 'waiting_approval' && task.error_message && (() => {
+                              const waitingBadge = getMultiplierWaitingBadge(task);
+                              const isClaim = waitingBadge?.blockKind === 'claim';
+                              return (
+                                <div style={{
+                                  background: isClaim ? 'var(--status-danger-soft)' : 'var(--status-warning-soft)',
+                                  border: `1px solid ${isClaim ? 'var(--status-danger)' : 'var(--status-warning)'}`,
+                                  color: isClaim ? 'var(--status-danger)' : 'var(--status-warning)',
+                                  borderRadius: 8,
+                                  padding: '14px 18px',
+                                  fontSize: '0.82rem',
+                                  lineHeight: 1.5
+                                }}>
+                                  <strong style={{ display: 'block', marginBottom: 4, color: 'var(--text-primary)' }}>
+                                    {waitingBadge?.text || '⚠️ Perlu Review VO / Storyboard'}
+                                  </strong>
+                                  <div style={{ color: 'var(--text-primary)' }}>{task.error_message}</div>
+                                </div>
+                              );
+                            })()}
 
                             {/* Horizontal Tabs Navigation */}
                             <div style={{ display: 'flex', borderBottom: '1px solid var(--border-subtle)', marginBottom: '14px', gap: '6px', flexWrap: 'wrap', overflowX: 'auto' }}>

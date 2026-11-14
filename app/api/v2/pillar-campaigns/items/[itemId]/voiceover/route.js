@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDb, updatePillarCampaignItem, updatePillarCampaign } from '@/lib/db';
 import { withTenantContext } from '@/lib/auth';
+import { buildVoiceoverSaveUpdates } from '@/lib/vo-status-ui';
 
 export const GET = withTenantContext(async (request, { params }) => {
   try {
@@ -52,29 +53,6 @@ export const PATCH = withTenantContext(async (request, { params }) => {
       await updatePillarCampaign(item.campaign_id, campUpdates);
     }
 
-    let resultJson = JSON.parse(item.result_json || '{}');
-    resultJson.voiceover = voiceover.map(v => ({
-      scene: Number(v.scene),
-      narration: String(v.narration || '').trim()
-    }));
-
-    let planJson = [];
-    try { planJson = JSON.parse(item.new_video_plan_json || '[]'); } catch (_) {}
-    if (Array.isArray(planJson) && planJson.length > 0) {
-      planJson = planJson.map((p, idx) => {
-        const match = resultJson.voiceover.find(v => Number(v.scene) === Number(p.clip_index || idx + 1));
-        return {
-          ...p,
-          new_vo: match ? match.narration : (p.new_vo || '')
-        };
-      });
-    }
-
-    const updateFields = {
-      result_json: JSON.stringify(resultJson),
-      new_video_plan_json: planJson.length > 0 ? JSON.stringify(planJson) : item.new_video_plan_json
-    };
-
     if (auto_trigger_remux) {
       let visualPaths = [];
       try { visualPaths = JSON.parse(item.visual_clip_paths || '[]'); } catch (_) {}
@@ -84,18 +62,9 @@ export const PATCH = withTenantContext(async (request, { params }) => {
           error: 'Video G-Labs belum lengkap. Re-mux otomatis hanya dapat dijalankan jika visual berstatus completed.'
         }, { status: 409 });
       }
-
-      updateFields.workflow_status = 'production_processing';
-      updateFields.tts_status = 'pending';
-      updateFields.tts_batch_id = null;
-      updateFields.ffmpeg_status = 'pending';
-      updateFields.ffmpeg_output_path = null;
-      updateFields.upload_status = 'pending';
-      updateFields.drive_link = null;
-      updateFields.social_post_status = 'pending';
-      updateFields.social_links_json = null;
-      updateFields.retry_count = 0;
     }
+
+    const { updateFields, resultJson } = buildVoiceoverSaveUpdates(item, { voiceover, auto_trigger_remux });
 
     await updatePillarCampaignItem(itemId, updateFields);
 
