@@ -1,7 +1,7 @@
 # Rencana Penjadwalan Auto Pipeline — NutriBake (Premix Cocoa Powder Premium)
 
-**Status**: Draft Rencana (Belum Dieksekusi)  
-**Tanggal Penyusunan**: 2026-11-15  
+**Status**: ✅ **SUKSES DIEKSEKUSI (7 Jadwal Aktif di DB)**  
+**Tanggal Eksekusi**: 2026-11-15 (15:20 WIB)  
 **Periode Jadwal**: 16 November 2026 – 22 November 2026 (7 Hari)
 
 ---
@@ -26,17 +26,17 @@
 
 ---
 
-## 2. Rincian 7 Jadwal Harian (16–22 November 2026)
+## 2. Rincian 7 Jadwal Harian (16–22 November 2026) — Terverifikasi Aktif
 
-| # | Tanggal (`target_date`) | Hari | Nama Jadwal | Topik / Arahan AI | Generate | Publish |
-| :-: | :--- | :--- | :--- | :--- | :-: | :-: |
-| 1 | `2026-11-16` | Senin | `Product Video - Nutribake - cokelat tanpa gula` | `cokelat tanpa gula` | `01:00` | `10:11` |
-| 2 | `2026-11-17` | Selasa | `Product Video - Nutribake - coklat keto` | `coklat keto` | `01:00` | `10:08` |
-| 3 | `2026-11-18` | Rabu | `Product Video - Nutribake - diet keto` | `diet keto` | `01:00` | `10:15` |
-| 4 | `2026-11-19` | Kamis | `Product Video - Nutribake - menu defisit kalori` | `menu defisit kalori` | `01:00` | `10:07` |
-| 5 | `2026-11-20` | Jumat | `Product Video - Nutribake - minuman rendah kalori` | `minuman rendah kalori` | `01:00` | `10:17` |
-| 6 | `2026-11-21` | Sabtu | `Product Video - Nutribake - coklat sugar free` | `coklat sugar free` | `01:00` | `10:12` |
-| 7 | `2026-11-22` | Minggu | `Product Video - Nutribake - cemilan diet` | `cemilan diet` | `01:00` | `10:09` |
+| # | Schedule ID | Tanggal (`target_date`) | Hari | Topik / Arahan AI | Generate | Publish | Status |
+| :-: | :--- | :--- | :--- | :--- | :-: | :-: | :-: |
+| 1 | `apsched_1794730857980_6712e3` | `2026-11-16` | Senin | `cokelat tanpa gula` | `01:00` | `10:11` | 🟢 Aktif |
+| 2 | `apsched_1794730857987_80a374` | `2026-11-17` | Selasa | `coklat keto` | `01:00` | `10:08` | 🟢 Aktif |
+| 3 | `apsched_1794730857993_cb58e0` | `2026-11-18` | Rabu | `diet keto` | `01:00` | `10:15` | 🟢 Aktif |
+| 4 | `apsched_1794730857998_ca8b10` | `2026-11-19` | Kamis | `menu defisit kalori` | `01:00` | `10:07` | 🟢 Aktif |
+| 5 | `apsched_1794730858002_220d1e` | `2026-11-20` | Jumat | `minuman rendah kalori` | `01:00` | `10:17` | 🟢 Aktif |
+| 6 | `apsched_1794730858007_772a74` | `2026-11-21` | Sabtu | `coklat sugar free` | `01:00` | `10:12` | 🟢 Aktif |
+| 7 | `apsched_1794730858012_433f50` | `2026-11-22` | Minggu | `cemilan diet` | `01:00` | `10:09` | 🟢 Aktif |
 
 ---
 
