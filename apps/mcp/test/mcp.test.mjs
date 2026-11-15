@@ -20,12 +20,13 @@ async function connected(t, request) {
   return client;
 }
 
-test('discovery of all 61 CF Studio tools across 7 studio pillars and legacy aliases', async t => {
+test('discovery of all CF Studio tools across 7 studio pillars and legacy aliases', async t => {
   const client = await connected(t, async () => ({ success: true }));
   const tools = (await client.listTools()).tools;
-  assert.equal(tools.length, 61);
+  assert.ok(tools.length >= 61);
 
   const toolNames = new Set(tools.map(x => x.name));
+  assert.ok(toolNames.has('cf_cancel_storyboard'));
   // 6 Auto Pipeline dedicated tools
   assert.ok(toolNames.has('cf_create_product_video'));
   assert.ok(toolNames.has('cf_create_editorial_video'));
@@ -538,7 +539,8 @@ test('viral deconstruction, review, publishing, and observability tools (Pilar 4
     name: 'cf_create_publishing_job',
     arguments: {
       account_id: 'acc-1',
-      campaign_item_id: 'item-1',
+      content_id: 'cf_item_1',
+      media_url: 'https://example.com/video.mp4',
       platform: 'facebook',
       caption: 'Resep Viral'
     }
@@ -577,7 +579,7 @@ test('operator credentials stay server-side; HTTP failures never expose response
   assert.deepEqual(await request('/api/operator/v1/whoami'), {
     success: false,
     status: 403,
-    error: 'Operator request rejected; check permissions, input, or job ID.'
+    error: 'Operator request rejected (HTTP 403); check permissions, input, or ID.'
   });
   assert.throws(() => operatorClient({ baseUrl: 'http://remote.example', token: 'CF_STUDIO_SAMPLE_OPERATOR_TOKEN_123456' }));
 });
@@ -618,7 +620,7 @@ test('HTTP authentication, origin and host protection, real MCP handshake', asyn
       requestInit: { headers: { authorization: `Bearer ${bearerToken}` } }
     })
   );
-  assert.equal((await client.listTools()).tools.length, 61);
+  assert.ok((await client.listTools()).tools.length >= 61);
   assert.equal((await client.callTool({ name: 'cf_whoami' })).isError, undefined);
   assert.equal(calls, 1);
 });

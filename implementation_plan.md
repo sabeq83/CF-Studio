@@ -1,232 +1,273 @@
-# Rencana Implementasi: Perbaikan UI/UX AI Visual Identity Studio Builder (Opsi A: 1-Kolom Vertikal)
+# Rencana Implementasi: 4 Celah CF Studio untuk CF Autopipeline (CFA)
 
-## Latar Belakang & Akar Masalah
-
-Pengguna melaporkan bahwa saat membuat Visual Identity baru melalui AI Studio Builder, proses seolah berhenti ("stuck") setelah muncul badge **"Usulan Siap Direview"**, dan tombol **"Generate Visual Preview (G-Labs Node 2)"** tidak terlihat.
-
-Akar masalahnya adalah **urutan tumpukan vertikal yang keliru**:
-- Proposal Card menaruh Rationale, 4 Atribut, dan Textarea Prompt T2I *di atas* tombol Generate.
-- Akibatnya, tombol Generate dan Kanvas Preview terdorong ke posisi Y: ~850px (*below the fold*), tidak terlihat pada layar standar.
-
-Pengguna meminta evaluasi: *"kenapa harus 2 kolom split? apakah 1 kolom vertikal tidak bisa?"* dan menginstruksikan: *"coba buat mockup opsi A"*.
+Berdasarkan dokumen serah terima [HANDOFF_ANTIGRAVITY_4_CELAH_MCP_PUBLISH.md](file:///Users/sabeqmmursyid/_cfstudio/HANDOFF_ANTIGRAVITY_4_CELAH_MCP_PUBLISH.md).
 
 ---
 
-## Solusi Desain Opsi A: 1-Kolom Vertikal (Linear, Bersih, Hero di Atas)
+## Ringkasan Perubahan
 
-**Mockup interaktif Opsi A sudah diimplementasikan dan aktif sebagai default** di:  
-🔗 `http://100.95.245.55:5010/mockup_ai_visual_identity_builder.html`  
-*(Dilengkapi pula tombol switcher di header modal untuk beralih antara Opsi A dan Opsi B secara instan)*.
-
-### 1. Auto-Collapse Composer (Stage 1 → Stage 2)
-- Saat usulan AI selesai dirakit, Composer 12-chips menciut menjadi **Compact Concept Bar (40px)** di bagian atas.
-- Pengguna tetap dapat mengklik tombol *"✏️ Ubah Konsep Ide"* untuk kembali mengedit prompt kapan saja.
-
-### 2. Membalik Urutan Vertikal: Hero Preview Naik ke Atas
-- **Posisi 1**: Header Usulan (Nama Preset, Badge Siap Direview, preset_key)
-- **Posisi 2 (Y: ~110px)**: **Control Bar Aspek Rasio + TOMBOL GENERATE BERPENDAR** (`pulseGlow` hijau cerah)
-- **Posisi 3**: **Kanvas Preview G-Labs** (Langsung tampil utuh di tengah layar)
-- **Posisi 4 (Di bawah kanvas)**: Strip Atribut 4-item (Visual Mode, Subject, Environment, Color Palette)
-- **Posisi 5 (Di bawah kanvas)**: Textarea Production T2I Prompt (editable + tombol Salin)
-- **Posisi 6 (Di bawah kanvas)**: Rationale Desain Estetika
-
-### 3. Keunggulan Opsi A:
-- **Nol Scroll**: Tombol Generate berada di Y: ~110px dari atas modal, langsung tampak di hadapan pengguna.
-- **Lebar Modal Standar**: Cukup `max-width: 820px` (tidak perlu melebar sampai 1140px).
-- **Alur Linear Alami**: Mata pengguna bergerak fokus dari atas (tombol render & visual) ke bawah (detail prompt jika ingin dioprek).
+| # | Celah | Solusi Teknis |
+|---|---|---|
+| 1 | **Judul per platform (`platform_titles`)** | Tambahkan `cleanTitle` & `normalizePlatformTitles` di `lib/publishing-contract.js`, terapkan pemilihan judul per platform di `lib/publishing-service.js`, dan perluas skema MCP `cf_create_publishing_job` & `cf_publish_storyboard` di `apps/mcp/tools.mjs`. |
+| 2 | **Mode ringkas `cf_get_storyboard_status`** | Ubah `fetchPillarStoryboardSummary` di `apps/mcp/tools.mjs` agar default tanpa `items` mentah (`item_count`), sertakan `error_message` dan `generation_error` pada `stages`, tambahkan argumen `include_items`, dan sesuaikan pemanggil yang membutuhkan items. |
+| 3 | **Filter pada daftar preset & VI** | Tambahkan parameter `brand`, `query`, dan `detail` (default `false` / ringkas) pada `cf_list_presets`, `makna_list_presets`, dan `cf_list_visual_identities` di `apps/mcp/tools.mjs`. |
+| 4 | **Membatalkan Custom Storyboard (`cst_*`)** | Tambahkan status `'cancelled'` pada PATCH `/api/v2/pillar-campaigns/[id]`, hentikan proses di worker/scheduler sebelum tahap pemakaian kuota (Gemini, Start Frame, TTS, G-Labs, FFmpeg), dan daftarkan tool MCP baru `cf_cancel_storyboard`. |
 
 ---
 
 ## Execution Task List
-- [x] Task 1: Pembuatan Mockup Interaktif Opsi A (1-Kolom Vertikal dengan Hero di Atas) + Switcher Opsi B
-- [x] Task 2: Sinkronisasi Mockup ke Server Mac Mini Staging (`http://100.95.245.55:5010/mockup_ai_visual_identity_builder.html`)
-- [x] Task 3: Tambah state baru (`autoPreview`, `isComposeMode`) & import `useEffect`/`useRef` di `AiVisualIdentityBuilderModal.js`
-- [x] Task 4: Implementasi Auto-Collapse Composer → Compact Concept Bar pada React Component
-- [x] Task 5: Refaktor Urutan JSX Proposal Card ke 1-Kolom Vertikal (Hero Control Bar + Kanvas di Atas, Spesifikasi di Bawah)
-- [x] Task 6: Implementasi Tombol Generate Berpendar (`pulseGlow`) + Tombol Cadangan di Kanvas Kosong
-- [x] Task 7: Implementasi Toggle Auto-Generate Preview & CSS Keyframes Injection
-- [x] Task 8: Verifikasi Build Lokal (`npm run build`) & Uji Fungsionalitas
-- [x] Task 9: Prosedur Rilis Non-Interaktif & Deploy ke Staging Mac Mini
+- [x] Task 1: Implementasi Celah 1 (Judul per Platform `platform_titles`)
+  - [x] 1.1 Update `lib/publishing-contract.js` (tambah `cleanTitle`, `normalizePlatformTitles`, validasi `platform_titles`)
+  - [x] 1.2 Update `lib/publishing-service.js` (pilih `selectedTitle` berdasarkan target platform)
+  - [x] 1.3 Update `apps/mcp/tools.mjs` (skema dan forwarding `platform_titles` di `cf_create_publishing_job` dan `cf_publish_storyboard`)
+- [x] Task 2: Implementasi Celah 2 (Mode Ringkas & Error Reporting `cf_get_storyboard_status`)
+  - [x] 2.1 Update `fetchPillarStoryboardSummary` dengan opsi `{ includeItems = false }`, `item_count`, dan error fields di `stages`
+  - [x] 2.2 Update skema dan handler `cf_get_storyboard_status` dengan parameter `include_items`
+  - [x] 2.3 Pastikan pemanggil lain yang butuh items (`cf_approve_job`) mengirim `{ includeItems: true }`
+- [x] Task 3: Implementasi Celah 3 (Filter Brand/Query & Output Ringkas Preset & Visual Identity)
+  - [x] 3.1 Update `cf_list_presets` dan `makna_list_presets` di `apps/mcp/tools.mjs`
+  - [x] 3.2 Update `cf_list_visual_identities` di `apps/mcp/tools.mjs`
+- [x] Task 4: Implementasi Celah 4 (Pembatalan Custom Storyboard `cst_*`)
+  - [x] 4.1 Update PATCH di `app/api/v2/pillar-campaigns/[id]/route.js` untuk menerima `'cancelled'` dan membatalkan item / aset yang belum selesai
+  - [x] 4.2 Tambahkan guard status (`paused` / `cancelled`) di `lib/scheduler-processors.js` (`processPillarGenerator`, `processPillarTts`, `processPillarGlabs`, `processPillarFfmpeg`)
+  - [x] 4.3 Tambahkan guard status di `lib/start-frame-worker.js` sebelum submit provider task
+  - [x] 4.4 Daftarkan tool MCP `cf_cancel_storyboard` di `apps/mcp/tools.mjs`
+- [x] Task 5: Pengujian & Verifikasi Komprehensif
+  - [x] 5.1 Buat unit test mandiri `tests/test-4-celah-mcp-publish.test.mjs` untuk menguji ke-4 celah
+  - [x] 5.2 Jalankan unit test dan periksa kelulusan
+  - [x] 5.3 Jalankan `npm run build` untuk memastikan tidak ada kesalahan kompilasi
+- [x] Task 6: SOP Rilis & Auto Git Sync (Non-Interactive Release)
+  - [x] 6.1 Jalankan `npm run release-non-interactive` dengan versi patch
+  - [x] 6.2 Verifikasi commit, tag, changelog, dan push remote
+- [ ] Task 7: SOP Deployment Mac Mini Staging
+  - [ ] 7.1 Deploy ke staging dengan atomic deployment (`npm run deploy:staging -- --ref <full-git-sha> --apply --confirm-staging`)
+  - [ ] 7.2 Verifikasi kesehatan layanan staging (UI port 5010 & API port 7010)
 
 ---
 
-## Detailed Before & After Code Snippets (Untuk Implementasi React Component)
+## Detailed Before & After Code Snippets
 
-### 1. State Baru & Auto-Collapse Flag
-
-**File**: [`AiVisualIdentityBuilderModal.js`](file:///Users/sabeqmmursyid/_cfstudio/app/components/AiVisualIdentityBuilderModal.js#L92-L115)
+### 1. `lib/publishing-contract.js`
 
 #### Code Sebelum (Current/Before):
-```javascript
-export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditing }) {
-  const [userPrompt, setUserPrompt] = useState(TRENDING_PRESETS[0].prompt);
-  const [activeChip, setActiveChip] = useState('stickman');
-  const [isSynthesizing, setIsSynthesizing] = useState(false);
-  const [synthesisStage, setSynthesisStage] = useState('');
-  const [error, setError] = useState(null);
-
-  // Proposal state
-  const [proposal, setProposal] = useState(null);
-  const [t2iPrompt, setT2iPrompt] = useState('');
-  const [aspectRatio, setAspectRatio] = useState('9:16');
+```js
+    title: String(title || '').trim().replace(/^["'\s]+|["'\s]+$/g, '').slice(0, 100),
+    caption: String(caption || '').trim(),
+    media_url: String(media_url || '').trim(),
+    caption_facebook: input.caption_facebook ? String(input.caption_facebook).trim() : null,
+    caption_bio: input.caption_bio ? String(input.caption_bio).trim() : null,
+    platform_captions: (input.platform_captions && typeof input.platform_captions === 'object') ? input.platform_captions : null,
 ```
 
 #### Code Sesudah (Proposed/After):
-```javascript
-export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditing }) {
-  const [userPrompt, setUserPrompt] = useState(TRENDING_PRESETS[0].prompt);
-  const [activeChip, setActiveChip] = useState('stickman');
-  const [isSynthesizing, setIsSynthesizing] = useState(false);
-  const [synthesisStage, setSynthesisStage] = useState('');
-  const [error, setError] = useState(null);
+```js
+function cleanTitle(t) {
+  return String(t || '').trim().replace(/^["'\s]+|["'\s]+$/g, '').slice(0, 100);
+}
 
-  // Proposal state
-  const [proposal, setProposal] = useState(null);
-  const [t2iPrompt, setT2iPrompt] = useState('');
-  const [aspectRatio, setAspectRatio] = useState('9:16');
+function normalizePlatformTitles(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  const out = {};
+  for (const [platform, value] of Object.entries(raw)) {
+    const t = cleanTitle(value);
+    if (t) out[String(platform).toLowerCase()] = t;
+  }
+  return Object.keys(out).length ? out : null;
+}
 
-  // 🚀 Opsi A: Auto-collapse composer flag & Auto-preview toggle
-  const [isComposeMode, setIsComposeMode] = useState(true);
-  const [autoPreview, setAutoPreview] = useState(true);
-  const modalBodyRef = useRef(null);
+...
+    title: cleanTitle(title),
+    caption: String(caption || '').trim(),
+    media_url: String(media_url || '').trim(),
+    caption_facebook: input.caption_facebook ? String(input.caption_facebook).trim() : null,
+    caption_bio: input.caption_bio ? String(input.caption_bio).trim() : null,
+    platform_captions: (input.platform_captions && typeof input.platform_captions === 'object') ? input.platform_captions : null,
+    platform_titles: normalizePlatformTitles(input.platform_titles),
 ```
 
 ---
 
-### 2. Membalik Urutan JSX Proposal Card (Hero Preview Naik ke Atas)
+### 2. `lib/publishing-service.js`
 
-**File**: [`AiVisualIdentityBuilderModal.js`](file:///Users/sabeqmmursyid/_cfstudio/app/components/AiVisualIdentityBuilderModal.js#L580-L1006)
-
-#### Code Sebelum (Current/Before) — Urutan Lama (Tombol Generate Terkubur di Bawah):
-```jsx
-{/* Part 2: Interactive Proposal Card */}
-{proposal && (
-  <div style={{ backgroundColor: 'var(--surface-raised)', borderRadius: '12px', ... }}>
-    {/* 1. Header */}
-    <div style={{ padding: '16px 20px' }}>...</div>
-
-    {/* 2. Rationale (Menghabiskan ruang vertikal) */}
-    {proposal.creative_rationale && <div>...</div>}
-
-    {/* 3. Attributes Strip */}
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>...</div>
-
-    {/* 4. T2I Prompt Textarea (Menghabiskan ruang vertikal) */}
-    <div style={{ padding: '18px 20px' }}>
-      <textarea rows={3} ... />
-    </div>
-
-    {/* 5. G-Labs Review Section (TERKUBUR DI BAWAH Y > 800px) */}
-    <div style={{ padding: '20px' }}>
-      <button onClick={handleRenderGlabs}>Generate Visual Preview</button>
-      <div style={{ minHeight: '280px' }}>...kanvas...</div>
-    </div>
-  </div>
-)}
+#### Code Sebelum (Current/Before):
+```js
+    return {
+      accountId: accId,
+      publishMode: validated.publish_mode,
+      mediaType: validated.media_type,
+      title: validated.title,
+      caption: selectedCaption,
+      mediaUrl: validated.media_url,
+      scheduledAt: validated.schedules?.[accId] || validated.scheduled_at,
+      approvalStatus: 'not_required',
+      isAiGenerated: !!validated.is_ai_generated
+    };
 ```
 
-#### Code Sesudah (Proposed/After) — Urutan Opsi A (Hero Preview Naik ke Atas, Y: ~110px):
-```jsx
-{/* Part 2: Opsi A - 1-Kolom Vertikal dengan Hero Preview di Atas */}
-{proposal && (
-  <div style={{ backgroundColor: 'var(--surface-raised)', border: '1px solid var(--border-strong)', borderRadius: 'var(--radius-md, 12px)', overflow: 'hidden', boxShadow: 'var(--shadow-card)', display: 'flex', flexDirection: 'column' }}>
-    
-    {/* 1. Header Usulan */}
-    <div style={{ backgroundColor: 'var(--surface-interactive)', padding: '12px 18px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <div>
-        <div style={{ backgroundColor: 'var(--status-success-soft)', color: 'var(--status-success)', fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: 'var(--radius-full)' }}>
-          ✨ Usulan Siap Direview
-        </div>
-        <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', margin: '4px 0 0 0' }}>
-          {proposal.label}
-        </h3>
-        <span style={{ fontFamily: 'var(--font-mono, monospace)', fontSize: '11px', color: 'var(--text-muted)' }}>
-          preset_key: {proposal.suggested_preset_key}
-        </span>
-      </div>
-      <span style={{ fontSize: '11px', color: 'var(--text-muted)', backgroundColor: 'var(--surface)', padding: '4px 10px', borderRadius: 'var(--radius-sm, 6px)', border: '1px solid var(--border-subtle)' }}>
-        Schema v2 Compliant • Faceless Invariant
-      </span>
-    </div>
+#### Code Sesudah (Proposed/After):
+```js
+    const selectedTitle = validated.platform_titles?.[platform] || validated.title;
 
-    {/* 2. 🌟 HERO SECTION: CONTROL BAR & KANVAS PREVIEW LANGSUNG DI ATAS 🌟 */}
-    <div style={{ padding: '14px 18px', backgroundColor: 'var(--surface)', borderBottom: '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', backgroundColor: 'var(--surface-interactive)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm, 8px)', flexWrap: 'wrap', gap: '10px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-muted)' }}>Rasio:</span>
-          <div style={{ display: 'flex', gap: '5px' }}>
-            {['9:16', '1:1', '16:9'].map((ratio) => (
-              <button key={ratio} type="button" onClick={() => setAspectRatio(ratio)} style={{ backgroundColor: aspectRatio === ratio ? 'var(--action-primary)' : 'var(--input-bg)', color: aspectRatio === ratio ? 'var(--on-action-primary)' : 'var(--text-secondary)', border: `1px solid ${aspectRatio === ratio ? 'var(--action-primary)' : 'var(--border-subtle)'}`, fontSize: '11px', fontWeight: 600, padding: '4px 10px', borderRadius: 'var(--radius-xs, 4px)', cursor: 'pointer' }}>
-                {ratio}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* 🌟 TOMBOL GENERATE BERPENDAR MENYALA (POSISI Y ~110px) 🌟 */}
-        <button
-          type="button"
-          onClick={handleRenderGlabs}
-          disabled={isRenderingGlabs}
-          style={{
-            background: 'linear-gradient(135deg, var(--status-success), var(--action-primary))',
-            color: 'var(--on-action-primary)',
-            border: 'none',
-            padding: '8px 18px',
-            borderRadius: 'var(--radius-sm, 8px)',
-            fontSize: '12.5px',
-            fontWeight: 700,
-            cursor: isRenderingGlabs ? 'not-allowed' : 'pointer',
-            opacity: isRenderingGlabs ? 0.6 : 1,
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            boxShadow: '0 4px 14px rgba(74, 222, 128, 0.45)',
-            animation: isRenderingGlabs ? 'none' : 'pulseGlow 2.5s infinite'
-          }}
-        >
-          <span>{isRenderingGlabs ? '⏳' : '🎨'}</span>
-          <span>{isRenderingGlabs ? 'Rendering di G-Labs...' : 'Generate Visual Preview (G-Labs)'}</span>
-        </button>
-      </div>
-
-      {/* Kanvas Viewport Box (Langsung tampil di tengah) */}
-      <div style={{ border: renderedImageUrl ? '1px solid var(--border-subtle)' : '2px dashed var(--border-strong)', borderRadius: 'var(--radius-md, 12px)', backgroundColor: renderedImageUrl ? 'var(--canvas)' : 'var(--input-bg)', minHeight: '290px', maxHeight: '380px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '16px', position: 'relative' }}>
-        {/* State Empty / Rendering / Rendered */}
-      </div>
-    </div>
-
-    {/* 3. SPESIFIKASI & PROMPT T2I DI BAWAH KANVAS PREVIEW */}
-    <div style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-      {/* 4 Kotak Atribut Horizontal */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
-        {/* Visual Mode, Subject System, Environment, Lighting */}
-      </div>
-
-      {/* Textarea Production T2I Prompt */}
-      <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm, 8px)', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        {/* T2I Header + Copy Button + Textarea */}
-      </div>
-
-      {/* Rationale Desain Estetika */}
-      {proposal.creative_rationale && (
-        <div style={{ backgroundColor: 'var(--surface-subtle)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm, 8px)', padding: '10px 14px' }}>
-          <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>💡 Alasan Desain Estetika (Rationale):</div>
-          <div style={{ fontSize: '12px', color: 'var(--text-secondary)', fontStyle: 'italic', marginTop: '4px' }}>
-            "{proposal.creative_rationale}"
-          </div>
-        </div>
-      )}
-    </div>
-
-  </div>
-)}
+    return {
+      accountId: accId,
+      publishMode: validated.publish_mode,
+      mediaType: validated.media_type,
+      title: selectedTitle,
+      caption: selectedCaption,
+      mediaUrl: validated.media_url,
+      scheduledAt: validated.schedules?.[accId] || validated.scheduled_at,
+      approvalStatus: 'not_required',
+      isAiGenerated: !!validated.is_ai_generated
+    };
 ```
 
 ---
 
-## File yang Dimodifikasi
+### 3. `apps/mcp/tools.mjs` (Celah 1, 2, 3, 4)
 
-| # | File | Jenis Perubahan |
-|---|------|-----------------|
-| 1 | `app/components/AiVisualIdentityBuilderModal.js` | Refaktor urutan JSX (1-Kolom Vertikal dengan Hero Preview di Atas), Auto-collapse Composer, Toggle Auto-preview, CSS inject |
+#### Code Sebelum (Current/Before) — `fetchPillarStoryboardSummary`:
+```js
+async function fetchPillarStoryboardSummary(request, campaignId) {
+  const detail = await request(`/api/v2/pillar-campaigns/${encodeURIComponent(campaignId)}`);
+  if (!detail || detail.success === false) return detail;
+  const campaign = detail.campaign || {};
+  const items = Array.isArray(detail.items) ? detail.items : [];
+  const primaryItem = items[0] || null;
+  let contentFlowItem = null;
+  if (primaryItem?.id) {
+    const cfSearch = await request(`/api/content-flow?q=${encodeURIComponent(`opc_${primaryItem.id}`)}`);
+    const rows = Array.isArray(cfSearch?.items) ? cfSearch.items : (Array.isArray(cfSearch?.data) ? cfSearch.data : []);
+    contentFlowItem = rows.find(r => r.id === `opc_${primaryItem.id}` || String(r.source_item_id) === String(primaryItem.id)) || rows[0] || null;
+  }
+  return {
+    success: true,
+    campaign_id: campaign.id || campaignId,
+    campaign_name: campaign.campaign_name,
+    status: campaign.status,
+    execution_mode: campaign.execution_mode,
+    approval_mode: campaign.approval_mode,
+    target_product_id: campaign.target_product_id || null,
+    product_ref_image_path: campaign.product_ref_image_path || null,
+    voice_provider: campaign.voice_provider,
+    voice_persona: campaign.voice_persona,
+    auto_sync_contentflow: Boolean(campaign.auto_sync_contentflow),
+    item_id: primaryItem?.id || null,
+    workflow_status: primaryItem?.workflow_status || null,
+    review_state: primaryItem?.review_state || null,
+    review_revision: primaryItem?.review_revision ?? null,
+    stages: primaryItem ? {
+      generation_status: primaryItem.generation_status,
+      start_frame_status: primaryItem.start_frame_status,
+      tts_status: primaryItem.tts_status,
+      visual_status: primaryItem.visual_status,
+      ffmpeg_status: primaryItem.ffmpeg_status,
+      upload_status: primaryItem.upload_status
+    } : null,
+    output: primaryItem ? {
+      ffmpeg_output_path: primaryItem.ffmpeg_output_path || null,
+      drive_link: primaryItem.drive_link || null,
+      nextcloud_url: primaryItem.nextcloud_url || null
+    } : null,
+    content_flow_item_id: contentFlowItem?.id || null,
+    content_flow_video_id: contentFlowItem?.video_id || null,
+    content_flow_url_asset: contentFlowItem?.url_asset || null,
+    items,
+    stats: detail.stats || null
+  };
+}
+```
+
+#### Code Sesudah (Proposed/After) — `fetchPillarStoryboardSummary`:
+```js
+async function fetchPillarStoryboardSummary(request, campaignId, { includeItems = false } = {}) {
+  const detail = await request(`/api/v2/pillar-campaigns/${encodeURIComponent(campaignId)}`);
+  if (!detail || detail.success === false) return detail;
+  const campaign = detail.campaign || {};
+  const items = Array.isArray(detail.items) ? detail.items : [];
+  const primaryItem = items[0] || null;
+  let contentFlowItem = null;
+  if (primaryItem?.id) {
+    const cfSearch = await request(`/api/content-flow?q=${encodeURIComponent(`opc_${primaryItem.id}`)}`);
+    const rows = Array.isArray(cfSearch?.items) ? cfSearch.items : (Array.isArray(cfSearch?.data) ? cfSearch.data : []);
+    contentFlowItem = rows.find(r => r.id === `opc_${primaryItem.id}` || String(r.source_item_id) === String(primaryItem.id)) || rows[0] || null;
+  }
+  const errorMessage = primaryItem?.error_message || primaryItem?.review_reason || primaryItem?.contentflow_error || null;
+  const generationError = primaryItem?.generation_error || (primaryItem?.generation_status === 'failed' ? (primaryItem?.review_reason || 'Generation failed') : null);
+
+  return {
+    success: true,
+    campaign_id: campaign.id || campaignId,
+    campaign_name: campaign.campaign_name,
+    status: campaign.status,
+    execution_mode: campaign.execution_mode,
+    approval_mode: campaign.approval_mode,
+    target_product_id: campaign.target_product_id || null,
+    product_ref_image_path: campaign.product_ref_image_path || null,
+    voice_provider: campaign.voice_provider,
+    voice_persona: campaign.voice_persona,
+    auto_sync_contentflow: Boolean(campaign.auto_sync_contentflow),
+    item_id: primaryItem?.id || null,
+    workflow_status: primaryItem?.workflow_status || null,
+    review_state: primaryItem?.review_state || null,
+    review_revision: primaryItem?.review_revision ?? null,
+    stages: primaryItem ? {
+      generation_status: primaryItem.generation_status,
+      start_frame_status: primaryItem.start_frame_status,
+      tts_status: primaryItem.tts_status,
+      visual_status: primaryItem.visual_status,
+      ffmpeg_status: primaryItem.ffmpeg_status,
+      upload_status: primaryItem.upload_status,
+      error_message: errorMessage,
+      generation_error: generationError
+    } : null,
+    output: primaryItem ? {
+      ffmpeg_output_path: primaryItem.ffmpeg_output_path || null,
+      drive_link: primaryItem.drive_link || null,
+      nextcloud_url: primaryItem.nextcloud_url || null
+    } : null,
+    content_flow_item_id: contentFlowItem?.id || null,
+    content_flow_video_id: contentFlowItem?.video_id || null,
+    content_flow_url_asset: contentFlowItem?.url_asset || null,
+    ...(includeItems ? { items } : { item_count: items.length }),
+    stats: detail.stats || null
+  };
+}
+```
+
+---
+
+### 4. `app/api/v2/pillar-campaigns/[id]/route.js` (Celah 4)
+
+#### Code Sebelum (Current/Before):
+```js
+    const updates = {};
+    if (body.status !== undefined && ['running', 'paused', 'completed', 'draft'].includes(body.status)) {
+      updates.status = body.status;
+    }
+```
+
+#### Code Sesudah (Proposed/After):
+```js
+    const updates = {};
+    if (body.status !== undefined && ['running', 'paused', 'completed', 'draft', 'cancelled'].includes(body.status)) {
+      updates.status = body.status;
+    }
+    ...
+    const campaign = await getPillarCampaign(id);
+    await updatePillarCampaign(id, updates);
+
+    if (updates.status === 'cancelled') {
+      const db = getDb();
+      await db.prepare(`
+        UPDATE pillar_campaign_items
+        SET workflow_status = 'cancelled'
+        WHERE campaign_id = ? AND workflow_status NOT IN ('completed', 'failed')
+      `).run(id);
+      const { pgQuery } = await import('../../../../../lib/db-pg');
+      await pgQuery(`
+        UPDATE pillar_campaign_item_assets
+        SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP
+        WHERE campaign_id = $1 AND status IN ('queued', 'waiting_lane', 'retry_wait')
+      `, [id]).catch(() => {});
+    }
+```

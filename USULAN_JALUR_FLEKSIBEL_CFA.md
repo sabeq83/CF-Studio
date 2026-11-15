@@ -1,6 +1,7 @@
 # Usulan: Jalur Konten Fleksibel untuk CF Autopipeline (CFA)
 
-> Tanggal: 15 Nov 2026 · Status: **usulan, belum dibangun**
+> Tanggal: 15 Nov 2026 · Status: **Tahap 1 + 2 sudah dibangun dan diuji tanpa kuota di Mac Mini (15 Nov 2026).** Tahap 3–5 belum.
+> Video uji jalur produk (`cst_7411ed5d3aa6`) sudah sesuai harapan pengguna.
 > Tujuan: satu sistem untuk semua brand, tenant, produk (afiliasi maupun bukan), preset, VI, dan jenis video, tanpa harus merakit jalur satu per satu.
 
 ---

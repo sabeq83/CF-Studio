@@ -5,9 +5,32 @@
 
 ---
 
-## 1. Jadwal per brand
+## 1. Jadwal: sistem jalur (berlaku sejak 15 Nov 2026)
 
-**Caranya:** buat satu tugas terjadwal per brand di Claude Desktop, dan sebutkan nama brand di perintahnya.
+**Sekarang cukup satu tugas per tahap untuk semua brand.** Setiap tugas menyapu semua jalur aktif di `~/cf-autopipeline/jalur/`.
+
+| Nama tugas | Jam | Perintah | Model |
+|---|---|---|---|
+| CFA · Riset | 05:00 | `Jalankan skill cfa-riset.` | Sonnet |
+| CFA · Naskah | 05:30 | `Jalankan skill cfa-penulis.` | Opus |
+| CFA · Produksi | 06:00 | `Jalankan skill cfa-produksi.` | Haiku |
+| CFA · Publish | 09:00 & 13:00 | `Jalankan skill cfa-publish.` | Haiku |
+
+Jalur aktif saat ini:
+- `nutribake-produk-cocoa`: video produk Premix Cocoa harian, sudut diet, ke YT/FB/IG/TikTok, draft 18:00.
+- `habitfolk-resep`: resep air fryer harian, ke FB/YT, draft 18:00.
+
+Satu jalur saja tetap bisa: `Jalankan skill cfa-riset untuk jalur nutribake-produk-cocoa saja.` Tugas per brand yang sudah dibuat (mis. "Nutribake - Riset" dengan "untuk brand nutribake saja") tetap berfungsi.
+
+Ringkasan dan pengecekan jalur dari Terminal Mac Mini:
+```bash
+python3 ~/cf-autopipeline/bin/antrean.py jalur
+python3 ~/cf-autopipeline/bin/antrean.py cek-jalur
+```
+
+### Cara lama: per brand
+
+Buat satu tugas terjadwal per brand di Claude Desktop, dan sebutkan nama brand di perintahnya.
 
 | Nama tugas | Jam | Perintah |
 |---|---|---|

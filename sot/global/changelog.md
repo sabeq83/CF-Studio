@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.48.23 — Fix 4 Celah CF Studio untuk CFA (platform_titles, compact storyboard, filter preset/VI, cancel cst) (15/11/2026)
+- Dukungan platform_titles di publishing contract dan service
+- Mode ringkas dan pelaporan error di cf_get_storyboard_status
+- Filter brand dan query pada cf_list_presets dan cf_list_visual_identities
+- Fitur pembatalan custom storyboard cst via PATCH dan tool cf_cancel_storyboard
+
 ## V2.48.22 — Fix topicComplianceSection di Custom Storyboard gemini_engineer (15/11/2026)
 - Destructure topicComplianceSection pada buildCustomStoryboardPromptEngineerPrompt di lib/prompts.js
 - Simpan error reason ke review_reason saat generator storyboard gagal di lib/scheduler-processors.js

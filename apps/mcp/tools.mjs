@@ -147,7 +147,7 @@ function buildScheduleBatchItems(args = {}) {
   return null;
 }
 
-async function fetchPillarStoryboardSummary(request, campaignId) {
+async function fetchPillarStoryboardSummary(request, campaignId, { includeItems = false } = {}) {
   const detail = await request(`/api/v2/pillar-campaigns/${encodeURIComponent(campaignId)}`);
   if (!detail || detail.success === false) return detail;
   const campaign = detail.campaign || {};
@@ -159,6 +159,9 @@ async function fetchPillarStoryboardSummary(request, campaignId) {
     const rows = Array.isArray(cfSearch?.items) ? cfSearch.items : (Array.isArray(cfSearch?.data) ? cfSearch.data : []);
     contentFlowItem = rows.find(r => r.id === `opc_${primaryItem.id}` || String(r.source_item_id) === String(primaryItem.id)) || rows[0] || null;
   }
+  const errorMessage = primaryItem?.error_message || primaryItem?.review_reason || primaryItem?.contentflow_error || null;
+  const generationError = primaryItem?.generation_error || (primaryItem?.generation_status === 'failed' ? (primaryItem?.review_reason || 'Generation failed') : null);
+
   return {
     success: true,
     campaign_id: campaign.id || campaignId,
@@ -181,7 +184,9 @@ async function fetchPillarStoryboardSummary(request, campaignId) {
       tts_status: primaryItem.tts_status,
       visual_status: primaryItem.visual_status,
       ffmpeg_status: primaryItem.ffmpeg_status,
-      upload_status: primaryItem.upload_status
+      upload_status: primaryItem.upload_status,
+      error_message: errorMessage,
+      generation_error: generationError
     } : null,
     output: primaryItem ? {
       ffmpeg_output_path: primaryItem.ffmpeg_output_path || null,
@@ -191,7 +196,7 @@ async function fetchPillarStoryboardSummary(request, campaignId) {
     content_flow_item_id: contentFlowItem?.id || null,
     content_flow_video_id: contentFlowItem?.video_id || null,
     content_flow_url_asset: contentFlowItem?.url_asset || null,
-    items,
+    ...(includeItems ? { items } : { item_count: items.length }),
     stats: detail.stats || null
   };
 }
@@ -264,7 +269,8 @@ async function dispatchPublishingWithLookup(request, args) {
       ...(fallbackCaption !== undefined ? { caption: fallbackCaption } : {}),
       ...(args.caption_facebook !== undefined ? { caption_facebook: args.caption_facebook } : {}),
       ...(args.caption_bio !== undefined ? { caption_bio: args.caption_bio } : {}),
-      ...(args.platform_captions ? { platform_captions: args.platform_captions } : {})
+      ...(args.platform_captions ? { platform_captions: args.platform_captions } : {}),
+      ...(args.platform_titles ? { platform_titles: args.platform_titles } : {})
     }
   });
 }
@@ -419,11 +425,43 @@ export function createCfStudioServer(rawRequest) {
     }
   );
 
-  register('cf_list_presets', 'List available campaign production presets and video archetypes.', {}, true, () =>
-    request('/api/operator/v1/presets')
+  register(
+    'cf_list_presets',
+    'List campaign production presets. Use brand/query to filter; returns a compact list unless detail=true.',
+    {
+      brand: z.string().max(100).optional(),
+      query: z.string().max(100).optional(),
+      detail: z.boolean().default(false)
+    },
+    true,
+    async ({ brand, query, detail }) => {
+      const res = await request('/api/operator/v1/presets');
+      let list = res.presets || res.data || [];
+      const match = (p, s) => JSON.stringify([p.key, p.label, p.brand, p.config?.label]).toLowerCase().includes(s.toLowerCase());
+      if (brand) list = list.filter(p => match(p, brand));
+      if (query) list = list.filter(p => match(p, query));
+      if (!detail) list = list.map(p => ({ key: p.key, label: p.label, campaign_kinds: p.campaign_kinds }));
+      return { success: true, count: list.length, presets: list };
+    }
   );
-  register('makna_list_presets', 'List available campaign production presets (legacy alias).', {}, true, () =>
-    request('/api/operator/v1/presets')
+  register(
+    'makna_list_presets',
+    'List campaign production presets (legacy alias). Use brand/query to filter; returns a compact list unless detail=true.',
+    {
+      brand: z.string().max(100).optional(),
+      query: z.string().max(100).optional(),
+      detail: z.boolean().default(false)
+    },
+    true,
+    async ({ brand, query, detail }) => {
+      const res = await request('/api/operator/v1/presets');
+      let list = res.presets || res.data || [];
+      const match = (p, s) => JSON.stringify([p.key, p.label, p.brand, p.config?.label]).toLowerCase().includes(s.toLowerCase());
+      if (brand) list = list.filter(p => match(p, brand));
+      if (query) list = list.filter(p => match(p, query));
+      if (!detail) list = list.map(p => ({ key: p.key, label: p.label, campaign_kinds: p.campaign_kinds }));
+      return { success: true, count: list.length, presets: list };
+    }
   );
 
   register(
@@ -931,12 +969,24 @@ export function createCfStudioServer(rawRequest) {
 
   register(
     'cf_get_storyboard_status',
-    'Poll full production progress (TTS, Start Frame, Veo, FFmpeg, Upload, ContentFlow sync, and review_revision) for a custom storyboard or OPC campaign (cst_*/opc).',
+    'Poll full production progress (TTS, Start Frame, Veo, FFmpeg, Upload, ContentFlow sync, and review_revision) for a custom storyboard or OPC campaign (cst_*/opc). Use include_items=true to include raw clip prompts and paths.',
     {
-      campaign_id: z.string().trim().min(1).max(128)
+      campaign_id: z.string().trim().min(1).max(128),
+      include_items: z.boolean().default(false)
     },
     true,
-    ({ campaign_id }) => fetchPillarStoryboardSummary(request, campaign_id)
+    ({ campaign_id, include_items }) => fetchPillarStoryboardSummary(request, campaign_id, { includeItems: Boolean(include_items) })
+  );
+
+  register(
+    'cf_cancel_storyboard',
+    'Cancel (or pause) a custom storyboard / OPC campaign (cst_*). Stops further quota-consuming stages.',
+    { campaign_id: z.string().trim().min(1).max(128), mode: z.enum(['cancel', 'pause']).default('cancel') },
+    false,
+    ({ campaign_id, mode }) => request(`/api/v2/pillar-campaigns/${encodeURIComponent(campaign_id)}`, {
+      method: 'PATCH',
+      body: { status: mode === 'pause' ? 'paused' : 'cancelled' }
+    })
   );
 
   register(
@@ -1402,12 +1452,31 @@ export function createCfStudioServer(rawRequest) {
 
   register(
     'cf_list_visual_identities',
-    'List available active Visual Identity presets (system & tenant custom).',
+    'List available Visual Identity presets. Use brand/query to filter; returns a compact list unless detail=true.',
     {
-      status: z.enum(['active', 'all', 'archived']).default('active')
+      status: z.enum(['active', 'all', 'archived']).default('active'),
+      brand: z.string().max(100).optional(),
+      query: z.string().max(100).optional(),
+      detail: z.boolean().default(false)
     },
     true,
-    args => request(`/api/v2/visual-identities?${new URLSearchParams(args)}`)
+    async ({ status, brand, query, detail }) => {
+      const res = await request(`/api/v2/visual-identities?status=${encodeURIComponent(status || 'active')}`);
+      let list = res.data || res.visual_identities || [];
+      const match = (v, s) => JSON.stringify([v.id, v.preset_key, v.label, v.description, v.config?.brand, v.config?.label]).toLowerCase().includes(s.toLowerCase());
+      if (brand) list = list.filter(v => match(v, brand));
+      if (query) list = list.filter(v => match(v, query));
+      if (!detail) {
+        list = list.map(v => ({
+          id: v.id,
+          preset_key: v.preset_key,
+          label: v.label,
+          status: v.status,
+          source: v.source
+        }));
+      }
+      return { success: true, count: list.length, visual_identities: list };
+    }
   );
 
   register(
@@ -1588,7 +1657,7 @@ export function createCfStudioServer(rawRequest) {
     false,
     ({ job_id, review_revision, ...body }) => {
       if (job_id.startsWith('cst_') || job_id.startsWith('opc_') || /^\d+$/.test(job_id)) {
-        return fetchPillarStoryboardSummary(request, job_id).then(summary => {
+        return fetchPillarStoryboardSummary(request, job_id, { includeItems: true }).then(summary => {
           if (!summary?.success) return summary;
           const targetItemId = summary.item_id;
           if (!targetItemId) return { success: false, error: `Tidak ditemukan item pada ${job_id}.` };
@@ -1638,6 +1707,7 @@ export function createCfStudioServer(rawRequest) {
       caption_facebook: z.string().max(5000).optional(),
       caption_bio: z.string().max(5000).optional(),
       platform_captions: z.record(z.string()).optional(),
+      platform_titles: z.record(z.string().max(100)).optional(),
       trigger_sync_if_missing: z.boolean().default(true)
     },
     false,
@@ -1661,6 +1731,7 @@ export function createCfStudioServer(rawRequest) {
       caption_facebook: z.string().max(5000).optional(),
       caption_bio: z.string().max(5000).optional(),
       platform_captions: z.record(z.string()).optional(),
+      platform_titles: z.record(z.string().max(100)).optional(),
       trigger_sync_if_missing: z.boolean().default(true)
     },
     false,

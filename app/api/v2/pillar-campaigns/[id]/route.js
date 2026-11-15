@@ -84,7 +84,7 @@ export const PATCH = withTenantContext(async (request, { params }, user) => {
     const body = await request.json();
     
     const updates = {};
-    if (body.status !== undefined && ['running', 'paused', 'completed', 'draft'].includes(body.status)) {
+    if (body.status !== undefined && ['running', 'paused', 'completed', 'draft', 'cancelled'].includes(body.status)) {
       updates.status = body.status;
     }
     if (body.execution_mode !== undefined && ['full_autopilot', 'manual_review'].includes(body.execution_mode)) {
@@ -154,6 +154,23 @@ export const PATCH = withTenantContext(async (request, { params }, user) => {
     
     const campaign = await getPillarCampaign(id);
     await updatePillarCampaign(id, updates);
+
+    if (updates.status === 'cancelled') {
+      const db = getDb();
+      await db.prepare(`
+        UPDATE pillar_campaign_items
+        SET workflow_status = 'cancelled'
+        WHERE campaign_id = ? AND workflow_status NOT IN ('completed', 'failed')
+      `).run(id);
+      try {
+        const { pgQuery } = await import('../../../../../lib/db-pg');
+        await pgQuery(`
+          UPDATE pillar_campaign_item_assets
+          SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP
+          WHERE campaign_id = $1 AND status IN ('queued', 'waiting_lane', 'retry_wait')
+        `, [id]);
+      } catch (_) {}
+    }
     
     try {
       const campaignName = campaign ? campaign.campaign_name : id;
