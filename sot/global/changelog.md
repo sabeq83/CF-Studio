@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.48.17 — Support legacy photo_url fallback in campaign product reference resolver (15/11/2026)
+- Fallback cleaned_photo_url/photo_url/generated_photo_url saat active_photo bukan canonical clean/raw
+- Tambah regression test untuk produk migrasi OPC di Start Frame request
+
 ## V2.48.16 — Fix recipe campaign product bridging & auto-match katalog (15/11/2026)
 - Tambah resolver auto-match produk aktif brand untuk recipe_campaign
 - Propagasi product_bridging preset ke ingest, creative adapter, dan Start Frame

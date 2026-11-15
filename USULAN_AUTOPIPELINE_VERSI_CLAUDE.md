@@ -95,3 +95,35 @@ Harga per 1 juta token: Opus 5.5 $4 masuk / $20 keluar; Sonnet 5.5 $2 / $10; Hai
 3. **Tambah tabel riset kata kunci** + penghindar topik berulang.
 4. **Tambah QA Claude** sebelum publish + logika "ulang otomatis".
 5. Setelah stabil, baru pertimbangkan Managed Agents (cloud) bila ingin lepas dari server sendiri.
+
+---
+
+## 9. REVISI (15 Nov 2026): Versi tanpa API — Skill Claude + Jadwal + CF Studio
+
+Keputusan pengguna: **belum ada budget API**. Arah baru: Claude bekerja lewat **langganan yang sudah ada** (skill + tugas terjadwal), CF Studio tetap jadi mesin produksi lewat MCP `cf-studio`. Bagian 4 (pilihan API) dan 6 (biaya API) tidak berlaku untuk versi ini.
+
+### Pembagian kerja
+| Agent | Bentuk | Jadwal contoh | Masukan → Keluaran |
+|---|---|---|---|
+| 1. Riset | Skill `cf-riset-keyword` | 05:00 | Daftar kata kunci jadwal → file riset per kata kunci (status `riset_selesai`) |
+| 2+3a. Penulis & Prompt | Skill `cf-penulis-storyboard` (digabung, 1 kali kerja) | 06:00 | File riset → storyboard + VO + caption + prompt T2I/I2V (status `naskah_siap`) |
+| 3b+4. Produksi | Skill `cf-kirim-produksi` → CF Studio (`cf_submit_custom_storyboard`, mode `direct_passthrough`) | 06:30 | Naskah → kampanye `cst_*` di CF Studio (status `diproduksi`). G-Labs, TTS, render dikerjakan CF Studio |
+| QA | Bagian dari skill publisher | 11:00 | Cek status `cst_*` selesai, cek naskah/caption → lolos / tandai ulang |
+| 5. Publisher | Skill `cf-jadwal-publish` → `cf_create_publishing_job` (Repliz, `scheduled_at`) | 11:00 | Video lolos → dijadwalkan (status `terjadwal`) |
+| 6. Orkestrator | **Bukan agent terpisah**: file status bersama + jadwal berurutan | – | Setiap skill hanya mengambil item dengan status yang tepat; kalau belum ada, dilewati dan dicoba di putaran berikutnya |
+
+### Aturan orkestrasi (supaya jadwal terpisah tetap rapi)
+- Satu **file status bersama** (antrean) — misalnya `pipeline/antrean.json` atau Google Sheet seperti pola `fb-topic-researcher` → `fb-daily-orchestrator` yang sudah dipakai.
+- Agent tidak bergantung pada jam, tapi pada **status**. Kalau riset telat, penulis tidak error — hanya menunggu putaran berikutnya.
+- Setiap agent menulis log singkat & alasan gagal ke file yang sama.
+
+### Hal yang perlu diputuskan
+1. **Di mana jadwal berjalan.** Tugas terjadwal di aplikasi desktop hanya jalan kalau komputer menyala & aplikasi terbuka. Rutinitas cloud tidak bisa menjangkau CF Studio (jaringan Tailscale). Pilihan paling stabil: Claude Code di **Mac Mini** (selalu menyala) dijalankan terjadwal dengan login langganan.
+2. **Batas pemakaian langganan.** Tidak ada tagihan per video, tapi ada kuota pemakaian. 3–5 video/hari diperkirakan masih aman; perlu dipantau minggu pertama.
+
+### Kekurangan CF Studio yang perlu diperbaiki (ditemukan saat uji)
+1. **Mode `direct_passthrough` mengabaikan prompt lengkap** bila `visual_action` diisi (`lib/custom-storyboard-pipeline.js:307` — urutan prioritas `visual_action` > `visual_prompt`). Perbaikan: pakai `visual_prompt` untuk T2I bila tersedia, `visual_action` hanya sebagai deskripsi.
+2. **Tidak ada tool MCP untuk membatalkan custom storyboard (`cst_*`).** `cf_cancel_pipeline_job` hanya untuk antrean Auto Pipeline.
+3. **Output `cf_get_storyboard_status` terlalu besar** (70–146 ribu karakter) — boros kuota langganan setiap kali skill mengecek. Perlu mode ringkas (status tahap + path video saja).
+4. **Penyimpanan riset kata kunci** belum ada (cukup file/Sheet dulu; tabel DB nanti).
+5. (Terpisah, untuk pipeline Gemini) properti visual bocor ke teks resep/caption.

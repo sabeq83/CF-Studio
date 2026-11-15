@@ -237,6 +237,27 @@ test('OPC start frame contract & request honor both campaign and per-item produc
     assert.equal(reqClip3.audit.reference_count, 0);
     assert.equal(reqClip3.audit.product_reference_count, 0);
     assert.equal(reqClip3.providerRequest.reference_images, undefined);
+
+    // Migrated OPC products often have photo_url populated while clean/raw are null
+    const legacyLoader = async (pid) => ({
+      id: pid,
+      product_name: 'Tepung Almond Premium 500g',
+      active_photo: 'generated_photo_url',
+      raw_photo_url: null,
+      clean_photo_url: null,
+      photo_url: imgRelPath
+    });
+    const reqLegacyClip4 = await buildOpcStartFrameRequest({
+      campaign: campaignWithFallback,
+      item,
+      clipIndex: 4,
+      prompt: 'Culinary tabletop scene with almond flour pack',
+      productLoader: legacyLoader,
+      cwd: tmpDir
+    });
+    assert.equal(reqLegacyClip4.audit.reference_count, 1);
+    assert.equal(reqLegacyClip4.audit.product_reference_count, 1);
+    assert.equal(reqLegacyClip4.audit.reference_source_field, 'photo_url');
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }
