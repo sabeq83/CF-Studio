@@ -6,6 +6,7 @@ import { google } from 'googleapis';
 import { generateImage, generateVideo, getTaskStatus, getFileUrl } from '@/lib/webhook-client';
 import { processVideoMuxing } from '@/lib/video-studio-processor'; // kept for potential future use
 import { getOrCreateFolderInFolder, uploadLocalFileToFolder } from '@/lib/drive-uploader';
+import { bufferToBase64DataUrl, readLocalImageDataUrl } from '@/lib/base64-image-reference';
 import fs from 'fs';
 import path from 'path';
 
@@ -19,13 +20,7 @@ function log(msg) {
 }
 
 function fileToBase64(relPath) {
-  try {
-    const absPath = relPath.startsWith('/') ? path.join(process.cwd(), 'public', relPath) : relPath;
-    if (!fs.existsSync(absPath)) return null;
-    return fs.readFileSync(absPath).toString('base64');
-  } catch {
-    return null;
-  }
+  return readLocalImageDataUrl(relPath);
 }
 
 // Resolve the best product image path following hierarchy: Studio -> Cleaned/Clean -> photo_url -> Raw
@@ -201,7 +196,7 @@ export const POST = withTenantContext(async (request) => {
         const imgRes = await fetch(productImageUrlOverride);
         if (!imgRes.ok) throw new Error(`Gagal download foto produk dari override URL: HTTP ${imgRes.status}`);
         const imgBuf = Buffer.from(await imgRes.arrayBuffer());
-        productBase64 = imgBuf.toString('base64');
+        productBase64 = bufferToBase64DataUrl(imgBuf, 'repair_product.png');
         // Simpan ke disk + update DB untuk future use
         const safeFilename = `repair_product_${Date.now()}.png`;
         const newPhotoPath = `/uploads/products/${safeFilename}`;
@@ -238,7 +233,7 @@ export const POST = withTenantContext(async (request) => {
             product.raw_photo_url = rawRelPath; // update in-memory object
             
             addLog(`Foto produk berhasil di-download ulang ke ${rawRelPath}`);
-            productBase64 = imgBuf.toString('base64');
+            productBase64 = bufferToBase64DataUrl(imgBuf, rawFilename);
           } else {
             addLog('scraped_image_url kosong. Tidak dapat re-download foto produk secara otomatis.');
             return NextResponse.json({

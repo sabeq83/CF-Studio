@@ -5,6 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import { withTenantContext } from '@/lib/auth';
 import { resolveBridgePlan, readBridgeInputs } from '@/lib/bridging/bridge-plan';
+import { readLocalImageDataUrl } from '@/lib/base64-image-reference';
 
 export const POST = withTenantContext(async (req, { params }) => {
   try {
@@ -51,38 +52,17 @@ export const POST = withTenantContext(async (req, { params }) => {
   }
 });
 
-const fileToBase64 = (filePath) => {
-  const absolutePath = (!path.isAbsolute(filePath) || !fs.existsSync(filePath)) ? path.join(process.cwd(), 'public', filePath.startsWith('/') ? filePath.slice(1) : filePath) : filePath;
-  if (!fs.existsSync(absolutePath)) return null;
-  const buffer = fs.readFileSync(absolutePath);
-  let mimeType = 'image/png';
-  if (buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF) {
-    mimeType = 'image/jpeg';
-  } else if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) {
-    mimeType = 'image/png';
-  } else if (buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46) {
-    mimeType = 'image/webp';
-  }
-  return `data:${mimeType};base64,${buffer.toString('base64')}`;
-};
-
 async function runTaskRegenerateStartFramesBackground(taskId, task, prompts) {
   try {
     const imageModel = await getSetting('webhook_image_model') || 'nano_banana_pro';
     
-    let productBase64 = null;
     let bridging = {};
     try {
       bridging = JSON.parse(task.bridging_config_json || '{}');
     } catch (_) {}
 
     const imagePath = bridging.product_ref_image_path || bridging.productRefImagePath;
-    if (imagePath) {
-      const fullPath = path.join(process.cwd(), 'public', imagePath);
-      if (fs.existsSync(fullPath)) {
-        productBase64 = fs.readFileSync(fullPath).toString('base64');
-      }
-    }
+    const productBase64 = imagePath ? readLocalImageDataUrl(imagePath) : null;
 
     const aesthetics = (() => { try { return JSON.parse(task.vso_config_json || '{}'); } catch { return {}; } })();
     const bridgePlan = resolveBridgePlan(readBridgeInputs(bridging, { ...aesthetics, target_clips_count: prompts.length }, { defaultActive: true }));

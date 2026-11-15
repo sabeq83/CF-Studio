@@ -5,6 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import { withTenantContext } from '@/lib/auth';
 import { resolveBridgePlan, readBridgeInputs } from '@/lib/bridging/bridge-plan';
+import { readLocalImageDataUrl } from '@/lib/base64-image-reference';
 
 export const POST = withTenantContext(async (req, { params }) => {
   try {
@@ -31,12 +32,7 @@ export const POST = withTenantContext(async (req, { params }) => {
     } catch (_) {}
 
     const imagePath = bridging.product_ref_image_path || bridging.productRefImagePath;
-    if (imagePath) {
-      const fullPath = path.join(process.cwd(), 'public', imagePath);
-      if (fs.existsSync(fullPath)) {
-        productBase64 = fs.readFileSync(fullPath).toString('base64');
-      }
-    }
+    productBase64 = imagePath ? readLocalImageDataUrl(imagePath) : null;
 
     console.log(`[Multiplier UI Regenerate] Submitting T2I task for clip ${clipIndex}...`);
 

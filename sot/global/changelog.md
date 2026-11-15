@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.48.15 — Fix start-frame worker jsonb CASE type mismatch and T2I Data URI reference encoding (15/11/2026)
+- Fix CASE request_json jsonb vs text type mismatch in lib/start-frame-worker.js
+- Add readLocalImageDataUrl in lib/base64-image-reference.js and use Data URI encoding across Multiplier regenerate-start-frames, regenerate-t2i, and sheets-autopilot repair-clip
+- Add regression assertions in tests/base64-image-reference.test.js
+
 ## V2.48.14 — Fix leading-slash web path resolution in character reference resolver (15/11/2026)
 - Fix fileToBase64 in cartoon-reference-resolver.js so /uploads/... web paths fall back to <cwd>/public
 - Add regression test for leading-slash upload paths in start-frame-model-selection.test.js

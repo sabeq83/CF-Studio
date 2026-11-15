@@ -1,10 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import {
   inspectBase64ImageReference,
   inspectBase64ImageReferences,
   sanitizeReferenceName,
-  getReferenceData
+  getReferenceData,
+  readLocalImageDataUrl
 } from '../lib/base64-image-reference.js';
 
 test('inspectBase64ImageReference supports string data URI and object references', () => {
@@ -75,4 +79,36 @@ test('inspectBase64ImageReferences processes array of mixed valid references', (
   assert.equal(results[0].mimeType, 'image/png');
   assert.equal(results[1].mimeType, 'image/jpeg');
   assert.equal(results[1].name, 'hero.jpg');
+});
+
+test('readLocalImageDataUrl produces valid Data URI for leading-slash public files and Multiplier routes avoid raw base64', () => {
+  const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'cf-b64-local-'));
+  try {
+    const dir = path.join(tmpRoot, 'public', 'uploads', 'products', 'default_tenant', 'clean');
+    fs.mkdirSync(dir, { recursive: true });
+    const jpgBuf = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(140, 0x11)]);
+    fs.writeFileSync(path.join(dir, 'sample.jpg'), jpgBuf);
+
+    const dataUri = readLocalImageDataUrl('/uploads/products/default_tenant/clean/sample.jpg', tmpRoot);
+    assert.ok(dataUri && dataUri.startsWith('data:image/jpeg;base64,'));
+    const inspected = inspectBase64ImageReferences([dataUri]);
+    assert.equal(inspected[0].mimeType, 'image/jpeg');
+    assert.equal(inspected[0].byteLength, jpgBuf.length);
+  } finally {
+    fs.rmSync(tmpRoot, { recursive: true, force: true });
+  }
+
+  for (const rel of [
+    '../app/api/v2/multiplier/[id]/regenerate-start-frames/route.js',
+    '../app/api/v2/multiplier/[id]/regenerate-t2i/route.js',
+    '../app/api/sheets-autopilot/repair-clip/route.js'
+  ]) {
+    const src = fs.readFileSync(new URL(rel, import.meta.url), 'utf8');
+    assert.match(src, /readLocalImageDataUrl/);
+    assert.doesNotMatch(src, /fs\.readFileSync\(fullPath\)\.toString\('base64'\)/);
+  }
+
+  const workerSrc = fs.readFileSync(new URL('../lib/start-frame-worker.js', import.meta.url), 'utf8');
+  assert.doesNotMatch(workerSrc, /to_jsonb\(\$6::text\)\)::text/);
+  assert.match(workerSrc, /ELSE request_json::jsonb/);
 });

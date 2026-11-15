@@ -1,6 +1,6 @@
 {
   "name": "cf-studio",
-  "version": "2.48.14",
+  "version": "2.48.15",
   "private": true,
   "scripts": {
     "dev": "next dev --webpack -p 3005",

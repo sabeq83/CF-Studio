@@ -300,3 +300,21 @@ Di Import Planner Modal dan form OPC: bila gaya planner ≠ gaya preset, tampilk
 
 ### File terkait
 `app/settings/presets/page.js`, `app/components/ImportPlannerModal.js`, `app/components/campaign-forms/PillarConfigurationForm.js`, `app/components/campaign-forms/PlannerConfigurationForm.js`, `lib/pillar-campaign-ingest.js`, `lib/contentflow-studio-adapters.js`, `lib/autonomous-engine.js`, `lib/operator-content-worker.js`, `lib/prompts.js` (deteksi metafora).
+
+---
+
+# BAGIAN 4 — Penyederhanaan Prompt System (15 Nov 2026)
+
+Seluruh `kb/PROMPT_SYSTEM_v47.9.md` (2.379 baris) sudah dibaca dan dipetakan. Hasil di `docs/kb-lite-draft/`:
+- `PROMPT_SYSTEM_INVENTORY.md`: peta setiap aturan → modul tujuan / alasan dibuang, daftar konflik, dan usulan modul per proses.
+- `VIDEO_PROMPT_CORE_LITE.md` (±7 KB), `VOICE_AUDIO_LITE.md` (±5 KB), `METAPHOR_PHYSICS_LIBRARY_LITE.md` (±4 KB), `MANDATE_GLOSSARY_LITE.md` (±3 KB).
+- Total ±19 KB menggantikan 140 KB, dan tidak pernah dimuat sekaligus.
+
+Temuan penting:
+1. **Mandate 2 ("No abstract/surreal metaphors") ikut terkirim ke planner tahap 2** dan bertentangan dengan gaya Metafora. Ini menambah penyebab di bagian 2 dokumen ini.
+2. Kode hanya merujuk 11 nomor mandate dari KB, kebanyakan sebagai label. Mandate 92–97 ditulis langsung di kode.
+3. Kode sudah membatalkan Mandate 74 & 79 secara eksplisit.
+4. Beberapa aturan bertentangan dengan kode yang berlaku (Mandate 34 vs 94, Mandate 67 vs "siku ke bawah", Block 2 negative "hands" vs mode modest hands, Mandate 71 vs `words_per_clip`).
+5. Template JSON (II.A–II.F), grid 3x3/triptych, reverse angle, Nano Banana, dan fitur batch variabel tidak dipakai lagi oleh kode.
+
+Langkah lanjut ada di instruksi Antigravity fase P7 (sudah diperbarui).

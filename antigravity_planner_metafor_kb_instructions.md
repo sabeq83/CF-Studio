@@ -2,11 +2,12 @@
 
 Dokumen ini adalah instruksi kerja. Dokumen acuannya:
 - `docs/usulan_planner_metafor_visual_action.md`: analisa lengkap (U1–U11, bagian 7–12).
-- `docs/kb-lite-draft/REALIST_VIRAL_NARRATIVE_LITE.md` dan `docs/kb-lite-draft/VISUAL_STYLE_GUIDE_LITE.md`: draf KB ringan untuk planner.
+- `docs/kb-lite-draft/` (lihat `README.md`): seluruh draf KB ringan — untuk planner (REALIST & VISUAL_STYLE lite) dan pengganti Prompt System (VIDEO_PROMPT_CORE, VOICE_AUDIO, METAPHOR_PHYSICS_LIBRARY, MANDATE_GLOSSARY), beserta `PROMPT_SYSTEM_INVENTORY.md`.
 
 ## Konteks penting
 
-- **Server staging dipakai untuk produksi harian.** Setiap rilis ke staging langsung dipakai konten brand. Perubahan perilaku prompt yang luas **wajib di balik flag** dengan default **off** (lihat bagian Flag).
+- **Ini update besar. Seluruh uji coba dilakukan di server Mac Mini Dev. TIDAK ADA deployment ke Staging** (dan tentu tidak ke Production) sampai user menyatakan hasil Dev lolos dan memberi perintah terpisah. Lihat bagian **Lingkungan Uji: Mac Mini Dev**.
+- Server Staging dipakai untuk produksi harian brand, karena itu tidak boleh tersentuh selama pekerjaan ini. Perubahan perilaku prompt yang luas tetap **di balik flag** dengan default **off**, supaya saat nanti dibawa ke Staging perilaku lama tidak langsung berubah.
 - Masalah utama:
   1. Planner dengan Visual Style **Metafora** menghasilkan aksi visual hook yang realis/produk, bukan analogi benda (kasus `pln_7d6363e0`: 0 dari 6 baris metafora, hook baris 1–3 menyalin contoh prompt).
   2. Saat ingest planner → OPC, `visual_style` diambil dari **preset**, bukan dari planner (`lib/pillar-campaign-ingest.js:208`). Preset tidak punya opsi Metafora/Investigasi, sehingga storyboard jalan sebagai Cinematic dan KB metafora tidak dimuat.
@@ -23,15 +24,49 @@ Dokumen ini adalah instruksi kerja. Dokumen acuannya:
 
 ## Aturan umum
 
-- Satu fase satu rilis (`npm run release-non-interactive`), lalu deploy ke **Dev/Staging** sesuai SOP atomic deployment. **Production dilarang** tanpa perintah eksplisit user.
+- Satu fase satu commit + deploy ke **Dev saja** (lihat bagian Lingkungan Uji). **Staging dan Production dilarang** selama pekerjaan ini.
 - **Jangan memproses ulang** item, storyboard, atau video yang sudah `Completed`. Perubahan hanya berlaku untuk generasi baru.
-- **Jangan mengubah data preset, planner, atau kampanye di database** (termasuk U11). Agent hanya melaporkan; user yang memutuskan.
+- **Jangan mengubah data preset, planner, atau kampanye yang sudah ada** di schema mana pun (termasuk U11). Agent hanya melaporkan; user yang memutuskan. Pengecualian: membuat **data uji baru** di schema `dev` (lihat Lingkungan Uji).
 - **Jangan menghapus tabel database** (`instant_campaigns`, `instant_campaign_items`, dll.) di fase mana pun. Penghapusan tabel adalah pekerjaan terpisah atas instruksi user.
 - **Jangan mengubah aturan prompt video** (presence truth, kinetics, anatomy lock, T2I/I2V, start frame, bridging) kecuali disebut eksplisit di fase.
-- Semua perubahan UI: **wajib mockup HTML dulu** di `public/mockup_*.html`, sinkron ke staging (`http://100.95.245.55:5010/mockup_*.html`), tunggu review user, baru coding React. Pakai **semantic CSS tokens** dari `app/theme.css`, tanpa warna hardcoded.
+- Semua perubahan UI: **wajib mockup HTML dulu** di `public/mockup_*.html`, sinkron ke server **Dev** (`http://100.95.245.55:5020/mockup_*.html`, ikut terbawa saat deploy Dev; jangan menyalin ke folder Staging), tunggu review user, baru coding React. Pakai **semantic CSS tokens** dari `app/theme.css`, tanpa warna hardcoded.
 - Semua prompt baru wajib berlaku juga untuk `target_language = en-US`.
 - Jangan menulis API key atau secret di kode, test, atau dokumen (SOP Zero Secret Exposure).
 - Jangan mengubah pengaturan model Gemini, API key, atau tier tenant tanpa persetujuan user.
+
+## Lingkungan Uji: Mac Mini Dev (bukan Staging)
+
+Pengecualian SOP untuk pekerjaan ini (atas instruksi user): **tidak ada deploy ke Staging** dan **rilis ke `main` ditunda** sampai hasil Dev disetujui.
+
+| Item | Nilai |
+|---|---|
+| Host | `ssh masbenu@100.95.245.55` (Mac Mini) |
+| UI / API | `http://100.95.245.55:5020` / `http://100.95.245.55:7020` |
+| Folder aktif | `~/maknaflow-dev-atomic/current` (fallback lama `~/maknaflow-dev`) |
+| PM2 | `ecosystem.macmini.config.cjs --env dev` |
+| Database | PostgreSQL pusat, **schema `dev`** (`PG_SEARCH_PATH=dev`), `PGPOOL_MAX=3` |
+| SOT deploy | `sot/global/GIT_BASED_ATOMIC_DEPLOYMENT.md` |
+
+**Alur Git & deploy per fase**
+1. Kerjakan di branch fitur `feature/planner-metafor-kb` (dari `main` terbaru). Jangan commit langsung ke `main`.
+2. Setelah test lokal & `npm run build` lolos: commit, lalu `git push origin feature/planner-metafor-kb`. Script deploy Dev mengambil semua branch dari remote, jadi SHA branch bisa dipakai.
+3. Dry-run: `npm run deploy:dev:atomic -- --ref <full-git-sha>`
+4. Apply: `npm run deploy:dev:atomic -- --ref <full-git-sha> --apply --confirm-dev`
+5. Rollback bila gagal: `npm run deploy:dev:rollback -- --apply --confirm-dev` (tambahkan `--release <id>` bila perlu).
+6. Verifikasi setelah deploy: symlink `current` + manifest menunjuk SHA yang benar, HTTP 200 UI/API, PM2 dev online, `pm_cwd` = path release, `PG_SEARCH_PATH=dev`, `PGPOOL_MAX=3`, file shared (`.env.local`, `data`, `logs`, `public/uploads`) tetap terhubung.
+7. Selama build remote berjalan: **jangan polling SSH tiap 10–15 detik**; tunggu dalam sesi deploy yang sama dengan jeda 60–120 detik.
+8. **Jangan** menjalankan `npm run release-non-interactive`, `deploy:staging*`, atau `deploy:macmini-prod`. Rilis versi, merge ke `main`, dan deploy Staging adalah langkah terpisah setelah user menyetujui hasil Dev.
+
+**Data uji di schema `dev`**
+- Schema `dev` punya data sendiri (±123 planner, 41 planner Garlibee, preset `default_tenant`), tetapi **tidak ada** planner `pln_7d6363e0` dan belum ada planner bergaya Metafora.
+- Buat planner uji baru **langsung di Dev** lewat UI/API Dev (contoh: produk Garlibee, Metafora, Problem-First, 6 baris). Jangan menyalin data dari schema `staging`.
+- Data `staging` boleh **dibaca saja** sebagai pembanding (mis. isi `pln_7d6363e0`). Dilarang menulis apa pun ke schema `staging` atau `public`.
+- Flag (`planner_kb_profile`, `planner_creative_brief`, `kb_profile`) boleh dinyalakan **hanya di `dev.tenant_settings`** untuk keperluan uji. Catat setiap perubahan setting Dev di plan.
+- Uji yang memanggil G-Labs/render video (Node 2) dan TTS memakai kuota nyata: **minta izin user** sebelum menjalankan, dan batasi jumlahnya.
+- Pastikan tidak ada jadwal otomatis Dev (scheduler, autopilot, publishing) yang ikut memposting ke akun sosial nyata saat uji. Bila ada, laporkan ke user dan minta keputusan sebelum lanjut.
+
+**Kapan pindah ke Staging**
+- Hanya setelah user menyatakan hasil Dev lolos. Agent menyiapkan ringkasan: daftar fase yang lolos, hasil uji A/B, flag yang dipakai, dan risiko. User yang memberi perintah deploy Staging.
 
 ## Flag
 
@@ -39,6 +74,7 @@ Dokumen ini adalah instruksi kerja. Dokumen acuannya:
 |---|---|---|---|---|
 | `planner_kb_profile` | `tenant_settings` (override per planner di `metadata_json`) | `legacy` / `lite` | `legacy` | P3 |
 | `planner_creative_brief` | `tenant_settings` (override per planner) | `off` / `on` | `off` | P4 |
+| `kb_profile` | `tenant_settings` | `legacy` / `modular` | `legacy` | P7 |
 
 - Flag kosong = default. Planner dan kampanye lama tidak berubah.
 - Tampilkan kedua flag di Settings (setelah mockup disetujui) dan bisa dibaca via MCP.
@@ -55,7 +91,7 @@ Dokumen ini adalah instruksi kerja. Dokumen acuannya:
    - `lib/autonomous-engine.js` (±641, ±872)
    - `lib/operator-content-worker.js` (±141)
 2. Konfirmasi deteksi metafora storyboard di `lib/prompts.js` (`buildPillarSharedPromptContext`, ±1950: `campaignData.visual_style`, `rowPayloadDataEarly.visual_style`, `metaphor_kit_key`, VI `metaphor_driven`).
-3. Daftar semua nilai `visual_style` yang ada di data staging (preset `operator_presets_json`, `content_planners`, `pillar_campaigns`). Temuan awal: `Cinematic`, `UGC`, `Macrophotography`, `metaphoric_faceless`, `investigative_faceless`, `Food Porn`, `photorealistic_culinary`, `Realistic`, `Explainer 2D Motion`, `Culinary Cinematic`.
+3. Daftar semua nilai `visual_style` yang ada di data (baca saja; schema `staging` sebagai acuan utama dan `dev` sebagai pembanding) (preset `operator_presets_json`, `content_planners`, `pillar_campaigns`). Temuan awal: `Cinematic`, `UGC`, `Macrophotography`, `metaphoric_faceless`, `investigative_faceless`, `Food Porn`, `photorealistic_culinary`, `Realistic`, `Explainer 2D Motion`, `Culinary Cinematic`.
 4. Hitung ukuran KB per panggilan planner (Call 1, Call 2, regenerate) dalam karakter dan perkiraan token.
 5. Laporkan di plan, lalu berhenti.
 
@@ -127,7 +163,7 @@ Lokasi: `lib/content-planner-engine.js` — arahan metafora Call 2 (±962–975)
 **Test P2:**
 - Snapshot test prompt: gaya Cinematic/UGC/Macrophotography **identik** dengan sebelum perubahan.
 - Unit test validator dengan 6 baris nyata `pln_7d6363e0` (harus terdeteksi gagal) dan contoh visual metafora yang benar (harus lolos).
-- Uji di staging: buat planner baru dengan produk & pengaturan sama seperti `pln_7d6363e0` (Garlibee, Metafora, Problem-First, 6 baris). Lulus bila 6/6 visual action berupa analogi benda, 0 produk/bahan/alat medis, tidak ada hook yang menyalin contoh, benda analogi berbeda tiap baris.
+- Uji di **Dev**: buat planner baru di Dev dengan produk & pengaturan sama seperti `pln_7d6363e0` (Garlibee, Metafora, Problem-First, 6 baris). Lulus bila 6/6 visual action berupa analogi benda, 0 produk/bahan/alat medis, tidak ada hook yang menyalin contoh, benda analogi berbeda tiap baris.
 - **Jangan regenerate** `pln_7d6363e0` yang lama tanpa izin user. Buat planner baru untuk uji.
 
 ## Fase P3: KB ringan planner + penyesuaian Gemini API (bagian 8) — flag `planner_kb_profile`
@@ -172,7 +208,7 @@ Lokasi: `lib/content-planner-engine.js` — arahan metafora Call 2 (±962–975)
 
 ## Fase P5: Hapus Instant Factory & Sheets Autopilot (bagian 10)
 
-Data staging & production: `instant_campaigns` = 0 baris; `sheets_autopilot_scheduler_active` tidak aktif. Konfirmasi ulang di P0 sebelum menghapus.
+Data staging & production: `instant_campaigns` = 0 baris; `sheets_autopilot_scheduler_active` tidak aktif. Konfirmasi ulang di P0 (termasuk schema `dev`) sebelum menghapus. Penghapusan kode diuji di Dev dulu; karena kode ini nanti ikut ke Staging, laporkan juga apakah Staging punya pemakaian aktif.
 
 **P5-1. Pindahkan dulu helper Google Sheets** (wajib sebelum menghapus apa pun)
 - Pindahkan `updateCell`, `ensureTabAndAppendRows`, `getColumnLetter`, `resolveProductImagePath`, `resolveProductReferenceImage` dari `lib/sheets-autopilot-worker.js` ke file baru (mis. `lib/google-sheets-helpers.js`).
@@ -187,7 +223,7 @@ Data staging & production: `instant_campaigns` = 0 baris; `sheets_autopilot_sche
 - Bersihkan titik terkait: tick Instant di `lib/campaign-scheduler.js` (±920–1000, ±1294, ±1332), fungsi `processInstant*` di `lib/scheduler-processors.js`, fungsi DB instant di `lib/db.js`, Affiliate Studio (`affiliate-studio-launch-adapter.js`, `-production-adapter.js`, `-recommendation-adapter.js`, `-contract.js`: hapus engine `instant`, rekomendasi BOFU dialihkan ke engine lain — usulkan engine pengganti di plan, user memutuskan), tab Instant di Video Studio (`app/video-studio/page.js`, `app/api/video-studio/campaign-videos/route.js`, `render/route.js`), TTS Studio (`app/api/tts-studio/campaign-data/route.js`), `lib/naming-helper.js`, `lib/drive-sync-helper.js`, `lib/nextcloud-sync-helper.js`, entri `INSTANT_FACTORY` di `lib/gemini.js`, log `instant_factory_logs` (`lib/scheduler.js`, `app/api/scheduler/control/route.js`, `app/api/system-logs/route.js`, `lib/console-hook.js`), izin di `lib/schema/user-schema.js`, skrip `scripts/find-campaign.js`, `scripts/update-schema-phase2.js`, `scripts/local-staging/setup.js`.
 - **Jangan sentuh** `app/auto-pipeline/page.js`: variabel `instant*` di sana hanya nama form, bukan Instant Factory.
 - Jangan hapus tabel database.
-- Test: `npm run build` lolos, tidak ada import yang menunjuk file terhapus, halaman Affiliate Studio, Video Studio, TTS Studio, Auto Pipeline terbuka normal, scheduler berjalan tanpa error di log staging.
+- Test: `npm run build` lolos, tidak ada import yang menunjuk file terhapus, halaman Affiliate Studio, Video Studio, TTS Studio, Auto Pipeline terbuka normal, scheduler berjalan tanpa error di log Dev.
 
 ## Fase P6: Pisahkan `creative_approach` dan `visual_look` (U7)
 
@@ -196,18 +232,39 @@ Kerjakan setelah P1 stabil. **Mockup dulu** untuk semua form yang berubah.
 - `visual_look`: Cinematic / UGC / Macrophotography / Food Porn / photorealistic_culinary / dll. Dipegang **preset**.
 - Kolom baru di `content_planners`, `pillar_campaigns`, dan payload baris; kolom `visual_style` lama tetap ada dan tetap diisi (kompatibilitas) sampai semua pembaca pindah.
 - Pemetaan nilai lama: `metaphoric_faceless`/`investigative_faceless` → `creative_approach`; sisanya → `visual_look` dengan `creative_approach = standard`.
-- Migrasi skema mengikuti aturan database (`DISABLE_AUTO_MIGRATIONS`, schema per environment). Tulis skrip migrasi dan dry-run di Dev; jangan jalankan di staging/production tanpa persetujuan user.
+- Migrasi skema mengikuti aturan database (`DISABLE_AUTO_MIGRATIONS`, schema per environment). Tulis skrip migrasi, dry-run lalu jalankan di schema `dev` saja (dengan persetujuan user). Dilarang menjalankannya di `staging`/`public`.
 - Semua pembaca (`lib/prompts.js`, `lib/content-planner-engine.js`, ingest, start-frame QC, metaphor policy, visual identity allocator, MCP preset tools) dipindah ke field baru, dengan fallback ke `visual_style`.
 - Test: kombinasi Metafora + Macrophotography menghasilkan storyboard metafora dengan tampilan makro.
 
-## Fase P7: KB modular untuk kampanye lain (bagian 9) — audit dulu, plan terpisah
+## Fase P7: KB modular untuk kampanye lain (bagian 9 & BAGIAN 4) — flag `kb_profile`
 
-Fase ini **hanya audit + plan**, belum coding. Hasilnya plan baru yang diajukan ke user.
-1. Cache master KB Gemini (`lib/kb-stitcher.js`, `refreshGeminiContextCache` di `lib/gemini.js`): saat ini membawa seluruh 12 KB untuk tugas `useKB: true` di tenant paid + caching on. Usulkan isi cache per tugas.
-2. Deconstruct (`buildReverseEngineeringPrompt`, `buildReverseEngineeringBridgePrompt` di `lib/prompts.js`) dan Multiplier (`lib/multiplier-angle-generator.js` membaca file REALIST langsung, tidak lewat `kb-loader`). Baca prompt-nya, petakan bagian KB yang benar-benar dipakai.
-3. PROMPT_SYSTEM: petakan "Mandate" bernomor mana yang dirujuk kode/prompt storyboard. Usulkan pemecahan per modul. **Jangan buang** bagian yang dirujuk.
-4. Struktur target: KB inti kecil (compliance ringkas, brand voice, bahasa) + modul per tugas + modul per gaya visual.
-5. Instant Factory & Sheets Autopilot **tidak** masuk lingkup (dihapus di P5).
+Draf modul sudah tersedia di `docs/kb-lite-draft/` (lihat `README.md` dan `PROMPT_SYSTEM_INVENTORY.md`). Agent **tidak menulis ulang isinya dari nol**; agent memverifikasi, memindahkan, menyambungkan, dan menguji.
+
+**P7-0. Verifikasi inventaris (baca saja)**
+- Cocokkan `PROMPT_SYSTEM_INVENTORY.md` dengan kode `main` terbaru: daftar nomor mandate yang dirujuk, proses yang memuat PROMPT_SYSTEM, dan konflik di bagian B.
+- Audit prompt Deconstruct (`buildReverseEngineeringPrompt`, `buildReverseEngineeringBridgePrompt`) dan Multiplier (`lib/multiplier-angle-generator.js` membaca file REALIST langsung). Catat bila ada aturan yang dibutuhkan tapi belum ada di modul lite; usulkan tambahannya di plan, jangan menambah diam-diam.
+- Cek asal `MAKNA_Config_v54.9` (tidak ada di folder `kb/`).
+- Laporkan, lalu berhenti untuk persetujuan.
+
+**P7-1. Pindahkan modul ke `kb/`** (nama file tanpa akhiran `_LITE` atau dengan versi, sesuai konvensi `kb-loader`): `VIDEO_PROMPT_CORE`, `VOICE_AUDIO`, `METAPHOR_PHYSICS_LIBRARY`, `MANDATE_GLOSSARY`. File lama (`PROMPT_SYSTEM_v47.9.md`, `REALIST_VIRAL_NARRATIVE_v47.9.md`, `VISUAL_STYLE_GUIDE_v47.9.md`) **tetap ada** selama flag masih bisa `legacy`.
+
+**P7-2. Flag `kb_profile`** (`tenant_settings`, default `legacy`): saat `modular`, setiap proses memuat modul sesuai tabel bagian D di `PROMPT_SYSTEM_INVENTORY.md`:
+- RE campaign / Deconstruct / Bridge: VIDEO_PROMPT_CORE + VOICE_AUDIO + MANDATE_GLOSSARY (+ METAPHOR_PHYSICS_LIBRARY bila gaya Metafora).
+- Storyboard OPC micro-KB: tetap, ditambah MANDATE_GLOSSARY.
+- Multiplier: VOICE_AUDIO (persona router), menggantikan pembacaan file REALIST langsung.
+- Pillar lama (cabang else) dan Production/pipeline v54: VIDEO_PROMPT_CORE + VOICE_AUDIO + MANDATE_GLOSSARY. Laporkan bila jalur ini sudah tidak dipakai; usulkan pensiun, user memutuskan.
+- Cache master Gemini (`lib/kb-stitcher.js`): isi diganti modul inti (VIDEO_PROMPT_CORE + VOICE_AUDIO + MANDATE_GLOSSARY + compliance ringkas). Pastikan cache lama dibuat ulang saat profil berubah.
+- Planner tidak memakai VIDEO_PROMPT_CORE (sudah ditangani P3).
+
+**P7-3. Uji perbandingan**
+- Jalankan `legacy` vs `modular` pada kasus nyata per jalur: 2 RE campaign, 2 Bridge Inject, 1 Deconstruct, 2 Multiplier, 1 storyboard metafora, 1 cartoon/3D, 1 `en-US`.
+- Bandingkan: ukuran prompt/token, keberhasilan parsing JSON, kelengkapan layer prompt video (LAYER 0–3, micro-pacing, audio segment), kepatuhan presence/faceless, dan hasil validator yang sudah ada.
+- RE campaign dan Bridge paling sensitif (prompt videonya langsung dikirim ke G-Labs): uji sampai render video untuk minimal 1 kasus masing-masing di **Dev**, dengan izin user (memakai kuota G-Labs nyata).
+- Tulis output di luar folder release. User yang memutuskan kapan `modular` dinyalakan per tenant.
+
+**P7-4. Pembersihan konflik di kode** (setelah `modular` disetujui)
+- Hapus label/aturan yang bertentangan atau sudah dibatalkan (Mandate 2 di jalur metafora, rujukan "OVERRIDE MANDATE 74 & 79" bila blok lamanya tidak lagi dimuat).
+- File KB lama baru boleh dihapus dari pemuatan setelah semua tenant memakai `modular` dan user menyetujui.
 
 ## Data yang hanya dilaporkan (U11, jangan diubah)
 
@@ -219,8 +276,8 @@ Fase ini **hanya audit + plan**, belum coding. Hasilnya plan baru yang diajukan 
 
 - Unit test untuk semua fungsi baru; snapshot test prompt untuk memastikan gaya/flag yang tidak disentuh **identik** dengan sebelumnya.
 - `npm run build` lolos.
-- Deploy ke Dev/Staging sesuai SOP atomic deployment, lalu cek: HTTP 200 UI/API, PM2 online, `pm_cwd`, `PG_SEARCH_PATH`, `PGPOOL_MAX`.
-- Untuk UI: sediakan link mockup dan halaman staging untuk diuji user secara manual.
+- Deploy ke **Dev saja** sesuai bagian Lingkungan Uji, lalu cek: HTTP 200 UI/API, PM2 online, `pm_cwd`, `PG_SEARCH_PATH=dev`, `PGPOOL_MAX=3`.
+- Untuk UI: sediakan link mockup dan halaman di Dev (`http://100.95.245.55:5020`) untuk diuji user secara manual.
 - Laporkan per fase: apa yang berubah, hasil test, dan apa yang belum diverifikasi.
 
 ## Ringkasan tracker
@@ -234,7 +291,7 @@ Fase ini **hanya audit + plan**, belum coding. Hasilnya plan baru yang diajukan 
 | P4 | Brief kreatif terkunci planner → OPC | `planner_creative_brief` | ya (toggle Settings) |
 | P5 | Pindah helper Sheets, hapus Sheets Autopilot & Instant Factory | – | – |
 | P6 | Pisah `creative_approach` vs `visual_look` | – | ya |
-| P7 | Audit & plan KB modular (cache, deconstruct, multiplier, PROMPT_SYSTEM) | – | – |
+| P7 | KB modular dari draf `docs/kb-lite-draft/` (cache, RE/Deconstruct/Bridge, multiplier, pillar lama) + uji A/B | `kb_profile` | – |
 
 Urutan wajib: P0 → P1 → P2 → P3 → P4. P5 boleh dikerjakan setelah P0 disetujui, terpisah dari P1–P4. P6 setelah P1 stabil. P7 setelah P3.
-Aturan lain tetap berlaku: satu fase per rilis, item `Completed` tidak diproses ulang, data DB tidak diubah tanpa izin, flag dan production adalah keputusan user.
+Aturan lain tetap berlaku: satu fase per commit + deploy **Dev saja**, tidak ada deploy Staging/Production dan tidak ada rilis ke `main` sampai user menyetujui hasil Dev, item `Completed` tidak diproses ulang, data Staging/Production tidak disentuh, flag di luar schema `dev` adalah keputusan user.
