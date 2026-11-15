@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.48.22 — Fix topicComplianceSection di Custom Storyboard gemini_engineer (15/11/2026)
+- Destructure topicComplianceSection pada buildCustomStoryboardPromptEngineerPrompt di lib/prompts.js
+- Simpan error reason ke review_reason saat generator storyboard gagal di lib/scheduler-processors.js
+- Tambah verifikasi regresi test untuk custom storyboard prompt engineer
+
 ## V2.48.21 — Perbaikan Preset Bridging & Story Arc Auto Pipeline (15/11/2026)
 - Filter preset brand wajib penuhi kecocokan campaign_kinds untuk cegah kebocoran preset editorial ke produk
 - Dropdown Auto Pipeline dikelompokkan dengan optgroup dan label spesifikasi bridging eksplisit
