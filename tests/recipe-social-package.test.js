@@ -76,13 +76,13 @@ test('buildRecipeSocialPackage creates full platform caption package', () => {
 
   const pkg = buildRecipeSocialPackage(recipe, {
     hook: 'Stop beli matcha mahal di kafe!',
-    cta: 'Cek produk di keranjang kuning!'
+    cta: 'Cek produk di keranjang!'
   });
 
   assert.ok(pkg.caption_with_recipe.includes('Stop beli matcha mahal di kafe!'));
   assert.ok(pkg.caption_with_recipe.includes('BAHAN-BAHAN:'));
   assert.ok(pkg.caption_with_recipe.includes('CARA MEMBUAT:'));
-  assert.ok(pkg.caption_with_recipe.includes('Cek produk di keranjang kuning!'));
+  assert.ok(pkg.caption_with_recipe.includes('Cek produk di keranjang!'));
   assert.ok(Array.isArray(pkg.hashtags) && pkg.hashtags.length > 0);
   assert.ok(pkg.platform_captions.tiktok);
 });

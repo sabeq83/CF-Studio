@@ -37,7 +37,7 @@ test('F2c1-T1 (R12.1): resolvePreRenderFinishingMeta populates Brand Profile fie
     logo_url: 'https://cdn.example.com/logo-trans.png',
     brand_color: '#1b4332',
     brand_tagline: 'Sehat Alami Setiap Hari',
-    default_cta_tiktok: 'CEK KERANJANG KUNING',
+    default_cta_tiktok: 'CEK KERANJANG',
     default_cta_facebook: 'KLIK PESAN SEKARANG',
     default_cta_youtube: 'CEK LINK DESKRIPSI',
     safety_notice_text: 'Minum sesuai anjuran, hentikan bila tidak cocok.',
@@ -65,7 +65,7 @@ test('F2c1-T1 (R12.1): resolvePreRenderFinishingMeta populates Brand Profile fie
   assert.equal(metaTikTok.brand.logoUrl, 'https://cdn.example.com/logo-trans.png');
   assert.equal(metaTikTok.brand.color, '#1b4332');
   assert.equal(metaTikTok.brand.tagline, 'Sehat Alami Setiap Hari');
-  assert.equal(metaTikTok.brand.defaultCta, 'CEK KERANJANG KUNING');
+  assert.equal(metaTikTok.brand.defaultCta, 'CEK KERANJANG');
   assert.equal(metaTikTok.brand.safetyNoticeText, 'Minum sesuai anjuran, hentikan bila tidak cocok.');
   assert.equal(metaTikTok.brand.presenterName, 'Tim R&D');
   assert.equal(metaTikTok.brand.presenterRole, 'Formulator');

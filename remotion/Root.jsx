@@ -20,7 +20,7 @@ export const RemotionRoot = () => {
           hookSubtitle: "Makan enak itu hak semua orang.",
           brandName: "GarliBee",
           packSize: "Kemasan 300 Gram",
-          ctaText: "Cek Keranjang Kuning",
+          ctaText: "Cek Keranjang",
           disclaimer: "Pangan olahan, bukan obat."
         }}
       />

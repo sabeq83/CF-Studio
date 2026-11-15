@@ -4,7 +4,7 @@ import { useCurrentFrame, useVideoConfig, spring, interpolate } from 'remotion';
 export const CtaBanner = ({
   brandName = "GarliBee",
   packSize = "Kemasan 300 Gram",
-  ctaText = "Cek Keranjang Kuning",
+  ctaText = "Cek Keranjang",
   disclaimer = "Pangan olahan, bukan obat."
 }) => {
   const frame = useCurrentFrame();

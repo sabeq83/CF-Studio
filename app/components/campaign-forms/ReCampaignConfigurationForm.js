@@ -1444,7 +1444,7 @@ const canonicalConfigurationForm0 = (<form onSubmit={productionMode === 'mass' ?
                       <input
                         type="text"
                         className="form-input"
-                        placeholder="Kalimat wajib di akhir klip voiceover (misal: Produk ada di keranjang kuning ya!)"
+                        placeholder="Kalimat wajib di akhir klip voiceover (misal: Produk ada di keranjang ya!)"
                         value={mandatoryOutroLine}
                         onChange={e => setMandatoryOutroLine(e.target.value)}
                       />

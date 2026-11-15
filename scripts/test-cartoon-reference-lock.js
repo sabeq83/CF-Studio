@@ -164,7 +164,7 @@ const invalidCartoonOutput = {
   ],
   voiceover: [
     { scene: 1, narration: 'Mochi sedang sakit dan obat ini menyembuhkan penyakit Mochi.' },
-    { scene: 2, narration: 'Membeli produk di keranjang kuning.' },
+    { scene: 2, narration: 'Membeli produk di keranjang.' },
     { scene: 3, narration: 'Narasi standard.' },
     { scene: 4, narration: 'Narasi standard.' },
     { scene: 5, narration: 'Narasi standard.' },

@@ -210,7 +210,7 @@ test('buildBridgeZoningContract emits multi-segment PRE -> INTRO -> GAP -> RECAL
     mode: 'multiplier',
     productName: 'GarliBee',
     productUsp: 'Madu fermentasi alami',
-    mandatoryOutroLine: 'Cek keranjang kuning sekarang.'
+    mandatoryOutroLine: 'Cek keranjang sekarang.'
   });
   assert.ok(contract.includes('ZONA PRE-BRIDGING (Klip #1)'));
   assert.ok(contract.includes('ZONA INTRO PRODUK'));
@@ -218,6 +218,6 @@ test('buildBridgeZoningContract emits multi-segment PRE -> INTRO -> GAP -> RECAL
   assert.ok(contract.includes('ZONA RECALL PRODUK'));
   assert.ok(contract.includes('DILARANG MEMPERKENALKAN ULANG'));
   assert.ok(contract.includes('ZONA POST-BRIDGING / PENUTUP (Klip #7)'));
-  assert.ok(contract.includes('Cek keranjang kuning sekarang.'));
+  assert.ok(contract.includes('Cek keranjang sekarang.'));
 });
 

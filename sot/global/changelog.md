@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.48.20 — Update CTA Template Finishing & Prompt ke CEK KERANJANG / ORDER NOW (15/11/2026)
+- Ubah CTA Template Finishing di resolveCtaAndSavePrompt menjadi CEK KERANJANG (ID) dan ORDER NOW (EN)
+- Ubah fallback CTA Remotion & Video Studio dari Cek Keranjang Kuning ke Cek Keranjang
+- Bersihkan contoh & placeholder keranjang kuning pada prompt AI, KB, preset, UI form & test snapshot
+
 ## V2.48.19 — Block generic product and packaging on non-bridging clips (15/11/2026)
 - Teruskan jadwal bridging ke Content Planner resep agar scene non-bridging bebas kemasan
 - Tambah sanitizer Food Truth dan istilah kemasan deterministik pada Recipe Production Adapter dan Start Frame Gateway

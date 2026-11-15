@@ -18,7 +18,7 @@ export default function VideoStudio() {
     hookSubtitle: 'Makan enak itu hak semua orang.',
     brandName: 'GarliBee',
     packSize: 'Kemasan 300 Gram',
-    ctaText: 'Cek Keranjang Kuning',
+    ctaText: 'Cek Keranjang',
     disclaimer: 'Pangan olahan, bukan obat.',
     themeColor: '#F59E0B'
   });

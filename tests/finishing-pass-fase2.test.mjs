@@ -173,7 +173,7 @@ test('F2-T1: extractProductCardData & resolveCtaAndSavePrompt stay 100% metadata
   assert.equal(herbal.tag, 'BAHAN KUNCI');
 
   const { cta, savePrompt } = resolveCtaAndSavePrompt({
-    cleanVoiceoverClips: ['Yuk langsung cek keranjang kuning sebelum kehabisan.'],
+    cleanVoiceoverClips: ['Yuk langsung cek keranjang sebelum kehabisan.'],
     wordEvents: [{ w: 'keranjang', s: 9.2, e: 9.6 }],
     clipOffsets: [
       { start: 0, duration: 4 },
@@ -184,8 +184,23 @@ test('F2-T1: extractProductCardData & resolveCtaAndSavePrompt stay 100% metadata
     platform: 'tiktok',
     totalDuration: 12
   });
-  assert.equal(cta.text, 'CEK KERANJANG KUNING');
+  assert.equal(cta.text, 'CEK KERANJANG');
   assert.ok(savePrompt && savePrompt.titleText.includes('Resep'));
+
+  const enBasket = resolveCtaAndSavePrompt({
+    cleanVoiceoverClips: ['Check the basket below before it sells out.'],
+    wordEvents: [{ w: 'basket', s: 9.2, e: 9.6 }],
+    clipOffsets: [
+      { start: 0, duration: 4 },
+      { start: 4, duration: 4 },
+      { start: 8, duration: 4 }
+    ],
+    hasRecipe: false,
+    platform: 'tiktok',
+    totalDuration: 12,
+    targetLanguage: 'en-US'
+  });
+  assert.equal(enBasket.cta.text, 'ORDER NOW');
 });
 
 test('F2-T2 & F2-T3: Zero hardcoded strings (R6.6) in templates & E2E camera motion + Playwright render for calm_wellness and recipe_pop', async () => {
@@ -200,7 +215,7 @@ test('F2-T2 & F2-T3: Zero hardcoded strings (R6.6) in templates & E2E camera mot
     /jahe\s+parut/i,
     /p-irt/i,
     /bpom/i,
-    /cek\s+keranjang\s+kuning/i,
+    /cek\s+keranjang/i,
     /simpan\s+resep\s+ini/i,
     /#f2b632/i,
     /#b88928/i,

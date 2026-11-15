@@ -378,7 +378,7 @@ export default function ContentPlannerWorkbench() {
         num: 4,
         title: 'Scene 4: Plating / Hero Taste Shot & CTA',
         visual: 'Hero shot hasil akhir dengan garnish menarik dan ajakan checkout.',
-        vo: row?.cta || idea?.cta || 'Yuk recook sekarang! Klik keranjang kuning untuk pesan produk originalnya!'
+        vo: row?.cta || idea?.cta || 'Yuk recook sekarang! Cek keranjang untuk pesan produk originalnya!'
       }
     ];
   }
@@ -1400,7 +1400,7 @@ Yuk recook sekarang! Simpan postingan ini ya ✨
                     <div style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)', borderRadius: '10px', padding: '14px' }}>
                       <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Call to Action (CTA):</div>
                       <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>
-                        "Save resep ini &amp; klik keranjang kuning / link di bio untuk produknya!"
+                        "Save resep ini &amp; cek keranjang / link di bio untuk produknya!"
                       </div>
                     </div>
 
