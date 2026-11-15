@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.48.16 — Fix recipe campaign product bridging & auto-match katalog (15/11/2026)
+- Tambah resolver auto-match produk aktif brand untuk recipe_campaign
+- Propagasi product_bridging preset ke ingest, creative adapter, dan Start Frame
+- Tambah UI kontrol Auto Katalog / Manual / Tanpa Produk di Auto Pipeline
+
 ## V2.48.15 — Fix start-frame worker jsonb CASE type mismatch and T2I Data URI reference encoding (15/11/2026)
 - Fix CASE request_json jsonb vs text type mismatch in lib/start-frame-worker.js
 - Add readLocalImageDataUrl in lib/base64-image-reference.js and use Data URI encoding across Multiplier regenerate-start-frames, regenerate-t2i, and sheets-autopilot repair-clip

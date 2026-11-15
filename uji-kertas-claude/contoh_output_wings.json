@@ -1,0 +1,111 @@
+{
+  "keyword": "air fryer chicken wings recipe",
+  "brand": "HabitFolk",
+  "research_angle": "cornstarch vs baking powder",
+  "hook": "Cornstarch beats baking powder for crispy air fryer wings",
+  "video_dna": {
+    "visual_style": "photorealistic_culinary",
+    "color_grade": "warm_appetizing",
+    "lighting": "soft_morning_window",
+    "camera_angle": "top_down_45_degree_tabletop_macro",
+    "pacing": "energetic_snappy",
+    "audio_energy": "medium_high_with_sizzle",
+    "aspect_ratio": "9:16"
+  },
+  "social_media_package": {
+    "caption_opening": "Cornstarch, not baking powder. That's the difference between \"pretty crispy\" and shatter-crisp air fryer wings.",
+    "cta": "Want more air fryer recipes? Get the app through the link in my bio.",
+    "hashtags": [
+      "#AirFryerWings",
+      "#CrispyWings",
+      "#GarlicButterWings",
+      "#AirFryerRecipes",
+      "#WingNight",
+      "#EasyDinner",
+      "#GameDayFood",
+      "#HomeCooking"
+    ]
+  },
+  "new_video_plan_json": [
+    {
+      "clip_index": 1,
+      "product_visible": false,
+      "requires_product_reference": false,
+      "visual_action": "Close-up sayap matang keemasan dipatahkan, kulit renyah retak, uap naik",
+      "new_vo": "Most wing recipes say baking powder. Chefs say cornstarch. Here's the crispiest way to make wings in your air fryer.",
+      "t2i_prompt": "(VERTICAL 9:16) --ar 9:16 --no landscape. Photorealistic culinary photography, top-down 45-degree tabletop macro, 100mm macro lens, shallow depth of field. Polished white Carrara marble countertop with soft grey veining, natural oak cutting board, clear glass ramekins, stainless steel prep bowls, dark grey silicone tongs. Soft morning window light from the side, warm appetizing color grade. A chef in charcoal linen sleeves only as soft blur in the background, hands never sharp or prominent. No text, no logos, no packaging. SCENE: Extreme close-up of one golden, crackly air-fried chicken wing being pulled apart above a bowl of glossy garlic-butter wings, steam rising, crisp skin flakes mid-air.",
+      "i2v_prompt": "(VERTICAL 9:16) --ar 9:16 --no landscape [LAYER 1: INPUT & TRUTH LOCK] (Start Frame Reference: CLIP_1_START_FRAME.png), (Consistency: MAX). [LAYER 2: MICRO-PACING & ACTION] 0.0s-2.0s: slow push-in as the wing splits, skin cracks. 2.0s-4.0s: steam curls upward, gentle rack focus to the bowl. [LAYER 3: SFX] [SFX: sharp crunch, soft sizzle].",
+      "t2v_prompt": ""
+    },
+    {
+      "clip_index": 2,
+      "product_visible": false,
+      "requires_product_reference": false,
+      "visual_action": "Tisu dapur menekan sayap mentah di atas talenan",
+      "new_vo": "Pat the wings bone-dry. Any moisture left on the skin turns into steam, not crunch.",
+      "t2i_prompt": "(VERTICAL 9:16) --ar 9:16 --no landscape. Photorealistic culinary photography, top-down 45-degree tabletop macro, 100mm macro lens, shallow depth of field. Polished white Carrara marble countertop with soft grey veining, natural oak cutting board, clear glass ramekins, stainless steel prep bowls, dark grey silicone tongs. Soft morning window light from the side, warm appetizing color grade. A chef in charcoal linen sleeves only as soft blur in the background, hands never sharp or prominent. No text, no logos, no packaging. SCENE: Raw chicken wings on the oak board, a folded paper towel pressing down on them, damp spots visible on the towel.",
+      "i2v_prompt": "(VERTICAL 9:16) --ar 9:16 --no landscape [LAYER 1: INPUT & TRUTH LOCK] (Start Frame Reference: CLIP_2_START_FRAME.png), (Consistency: MAX). [LAYER 2: MICRO-PACING & ACTION] 0.0s-2.0s: towel presses and lifts. 2.0s-4.0s: camera tilts to dry, matte wing skin. [LAYER 3: SFX] [SFX: paper rustle].",
+      "t2v_prompt": ""
+    },
+    {
+      "clip_index": 3,
+      "product_visible": false,
+      "requires_product_reference": false,
+      "visual_action": "Bumbu ditabur ke mangkuk, sayap diaduk sampai berlapis merata",
+      "new_vo": "One tablespoon of cornstarch, garlic powder, smoked paprika and salt. Toss until every wing looks dusty.",
+      "t2i_prompt": "(VERTICAL 9:16) --ar 9:16 --no landscape. Photorealistic culinary photography, top-down 45-degree tabletop macro, 100mm macro lens, shallow depth of field. Polished white Carrara marble countertop with soft grey veining, natural oak cutting board, clear glass ramekins, stainless steel prep bowls, dark grey silicone tongs. Soft morning window light from the side, warm appetizing color grade. A chef in charcoal linen sleeves only as soft blur in the background, hands never sharp or prominent. No text, no logos, no packaging. SCENE: Stainless bowl of raw wings with a cloud of cornstarch, paprika and garlic powder falling onto them, wings half coated.",
+      "i2v_prompt": "(VERTICAL 9:16) --ar 9:16 --no landscape [LAYER 1: INPUT & TRUTH LOCK] (Start Frame Reference: CLIP_3_START_FRAME.png), (Consistency: MAX). [LAYER 2: MICRO-PACING & ACTION] 0.0s-2.0s: spices fall in slow motion. 2.0s-4.0s: tongs toss wings until evenly dusted. [LAYER 3: SFX] [SFX: powder whoosh, light clatter].",
+      "t2v_prompt": ""
+    },
+    {
+      "clip_index": 4,
+      "product_visible": false,
+      "requires_product_reference": false,
+      "visual_action": "Sayap disusun berjarak di keranjang air fryer",
+      "new_vo": "Single layer, no overlapping. Air fry at 380 degrees for 15 minutes.",
+      "t2i_prompt": "(VERTICAL 9:16) --ar 9:16 --no landscape. Photorealistic culinary photography, top-down 45-degree tabletop macro, 100mm macro lens, shallow depth of field. Polished white Carrara marble countertop with soft grey veining, natural oak cutting board, clear glass ramekins, stainless steel prep bowls, dark grey silicone tongs. Soft morning window light from the side, warm appetizing color grade. A chef in charcoal linen sleeves only as soft blur in the background, hands never sharp or prominent. No text, no logos, no packaging. SCENE: Air fryer basket viewed from above, seasoned wings arranged in one neat layer with gaps between each piece.",
+      "i2v_prompt": "(VERTICAL 9:16) --ar 9:16 --no landscape [LAYER 1: INPUT & TRUTH LOCK] (Start Frame Reference: CLIP_4_START_FRAME.png), (Consistency: MAX). [LAYER 2: MICRO-PACING & ACTION] 0.0s-2.0s: last wing placed into a gap. 2.0s-4.0s: basket slides out of frame toward the fryer. [LAYER 3: SFX] [SFX: basket click, fan hum].",
+      "t2v_prompt": ""
+    },
+    {
+      "clip_index": 5,
+      "product_visible": false,
+      "requires_product_reference": false,
+      "visual_action": "Sayap dibalik dengan penjepit, warna sudah keemasan",
+      "new_vo": "Flip, then crank it to 400 for another 10 to 12 minutes, until deep golden and 165 inside.",
+      "t2i_prompt": "(VERTICAL 9:16) --ar 9:16 --no landscape. Photorealistic culinary photography, top-down 45-degree tabletop macro, 100mm macro lens, shallow depth of field. Polished white Carrara marble countertop with soft grey veining, natural oak cutting board, clear glass ramekins, stainless steel prep bowls, dark grey silicone tongs. Soft morning window light from the side, warm appetizing color grade. A chef in charcoal linen sleeves only as soft blur in the background, hands never sharp or prominent. No text, no logos, no packaging. SCENE: Half-cooked golden wings in the basket, tongs flipping one wing to show the browned underside.",
+      "i2v_prompt": "(VERTICAL 9:16) --ar 9:16 --no landscape [LAYER 1: INPUT & TRUTH LOCK] (Start Frame Reference: CLIP_5_START_FRAME.png), (Consistency: MAX). [LAYER 2: MICRO-PACING & ACTION] 0.0s-2.0s: wing flips over. 2.0s-4.0s: slow push-in on blistered, golden skin. [LAYER 3: SFX] [SFX: crackling fat].",
+      "t2v_prompt": ""
+    },
+    {
+      "clip_index": 6,
+      "product_visible": false,
+      "requires_product_reference": false,
+      "visual_action": "Mentega meleleh di wajan, bawang putih cincang masuk, berbuih",
+      "new_vo": "Meanwhile, melt butter with fresh garlic and chili flakes. One minute, don't let it brown.",
+      "t2i_prompt": "(VERTICAL 9:16) --ar 9:16 --no landscape. Photorealistic culinary photography, top-down 45-degree tabletop macro, 100mm macro lens, shallow depth of field. Polished white Carrara marble countertop with soft grey veining, natural oak cutting board, clear glass ramekins, stainless steel prep bowls, dark grey silicone tongs. Soft morning window light from the side, warm appetizing color grade. A chef in charcoal linen sleeves only as soft blur in the background, hands never sharp or prominent. No text, no logos, no packaging. SCENE: Small dark skillet with melting butter, minced garlic and red chili flakes, gentle foam on the surface.",
+      "i2v_prompt": "(VERTICAL 9:16) --ar 9:16 --no landscape [LAYER 1: INPUT & TRUTH LOCK] (Start Frame Reference: CLIP_6_START_FRAME.png), (Consistency: MAX). [LAYER 2: MICRO-PACING & ACTION] 0.0s-2.0s: garlic drops into the butter. 2.0s-4.0s: foam bubbles spread, slight steam. [LAYER 3: SFX] [SFX: soft sizzle].",
+      "t2v_prompt": ""
+    },
+    {
+      "clip_index": 7,
+      "product_visible": false,
+      "requires_product_reference": false,
+      "visual_action": "Sayap panas diaduk dengan saus mentega mengkilap (ASMR)",
+      "new_vo": "Toss the hot wings in the garlic butter. Listen to that.",
+      "t2i_prompt": "(VERTICAL 9:16) --ar 9:16 --no landscape. Photorealistic culinary photography, top-down 45-degree tabletop macro, 100mm macro lens, shallow depth of field. Polished white Carrara marble countertop with soft grey veining, natural oak cutting board, clear glass ramekins, stainless steel prep bowls, dark grey silicone tongs. Soft morning window light from the side, warm appetizing color grade. A chef in charcoal linen sleeves only as soft blur in the background, hands never sharp or prominent. No text, no logos, no packaging. SCENE: Crispy wings in the stainless bowl, garlic butter being poured over them in a glossy ribbon.",
+      "i2v_prompt": "(VERTICAL 9:16) --ar 9:16 --no landscape [LAYER 1: INPUT & TRUTH LOCK] (Start Frame Reference: CLIP_7_START_FRAME.png), (Consistency: MAX). [LAYER 2: MICRO-PACING & ACTION] 0.0s-2.0s: butter ribbon coats the wings. 2.0s-4.0s: tongs toss, wings glisten. [LAYER 3: SFX] [SFX: loud sizzle, sticky toss].",
+      "t2v_prompt": ""
+    },
+    {
+      "clip_index": 8,
+      "product_visible": false,
+      "requires_product_reference": false,
+      "visual_action": "Piring saji sayap dengan peterseli, tangan mengambil satu",
+      "new_vo": "Want more air fryer recipes? Get the app through the link in my bio.",
+      "t2i_prompt": "(VERTICAL 9:16) --ar 9:16 --no landscape. Photorealistic culinary photography, top-down 45-degree tabletop macro, 100mm macro lens, shallow depth of field. Polished white Carrara marble countertop with soft grey veining, natural oak cutting board, clear glass ramekins, stainless steel prep bowls, dark grey silicone tongs. Soft morning window light from the side, warm appetizing color grade. A chef in charcoal linen sleeves only as soft blur in the background, hands never sharp or prominent. No text, no logos, no packaging. SCENE: Warm terracotta stoneware bowl of finished garlic-butter wings with chopped parsley, one wing slightly lifted.",
+      "i2v_prompt": "(VERTICAL 9:16) --ar 9:16 --no landscape [LAYER 1: INPUT & TRUTH LOCK] (Start Frame Reference: CLIP_8_START_FRAME.png), (Consistency: MAX). [LAYER 2: MICRO-PACING & ACTION] 0.0s-2.0s: slow orbit around the bowl. 2.0s-4.0s: wing lifts out of frame. [LAYER 3: SFX] [SFX: soft crunch, light ambient kitchen].",
+      "t2v_prompt": ""
+    }
+  ]
+}

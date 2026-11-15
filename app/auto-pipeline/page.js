@@ -5,6 +5,7 @@ import ScheduleCalendarView from '../components/ScheduleCalendarView';
 import ScheduleTableView from '../components/ScheduleTableView';
 import ThreadsSeriesForm from './ThreadsSeriesForm';
 import AutoPipelineQueueDrawer from '../components/AutoPipelineQueueDrawer';
+import RecipeProductBridgingControl from '../components/RecipeProductBridgingControl';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { GRID_LAYOUT_COORDINATES } from '@/lib/core/GridCoordinates';
@@ -301,6 +302,12 @@ export default function AutoPipelinePage() {
   const [instantPostAffiliateLink, setInstantPostAffiliateLink] = useState(true);
   const [instantGenerateRecipe, setInstantGenerateRecipe] = useState(true);
   const [schedGenerateRecipe, setSchedGenerateRecipe] = useState(true);
+  const [instantRecipeProductMode, setInstantRecipeProductMode] = useState('auto'); // 'auto' | 'manual' | 'none'
+  const [instantRecipeProductId, setInstantRecipeProductId] = useState('');
+  const [instantRecipeProductSearch, setInstantRecipeProductSearch] = useState('');
+  const [schedRecipeProductMode, setSchedRecipeProductMode] = useState('auto'); // 'auto' | 'manual' | 'none'
+  const [schedRecipeProductId, setSchedRecipeProductId] = useState('');
+  const [schedRecipeProductSearch, setSchedRecipeProductSearch] = useState('');
   const [modalBrandPresets, setModalBrandPresets] = useState([]);
   const [savingSchedule, setSavingSchedule] = useState(false);
 
@@ -1079,7 +1086,14 @@ export default function AutoPipelinePage() {
         showToast('Topik resep wajib diisi.', 'error');
         return;
       }
+      if (instantRecipeProductMode === 'manual' && !instantRecipeProductId) {
+        showToast('Pilih produk dari katalog atau ubah mode ke Auto Katalog / Tanpa Produk.', 'error');
+        return;
+      }
       targetTopic = topic.trim();
+      targetProductId = instantRecipeProductMode === 'manual'
+        ? instantRecipeProductId
+        : (instantRecipeProductMode === 'auto' ? 'auto' : null);
     }
 
     setIsLaunching(true);
@@ -1096,7 +1110,10 @@ export default function AutoPipelinePage() {
           target_language: instantCampaignType === 'recipe_labs' ? instantTargetLanguage : undefined,
           recipe_classification: instantCampaignType === 'recipe_labs' ? instantRecipeClassification : undefined,
           product_id: targetProductId,
-          bridging_mode: instantCampaignType === 'multiplier_campaign' ? (targetProductId ? 'select_existing' : 'none') : undefined,
+          product_mode: instantCampaignType === 'recipe_campaign' ? instantRecipeProductMode : undefined,
+          bridging_mode: instantCampaignType === 'multiplier_campaign'
+            ? (targetProductId ? 'select_existing' : 'none')
+            : (instantCampaignType === 'recipe_campaign' && instantRecipeProductMode === 'none' ? 'none' : undefined),
           product_aware_angle: instantCampaignType === 'multiplier_campaign' ? true : undefined,
           product_title: targetTopic,
           promotion_context: instantPromotionContext.trim() || null,
@@ -1468,6 +1485,9 @@ export default function AutoPipelinePage() {
     }
     setSchedPostAffiliateLink(true);
     setSchedGenerateRecipe(true);
+    setSchedRecipeProductMode('auto');
+    setSchedRecipeProductId('');
+    setSchedRecipeProductSearch('');
     setIsScheduleModalOpen(true);
   }
 
@@ -1550,6 +1570,16 @@ export default function AutoPipelinePage() {
     setSchedSelectedCep(schedCfg.selected_cep || 'auto');
     setSchedPostAffiliateLink(schedCfg.post_link_affiliate !== false);
     setSchedGenerateRecipe(schedCfg.generate_recipe !== false);
+    if (pType === 'recipe_campaign') {
+      const initMode = schedCfg.product_mode
+        || (schedCfg.bridging_mode === 'none' ? 'none' : (schedCfg.product_id && schedCfg.product_id !== 'auto' ? 'manual' : 'auto'));
+      setSchedRecipeProductMode(initMode);
+      setSchedRecipeProductId(initMode === 'manual' ? (schedCfg.product_id || '') : '');
+    } else {
+      setSchedRecipeProductMode('auto');
+      setSchedRecipeProductId('');
+    }
+    setSchedRecipeProductSearch('');
     setSchedPromotionContext(schedCfg.promotion_context || (sched.topic && sched.topic !== sched.target_item_title ? sched.topic : ''));
 
     if (pType === 'recipe_labs') {
@@ -1618,6 +1648,9 @@ export default function AutoPipelinePage() {
         }
       } else {
         if (!schedTopic.trim()) return showToast('Tema / Arahan topik resep wajib diisi', 'error');
+      }
+      if (schedRecipeProductMode === 'manual' && !schedRecipeProductId) {
+        return showToast('Pilih produk dari katalog atau ubah mode ke Auto Katalog / Tanpa Produk.', 'error');
       }
     } else if (schedCampaignType === 'multiplier_campaign') {
       if (!editingSchedule && selectedBlueprintIds.length === 0) {
@@ -1712,6 +1745,15 @@ export default function AutoPipelinePage() {
         editPipelineConfig.post_link_affiliate = schedPostAffiliateLink;
         if (schedCampaignType === 'multiplier_campaign' || schedCampaignType === 'recipe_campaign') {
           editPipelineConfig.generate_recipe = schedGenerateRecipe;
+        }
+        if (schedCampaignType === 'recipe_campaign') {
+          editPipelineConfig.product_mode = schedRecipeProductMode;
+          editPipelineConfig.product_id = schedRecipeProductMode === 'manual'
+            ? schedRecipeProductId
+            : (schedRecipeProductMode === 'auto' ? 'auto' : null);
+          if (schedRecipeProductMode === 'none') {
+            editPipelineConfig.bridging_mode = 'none';
+          }
         }
 
         const payload = {
@@ -1942,7 +1984,12 @@ export default function AutoPipelinePage() {
               timezone: 'Asia/Jakarta',
               pipeline_config: {
                 generate_recipe: schedGenerateRecipe,
-                post_link_affiliate: schedPostAffiliateLink
+                post_link_affiliate: schedPostAffiliateLink,
+                product_mode: schedRecipeProductMode,
+                product_id: schedRecipeProductMode === 'manual'
+                  ? schedRecipeProductId
+                  : (schedRecipeProductMode === 'auto' ? 'auto' : null),
+                ...(schedRecipeProductMode === 'none' ? { bridging_mode: 'none' } : {})
               }
             };
           });
@@ -2190,6 +2237,15 @@ export default function AutoPipelinePage() {
           pipelineConfigPayload.post_link_affiliate = schedPostAffiliateLink;
           if (schedCampaignType === 'multiplier_campaign' || schedCampaignType === 'recipe_campaign') {
             pipelineConfigPayload.generate_recipe = schedGenerateRecipe;
+          }
+          if (schedCampaignType === 'recipe_campaign') {
+            pipelineConfigPayload.product_mode = schedRecipeProductMode;
+            pipelineConfigPayload.product_id = schedRecipeProductMode === 'manual'
+              ? schedRecipeProductId
+              : (schedRecipeProductMode === 'auto' ? 'auto' : null);
+            if (schedRecipeProductMode === 'none') {
+              pipelineConfigPayload.bridging_mode = 'none';
+            }
           }
 
           const payload = {
@@ -3941,6 +3997,21 @@ export default function AutoPipelinePage() {
                       ))}
                     </div>
                   </div>
+
+                  {/* Integrasi Produk Katalog & Bridging Resep (Instant Launch) */}
+                  <RecipeProductBridgingControl
+                    presetConfig={activePresetConfig}
+                    brandId={selectedBrandId}
+                    topic={topic}
+                    category={category}
+                    catalogProducts={catalogProducts}
+                    productMode={instantRecipeProductMode}
+                    onProductModeChange={setInstantRecipeProductMode}
+                    selectedProductId={instantRecipeProductId}
+                    onSelectProductId={setInstantRecipeProductId}
+                    searchQuery={instantRecipeProductSearch}
+                    onSearchQueryChange={setInstantRecipeProductSearch}
+                  />
                 </>
               )}
 
@@ -7472,6 +7543,32 @@ export default function AutoPipelinePage() {
                       </div>
                     </div>
                     )}
+
+                    {/* Integrasi Produk Katalog & Bridging Resep (Modal Jadwal) */}
+                    {(() => {
+                      const schedModalList = modalBrandPresets.length > 0 ? modalBrandPresets : operatorPresets;
+                      const schedPresetObj = schedModalList.find(p => p.key === schedPresetKey);
+                      const schedPresetCfg = schedPresetObj?.config || schedPresetObj || null;
+                      const schedActiveTopic = schedRecipeMode === 'menu_list'
+                        ? (schedRecipeMenuList.split('\n').map(m => m.trim()).filter(Boolean)[0] || schedTopic)
+                        : schedTopic;
+                      return (
+                        <RecipeProductBridgingControl
+                          presetConfig={schedPresetCfg}
+                          brandId={schedBrandId}
+                          topic={schedActiveTopic}
+                          category={schedCategory}
+                          isBatchMenuList={!editingSchedule && schedRecipeMode === 'menu_list'}
+                          catalogProducts={catalogProducts}
+                          productMode={schedRecipeProductMode}
+                          onProductModeChange={setSchedRecipeProductMode}
+                          selectedProductId={schedRecipeProductId}
+                          onSelectProductId={setSchedRecipeProductId}
+                          searchQuery={schedRecipeProductSearch}
+                          onSearchQueryChange={setSchedRecipeProductSearch}
+                        />
+                      );
+                    })()}
                   </>
                 )}
 

@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup UI — Recipe Campaign Product Bridging & Auto-Match Katalog | MAKNA Flow</title>
+  <style>
+    /* MAKNA Flow semantic theme system (mirrored from app/theme.css for standalone parity) */
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --status-purple: #c084fc;
+      --status-purple-soft: rgba(192, 132, 252, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --input-bg: #ffffff;
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --link: #075ea8;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --status-neutral: #6548bd;
+      --status-neutral-soft: #f0ecfb;
+      --status-purple: #8b5cf6;
+      --status-purple-soft: #f5f3ff;
+      --focus-ring: #6d4ed6;
+      --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+      --shadow-modal: 0 26px 80px rgba(31, 45, 61, 0.22);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--canvas);
+      color: var(--text-primary);
+      line-height: 1.5;
+      min-height: 100vh;
+      padding: 1.5rem;
+      transition: background var(--transition), color var(--transition);
+    }
+
+    .container {
+      max-width: 1320px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1rem 1.25rem;
+      box-shadow: var(--shadow-card);
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-badge {
+      padding: 0.35rem 0.65rem;
+      border-radius: var(--radius-sm);
+      background: color-mix(in srgb, var(--action-primary) 15%, transparent);
+      color: var(--action-primary);
+      border: 1px solid color-mix(in srgb, var(--action-primary) 35%, transparent);
+      font-weight: 800;
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+    }
+
+    h1 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .topbar-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+
+    .seg-tabs {
+      display: inline-flex;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.2rem;
+      gap: 0.25rem;
+    }
+
+    .seg-tab {
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      padding: 0.45rem 0.85rem;
+      border-radius: var(--radius-xs);
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .seg-tab.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    .theme-btn {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      padding: 0.48rem 0.85rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .theme-btn:hover { background: var(--surface-hover); }
+
+    .layout-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.18fr) minmax(0, 1fr);
+      gap: 1.25rem;
+      align-items: start;
+    }
+
+    @media (max-width: 1020px) {
+      .layout-grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .panel-title {
+      font-size: 0.96rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .pill {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.22rem 0.6rem;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      border: 1px solid transparent;
+    }
+    .pill-info { background: var(--status-info-soft); color: var(--status-info); border-color: color-mix(in srgb, var(--status-info) 35%, transparent); }
+    .pill-success { background: var(--status-success-soft); color: var(--status-success); border-color: color-mix(in srgb, var(--status-success) 35%, transparent); }
+    .pill-warning { background: var(--status-warning-soft); color: var(--status-warning); border-color: color-mix(in srgb, var(--status-warning) 35%, transparent); }
+    .pill-purple { background: var(--status-purple-soft); color: var(--status-purple); border-color: color-mix(in srgb, var(--status-purple) 35%, transparent); }
+    .pill-danger { background: var(--status-danger-soft); color: var(--status-danger); border-color: color-mix(in srgb, var(--status-danger) 35%, transparent); }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .field-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .field-hint {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    select, input[type="text"], textarea {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      padding: 0.6rem 0.85rem;
+      font-size: 0.85rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color var(--transition);
+    }
+    select:focus, input[type="text"]:focus, textarea:focus {
+      border-color: var(--focus-ring);
+    }
+
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    @media (max-width: 640px) { .row-2 { grid-template-columns: 1fr; } }
+
+    .quick-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      align-items: center;
+    }
+
+    .quick-pill {
+      font-size: 0.73rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--link);
+      cursor: pointer;
+    }
+    .quick-pill:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+
+    /* New Section: Integrasi Produk & Bridging Resep */
+    .bridging-card {
+      background: var(--surface-raised);
+      border: 1.5px solid color-mix(in srgb, var(--action-primary) 45%, var(--border-subtle));
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .preset-bridge-banner {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.65rem 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      font-size: 0.78rem;
+    }
+
+    .mode-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.6rem;
+    }
+    @media (max-width: 720px) { .mode-grid { grid-template-columns: 1fr; } }
+
+    .mode-option {
+      background: var(--surface);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      text-align: left;
+      transition: all var(--transition);
+    }
+    .mode-option:hover {
+      background: var(--surface-interactive);
+      border-color: var(--border-strong);
+    }
+    .mode-option.selected {
+      background: color-mix(in srgb, var(--action-primary) 12%, var(--surface));
+      border-color: var(--action-primary);
+    }
+
+    .mode-option-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .mode-check {
+      width: 17px;
+      height: 17px;
+      border-radius: 9999px;
+      border: 1px solid var(--border-strong);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.62rem;
+      font-weight: 900;
+      color: transparent;
+    }
+    .mode-option.selected .mode-check {
+      background: var(--action-primary);
+      border-color: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    .mode-desc {
+      font-size: 0.71rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    .matched-preview-box {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .prod-thumb {
+      width: 54px;
+      height: 54px;
+      border-radius: var(--radius-sm);
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      object-fit: cover;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      overflow: hidden;
+    }
+
+    .prod-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .prod-meta {
+      flex: 1;
+      min-width: 0;
+    }
+    .prod-name {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+    .prod-sub {
+      font-size: 0.73rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+    }
+
+    .catalog-list {
+      max-height: 220px;
+      overflow-y: auto;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.5rem;
+      margin-top: 0.35rem;
+    }
+    @media (max-width: 640px) { .catalog-list { grid-template-columns: 1fr; } }
+
+    .catalog-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.5rem;
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      border: 1.5px solid var(--border-subtle);
+      cursor: pointer;
+      text-align: left;
+    }
+    .catalog-item:hover { background: var(--surface-hover); }
+    .catalog-item.selected {
+      border-color: var(--action-primary);
+      background: color-mix(in srgb, var(--action-primary) 12%, var(--surface));
+    }
+
+    .launch-btn {
+      width: 100%;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      font-weight: 800;
+      font-size: 0.9rem;
+      padding: 0.78rem 1rem;
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+    .launch-btn:hover { background: var(--action-primary-hover); }
+
+    /* Storyboard Strip & Output Inspector */
+    .clips-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.65rem;
+    }
+    @media (max-width: 640px) { .clips-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .clip-card {
+      background: var(--surface-raised);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.65rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      position: relative;
+    }
+    .clip-card.bridged {
+      border-color: var(--action-primary);
+      background: color-mix(in srgb, var(--action-primary) 10%, var(--surface-raised));
+    }
+
+    .clip-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.74rem;
+      font-weight: 800;
+    }
+
+    .clip-role {
+      font-size: 0.66rem;
+      font-weight: 700;
+      padding: 0.14rem 0.45rem;
+      border-radius: 9999px;
+    }
+    .clip-role.product {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid color-mix(in srgb, var(--status-success) 35%, transparent);
+    }
+    .clip-role.culinary {
+      background: var(--surface-interactive);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .clip-visual {
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      line-height: 1.38;
+    }
+
+    .clip-ref-row {
+      margin-top: auto;
+      padding-top: 0.4rem;
+      border-top: 1px dashed var(--border-subtle);
+      font-size: 0.68rem;
+      font-family: var(--font-mono);
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-muted);
+    }
+    .clip-card.bridged .clip-ref-row {
+      color: var(--action-primary);
+      font-weight: 700;
+    }
+
+    .trace-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+    }
+    .trace-table th, .trace-table td {
+      text-align: left;
+      padding: 0.48rem 0.6rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .trace-table th {
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .code-box {
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+
+    .notice-box {
+      background: var(--status-info-soft);
+      border: 1px solid color-mix(in srgb, var(--status-info) 35%, transparent);
+      color: var(--text-primary);
+      border-radius: var(--radius-sm);
+      padding: 0.7rem 0.85rem;
+      font-size: 0.76rem;
+      line-height: 1.45;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="brand-title">
+        <span class="brand-badge">STAGING MOCKUP</span>
+        <div>
+          <h1>Auto Pipeline • Recipe Campaign Product Bridging & Auto-Match Katalog</h1>
+          <div class="subtitle">Simulasi interaksi UI &amp; jalur propagasi bridging preset ke Start Frame (#opc_261115_qy3qwy fix)</div>
+        </div>
+      </div>
+
+      <div class="topbar-controls">
+        <div class="seg-tabs" role="tablist">
+          <button type="button" class="seg-tab active" data-view="instant" onclick="switchView('instant')">⚡ Tab 1-Klik Instan</button>
+          <button type="button" class="seg-tab" data-view="schedule" onclick="switchView('schedule')">📅 Modal Buat Jadwal</button>
+        </div>
+        <button type="button" class="theme-btn" id="themeToggleBtn" onclick="toggleTheme()">☀️ Light Mode</button>
+      </div>
+    </div>
+
+    <!-- Main Split Layout -->
+    <div class="layout-grid">
+      <!-- LEFT: Simulated Auto Pipeline UI Form -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span id="formIcon">🍳</span>
+            <span id="formHeading">Video Resep Masak (recipe_campaign) — 1-Klik Instan</span>
+          </div>
+          <span class="pill pill-info">Brand: Nutribake</span>
+        </div>
+
+        <!-- Preset Selector -->
+        <div class="row-2">
+          <div class="field-group">
+            <label class="field-label" for="presetSelect">
+              <span>Operator Preset</span>
+              <span class="field-hint">Mengatur klip bridging &amp; visual</span>
+            </label>
+            <select id="presetSelect" onchange="onPresetChange()">
+              <option value="nutribake_resep_produk_reveal2">Nutribake Resep Produk – Reveal Klip 2 (Klip 4 &amp; 6)</option>
+              <option value="nutribake_resep_viral">Nutribake Resep Viral (Klip 3 &amp; 5)</option>
+              <option value="recipe_organic_only">Resep Edukasi Organik (Tanpa Bridging)</option>
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="categorySelect">
+              <span>Kategori Kuliner</span>
+              <span class="pill pill-info" id="catBadge">✨ Auto-Terdeteksi</span>
+            </label>
+            <select id="categorySelect" onchange="renderSimulation()">
+              <option value="dessert">🍰 Baking / Dessert</option>
+              <option value="makanan_utama">🍗 Makanan Utama</option>
+              <option value="camilan">🍟 Camilan / Side Dish</option>
+              <option value="minuman">🥤 Minuman</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Schedule Mode Toggle (visible only in schedule view) -->
+        <div class="field-group hidden" id="scheduleModeBox">
+          <label class="field-label">
+            <span>Mode Input Topik Jadwal</span>
+            <span class="field-hint">Umbrella tema harian vs daftar menu</span>
+          </label>
+          <div class="seg-tabs" style="width: fit-content;">
+            <button type="button" class="seg-tab active" data-smode="umbrella" onclick="setScheduleTopicMode('umbrella')">🎯 1 Jadwal Tema Umbrella</button>
+            <button type="button" class="seg-tab" data-smode="menu_list" onclick="setScheduleTopicMode('menu_list')">📋 Batch Daftar Menu</button>
+          </div>
+        </div>
+
+        <!-- Topic Input (Umbrella / Instant) -->
+        <div class="field-group" id="topicSingleBox">
+          <label class="field-label" for="topicInput">
+            <span>Topik / Arahan Resep AI</span>
+            <span class="field-hint">Menjadi dasar Auto-Match produk katalog &amp; ide resep</span>
+          </label>
+          <input type="text" id="topicInput" value="Fudgy Brownies Sehat Tanpa Tepung" oninput="onTopicInput()" />
+          <div class="quick-pills">
+            <span class="field-hint">Uji Topik:</span>
+            <button type="button" class="quick-pill" onclick="applyTopic('Fudgy Brownies Sehat Tanpa Tepung', 'dessert')">Fudgy Brownies Sehat</button>
+            <button type="button" class="quick-pill" onclick="applyTopic('Overnight Oats Cokelat Chia Sehat', 'dessert')">Overnight Oats Chia</button>
+            <button type="button" class="quick-pill" onclick="applyTopic('Kue Tart Anti Lengket Gula Aren', 'dessert')">Tart Gula Aren Baking Paper</button>
+            <button type="button" class="quick-pill" onclick="applyTopic('Roti Panggang Vegan Butter Gurih', 'camilan')">Roti Vegan Butter</button>
+          </div>
+        </div>
+
+        <!-- Batch Menu List (Schedule menu_list mode) -->
+        <div class="field-group hidden" id="menuListBox">
+          <label class="field-label" for="menuListInput">
+            <span>Daftar Nama Menu Kuliner (1 Baris = 1 Jadwal Mandiri)</span>
+            <span class="pill pill-info" id="menuCountBadge">3 Menu</span>
+          </label>
+          <textarea id="menuListInput" rows="3" oninput="renderSimulation()">Fudgy Brownies Cokelat Tanpa Tepung
+Overnight Oats Chia Seeds &amp; Gula Aren
+Banana Muffin Panggang Vegan Butter</textarea>
+        </div>
+
+        <!-- NEW FEATURE: Integrasi Produk & Bridging Resep -->
+        <div class="bridging-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+            <div style="font-size:0.88rem; font-weight:800; color:var(--text-primary); display:flex; align-items:center; gap:0.45rem;">
+              <span>🛍️</span>
+              <span>Integrasi Produk Katalog &amp; Bridging Resep</span>
+            </div>
+            <span class="pill pill-success" id="bridgingActivePill">Bridging Aktif: Klip 4 &amp; Klip 6</span>
+          </div>
+
+          <div class="preset-bridge-banner" id="presetBridgeBanner">
+            <div>
+              <strong>Setting Preset Terdeteksi:</strong>
+              <span id="presetBridgeSummary">Slot Bridging: Klip 4 (Intro), Klip 6 (Recall)</span>
+            </div>
+            <span class="pill pill-purple" id="bridgingModeBadge">Mode: Auto-Match Katalog</span>
+          </div>
+
+          <!-- 3 Options -->
+          <div class="mode-grid">
+            <button type="button" class="mode-option selected" data-pmode="auto" onclick="setProductMode('auto')">
+              <div class="mode-option-head">
+                <span>✨ Auto Katalog</span>
+                <span class="mode-check">✓</span>
+              </div>
+              <div class="mode-desc">
+                Cocokkan otomatis produk aktif brand sesuai topik resep (bawaan jika preset mengaktifkan bridging).
+              </div>
+            </button>
+
+            <button type="button" class="mode-option" data-pmode="manual" onclick="setProductMode('manual')">
+              <div class="mode-option-head">
+                <span>🎯 Pilih Manual</span>
+                <span class="mode-check">✓</span>
+              </div>
+              <div class="mode-desc">
+                Kunci 1 produk spesifik dari katalog Nutribake untuk tampil di klip bridging.
+              </div>
+            </button>
+
+            <button type="button" class="mode-option" data-pmode="none" onclick="setProductMode('none')">
+              <div class="mode-option-head">
+                <span>🌿 Tanpa Produk</span>
+                <span class="mode-check">✓</span>
+              </div>
+              <div class="mode-desc">
+                Paksa resep organik murni (matikan bridging klip meski preset aktif).
+              </div>
+            </button>
+          </div>
+
+          <!-- Auto-Match Result Preview -->
+          <div id="autoMatchPanel">
+            <div class="matched-preview-box">
+              <div class="prod-thumb" id="autoThumb">🍫</div>
+              <div class="prod-meta">
+                <div style="display:flex; align-items:center; gap:0.4rem; flex-wrap:wrap;">
+                  <span class="prod-name" id="autoProdName">Monggo Dark Chocolate</span>
+                  <span class="pill pill-success" id="autoScorePill">Skor Kecocokan: 94</span>
+                </div>
+                <div class="prod-sub" id="autoProdSub">ID: pe_1786590944749_3568 • Clean Photo siap pakai sebagai Start Frame Reference</div>
+              </div>
+            </div>
+            <div class="field-hint" id="autoScheduleNote" style="margin-top:0.45rem;">
+              💡 Saat runtime berjalan, backend mencocokkan topik/menu resep ke produk aktif brand dari <code>brand_products</code> + memastikan <code>clean_photo_url</code> valid.
+            </div>
+          </div>
+
+          <!-- Manual Picker -->
+          <div id="manualPickerPanel" class="hidden">
+            <input type="text" id="catalogSearch" placeholder="Cari produk aktif Nutribake (misal: Monggo, Baking Paper, Gula Aren)..." oninput="renderCatalogList()" />
+            <div class="catalog-list" id="catalogList"></div>
+          </div>
+
+          <!-- Organic Notice -->
+          <div id="organicNoticePanel" class="hidden notice-box">
+            <strong>🌿 Mode Resep Organik Aktif:</strong> Pipeline akan mengirim <code>bridging_mode: "none"</code> sehingga seluruh 6 klip fokus pada bahan dapur umum tanpa menginjeksi gambar referensi produk maupun prompt <code>(Product Truth)</code>.
+          </div>
+        </div>
+
+        <button type="button" class="launch-btn" id="simulateActionBtn" onclick="pulseSimulation()">
+          🚀 Simulasikan Launch Auto Pipeline (Verifikasi Payload)
+        </button>
+      </div>
+
+      <!-- RIGHT: Live Pipeline Trace & 6-Clip Start Frame Simulator -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>🎬</span>
+            <span>Simulasi Storyboard 6 Klip &amp; Start Frame Guard</span>
+          </div>
+          <span class="pill pill-purple" id="refAuditPill">Start Frame Ref: Klip 4 &amp; 6</span>
+        </div>
+
+        <!-- 6-Clip Visual Storyboard -->
+        <div class="clips-grid" id="clipsGrid"></div>
+
+        <!-- Pipeline Trace Table (6 Steps Verified) -->
+        <div>
+          <div class="field-label" style="margin-bottom:0.4rem;">
+            <span>Jejak Propagasi Backend (Database &amp; Worker Contract)</span>
+            <span class="field-hint">Real-time sesuai konfigurasi kiri</span>
+          </div>
+          <table class="trace-table">
+            <thead>
+              <tr>
+                <th>Tahap Pipeline</th>
+                <th>Status Nilai</th>
+                <th>Efek ke Klip 4 &amp; 6</th>
+              </tr>
+            </thead>
+            <tbody id="traceBody"></tbody>
+          </table>
+        </div>
+
+        <!-- Payload Preview -->
+        <div class="field-group">
+          <label class="field-label">
+            <span>Payload Request &amp; DB Campaign Bundle Preview</span>
+            <span class="field-hint" id="payloadTargetHint">POST /api/v2/recipes/autonomous-pipeline</span>
+          </label>
+          <div class="code-box" id="payloadCode"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Real Nutribake active products observed on Staging DB
+    const CATALOG = [
+      {
+        id: 'pe_1786590944749_3568',
+        name: 'Monggo Dark Chocolate',
+        category: 'Makanan & Minuman / Cokelat',
+        keywords: ['brownies', 'cokelat', 'chocolate', 'fudgy', 'cocoa', 'dessert', 'kue', 'cake', 'muffin'],
+        photo: '/uploads/products/default_tenant/clean/clean_default_tenant_pe_1786590944749_3568_1786592613971.jpg',
+        emoji: '🍫',
+        affiliate: 'https://s.shopee.co.id/20ucJrQmFD'
+      },
+      {
+        id: 'pe_1781998076875_150',
+        name: 'Nutrifarm Dark Chocolate Powder',
+        category: 'Minuman Cokelat & Baking',
+        keywords: ['chocolate', 'cokelat', 'powder', 'bubuk', 'brownies', 'smoothie', 'latte', 'minuman'],
+        photo: '/uploads/products/clean/clean_pe_1781998076875_150.jpg',
+        emoji: '🥣',
+        affiliate: 'https://s.shopee.co.id/6L2Q9RLsmh'
+      },
+      {
+        id: 'pe_sync_1781148697787_757',
+        name: 'Nutrifarm Chia Seeds',
+        category: 'Makanan Sehat & Superfood',
+        keywords: ['chia', 'oats', 'overnight', 'smoothie', 'sehat', 'diet', 'serat', 'sarapan'],
+        photo: '/uploads/products/clean/cleaned_pe_sync_1781148697787_757_1785224498722.jpg',
+        emoji: '🌱',
+        affiliate: 'https://s.shopee.co.id/6VLqr563Oc'
+      },
+      {
+        id: 'pe_1782444243745_260',
+        name: 'Nutrifarm Gula Aren Bubuk',
+        category: 'Bahan Pokok / Gula & Pemanis',
+        keywords: ['gula aren', 'pemanis', 'tart', 'kopi', 'coffee', 'latte', 'oats', 'manis', 'dessert'],
+        photo: '/uploads/products/default_tenant/clean/clean_default_tenant_pe_1782444243745_260_1786417582316.jpg',
+        emoji: '🍯',
+        affiliate: 'https://s.shopee.co.id/6pygkFVT7a'
+      },
+      {
+        id: 'pe_1782648830415_399',
+        name: 'DELAPAN Baking Paper Non-Stick Silicone',
+        category: 'Peralatan Masak & Alat Baking',
+        keywords: ['baking paper', 'anti lengket', 'panggang', 'oven', 'tart', 'kue', 'brownies', 'loyang'],
+        photo: '/uploads/products/default_tenant/clean/clean_default_tenant_pe_1782648830415_399_1786417676767.jpg',
+        emoji: '📜',
+        affiliate: 'https://s.shopee.co.id/AAEeGSZgZw'
+      },
+      {
+        id: 'pe_sync_1781148697788_434',
+        name: 'BEORGANIK Vegan Butter Organik',
+        category: 'Bahan Makanan / Mentega Nabati',
+        keywords: ['butter', 'vegan', 'mentega', 'roti', 'toast', 'muffin', 'panggang', 'gurih', 'cookies'],
+        photo: '/uploads/products/clean/clean_pe_sync_1781148697788_434.jpg',
+        emoji: '🧈',
+        affiliate: 'https://s.shopee.co.id/40fB1m2zbH'
+      }
+    ];
+
+    const PRESETS = {
+      nutribake_resep_produk_reveal2: {
+        label: 'Nutribake Resep Produk – Reveal Klip 2',
+        is_bridging_active: true,
+        bridging_mode: 'select_existing',
+        bridge_segments: [
+          { at_clip: 4, duration_clips: 1, role: 'intro' },
+          { at_clip: 6, duration_clips: 1, role: 'recall' }
+        ],
+        target_clips_count: 6
+      },
+      nutribake_resep_viral: {
+        label: 'Nutribake Resep Viral',
+        is_bridging_active: true,
+        bridging_mode: 'select_existing',
+        bridge_segments: [
+          { at_clip: 3, duration_clips: 1, role: 'intro' },
+          { at_clip: 5, duration_clips: 1, role: 'recall' }
+        ],
+        target_clips_count: 6
+      },
+      recipe_organic_only: {
+        label: 'Resep Edukasi Organik',
+        is_bridging_active: false,
+        bridging_mode: 'none',
+        bridge_segments: [],
+        target_clips_count: 6
+      }
+    };
+
+    const state = {
+      view: 'instant',
+      scheduleTopicMode: 'umbrella',
+      productMode: 'auto', // 'auto' | 'manual' | 'none'
+      manualProductId: CATALOG[0].id
+    };
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') !== 'light';
+      html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.getElementById('themeToggleBtn').textContent = isDark ? '🌙 Dark Mode' : '☀️ Light Mode';
+    }
+
+    function switchView(view) {
+      state.view = view;
+      document.querySelectorAll('[data-view]').forEach(el => {
+        el.classList.toggle('active', el.dataset.view === view);
+      });
+      const isSched = view === 'schedule';
+      document.getElementById('formHeading').textContent = isSched
+        ? 'Jadwal Otomatis (recipe_campaign) — Scheduler Modal'
+        : 'Video Resep Masak (recipe_campaign) — 1-Klik Instan';
+      document.getElementById('scheduleModeBox').classList.toggle('hidden', !isSched);
+      document.getElementById('simulateActionBtn').textContent = isSched
+        ? '📅 Simulasikan Simpan Jadwal Recipe Campaign'
+        : '🚀 Simulasikan Launch Auto Pipeline (Verifikasi Payload)';
+      document.getElementById('payloadTargetHint').textContent = isSched
+        ? 'POST /api/v2/recipes/auto-pipeline-schedules'
+        : 'POST /api/v2/recipes/autonomous-pipeline';
+      setScheduleTopicMode(state.scheduleTopicMode);
+    }
+
+    function setScheduleTopicMode(smode) {
+      state.scheduleTopicMode = smode;
+      document.querySelectorAll('[data-smode]').forEach(el => {
+        el.classList.toggle('active', el.dataset.smode === smode);
+      });
+      const showList = state.view === 'schedule' && smode === 'menu_list';
+      document.getElementById('topicSingleBox').classList.toggle('hidden', showList);
+      document.getElementById('menuListBox').classList.toggle('hidden', !showList);
+      renderSimulation();
+    }
+
+    function setProductMode(pmode) {
+      state.productMode = pmode;
+      document.querySelectorAll('[data-pmode]').forEach(el => {
+        el.classList.toggle('selected', el.dataset.pmode === pmode);
+      });
+      renderSimulation();
+    }
+
+    function applyTopic(text, cat) {
+      document.getElementById('topicInput').value = text;
+      document.getElementById('categorySelect').value = cat;
+      document.getElementById('catBadge').textContent = '✨ Auto-Terdeteksi';
+      renderSimulation();
+    }
+
+    function onTopicInput() {
+      const t = document.getElementById('topicInput').value.toLowerCase();
+      const sel = document.getElementById('categorySelect');
+      if (/brownies|oats|tart|kue|cake|muffin/.test(t)) sel.value = 'dessert';
+      else if (/smoothie|kopi|latte/.test(t)) sel.value = 'minuman';
+      else if (/roti|fries|camilan/.test(t)) sel.value = 'camilan';
+      else sel.value = 'makanan_utama';
+      renderSimulation();
+    }
+
+    function onPresetChange() {
+      renderSimulation();
+    }
+
+    function scoreProductForTopic(topic, category) {
+      const tokens = `${topic} ${category}`.toLowerCase().split(/[\s,\/-]+/).filter(w => w.length >= 3);
+      let best = CATALOG[0];
+      let bestScore = -1;
+      for (const p of CATALOG) {
+        let score = 40;
+        const hay = `${p.name} ${p.category} ${p.keywords.join(' ')}`.toLowerCase();
+        for (const tok of tokens) {
+          if (p.keywords.some(k => k.includes(tok) || tok.includes(k))) score += 28;
+          else if (hay.includes(tok)) score += 16;
+        }
+        if (category === 'dessert' && /cokelat|chocolate|baking|gula/i.test(hay)) score += 12;
+        if (p.photo) score += 8;
+        if (score > bestScore) {
+          bestScore = score;
+          best = p;
+        }
+      }
+      return { product: best, score: Math.min(99, bestScore) };
+    }
+
+    function renderCatalogList() {
+      const q = (document.getElementById('catalogSearch').value || '').toLowerCase();
+      const filtered = CATALOG.filter(p => !q || `${p.name} ${p.category}`.toLowerCase().includes(q));
+      const container = document.getElementById('catalogList');
+      container.innerHTML = filtered.map(p => {
+        const isSel = state.manualProductId === p.id;
+        return `
+          <button type="button" class="catalog-item ${isSel ? 'selected' : ''}" onclick="selectManualProduct('${p.id}')">
+            <div class="prod-thumb" style="width:40px;height:40px;font-size:1.1rem;">${p.emoji}</div>
+            <div class="prod-meta">
+              <div class="prod-name" style="font-size:0.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}</div>
+              <div class="prod-sub" style="font-size:0.68rem;">${p.category}</div>
+            </div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectManualProduct(id) {
+      state.manualProductId = id;
+      renderCatalogList();
+      renderSimulation();
+    }
+
+    function getBridgedClipMap(segments) {
+      const map = new Map();
+      for (const seg of (segments || [])) {
+        const start = Number(seg.at_clip);
+        const dur = Number(seg.duration_clips || 1);
+        for (let i = 0; i < dur; i++) {
+          map.set(start + i, seg.role || 'featured');
+        }
+      }
+      return map;
+    }
+
+    function pulseSimulation() {
+      const btn = document.getElementById('simulateActionBtn');
+      const old = btn.textContent;
+      btn.textContent = '✅ Payload Terverifikasi — Siap Dijalankan oleh Pipeline!';
+      setTimeout(() => { btn.textContent = old; }, 1800);
+    }
+
+    function renderSimulation() {
+      const presetKey = document.getElementById('presetSelect').value;
+      const preset = PRESETS[presetKey];
+      const isMenuList = state.view === 'schedule' && state.scheduleTopicMode === 'menu_list';
+      const menuLines = (document.getElementById('menuListInput').value || '').split('\n').map(s => s.trim()).filter(Boolean);
+      document.getElementById('menuCountBadge').textContent = `${menuLines.length} Menu`;
+
+      const activeTopic = isMenuList ? (menuLines[0] || 'Fudgy Brownies Cokelat Tanpa Tepung') : document.getElementById('topicInput').value;
+      const category = document.getElementById('categorySelect').value;
+
+      // Resolve effective bridging + product
+      const autoRes = scoreProductForTopic(activeTopic, category);
+      const manualProd = CATALOG.find(p => p.id === state.manualProductId) || CATALOG[0];
+
+      const effectiveProduct = state.productMode === 'none'
+        ? null
+        : (state.productMode === 'manual' ? manualProd : autoRes.product);
+
+      const presetHasBridging = preset.is_bridging_active && preset.bridge_segments.length > 0;
+      const effectiveBridging = state.productMode !== 'none' && (presetHasBridging || state.productMode === 'manual');
+      const effectiveSegments = effectiveBridging
+        ? (presetHasBridging ? preset.bridge_segments : [{ at_clip: 4, duration_clips: 1, role: 'intro' }, { at_clip: 6, duration_clips: 1, role: 'recall' }])
+        : [];
+      const clipMap = getBridgedClipMap(effectiveSegments);
+
+      // Update Bridging UI Visibility
+      document.getElementById('autoMatchPanel').classList.toggle('hidden', state.productMode !== 'auto');
+      document.getElementById('manualPickerPanel').classList.toggle('hidden', state.productMode !== 'manual');
+      document.getElementById('organicNoticePanel').classList.toggle('hidden', state.productMode !== 'none');
+
+      if (state.productMode === 'manual') renderCatalogList();
+
+      // Auto-match card details
+      document.getElementById('autoThumb').textContent = autoRes.product.emoji;
+      document.getElementById('autoProdName').textContent = isMenuList
+        ? `Auto per Baris Menu (Contoh baris #1: ${autoRes.product.name})`
+        : autoRes.product.name;
+      document.getElementById('autoScorePill').textContent = `Skor Kecocokan: ${autoRes.score}`;
+      document.getElementById('autoProdSub').textContent = `ID: ${autoRes.product.id} • Photo: ${autoRes.product.photo}`;
+      document.getElementById('autoScheduleNote').style.display = state.view === 'schedule' ? 'block' : 'none';
+
+      // Preset Banner & Pills
+      const segText = effectiveSegments.length > 0
+        ? effectiveSegments.map(s => `Klip ${s.at_clip} (${s.role})`).join(', ')
+        : 'Tidak ada segmen bridging pada preset ini';
+      document.getElementById('presetBridgeSummary').textContent = `Slot Preset: ${segText}`;
+
+      const activePill = document.getElementById('bridgingActivePill');
+      if (effectiveBridging && effectiveProduct) {
+        activePill.className = 'pill pill-success';
+        activePill.textContent = `Bridging Aktif: Klip ${effectiveSegments.map(s => s.at_clip).join(' & ')}`;
+      } else if (state.productMode === 'none') {
+        activePill.className = 'pill pill-warning';
+        activePill.textContent = 'Bridging Dimatikan User';
+      } else {
+        activePill.className = 'pill pill-danger';
+        activePill.textContent = 'Preset Tanpa Bridging';
+      }
+
+      const modeBadge = document.getElementById('bridgingModeBadge');
+      modeBadge.textContent = state.productMode === 'auto'
+        ? 'Mode: Auto-Match Katalog'
+        : (state.productMode === 'manual' ? 'Mode: Produk Manual Terkunci' : 'Mode: Organik Murni');
+
+      const bridgedNums = Array.from(clipMap.keys());
+      document.getElementById('refAuditPill').textContent = effectiveBridging && bridgedNums.length
+        ? `Start Frame Ref: Klip ${bridgedNums.join(' & ')}`
+        : 'Start Frame Ref: 0 Klip (Pure Culinary)';
+
+      // 6 Clips Storyboard Simulation
+      const stepLabels = [
+        { clip: 1, title: 'Hook Visual / Retention', action: 'Close-up hasil jadi menggugah selera + teks hook pembuka.' },
+        { clip: 2, title: 'Preparation Bahan', action: 'Penakaran bahan dasar ke dalam mangkuk keramik putih doff.' },
+        { clip: 3, title: 'Mixing / Cooking Action', action: 'Pengadukan adonan kental dengan spatula silikon.' },
+        { clip: 4, title: 'Baking / Integration', action: 'Proses memanggang / penuangan adonan ke loyang hitam.' },
+        { clip: 5, title: 'Cooked Reveal & Texture', action: 'Hasil matang bertekstur lembut diletakkan di meja marble.' },
+        { clip: 6, title: 'Plating & Closing CTA', action: 'Penyajian akhir + ajakan recook & cek keranjang/bio.' }
+      ];
+
+      document.getElementById('clipsGrid').innerHTML = stepLabels.map(s => {
+        const role = clipMap.get(s.clip);
+        const isBridged = Boolean(role && effectiveProduct);
+        const visualCopy = isBridged
+          ? `Tampilkan fisik <strong>${effectiveProduct.name}</strong> (${role.toUpperCase()}) secara natural di meja samping masakan.`
+          : s.action;
+        return `
+          <div class="clip-card ${isBridged ? 'bridged' : ''}">
+            <div class="clip-top">
+              <span>Klip ${s.clip}</span>
+              <span class="clip-role ${isBridged ? 'product' : 'culinary'}">
+                ${isBridged ? `📦 PRODUK (${role})` : '🍳 KULINER'}
+              </span>
+            </div>
+            <div style="font-size:0.74rem;font-weight:700;color:var(--text-primary);">${s.title}</div>
+            <div class="clip-visual">${visualCopy}</div>
+            <div class="clip-ref-row">
+              <span>${isBridged ? 'T2I Ref: 1 foto produk' : 'T2I Ref: 0 (culinary)'}</span>
+              <span>${isBridged ? 'Product Truth ON' : 'No Product'}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Trace Table
+      document.getElementById('traceBody').innerHTML = [
+        [
+          '1. Preset Bridging',
+          presetHasBridging ? `Aktif (${effectiveSegments.map(s => `Klip ${s.at_clip}`).join(', ')})` : 'Nonaktif di preset',
+          presetHasBridging ? 'Diwariskan ke campaign' : 'Fallback default'
+        ],
+        [
+          '2. Produk Terpilih',
+          effectiveProduct ? `${effectiveProduct.name}` : 'null (Resep Organik)',
+          effectiveProduct ? `ID: ${effectiveProduct.id}` : 'Tanpa produk'
+        ],
+        [
+          '3. Ingest Campaign',
+          effectiveBridging ? 'is_bridging_active = 1' : 'is_bridging_active = 0',
+          effectiveBridging ? `bridge_segments = ${JSON.stringify(effectiveSegments.map(s => s.at_clip))}` : '[]'
+        ],
+        [
+          '4. Creative Adapter',
+          effectiveBridging ? 'product_visible = true' : 'product_visible = false',
+          effectiveBridging ? `Hanya Klip ${bridgedNums.join(' & ')} inject (Product Truth)` : 'Semua klip non-produk'
+        ],
+        [
+          '5. Start Frame Audit',
+          effectiveBridging ? 'reference_count = 1' : 'reference_count = 0',
+          effectiveBridging ? `Foto produk terlampir di Klip ${bridgedNums.join(' & ')}` : 'Tidak mengirim foto produk'
+        ]
+      ].map(r => `<tr><td><strong>${r[0]}</strong></td><td><code>${r[1]}</code></td><td>${r[2]}</td></tr>`).join('');
+
+      // Payload Preview
+      const productPayloadMode = state.productMode;
+      const samplePayload = state.view === 'instant' ? {
+        pipeline_type: 'recipe_campaign',
+        brand_id: '940e766b-76d0-49b7-b6d5-01dfb0041d40',
+        preset_key: presetKey,
+        topic: activeTopic,
+        category,
+        product_mode: productPayloadMode,
+        product_id: productPayloadMode === 'manual' ? manualProd.id : (productPayloadMode === 'auto' ? 'auto' : null),
+        bridging_mode: productPayloadMode === 'none' ? 'none' : preset.bridging_mode,
+        resolved_preview_at_runtime: effectiveProduct ? {
+          target_product_id: effectiveProduct.id,
+          target_product_name: effectiveProduct.name,
+          is_bridging_active: effectiveBridging ? 1 : 0,
+          bridge_segments: effectiveSegments,
+          product_ref_image_path: effectiveProduct.photo
+        } : {
+          target_product_id: null,
+          is_bridging_active: 0,
+          bridge_segments: []
+        }
+      } : {
+        pipeline_type: 'recipe_campaign',
+        schedule_batch_items: isMenuList ? menuLines.length : 1,
+        preset_key: presetKey,
+        topic: isMenuList ? menuLines[0] : activeTopic,
+        pipeline_config: {
+          generate_recipe: true,
+          post_link_affiliate: true,
+          product_mode: productPayloadMode,
+          product_id: productPayloadMode === 'manual' ? manualProd.id : null,
+          bridging_mode: productPayloadMode === 'none' ? 'none' : preset.bridging_mode
+        },
+        resolved_at_cron_trigger: effectiveProduct ? {
+          auto_matched_product: effectiveProduct.name,
+          product_id: effectiveProduct.id,
+          bridge_segments: effectiveSegments
+        } : { organic_only: true }
+      };
+
+      document.getElementById('payloadCode').textContent = JSON.stringify(samplePayload, null, 2);
+    }
+
+    renderSimulation();
+  </script>
+</body>
+</html>
+

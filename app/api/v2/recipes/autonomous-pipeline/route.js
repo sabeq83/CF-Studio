@@ -302,6 +302,9 @@ export const POST = withTenantContext(async (request, _context, user) => {
       result = await executeAutonomousRecipePipeline({
         brandId: body.brand_id || body.brandId,
         presetKey: body.preset_key || body.presetKey || null,
+        productId: body.product_id || body.productId || null,
+        productMode: body.product_mode || body.productMode || null,
+        bridgingMode: body.bridging_mode || body.bridgingMode || null,
         topic: body.topic,
         category: body.category || 'makanan_utama',
         recipeCount: body.recipe_count || body.recipeCount || 1,
