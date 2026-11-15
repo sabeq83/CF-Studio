@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.48.19 — Block generic product and packaging on non-bridging clips (15/11/2026)
+- Teruskan jadwal bridging ke Content Planner resep agar scene non-bridging bebas kemasan
+- Tambah sanitizer Food Truth dan istilah kemasan deterministik pada Recipe Production Adapter dan Start Frame Gateway
+- Tambah regression test untuk reproduksi kasus opc_261115_ghu8bo
+
 ## V2.48.18 — Fix PostgreSQL 42P18 error on manual recipe product selection (15/11/2026)
 - Pisahkan query manual resolver berdasarkan brandId tanpa (? IS NULL)
 - Pastikan mode manual selalu mengaktifkan bridging_mode select_existing di UI dan engine
