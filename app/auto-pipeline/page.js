@@ -10,6 +10,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { GRID_LAYOUT_COORDINATES } from '@/lib/core/GridCoordinates';
 import { buildMultiplierSchedulePairs } from '@/lib/multiplier-pairing';
+import { buildRecipeProductSubmitFields } from '@/lib/recipe-product-matcher-shared';
 
 const LAYOUT_PRESET_METADATA = {
   3: [
@@ -1113,7 +1114,9 @@ export default function AutoPipelinePage() {
           product_mode: instantCampaignType === 'recipe_campaign' ? instantRecipeProductMode : undefined,
           bridging_mode: instantCampaignType === 'multiplier_campaign'
             ? (targetProductId ? 'select_existing' : 'none')
-            : (instantCampaignType === 'recipe_campaign' && instantRecipeProductMode === 'none' ? 'none' : undefined),
+            : (instantCampaignType === 'recipe_campaign'
+                ? buildRecipeProductSubmitFields(instantRecipeProductMode, targetProductId).bridging_mode
+                : undefined),
           product_aware_angle: instantCampaignType === 'multiplier_campaign' ? true : undefined,
           product_title: targetTopic,
           promotion_context: instantPromotionContext.trim() || null,
@@ -1747,13 +1750,7 @@ export default function AutoPipelinePage() {
           editPipelineConfig.generate_recipe = schedGenerateRecipe;
         }
         if (schedCampaignType === 'recipe_campaign') {
-          editPipelineConfig.product_mode = schedRecipeProductMode;
-          editPipelineConfig.product_id = schedRecipeProductMode === 'manual'
-            ? schedRecipeProductId
-            : (schedRecipeProductMode === 'auto' ? 'auto' : null);
-          if (schedRecipeProductMode === 'none') {
-            editPipelineConfig.bridging_mode = 'none';
-          }
+          Object.assign(editPipelineConfig, buildRecipeProductSubmitFields(schedRecipeProductMode, schedRecipeProductId));
         }
 
         const payload = {
@@ -1985,11 +1982,7 @@ export default function AutoPipelinePage() {
               pipeline_config: {
                 generate_recipe: schedGenerateRecipe,
                 post_link_affiliate: schedPostAffiliateLink,
-                product_mode: schedRecipeProductMode,
-                product_id: schedRecipeProductMode === 'manual'
-                  ? schedRecipeProductId
-                  : (schedRecipeProductMode === 'auto' ? 'auto' : null),
-                ...(schedRecipeProductMode === 'none' ? { bridging_mode: 'none' } : {})
+                ...buildRecipeProductSubmitFields(schedRecipeProductMode, schedRecipeProductId)
               }
             };
           });
@@ -2239,13 +2232,7 @@ export default function AutoPipelinePage() {
             pipelineConfigPayload.generate_recipe = schedGenerateRecipe;
           }
           if (schedCampaignType === 'recipe_campaign') {
-            pipelineConfigPayload.product_mode = schedRecipeProductMode;
-            pipelineConfigPayload.product_id = schedRecipeProductMode === 'manual'
-              ? schedRecipeProductId
-              : (schedRecipeProductMode === 'auto' ? 'auto' : null);
-            if (schedRecipeProductMode === 'none') {
-              pipelineConfigPayload.bridging_mode = 'none';
-            }
+            Object.assign(pipelineConfigPayload, buildRecipeProductSubmitFields(schedRecipeProductMode, schedRecipeProductId));
           }
 
           const payload = {

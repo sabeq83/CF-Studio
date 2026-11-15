@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
-import { scoreCatalogProductForRecipe, pickAutoMatchedBrandProduct } from '../lib/recipe-product-matcher-shared.js';
+import { scoreCatalogProductForRecipe, pickAutoMatchedBrandProduct, buildRecipeProductSubmitFields } from '../lib/recipe-product-matcher-shared.js';
 import { resolveRecipeProductSelection } from '../lib/recipe-product-resolver.js';
 import { resolveAutonomousPipelineAffiliateOverrides } from '../lib/bridging/bridge-plan.js';
 import { resolveProductReferenceRequirement } from '../lib/opc-start-frame-contract.js';
@@ -43,6 +43,8 @@ const MOCK_PRODUCTS = [
 function createMockDb(rows = MOCK_PRODUCTS) {
   return {
     prepare(sql) {
+      // Guard against PostgreSQL 42P18 ("could not determine data type of parameter") caused by `? IS NULL`
+      assert.equal(/\?\s+IS\s+NULL/i.test(sql), false, `SQL must not use untyped "? IS NULL": ${sql}`);
       return {
         async get(...params) {
           const targetId = params[params.length - 1];
@@ -99,6 +101,34 @@ test('resolveRecipeProductSelection supports auto, manual, and explicit organic 
   assert.equal(manualRes.resolved, true);
   assert.equal(manualRes.mode, 'manual');
   assert.equal(manualRes.product?.product_id, 'pe_baking_paper');
+
+  const manualNoBrandRes = await resolveRecipeProductSelection({
+    db,
+    brandId: null,
+    topic: 'coklat diet',
+    category: 'dessert',
+    productId: 'pe_monggo_dark',
+    productMode: 'manual',
+    bridgingMode: 'select_existing'
+  });
+  assert.equal(manualNoBrandRes.resolved, true);
+  assert.equal(manualNoBrandRes.mode, 'manual');
+  assert.equal(manualNoBrandRes.product?.product_id, 'pe_monggo_dark');
+
+  assert.deepEqual(buildRecipeProductSubmitFields('manual', 'pe_monggo_dark'), {
+    product_mode: 'manual',
+    product_id: 'pe_monggo_dark',
+    bridging_mode: 'select_existing'
+  });
+  assert.deepEqual(buildRecipeProductSubmitFields('none', 'pe_monggo_dark'), {
+    product_mode: 'none',
+    product_id: null,
+    bridging_mode: 'none'
+  });
+  assert.deepEqual(buildRecipeProductSubmitFields('auto', null), {
+    product_mode: 'auto',
+    product_id: 'auto'
+  });
 
   const noneRes = await resolveRecipeProductSelection({
     db,

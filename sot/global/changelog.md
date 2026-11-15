@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.48.18 — Fix PostgreSQL 42P18 error on manual recipe product selection (15/11/2026)
+- Pisahkan query manual resolver berdasarkan brandId tanpa (? IS NULL)
+- Pastikan mode manual selalu mengaktifkan bridging_mode select_existing di UI dan engine
+
 ## V2.48.17 — Support legacy photo_url fallback in campaign product reference resolver (15/11/2026)
 - Fallback cleaned_photo_url/photo_url/generated_photo_url saat active_photo bukan canonical clean/raw
 - Tambah regression test untuk produk migrasi OPC di Start Frame request

@@ -127,3 +127,4 @@ Keputusan pengguna: **belum ada budget API**. Arah baru: Claude bekerja lewat **
 3. **Output `cf_get_storyboard_status` terlalu besar** (70–146 ribu karakter) — boros kuota langganan setiap kali skill mengecek. Perlu mode ringkas (status tahap + path video saja).
 4. **Penyimpanan riset kata kunci** belum ada (cukup file/Sheet dulu; tabel DB nanti).
 5. (Terpisah, untuk pipeline Gemini) properti visual bocor ke teks resep/caption.
+6. **Pembersih prompt gambar menghapus terlalu banyak** (`lib/webhook-client.js:251`, `sanitizeImagePrompt`): pola `/--no\s+[^\[\(\n]+/` menghapus dari `--no` sampai `[`/`(` berikutnya. Prompt tanpa kurung setelah `--no landscape.` terhapus total → G-Labs membuat gambar acak (uji `cst_1983728aa53f`: start frame berisi jurnal & kopi, bukan sayap ayam). Perbaikan: batasi penghapusan sampai titik/koma pertama, mis. `/--no\s+[^.,\[\(\n]+/`. Sementara itu skill CFA tidak memakai `--no`/`--ar`.
