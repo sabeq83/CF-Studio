@@ -39,9 +39,9 @@ Berdasarkan dokumen serah terima [HANDOFF_ANTIGRAVITY_4_CELAH_MCP_PUBLISH.md](fi
 - [x] Task 6: SOP Rilis & Auto Git Sync (Non-Interactive Release)
   - [x] 6.1 Jalankan `npm run release-non-interactive` dengan versi patch
   - [x] 6.2 Verifikasi commit, tag, changelog, dan push remote
-- [ ] Task 7: SOP Deployment Mac Mini Staging
-  - [ ] 7.1 Deploy ke staging dengan atomic deployment (`npm run deploy:staging -- --ref <full-git-sha> --apply --confirm-staging`)
-  - [ ] 7.2 Verifikasi kesehatan layanan staging (UI port 5010 & API port 7010)
+- [x] Task 7: SOP Deployment Mac Mini Staging
+  - [x] 7.1 Deploy ke staging dengan atomic deployment (`npm run deploy:staging -- --ref <full-git-sha> --apply --confirm-staging`)
+  - [x] 7.2 Verifikasi kesehatan layanan staging (UI port 5010 & API port 7010)
 
 ---
 
