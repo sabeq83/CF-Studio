@@ -16,9 +16,12 @@ export const GET = withTenantContext(async (request, _context, user) => {
         SELECT 
           c.id, c.campaign_name, c.status, c.created_at, c.brand_profile_id,
           c.content_pillar, c.visual_identity_preset_id, c.target_clips_count, c.clip_duration, c.video_model,
+          c.is_bridging_active, c.bridge_at_clip, c.bridge_duration_clips, c.bridge_segments, c.source_planner_id,
+          cp.metadata_json as planner_metadata,
           bp.brand_name
         FROM pillar_campaigns c
         LEFT JOIN brand_profiles bp ON c.brand_profile_id = bp.id
+        LEFT JOIN content_planners cp ON c.source_planner_id = cp.id
         ORDER BY c.created_at DESC LIMIT ?
       `).all(limit);
     } catch (e) {
@@ -67,6 +70,22 @@ export const GET = withTenantContext(async (request, _context, user) => {
           type = 'editorial_campaign';
           badge = '📰 Brand Editorial';
         }
+        let plannerMeta = {};
+        try { plannerMeta = typeof c.planner_metadata === 'string' ? JSON.parse(c.planner_metadata) : (c.planner_metadata || {}); } catch(_) {}
+        const pKey = plannerMeta?.operator_preset_key || null;
+
+        let bridgeSummary = 'Non-Bridging';
+        if (c.is_bridging_active === '1' || c.is_bridging_active === 1 || c.is_bridging_active === true) {
+          let segs = [];
+          try { segs = typeof c.bridge_segments === 'string' ? JSON.parse(c.bridge_segments) : (c.bridge_segments || []); } catch(_) {}
+          if (Array.isArray(segs) && segs.length > 0) {
+            bridgeSummary = `Klip ${segs.map(s => s.at_clip).join(', ')}`;
+          } else if (c.bridge_at_clip) {
+            const dur = Number(c.bridge_duration_clips || 1);
+            bridgeSummary = dur > 1 ? `Klip ${c.bridge_at_clip}-${Number(c.bridge_at_clip) + dur - 1}` : `Klip ${c.bridge_at_clip}`;
+          }
+        }
+
         return {
           id: c.id,
           campaign_type: type,
@@ -75,6 +94,8 @@ export const GET = withTenantContext(async (request, _context, user) => {
           brand_name: c.brand_name || 'Brand Profile',
           brand_profile_id: c.brand_profile_id || null,
           visual_identity_preset_id: c.visual_identity_preset_id || 'vi_default',
+          operator_preset_key: pKey,
+          bridging_summary: bridgeSummary,
           format_klip: `${c.target_clips_count || 8} Klip @ ${c.clip_duration || 4}s (${c.video_model || 'omni_flash'})`,
           status: c.status || 'running',
           total_items: 1,

@@ -16,7 +16,8 @@
 
 - Keempat skill dan helper antrean mendukung `--brand`, jadi hanya item brand itu yang diproses.
 - Jadwal tiap brand bisa berbeda, dan satu brand bisa dijeda tanpa mengganggu brand lain.
-- **Brand baru** perlu dimasukkan dulu ke `config.json`: preset, Visual Identity, tenant, akun Repliz, dan kata kunci. Saat ini baru HabitFolk yang terisi.
+- **Brand baru** perlu dimasukkan dulu ke `config.json`: preset, Visual Identity, tenant, dan akun Repliz. Saat ini baru HabitFolk yang terisi.
+- **Kata kunci** disimpan per brand di `~/cf-autopipeline/kata_kunci/<brand>.txt` (contoh: `habitfolk.txt`), satu kata kunci per baris. Baris yang diawali `#` diabaikan, dan kata kunci ganda otomatis dilewati. Buka file dengan TextEdit, tambahkan baris, lalu simpan. Riset akan memberi peringatan lewat Telegram kalau kata kunci segar tinggal 3 atau kurang.
 
 Skrip produksi dan publish juga bisa dijalankan langsung dari Terminal Mac Mini:
 ```bash

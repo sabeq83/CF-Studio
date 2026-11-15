@@ -466,49 +466,84 @@ export default function AutoPipelinePage() {
 
     let steps = [];
 
-    // 1. VIDEO PRODUK (product_campaign)
+    // 1. VIDEO PRODUK (product_campaign) — Dinamis mengikuti konfigurasi bridging preset
     if (type === 'product_campaign') {
-      if (c === 3) {
-        steps = [
-          { seq: 1, title: 'Hook Pain Point', tag: 'Hook 0-3s', icon: '🎯' },
-          { seq: 2, title: 'Pivot Solusi Produk', tag: '🛍️ PIVOT PRODUK', icon: '💡' },
-          { seq: 3, title: 'Hasil & Outro CTA', tag: 'CTA Link Bio', icon: '🚀' }
-        ];
-      } else if (c === 4) {
-        steps = [
-          { seq: 1, title: 'Hook Masalah Penonton', tag: 'Hook 0-3s', icon: '🎯' },
-          { seq: 2, title: 'Eskalasi Kebutuhan', tag: 'Pain Point', icon: '⚡' },
-          { seq: 3, title: 'Pivot Solusi Produk', tag: '🛍️ PIVOT PRODUK', icon: '💡' },
-          { seq: 4, title: 'Transformasi & Outro CTA', tag: 'CTA Link Bio', icon: '🚀' }
-        ];
-      } else if (c === 5) {
-        steps = [
-          { seq: 1, title: 'Hook Relatable', tag: 'Hook 0-3s', icon: '🎯' },
-          { seq: 2, title: 'Eskalasi Dampak Masalah', tag: 'Pain Point', icon: '⚡' },
-          { seq: 3, title: 'Pivot Intro Produk', tag: '🛍️ PIVOT PRODUK', icon: '💡' },
-          { seq: 4, title: 'Demonstrasi Bukti USP', tag: 'Fitur Utama', icon: '🔬' },
-          { seq: 5, title: 'Hasil Transformasi & CTA', tag: 'CTA Link Bio', icon: '🚀' }
-        ];
-      } else if (c === 6) {
-        steps = [
-          { seq: 1, title: 'Hook Relatable / Pain Point', tag: 'Hook 0-3s', icon: '🎯' },
-          { seq: 2, title: 'Eskalasi Masalah Penonton', tag: 'Pain Point', icon: '⚡' },
-          { seq: 3, title: 'Solusi & Intro Produk Target', tag: '🛍️ PIVOT PRODUK', icon: '💡' },
-          { seq: 4, title: 'Demonstrasi Fitur & USP', tag: 'Fitur Unggulan', icon: '🔬' },
-          { seq: 5, title: 'Bukti Nyata / Transformasi', tag: 'Social Proof', icon: '✨' },
-          { seq: 6, title: 'Rekomendasi & Outro CTA', tag: 'CTA Link Bio', icon: '🚀' }
-        ];
+      const pb = presetConfig?.product_bridging || {};
+      const isBridgingActive = Boolean(pb.is_bridging_active);
+      const segments = Array.isArray(pb.bridge_segments) && pb.bridge_segments.length > 0
+        ? pb.bridge_segments
+        : (pb.bridge_at_clip ? [{ at_clip: Number(pb.bridge_at_clip), duration_clips: Number(pb.bridge_duration_clips || 1), role: 'intro' }] : []);
+
+      if (!isBridgingActive) {
+        if (c === 3) {
+          steps = [
+            { seq: 1, title: 'Hook Pain Point', tag: 'Hook 0-3s', icon: '🎯' },
+            { seq: 2, title: 'Solusi & Fitur Produk', tag: '🛍️ FITUR PRODUK', icon: '💡' },
+            { seq: 3, title: 'Hasil & Outro CTA', tag: 'CTA Link Bio', icon: '🚀' }
+          ];
+        } else if (c === 4) {
+          steps = [
+            { seq: 1, title: 'Hook Masalah Penonton', tag: 'Hook 0-3s', icon: '🎯' },
+            { seq: 2, title: 'Eskalasi Kebutuhan', tag: 'Pain Point', icon: '⚡' },
+            { seq: 3, title: 'Solusi & Fitur Produk', tag: '🛍️ FITUR PRODUK', icon: '💡' },
+            { seq: 4, title: 'Transformasi & Outro CTA', tag: 'CTA Link Bio', icon: '🚀' }
+          ];
+        } else if (c === 5) {
+          steps = [
+            { seq: 1, title: 'Hook Relatable', tag: 'Hook 0-3s', icon: '🎯' },
+            { seq: 2, title: 'Eskalasi Dampak Masalah', tag: 'Pain Point', icon: '⚡' },
+            { seq: 3, title: 'Intro & Solusi Produk', tag: '🛍️ FITUR PRODUK', icon: '💡' },
+            { seq: 4, title: 'Demonstrasi Bukti USP', tag: 'Fitur Utama', icon: '🔬' },
+            { seq: 5, title: 'Hasil Transformasi & CTA', tag: 'CTA Link Bio', icon: '🚀' }
+          ];
+        } else if (c === 6) {
+          steps = [
+            { seq: 1, title: 'Hook Relatable / Pain Point', tag: 'Hook 0-3s', icon: '🎯' },
+            { seq: 2, title: 'Eskalasi Masalah Penonton', tag: 'Pain Point', icon: '⚡' },
+            { seq: 3, title: 'Solusi & Intro Produk Target', tag: '🛍️ FITUR PRODUK', icon: '💡' },
+            { seq: 4, title: 'Demonstrasi Fitur & USP', tag: 'Fitur Unggulan', icon: '🔬' },
+            { seq: 5, title: 'Bukti Nyata / Transformasi', tag: 'Social Proof', icon: '✨' },
+            { seq: 6, title: 'Rekomendasi & Outro CTA', tag: 'CTA Link Bio', icon: '🚀' }
+          ];
+        } else {
+          steps = [
+            { seq: 1, title: 'Hook Emosional Penonton', tag: 'Hook 0-3s', icon: '🎯' },
+            { seq: 2, title: 'Eskalasi Masalah Harian', tag: 'Pain Point', icon: '⚡' },
+            { seq: 3, title: 'Akar Masalah Utama', tag: 'Root Cause', icon: '🔍' },
+            { seq: 4, title: 'Pengenalan Produk Solusi', tag: '🛍️ FITUR PRODUK', icon: '💡' },
+            { seq: 5, title: 'Fitur Unggulan & Formula', tag: 'Fitur USP', icon: '🔬' },
+            { seq: 6, title: 'Demonstrasi Rutinitas Konsumsi', tag: 'Daily Routine', icon: '✨' },
+            { seq: 7, title: 'Bukti Hasil Transformasi', tag: 'Social Proof', icon: '🌟' },
+            { seq: 8, title: 'Penawaran Spesial & Outro CTA', tag: 'CTA Link Bio', icon: '🚀' }
+          ];
+        }
       } else {
-        steps = [
-          { seq: 1, title: 'Hook Emosional Penonton', tag: 'Hook 0-3s', icon: '🎯' },
-          { seq: 2, title: 'Eskalasi Masalah Harian', tag: 'Pain Point', icon: '⚡' },
-          { seq: 3, title: 'Akar Masalah Utama', tag: 'Root Cause', icon: '🔍' },
-          { seq: 4, title: 'Pivot Pengenalan Produk', tag: '🛍️ PIVOT PRODUK', icon: '💡' },
-          { seq: 5, title: 'Fitur Unggulan & Formula', tag: 'Fitur USP', icon: '🔬' },
-          { seq: 6, title: 'Demonstrasi Rutinitas Konsumsi', tag: 'Daily Routine', icon: '✨' },
-          { seq: 7, title: 'Bukti Hasil Transformasi', tag: 'Social Proof', icon: '🌟' },
-          { seq: 8, title: 'Penawaran Spesial & Outro CTA', tag: 'CTA Link Bio', icon: '🚀' }
-        ];
+        // Bridging Aktif: petakan klip secara dinamis sesuai bridge_segments atau bridge_at_clip
+        steps = Array.from({ length: c }, (_, idx) => {
+          const seq = idx + 1;
+          const matchedSeg = segments.find(s => {
+            const start = Number(s.at_clip);
+            const end = start + Number(s.duration_clips || 1) - 1;
+            return seq >= start && seq <= end;
+          });
+
+          if (seq === 1) {
+            return { seq: 1, title: 'Hook Relatable / Masalah', tag: 'Hook 0-3s', icon: '🎯' };
+          }
+          if (matchedSeg) {
+            if (matchedSeg.role === 'recall') {
+              return { seq, title: 'Pengingat Produk & CTA', tag: '🔁 RECALL PRODUK', icon: '✨' };
+            }
+            return { seq, title: 'Pivot Pengenalan Produk Target', tag: '🛍️ INTRO PRODUK', icon: '💡' };
+          }
+          if (seq === c) {
+            return { seq, title: 'Rekomendasi & Outro CTA', tag: 'CTA Link Bio', icon: '🚀' };
+          }
+          if (seq === 2) {
+            return { seq, title: 'Eskalasi Masalah & Kebutuhan', tag: 'Pain Point', icon: '⚡' };
+          }
+          return { seq, title: `Edukasi & Konteks Nilai #${seq}`, tag: 'Zero-Product Gap', icon: '🔍' };
+        });
       }
     }
 
@@ -936,10 +971,19 @@ export default function AutoPipelinePage() {
           const opList = data.operator_presets || [];
           setOperatorPresets(opList);
 
-          const defaultKey = opList[0]?.key || (instantCampaignType === 'product_campaign' ? 'product_campaign' : (instantCampaignType === 'editorial_campaign' ? 'brand_editorial_campaign' : 'recipe_campaign_default'));
-          setSelectedPresetKey(defaultKey);
+          let effectiveKey = opList[0]?.key || (instantCampaignType === 'product_campaign' ? 'product_campaign' : (instantCampaignType === 'editorial_campaign' ? 'brand_editorial_campaign' : 'recipe_campaign_default'));
+          setSelectedPresetKey(prevKey => {
+            if (prevKey && opList.some(p => p.key === prevKey)) {
+              effectiveKey = prevKey;
+              return prevKey;
+            }
+            const brandMatch = opList.find(p => p.is_brand_match);
+            effectiveKey = brandMatch ? brandMatch.key : effectiveKey;
+            return effectiveKey;
+          });
 
-          const initialConfig = opList[0]?.config || opList[0] || data.default_preset || null;
+          const matchedPreset = opList.find(p => p.key === effectiveKey);
+          const initialConfig = matchedPreset?.config || matchedPreset || opList[0]?.config || opList[0] || data.default_preset || null;
           setActivePresetConfig(initialConfig);
 
           if (Array.isArray(data.presets)) {
@@ -3013,11 +3057,54 @@ export default function AutoPipelinePage() {
                       outline: 'none'
                     }}
                   >
-                    {operatorPresets.map(op => (
-                      <option key={op.key} value={op.key}>
-                        {op.label || op.key}
-                      </option>
-                    ))}
+                    {(() => {
+                      const brandPresets = operatorPresets.filter(p => p.is_brand_match);
+                      const generalPresets = operatorPresets.filter(p => !p.is_brand_match);
+                      const selectedBrandObj = brands.find(b => b.id === selectedBrandId);
+                      const brandLabel = selectedBrandObj?.brand_name || 'Brand';
+
+                      const formatPresetOptionLabel = (op) => {
+                        const pb = op.config?.product_bridging || op.product_bridging || {};
+                        let tag = '[Non-Bridging]';
+                        if (pb.is_bridging_active) {
+                          if (Array.isArray(pb.bridge_segments) && pb.bridge_segments.length > 0) {
+                            tag = `[Bridge: Klip ${pb.bridge_segments.map(s => s.at_clip).join(', ')}]`;
+                          } else if (pb.bridge_at_clip) {
+                            const dur = Number(pb.bridge_duration_clips || 1);
+                            tag = dur > 1 ? `[Bridge: Klip ${pb.bridge_at_clip}-${Number(pb.bridge_at_clip) + dur - 1}]` : `[Bridge: Klip ${pb.bridge_at_clip}]`;
+                          }
+                        }
+                        return `${op.label || op.key} ${tag}`;
+                      };
+
+                      if (brandPresets.length > 0) {
+                        return (
+                          <>
+                            <optgroup label={`⭐ Preset Khusus ${brandLabel} (${brandPresets.length})`}>
+                              {brandPresets.map(op => (
+                                <option key={op.key} value={op.key}>
+                                  {formatPresetOptionLabel(op)}
+                                </option>
+                              ))}
+                            </optgroup>
+                            {generalPresets.length > 0 && (
+                              <optgroup label={`Preset Umum & Alternatif (${generalPresets.length})`}>
+                                {generalPresets.map(op => (
+                                  <option key={op.key} value={op.key}>
+                                    {formatPresetOptionLabel(op)}
+                                  </option>
+                                ))}
+                              </optgroup>
+                            )}
+                          </>
+                        );
+                      }
+                      return operatorPresets.map(op => (
+                        <option key={op.key} value={op.key}>
+                          {formatPresetOptionLabel(op)}
+                        </option>
+                      ));
+                    })()}
                   </select>
                 </div>
 
@@ -3203,6 +3290,49 @@ export default function AutoPipelinePage() {
                       🎥 {activePresetConfig?.visual_engine?.visual_mode || 'hybrid_lock'} • {wordsPerClip}
                     </span>
                   </div>
+
+                  {/* 7. Product Bridging Spec Badge */}
+                  {(() => {
+                    const pb = activePresetConfig?.product_bridging || {};
+                    const isBridgingActive = Boolean(pb.is_bridging_active);
+                    let bridgingDesc = '⚪ Nonaktif';
+                    let bridgingColor = 'var(--text-muted)';
+                    let bridgingBg = 'var(--surface)';
+                    let bridgingBorder = 'var(--border-subtle)';
+
+                    if (isBridgingActive) {
+                      bridgingColor = 'var(--status-success)';
+                      bridgingBg = 'var(--status-success-soft)';
+                      bridgingBorder = 'var(--status-success)';
+                      if (Array.isArray(pb.bridge_segments) && pb.bridge_segments.length > 0) {
+                        bridgingDesc = `🟢 Aktif • Klip ${pb.bridge_segments.map(s => `${s.at_clip} (${s.role || 'bridge'})`).join(' & ')}`;
+                      } else if (pb.bridge_at_clip) {
+                        const dur = Number(pb.bridge_duration_clips || 1);
+                        bridgingDesc = `🟢 Aktif • Klip ${pb.bridge_at_clip}${dur > 1 ? `-${Number(pb.bridge_at_clip) + dur - 1}` : ''} (${dur} klip)`;
+                      } else {
+                        bridgingDesc = '🟢 Aktif';
+                      }
+                    }
+
+                    return (
+                      <div style={{
+                        background: bridgingBg,
+                        border: `1px solid ${bridgingBorder}`,
+                        borderRadius: 'var(--radius-sm)',
+                        padding: '0.65rem 0.8rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.2rem'
+                      }}>
+                        <span style={{ fontSize: '0.68rem', fontWeight: 700, color: bridgingColor, textTransform: 'uppercase' }}>
+                          Product Bridging
+                        </span>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: isBridgingActive ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+                          🛍️ {bridgingDesc}
+                        </span>
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* Mini Story Arc Timeline Preview */}
@@ -5674,7 +5804,7 @@ export default function AutoPipelinePage() {
                   <tr style={{ background: 'var(--surface-raised)', borderBottom: '1px solid var(--border-subtle)' }}>
                     <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.78rem', textTransform: 'uppercase' }}>Campaign ID & Tipe</th>
                     <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.78rem', textTransform: 'uppercase' }}>Brand & Judul Batch</th>
-                    <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.78rem', textTransform: 'uppercase' }}>VI Preset Terpilih</th>
+                    <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.78rem', textTransform: 'uppercase' }}>Preset &amp; Identitas Visual</th>
                     <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.78rem', textTransform: 'uppercase' }}>Format Klip</th>
                     <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.78rem', textTransform: 'uppercase' }}>Status Produksi</th>
                     <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.78rem', textTransform: 'uppercase' }}>Aksi & Sync</th>
@@ -5778,9 +5908,40 @@ export default function AutoPipelinePage() {
                             </div>
                           </td>
                           <td style={{ padding: '0.85rem 1rem' }}>
-                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.76rem', color: 'var(--text-secondary)' }}>
-                              {camp.visual_identity_preset_id || 'vi_default'}
-                            </span>
+                            {camp.operator_preset_key && (
+                              <div style={{ marginBottom: '0.25rem' }}>
+                                <span style={{
+                                  fontSize: '0.7rem',
+                                  fontWeight: 700,
+                                  background: 'var(--surface-subtle)',
+                                  color: 'var(--text-primary)',
+                                  border: '1px solid var(--border-subtle)',
+                                  padding: '0.1rem 0.4rem',
+                                  borderRadius: 'var(--radius-xs)',
+                                  display: 'inline-block'
+                                }}>
+                                  ⚙️ {camp.operator_preset_key}
+                                </span>
+                              </div>
+                            )}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+                              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.74rem', color: 'var(--text-secondary)' }}>
+                                🧬 {camp.visual_identity_preset_id || 'vi_default'}
+                              </span>
+                              {camp.bridging_summary && camp.bridging_summary !== 'Non-Bridging' && (
+                                <span style={{
+                                  fontSize: '0.66rem',
+                                  fontWeight: 700,
+                                  background: 'var(--status-success-soft)',
+                                  color: 'var(--status-success)',
+                                  border: '1px solid var(--status-success)',
+                                  padding: '0.05rem 0.35rem',
+                                  borderRadius: '9999px'
+                                }}>
+                                  Bridge: {camp.bridging_summary}
+                                </span>
+                              )}
+                            </div>
                           </td>
                           <td style={{ padding: '0.85rem 1rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                             {camp.format_klip || `${camp.target_clips_count || 8} Klip @ ${camp.clip_duration || 4}s (${camp.video_model || 'omni_flash'})`}

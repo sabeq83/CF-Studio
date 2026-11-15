@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.48.21 — Perbaikan Preset Bridging & Story Arc Auto Pipeline (15/11/2026)
+- Filter preset brand wajib penuhi kecocokan campaign_kinds untuk cegah kebocoran preset editorial ke produk
+- Dropdown Auto Pipeline dikelompokkan dengan optgroup dan label spesifikasi bridging eksplisit
+- Adaptive Story Arc dinamis membaca konfigurasi product_bridging preset terpilih
+- Audit trail preset_key dan bridging_summary ditambahkan pada endpoint batches dan tabel riwayat
+
 ## V2.48.20 — Update CTA Template Finishing & Prompt ke CEK KERANJANG / ORDER NOW (15/11/2026)
 - Ubah CTA Template Finishing di resolveCtaAndSavePrompt menjadi CEK KERANJANG (ID) dan ORDER NOW (EN)
 - Ubah fallback CTA Remotion & Video Studio dari Cek Keranjang Kuning ke Cek Keranjang

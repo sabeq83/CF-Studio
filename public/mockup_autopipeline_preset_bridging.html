@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup UI — Perbaikan Preset Bridging & Story Arc Auto Pipeline | MAKNA Flow</title>
+  <style>
+    /* MAKNA Flow semantic theme tokens */
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-purple: #c084fc;
+      --status-purple-soft: rgba(192, 132, 252, 0.14);
+      --focus-ring: #2dd4bf;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --input-bg: #ffffff;
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --link: #075ea8;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --status-purple: #7c3aed;
+      --status-purple-soft: #f5f3ff;
+      --focus-ring: #087f73;
+      --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+      --shadow-modal: 0 26px 80px rgba(31, 45, 61, 0.22);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--canvas);
+      color: var(--text-primary);
+      line-height: 1.5;
+      min-height: 100vh;
+      padding: 1.5rem;
+      transition: background var(--transition), color var(--transition);
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* Header Nav */
+    .header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+    }
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .header-title h1 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .theme-toggle-btn {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 0.45rem 0.85rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: background var(--transition);
+    }
+    .theme-toggle-btn:hover {
+      background: var(--surface-hover);
+    }
+
+    /* Case Study Audit Banner */
+    .audit-banner {
+      background: var(--surface-raised);
+      border-left: 4px solid var(--status-warning);
+      border-top: 1px solid var(--border-subtle);
+      border-right: 1px solid var(--border-subtle);
+      border-bottom: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+    .audit-banner-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .audit-banner-title {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: var(--status-warning);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .audit-banner-text {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Main Grid */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    /* Form Container */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      box-shadow: var(--shadow-card);
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    /* Form Rows */
+    .form-row-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .form-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .badge-chip {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 0.15rem 0.5rem;
+      border-radius: var(--radius-xs);
+    }
+    .badge-success {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+    }
+    .badge-warning {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border: 1px solid var(--status-warning);
+    }
+    .badge-info {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid var(--status-info);
+    }
+    .badge-purple {
+      background: var(--status-purple-soft);
+      color: var(--status-purple);
+      border: 1px solid var(--status-purple);
+    }
+
+    select, input[type="text"] {
+      height: 44px;
+      background: var(--input-bg);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0 0.85rem;
+      font-size: 0.88rem;
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color var(--transition);
+      font-family: inherit;
+    }
+    select:focus, input[type="text"]:focus {
+      border-color: var(--focus-ring);
+    }
+
+    .select-highlight {
+      border-color: var(--action-primary) !important;
+      font-weight: 700;
+    }
+
+    /* Inspector Card */
+    .inspector-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.15rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .inspector-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 0.75rem;
+    }
+
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .spec-item {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .spec-item.highlight-bridging {
+      border: 1.5px solid var(--status-success);
+      background: var(--surface-interactive);
+    }
+
+    .spec-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .spec-val {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* Story Arc Timeline Preview */
+    .story-arc-section {
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .story-arc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .story-arc-title {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .clips-timeline {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 0.6rem;
+    }
+
+    .clip-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      padding: 0.65rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      transition: all var(--transition);
+      position: relative;
+    }
+
+    .clip-card.is-intro {
+      border: 1.5px solid var(--status-success);
+      background: var(--surface-interactive);
+      box-shadow: 0 0 0 1px var(--status-success-soft);
+    }
+
+    .clip-card.is-recall {
+      border: 1.5px solid var(--status-purple);
+      background: var(--surface-interactive);
+      box-shadow: 0 0 0 1px var(--status-purple-soft);
+    }
+
+    .clip-card.is-hook {
+      border-color: var(--status-warning);
+    }
+
+    .clip-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .clip-seq {
+      font-weight: 800;
+      font-size: 0.82rem;
+      color: var(--action-primary);
+    }
+
+    .clip-dur {
+      font-size: 0.66rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .clip-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+
+    .clip-tag {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      display: inline-block;
+      width: fit-content;
+      margin-top: 0.2rem;
+    }
+
+    .tag-intro {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+    }
+
+    .tag-recall {
+      background: var(--status-purple-soft);
+      color: var(--status-purple);
+      border: 1px solid var(--status-purple);
+    }
+
+    .tag-hook {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+    }
+
+    .tag-neutral {
+      background: var(--surface-raised);
+      color: var(--text-muted);
+    }
+
+    /* Batches Table Preview */
+    .table-container {
+      overflow-x: auto;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      text-align: left;
+    }
+
+    th {
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+      font-weight: 700;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      background: var(--surface);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .btn-simulate {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      font-weight: 700;
+      border: none;
+      padding: 0.65rem 1.25rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 0.88rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: background var(--transition);
+    }
+    .btn-simulate:hover {
+      background: var(--action-primary-hover);
+    }
+
+    .callout-box {
+      background: var(--surface-raised);
+      border: 1px dashed var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem 1rem;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <!-- Top Bar -->
+    <header class="header-bar">
+      <div class="header-title">
+        <span style="font-size: 1.4rem;">🎯</span>
+        <div>
+          <h1>Simulasi UI: Preset Bridging & Adaptive Story Arc Auto Pipeline</h1>
+          <p style="font-size: 0.75rem; color: var(--text-muted);">Verifikasi Mockup HTML Staging (Port 5010) — SOP Mockup Sebelum Coding</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="theme-toggle-btn" onclick="toggleTheme()">
+          <span id="theme-icon">🌙</span> <span id="theme-text">Mode Gelap</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Case Study Audit Alert -->
+    <div class="audit-banner">
+      <div class="audit-banner-header">
+        <span class="audit-banner-title">
+          <span>⚠️</span> Analisa Kasus: Kampanye opc_261115_w7tsy0 & Solusi UI
+        </span>
+        <span class="badge-chip badge-warning">Diagnosa Terverifikasi</span>
+      </div>
+      <p class="audit-banner-text">
+        <strong>Penyebab Utama:</strong> Pada kampanye <code>opc_261115_w7tsy0</code>, request masuk membawa preset <code>nutribake_video_produk_reveal2</code> (Reveal Klip 2), <strong>bukan</strong> <code>nutribake_video_produk_reveal2kali</code> (Reveal 2x). Karena label kedua preset di dropdown lama sangat mirip tanpa detail bridging, dan Inspector Card tidak menampilkan badge Product Bridging, pengguna tidak menyadari bahwa klip 2 adalah titik bridging yang tereksekusi.
+      </p>
+    </div>
+
+    <!-- Main Simulator -->
+    <main class="main-grid">
+      <div class="card">
+        <div class="card-title">
+          <span>⚙️</span>
+          <span>1. Formulir Konfigurasi Pipeline (Tampilan Baru dengan Filter &amp; Bridging Tag)</span>
+        </div>
+
+        <div class="form-row-3">
+          <!-- 1. Brand Profile -->
+          <div class="form-group">
+            <label class="form-label">
+              <span>1. Profil Brand</span>
+              <span class="badge-chip badge-info">Multi-Brand</span>
+            </label>
+            <select id="brand-select" onchange="handleBrandChange(this.value)">
+              <option value="nutribake" selected>NutriBake (@nutribake)</option>
+              <option value="dapurbotani">Dapur Botani (@dapurbotani)</option>
+              <option value="habitfolk">HabitFolk (@habitfolk)</option>
+            </select>
+          </div>
+
+          <!-- 2. Jenis Kampanye -->
+          <div class="form-group">
+            <label class="form-label">
+              <span>2. Jenis Video</span>
+              <span class="badge-chip badge-purple">Type-Safe Filter</span>
+            </label>
+            <select id="type-select" onchange="handleTypeChange(this.value)">
+              <option value="product_campaign" selected>📦 Video Promosi Produk</option>
+              <option value="recipe_campaign">🍲 Video Resep Masakan</option>
+              <option value="editorial_campaign">📰 Brand Editorial</option>
+            </select>
+          </div>
+
+          <!-- 3. Preset Video (ENHANCED DROPDOWN) -->
+          <div class="form-group">
+            <label class="form-label">
+              <span>3. Preset Video</span>
+              <span class="badge-chip badge-success">✨ Enhanced with Optgroup &amp; Bridging</span>
+            </label>
+            <select id="preset-select" class="select-highlight" onchange="handlePresetChange(this.value)">
+              <!-- Diisi secara dinamis oleh JavaScript -->
+            </select>
+          </div>
+        </div>
+
+        <!-- Read-Only Inspector Card (ENHANCED) -->
+        <div class="inspector-card">
+          <div class="inspector-header">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span style="font-size: 1.1rem;">📋</span>
+              <span style="font-size: 0.88rem; font-weight: 700; color: var(--text-primary);">
+                Rincian Bawaan Preset Terpilih:
+                <span id="inspector-preset-label" style="color: var(--action-primary); margin-left: 0.35rem;">
+                  Nutribake Video Produk – Reveal 2x
+                </span>
+                <span id="inspector-preset-key" style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); margin-left: 0.3rem;">
+                  (nutribake_video_produk_reveal2kali)
+                </span>
+              </span>
+            </div>
+            <span class="badge-chip badge-info">
+              🔒 Terkunci &amp; Dikelola oleh Preset Manager
+            </span>
+          </div>
+
+          <!-- Specs Badges Grid -->
+          <div class="specs-grid">
+            <!-- SPEC 1: Bridging (NEW) -->
+            <div class="spec-item highlight-bridging" id="spec-bridging-box">
+              <span class="spec-label">⚡ Product Bridging (Posisi Muncul Produk)</span>
+              <span class="spec-val" id="spec-bridging-val" style="color: var(--status-success);">
+                🟢 Aktif • Klip 4 (Intro) &amp; Klip 6 (Recall)
+              </span>
+            </div>
+
+            <!-- SPEC 2: Format Klip -->
+            <div class="spec-item">
+              <span class="spec-label">Format Klip &amp; Durasi</span>
+              <span class="spec-val" id="spec-format-val">
+                🎬 6 Klip × 4 detik (~24s)
+              </span>
+            </div>
+
+            <!-- SPEC 3: AI & VO -->
+            <div class="spec-item">
+              <span class="spec-label">Model AI &amp; Voice-Over</span>
+              <span class="spec-val" id="spec-voice-val">
+                🤖 omni_flash • 🎙️ Indonesian Anchor
+              </span>
+            </div>
+
+            <!-- SPEC 4: Subtitel -->
+            <div class="spec-item">
+              <span class="spec-label">Finishing Subtitel</span>
+              <span class="spec-val" id="spec-motion-val">
+                🟡 Floating Black on White
+              </span>
+            </div>
+
+            <!-- SPEC 5: Transisi -->
+            <div class="spec-item">
+              <span class="spec-label">Finishing Transisi FFmpeg</span>
+              <span class="spec-val" id="spec-trans-val">
+                ✂️ FADE (0.3s)
+              </span>
+            </div>
+
+            <!-- SPEC 6: Identitas Visual -->
+            <div class="spec-item">
+              <span class="spec-label">Identitas Visual (VI)</span>
+              <span class="spec-val" id="spec-vi-val" style="color: var(--status-purple);">
+                🧬 Modern Pastry Studio
+              </span>
+            </div>
+
+            <!-- SPEC 7: Mode Visual -->
+            <div class="spec-item">
+              <span class="spec-label">Mode Visual &amp; Pacing</span>
+              <span class="spec-val" id="spec-mode-val">
+                🎥 hybrid_lock • 8-9 kata
+              </span>
+            </div>
+          </div>
+
+          <!-- Adaptive Story Arc Timeline (ENHANCED DYNAMIC BRIDGING) -->
+          <div class="story-arc-section">
+            <div class="story-arc-header">
+              <div class="story-arc-title">
+                <span>🎯</span>
+                <span id="arc-summary-title">ALUR BABAK STORY ARC: 6 KLIP • @4S • TOTAL: 24S (KINETIC / FAST)</span>
+              </div>
+              <span class="badge-chip badge-success" id="arc-bridging-mode-pill">
+                Multi-Segment Bridging (Klip 4 &amp; 6)
+              </span>
+            </div>
+
+            <div class="clips-timeline" id="clips-timeline-container">
+              <!-- Diisi dinamis oleh renderStoryArc() -->
+            </div>
+          </div>
+        </div>
+
+        <div class="callout-box">
+          <span>💡</span>
+          <span>
+            <strong>Keuntungan Tampilan Baru:</strong> Saat operator memilih preset di dropdown, info bridging (misal <code>[Bridge: Klip 4, 6]</code> vs <code>[Bridge: Klip 2]</code>) langsung terlihat. Inspector Card &amp; Timeline di bawahnya secara real-time memperlihatkan klip mana yang memuat produk dan klip mana yang bebas produk (Zero-Product Gap).
+          </span>
+        </div>
+      </div>
+
+      <!-- 2. Recent Batches Table Transparency (ENHANCED AUDIT TRAIL) -->
+      <div class="card">
+        <div class="card-title" style="justify-content: space-between; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span>📊</span>
+            <span>2. Riwayat Batch Kampanye (Audit Trail Preset &amp; Posisi Bridging Aktual)</span>
+          </div>
+          <span class="badge-chip badge-info">Audit Transparan</span>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>ID Kampanye</th>
+                <th>Brand &amp; Target Produk</th>
+                <th>Preset Terpilih (Audit SOT)</th>
+                <th>Bridging Status</th>
+                <th>Format Klip</th>
+                <th>Status</th>
+                <th>Waktu Eksekusi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Kasus w7tsy0 -->
+              <tr style="background: rgba(251, 191, 36, 0.05);">
+                <td>
+                  <strong style="color: var(--action-primary); font-family: var(--font-mono);">opc_261115_w7tsy0</strong>
+                </td>
+                <td>
+                  <strong>NutriBake</strong><br />
+                  <span style="font-size: 0.72rem; color: var(--text-muted);">Premix Cocoa Powder Premium</span>
+                </td>
+                <td>
+                  <span class="badge-chip badge-warning" style="display: inline-block; margin-bottom: 2px;">
+                    nutribake_video_produk_reveal2
+                  </span><br />
+                  <span style="font-size: 0.74rem; color: var(--text-secondary);">Nutribake Video Produk – Reveal Klip 2</span>
+                </td>
+                <td>
+                  <span class="badge-chip badge-warning">Aktif • Klip 2 Saja</span><br />
+                  <span style="font-size: 0.68rem; color: var(--text-muted);">Klip 1, 3-6 Non-Produk</span>
+                </td>
+                <td>6 Klip @ 4s (omni_flash)</td>
+                <td><span class="badge-chip badge-success">Completed</span></td>
+                <td style="font-size: 0.72rem; color: var(--text-muted);">15 Nov 2026 13:47 WIB</td>
+              </tr>
+
+              <!-- Kasus Baru Perbaikan -->
+              <tr style="background: rgba(74, 222, 128, 0.05);">
+                <td>
+                  <strong style="color: var(--action-primary); font-family: var(--font-mono);">opc_261115_reveal2x_demo</strong>
+                </td>
+                <td>
+                  <strong>NutriBake</strong><br />
+                  <span style="font-size: 0.72rem; color: var(--text-muted);">Premix Cocoa Powder Premium</span>
+                </td>
+                <td>
+                  <span class="badge-chip badge-success" style="display: inline-block; margin-bottom: 2px;">
+                    nutribake_video_produk_reveal2kali
+                  </span><br />
+                  <span style="font-size: 0.74rem; color: var(--text-secondary);">Nutribake Video Produk – Reveal 2x</span>
+                </td>
+                <td>
+                  <span class="badge-chip badge-success">Aktif • Klip 4 &amp; 6</span><br />
+                  <span style="font-size: 0.68rem; color: var(--text-muted);">Klip 1-3, 5 Non-Produk</span>
+                </td>
+                <td>6 Klip @ 4s (omni_flash)</td>
+                <td><span class="badge-chip badge-info">Siap Eksekusi</span></td>
+                <td style="font-size: 0.72rem; color: var(--text-muted);">Simulasi Berikutnya</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    // Data Preset Mockup (Mensimulasikan data dari API /api/v2/recipes/autonomous-pipeline)
+    const PRESETS_DATABASE = {
+      nutribake: {
+        product_campaign: [
+          {
+            key: 'nutribake_video_produk_reveal2kali',
+            label: 'Nutribake Video Produk – Reveal 2x',
+            is_brand_match: true,
+            config: {
+              label: 'Nutribake Video Produk – Reveal 2x',
+              visual_engine: { target_clips_count: 6, clip_duration: 4, video_model: 'omni_flash', words_per_clip: '8-9 kata', visual_mode: 'hybrid_lock' },
+              product_bridging: {
+                is_bridging_active: true,
+                bridging_mode: 'select_existing',
+                bridge_at_clip: 4,
+                bridge_duration_clips: 1,
+                bridge_segments: [
+                  { at_clip: 4, duration_clips: 1, role: 'intro' },
+                  { at_clip: 6, duration_clips: 1, role: 'recall' }
+                ]
+              },
+              visual_swap: { visual_identity_preset_id: 'vi_nutribake_modern_pastry' },
+              basic_strategy: { voice_persona: 'Indonesian_professional_anchor_vv2', target_language: 'id-ID' },
+              workflow: { motion_text_style: 'floating_black_on_white', video_transition: 'fade', transition_duration: 0.3 }
+            }
+          },
+          {
+            key: 'nutribake_video_produk_reveal2',
+            label: 'Nutribake Video Produk – Reveal Klip 2',
+            is_brand_match: true,
+            config: {
+              label: 'Nutribake Video Produk – Reveal Klip 2',
+              visual_engine: { target_clips_count: 6, clip_duration: 4, video_model: 'omni_flash', words_per_clip: '8-9 kata', visual_mode: 'hybrid_lock' },
+              product_bridging: {
+                is_bridging_active: true,
+                bridging_mode: 'select_existing',
+                bridge_at_clip: 2,
+                bridge_duration_clips: 1,
+                bridge_segments: [
+                  { at_clip: 2, duration_clips: 1, role: 'intro' }
+                ]
+              },
+              visual_swap: { visual_identity_preset_id: 'vi_nutribake_modern_pastry' },
+              basic_strategy: { voice_persona: 'Indonesian_professional_anchor_vv2', target_language: 'id-ID' },
+              workflow: { motion_text_style: 'floating_black_on_white', video_transition: 'fade', transition_duration: 0.3 }
+            }
+          },
+          {
+            key: 'nutribake_video_produk',
+            label: 'Nutribake Video Produk (Legacy)',
+            is_brand_match: true,
+            config: {
+              label: 'Nutribake Video Produk (Legacy)',
+              visual_engine: { target_clips_count: 6, clip_duration: 4, video_model: 'omni_flash', words_per_clip: '8-9 kata', visual_mode: 'hybrid_lock' },
+              product_bridging: {
+                is_bridging_active: true,
+                bridging_mode: 'select_existing',
+                bridge_at_clip: 5,
+                bridge_duration_clips: 2
+              },
+              visual_swap: { visual_identity_preset_id: 'vi_nutribake_modern_pastry' },
+              basic_strategy: { voice_persona: 'Indonesian_professional_anchor_vv2', target_language: 'id-ID' },
+              workflow: { motion_text_style: 'floating_black_on_white', video_transition: 'fade', transition_duration: 0.3 }
+            }
+          },
+          {
+            key: 'product_campaign',
+            label: 'Product Campaign Default',
+            is_brand_match: false,
+            config: {
+              label: 'Product Campaign Default',
+              visual_engine: { target_clips_count: 4, clip_duration: 8, video_model: 'veo_31_lite', words_per_clip: '17-19 kata', visual_mode: 'hybrid_lock' },
+              product_bridging: {
+                is_bridging_active: true,
+                bridging_mode: 'select_existing',
+                bridge_at_clip: 3,
+                bridge_duration_clips: 1
+              },
+              visual_swap: { visual_identity_preset_id: 'default' },
+              basic_strategy: { voice_persona: 'Indonesian_casual_reporter_vv2', target_language: 'id-ID' },
+              workflow: { motion_text_style: 'floating_white_yellow', video_transition: 'cut', transition_duration: 0.5 }
+            }
+          }
+        ]
+      }
+    };
+
+    let currentBrand = 'nutribake';
+    let currentType = 'product_campaign';
+    let currentPresetKey = 'nutribake_video_produk_reveal2kali';
+
+    function getBridgingSummaryTag(pb) {
+      if (!pb || !pb.is_bridging_active) return '[Non-Bridging]';
+      if (Array.isArray(pb.bridge_segments) && pb.bridge_segments.length > 0) {
+        const segs = pb.bridge_segments.map(s => s.at_clip).join(', ');
+        return `[Bridge: Klip ${segs}]`;
+      }
+      if (pb.bridge_at_clip) {
+        const dur = Number(pb.bridge_duration_clips || 1);
+        if (dur > 1) {
+          return `[Bridge: Klip ${pb.bridge_at_clip}-${pb.bridge_at_clip + dur - 1}]`;
+        }
+        return `[Bridge: Klip ${pb.bridge_at_clip}]`;
+      }
+      return '[Bridge Aktif]';
+    }
+
+    function populatePresetDropdown() {
+      const select = document.getElementById('preset-select');
+      select.innerHTML = '';
+
+      const list = PRESETS_DATABASE[currentBrand]?.[currentType] || [];
+      const brandPresets = list.filter(p => p.is_brand_match);
+      const generalPresets = list.filter(p => !p.is_brand_match);
+
+      if (brandPresets.length > 0) {
+        const optgroupBrand = document.createElement('optgroup');
+        optgroupBrand.label = `⭐ Preset Khusus NutriBake (${brandPresets.length})`;
+        brandPresets.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p.key;
+          const tag = getBridgingSummaryTag(p.config?.product_bridging);
+          opt.textContent = `${p.label} ${tag}`;
+          optgroupBrand.appendChild(opt);
+        });
+        select.appendChild(optgroupBrand);
+      }
+
+      if (generalPresets.length > 0) {
+        const optgroupGen = document.createElement('optgroup');
+        optgroupGen.label = `Preset Umum & Alternatif (${generalPresets.length})`;
+        generalPresets.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p.key;
+          const tag = getBridgingSummaryTag(p.config?.product_bridging);
+          opt.textContent = `${p.label} ${tag}`;
+          optgroupGen.appendChild(opt);
+        });
+        select.appendChild(optgroupGen);
+      }
+
+      select.value = currentPresetKey;
+      updateInspector();
+    }
+
+    function updateInspector() {
+      const list = PRESETS_DATABASE[currentBrand]?.[currentType] || [];
+      const preset = list.find(p => p.key === currentPresetKey) || list[0];
+      if (!preset) return;
+
+      const cfg = preset.config || {};
+      const ve = cfg.visual_engine || {};
+      const pb = cfg.product_bridging || {};
+      const bs = cfg.basic_strategy || {};
+      const wf = cfg.workflow || {};
+      const vs = cfg.visual_swap || {};
+
+      document.getElementById('inspector-preset-label').textContent = preset.label;
+      document.getElementById('inspector-preset-key').textContent = `(${preset.key})`;
+
+      // Spec 1: Bridging
+      const specBridgeVal = document.getElementById('spec-bridging-val');
+      const specBridgeBox = document.getElementById('spec-bridging-box');
+      if (pb.is_bridging_active) {
+        specBridgeBox.className = 'spec-item highlight-bridging';
+        if (Array.isArray(pb.bridge_segments) && pb.bridge_segments.length > 0) {
+          const desc = pb.bridge_segments.map(s => `Klip ${s.at_clip} (${s.role || 'bridge'})`).join(' & ');
+          specBridgeVal.innerHTML = `🟢 Aktif • ${desc}`;
+          specBridgeVal.style.color = 'var(--status-success)';
+        } else {
+          const dur = Number(pb.bridge_duration_clips || 1);
+          specBridgeVal.innerHTML = `🟢 Aktif • Klip ${pb.bridge_at_clip || 3} (${dur} klip)`;
+          specBridgeVal.style.color = 'var(--status-success)';
+        }
+      } else {
+        specBridgeBox.className = 'spec-item';
+        specBridgeVal.innerHTML = `⚪ Nonaktif (Konten Cerita Tanpa Produk)`;
+        specBridgeVal.style.color = 'var(--text-muted)';
+      }
+
+      // Spec 2-7
+      document.getElementById('spec-format-val').textContent = `🎬 ${ve.target_clips_count || 6} Klip × ${ve.clip_duration || 4}s (~${(ve.target_clips_count || 6) * (ve.clip_duration || 4)}s)`;
+      document.getElementById('spec-voice-val').textContent = `🤖 ${ve.video_model || 'omni_flash'} • 🎙️ ${bs.voice_persona || 'Indonesian Anchor'}`;
+      document.getElementById('spec-motion-val').textContent = `🟡 ${wf.motion_text_style || 'floating_black_on_white'}`;
+      document.getElementById('spec-trans-val').textContent = `✂️ ${(wf.video_transition || 'fade').toUpperCase()} (${wf.transition_duration || 0.3}s)`;
+      document.getElementById('spec-vi-val').textContent = `🧬 ${vs.visual_identity_preset_id || 'Modern Pastry'}`;
+      document.getElementById('spec-mode-val').textContent = `🎥 ${ve.visual_mode || 'hybrid_lock'} • ${ve.words_per_clip || '8-9 kata'}`;
+
+      // Render Dynamic Story Arc
+      renderStoryArc(ve.target_clips_count || 6, ve.clip_duration || 4, pb);
+    }
+
+    function renderStoryArc(clipsCount, clipDuration, pb) {
+      const container = document.getElementById('clips-timeline-container');
+      container.innerHTML = '';
+
+      const isBridging = Boolean(pb?.is_bridging_active);
+      const segments = Array.isArray(pb?.bridge_segments) && pb.bridge_segments.length > 0
+        ? pb.bridge_segments
+        : (pb?.bridge_at_clip ? [{ at_clip: Number(pb.bridge_at_clip), duration_clips: Number(pb.bridge_duration_clips || 1), role: 'intro' }] : []);
+
+      const arcPill = document.getElementById('arc-bridging-mode-pill');
+      if (isBridging && segments.length > 1) {
+        arcPill.className = 'badge-chip badge-success';
+        arcPill.textContent = `Multi-Segment Bridging (Klip ${segments.map(s => s.at_clip).join(', ')})`;
+      } else if (isBridging) {
+        arcPill.className = 'badge-chip badge-warning';
+        arcPill.textContent = `Single-Zone Bridging (Klip ${segments[0]?.at_clip || pb.bridge_at_clip})`;
+      } else {
+        arcPill.className = 'badge-chip badge-info';
+        arcPill.textContent = 'Murni Edukasi / Tanpa Produk';
+      }
+
+      document.getElementById('arc-summary-title').textContent =
+        `ALUR BABAK STORY ARC: ${clipsCount} KLIP • @${clipDuration}S • TOTAL: ${clipsCount * clipDuration}S (KINETIC / FAST)`;
+
+      for (let i = 1; i <= clipsCount; i++) {
+        const seg = segments.find(s => {
+          const start = Number(s.at_clip);
+          const end = start + Number(s.duration_clips || 1) - 1;
+          return i >= start && i <= end;
+        });
+
+        let cardClass = 'clip-card';
+        let title = '';
+        let tagText = '';
+        let tagClass = 'clip-tag tag-neutral';
+
+        if (i === 1) {
+          cardClass += ' is-hook';
+          title = 'Hook Relatable / Pain Point';
+          tagText = '🎯 Hook 0-3s';
+          tagClass = 'clip-tag tag-hook';
+        } else if (seg) {
+          if (seg.role === 'recall') {
+            cardClass += ' is-recall';
+            title = 'Pengingat Manfaat &amp; CTA';
+            tagText = '🔁 RECALL PRODUK';
+            tagClass = 'clip-tag tag-recall';
+          } else {
+            cardClass += ' is-intro';
+            title = 'Pivot Pengenalan Produk Target';
+            tagText = '🛍️ INTRO PRODUK';
+            tagClass = 'clip-tag tag-intro';
+          }
+        } else if (i === clipsCount) {
+          title = 'Rekomendasi &amp; Outro CTA';
+          tagText = '🚀 Outro CTA';
+          tagClass = 'clip-tag tag-neutral';
+        } else if (i === 2) {
+          title = 'Eskalasi Masalah &amp; Dilema';
+          tagText = '⚡ Pain Point';
+          tagClass = 'clip-tag tag-neutral';
+        } else {
+          title = 'Edukasi / Transformasi Cerita';
+          tagText = '🔍 Bahan / Manfaat';
+          tagClass = 'clip-tag tag-neutral';
+        }
+
+        const card = document.createElement('div');
+        card.className = cardClass;
+        card.innerHTML = `
+          <div class="clip-top">
+            <span class="clip-seq">Klip ${i}</span>
+            <span class="clip-dur">${clipDuration}s</span>
+          </div>
+          <div class="clip-title">${title}</div>
+          <span class="${tagClass}">${tagText}</span>
+        `;
+        container.appendChild(card);
+      }
+    }
+
+    function handlePresetChange(val) {
+      currentPresetKey = val;
+      updateInspector();
+    }
+
+    function handleBrandChange(val) {
+      currentBrand = val;
+      populatePresetDropdown();
+    }
+
+    function handleTypeChange(val) {
+      currentType = val;
+      populatePresetDropdown();
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      document.getElementById('theme-icon').textContent = next === 'dark' ? '🌙' : '☀️';
+      document.getElementById('theme-text').textContent = next === 'dark' ? 'Mode Gelap' : 'Mode Terang';
+    }
+
+    // Inisialisasi awal
+    populatePresetDropdown();
+  </script>
+</body>
+</html>
