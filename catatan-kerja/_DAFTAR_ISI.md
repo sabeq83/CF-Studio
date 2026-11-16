@@ -1,0 +1,109 @@
+# Daftar Isi Dokumen Kerja (catatan-kerja)
+
+Terakhir diperbarui: 17 November 2026
+
+## USULAN
+
+| Nama File | Ringkasan / Judul |
+|---|---|
+| `ANALISA_TENANT_MCP_MACMINI.md` | Analisa: Preset "tidak ditemukan" saat CF Autopipeline dijalankan dari Mac Mini |
+| `USULAN_ANALITIK_MINGGUAN_CFA.md` | Usulan: Analitik & Laporan Mingguan + Rencana Konten Pekan Depan |
+| `USULAN_AUDIT_TEMPLATE_FINISHING_GENERAL.md` | Usulan: Template Finishing Lebih General, Lebih Bersih |
+| `USULAN_AUTOPIPELINE_VERSI_CLAUDE.md` | Usulan: Auto Pipeline + Scheduler Versi Claude (6 Agent) |
+| `USULAN_FINISHING_VIDEO_CFSTUDIO.md` | Usulan Pengembangan: Finishing Video CF Studio (Motion Text & Animasi) |
+| `USULAN_JADWAL_CLAUDE_DESKTOP_MACMINI.md` | Usulan: Menyusun Jadwal CF Autopipeline Sendiri lewat Claude Desktop di Mac Mini |
+| `USULAN_JALUR_FLEKSIBEL_CFA.md` | Usulan: Jalur Konten Fleksibel untuk CF Autopipeline (CFA) |
+| `USULAN_LINK_AFFILIATE_KOMENTAR_YOUTUBE.md` | Usulan: Link Affiliate Shopee di Komentar Pertama YouTube |
+| `USULAN_PERBAIKAN_NARASI_VO_CFSTUDIO.md` | Usulan Perbaikan Narasi VO (Gemini) — Kampanye Pilar & Multiplier |
+| `USULAN_PERBAIKAN_PRESET_BRIDGING_AUTOPIPELINE.md` | Analisa & Usulan Perbaikan: Ketidaksesuaian Preset Bridging pada Kampanye `opc_261115_w7tsy0` |
+| `USULAN_PERBAIKAN_SCRAPER_FOTO_PRODUK.md` | Usulan: Perbaikan Scraper Foto Produk (pilih foto produk saja) |
+| `USULAN_RENDER_FINISHING_VIDEO_STUDIO.md` | Usulan (Revisi 2): Render Penuh dengan Finishing Template di Video Studio |
+| `USULAN_RISET_PRODUK_MINGGUAN_CFA.md` | Usulan: Skill Riset Produk Mingguan (7–10 Produk Baru per Pekan) |
+| `USULAN_SOP_KARTU_KONTEKS_MENU.md` | USULAN — SOP Kartu Konteks Menu CF Studio (Hemat Token) |
+| `USULAN_SUMBER_VIDEO_VIDEO_STUDIO.md` | Usulan: Sumber Video di Video Studio Disambungkan ke Kampanye Aktif |
+| `USULAN_TEMPLATE_FINISHING_TAMBAHAN.md` | Usulan 5 Template Finishing Tambahan (total 7) |
+| `audit_produk_db_usulan.md` | Audit Forensik & Usulan Solusi Isolasi Database Produk MAKNA Flow |
+
+## INSTRUKSI-AGENT
+
+| Nama File | Ringkasan / Judul |
+|---|---|
+| `HANDOFF_ANTIGRAVITY_4_CELAH_MCP_PUBLISH.md` | Handoff Antigravity: 4 Celah CF Studio untuk CF Autopipeline (CFA) |
+| `HANDOFF_ANTIGRAVITY_FIX_TOPICCOMPLIANCE_CUSTOM_STORYBOARD.md` | Handoff Antigravity: Custom Storyboard `gemini_engineer` Selalu Gagal |
+| `HANDOFF_ANTIGRAVITY_MULTIPLIER_LOKASI_PER_KLIP.md` | Handoff Antigravity: Multiplier Selalu di "Meja Kayu", Lokasi per Klip Tidak Jalan |
+| `INSTRUKSI_PERBAIKAN_JADWAL_CFA_MACMINI.md` | Instruksi untuk Agent Claude di Mac Mini: Perbaiki Jadwal CF Autopipeline |
+| `PETUNJUK_CFA_JADWAL_TELEGRAM_HEMAT_TOKEN.md` | Petunjuk CF Autopipeline: Jadwal per Brand, Notifikasi Telegram, dan Hemat Token |
+| `antigravity_agent_instructions.md` | Instruksi Agent AI Antigravity — Implementasi Deconstruct URL Library |
+| `antigravity_analitik_mingguan_instructions.md` | Instruksi Antigravity: Analitik Performa Konten via Repliz |
+| `antigravity_finishing_pass_cek_ulang.md` | Instruksi Antigravity: Cek Ulang Plan Finishing Pass (setelah Revisi 01) |
+| `antigravity_finishing_pass_instructions.md` | Instruksi Antigravity: Finishing Pass Video (Motion Text, Keyword Punch, Template) |
+| `antigravity_finishing_pass_revisi_01.md` | Revisi 01: Finishing Pass (berlaku sebelum Fase 0 dikerjakan) |
+| `antigravity_finishing_pass_revisi_02.md` | Revisi 02: Finishing Pass (berlaku setelah rilis Fase 2 v2.44.6) |
+| `antigravity_finishing_pass_revisi_03.md` | Revisi 03: Caption 2–3 Kata, Font Besar, Satu Sumber (berlaku setelah v2.44.19) |
+| `antigravity_finishing_satu_fokus_instructions.md` | Instruksi Antigravity: Finishing "Satu Fokus", Skin General & Babak Natural |
+| `antigravity_kartu_menu_dan_rapikan_folder_instructions.md` | INSTRUKSI ANTIGRAVITY — Lengkapi Kartu Menu & Rapikan Folder Proyek |
+| `antigravity_multiplier_instructions.md` | Instruksi Antigravity — Multiplier Blueprint × Product |
+| `antigravity_planner_metafor_kb_instructions.md` | Instruksi Agent: Metafora Planner, Sinkron Visual Style, Penyederhanaan KB & Pembersihan Fitur |
+| `antigravity_scraper_foto_produk_instructions.md` | Instruksi Antigravity: Perbaikan Scraper Foto Produk (pilih foto produk saja, tanpa orang) |
+| `antigravity_scraper_foto_produk_revisi_01.md` | Revisi 01: Scraper Foto Produk (setelah v2.49.1) + Tinjau & Ganti Foto di UI |
+| `antigravity_uji_insight_2_halaman.md` | Instruksi Antigravity: Uji Insight Facebook 2 Halaman (Hanya Membaca) |
+| `antigravity_video_studio_finishing_render_instructions.md` | Instruksi Antigravity: Render Penuh dengan Finishing Template di Video Studio |
+| `antigravity_video_studio_sumber_kampanye_instructions.md` | Instruksi Antigravity: Sumber Video dari Kampanye Aktif di Video Studio |
+| `antigravity_vo_narasi_instructions.md` | Instruksi Agent: Perbaikan Narasi VO (Kampanye Pilar & Multiplier) |
+| `antigravity_vo_narasi_koreksi_v2451.md` | Instruksi Koreksi v2.45.1: Perbaikan Narasi VO |
+| `antigravity_youtube_studio_blueprint_script_instructions.md` | Instruksi Agent AI Antigravity — YouTube Studio Fase 2: AI Blueprint & Script Approval |
+| `antigravity_youtube_studio_duration_generation_profile_instructions.md` | Instruksi Agent AI Antigravity — YouTube Studio Fase 2.5: Duration & Generation Profiles |
+| `antigravity_youtube_studio_editorial_ui_refinement_instructions.md` | Instruksi Agent AI Antigravity — YouTube Studio One-Column UI Refinement |
+| `antigravity_youtube_studio_editorial_workflow_instructions.md` | Instruksi Agent AI Antigravity — YouTube Studio Fase 1: Editorial Workflow |
+| `antigravity_youtube_studio_hybrid_api_smoke_instructions.md` | Instruksi Agent AI Antigravity — Hybrid Prompt API & Dev Smoke Test YouTube Studio |
+| `antigravity_youtube_studio_hybrid_production_instructions.md` | Instruksi Agent AI Antigravity — YouTube Studio Hybrid Production |
+| `antigravity_youtube_studio_information_architecture_instructions.md` | Instruksi Agent AI Antigravity — YouTube Studio Information Architecture & UI Refactor |
+| `antigravity_youtube_studio_instructions.md` | Instruksi Agent AI Antigravity — Implementasi YouTube Studio MVP |
+| `antigravity_youtube_studio_kb_foundation_instructions.md` | Instruksi Agent AI Antigravity — YouTube Studio KB Foundation |
+| `antigravity_youtube_studio_multi_speaker_narrative_instructions.md` | Instruksi Tunggal AI Agent Antigravity — Execute YouTube Studio Multi-Speaker Narrative Stage A–E |
+| `antigravity_youtube_studio_production_factory_instructions.md` | Instruksi Agent AI Antigravity — YouTube Studio Fase 3: Production Factory |
+| `antigravity_youtube_studio_production_orchestration_instructions.md` | Instruksi Agent AI Antigravity — YouTube Studio Production Orchestration |
+| `instruksi_kartun.md` | Implementasi Cartoon Universe MAKNA Flow |
+| `kartun_tahap1.md` | Kerjakan hanya Tahap 1: World-Aware Content Planner PawVille MVP. |
+
+## RENCANA
+
+| Nama File | Ringkasan / Judul |
+|---|---|
+| `analitik_mingguan_implementation_plan.md` | Implementation Plan: Analitik Performa Konten via Repliz (Paket Gold) |
+| `deconstruct_lab_implementation_plan.md` | Implementation Plan — Rekonstruksi Deconstruct Lab |
+| `finishing_pass_implementation_plan.md` | Finishing Pass Implementation Plan & Execution Tracker (`v2.45.x`) — `(Revisi 03)` |
+| `finishing_satu_fokus_implementation_plan.md` | Implementation Plan: Finishing "Satu Fokus", Skin General & Babak Natural |
+| `implementation_plan_video_studio_finishing.md` | Implementation Plan — Video Studio Finishing Template (Fase 2–4) |
+| `multiplier_lab_implementation_plan.md` | Implementation Plan — Multiplier Lab Blueprint × Product |
+| `rencana_penjadwalan_cocoa.md` | Rencana Penjadwalan Auto Pipeline — NutriBake (Premix Cocoa Powder Premium) |
+| `rencana_penjadwalan_rolled_oat.md` | Rencana Penjadwalan Auto Pipeline — NutriBake (Rolled Oat Premium Sahabat) |
+| `scraper_foto_produk_implementation_plan.md` | Implementation Plan: Perbaikan Scraper Foto Produk (Pilih Foto Produk Saja) |
+| `scraper_foto_produk_revisi_01_plan.md` | Implementation Plan: Revisi 01 Scraper Foto Produk & Tinjau/Ganti Foto UI |
+| `vo_narasi_implementation_plan.md` | Rencana Implementasi Perbaikan Narasi VO End-to-End (Fase V0–V5) |
+
+## LAPORAN
+
+| Nama File | Ringkasan / Judul |
+|---|---|
+| `LAPORAN_PERBAIKAN_SCRAPER_FOTO_PRODUK.md` | Laporan Resmi: Perbaikan Scraper Foto Produk E-Commerce (Pilih Foto Bersih) |
+| `LAPORAN_RILIS_DAN_DEPLOY_SCRAPER_FOTO_PRODUK.md` | Laporan Resmi Rilis, Deployment, & Verifikasi End-to-End Scraper Foto Produk |
+| `maknagrid_published_facebook_videos.md` | Maknagrid Published Facebook Video IDs |
+
+## KONTEN
+
+| Nama File | Ringkasan / Judul |
+|---|---|
+| `naskah.md` | RE-DAPU-20260708-001 |
+| `resep-multiplier.md` | Usulan & Analisa: Ekstraksi Resep Lengkap pada Caption Video Multiplier dengan Kontrol ON/OFF (`resep-multiplier`) |
+
+## ARSIP-KELUARAN
+
+| Nama File | Ringkasan / Judul |
+|---|---|
+| `diff.txt` | ��d i f f   - - g i t   a / l i b / s h e e t s - a u t o p i l o t - w o r k e r . j s   b / l i b  |
+| `diff_wsl.txt` | ��d i f f   - - g i t   a / l i b / s h e e t s - a u t o p i l o t - w o r k e r . j s   b / l i b  |
+| `diff_wsl_utf8.txt` | diff --git a/lib/sheets-autopilot-worker.js b/lib/sheets-autopilot-worker.js |
+| `inspect_output.txt` | [PostgreSQL] Connection Pool initialized to 100.78.186.123:5432/maknaflow_db (schema: public) |
+| `prompt_output.txt` | Kamu adalah seorang Creative Director & Senior Copywriter di MAKNA Engine. |
+

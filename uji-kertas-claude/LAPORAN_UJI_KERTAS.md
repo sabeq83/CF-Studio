@@ -182,7 +182,7 @@ Untuk 5 kata kunci ini (riset ±1 pencarian per kata kunci + naskah + prompt): *
 
 1. **Uji produksi 1 video:** kirim naskah + prompt "Chicken Wings" versi Claude ke antrean produksi yang ada (TTS → G-Labs → render), lalu bandingkan videonya dengan item 2074 versi Gemini. Ini butuh persetujuan karena memakai kuota G-Labs.
 2. **Perbaikan cepat untuk Gemini sekarang (terpisah dari proyek Claude):** pisahkan teks resep dari deskripsi properti visual, supaya caption tidak berisi "matte dark-grey heat-resistant silicone tongs".
-3. Kalau hasil video setara atau lebih baik → lanjut ke MVP `pipeline_type = 'claude_keyword'` (lihat [USULAN_AUTOPIPELINE_VERSI_CLAUDE.md](../USULAN_AUTOPIPELINE_VERSI_CLAUDE.md)).
+3. Kalau hasil video setara atau lebih baik → lanjut ke MVP `pipeline_type = 'claude_keyword'` (lihat [USULAN_AUTOPIPELINE_VERSI_CLAUDE.md](../catatan-kerja/usulan/USULAN_AUTOPIPELINE_VERSI_CLAUDE.md)).
 
 ---
 

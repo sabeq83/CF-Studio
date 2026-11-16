@@ -1,273 +1,161 @@
-# Rencana Implementasi: 4 Celah CF Studio untuk CF Autopipeline (CFA)
+# Implementation Plan — Kartu Menu & Perapian Folder
 
-Berdasarkan dokumen serah terima [HANDOFF_ANTIGRAVITY_4_CELAH_MCP_PUBLISH.md](file:///Users/sabeqmmursyid/_cfstudio/HANDOFF_ANTIGRAVITY_4_CELAH_MCP_PUBLISH.md).
+Tanggal: 17 November 2026 | Versi: v2.50.0 (`550cc67`)
+Instruksi sumber: `antigravity_kartu_menu_dan_rapikan_folder_instructions.md`
 
----
-
-## Ringkasan Perubahan
-
-| # | Celah | Solusi Teknis |
-|---|---|---|
-| 1 | **Judul per platform (`platform_titles`)** | Tambahkan `cleanTitle` & `normalizePlatformTitles` di `lib/publishing-contract.js`, terapkan pemilihan judul per platform di `lib/publishing-service.js`, dan perluas skema MCP `cf_create_publishing_job` & `cf_publish_storyboard` di `apps/mcp/tools.mjs`. |
-| 2 | **Mode ringkas `cf_get_storyboard_status`** | Ubah `fetchPillarStoryboardSummary` di `apps/mcp/tools.mjs` agar default tanpa `items` mentah (`item_count`), sertakan `error_message` dan `generation_error` pada `stages`, tambahkan argumen `include_items`, dan sesuaikan pemanggil yang membutuhkan items. |
-| 3 | **Filter pada daftar preset & VI** | Tambahkan parameter `brand`, `query`, dan `detail` (default `false` / ringkas) pada `cf_list_presets`, `makna_list_presets`, dan `cf_list_visual_identities` di `apps/mcp/tools.mjs`. |
-| 4 | **Membatalkan Custom Storyboard (`cst_*`)** | Tambahkan status `'cancelled'` pada PATCH `/api/v2/pillar-campaigns/[id]`, hentikan proses di worker/scheduler sebelum tahap pemakaian kuota (Gemini, Start Frame, TTS, G-Labs, FFmpeg), dan daftarkan tool MCP baru `cf_cancel_storyboard`. |
+> [!IMPORTANT]
+> Dua commit terpisah. Tidak ada perubahan perilaku aplikasi. Tidak perlu deploy.
 
 ---
 
 ## Execution Task List
-- [x] Task 1: Implementasi Celah 1 (Judul per Platform `platform_titles`)
-  - [x] 1.1 Update `lib/publishing-contract.js` (tambah `cleanTitle`, `normalizePlatformTitles`, validasi `platform_titles`)
-  - [x] 1.2 Update `lib/publishing-service.js` (pilih `selectedTitle` berdasarkan target platform)
-  - [x] 1.3 Update `apps/mcp/tools.mjs` (skema dan forwarding `platform_titles` di `cf_create_publishing_job` dan `cf_publish_storyboard`)
-- [x] Task 2: Implementasi Celah 2 (Mode Ringkas & Error Reporting `cf_get_storyboard_status`)
-  - [x] 2.1 Update `fetchPillarStoryboardSummary` dengan opsi `{ includeItems = false }`, `item_count`, dan error fields di `stages`
-  - [x] 2.2 Update skema dan handler `cf_get_storyboard_status` dengan parameter `include_items`
-  - [x] 2.3 Pastikan pemanggil lain yang butuh items (`cf_approve_job`) mengirim `{ includeItems: true }`
-- [x] Task 3: Implementasi Celah 3 (Filter Brand/Query & Output Ringkas Preset & Visual Identity)
-  - [x] 3.1 Update `cf_list_presets` dan `makna_list_presets` di `apps/mcp/tools.mjs`
-  - [x] 3.2 Update `cf_list_visual_identities` di `apps/mcp/tools.mjs`
-- [x] Task 4: Implementasi Celah 4 (Pembatalan Custom Storyboard `cst_*`)
-  - [x] 4.1 Update PATCH di `app/api/v2/pillar-campaigns/[id]/route.js` untuk menerima `'cancelled'` dan membatalkan item / aset yang belum selesai
-  - [x] 4.2 Tambahkan guard status (`paused` / `cancelled`) di `lib/scheduler-processors.js` (`processPillarGenerator`, `processPillarTts`, `processPillarGlabs`, `processPillarFfmpeg`)
-  - [x] 4.3 Tambahkan guard status di `lib/start-frame-worker.js` sebelum submit provider task
-  - [x] 4.4 Daftarkan tool MCP `cf_cancel_storyboard` di `apps/mcp/tools.mjs`
-- [x] Task 5: Pengujian & Verifikasi Komprehensif
-  - [x] 5.1 Buat unit test mandiri `tests/test-4-celah-mcp-publish.test.mjs` untuk menguji ke-4 celah
-  - [x] 5.2 Jalankan unit test dan periksa kelulusan
-  - [x] 5.3 Jalankan `npm run build` untuk memastikan tidak ada kesalahan kompilasi
-- [x] Task 6: SOP Rilis & Auto Git Sync (Non-Interactive Release)
-  - [x] 6.1 Jalankan `npm run release-non-interactive` dengan versi patch
-  - [x] 6.2 Verifikasi commit, tag, changelog, dan push remote
-- [x] Task 7: SOP Deployment Mac Mini Staging
-  - [x] 7.1 Deploy ke staging dengan atomic deployment (`npm run deploy:staging -- --ref <full-git-sha> --apply --confirm-staging`)
-  - [x] 7.2 Verifikasi kesehatan layanan staging (UI port 5010 & API port 7010)
+
+### Bagian A — Kartu Menu
+- [x] **A1** — Tulis 19 kartu menu baru di `sot/menus/kartu/` (maks 60 baris per kartu)
+- [x] **A2** — Pindahkan file `sot/menus/rencana/` via `git mv` (youtube-studio-*-implementation-plan.md, roadmap, mvp, dll)
+- [x] **A3** — Perbarui `sot/menus/_PETA_MENU.md` (ganti "belum" → tautan kartu, perbaiki fungsi singkat, hapus peringatan)
+- [x] **A4** — Verifikasi: `wc -l sot/menus/kartu/*.md` ≤ 60, `ls` jalur file di kartu ada semua
+- [x] **A5** — Commit A: `docs(menus): lengkapi kartu konteks 22 menu dan peta menu`
+
+### Bagian B — Perapian Folder
+- [x] **B1** — Buat struktur folder `catatan-kerja/` (usulan, instruksi-agent, rencana, laporan, konten, arsip-keluaran)
+- [x] **B2** — `git mv` file-file ke `catatan-kerja/` sesuai tabel B3
+- [x] **B3** — `git mv` mockup ke `docs/mockups/`
+- [x] **B4** — `git mv` scratch-*.mjs + check-* + inspect_* ke `scripts/arsip-scratch/`
+- [x] **B5** — Perbarui komentar `lib/word-alignment-engine.js` baris ± 148 (jalur mockup baru)
+- [x] **B6** — Buat `catatan-kerja/_DAFTAR_ISI.md`
+- [x] **B7** — Tambah SOP Lokasi File Dokumen Kerja ke `AGENTS.md` (tidak di-commit)
+- [x] **B8** — `npm run build` (DISABLE_AUTO_MIGRATIONS=true) → harus berhasil
+- [x] **B9** — Commit B: `chore(repo): rapikan dokumen kerja dan skrip scratch ke dalam folder`
+
+### Rilis
+- [ ] **R1** — `npm run release-non-interactive` patch
+- [ ] **R2** — Tulis `catatan-kerja/laporan/LAPORAN_KARTU_MENU_DAN_PERAPIAN_FOLDER.md`
 
 ---
 
-## Detailed Before & After Code Snippets
+## Tabel B: Jalur Lama → Jalur Baru
 
-### 1. `lib/publishing-contract.js`
+### catatan-kerja/usulan/
+| Lama | Baru |
+|---|---|
+| `USULAN_ANALITIK_MINGGUAN_CFA.md` | `catatan-kerja/usulan/USULAN_ANALITIK_MINGGUAN_CFA.md` |
+| `USULAN_AUDIT_TEMPLATE_FINISHING_GENERAL.md` | `catatan-kerja/usulan/USULAN_AUDIT_TEMPLATE_FINISHING_GENERAL.md` |
+| `USULAN_AUTOPIPELINE_VERSI_CLAUDE.md` | `catatan-kerja/usulan/USULAN_AUTOPIPELINE_VERSI_CLAUDE.md` |
+| `USULAN_FINISHING_VIDEO_CFSTUDIO.md` | `catatan-kerja/usulan/USULAN_FINISHING_VIDEO_CFSTUDIO.md` |
+| `USULAN_JADWAL_CLAUDE_DESKTOP_MACMINI.md` | `catatan-kerja/usulan/USULAN_JADWAL_CLAUDE_DESKTOP_MACMINI.md` |
+| `USULAN_JALUR_FLEKSIBEL_CFA.md` | `catatan-kerja/usulan/USULAN_JALUR_FLEKSIBEL_CFA.md` |
+| `USULAN_LINK_AFFILIATE_KOMENTAR_YOUTUBE.md` | `catatan-kerja/usulan/USULAN_LINK_AFFILIATE_KOMENTAR_YOUTUBE.md` |
+| `USULAN_PERBAIKAN_NARASI_VO_CFSTUDIO.md` | `catatan-kerja/usulan/USULAN_PERBAIKAN_NARASI_VO_CFSTUDIO.md` |
+| `USULAN_PERBAIKAN_PRESET_BRIDGING_AUTOPIPELINE.md` | `catatan-kerja/usulan/USULAN_PERBAIKAN_PRESET_BRIDGING_AUTOPIPELINE.md` |
+| `USULAN_PERBAIKAN_SCRAPER_FOTO_PRODUK.md` | `catatan-kerja/usulan/USULAN_PERBAIKAN_SCRAPER_FOTO_PRODUK.md` |
+| `USULAN_RENDER_FINISHING_VIDEO_STUDIO.md` | `catatan-kerja/usulan/USULAN_RENDER_FINISHING_VIDEO_STUDIO.md` |
+| `USULAN_RISET_PRODUK_MINGGUAN_CFA.md` | `catatan-kerja/usulan/USULAN_RISET_PRODUK_MINGGUAN_CFA.md` |
+| `USULAN_SOP_KARTU_KONTEKS_MENU.md` | `catatan-kerja/usulan/USULAN_SOP_KARTU_KONTEKS_MENU.md` |
+| `USULAN_TEMPLATE_FINISHING_TAMBAHAN.md` | `catatan-kerja/usulan/USULAN_TEMPLATE_FINISHING_TAMBAHAN.md` |
+| `USULAN_SUMBER_VIDEO_VIDEO_STUDIO.md` | `catatan-kerja/usulan/USULAN_SUMBER_VIDEO_VIDEO_STUDIO.md` |
+| `ANALISA_TENANT_MCP_MACMINI.md` | `catatan-kerja/usulan/ANALISA_TENANT_MCP_MACMINI.md` |
+| `audit_produk_db_usulan.md` | `catatan-kerja/usulan/audit_produk_db_usulan.md` |
 
-#### Code Sebelum (Current/Before):
-```js
-    title: String(title || '').trim().replace(/^["'\s]+|["'\s]+$/g, '').slice(0, 100),
-    caption: String(caption || '').trim(),
-    media_url: String(media_url || '').trim(),
-    caption_facebook: input.caption_facebook ? String(input.caption_facebook).trim() : null,
-    caption_bio: input.caption_bio ? String(input.caption_bio).trim() : null,
-    platform_captions: (input.platform_captions && typeof input.platform_captions === 'object') ? input.platform_captions : null,
-```
+### catatan-kerja/instruksi-agent/
+| Lama | Baru |
+|---|---|
+| `antigravity_agent_instructions.md` | `catatan-kerja/instruksi-agent/antigravity_agent_instructions.md` |
+| `antigravity_analitik_mingguan_instructions.md` | `catatan-kerja/instruksi-agent/antigravity_analitik_mingguan_instructions.md` |
+| `antigravity_finishing_pass_cek_ulang.md` | `catatan-kerja/instruksi-agent/antigravity_finishing_pass_cek_ulang.md` |
+| `antigravity_finishing_pass_instructions.md` | `catatan-kerja/instruksi-agent/antigravity_finishing_pass_instructions.md` |
+| `antigravity_finishing_pass_revisi_01.md` | `catatan-kerja/instruksi-agent/antigravity_finishing_pass_revisi_01.md` |
+| `antigravity_finishing_pass_revisi_02.md` | `catatan-kerja/instruksi-agent/antigravity_finishing_pass_revisi_02.md` |
+| `antigravity_finishing_pass_revisi_03.md` | `catatan-kerja/instruksi-agent/antigravity_finishing_pass_revisi_03.md` |
+| `antigravity_finishing_satu_fokus_instructions.md` | `catatan-kerja/instruksi-agent/antigravity_finishing_satu_fokus_instructions.md` |
+| `antigravity_kartu_menu_dan_rapikan_folder_instructions.md` | `catatan-kerja/instruksi-agent/antigravity_kartu_menu_dan_rapikan_folder_instructions.md` |
+| `antigravity_multiplier_instructions.md` | `catatan-kerja/instruksi-agent/antigravity_multiplier_instructions.md` |
+| `antigravity_planner_metafor_kb_instructions.md` | `catatan-kerja/instruksi-agent/antigravity_planner_metafor_kb_instructions.md` |
+| `antigravity_scraper_foto_produk_instructions.md` | `catatan-kerja/instruksi-agent/antigravity_scraper_foto_produk_instructions.md` |
+| `antigravity_scraper_foto_produk_revisi_01.md` | `catatan-kerja/instruksi-agent/antigravity_scraper_foto_produk_revisi_01.md` |
+| `antigravity_uji_insight_2_halaman.md` | `catatan-kerja/instruksi-agent/antigravity_uji_insight_2_halaman.md` |
+| `antigravity_video_studio_finishing_render_instructions.md` | `catatan-kerja/instruksi-agent/antigravity_video_studio_finishing_render_instructions.md` |
+| `antigravity_vo_narasi_instructions.md` | `catatan-kerja/instruksi-agent/antigravity_vo_narasi_instructions.md` |
+| `antigravity_vo_narasi_koreksi_v2451.md` | `catatan-kerja/instruksi-agent/antigravity_vo_narasi_koreksi_v2451.md` |
+| `antigravity_youtube_studio_blueprint_script_instructions.md` | `catatan-kerja/instruksi-agent/antigravity_youtube_studio_blueprint_script_instructions.md` |
+| `antigravity_youtube_studio_duration_generation_profile_instructions.md` | `catatan-kerja/instruksi-agent/antigravity_youtube_studio_duration_generation_profile_instructions.md` |
+| `antigravity_youtube_studio_editorial_ui_refinement_instructions.md` | `catatan-kerja/instruksi-agent/antigravity_youtube_studio_editorial_ui_refinement_instructions.md` |
+| `antigravity_youtube_studio_editorial_workflow_instructions.md` | `catatan-kerja/instruksi-agent/antigravity_youtube_studio_editorial_workflow_instructions.md` |
+| `antigravity_youtube_studio_hybrid_api_smoke_instructions.md` | `catatan-kerja/instruksi-agent/antigravity_youtube_studio_hybrid_api_smoke_instructions.md` |
+| `antigravity_youtube_studio_hybrid_production_instructions.md` | `catatan-kerja/instruksi-agent/antigravity_youtube_studio_hybrid_production_instructions.md` |
+| `antigravity_youtube_studio_information_architecture_instructions.md` | `catatan-kerja/instruksi-agent/antigravity_youtube_studio_information_architecture_instructions.md` |
+| `antigravity_youtube_studio_instructions.md` | `catatan-kerja/instruksi-agent/antigravity_youtube_studio_instructions.md` |
+| `antigravity_youtube_studio_kb_foundation_instructions.md` | `catatan-kerja/instruksi-agent/antigravity_youtube_studio_kb_foundation_instructions.md` |
+| `antigravity_youtube_studio_multi_speaker_narrative_instructions.md` | `catatan-kerja/instruksi-agent/antigravity_youtube_studio_multi_speaker_narrative_instructions.md` |
+| `antigravity_youtube_studio_production_factory_instructions.md` | `catatan-kerja/instruksi-agent/antigravity_youtube_studio_production_factory_instructions.md` |
+| `antigravity_youtube_studio_production_orchestration_instructions.md` | `catatan-kerja/instruksi-agent/antigravity_youtube_studio_production_orchestration_instructions.md` |
+| `HANDOFF_ANTIGRAVITY_4_CELAH_MCP_PUBLISH.md` | `catatan-kerja/instruksi-agent/HANDOFF_ANTIGRAVITY_4_CELAH_MCP_PUBLISH.md` |
+| `HANDOFF_ANTIGRAVITY_FIX_TOPICCOMPLIANCE_CUSTOM_STORYBOARD.md` | `catatan-kerja/instruksi-agent/HANDOFF_ANTIGRAVITY_FIX_TOPICCOMPLIANCE_CUSTOM_STORYBOARD.md` |
+| `HANDOFF_ANTIGRAVITY_MULTIPLIER_LOKASI_PER_KLIP.md` | `catatan-kerja/instruksi-agent/HANDOFF_ANTIGRAVITY_MULTIPLIER_LOKASI_PER_KLIP.md` |
+| `INSTRUKSI_PERBAIKAN_JADWAL_CFA_MACMINI.md` | `catatan-kerja/instruksi-agent/INSTRUKSI_PERBAIKAN_JADWAL_CFA_MACMINI.md` |
+| `PETUNJUK_CFA_JADWAL_TELEGRAM_HEMAT_TOKEN.md` | `catatan-kerja/instruksi-agent/PETUNJUK_CFA_JADWAL_TELEGRAM_HEMAT_TOKEN.md` |
+| `instruksi_kartun.md` | `catatan-kerja/instruksi-agent/instruksi_kartun.md` |
+| `kartun_tahap1.md` | `catatan-kerja/instruksi-agent/kartun_tahap1.md` |
 
-#### Code Sesudah (Proposed/After):
-```js
-function cleanTitle(t) {
-  return String(t || '').trim().replace(/^["'\s]+|["'\s]+$/g, '').slice(0, 100);
-}
+### catatan-kerja/rencana/
+| Lama | Baru |
+|---|---|
+| `analitik_mingguan_implementation_plan.md` | `catatan-kerja/rencana/analitik_mingguan_implementation_plan.md` |
+| `deconstruct_lab_implementation_plan.md` | `catatan-kerja/rencana/deconstruct_lab_implementation_plan.md` |
+| `finishing_pass_implementation_plan.md` | `catatan-kerja/rencana/finishing_pass_implementation_plan.md` |
+| `finishing_satu_fokus_implementation_plan.md` | `catatan-kerja/rencana/finishing_satu_fokus_implementation_plan.md` |
+| `implementation_plan_video_studio_finishing.md` | `catatan-kerja/rencana/implementation_plan_video_studio_finishing.md` |
+| `multiplier_lab_implementation_plan.md` | `catatan-kerja/rencana/multiplier_lab_implementation_plan.md` |
+| `scraper_foto_produk_implementation_plan.md` | `catatan-kerja/rencana/scraper_foto_produk_implementation_plan.md` |
+| `scraper_foto_produk_revisi_01_plan.md` | `catatan-kerja/rencana/scraper_foto_produk_revisi_01_plan.md` |
+| `vo_narasi_implementation_plan.md` | `catatan-kerja/rencana/vo_narasi_implementation_plan.md` |
+| `rencana_penjadwalan_cocoa.md` | `catatan-kerja/rencana/rencana_penjadwalan_cocoa.md` |
+| `rencana_penjadwalan_rolled_oat.md` | `catatan-kerja/rencana/rencana_penjadwalan_rolled_oat.md` |
 
-function normalizePlatformTitles(raw) {
-  if (!raw || typeof raw !== 'object') return null;
-  const out = {};
-  for (const [platform, value] of Object.entries(raw)) {
-    const t = cleanTitle(value);
-    if (t) out[String(platform).toLowerCase()] = t;
-  }
-  return Object.keys(out).length ? out : null;
-}
+### catatan-kerja/laporan/
+| Lama | Baru |
+|---|---|
+| `LAPORAN_PERBAIKAN_SCRAPER_FOTO_PRODUK.md` | `catatan-kerja/laporan/LAPORAN_PERBAIKAN_SCRAPER_FOTO_PRODUK.md` |
+| `LAPORAN_RILIS_DAN_DEPLOY_SCRAPER_FOTO_PRODUK.md` | `catatan-kerja/laporan/LAPORAN_RILIS_DAN_DEPLOY_SCRAPER_FOTO_PRODUK.md` |
+| `maknagrid_published_facebook_videos.md` | `catatan-kerja/laporan/maknagrid_published_facebook_videos.md` |
 
-...
-    title: cleanTitle(title),
-    caption: String(caption || '').trim(),
-    media_url: String(media_url || '').trim(),
-    caption_facebook: input.caption_facebook ? String(input.caption_facebook).trim() : null,
-    caption_bio: input.caption_bio ? String(input.caption_bio).trim() : null,
-    platform_captions: (input.platform_captions && typeof input.platform_captions === 'object') ? input.platform_captions : null,
-    platform_titles: normalizePlatformTitles(input.platform_titles),
-```
+### catatan-kerja/konten/
+| Lama | Baru |
+|---|---|
+| `naskah.md` | `catatan-kerja/konten/naskah.md` ⚠️ Perlu cek kode dulu |
+| `resep-multiplier.md` | `catatan-kerja/konten/resep-multiplier.md` |
 
----
+### docs/mockups/
+| Lama | Baru |
+|---|---|
+| `mockup_caption_styles.html` | `docs/mockups/mockup_caption_styles.html` |
+| `mockup_finishing_preview.html` | `docs/mockups/mockup_finishing_preview.html` |
+| `mockup_finishing_templates_v3.html` | `docs/mockups/mockup_finishing_templates_v3.html` |
 
-### 2. `lib/publishing-service.js`
+### catatan-kerja/arsip-keluaran/
+| Lama | Baru |
+|---|---|
+| `diff.txt` | `catatan-kerja/arsip-keluaran/diff.txt` |
+| `diff_wsl.txt` | `catatan-kerja/arsip-keluaran/diff_wsl.txt` |
+| `diff_wsl_utf8.txt` | `catatan-kerja/arsip-keluaran/diff_wsl_utf8.txt` |
+| `inspect_output.txt` | `catatan-kerja/arsip-keluaran/inspect_output.txt` |
+| `prompt_output.txt` | `catatan-kerja/arsip-keluaran/prompt_output.txt` |
 
-#### Code Sebelum (Current/Before):
-```js
-    return {
-      accountId: accId,
-      publishMode: validated.publish_mode,
-      mediaType: validated.media_type,
-      title: validated.title,
-      caption: selectedCaption,
-      mediaUrl: validated.media_url,
-      scheduledAt: validated.schedules?.[accId] || validated.scheduled_at,
-      approvalStatus: 'not_required',
-      isAiGenerated: !!validated.is_ai_generated
-    };
-```
+### scripts/arsip-scratch/
+| Lama | Baru |
+|---|---|
+| `scratch-*.mjs` (18 file) | `scripts/arsip-scratch/scratch-*.mjs` |
+| `check-tables.js` | `scripts/arsip-scratch/check-tables.js` |
+| `check_errors.js` | `scripts/arsip-scratch/check_errors.js` |
+| `check_errors.sh` | `scripts/arsip-scratch/check_errors.sh` |
+| `inspect_scheduler_config.mjs` | `scripts/arsip-scratch/inspect_scheduler_config.mjs` |
 
-#### Code Sesudah (Proposed/After):
-```js
-    const selectedTitle = validated.platform_titles?.[platform] || validated.title;
-
-    return {
-      accountId: accId,
-      publishMode: validated.publish_mode,
-      mediaType: validated.media_type,
-      title: selectedTitle,
-      caption: selectedCaption,
-      mediaUrl: validated.media_url,
-      scheduledAt: validated.schedules?.[accId] || validated.scheduled_at,
-      approvalStatus: 'not_required',
-      isAiGenerated: !!validated.is_ai_generated
-    };
-```
-
----
-
-### 3. `apps/mcp/tools.mjs` (Celah 1, 2, 3, 4)
-
-#### Code Sebelum (Current/Before) — `fetchPillarStoryboardSummary`:
-```js
-async function fetchPillarStoryboardSummary(request, campaignId) {
-  const detail = await request(`/api/v2/pillar-campaigns/${encodeURIComponent(campaignId)}`);
-  if (!detail || detail.success === false) return detail;
-  const campaign = detail.campaign || {};
-  const items = Array.isArray(detail.items) ? detail.items : [];
-  const primaryItem = items[0] || null;
-  let contentFlowItem = null;
-  if (primaryItem?.id) {
-    const cfSearch = await request(`/api/content-flow?q=${encodeURIComponent(`opc_${primaryItem.id}`)}`);
-    const rows = Array.isArray(cfSearch?.items) ? cfSearch.items : (Array.isArray(cfSearch?.data) ? cfSearch.data : []);
-    contentFlowItem = rows.find(r => r.id === `opc_${primaryItem.id}` || String(r.source_item_id) === String(primaryItem.id)) || rows[0] || null;
-  }
-  return {
-    success: true,
-    campaign_id: campaign.id || campaignId,
-    campaign_name: campaign.campaign_name,
-    status: campaign.status,
-    execution_mode: campaign.execution_mode,
-    approval_mode: campaign.approval_mode,
-    target_product_id: campaign.target_product_id || null,
-    product_ref_image_path: campaign.product_ref_image_path || null,
-    voice_provider: campaign.voice_provider,
-    voice_persona: campaign.voice_persona,
-    auto_sync_contentflow: Boolean(campaign.auto_sync_contentflow),
-    item_id: primaryItem?.id || null,
-    workflow_status: primaryItem?.workflow_status || null,
-    review_state: primaryItem?.review_state || null,
-    review_revision: primaryItem?.review_revision ?? null,
-    stages: primaryItem ? {
-      generation_status: primaryItem.generation_status,
-      start_frame_status: primaryItem.start_frame_status,
-      tts_status: primaryItem.tts_status,
-      visual_status: primaryItem.visual_status,
-      ffmpeg_status: primaryItem.ffmpeg_status,
-      upload_status: primaryItem.upload_status
-    } : null,
-    output: primaryItem ? {
-      ffmpeg_output_path: primaryItem.ffmpeg_output_path || null,
-      drive_link: primaryItem.drive_link || null,
-      nextcloud_url: primaryItem.nextcloud_url || null
-    } : null,
-    content_flow_item_id: contentFlowItem?.id || null,
-    content_flow_video_id: contentFlowItem?.video_id || null,
-    content_flow_url_asset: contentFlowItem?.url_asset || null,
-    items,
-    stats: detail.stats || null
-  };
-}
-```
-
-#### Code Sesudah (Proposed/After) — `fetchPillarStoryboardSummary`:
-```js
-async function fetchPillarStoryboardSummary(request, campaignId, { includeItems = false } = {}) {
-  const detail = await request(`/api/v2/pillar-campaigns/${encodeURIComponent(campaignId)}`);
-  if (!detail || detail.success === false) return detail;
-  const campaign = detail.campaign || {};
-  const items = Array.isArray(detail.items) ? detail.items : [];
-  const primaryItem = items[0] || null;
-  let contentFlowItem = null;
-  if (primaryItem?.id) {
-    const cfSearch = await request(`/api/content-flow?q=${encodeURIComponent(`opc_${primaryItem.id}`)}`);
-    const rows = Array.isArray(cfSearch?.items) ? cfSearch.items : (Array.isArray(cfSearch?.data) ? cfSearch.data : []);
-    contentFlowItem = rows.find(r => r.id === `opc_${primaryItem.id}` || String(r.source_item_id) === String(primaryItem.id)) || rows[0] || null;
-  }
-  const errorMessage = primaryItem?.error_message || primaryItem?.review_reason || primaryItem?.contentflow_error || null;
-  const generationError = primaryItem?.generation_error || (primaryItem?.generation_status === 'failed' ? (primaryItem?.review_reason || 'Generation failed') : null);
-
-  return {
-    success: true,
-    campaign_id: campaign.id || campaignId,
-    campaign_name: campaign.campaign_name,
-    status: campaign.status,
-    execution_mode: campaign.execution_mode,
-    approval_mode: campaign.approval_mode,
-    target_product_id: campaign.target_product_id || null,
-    product_ref_image_path: campaign.product_ref_image_path || null,
-    voice_provider: campaign.voice_provider,
-    voice_persona: campaign.voice_persona,
-    auto_sync_contentflow: Boolean(campaign.auto_sync_contentflow),
-    item_id: primaryItem?.id || null,
-    workflow_status: primaryItem?.workflow_status || null,
-    review_state: primaryItem?.review_state || null,
-    review_revision: primaryItem?.review_revision ?? null,
-    stages: primaryItem ? {
-      generation_status: primaryItem.generation_status,
-      start_frame_status: primaryItem.start_frame_status,
-      tts_status: primaryItem.tts_status,
-      visual_status: primaryItem.visual_status,
-      ffmpeg_status: primaryItem.ffmpeg_status,
-      upload_status: primaryItem.upload_status,
-      error_message: errorMessage,
-      generation_error: generationError
-    } : null,
-    output: primaryItem ? {
-      ffmpeg_output_path: primaryItem.ffmpeg_output_path || null,
-      drive_link: primaryItem.drive_link || null,
-      nextcloud_url: primaryItem.nextcloud_url || null
-    } : null,
-    content_flow_item_id: contentFlowItem?.id || null,
-    content_flow_video_id: contentFlowItem?.video_id || null,
-    content_flow_url_asset: contentFlowItem?.url_asset || null,
-    ...(includeItems ? { items } : { item_count: items.length }),
-    stats: detail.stats || null
-  };
-}
-```
-
----
-
-### 4. `app/api/v2/pillar-campaigns/[id]/route.js` (Celah 4)
-
-#### Code Sebelum (Current/Before):
-```js
-    const updates = {};
-    if (body.status !== undefined && ['running', 'paused', 'completed', 'draft'].includes(body.status)) {
-      updates.status = body.status;
-    }
-```
-
-#### Code Sesudah (Proposed/After):
-```js
-    const updates = {};
-    if (body.status !== undefined && ['running', 'paused', 'completed', 'draft', 'cancelled'].includes(body.status)) {
-      updates.status = body.status;
-    }
-    ...
-    const campaign = await getPillarCampaign(id);
-    await updatePillarCampaign(id, updates);
-
-    if (updates.status === 'cancelled') {
-      const db = getDb();
-      await db.prepare(`
-        UPDATE pillar_campaign_items
-        SET workflow_status = 'cancelled'
-        WHERE campaign_id = ? AND workflow_status NOT IN ('completed', 'failed')
-      `).run(id);
-      const { pgQuery } = await import('../../../../../lib/db-pg');
-      await pgQuery(`
-        UPDATE pillar_campaign_item_assets
-        SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP
-        WHERE campaign_id = $1 AND status IN ('queued', 'waiting_lane', 'retry_wait')
-      `, [id]).catch(() => {});
-    }
-```
+### File TIDAK dipindah
+| File | Alasan |
+|---|---|
+| `README.md`, `CLAUDE.md`, `AGENTS.md` | Dibaca otomatis agen/alat |
+| `implementation_plan.md` | Rencana aktif ini |
+| `package.json`, `package-lock.json`, `next.config.mjs`, `jsconfig.json`, `middleware.js`, `instrumentation.js` | Konfigurasi aplikasi |
+| `ecosystem.*.js/cjs` | Dirujuk deploy script |
+| `naskah.md` | ⚠️ Dikonfirmasi: nama file di kode (`drive-sync-helper.js`, `scheduler-processors.js`) adalah nama file keluaran dinamis bukan membaca file ini — AMAN dipindah |
+| `db.sqlite` | Dirujuk `scripts/local-staging/setup.js` |

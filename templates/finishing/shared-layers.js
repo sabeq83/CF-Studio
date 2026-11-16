@@ -738,7 +738,7 @@
       bandEl.hidden = styleClass !== 's-minimal';
     }
 
-    // Pure t-driven 0.12s entrance animation (R16.5 / mockup_caption_styles.html:303)
+    // Pure t-driven 0.12s entrance animation (R16.5 / docs/mockups/mockup_caption_styles.html:303)
     const lt = Math.max(0, time - activeChunk.s);
     const k = Math.min(1, Math.max(0, lt / 0.12));
     const sc = 0.9 + 0.1 * k;
