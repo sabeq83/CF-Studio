@@ -1415,7 +1415,8 @@ export function createCfStudioServer(rawRequest) {
     {
       url: z.string().url(),
       category: z.string().max(100).optional(),
-      tags: z.string().max(500).optional()
+      tags: z.string().max(500).optional(),
+      refresh_photo: z.boolean().optional()
     },
     false,
     ({ url, ...args }) => request('/api/v2/products/scrape', { body: { urls: url, ...args } })

@@ -28,7 +28,7 @@ function normalizeUrl(url) {
 export const POST = withTenantContext(async (req) => {
   try {
     const body = await req.json();
-    const { urls, csv_data, category, tags, repair_mode = true } = body;
+    const { urls, csv_data, category, tags, repair_mode = true, refresh_photo = false } = body;
 
     if (!urls && !csv_data) {
       return NextResponse.json({ success: false, error: 'Masukkan daftar URL produk atau file CSV terlebih dahulu.' }, { status: 400 });
@@ -88,7 +88,11 @@ export const POST = withTenantContext(async (req) => {
             await db.prepare('UPDATE product_extractions SET affiliate_link = ? WHERE id = ?').run(affiliate, existing.id);
             updatedCount++;
 
-            if (repair_mode) {
+            if (refresh_photo) {
+              urlsToScrape.push(url);
+              urlAffiliatesMap[url] = affiliate;
+              repairCount++;
+            } else if (repair_mode) {
               const comp = checkMissingComponents(existing);
               if (comp.anyMissing) {
                 urlsToScrape.push(url);
@@ -124,7 +128,10 @@ export const POST = withTenantContext(async (req) => {
         if (url.startsWith('http://') || url.startsWith('https://')) {
           const existing = findExistingProduct(url);
           if (existing) {
-            if (repair_mode) {
+            if (refresh_photo) {
+              urlsToScrape.push(url);
+              repairCount++;
+            } else if (repair_mode) {
               const comp = checkMissingComponents(existing);
               if (comp.anyMissing) {
                 urlsToScrape.push(url);
@@ -162,16 +169,32 @@ export const POST = withTenantContext(async (req) => {
     // Chunk validUrls into batches of 20 (efficient batching)
     const batchSize = 20;
     let enqueuedCount = 0;
+    const jobIds = [];
+    const reservedIds = {};
+    let singleTargetProductId = null;
+
+    if (urlsToScrape.length === 1) {
+      const singleUrl = urlsToScrape[0];
+      const existing = findExistingProduct(singleUrl);
+      singleTargetProductId = existing ? existing.id : `pe_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+      reservedIds[singleUrl] = singleTargetProductId;
+    }
+
     for (let i = 0; i < urlsToScrape.length; i += batchSize) {
       const chunk = urlsToScrape.slice(i, i + batchSize);
-      // Pass the urlAffiliatesMap and repair_mode in the job payload
-      await createJob('product_scraper', { 
+      // Pass urlAffiliatesMap, repair_mode, refresh_photo, and reserved_ids in the job payload
+      const created = await createJob('product_scraper', { 
         urls: chunk, 
         category, 
         tags, 
         url_affiliates_map: urlAffiliatesMap, 
-        repair_mode 
+        repair_mode,
+        refresh_photo: Boolean(refresh_photo),
+        reserved_ids: reservedIds
       });
+      if (created?.id) {
+        jobIds.push(created.id);
+      }
       enqueuedCount += chunk.length;
     }
 
@@ -195,6 +218,8 @@ export const POST = withTenantContext(async (req) => {
       success: true, 
       message, 
       enqueued_count: enqueuedCount,
+      job_ids: jobIds,
+      product_id: singleTargetProductId || undefined,
       skipped_count: skippedCount,
       updated_count: updatedCount,
       new_count: newCount,
