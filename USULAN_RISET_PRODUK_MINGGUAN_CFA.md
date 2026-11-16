@@ -41,6 +41,8 @@ Jadi sebagian besar pipa sudah ada. Yang kurang: **pencarian kandidat**, **statu
 | C. Halaman publik (Terlaris per kategori, pencarian kata kunci) | Claude membuka lewat browser | Shopee sering menampilkan captcha/blokir untuk akses otomatis. **Claude tidak boleh menembus captcha**, jadi opsi ini tidak bisa diandalkan penuh |
 | D. Alat riset pihak ketiga (berbayar) | Ekspor data penjualan per kategori | Akurat, tapi ada biaya |
 
+> Catatan (cek dokumentasi Repliz, 16 Nov 2026): fitur Shopee di Repliz (`/public/addon/shopee/product`) hanya menampilkan produk **toko sendiri** yang terhubung, bukan produk terlaris pasar. Jadi tidak bisa dipakai sebagai sumber riset.
+
 **Rekomendasi:** gabungan **A + B**. A untuk mencari kandidat (30–50 per pekan), B untuk membaca tren dari pekan ke pekan. Pekan pertama memakai "terjual per bulan" sebagai perkiraan, mulai pekan kedua memakai selisih mingguan.
 
 Karena belum ada budget API, langkah membuka Shopee dilakukan lewat browser di Mac Mini oleh skill. Bila halaman meminta login atau captcha, skill berhenti dan meminta man power membantu, bukan memaksa.

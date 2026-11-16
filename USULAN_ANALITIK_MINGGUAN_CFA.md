@@ -1,148 +1,164 @@
 # Usulan: Analitik & Laporan Mingguan + Rencana Konten Pekan Depan
 
-Tanggal: 16 Nov 2026 · Status: usulan (belum dikerjakan)
+Tanggal: 16 Nov 2026 · Versi 2.1 (disempurnakan setelah mempelajari dokumentasi API Repliz `https://api.repliz.com/public-json`) · Status: usulan disetujui arah, **paket Repliz sudah Gold** → Tingkat 1 + Tingkat 2 dikerjakan sekaligus
+
+Rencana teknis: [analitik_mingguan_implementation_plan.md](analitik_mingguan_implementation_plan.md) · Instruksi agent: [antigravity_analitik_mingguan_instructions.md](antigravity_analitik_mingguan_instructions.md)
 
 ---
 
 ## Ringkasan untuk pengguna
 
-Alur yang diusulkan, sekali seminggu (Senin pagi):
+**Kabar baik:** Repliz **sudah menyediakan data performa**, jadi kita tidak perlu ekspor manual atau izin Meta sendiri. Ada dua jenis data:
 
-1. **Web app CF Studio** setiap hari mengambil angka performa video yang sudah tayang (views, like, komentar, share, simpan, klik link) dan menyimpannya.
-2. **Skrip ringan** (tanpa AI) merangkum angka per brand dan per jenis video, lalu menandai video yang bagus dan yang lemah.
-3. **Skill Claude `cfa-analitik`** membaca rangkuman itu, mencari pola ("hook pertanyaan menang di NutriBake", "video resep jam 19.00 lebih tinggi"), lalu menyusun:
-   - **Laporan statistik pekan lalu per brand**, dan
-   - **Rencana konten pekan depan** per brand untuk 4 jenis: multiplier, produk, resep, editorial.
-4. Rencana masuk ke antrean CFA sebagai **draft**. Pengguna menyetujui, lalu `cfa-riset` dan agent lain menjalankannya seperti biasa.
+| Data | Isinya | Paket Repliz minimal |
+|---|---|---|
+| **Statistik per halaman/akun** | Total 28 hari terakhir + angka harian: views, jangkauan, interaksi, pengikut baru, views video | **Standard** |
+| **Statistik per video** | Per posting: views, jangkauan, klik, reaksi, komentar, share (Facebook). Lebih lengkap untuk YouTube, TikTok, Instagram Reels | **Gold** |
 
-**Satu hal harus dipastikan dulu:** di kode sekarang, CF Studio **belum mengambil data performa apa pun dari Repliz**. Yang disimpan baru status tayang, ID posting, dan link posting. Langkah pertama adalah memastikan apakah Repliz menyediakan data performa lewat API (lihat Fase 0).
+**Dua syarat sebelum mulai:**
+1. **Halaman Facebook yang terhubung ke Repliz sebelum 13 Nov 2026 harus disambungkan ulang sekali** (Reconnect di Repliz) agar izin membaca insight aktif. Kalau tidak, views, jangkauan, dan klik akan kosong. Yang tersisa hanya like, komentar, share.
+2. **Cek paket Repliz.** Laporan per brand bisa jalan di paket Standard ke atas. Untuk memetakan **video mana yang bagus**, dibutuhkan paket **Gold**.
 
----
-
-## 1. Kondisi sekarang
-
-| Komponen | Kondisi |
-|---|---|
-| `lib/repliz-client.js` | Hanya: daftar akun, buat/cek/ulang/hapus jadwal, cari konten Threads, komentar. **Tidak ada endpoint performa/insight** |
-| Tabel `publishing_jobs` | Menyimpan `external_post_id`, `external_permalink`, status. **Tidak ada kolom angka performa** |
-| `publishing-repository.js` "metrics" | Hanya hitungan operasional (terjadwal, tayang hari ini, gagal), bukan performa |
-| CFA (`~/cf-autopipeline`) | Tahu jalur, brand, jenis, preset, produk, topik, sudut pandang tiap item. Ini bekal bagus untuk menjelaskan **kenapa** sebuah video menang |
-
-Jadi bahan untuk "menjelaskan" sudah ada. Yang belum ada adalah **angka hasil**.
+Alurnya tetap sama: web app mengumpulkan angka setiap hari, skrip merangkum, skill Claude menganalisa dan menyusun rencana pekan depan, lalu Anda menyetujui.
 
 ---
 
-## 2. Sumber data performa (Fase 0, wajib dicek dulu)
+## 1. Temuan dari dokumentasi Repliz
 
-Urutan pilihan, dari yang paling diharapkan:
+### 1.1 Endpoint yang relevan
 
-| Opsi | Cara | Kelebihan | Kekurangan |
-|---|---|---|---|
-| A. API Repliz | Cek dokumentasi/dukungan Repliz: adakah endpoint statistik per posting atau per akun | Satu pintu untuk FB, IG, YouTube, TikTok, Threads | Belum terkonfirmasi ada. Pencarian web saya tidak menemukan dokumentasi publiknya |
-| B. API platform langsung | Facebook/Instagram lewat Meta Graph API (insight video/reels), YouTube Analytics API | Data paling lengkap (retensi, durasi tonton) | Perlu token per halaman/kanal dan izin aplikasi Meta, pekerjaan setup lebih besar |
-| C. Ekspor manual mingguan | Man power ekspor CSV dari Meta Business Suite / YouTube Studio tiap Senin, unggah ke CF Studio | Bisa jalan minggu ini, tanpa izin API | Tergantung orang, rawan lupa |
+| Endpoint | Fungsi | Paket |
+|---|---|---|
+| `GET /public/account/{accountId}/statistic` | Statistik halaman: pengikut, total 28 hari (views, reach, engagement, profileViews, newFollows, unfollows, videoViews) + angka harian | Standard+ |
+| `GET /public/content?accountId=` | Daftar semua posting di halaman (id, judul, caption, tipe, link, tanggal). Termasuk posting yang **bukan** dari CF Studio | Gold+ |
+| `GET /public/content/{contentId}/statistic?accountId=` | Statistik satu posting, langsung dari platform | Gold+ |
+| `GET /public/schedule/{id}` | Sudah dipakai CF Studio. Memberi ID posting setelah tayang | Premium+ |
 
-**Rekomendasi:** mulai dengan **C** agar laporan pertama bisa keluar cepat, sambil memastikan **A**. Kalau A tidak tersedia, rencanakan **B** untuk Facebook (kanal utama).
+`contentId` = ID posting di platform. CF Studio **sudah menyimpannya** di `publishing_jobs.external_post_id`, jadi menghubungkan angka ke video yang kita produksi tinggal dicocokkan.
 
-Struktur penyimpanan di bawah dibuat sama untuk ketiga opsi, jadi sumber bisa diganti tanpa mengubah laporan.
+### 1.2 Angka yang tersedia per platform (statistik per posting)
+
+| Platform | Angka |
+|---|---|
+| **Facebook** | like, comment, share + insight: **views, reach (penonton unik), clicks, reaction** (total & per jenis). Tidak ada data simpan (save) dan durasi tonton |
+| **YouTube** | views, like, comment + **rata-rata durasi tonton, % ditonton, menit tonton, subscriber +/-, share, sumber trafik (SHORTS, pencarian, dll.)**, angka harian 28 hari. Cache 6 jam |
+| **TikTok** | views, like, comment, share, favourite, **rata-rata ditonton, rasio tonton penuh, retensi per detik**, sumber tayangan, profil penonton |
+| **Instagram Reels** | views, reach, like, comment, share, saved, **rata-rata durasi tonton, skip rate 3 detik pertama** |
+| **Threads** | views, like, replies, repost, quotes, share |
+
+### 1.3 Catatan penting lain
+
+- **Shopee addon** (`/public/addon/shopee/product`) hanya menampilkan produk **toko sendiri** yang terhubung, bukan produk terlaris pasar. Tidak bisa dipakai untuk riset produk (relevan untuk usulan Riset Produk).
+- Repliz punya endpoint **riset TikTok & Threads** (paket Gold+): cari hashtag, video, dan konten pengguna. Ini bisa jadi sumber ide topik tambahan, di luar cakupan usulan ini.
+- Autentikasi memakai Access Key + Secret Key yang sudah tersimpan di pengaturan tenant. Tidak perlu kredensial baru.
 
 ---
 
-## 3. Rancangan
+## 2. Rancangan yang disempurnakan
 
-### 3.1 Web app: tabel angka performa
+### 2.1 Dua tingkat laporan, sesuai paket
 
-Tabel baru `post_metric_snapshots` (per tenant, per schema dev/staging/public):
+| Tingkat | Butuh | Isi laporan |
+|---|---|---|
+| **Tingkat 1: Laporan brand** | Paket Standard+ (bisa langsung) | Per brand/halaman pekan lalu vs pekan sebelumnya: views, jangkauan, interaksi, views video, pengikut baru/hilang. Hari terbaik dalam pekan. Jumlah video tayang dari CF Studio |
+| **Tingkat 2: Peta video** | Paket Gold | Semua di atas + peringkat tiap video, pola yang menang (jenis video, hook, jam tayang, produk, template), dan rencana konten pekan depan berbasis video menang |
 
-| Kolom | Isi |
-|---|---|
-| `tenant_id`, `publishing_job_id`, `platform`, `account_id` | Penghubung ke posting |
-| `external_post_id`, `permalink` | |
-| `captured_at`, `age_hours` | Kapan diambil, umur posting saat itu |
-| `views`, `reach`, `likes`, `comments`, `shares`, `saves`, `link_clicks` | Angka utama (boleh kosong bila platform tidak memberi) |
-| `avg_watch_sec`, `completion_rate` | Bila tersedia |
-| `source` | `repliz` / `meta_api` / `youtube_api` / `csv_upload` |
+Kalau paket belum Gold, Tingkat 1 tetap jalan dan rencana pekan depan disusun dari tren halaman + data produksi CFA. Hasilnya kurang tajam, tapi tetap berguna.
 
-Ditambah:
-- **Pengambil harian** (worker terjadwal di web app): ambil angka untuk posting berumur 1–14 hari. Snapshot disimpan di umur ±24 jam, **72 jam**, dan 7 hari.
-- **Unggah CSV** di halaman Publishing (untuk opsi C), dicocokkan ke posting lewat ID posting atau link.
-- **Tool MCP baru** `cf_get_post_metrics` (filter: tenant, brand, rentang tanggal). Mengembalikan angka + metadata konten (brand, jenis, preset, template finishing, judul/hook, produk, jam tayang).
+### 2.2 Web app CF Studio (dikerjakan Antigravity)
 
-### 3.2 Cara menilai "video bagus" (adil antar video)
+1. **`lib/repliz-client.js`**: tambah fungsi `getReplizAccountStatistic`, `listReplizContent`, `getReplizContentStatistic`.
+2. **Tabel baru:**
+   - `account_metric_daily`: angka harian per akun (dari statistik akun), satu baris per akun per hari.
+   - `post_metric_snapshots`: angka per posting pada umur tertentu (kolom umum: `views`, `reach`, `clicks`, `reactions`, `comments`, `shares`, `saves`, `avg_watch_sec`, `view_pct`, `full_watch_rate`, `skip_rate`, plus `raw_json` untuk angka khusus platform).
+3. **Pengambil otomatis harian** (mis. pukul 03.00):
+   - Statistik akun untuk semua akun Repliz aktif → `account_metric_daily`.
+   - (Gold) Untuk posting berumur 1–14 hari dari `publishing_jobs`: ambil statistik, simpan snapshot di umur **±24 jam, 72 jam, 7 hari**.
+   - (Gold, opsional) `GET /public/content` untuk mencatat posting di luar CF Studio sebagai pembanding.
+   - Jeda antar panggilan dan batasi jumlah per jalan agar tidak membebani Repliz (dokumentasi tidak menyebut batas pemakaian, jadi tetap hemat).
+4. **Deteksi masalah koneksi:** bila `insight` Facebook bernilai kosong, tandai akun "**Perlu reconnect di Repliz**" dan tampilkan di halaman Publishing.
+5. **Tool MCP baru** `cf_get_post_metrics` dan `cf_get_account_metrics` (filter tenant, brand, rentang tanggal). Hasil sudah digabung dengan data konten: brand, jenis video, preset, template finishing, hook, produk, jam tayang.
+6. **Halaman ringkas** "Performa" di web app (opsional, fase akhir): tabel per brand dan daftar video teratas.
 
-- **Pakai angka di umur 72 jam** sebagai pembanding utama. Video tayang Minggu malam tidak kalah hanya karena baru berumur beberapa jam. Video yang belum mencapai 72 jam saat laporan dibuat **ditandai "belum matang"** dan dinilai di laporan pekan berikutnya.
-- **Skor keterlibatan**: `(like + 2×komentar + 3×share + 3×simpan) ÷ views`. Simpan dan share diberi bobot lebih karena paling menandakan konten berguna.
-- **Dibandingkan di dalam kelompoknya** (brand × jenis video), bukan antar brand. Video resep NutriBake dibandingkan dengan video resep NutriBake.
-- **Kategori**: 20% teratas = *Menang*, 20% terbawah = *Lemah*, sisanya *Rata-rata*. Kalau kelompoknya kurang dari 5 video, cukup dilaporkan tanpa label (sampel terlalu kecil).
+### 2.3 Cara menilai video (disesuaikan dengan data Facebook)
 
-### 3.3 Skrip ringan `cfa_analitik.py` (tanpa AI)
+Karena Facebook tidak memberi data simpan dan durasi tonton, skor dibedakan per platform:
 
-Di `~/cf-autopipeline/bin/`, pola sama dengan `cfa_token.py` dan `cfa_laporan_riset.py`:
-- Tarik data pekan lalu (Senin–Minggu) lewat API CF Studio.
-- Gabungkan dengan data item CFA (jalur, topik, sudut pandang, produk, jenis hook).
-- Hitung: total & perubahan dibanding pekan sebelumnya per brand, peringkat video, rata-rata per dimensi (jenis video, jam tayang, hari, preset, template finishing, jenis hook, produk).
-- Keluarkan `analitik/minggu-YYYY-WW.json` (ringkas, hemat token untuk Claude) dan halaman HTML laporan.
+| Platform | Skor keterlibatan | Skor klik (penting untuk afiliasi) |
+|---|---|---|
+| Facebook | `(reaksi + 2×komentar + 3×share) ÷ reach` | `clicks ÷ reach` |
+| YouTube | `% ditonton` + `(like + 2×komentar + 3×share) ÷ views` | – |
+| TikTok / IG Reels | `rasio tonton penuh` / `1 − skip rate` + interaksi ÷ views | klik website (TikTok) |
 
-### 3.4 Skill `cfa-analitik` (Claude)
+Aturan yang tetap:
+- Dibandingkan pada **umur 72 jam**. Video yang belum 72 jam saat laporan dibuat ditandai "belum matang" dan dinilai pekan depan.
+- Dibandingkan **di dalam kelompoknya** (brand × jenis video).
+- 20% teratas = *Menang*, 20% terbawah = *Lemah*. Kelompok kurang dari 5 video tidak diberi label.
+- Untuk Facebook, **reach lebih penting dari views** (views bisa terhitung berulang dari orang yang sama).
 
-Tugas Claude hanya bagian yang butuh penalaran:
-1. Baca JSON ringkasan (bukan data mentah, agar hemat token).
-2. Tulis **temuan** per brand: 3 hal yang berhasil, 2 yang tidak, dengan bukti angka.
-3. Susun **rencana pekan depan** per brand dengan pola alokasi **70 / 20 / 10**:
-   - 70% mengulang pola yang menang (topik/sudut/hook/jam serupa),
-   - 20% variasi dari pola menang,
-   - 10% percobaan baru.
-4. Untuk tiap jenis video:
+### 2.4 Skrip `cfa_analitik.py` dan skill `cfa-analitik`
 
-| Jenis | Isi rencana |
-|---|---|
-| Multiplier | Video menang mana yang dibuat ulang dengan sudut baru, berapa variasi |
-| Produk | Produk mana yang dipertahankan, mana yang diganti (terhubung ke usulan Riset Produk Mingguan) |
-| Resep | Tema resep, produk yang dipakai, panjang ideal |
-| Editorial | Topik & sudut pandang edukasi, jenis hook |
+Tidak berubah dari versi 1, dengan penyesuaian:
+- Skrip menarik data lewat tool MCP/API CF Studio (bukan langsung ke Repliz), jadi kunci Repliz tetap hanya di server.
+- Ringkasan JSON memuat dua bagian: `brand_summary` (Tingkat 1) dan `video_ranking` + `patterns` (Tingkat 2, bila ada).
+- Skill menulis laporan + rencana pekan depan dengan pola **70% ulang pola menang / 20% variasi / 10% percobaan**, untuk multiplier, produk, resep, dan editorial. Rencana masuk antrean CFA sebagai **draft** dan menunggu persetujuan Anda.
+- Untuk video produk, skor klik dipakai menentukan produk **lanjut** atau **diganti** (terhubung ke usulan Riset Produk).
 
-5. Simpan rencana ke antrean CFA sebagai **draft** (lewat helper `antrean.py`, perintah baru mis. `antrean.py rencana-minggu <file>`). Tidak ada yang diproduksi sebelum pengguna bilang "setuju".
-
-### 3.5 Format laporan (contoh isi)
+### 2.5 Contoh isi laporan
 
 ```
 NutriBake · Pekan 46 (9–15 Nov)
-Tayang 14 video · Views 48.200 (+18%) · Skor keterlibatan 4,1% (+0,6)
-Menang: "Brownies tanpa mixer" (resep, 12.400 views, 310 simpan)
-Lemah: 3 video produk dengan hook manfaat umum (<800 views)
-Pola: hook pertanyaan 2,3× lebih tinggi dari hook pernyataan; jam 19.00 terbaik
-Rencana pekan 47: 5 resep (3 ulang pola brownies), 3 produk (ganti 1), 2 multiplier dari "Brownies tanpa mixer", 2 editorial
+Halaman: views 48.200 (+18%) · jangkauan 31.500 (+12%) · pengikut baru 214
+Video CF Studio tayang: 14 (resep 6, produk 4, multiplier 2, editorial 2)
+
+Menang
+- "Brownies tanpa mixer" (resep) · jangkauan 9.800 · 41 share · klik 2,1%
+- "3 kesalahan bikin cookies" (editorial) · jangkauan 6.200 · 63 komentar
+Lemah
+- 3 video produk dengan hook manfaat umum · jangkauan < 900
+
+Pola
+- Hook pertanyaan: jangkauan 2,3× hook pernyataan (8 vs 6 video)
+- Tayang 19.00: terbaik untuk resep; 12.00: terbaik untuk produk
+- Template Recipe Pop: klik lebih tinggi dari tanpa template
+
+Rencana pekan 47 (draft)
+- Resep 5: 3 mengulang pola "tanpa mixer", 1 variasi, 1 baru
+- Produk 3: pertahankan Premix Cocoa, ganti 2 produk klik rendah
+- Multiplier 2: dari "Brownies tanpa mixer"
+- Editorial 2: format "kesalahan umum"
 ```
 
 ---
 
-## 4. Jadwal mingguan
+## 3. Jadwal mingguan
 
-| Hari/jam | Kegiatan | Pelaku |
+| Waktu | Kegiatan | Pelaku |
 |---|---|---|
-| Setiap hari | Ambil angka performa | Web app (otomatis) |
-| Senin 07.00 | `cfa_analitik.py` lalu skill `cfa-analitik` | Tugas terjadwal Claude Desktop (diatur pengguna sendiri lewat UI) |
-| Senin pagi | Pengguna baca laporan, setujui/ubah rencana | Pengguna |
-| Senin siang | Rencana masuk ke jalur, `cfa-riset` berjalan seperti biasa | CFA |
-
-Untuk opsi C (CSV), man power mengunggah CSV paling lambat Senin 06.30.
+| Setiap hari 03.00 | Ambil statistik akun (+ per video bila Gold) | Web app |
+| Senin 07.00 | `cfa_analitik.py` lalu skill `cfa-analitik` | Tugas terjadwal Claude Desktop (diatur sendiri oleh pengguna lewat UI) |
+| Senin pagi | Baca laporan, setujui/ubah rencana | Pengguna |
+| Senin siang | Rencana masuk jalur, `cfa-riset` berjalan | CFA |
 
 ---
 
-## 5. Tahapan kerja
+## 4. Tahapan kerja
 
-| Fase | Isi | Eksekutor |
+| Fase | Isi | Pelaku |
 |---|---|---|
-| 0 | Pastikan apakah Repliz punya API performa. Tentukan opsi A/B/C | Pengguna + Claude |
-| 1 | Tabel `post_metric_snapshots`, unggah CSV, tool MCP `cf_get_post_metrics` | Antigravity |
-| 2 | `cfa_analitik.py` + halaman HTML laporan | Claude (skrip CFA) |
-| 3 | Skill `cfa-analitik` + perintah `antrean.py rencana-minggu` | Claude |
-| 4 | Pengambil harian otomatis (Repliz atau Meta/YouTube API) | Antigravity |
+| 0a | **Reconnect** semua halaman Facebook di Repliz (yang terhubung sebelum 13 Nov 2026) | Pengguna / man power |
+| 0b | ~~Cek paket Repliz~~ → **sudah Gold** (16 Nov 2026) | Selesai |
+| 0c | Uji 1 halaman: panggil statistik akun & 1 posting, pastikan `insight` terisi | Antigravity |
+| 1 | Fungsi Repliz baru, tabel `account_metric_daily`, pengambil harian, tool MCP `cf_get_account_metrics` → **Laporan Tingkat 1 bisa jalan** | Antigravity |
+| 2 | `cfa_analitik.py` + skill `cfa-analitik` versi Tingkat 1 | Claude |
+| 3 | (Gold) Tabel `post_metric_snapshots`, snapshot 24j/72j/7h, tool `cf_get_post_metrics`, penanda "perlu reconnect" | Antigravity |
+| 4 | Skill versi Tingkat 2: peringkat video, pola, rencana 70/20/10, kirim draft ke antrean | Claude |
 | 5 | Uji 2 pekan berjalan, sesuaikan bobot skor | Bersama |
 
-## 6. Risiko & catatan
+## 5. Risiko & catatan
 
-- **Sampel kecil.** Satu brand bisa hanya 5–15 video per pekan, jadi pola harus dibaca hati-hati. Laporan wajib menyebut jumlah video tiap kelompok, dan Claude tidak boleh menyimpulkan dari kurang dari 3 video.
-- **Views Facebook bisa naik turun karena distribusi algoritme**, bukan kualitas konten. Karena itu skor keterlibatan lebih penting daripada views mentah.
-- **Klik link afiliasi** paling dekat ke penjualan. Bila memakai link Shopee berkode, data klik/komisi dari dasbor Shopee Affiliate bisa ditambahkan nanti sebagai kolom `link_clicks`/`orders`.
-- Biaya token kecil karena Claude hanya membaca ringkasan, bukan data per posting.
+- **Tanpa reconnect**, angka utama Facebook kosong. Ini langkah paling penting dan paling mudah terlewat.
+- **Tanpa paket Gold**, tidak ada peringkat per video. Laporan tetap ada, tapi rencana pekan depan kurang tajam.
+- **Sampel kecil:** satu brand bisa hanya 5–15 video per pekan. Laporan wajib menyebut jumlah video tiap kelompok, dan pola dari kurang dari 3 video tidak boleh disimpulkan.
+- **Klik Facebook** mencakup semua klik di posting (bukan hanya link afiliasi). Untuk angka penjualan nyata, nanti bisa ditambah data klik/pesanan dari dasbor Shopee Affiliate.
+- Biaya token kecil: Claude hanya membaca ringkasan, bukan data mentah.

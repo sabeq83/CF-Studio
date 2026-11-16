@@ -1,0 +1,2119 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Finishing Satu Fokus, Skin General & Babak Natural — MAKNA Flow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=Inter:wght@400;500;600;700;800&family=Montserrat:ital,wght@0,500;0,600;0,700;0,800;0,900;1,700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================================================
+       1. TOKEN DESAIN MANDIRI (SELF-CONTAINED THEME) - HALAMAN PEMBUNGKUS
+       ========================================================================== */
+    :root[data-theme="dark"] {
+      --surface: #0b0f19;
+      --surface-raised: #111827;
+      --surface-subtle: #1f2937;
+      --surface-interactive: #283548;
+      --border-color: #374151;
+      --border-subtle: #1f2937;
+      --text-primary: #f9fafb;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --action-primary: #f59e0b;
+      --action-primary-hover: #d97706;
+      --on-action-primary: #000000;
+      --status-success: #10b981;
+      --status-success-soft: rgba(16, 185, 129, 0.18);
+      --status-danger: #ef4444;
+      --status-danger-soft: rgba(239, 68, 68, 0.22);
+      --status-warning: #f59e0b;
+      --status-info: #3b82f6;
+      --focus-ring: #f59e0b;
+      --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+    }
+
+    :root[data-theme="light"] {
+      --surface: #f3f4f6;
+      --surface-raised: #ffffff;
+      --surface-subtle: #f9fafb;
+      --surface-interactive: #e5e7eb;
+      --border-color: #d1d5db;
+      --border-subtle: #e5e7eb;
+      --text-primary: #111827;
+      --text-secondary: #4b5563;
+      --text-muted: #6b7280;
+      --action-primary: #d97706;
+      --action-primary-hover: #b45309;
+      --on-action-primary: #ffffff;
+      --status-success: #059669;
+      --status-success-soft: rgba(5, 150, 105, 0.12);
+      --status-danger: #dc2626;
+      --status-danger-soft: rgba(220, 38, 38, 0.15);
+      --status-warning: #d97706;
+      --status-info: #2563eb;
+      --focus-ring: #d97706;
+      --shadow-card: 0 10px 20px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--surface);
+      color: var(--text-primary);
+      line-height: 1.5;
+      padding: 1.5rem;
+      min-height: 100vh;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    h1 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.2rem 0.55rem;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .badge-review { background: var(--status-warning); color: #000; }
+    .badge-ok { background: var(--status-success-soft); color: var(--status-success); border: 1px solid var(--status-success); }
+    .badge-danger { background: var(--status-danger-soft); color: var(--status-danger); border: 1px solid var(--status-danger); }
+
+    .theme-toggle-btn {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 0.45rem 0.9rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .theme-toggle-btn:hover { background: var(--border-color); }
+
+    /* Layout Grid */
+    .layout-grid {
+      display: grid;
+      grid-template-columns: 430px 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+    @media (max-width: 980px) {
+      .layout-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Screen Preview Stage */
+    .screen-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-color);
+      border-radius: 1rem;
+      padding: 1.25rem;
+      box-shadow: var(--shadow-card);
+      position: sticky;
+      top: 1.5rem;
+    }
+
+    .stage-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.9rem;
+      font-size: 0.85rem;
+    }
+
+    /* 9:16 Canvas Phone Container */
+    .phone-viewport {
+      width: 360px;
+      height: 640px;
+      border-radius: 2rem;
+      overflow: hidden;
+      position: relative;
+      background: #000;
+      border: 6px solid #222;
+      box-shadow: 0 20px 40px -10px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.15);
+      container-type: inline-size;
+      user-select: none;
+    }
+
+    .video-backdrop {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background-size: cover;
+      background-position: center;
+      transition: background-image 0.4s ease;
+      filter: brightness(0.92) contrast(1.05);
+    }
+    .video-backdrop::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0) 25%, rgba(0,0,0,0.1) 60%, rgba(0,0,0,0.7) 100%);
+      pointer-events: none;
+    }
+
+    /* Zone Visualizer Guidelines */
+    .zone-guides {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 99;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .zone-guides.active { opacity: 1; }
+    .zone-box {
+      position: absolute;
+      left: 0;
+      right: 15%;
+      border: 1px dashed rgba(255, 255, 255, 0.4);
+      display: flex;
+      align-items: flex-start;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.9);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .zone-top { top: 12%; height: 28%; background: rgba(59, 130, 246, 0.12); border-color: rgba(59, 130, 246, 0.6); }
+    .zone-mid { top: 40%; height: 20%; background: rgba(245, 158, 11, 0.12); border-color: rgba(245, 158, 11, 0.6); }
+    .zone-bot { top: 64%; height: 12%; background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.6); }
+    .zone-right-gutter {
+      position: absolute;
+      top: 0; bottom: 0; right: 0; width: 15%;
+      background: rgba(239, 68, 68, 0.15);
+      border-left: 1px dashed rgba(239, 68, 68, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      writing-mode: vertical-rl;
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: rgba(239, 68, 68, 0.9);
+    }
+
+    /* Video Player Controls */
+    .player-controls {
+      width: 100%;
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .scrubber-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .time-slider {
+      flex: 1;
+      height: 6px;
+      -webkit-appearance: none;
+      background: var(--surface-interactive);
+      border-radius: 999px;
+      outline: none;
+    }
+    .time-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--action-primary);
+      cursor: pointer;
+      box-shadow: 0 0 6px rgba(0,0,0,0.4);
+    }
+    .time-display {
+      font-size: 0.8rem;
+      font-family: monospace;
+      font-weight: 700;
+      min-width: 5.5rem;
+      text-align: right;
+    }
+
+    .play-btn-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .btn-play {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      padding: 0.4rem 0.9rem;
+      border-radius: 0.4rem;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.82rem;
+    }
+    .btn-play:hover { background: var(--action-primary-hover); }
+
+    /* Control Panel & Specifications */
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-color);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      box-shadow: var(--shadow-card);
+    }
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      margin-bottom: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--text-primary);
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    .form-group:last-child { margin-bottom: 0; }
+    .form-label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    /* Segmented Button Groups */
+    .seg-group {
+      display: flex;
+      background: var(--surface);
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      padding: 3px;
+      gap: 3px;
+      flex-wrap: wrap;
+    }
+    .seg-btn {
+      flex: 1;
+      min-width: 90px;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      padding: 0.45rem 0.7rem;
+      border-radius: 0.35rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+    }
+    .seg-btn:hover { color: var(--text-primary); background: var(--surface-interactive); }
+    .seg-btn.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    /* Mode Sebelum vs Sesudah Giant Toggle */
+    .mode-toggle-card {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(59, 130, 246, 0.08));
+      border: 2px solid var(--action-primary);
+    }
+    .mode-seg-btn {
+      padding: 0.65rem 1rem;
+      font-size: 0.9rem;
+    }
+
+    .toggles-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin-top: 0.8rem;
+    }
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+    .toggle-row input {
+      cursor: pointer;
+      accent-color: var(--action-primary);
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Skin Pill Selector */
+    .skin-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 0.5rem;
+    }
+    .skin-card {
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      padding: 0.6rem;
+      cursor: pointer;
+      background: var(--surface);
+      transition: all 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+    .skin-card:hover { border-color: var(--action-primary); }
+    .skin-card.active {
+      border-color: var(--action-primary);
+      background: var(--surface-interactive);
+      outline: 2px solid var(--action-primary);
+    }
+    .skin-swatches {
+      display: flex;
+      gap: 4px;
+      height: 12px;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .skin-swatch { flex: 1; height: 100%; }
+    .skin-name { font-size: 0.75rem; font-weight: 700; color: var(--text-primary); }
+    .skin-desc { font-size: 0.68rem; color: var(--text-muted); line-height: 1.2; }
+
+    /* Action Toolbar for Problem Solution */
+    .action-btn-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.75rem;
+    }
+    .btn-action {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 0.4rem 0.75rem;
+      border-radius: 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-action:hover { background: var(--border-color); }
+
+    /* Specification Tables */
+    .spec-table-container {
+      margin-top: 2rem;
+      overflow-x: auto;
+    }
+    .spec-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      text-align: left;
+    }
+    .spec-table th, .spec-table td {
+      padding: 0.65rem 0.85rem;
+      border: 1px solid var(--border-color);
+    }
+    .spec-table th {
+      background: var(--surface-subtle);
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    /* ==========================================================================
+       2. TOKEN & CSS OVERLAY FINISHING (100% PURE VAR(--FX-*), ZERO HARDCODED HEX)
+       ========================================================================== */
+    .overlay-stage {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+      overflow: hidden;
+    }
+
+    /* Common typography token bindings */
+    .fx-display-font { font-family: var(--fx-font-display); text-transform: var(--fx-text-case); }
+    .fx-body-font { font-family: var(--fx-font-body); }
+    .fx-ui-font { font-family: var(--fx-font-ui); }
+
+    /* --- Hook Card (Zona Tengah, 40-60%) --- */
+    .fx-hook-layer {
+      position: absolute;
+      top: 44cqh;
+      left: 6cqw;
+      right: 18cqw;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.6cqw;
+      opacity: 0;
+      transform: scale(0.92);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .fx-hook-layer.active { opacity: 1; transform: scale(1); }
+    .fx-hook-l1 {
+      font-family: var(--fx-font-display);
+      font-size: var(--fx-size-display-sm);
+      color: var(--fx-card-ink);
+      line-height: 1.05;
+      text-transform: var(--fx-text-case);
+      -webkit-text-stroke: var(--fx-stroke-width) var(--fx-stroke);
+      filter: drop-shadow(0 0.5cqw 1cqw rgba(0,0,0,0.7));
+    }
+    .fx-hook-l2 {
+      font-family: var(--fx-font-display);
+      font-size: var(--fx-size-display);
+      color: var(--fx-accent);
+      line-height: 1.0;
+      text-transform: var(--fx-text-case);
+      -webkit-text-stroke: var(--fx-stroke-width) var(--fx-stroke);
+      filter: drop-shadow(0 0.8cqw 1.2cqw rgba(0,0,0,0.8));
+    }
+
+    /* --- Keyword Punch (Zona Tengah) --- */
+    .fx-punch-layer {
+      position: absolute;
+      top: 48cqh;
+      left: 5cqw;
+      right: 18cqw;
+      text-align: center;
+      font-family: var(--fx-font-display);
+      font-size: var(--fx-size-display);
+      color: var(--fx-accent);
+      line-height: 1.0;
+      text-transform: var(--fx-text-case);
+      -webkit-text-stroke: var(--fx-stroke-width) var(--fx-stroke);
+      filter: drop-shadow(0 1cqw 1.5cqw rgba(0,0,0,0.9));
+      opacity: 0;
+      transform: scale(0.85);
+      transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .fx-punch-layer.active { opacity: 1; transform: scale(1); }
+
+    /* --- Subtitle (Zona Bawah, 64-76%) --- */
+    .fx-sub-layer {
+      position: absolute;
+      top: 68cqh;
+      left: 6cqw;
+      right: 18cqw;
+      text-align: center;
+      font-family: var(--fx-font-body);
+      font-size: var(--fx-size-sub);
+      font-weight: 800;
+      color: var(--fx-card-ink);
+      line-height: 1.25;
+      text-transform: var(--fx-text-case);
+      -webkit-text-stroke: var(--fx-stroke-width) var(--fx-stroke);
+      filter: drop-shadow(0 0.6cqw 1cqw rgba(0,0,0,0.8));
+    }
+    .fx-sub-layer .hl {
+      color: var(--fx-accent);
+    }
+    .fx-sub-layer.compact {
+      font-size: calc(var(--fx-size-sub) * 0.9);
+      max-width: 70cqw;
+      margin: 0 auto;
+    }
+
+    /* --- Watermark Brand --- */
+    .fx-watermark {
+      position: absolute;
+      top: 3.5cqh;
+      left: 5cqw;
+      display: flex;
+      align-items: center;
+      gap: 1.5cqw;
+      background: var(--fx-card);
+      color: var(--fx-card-ink);
+      padding: 1cqw 2.2cqw;
+      border-radius: var(--fx-radius);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    }
+    .fx-watermark-mark {
+      width: 4cqw;
+      height: 4cqw;
+      background: var(--fx-accent);
+      color: var(--fx-accent-ink);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2cqw;
+      font-weight: 900;
+      font-family: var(--fx-font-ui);
+    }
+    .fx-watermark-name {
+      font-size: var(--fx-size-meta);
+      font-family: var(--fx-font-ui);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    /* --- Zona Atas: Daftar Bahan (Recipe & Ramuan) --- */
+    .fx-ing-card {
+      position: absolute;
+      top: 13cqh;
+      left: 5cqw;
+      max-width: 58cqw;
+      display: flex;
+      flex-direction: column;
+      gap: 1cqw;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+    .fx-ing-card.active { opacity: 1; }
+    .fx-ing-header {
+      display: flex;
+      align-items: center;
+      gap: 1.2cqw;
+      font-family: var(--fx-font-ui);
+      font-size: var(--fx-size-label);
+      font-weight: 700;
+      color: var(--fx-card-ink);
+      text-transform: var(--fx-text-case);
+      background: var(--fx-card);
+      padding: 0.8cqw 2cqw;
+      border-radius: var(--fx-radius);
+      width: fit-content;
+      backdrop-filter: blur(8px);
+    }
+    .fx-ing-chips {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8cqw;
+    }
+    .fx-chip-item {
+      display: flex;
+      align-items: center;
+      gap: 1.2cqw;
+      background: var(--fx-chip);
+      color: var(--fx-chip-ink);
+      padding: 1.1cqw 2.4cqw;
+      border-radius: var(--fx-radius);
+      font-family: var(--fx-font-body);
+      font-size: var(--fx-size-body);
+      font-weight: 600;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.18);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      transform: translateX(0);
+      transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .fx-chip-item.new-chip {
+      animation: chipSlideIn 0.3s ease forwards;
+    }
+    @keyframes chipSlideIn {
+      from { opacity: 0; transform: translateX(-15cqw); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .fx-chip-check {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.8cqw;
+      height: 2.8cqw;
+      background: var(--fx-accent);
+      color: var(--fx-accent-ink);
+      border-radius: 50%;
+      font-size: 1.8cqw;
+      font-weight: 900;
+    }
+    .fx-chip-name { font-weight: 600; }
+    .fx-chip-qty {
+      font-size: var(--fx-size-meta);
+      opacity: 0.8;
+      font-weight: 500;
+      margin-left: 0.4cqw;
+    }
+
+    /* Stack mode Sebelum: font besar, tumpuk sampai 4 + overflow */
+    .fx-ing-card.mode-sebelum .fx-ing-header {
+      font-size: 2.9cqw;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+    .fx-ing-card.mode-sebelum .fx-chip-item {
+      font-size: 3.3cqw;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 1.4cqw 3cqw;
+    }
+    .fx-chip-overflow {
+      background: var(--fx-card);
+      color: var(--fx-card-ink);
+      padding: 0.8cqw 2cqw;
+      border-radius: var(--fx-radius);
+      font-family: var(--fx-font-ui);
+      font-size: 2.2cqw;
+      font-weight: 700;
+      width: fit-content;
+    }
+
+    /* --- Zona Atas: Label Langkah (Step) --- */
+    .fx-step-badge {
+      position: absolute;
+      top: 13cqh;
+      right: 18cqw;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.4cqw;
+      opacity: 0;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .fx-step-badge.active { opacity: 1; }
+    .fx-step-badge.mode-sesudah {
+      /* Sesudah: posisi rapi di kiri atas bergiliran */
+      right: auto;
+      left: 5cqw;
+      align-items: flex-start;
+    }
+    .fx-step-pill {
+      background: var(--fx-accent);
+      color: var(--fx-accent-ink);
+      font-family: var(--fx-font-ui);
+      font-size: var(--fx-size-label);
+      font-weight: 800;
+      padding: 0.8cqw 2.2cqw;
+      border-radius: var(--fx-radius);
+      text-transform: var(--fx-text-case);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+    }
+    .fx-step-text {
+      background: var(--fx-card);
+      color: var(--fx-card-ink);
+      font-family: var(--fx-font-body);
+      font-size: var(--fx-size-body);
+      font-weight: 600;
+      padding: 0.8cqw 2.2cqw;
+      border-radius: var(--fx-radius);
+      max-width: 50cqw;
+      backdrop-filter: blur(8px);
+    }
+
+    /* --- Zona Atas: Kartu Produk --- */
+    .fx-product-card {
+      position: absolute;
+      top: 14cqh;
+      left: 5cqw;
+      right: 18cqw;
+      background: var(--fx-card);
+      color: var(--fx-card-ink);
+      border-radius: var(--fx-radius);
+      padding: 2cqw 3cqw;
+      display: flex;
+      align-items: center;
+      gap: 2.5cqw;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+      opacity: 0;
+      transform: translateY(-5px);
+      transition: all 0.25s ease;
+    }
+    .fx-product-card.active { opacity: 1; transform: translateY(0); }
+    .fx-product-icon {
+      width: 9cqw;
+      height: 9cqw;
+      background: var(--fx-chip);
+      color: var(--fx-chip-ink);
+      border-radius: 1.5cqw;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4cqw;
+      flex-shrink: 0;
+    }
+    .fx-product-info { flex: 1; overflow: hidden; }
+    .fx-product-tag {
+      font-family: var(--fx-font-ui);
+      font-size: var(--fx-size-meta);
+      font-weight: 800;
+      color: var(--fx-accent);
+      letter-spacing: 0.04em;
+      text-transform: var(--fx-text-case);
+    }
+    .fx-product-name {
+      font-family: var(--fx-font-body);
+      font-size: var(--fx-size-body);
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .fx-product-spec {
+      font-family: var(--fx-font-ui);
+      font-size: var(--fx-size-meta);
+      color: var(--fx-card-muted);
+    }
+
+    /* --- Zona Atas: Save Prompt & CTA --- */
+    .fx-save-card {
+      position: absolute;
+      top: 14cqh;
+      left: 6cqw;
+      right: 18cqw;
+      background: var(--fx-card);
+      color: var(--fx-card-ink);
+      border-radius: var(--fx-radius);
+      padding: 2cqw 3cqw;
+      text-align: center;
+      backdrop-filter: blur(8px);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+    .fx-save-card.active { opacity: 1; }
+    .fx-save-title { font-family: var(--fx-font-body); font-size: var(--fx-size-body); font-weight: 700; }
+    .fx-save-sub { font-family: var(--fx-font-ui); font-size: var(--fx-size-meta); color: var(--fx-card-muted); }
+
+    .fx-cta-pill {
+      position: absolute;
+      top: 15cqh;
+      left: 6cqw;
+      right: 18cqw;
+      background: var(--fx-accent);
+      color: var(--fx-accent-ink);
+      font-family: var(--fx-font-ui);
+      font-size: var(--fx-size-body);
+      font-weight: 800;
+      text-transform: var(--fx-text-case);
+      padding: 1.8cqw 3cqw;
+      border-radius: var(--fx-radius);
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5cqw;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+    .fx-cta-pill.active { opacity: 1; }
+
+    /* --- Babak Problem Solution: Mode SEBELUM (Pill 1 MASALAH + Bar Progres) --- */
+    .fx-old-chapter-box {
+      position: absolute;
+      top: 13cqh;
+      left: 5cqw;
+      display: flex;
+      flex-direction: column;
+      gap: 1cqw;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .fx-old-chapter-box.active { opacity: 1; }
+    .fx-old-chapter-pill {
+      display: flex;
+      align-items: center;
+      gap: 1.5cqw;
+      background: var(--fx-card);
+      color: #ffffff;
+      padding: 1.2cqw 2.8cqw;
+      border-radius: 99cqw;
+      font-family: var(--fx-font-ui);
+      font-size: 2.8cqw;
+      font-weight: 900;
+      text-transform: uppercase;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .fx-old-chapter-num {
+      width: 4.5cqw;
+      height: 4.5cqw;
+      border-radius: 50%;
+      background: var(--active-phase-color, #e5484d);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5cqw;
+      font-weight: 900;
+    }
+    .fx-old-track {
+      display: flex;
+      gap: 1cqw;
+      width: 45cqw;
+    }
+    .fx-old-track span {
+      flex: 1;
+      height: 0.9cqw;
+      background: rgba(255,255,255,0.25);
+      border-radius: 99cqw;
+    }
+    .fx-old-track span.filled {
+      background: var(--active-phase-color, #e5484d);
+    }
+
+    /* --- Babak Problem Solution: Mode SESUDAH (Kartu Natural .x-phase) --- */
+    .fx-natural-phase-card {
+      position: absolute;
+      top: 13cqh;
+      left: 5cqw;
+      max-width: 62cqw;
+      background: var(--fx-card);
+      color: var(--fx-card-ink);
+      border-left: 1.2cqw solid var(--active-phase-color, var(--fx-phase-problem));
+      border-radius: 1.6cqw;
+      padding: 1.4cqw 2.6cqw;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.35);
+      backdrop-filter: blur(8px);
+      opacity: 0;
+      transform: translateX(-10px);
+      transition: all 0.25s ease;
+    }
+    .fx-natural-phase-card.active { opacity: 1; transform: translateX(0); }
+    .fx-natural-lead {
+      display: block;
+      font-family: var(--fx-font-ui);
+      font-size: var(--fx-size-label);
+      font-weight: 700;
+      color: var(--active-phase-color, var(--fx-phase-problem));
+      letter-spacing: 0.02em;
+    }
+    .fx-natural-line {
+      display: block;
+      margin-top: 0.6cqw;
+      font-family: var(--fx-font-body);
+      font-size: var(--fx-size-body);
+      font-weight: 600;
+      line-height: 1.25;
+    }
+    .fx-phase-dots {
+      display: flex;
+      gap: 0.8cqw;
+      margin-top: 1cqw;
+    }
+    .fx-phase-dots b {
+      width: 1.2cqw;
+      height: 1.2cqw;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+    }
+    .fx-phase-dots b.current {
+      background: var(--active-phase-color, var(--fx-phase-problem));
+      transform: scale(1.3);
+    }
+
+    /* --- Callouts (Problem Solution) --- */
+    .fx-callout-pin {
+      position: absolute;
+      background: var(--fx-card);
+      color: var(--fx-card-ink);
+      border-radius: var(--fx-radius);
+      padding: 1.2cqw 2.4cqw;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      opacity: 0;
+      transform: scale(0.9);
+      transition: all 0.2s ease;
+    }
+    .fx-callout-pin.active { opacity: 1; transform: scale(1); }
+    .fx-callout-text { font-family: var(--fx-font-ui); font-size: var(--fx-size-label); font-weight: 800; color: var(--fx-accent); }
+    .fx-callout-sub { font-family: var(--fx-font-body); font-size: var(--fx-size-meta); color: var(--fx-card-muted); }
+
+    /* --- Timing Badge & Disclaimer (Ramuan Ritual) --- */
+    .fx-timing-badge {
+      position: absolute;
+      top: 13cqh;
+      left: 5cqw;
+      background: var(--fx-card);
+      color: var(--fx-card-ink);
+      border-radius: var(--fx-radius);
+      padding: 1.2cqw 2.4cqw;
+      display: flex;
+      align-items: center;
+      gap: 1.5cqw;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .fx-timing-badge.active { opacity: 1; }
+    .fx-timing-emoji { font-size: 3.5cqw; }
+    .fx-timing-title { font-family: var(--fx-font-ui); font-size: var(--fx-size-label); font-weight: 800; color: var(--fx-accent); }
+    .fx-timing-sub { font-family: var(--fx-font-body); font-size: var(--fx-size-meta); color: var(--fx-card-muted); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>
+          <span>🎬 Finishing Pass: "Satu Fokus", Skin General & Babak Natural</span>
+          <span class="badge badge-review">Gerbang Review Pengguna</span>
+        </h1>
+        <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.2rem;">
+          Simulasi interaktif perbandingan perilaku overlay <strong>Sebelum</strong> (penumpukan teks) vs <strong>Sesudah</strong> (Satu Fokus & Skin General).
+        </p>
+      </div>
+      <button class="theme-toggle-btn" id="btnThemeToggle" title="Ganti Mode Tampilan Halaman">
+        <span id="themeIcon">☀️</span> Light Mode
+      </button>
+    </header>
+
+    <div class="layout-grid">
+      <!-- 1. STAGE LAYAR 9:16 PREVIEW -->
+      <div class="screen-stage">
+        <div class="stage-header">
+          <span style="font-weight: 700;">Layar Pratinjau (9:16)</span>
+          <span id="txtDensityBadge" class="badge badge-ok">Blok teks aktif: 1</span>
+        </div>
+
+        <!-- Phone 9:16 Viewport -->
+        <div class="phone-viewport" id="phoneViewport">
+          <!-- Backdrop Placeholder Background Image / Gradient -->
+          <div class="video-backdrop" id="videoBackdrop"></div>
+
+          <!-- Zone Guidelines Visualizer -->
+          <div class="zone-guides" id="zoneGuides">
+            <div class="zone-box zone-top">Zona Atas (12–40%): 1 Kartu Info</div>
+            <div class="zone-box zone-mid">Zona Tengah (40–60%): Hook / Punch</div>
+            <div class="zone-box zone-bot">Zona Bawah (64–76%): Subtitle</div>
+            <div class="zone-right-gutter">Safe Margin Kanan (15%)</div>
+          </div>
+
+          <!-- Overlay Layer Canvas -->
+          <div class="overlay-stage" id="overlayStage">
+            <!-- Watermark -->
+            <div class="fx-watermark" id="elWatermark">
+              <div class="fx-watermark-mark" id="txtWatermarkMark">DB</div>
+              <div class="fx-watermark-name" id="txtWatermarkName">Dapur Botani</div>
+            </div>
+
+            <!-- Hook Title -->
+            <div class="fx-hook-layer" id="elHook">
+              <span class="fx-hook-l1" id="txtHookL1">3 RESEP MINUMAN HERBAL</span>
+              <span class="fx-hook-l2" id="txtHookL2">PEREDA BEGAH ALAMI</span>
+            </div>
+
+            <!-- Keyword Punch -->
+            <div class="fx-punch-layer" id="elPunch">TERASA HANGAT</div>
+
+            <!-- Recipe Ingredients Card -->
+            <div class="fx-ing-card" id="elIng">
+              <div class="fx-ing-header" id="txtIngHeader">BAHAN 3/6</div>
+              <div class="fx-ing-chips" id="listIngChips"></div>
+              <div class="fx-chip-overflow" id="elIngOverflow" style="display: none;">+2 bahan lain</div>
+            </div>
+
+            <!-- Step Badge -->
+            <div class="fx-step-badge" id="elStep">
+              <div class="fx-step-pill" id="txtStepPill">LANGKAH 1/3</div>
+              <div class="fx-step-text" id="txtStepText">Iris jahe segar tipis-tipis</div>
+            </div>
+
+            <!-- Product Card -->
+            <div class="fx-product-card" id="elProduct">
+              <div class="fx-product-icon">📦</div>
+              <div class="fx-product-info">
+                <div class="fx-product-tag" id="txtProdTag">BAHAN KUNCI</div>
+                <div class="fx-product-name" id="txtProdName">Bubuk Kayu Manis Murni</div>
+                <div class="fx-product-spec" id="txtProdSpec">Toples Kaca 200g • Pilihan Alami</div>
+              </div>
+            </div>
+
+            <!-- Save Prompt -->
+            <div class="fx-save-card" id="elSave">
+              <div class="fx-save-title" id="txtSaveTitle">Simpan & Bagikan Resep</div>
+              <div class="fx-save-sub" id="txtSaveSub">Takaran lengkap ada di caption ⬇️</div>
+            </div>
+
+            <!-- CTA Pill -->
+            <div class="fx-cta-pill" id="elCta">
+              <span>CEK RESEP LENGKAP DI BIO</span>
+              <span>▼</span>
+            </div>
+
+            <!-- Problem Solution: Mode Sebelum (Old Chapter Pill) -->
+            <div class="fx-old-chapter-box" id="elOldChapter">
+              <div class="fx-old-chapter-pill">
+                <span class="fx-old-chapter-num" id="txtOldChapNum">1</span>
+                <span id="txtOldChapLabel">MASALAH</span>
+              </div>
+              <div class="fx-old-track" id="elOldTrack">
+                <span class="filled"></span>
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <!-- Problem Solution: Mode Sesudah (.x-phase Natural Card) -->
+            <div class="fx-natural-phase-card" id="elNaturalPhase">
+              <span class="fx-natural-lead" id="txtPhaseLead">Masalahnya…</span>
+              <span class="fx-natural-line" id="txtPhaseLine">Suara jalanan tembus ke kamar</span>
+              <div class="fx-phase-dots" id="elPhaseDots">
+                <b class="current"></b><b></b><b></b><b></b>
+              </div>
+            </div>
+
+            <!-- Callout Pin -->
+            <div class="fx-callout-pin" id="elCallout" style="top: 28cqh; left: 45cqw;">
+              <span class="fx-callout-text" id="txtCalloutText">LAPIS PADAT</span>
+              <span class="fx-callout-sub" id="txtCalloutSub">Redam gema berlebih</span>
+            </div>
+
+            <!-- Timing Badge (Ramuan Ritual) -->
+            <div class="fx-timing-badge" id="elTiming">
+              <span class="fx-timing-emoji" id="txtTimingEmoji">🌙</span>
+              <div>
+                <div class="fx-timing-title" id="txtTimingTitle">MALAM HARI</div>
+                <div class="fx-timing-sub" id="txtTimingSub">Diminum hangat sebelum tidur</div>
+              </div>
+            </div>
+
+            <!-- Subtitle -->
+            <div class="fx-sub-layer" id="elSub">
+              Jam dua siang di kantor <span class="hl">perut bunyi aneh</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Video Player Scrubber & Controls -->
+        <div class="player-controls">
+          <div class="scrubber-row">
+            <button class="btn-play" id="btnPlayPause">▶ Play</button>
+            <input type="range" id="timeSlider" class="time-slider" min="0" max="24" step="0.1" value="3.5">
+            <span class="time-display" id="txtTimeDisplay">03.5s / 24.0s</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. PANEL KONTROL INTERAKTIF & REVIEW SPEK -->
+      <div class="controls-panel">
+        <!-- Card 1: Toggle Raksasa Sebelum vs Sesudah -->
+        <div class="card mode-toggle-card">
+          <div class="card-title">
+            <span>Perilaku Sistem (Mode Simulasi)</span>
+            <span style="font-size: 0.75rem; font-weight: normal; color: var(--text-secondary);">Klik untuk bandingkan langsung</span>
+          </div>
+          <div class="seg-group">
+            <button class="seg-btn mode-seg-btn" id="btnModeSebelum">
+              ❌ Sebelum (Tumpuk)
+            </button>
+            <button class="seg-btn mode-seg-btn active" id="btnModeSesudah">
+              ✨ Sesudah (Satu Fokus)
+            </button>
+          </div>
+          <p id="txtModeDesc" style="font-size: 0.8rem; margin-top: 0.65rem; color: var(--text-primary); line-height: 1.4;">
+            <strong>Aturan Satu Fokus Aktif:</strong> Maksimal 1 kartu info di Zona Atas + Subtitle (Maks 2 blok teks aktif). Bahan bergiliran 3 chip jendela bergulir (≤ 4 detik), babak natural tanpa nomor/bar kaku, dan subtitle otomatis ringkas.
+          </p>
+        </div>
+
+        <!-- Card 2: Pengaturan Template & Skin -->
+        <div class="card">
+          <div class="card-title">
+            <span>Pilihan Template & Skin Visual</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">1. Pilih Template Tata Letak</label>
+            <div class="seg-group" id="groupTemplate">
+              <button class="seg-btn active" data-tpl="recipe_pop">Recipe Pop</button>
+              <button class="seg-btn" data-tpl="ramuan_ritual">Ramuan Ritual</button>
+              <button class="seg-btn" data-tpl="problem_solution">Problem Solution</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">2. Pilih Skin Visual (6 Skin General)</label>
+            <div class="skin-grid" id="gridSkins">
+              <!-- Pop Kuning -->
+              <div class="skin-card active" data-skin="pop_kuning">
+                <div class="skin-swatches">
+                  <div class="skin-swatch" style="background: #ffcc3d;"></div>
+                  <div class="skin-swatch" style="background: #fff8ee;"></div>
+                  <div class="skin-swatch" style="background: #111111;"></div>
+                </div>
+                <div class="skin-name">Pop Kuning</div>
+                <div class="skin-desc">Gaya sekarang, energik, stroke tebal</div>
+              </div>
+
+              <!-- Bersih Putih -->
+              <div class="skin-card" data-skin="bersih_putih">
+                <div class="skin-swatches">
+                  <div class="skin-swatch" style="background: #ffffff; border: 1px solid #ddd;"></div>
+                  <div class="skin-swatch" style="background: #2563eb;"></div>
+                  <div class="skin-swatch" style="background: #111827;"></div>
+                </div>
+                <div class="skin-name">Bersih Putih</div>
+                <div class="skin-desc">Minimalis modern, tanpa stroke, DM Sans</div>
+              </div>
+
+              <!-- Hangat Earthy -->
+              <div class="skin-card" data-skin="hangat_earthy">
+                <div class="skin-swatches">
+                  <div class="skin-swatch" style="background: #c25e34;"></div>
+                  <div class="skin-swatch" style="background: #eeddc7;"></div>
+                  <div class="skin-swatch" style="background: #2d241c;"></div>
+                </div>
+                <div class="skin-name">Hangat Earthy</div>
+                <div class="skin-desc">Krem, terakota, zaitun alami</div>
+              </div>
+
+              <!-- Gelap Tegas -->
+              <div class="skin-card" data-skin="gelap_tegas">
+                <div class="skin-swatches">
+                  <div class="skin-swatch" style="background: #06b6d4;"></div>
+                  <div class="skin-swatch" style="background: #1e293b;"></div>
+                  <div class="skin-swatch" style="background: #0a0f18;"></div>
+                </div>
+                <div class="skin-name">Gelap Tegas</div>
+                <div class="skin-desc">Dark glassmorphism, aksen cyan neon</div>
+              </div>
+
+              <!-- Pastel Lembut -->
+              <div class="skin-card" data-skin="pastel_lembut">
+                <div class="skin-swatches">
+                  <div class="skin-swatch" style="background: #ec4899;"></div>
+                  <div class="skin-swatch" style="background: #fce7f3;"></div>
+                  <div class="skin-swatch" style="background: #334155;"></div>
+                </div>
+                <div class="skin-name">Pastel Lembut</div>
+                <div class="skin-desc">Radius melengkung manis, soft lifestyle</div>
+              </div>
+
+              <!-- Editorial Serif -->
+              <div class="skin-card" data-skin="editorial_serif">
+                <div class="skin-swatches">
+                  <div class="skin-swatch" style="background: #b45309;"></div>
+                  <div class="skin-swatch" style="background: #f5efe6;"></div>
+                  <div class="skin-swatch" style="background: #1c1917;"></div>
+                </div>
+                <div class="skin-name">Editorial Serif</div>
+                <div class="skin-desc">Playfair Display, elegan premium</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Interaksi Khusus & Skenario Uji -->
+        <div class="card">
+          <div class="card-title">
+            <span>Opsi & Skenario Babak Natural</span>
+          </div>
+
+          <div class="toggles-list">
+            <label class="toggle-row">
+              <span>Tampilkan Garis Zona Layar (Atas/Tengah/Bawah/Margin Kanan)</span>
+              <input type="checkbox" id="chkShowGuides">
+            </label>
+            <label class="toggle-row">
+              <span>Bahasa Naskah & Teks (ID / EN)</span>
+              <input type="checkbox" id="chkLangEn">
+            </label>
+            <label class="toggle-row" id="rowDotsToggle">
+              <span>Tampilkan 4 Titik Segmen (Dots) di Bawah Kartu Babak</span>
+              <input type="checkbox" id="chkShowDots" checked>
+            </label>
+          </div>
+
+          <!-- Tombol Aksi Khusus Problem Solution -->
+          <div id="psActionPanel" style="margin-top: 1rem; padding-top: 0.8rem; border-top: 1px dashed var(--border-color);">
+            <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.4rem;">
+              KONTROL KHUSUS: PROBLEM SOLUTION
+            </div>
+            <div class="action-btn-row">
+              <button class="btn-action" id="btnRotateLead">🎲 Acak Variasi Pembuka Babak</button>
+              <button class="btn-action" id="btnToggleNoPlan">⚡ Mode Tanpa Data Babak (Fallback Baru)</button>
+            </div>
+            <div id="txtLeadSample" style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.4rem;">
+              Variasi aktif: "Masalahnya…" • "Ternyata penyebabnya…" • "Solusinya…" • "Hasilnya…"
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4: Tabel Ringkas Aturan Desain Satu Fokus (R1 - R6) -->
+        <div class="card">
+          <div class="card-title">
+            <span>Matriks Aturan "Satu Fokus" (R1–R6) & Skala Token</span>
+          </div>
+          <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.8rem;">
+            Pengecekan kepatuhan sistem finishing baru untuk mencegah video terasa penuh:
+          </p>
+
+          <table class="spec-table">
+            <thead>
+              <tr>
+                <th>Aturan</th>
+                <th>Sebelum</th>
+                <th>Sesudah (Satu Fokus)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>R1: Kepadatan</strong></td>
+                <td>Hingga 5–6 blok teks bersamaan</td>
+                <td><strong>Maksimal 2 blok teks</strong> (1 info atas/tengah + subtitle)</td>
+              </tr>
+              <tr>
+                <td><strong>R2: Bahan</strong></td>
+                <td>Tampil terus sampai ±78% durasi (tumpuk 4 chip)</td>
+                <td><strong>Maks 4 detik</strong>, jendela bergulir 3 chip, huruf biasa 2.7cqw</td>
+              </tr>
+              <tr>
+                <td><strong>R3: Babak PS</strong></td>
+                <td>Pill kaku "1 MASALAH" + bar progres tiap klip</td>
+                <td><strong>Kalimat natural</strong> ("Masalahnya…") + frasa VO, hanya saat ganti babak</td>
+              </tr>
+              <tr>
+                <td><strong>R4: Subtitle</strong></td>
+                <td>7.6cqw kapital selalu penuh</td>
+                <td><strong>Kompak (maks 4 kata)</strong> saat kartu atas tampil</td>
+              </tr>
+              <tr>
+                <td><strong>R5: Skin</strong></td>
+                <td>Tertanam di CSS (kuning/cokelat per template)</td>
+                <td><strong>6 Skin General Bebas Brand</strong> via token <code>var(--fx-*)</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT LOGIKA SIMULASI MOCKUP INTERAKTIF -->
+  <script>
+    // --- 1. DEFINISI 6 SKIN GENERAL (HEX HANYA DI DALAM OBJEK JS INI) ---
+    const SKINS = {
+      pop_kuning: {
+        id: 'pop_kuning',
+        name: 'Pop Kuning (Default)',
+        tokens: {
+          '--fx-accent': '#ffcc3d',
+          '--fx-accent-ink': '#111111',
+          '--fx-card': 'rgba(20, 12, 8, 0.82)',
+          '--fx-card-ink': '#ffffff',
+          '--fx-card-muted': 'rgba(255, 255, 255, 0.72)',
+          '--fx-chip': '#fff8ee',
+          '--fx-chip-ink': '#2a1a10',
+          '--fx-stroke': '#000000',
+          '--fx-stroke-width': '0.55cqw',
+          '--fx-text-case': 'uppercase',
+          '--fx-radius': '99cqw',
+          '--fx-font-display': '"Anton", Impact, sans-serif',
+          '--fx-font-body': '"Montserrat", "Arial Black", sans-serif',
+          '--fx-font-ui': '"Inter", system-ui, sans-serif',
+          '--fx-size-sub': '6.2cqw',
+          '--fx-phase-problem': '#e5484d',
+          '--fx-phase-cause': '#f2850d',
+          '--fx-phase-solution': '#1f9d55',
+          '--fx-phase-result': '#2f7fe0'
+        }
+      },
+      bersih_putih: {
+        id: 'bersih_putih',
+        name: 'Bersih Putih',
+        tokens: {
+          '--fx-accent': '#2563eb',
+          '--fx-accent-ink': '#ffffff',
+          '--fx-card': 'rgba(255, 255, 255, 0.94)',
+          '--fx-card-ink': '#111827',
+          '--fx-card-muted': 'rgba(17, 24, 39, 0.65)',
+          '--fx-chip': '#f3f4f6',
+          '--fx-chip-ink': '#111827',
+          '--fx-stroke': 'transparent',
+          '--fx-stroke-width': '0',
+          '--fx-text-case': 'none',
+          '--fx-radius': '2.2cqw',
+          '--fx-font-display': '"DM Sans", sans-serif',
+          '--fx-font-body': '"DM Sans", sans-serif',
+          '--fx-font-ui': '"DM Sans", sans-serif',
+          '--fx-size-sub': '5.6cqw',
+          '--fx-phase-problem': '#dc2626',
+          '--fx-phase-cause': '#d97706',
+          '--fx-phase-solution': '#059669',
+          '--fx-phase-result': '#2563eb'
+        }
+      },
+      hangat_earthy: {
+        id: 'hangat_earthy',
+        name: 'Hangat Earthy',
+        tokens: {
+          '--fx-accent': '#c25e34',
+          '--fx-accent-ink': '#ffffff',
+          '--fx-card': 'rgba(45, 36, 28, 0.85)',
+          '--fx-card-ink': '#fbf7ee',
+          '--fx-card-muted': 'rgba(251, 247, 238, 0.72)',
+          '--fx-chip': '#eeddc7',
+          '--fx-chip-ink': '#38271a',
+          '--fx-stroke': '#20150e',
+          '--fx-stroke-width': '0.35cqw',
+          '--fx-text-case': 'none',
+          '--fx-radius': '3.2cqw',
+          '--fx-font-display': '"Montserrat", sans-serif',
+          '--fx-font-body': '"Montserrat", sans-serif',
+          '--fx-font-ui': '"Inter", sans-serif',
+          '--fx-size-sub': '5.8cqw',
+          '--fx-phase-problem': '#b91c1c',
+          '--fx-phase-cause': '#c25e34',
+          '--fx-phase-solution': '#4d7c0f',
+          '--fx-phase-result': '#1e40af'
+        }
+      },
+      gelap_tegas: {
+        id: 'gelap_tegas',
+        name: 'Gelap Tegas',
+        tokens: {
+          '--fx-accent': '#06b6d4',
+          '--fx-accent-ink': '#000000',
+          '--fx-card': 'rgba(10, 15, 24, 0.90)',
+          '--fx-card-ink': '#f8fafc',
+          '--fx-card-muted': 'rgba(248, 250, 252, 0.65)',
+          '--fx-chip': '#1e293b',
+          '--fx-chip-ink': '#f8fafc',
+          '--fx-stroke': '#000000',
+          '--fx-stroke-width': '0.45cqw',
+          '--fx-text-case': 'uppercase',
+          '--fx-radius': '1.6cqw',
+          '--fx-font-display': '"Anton", sans-serif',
+          '--fx-font-body': '"Inter", sans-serif',
+          '--fx-font-ui': '"Inter", sans-serif',
+          '--fx-size-sub': '6.0cqw',
+          '--fx-phase-problem': '#f43f5e',
+          '--fx-phase-cause': '#f59e0b',
+          '--fx-phase-solution': '#10b981',
+          '--fx-phase-result': '#06b6d4'
+        }
+      },
+      pastel_lembut: {
+        id: 'pastel_lembut',
+        name: 'Pastel Lembut',
+        tokens: {
+          '--fx-accent': '#ec4899',
+          '--fx-accent-ink': '#ffffff',
+          '--fx-card': 'rgba(255, 255, 255, 0.92)',
+          '--fx-card-ink': '#334155',
+          '--fx-card-muted': 'rgba(51, 65, 85, 0.70)',
+          '--fx-chip': '#fce7f3',
+          '--fx-chip-ink': '#831843',
+          '--fx-stroke': 'transparent',
+          '--fx-stroke-width': '0',
+          '--fx-text-case': 'none',
+          '--fx-radius': '4.5cqw',
+          '--fx-font-display': '"Montserrat", sans-serif',
+          '--fx-font-body': '"DM Sans", sans-serif',
+          '--fx-font-ui': '"Inter", sans-serif',
+          '--fx-size-sub': '5.6cqw',
+          '--fx-phase-problem': '#e11d48',
+          '--fx-phase-cause': '#ea580c',
+          '--fx-phase-solution': '#16a34a',
+          '--fx-phase-result': '#0284c7'
+        }
+      },
+      editorial_serif: {
+        id: 'editorial_serif',
+        name: 'Editorial Serif',
+        tokens: {
+          '--fx-accent': '#b45309',
+          '--fx-accent-ink': '#ffffff',
+          '--fx-card': 'rgba(254, 252, 246, 0.94)',
+          '--fx-card-ink': '#1c1917',
+          '--fx-card-muted': 'rgba(28, 25, 23, 0.65)',
+          '--fx-chip': '#f5efe6',
+          '--fx-chip-ink': '#292524',
+          '--fx-stroke': 'transparent',
+          '--fx-stroke-width': '0',
+          '--fx-text-case': 'none',
+          '--fx-radius': '1.2cqw',
+          '--fx-font-display': '"Playfair Display", Georgia, serif',
+          '--fx-font-body': '"DM Sans", sans-serif',
+          '--fx-font-ui': '"Inter", sans-serif',
+          '--fx-size-sub': '5.6cqw',
+          '--fx-phase-problem': '#991b1b',
+          '--fx-phase-cause': '#b45309',
+          '--fx-phase-solution': '#166534',
+          '--fx-phase-result': '#1e40af'
+        }
+      }
+    };
+
+    // --- 2. SKENARIO DATA TIMELINE NYATA ---
+    const SCENARIOS = {
+      recipe_pop: {
+        bg: 'linear-gradient(135deg, #2b1f1d, #422d21)',
+        brand: { name: 'Dapur Botani', mark: 'DB' },
+        hook: { l1: '3 RESEP MINUMAN HERBAL', l2: 'PEREDA BEGAH ALAMI', s: 0, e: 1.75 },
+        ingredients: [
+          { name: 'Jahe merah iris', qty: '1 ruas', s: 1.8 },
+          { name: 'Air hangat matang', qty: '250 ml', s: 2.3 },
+          { name: 'Madu hutan murni', qty: '1 sdt', s: 2.8 },
+          { name: 'Perasan jeruk nipis', qty: '1/2 buah', s: 3.3 },
+          { name: 'Serai memar', qty: '1 batang', s: 3.8 },
+          { name: 'Kayu manis bubuk', qty: 'sejumput', s: 4.3 }
+        ],
+        steps: [
+          { n: 1, total: 3, pill: 'LANGKAH 1/3', text: 'Iris tipis rimpang jahe & serai', s: 6.0, e: 11.5 },
+          { n: 2, total: 3, pill: 'LANGKAH 2/3', text: 'Seduh air hangat 5 menit', s: 11.8, e: 16.5 },
+          { n: 3, total: 3, pill: 'LANGKAH 3/3', text: 'Tambahkan madu & perasan jeruk', s: 16.8, e: 21.0 }
+        ],
+        punch: { text: 'TERASA HANGAT', s: 4.8, e: 5.8 },
+        product: { tag: 'BAHAN UTAMA', name: 'Bubuk Rimpang Botani', spec: 'Kemasan Kaca 200g • Alami', s: 12.0, e: 15.5 },
+        save: { title: 'Simpan & Bagikan Resep', sub: 'Takaran lengkap ada di caption ⬇️', s: 17.0, e: 19.5 },
+        cta: { text: 'CEK RESEP LENGKAP DI BIO', s: 20.0, e: 23.5 },
+        subs: [
+          { s: 0.0, e: 1.8, text: 'Jam dua siang di kantor perut bunyi aneh' },
+          { s: 1.8, e: 3.2, text: 'Bikin begah dan susah konsentrasi kerja' },
+          { s: 3.2, e: 4.8, text: 'Solusinya seduhan rempah hangat alami ini' },
+          { s: 4.8, e: 6.0, text: 'Langsung terasa hangat nyaman di lambung' },
+          { s: 6.0, e: 8.5, text: 'Iris jahe merah segar dan memarkan serai' },
+          { s: 8.5, e: 11.8, text: 'Aromanya seketika bikin pikiran rileks' },
+          { s: 11.8, e: 14.5, text: 'Seduh air hangat selama lima menit' },
+          { s: 14.5, e: 17.0, text: 'Beri sesendok madu murni tanpa gula rafinasi' },
+          { s: 17.0, e: 20.0, text: 'Simpan resep ini buat bekal kerja besok' },
+          { s: 20.0, e: 24.0, text: 'Cek racikan herbal selengkapnya di link bio' }
+        ]
+      },
+
+      ramuan_ritual: {
+        bg: 'linear-gradient(135deg, #1b262c, #0f4c75)',
+        brand: { name: 'Siasat Sehat', mark: 'SS' },
+        hook: { l1: 'RITUAL MALAM HARI', l2: 'TIDUR NYENYAK SEHARIAN', s: 0, e: 1.75 },
+        ingredients: [
+          { name: 'Bunga telang kering', qty: '5 kelopak', s: 1.8 },
+          { name: 'Air hangat', qty: '200 ml', s: 2.4 },
+          { name: 'Madu randu', qty: '1 sdm', s: 3.0 },
+          { name: 'Biji chia', qty: '1/2 sdt', s: 3.6 }
+        ],
+        steps: [
+          { n: 1, total: 2, pill: 'TAHAP 1/2', text: 'Seduh bunga telang air hangat', s: 6.2, e: 11.0 },
+          { n: 2, total: 2, pill: 'TAHAP 2/2', text: 'Aduk rata selagi hangat', s: 11.5, e: 16.5 }
+        ],
+        timing: { emoji: '🌙', title: 'MALAM HARI', sub: 'Minum hangat 30 mnt sebelum tidur', s: 7.0, e: 10.5 },
+        punch: { text: 'TIDUR LELAP', s: 4.6, e: 5.6 },
+        product: { tag: 'REKOMENDASI', name: 'Telang Herbal Premium', spec: 'Kaya Antioksidan Alami', s: 12.0, e: 15.0 },
+        save: { title: 'Simpan Ritual Ini', sub: 'Bantu kualitas tidur harian', s: 17.0, e: 19.5 },
+        cta: { text: 'CEK INFO LENGKAP DI LINK BIO', s: 20.0, e: 23.5 },
+        subs: [
+          { s: 0.0, e: 1.8, text: 'Sering overthinking dan susah tidur malam?' },
+          { s: 1.8, e: 4.0, text: 'Cobain seduhan ritual bunga telang ini' },
+          { s: 4.0, e: 6.0, text: 'Warna birunya cantik dan menenangkan saraf' },
+          { s: 6.0, e: 9.0, text: 'Seduh air hangat selama lima menit' },
+          { s: 9.0, e: 12.0, text: 'Minum hangat 30 menit sebelum tidur' },
+          { s: 12.0, e: 16.0, text: 'Bikin badan rileks dan siap istirahat total' },
+          { s: 16.0, e: 20.0, text: 'Simpan tips ini buat dicoba malam ini ya' },
+          { s: 20.0, e: 24.0, text: 'Konsultasi herbal alami klik tautan di bio' }
+        ]
+      },
+
+      problem_solution: {
+        bg: 'linear-gradient(135deg, #18181b, #27272a)',
+        brand: { name: 'Ruang Akustik', mark: 'RA' },
+        hook: { l1: 'SUARA JALANAN TEMBUS?', l2: 'KAMAR BIKIN STRES', s: 0, e: 1.75 },
+        // 5 Klip Babak Natural
+        phases: [
+          { clip: 1, phase: 'problem', s: 1.85, e: 4.5, lead: 'Masalahnya…', line: 'Suara jalanan tembus ke kamar', color: '#e5484d', oldN: 1, oldLabel: 'MASALAH' },
+          { clip: 2, phase: 'cause', s: 6.0, e: 8.6, lead: 'Ternyata penyebabnya…', line: 'Celah jendela tanpa peredam', color: '#f2850d', oldN: 2, oldLabel: 'PENYEBAB' },
+          // Klip 3 tidak memunculkan kartu babak (masih fase cause, visual void)
+          { clip: 4, phase: 'solution', s: 12.0, e: 14.8, lead: 'Solusinya…', line: 'Pasang panel rockwool slab', color: '#1f9d55', oldN: 3, oldLabel: 'SOLUSI' },
+          { clip: 5, phase: 'result', s: 17.5, e: 20.3, lead: 'Hasilnya…', line: 'Kamar jauh lebih tenang', color: '#2f7fe0', oldN: 4, oldLabel: 'HASIL' }
+        ],
+        callout: { text: 'CELAH RAPAT', sub: 'Tutup celah akustik 50mm', s: 9.0, e: 11.5 },
+        punch: { text: 'KEDAP SUARA', s: 4.8, e: 5.8 },
+        cta: { text: 'KONSULTASI AKUSTIK RUANGAN DI BIO', s: 20.5, e: 23.5 },
+        subs: [
+          { s: 0.0, e: 1.85, text: 'Tiap malam kebangun karena klakson jalan raya?' },
+          { s: 1.85, e: 4.5, text: 'Suara jalanan tembus bikin kualitas tidur anjlok' },
+          { s: 4.5, e: 6.0, text: 'Padahal pintu dan jendela kamar sudah ditutup rapat' },
+          { s: 6.0, e: 8.6, text: 'Ternyata ada celah mikro tanpa peredam akustik' },
+          { s: 8.6, e: 12.0, text: 'Bunyi frekuensi tinggi menyusup lewat rongga kusen' },
+          { s: 12.0, e: 14.8, text: 'Pasang panel rockwool slab densitas tinggi' },
+          { s: 14.8, e: 17.5, text: 'Menyerap desibel kebisingan secara maksimal' },
+          { s: 17.5, e: 20.5, text: 'Kamar jauh lebih tenang istirahat pun pulih' },
+          { s: 20.5, e: 24.0, text: 'Ingin hitung kebutuhan ruang? Cek link di bio' }
+        ]
+      }
+    };
+
+    // Rotasi Variasi Pembuka Babak Natural (Tabel Rencana 3.5)
+    const PHASE_LEAD_ROTATIONS = {
+      id: {
+        problem: ['Masalahnya…', 'Yang sering terjadi…', 'Pernah ngalamin ini?'],
+        cause: ['Ternyata penyebabnya…', 'Kenapa bisa begitu?', 'Akar masalahnya…'],
+        solution: ['Solusinya…', 'Caranya…', 'Coba ini…'],
+        result: ['Hasilnya…', 'Setelah itu…', 'Bedanya terasa…']
+      },
+      en: {
+        problem: ['The problem…', 'Sound familiar?', 'Common struggle…'],
+        cause: ["Here's why…", 'The real cause…', 'What happens inside…'],
+        solution: ['The fix…', 'Try this…', 'Simple step…'],
+        result: ['The result…', 'After that…', 'Noticeable shift…']
+      }
+    };
+
+    // --- STATE SIMULASI ---
+    let state = {
+      mode: 'sesudah', // 'sebelum' | 'sesudah'
+      template: 'recipe_pop',
+      skin: 'pop_kuning',
+      time: 3.5,
+      isPlaying: false,
+      isEn: false,
+      showGuides: false,
+      showDots: true,
+      rotateIndex: 0,
+      noPlanFallback: false
+    };
+
+    // --- DOM REFERENCES ---
+    const elPhone = document.getElementById('phoneViewport');
+    const elBackdrop = document.getElementById('videoBackdrop');
+    const elGuides = document.getElementById('zoneGuides');
+    const timeSlider = document.getElementById('timeSlider');
+    const txtTime = document.getElementById('txtTimeDisplay');
+    const btnPlay = document.getElementById('btnPlayPause');
+    const txtDensity = document.getElementById('txtDensityBadge');
+
+    // Overlays DOM
+    const elWatermark = document.getElementById('elWatermark');
+    const txtWatermarkMark = document.getElementById('txtWatermarkMark');
+    const txtWatermarkName = document.getElementById('txtWatermarkName');
+    const elHook = document.getElementById('elHook');
+    const txtHookL1 = document.getElementById('txtHookL1');
+    const txtHookL2 = document.getElementById('txtHookL2');
+    const elPunch = document.getElementById('elPunch');
+    const elIng = document.getElementById('elIng');
+    const txtIngHeader = document.getElementById('txtIngHeader');
+    const listIngChips = document.getElementById('listIngChips');
+    const elIngOverflow = document.getElementById('elIngOverflow');
+    const elStep = document.getElementById('elStep');
+    const txtStepPill = document.getElementById('txtStepPill');
+    const txtStepText = document.getElementById('txtStepText');
+    const elProduct = document.getElementById('elProduct');
+    const txtProdTag = document.getElementById('txtProdTag');
+    const txtProdName = document.getElementById('txtProdName');
+    const txtProdSpec = document.getElementById('txtProdSpec');
+    const elSave = document.getElementById('elSave');
+    const elCta = document.getElementById('elCta');
+    const elSub = document.getElementById('elSub');
+
+    // Problem Solution Overlays
+    const elOldChapter = document.getElementById('elOldChapter');
+    const txtOldChapNum = document.getElementById('txtOldChapNum');
+    const txtOldChapLabel = document.getElementById('txtOldChapLabel');
+    const elOldTrack = document.getElementById('elOldTrack');
+    const elNaturalPhase = document.getElementById('elNaturalPhase');
+    const txtPhaseLead = document.getElementById('txtPhaseLead');
+    const txtPhaseLine = document.getElementById('txtPhaseLine');
+    const elPhaseDots = document.getElementById('elPhaseDots');
+    const elCallout = document.getElementById('elCallout');
+    const elTiming = document.getElementById('elTiming');
+
+    // --- APLIKASI TOKEN SKIN KE VIEWPORT ---
+    function applySkin(skinKey) {
+      const skin = SKINS[skinKey] || SKINS.pop_kuning;
+      for (const [k, v] of Object.entries(skin.tokens)) {
+        elPhone.style.setProperty(k, v);
+      }
+    }
+
+    // --- FUNGSI UTAMA RENDER BERDASARKAN DETIK (t) ---
+    function renderAt(t) {
+      const isSebelum = state.mode === 'sebelum';
+      const scn = SCENARIOS[state.template];
+      let activeTextBlocks = 0;
+
+      // 1. Latar Visual
+      elBackdrop.style.background = scn.bg;
+
+      // 2. Watermark Brand (Selalu tampil di pojok)
+      txtWatermarkMark.textContent = scn.brand.mark;
+      txtWatermarkName.textContent = scn.brand.name;
+      // Watermark tidak dihitung dalam kuota blok teks aktif sesuai aturan R1
+      elWatermark.style.display = 'flex';
+
+      // 3. Hook Card (0 - 1.75s)
+      const isHook = t >= scn.hook.s && t < scn.hook.e;
+      elHook.classList.toggle('active', isHook);
+      txtHookL1.textContent = scn.hook.l1;
+      txtHookL2.textContent = scn.hook.l2;
+      if (isHook) activeTextBlocks++;
+
+      // 4. Keyword Punch
+      let isPunch = false;
+      if (scn.punch && t >= scn.punch.s && t < scn.punch.e) {
+        isPunch = true;
+        elPunch.textContent = scn.punch.text;
+      }
+      elPunch.classList.toggle('active', isPunch);
+      if (isPunch) activeTextBlocks++;
+
+      // Aturan R3: Jika Hook atau Punch aktif, kartu Zona Atas disembunyikan
+      const hideTopZone = !isSebelum && (isHook || isPunch);
+
+      // -------------------------------------------------------------
+      // 5. TEMPLATE: RECIPE POP
+      // -------------------------------------------------------------
+      if (state.template === 'recipe_pop') {
+        elIng.classList.toggle('mode-sebelum', isSebelum);
+        elStep.classList.toggle('mode-sesudah', !isSebelum);
+        elOldChapter.classList.remove('active');
+        elNaturalPhase.classList.remove('active');
+        elCallout.classList.remove('active');
+        elTiming.classList.remove('active');
+
+        // BAHAN:
+        let showIng = false;
+        if (isSebelum) {
+          // SEBELUM: Daftar bahan menumpuk lama sampai detik 17s (ingUntil), tumpuk 4 chip + overflow
+          showIng = t >= 1.8 && t < 17.0 && !isHook;
+          if (showIng) {
+            elIng.classList.add('active');
+            const shownChips = scn.ingredients.filter(x => t >= x.s);
+            txtIngHeader.textContent = `BAHAN ${Math.min(4, shownChips.length)}/6`;
+            listIngChips.innerHTML = shownChips.slice(0, 4).map(x => `
+              <div class="fx-chip-item">
+                <span class="fx-chip-check">✓</span>
+                <span class="fx-chip-name">${x.name.toUpperCase()}</span>
+              </div>
+            `).join('');
+            elIngOverflow.style.display = shownChips.length > 4 ? 'block' : 'none';
+            activeTextBlocks++;
+          } else {
+            elIng.classList.remove('active');
+          }
+        } else {
+          // SESUDAH (SATU FOKUS):
+          // Bahan aktif HANYA setelah hook dan MAKS 4 detik (1.8s s/d 5.8s)
+          // Memakai jendela 3 chip bergulir, format Nama · Takaran
+          showIng = t >= 1.8 && t < 5.8 && !hideTopZone;
+          if (showIng) {
+            elIng.classList.add('active');
+            elIngOverflow.style.display = 'none';
+            // Hitung sliding window 3 chip
+            const elapsedInIng = t - 1.8;
+            const windowStartIndex = Math.min(3, Math.floor(elapsedInIng / 1.3));
+            const windowChips = scn.ingredients.slice(windowStartIndex, windowStartIndex + 3);
+            
+            txtIngHeader.textContent = `Bahan ${windowStartIndex + windowChips.length}/6`;
+            listIngChips.innerHTML = windowChips.map(x => `
+              <div class="fx-chip-item new-chip">
+                <span class="fx-chip-check">✓</span>
+                <span class="fx-chip-name">${x.name}</span>
+                <span class="fx-chip-qty">· ${x.qty}</span>
+              </div>
+            `).join('');
+            activeTextBlocks++;
+          } else {
+            elIng.classList.remove('active');
+          }
+        }
+
+        // LANGKAH (STEP):
+        const currentStep = scn.steps.find(st => t >= st.s && t < st.e);
+        let showStep = false;
+        if (isSebelum) {
+          // SEBELUM: Langkah tampil BERSAMAAN dengan bahan di pojok kanan atas!
+          showStep = Boolean(currentStep && !isHook && !isPunch);
+        } else {
+          // SESUDAH: Langkah HANYA mulai SETELAH fase bahan selesai (t >= 6.0s)
+          showStep = Boolean(currentStep && t >= 6.0 && !hideTopZone);
+        }
+
+        if (showStep) {
+          elStep.classList.add('active');
+          txtStepPill.textContent = currentStep.pill;
+          txtStepText.textContent = currentStep.text;
+          activeTextBlocks++;
+        } else {
+          elStep.classList.remove('active');
+        }
+
+        // KARTU PRODUK:
+        let showProd = false;
+        if (isSebelum) {
+          // SEBELUM: Produk tampil melintang di 12-16s menabrak langkah & bahan!
+          showProd = t >= scn.product.s && t < scn.product.e && !isHook && !isPunch;
+        } else {
+          // SESUDAH: Produk tampil di slotnya sendiri (12.0s - 15.5s), tidak bertabrakan
+          showProd = t >= scn.product.s && t < scn.product.e && !hideTopZone;
+        }
+
+        if (showProd) {
+          elProduct.classList.add('active');
+          txtProdTag.textContent = scn.product.tag;
+          txtProdName.textContent = scn.product.name;
+          txtProdSpec.textContent = scn.product.spec;
+          activeTextBlocks++;
+        } else {
+          elProduct.classList.remove('active');
+        }
+
+        // SAVE PROMPT & CTA:
+        const showSave = t >= scn.save.s && t < scn.save.e && !hideTopZone;
+        elSave.classList.toggle('active', showSave);
+        if (showSave) activeTextBlocks++;
+
+        const showCta = t >= scn.cta.s && t < scn.cta.e && !hideTopZone && !showSave;
+        elCta.classList.toggle('active', showCta);
+        if (showCta) activeTextBlocks++;
+      }
+
+      // -------------------------------------------------------------
+      // 6. TEMPLATE: RAMUAN RITUAL
+      // -------------------------------------------------------------
+      else if (state.template === 'ramuan_ritual') {
+        elOldChapter.classList.remove('active');
+        elNaturalPhase.classList.remove('active');
+        elCallout.classList.remove('active');
+
+        // Bahan
+        let showIng = false;
+        if (isSebelum) {
+          showIng = t >= 1.8 && t < 15.0 && !isHook;
+          if (showIng) {
+            elIng.classList.add('active');
+            elIng.classList.add('mode-sebelum');
+            const shownChips = scn.ingredients.filter(x => t >= x.s);
+            txtIngHeader.textContent = `RAMUAN ${shownChips.length}/4`;
+            listIngChips.innerHTML = shownChips.map(x => `
+              <div class="fx-chip-item">
+                <span class="fx-chip-check">✓</span>
+                <span class="fx-chip-name">${x.name.toUpperCase()}</span>
+              </div>
+            `).join('');
+            activeTextBlocks++;
+          } else {
+            elIng.classList.remove('active');
+          }
+        } else {
+          // Sesudah: bahan maksimal 4 detik bergiliran
+          showIng = t >= 1.8 && t < 5.8 && !hideTopZone;
+          if (showIng) {
+            elIng.classList.add('active');
+            elIng.classList.remove('mode-sebelum');
+            txtIngHeader.textContent = `Bahan Ramuan 4/4`;
+            listIngChips.innerHTML = scn.ingredients.slice(0, 3).map(x => `
+              <div class="fx-chip-item new-chip">
+                <span class="fx-chip-check">✓</span>
+                <span class="fx-chip-name">${x.name}</span>
+                <span class="fx-chip-qty">· ${x.qty}</span>
+              </div>
+            `).join('');
+            activeTextBlocks++;
+          } else {
+            elIng.classList.remove('active');
+          }
+        }
+
+        // Timing Badge (Ramuan Ritual)
+        let showTiming = false;
+        if (isSebelum) {
+          // Sebelum: timing badge bertumpuk dengan bahan
+          showTiming = t >= scn.timing.s && t < scn.timing.e;
+        } else {
+          // Sesudah: tampil bergantian di slot setelah bahan
+          showTiming = t >= 6.2 && t < 11.0 && !hideTopZone;
+        }
+        elTiming.classList.toggle('active', showTiming);
+        if (showTiming) activeTextBlocks++;
+
+        // Product
+        const showProd = t >= scn.product.s && t < scn.product.e && !hideTopZone;
+        elProduct.classList.toggle('active', showProd);
+        if (showProd) activeTextBlocks++;
+
+        // Save & CTA
+        const showSave = t >= scn.save.s && t < scn.save.e && !hideTopZone;
+        elSave.classList.toggle('active', showSave);
+        if (showSave) activeTextBlocks++;
+
+        const showCta = t >= scn.cta.s && t < scn.cta.e && !hideTopZone && !showSave;
+        elCta.classList.toggle('active', showCta);
+        if (showCta) activeTextBlocks++;
+      }
+
+      // -------------------------------------------------------------
+      // 7. TEMPLATE: PROBLEM SOLUTION
+      // -------------------------------------------------------------
+      else if (state.template === 'problem_solution') {
+        elIng.classList.remove('active');
+        elStep.classList.remove('active');
+        elProduct.classList.remove('active');
+        elSave.classList.remove('active');
+        elTiming.classList.remove('active');
+
+        const activePhase = scn.phases.find(p => t >= p.s && t < p.e);
+
+        if (isSebelum) {
+          // SEBELUM: Pill nomor bulat kaku ("1 MASALAH") + bar progres selalu ada tiap klip!
+          elNaturalPhase.classList.remove('active');
+          if (activePhase && !isHook) {
+            elOldChapter.classList.add('active');
+            txtOldChapNum.textContent = activePhase.oldN;
+            txtOldChapLabel.textContent = activePhase.oldLabel;
+            elOldChapter.style.setProperty('--active-phase-color', activePhase.color);
+            
+            // Bar progress filled up to current clip
+            const spans = elOldTrack.querySelectorAll('span');
+            spans.forEach((sp, idx) => {
+              sp.classList.toggle('filled', idx < activePhase.oldN);
+              sp.style.setProperty('--active-phase-color', activePhase.color);
+            });
+            activeTextBlocks += 2; // Pill + Bar progres dihitung sebagai 2 blok kaku
+          } else {
+            elOldChapter.classList.remove('active');
+          }
+
+          // Callout pin muncul bertabrakan
+          const showCallout = t >= scn.callout.s && t < scn.callout.e;
+          elCallout.classList.toggle('active', showCallout);
+          if (showCallout) activeTextBlocks++;
+        } else {
+          // SESUDAH: Babak Natural (.x-phase)
+          elOldChapter.classList.remove('active');
+
+          let showNatural = false;
+          if (state.noPlanFallback) {
+            // Mode fallback tanpa data: hanya problem di klip 1 dan solution di klip produk
+            showNatural = (activePhase && (activePhase.phase === 'problem' || activePhase.phase === 'solution')) && !hideTopZone;
+          } else {
+            // Normal: hanya kartu di klip pertama tiap fase, 2.0-2.8 dtk, lalu HILANG (Klip 3 sengaja kosong!)
+            showNatural = Boolean(activePhase && !hideTopZone);
+          }
+
+          if (showNatural) {
+            elNaturalPhase.classList.add('active');
+            
+            // Variasi pembuka yang dirotasi
+            const langKey = state.isEn ? 'en' : 'id';
+            const rotations = PHASE_LEAD_ROTATIONS[langKey][activePhase.phase] || [activePhase.lead];
+            const currentLead = rotations[state.rotateIndex % rotations.length];
+
+            txtPhaseLead.textContent = currentLead;
+            txtPhaseLine.textContent = activePhase.line;
+            elNaturalPhase.style.setProperty('--active-phase-color', `var(--fx-phase-${activePhase.phase})`);
+
+            // Dots opsional
+            elPhaseDots.style.display = state.showDots ? 'flex' : 'none';
+            const dots = elPhaseDots.querySelectorAll('b');
+            dots.forEach((dot, idx) => {
+              dot.classList.toggle('current', idx === (activePhase.oldN - 1));
+            });
+
+            activeTextBlocks++;
+          } else {
+            elNaturalPhase.classList.remove('active');
+          }
+
+          // Callout tampil bergiliran (tidak bersamaan dengan babak natural)
+          const showCallout = !showNatural && t >= scn.callout.s && t < scn.callout.e && !hideTopZone;
+          elCallout.classList.toggle('active', showCallout);
+          if (showCallout) activeTextBlocks++;
+        }
+
+        const showCta = t >= scn.cta.s && t < scn.cta.e && !hideTopZone;
+        elCta.classList.toggle('active', showCta);
+        if (showCta) activeTextBlocks++;
+      }
+
+      // -------------------------------------------------------------
+      // 8. SUBTITLE (ZONA BAWAH)
+      // -------------------------------------------------------------
+      const activeSub = scn.subs.find(s => t >= s.s && t < s.e);
+      if (activeSub) {
+        elSub.innerHTML = activeSub.text;
+        elSub.style.display = 'block';
+        activeTextBlocks++;
+
+        // Aturan R6: Saat kartu Zona Atas aktif, subtitle kompak (maks 4 kata / 1 baris)
+        const isTopCardVisible = activeTextBlocks > 1 && !isHook && !isPunch;
+        if (!isSebelum && isTopCardVisible) {
+          elSub.classList.add('compact');
+          const words = activeSub.text.split(' ');
+          if (words.length > 4) {
+            elSub.innerHTML = words.slice(0, 4).join(' ') + '…';
+          }
+        } else {
+          elSub.classList.remove('compact');
+        }
+      } else {
+        elSub.style.display = 'none';
+      }
+
+      // -------------------------------------------------------------
+      // 9. UPDATE PENGHITUNG KEPADATAN TEKS
+      // -------------------------------------------------------------
+      txtDensity.textContent = `Blok teks aktif: ${activeTextBlocks}`;
+      if (activeTextBlocks > 2) {
+        txtDensity.className = 'badge badge-danger';
+        txtDensity.textContent = `⚠️ Kepadatan Berlebih: ${activeTextBlocks} Blok (Pelanggaran R1)`;
+      } else {
+        txtDensity.className = 'badge badge-ok';
+        txtDensity.textContent = `✅ Satu Fokus: ${activeTextBlocks} Blok Aktif`;
+      }
+    }
+
+    // --- EVENT LISTENERS & KONTROL UI ---
+    applySkin(state.skin);
+    renderAt(state.time);
+
+    // Scrubber
+    timeSlider.addEventListener('input', (e) => {
+      state.time = parseFloat(e.target.value);
+      txtTime.textContent = `${state.time.toFixed(1).padStart(4, '0')}s / 24.0s`;
+      renderAt(state.time);
+    });
+
+    // Play / Pause Simulation
+    let playInterval = null;
+    btnPlay.addEventListener('click', () => {
+      state.isPlaying = !state.isPlaying;
+      btnPlay.textContent = state.isPlaying ? '⏸ Pause' : '▶ Play';
+      if (state.isPlaying) {
+        playInterval = setInterval(() => {
+          state.time += 0.1;
+          if (state.time > 24) state.time = 0;
+          timeSlider.value = state.time;
+          txtTime.textContent = `${state.time.toFixed(1).padStart(4, '0')}s / 24.0s`;
+          renderAt(state.time);
+        }, 100);
+      } else {
+        clearInterval(playInterval);
+      }
+    });
+
+    // Toggle Sebelum vs Sesudah
+    const btnModeSebelum = document.getElementById('btnModeSebelum');
+    const btnModeSesudah = document.getElementById('btnModeSesudah');
+    const txtModeDesc = document.getElementById('txtModeDesc');
+
+    btnModeSebelum.addEventListener('click', () => {
+      state.mode = 'sebelum';
+      btnModeSebelum.classList.add('active');
+      btnModeSesudah.classList.remove('active');
+      txtModeDesc.innerHTML = `<strong>Mode Sebelum Aktif:</strong> Meniru perilaku lama. Bahan menumpuk hingga 78% durasi (tumpuk 4 chip), langkah & kartu produk bertabrakan di atasnya, babak berupa pill kaku <em>1 MASALAH</em> + bar progres, dan subtitle 7.6cqw kapital penuh. Kepadatan sering melebihi 3-5 blok teks.`;
+      renderAt(state.time);
+    });
+
+    btnModeSesudah.addEventListener('click', () => {
+      state.mode = 'sesudah';
+      btnModeSesudah.classList.add('active');
+      btnModeSebelum.classList.remove('active');
+      txtModeDesc.innerHTML = `<strong>Aturan Satu Fokus Aktif:</strong> Maksimal 1 kartu info di Zona Atas + Subtitle (Maks 2 blok teks aktif). Bahan bergiliran 3 chip jendela bergulir (≤ 4 detik), babak natural tanpa nomor/bar kaku, dan subtitle otomatis ringkas.`;
+      renderAt(state.time);
+    });
+
+    // Template Selector
+    document.querySelectorAll('#groupTemplate .seg-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#groupTemplate .seg-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.template = btn.dataset.tpl;
+        
+        // Show/hide PS controls
+        document.getElementById('psActionPanel').style.display = state.template === 'problem_solution' ? 'block' : 'none';
+        document.getElementById('rowDotsToggle').style.display = state.template === 'problem_solution' ? 'flex' : 'none';
+
+        renderAt(state.time);
+      });
+    });
+
+    // Skin Selector
+    document.querySelectorAll('.skin-card').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('.skin-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        state.skin = card.dataset.skin;
+        applySkin(state.skin);
+        renderAt(state.time);
+      });
+    });
+
+    // Zone Guides Toggle
+    document.getElementById('chkShowGuides').addEventListener('change', (e) => {
+      state.showGuides = e.target.checked;
+      elGuides.classList.toggle('active', state.showGuides);
+    });
+
+    // Language Toggle
+    document.getElementById('chkLangEn').addEventListener('change', (e) => {
+      state.isEn = e.target.checked;
+      renderAt(state.time);
+    });
+
+    // Dots Toggle
+    document.getElementById('chkShowDots').addEventListener('change', (e) => {
+      state.showDots = e.target.checked;
+      renderAt(state.time);
+    });
+
+    // PS Rotate Lead
+    document.getElementById('btnRotateLead').addEventListener('click', () => {
+      state.rotateIndex++;
+      const langKey = state.isEn ? 'en' : 'id';
+      const p = PHASE_LEAD_ROTATIONS[langKey].problem[state.rotateIndex % 3];
+      const c = PHASE_LEAD_ROTATIONS[langKey].cause[state.rotateIndex % 3];
+      const s = PHASE_LEAD_ROTATIONS[langKey].solution[state.rotateIndex % 3];
+      const r = PHASE_LEAD_ROTATIONS[langKey].result[state.rotateIndex % 3];
+      document.getElementById('txtLeadSample').textContent = `Variasi aktif: "${p}" • "${c}" • "${s}" • "${r}"`;
+      renderAt(state.time);
+    });
+
+    // PS Fallback Mode (No Plan)
+    document.getElementById('btnToggleNoPlan').addEventListener('click', () => {
+      state.noPlanFallback = !state.noPlanFallback;
+      document.getElementById('btnToggleNoPlan').style.borderColor = state.noPlanFallback ? 'var(--action-primary)' : 'var(--border-color)';
+      document.getElementById('btnToggleNoPlan').style.background = state.noPlanFallback ? 'var(--surface-interactive)' : 'transparent';
+      document.getElementById('txtLeadSample').textContent = state.noPlanFallback 
+        ? 'Mode Fallback Aktif: Hanya Babak Problem (Klip 1) dan Solusi (Klip Produk). Klip lain bersih tanpa babak.'
+        : 'Mode Normal: 4 Babak Natural ber-VO.';
+      renderAt(state.time);
+    });
+
+    // Theme Toggle
+    const btnThemeToggle = document.getElementById('btnThemeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    btnThemeToggle.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      themeIcon.textContent = next === 'dark' ? '☀️' : '🌙';
+      btnThemeToggle.innerHTML = `${themeIcon.outerHTML} ${next === 'dark' ? 'Light Mode' : 'Dark Mode'}`;
+    });
+  </script>
+</body>
+</html>
