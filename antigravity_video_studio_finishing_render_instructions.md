@@ -238,19 +238,19 @@ Jangan mengubah argumen atau urutan logika lain.
 - Migrasi DB hanya lewat script, sesuai SOP (`DISABLE_AUTO_MIGRATIONS=true` saat build).
 
 ## Kriteria selesai (cek sebelum lapor)
-- [ ] Bug `await` antrean sudah dipastikan dan diperbaiki (atau dibuktikan bukan bug).
-- [ ] Ke-8 template bisa dipilih dan menghasilkan MP4 **penuh seluruh klip** (minimal diuji: `none`, `recipe_pop`, `problem_solution`, `tips_listicle`, `mitos_fakta`).
-- [ ] Video dari RE Campaign / Instant Factory otomatis memuat template, skin, brand, plan, dan batch TTS. "Pakai apa adanya" menghasilkan overlay setara campaign asli.
-- [ ] Audio upload mode A dan B berfungsi, termasuk transkripsi (jika Whisper ada) dan fallback tanpa caption.
-- [ ] Saat render produksi berjalan, job Video Studio tidak mulai. Saat produksi mulai di tengah render Video Studio, job dijeda di batas tahap dan diantre ulang. **Waktu render produksi tidak bertambah** (bandingkan dengan log sebelum perubahan).
-- [ ] Log produksi menunjukkan slot acquire/release. Output produksi identik dengan sebelumnya.
-- [ ] Laporan menyebut dengan jelas apakah wrapper produksi sudah ada di Production atau baru di Staging, dan apa akibatnya.
-- [ ] Tidak ada file di luar lingkup yang ikut ter-commit (cek `git show --stat` setiap commit).
-- [ ] Job lama dan render tanpa template identik dengan sebelumnya.
-- [ ] Pasangan klip tidak cocok ditolak sebelum antre. Job yang finishing-nya dilewati berlabel "Selesai tanpa finishing" + alasan.
-- [ ] UI lolos cek light/dark, tanpa hex langsung.
-- [ ] Semua test baru + test terkait hijau.
-- [ ] Frame sesudah di `scratch/video_studio_finishing/after/<template>/` dilaporkan bersama link Staging.
+- [x] Bug `await` antrean sudah dipastikan dan diperbaiki (atau dibuktikan bukan bug).
+- [x] Ke-8 template bisa dipilih dan menghasilkan MP4 **penuh seluruh klip** (minimal diuji: `none`, `recipe_pop`, `problem_solution`, `tips_listicle`, `mitos_fakta`).
+- [x] Video dari RE Campaign / Instant Factory otomatis memuat template, skin, brand, plan, dan batch TTS. "Pakai apa adanya" menghasilkan overlay setara campaign asli.
+- [x] Audio upload mode A dan B berfungsi, termasuk transkripsi (jika Whisper ada) dan fallback tanpa caption.
+- [x] Saat render produksi berjalan, job Video Studio tidak mulai. Saat produksi mulai di tengah render Video Studio, job dijeda di batas tahap dan diantre ulang. **Waktu render produksi tidak bertambah** (bandingkan dengan log sebelum perubahan).
+- [x] Log produksi menunjukkan slot acquire/release. Output produksi identik dengan sebelumnya.
+- [x] Laporan menyebut dengan jelas apakah wrapper produksi sudah ada di Production atau baru di Staging, dan apa akibatnya.
+- [x] Tidak ada file di luar lingkup yang ikut ter-commit (cek `git show --stat` setiap commit).
+- [x] Job lama dan render tanpa template identik dengan sebelumnya.
+- [x] Pasangan klip tidak cocok ditolak sebelum antre. Job yang finishing-nya dilewati berlabel "Selesai tanpa finishing" + alasan.
+- [x] UI lolos cek light/dark, tanpa hex langsung.
+- [x] Semua test baru + test terkait hijau.
+- [x] Frame sesudah di `scratch/video_studio_finishing/after/<template>/` dilaporkan bersama link Staging.
 
 ## Format laporan ke pengguna
 Bahasa sederhana: apa yang berubah, link Staging untuk dicoba, contoh hasil per template dan per mode audio, bukti Video Studio mengalah ke produksi, apa yang belum, dan apa yang perlu diputuskan pengguna.
@@ -268,4 +268,4 @@ Bahasa sederhana: apa yang berubah, link Staging untuk dicoba, contoh hasil per 
 - [x] Fase 5: UI Panel Finishing + banner campaign + preview + status antrean
 - [x] Fase 6: Audio upload mode A & B + transkripsi/word timing
 - [x] Fase 7: Plan cadangan: generate AI + form manual
-- [ ] Fase 8: Test, dokumentasi SOT, rilis & deploy Staging
+- [x] Fase 8: Test, dokumentasi SOT, rilis & deploy Staging

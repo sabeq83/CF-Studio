@@ -316,6 +316,91 @@ Operasi FFmpeg adalah aktivitas intensif CPU (*CPU Bound*). Untuk menjamin keseh
 2. **Pembersihan Otomatis (Temp File Garbage Collection):** Semua file video dan audio yang diunggah pengguna ke folder /public/temp/ akan dihapus secara otomatis menggunakan fungsi fs.unlinkSync() tepat 30 menit setelah status pengerjaan berubah menjadi completed atau failed.  
 3. **Batas Ukuran File Maksimal (File Limit):** Batasi ukuran unggahan video maksimal **50MB** dan audio maksimal **10MB** melalui file konfigurasi Next.js (bodyParser: { sizeLimit: '50mb' }) untuk mencegah kehabisan ruang penyimpanan disk (*disk exhaustion*).
 
+## **7\. FINISHING TEMPLATE ENGINE & PLAYWRIGHT OVERLAY (V6.0)**
+
+Mulai versi V6.0, Video Studio terintegrasi penuh dengan **8 Finishing Templates Engine** yang setara dengan pipeline produksi RE Campaign, Instant Factory, dan Multiplier. Video Studio memanfaatkan engine bersama `processTtsStudioMuxing` yang menggabungkan perakitan klip video, sinkronisasi audio tingkat lanjut, transkripsi per kata (word timing), serta perekaman grafis visual kaya (motion graphic, hook cards, recipe chips, callouts, chapters, comparison badges) berbasis browser headless Playwright.
+
+### **7.1. Daftar 8 Finishing Template yang Didukung**
+1. **`none` (Clean / Minimalist)**: Render bersih audio-visual tanpa overlay grafis, transisi cut / xfade murni.
+2. **`recipe_pop` (Kuliner & Makanan)**: Kartu judul resep, punchy hook, timing badge, chips bahan baku, tips kuliner, dan callout rasa.
+3. **`problem_solution` (Produk Solutif / Skincare / Gadget)**: Pain point callout, formula highlight, klaim sebelum/sesudah, feature chips, dan CTA solutif.
+4. **`tips_listicle` (Tips & Edukasi Praktis)**: Penomoran tips bernomor (Step 1..N), ringkasan tips, highlight solusi, dan checklist kesimpulan.
+5. **`ramuan_ritual` (Herbal & Tradisional)**: Disclaimer herbal otomatis, tahapan ritual/pembuatan ramuan, kartu khasiat bahan alam, dan anjuran konsumsi.
+6. **`calm_wellness` (Kesehatan Mental & Relaksasi)**: Nada warna menenangkan, babak relaksasi, breathing cues, tips mindfulness, dan floating wellness card.
+7. **`angka_banding` (Data, Statistik & Perbandingan)**: Visualisasi metrik angka/persentase, perbandingan sebelum vs sesudah, card statistik, dan penekanan bukti riil.
+8. **`mitos_fakta` (Edukasi Debunking & Fakta Ilmiah)**: Format kartu flip Mitos vs Fakta, stempel kebenaran, penjelasan logis, dan pembuktian sains.
+
+---
+
+### **7.2. Penyelarasan Audio Upload (Mode A & Mode B)**
+
+Video Studio mendukung audio baik dari **TTS Studio (batch)** maupun **Upload Mandiri / Database** dengan dua mode arsitektur:
+
+1. **Mode A — Single Continuous Audio (1 Audio, N Klip Video)**:
+   - Digunakan saat pengguna mengunggah 1 file rekaman suara panjang (atau file audio utuh) untuk mengiringi kumpulan beberapa klip video.
+   - Video dirangkai terlebih dahulu menjadi 1 berkas video kontinu via `concatRawVideoOnlyClips`.
+   - Engine menghitung `customClipOffsets` berdasarkan durasi riil masing-masing klip video mentah, sehingga elemen template yang terikat nomor klip (Hook adegan awal, badge adegan tengah, tips adegan akhir) mendarat tepat pada batas transisi klip.
+   - Word timing ditranskripsikan pada continuous audio file.
+
+2. **Mode B — Per-Clip Audio (N Klip Video ↔ N Audio Klip)**:
+   - Digunakan saat pengguna mengunggah audio per adegan (misal: adegan 1 audio 1, adegan 2 audio 2).
+   - Sistem memvalidasi jumlah file audio harus sama persis dengan jumlah klip video terpilih. Jika tidak sama, tombol render dikunci dengan peringatan jumlah mismatch.
+   - Disusun menjadi `batchDataOverride` terstruktur untuk disinkronkan per-klip oleh `processTtsStudioMuxing`.
+
+3. **Word Alignment & Caption Fallback Matrix**:
+   - **Teks VO Tersedia**: Menggunakan alignment Tier 3 (teks VO + deteksi silence FFmpeg).
+   - **Teks VO Kosong + Whisper CLI Tersedia**: Menggunakan alignment Tier 2 (transkripsi kata presisi dari audio via Whisper).
+   - **Teks VO Kosong + Whisper CLI Absen**: Caption otomatis dialihkan ke `captionMode = 'none'` agar proses render tidak crash; layer grafis template (hook, tips, callouts, chips) tetap ter-render sempurna tanpa gangguan.
+
+---
+
+### **7.3. Sistem Slot Render Bersama & Mekanisme Video Studio Mengalah (`lib/render-slot.js`)**
+
+Untuk menjamin beban CPU / GPU Mac Mini tidak mengalami lonjakan (*throttling*) dan tidak mengganggu jadwal produksi reguler, Video Studio menerapkan aturan **selalu mengalah ke proses produksi**:
+
+1. **Locking Berbasis Filesystem Multi-Node**:
+   - Status proses produksi ditandai pada direktori bersama `~/.cfstudio/render-slots/` (`RENDER_SLOT_DIR`).
+   - Pipeline produksi (RE Campaign, Instant Factory, Multiplier) memanggil `acquireProductionSlot({ env, jobRef })` sebelum merender dan memanggil `release()` saat selesai.
+   - Heartbeat file diperbarui setiap 30 detik. Kunci lama (> 120 detik) dianggap basi dan dibersihkan otomatis.
+   - Operasi penulisan slot tidak pernah melempar error fatal yang menghambat produksi.
+
+2. **Pencegahan Awal Antrean Video Studio**:
+   - Sebelum mengambil pekerjaan dari antrean `ffmpeg_studio_jobs`, worker memeriksa `isProductionActive()`.
+   - Jika produksi sedang berlangsung, worker Video Studio menunda pemrosesan selama 60 detik (`progress_stage = 'waiting_production'`) tanpa polling CPU yang agresif.
+
+3. **Pemberhentian & Penjadwalan Ulang di Tengah Jalan (`RenderYieldError`)**:
+   - Di batas tiap checkpoint rendering (antar sinkronisasi klip, sebelum penggabungan video, sebelum Playwright overlay capture, dan sebelum master audio pass), worker memeriksa `shouldYield()`.
+   - Jika terdeteksi produksi dimulai saat Video Studio sedang merender, worker membatalkan operasi saat itu juga, melempar `RenderYieldError`, membersihkan berkas sementara, menaikkan `yield_count`, menyetel status ke `pending` (`progress_stage = 'yielded'`), dan mengantre ulang.
+   - Jika sebuah job telah mengalah $\ge 3$ kali, UI Video Studio akan menampilkan banner saran waktu rendering di luar jam sibuk produksi.
+
+---
+
+### **7.4. Sumber Finishing Plan & Validasi Kepatuhan**
+
+Video Studio menyediakan 3 saluran resolusi Finishing Plan:
+1. **Campaign Asal (`GET /api/video-studio/finishing-source`)**:
+   - Jika video dipilih dari RE Campaign atau Instant Factory, sistem secara otomatis mengekstrak `finishing_template`, `finishing_skin`, `finishing_plan`, profil `brand`, serta batch TTS yang relevan.
+   - Pengguna cukup menekan tombol "Pakai apa adanya" untuk mendapatkan hasil identik dengan output campaign.
+2. **AI Plan Generator (`POST /api/video-studio/finishing-plan-generate`)**:
+   - Memanfaatkan Gemini LLM dengan key pool yang aman untuk menganalisis teks naskah / transkripsi VO dan menghasilkan struktur JSON plan sesuai skema template yang dipilih.
+3. **Form Editor Manual & Validasi (`POST /api/video-studio/finishing-plan-validate`)**:
+   - Form visual interaktif (`FinishingPlanEditor.jsx`) dengan audit kepatuhan ketat: validasi klaim berlebihan pada produk herbal, batas panjang karakter hook & punchlines, kepadatan kata, dan konsistensi waktu.
+
+---
+
+### **7.5. Skema Kolom Database Tambahan (`ffmpeg_studio_jobs`)**
+
+Pembaruan skema PostgreSQL multi-tenant/multi-schema (`scripts/migrate-ffmpeg-studio-finishing-fields.mjs`):
+* `finishing_template TEXT DEFAULT 'none'`
+* `finishing_plan JSONB`
+* `finishing_config JSONB`
+* `audio_mode TEXT DEFAULT 'single'`
+* `progress_stage TEXT`
+* `yield_count INTEGER DEFAULT 0`
+* `finishing_status TEXT`
+
+---
+
 **EOF (End of Blueprint Document)**
 
 *Fitur Standalone FFmpeg Studio ini melengkapi kemandirian produksi materi promosi iklan digital massal pada MAKNA Engine V5.*
