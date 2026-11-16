@@ -23,7 +23,10 @@ export async function POST(request) {
       bgm_file,
       bgm_volume,
       sfx_volume,
-      video_scale
+      video_scale,
+      finishing_template,
+      finishing_config,
+      audio_mode
     } = body;
 
     // 1. Basic validation
@@ -35,6 +38,29 @@ export async function POST(request) {
     }
     if (!sync_option || !['shortest', 'stretch', 'freeze', 'loop'].includes(sync_option)) {
       return NextResponse.json({ success: false, error: 'Strategi sinkronisasi tidak valid' }, { status: 400 });
+    }
+
+    // Finishing template validation
+    const { FINISHING_TEMPLATE_IDS, isRichFinishingTemplate, hasStrictTemplateCompliance } = await import('@/lib/finishing-template-registry');
+    const resolvedTemplate = finishing_template ? String(finishing_template).trim().toLowerCase() : 'none';
+    if (!FINISHING_TEMPLATE_IDS.includes(resolvedTemplate)) {
+      return NextResponse.json({
+        success: false,
+        error: `Finishing template '${resolvedTemplate}' tidak dikenal. Pilih salah satu dari: ${FINISHING_TEMPLATE_IDS.join(', ')}`
+      }, { status: 400 });
+    }
+
+    let parsedFinishingConfig = {};
+    if (finishing_config) {
+      if (typeof finishing_config === 'object') {
+        parsedFinishingConfig = finishing_config;
+      } else {
+        try {
+          parsedFinishingConfig = JSON.parse(finishing_config);
+        } catch (e) {
+          console.warn('[Video Studio Render API] finishing_config JSON rusak, diabaikan:', e.message);
+        }
+      }
     }
 
     // Parse input video paths (supports string, JSON array, or Array object)
@@ -127,16 +153,88 @@ export async function POST(request) {
       }
     }
 
+    const resolvedAudioMode = audio_mode || (audio_source_type === 'tts_studio' ? 'tts_batch' : 'single');
+
     if (audio_source_type !== 'tts_studio') {
-      const absoluteAudioPath = path.isAbsolute(resolvedAudioPath) ? resolvedAudioPath : path.join(process.cwd(), resolvedAudioPath);
-      if (!fs.existsSync(absoluteAudioPath)) {
-        return NextResponse.json({ success: false, error: `File audio tidak ditemukan di server: ${resolvedAudioPath}` }, { status: 400 });
+      if (resolvedAudioMode === 'per_clip') {
+        let audioInputList = [];
+        if (Array.isArray(audio_path)) {
+          audioInputList = audio_path;
+        } else {
+          try {
+            const parsed = JSON.parse(audio_path);
+            audioInputList = Array.isArray(parsed) ? parsed : [audio_path];
+          } catch {
+            audioInputList = [audio_path];
+          }
+        }
+        if (audioInputList.length !== resolvedVideoPaths.length) {
+          return NextResponse.json({
+            success: false,
+            error: `Mode "satu audio per klip": Jumlah file audio (${audioInputList.length}) tidak cocok dengan jumlah klip video (${resolvedVideoPaths.length}).`
+          }, { status: 400 });
+        }
+        for (const ap of audioInputList) {
+          const absoluteAudioPath = path.isAbsolute(ap) ? ap : path.join(process.cwd(), ap);
+          if (!fs.existsSync(absoluteAudioPath)) {
+            return NextResponse.json({ success: false, error: `File audio tidak ditemukan di server: ${ap}` }, { status: 400 });
+          }
+        }
+      } else {
+        const absoluteAudioPath = path.isAbsolute(resolvedAudioPath) ? resolvedAudioPath : path.join(process.cwd(), resolvedAudioPath);
+        if (!fs.existsSync(absoluteAudioPath)) {
+          return NextResponse.json({ success: false, error: `File audio tidak ditemukan di server: ${resolvedAudioPath}` }, { status: 400 });
+        }
       }
     } else {
       const { getTtsBatchWithClips } = await import('@/lib/db');
       const batchData = await getTtsBatchWithClips(resolvedAudioPath);
       if (!batchData) {
         return NextResponse.json({ success: false, error: `Batch TTS Studio '${resolvedAudioPath}' tidak ditemukan` }, { status: 400 });
+      }
+      const completedClips = (batchData.clips || []).filter(c => c.status === 'completed');
+      if (completedClips.length !== resolvedVideoPaths.length) {
+        return NextResponse.json({
+          success: false,
+          error: `Jumlah klip video (${resolvedVideoPaths.length}) dan klip audio TTS (${completedClips.length}) tidak sama. Samakan jumlah klip sebelum render.`
+        }, { status: 400 });
+      }
+    }
+
+    // Template kaya -> validasi plan wajib
+    let planWarnings = [];
+    if (isRichFinishingTemplate(resolvedTemplate)) {
+      const plan = parsedFinishingConfig?.finishingPlan || null;
+      if (!plan) {
+        return NextResponse.json({
+          success: false,
+          error: `Template finishing '${resolvedTemplate}' membutuhkan finishing plan. Buat plan dengan AI atau isi manual terlebih dahulu.`
+        }, { status: 400 });
+      }
+
+      const { validateFinishingPlan } = await import('@/lib/finishing-plan-validator');
+      const strictClaims = hasStrictTemplateCompliance(resolvedTemplate);
+      const isHerbalProduct = parsedFinishingConfig?.isHerbalProduct ?? true;
+      const cleanVoiceoverClips = Array(resolvedVideoPaths.length).fill({ text: '' });
+
+      const planValidation = validateFinishingPlan(plan, {
+        cleanVoiceoverClips,
+        isHerbalProduct,
+        finishingTemplate: resolvedTemplate,
+        strictClaims,
+        recipeTexts: parsedFinishingConfig?.recipeTexts || [],
+        productData: parsedFinishingConfig?.productData || null,
+        targetLanguage: parsedFinishingConfig?.targetLanguage || 'id-ID'
+      });
+
+      planWarnings = planValidation.warnings || [];
+      const planErrors = planWarnings.filter(w => /rejected|claim|invalid|illegal|forbidden/i.test(w));
+      if (planErrors.length > 0) {
+        return NextResponse.json({
+          success: false,
+          error: `Finishing plan tidak valid untuk '${resolvedTemplate}': ${planErrors.join(', ')}`,
+          warnings: planWarnings
+        }, { status: 400 });
       }
     }
 
@@ -175,7 +273,13 @@ export async function POST(request) {
       video_scale: video_scale !== undefined ? parseFloat(video_scale) : 1.0,
       output_path: null,
       status: 'pending',
-      error_log: null
+      error_log: null,
+      finishing_template: resolvedTemplate,
+      finishing_config: JSON.stringify(parsedFinishingConfig),
+      progress_stage: null,
+      finishing_status: null,
+      audio_mode: resolvedAudioMode,
+      yield_count: 0
     };
 
     await createFfmpegStudioJob(jobRecord);
@@ -188,8 +292,11 @@ export async function POST(request) {
       message: 'Pekerjaan rendering berhasil dimasukkan ke dalam antrean.',
       data: {
         job_id: jobId,
-        status: 'pending'
-      }
+        status: 'pending',
+        finishing_template: resolvedTemplate,
+        audio_mode: resolvedAudioMode
+      },
+      warnings: planWarnings.length > 0 ? planWarnings : undefined
     });
 
   } catch (error) {
