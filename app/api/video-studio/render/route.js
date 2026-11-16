@@ -154,6 +154,7 @@ export async function POST(request) {
     }
 
     const resolvedAudioMode = audio_mode || (audio_source_type === 'tts_studio' ? 'tts_batch' : 'single');
+    let finalAudioPathForJob = resolvedAudioPath;
 
     if (audio_source_type !== 'tts_studio') {
       if (resolvedAudioMode === 'per_clip') {
@@ -174,17 +175,30 @@ export async function POST(request) {
             error: `Mode "satu audio per klip": Jumlah file audio (${audioInputList.length}) tidak cocok dengan jumlah klip video (${resolvedVideoPaths.length}).`
           }, { status: 400 });
         }
+
+        const resolvedAudioInputList = [];
         for (const ap of audioInputList) {
-          const absoluteAudioPath = path.isAbsolute(ap) ? ap : path.join(process.cwd(), ap);
-          if (!fs.existsSync(absoluteAudioPath)) {
-            return NextResponse.json({ success: false, error: `File audio tidak ditemukan di server: ${ap}` }, { status: 400 });
+          let resolvedAp = ap;
+          if (audio_source_type === 'database') {
+            const audioEntry = await getVideoById(ap);
+            if (!audioEntry) {
+              return NextResponse.json({ success: false, error: `Audio dengan ID '${ap}' tidak ditemukan di database` }, { status: 404 });
+            }
+            resolvedAp = audioEntry.local_path;
           }
+          const absoluteAudioPath = path.isAbsolute(resolvedAp) ? resolvedAp : path.join(process.cwd(), resolvedAp);
+          if (!fs.existsSync(absoluteAudioPath)) {
+            return NextResponse.json({ success: false, error: `File audio tidak ditemukan di server: ${resolvedAp}` }, { status: 400 });
+          }
+          resolvedAudioInputList.push(resolvedAp);
         }
+        finalAudioPathForJob = JSON.stringify(resolvedAudioInputList);
       } else {
         const absoluteAudioPath = path.isAbsolute(resolvedAudioPath) ? resolvedAudioPath : path.join(process.cwd(), resolvedAudioPath);
         if (!fs.existsSync(absoluteAudioPath)) {
           return NextResponse.json({ success: false, error: `File audio tidak ditemukan di server: ${resolvedAudioPath}` }, { status: 400 });
         }
+        finalAudioPathForJob = resolvedAudioPath;
       }
     } else {
       const { getTtsBatchWithClips } = await import('@/lib/db');
@@ -265,7 +279,7 @@ export async function POST(request) {
       video_source_type,
       video_path: JSON.stringify(resolvedVideoPaths),
       audio_source_type,
-      audio_path: resolvedAudioPath,
+      audio_path: finalAudioPathForJob,
       sync_option,
       bgm_path: bgmPath,
       bgm_volume: bgm_volume !== undefined ? parseFloat(bgm_volume) : 0.15,

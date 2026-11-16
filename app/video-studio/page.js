@@ -51,6 +51,11 @@ export default function VideoStudio() {
   // Audio Inputs
   const [audioSourceType, setAudioSourceType] = useState('upload');
   const [audioFile, setAudioFile] = useState(null);
+  const [audioFiles, setAudioFiles] = useState([]);
+  const [audioVoTexts, setAudioVoTexts] = useState([]);
+  const [singleVoText, setSingleVoText] = useState('');
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [transcribeNotice, setTranscribeNotice] = useState('');
   const [audioDbId, setAudioDbId] = useState('');
   const [audioSearch, setAudioSearch] = useState('');
   const [dbAudios, setDbAudios] = useState([]);
@@ -280,6 +285,40 @@ export default function VideoStudio() {
     return data.data.fs_path;
   }
 
+  // Helper to calculate total selected video clips
+  const videoClipCount = videoSourceType === 're_campaign' || videoSourceType === 'instant_factory'
+    ? selectedCampaignVideos.length
+    : (videoSourceType === 'upload' ? videoFiles.length : videoDbIds.length);
+
+  const handleAutoTranscribe = async () => {
+    if (!audioFile) {
+      setTranscribeNotice('⚠️ Silakan pilih file audio terlebih dahulu.');
+      return;
+    }
+    setIsTranscribing(true);
+    setTranscribeNotice('⏳ Mengunggah audio sementara untuk transkripsi...');
+    try {
+      const uploadedFsPath = await uploadFile(audioFile);
+      setTranscribeNotice('🎙️ Menjalankan transkripsi Whisper...');
+      const res = await fetch('/api/video-studio/transcribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ audio_path: uploadedFsPath })
+      });
+      const data = await res.json();
+      if (data.success && data.text) {
+        setSingleVoText(data.text);
+        setTranscribeNotice('✓ Transkripsi berhasil dimuat ke teks Voiceover.');
+      } else {
+        setTranscribeNotice(data.error || 'Whisper CLI tidak tersedia di server. Silakan masukkan teks Voiceover secara manual.');
+      }
+    } catch (err) {
+      setTranscribeNotice(`Gagal transkripsi: ${err.message}`);
+    } finally {
+      setIsTranscribing(false);
+    }
+  };
+
   async function handleFormSubmit(e) {
     e.preventDefault();
     setIsSubmitting(true);
@@ -297,8 +336,19 @@ export default function VideoStudio() {
       if ((videoSourceType === 're_campaign' || videoSourceType === 'instant_factory') && selectedCampaignVideos.length === 0) {
         throw new Error('Silakan pilih minimal 1 video dari kampanye.');
       }
-      if (audioSourceType === 'upload' && !audioFile) {
-        throw new Error('Silakan pilih file audio untuk diunggah.');
+      if (audioSourceType === 'upload') {
+        if (audioMode === 'per_clip') {
+          if (audioFiles.length === 0) {
+            throw new Error('Silakan pilih file audio per-klip untuk diunggah.');
+          }
+          if (audioFiles.length !== videoClipCount) {
+            throw new Error(`Mode "Satu audio per klip": Jumlah file audio (${audioFiles.length}) tidak sama dengan jumlah klip video (${videoClipCount}).`);
+          }
+        } else {
+          if (!audioFile) {
+            throw new Error('Silakan pilih file audio untuk diunggah.');
+          }
+        }
       }
       if (audioSourceType === 'database' && !audioDbId) {
         throw new Error('Silakan pilih audio dari database.');
@@ -330,8 +380,18 @@ export default function VideoStudio() {
       }
 
       if (audioSourceType === 'upload') {
-        setStatusMessage('Sedang mengunggah audio...');
-        audioPath = await uploadFile(audioFile);
+        if (audioMode === 'per_clip') {
+          const uploadedAudioList = [];
+          for (let i = 0; i < audioFiles.length; i++) {
+            setStatusMessage(`Sedang mengunggah audio ${i + 1}/${audioFiles.length}...`);
+            const p = await uploadFile(audioFiles[i]);
+            uploadedAudioList.push(p);
+          }
+          audioPath = JSON.stringify(uploadedAudioList);
+        } else {
+          setStatusMessage('Sedang mengunggah audio...');
+          audioPath = await uploadFile(audioFile);
+        }
       }
 
       // 3. Queue render job
@@ -356,7 +416,9 @@ export default function VideoStudio() {
             brandName,
             hookTitle: finishingPlan?.hook || '',
             skin: finishingSkin,
-            isHerbalProduct: false
+            isHerbalProduct: false,
+            voiceoverTexts: audioMode === 'per_clip' ? audioVoTexts : (singleVoText ? [singleVoText] : null),
+            captionText: audioMode === 'single' ? singleVoText : ''
           }),
           audio_mode: audioSourceType === 'tts_studio' ? 'tts_batch' : audioMode
         })
@@ -1052,19 +1114,264 @@ export default function VideoStudio() {
                   </div>
 
                   {audioSourceType === 'upload' ? (
-                    <div className="drag-drop-zone">
-                      <input
-                        id="audio-file-input"
-                        type="file"
-                        accept="audio/mp3,audio/wav,audio/mpeg"
-                        onChange={(e) => setAudioFile(e.target.files[0] || null)}
-                      />
-                      {audioFile ? (
-                        <p className="file-selected">
-                          ✓ {audioFile.name} ({(audioFile.size / (1024 * 1024)).toFixed(2)} MB)
-                        </p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {/* Sub-Tabs: Mode A (Single) vs Mode B (Per-Clip) */}
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 1fr',
+                        gap: '8px',
+                        background: 'var(--surface-interactive)',
+                        padding: '4px',
+                        borderRadius: 'var(--radius-md)'
+                      }}>
+                        <button
+                          type="button"
+                          onClick={() => setAudioMode('single')}
+                          style={{
+                            padding: '8px 12px',
+                            borderRadius: 'var(--radius-sm)',
+                            border: 'none',
+                            background: audioMode === 'single' ? 'var(--surface)' : 'transparent',
+                            color: audioMode === 'single' ? 'var(--action-primary)' : 'var(--text-secondary)',
+                            fontWeight: audioMode === 'single' ? 700 : 500,
+                            cursor: 'pointer',
+                            fontSize: '0.8rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '6px'
+                          }}
+                        >
+                          <span>🎵 Mode A (1 Audio Semua Klip)</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setAudioMode('per_clip')}
+                          style={{
+                            padding: '8px 12px',
+                            borderRadius: 'var(--radius-sm)',
+                            border: 'none',
+                            background: audioMode === 'per_clip' ? 'var(--surface)' : 'transparent',
+                            color: audioMode === 'per_clip' ? 'var(--action-primary)' : 'var(--text-secondary)',
+                            fontWeight: audioMode === 'per_clip' ? 700 : 500,
+                            cursor: 'pointer',
+                            fontSize: '0.8rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '6px'
+                          }}
+                        >
+                          <span>🎙️ Mode B (1 Audio per Klip)</span>
+                        </button>
+                      </div>
+
+                      {audioMode === 'single' ? (
+                        <>
+                          <div className="drag-drop-zone">
+                            <input
+                              id="audio-file-input"
+                              type="file"
+                              accept="audio/mp3,audio/wav,audio/mpeg"
+                              onChange={(e) => setAudioFile(e.target.files[0] || null)}
+                            />
+                            {audioFile ? (
+                              <p className="file-selected">
+                                ✓ {audioFile.name} ({(audioFile.size / (1024 * 1024)).toFixed(2)} MB)
+                              </p>
+                            ) : (
+                              <p>Seret 1 berkas audio (.mp3, .wav) ke sini atau klik untuk mencari (Maks 10MB)</p>
+                            )}
+                          </div>
+
+                          {/* Voiceover Text Column & Auto-transcribe */}
+                          <div style={{
+                            background: 'var(--surface)',
+                            border: '1px solid var(--border-subtle)',
+                            borderRadius: 'var(--radius-md)',
+                            padding: '12px'
+                          }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                              <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                                Teks Voiceover untuk Subtitle / Caption (Opsional)
+                              </label>
+                              <button
+                                type="button"
+                                onClick={handleAutoTranscribe}
+                                disabled={isTranscribing || !audioFile}
+                                style={{
+                                  background: 'var(--surface-interactive)',
+                                  border: '1px solid var(--border-subtle)',
+                                  borderRadius: 'var(--radius-sm)',
+                                  color: 'var(--action-primary)',
+                                  padding: '4px 10px',
+                                  fontSize: '0.72rem',
+                                  fontWeight: 600,
+                                  cursor: isTranscribing || !audioFile ? 'not-allowed' : 'pointer',
+                                  opacity: isTranscribing || !audioFile ? 0.6 : 1
+                                }}
+                              >
+                                {isTranscribing ? '⏳ Menyelaraskan...' : '✨ Transkripsi Otomatis (Whisper)'}
+                              </button>
+                            </div>
+                            <textarea
+                              rows={2}
+                              className="form-input"
+                              placeholder="Masukkan teks naskah audio ini agar engine dapat membuat subtitle/caption akurat..."
+                              value={singleVoText}
+                              onChange={(e) => setSingleVoText(e.target.value)}
+                              style={{ width: '100%', fontSize: '0.8rem', resize: 'vertical' }}
+                            />
+                            {transcribeNotice && (
+                              <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
+                                {transcribeNotice}
+                              </p>
+                            )}
+                          </div>
+                        </>
                       ) : (
-                        <p>Seret file audio (.mp3, .wav) ke sini atau klik untuk mencari (Maks 10MB)</p>
+                        /* Mode B: Per-Clip Audio List */
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                          <div className="drag-drop-zone">
+                            <input
+                              id="audio-files-input"
+                              type="file"
+                              multiple
+                              accept="audio/mp3,audio/wav,audio/mpeg"
+                              onChange={(e) => {
+                                const files = Array.from(e.target.files || []);
+                                setAudioFiles(files);
+                                setAudioVoTexts(prev => {
+                                  const arr = [...prev];
+                                  while (arr.length < files.length) arr.push('');
+                                  return arr.slice(0, files.length);
+                                });
+                              }}
+                            />
+                            <p>
+                              {audioFiles.length > 0
+                                ? `✓ ${audioFiles.length} file audio terpilih (Klip target: ${videoClipCount} klip)`
+                                : `Pilih sekaligus ${videoClipCount || 'N'} berkas audio (.mp3, .wav) sesuai urutan klip`}
+                            </p>
+                          </div>
+
+                          {audioFiles.length > 0 && (
+                            <div style={{
+                              background: 'var(--surface)',
+                              border: '1px solid var(--border-subtle)',
+                              borderRadius: 'var(--radius-md)',
+                              padding: '10px'
+                            }}>
+                              <div style={{ fontSize: '0.76rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '8px' }}>
+                                Pasangan Adegan Klip Video ↔ Audio:
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {audioFiles.map((af, idx) => (
+                                  <div
+                                    key={idx}
+                                    style={{
+                                      display: 'flex',
+                                      flexDirection: 'column',
+                                      gap: '4px',
+                                      padding: '8px 10px',
+                                      background: 'var(--surface-interactive)',
+                                      borderRadius: 'var(--radius-sm)',
+                                      border: '1px solid var(--border-subtle)'
+                                    }}
+                                  >
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                      <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                                        Adegan #{idx + 1} ↔ <span style={{ color: 'var(--action-primary)' }}>{af.name}</span> ({(af.size / (1024 * 1024)).toFixed(2)} MB)
+                                      </span>
+                                      <div style={{ display: 'flex', gap: '4px' }}>
+                                        {idx > 0 && (
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              const newFiles = [...audioFiles];
+                                              const tmpF = newFiles[idx - 1];
+                                              newFiles[idx - 1] = newFiles[idx];
+                                              newFiles[idx] = tmpF;
+                                              setAudioFiles(newFiles);
+
+                                              const newVo = [...audioVoTexts];
+                                              const tmpV = newVo[idx - 1];
+                                              newVo[idx - 1] = newVo[idx];
+                                              newVo[idx] = tmpV;
+                                              setAudioVoTexts(newVo);
+                                            }}
+                                            style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '0.8rem' }}
+                                            title="Pindah ke atas"
+                                          >
+                                            ⬆️
+                                          </button>
+                                        )}
+                                        {idx < audioFiles.length - 1 && (
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              const newFiles = [...audioFiles];
+                                              const tmpF = newFiles[idx + 1];
+                                              newFiles[idx + 1] = newFiles[idx];
+                                              newFiles[idx] = tmpF;
+                                              setAudioFiles(newFiles);
+
+                                              const newVo = [...audioVoTexts];
+                                              const tmpV = newVo[idx + 1];
+                                              newVo[idx + 1] = newVo[idx];
+                                              newVo[idx] = tmpV;
+                                              setAudioVoTexts(newVo);
+                                            }}
+                                            style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '0.8rem' }}
+                                            title="Pindah ke bawah"
+                                          >
+                                            ⬇️
+                                          </button>
+                                        )}
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setAudioFiles(audioFiles.filter((_, i) => i !== idx));
+                                            setAudioVoTexts(audioVoTexts.filter((_, i) => i !== idx));
+                                          }}
+                                          style={{ background: 'transparent', border: 'none', color: 'var(--status-danger)', cursor: 'pointer', fontSize: '0.8rem' }}
+                                          title="Hapus file audio ini"
+                                        >
+                                          🗑️
+                                        </button>
+                                      </div>
+                                    </div>
+                                    <input
+                                      type="text"
+                                      className="form-input"
+                                      placeholder={`Teks Voiceover adegan #${idx + 1} (opsional)`}
+                                      value={audioVoTexts[idx] || ''}
+                                      onChange={(e) => {
+                                        const next = [...audioVoTexts];
+                                        next[idx] = e.target.value;
+                                        setAudioVoTexts(next);
+                                      }}
+                                      style={{ fontSize: '0.75rem', padding: '4px 8px' }}
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {videoClipCount > 0 && audioFiles.length > 0 && audioFiles.length !== videoClipCount && (
+                            <div style={{
+                              padding: '8px 12px',
+                              background: 'var(--status-danger-soft)',
+                              border: '1px solid var(--status-danger)',
+                              borderRadius: 'var(--radius-sm)',
+                              color: 'var(--status-danger)',
+                              fontSize: '0.78rem'
+                            }}>
+                              ⚠️ <strong>Jumlah Tidak Cocok:</strong> Video memiliki {videoClipCount} klip, namun Anda mengunggah {audioFiles.length} file audio. Samakan jumlahnya sebelum render.
+                            </div>
+                          )}
+                        </div>
                       )}
                     </div>
                   ) : audioSourceType === 'database' ? (
@@ -1190,7 +1497,7 @@ export default function VideoStudio() {
                   audioSourceType={audioSourceType}
                   audioMode={audioMode}
                   onChangeAudioMode={setAudioMode}
-                  audioFileCount={audioFile ? 1 : 0}
+                  audioFileCount={audioMode === 'per_clip' ? audioFiles.length : (audioFile ? 1 : 0)}
                   finishingTemplate={finishingTemplate}
                   onChangeTemplate={setFinishingTemplate}
                   finishingPlan={finishingPlan}
@@ -1208,21 +1515,31 @@ export default function VideoStudio() {
                   onValidityChange={setIsPlanValid}
                 />
 
-                <button
-                  type="submit"
-                  className="glowing-btn-render"
-                  disabled={isSubmitting || (finishingTemplate !== 'none' && !isPlanValid)}
-                  style={{
-                    opacity: (finishingTemplate !== 'none' && !isPlanValid) ? 0.6 : 1,
-                    cursor: (finishingTemplate !== 'none' && !isPlanValid) ? 'not-allowed' : 'pointer'
-                  }}
-                >
-                  {isSubmitting
-                    ? '⏳ Mengunggah & Memproses...'
-                    : (finishingTemplate !== 'none' && !isPlanValid)
-                      ? '⚠️ Plan Finishing Belum Lengkap (Hook Wajib)'
-                      : '🎬 Mulai Rendering Video'}
-                </button>
+                {(() => {
+                  const isAudioCountMismatch = audioSourceType === 'upload' && audioMode === 'per_clip' && videoClipCount > 0 && audioFiles.length > 0 && audioFiles.length !== videoClipCount;
+                  const isPlanIncomplete = finishingTemplate !== 'none' && !isPlanValid;
+                  const isBlocked = isSubmitting || isPlanIncomplete || isAudioCountMismatch;
+
+                  return (
+                    <button
+                      type="submit"
+                      className="glowing-btn-render"
+                      disabled={isBlocked}
+                      style={{
+                        opacity: isBlocked ? 0.6 : 1,
+                        cursor: isBlocked ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      {isSubmitting
+                        ? '⏳ Mengunggah & Memproses...'
+                        : isAudioCountMismatch
+                          ? `⚠️ Jumlah Audio (${audioFiles.length}) ≠ Klip (${videoClipCount})`
+                          : isPlanIncomplete
+                            ? '⚠️ Plan Finishing Belum Lengkap (Hook Wajib)'
+                            : '🎬 Mulai Rendering Video'}
+                    </button>
+                  );
+                })()}
               </form>
             </div>
 

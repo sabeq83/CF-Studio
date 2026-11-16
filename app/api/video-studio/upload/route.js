@@ -13,67 +13,88 @@ if (!fs.existsSync(TEMP_DIR)) {
 export async function POST(request) {
   try {
     const formData = await request.formData();
-    const file = formData.get('file');
+    
+    // Support multiple files via 'files' or multiple 'file' keys
+    let rawFiles = formData.getAll('files');
+    if (!rawFiles || rawFiles.length === 0) {
+      rawFiles = formData.getAll('file');
+    }
 
-    if (!file || !file.size) {
+    const validFiles = (rawFiles || []).filter(f => f && f.size > 0);
+
+    if (validFiles.length === 0) {
       return NextResponse.json({ success: false, error: 'File wajib diunggah' }, { status: 400 });
     }
 
-    const filename = file.name || 'unnamed_file';
-    const ext = path.extname(filename).toLowerCase();
-    const mimeType = file.type || '';
-
-    const isVideo = mimeType.startsWith('video/') || ['.mp4', '.mov', '.webm', '.mkv', '.avi'].includes(ext);
-    const isAudio = mimeType.startsWith('audio/') || ['.mp3', '.wav', '.ogg', '.m4a', '.aac'].includes(ext);
-
-    if (!isVideo && !isAudio) {
-      return NextResponse.json({
-        success: false,
-        error: 'Format file tidak didukung. Harap unggah file video (.mp4/.mov) atau audio (.mp3/.wav)'
-      }, { status: 400 });
-    }
-
-    // Size validation
     const maxVideoSize = 50 * 1024 * 1024; // 50MB
     const maxAudioSize = 10 * 1024 * 1024; // 10MB
 
-    if (isVideo && file.size > maxVideoSize) {
-      return NextResponse.json({
-        success: false,
-        error: `Ukuran video melebihi batas maksimal (50MB). Ukuran file Anda: ${(file.size / (1024 * 1024)).toFixed(2)}MB`
-      }, { status: 400 });
-    }
+    const processedData = [];
 
-    if (isAudio && file.size > maxAudioSize) {
-      return NextResponse.json({
-        success: false,
-        error: `Ukuran audio melebihi batas maksimal (10MB). Ukuran file Anda: ${(file.size / (1024 * 1024)).toFixed(2)}MB`
-      }, { status: 400 });
-    }
+    for (const file of validFiles) {
+      const filename = file.name || 'unnamed_file';
+      const ext = path.extname(filename).toLowerCase();
+      const mimeType = file.type || '';
 
-    // Generate safe unique filename
-    const safeBaseName = path.basename(filename, ext).replace(/[^a-zA-Z0-9-_]/g, '_');
-    const uniqueFilename = `tmp_${uuidv4().substring(0, 8)}_${safeBaseName}${ext}`;
-    const destinationPath = path.join(TEMP_DIR, uniqueFilename);
+      const isVideo = mimeType.startsWith('video/') || ['.mp4', '.mov', '.webm', '.mkv', '.avi'].includes(ext);
+      const isAudio = mimeType.startsWith('audio/') || ['.mp3', '.wav', '.ogg', '.m4a', '.aac'].includes(ext);
 
-    // Save file
-    const buffer = Buffer.from(await file.arrayBuffer());
-    fs.writeFileSync(destinationPath, buffer);
+      if (!isVideo && !isAudio) {
+        return NextResponse.json({
+          success: false,
+          error: `Format file '${filename}' tidak didukung. Harap unggah file video (.mp4/.mov) atau audio (.mp3/.wav)`
+        }, { status: 400 });
+      }
 
-    // Relative web accessible path (e.g. /temp/filename.ext) and relative filesystem path
-    const relativeFsPath = path.join('public', 'temp', uniqueFilename);
-    const webUrlPath = `/temp/${uniqueFilename}`;
+      if (isVideo && file.size > maxVideoSize) {
+        return NextResponse.json({
+          success: false,
+          error: `Ukuran video '${filename}' melebihi batas maksimal (50MB). Ukuran file: ${(file.size / (1024 * 1024)).toFixed(2)}MB`
+        }, { status: 400 });
+      }
 
-    return NextResponse.json({
-      success: true,
-      data: {
+      if (isAudio && file.size > maxAudioSize) {
+        return NextResponse.json({
+          success: false,
+          error: `Ukuran audio '${filename}' melebihi batas maksimal (10MB). Ukuran file: ${(file.size / (1024 * 1024)).toFixed(2)}MB`
+        }, { status: 400 });
+      }
+
+      // Generate safe unique filename
+      const safeBaseName = path.basename(filename, ext).replace(/[^a-zA-Z0-9-_]/g, '_');
+      const uniqueFilename = `tmp_${uuidv4().substring(0, 8)}_${safeBaseName}${ext}`;
+      const destinationPath = path.join(TEMP_DIR, uniqueFilename);
+
+      // Save file
+      const buffer = Buffer.from(await file.arrayBuffer());
+      fs.writeFileSync(destinationPath, buffer);
+
+      const relativeFsPath = path.join('public', 'temp', uniqueFilename);
+      const webUrlPath = `/temp/${uniqueFilename}`;
+
+      processedData.push({
         filename: filename,
         fs_path: relativeFsPath,
         web_path: webUrlPath,
         size_bytes: file.size,
         mime_type: mimeType,
         is_video: isVideo
-      }
+      });
+    }
+
+    if (processedData.length === 1 && !formData.has('files')) {
+      // Backward compatible for single file upload
+      return NextResponse.json({
+        success: true,
+        data: processedData[0],
+        items: processedData
+      });
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: processedData,
+      count: processedData.length
     });
 
   } catch (error) {
