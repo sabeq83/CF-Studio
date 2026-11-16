@@ -7,7 +7,7 @@ import {
   PREVIEW_TIMELINE_MARKERS,
   buildPreviewTimeline
 } from '@/lib/finishing-preview-builder';
-import { auditTextDensity } from '@/lib/finishing-plan-validator';
+import { auditTextDensity } from '@/lib/finishing-layer-scheduler';
 
 const BASE_W = 720;
 const BASE_H = 1280;
