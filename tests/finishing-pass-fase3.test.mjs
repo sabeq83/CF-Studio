@@ -154,22 +154,27 @@ test('F3-T2: All 7+1 templates load & scrub cleanly via buildPreviewTimeline() i
         await page.evaluate((sec) => window.renderAt(sec), mk.t);
       }
 
-      if (entry.id === 'tips_listicle') {
-        await page.evaluate(() => window.renderAt(4.2));
-        const tipNum = await page.textContent('#oTipNum');
-        assert.ok(tipNum && tipNum.includes('TIP'), `Expected active TIP pill on tips-listicle preview, got: ${tipNum}`);
-      } else if (entry.id === 'mitos_fakta') {
-        await page.evaluate(() => window.renderAt(9.5));
-        const stampTag = await page.textContent('#oStampTag');
-        assert.ok(stampTag && stampTag.includes('FAKTA'), `Expected active FAKTA stamp on mitos-fakta preview, got: ${stampTag}`);
-      } else if (entry.id === 'angka_banding') {
-        await page.evaluate(() => window.renderAt(9.5));
-        const leftTxt = await page.textContent('#oCmpLeftTitle');
-        assert.ok(leftTxt && leftTxt.length > 0, 'Expected compare column rendered on angka-banding preview');
-      } else if (entry.id === 'problem_solution') {
-        await page.evaluate(() => window.renderAt(4.2));
-        const chapLbl = await page.textContent('#oChapLabel');
-        assert.ok(chapLbl && chapLbl.length > 0, 'Expected active chapter label on problem-solution preview');
+      try {
+        if (entry.id === 'tips_listicle') {
+          await page.evaluate(() => window.renderAt(4.2));
+          const tipNum = await page.textContent('#oTipNum');
+          assert.ok(tipNum && tipNum.includes('TIP'), `Expected active TIP pill on tips-listicle preview, got: ${tipNum}`);
+        } else if (entry.id === 'mitos_fakta') {
+          await page.evaluate(() => window.renderAt(9.5));
+          const stampTag = await page.textContent('#oStampTag');
+          assert.ok(stampTag && stampTag.includes('FAKTA'), `Expected active FAKTA stamp on mitos-fakta preview, got: ${stampTag}`);
+        } else if (entry.id === 'angka_banding') {
+          await page.evaluate(() => window.renderAt(9.5));
+          const leftTxt = await page.textContent('#oCmpLeftTitle');
+          assert.ok(leftTxt && leftTxt.length > 0, 'Expected compare column rendered on angka-banding preview');
+        } else if (entry.id === 'problem_solution') {
+          await page.evaluate(() => window.renderAt(4.2));
+          const chapLbl = await page.textContent('#oChapLabel');
+          assert.ok(chapLbl && chapLbl.length > 0, 'Expected active chapter label on problem-solution preview');
+        }
+      } catch (err) {
+        console.error(`[F3-T2 Error on ${entry.id}]`, err.message);
+        throw err;
       }
     }
 

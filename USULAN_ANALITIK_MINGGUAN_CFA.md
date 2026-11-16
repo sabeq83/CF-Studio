@@ -4,6 +4,8 @@ Tanggal: 16 Nov 2026 · Versi 2.1 (disempurnakan setelah mempelajari dokumentasi
 
 Rencana teknis: [analitik_mingguan_implementation_plan.md](analitik_mingguan_implementation_plan.md) · Instruksi agent: [antigravity_analitik_mingguan_instructions.md](antigravity_analitik_mingguan_instructions.md)
 
+> **Pembaruan 16 Nov 2026: reconnect Repliz gagal.** Reconnect NutriBake & Dapur Botani di Repliz memunculkan error izin Facebook (`pages_read_engagement`). Jalan keluarnya: data **Facebook** diambil langsung lewat **app Meta milik pengguna** yang sudah terhubung ke CF Studio (Dapur Botani, NutriBake ID, Sedekah Al-Quran + IG keduanya). Platform lain tetap lewat Repliz, dan posting tetap lewat Repliz. Halaman lain cukup ditambahkan sekali lewat login ulang app Meta (centang semua halaman), tidak perlu reconnect satu per satu di Repliz. Detail: bagian 3A di rencana teknis.
+
 ---
 
 ## Ringkasan untuk pengguna

@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.49.0 — Finishing Satu Fokus, Skin General & Babak Natural (16/11/2026)
+- Arsitektur Satu Fokus R1-R6 dengan Layer Scheduler dan proteksi tabrakan teks
+- 6 Skin General Bebas Brand & Tokenized 100% var(--fx-*)
+- Babak Natural Problem Solution tanpa nomor bulat dan tanpa bar kaku
+- Eliminasi Hex di 8 Template HTML (Zero Hex & Safe Zone 15cqw)
+- Migrasi finishing_skin & default_finishing_template di brand_profiles dev & staging
+
 ## V2.48.24 — Fix Multiplier per-clip location & optics for planner_driven VI (16/11/2026)
 - Dynamic per-clip location and optics for planner_driven VI
 - Strict anti-branding when bridging is none

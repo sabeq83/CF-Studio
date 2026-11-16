@@ -6,12 +6,13 @@
   <style id="shared-layers-css"></style>
   <style>
     :root {
-      --accent: #ffcc3d;
-      --accent-soft: #e2b857;
-      --active-word: #fff066;
-      --f-punch: "Anton", Impact, sans-serif;
-      --f-sub: "Montserrat", "Arial Black", sans-serif;
-      --f-ui: "Inter", system-ui, sans-serif;
+      --accent: var(--fx-accent);
+      --accent-soft: var(--fx-accent);
+      --active-word: var(--fx-accent);
+      --brand: var(--fx-card);
+      --f-punch: var(--fx-font-display);
+      --f-sub: var(--fx-font-body);
+      --f-ui: var(--fx-font-ui);
     }
     * { box-sizing: border-box; }
     [hidden] { display: none !important; }
@@ -32,7 +33,7 @@
     .flash {
       position: absolute;
       inset: 0;
-      background: #ffffff;
+      background: var(--fx-card-ink);
       opacity: 0;
       pointer-events: none;
     }
@@ -42,7 +43,7 @@
       top: 0;
       height: 0.9cqw;
       width: 0;
-      background: var(--accent);
+      background: var(--fx-accent);
     }
     .hook {
       position: absolute;
@@ -50,86 +51,88 @@
       right: 15cqw;
       top: 19cqh;
       text-align: center;
-      font-family: var(--f-punch);
-      text-transform: uppercase;
+      font-family: var(--fx-font-display);
+      text-transform: var(--fx-text-case);
       line-height: 0.96;
-      color: #ffffff;
+      color: var(--fx-card-ink);
       transform-origin: 50% 50%;
     }
     .hook .l1 {
       display: block;
-      font-size: var(--hook-l1-size, 8.8cqw);
+      font-size: var(--hook-l1-size, var(--fx-size-display-sm));
       letter-spacing: 0.01em;
-      -webkit-text-stroke: 0.52cqw #000000;
+      -webkit-text-stroke: var(--fx-stroke-width) var(--fx-stroke);
       paint-order: stroke fill;
       text-shadow: 0 1cqw 2cqw rgba(0, 0, 0, 0.65);
     }
     .hook .l2 {
       display: inline-block;
       margin-top: 1.8cqw;
-      font-size: var(--hook-l2-size, 10.8cqw);
-      background: var(--accent);
-      color: #111111;
+      font-size: var(--hook-l2-size, var(--fx-size-display));
+      background: var(--fx-accent);
+      color: var(--fx-accent-ink);
       padding: 1cqw 3.2cqw 0.35cqw;
-      border-radius: 1.2cqw;
+      border-radius: var(--fx-radius);
       transform: rotate(-1.5deg);
       box-shadow: 0 1.1cqw 2.4cqw rgba(0, 0, 0, 0.4);
     }
     .prod {
       position: absolute;
       left: 5cqw;
-      top: 25cqh;
+      top: 14cqh;
       max-width: 78cqw;
       display: flex;
       align-items: center;
       gap: 2.5cqw;
-      background: rgba(255, 255, 255, 0.95);
-      color: #111827;
-      border-radius: 3.2cqw;
-      padding: 2cqw 3.4cqw 2cqw 2.2cqw;
-      box-shadow: 0 1.8cqw 4.5cqw rgba(0, 0, 0, 0.38);
-      border-left: 1.1cqw solid var(--accent);
+      background: var(--fx-card);
+      color: var(--fx-card-ink);
+      border-radius: var(--fx-radius);
+      padding: 1.8cqw 3.2cqw 1.8cqw 2cqw;
+      box-shadow: var(--fx-shadow);
+      border-left: 1.1cqw solid var(--fx-accent);
+      z-index: 6;
     }
     .prod img {
-      width: 15cqw;
-      height: 15cqw;
+      width: 14cqw;
+      height: 14cqw;
       object-fit: contain;
-      border-radius: 2cqw;
-      background: #ffffff;
+      border-radius: 1.6cqw;
+      background: var(--fx-chip);
       flex-shrink: 0;
     }
     .prod .tag {
       display: inline-block;
-      font-family: var(--f-ui);
+      font-family: var(--fx-font-ui);
       font-weight: 700;
-      font-size: 2.3cqw;
+      font-size: var(--fx-size-label);
       letter-spacing: 0.05em;
-      background: var(--accent);
-      color: #111111;
+      background: var(--fx-accent);
+      color: var(--fx-accent-ink);
       border-radius: 1cqw;
       padding: 0.35cqw 1.3cqw;
-      margin-bottom: 0.7cqw;
+      margin-bottom: 0.6cqw;
+      text-transform: var(--fx-text-case);
     }
     .prod .pn {
-      font-family: var(--f-sub);
-      font-weight: 900;
-      font-size: 3.9cqw;
+      font-family: var(--fx-font-body);
+      font-weight: 800;
+      font-size: var(--fx-size-body);
       line-height: 1.08;
-      color: #0f172a;
+      color: var(--fx-card-ink);
     }
     .prod .pd {
-      font-family: var(--f-ui);
+      font-family: var(--fx-font-ui);
       font-weight: 600;
-      font-size: 2.5cqw;
-      color: #475569;
-      margin-top: 0.6cqw;
+      font-size: var(--fx-size-meta);
+      color: var(--fx-card-muted);
+      margin-top: 0.5cqw;
     }
     .prod .disc {
-      font-family: var(--f-ui);
+      font-family: var(--fx-font-ui);
       font-weight: 500;
-      font-size: 2.05cqw;
-      color: #64748b;
-      margin-top: 0.5cqw;
+      font-size: var(--fx-size-meta);
+      color: var(--fx-card-muted);
+      margin-top: 0.4cqw;
     }
     .punch {
       position: absolute;
@@ -137,12 +140,13 @@
       right: 15cqw;
       top: 44cqh;
       text-align: center;
-      font-family: var(--f-punch);
-      text-transform: uppercase;
-      font-size: var(--punch-size, 15.5cqw);
+      font-family: var(--fx-font-display);
+      text-transform: var(--fx-text-case);
+      font-size: var(--punch-size, var(--fx-size-display));
       line-height: 0.94;
       transform-origin: 50% 50%;
-      -webkit-text-stroke: 0.65cqw #000000;
+      color: var(--fx-accent);
+      -webkit-text-stroke: var(--fx-stroke-width) var(--fx-stroke);
       paint-order: stroke fill;
       text-shadow: 0 1.3cqw 0 rgba(0, 0, 0, 0.5);
     }
@@ -150,31 +154,32 @@
       position: absolute;
       left: 6cqw;
       right: 15cqw;
-      top: 54cqh;
+      top: 14cqh;
       display: flex;
       justify-content: center;
+      z-index: 6;
     }
     .save .card {
-      background: rgba(255, 255, 255, 0.94);
-      color: #0f172a;
-      border-radius: 2.6cqw;
-      padding: 1.5cqw 3.4cqw;
+      background: var(--fx-card);
+      color: var(--fx-card-ink);
+      border-radius: var(--fx-radius);
+      padding: 1.4cqw 3.6cqw;
       text-align: center;
-      box-shadow: 0 1.2cqw 3cqw rgba(0, 0, 0, 0.35);
-      border: 0.35cqw solid rgba(15, 23, 42, 0.08);
+      box-shadow: var(--fx-shadow);
+      border: 0.35cqw solid var(--fx-stroke);
     }
     .save .stitle {
-      font-family: var(--f-sub);
-      font-weight: 900;
-      font-size: 3.7cqw;
+      font-family: var(--fx-font-body);
+      font-weight: 800;
+      font-size: var(--fx-size-body);
       line-height: 1.15;
     }
     .save .ssub {
-      font-family: var(--f-ui);
+      font-family: var(--fx-font-ui);
       font-weight: 600;
-      font-size: 2.6cqw;
-      color: #475569;
-      margin-top: 0.4cqw;
+      font-size: var(--fx-size-meta);
+      color: var(--fx-card-muted);
+      margin-top: 0.35cqw;
     }
     .cta {
       position: absolute;
@@ -187,23 +192,23 @@
       gap: 1.4cqw;
     }
     .cta .arrow {
-      font-family: var(--f-punch);
+      font-family: var(--fx-font-display);
       font-size: 11cqw;
-      color: var(--accent);
-      -webkit-text-stroke: 0.45cqw #000000;
+      color: var(--fx-accent);
+      -webkit-text-stroke: var(--fx-stroke-width) var(--fx-stroke);
       paint-order: stroke fill;
       line-height: 1;
     }
     .cta .pill {
-      font-family: var(--f-sub);
+      font-family: var(--fx-font-body);
       font-weight: 900;
-      font-size: 4.8cqw;
-      text-transform: uppercase;
-      background: var(--accent);
-      color: #111111;
-      padding: 1.5cqw 4cqw;
-      border-radius: 99cqw;
-      box-shadow: 0 1.2cqw 0 #000000;
+      font-size: var(--fx-size-body);
+      text-transform: var(--fx-text-case);
+      background: var(--fx-accent);
+      color: var(--fx-accent-ink);
+      padding: 1.4cqw 3.8cqw;
+      border-radius: var(--fx-radius);
+      box-shadow: 0 1.2cqw 0 var(--fx-stroke);
     }
   </style>
   <script src="./shared-layers.js"></script>
@@ -270,10 +275,10 @@
       }
 
       const PUNCH_COLORS = {
-        benefit: '#9df27a',
-        result: '#ffcc3d',
-        warning: '#ff6b6b',
-        hook: '#ffffff'
+        benefit: 'var(--fx-accent)',
+        result: 'var(--fx-phase-solution)',
+        warning: 'var(--fx-phase-problem)',
+        hook: 'var(--fx-card-ink)'
       };
 
       let T = null;
@@ -309,22 +314,25 @@
         oPhone.style.width = `${Number(cfg.width) || 720}px`;
         oPhone.style.height = `${Number(cfg.height) || 1280}px`;
 
-        if (cfg.accentColor) {
-          document.documentElement.style.setProperty('--accent', cfg.accentColor);
-          document.documentElement.style.setProperty('--accent-soft', cfg.accentColor);
+        if (SL?.applySkinTokens) {
+          SL.applySkinTokens(document, T.skin);
+        } else if (T.skin?.tokens) {
+          for (const [k, v] of Object.entries(T.skin.tokens)) {
+            document.documentElement.style.setProperty(k, v);
+          }
+        }
+
+        const customAccent = cfg.accentColor || cfg.accent || (T.brand && (T.brand.accentColor || T.brand.accent));
+        if (customAccent) {
+          document.documentElement.style.setProperty('--fx-accent', customAccent);
+          document.documentElement.style.setProperty('--accent', customAccent);
         }
         if (cfg.activeWordColor) {
           document.documentElement.style.setProperty('--active-word', cfg.activeWordColor);
         }
 
-        if (cfg.fontBaseUrl) {
-          const base = String(cfg.fontBaseUrl).replace(/\/+$/, '');
-          dynamicFonts.textContent = `
-            @font-face { font-family: "Anton"; src: url("${base}/Anton-Regular.ttf") format("truetype"); font-weight: 400; font-style: normal; }
-            @font-face { font-family: "Montserrat"; src: url("${base}/Montserrat-ExtraBold.ttf") format("truetype"); font-weight: 800; font-style: normal; }
-            @font-face { font-family: "Montserrat"; src: url("${base}/Montserrat-Black.ttf") format("truetype"); font-weight: 900; font-style: normal; }
-            @font-face { font-family: "Inter"; src: url("${base}/Inter-Bold.ttf") format("truetype"); font-weight: 700; font-style: normal; }
-          `;
+        if (SL?.buildDynamicFontFaces && cfg.fontBaseUrl) {
+          dynamicFonts.textContent = SL.buildDynamicFontFaces(cfg.fontBaseUrl);
         }
 
         const pos = cfg.position || 'bottom';
@@ -399,7 +407,6 @@
         const captionMode = T.config?.captionMode || 'full';
         const time = Math.min(Math.max(0, Number(t) || 0), dur);
 
-        // Progress bar & cut flash
         oProg.style.width = `${((time / dur) * 100).toFixed(3)}%`;
         let flashOp = 0;
         for (const cutT of (T.clipCuts || [])) {
@@ -411,7 +418,6 @@
         }
         oFlash.style.opacity = flashOp.toFixed(4);
 
-        // Anti-overlap hierarchy R6.4: Keyword Punch > Product Card > Save Prompt / Caption > Hook Card
         const hookEnd = Number(T.config?.hookDuration) || 1.75;
         const showHook = Boolean(T.hookCard && T.hookCard.l1 && time >= 0 && time < hookEnd);
         oHook.hidden = !showHook;
@@ -419,13 +425,17 @@
           applyPop(oHook, time, 0, hookEnd, 0.24, 0.16, 0);
         }
 
+        // Slot resolver helper (Aturan Satu Fokus)
+        const slot = (layer) => (T.slots || []).find((x) => x.layer === layer && time >= x.s && time < x.e);
+
+        const punchSlot = slot('punch');
         const punches = Array.isArray(T.punches) ? T.punches : [];
-        const activePunch = punches.find((p) => time >= p.s && time < p.e);
+        const activePunch = punchSlot ? punchSlot.ref : punches.find((p) => time >= p.s && time < p.e);
         oPunch.hidden = !activePunch;
         if (activePunch) {
           const txt = String(activePunch.phrase || '').toUpperCase();
           const cLen = txt.length;
-          let pSize = '15.5cqw';
+          let pSize = 'var(--fx-size-display)';
           if (cLen > 24) pSize = '11cqw';
           else if (cLen > 18) pSize = '12.6cqw';
           else if (cLen > 13) pSize = '14cqw';
@@ -436,7 +446,8 @@
         }
 
         const pr = T.productCard;
-        const showProd = Boolean(pr && pr.name && !activePunch && !showHook && time >= pr.s && time < pr.e);
+        const prodSlot = slot('product');
+        const showProd = Boolean(prodSlot ? prodSlot.ref : (pr && pr.name && !activePunch && !showHook && time >= pr.s && time < pr.e));
         oProd.hidden = !showProd;
         if (showProd) {
           const slideX = (1 - easeOut((time - pr.s) / 0.35)) * -105;
@@ -446,14 +457,16 @@
         }
 
         const sv = T.savePrompt;
-        const showSave = Boolean(sv && sv.titleText && !activePunch && time >= sv.s && time < sv.e);
+        const saveSlot = slot('save');
+        const showSave = Boolean(saveSlot ? saveSlot.ref : (sv && sv.titleText && !activePunch && time >= sv.s && time < sv.e));
         oSave.hidden = !showSave;
         if (showSave) {
           applyPop(oSave, time, sv.s, sv.e, 0.22, 0.18, 0);
         }
 
         const ca = T.cta;
-        const showCta = Boolean(ca && ca.text && !activePunch && !showSave && time >= ca.s && time <= ca.e);
+        const ctaSlot = slot('cta');
+        const showCta = Boolean(ctaSlot ? ctaSlot.ref : (ca && ca.text && !activePunch && !showSave && time >= ca.s && time <= ca.e));
         oCta.hidden = !showCta;
         if (showCta) {
           applyPop(oCta, time, ca.s, Math.max(ca.e, ca.s + 1), 0.24, 0.15, 0);
@@ -474,4 +487,3 @@
   </script>
 </body>
 </html>
-

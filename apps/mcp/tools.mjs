@@ -1849,7 +1849,9 @@ export function createCfStudioServer(rawRequest) {
       raw_guideline_text: z.string().max(12000).optional(),
       storage_provider: z.enum(['nextcloud', 'gdrive']).optional(),
       nextcloud_target_folder: z.string().max(300).optional(),
-      drive_target_folder: z.string().max(300).optional()
+      drive_target_folder: z.string().max(300).optional(),
+      finishing_skin: z.string().max(64).optional(),
+      default_finishing_template: z.string().max(64).optional()
     },
     false,
     body => request('/api/v2/brand-profiles', { body })

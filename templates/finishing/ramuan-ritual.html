@@ -6,13 +6,13 @@
   <style id="shared-layers-css"></style>
   <style>
     :root {
-      --accent: #e0913a;
-      --accent-soft: #ecc189;
-      --active-word: #fff066;
-      --brand: #2f2116;
-      --f-punch: "Anton", Impact, sans-serif;
-      --f-sub: "Montserrat", "Arial Black", sans-serif;
-      --f-ui: "Inter", system-ui, sans-serif;
+      --accent: var(--fx-accent);
+      --accent-soft: var(--fx-accent);
+      --active-word: var(--fx-accent);
+      --brand: var(--fx-card);
+      --f-punch: var(--fx-font-display);
+      --f-sub: var(--fx-font-body);
+      --f-ui: var(--fx-font-ui);
     }
     * { box-sizing: border-box; }
     [hidden] { display: none !important; }
@@ -38,7 +38,7 @@
     .flash {
       position: absolute;
       inset: 0;
-      background: #ffffff;
+      background: var(--fx-card-ink);
       opacity: 0;
       pointer-events: none;
     }
@@ -48,7 +48,7 @@
       top: 0;
       height: 0.9cqw;
       width: 0;
-      background: var(--accent);
+      background: var(--fx-accent);
     }
     .hook {
       position: absolute;
@@ -56,27 +56,27 @@
       right: 15cqw;
       top: 19cqh;
       text-align: center;
-      font-family: var(--f-punch);
-      text-transform: uppercase;
+      font-family: var(--fx-font-display);
+      text-transform: var(--fx-text-case);
       line-height: 0.95;
-      color: #ffffff;
+      color: var(--fx-card-ink);
       transform-origin: 50% 50%;
     }
     .hook .l1 {
       display: block;
-      font-size: var(--hook-l1-size, 8.8cqw);
-      -webkit-text-stroke: 0.5cqw #000000;
+      font-size: var(--hook-l1-size, var(--fx-size-display-sm));
+      -webkit-text-stroke: var(--fx-stroke-width) var(--fx-stroke);
       paint-order: stroke fill;
       text-shadow: 0 1.2cqw 2.4cqw rgba(0, 0, 0, 0.55);
     }
     .hook .l2 {
       display: inline-block;
       margin-top: 2cqw;
-      font-size: var(--hook-l2-size, 11cqw);
-      background: var(--accent);
-      color: #1c120a;
+      font-size: var(--hook-l2-size, var(--fx-size-display));
+      background: var(--fx-accent);
+      color: var(--fx-accent-ink);
       padding: 1cqw 3cqw 0.3cqw;
-      border-radius: 1.2cqw;
+      border-radius: var(--fx-radius);
       transform: rotate(-2deg);
       box-shadow: 0 1.1cqw 2.4cqw rgba(0, 0, 0, 0.4);
     }
@@ -84,160 +84,165 @@
       position: absolute;
       left: 4.5cqw;
       top: 13cqh;
-      max-width: 46cqw;
+      max-width: 52cqw;
       display: grid;
-      gap: 1.3cqw;
+      gap: 1cqw;
       justify-items: start;
+      z-index: 6;
     }
     #oIngList {
       display: grid;
-      gap: 1.3cqw;
+      gap: 1cqw;
       justify-items: start;
       width: 100%;
     }
     .ing .hd {
-      font-family: var(--f-sub);
-      font-weight: 900;
-      font-size: 2.8cqw;
-      letter-spacing: 0.1em;
-      color: #fff8ee;
-      background: rgba(47, 33, 22, 0.86);
-      border-left: 0.8cqw solid var(--accent);
-      padding: 0.7cqw 1.9cqw;
-      border-radius: 1.2cqw;
+      font-family: var(--fx-font-ui);
+      font-weight: 700;
+      font-size: var(--fx-size-label);
+      letter-spacing: 0.05em;
+      color: var(--fx-card-ink);
+      background: var(--fx-card);
+      border-left: 0.8cqw solid var(--fx-accent);
+      padding: 0.6cqw 1.8cqw;
+      border-radius: var(--fx-radius);
+      text-transform: var(--fx-text-case);
     }
     .ing .it {
       display: flex;
       align-items: center;
-      gap: 1.3cqw;
-      background: #fff7ec;
-      color: #2b1a0e;
-      font-family: var(--f-sub);
-      font-weight: 800;
-      font-size: 3.15cqw;
-      padding: 0.95cqw 2cqw 0.95cqw 1.1cqw;
-      border-radius: 99cqw;
-      box-shadow: 0 1cqw 2.4cqw rgba(0, 0, 0, 0.34);
+      gap: 1.2cqw;
+      background: var(--fx-chip);
+      color: var(--fx-chip-ink);
+      font-family: var(--fx-font-body);
+      font-weight: 600;
+      font-size: var(--fx-size-body);
+      padding: 0.85cqw 1.8cqw 0.85cqw 1.1cqw;
+      border-radius: var(--fx-radius);
+      box-shadow: var(--fx-shadow);
       max-width: 100%;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      text-transform: none;
     }
     .ing .it .ck {
-      width: 4.3cqw;
-      height: 4.3cqw;
+      width: 3.8cqw;
+      height: 3.8cqw;
       border-radius: 50%;
-      background: var(--accent-soft);
-      color: #1f130a;
+      background: var(--fx-accent);
+      color: var(--fx-accent-ink);
       display: grid;
       place-items: center;
-      font-size: 2.6cqw;
-      font-family: var(--f-ui);
+      font-size: 2.2cqw;
+      font-family: var(--fx-font-ui);
       font-weight: 800;
       flex-shrink: 0;
     }
     .ing .it.new {
-      background: var(--accent);
-      color: #1a1008;
+      background: var(--fx-accent);
+      color: var(--fx-accent-ink);
     }
     .ing .more {
       display: inline-block;
-      font-family: var(--f-ui);
+      font-family: var(--fx-font-ui);
       font-weight: 700;
-      font-size: 2.7cqw;
-      color: #fff8ee;
-      background: rgba(47, 33, 22, 0.86);
+      font-size: var(--fx-size-meta);
+      color: var(--fx-card-ink);
+      background: var(--fx-card);
       padding: 0.6cqw 1.8cqw;
-      border-radius: 99cqw;
+      border-radius: var(--fx-radius);
     }
     .x-time {
       position: absolute;
       right: 15cqw;
       top: 13cqh;
-      max-width: 34cqw;
-      background: rgba(31, 21, 14, 0.92);
-      border: 0.45cqw solid var(--accent);
-      border-radius: 2.2cqw;
-      padding: 1.15cqw 2.3cqw;
+      max-width: 36cqw;
+      background: var(--fx-card);
+      border: 0.45cqw solid var(--fx-accent);
+      border-radius: var(--fx-radius);
+      padding: 1.1cqw 2.2cqw;
       display: flex;
       flex-direction: column;
       align-items: flex-end;
       text-align: right;
-      box-shadow: 0 1.2cqw 2.8cqw rgba(0, 0, 0, 0.45);
+      box-shadow: var(--fx-shadow);
       transform-origin: 100% 0%;
+      z-index: 6;
     }
     .x-time i {
       font-style: normal;
       display: inline-flex;
       align-items: center;
       gap: 1.1cqw;
-      font-family: var(--f-sub);
-      font-weight: 900;
-      font-size: 3cqw;
+      font-family: var(--fx-font-ui);
+      font-weight: 700;
+      font-size: var(--fx-size-label);
       line-height: 1.1;
-      color: var(--accent);
+      color: var(--fx-accent);
       letter-spacing: 0.03em;
-      text-transform: uppercase;
+      text-transform: var(--fx-text-case);
     }
     .x-time .sub-t {
       margin-top: 0.45cqw;
-      font-family: var(--f-ui);
-      font-weight: 700;
-      font-size: 2.45cqw;
+      font-family: var(--fx-font-body);
+      font-weight: 600;
+      font-size: var(--fx-size-meta);
       line-height: 1.15;
-      color: #faf3ea;
+      color: var(--fx-card-muted);
     }
     .prod {
       position: absolute;
       left: 5cqw;
-      top: 34cqh;
+      top: 14cqh;
       max-width: 78cqw;
       display: flex;
       align-items: center;
       gap: 2.3cqw;
-      background: #fffcf7;
-      color: #1e140c;
-      border: 0.35cqw solid rgba(224, 145, 58, 0.45);
-      border-radius: 2.8cqw;
-      padding: 1.8cqw 3cqw 1.8cqw 1.9cqw;
-      box-shadow: 0 1.6cqw 4.2cqw rgba(0, 0, 0, 0.4);
+      background: var(--fx-card);
+      color: var(--fx-card-ink);
+      border: 0.35cqw solid var(--fx-accent);
+      border-radius: var(--fx-radius);
+      padding: 1.6cqw 2.8cqw 1.6cqw 1.8cqw;
+      box-shadow: var(--fx-shadow);
+      z-index: 6;
     }
     .prod img {
-      width: 14.5cqw;
-      height: 14.5cqw;
+      width: 14cqw;
+      height: 14cqw;
       object-fit: contain;
-      border-radius: 2cqw;
-      background: #ffffff;
+      border-radius: 1.6cqw;
+      background: var(--fx-chip);
       flex-shrink: 0;
     }
     .prod .tag {
       display: inline-block;
-      font-family: var(--f-ui);
+      font-family: var(--fx-font-ui);
       font-weight: 800;
-      font-size: 2.2cqw;
-      background: var(--accent);
-      color: #1c120a;
+      font-size: var(--fx-size-label);
+      background: var(--fx-accent);
+      color: var(--fx-accent-ink);
       border-radius: 1cqw;
       padding: 0.3cqw 1.2cqw;
       margin-bottom: 0.6cqw;
-      text-transform: uppercase;
+      text-transform: var(--fx-text-case);
     }
     .prod .pn {
-      font-family: var(--f-sub);
-      font-weight: 900;
-      font-size: 3.9cqw;
-      line-height: 1.08;
+      font-family: var(--fx-font-body);
+      font-weight: 800;
+      font-size: var(--fx-size-body);
+      line-height: 1.1;
     }
     .prod .pd {
-      font-family: var(--f-ui);
-      font-size: 2.45cqw;
-      color: #5b4838;
+      font-family: var(--fx-font-ui);
+      font-size: var(--fx-size-meta);
+      color: var(--fx-card-muted);
       margin-top: 0.5cqw;
     }
     .prod .disc {
-      font-family: var(--f-ui);
-      font-size: 2cqw;
-      color: #6b5d52;
+      font-family: var(--fx-font-ui);
+      font-size: var(--fx-size-meta);
+      color: var(--fx-card-muted);
       margin-top: 0.45cqw;
     }
     .punch {
@@ -246,12 +251,13 @@
       right: 15cqw;
       top: 43cqh;
       text-align: center;
-      font-family: var(--f-punch);
-      text-transform: uppercase;
-      font-size: var(--punch-size, 15cqw);
+      font-family: var(--fx-font-display);
+      text-transform: var(--fx-text-case);
+      font-size: var(--punch-size, var(--fx-size-display));
       line-height: 0.94;
       transform-origin: 50% 50%;
-      -webkit-text-stroke: 0.62cqw #000000;
+      color: var(--fx-accent);
+      -webkit-text-stroke: var(--fx-stroke-width) var(--fx-stroke);
       paint-order: stroke fill;
       text-shadow: 0 1.3cqw 0 rgba(0, 0, 0, 0.48);
     }
@@ -266,48 +272,45 @@
       gap: 1.4cqw;
     }
     .cta .arrow {
-      font-family: var(--f-punch);
+      font-family: var(--fx-font-display);
       font-size: 10cqw;
-      color: var(--accent);
-      -webkit-text-stroke: 0.45cqw #000000;
+      color: var(--fx-accent);
+      -webkit-text-stroke: var(--fx-stroke-width) var(--fx-stroke);
       paint-order: stroke fill;
       line-height: 1;
     }
     .cta .pill {
-      font-family: var(--f-sub);
+      font-family: var(--fx-font-body);
       font-weight: 900;
-      font-size: 4.4cqw;
-      text-transform: uppercase;
-      background: var(--accent);
-      color: #1c120a;
+      font-size: var(--fx-size-body);
+      text-transform: var(--fx-text-case);
+      background: var(--fx-accent);
+      color: var(--fx-accent-ink);
       padding: 1.4cqw 3.8cqw;
-      border-radius: 99cqw;
-      box-shadow: 0 1.2cqw 0 #000000;
+      border-radius: var(--fx-radius);
+      box-shadow: 0 1.2cqw 0 var(--fx-stroke);
     }
   </style>
+  <script src="./shared-layers.js"></script>
 </head>
 <body>
   <div class="phone" id="phone">
     <div class="flash" id="oFlash"></div>
-    <div class="hook" id="oHook" hidden>
-      <span class="l1" id="oHookL1"></span>
-      <span class="l2" id="oHookL2"></span>
-    </div>
     <div class="ing" id="oIng" hidden>
-      <div class="hd" id="oIngHd"></div>
+      <div class="hd" id="oIngHd">BAHAN</div>
       <div id="oIngList"></div>
       <div class="more" id="oIngMore" hidden></div>
     </div>
     <div class="x-time" id="oTime" hidden>
-      <i><span id="oTimeEmoji"></span><span id="oTimeTitle"></span></i>
-      <span class="sub-t" id="oTimeSub" hidden></span>
+      <i id="oTimeI"><span id="oTimeEmoji">⏱️</span><span id="oTimeTitle"></span></i>
+      <div class="sub-t" id="oTimeSub" hidden></div>
     </div>
     <div class="prod" id="oProd" hidden>
       <img id="oProdImg" alt="" hidden>
       <div>
-        <span class="tag" id="oProdTag" hidden></span>
+        <span class="tag" id="oProdTag">HERBAL UTAMA</span>
         <div class="pn" id="oProdName"></div>
-        <div class="pd" id="oProdSpec" hidden></div>
+        <div class="pd" id="oProdDesc" hidden></div>
         <div class="disc" id="oProdDisc" hidden></div>
       </div>
     </div>
@@ -317,86 +320,60 @@
       <div class="pill" id="oCtaPill"></div>
     </div>
     <div class="sub" id="oSub" hidden></div>
+    <div class="hook" id="oHook" hidden>
+      <span class="l1" id="oHookL1"></span>
+      <span class="l2" id="oHookL2"></span>
+    </div>
     <div class="layer" id="oPatch" hidden></div>
     <div class="layer" id="oBrand" hidden></div>
     <div class="progress" id="oProg"></div>
   </div>
 
-  <script src="./shared-layers.js"></script>
   <script>
     (function () {
-      const $ = (id) => document.getElementById(id);
-      const oPhone = $('phone');
-      const oFlash = $('oFlash');
-      const oHook = $('oHook');
-      const oHookL1 = $('oHookL1');
-      const oHookL2 = $('oHookL2');
-      const oIng = $('oIng');
-      const oIngHd = $('oIngHd');
-      const oIngList = $('oIngList');
-      const oIngMore = $('oIngMore');
-      const oTime = $('oTime');
-      const oTimeEmoji = $('oTimeEmoji');
-      const oTimeTitle = $('oTimeTitle');
-      const oTimeSub = $('oTimeSub');
-      const oProd = $('oProd');
-      const oProdImg = $('oProdImg');
-      const oProdTag = $('oProdTag');
-      const oProdName = $('oProdName');
-      const oProdSpec = $('oProdSpec');
-      const oProdDisc = $('oProdDisc');
-      const oPunch = $('oPunch');
-      const oCta = $('oCta');
-      const oCtaArrow = $('oCtaArrow');
-      const oCtaPill = $('oCtaPill');
-      const oSub = $('oSub');
-      const oPatch = $('oPatch');
-      const oBrand = $('oBrand');
-      const oProg = $('oProg');
-      const dynamicFonts = $('dynamic-fonts');
-      const sharedCssEl = $('shared-layers-css');
       const SL = window.FinishingSharedLayers || null;
+      let T = null;
+      let labels = { ingredientsHeader: 'BAHAN' };
 
-      if (SL && sharedCssEl) {
-        sharedCssEl.textContent = SL.SHARED_LAYERS_CSS || '';
+      const oFlash = document.getElementById('oFlash');
+      const oProg = document.getElementById('oProg');
+      const oIng = document.getElementById('oIng');
+      const oIngHd = document.getElementById('oIngHd');
+      const oIngList = document.getElementById('oIngList');
+      const oIngMore = document.getElementById('oIngMore');
+      const oTime = document.getElementById('oTime');
+      const oTimeEmoji = document.getElementById('oTimeEmoji');
+      const oTimeTitle = document.getElementById('oTimeTitle');
+      const oTimeSub = document.getElementById('oTimeSub');
+      const oProd = document.getElementById('oProd');
+      const oProdImg = document.getElementById('oProdImg');
+      const oProdTag = document.getElementById('oProdTag');
+      const oProdName = document.getElementById('oProdName');
+      const oProdDesc = document.getElementById('oProdDesc');
+      const oProdDisc = document.getElementById('oProdDisc');
+      const oPunch = document.getElementById('oPunch');
+      const oCta = document.getElementById('oCta');
+      const oCtaArrow = document.getElementById('oCtaArrow');
+      const oCtaPill = document.getElementById('oCtaPill');
+      const oSub = document.getElementById('oSub');
+      const oHook = document.getElementById('oHook');
+      const oHookL1 = document.getElementById('oHookL1');
+      const oHookL2 = document.getElementById('oHookL2');
+      const oPatch = document.getElementById('oPatch');
+      const oBrand = document.getElementById('oBrand');
+      const dynamicFonts = document.getElementById('dynamic-fonts');
+      const sharedLayersCss = document.getElementById('shared-layers-css');
+
+      if (SL && sharedLayersCss) {
+        sharedLayersCss.textContent = SL.SHARED_LAYERS_CSS;
       }
 
       const PUNCH_COLORS = {
-        benefit: '#9df27a',
-        result: '#e0913a',
-        number: '#ffcc3d',
-        warning: '#ff6b6b',
-        problem: '#ff6b6b',
-        hook: '#ffffff'
+        problem: 'var(--fx-phase-problem)',
+        benefit: 'var(--fx-accent)',
+        result: 'var(--fx-phase-solution)',
+        hook: 'var(--fx-accent)'
       };
-
-      let T = null;
-      let labels = SL ? SL.getLocalizedLabels('id-ID') : { ingredientsHeader: 'BAHAN', defaultCta: '' };
-
-      function backOut(x) {
-        const c = 1.9;
-        const cl = Math.min(Math.max(x, 0), 1);
-        return 1 + (c + 1) * Math.pow(cl - 1, 3) + c * Math.pow(cl - 1, 2);
-      }
-
-      function easeOut(x) {
-        const cl = Math.min(Math.max(x, 0), 1);
-        return 1 - Math.pow(1 - cl, 3);
-      }
-
-      function applyPop(el, t, s, e, inDur, outDur, rotDeg) {
-        const lt = t - s;
-        const rt = e - t;
-        let sc = backOut(lt / inDur);
-        let op = Math.min(1, Math.max(0, lt / 0.06));
-        if (rt < outDur) {
-          const k = Math.max(rt, 0) / outDur;
-          op = Math.min(op, k);
-          sc *= 0.9 + 0.1 * k;
-        }
-        el.style.opacity = String(op);
-        el.style.transform = `scale(${sc.toFixed(4)}) rotate(${rotDeg || 0}deg)`;
-      }
 
       function escapeHtml(str) {
         return String(str || '').replace(/[&<>"]/g, (c) => ({
@@ -407,36 +384,64 @@
         }[c]));
       }
 
-      window.loadTimeline = function (timeline) {
-        T = timeline || { config: {}, words: [], chunks: [], punches: [], timingBadges: [] };
-        const cfg = T.config || {};
-        oPhone.style.width = `${Number(cfg.width) || 720}px`;
-        oPhone.style.height = `${Number(cfg.height) || 1280}px`;
+      function easeOut(x) {
+        return 1 - Math.pow(1 - x, 3);
+      }
 
-        const customAccent = T.brand?.accentColor || (cfg.accentColor && cfg.accentColor !== '#ffcc3d' ? cfg.accentColor : '');
+      function easeOutBack(x) {
+        const c1 = 1.70158;
+        const c3 = c1 + 1;
+        return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
+      }
+
+      function applyPop(el, time, s, e, inDur = 0.22, outDur = 0.16, rotDeg = 0) {
+        const dt = time - s;
+        const rem = e - time;
+        if (dt < 0 || rem < 0) {
+          el.style.opacity = '0';
+          el.style.transform = `scale(0.85) rotate(${rotDeg}deg)`;
+          return;
+        }
+        if (dt < inDur) {
+          const k = Math.min(1, Math.max(0, dt / inDur));
+          const sc = 0.85 + 0.15 * easeOutBack(k);
+          el.style.opacity = String(k);
+          el.style.transform = `scale(${sc.toFixed(4)}) rotate(${(rotDeg * k).toFixed(2)}deg)`;
+        } else if (rem < outDur) {
+          const k = Math.min(1, Math.max(0, rem / outDur));
+          el.style.opacity = String(k);
+          el.style.transform = `scale(${(0.9 + 0.1 * k).toFixed(4)}) rotate(${(rotDeg * k).toFixed(2)}deg)`;
+        } else {
+          el.style.opacity = '1';
+          el.style.transform = `scale(1) rotate(${rotDeg}deg)`;
+        }
+      }
+
+      window.loadTimeline = function (timeline) {
+        T = timeline;
+        const cfg = T.config || {};
+
+        if (SL?.applySkinTokens) {
+          SL.applySkinTokens(document, T.skin);
+        } else if (T.skin?.tokens) {
+          for (const [k, v] of Object.entries(T.skin.tokens)) {
+            document.documentElement.style.setProperty(k, v);
+          }
+        }
+
+        labels = SL ? SL.getLocalizedLabels(cfg.targetLanguage || T.brand?.targetLanguage || 'id-ID') : { ingredientsHeader: 'BAHAN' };
+
+        const customAccent = cfg.accentColor || cfg.accent || (T.brand && (T.brand.accentColor || T.brand.accent));
         if (customAccent) {
+          document.documentElement.style.setProperty('--fx-accent', customAccent);
           document.documentElement.style.setProperty('--accent', customAccent);
-          document.documentElement.style.setProperty('--accent-soft', customAccent);
         }
         if (cfg.activeWordColor) {
           document.documentElement.style.setProperty('--active-word', cfg.activeWordColor);
         }
-        if (T.brand?.color) {
-          document.documentElement.style.setProperty('--brand', T.brand.color);
-        }
 
-        if (SL) {
-          labels = SL.getLocalizedLabels(cfg.targetLanguage || T.brand?.targetLanguage || 'id-ID');
-        }
-
-        if (cfg.fontBaseUrl) {
-          const base = String(cfg.fontBaseUrl).replace(/\/+$/, '');
-          dynamicFonts.textContent = `
-            @font-face { font-family: "Anton"; src: url("${base}/Anton-Regular.ttf") format("truetype"); font-weight: 400; font-style: normal; }
-            @font-face { font-family: "Montserrat"; src: url("${base}/Montserrat-ExtraBold.ttf") format("truetype"); font-weight: 800; font-style: normal; }
-            @font-face { font-family: "Montserrat"; src: url("${base}/Montserrat-Black.ttf") format("truetype"); font-weight: 900; font-style: normal; }
-            @font-face { font-family: "Inter"; src: url("${base}/Inter-Bold.ttf") format("truetype"); font-weight: 700; font-style: normal; }
-          `;
+        if (SL?.buildDynamicFontFaces && cfg.fontBaseUrl) {
+          dynamicFonts.textContent = SL.buildDynamicFontFaces(cfg.fontBaseUrl);
         }
 
         const pos = cfg.position || 'bottom';
@@ -452,8 +457,8 @@
 
         const hc = T.hookCard;
         if (hc && hc.l1) {
-          oHook.style.setProperty('--hook-l1-size', `${((hc.l1Ratio || 0.096) * 100).toFixed(2)}cqw`);
-          oHook.style.setProperty('--hook-l2-size', `${((hc.l2Ratio || 0.112) * 100).toFixed(2)}cqw`);
+          oHook.style.setProperty('--hook-l1-size', `${((hc.l1Ratio || 0.088) * 100).toFixed(2)}cqw`);
+          oHook.style.setProperty('--hook-l2-size', `${((hc.l2Ratio || 0.11) * 100).toFixed(2)}cqw`);
           oHookL1.textContent = hc.l1;
           if (hc.l2) {
             oHookL2.textContent = hc.l2;
@@ -466,37 +471,21 @@
           oHook.hidden = true;
         }
 
-        const rec = T.recipe;
-        if (rec?.ingredients?.header) {
-          oIngHd.textContent = rec.ingredients.header;
-        } else {
-          oIngHd.textContent = labels.ingredientsHeader || 'BAHAN';
-        }
-        oIngList.dataset.k = '';
-        oIngMore.hidden = true;
-
         const pc = T.productCard;
         if (pc && pc.name) {
+          oProdName.textContent = pc.name;
+          if (pc.specLine) {
+            oProdDesc.textContent = pc.specLine;
+            oProdDesc.hidden = false;
+          } else {
+            oProdDesc.hidden = true;
+          }
+          if (pc.tag) oProdTag.textContent = pc.tag;
           if (pc.imageUrl) {
             oProdImg.src = pc.imageUrl;
             oProdImg.hidden = false;
           } else {
-            oProdImg.removeAttribute('src');
             oProdImg.hidden = true;
-          }
-          const tagTxt = pc.tag || pc.badgeLabel || '';
-          if (tagTxt) {
-            oProdTag.textContent = tagTxt;
-            oProdTag.hidden = false;
-          } else {
-            oProdTag.hidden = true;
-          }
-          oProdName.textContent = pc.name;
-          if (pc.specLine) {
-            oProdSpec.textContent = pc.specLine;
-            oProdSpec.hidden = false;
-          } else {
-            oProdSpec.hidden = true;
           }
           if (pc.disclaimer) {
             oProdDisc.textContent = pc.disclaimer;
@@ -547,43 +536,53 @@
           applyPop(oHook, time, 0, hookEnd, 0.24, 0.16, 0);
         }
 
-        // Concise ingredient chips (left safe zone >= 13cqh; aligns with extractRecipeOverlayData { until, items: [{ label, s }], totalCount, overflowLabel })
+        // Slot resolver (Aturan Satu Fokus)
+        const slot = (layer) => (T.slots || []).find((x) => x.layer === layer && time >= x.s && time < x.e);
+
+        // Keyword Punch
+        const punchSlot = slot('punch');
+        const punches = Array.isArray(T.punches) ? T.punches : [];
+        const activePunch = punchSlot ? punchSlot.ref : (!endOn ? punches.find((p) => time >= p.s && time < p.e) : null);
+        oPunch.hidden = !activePunch;
+        if (activePunch) {
+          const txt = String(activePunch.displayText || activePunch.phrase || '').toUpperCase();
+          const cLen = txt.length;
+          let pSize = 'var(--fx-size-display)';
+          if (cLen > 24) pSize = '10.6cqw';
+          else if (cLen > 18) pSize = '12.2cqw';
+          else if (cLen > 13) pSize = '13.6cqw';
+          oPunch.style.setProperty('--punch-size', pSize);
+          oPunch.textContent = txt;
+          oPunch.style.color = PUNCH_COLORS[activePunch.type] || PUNCH_COLORS.result;
+          applyPop(oPunch, time, activePunch.s, activePunch.e, 0.18, 0.14, 1.2);
+        }
+
+        // Ingredients (Aturan Satu Fokus: Jendela 3 chip, maks 4 detik)
         const ing = T.recipe?.ingredients;
         const ingItems = Array.isArray(ing?.items) ? ing.items : [];
-        const ingStart = Number(ing?.s ?? ingItems[0]?.s ?? 0);
-        const ingEnd = Number(ing?.until || ing?.e || dur);
-        const unlocked = ingItems.filter((it) => time >= Number(it?.s || 0));
-        const ingVisible = Boolean(
-          !endOn && !showHook && ing && unlocked.length > 0 && time >= ingStart && time <= ingEnd
-        );
+        const ingSlot = slot('ingredients');
+        const ingVisible = Boolean(ingSlot ? ingSlot.ref : (!endOn && !showHook && ingItems.length > 0 && time >= Number(ing?.s || ingItems[0]?.s || 0) && time <= Number(ing?.until || dur)));
         oIng.hidden = !ingVisible;
         if (ingVisible) {
+          const shownTotal = ingItems.filter((it) => time >= Number(it?.s || 0)).length;
           const totalDisplay = Number(ing.totalCount || ingItems.length);
           const hdBase = ing.header || labels.ingredientsHeader || 'BAHAN';
-          oIngHd.textContent = `${hdBase} ${unlocked.length}/${totalDisplay}`;
-          const displayItems = unlocked.slice(0, 4);
-          oIngList.innerHTML = displayItems.map((it, idx) => {
+          oIngHd.textContent = `${hdBase} ${shownTotal}/${totalDisplay}`;
+          const activeWindowChips = ingItems.filter((it) => time >= Number(it?.s || 0) && (it.e ? time < Number(it.e) : true)).slice(0, 3);
+          oIngList.innerHTML = activeWindowChips.map((it, idx) => {
             const labelTxt = it?.label || it?.text || it?.raw || '';
-            const isNew = idx === displayItems.length - 1 && (time - Number(it?.s || 0)) < 0.7;
+            const isNew = idx === activeWindowChips.length - 1 && (time - Number(it?.s || 0)) < 0.55;
             const slideX = ((1 - easeOut((time - Number(it?.s || 0)) / 0.28)) * -50).toFixed(2);
             return `<div class="it${isNew ? ' new' : ''}" style="transform:translateX(${slideX}cqw)"><span class="ck">✓</span><span>${escapeHtml(labelTxt)}</span></div>`;
           }).join('');
-          if (ing.overflowLabel) {
-            oIngMore.textContent = ing.overflowLabel;
-            oIngMore.hidden = false;
-          } else if (unlocked.length > 4) {
-            oIngMore.textContent = `+${unlocked.length - 4}`;
-            oIngMore.hidden = false;
-          } else {
-            oIngMore.hidden = true;
-          }
         }
 
-        // Timing reminder badge (.x-time) synced to VO phrase triggers (right safe zone)
+        // Timing reminder badge (.x-time)
+        const timeSlot = slot('timing');
         const badges = Array.isArray(T.timingBadges) ? T.timingBadges : [];
-        const activeBadge = (!endOn && !showHook)
+        const activeBadge = timeSlot ? timeSlot.ref : ((!endOn && !showHook && (!T.slots || T.slots.length === 0))
           ? badges.find((b) => time >= b.s && time < b.e)
-          : null;
+          : null);
         oTime.hidden = !activeBadge;
         if (activeBadge) {
           const em = activeBadge.emoji || '⏱️';
@@ -598,32 +597,20 @@
           applyPop(oTime, time, activeBadge.s, activeBadge.e, 0.22, 0.14, 0);
         }
 
-        const punches = Array.isArray(T.punches) ? T.punches : [];
-        const activePunch = !endOn ? punches.find((p) => time >= p.s && time < p.e) : null;
-        oPunch.hidden = !activePunch;
-        if (activePunch) {
-          const txt = String(activePunch.displayText || activePunch.phrase || '').toUpperCase();
-          const cLen = txt.length;
-          let pSize = '15cqw';
-          if (cLen > 24) pSize = '10.6cqw';
-          else if (cLen > 18) pSize = '12.2cqw';
-          else if (cLen > 13) pSize = '13.6cqw';
-          oPunch.style.setProperty('--punch-size', pSize);
-          oPunch.textContent = txt;
-          oPunch.style.color = PUNCH_COLORS[activePunch.type] || PUNCH_COLORS.result;
-          applyPop(oPunch, time, activePunch.s, activePunch.e, 0.18, 0.14, 1.2);
-        }
-
+        // Product Card
         const pc = T.productCard;
-        const showProd = Boolean(!endOn && !activePunch && !showHook && pc && pc.name && time >= pc.s && time <= pc.e);
+        const prodSlot = slot('product');
+        const showProd = Boolean(prodSlot ? prodSlot.ref : (!endOn && !activePunch && !showHook && pc && pc.name && time >= pc.s && time <= pc.e));
         oProd.hidden = !showProd;
         if (showProd) {
           oProdDisc.hidden = Boolean(brandState.safetyNotice || !pc.disclaimer);
           applyPop(oProd, time, pc.s, pc.e, 0.24, 0.16, 0);
         }
 
+        // CTA
         const ca = T.cta;
-        const showCta = Boolean(!endOn && !activePunch && !showProd && ca && ca.text && time >= ca.s && time <= ca.e);
+        const ctaSlot = slot('cta');
+        const showCta = Boolean(ctaSlot ? ctaSlot.ref : (!endOn && !activePunch && !showProd && ca && ca.text && time >= ca.s && time <= ca.e));
         oCta.hidden = !showCta;
         if (showCta) {
           applyPop(oCta, time, ca.s, Math.max(ca.e, ca.s + 1), 0.24, 0.15, 0);
@@ -631,6 +618,7 @@
           oCtaArrow.style.transform = `translateY(${bounceY.toFixed(2)}cqw)`;
         }
 
+        // Subtitle
         if (SL?.renderSubtitle) {
           SL.renderSubtitle(oSub, T, time, {
             captionMode,
@@ -645,4 +633,3 @@
   </script>
 </body>
 </html>
-

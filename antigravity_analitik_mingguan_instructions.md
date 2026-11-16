@@ -29,10 +29,16 @@ Setiap tahap selesai, ubah `- [ ]` menjadi `- [x]` di **Execution Task List** pa
   - `GET /public/account/{id}/statistic` untuk akun Facebook → catat `summary` terisi atau null.
   - Ambil 3 `publishing_jobs` berstatus published terbaru → `GET /public/content/{external_post_id}/statistic?accountId={provider_account_id}` → catat 200/404 dan apakah `insight` terisi.
   - `GET /public/content?accountId=` satu halaman → bandingkan format `id` dengan `external_post_id`.
+- **Uji jalur app Meta milik pengguna** (bagian 3A rencana). Reconnect di Repliz gagal karena error izin `pages_read_engagement`, jadi Facebook kemungkinan akan diambil dari app Meta yang sudah terhubung ke CF Studio:
+  - Jalankan di **server Staging** (token didekripsi dengan `decryptSecret` di sana, karena kunci enkripsi ada di `.env` server). **Jangan mencetak atau menyalin token.**
+  - Akun target: `acc_facebook_1786756995700_b27da3` (Dapur Botani, page 1030799026791337) dan `acc_facebook_1786756995685_71ed15` (NutriBake ID, page 1071656722705640).
+  - Cek izin token (`read_insights`, `pages_read_engagement`), panggil insight halaman 7 hari, lalu insight 3 posting Facebook yang dipublish lewat Repliz (`external_post_id`), termasuk `video_insights` untuk Reels.
+  - Catat nama metrik yang benar-benar berhasil di versi Graph yang dipakai.
 - Laporan ke pengguna dalam bahasa sederhana:
   - Daftar halaman Facebook yang **perlu reconnect di Repliz** (summary/insight null).
   - Apakah ID posting cocok.
-  - Contoh angka 1 video (views, jangkauan, klik, reaksi, komentar, share).
+  - Contoh angka 1 video (views, jangkauan, klik, reaksi, komentar, share) dari **Repliz dan dari app Meta**, berdampingan.
+  - Apakah token app Meta punya izin insight. Kalau tidak, sebutkan izin mana yang kurang.
 
 ## Fase 1–4: Data, pengambil harian, API & MCP
 

@@ -6,12 +6,12 @@
   <style id="shared-layers-css"></style>
   <style>
     :root {
-      --accent: #ffcc3d;
-      --accent-soft: #e2b857;
-      --active-word: #fff066;
-      --f-punch: "Anton", Impact, sans-serif;
-      --f-sub: "Montserrat", "Arial Black", sans-serif;
-      --f-ui: "Inter", system-ui, sans-serif;
+      --accent: var(--fx-accent);
+      --accent-soft: var(--fx-accent);
+      --active-word: var(--fx-accent);
+      --f-punch: var(--fx-font-display);
+      --f-sub: var(--fx-font-body);
+      --f-ui: var(--fx-font-ui);
     }
     * { box-sizing: border-box; }
     [hidden] { display: none !important; }
@@ -32,7 +32,7 @@
     .flash {
       position: absolute;
       inset: 0;
-      background: #ffffff;
+      background: var(--fx-card-ink);
       opacity: 0;
       pointer-events: none;
     }
@@ -42,7 +42,7 @@
       top: 0;
       height: 0.9cqw;
       width: 0;
-      background: var(--accent);
+      background: var(--fx-accent);
     }
     .hook {
       position: absolute;
@@ -50,169 +50,177 @@
       right: 15cqw;
       top: 19cqh;
       text-align: center;
-      font-family: var(--f-punch);
-      text-transform: uppercase;
+      font-family: var(--fx-font-display);
+      text-transform: var(--fx-text-case);
       line-height: 0.95;
-      color: #ffffff;
+      color: var(--fx-card-ink);
       transform-origin: 50% 50%;
     }
     .hook .l1 {
       display: block;
-      font-size: var(--hook-l1-size, 8.6cqw);
-      -webkit-text-stroke: 0.5cqw #000000;
+      font-size: var(--hook-l1-size, var(--fx-size-display-sm));
+      -webkit-text-stroke: var(--fx-stroke-width) var(--fx-stroke);
       paint-order: stroke fill;
       text-shadow: 0 1.2cqw 2.4cqw rgba(0, 0, 0, 0.55);
     }
     .hook .l2 {
       display: inline-block;
       margin-top: 2cqw;
-      font-size: var(--hook-l2-size, 11cqw);
-      background: var(--accent);
-      color: #111111;
+      font-size: var(--hook-l2-size, var(--fx-size-display));
+      background: var(--fx-accent);
+      color: var(--fx-accent-ink);
       padding: 1cqw 3cqw 0.25cqw;
       transform: rotate(-2.5deg);
+      border-radius: var(--fx-radius);
       box-shadow: 0 1.1cqw 2.4cqw rgba(0, 0, 0, 0.4);
     }
     .ing {
       position: absolute;
       left: 4.5cqw;
       top: 12cqh;
-      max-width: 44cqw;
+      max-width: 52cqw;
       display: grid;
-      gap: 1.4cqw;
+      gap: 1cqw;
       justify-items: start;
+      z-index: 6;
     }
     .ing .hd {
-      font-family: var(--f-sub);
-      font-weight: 900;
-      font-size: 2.9cqw;
-      letter-spacing: 0.1em;
-      color: #ffffff;
-      background: rgba(20, 12, 8, 0.76);
-      padding: 0.75cqw 2cqw;
-      border-radius: 1.2cqw;
+      font-family: var(--fx-font-ui);
+      font-weight: 700;
+      font-size: var(--fx-size-label);
+      letter-spacing: 0.05em;
+      color: var(--fx-card-ink);
+      background: var(--fx-card);
+      padding: 0.6cqw 1.8cqw;
+      border-radius: var(--fx-radius);
+      text-transform: var(--fx-text-case);
     }
     .ing .it {
       display: flex;
       align-items: center;
-      gap: 1.4cqw;
-      background: #fff8ee;
-      color: #2a1a10;
-      font-family: var(--f-sub);
-      font-weight: 800;
-      font-size: 3.3cqw;
-      padding: 1.05cqw 2.1cqw 1.05cqw 1.2cqw;
-      border-radius: 99cqw;
-      box-shadow: 0 1cqw 2.6cqw rgba(0, 0, 0, 0.35);
+      gap: 1.2cqw;
+      background: var(--fx-chip);
+      color: var(--fx-chip-ink);
+      font-family: var(--fx-font-body);
+      font-weight: 600;
+      font-size: var(--fx-size-body);
+      padding: 0.85cqw 1.8cqw 0.85cqw 1.1cqw;
+      border-radius: var(--fx-radius);
+      box-shadow: var(--fx-shadow);
       max-width: 100%;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      text-transform: none;
     }
     .ing .it .ck {
-      width: 4.6cqw;
-      height: 4.6cqw;
+      width: 3.8cqw;
+      height: 3.8cqw;
       border-radius: 50%;
-      background: var(--accent-soft);
-      color: #1d120a;
+      background: var(--fx-accent);
+      color: var(--fx-accent-ink);
       display: grid;
       place-items: center;
-      font-size: 2.8cqw;
-      font-family: var(--f-ui);
+      font-size: 2.2cqw;
+      font-family: var(--fx-font-ui);
       font-weight: 700;
       flex-shrink: 0;
     }
     .ing .it.new {
-      background: var(--accent);
-      color: #1d120a;
+      background: var(--fx-accent);
+      color: var(--fx-accent-ink);
     }
     .ing .more {
       display: inline-block;
-      font-family: var(--f-ui);
+      font-family: var(--fx-font-ui);
       font-weight: 700;
-      font-size: 2.8cqw;
-      color: #ffffff;
-      background: rgba(20, 12, 8, 0.8);
-      padding: 0.65cqw 2cqw;
-      border-radius: 99cqw;
+      font-size: var(--fx-size-meta);
+      color: var(--fx-card-ink);
+      background: var(--fx-card);
+      padding: 0.6cqw 1.8cqw;
+      border-radius: var(--fx-radius);
     }
     .step {
       position: absolute;
       right: 15cqw;
       top: 12cqh;
-      max-width: 34cqw;
+      max-width: 38cqw;
       text-align: right;
-      font-family: var(--f-sub);
-      font-weight: 900;
-      color: #ffffff;
+      font-family: var(--fx-font-body);
+      font-weight: 800;
+      color: var(--fx-card-ink);
       transform-origin: 100% 0;
+      z-index: 6;
     }
     .step .n {
       display: inline-block;
-      background: #2a1a10;
-      border: 0.45cqw solid #ffffff;
-      border-radius: 2cqw;
-      padding: 0.7cqw 2cqw;
-      font-size: 3.5cqw;
+      background: var(--fx-card);
+      color: var(--fx-card-ink);
+      border: 0.35cqw solid var(--fx-accent);
+      border-radius: var(--fx-radius);
+      padding: 0.6cqw 1.8cqw;
+      font-size: var(--fx-size-label);
       letter-spacing: 0.05em;
+      font-family: var(--fx-font-ui);
     }
     .step .t {
       display: block;
-      margin-top: 1cqw;
-      font-size: 3.1cqw;
-      -webkit-text-stroke: 0.38cqw #000000;
+      margin-top: 0.8cqw;
+      font-size: var(--fx-size-body);
+      -webkit-text-stroke: var(--fx-stroke-width) var(--fx-stroke);
       paint-order: stroke fill;
-      text-transform: uppercase;
+      text-transform: var(--fx-text-case);
     }
     .prod {
       position: absolute;
       left: 5cqw;
-      top: 28cqh;
+      top: 14cqh;
       max-width: 78cqw;
       display: flex;
       align-items: center;
       gap: 2.4cqw;
-      background: #ffffff;
-      color: #111111;
-      border-radius: 3cqw;
-      padding: 1.9cqw 3.2cqw 1.9cqw 2cqw;
-      box-shadow: 0 1.8cqw 4.6cqw rgba(0, 0, 0, 0.4);
+      background: var(--fx-card);
+      color: var(--fx-card-ink);
+      border-radius: var(--fx-radius);
+      padding: 1.6cqw 2.8cqw 1.6cqw 1.8cqw;
+      box-shadow: var(--fx-shadow);
+      z-index: 6;
     }
     .prod img {
-      width: 15cqw;
-      height: 15cqw;
+      width: 14cqw;
+      height: 14cqw;
       object-fit: contain;
-      border-radius: 2cqw;
-      background: #ffffff;
+      border-radius: 1.6cqw;
+      background: var(--fx-chip);
       flex-shrink: 0;
     }
     .prod .tag {
       display: inline-block;
-      font-family: var(--f-ui);
+      font-family: var(--fx-font-ui);
       font-weight: 700;
-      font-size: 2.3cqw;
-      background: var(--accent);
-      color: #111111;
+      font-size: var(--fx-size-label);
+      background: var(--fx-accent);
+      color: var(--fx-accent-ink);
       border-radius: 1cqw;
-      padding: 0.3cqw 1.3cqw;
-      margin-bottom: 0.7cqw;
+      padding: 0.3cqw 1.2cqw;
+      margin-bottom: 0.6cqw;
     }
     .prod .pn {
-      font-family: var(--f-sub);
-      font-weight: 900;
-      font-size: 4cqw;
-      line-height: 1.05;
+      font-family: var(--fx-font-body);
+      font-weight: 800;
+      font-size: var(--fx-size-body);
+      line-height: 1.1;
     }
     .prod .pd {
-      font-family: var(--f-ui);
-      font-size: 2.5cqw;
-      color: #555555;
-      margin-top: 0.6cqw;
+      font-family: var(--fx-font-ui);
+      font-size: var(--fx-size-meta);
+      color: var(--fx-card-muted);
+      margin-top: 0.5cqw;
     }
     .prod .disc {
-      font-family: var(--f-ui);
-      font-size: 2cqw;
-      color: #6b7280;
+      font-family: var(--fx-font-ui);
+      font-size: var(--fx-size-meta);
+      color: var(--fx-card-muted);
       margin-top: 0.4cqw;
     }
     .punch {
@@ -221,12 +229,13 @@
       right: 15cqw;
       top: 44cqh;
       text-align: center;
-      font-family: var(--f-punch);
-      text-transform: uppercase;
-      font-size: var(--punch-size, 15.5cqw);
+      font-family: var(--fx-font-display);
+      text-transform: var(--fx-text-case);
+      font-size: var(--punch-size, var(--fx-size-display));
       line-height: 0.92;
       transform-origin: 50% 50%;
-      -webkit-text-stroke: 0.62cqw #000000;
+      color: var(--fx-accent);
+      -webkit-text-stroke: var(--fx-stroke-width) var(--fx-stroke);
       paint-order: stroke fill;
       text-shadow: 0 1.3cqw 0 rgba(0, 0, 0, 0.45);
     }
@@ -234,28 +243,29 @@
       position: absolute;
       left: 6cqw;
       right: 15cqw;
-      top: 54cqh;
+      top: 14cqh;
       display: flex;
       justify-content: center;
+      z-index: 6;
     }
     .save .card {
-      background: rgba(255, 255, 255, 0.94);
-      color: #111111;
-      border-radius: 99cqw;
-      padding: 1.4cqw 3.8cqw;
+      background: var(--fx-card);
+      color: var(--fx-card-ink);
+      border-radius: var(--fx-radius);
+      padding: 1.4cqw 3.6cqw;
       text-align: center;
-      box-shadow: 0 1.2cqw 3cqw rgba(0, 0, 0, 0.35);
+      box-shadow: var(--fx-shadow);
     }
     .save .stitle {
-      font-family: var(--f-sub);
+      font-family: var(--fx-font-body);
       font-weight: 800;
-      font-size: 3.7cqw;
+      font-size: var(--fx-size-body);
     }
     .save .ssub {
-      font-family: var(--f-ui);
+      font-family: var(--fx-font-ui);
       font-weight: 600;
-      font-size: 2.4cqw;
-      color: #4b5563;
+      font-size: var(--fx-size-meta);
+      color: var(--fx-card-muted);
       margin-top: 0.25cqw;
     }
     .cta {
@@ -269,23 +279,23 @@
       gap: 1.4cqw;
     }
     .cta .arrow {
-      font-family: var(--f-punch);
-      font-size: 11.5cqw;
-      color: var(--accent);
-      -webkit-text-stroke: 0.48cqw #000000;
+      font-family: var(--fx-font-display);
+      font-size: 11cqw;
+      color: var(--fx-accent);
+      -webkit-text-stroke: var(--fx-stroke-width) var(--fx-stroke);
       paint-order: stroke fill;
       line-height: 1;
     }
     .cta .pill {
-      font-family: var(--f-sub);
+      font-family: var(--fx-font-body);
       font-weight: 900;
-      font-size: 5cqw;
-      text-transform: uppercase;
-      background: var(--accent);
-      color: #111111;
-      padding: 1.5cqw 4.2cqw;
-      border-radius: 99cqw;
-      box-shadow: 0 1.3cqw 0 #000000;
+      font-size: var(--fx-size-body);
+      text-transform: var(--fx-text-case);
+      background: var(--fx-accent);
+      color: var(--fx-accent-ink);
+      padding: 1.4cqw 3.8cqw;
+      border-radius: var(--fx-radius);
+      box-shadow: 0 1.2cqw 0 var(--fx-stroke);
     }
   </style>
   <script src="./shared-layers.js"></script>
@@ -298,123 +308,136 @@
     <div class="prod" id="oProd" hidden>
       <img id="oProdImg" alt="" hidden>
       <div>
-        <span class="tag" id="oProdTag"></span>
+        <span class="tag" id="oProdTag">BAHAN UTAMA</span>
         <div class="pn" id="oProdName"></div>
-        <div class="pd" id="oProdSpec" hidden></div>
+        <div class="pd" id="oProdDesc" hidden></div>
         <div class="disc" id="oProdDisc" hidden></div>
       </div>
     </div>
-    <div class="hook" id="oHook" hidden>
-      <span class="l1" id="oHookL1"></span>
-      <span class="l2" id="oHookL2"></span>
-    </div>
+    <div class="punch" id="oPunch" hidden></div>
     <div class="save" id="oSave" hidden>
       <div class="card">
         <div class="stitle" id="oSaveTitle"></div>
-        <div class="ssub" id="oSaveSub"></div>
+        <div class="ssub" id="oSaveSub" hidden></div>
       </div>
     </div>
-    <div class="punch" id="oPunch" hidden></div>
     <div class="cta" id="oCta" hidden>
       <div class="arrow" id="oCtaArrow"></div>
       <div class="pill" id="oCtaPill"></div>
     </div>
     <div class="sub" id="oSub" hidden></div>
+    <div class="hook" id="oHook" hidden>
+      <span class="l1" id="oHookL1"></span>
+      <span class="l2" id="oHookL2"></span>
+    </div>
+    <div class="layer" id="oPatch" hidden></div>
+    <div class="layer" id="oBrand" hidden></div>
     <div class="progress" id="oProg"></div>
   </div>
 
   <script>
     (function () {
-      const $ = (id) => document.getElementById(id);
-      const oPhone = $('phone');
-      const oFlash = $('oFlash');
-      const oIng = $('oIng');
-      const oStep = $('oStep');
-      const oStepNum = $('oStepNum');
-      const oStepTxt = $('oStepTxt');
-      const oProd = $('oProd');
-      const oProdImg = $('oProdImg');
-      const oProdTag = $('oProdTag');
-      const oProdName = $('oProdName');
-      const oProdSpec = $('oProdSpec');
-      const oProdDisc = $('oProdDisc');
-      const oHook = $('oHook');
-      const oHookL1 = $('oHookL1');
-      const oHookL2 = $('oHookL2');
-      const oSave = $('oSave');
-      const oSaveTitle = $('oSaveTitle');
-      const oSaveSub = $('oSaveSub');
-      const oPunch = $('oPunch');
-      const oCta = $('oCta');
-      const oCtaArrow = $('oCtaArrow');
-      const oCtaPill = $('oCtaPill');
-      const oSub = $('oSub');
-      const oProg = $('oProg');
-      const dynamicFonts = $('dynamic-fonts');
       const SL = window.FinishingSharedLayers || null;
-      const sharedCssEl = $('shared-layers-css');
-      if (sharedCssEl && SL?.SHARED_LAYERS_CSS) {
-        sharedCssEl.textContent = SL.SHARED_LAYERS_CSS;
+      let T = null;
+      let labels = { ingredientsHeader: 'BAHAN', stepLabel: 'LANGKAH' };
+
+      const oFlash = document.getElementById('oFlash');
+      const oProg = document.getElementById('oProg');
+      const oIng = document.getElementById('oIng');
+      const oStep = document.getElementById('oStep');
+      const oStepNum = document.getElementById('oStepNum');
+      const oStepTxt = document.getElementById('oStepTxt');
+      const oProd = document.getElementById('oProd');
+      const oProdImg = document.getElementById('oProdImg');
+      const oProdTag = document.getElementById('oProdTag');
+      const oProdName = document.getElementById('oProdName');
+      const oProdDesc = document.getElementById('oProdDesc');
+      const oProdDisc = document.getElementById('oProdDisc');
+      const oPunch = document.getElementById('oPunch');
+      const oSave = document.getElementById('oSave');
+      const oSaveTitle = document.getElementById('oSaveTitle');
+      const oSaveSub = document.getElementById('oSaveSub');
+      const oCta = document.getElementById('oCta');
+      const oCtaArrow = document.getElementById('oCtaArrow');
+      const oCtaPill = document.getElementById('oCtaPill');
+      const oSub = document.getElementById('oSub');
+      const oHook = document.getElementById('oHook');
+      const oHookL1 = document.getElementById('oHookL1');
+      const oHookL2 = document.getElementById('oHookL2');
+      const oPatch = document.getElementById('oPatch');
+      const oBrand = document.getElementById('oBrand');
+      const dynamicFonts = document.getElementById('dynamic-fonts');
+      const sharedLayersCss = document.getElementById('shared-layers-css');
+
+      if (SL && sharedLayersCss) {
+        sharedLayersCss.textContent = SL.SHARED_LAYERS_CSS;
       }
-      let labels = SL ? SL.getLocalizedLabels('id-ID') : { ingredientsHeader: 'BAHAN', stepLabel: 'LANGKAH' };
 
       const PUNCH_COLORS = {
-        benefit: '#9df27a',
-        result: '#ffcc3d',
-        warning: '#ff6b6b',
-        hook: '#ffffff'
+        problem: 'var(--fx-phase-problem)',
+        benefit: 'var(--fx-accent)',
+        result: 'var(--fx-phase-solution)',
+        hook: 'var(--fx-accent)'
       };
 
-      let T = null;
-
-      function backOut(x) {
-        const c = 1.9;
-        const cl = Math.min(Math.max(x, 0), 1);
-        return 1 + (c + 1) * Math.pow(cl - 1, 3) + c * Math.pow(cl - 1, 2);
-      }
-
       function easeOut(x) {
-        const cl = Math.min(Math.max(x, 0), 1);
-        return 1 - Math.pow(1 - cl, 3);
+        return 1 - Math.pow(1 - x, 3);
       }
 
-      function applyPop(el, t, s, e, inDur, outDur, rotDeg) {
-        const lt = t - s;
-        const rt = e - t;
-        let sc = backOut(lt / inDur);
-        let op = Math.min(1, Math.max(0, lt / 0.06));
-        if (rt < outDur) {
-          const k = Math.max(rt, 0) / outDur;
-          op = Math.min(op, k);
-          sc *= 0.9 + 0.1 * k;
+      function easeOutBack(x) {
+        const c1 = 1.70158;
+        const c3 = c1 + 1;
+        return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
+      }
+
+      function applyPop(el, time, s, e, inDur = 0.22, outDur = 0.16, rotDeg = 0) {
+        const dt = time - s;
+        const rem = e - time;
+        if (dt < 0 || rem < 0) {
+          el.style.opacity = '0';
+          el.style.transform = `scale(0.85) rotate(${rotDeg}deg)`;
+          return;
         }
-        el.style.opacity = String(op);
-        el.style.transform = `scale(${sc.toFixed(4)}) rotate(${rotDeg || 0}deg)`;
+        if (dt < inDur) {
+          const k = Math.min(1, Math.max(0, dt / inDur));
+          const sc = 0.85 + 0.15 * easeOutBack(k);
+          el.style.opacity = String(k);
+          el.style.transform = `scale(${sc.toFixed(4)}) rotate(${(rotDeg * k).toFixed(2)}deg)`;
+        } else if (rem < outDur) {
+          const k = Math.min(1, Math.max(0, rem / outDur));
+          el.style.opacity = String(k);
+          el.style.transform = `scale(${(0.9 + 0.1 * k).toFixed(4)}) rotate(${(rotDeg * k).toFixed(2)}deg)`;
+        } else {
+          el.style.opacity = '1';
+          el.style.transform = `scale(1) rotate(${rotDeg}deg)`;
+        }
       }
 
       window.loadTimeline = function (timeline) {
-        T = timeline || { config: {}, words: [], chunks: [], punches: [] };
+        T = timeline;
         const cfg = T.config || {};
-        oPhone.style.width = `${Number(cfg.width) || 720}px`;
-        oPhone.style.height = `${Number(cfg.height) || 1280}px`;
+
+        if (SL?.applySkinTokens) {
+          SL.applySkinTokens(document, T.skin);
+        } else if (T.skin?.tokens) {
+          for (const [k, v] of Object.entries(T.skin.tokens)) {
+            document.documentElement.style.setProperty(k, v);
+          }
+        }
+
         labels = SL ? SL.getLocalizedLabels(cfg.targetLanguage || T.brand?.targetLanguage || 'id-ID') : { ingredientsHeader: 'BAHAN', stepLabel: 'LANGKAH' };
 
-        if (cfg.accentColor) {
-          document.documentElement.style.setProperty('--accent', cfg.accentColor);
-          document.documentElement.style.setProperty('--accent-soft', cfg.accentColor);
+        const customAccent = cfg.accentColor || cfg.accent || (T.brand && (T.brand.accentColor || T.brand.accent));
+        if (customAccent) {
+          document.documentElement.style.setProperty('--fx-accent', customAccent);
+          document.documentElement.style.setProperty('--accent', customAccent);
         }
         if (cfg.activeWordColor) {
           document.documentElement.style.setProperty('--active-word', cfg.activeWordColor);
         }
 
-        if (cfg.fontBaseUrl) {
-          const base = String(cfg.fontBaseUrl).replace(/\/+$/, '');
-          dynamicFonts.textContent = `
-            @font-face { font-family: "Anton"; src: url("${base}/Anton-Regular.ttf") format("truetype"); font-weight: 400; font-style: normal; }
-            @font-face { font-family: "Montserrat"; src: url("${base}/Montserrat-ExtraBold.ttf") format("truetype"); font-weight: 800; font-style: normal; }
-            @font-face { font-family: "Montserrat"; src: url("${base}/Montserrat-Black.ttf") format("truetype"); font-weight: 900; font-style: normal; }
-            @font-face { font-family: "Inter"; src: url("${base}/Inter-Bold.ttf") format("truetype"); font-weight: 700; font-style: normal; }
-          `;
+        if (SL?.buildDynamicFontFaces && cfg.fontBaseUrl) {
+          dynamicFonts.textContent = SL.buildDynamicFontFaces(cfg.fontBaseUrl);
         }
 
         const pos = cfg.position || 'bottom';
@@ -446,31 +469,29 @@
 
         const pr = T.productCard;
         if (pr && pr.name) {
-          oProdTag.textContent = pr.tag || '';
-          oProdTag.hidden = !pr.tag;
           oProdName.textContent = pr.name;
-          oProdSpec.textContent = pr.specLine || '';
-          oProdSpec.hidden = !pr.specLine;
-          oProdDisc.textContent = pr.disclaimer || '';
-          oProdDisc.hidden = !pr.disclaimer;
+          if (pr.specLine) {
+            oProdDesc.textContent = pr.specLine;
+            oProdDesc.hidden = false;
+          }
+          if (pr.tag) oProdTag.textContent = pr.tag;
+          if (pr.disclaimer) {
+            oProdDisc.textContent = pr.disclaimer;
+            oProdDisc.hidden = false;
+          }
           if (pr.imageUrl) {
             oProdImg.src = pr.imageUrl;
             oProdImg.hidden = false;
-          } else {
-            oProdImg.removeAttribute('src');
-            oProdImg.hidden = true;
           }
-        } else {
-          oProd.hidden = true;
         }
 
         const sv = T.savePrompt;
         if (sv && sv.titleText) {
           oSaveTitle.textContent = sv.titleText;
-          oSaveSub.textContent = sv.subtitleText || '';
-          oSaveSub.hidden = !sv.subtitleText;
-        } else {
-          oSave.hidden = true;
+          if (sv.subtitleText) {
+            oSaveSub.textContent = sv.subtitleText;
+            oSaveSub.hidden = false;
+          }
         }
 
         const ca = T.cta;
@@ -489,7 +510,6 @@
         const captionMode = T.config?.captionMode || 'full';
         const time = Math.min(Math.max(0, Number(t) || 0), dur);
 
-        // Progress bar & cut flash
         oProg.style.width = `${((time / dur) * 100).toFixed(3)}%`;
         let flashOp = 0;
         for (const cutT of (T.clipCuts || [])) {
@@ -501,20 +521,30 @@
         }
         oFlash.style.opacity = flashOp.toFixed(4);
 
+        const brandState = SL
+          ? SL.renderSharedLayersDom({ oBrandRoot: oBrand, oPatchRoot: oPatch, timeline: T, time })
+          : { endCard: null };
+        const endOn = Boolean(brandState.endCard);
+
         const hookEnd = Number(T.config?.hookDuration) || 1.75;
-        const showHook = Boolean(T.hookCard && T.hookCard.l1 && time >= 0 && time < hookEnd);
+        const showHook = Boolean(!endOn && T.hookCard && T.hookCard.l1 && time >= 0 && time < hookEnd);
         oHook.hidden = !showHook;
         if (showHook) {
           applyPop(oHook, time, 0, hookEnd, 0.24, 0.16, 0);
         }
 
+        // Slot resolver helper (Aturan Satu Fokus)
+        const slot = (layer) => (T.slots || []).find((x) => x.layer === layer && time >= x.s && time < x.e);
+
+        // Keyword Punch
+        const punchSlot = slot('punch');
         const punches = Array.isArray(T.punches) ? T.punches : [];
-        const activePunch = punches.find((p) => time >= p.s && time < p.e);
+        const activePunch = punchSlot ? punchSlot.ref : (!endOn ? punches.find((p) => time >= p.s && time < p.e) : null);
         oPunch.hidden = !activePunch;
         if (activePunch) {
           const txt = String(activePunch.phrase || '').toUpperCase();
           const cLen = txt.length;
-          let pSize = '15.5cqw';
+          let pSize = 'var(--fx-size-display)';
           if (cLen > 24) pSize = '11cqw';
           else if (cLen > 18) pSize = '12.6cqw';
           else if (cLen > 13) pSize = '14cqw';
@@ -524,19 +554,21 @@
           applyPop(oPunch, time, activePunch.s, activePunch.e, 0.18, 0.14, 2);
         }
 
-        // IngredientStack (<= 4 chips + overflow pill, hidden cleanly if empty)
+        // Ingredients (Aturan Satu Fokus: Jendela 3 chip, maks 4 detik)
         const ing = T.recipe?.ingredients;
         const ingItems = Array.isArray(ing?.items) ? ing.items : [];
-        const showIng = Boolean(ingItems.length > 0 && !showHook && time >= ingItems[0].s && time < Number(ing.until || 0));
+        const ingSlot = slot('ingredients');
+        const showIng = Boolean(ingSlot ? ingSlot.ref : (!endOn && ingItems.length > 0 && !showHook && time >= ingItems[0].s && time < Number(ing.until || 0)));
         oIng.hidden = !showIng;
         if (showIng) {
-          const shown = ingItems.filter((x) => time >= x.s);
+          const shownTotal = ingItems.filter((x) => time >= x.s).length;
+          const activeWindowChips = ingItems.filter((x) => time >= x.s && (x.e ? time < x.e : true)).slice(0, 3);
           const totalDisplay = Number(ing.totalCount || ingItems.length);
           const hd = document.createElement('div');
           hd.className = 'hd';
-          hd.textContent = `${labels.ingredientsHeader || 'BAHAN'} ${shown.length}/${totalDisplay}`;
-          const chipsHtml = shown.map((x, idx) => {
-            const isNew = idx === shown.length - 1 && (time - x.s) < 0.55;
+          hd.textContent = `${labels.ingredientsHeader || 'BAHAN'} ${shownTotal}/${totalDisplay}`;
+          const chipsHtml = activeWindowChips.map((x, idx) => {
+            const isNew = idx === activeWindowChips.length - 1 && (time - x.s) < 0.55;
             const slideX = ((1 - easeOut((time - x.s) / 0.3)) * -60).toFixed(2);
             const row = document.createElement('div');
             row.className = `it${isNew ? ' new' : ''}`;
@@ -550,30 +582,27 @@
             row.appendChild(lb);
             return row.outerHTML;
           }).join('');
-          let moreHtml = '';
-          if (ing.overflowLabel && shown.length === ingItems.length) {
-            const more = document.createElement('div');
-            more.className = 'more';
-            more.textContent = ing.overflowLabel;
-            moreHtml = more.outerHTML;
-          }
-          oIng.innerHTML = hd.outerHTML + chipsHtml + moreHtml;
+          oIng.innerHTML = hd.outerHTML + chipsHtml;
           oIng.style.opacity = String(Math.min(1, Math.max(0, (Number(ing.until) - time) / 0.25)));
         }
 
-        // StepBadge (3..8+ clips dynamically, priority respects Keyword Punch)
+        // StepBadge (Langkah mulai setelah bahan)
         const steps = Array.isArray(T.recipe?.steps) ? T.recipe.steps : [];
-        const activeStep = steps.find((st) => time >= st.s && time < st.e);
-        const showStep = Boolean(activeStep && !activePunch && !showHook);
-        oStep.hidden = !showStep;
-        if (showStep) {
+        const stepSlot = slot('step');
+        const activeStep = stepSlot ? stepSlot.ref : (!endOn && !activePunch && !showHook
+          ? steps.find((st) => time >= st.s && time < st.e)
+          : null);
+        oStep.hidden = !activeStep;
+        if (activeStep) {
           oStepNum.textContent = activeStep.badge || `${labels.stepLabel || 'LANGKAH'} ${activeStep.n}/${activeStep.total}`;
           oStepTxt.textContent = activeStep.t || '';
           applyPop(oStep, time, activeStep.s, activeStep.e, 0.22, 0.1, 0);
         }
 
+        // Product Card
         const pr = T.productCard;
-        const showProd = Boolean(pr && pr.name && !activePunch && !showHook && time >= pr.s && time < pr.e);
+        const prodSlot = slot('product');
+        const showProd = Boolean(prodSlot ? prodSlot.ref : (!endOn && pr && pr.name && !activePunch && !showHook && time >= pr.s && time < pr.e));
         oProd.hidden = !showProd;
         if (showProd) {
           const slideX = (1 - easeOut((time - pr.s) / 0.35)) * -105;
@@ -582,15 +611,19 @@
           oProd.style.opacity = String(fadeOut);
         }
 
+        // Save Prompt
         const sv = T.savePrompt;
-        const showSave = Boolean(sv && sv.titleText && !activePunch && time >= sv.s && time < sv.e);
+        const saveSlot = slot('save');
+        const showSave = Boolean(saveSlot ? saveSlot.ref : (!endOn && sv && sv.titleText && !activePunch && time >= sv.s && time < sv.e));
         oSave.hidden = !showSave;
         if (showSave) {
           applyPop(oSave, time, sv.s, sv.e, 0.24, 0.18, 0);
         }
 
+        // CTA
         const ca = T.cta;
-        const showCta = Boolean(ca && ca.text && !activePunch && !showSave && time >= ca.s && time <= ca.e);
+        const ctaSlot = slot('cta');
+        const showCta = Boolean(ctaSlot ? ctaSlot.ref : (!endOn && ca && ca.text && !activePunch && !showSave && time >= ca.s && time <= ca.e));
         oCta.hidden = !showCta;
         if (showCta) {
           applyPop(oCta, time, ca.s, Math.max(ca.e, ca.s + 1), 0.24, 0.15, 0);
@@ -598,10 +631,12 @@
           oCtaArrow.style.transform = `translateY(${bounceY.toFixed(2)}cqw)`;
         }
 
+        // Subtitle
         if (SL?.renderSubtitle) {
           SL.renderSubtitle(oSub, T, time, {
             captionMode,
             activePunch,
+            hidden: endOn,
             subTop: oSub.dataset.subTop || '69cqh',
             subRight: '15cqw'
           });
@@ -611,4 +646,3 @@
   </script>
 </body>
 </html>
-

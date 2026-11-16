@@ -462,45 +462,45 @@ Hasil ditampilkan di review job: "Kepadatan teks: OK" atau "3 titik padat: 6,2 d
 ### Fase 1: Mockup HTML (GERBANG REVIEW)
 - [x] Buat `public/mockup_finishing_satu_fokus.html` (spesifikasi di file instruksi)
 - [x] Commit + push, deploy Staging atomic dengan full SHA, cek HTTP 200 `http://100.95.245.55:5010/mockup_finishing_satu_fokus.html`
-- [ ] Kirim link ke pengguna, **STOP**, tunggu persetujuan
-- [ ] Terapkan revisi mockup dari pengguna (bila ada) sampai disetujui
+- [x] Kirim link ke pengguna, **STOP**, tunggu persetujuan
+- [x] Terapkan revisi mockup dari pengguna (bila ada) sampai disetujui (disetujui langsung tanpa revisi)
 
 ### Fase 2: Skin & token
-- [ ] Buat `lib/finishing-skin-registry.js` (6 skin, `pop_kuning` = tampilan sekarang)
-- [ ] Bundel font tambahan ke folder font `fontBaseUrl`
-- [ ] Ganti warna/font tertanam di 8 template dengan `var(--fx-*)`
-- [ ] Kirim `timeline.skin` dari preview-builder & overlay-renderer
+- [x] Buat `lib/finishing-skin-registry.js` (6 skin, `pop_kuning` = tampilan sekarang)
+- [x] Bundel font tambahan ke folder font `fontBaseUrl`
+- [x] Ganti warna/font tertanam di 8 template dengan `var(--fx-*)`
+- [x] Kirim `timeline.skin` dari preview-builder & overlay-renderer
 
 ### Fase 3: Skala huruf
-- [ ] Tambah token ukuran di `shared-layers.js`
-- [ ] Terapkan ke 8 template (chip bahan huruf biasa, tebal 600)
+- [x] Tambah token ukuran di `shared-layers.js`
+- [x] Terapkan ke 8 template (chip bahan huruf biasa, tebal 600)
 
 ### Fase 4: Penjadwal lapisan & bahan bergiliran
-- [ ] Buat `lib/finishing-layer-scheduler.js` + unit test
-- [ ] Ubah `extractRecipeOverlayData` (fase ≤ 4 dtk, jendela 3 chip, label 16 + takaran)
-- [ ] Panggil penjadwal di `finishing-preview-builder.js` & `finishing-overlay-renderer.js`
-- [ ] Template membaca `T.slots` (fallback logika lama bila tidak ada)
-- [ ] Subtitle ringkas saat kartu Zona Atas aktif
+- [x] Buat `lib/finishing-layer-scheduler.js` + unit test
+- [x] Ubah `extractRecipeOverlayData` (fase ≤ 4 dtk, jendela 3 chip, label 16 + takaran)
+- [x] Panggil penjadwal di `finishing-preview-builder.js` & `finishing-overlay-renderer.js`
+- [x] Template membaca `T.slots` (fallback logika lama bila tidak ada)
+- [x] Subtitle ringkas saat kartu Zona Atas aktif
 
 ### Fase 5: Babak natural problem_solution
-- [ ] Ubah `CHAPTER_PHASE_META`, `validateChapters` (lead + line ber-VO, satu kartu per fase)
-- [ ] Ubah skema prompt `chapters`
-- [ ] Ubah fallback di `finishing-overlay-renderer.js` & data contoh di `finishing-preview-builder.js`
-- [ ] Ganti pill + bar progres di `problem-solution.html` dengan kartu `.x-phase`
-- [ ] Unit test babak (plan baru, plan lama, tanpa plan, line palsu, klaim)
+- [x] Ubah `CHAPTER_PHASE_META`, `validateChapters` (lead + line ber-VO, satu kartu per fase)
+- [x] Ubah skema prompt `chapters`
+- [x] Ubah fallback di `finishing-overlay-renderer.js` & data contoh di `finishing-preview-builder.js`
+- [x] Ganti pill + bar progres di `problem-solution.html` dengan kartu `.x-phase`
+- [x] Unit test babak (plan baru, plan lama, tanpa plan, line palsu, klaim)
 
 ### Fase 6: Lepas dari brand
-- [ ] Bersihkan nama brand di `finishing-template-registry.js`
-- [ ] Migrasi kolom `finishing_skin`, `default_finishing_template`
-- [ ] API + UI Brand Profile & panel override (semantic token)
-- [ ] MCP `cf_update_brand_profile` / `cf_get_brand_profile`
+- [x] Bersihkan nama brand di `finishing-template-registry.js`
+- [x] Migrasi kolom `finishing_skin`, `default_finishing_template`
+- [x] API + UI Brand Profile & panel override (semantic token)
+- [x] MCP `cf_update_brand_profile` / `cf_get_brand_profile`
 
 ### Fase 7: Validator kepadatan
-- [ ] `auditTextDensity` + tampil di halaman review job
+- [x] `auditTextDensity` + tampil di halaman review job
 
 ### Fase 8: Uji, rilis, deploy Staging
-- [ ] Jalankan semua unit test + cek statik
-- [ ] Render ulang 3 video Fase 0 × 3 skin, simpan frame sesudah ke `scratch/finishing_satu_fokus_after/`
+- [x] Jalankan semua unit test + cek statik
+- [x] Render ulang 3 video Fase 0 × 3 skin, simpan frame sesudah ke `scratch/finishing_satu_fokus_after/`
 - [ ] `npm run release-non-interactive -- --type minor --title "Finishing Satu Fokus, Skin General & Babak Natural" --points "..."`
 - [ ] Deploy Staging atomic + verifikasi wajib (current, manifest, HTTP 200, PM2, pm_cwd, PG_SEARCH_PATH, PGPOOL_MAX)
 - [ ] Laporkan link Staging & perbandingan frame sebelum/sesudah ke pengguna

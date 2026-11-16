@@ -6,13 +6,13 @@
   <style id="shared-layers-css"></style>
   <style>
     :root {
-      --accent: #d9653b;
-      --accent-soft: #f08a62;
-      --active-word: #fff066;
-      --brand: #231915;
-      --f-punch: "Anton", Impact, sans-serif;
-      --f-sub: "Montserrat", "Arial Black", sans-serif;
-      --f-ui: "Inter", system-ui, sans-serif;
+      --accent: var(--fx-accent);
+      --accent-soft: var(--fx-accent);
+      --active-word: var(--fx-accent);
+      --brand: var(--fx-card);
+      --f-punch: var(--fx-font-display);
+      --f-sub: var(--fx-font-body);
+      --f-ui: var(--fx-font-ui);
     }
     * { box-sizing: border-box; }
     [hidden] { display: none !important; }
@@ -38,7 +38,7 @@
     .flash {
       position: absolute;
       inset: 0;
-      background: #ffffff;
+      background: var(--fx-card-ink);
       opacity: 0;
       pointer-events: none;
     }
@@ -48,7 +48,7 @@
       top: 0;
       height: 0.9cqw;
       width: 0;
-      background: var(--accent);
+      background: var(--fx-accent);
     }
     .hook {
       position: absolute;
@@ -56,45 +56,45 @@
       right: 15cqw;
       top: 22cqh;
       text-align: center;
-      font-family: var(--f-punch);
-      text-transform: uppercase;
+      font-family: var(--fx-font-display);
+      text-transform: var(--fx-text-case);
       line-height: 0.96;
-      color: #ffffff;
+      color: var(--fx-card-ink);
       transform-origin: 50% 50%;
     }
     .hook .l1 {
       display: block;
-      font-size: var(--hook-l1-size, 9.6cqw);
+      font-size: var(--hook-l1-size, var(--fx-size-display-sm));
       letter-spacing: 0.01em;
-      -webkit-text-stroke: 0.52cqw #000000;
+      -webkit-text-stroke: var(--fx-stroke-width) var(--fx-stroke);
       paint-order: stroke fill;
-      text-shadow: 0 1cqw 2cqw rgba(0, 0, 0, 0.65);
+      text-shadow: 0 1cqw 2cqw var(--fx-shadow, rgba(0, 0, 0, 0.65));
     }
     .hook .l2 {
       display: inline-block;
       margin-top: 1.8cqw;
-      font-size: var(--hook-l2-size, 11.2cqw);
-      background: var(--accent);
-      color: #111111;
+      font-size: var(--hook-l2-size, var(--fx-size-display));
+      background: var(--fx-accent);
+      color: var(--fx-accent-ink);
       padding: 1cqw 3.2cqw 0.35cqw;
-      border-radius: 1.2cqw;
+      border-radius: var(--fx-radius, 1.2cqw);
       transform: rotate(-1.5deg);
-      box-shadow: 0 1.1cqw 2.4cqw rgba(0, 0, 0, 0.4);
+      box-shadow: 0 1.1cqw 2.4cqw var(--fx-shadow, rgba(0, 0, 0, 0.4));
     }
     .x-loc {
       position: absolute;
       left: 5cqw;
       top: 13cqh;
       max-width: 76cqw;
-      font-family: var(--f-sub);
+      font-family: var(--fx-font-body);
       font-weight: 800;
-      font-size: 3.4cqw;
-      color: #111827;
-      background: rgba(255, 255, 255, 0.94);
+      font-size: var(--fx-size-meta, 3.4cqw);
+      color: var(--fx-card-ink);
+      background: var(--fx-card);
       padding: 1cqw 2.8cqw;
-      border-radius: 99cqw;
-      box-shadow: 0 1cqw 2.4cqw rgba(0, 0, 0, 0.35);
-      border-left: 1cqw solid var(--accent);
+      border-radius: var(--fx-radius, 99cqw);
+      box-shadow: var(--fx-shadow, 0 1cqw 2.4cqw rgba(0, 0, 0, 0.35));
+      border-left: 1cqw solid var(--fx-accent);
     }
     .x-tip {
       position: absolute;
@@ -108,30 +108,31 @@
       transform-origin: 0% 50%;
     }
     .x-tip .n {
-      font-family: var(--f-punch);
-      font-size: 9.8cqw;
+      font-family: var(--fx-font-display);
+      font-size: var(--fx-size-display-sm, 8cqw);
       line-height: 1;
-      color: var(--accent);
-      -webkit-text-stroke: 0.48cqw #000000;
+      color: var(--fx-accent);
+      -webkit-text-stroke: var(--fx-stroke-width) var(--fx-stroke);
       paint-order: stroke fill;
       letter-spacing: 0.02em;
-      text-shadow: 0 0.8cqw 1.6cqw rgba(0, 0, 0, 0.55);
+      text-shadow: 0 0.8cqw 1.6cqw var(--fx-shadow, rgba(0, 0, 0, 0.55));
+      text-transform: var(--fx-text-case, uppercase);
     }
     .x-tip .n small {
       font-size: 5.8cqw;
-      color: #ffffff;
+      color: var(--fx-card-ink);
     }
     .x-tip .t {
-      font-family: var(--f-sub);
-      font-weight: 900;
-      font-size: 4.8cqw;
+      font-family: var(--fx-font-body);
+      font-weight: 700;
+      font-size: var(--fx-size-body, 4.2cqw);
       line-height: 1.16;
-      color: #111827;
-      background: rgba(255, 255, 255, 0.96);
+      color: var(--fx-card-ink);
+      background: var(--fx-card);
       padding: 1.6cqw 3.2cqw;
-      border-radius: 2.2cqw;
-      border-left: 1.2cqw solid var(--accent);
-      box-shadow: 0 1.4cqw 2.8cqw rgba(0, 0, 0, 0.38);
+      border-radius: var(--fx-radius, 2.2cqw);
+      border-left: 1.2cqw solid var(--fx-accent);
+      box-shadow: var(--fx-shadow, 0 1.4cqw 2.8cqw rgba(0, 0, 0, 0.38));
       max-width: 100%;
     }
     .x-recap {
@@ -139,28 +140,28 @@
       left: 5cqw;
       right: 15cqw;
       top: 15cqh;
-      background: rgba(255, 250, 243, 0.97);
-      color: #1f2937;
-      border-radius: 3cqw;
+      background: var(--fx-card);
+      color: var(--fx-card-ink);
+      border-radius: var(--fx-radius, 3cqw);
       padding: 3.2cqw 3.8cqw;
-      box-shadow: 0 2cqw 5cqw rgba(0, 0, 0, 0.45);
+      box-shadow: var(--fx-shadow, 0 2cqw 5cqw rgba(0, 0, 0, 0.45));
       transform-origin: 50% 0%;
     }
     .x-recap .hd {
-      font-family: var(--f-sub);
+      font-family: var(--fx-font-ui);
       font-weight: 900;
-      font-size: 3.2cqw;
+      font-size: var(--fx-size-label, 3cqw);
       letter-spacing: 0.14em;
-      color: var(--accent);
-      text-transform: uppercase;
+      color: var(--fx-accent);
+      text-transform: var(--fx-text-case, uppercase);
     }
     .x-recap .ti {
-      font-family: var(--f-punch);
-      font-size: 6.8cqw;
+      font-family: var(--fx-font-display);
+      font-size: var(--fx-size-display-sm, 6cqw);
       line-height: 1.02;
       margin: 0.8cqw 0 1.8cqw;
-      text-transform: uppercase;
-      color: #111827;
+      text-transform: var(--fx-text-case, uppercase);
+      color: var(--fx-card-ink);
     }
     .x-recap ul {
       margin: 0;
@@ -171,19 +172,20 @@
       display: flex;
       gap: 1.8cqw;
       align-items: flex-start;
-      font-family: var(--f-sub);
-      font-weight: 800;
-      font-size: 3.9cqw;
+      font-family: var(--fx-font-body);
+      font-weight: 700;
+      font-size: var(--fx-size-body, 3.8cqw);
       line-height: 1.22;
       margin: 1.2cqw 0;
+      color: var(--fx-card-ink);
     }
     .x-recap li b {
       flex: none;
       width: 5cqw;
       height: 5cqw;
       border-radius: 50%;
-      background: var(--accent);
-      color: #ffffff;
+      background: var(--fx-accent);
+      color: var(--fx-accent-ink);
       display: grid;
       place-items: center;
       font-size: 3cqw;
@@ -191,11 +193,11 @@
     .x-recap .sv {
       margin-top: 2cqw;
       padding-top: 1.6cqw;
-      border-top: 0.3cqw dashed rgba(17, 24, 39, 0.18);
-      font-family: var(--f-sub);
+      border-top: 0.3cqw dashed var(--fx-card-muted);
+      font-family: var(--fx-font-body);
       font-weight: 800;
-      font-size: 3.5cqw;
-      color: #334155;
+      font-size: var(--fx-size-meta, 3.2cqw);
+      color: var(--fx-card-muted);
     }
     .punch {
       position: absolute;
@@ -203,14 +205,14 @@
       right: 15cqw;
       top: 41cqh;
       text-align: center;
-      font-family: var(--f-punch);
-      text-transform: uppercase;
-      font-size: var(--punch-size, 15.5cqw);
+      font-family: var(--fx-font-display);
+      text-transform: var(--fx-text-case);
+      font-size: var(--punch-size, var(--fx-size-display));
       line-height: 0.94;
       transform-origin: 50% 50%;
-      -webkit-text-stroke: 0.65cqw #000000;
+      -webkit-text-stroke: var(--fx-stroke-width) var(--fx-stroke);
       paint-order: stroke fill;
-      text-shadow: 0 1.3cqw 0 rgba(0, 0, 0, 0.5);
+      text-shadow: 0 1.3cqw 0 var(--fx-shadow, rgba(0, 0, 0, 0.5));
     }
     .cta {
       position: absolute;
@@ -223,23 +225,23 @@
       gap: 1.4cqw;
     }
     .cta .arrow {
-      font-family: var(--f-punch);
+      font-family: var(--fx-font-display);
       font-size: 10cqw;
-      color: var(--accent);
-      -webkit-text-stroke: 0.45cqw #000000;
+      color: var(--fx-accent);
+      -webkit-text-stroke: var(--fx-stroke-width) var(--fx-stroke);
       paint-order: stroke fill;
       line-height: 1;
     }
     .cta .pill {
-      font-family: var(--f-sub);
+      font-family: var(--fx-font-body);
       font-weight: 900;
-      font-size: 4.5cqw;
-      text-transform: uppercase;
-      background: var(--accent);
-      color: #111111;
+      font-size: var(--fx-size-body);
+      text-transform: var(--fx-text-case);
+      background: var(--fx-accent);
+      color: var(--fx-accent-ink);
       padding: 1.4cqw 3.8cqw;
-      border-radius: 99cqw;
-      box-shadow: 0 1.2cqw 0 #000000;
+      border-radius: var(--fx-radius, 99cqw);
+      box-shadow: 0 1.2cqw 0 var(--fx-stroke);
     }
   </style>
 </head>
@@ -307,12 +309,12 @@
       }
 
       const PUNCH_COLORS = {
-        benefit: '#9df27a',
-        result: '#ffcc3d',
-        number: '#ffcc3d',
-        warning: '#ff6b6b',
-        problem: '#ff6b6b',
-        hook: '#ffffff'
+        benefit: 'var(--fx-phase-solution)',
+        result: 'var(--fx-accent)',
+        number: 'var(--fx-accent)',
+        warning: 'var(--fx-phase-cause)',
+        problem: 'var(--fx-phase-problem)',
+        hook: 'var(--fx-card-ink)'
       };
 
       let T = null;
@@ -358,7 +360,16 @@
         oPhone.style.width = `${Number(cfg.width) || 720}px`;
         oPhone.style.height = `${Number(cfg.height) || 1280}px`;
 
+        if (SL?.applySkinTokens) {
+          SL.applySkinTokens(document, T.skin);
+        } else if (T.skin?.tokens) {
+          for (const [k, v] of Object.entries(T.skin.tokens)) {
+            document.documentElement.style.setProperty(k, v);
+          }
+        }
+
         if (cfg.accentColor) {
+          document.documentElement.style.setProperty('--fx-accent', cfg.accentColor);
           document.documentElement.style.setProperty('--accent', cfg.accentColor);
           document.documentElement.style.setProperty('--accent-soft', cfg.accentColor);
         }
@@ -373,14 +384,8 @@
           labels = SL.getLocalizedLabels(cfg.targetLanguage || T.brand?.targetLanguage || 'id-ID');
         }
 
-        if (cfg.fontBaseUrl) {
-          const base = String(cfg.fontBaseUrl).replace(/\/+$/, '');
-          dynamicFonts.textContent = `
-            @font-face { font-family: "Anton"; src: url("${base}/Anton-Regular.ttf") format("truetype"); font-weight: 400; font-style: normal; }
-            @font-face { font-family: "Montserrat"; src: url("${base}/Montserrat-ExtraBold.ttf") format("truetype"); font-weight: 800; font-style: normal; }
-            @font-face { font-family: "Montserrat"; src: url("${base}/Montserrat-Black.ttf") format("truetype"); font-weight: 900; font-style: normal; }
-            @font-face { font-family: "Inter"; src: url("${base}/Inter-Bold.ttf") format("truetype"); font-weight: 700; font-style: normal; }
-          `;
+        if (SL?.buildDynamicFontFaces && cfg.fontBaseUrl) {
+          dynamicFonts.textContent = SL.buildDynamicFontFaces(cfg.fontBaseUrl);
         }
 
         const pos = cfg.position || 'bottom';
@@ -460,6 +465,9 @@
           : { endCard: null };
         const endOn = Boolean(brandState.endCard);
 
+        // Slot resolver (Aturan Satu Fokus)
+        const slot = (layer) => (T.slots || []).find((x) => x.layer === layer && time >= x.s && time < x.e);
+
         // Optional location badge from brand profile on clip 0 (inside safe zone >= 13cqh)
         const locText = String(T.brand?.location || '').trim();
         const firstCut = Array.isArray(T.clipCuts) && T.clipCuts.length > 0 ? Number(T.clipCuts[0]) : Math.min(dur, 4.0);
@@ -472,14 +480,19 @@
         }
 
         const hookEnd = Number(T.config?.hookDuration) || 1.75;
-        const showHook = Boolean(!endOn && T.hookCard && T.hookCard.l1 && time >= 0 && time < hookEnd);
+        const hookSlot = slot('hook');
+        const showHook = Boolean(!endOn && ((hookSlot && T.hookCard && T.hookCard.l1) || (!T.slots && T.hookCard && T.hookCard.l1 && time >= 0 && time < hookEnd)));
         oHook.hidden = !showHook;
         if (showHook) {
           applyPop(oHook, time, 0, hookEnd, 0.24, 0.16, 0);
         }
 
         const punches = Array.isArray(T.punches) ? T.punches : [];
-        const activePunch = !endOn ? punches.find((p) => time >= p.s && time < p.e) : null;
+        const punchSlot = slot('punch');
+        const activePunch = punchSlot
+          ? (punchSlot.ref || punches.find((p) => time >= p.s && time < p.e))
+          : ((!endOn && (!T.slots || T.slots.length === 0)) ? punches.find((p) => time >= p.s && time < p.e) : null);
+
         oPunch.hidden = !activePunch;
         if (activePunch) {
           const txt = String(activePunch.displayText || activePunch.phrase || '').toUpperCase();
@@ -490,7 +503,7 @@
           else if (cLen > 13) pSize = '14cqw';
           oPunch.style.setProperty('--punch-size', pSize);
           oPunch.textContent = txt;
-          oPunch.style.color = PUNCH_COLORS[activePunch.type] || PUNCH_COLORS.result;
+          oPunch.style.color = PUNCH_COLORS[activePunch.type] || 'var(--fx-card-ink)';
           applyPop(oPunch, time, activePunch.s, activePunch.e, 0.18, 0.14, 1.2);
         }
 
@@ -502,7 +515,8 @@
           : 0;
         const recapEnd = dur - endCardDur;
         const recapStart = Math.max(hookEnd + 0.5, recapEnd - Math.min(3.2, Math.max(1.8, dur * 0.22)));
-        const showRecap = Boolean(!endOn && !activePunch && tips.length > 0 && recapEnd > recapStart + 0.6 && time >= recapStart && time < recapEnd);
+        const saveSlot = slot('save');
+        const showRecap = Boolean(!endOn && !activePunch && tips.length > 0 && ((saveSlot) || (!T.slots && recapEnd > recapStart + 0.6 && time >= recapStart && time < recapEnd)));
         oRecap.hidden = !showRecap;
         if (showRecap) {
           applyPop(oRecap, time, recapStart, recapEnd, 0.26, 0.16, 0);
@@ -518,9 +532,13 @@
         }
 
         // Slide-in numbered tip in lower-left safe zone (hidden during Hook, Punch, Recap, EndCard)
-        const activeTip = (!endOn && !showRecap && !activePunch && !showHook)
-          ? tips.find((tp) => time >= tp.s && time < tp.e)
-          : null;
+        const tipSlot = slot('tip');
+        const activeTip = tipSlot
+          ? (tipSlot.ref || tips.find((tp) => time >= tp.s && time < tp.e))
+          : ((!endOn && !showRecap && !activePunch && !showHook && (!T.slots || T.slots.length === 0))
+              ? tips.find((tp) => time >= tp.s && time < tp.e)
+              : null);
+
         oTip.hidden = !activeTip;
         if (activeTip) {
           const numHtml = `${escapeHtml(labels.tipLabel || 'TIP')} ${activeTip.n}<small>/${activeTip.total}</small>`;
@@ -533,7 +551,8 @@
         }
 
         const ca = T.cta;
-        const showCta = Boolean(!endOn && !showRecap && !activePunch && ca && ca.text && time >= ca.s && time <= ca.e);
+        const ctaSlot = slot('cta');
+        const showCta = Boolean(!endOn && !showRecap && !activePunch && ca && ca.text && ((ctaSlot) || (!T.slots && time >= ca.s && time <= ca.e)));
         oCta.hidden = !showCta;
         if (showCta) {
           applyPop(oCta, time, ca.s, Math.max(ca.e, ca.s + 1), 0.24, 0.15, 0);
@@ -555,4 +574,3 @@
   </script>
 </body>
 </html>
-

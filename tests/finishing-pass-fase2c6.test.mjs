@@ -45,7 +45,7 @@ test('F2c6-T2 (R12.1, R12.2): mitos_fakta registered & prompt schema injects myt
   assert.equal(meta.layers.mythFact, true);
   assert.equal(meta.layers.sharedBrand, true);
   assert.equal(suggestFinishingTemplate({ campaign_name: 'Edukasi Dapur - Mitos vs Fakta' }), 'mitos_fakta');
-  assert.equal(suggestFinishingTemplate({ campaign_name: 'Siasat Sehat Harian' }), 'ramuan_ritual');
+  assert.equal(suggestFinishingTemplate({ campaign_name: 'Seduhan Herbal Harian' }), 'ramuan_ritual');
 
   const mfJson = buildFinishingPlanPromptJson('mitos_fakta', '  ');
   assert.ok(mfJson.includes('"myth_fact"'));

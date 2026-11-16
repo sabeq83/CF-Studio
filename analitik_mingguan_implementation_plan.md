@@ -42,6 +42,49 @@ Dokumentasi tidak menyebut batas pemakaian. Tetap hemat: jeda ±300 ms antar pan
 
 ---
 
+## 3A. Sumber Facebook ganda: app Meta milik pengguna (ditambahkan 16 Nov 2026)
+
+**Latar:** reconnect halaman di Repliz gagal dengan error Meta: `pages_read_engagement` / "Page Public Content Access". Reconnect satu per satu juga berat karena halamannya banyak. Di sisi lain, CF Studio **sudah punya koneksi langsung ke app Meta milik pengguna** (provider `meta`, token terenkripsi di `publishing_accounts.token_ciphertext`). Menurut pengguna, izin baca halaman sudah diotorisasi untuk Dapur Botani dan NutriBake.
+
+Akun provider `meta` yang terdaftar (tenant `default_tenant`, dicek lewat MCP `cf_list_publishing_accounts`):
+
+| Akun | Page/IG ID | Status |
+|---|---|---|
+| Dapur Botani (FB) | 1030799026791337 | active |
+| NutriBake ID (FB) | 1071656722705640 | active |
+| Sedekah Al-Quran Al-Izzah (FB) | 308256695706215 | active |
+| @dapur_botani (IG via Dapur Botani) | 17841439243921276 | active |
+| @nutribake_id (IG via NutriBake ID) | 17841479686815774 | active |
+
+Akun Repliz Dapur Botani & NutriBake ID (FB/IG/TikTok/YouTube) masih `active` (diverifikasi 16 Nov 2026), jadi posting tidak terganggu oleh reconnect yang gagal.
+
+**Keputusan desain:**
+- **Facebook:** ambil insight lewat **Graph API dengan token app Meta milik pengguna** bila halaman itu punya akun provider `meta` aktif dengan izin `read_insights` + `pages_read_engagement`. Kalau tidak ada, pakai Repliz. Kalau keduanya tidak tersedia, simpan like/comment/share saja dan tandai `needs_reconnect`.
+- **Platform lain** (YouTube, TikTok, Instagram, Threads): tetap lewat Repliz. Izin ini tidak terpengaruh error Facebook tadi.
+- **Postingan tetap dipublish lewat Repliz.** Insight post Facebook bisa dibaca dengan token halaman siapa pun yang punya izin, tidak harus token yang mempublish.
+- Kalau app dalam mode **Development**, izin tetap berlaku untuk pengguna yang punya peran di app (admin/developer/tester) **tanpa App Review**. Cukup untuk halaman milik sendiri.
+- **Menambah halaman lain** ke jalur ini cukup sekali login ulang ke app Meta pengguna (centang semua halaman di "Edit settings"), lalu daftarkan sebagai akun `meta` di CF Studio. Tidak perlu reconnect satu per satu di Repliz.
+
+**Endpoint Graph (diverifikasi di Fase 0 karena nama metrik Meta sering berubah; versi Graph mengikuti `getGraphApiVersion()`, default v25.0):**
+
+| Kebutuhan | Endpoint | Metrik kandidat |
+|---|---|---|
+| Cek izin token | `GET /me/permissions` (user token) atau `GET /debug_token` | `read_insights`, `pages_read_engagement`, `pages_show_list` |
+| Insight halaman harian | `GET /{page-id}/insights?metric=...&period=day&since=&until=` | `page_media_view` / `page_views_total`, `page_post_engagements`, `page_follows`, `page_daily_follows_unique` |
+| Insight post | `GET /{post-id}/insights?metric=...` | `post_media_view`, `post_total_media_view_unique`, `post_clicks`, `post_reactions_by_type_total` |
+| Insight Reels/video | `GET /{video-id}/video_insights` | `blue_reels_play_count`, `post_video_avg_time_watched`, `post_video_view_time`, `post_impressions_unique` |
+| Like/komentar/share | `GET /{post-id}?fields=shares,comments.summary(true),reactions.summary(true)` | – |
+
+Kelebihan jalur ini: untuk Reels Facebook ada **rata-rata durasi tonton**, yang tidak diberikan Repliz.
+
+**Tambahan kode:**
+- `lib/meta-insights-client.js` (baru): `getMetaTokenPermissions`, `getFacebookPageInsights`, `getFacebookPostInsights`, `getFacebookVideoInsights`. Memakai `getGraphBaseUrl()` dan `resolvePageAccessToken()` dari `lib/meta-publisher.js`, token didekripsi dengan `decryptSecret` dari `lib/encrypted-secret.js`. Token tidak pernah dicetak.
+- `repliz-metrics-collector.js` → ganti nama logis menjadi pengambil gabungan: per akun Facebook Repliz, cari akun `meta` dengan nama/page yang sama (pencocokan `display_name` + konfirmasi `generatedId` Repliz = `facebook_page_id`). Kalau ada dan izinnya lengkap → sumber `meta_api`, kalau tidak → `repliz`.
+- Kolom `source` (`repliz` / `meta_api`) di `account_metric_daily` dan `post_metric_snapshots`.
+- `publishing_accounts.insights_status` juga diisi untuk akun `meta` (`ok` / `missing_permission`).
+
+---
+
 ## 4. Desain data
 
 ### 4.1 Tabel `account_metric_daily`
@@ -290,7 +333,8 @@ Pembagi 0 atau null → skor null. Label `menang`/`lemah` dihitung di skrip CFA 
 - [ ] Panggil statistik akun untuk 1 halaman Facebook per tenant aktif, catat apakah `summary` terisi
 - [ ] Ambil 3 `publishing_jobs` published terbaru, panggil statistik posting dengan `external_post_id`, catat apakah cocok (bukan 404) dan apakah `insight` terisi
 - [ ] Panggil `GET /public/content` 1 halaman, bandingkan format `id` dengan `external_post_id`
-- [ ] Lapor ke pengguna: daftar halaman yang **perlu reconnect**, kecocokan ID, contoh angka. **Berhenti bila ID tidak cocok**
+- [ ] **Uji jalur app Meta (3A)** di server Staging (token didekripsi di server, tidak dicetak): untuk akun `meta` Dapur Botani & NutriBake ID, cek izin token (`read_insights`, `pages_read_engagement`), panggil insight halaman 7 hari, dan insight 3 posting yang dipublish lewat Repliz (pakai `external_post_id`). Catat metrik yang benar-benar tersedia di versi Graph yang dipakai, termasuk Reels (`video_insights`)
+- [ ] Lapor ke pengguna: daftar halaman yang **perlu reconnect**, kecocokan ID, contoh angka dari **Repliz vs app Meta** untuk 1 video yang sama. **Berhenti bila ID tidak cocok atau token Meta tidak punya izin insight**
 
 ### Fase 1: Fondasi data
 - [ ] Fungsi baru di `lib/repliz-client.js`

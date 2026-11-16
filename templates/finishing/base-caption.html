@@ -6,11 +6,11 @@
   <style id="shared-layers-css"></style>
   <style>
     :root {
-      --accent: #ffcc3d;
-      --active-word: #fff066;
-      --f-punch: "Anton", Impact, sans-serif;
-      --f-sub: "Montserrat", "Arial Black", sans-serif;
-      --f-ui: "Inter", system-ui, sans-serif;
+      --accent: var(--fx-accent);
+      --active-word: var(--fx-accent);
+      --f-punch: var(--fx-font-display);
+      --f-sub: var(--fx-font-body);
+      --f-ui: var(--fx-font-ui);
     }
     * { box-sizing: border-box; }
     [hidden] { display: none !important; }
@@ -34,7 +34,7 @@
       top: 0;
       height: 0.9cqw;
       width: 0;
-      background: var(--accent);
+      background: var(--fx-accent);
     }
     .hook {
       position: absolute;
@@ -42,31 +42,31 @@
       right: 6cqw;
       top: 20cqh;
       text-align: center;
-      font-family: var(--f-punch);
-      text-transform: uppercase;
+      font-family: var(--fx-font-display);
+      text-transform: var(--fx-text-case);
       line-height: 0.96;
-      color: #ffffff;
+      color: var(--fx-card-ink);
       transform-origin: 50% 50%;
     }
     .hook .l1 {
       display: block;
-      font-size: var(--hook-l1-size, 9.2cqw);
+      font-size: var(--hook-l1-size, var(--fx-size-display-sm, 9.2cqw));
       letter-spacing: 0.01em;
-      -webkit-text-stroke: 0.55cqw #000000;
+      -webkit-text-stroke: var(--fx-stroke-width) var(--fx-stroke);
       paint-order: stroke fill;
-      text-shadow: 0 1.1cqw 2.2cqw rgba(0, 0, 0, 0.65);
+      text-shadow: 0 1.1cqw 2.2cqw var(--fx-shadow, rgba(0, 0, 0, 0.65));
     }
     .hook .l2 {
       display: inline-block;
       margin-top: 1.8cqw;
-      font-size: var(--hook-l2-size, 11.4cqw);
+      font-size: var(--hook-l2-size, var(--fx-size-display, 11.4cqw));
       letter-spacing: 0.01em;
-      background: var(--accent);
-      color: #111111;
+      background: var(--fx-accent);
+      color: var(--fx-accent-ink);
       padding: 1.1cqw 3.2cqw 0.3cqw;
-      border-radius: 1cqw;
+      border-radius: var(--fx-radius, 1cqw);
       transform: rotate(-2deg);
-      box-shadow: 0 1.2cqw 2.4cqw rgba(0, 0, 0, 0.45);
+      box-shadow: 0 1.2cqw 2.4cqw var(--fx-shadow, rgba(0, 0, 0, 0.45));
     }
     .punch {
       position: absolute;
@@ -74,14 +74,14 @@
       right: 5cqw;
       top: 45cqh;
       text-align: center;
-      font-family: var(--f-punch);
-      text-transform: uppercase;
-      font-size: var(--punch-size, 16cqw);
+      font-family: var(--fx-font-display);
+      text-transform: var(--fx-text-case);
+      font-size: var(--punch-size, var(--fx-size-display, 16cqw));
       line-height: 0.94;
       transform-origin: 50% 50%;
-      -webkit-text-stroke: 0.65cqw #000000;
+      -webkit-text-stroke: var(--fx-stroke-width) var(--fx-stroke);
       paint-order: stroke fill;
-      text-shadow: 0 1.3cqw 0 rgba(0, 0, 0, 0.5);
+      text-shadow: 0 1.3cqw 0 var(--fx-shadow, rgba(0, 0, 0, 0.5));
     }
   </style>
   <script src="./shared-layers.js"></script>
@@ -115,10 +115,11 @@
       }
 
       const PUNCH_COLORS = {
-        benefit: '#9df27a',
-        result: '#ffcc3d',
-        warning: '#ff6b6b',
-        hook: '#ffffff'
+        benefit: 'var(--fx-phase-solution)',
+        result: 'var(--fx-accent)',
+        warning: 'var(--fx-phase-cause)',
+        problem: 'var(--fx-phase-problem)',
+        hook: 'var(--fx-card-ink)'
       };
 
       let T = null;
@@ -151,17 +152,24 @@
         oPhone.style.width = `${w}px`;
         oPhone.style.height = `${h}px`;
 
-        if (cfg.accentColor) document.documentElement.style.setProperty('--accent', cfg.accentColor);
-        if (cfg.activeWordColor) document.documentElement.style.setProperty('--active-word', cfg.activeWordColor);
+        if (SL?.applySkinTokens) {
+          SL.applySkinTokens(document, T.skin);
+        } else if (T.skin?.tokens) {
+          for (const [k, v] of Object.entries(T.skin.tokens)) {
+            document.documentElement.style.setProperty(k, v);
+          }
+        }
 
-        if (cfg.fontBaseUrl) {
-          const base = String(cfg.fontBaseUrl).replace(/\/+$/, '');
-          dynamicFonts.textContent = `
-            @font-face { font-family: "Anton"; src: url("${base}/Anton-Regular.ttf") format("truetype"); font-weight: 400; font-style: normal; }
-            @font-face { font-family: "Montserrat"; src: url("${base}/Montserrat-ExtraBold.ttf") format("truetype"); font-weight: 800; font-style: normal; }
-            @font-face { font-family: "Montserrat"; src: url("${base}/Montserrat-Black.ttf") format("truetype"); font-weight: 900; font-style: normal; }
-            @font-face { font-family: "Inter"; src: url("${base}/Inter-Bold.ttf") format("truetype"); font-weight: 700; font-style: normal; }
-          `;
+        if (cfg.accentColor) {
+          document.documentElement.style.setProperty('--fx-accent', cfg.accentColor);
+          document.documentElement.style.setProperty('--accent', cfg.accentColor);
+        }
+        if (cfg.activeWordColor) {
+          document.documentElement.style.setProperty('--active-word', cfg.activeWordColor);
+        }
+
+        if (SL?.buildDynamicFontFaces && cfg.fontBaseUrl) {
+          dynamicFonts.textContent = SL.buildDynamicFontFaces(cfg.fontBaseUrl);
         }
 
         const pos = cfg.position || 'bottom';
@@ -204,9 +212,13 @@
         // 1. Progress Bar
         oProg.style.width = `${((time / dur) * 100).toFixed(3)}%`;
 
+        // Slot resolver (Aturan Satu Fokus)
+        const slot = (layer) => (T.slots || []).find((x) => x.layer === layer && time >= x.s && time < x.e);
+
         // 2. Hook Card (0 .. hookDuration)
         const hookEnd = Number(T.config?.hookDuration) || 1.75;
-        const showHook = Boolean(T.hookCard && T.hookCard.l1 && time >= 0 && time < hookEnd);
+        const hookSlot = slot('hook');
+        const showHook = Boolean((hookSlot && T.hookCard && T.hookCard.l1) || (!T.slots && T.hookCard && T.hookCard.l1 && time >= 0 && time < hookEnd));
         oHook.hidden = !showHook;
         if (showHook) {
           applyPop(oHook, time, 0, hookEnd, 0.24, 0.16, 0);
@@ -214,7 +226,11 @@
 
         // 3. Keyword Punch
         const punches = Array.isArray(T.punches) ? T.punches : [];
-        const activePunch = punches.find((p) => time >= p.s && time < p.e);
+        const punchSlot = slot('punch');
+        const activePunch = punchSlot
+          ? (punchSlot.ref || punches.find((p) => time >= p.s && time < p.e))
+          : ((!T.slots || T.slots.length === 0) ? punches.find((p) => time >= p.s && time < p.e) : null);
+
         oPunch.hidden = !activePunch;
         if (activePunch) {
           const txt = String(activePunch.phrase || '').toUpperCase();
@@ -225,7 +241,7 @@
           else if (cLen > 13) pSize = '14.2cqw';
           oPunch.style.setProperty('--punch-size', pSize);
           oPunch.textContent = txt;
-          oPunch.style.color = PUNCH_COLORS[activePunch.type] || PUNCH_COLORS.result;
+          oPunch.style.color = PUNCH_COLORS[activePunch.type] || 'var(--fx-card-ink)';
           applyPop(oPunch, time, activePunch.s, activePunch.e, 0.18, 0.14, 2);
         }
 
@@ -243,4 +259,3 @@
   </script>
 </body>
 </html>
-

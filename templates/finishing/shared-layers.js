@@ -8,6 +8,39 @@
   }
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   const SHARED_LAYERS_CSS = `
+    :root {
+      --fx-size-display: 12.5cqw;
+      --fx-size-display-sm: 8cqw;
+      --fx-size-sub: 6.2cqw;
+      --fx-size-label: 2.4cqw;
+      --fx-size-body: 2.7cqw;
+      --fx-size-meta: 2.1cqw;
+
+      --fx-accent: #ffcc3d;
+      --fx-accent-ink: #111111;
+      --fx-card: rgba(20, 12, 8, 0.82);
+      --fx-card-ink: #ffffff;
+      --fx-card-muted: rgba(255, 255, 255, 0.72);
+      --fx-chip: #fff8ee;
+      --fx-chip-ink: #2a1a10;
+      --fx-stroke: #000000;
+      --fx-stroke-width: 0.55cqw;
+      --fx-shadow: 0 0.8cqw 2cqw rgba(0, 0, 0, 0.5);
+      --fx-text-case: uppercase;
+      --fx-radius: 99cqw;
+      --fx-font-display: "Anton", Impact, sans-serif;
+      --fx-font-body: "Montserrat", "Arial Black", sans-serif;
+      --fx-font-ui: "Inter", system-ui, sans-serif;
+      --fx-phase-problem: #e5484d;
+      --fx-phase-cause: #f2850d;
+      --fx-phase-solution: #1f9d55;
+      --fx-phase-result: #2f7fe0;
+
+      --accent: var(--fx-accent);
+      --f-punch: var(--fx-font-display);
+      --f-sub: var(--fx-font-body);
+      --f-ui: var(--fx-font-ui);
+    }
     .x { position: absolute; pointer-events: none; }
     .x-wm {
       left: 4.5cqw;
@@ -203,13 +236,13 @@
       z-index: 5;
     }
     .sub.s-yellow {
-      font-family: var(--f-sub);
+      font-family: var(--fx-font-body, var(--f-sub));
       font-weight: 900;
-      font-size: var(--sub-size, 7.6cqw);
+      font-size: var(--sub-size, var(--fx-size-sub, 6.2cqw));
       line-height: 1.05;
-      text-transform: uppercase;
-      color: #ffffff;
-      -webkit-text-stroke: 0.75cqw #000000;
+      text-transform: var(--fx-text-case, uppercase);
+      color: var(--fx-card-ink, #ffffff);
+      -webkit-text-stroke: var(--fx-stroke-width, 0.6cqw) var(--fx-stroke, #000000);
       paint-order: stroke fill;
       text-shadow: 0 0.9cqw 0 rgba(0, 0, 0, 0.55);
       gap: 2.2cqw;
@@ -218,7 +251,7 @@
       display: inline-block;
     }
     .sub.s-yellow span.on {
-      color: var(--sub-accent-text, var(--accent, #ffd23f));
+      color: var(--sub-accent-text, var(--fx-accent, var(--accent, #ffd23f)));
     }
     .sub.s-pill {
       gap: 0;
@@ -227,16 +260,16 @@
       display: inline-flex;
       gap: 1.8cqw;
       align-items: baseline;
-      background: #ffffff;
-      color: #0d0e11;
-      border-radius: 2.4cqw;
+      background: var(--fx-card-ink, #ffffff);
+      color: var(--fx-chip-ink, #0d0e11);
+      border-radius: var(--fx-radius, 2.4cqw);
       padding: 1.4cqw 3.2cqw 1.6cqw;
       box-shadow: 0 1.2cqw 0 rgba(0, 0, 0, 0.45);
-      font-family: var(--f-sub);
+      font-family: var(--fx-font-body, var(--f-sub));
       font-weight: 900;
-      font-size: var(--sub-size, 7cqw);
+      font-size: var(--sub-size, var(--fx-size-sub, 6.2cqw));
       line-height: 1.05;
-      text-transform: uppercase;
+      text-transform: var(--fx-text-case, uppercase);
     }
     .sub.s-pill .pill span {
       display: inline-block;
@@ -245,16 +278,16 @@
       margin: 0 -1cqw;
     }
     .sub.s-pill .pill span.on {
-      background: var(--sub-accent-bg, var(--accent, #ffd23f));
-      color: var(--pill-on-fg, #0d0e11);
+      background: var(--sub-accent-bg, var(--fx-accent, var(--accent, #ffd23f)));
+      color: var(--pill-on-fg, var(--fx-accent-ink, #0d0e11));
     }
     .sub.s-minimal {
-      font-family: var(--f-sub);
+      font-family: var(--fx-font-body, var(--f-sub));
       font-weight: 800;
-      font-size: var(--sub-size, 6.8cqw);
+      font-size: var(--sub-size, var(--fx-size-sub, 5.6cqw));
       line-height: 1.1;
       text-transform: none;
-      color: #ffffff;
+      color: var(--fx-card-ink, #ffffff);
       text-shadow: 0 0.4cqw 1.6cqw rgba(0, 0, 0, 0.55);
       gap: 2cqw;
     }
@@ -264,7 +297,11 @@
       padding-bottom: 0.3cqw;
     }
     .sub.s-minimal span.on {
-      border-bottom-color: var(--sub-accent-text, var(--accent, #ffd23f));
+      border-bottom-color: var(--sub-accent-text, var(--fx-accent, var(--accent, #ffd23f)));
+    }
+    .sub.compact {
+      max-width: 72cqw;
+      font-size: calc(var(--sub-size, var(--fx-size-sub, 6.2cqw)) * 0.92);
     }
   `;
 
@@ -641,9 +678,32 @@
       return false;
     }
 
+    const isCompact = Boolean(
+      opts.compact ||
+      (Array.isArray(timeline?.subtitleCompact) && timeline.subtitleCompact.some((w) => time >= w.s && time < w.e)) ||
+      (Array.isArray(timeline?.slots) && timeline.slots.some((s) => s.zone === 'top' && time >= s.s && time < s.e))
+    );
+
+    let displayIndices = visibleIndices;
+    if (isCompact && displayIndices.length > 4) {
+      const activeWordPos = displayIndices.findIndex((idx) => {
+        const item = words[idx];
+        return item && time >= item.s && time <= item.e + 0.04;
+      });
+      const center = activeWordPos >= 0 ? activeWordPos : 0;
+      const start = Math.max(0, Math.min(center, displayIndices.length - 4));
+      displayIndices = displayIndices.slice(start, start + 4);
+    }
+
+    if (isCompact) {
+      oSub.classList.add('compact');
+    } else {
+      oSub.classList.remove('compact');
+    }
+
     // Never shrink multi-word chunks; only allow pre-computed singleWordFontCqw (min 6cqw, R15.7)
-    const firstWordObj = words[visibleIndices[0]];
-    const singleCqw = visibleIndices.length === 1
+    const firstWordObj = words[displayIndices[0]];
+    const singleCqw = displayIndices.length === 1
       ? (activeChunk.fontCqw || activeChunk.singleWordFontCqw || firstWordObj?.singleWordFontCqw || null)
       : null;
     if (singleCqw && Number.isFinite(Number(singleCqw))) {
@@ -652,7 +712,7 @@
       oSub.style.removeProperty('--sub-size');
     }
 
-    const spansHtml = visibleIndices.map((idx) => {
+    const spansHtml = displayIndices.map((idx) => {
       const item = words[idx];
       if (!item) return '';
       const isOn = time >= item.s && time <= item.e + 0.04;
@@ -687,6 +747,32 @@
     return true;
   }
 
+  function applySkinTokens(rootDoc, skinSpec = {}) {
+    if (!rootDoc) return;
+    const docEl = rootDoc.documentElement || rootDoc;
+    if (!docEl || typeof docEl.style?.setProperty !== 'function') return;
+    const tokens = skinSpec?.tokens || (typeof skinSpec === 'object' && !Array.isArray(skinSpec) ? skinSpec : null);
+    if (!tokens) return;
+    for (const [prop, val] of Object.entries(tokens)) {
+      if (typeof val === 'string' && val.trim()) {
+        docEl.style.setProperty(prop, val);
+      }
+    }
+  }
+
+  function buildDynamicFontFaces(fontBaseUrl) {
+    if (!fontBaseUrl) return '';
+    const base = String(fontBaseUrl).replace(/\/+$/, '');
+    return `
+      @font-face { font-family: "Anton"; src: url("${base}/Anton-Regular.ttf") format("truetype"); font-weight: 400; font-style: normal; }
+      @font-face { font-family: "Montserrat"; src: url("${base}/Montserrat-ExtraBold.ttf") format("truetype"); font-weight: 800; font-style: normal; }
+      @font-face { font-family: "Montserrat"; src: url("${base}/Montserrat-Black.ttf") format("truetype"); font-weight: 900; font-style: normal; }
+      @font-face { font-family: "Inter"; src: url("${base}/Inter-Bold.ttf") format("truetype"); font-weight: 700; font-style: normal; }
+      @font-face { font-family: "DM Sans"; src: url("${base}/DMSans-Regular.ttf") format("truetype"); font-weight: 400 900; font-style: normal; }
+      @font-face { font-family: "Playfair Display"; src: url("${base}/PlayfairDisplay-Regular.ttf") format("truetype"); font-weight: 400 900; font-style: normal; }
+    `;
+  }
+
   return {
     SHARED_LAYERS_CSS,
     I18N_DICTIONARY,
@@ -699,6 +785,8 @@
     resolveSubtitleStyleClass,
     resolveSubtitleAccentPalette,
     configureSubtitleLayer,
-    renderSubtitle
+    renderSubtitle,
+    applySkinTokens,
+    buildDynamicFontFaces
   };
 });

@@ -57,6 +57,8 @@ export const POST = withTenantContext(async (req, _ctx, user) => {
       presenter_name: body.presenter_name,
       presenter_role: body.presenter_role,
       brand_location: body.brand_location,
+      finishing_skin: body.finishing_skin || null,
+      default_finishing_template: body.default_finishing_template || null,
       ...editorial,
     });
 

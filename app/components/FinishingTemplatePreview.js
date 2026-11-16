@@ -7,6 +7,7 @@ import {
   PREVIEW_TIMELINE_MARKERS,
   buildPreviewTimeline
 } from '@/lib/finishing-preview-builder';
+import { auditTextDensity } from '@/lib/finishing-plan-validator';
 
 const BASE_W = 720;
 const BASE_H = 1280;
@@ -14,6 +15,7 @@ const SCALE = 0.35; // 252px x 448px responsive phone stage
 
 export default function FinishingTemplatePreview({
   finishingTemplate = 'none',
+  finishingSkin = 'pop_kuning',
   captionMode = 'hybrid',
   loudnessTarget = -14,
   targetLanguage = 'id-ID',
@@ -51,6 +53,7 @@ export default function FinishingTemplatePreview({
     () =>
       buildPreviewTimeline({
         templateId: meta.id,
+        finishingSkin,
         captionMode,
         loudnessTarget,
         targetLanguage: previewLang,
@@ -65,6 +68,7 @@ export default function FinishingTemplatePreview({
       }),
     [
       meta.id,
+      finishingSkin,
       captionMode,
       loudnessTarget,
       previewLang,
@@ -78,6 +82,8 @@ export default function FinishingTemplatePreview({
       motionPosition
     ]
   );
+
+  const densityAudit = useMemo(() => auditTextDensity(timeline), [timeline]);
 
   useEffect(() => {
     setIframeLoaded(false);
@@ -388,6 +394,14 @@ export default function FinishingTemplatePreview({
             <div style={{ color: 'var(--text-muted)', fontSize: '0.68rem' }}>Audio &amp; Caption</div>
             <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
               {captionMode} • {loudnessTarget} LUFS
+            </div>
+          </div>
+          <div style={{ padding: '8px 10px', borderRadius: '6px', background: densityAudit.ok ? 'var(--status-success-soft)' : 'var(--status-warning-soft)', border: '1px solid var(--border-subtle)' }}>
+            <div style={{ color: densityAudit.ok ? 'var(--status-success)' : 'var(--status-warning)', fontSize: '0.68rem', fontWeight: 700 }}>
+              {densityAudit.ok ? '✓ Kepadatan Teks' : '⚠ Kepadatan Teks'}
+            </div>
+            <div style={{ fontWeight: 600, color: densityAudit.ok ? 'var(--status-success)' : 'var(--status-warning)' }}>
+              {densityAudit.summary}
             </div>
           </div>
         </div>

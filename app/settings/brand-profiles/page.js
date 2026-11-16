@@ -26,6 +26,8 @@ const emptyForm = {
   webhook_host: '',
   webhook_port: '',
   webhook_api_key: '',
+  finishing_skin: 'pop_kuning',
+  default_finishing_template: '',
 };
 
 export default function BrandProfilesPage() {
@@ -157,6 +159,8 @@ export default function BrandProfilesPage() {
           webhook_host: data.data.webhook_host || '',
           webhook_port: data.data.webhook_port || '',
           webhook_api_key: data.data.webhook_api_key || '',
+          finishing_skin: data.data.finishing_skin || 'pop_kuning',
+          default_finishing_template: data.data.default_finishing_template || '',
         });
         setEditingId(id);
         setShowForm(true);
@@ -345,6 +349,39 @@ export default function BrandProfilesPage() {
                     )}
                   </div>
                 </div>
+
+                {/* Finishing Pass Defaults */}
+                <div style={{ background: 'var(--surface-subtle)', padding: '16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
+                  <div style={{ fontWeight: 600, fontSize: '0.85rem', marginBottom: '12px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>🎨</span> Finishing Pass Style (Skin & Template Default)
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontSize: '0.75rem' }}>Gaya Visual (Skin)</label>
+                      <select className="form-input" name="finishing_skin" value={formData.finishing_skin || 'pop_kuning'} onChange={handleChange} style={{ padding: '8px' }}>
+                        <option value="pop_kuning">Pop Kuning (Default - Kontras & Enerjik)</option>
+                        <option value="bersih_putih">Bersih Putih (DM Sans - Minimalis)</option>
+                        <option value="hangat_earthy">Hangat Earthy (Alami & Herbal)</option>
+                        <option value="gelap_tegas">Gelap Tegas (High Contrast & Maskulin)</option>
+                        <option value="pastel_lembut">Pastel Lembut (Soft & Estetik)</option>
+                        <option value="editorial_serif">Editorial Serif (Playfair - Mewah/Klasik)</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontSize: '0.75rem' }}>Default Template Finishing</label>
+                      <select className="form-input" name="default_finishing_template" value={formData.default_finishing_template || ''} onChange={handleChange} style={{ padding: '8px' }}>
+                        <option value="">Otomatis (Sesuai Niche Konten / None)</option>
+                        <option value="recipe_pop">Recipe Pop (Resep & Masakan)</option>
+                        <option value="ramuan_ritual">Ramuan Ritual (Herbal & Seduhan)</option>
+                        <option value="problem_solution">Problem Solution (Kalimat Natural)</option>
+                        <option value="tips_listicle">Tips Listicle (Daftar & Kunci)</option>
+                        <option value="angka_banding">Angka & Banding (Komparasi & Counter)</option>
+                        <option value="mitos_fakta">Mitos vs Fakta (Q&A & Validasi)</option>
+                        <option value="calm_wellness">Calm Wellness (Editorial Bersih)</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div style={{ display: 'flex', gap: 12, marginTop: '24px' }}>
@@ -374,6 +411,7 @@ export default function BrandProfilesPage() {
                 <tr>
                   <th>Brand Name</th>
                   <th>Tone of Voice</th>
+                  <th>Finishing Skin</th>
                   <th>Visual Signature</th>
                   <th>Storage Destination</th>
                   <th>G-Labs Host</th>
@@ -389,6 +427,11 @@ export default function BrandProfilesPage() {
                     <td>
                       <span style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '4px', background: 'var(--status-neutral-soft)', color: 'var(--accent-light)' }}>
                         {p.tone_of_voice}
+                      </span>
+                    </td>
+                    <td>
+                      <span style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '4px', background: 'var(--surface-interactive)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}>
+                        {p.finishing_skin || 'pop_kuning'}
                       </span>
                     </td>
                     <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
