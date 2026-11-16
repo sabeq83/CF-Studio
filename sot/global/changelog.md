@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.48.24 — Fix Multiplier per-clip location & optics for planner_driven VI (16/11/2026)
+- Dynamic per-clip location and optics for planner_driven VI
+- Strict anti-branding when bridging is none
+- Preserve location_en in storyboard schema
+
 ## V2.48.23 — Fix 4 Celah CF Studio untuk CFA (platform_titles, compact storyboard, filter preset/VI, cancel cst) (15/11/2026)
 - Dukungan platform_titles di publishing contract dan service
 - Mode ringkas dan pelaporan error di cf_get_storyboard_status

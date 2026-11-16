@@ -11,16 +11,42 @@
 
 | Nama tugas | Jam | Perintah | Model |
 |---|---|---|---|
-| CFA · Riset | 05:00 | `Jalankan skill cfa-riset.` | Sonnet |
-| CFA · Naskah | 05:30 | `Jalankan skill cfa-penulis.` | Opus |
-| CFA · Produksi | 06:00 | `Jalankan skill cfa-produksi.` | Haiku |
-| CFA · Publish | 09:00 & 13:00 | `Jalankan skill cfa-publish.` | Haiku |
+| CFA · Riset | 05:00 setiap hari | `Jalankan skill cfa-riset.` | Sonnet |
+| CFA · Naskah | 20:00 setiap hari | `Jalankan skill cfa-penulis.` | Opus atau Sonnet |
+| CFA · Produksi | 21:00 setiap hari | `Jalankan skill cfa-produksi.` | Haiku |
+| CFA · Publish | 06:00 & 12:00 setiap hari | `Jalankan skill cfa-publish.` | Haiku |
 
-Jalur aktif saat ini:
-- `nutribake-produk-cocoa`: video produk Premix Cocoa harian, sudut diet, ke YT/FB/IG/TikTok, draft 18:00.
-- `habitfolk-resep`: resep air fryer harian, ke FB/YT, draft 18:00.
+**Penjadwal resmi: Claude Desktop saja** (sejak 16 Nov 2026). Empat jadwal launchd lama sudah dinonaktifkan, dan file-nya disimpan di `~/cf-autopipeline/launchd-nonaktif/` sebagai cadangan. Jangan menjalankan keduanya bersamaan.
+
+Riset tetap dijadwalkan setiap hari. Jalur riset mingguan hanya dikerjakan pada hari Senin, sedangkan HabitFolk (riset harian) dikerjakan setiap hari. Naskah dan produksi dikerjakan malam hari untuk video **besok**, sehingga video sudah jadi sebelum slot pagi.
+
+Jalur aktif saat ini (sejak 15 Nov 2026):
+
+| Jalur | Produk | Riset | Posting |
+|---|---|---|---|
+| `nutribake-produk-cocoa` | Premix Cocoa Powder Premium | Mingguan (Senin) | 1/hari, tersebar 07.17–19.11, **live**, YT/FB/IG/TikTok |
+| `nutribake-produk-darkchoco` | Nutrifarm Dark Chocolate Powder | Mingguan (Senin) | sama |
+| `nutribake-produk-oat` | Rolled Oat Premium Sahabat | Mingguan (Senin) | sama |
+| `nutribake-produk-peanutbutter` | Beorganik Peanut Butter | Mingguan (Senin) | sama |
+| `habitfolk-food` | — (healthy food, 8 klip) | Mingguan (Senin) | 1/hari, **07.30 ET = 19.30 WIB**, draft, FB/YT |
+| `habitfolk-habit` | — (healthy habit: makanan, minum, gerak, istirahat, self-care; preset **habitfolk_habit_6clips**, VI **Golden Hour Everyday** dengan 11 lokasi bergilir) | Mingguan (Senin) | 1/hari, **17.30 ET = 05.30 WIB**, draft, FB/YT |
+
+**NutriBake:** empat video memakai slot tetap 08.15, 11.45, 14.45, dan 18.30 WIB, di sela Multiplier CF Studio (06.xx dan 16.xx), dengan urutan produk bergilir setiap hari. Lihat rencana jam: `python3 ~/cf-autopipeline/bin/antrean.py jadwal --date <YYYY-MM-DD>`.
+
+**HabitFolk:** penontonnya di Amerika, jadi jamnya mengikuti waktu Pantai Timur AS. Video kebiasaan dari item tanggal D tayang pukul 05.30 WIB tanggal D+1 (17.30 ET hari D). Jalur lama `habitfolk-resep` diarsipkan, dan kata kunci air fryer-nya pindah ke `habitfolk-food`. Jadwal air fryer di CF Studio sudah dijeda.
+
+Batas: 8 video per hari, 8 video per putaran produksi.
 
 Satu jalur saja tetap bisa: `Jalankan skill cfa-riset untuk jalur nutribake-produk-cocoa saja.` Tugas per brand yang sudah dibuat (mis. "Nutribake - Riset" dengan "untuk brand nutribake saja") tetap berfungsi.
+
+**Menambah atau mengubah jalur cukup lewat chat** di Claude Desktop Mac Mini (skill `cfa-jalur`), contohnya:
+- "Tampilkan semua jalur."
+- "Tambah jalur NutriBake video produk Pagibaik Rolled Oat, posting ke Facebook dan TikTok, Senin–Rabu–Jumat jam 19.00."
+- "Jeda jalur habitfolk-resep." / "Aktifkan lagi."
+- "Tambah produk Omura Cocoa ke jalur nutribake-produk-cocoa."
+- "Daftarkan brand Dapur Botani."
+
+Claude mencari brand, preset, produk, dan akun di CF Studio, menunjukkan ringkasan, lalu menyimpan setelah Anda setuju. Jalur baru selalu mulai sebagai draft.
 
 Ringkasan dan pengecekan jalur dari Terminal Mac Mini:
 ```bash
@@ -94,6 +120,32 @@ Yang bisa membuat lebih boros:
 Hasilnya, AI hanya bekerja penuh di **riset** dan **naskah**. Tahap lain hampir tidak memakai token.
 
 ---
+
+## 4a. Laporan riset (skill `cfa-laporan-riset`)
+
+Setiap kali riset selesai, CFA otomatis membuat halaman **laporan riset** dan mengirim ringkasannya ke Telegram. Halaman itu ada di `~/cf-autopipeline/laporan/riset-<tanggal Senin>.html` di Mac Mini. Isinya:
+- topik per brand dan jalur, beserta tanggal tayang dan produknya;
+- sudut pandang (hook) setiap topik;
+- fakta kunci dengan link sumber yang bisa diklik;
+- catatan dan status (menunggu riset, naskah siap, terjadwal tayang).
+
+Cara membuka:
+- Chat di Claude Desktop Mac Mini: "tampilkan laporan riset minggu ini" atau "topik minggu depan apa saja".
+- Terminal: `python3 ~/cf-autopipeline/bin/cfa_laporan_riset.py --buka`
+- Finder: buka folder `cf-autopipeline/laporan`, lalu klik dua kali file HTML-nya.
+
+## 4b. Laporan pemakaian token (skill `cfa-token`)
+
+Tanya langsung di Claude Desktop Mac Mini: "berapa token hari ini?", "laporan token mingguan", atau "putaran mana yang paling boros hari ini?". Bisa juga dijadwalkan (opsional, model Haiku):
+
+| Tugas | Jam | Perintah |
+|---|---|---|
+| CFA · Token harian | 22:00 setiap hari | `Jalankan skill cfa-token harian dan kirim ke Telegram.` |
+| CFA · Token mingguan | Senin 07:00 | `Jalankan skill cfa-token mingguan dan kirim ke Telegram.` |
+
+Dari Terminal: `python3 ~/cf-autopipeline/bin/cfa_token.py harian` (atau `mingguan`, `rincian`).
+- Yang dihitung hanya putaran yang berjalan di Mac Mini dengan folder kerja `~/cf-autopipeline`. Chat di laptop tidak ikut.
+- Angka $ adalah perkiraan setara harga Claude API untuk pembanding. Langganan tidak ditagih per token, dan sisa kuota langganan tidak terbaca.
 
 ## 5. Usulan isi tugas terjadwal di Claude Desktop (Mac Mini)
 
