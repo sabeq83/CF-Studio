@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi UI: Tinjau & Ganti Foto Produk (Revisi 01)</title>
+  <style>
+    /* Theme Tokens from MAKNA Flow app/theme.css */
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-backdrop: rgba(2, 6, 14, 0.78);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-purple: #c084fc;
+      --status-purple-soft: rgba(192, 132, 252, 0.14);
+      --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.28);
+      --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.6);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f8fafc;
+      --sidebar: #f1f5f9;
+      --surface: #ffffff;
+      --surface-raised: #f1f5f9;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --input-bg: #f8fafc;
+      --overlay-backdrop: rgba(15, 23, 42, 0.65);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --border-subtle: #cbd5e1;
+      --border-strong: #94a3b8;
+      --action-primary: #0d9488;
+      --action-primary-hover: #14b8a6;
+      --on-action-primary: #ffffff;
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.12);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.12);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.14);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.12);
+      --status-purple: #9333ea;
+      --status-purple-soft: rgba(147, 51, 234, 0.12);
+      --shadow-card: 0 6px 18px rgba(0, 0, 0, 0.08);
+      --shadow-modal: 0 20px 50px rgba(0, 0, 0, 0.2);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      padding: 24px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .header-title h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-title p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 12.5px;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+    }
+
+    .btn-secondary {
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      border-color: var(--border-subtle);
+    }
+    .btn-secondary:hover {
+      background: var(--surface-interactive);
+      border-color: var(--border-strong);
+    }
+
+    .btn-warning {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border-color: var(--status-warning);
+    }
+    .btn-warning:hover {
+      filter: brightness(1.1);
+    }
+
+    .btn-danger {
+      background: var(--status-danger-soft);
+      color: var(--status-danger);
+      border-color: var(--status-danger);
+    }
+
+    .theme-toggle {
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+      padding: 6px 12px;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    /* Filter Pills */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+
+    .filter-pill {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .filter-pill:hover {
+      border-color: var(--border-strong);
+      color: var(--text-primary);
+    }
+
+    .filter-pill.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border-color: var(--action-primary);
+    }
+
+    .filter-pill.active-warning {
+      background: var(--status-warning);
+      color: #000;
+      border-color: var(--status-warning);
+    }
+
+    .pill-badge {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 1px 6px;
+      border-radius: 999px;
+      font-size: 11px;
+    }
+
+    /* Grid Produk */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .card-top {
+      display: flex;
+      gap: 14px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .thumb-box {
+      width: 86px;
+      height: 86px;
+      border-radius: var(--radius-sm);
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      overflow: hidden;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .thumb-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .card-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .tag-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .badge-status {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .badge-review {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border: 1px solid var(--status-warning);
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    .badge-approved {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+    }
+
+    .badge-processing {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid var(--status-info);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.75; }
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.35;
+    }
+
+    .error-reason {
+      font-size: 11px;
+      color: var(--status-warning);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 2px;
+      background: var(--status-warning-soft);
+      padding: 3px 6px;
+      border-radius: var(--radius-xs);
+    }
+
+    .card-actions {
+      padding: 10px 16px;
+      background: var(--surface-raised);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Modal Backdrop */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: var(--overlay-backdrop);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(6px);
+      padding: 20px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-modal);
+      width: 100%;
+      max-width: 640px;
+      max-height: 90vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .modal-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .modal-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    /* Tabs */
+    .tabs-header {
+      display: flex;
+      border-bottom: 1px solid var(--border-subtle);
+      gap: 4px;
+    }
+
+    .tab-btn {
+      padding: 8px 16px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .tab-btn.active {
+      color: var(--action-primary);
+      border-bottom-color: var(--action-primary);
+    }
+
+    .tab-content {
+      display: none;
+      padding-top: 12px;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Candidate Grid */
+    .candidates-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      max-height: 280px;
+      overflow-y: auto;
+      padding: 4px;
+    }
+
+    .candidate-card {
+      border: 2px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      cursor: pointer;
+      background: var(--surface-raised);
+      position: relative;
+      transition: all 0.15s ease;
+    }
+
+    .candidate-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+    }
+
+    .candidate-card.selected {
+      border-color: var(--action-primary);
+      box-shadow: 0 0 0 2px var(--action-primary);
+    }
+
+    .candidate-card img {
+      width: 100%;
+      height: 110px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .cand-label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.75);
+      color: #fff;
+      font-size: 10px;
+      padding: 4px 6px;
+      display: flex;
+      justify-content: space-between;
+      backdrop-filter: blur(2px);
+    }
+
+    .cand-ai-badge {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      font-size: 9.5px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .badge-reject {
+      background: var(--status-danger);
+      color: #fff;
+    }
+
+    .badge-pick {
+      background: var(--status-success);
+      color: #000;
+    }
+
+    /* Comparison Box */
+    .compare-container {
+      display: flex;
+      gap: 16px;
+      background: var(--surface-raised);
+      padding: 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .compare-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .compare-item span {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .compare-img {
+      width: 80px;
+      height: 80px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      overflow: hidden;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .compare-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Drop Zone */
+    .drop-zone {
+      border: 2px dashed var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 28px 16px;
+      text-align: center;
+      background: var(--input-bg);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .drop-zone:hover {
+      border-color: var(--action-primary);
+      background: var(--surface-raised);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      border: 1px solid var(--border-strong);
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-modal);
+      font-size: 13px;
+      font-weight: 600;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      z-index: 2000;
+    }
+
+    .toast.show {
+      display: flex;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="header-title">
+        <h1>📸 Simulasi UI Katalog Produk (Revisi 01)</h1>
+        <p>Fitur Tinjau Foto Perlu Review (R6) & Modal Ganti Foto 3-Tab (R7)</p>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <button class="theme-toggle" onclick="toggleTheme()">🌓 Ganti Tema (Terang/Gelap)</button>
+        <span style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);">Staging Mac Mini :5010</span>
+      </div>
+    </header>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <span style="font-size: 12px; color: var(--text-muted); font-weight: 600; margin-right: 4px;">Filter Cepat:</span>
+      <button class="filter-pill active" id="filter-all" onclick="setFilter('all')">
+        Semua Produk <span class="pill-badge">3</span>
+      </button>
+      <button class="filter-pill" id="filter-review" onclick="setFilter('review')">
+        ⚠️ Perlu Ditinjau <span class="pill-badge" id="badge-count-review">1</span>
+      </button>
+      <button class="filter-pill" id="filter-approved" onclick="setFilter('approved')">
+        ✅ Disetujui <span class="pill-badge">2</span>
+      </button>
+    </div>
+
+    <!-- Product Grid -->
+    <div class="products-grid">
+
+      <!-- CARD 1: Habarlic (needs_review) -->
+      <div class="card" id="card-habarlic" data-status="needs_review">
+        <div class="card-top">
+          <div class="thumb-box">
+            <!-- Thumbnail menggunakan SVG mockup botol produk -->
+            <img id="img-habarlic" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231e293b'/><circle cx='50' cy='45' r='25' fill='%23fbbf24'/><text x='50' y='50' font-size='11' font-weight='bold' text-anchor='middle' fill='%23000'>HABARLIC</text><rect x='35' y='72' width='30' height='15' fill='%2338bdf8' rx='3'/></svg>" alt="Habarlic 5 in 1">
+          </div>
+          <div class="card-info">
+            <div class="tag-row">
+              <span class="badge-status badge-review" id="badge-habarlic">⚠️ Foto perlu ditinjau</span>
+              <span style="font-size: 11px; color: var(--text-muted); background: var(--surface-raised); padding: 2px 6px; border-radius: 4px;">Herbal</span>
+            </div>
+            <h4 class="card-title">Habarlic 5 in 1 Kapsul Habbatussauda</h4>
+            <div class="error-reason" id="error-habarlic">
+              <span>⚠️</span>
+              <span id="error-text-habarlic">foto mentah memuat orang/model</span>
+            </div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+              ID: pe_1794803911352_653
+            </div>
+          </div>
+        </div>
+        <div class="card-actions">
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-warning" id="btn-approve-habarlic" onclick="openApproveModal('habarlic')">
+              ✅ Setujui Foto
+            </button>
+            <button class="btn btn-secondary" onclick="openReplaceModal('habarlic')">
+              🔄 Ganti Foto
+            </button>
+          </div>
+          <span style="font-size: 11px; font-family: var(--font-mono); color: var(--text-muted);">Tokopedia</span>
+        </div>
+      </div>
+
+      <!-- CARD 2: Laxing SOHO (approved) -->
+      <div class="card" id="card-laxing" data-status="approved">
+        <div class="card-top">
+          <div class="thumb-box">
+            <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231e293b'/><rect x='25' y='30' width='50' height='40' rx='5' fill='%234ade80'/><text x='50' y='54' font-size='12' font-weight='bold' text-anchor='middle' fill='%23000'>LAXING</text></svg>" alt="Laxing">
+          </div>
+          <div class="card-info">
+            <div class="tag-row">
+              <span class="badge-status badge-approved">✅ Disetujui</span>
+              <span style="font-size: 11px; color: var(--text-muted); background: var(--surface-raised); padding: 2px 6px; border-radius: 4px;">Pencernaan</span>
+            </div>
+            <h4 class="card-title">Laxing Kapsul Herbal Detoks SOHO</h4>
+            <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;">
+              Foto blister kemasan bersih dari listing terverifikasi.
+            </div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+              ID: pe_1794802696381_879
+            </div>
+          </div>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-secondary" onclick="openReplaceModal('laxing')">
+            🔄 Ganti Foto
+          </button>
+          <span style="font-size: 11px; font-family: var(--font-mono); color: var(--text-muted);">Tokopedia</span>
+        </div>
+      </div>
+
+      <!-- CARD 3: Cottonology Kemeja (needs_review) -->
+      <div class="card" id="card-cottonology" data-status="needs_review">
+        <div class="card-top">
+          <div class="thumb-box">
+            <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231e293b'/><circle cx='50' cy='35' r='14' fill='%23fb7185'/><path d='M25 80 Q50 50 75 80 Z' fill='%23fb7185'/><text x='50' y='92' font-size='9' text-anchor='middle' fill='%23fff'>MODEL</text></svg>" alt="Cottonology">
+          </div>
+          <div class="card-info">
+            <div class="tag-row">
+              <span class="badge-status badge-review">⚠️ Foto perlu ditinjau</span>
+              <span style="font-size: 11px; color: var(--text-muted); background: var(--surface-raised); padding: 2px 6px; border-radius: 4px;">Fashion Pria</span>
+            </div>
+            <h4 class="card-title">Kemeja Pria Lengan Panjang Cottonology</h4>
+            <div class="error-reason">
+              <span>⚠️</span>
+              <span>semua kandidat memuat model/orang</span>
+            </div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+              ID: pe_1794809988112_441
+            </div>
+          </div>
+        </div>
+        <div class="card-actions">
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-warning" onclick="openApproveModal('cottonology')">
+              ✅ Setujui Foto
+            </button>
+            <button class="btn btn-secondary" onclick="openReplaceModal('cottonology')">
+              🔄 Ganti Foto
+            </button>
+          </div>
+          <span style="font-size: 11px; font-family: var(--font-mono); color: var(--text-muted);">Tokopedia</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL 1: DIALOG KONFIRMASI PERSETUJUAN FOTO (R6) -->
+  <div class="modal-backdrop" id="modal-approve">
+    <div class="modal-card" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3>🔍 Konfirmasi Persetujuan Foto Produk</h3>
+        <button class="modal-close" onclick="closeModals()">✕</button>
+      </div>
+      <div class="modal-body" style="text-align: center;">
+        <div style="margin: 0 auto; width: 180px; height: 180px; border-radius: var(--radius-md); border: 2px solid var(--border-subtle); overflow: hidden; background: #000; display: flex; align-items: center; justify-content: center;">
+          <img id="approve-modal-img" src="" alt="Pratinjau Foto Clean" style="width: 100%; height: 100%; object-fit: contain;">
+        </div>
+
+        <div style="text-align: left; background: var(--surface-raised); padding: 12px 14px; border-radius: var(--radius-sm); border-left: 3px solid var(--status-warning);">
+          <div style="font-size: 11.5px; font-weight: 700; color: var(--text-secondary); margin-bottom: 2px;">Catatan Peninjauan AI:</div>
+          <div style="font-size: 12.5px; color: var(--status-warning);" id="approve-modal-reason">foto mentah memuat orang/model</div>
+        </div>
+
+        <div style="text-align: left; background: var(--status-danger-soft); border: 1px solid var(--status-danger); padding: 10px 14px; border-radius: var(--radius-sm); font-size: 12px; color: var(--text-primary);">
+          ⚠️ <strong>Peringatan Kepatuhan:</strong> Pastikan tidak ada wajah orang, model, atau tokoh publik di dalam foto sebelum menyetujui, agar video AI mematuhi regulasi periklanan.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModals()">Batal</button>
+        <button class="btn btn-primary" id="btn-confirm-approve" onclick="executeApprove()">Setujui Foto Ini</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: GANTI FOTO 3-TAB (R7) -->
+  <div class="modal-backdrop" id="modal-replace">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="replace-modal-title">🔄 Ganti Foto Produk</h3>
+        <button class="modal-close" onclick="closeModals()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Comparison Bar -->
+        <div class="compare-container">
+          <div class="compare-item">
+            <span>Foto Saat Ini</span>
+            <div class="compare-img">
+              <img id="current-photo-img" src="" alt="Foto Sekarang">
+            </div>
+          </div>
+          <div style="font-size: 20px; color: var(--text-muted);">➡️</div>
+          <div class="compare-item">
+            <span>Foto Pilihan Baru</span>
+            <div class="compare-img" style="border: 2px solid var(--action-primary);">
+              <img id="selected-photo-img" src="" alt="Foto Baru">
+            </div>
+          </div>
+        </div>
+
+        <!-- Warning jika memilih foto tidak direkomendasikan -->
+        <div id="replace-warning-box" style="display: none; background: var(--status-warning-soft); border: 1px solid var(--status-warning); padding: 8px 12px; border-radius: var(--radius-xs); font-size: 12px; color: var(--status-warning);">
+          ⚠️ Kandidat ini terdeteksi AI memuat orang/infografis. Foto akan masuk status <em>needs_review</em> setelah diproses.
+        </div>
+
+        <!-- 3 Tabs Header -->
+        <div class="tabs-header">
+          <button class="tab-btn active" id="tab-btn-1" onclick="switchTab(1)">1. Pilih dari Listing</button>
+          <button class="tab-btn" id="tab-btn-2" onclick="switchTab(2)">2. Unggah Sendiri</button>
+          <button class="tab-btn" id="tab-btn-3" onclick="switchTab(3)">3. Ambil Ulang Otomatis</button>
+        </div>
+
+        <!-- TAB 1: Kandidat Listing -->
+        <div class="tab-content active" id="tab-content-1">
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">Pilih salah satu kandidat galeri e-commerce yang tersimpan di server:</p>
+          <div class="candidates-grid" id="candidates-grid">
+            <!-- Cand 0: Banner berwajah orang -->
+            <div class="candidate-card" onclick="selectCandidate(0, 'https://images.tokopedia.net/img/cache/700/VqbcmM/2024/1/1/habarlic_banner.jpg', 'ada orang', true)">
+              <span class="cand-ai-badge badge-reject">🚫 Ada Orang</span>
+              <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23475569'/><circle cx='50' cy='35' r='15' fill='%23fbbf24'/><text x='50' y='80' font-size='9' text-anchor='middle' fill='%23fff'>Banner Promo</text></svg>" alt="Kandidat #0">
+              <div class="cand-label">
+                <span>#0 Banner</span>
+                <span>Skor: 30</span>
+              </div>
+            </div>
+
+            <!-- Cand 1: Botol + Kotak Kemasan (Recommended) -->
+            <div class="candidate-card selected" onclick="selectCandidate(1, 'https://images.tokopedia.net/img/cache/700/VqbcmM/2024/1/1/habarlic_clean.jpg', 'produk bersih', false)">
+              <span class="cand-ai-badge badge-pick">⭐ Rekomendasi AI</span>
+              <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231e293b'/><circle cx='40' cy='45' r='20' fill='%23fbbf24'/><rect x='60' y='30' width='25' height='45' fill='%2338bdf8' rx='2'/><text x='50' y='88' font-size='8' text-anchor='middle' fill='%23fff'>Botol + Kotak</text></svg>" alt="Kandidat #1">
+              <div class="cand-label">
+                <span>#1 Botol+Box</span>
+                <span>Skor: 95</span>
+              </div>
+            </div>
+
+            <!-- Cand 2: Infografis Khasiat -->
+            <div class="candidate-card" onclick="selectCandidate(2, 'https://images.tokopedia.net/img/cache/700/VqbcmM/2024/1/1/habarlic_info.jpg', 'infografis', true)">
+              <span class="cand-ai-badge badge-reject">📊 Infografis</span>
+              <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23334155'/><line x1='15' y1='30' x2='85' y2='30' stroke='%2394a3b8' stroke-width='4'/><line x1='15' y1='50' x2='85' y2='50' stroke='%2394a3b8' stroke-width='4'/><line x1='15' y1='70' x2='60' y2='70' stroke='%2394a3b8' stroke-width='4'/></svg>" alt="Kandidat #2">
+              <div class="cand-label">
+                <span>#2 Khasiat</span>
+                <span>Skor: 40</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: Unggah Sendiri -->
+        <div class="tab-content" id="tab-content-2">
+          <div class="drop-zone" onclick="simulateUpload()">
+            <div style="font-size: 28px; margin-bottom: 6px;">📤</div>
+            <div style="font-weight: 600; font-size: 13px; color: var(--text-primary);">Klik atau seret file gambar produk ke sini</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Mendukung format JPG, PNG, WebP (Maksimal 15 MB)</div>
+          </div>
+          <div id="upload-status" style="display: none; margin-top: 10px; font-size: 12px; color: var(--status-success);">
+            ✅ File simulasi terpilih: <strong>foto_habarlic_studio_custom.png</strong> (1.4 MB)
+          </div>
+        </div>
+
+        <!-- TAB 3: Ambil Ulang Otomatis -->
+        <div class="tab-content" id="tab-content-3">
+          <div style="background: var(--surface-raised); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); display: flex; flex-direction: column; gap: 8px;">
+            <div style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">URL Tokopedia Terhubung:</div>
+            <div style="font-family: var(--font-mono); font-size: 11px; color: var(--status-info); word-break: break-all; background: var(--input-bg); padding: 8px; border-radius: var(--radius-xs);">
+              https://www.tokopedia.com/habarlic/live-spesial-ramadhan-habarlic-5-in-1...
+            </div>
+            <div style="font-size: 11.5px; color: var(--text-muted); line-height: 1.4;">
+              Sistem akan menjalankan ulang crawler Playwright headless, mendownload galeri baru, dan mengevaluasi kandidat foto terbaik dengan AI Vision.
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModals()">Batal</button>
+        <button class="btn btn-primary" id="btn-confirm-replace" onclick="executeReplace()">Terapkan Foto Baru</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast-notif">
+    <span id="toast-icon">✅</span>
+    <span id="toast-msg">Pesan notifikasi</span>
+  </div>
+
+  <script>
+    let activeProductTarget = null;
+    let selectedReplacement = {
+      type: 'candidate',
+      index: 1,
+      svg: "<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231e293b'/><circle cx='40' cy='45' r='20' fill='%23fbbf24'/><rect x='60' y='30' width='25' height='45' fill='%2338bdf8' rx='2'/><text x='50' y='88' font-size='8' text-anchor='middle' fill='%23fff'>Botol + Kotak</text></svg>"
+    };
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+    }
+
+    function setFilter(type) {
+      document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active', 'active-warning'));
+      const cards = document.querySelectorAll('.card');
+
+      if (type === 'all') {
+        document.getElementById('filter-all').classList.add('active');
+        cards.forEach(c => c.style.display = 'flex');
+      } else if (type === 'review') {
+        document.getElementById('filter-review').classList.add('active-warning');
+        cards.forEach(c => {
+          c.style.display = (c.getAttribute('data-status') === 'needs_review') ? 'flex' : 'none';
+        });
+      } else if (type === 'approved') {
+        document.getElementById('filter-approved').classList.add('active');
+        cards.forEach(c => {
+          c.style.display = (c.getAttribute('data-status') === 'approved') ? 'flex' : 'none';
+        });
+      }
+    }
+
+    function showToast(msg, icon = '✅') {
+      const t = document.getElementById('toast-notif');
+      document.getElementById('toast-msg').innerText = msg;
+      document.getElementById('toast-icon').innerText = icon;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3500);
+    }
+
+    function closeModals() {
+      document.getElementById('modal-approve').classList.remove('open');
+      document.getElementById('modal-replace').classList.remove('open');
+    }
+
+    // Modal Approve
+    function openApproveModal(id) {
+      activeProductTarget = id;
+      const modal = document.getElementById('modal-approve');
+      const img = document.getElementById('approve-modal-img');
+      const reason = document.getElementById('approve-modal-reason');
+
+      if (id === 'habarlic') {
+        img.src = document.getElementById('img-habarlic').src;
+        reason.innerText = 'foto mentah memuat orang/model';
+      } else {
+        img.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231e293b'/><circle cx='50' cy='35' r='14' fill='%23fb7185'/><path d='M25 80 Q50 50 75 80 Z' fill='%23fb7185'/></svg>";
+        reason.innerText = 'semua kandidat memuat model/orang';
+      }
+      modal.classList.add('open');
+    }
+
+    function executeApprove() {
+      closeModals();
+      if (activeProductTarget === 'habarlic') {
+        const badge = document.getElementById('badge-habarlic');
+        badge.className = 'badge-status badge-approved';
+        badge.innerText = '✅ Disetujui';
+        document.getElementById('error-habarlic').style.display = 'none';
+        document.getElementById('btn-approve-habarlic').style.display = 'none';
+        document.getElementById('card-habarlic').setAttribute('data-status', 'approved');
+        
+        // Update review count badge
+        document.getElementById('badge-count-review').innerText = '0';
+        showToast('Foto produk Habarlic berhasil disetujui (Approved)!');
+      }
+    }
+
+    // Modal Replace
+    function openReplaceModal(id) {
+      activeProductTarget = id;
+      const modal = document.getElementById('modal-replace');
+      const curImg = document.getElementById('current-photo-img');
+      const selImg = document.getElementById('selected-photo-img');
+
+      if (id === 'habarlic') {
+        curImg.src = document.getElementById('img-habarlic').src;
+        selImg.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231e293b'/><circle cx='40' cy='45' r='20' fill='%23fbbf24'/><rect x='60' y='30' width='25' height='45' fill='%2338bdf8' rx='2'/><text x='50' y='88' font-size='8' text-anchor='middle' fill='%23fff'>Botol + Kotak</text></svg>";
+      } else {
+        curImg.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231e293b'/><rect x='25' y='30' width='50' height='40' rx='5' fill='%234ade80'/></svg>";
+        selImg.src = curImg.src;
+      }
+      modal.classList.add('open');
+    }
+
+    function switchTab(num) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.getElementById('tab-btn-' + num).classList.add('active');
+      document.getElementById('tab-content-' + num).classList.add('active');
+
+      if (num === 2) {
+        selectedReplacement.type = 'upload';
+      } else if (num === 3) {
+        selectedReplacement.type = 'rescrape';
+      } else {
+        selectedReplacement.type = 'candidate';
+      }
+    }
+
+    function selectCandidate(idx, url, desc, hasWarning) {
+      document.querySelectorAll('.candidate-card').forEach(c => c.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+      
+      const warnBox = document.getElementById('replace-warning-box');
+      if (hasWarning) {
+        warnBox.style.display = 'block';
+      } else {
+        warnBox.style.display = 'none';
+      }
+
+      const selImg = document.getElementById('selected-photo-img');
+      if (idx === 0) {
+        selImg.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23475569'/><circle cx='50' cy='35' r='15' fill='%23fbbf24'/><text x='50' y='80' font-size='9' text-anchor='middle' fill='%23fff'>Banner Promo</text></svg>";
+      } else if (idx === 1) {
+        selImg.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231e293b'/><circle cx='40' cy='45' r='20' fill='%23fbbf24'/><rect x='60' y='30' width='25' height='45' fill='%2338bdf8' rx='2'/><text x='50' y='88' font-size='8' text-anchor='middle' fill='%23fff'>Botol + Kotak</text></svg>";
+      } else {
+        selImg.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23334155'/><line x1='15' y1='30' x2='85' y2='30' stroke='%2394a3b8' stroke-width='4'/><line x1='15' y1='50' x2='85' y2='50' stroke='%2394a3b8' stroke-width='4'/></svg>";
+      }
+      selectedReplacement = { type: 'candidate', index: idx, src: selImg.src };
+    }
+
+    function simulateUpload() {
+      document.getElementById('upload-status').style.display = 'block';
+      const selImg = document.getElementById('selected-photo-img');
+      selImg.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230f766e'/><text x='50' y='55' font-size='11' font-weight='bold' text-anchor='middle' fill='%23fff'>UPLOADED</text></svg>";
+      selectedReplacement = { type: 'upload', src: selImg.src };
+      showToast('File gambar berhasil dipilih.');
+    }
+
+    function executeReplace() {
+      closeModals();
+      showToast('⏳ Memproses penggantian foto via job antrean...', '⏳');
+
+      const badge = document.getElementById('badge-habarlic');
+      badge.className = 'badge-status badge-processing';
+      badge.innerText = '⏳ Memproses Foto...';
+
+      setTimeout(() => {
+        // Simulasi selesai
+        const targetImg = document.getElementById('img-habarlic');
+        targetImg.src = selectedReplacement.src || document.getElementById('selected-photo-img').src;
+        badge.className = 'badge-status badge-approved';
+        badge.innerText = '✅ Disetujui (Ganti Foto)';
+        document.getElementById('error-habarlic').style.display = 'none';
+        document.getElementById('btn-approve-habarlic').style.display = 'none';
+        showToast('Foto produk berhasil diganti & diverifikasi!');
+      }, 1500);
+    }
+  </script>
+</body>
+</html>

@@ -20,6 +20,7 @@ export const GET = withTenantContext(async (request) => {
     const search = searchParams.get('search') || '';
     const category = searchParams.get('category') || '';
     const affiliateStatus = searchParams.get('affiliate_status') || 'all';
+    const photoStatus = searchParams.get('photo_status') || 'all';
     const brandId = searchParams.get('brand_id') || 'all';
     const sort = searchParams.get('sort') || 'newest';
 
@@ -27,6 +28,7 @@ export const GET = withTenantContext(async (request) => {
       search,
       category,
       affiliateStatus,
+      photoStatus,
       brandId,
       cursor: searchParams.get('cursor'),
       limit: searchParams.get('limit') || 100,

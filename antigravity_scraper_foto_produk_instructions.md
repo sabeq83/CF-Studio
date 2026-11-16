@@ -1,5 +1,7 @@
 # Instruksi Antigravity: Perbaikan Scraper Foto Produk (pilih foto produk saja, tanpa orang)
 
+> **Revisi 01 berlaku (setelah v2.49.1):** baca `antigravity_scraper_foto_produk_revisi_01.md`. Isinya: perbaikan 4 celah backend (audit 2,5 MB, status gagal tetap approved, refresh mengosongkan foto, repair membatalkan needs_review), kualitas crop, tombol Setujui Foto, dan fitur Ganti Foto di UI.
+
 ## Mandat
 
 Kerjakan usulan di `USULAN_PERBAIKAN_SCRAPER_FOTO_PRODUK.md` (root repo), bagian P1–P5 (P6 opsional), agar scraper produk (`cf_scrape_product_url` → job `product_scraper`) memilih **foto produk saja** (tanpa orang/wajah, tanpa banner promo) dan tidak lagi menandai foto bermasalah sebagai `approved`.

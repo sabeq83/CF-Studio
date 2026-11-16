@@ -67,7 +67,7 @@ async function runDryRun() {
 
   // 2. Evaluasi & Pemilihan Foto Produk via Gemini Vision (P2)
   console.log(`\n[Langkah 2/5] Mengunduh hingga 6 kandidat dan mengevaluasi via Gemini Vision (1 call)...`);
-  const { pickBestProductPhoto } = await import('../lib/product-photo-picker.js');
+  const { pickBestProductPhoto, computeCropBox } = await import('../lib/product-photo-picker.js');
   const { generateWithImages, generateWithImage } = await import('../lib/gemini.js');
 
   const wrappedGenerateWithImages = async (imgs, prompt, schema) => {
@@ -102,10 +102,10 @@ async function runDryRun() {
   console.log(`\n📥 Mengunduh foto terpilih ke: ${rawPath}`);
   await downloadECommerceImage(photoPickerResult.selectedUrl, rawPath);
 
-  // 3. AI Spatial Smart Crop (P3)
-  console.log(`\n[Langkah 3/5] Menjalankan AI Spatial Smart Cropping (mengecualikan orang/model/teks)...`);
+  // 3. AI Spatial Smart Crop (P3 & R5)
+  console.log(`\n[Langkah 3/5] Menjalankan AI Spatial Smart Cropping (kemasan utuh botol + kotak, padding 6%)...`);
   const rawImageBuffer = fs.readFileSync(rawPath);
-  const cropPrompt = `Analyze this product photo. There might be multiple variants of the same product. Box the product package only. Exclude any people, faces, hands, models, logos/badges and promotional text. If a person is holding the product, box only the product. Return the bounding box coordinates [ymin, xmin, ymax, xmax] for only that ONE item. Return coordinates as normalized integers from 0 to 1000 representing [ymin, xmin, ymax, xmax]. For example, [0, 0, 1000, 1000] would be the entire image.`;
+  const cropPrompt = `Analyze this product photo. If the product consists of multiple items in a set (such as a bottle AND its packaging box, or a primary product and its case), box the ENTIRE SET together so both the primary item and its box/container are included. If there are duplicate loose items or hands/people/models, exclude the people/models and loose accessories, but KEEP the complete product packaging set intact. Exclude badges, promotional labels, and corner banners. Return the bounding box coordinates [ymin, xmin, ymax, xmax] as normalized integers from 0 to 1000.`;
   const cropResponseSchema = {
     type: 'object',
     properties: {
@@ -123,20 +123,24 @@ async function runDryRun() {
   let croppedPath = rawPath;
 
   try {
-    const cropCoords = JSON.parse(cropResultText);
-    console.log(`   Koordinat Crop AI: [ymin=${cropCoords.ymin}, xmin=${cropCoords.xmin}, ymax=${cropCoords.ymax}, xmax=${cropCoords.xmax}]`);
+    const cropCoords = typeof cropResultText === 'string' ? JSON.parse(cropResultText) : cropResultText;
+    console.log(`   Koordinat Crop AI Mentah: [ymin=${cropCoords.ymin}, xmin=${cropCoords.xmin}, ymax=${cropCoords.ymax}, xmax=${cropCoords.xmax}]`);
     const sharp = (await import('sharp')).default;
     const metadata = await sharp(rawPath).metadata();
-    const left = Math.max(0, Math.round((cropCoords.xmin / 1000) * metadata.width));
-    const top = Math.max(0, Math.round((cropCoords.ymin / 1000) * metadata.height));
-    const width = Math.min(metadata.width - left, Math.round(((cropCoords.xmax - cropCoords.xmin) / 1000) * metadata.width));
-    const height = Math.min(metadata.height - top, Math.round(((cropCoords.ymax - cropCoords.ymin) / 1000) * metadata.height));
+    
+    const cropDecision = computeCropBox({
+      coords: cropCoords,
+      width: metadata.width,
+      height: metadata.height
+    });
 
-    if (width > 10 && height > 10) {
-      const croppedBuffer = await sharp(rawPath).extract({ left, top, width, height }).toBuffer();
+    if (!cropDecision.shouldSkip && cropDecision.box) {
+      const croppedBuffer = await sharp(rawPath).extract(cropDecision.box).toBuffer();
       croppedPath = path.join(runOutputDir, 'cropped.png');
       fs.writeFileSync(croppedPath, croppedBuffer);
-      console.log(`   ✅ Bounding Box Sharp Crop berhasil: ${width}x${height}px -> ${croppedPath}`);
+      console.log(`   ✅ Bounding Box Sharp Crop berhasil: ${cropDecision.box.width}x${cropDecision.box.height}px (padding 6%) -> ${croppedPath}`);
+    } else {
+      console.log(`   ℹ️ Crop dilewati: ${cropDecision.reason}`);
     }
   } catch (cropErr) {
     console.warn(`   ⚠️ AI Crop gagal, memakai gambar mentah:`, cropErr.message);
@@ -223,12 +227,14 @@ async function runDryRun() {
   };
 
   const summaryPath = path.join(runOutputDir, 'dry_run_summary.json');
-  fs.writeFileSync(summaryPath, JSON.stringify(summary, null, 2));
+  const summaryJson = JSON.stringify(summary, null, 2);
+  fs.writeFileSync(summaryPath, summaryJson);
+  const auditSizeKb = (Buffer.byteLength(summaryJson, 'utf8') / 1024).toFixed(2);
 
   console.log(`\n======================================================`);
   console.log(`🏁 [SELESAI] Hasil dry-run tersimpan di:`);
   console.log(`   📁 ${runOutputDir}`);
-  console.log(`   📄 ${summaryPath}`);
+  console.log(`   📄 ${summaryPath} (${auditSizeKb} KB)`);
   console.log(`   ⚡ Total Panggilan Gemini Vision: ${visionCallsCount}`);
   console.log(`======================================================\n`);
 }
