@@ -3,7 +3,17 @@
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Sidebar from '../components/Sidebar';
+import FinishingPanel from '../components/video-studio/FinishingPanel';
 import './studio.css';
+
+const STAGE_LABELS = {
+  sync_clips: 'Menyelaraskan Klip Video & Audio',
+  concat: 'Menggabungkan Seluruh Klip',
+  overlay_capture: 'Merender Animasi Overlay Template',
+  master_pass: 'Muxing Akhir & Normalisasi Audio',
+  yielded: 'Dijeda (Mengalah ke Produksi)',
+  done: 'Render Selesai'
+};
 
 const RemotionPreviewPlayer = dynamic(() => import('../components/RemotionPreviewPlayer'), { ssr: false });
 
@@ -53,6 +63,15 @@ export default function VideoStudio() {
   const [bgmVolume, setBgmVolume] = useState(0.15);
   const [sfxVolume, setSfxVolume] = useState(0.0);
   const [videoScale, setVideoScale] = useState(1.0);
+
+  // Finishing Settings
+  const [finishingTemplate, setFinishingTemplate] = useState('none');
+  const [finishingPlan, setFinishingPlan] = useState(null);
+  const [finishingSkin, setFinishingSkin] = useState('pop_kuning');
+  const [captionMode, setCaptionMode] = useState('full');
+  const [brandName, setBrandName] = useState('');
+  const [audioMode, setAudioMode] = useState('single');
+  const [isPlanValid, setIsPlanValid] = useState(true);
 
   // Status & List Management
   const [jobs, setJobs] = useState([]);
@@ -329,7 +348,17 @@ export default function VideoStudio() {
           bgm_file: bgmFile || null,
           bgm_volume: bgmVolume,
           sfx_volume: sfxVolume,
-          video_scale: videoScale
+          video_scale: videoScale,
+          finishing_template: finishingTemplate,
+          finishing_config: JSON.stringify({
+            finishingPlan: finishingTemplate !== 'none' ? finishingPlan : null,
+            captionMode,
+            brandName,
+            hookTitle: finishingPlan?.hook || '',
+            skin: finishingSkin,
+            isHerbalProduct: false
+          }),
+          audio_mode: audioSourceType === 'tts_studio' ? 'tts_batch' : audioMode
         })
       });
 
@@ -1146,12 +1175,53 @@ export default function VideoStudio() {
                   )}
                 </div>
 
+                {/* 4. Finishing Template Panel */}
+                <FinishingPanel
+                  videoSourceType={videoSourceType}
+                  videoPaths={
+                    videoSourceType === 're_campaign'
+                      ? selectedCampaignVideos.map(v => v.id)
+                      : (videoSourceType === 'instant_factory'
+                          ? selectedCampaignVideos.map(v => v.fs_path)
+                          : (videoSourceType === 'upload'
+                              ? videoFiles.map(f => f.name)
+                              : videoDbIds))
+                  }
+                  audioSourceType={audioSourceType}
+                  audioMode={audioMode}
+                  onChangeAudioMode={setAudioMode}
+                  audioFileCount={audioFile ? 1 : 0}
+                  finishingTemplate={finishingTemplate}
+                  onChangeTemplate={setFinishingTemplate}
+                  finishingPlan={finishingPlan}
+                  onChangePlan={setFinishingPlan}
+                  captionMode={captionMode}
+                  onChangeCaptionMode={setCaptionMode}
+                  skin={finishingSkin}
+                  onChangeSkin={setFinishingSkin}
+                  brandName={brandName}
+                  onChangeBrandName={setBrandName}
+                  onAutoSelectTtsBatch={(batchId) => {
+                    setAudioSourceType('tts_studio');
+                    setSelectedTtsBatchId(batchId);
+                  }}
+                  onValidityChange={setIsPlanValid}
+                />
+
                 <button
                   type="submit"
                   className="glowing-btn-render"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || (finishingTemplate !== 'none' && !isPlanValid)}
+                  style={{
+                    opacity: (finishingTemplate !== 'none' && !isPlanValid) ? 0.6 : 1,
+                    cursor: (finishingTemplate !== 'none' && !isPlanValid) ? 'not-allowed' : 'pointer'
+                  }}
                 >
-                  {isSubmitting ? '⏳ Mengunggah & Memproses...' : '🎬 Mulai Rendering Video'}
+                  {isSubmitting
+                    ? '⏳ Mengunggah & Memproses...'
+                    : (finishingTemplate !== 'none' && !isPlanValid)
+                      ? '⚠️ Plan Finishing Belum Lengkap (Hook Wajib)'
+                      : '🎬 Mulai Rendering Video'}
                 </button>
               </form>
             </div>
@@ -1174,7 +1244,29 @@ export default function VideoStudio() {
                 ) : selectedJob && selectedJob.status === 'processing' ? (
                   <div className="no-preview">
                     <div className="spinner-loader" style={{ width: '40px', height: '40px' }}></div>
-                    <p style={{ marginTop: '8px' }}>Sedang memproses render video...</p>
+                    <p style={{ marginTop: '8px', fontWeight: 700, color: 'var(--text-primary)' }}>
+                      Sedang memproses render video...
+                    </p>
+                    {selectedJob.progress_stage && (
+                      <p style={{ fontSize: '0.8rem', color: 'var(--action-primary)', marginTop: '4px' }}>
+                        Tahap: {STAGE_LABELS[selectedJob.progress_stage] || selectedJob.progress_stage}
+                      </p>
+                    )}
+                  </div>
+                ) : selectedJob && (selectedJob.progress_stage === 'yielded' || selectedJob.status === 'pending' && selectedJob.yield_count > 0) ? (
+                  <div className="no-preview" style={{ padding: '20px', textAlign: 'center' }}>
+                    <span style={{ fontSize: '2rem' }}>⏸️</span>
+                    <p style={{ color: 'var(--status-warning)', fontWeight: 'bold', marginTop: '8px' }}>
+                      Render Dijeda (Mengalah ke Produksi)
+                    </p>
+                    <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '4px', maxWidth: '300px' }}>
+                      Job mengalah sementara karena render produksi terjadwal sedang aktif. Job akan otomatis dilanjutkan segera setelah slot produksi selesai.
+                    </p>
+                    {selectedJob.yield_count > 0 && (
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginTop: '6px' }}>
+                        Total dijeda: {selectedJob.yield_count} kali
+                      </span>
+                    )}
                   </div>
                 ) : selectedJob && selectedJob.status === 'pending' ? (
                   <div className="no-preview">
@@ -1213,11 +1305,74 @@ export default function VideoStudio() {
                           onClick={() => setSelectedJob(job)}
                         >
                           <div className="item-info">
-                            <div className="title">
-                              {job.id}
+                            <div className="title" style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                              <span>{job.id}</span>
+                              {job.finishing_template && job.finishing_template !== 'none' && (
+                                <span style={{
+                                  fontSize: '0.65rem',
+                                  padding: '1px 6px',
+                                  borderRadius: 'var(--radius-xs)',
+                                  background: 'var(--surface-interactive)',
+                                  color: 'var(--text-secondary)',
+                                  border: '1px solid var(--border-subtle)'
+                                }}>
+                                  {job.finishing_template}
+                                </span>
+                              )}
+                              {job.finishing_status === 'applied' && (
+                                <span style={{
+                                  fontSize: '0.62rem',
+                                  padding: '1px 5px',
+                                  borderRadius: 'var(--radius-xs)',
+                                  background: 'var(--status-success-soft)',
+                                  color: 'var(--status-success)',
+                                  fontWeight: 700
+                                }}>
+                                  ✓ Finishing
+                                </span>
+                              )}
+                              {job.finishing_status === 'skipped' && (
+                                <span style={{
+                                  fontSize: '0.62rem',
+                                  padding: '1px 5px',
+                                  borderRadius: 'var(--radius-xs)',
+                                  background: 'var(--status-warning-soft)',
+                                  color: 'var(--status-warning)'
+                                }}>
+                                  Tanpa Finishing
+                                </span>
+                              )}
+                              {job.yield_count > 0 && (
+                                <span style={{
+                                  fontSize: '0.62rem',
+                                  padding: '1px 5px',
+                                  borderRadius: 'var(--radius-xs)',
+                                  background: 'var(--status-warning-soft)',
+                                  color: 'var(--status-warning)',
+                                  fontWeight: 700
+                                }}>
+                                  Yielded {job.yield_count}x
+                                </span>
+                              )}
                             </div>
                             <div className="details">
                               <span>Opsi: {job.sync_option}</span>
+                              {job.progress_stage && job.status === 'processing' && (
+                                <>
+                                  <span>•</span>
+                                  <span style={{ color: 'var(--action-primary)', fontWeight: 600 }}>
+                                    {STAGE_LABELS[job.progress_stage] || job.progress_stage}
+                                  </span>
+                                </>
+                              )}
+                              {job.progress_stage === 'yielded' && (
+                                <>
+                                  <span>•</span>
+                                  <span style={{ color: 'var(--status-warning)', fontWeight: 600 }}>
+                                    Mengalah ke Produksi
+                                  </span>
+                                </>
+                              )}
                               <span>•</span>
                               <span>{formatDate(job.created_at)}</span>
                             </div>
