@@ -60,3 +60,6 @@ test('Fase 2.2: createFfmpegStudioJob persists new finishing fields with safe de
   assert.equal(record.yield_count, 0);
   assert.ok(record.finishing_config.includes('captionMode'));
 });
+
+setTimeout(() => process.exit(0), 100).unref();
+
