@@ -86,6 +86,7 @@ Terakhir diperbarui: 17 November 2026
 
 | Nama File | Ringkasan / Judul |
 |---|---|
+| `LAPORAN_KARTU_MENU_DAN_PERAPIAN_FOLDER.md` | Laporan Pelaksanaan: Kartu Menu & Perapian Folder Proyek |
 | `LAPORAN_PERBAIKAN_SCRAPER_FOTO_PRODUK.md` | Laporan Resmi: Perbaikan Scraper Foto Produk E-Commerce (Pilih Foto Bersih) |
 | `LAPORAN_RILIS_DAN_DEPLOY_SCRAPER_FOTO_PRODUK.md` | Laporan Resmi Rilis, Deployment, & Verifikasi End-to-End Scraper Foto Produk |
 | `maknagrid_published_facebook_videos.md` | Maknagrid Published Facebook Video IDs |
