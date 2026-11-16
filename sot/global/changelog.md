@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.50.0 — Video Studio Finishing Render Engine (16/11/2026)
+- Integrasi 8 template finishing & Playwright overlay
+- Dukungan audio upload Mode A single & Mode B per-clip
+- Sistem slot render bersama mengalah ke produksi
+- AI plan generator dan validator finishing
+
 ## V2.49.2 — Revisi 01 Scraper Foto Produk & Review UI (16/11/2026)
 - Pencegahan audit bloat raw_response dan skrip fix-photo-audit-bloat
 - Perbaikan penentuan status kegagalan needs_review pada foto
