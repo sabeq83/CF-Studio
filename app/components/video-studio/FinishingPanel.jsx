@@ -27,7 +27,11 @@ export default function FinishingPanel({
   brandName,
   onChangeBrandName,
   onAutoSelectTtsBatch,
-  onValidityChange
+  onValidityChange,
+  voTexts = [],
+  productData = null,
+  recipeData = null,
+  isHerbalProduct = true
 }) {
   const [sourceData, setSourceData] = useState(null);
   const [conflict, setConflict] = useState(false);
@@ -230,6 +234,10 @@ export default function FinishingPanel({
           onChangeSkin={onChangeSkin}
           brandName={brandName}
           onChangeBrandName={onChangeBrandName}
+          voTexts={voTexts}
+          productData={productData || sourceData?.productData}
+          recipeData={recipeData || sourceData?.recipeData}
+          isHerbalProduct={isHerbalProduct}
         />
       )}
 

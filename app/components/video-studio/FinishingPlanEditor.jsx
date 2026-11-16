@@ -13,11 +13,17 @@ export default function FinishingPlanEditor({
   skin = 'pop_kuning',
   onChangeSkin,
   brandName = '',
-  onChangeBrandName
+  onChangeBrandName,
+  voTexts = [],
+  productData = null,
+  recipeData = null,
+  isHerbalProduct = true
 }) {
   const [editorMode, setEditorMode] = useState('visual'); // 'visual' | 'json'
   const [jsonText, setJsonText] = useState('');
   const [jsonError, setJsonError] = useState('');
+  const [isGeneratingAi, setIsGeneratingAi] = useState(false);
+  const [aiNotice, setAiNotice] = useState('');
 
   if (templateId === 'none') {
     return (
@@ -39,6 +45,60 @@ export default function FinishingPlanEditor({
   const handleUpdateField = (field, value) => {
     const updated = { ...currentPlan, [field]: value };
     onChangePlan(updated);
+  };
+
+  const handleGenerateAiPlan = async () => {
+    setIsGeneratingAi(true);
+    setAiNotice('🤖 Menghubungi AI Gemini untuk menyusun plan finishing...');
+    try {
+      const res = await fetch('/api/video-studio/finishing-plan-generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          templateId,
+          voTexts,
+          productData,
+          recipeData,
+          isHerbalProduct
+        })
+      });
+      const data = await res.json();
+      if (data.success && data.plan) {
+        onChangePlan(data.plan);
+        setJsonText(JSON.stringify(data.plan, null, 2));
+        setAiNotice('✓ Plan berhasil dibuat otomatis oleh AI sesuai template.');
+      } else {
+        setAiNotice('⚠️ Gagal: ' + (data.error || 'AI tidak menghasilkan plan valid.'));
+      }
+    } catch (err) {
+      setAiNotice('⚠️ Terjadi kesalahan: ' + err.message);
+    } finally {
+      setIsGeneratingAi(false);
+    }
+  };
+
+  const handleValidatePlan = async () => {
+    try {
+      const res = await fetch('/api/video-studio/finishing-plan-validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          templateId,
+          plan: currentPlan,
+          cleanVoiceoverClips: (voTexts || []).map(t => ({ text: t })),
+          isHerbalProduct,
+          productData
+        })
+      });
+      const data = await res.json();
+      if (data.valid) {
+        setAiNotice('✓ Plan terverifikasi valid tanpa pelanggaran.');
+      } else {
+        setAiNotice(`⚠️ Ditemukan ${(data.errors || []).length} kendala validasi.`);
+      }
+    } catch (err) {
+      setAiNotice('⚠️ Gagal validasi: ' + err.message);
+    }
   };
 
   const handleSwitchToJson = () => {
@@ -104,7 +164,44 @@ export default function FinishingPlanEditor({
           )}
         </div>
 
-        <div style={{ display: 'flex', gap: '6px' }}>
+        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+          <button
+            type="button"
+            onClick={handleGenerateAiPlan}
+            disabled={isGeneratingAi}
+            style={{
+              padding: '4px 10px',
+              borderRadius: 'var(--radius-xs)',
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              cursor: isGeneratingAi ? 'not-allowed' : 'pointer',
+              background: 'var(--action-primary)',
+              color: 'var(--on-action-primary)',
+              border: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              opacity: isGeneratingAi ? 0.7 : 1
+            }}
+          >
+            <span>{isGeneratingAi ? '⏳ Menyusun...' : '✨ Buat dengan AI'}</span>
+          </button>
+          <button
+            type="button"
+            onClick={handleValidatePlan}
+            style={{
+              padding: '4px 10px',
+              borderRadius: 'var(--radius-xs)',
+              fontSize: '0.72rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              background: 'var(--surface-interactive)',
+              color: 'var(--text-secondary)',
+              border: '1px solid var(--border-color)'
+            }}
+          >
+            🔍 Validasi
+          </button>
           <button
             type="button"
             onClick={() => setEditorMode('visual')}
@@ -139,6 +236,20 @@ export default function FinishingPlanEditor({
           </button>
         </div>
       </div>
+
+      {aiNotice && (
+        <div style={{
+          background: 'var(--surface-interactive)',
+          border: '1px solid var(--border-subtle)',
+          borderRadius: 'var(--radius-sm)',
+          padding: '6px 12px',
+          marginBottom: '10px',
+          fontSize: '0.74rem',
+          color: 'var(--text-secondary)'
+        }}>
+          {aiNotice}
+        </div>
+      )}
 
       {/* Warnings & Errors */}
       {planErrors.length > 0 && (

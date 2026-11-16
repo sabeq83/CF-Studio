@@ -1513,6 +1513,7 @@ export default function VideoStudio() {
                     setSelectedTtsBatchId(batchId);
                   }}
                   onValidityChange={setIsPlanValid}
+                  voTexts={audioMode === 'per_clip' ? audioVoTexts : (singleVoText ? [singleVoText] : [])}
                 />
 
                 {(() => {

@@ -267,5 +267,5 @@ Bahasa sederhana: apa yang berubah, link Staging untuk dicoba, contoh hasil per 
 - [x] Fase 4: `lib/render-slot.js` + wrapper produksi + antrean mengalah + test
 - [x] Fase 5: UI Panel Finishing + banner campaign + preview + status antrean
 - [x] Fase 6: Audio upload mode A & B + transkripsi/word timing
-- [ ] Fase 7: Plan cadangan: generate AI + form manual
+- [x] Fase 7: Plan cadangan: generate AI + form manual
 - [ ] Fase 8: Test, dokumentasi SOT, rilis & deploy Staging
