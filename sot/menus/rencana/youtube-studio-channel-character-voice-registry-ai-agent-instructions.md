@@ -4,7 +4,7 @@
 
 Implementasikan seluruh rencana berikut sampai tuntas dalam satu continuous execution:
 
-`sot/menus/youtube-studio-channel-character-voice-registry-implementation-plan.md`
+`sot/menus/rencana/youtube-studio-channel-character-voice-registry-implementation-plan.md`
 
 Jangan berhenti setelah satu workstream dan jangan meminta prompt baru untuk melanjutkan tahap berikutnya. Berhenti hanya jika terdapat blocker nyata yang tidak dapat diselesaikan secara aman dari repository dan environment yang tersedia.
 

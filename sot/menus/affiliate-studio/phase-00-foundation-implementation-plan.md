@@ -1,7 +1,7 @@
 # Implementation Plan — Affiliate Studio Fase 0: Contract, Boundary, Permission, dan Feature Flag
 
 > Status: Planned  
-> Parent roadmap: `sot/menus/affiliate-studio-roadmap.md`  
+> Parent roadmap: `sot/menus/rencana/affiliate-studio-roadmap.md`  
 > Mandat: **additive-only**. Fase ini membangun pagar dan kontrak Affiliate Studio; tidak membuat UI Studio, Campaign Program, koneksi Content Planner, connector engine, atau production run.  
 > Legacy freeze: RE, Pillar/OPC, Recipe Labs, Multiplier, Instant Campaign, Product Bridging, Deconstruct, Content Planner, Product Database, ContentFlow, publishing, scheduler, worker, dan prompt tidak boleh direvisi.
 

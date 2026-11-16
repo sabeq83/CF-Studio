@@ -13,7 +13,7 @@ Pada awal sesi dan setiap context recovery, baca lengkap:
 1. `AGENTS.md`
 2. `sot/menus/affiliate-studio/master-execution-orchestrator.md`
 3. `sot/menus/affiliate-studio/affiliate-studio-execution-state.md`
-4. `sot/menus/affiliate-studio-roadmap.md`
+4. `sot/menus/rencana/affiliate-studio-roadmap.md`
 5. implementation plan fase aktif, bila sudah ada
 6. implementation plan dan handoff fase terakhir selesai
 7. panduan Next.js lokal yang relevan sebelum menulis code Next.js

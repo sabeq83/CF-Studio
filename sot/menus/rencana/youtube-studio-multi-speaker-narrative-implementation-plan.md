@@ -1,7 +1,7 @@
 # Master Implementation Plan — YouTube Studio Multi-Speaker Narrative (Stage A–E)
 
 > Status: Planned  
-> Blueprint source: `sot/menus/youtube-studio-multi-speaker-narrative-blueprint.md`  
+> Blueprint source: `sot/menus/rencana/youtube-studio-multi-speaker-narrative-blueprint.md`  
 > Scope: narration-only, dialogue-driven, hybrid narration-dialogue, multi-speaker TTS, speaker-aware visual production, dan advanced capability foundation  
 > Delivery model: satu continuous implementation task; agent melanjutkan Stage A sampai E tanpa menunggu instruksi baru per stage  
 > Deployment target: **Mac Mini Dev only**  

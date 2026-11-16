@@ -41,7 +41,7 @@ Jika terjadi perbedaan informasi, gunakan urutan authority berikut:
 4. Test aktual yang lulus pada baseline release terakhir.
 5. `sot/menus/affiliate-studio/affiliate-studio-execution-state.md`.
 6. Master orchestrator ini.
-7. `sot/menus/affiliate-studio-roadmap.md`.
+7. `sot/menus/rencana/affiliate-studio-roadmap.md`.
 8. Implementation plan fase sebelumnya.
 9. Design assumptions lama.
 

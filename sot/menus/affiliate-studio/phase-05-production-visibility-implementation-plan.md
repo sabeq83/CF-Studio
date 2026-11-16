@@ -1,7 +1,7 @@
 # JIT Implementation Plan — Affiliate Studio Fase 5: Unified Production Visibility
 
 > Status: Executable  
-> Parent roadmap: [affiliate-studio-roadmap.md](file:///Users/sabeqmmursyid/_maknaflow-staging/sot/menus/affiliate-studio-roadmap.md)  
+> Parent roadmap: [affiliate-studio-roadmap.md](file:///Users/sabeqmmursyid/_maknaflow-staging/sot/menus/rencana/affiliate-studio-roadmap.md)  
 > Master orchestrator: [master-execution-orchestrator.md](file:///Users/sabeqmmursyid/_maknaflow-staging/sot/menus/affiliate-studio/master-execution-orchestrator.md)  
 > Dependency: Fase 4 Content Planner Connection (`v2.25.2`) terilis dan seluruh tes lulus.
 

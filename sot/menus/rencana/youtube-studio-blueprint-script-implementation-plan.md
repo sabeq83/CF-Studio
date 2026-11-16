@@ -350,7 +350,7 @@ test('approved blueprint is required before a scene script can be created', asyn
 
 Test invalid AI structures, duration mismatch, cross-tenant IDs, approve/supersede behavior, scene regeneration, and no provider/render execution.
 
-### 6.11 `sot/menus/youtube-studio-blueprint-script-implementation-plan.md`
+### 6.11 `sot/menus/rencana/youtube-studio-blueprint-script-implementation-plan.md`
 
 **Code Sebelum (Current/Before)**
 

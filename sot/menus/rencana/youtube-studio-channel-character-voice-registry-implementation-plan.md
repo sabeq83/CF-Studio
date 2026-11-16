@@ -4,7 +4,7 @@
 > Scope: memperbaiki konsistensi multi-speaker dengan memusatkan karakter, voice identity, dan pilihan metode produksi audio pada Channel  
 > Delivery target: **Mac Mini Dev only** (`~/maknaflow-dev`, UI `5020`, API `7020`, schema `dev`)  
 > Production deployment: **dilarang** tanpa instruksi manual eksplisit  
-> Related baseline: `sot/menus/youtube-studio-multi-speaker-narrative-implementation-plan.md`
+> Related baseline: `sot/menus/rencana/youtube-studio-multi-speaker-narrative-implementation-plan.md`
 
 ## 1. Objective
 

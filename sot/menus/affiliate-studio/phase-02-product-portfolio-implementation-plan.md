@@ -1,7 +1,7 @@
 # Implementation Plan — Affiliate Studio Fase 2: Brand Product Portfolio Projection
 
 > Status: Planned  
-> Parent roadmap: `sot/menus/affiliate-studio-roadmap.md`  
+> Parent roadmap: `sot/menus/rencana/affiliate-studio-roadmap.md`  
 > Dependency: Fase 0 Foundation dan Fase 1 Brand Shell sudah dirilis (`v2.23.20` dan `v2.24.0` pada saat plan ini disusun).  
 > Mandat: **additive-only, read-only, no duplicate catalog**. Fase ini menyambungkan Product Database existing ke Brand Profile aktif melalui projection baru.
 

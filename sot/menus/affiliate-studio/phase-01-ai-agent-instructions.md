@@ -5,7 +5,7 @@
 Implementasikan hanya Fase 1 berdasarkan:
 
 1. `AGENTS.md`
-2. `sot/menus/affiliate-studio-roadmap.md`
+2. `sot/menus/rencana/affiliate-studio-roadmap.md`
 3. `sot/menus/affiliate-studio/phase-00-foundation-implementation-plan.md`
 4. `sot/menus/affiliate-studio/phase-01-brand-shell-implementation-plan.md`
 

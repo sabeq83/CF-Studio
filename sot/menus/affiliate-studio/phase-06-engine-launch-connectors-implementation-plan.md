@@ -1,7 +1,7 @@
 # JIT Implementation Plan — Affiliate Studio Fase 6: Engine Launch Connectors
 
 > Status: Executable  
-> Parent roadmap: [affiliate-studio-roadmap.md](file:///Users/sabeqmmursyid/_maknaflow-staging/sot/menus/affiliate-studio-roadmap.md)  
+> Parent roadmap: [affiliate-studio-roadmap.md](file:///Users/sabeqmmursyid/_maknaflow-staging/sot/menus/rencana/affiliate-studio-roadmap.md)  
 > Master orchestrator: [master-execution-orchestrator.md](file:///Users/sabeqmmursyid/_maknaflow-staging/sot/menus/affiliate-studio/master-execution-orchestrator.md)  
 > Dependency: Fase 5 Unified Production Visibility (`v2.25.3`) terilis dan seluruh tes lulus.
 

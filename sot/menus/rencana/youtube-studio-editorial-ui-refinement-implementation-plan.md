@@ -177,7 +177,7 @@ Use the existing semantic application layout utilities. Do not introduce a YouTu
 
 If the repository has no browser test harness, document the UI smoke steps rather than adding an unsuitable dependency. Keep API/domain tests independent of presentation details.
 
-### 5.5 `sot/menus/youtube-studio-editorial-ui-refinement-implementation-plan.md`
+### 5.5 `sot/menus/rencana/youtube-studio-editorial-ui-refinement-implementation-plan.md`
 
 **Code Sebelum (Current/Before)**
 

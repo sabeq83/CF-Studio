@@ -5,7 +5,7 @@
 Implementasikan hanya Fase 2 berdasarkan:
 
 1. `AGENTS.md`
-2. `sot/menus/affiliate-studio-roadmap.md`
+2. `sot/menus/rencana/affiliate-studio-roadmap.md`
 3. Fase 0 implementation plan dan implementasi aktual
 4. Fase 1 implementation plan dan implementasi aktual
 5. `sot/menus/affiliate-studio/phase-02-product-portfolio-implementation-plan.md`

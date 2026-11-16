@@ -1,7 +1,7 @@
 # Implementation Plan — Affiliate Studio Fase 1: Brand-First Application Shell
 
 > Status: Planned — blocked until Fase 0 is implemented, verified, released, and pushed.  
-> Parent roadmap: `sot/menus/affiliate-studio-roadmap.md`  
+> Parent roadmap: `sot/menus/rencana/affiliate-studio-roadmap.md`  
 > Dependency: `sot/menus/affiliate-studio/phase-00-foundation-implementation-plan.md`  
 > Mandat: **additive-only, read-only projection**. Fase ini menambahkan application shell, Brand Profile switcher, dan Brand Overview; tidak mengambil alih create/edit atau execution dari modul legacy.
 

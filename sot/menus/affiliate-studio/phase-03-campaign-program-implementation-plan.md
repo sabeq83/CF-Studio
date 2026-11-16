@@ -1,7 +1,7 @@
 # Implementation Plan — Affiliate Studio Fase 3: Campaign Program Domain
 
 > Status: Executable  
-> Parent roadmap: [affiliate-studio-roadmap.md](file:///Users/sabeqmmursyid/_maknaflow-staging/sot/menus/affiliate-studio-roadmap.md)  
+> Parent roadmap: [affiliate-studio-roadmap.md](file:///Users/sabeqmmursyid/_maknaflow-staging/sot/menus/rencana/affiliate-studio-roadmap.md)  
 > Master orchestrator: [master-execution-orchestrator.md](file:///Users/sabeqmmursyid/_maknaflow-staging/sot/menus/affiliate-studio/master-execution-orchestrator.md)  
 > Dependency: Fase 2 Brand Product Portfolio (`v2.25.0`) terilis dan seluruh tes lulus.
 

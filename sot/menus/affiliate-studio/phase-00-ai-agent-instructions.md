@@ -5,7 +5,7 @@
 Implementasikan hanya Fase 0 berdasarkan:
 
 1. `AGENTS.md`
-2. `sot/menus/affiliate-studio-roadmap.md`
+2. `sot/menus/rencana/affiliate-studio-roadmap.md`
 3. `sot/menus/affiliate-studio/phase-00-foundation-implementation-plan.md`
 
 Tujuan fase ini adalah membuat contract, boundary, permission, tenant feature flag, access policy, metadata-only connector registry, capability API, audit event, dan tests.
