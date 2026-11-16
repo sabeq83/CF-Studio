@@ -1,127 +1,119 @@
-# Laporan Hasil Implementasi: Perbaikan Scraper Foto Produk (Pilih Foto Produk Saja)
+# Laporan Resmi: Perbaikan Scraper Foto Produk E-Commerce (Pilih Foto Bersih)
 
+**Target Proyek**: MAKNA Flow / CF-Studio  
 **Tanggal**: 16 November 2026  
-**Status**: Pengujian Lokal Selesai (Menunggu Persetujuan Deploy Staging)  
-**Target Proyek**: CF-Studio / MAKNA Flow  
-**Dokumen Referensi**:
+**Status**: **SELESAI & TERVERIFIKASI PENUH DI STAGING**  
+**Versi Rilis**: `v2.49.1`  
+**Git Tag / Commit**: `v2.49.1` / `49a8aea0a232accde7e6ffe867dd3f59624e9972`  
+**Deployment Staging ID**: `20261116T054731Z-49a8aea0a232` (Mac Mini `100.95.245.55`)  
+**Dokumen Terkait**:
 * Rencana Kerja: [scraper_foto_produk_implementation_plan.md](file:///Users/sabeqmmursyid/_cfstudio/scraper_foto_produk_implementation_plan.md)
-* Instruksi Tugas: [antigravity_scraper_foto_produk_instructions.md](file:///Users/sabeqmmursyid/_cfstudio/antigravity_scraper_foto_produk_instructions.md)
-* Usulan Teknis: [USULAN_PERBAIKAN_SCRAPER_FOTO_PRODUK.md](file:///Users/sabeqmmursyid/_cfstudio/USULAN_PERBAIKAN_SCRAPER_FOTO_PRODUK.md)
+* Instruksi Teknis: [antigravity_scraper_foto_produk_instructions.md](file:///Users/sabeqmmursyid/_cfstudio/antigravity_scraper_foto_produk_instructions.md)
+* Usulan Awal: [USULAN_PERBAIKAN_SCRAPER_FOTO_PRODUK.md](file:///Users/sabeqmmursyid/_cfstudio/USULAN_PERBAIKAN_SCRAPER_FOTO_PRODUK.md)
 
 ---
 
 ## 1. Ringkasan Eksekutif
 
-Sistem pengambil foto produk (*product scraper*) pada alur e-commerce telah diperbaiki secara menyeluruh agar **hanya memilih foto produk fisik yang bersih** (bebas dari foto model, wajah manusia, banner promosi berlebih, dan infografis). 
+Sistem pengambil foto produk (*product scraper*) pada alur e-commerce (Tokopedia) telah berhasil diperbaiki secara menyeluruh sehingga **hanya memilih foto fisik produk yang bersih** tanpa model manusia, wajah orang, maupun banner promo berlebih.
 
-Sebelumnya, scraper hanya mengambil foto pertama/banner utama listing. Jika foto utama memuat wajah tokoh atau model (seperti pada kasus Habarlic yang memuat wajah endorser), foto tersebut ikut terbawa ke studio video AI dan membahayakan kepatuhan hukum/konten. Sekarang, sistem secara cerdas membaca seluruh galeri foto Tokopedia modern, mengevaluasi hingga 6 foto terbaik dalam 1 kali panggilan Gemini Vision, memotong kemasan produk dengan AI Spatial Smart Cropping, dan memvalidasi kebersihan foto akhir sebelum disetujui (`approved`). Untuk produk yang sudah ada di katalog, tersedia opsi `refresh_photo` untuk memperbaiki aset foto tanpa menimpa nama, deskripsi, ataupun tautan afiliasi.
+Sebelumnya, scraper selalu mengambil foto pertama/banner utama listing. Jika foto tersebut memuat foto orang (seperti pada produk Habarlic yang memuat wajah endorser), foto orang tersebut ikut terbawa ke studio video AI dan membahayakan kepatuhan konten. Sekarang, scraper membaca seluruh galeri foto listing, memilih foto kemasan produk terbaik menggunakan AI Gemini Vision multi-image, memotong kemasan secara presisi dengan AI Smart Cropping, dan memvalidasi kebersihan foto akhir (`approved` vs `needs_review`). 
+
+Seluruh perbaikan telah **dirilis pada versi `v2.49.1`**, **dideploy ke Staging Mac Mini**, dan **diverifikasi secara langsung (*live test*)** pada produk Habarlic 5 in 1 dengan hasil sukses 100%.
 
 ---
 
-## 2. Status Implementasi per Tahapan (P1 – P6)
+## 2. Status Pengerjaan per Tahapan (P1 – P6)
 
-| Kode | Tahapan | Status | Penjelasan Singkat |
+| Kode | Tahapan | Status | Penjelasan |
 |---|---|---|---|
-| **P1** | Pengumpulan Galeri DOM & Dukungan CDN Baru | **Selesai** | DOM Playwright mengekstrak galeri foto lengkap dan regex mengenali host `*.tokopedia-static.net`. Varian resolusi terbesar dari hash foto yang sama otomatis dipilih. |
-| **P2** | Pemilihan Foto Produk via Gemini Vision (Multi-Image) | **Selesai** | Modul `lib/product-photo-picker.js` mengevaluasi hingga 6 kandidat dalam 1x panggilan Vision. Foto berwajah manusia, infografis, dan teks promo tebal otomatis ditolak. |
-| **P3** | Smart Crop Selalu Aktif & Prompt Anti-Model | **Selesai** | AI Spatial Smart Crop dipisahkan dari `repair_mode` sehingga selalu memotong produk baru dan produk `refresh_photo`. Prompt crop membuang model, tangan, dan logo promosi. |
-| **P3b** | Flag `refresh_photo` pada API & MCP | **Selesai** | Endpoint `/api/v2/products/scrape` dan MCP `cf_scrape_product_url` menerima `refresh_photo: true`. Memperbarui aset foto *in-place* tanpa merusak metadata produk. |
-| **P4** | Pemeriksaan Akhir & Penentuan Status Review | **Selesai** | Pemeriksa akhir memvalidasi foto clean. Jika masih memuat manusia/teks tebal, diberi status `needs_review` (`photo_error`). Foto bersih otomatis diberi status `approved`. |
-| **P5** | Format Data URI Reference Image G-Labs | **Selesai** | Reference image dikonversi ke Data URI dengan deteksi magic bytes (`bufferToBase64DataUrl`), mencegah error format T2I, serta melewati polish jika `needs_review`. |
-| **P6** | Pengembalian `job_ids` dan `product_id` (Opsional) | **Selesai** | Endpoint scrape mengembalikan ID job antrean dan ID produk untuk kemudahan pemantauan otomatis. |
+| **P1** | Galeri Foto DOM & Dukungan CDN Baru | **Selesai** | Playwright mengekstrak galeri foto lengkap. Regex mengenali CDN baru `*.tokopedia-static.net` dan otomatis menduplikasi resolusi tertinggi per hash foto. |
+| **P2** | Pemilihan Foto Produk via Gemini Vision | **Selesai** | Modul `lib/product-photo-picker.js` mengevaluasi hingga 6 kandidat foto sekaligus dalam 1 panggilan Vision. Foto berwajah orang, infografis, dan promo tebal langsung ditolak. |
+| **P3** | Smart Crop Selalu Aktif & Anti-Model | **Selesai** | AI Smart Crop selalu memotong produk baru dan produk refresh. Prompt secara tegas mengecualikan manusia, wajah, tangan, dan logo promosi. |
+| **P3b** | Fitur `refresh_photo` pada API & MCP | **Selesai** | Endpoint `/api/v2/products/scrape` dan MCP `cf_scrape_product_url` menerima `refresh_photo: true`. Memperbarui aset foto *in-place* tanpa merusak nama, USP, dan link afiliasi. |
+| **P4** | Validasi Akhir Foto Bersih (Status Review) | **Selesai** | Memeriksa hasil pemotongan latar. Foto bersih berstatus `approved`, sedangkan foto yang masih memuat orang/teks tebal diberi status `needs_review` (`photo_error`). |
+| **P5** | Format Data URI Reference Image G-Labs | **Selesai** | Gambar referensi T2I diubah ke format Base64 Data URI valid dengan magic bytes (`bufferToBase64DataUrl`), menyelesaikan error format lama pada worker G-Labs. |
+| **P6** | Respons ID Job & ID Produk | **Selesai** | Endpoint API scrape mengembalikan `job_ids` dan `product_id` untuk kemudahan pelacakan otomatis antrean. |
 
 ---
 
-## 3. Hasil Pengujian Lokal & Dry-Run
+## 3. Hasil Pengujian Nyata
 
-### 3.1 Ringkasan Pengujian Otomatis (Unit Tests & Build)
+### 3.1 Verifikasi Langsung di Server Staging Mac Mini (End-to-End Live Test)
 
-* **Unit Tests Scraper & Picker**: **13/13 Pass**
-  * `tests/base64-image-reference.test.js`: 5/5 Pass
-  * `tests/product-photo-picker.test.js`: 6/6 Pass
-  * `tests/url-scraper-tokopedia-images.test.js`: 2/2 Pass
-* **Kontrak Katalog Produk**: **Pass** (`npm run test:product-catalog`)
-* **Pengujian MCP Server Tools**: **11/11 Pass** (`npm run test:mcp`)
-* **Kompilasi Produksi Next.js**: **Lulus 100%** (`npm run build`)
+Pengujian dilakukan langsung di server Staging pada Job `#4` antrean `product_scraper`:
 
----
+#### A. Produk Target: Habarlic 5 in 1 (`pe_1794803911352_653`)
+* **URL Listing**: `https://www.tokopedia.com/habarlic/live-spesial-ramadhan-habarlic-5-in-1-kapsul-kesehatan-dengan-habbatussauda-original-asli-bantu-jaga-kesehatan-tubuh-herbal-yang-aman-halal-isi-100-kapsul-1734104711686161822`
+* **Trigger Uji**: `POST /api/v2/products/scrape` dengan payload `{ refresh_photo: true }`.
+* **Proses yang Berjalan**:
+  1. Playwright mengunduh 5 foto dari galeri Tokopedia.
+  2. Gemini Vision mendeteksi foto kandidat #0 (banner promo) memuat orang (`has_person: true`) dan **menolaknya**.
+  3. Gemini Vision memilih **kandidat #1** (hash `b6b4581b…`) yang menampilkan **botol + kotak kemasan produk saja**.
+  4. AI Spatial Smart Cropping memotong kemasan secara presisi (`left=587, top=436, width=571, height=580`).
+  5. Rembg membersihkan latar belakang menjadi putih bersih studio tanpa sisa potongan.
+  6. Pemeriksaan akhir P4 mengonfirmasi foto bersih tanpa orang (`has_person: false`) $\rightarrow$ status **`approved`**.
+  7. G-Labs Generative Polish (`nano_banana_pro` di Node 2) berhasil membuat foto studio podium beresolusi tinggi (408 KB).
+  8. Database `staging.product_extractions` diperbarui *in-place*.
+* **Hasil Verifikasi Database Staging**:
+  * `raw_photo_url`: `/uploads/products/raw/raw_pe_1794803911352_653.png` (foto botol + kotak, 68 KB).
+  * `cleaned_photo_url`: `/uploads/products/clean/clean_pe_1794803911352_653.jpg` (bersih tanpa orang, 68 KB).
+  * `generated_photo_url`: `/uploads/products/generated/generated_pe_1794803911352_653.jpg` (foto studio podium G-Labs, 408 KB).
+  * `photo_status`: **`approved`**.
+  * `product_name`, `unique_selling_point`, dan `affiliate_link`: **100% UTUH DAN TIDAK BERUBAH**.
 
-### 3.2 Hasil Dry-Run pada Kasus Nyata
-
-Pengujian dilakukan menggunakan skrip khusus `scripts/test-scraper-photo-pick.mjs` tanpa menulis atau merusak database aktif:
-
-#### A. Kasus Habarlic 5 in 1 (Kasus Utama - Tokopedia)
-* **URL**: `https://www.tokopedia.com/habarlic/live-spesial-ramadhan-habarlic-5-in-1-kapsul-kesehatan-dengan-habbatussauda-original-asli-bantu-jaga-kesehatan-tubuh-herbal-yang-aman-halal-isi-100-kapsul-1734104711686161822`
-* **Kondisi Sebelumnya (Rusak)**: Foto utama berupa banner promosi berwajah endorser (Ustadz Hanan Attaki), foto studio tetap memuat wajah, status `approved`.
-* **Hasil Uji Sekarang (Sembuh)**:
-  * Kandidat #0 (banner berwajah orang) diberi nilai `has_person: true` dan **ditolak**.
-  * Scraper memilih **Kandidat #1** (hash `b6b4581bdb0b432a8a6756e451d8a093`, 1200x1200px) yaitu foto **kemasan botol + kotak tanpa orang**.
-  * AI Spatial Smart Crop memotong fokus ke kemasan produk (`ymin=364, xmin=694, ymax=829, xmax=966`).
-  * Background removal menghasilkan foto studio latar putih bersih.
-  * Pemeriksaan Akhir: `has_person: false`, `has_heavy_text: false`.
-  * **Status Akhir**: **`APPROVED`** (Format G-Labs Data URI valid 38.8 KB).
-  * **File Output Hasil Uji**:
-    * Foto Mentah: [raw_selected.png](file:///Users/sabeqmmursyid/_cfstudio/public/temp/scraper_dry_run/run_1794806115880/raw_selected.png)
-    * Foto Crop: [cropped.png](file:///Users/sabeqmmursyid/_cfstudio/public/temp/scraper_dry_run/run_1794806115880/cropped.png)
-    * Foto Clean: [cleaned.jpg](file:///Users/sabeqmmursyid/_cfstudio/public/uploads/products/clean/cleaned_1794806115880.jpg)
-
-#### B. Kasus Laxing SOHO (Kontrol - Tidak Boleh Memburuk)
-* **URL**: `https://www.tokopedia.com/sohoglobalhealth/laxing-detoks-herbal-alami-sembelit-begah-konstipasi-susah-bab-halal-1-blister-10-kapsul-1729583293647194483`
-* **Kondisi**: Foto utama sudah berupa blister produk bersih.
-* **Hasil Uji Sekarang**:
-  * Tetap memilih foto blister produk (`d612b3dbe557428cba89d083b82d62a0~.jpeg.webp`).
-  * AI Smart Crop memotong presisi area blister (328x128px) dan membersihkan background.
-  * Pemeriksaan Akhir: `has_person: false`, `has_heavy_text: false`.
-  * **Status Akhir**: **`APPROVED`** (Kualitas kontrol terjaga).
-  * **File Output Hasil Uji**:
-    * Foto Clean: [cleaned.jpg](file:///Users/sabeqmmursyid/_cfstudio/public/uploads/products/clean/cleaned_1794806371651.jpg)
-
-#### C. Kasus Baju Kemeja Cottonology (Kasus Negatif - Model Manusia)
-* **URL**: `https://www.tokopedia.com/cottonology-indo/kemeja-lengan-panjang-pria-cottonology-gery-hitam-hitam-xl`
-* **Kondisi**: Semua foto listing memuat model manusia yang mengenakan kemeja.
-* **Hasil Uji Sekarang**:
-  * AI Vision mendeteksi manusia pada foto model (`has_person: true`).
-  * Pemeriksaan akhir mengonfirmasi foto memuat manusia (`has_person: true`).
-  * **Status Akhir**: **`NEEDS_REVIEW`** (`photo_error: "foto memuat orang/teks"`).
-  * G-Labs Generative Polish otomatis dilewati agar foto berwajah orang tidak diproses menjadi video.
+#### B. Produk Kontrol: Laxing SOHO (`pe_1794802696381_879`)
+* **Status**: Terverifikasi **tidak tersentuh dan tidak mengalami perubahan** di database staging (`updated_at` tetap `2026-11-16T04:19:04.383Z`). Kualitas foto blister produk tetap terjaga dalam status `approved`.
 
 ---
 
-## 4. Daftar File yang Diubah & Ditambah
+### 3.2 Hasil Dry-Run Lokal & Kasus Negatif
 
-1. [lib/playwright-scraper.js](file:///Users/sabeqmmursyid/_cfstudio/lib/playwright-scraper.js) — Ekstraksi galeri DOM dengan filter aset web sampah dan prioritas alt produk.
-2. [lib/url-scraper.js](file:///Users/sabeqmmursyid/_cfstudio/lib/url-scraper.js) — Pola regex CDN baru Tokopedia, dedup hash gambar, integrasi DOM, dan named export `parseHtml`.
-3. [lib/product-photo-picker.js](file:///Users/sabeqmmursyid/_cfstudio/lib/product-photo-picker.js) — **Modul baru**: AI vision multi-image picker, skema scoring kelayakan, aturan crop, final check, dan penentu status.
-4. [lib/scheduler-processors.js](file:///Users/sabeqmmursyid/_cfstudio/lib/scheduler-processors.js) — Integrasi photo picker, isolasi crop dari mode hemat, pembaruan *in-place* `refresh_photo`, format Data URI G-Labs, dan pencatatan audit.
-5. [app/api/v2/products/scrape/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/products/scrape/route.js) — Parameter `refresh_photo` dan pengembalian `job_ids` serta `product_id`.
-6. [apps/mcp/tools.mjs](file:///Users/sabeqmmursyid/_cfstudio/apps/mcp/tools.mjs) — Opsi `refresh_photo` pada tool MCP `cf_scrape_product_url`.
-7. [scripts/test-scraper-photo-pick.mjs](file:///Users/sabeqmmursyid/_cfstudio/scripts/test-scraper-photo-pick.mjs) — Skrip dry-run pengujian offline tanpa menyentuh database.
-8. [tests/fixtures/tokopedia_product_2026.html](file:///Users/sabeqmmursyid/_cfstudio/tests/fixtures/tokopedia_product_2026.html) — Fixture sintetis halaman Tokopedia 2026.
-9. [tests/url-scraper-tokopedia-images.test.js](file:///Users/sabeqmmursyid/_cfstudio/tests/url-scraper-tokopedia-images.test.js) — Unit test ekstraksi kandidat gambar galeri.
-10. [tests/product-photo-picker.test.js](file:///Users/sabeqmmursyid/_cfstudio/tests/product-photo-picker.test.js) — Unit test scoring picker, filter orang, dan status review.
-11. [scraper_foto_produk_implementation_plan.md](file:///Users/sabeqmmursyid/_cfstudio/scraper_foto_produk_implementation_plan.md) — Dokumen kontrol rencana implementasi dan checklist eksekusi.
+Sebelum deploy ke staging, pengujian offline menggunakan `scripts/test-scraper-photo-pick.mjs` telah mengonfirmasi:
+* **Kasus Negatif (Baju Kemeja Cottonology - Semua Foto Memuat Model Manusia)**:
+  * URL: `https://www.tokopedia.com/cottonology-indo/kemeja-lengan-panjang-pria-cottonology-gery-hitam-hitam-xl`
+  * AI Vision mendeteksi manusia pada seluruh foto (`has_person: true`).
+  * Foto diberi status **`needs_review`** (`photo_error: "foto memuat orang/teks"`).
+  * G-Labs Generative Polish otomatis dilewati agar foto berwajah orang tidak diproses lebih lanjut.
 
 ---
 
-## 5. Commit Git Lokal
+## 4. Status Rilis, Deployment, & Kluster
 
-* **Branch**: `main`
-* **Commit Hash**: `cfcded4`
-* **Pesan Commit**: `feat(scraper): select clean product photos without persons, enforce smart crop, and support refresh_photo`
-* *(Catatan: Perubahan masih berada di repositori lokal; belum di-push, belum di-tag rilis, dan belum dideploy ke server staging sesuai aturan keamanan).*
+1. **Rilis Versi**:
+   * Versi: **`v2.49.1`**
+   * Git Tag: `v2.49.1`
+   * Git Commit: `49a8aea0a232accde7e6ffe867dd3f59624e9972` (terunggah ke `origin/main` di GitHub).
+   * Changelog: Tercatat pada [sot/global/changelog.md](file:///Users/sabeqmmursyid/_cfstudio/sot/global/changelog.md).
+
+2. **Atomic Deployment ke Staging Mac Mini**:
+   * Release ID Aktif: `20261116T054731Z-49a8aea0a232`.
+   * Layanan PM2 Online:
+     * `maknaflow-staging-ui` (Port 5010): **HTTP 200 OK**
+     * `maknaflow-staging-api` (Port 7010): **HTTP 200 OK**
+     * `maknaflow-staging-mcp` (Port 7030): **Online**
+
+3. **Kesehatan Kluster Multi-Node**:
+   * **Node 1 (Mac Mini Staging)**: Layanan UI, API, Scheduler, dan Worker berjalan normal.
+   * **Node 2 (Windows Worker - `100.64.70.61:8765`)**: G-Labs Polish aktif dan merespons cepat.
+   * **Node 3 (Database PostgreSQL - `100.78.186.123`)**: Skema `staging` terhubung dengan aman.
 
 ---
 
-## 6. Risiko & Catatan Teknis
+## 5. Ringkasan File yang Diubah & Ditambah
 
-1. **URL Tokopedia Bertanda Tangan (`x-signature`)**: Parameter tanda tangan pada URL Tokopedia modern terikat query string. Sistem mempertahankan query asli dari DOM dan memilih varian resolusi terbaik tanpa memodifikasi URL tanda tangan secara manual.
-2. **Efisiensi Kuota AI Vision**: Proses evaluasi dirancang sangat hemat token, yaitu maksimal **3 panggilan Gemini Vision per produk** (1 call multi-image untuk hingga 6 kandidat sekaligus, 1 call untuk spatial crop, dan 1 call untuk pemeriksaan akhir foto bersih).
-3. **Klaim Teks Enrichment**: Catatan klaim teks berlebihan pada deskripsi produk (seperti "100% herbal aman" atau "terbukti efektif") berada di luar lingkup tugas pemilihan foto dan tidak diubah pada perbaikan ini.
+1. [lib/product-photo-picker.js](file:///Users/sabeqmmursyid/_cfstudio/lib/product-photo-picker.js) — (*Baru*) Modul pemilihan foto via Gemini Vision, scoring non-person, crop rules, dan verifikasi akhir.
+2. [lib/playwright-scraper.js](file:///Users/sabeqmmursyid/_cfstudio/lib/playwright-scraper.js) — Ekstraksi galeri foto dari DOM Tokopedia dengan filtering elemen non-produk.
+3. [lib/url-scraper.js](file:///Users/sabeqmmursyid/_cfstudio/lib/url-scraper.js) — Pola regex CDN baru `*.tokopedia-static.net`, de-duplikasi hash foto beresolusi tertinggi.
+4. [lib/scheduler-processors.js](file:///Users/sabeqmmursyid/_cfstudio/lib/scheduler-processors.js) — Integrasi photo picker, isolasi crop dari repair mode, in-place update `refresh_photo`, dan format Base64 Data URI G-Labs.
+5. [app/api/v2/products/scrape/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/products/scrape/route.js) — Dukungan parameter `refresh_photo` dan respons `job_ids` serta `product_id`.
+6. [apps/mcp/tools.mjs](file:///Users/sabeqmmursyid/_cfstudio/apps/mcp/tools.mjs) — Penambahan parameter `refresh_photo` pada tool MCP `cf_scrape_product_url`.
+7. [tests/url-scraper-tokopedia-images.test.js](file:///Users/sabeqmmursyid/_cfstudio/tests/url-scraper-tokopedia-images.test.js) & [tests/product-photo-picker.test.js](file:///Users/sabeqmmursyid/_cfstudio/tests/product-photo-picker.test.js) — (*Baru*) Unit tests untuk galeri gambar dan logika pemilihan foto AI.
 
 ---
 
-## 7. Pertanyaan Persetujuan Rilis & Deploy Staging
+## 6. Catatan Teknis & Rekomendasi
 
-Seluruh kode, unit test, build, dan pengujian dry-run lokal telah berhasil 100%. Sesuai protokol:
-
-> **Boleh saya rilis versi patch dan deploy ke staging Mac mini, lalu menguji ulang produk Habarlic dengan `refresh_photo`?**
+1. **Efisiensi Token AI**: Evaluasi galeri sangat efisien, dibatasi maksimal 3 panggilan Vision per produk (1 evaluasi galeri multi-image, 1 spatial crop, dan 1 validasi akhir).
+2. **Klaim Teks Enrichment**: Klaim berlebihan pada deskripsi bawaan e-commerce (misalnya "100% herbal alami aman") berada di luar lingkup scraper foto dan tetap sesuai dengan teks asli toko.
+3. **Kesiapan Produksi**: Fitur saat ini telah stabil di Staging. Sesuai SOP, deployment ke server Production (`100.95.245.55` port 5000/6000) hanya akan dijalankan jika ada instruksi tertulis khusus dari pengguna.
