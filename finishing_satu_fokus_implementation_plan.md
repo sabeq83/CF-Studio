@@ -501,6 +501,6 @@ Hasil ditampilkan di review job: "Kepadatan teks: OK" atau "3 titik padat: 6,2 d
 ### Fase 8: Uji, rilis, deploy Staging
 - [x] Jalankan semua unit test + cek statik
 - [x] Render ulang 3 video Fase 0 × 3 skin, simpan frame sesudah ke `scratch/finishing_satu_fokus_after/`
-- [ ] `npm run release-non-interactive -- --type minor --title "Finishing Satu Fokus, Skin General & Babak Natural" --points "..."`
-- [ ] Deploy Staging atomic + verifikasi wajib (current, manifest, HTTP 200, PM2, pm_cwd, PG_SEARCH_PATH, PGPOOL_MAX)
-- [ ] Laporkan link Staging & perbandingan frame sebelum/sesudah ke pengguna
+- [x] `npm run release-non-interactive -- --type minor --title "Finishing Satu Fokus, Skin General & Babak Natural" --points "..."`
+- [x] Deploy Staging atomic + verifikasi wajib (current, manifest, HTTP 200, PM2, pm_cwd, PG_SEARCH_PATH, PGPOOL_MAX)
+- [x] Laporkan link Staging & perbandingan frame sebelum/sesudah ke pengguna
