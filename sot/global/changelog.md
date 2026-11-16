@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.49.1 — Perbaikan Scraper Foto Produk E-Commerce Bersih (16/11/2026)
+- Scraper galeri foto Tokopedia DOM dan CDN baru
+- Pemilihan foto bersih via Gemini Vision menolak foto berwajah dan infografis
+- Smart spatial crop selalu aktif untuk produk baru
+- Flag refresh_photo untuk pembaruan foto produk lama tanpa timpa metadata
+- Perbaikan reference image Data URI G-Labs
+
 ## V2.49.0 — Finishing Satu Fokus, Skin General & Babak Natural (16/11/2026)
 - Arsitektur Satu Fokus R1-R6 dengan Layer Scheduler dan proteksi tabrakan teks
 - 6 Skin General Bebas Brand & Tokenized 100% var(--fx-*)
