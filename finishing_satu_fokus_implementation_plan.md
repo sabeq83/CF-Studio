@@ -461,7 +461,7 @@ Hasil ditampilkan di review job: "Kepadatan teks: OK" atau "3 titik padat: 6,2 d
 
 ### Fase 1: Mockup HTML (GERBANG REVIEW)
 - [x] Buat `public/mockup_finishing_satu_fokus.html` (spesifikasi di file instruksi)
-- [ ] Commit + push, deploy Staging atomic dengan full SHA, cek HTTP 200 `http://100.95.245.55:5010/mockup_finishing_satu_fokus.html`
+- [x] Commit + push, deploy Staging atomic dengan full SHA, cek HTTP 200 `http://100.95.245.55:5010/mockup_finishing_satu_fokus.html`
 - [ ] Kirim link ke pengguna, **STOP**, tunggu persetujuan
 - [ ] Terapkan revisi mockup dari pengguna (bila ada) sampai disetujui
 
