@@ -1,5 +1,13 @@
 # Changelog
 
+## V2.49.2 — Revisi 01 Scraper Foto Produk & Review UI (16/11/2026)
+- Pencegahan audit bloat raw_response dan skrip fix-photo-audit-bloat
+- Perbaikan penentuan status kegagalan needs_review pada foto
+- Preservasi foto lama dan suffix timestamp pada refresh
+- Preservasi kemasan botol dan kotak utuh pada AI crop
+- Endpoint photo-review dan photo-replace multi-opsi
+- Antarmuka peninjauan foto dan modal ganti foto 3-tab
+
 ## V2.49.1 — Perbaikan Scraper Foto Produk E-Commerce Bersih (16/11/2026)
 - Scraper galeri foto Tokopedia DOM dan CDN baru
 - Pemilihan foto bersih via Gemini Vision menolak foto berwajah dan infografis
