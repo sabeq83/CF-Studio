@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup: Video Studio — Render dengan Finishing Template</title>
+<style>
+/* =========================================
+   DESIGN TOKENS (self-contained)
+   ========================================= */
+:root {
+  --surface: #f8fafc;
+  --surface-raised: #ffffff;
+  --surface-interactive: #f1f5f9;
+  --surface-subtle: #e2e8f0;
+  --border-subtle: #e2e8f0;
+  --border-strong: #94a3b8;
+  --border-color: #cbd5e1;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --input-bg: #ffffff;
+  --focus-ring: #3b82f6;
+  --action-primary: #2563eb;
+  --action-primary-hover: #1d4ed8;
+  --on-action-primary: #ffffff;
+  --status-info: #2563eb;
+  --status-info-soft: #dbeafe;
+  --status-success: #16a34a;
+  --status-success-soft: #dcfce7;
+  --status-warning: #d97706;
+  --status-warning-soft: #fef3c7;
+  --status-danger: #dc2626;
+  --status-danger-soft: #fee2e2;
+  --overlay-backdrop: rgba(0,0,0,0.5);
+  --shadow-modal: 0 20px 60px rgba(0,0,0,0.15);
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.08);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #0f172a;
+    --surface-raised: #1e293b;
+    --surface-interactive: #334155;
+    --surface-subtle: #1e293b;
+    --border-subtle: #334155;
+    --border-strong: #64748b;
+    --border-color: #475569;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --input-bg: #1e293b;
+    --focus-ring: #60a5fa;
+    --action-primary: #3b82f6;
+    --action-primary-hover: #2563eb;
+    --on-action-primary: #ffffff;
+    --status-info: #60a5fa;
+    --status-info-soft: #1e3a5f;
+    --status-success: #4ade80;
+    --status-success-soft: #052e16;
+    --status-warning: #fbbf24;
+    --status-warning-soft: #451a03;
+    --status-danger: #f87171;
+    --status-danger-soft: #450a0a;
+    --shadow-card: 0 2px 8px rgba(0,0,0,0.3);
+  }
+}
+
+[data-theme="light"] {
+  --surface: #f8fafc;
+  --surface-raised: #ffffff;
+  --surface-interactive: #f1f5f9;
+  --surface-subtle: #e2e8f0;
+  --border-subtle: #e2e8f0;
+  --border-strong: #94a3b8;
+  --border-color: #cbd5e1;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --input-bg: #ffffff;
+  --focus-ring: #3b82f6;
+  --action-primary: #2563eb;
+  --action-primary-hover: #1d4ed8;
+  --on-action-primary: #ffffff;
+  --status-info: #2563eb;
+  --status-info-soft: #dbeafe;
+  --status-success: #16a34a;
+  --status-success-soft: #dcfce7;
+  --status-warning: #d97706;
+  --status-warning-soft: #fef3c7;
+  --status-danger: #dc2626;
+  --status-danger-soft: #fee2e2;
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+[data-theme="dark"] {
+  --surface: #0f172a;
+  --surface-raised: #1e293b;
+  --surface-interactive: #334155;
+  --surface-subtle: #1e293b;
+  --border-subtle: #334155;
+  --border-strong: #64748b;
+  --border-color: #475569;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --input-bg: #1e293b;
+  --focus-ring: #60a5fa;
+  --action-primary: #3b82f6;
+  --action-primary-hover: #2563eb;
+  --on-action-primary: #ffffff;
+  --status-info: #60a5fa;
+  --status-info-soft: #1e3a5f;
+  --status-success: #4ade80;
+  --status-success-soft: #052e16;
+  --status-warning: #fbbf24;
+  --status-warning-soft: #451a03;
+  --status-danger: #f87171;
+  --status-danger-soft: #450a0a;
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+/* =========================================
+   GLOBAL RESET & BASE
+   ========================================= */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  background: var(--surface);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+a { color: var(--action-primary); }
+input, select, textarea, button { font-family: inherit; }
+button { cursor: pointer; }
+
+/* =========================================
+   TOP BAR
+   ========================================= */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--surface-raised);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 10px 20px;
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.topbar-title { font-weight: 700; font-size: 15px; color: var(--text-primary); flex-shrink: 0; }
+.topbar-sep { color: var(--text-muted); }
+.scenario-label { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+.scenario-buttons { display: flex; gap: 6px; flex-wrap: wrap; }
+.scenario-btn {
+  padding: 5px 11px; border-radius: 99px; border: 1.5px solid var(--border-color);
+  background: var(--surface-raised); color: var(--text-secondary);
+  font-size: 12px; font-weight: 500; transition: all 0.15s;
+}
+.scenario-btn:hover { border-color: var(--action-primary); color: var(--action-primary); }
+.scenario-btn.active { background: var(--action-primary); color: var(--on-action-primary); border-color: var(--action-primary); }
+.theme-btn {
+  margin-left: auto; padding: 6px 12px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color); background: var(--surface-interactive);
+  color: var(--text-secondary); font-size: 12px;
+}
+
+/* =========================================
+   MAIN LAYOUT
+   ========================================= */
+.main-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 0;
+  min-height: calc(100vh - 54px);
+}
+.left-panel {
+  padding: 20px;
+  overflow-y: auto;
+  border-right: 1px solid var(--border-subtle);
+  display: flex; flex-direction: column; gap: 16px;
+}
+.right-panel {
+  padding: 20px;
+  overflow-y: auto;
+  display: flex; flex-direction: column; gap: 16px;
+  background: var(--surface-raised);
+}
+
+/* =========================================
+   CARDS & SECTIONS
+   ========================================= */
+.section-card {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.section-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.section-title { font-weight: 600; font-size: 13px; color: var(--text-primary); display: flex; align-items: center; gap: 7px; }
+.section-icon { font-size: 15px; }
+.section-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+
+/* =========================================
+   FORM ELEMENTS
+   ========================================= */
+.form-row { display: flex; flex-direction: column; gap: 5px; }
+.form-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+.form-input, .form-select, .form-textarea {
+  background: var(--input-bg); border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-sm); padding: 8px 10px;
+  font-size: 13px; color: var(--text-primary); width: 100%;
+  transition: border-color 0.15s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  outline: none; border-color: var(--focus-ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus-ring) 20%, transparent);
+}
+.form-textarea { resize: vertical; min-height: 60px; }
+.form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+/* =========================================
+   BADGES
+   ========================================= */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600;
+}
+.badge-success { background: var(--status-success-soft); color: var(--status-success); }
+.badge-info { background: var(--status-info-soft); color: var(--status-info); }
+.badge-warning { background: var(--status-warning-soft); color: var(--status-warning); }
+.badge-danger { background: var(--status-danger-soft); color: var(--status-danger); }
+.badge-muted { background: var(--surface-interactive); color: var(--text-muted); }
+
+/* =========================================
+   ALERT BOXES
+   ========================================= */
+.alert {
+  border-radius: var(--radius-sm); padding: 10px 12px;
+  font-size: 12.5px; display: flex; gap: 8px; align-items: flex-start;
+  border-left: 3px solid;
+}
+.alert-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.alert-info { background: var(--status-info-soft); border-color: var(--status-info); color: var(--text-primary); }
+.alert-warning { background: var(--status-warning-soft); border-color: var(--status-warning); color: var(--text-primary); }
+.alert-danger { background: var(--status-danger-soft); border-color: var(--status-danger); color: var(--text-primary); }
+.alert-success { background: var(--status-success-soft); border-color: var(--status-success); color: var(--text-primary); }
+.alert-text { flex: 1; line-height: 1.5; }
+.alert-title { font-weight: 600; margin-bottom: 2px; }
+
+/* =========================================
+   CAMPAIGN BANNER
+   ========================================= */
+.campaign-banner {
+  background: linear-gradient(135deg, var(--status-info-soft), color-mix(in srgb, var(--status-success-soft) 60%, var(--status-info-soft)));
+  border: 1.5px solid var(--status-info);
+  border-radius: var(--radius-md); padding: 12px 14px;
+  display: flex; align-items: flex-start; gap: 10px;
+}
+.campaign-banner-icon { font-size: 20px; flex-shrink: 0; }
+.campaign-banner-content { flex: 1; min-width: 0; }
+.campaign-banner-title { font-weight: 700; font-size: 13px; color: var(--status-info); margin-bottom: 4px; }
+.campaign-banner-meta { font-size: 12px; color: var(--text-secondary); display: flex; flex-wrap: wrap; gap: 6px; }
+.campaign-banner-actions { display: flex; gap: 8px; margin-top: 10px; }
+.btn-sm {
+  padding: 5px 12px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 500;
+  border: 1.5px solid var(--border-color); background: var(--surface-raised); color: var(--text-primary);
+  transition: all 0.15s;
+}
+.btn-sm:hover { border-color: var(--action-primary); color: var(--action-primary); }
+.btn-sm-primary { background: var(--action-primary); color: var(--on-action-primary); border-color: var(--action-primary); }
+.btn-sm-primary:hover { background: var(--action-primary-hover); border-color: var(--action-primary-hover); }
+
+/* =========================================
+   TEMPLATE GALLERY
+   ========================================= */
+.template-gallery {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+}
+.template-card {
+  border: 2px solid var(--border-subtle); border-radius: var(--radius-md);
+  overflow: hidden; cursor: pointer; transition: all 0.15s; position: relative;
+  background: var(--surface-raised);
+}
+.template-card:hover { border-color: var(--action-primary); transform: translateY(-1px); box-shadow: var(--shadow-card); }
+.template-card.selected { border-color: var(--action-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--action-primary) 25%, transparent); }
+.template-preview-box {
+  height: 72px; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+  position: relative; overflow: hidden;
+}
+.template-badges {
+  position: absolute; top: 4px; left: 4px; display: flex; flex-direction: column; gap: 2px;
+}
+.template-badge { font-size: 9px; padding: 2px 5px; border-radius: 99px; font-weight: 700; }
+.template-badge-suggested { background: var(--status-warning); color: #fff; }
+.template-badge-campaign { background: var(--status-success); color: #fff; }
+.template-info { padding: 7px 8px; }
+.template-name { font-size: 11px; font-weight: 600; color: var(--text-primary); }
+.template-desc { font-size: 10px; color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
+
+/* Template Preview Colors */
+.tpl-none { background: linear-gradient(135deg, #1e293b, #334155); color: #94a3b8; }
+.tpl-calm { background: linear-gradient(135deg, #f8fafc, #e0f2fe); color: #0369a1; }
+.tpl-recipe { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; }
+.tpl-tips { background: linear-gradient(135deg, #ede9fe, #c4b5fd); color: #5b21b6; }
+.tpl-ramuan { background: linear-gradient(135deg, #fef3c7, #d97706); color: #451a03; }
+.tpl-problem { background: linear-gradient(135deg, #fee2e2, #fca5a5); color: #991b1b; }
+.tpl-angka { background: linear-gradient(135deg, #dbeafe, #93c5fd); color: #1e3a8a; }
+.tpl-mitos { background: linear-gradient(135deg, #f0fdf4, #86efac); color: #14532d; }
+
+/* =========================================
+   COLLAPSIBLE SECTION
+   ========================================= */
+.collapsible-header {
+  padding: 10px 14px; cursor: pointer; user-select: none;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  border-radius: var(--radius-sm); transition: background 0.1s;
+}
+.collapsible-header:hover { background: var(--surface-interactive); }
+.collapsible-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); display: flex; align-items: center; gap: 7px; }
+.collapsible-arrow { font-size: 11px; color: var(--text-muted); transition: transform 0.2s; }
+.collapsible-arrow.open { transform: rotate(180deg); }
+.collapsible-body { display: none; padding: 0 14px 14px; }
+.collapsible-body.open { display: block; }
+
+/* =========================================
+   TABS
+   ========================================= */
+.tabs { display: flex; border-bottom: 1.5px solid var(--border-subtle); margin-bottom: 12px; }
+.tab-btn {
+  padding: 7px 14px; font-size: 12.5px; font-weight: 500; color: var(--text-secondary);
+  border-bottom: 2px solid transparent; margin-bottom: -1.5px; transition: all 0.15s; border: none;
+  background: none; cursor: pointer;
+}
+.tab-btn.active { color: var(--action-primary); border-bottom-color: var(--action-primary); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* =========================================
+   VALIDATION BOX
+   ========================================= */
+.validation-box {
+  border-radius: var(--radius-sm); padding: 10px 12px; font-size: 12px;
+  border: 1.5px solid; display: flex; gap: 8px; align-items: flex-start;
+}
+.validation-ok { border-color: var(--status-success); background: var(--status-success-soft); color: var(--status-success); }
+.validation-warn { border-color: var(--status-warning); background: var(--status-warning-soft); color: var(--text-primary); }
+.validation-err { border-color: var(--status-danger); background: var(--status-danger-soft); color: var(--text-primary); }
+
+/* =========================================
+   VIDEO PREVIEW (9:16)
+   ========================================= */
+.preview-container { display: flex; flex-direction: column; gap: 12px; }
+.preview-title { font-weight: 600; font-size: 13px; color: var(--text-primary); }
+.preview-frame {
+  width: 100%; aspect-ratio: 9/16; max-width: 360px; margin: 0 auto;
+  border-radius: var(--radius-md); overflow: hidden; position: relative;
+  box-shadow: var(--shadow-modal);
+}
+.preview-bg {
+  position: absolute; inset: 0;
+  background: linear-gradient(170deg, #1e1a2e 0%, #0d1117 100%);
+}
+.preview-overlay-sim {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  justify-content: space-between; padding: 14px 10px;
+}
+.preview-timeline {
+  display: flex; align-items: center; gap: 8px; margin-top: 8px;
+}
+.preview-timeline input[type=range] { flex: 1; accent-color: var(--action-primary); }
+.preview-playbtn {
+  width: 32px; height: 32px; border-radius: 50%; background: var(--action-primary);
+  color: var(--on-action-primary); border: none; font-size: 12px;
+  display: flex; align-items: center; justify-content: center;
+}
+.preview-time { font-size: 11px; color: var(--text-muted); }
+
+/* Template overlay sims */
+.sim-hook {
+  background: rgba(0,0,0,0.65); border-radius: 8px; padding: 8px 10px;
+  color: #fff; font-size: 11px; font-weight: 700; text-align: center; letter-spacing: 0.03em;
+}
+.sim-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.sim-chip { background: rgba(255,204,61,0.9); color: #111; border-radius: 99px; padding: 3px 9px; font-size: 10px; font-weight: 700; }
+.sim-chip-blue { background: rgba(59,130,246,0.85); color: #fff; }
+.sim-chip-green { background: rgba(22,163,74,0.85); color: #fff; }
+.sim-cta { background: rgba(37,99,235,0.9); color: #fff; border-radius: 8px; padding: 7px 10px; font-size: 10px; font-weight: 700; text-align: center; }
+.sim-chapters { display: flex; flex-direction: column; gap: 4px; }
+.sim-chapter { background: rgba(220,38,38,0.8); color: #fff; border-radius: 6px; padding: 4px 8px; font-size: 10px; font-weight: 600; }
+.sim-chapter.solution { background: rgba(22,163,74,0.8); }
+.sim-brand-mark { background: rgba(255,255,255,0.1); border-radius: 6px; padding: 4px 8px; font-size: 10px; color: rgba(255,255,255,0.7); align-self: flex-end; }
+.sim-compare { display: flex; gap: 6px; }
+.sim-col { flex: 1; border-radius: 8px; padding: 6px; text-align: center; font-size: 10px; font-weight: 700; }
+.sim-col-a { background: rgba(239,68,68,0.8); color: #fff; }
+.sim-col-b { background: rgba(22,163,74,0.8); color: #fff; }
+.sim-myth { background: rgba(220,38,38,0.85); color: #fff; border-radius: 8px; padding: 7px 10px; text-align: center; font-size: 12px; font-weight: 900; letter-spacing: 0.08em; }
+.sim-ramuan { display: flex; flex-direction: column; gap: 3px; }
+.sim-ramuan-item { background: rgba(217,119,6,0.8); color: #fff; border-radius: 6px; padding: 3px 8px; font-size: 10px; }
+.sim-tips { display: flex; flex-direction: column; gap: 4px; }
+.sim-tip { display: flex; align-items: center; gap: 6px; }
+.sim-tip-num { background: var(--action-primary); color: #fff; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; }
+.sim-tip-text { background: rgba(0,0,0,0.6); color: #fff; border-radius: 6px; padding: 4px 8px; font-size: 10px; }
+.sim-wellness { display: flex; flex-direction: column; gap: 6px; }
+.sim-wellness-card { background: rgba(255,255,255,0.9); color: #0f172a; border-radius: 10px; padding: 8px 10px; }
+.sim-wellness-title { font-size: 10px; font-weight: 700; margin-bottom: 4px; }
+.sim-wellness-text { font-size: 9px; color: #475569; }
+.sim-caption { background: rgba(0,0,0,0.75); color: #fff; border-radius: 6px; padding: 5px 8px; font-size: 10px; text-align: center; line-height: 1.4; }
+
+/* =========================================
+   QUEUE LIST
+   ========================================= */
+.queue-list { display: flex; flex-direction: column; gap: 8px; }
+.queue-item {
+  background: var(--surface-interactive); border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-sm); padding: 10px 12px;
+  display: flex; align-items: flex-start; gap: 10px;
+}
+.queue-status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.dot-waiting { background: var(--status-warning); animation: pulse 1.5s infinite; }
+.dot-running { background: var(--status-info); animation: spin-pulse 1s infinite; }
+.dot-paused { background: var(--text-muted); }
+.dot-done { background: var(--status-success); }
+.dot-fail { background: var(--status-danger); }
+.dot-skipdone { background: var(--status-warning); }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+@keyframes spin-pulse { 0%{box-shadow:0 0 0 0 rgba(37,99,235,0.6)} 70%{box-shadow:0 0 0 6px transparent} 100%{box-shadow:0 0 0 0 transparent} }
+.queue-content { flex: 1; min-width: 0; }
+.queue-label { font-size: 12.5px; font-weight: 500; color: var(--text-primary); }
+.queue-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.progress-bar-wrap { height: 4px; background: var(--surface-subtle); border-radius: 99px; margin-top: 6px; }
+.progress-bar { height: 4px; border-radius: 99px; background: var(--action-primary); transition: width 0.5s; }
+.queue-hint { background: var(--status-warning-soft); border: 1px solid var(--status-warning); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 11.5px; color: var(--text-primary); }
+
+/* =========================================
+   RENDER BUTTON ZONE
+   ========================================= */
+.render-zone { display: flex; flex-direction: column; gap: 10px; }
+.btn-render {
+  width: 100%; padding: 13px; border-radius: var(--radius-md); border: none;
+  background: var(--action-primary); color: var(--on-action-primary);
+  font-size: 14px; font-weight: 700; transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-render:hover:not(:disabled) { background: var(--action-primary-hover); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(37,99,235,0.35); }
+.btn-render:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+.render-estimate { font-size: 11.5px; color: var(--text-muted); text-align: center; }
+
+/* =========================================
+   AUDIO FILE LIST (per clip)
+   ========================================= */
+.audio-clip-list { display: flex; flex-direction: column; gap: 6px; }
+.audio-clip-row {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface-interactive); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm); padding: 7px 10px; font-size: 12px;
+}
+.clip-index { font-weight: 700; color: var(--text-muted); font-size: 11px; min-width: 20px; }
+.clip-arrow { color: var(--text-muted); }
+.clip-filename { flex: 1; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* =========================================
+   SECTION-LEVEL CLIP COUNTER BADGE
+   ========================================= */
+.clip-count-badge {
+  font-size: 11px; background: var(--surface-interactive); color: var(--text-secondary);
+  border-radius: 99px; padding: 2px 8px; font-weight: 500;
+}
+
+/* =========================================
+   UTILITY
+   ========================================= */
+.text-muted { color: var(--text-muted); font-size: 12px; }
+.flex-row { display: flex; align-items: center; gap: 8px; }
+.flex-row-sb { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.hidden { display: none !important; }
+hr.divider { border: none; border-top: 1px solid var(--border-subtle); margin: 4px 0; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <span class="topbar-title">🎬 Video Studio — Render dengan Finishing Template</span>
+  <span class="topbar-sep">|</span>
+  <span class="scenario-label">Skenario:</span>
+  <div class="scenario-buttons">
+    <button class="scenario-btn active" onclick="setScenario('A')">A. Dari campaign</button>
+    <button class="scenario-btn" onclick="setScenario('B')">B. Upload tanpa campaign</button>
+    <button class="scenario-btn" onclick="setScenario('C')">C. Template diganti</button>
+    <button class="scenario-btn" onclick="setScenario('D')">D. Audio per klip ✓</button>
+    <button class="scenario-btn" onclick="setScenario('E')">E. Audio tidak cocok</button>
+    <button class="scenario-btn" onclick="setScenario('F')">F. Satu audio semua klip</button>
+    <button class="scenario-btn" onclick="setScenario('G')">G. Tanpa VO & Whisper</button>
+  </div>
+  <button class="theme-btn" onclick="toggleTheme()">🌙 Ganti Tema</button>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="main-layout">
+
+  <!-- ===== LEFT PANEL ===== -->
+  <div class="left-panel">
+
+    <!-- 1. SUMBER VIDEO -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="section-title"><span class="section-icon">🎞️</span> Sumber Video</span>
+        <span class="clip-count-badge" id="clip-count-badge">9 klip</span>
+      </div>
+      <div class="section-body">
+        <div class="form-row">
+          <label class="form-label">Sumber</label>
+          <select class="form-select" id="video-source-sel" onchange="onVideoSourceChange()">
+            <option value="campaign" selected>RE Campaign / Instant Factory</option>
+            <option value="db">Library (DB)</option>
+            <option value="upload">Upload file</option>
+          </select>
+        </div>
+        <div id="campaign-video-sel" class="form-row">
+          <label class="form-label">Pilih campaign</label>
+          <select class="form-select">
+            <option selected>✅ Minyak Urut Herbal — campaign_rekayasa_2024_11</option>
+            <option>Produk Kunyit Asam — opc_batch_09</option>
+            <option>Editorial Wellness — editorial_42</option>
+          </select>
+        </div>
+        <div id="upload-video-area" class="hidden">
+          <div class="alert alert-info"><span class="alert-icon">📁</span><div class="alert-text">Pilih file video (bisa banyak klip, urutan sesuai nama file)</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. SUMBER AUDIO -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="section-title"><span class="section-icon">🔊</span> Sumber Audio</span>
+      </div>
+      <div class="section-body">
+        <div class="form-row">
+          <label class="form-label">Jenis audio</label>
+          <select class="form-select" id="audio-source-sel" onchange="onAudioSourceChange()">
+            <option value="tts" selected>TTS Studio (klip VO)</option>
+            <option value="single">Upload — Satu audio untuk semua klip</option>
+            <option value="per_clip">Upload — Satu audio per klip</option>
+            <option value="db">Library (DB)</option>
+          </select>
+        </div>
+        <!-- TTS info -->
+        <div id="audio-tts-info">
+          <div class="alert alert-success">
+            <span class="alert-icon">✅</span>
+            <div class="alert-text"><span class="alert-title">Batch TTS Studio terpilih otomatis</span>Batch dari campaign: <strong>tts_batch_rekayasa_2024_11</strong> — 9 klip VO selesai</div>
+          </div>
+        </div>
+        <!-- Single audio -->
+        <div id="audio-single-info" class="hidden">
+          <div class="alert alert-warning">
+            <span class="alert-icon">⚠️</span>
+            <div class="alert-text"><span class="alert-title">Mode: Satu audio untuk semua klip</span>Semua klip video digabung dulu, lalu disinkronkan dengan satu audio. Untuk template <em>Tips Listicle</em> dan <em>Problem Solution</em>, mode <strong>satu audio per klip</strong> memberikan hasil lebih baik.</div>
+          </div>
+          <div class="form-row" style="margin-top:8px">
+            <label class="form-label">File audio</label>
+            <input type="text" class="form-input" placeholder="audio_promo_urut.mp3" readonly value="audio_promo_urut.mp3">
+          </div>
+        </div>
+        <!-- Per-clip audio -->
+        <div id="audio-per-clip-info" class="hidden">
+          <div class="audio-clip-list" id="per-clip-list"></div>
+        </div>
+        <!-- Mismatch -->
+        <div id="audio-mismatch-alert" class="hidden">
+          <div class="alert alert-danger">
+            <span class="alert-icon">❌</span>
+            <div class="alert-text"><span class="alert-title">Jumlah tidak cocok</span>Video: 9 klip, Audio: 7 file. Samakan jumlah file audio dengan jumlah klip sebelum melanjutkan.</div>
+          </div>
+        </div>
+        <!-- Teks VO opsional -->
+        <div id="vo-text-section">
+          <hr class="divider">
+          <div class="collapsible-header" onclick="toggleCollapsible('vo-text-body', 'vo-arrow')">
+            <span class="collapsible-title">📝 Teks VO (opsional)</span>
+            <span class="collapsible-arrow" id="vo-arrow">▼</span>
+          </div>
+          <div class="collapsible-body" id="vo-text-body">
+            <div class="form-row">
+              <label class="form-label">Teks voiceover (untuk word-sync caption)</label>
+              <textarea class="form-textarea" id="vo-text-input" placeholder="Isi teks VO per klip, atau kosongkan jika pakai transkripsi otomatis..."></textarea>
+            </div>
+            <div id="whisper-available-info" class="hidden">
+              <button class="btn-sm" onclick="simulateTranscribe()">🎙️ Transkripsi otomatis (Whisper)</button>
+            </div>
+            <div id="whisper-unavailable-info">
+              <div class="text-muted">Whisper CLI tidak tersedia di server ini. Jika teks VO dikosongkan, caption tidak akan tampil (layer lain tetap aktif).</div>
+            </div>
+            <div id="transcribe-result" class="hidden">
+              <div class="alert alert-success" style="margin-top:8px">
+                <span class="alert-icon">✅</span>
+                <div class="alert-text"><span class="alert-title">Transkripsi selesai</span>Periksa dan koreksi teks di bawah sebelum render:</div>
+              </div>
+              <textarea class="form-textarea" style="margin-top:6px">Klip 1: Pegal-pegal setelah kerja seharian? Klip 2: Coba urut dengan Minyak Herbal alami...</textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Strategi sinkron + BGM -->
+        <hr class="divider">
+        <div class="form-grid-2">
+          <div class="form-row">
+            <label class="form-label">Strategi sinkron</label>
+            <select class="form-select">
+              <option>Potong sesuai audio</option>
+              <option>Peregangan video</option>
+              <option>Freeze frame akhir</option>
+              <option>Loop video</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label class="form-label">BGM (opsional)</label>
+            <select class="form-select">
+              <option>— Tanpa BGM —</option>
+              <option>Mood Relaxing</option>
+              <option>Upbeat Promo</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. PANEL FINISHING -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="section-title"><span class="section-icon">✨</span> Finishing Template</span>
+      </div>
+      <div class="section-body">
+
+        <!-- CAMPAIGN BANNER (skenario A) -->
+        <div id="campaign-banner" class="campaign-banner">
+          <span class="campaign-banner-icon">🏷️</span>
+          <div class="campaign-banner-content">
+            <div class="campaign-banner-title">Dimuat dari campaign: <em>Minyak Urut Herbal</em></div>
+            <div class="campaign-banner-meta">
+              <span class="badge badge-info">template: recipe_pop</span>
+              <span class="badge badge-muted">skin: pop_kuning</span>
+              <span class="badge badge-success">plan ✓</span>
+              <span class="badge badge-success">batch TTS ✓</span>
+            </div>
+            <div class="campaign-banner-actions">
+              <button class="btn-sm btn-sm-primary" onclick="useCampaignAsIs()">✅ Pakai apa adanya</button>
+              <button class="btn-sm" onclick="openFinishingCustomize()">✏️ Ubah</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TEMPLATE DIGANTI WARNING (skenario C) -->
+        <div id="template-changed-warning" class="hidden">
+          <div class="alert alert-warning">
+            <span class="alert-icon">⚠️</span>
+            <div class="alert-text"><span class="alert-title">Plan tidak cocok dengan template baru</span>Plan campaign dibuat untuk <strong>recipe_pop</strong>. Template <strong>tips_listicle</strong> membutuhkan field berbeda (tips, punch_display). Buat plan baru dengan AI atau isi manual.</div>
+          </div>
+        </div>
+
+        <!-- FINISHING DETAILS (terlipat di skenario A mode "pakai apa adanya") -->
+        <div id="finishing-details">
+          <!-- Galeri Template -->
+          <div class="collapsible-header" onclick="toggleCollapsible('tpl-gallery-body','tpl-arrow')">
+            <span class="collapsible-title">🎨 Pilih Template</span>
+            <span class="collapsible-arrow open" id="tpl-arrow">▼</span>
+          </div>
+          <div class="collapsible-body open" id="tpl-gallery-body">
+            <div class="template-gallery" id="template-gallery"></div>
+          </div>
+
+          <hr class="divider">
+
+          <!-- Pengaturan Lanjutan -->
+          <div class="collapsible-header" onclick="toggleCollapsible('finishing-settings-body','settings-arrow')">
+            <span class="collapsible-title">⚙️ Pengaturan Lanjutan</span>
+            <span class="collapsible-arrow" id="settings-arrow">▼</span>
+          </div>
+          <div class="collapsible-body" id="finishing-settings-body">
+            <div class="form-grid-2" style="margin-bottom:10px">
+              <div class="form-row">
+                <label class="form-label">Skin Visual</label>
+                <select class="form-select" onchange="updateSkin(this.value)">
+                  <option value="pop_kuning" selected>Pop Kuning (Default)</option>
+                  <option value="bersih_putih">Bersih Putih</option>
+                  <option value="hangat_earthy">Hangat Earthy</option>
+                  <option value="gelap_tegas">Gelap Tegas</option>
+                  <option value="pastel_lembut">Pastel Lembut</option>
+                  <option value="editorial_serif">Editorial Serif</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <label class="form-label">Mode Caption</label>
+                <select class="form-select">
+                  <option>Penuh (full)</option>
+                  <option>Hybrid</option>
+                  <option>Kata kunci saja</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-grid-3" style="margin-bottom:10px">
+              <div class="form-row">
+                <label class="form-label">Transisi</label>
+                <select class="form-select">
+                  <option>Potong langsung</option>
+                  <option>Fade (xfade)</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <label class="form-label">Durasi transisi</label>
+                <input type="number" class="form-input" value="0.5" min="0.2" max="1.5" step="0.1">
+              </div>
+              <div class="form-row">
+                <label class="form-label">Platform</label>
+                <select class="form-select">
+                  <option>TikTok</option>
+                  <option>Facebook</option>
+                  <option>YouTube</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-grid-2" style="margin-bottom:10px">
+              <div class="form-row">
+                <label class="form-label">Gerak kamera</label>
+                <select class="form-select">
+                  <option>Otomatis (dari campaign)</option>
+                  <option>Aktif</option>
+                  <option>Nonaktif</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <label class="form-label">Target loudness</label>
+                <select class="form-select">
+                  <option>−14 LUFS (TikTok/YT)</option>
+                  <option>−16 LUFS (Facebook)</option>
+                  <option>−23 LUFS (Broadcast)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <hr class="divider">
+
+          <!-- Brand & Konten -->
+          <div class="collapsible-header" onclick="toggleCollapsible('brand-body','brand-arrow')">
+            <span class="collapsible-title">🏷️ Brand & Konten</span>
+            <span class="collapsible-arrow" id="brand-arrow">▼</span>
+          </div>
+          <div class="collapsible-body" id="brand-body">
+            <div class="form-grid-2" style="margin-bottom:10px">
+              <div class="form-row">
+                <label class="form-label">Brand preset</label>
+                <select class="form-select">
+                  <option>Minyak Urut Herbal Co.</option>
+                  <option>— Tanpa brand —</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <label class="form-label">Override warna aksen</label>
+                <input type="text" class="form-input" placeholder="#ffcc3d">
+              </div>
+            </div>
+            <div class="form-row">
+              <label class="form-label">Judul Hook</label>
+              <input type="text" class="form-input" value="Pegal Langsung Hilang!">
+            </div>
+            <div class="form-row">
+              <label class="form-label">Nama brand (di video)</label>
+              <input type="text" class="form-input" value="Minyak Urut Herbal">
+            </div>
+            <div class="form-row">
+              <label class="form-label">CTA</label>
+              <input type="text" class="form-input" value="Klik link bio untuk pesan sekarang!">
+            </div>
+            <div class="form-row">
+              <label class="form-label">Disclaimer (opsional)</label>
+              <input type="text" class="form-input" placeholder="Produk herbal tradisional. Bukan obat.">
+            </div>
+          </div>
+
+          <hr class="divider">
+
+          <!-- Sumber Plan -->
+          <div class="collapsible-header" onclick="toggleCollapsible('plan-body','plan-arrow')">
+            <span class="collapsible-title">📋 Sumber Finishing Plan</span>
+            <span class="collapsible-arrow" id="plan-arrow">▼</span>
+          </div>
+          <div class="collapsible-body" id="plan-body">
+            <div class="tabs" id="plan-tabs">
+              <button class="tab-btn active" onclick="switchTab('plan-tab-campaign', this)">Dari campaign asal</button>
+              <button class="tab-btn" onclick="switchTab('plan-tab-ai', this)">Buat dengan AI</button>
+              <button class="tab-btn" onclick="switchTab('plan-tab-manual', this)">Isi manual</button>
+            </div>
+            <div class="tab-panel active" id="plan-tab-campaign">
+              <div class="alert alert-success">
+                <span class="alert-icon">✅</span>
+                <div class="alert-text"><span class="alert-title">Plan dari campaign asal berhasil dimuat</span>Template: recipe_pop · Validasi: lulus · 4 chip bahan, 3 langkah, hook ✓</div>
+              </div>
+              <div class="text-muted" style="margin-top:8px">Plan ini divalidasi ulang sebelum render. Jika validator lebih ketat, akan muncul error beserta saran generate ulang.</div>
+            </div>
+            <div class="tab-panel" id="plan-tab-ai">
+              <div class="alert alert-info">
+                <span class="alert-icon">🤖</span>
+                <div class="alert-text"><span class="alert-title">Generate plan dengan AI</span>Sistem akan membuat finishing plan berdasarkan teks VO dan data produk campaign, lalu memvalidasinya otomatis.</div>
+              </div>
+              <button class="btn-sm" style="margin-top:8px; width:100%" onclick="simulateAIGenerate()">✨ Generate Plan dengan AI</button>
+              <div id="ai-plan-result" class="hidden" style="margin-top:8px">
+                <div class="alert alert-success"><span class="alert-icon">✅</span><div class="alert-text">Plan berhasil dibuat dan divalidasi. Lihat tab JSON untuk detail.</div></div>
+              </div>
+            </div>
+            <div class="tab-panel" id="plan-tab-manual">
+              <div class="form-row">
+                <label class="form-label">Hook</label>
+                <input type="text" class="form-input" placeholder="Pegal-pegal hilang dalam 10 menit?">
+              </div>
+              <div class="form-row" style="margin-top:8px">
+                <label class="form-label">Chip bahan (pisahkan dengan koma)</label>
+                <input type="text" class="form-input" placeholder="Jahe, Kunyit, Sereh, Cengkeh">
+              </div>
+              <div class="form-row" style="margin-top:8px">
+                <label class="form-label">Langkah resep (pisahkan baris)</label>
+                <textarea class="form-textarea" placeholder="Langkah 1: Oleskan tipis&#10;Langkah 2: Pijat merata&#10;Langkah 3: Diamkan 5 menit"></textarea>
+              </div>
+            </div>
+
+            <!-- Validation box -->
+            <div id="plan-validation-ok" class="validation-box validation-ok" style="margin-top:12px">
+              ✅ Plan valid — siap render. 4 chip bahan · 3 langkah · hook ✓ · tidak ada klaim terlarang
+            </div>
+            <div id="plan-validation-warn" class="validation-box validation-warn hidden" style="margin-top:12px">
+              <div><strong>⚠️ Peringatan:</strong> Teks terlalu padat di langkah 2. Pertimbangkan mempersingkat.</div>
+            </div>
+            <div id="plan-validation-err" class="validation-box validation-err hidden" style="margin-top:12px">
+              <div><strong>❌ Error:</strong> Klaim terlarang terdeteksi ("menyembuhkan"). Perbaiki atau hapus sebelum render.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PERINGATAN PASANGAN KLIP (mismatch) -->
+        <div id="clip-mismatch-warning" class="hidden">
+          <div class="alert alert-danger">
+            <span class="alert-icon">❌</span>
+            <div class="alert-text"><span class="alert-title">Jumlah tidak cocok — render diblokir</span>Video: 9 klip, Audio: 7 file. Samakan jumlah file audio dengan klip video dulu.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 4. RENDER BUTTON -->
+    <div class="render-zone">
+      <button class="btn-render" id="render-btn" onclick="startRender()">
+        🚀 Mulai Rendering Video
+      </button>
+      <div class="render-estimate" id="render-estimate">Estimasi: ~6–8 menit untuk 9 klip dengan template recipe_pop</div>
+    </div>
+
+  </div><!-- /left-panel -->
+
+  <!-- ===== RIGHT PANEL ===== -->
+  <div class="right-panel">
+
+    <!-- PREVIEW 9:16 -->
+    <div class="preview-container">
+      <div class="flex-row-sb">
+        <span class="preview-title">Preview</span>
+        <span class="badge badge-muted" id="preview-template-badge">recipe_pop · pop_kuning</span>
+      </div>
+      <div class="preview-frame">
+        <div class="preview-bg"></div>
+        <div class="preview-overlay-sim" id="preview-overlay">
+          <!-- filled by JS -->
+        </div>
+      </div>
+      <div class="preview-timeline">
+        <button class="preview-playbtn" onclick="togglePlay(this)">▶</button>
+        <input type="range" min="0" max="100" value="30" id="timeline-scrub">
+        <span class="preview-time" id="preview-time">0:03 / 0:11</span>
+      </div>
+    </div>
+
+    <!-- ANTREAN RENDER -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="section-title"><span class="section-icon">📋</span> Antrean Render</span>
+        <span class="badge badge-muted" id="queue-count-badge">0 job</span>
+      </div>
+      <div class="section-body">
+        <div class="queue-list" id="queue-list">
+          <div class="text-muted" style="text-align:center;padding:16px 0">Belum ada job. Klik "Mulai Rendering Video" untuk menambah.</div>
+        </div>
+        <div id="queue-hint-3x" class="queue-hint hidden">
+          💡 <strong>Render sering tertunda produksi.</strong> Coba jalankan di luar jam produksi terjadwal untuk mendapatkan hasil lebih cepat.
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /right-panel -->
+
+</div><!-- /main-layout -->
+
+<script>
+// =========================================
+// DATA
+// =========================================
+const TEMPLATES = [
+  { id: 'none',             label: 'Caption Dasar',      desc: 'Subtitle & Hook saja',              cls: 'tpl-none',    icon: '📄' },
+  { id: 'calm_wellness',    label: 'Calm Wellness',      desc: 'Editorial + Product Card',          cls: 'tpl-calm',    icon: '🌿' },
+  { id: 'recipe_pop',       label: 'Recipe Pop',         desc: 'Chips bahan + Step Cards',          cls: 'tpl-recipe',  icon: '🍳' },
+  { id: 'tips_listicle',    label: 'Tips Listicle',      desc: 'Badge TIP N/Total + Rekap',         cls: 'tpl-tips',    icon: '✅' },
+  { id: 'ramuan_ritual',    label: 'Ramuan Ritual',      desc: 'Kartu bahan seduh + badge waktu',   cls: 'tpl-ramuan',  icon: '🫖' },
+  { id: 'problem_solution', label: 'Problem Solution',   desc: 'Alur Masalah → Solusi',             cls: 'tpl-problem', icon: '🔧' },
+  { id: 'angka_banding',    label: 'Angka & Banding',    desc: 'Komparasi A vs B',                  cls: 'tpl-angka',   icon: '⚖️' },
+  { id: 'mitos_fakta',      label: 'Mitos vs Fakta',     desc: 'Stempel MITOS/FAKTA sinkron VO',    cls: 'tpl-mitos',   icon: '❓' },
+];
+
+const SKINS = {
+  pop_kuning:    { accent: '#ffcc3d', card: 'rgba(20,12,8,0.82)', ink: '#fff' },
+  bersih_putih:  { accent: '#2563eb', card: 'rgba(255,255,255,0.94)', ink: '#111' },
+  hangat_earthy: { accent: '#c2410c', card: 'rgba(28,18,10,0.85)', ink: '#fff' },
+  gelap_tegas:   { accent: '#06b6d4', card: 'rgba(2,6,23,0.9)', ink: '#fff' },
+  pastel_lembut: { accent: '#a78bfa', card: 'rgba(245,243,255,0.92)', ink: '#3b0764' },
+  editorial_serif:{ accent: '#1e293b', card: 'rgba(248,250,252,0.95)', ink: '#0f172a' },
+};
+
+let currentScenario = 'A';
+let selectedTemplate = 'recipe_pop';
+let selectedSkin = 'pop_kuning';
+let queueJobs = [];
+let queueInterval = null;
+let jobCounter = 0;
+
+// =========================================
+// TEMPLATE GALLERY
+// =========================================
+function buildTemplateGallery() {
+  const gallery = document.getElementById('template-gallery');
+  gallery.innerHTML = '';
+  TEMPLATES.forEach(t => {
+    const card = document.createElement('div');
+    card.className = 'template-card' + (t.id === selectedTemplate ? ' selected' : '');
+    card.onclick = () => selectTemplate(t.id);
+    const badges = [];
+    if (t.id === 'recipe_pop') badges.push('<span class="template-badge template-badge-campaign">Dari campaign</span>');
+    if (t.id === 'recipe_pop' || t.id === 'calm_wellness') badges.push('<span class="template-badge template-badge-suggested">Disarankan</span>');
+    card.innerHTML = `
+      <div class="template-preview-box ${t.cls}">
+        <div class="template-badges">${badges.join('')}</div>
+        <span style="font-size:22px">${t.icon}</span>
+      </div>
+      <div class="template-info">
+        <div class="template-name">${t.label}</div>
+        <div class="template-desc">${t.desc}</div>
+      </div>`;
+    gallery.appendChild(card);
+  });
+}
+
+function selectTemplate(id) {
+  selectedTemplate = id;
+  buildTemplateGallery();
+  updatePreview();
+  updatePreviewBadge();
+  if (currentScenario === 'C') {
+    document.getElementById('template-changed-warning').classList.remove('hidden');
+    document.getElementById('plan-validation-ok').classList.add('hidden');
+    document.getElementById('plan-validation-err').classList.remove('hidden');
+    document.getElementById('plan-validation-err').textContent = `❌ Error: Plan campaign dibuat untuk recipe_pop. Template ${id} membutuhkan field berbeda. Buat plan baru dengan AI atau isi manual.`;
+  }
+}
+
+// =========================================
+// PREVIEW OVERLAY SIMULATION
+// =========================================
+function updatePreview() {
+  const overlay = document.getElementById('preview-overlay');
+  const skin = SKINS[selectedSkin] || SKINS.pop_kuning;
+  const acc = skin.accent;
+  const card = skin.card;
+  const ink = skin.ink;
+
+  let html = '';
+  switch (selectedTemplate) {
+    case 'none':
+      html = `
+        <div class="sim-hook" style="background:rgba(0,0,0,0.75)">🎬 Caption Dasar Saja</div>
+        <div></div>
+        <div class="sim-caption">Pegal-pegal setelah kerja seharian?<br>Coba urut dengan bahan alami!</div>`;
+      break;
+    case 'recipe_pop':
+      html = `
+        <div class="sim-hook" style="background:${card};color:${ink}">🍳 Pegal Langsung Hilang!</div>
+        <div class="sim-chips">
+          <span class="sim-chip" style="background:${acc};color:${ink==='#fff'?'#111':ink}">Jahe</span>
+          <span class="sim-chip" style="background:${acc};color:${ink==='#fff'?'#111':ink}">Kunyit</span>
+          <span class="sim-chip" style="background:${acc};color:${ink==='#fff'?'#111':ink}">Sereh</span>
+          <span class="sim-chip" style="background:${acc};color:${ink==='#fff'?'#111':ink}">+2</span>
+        </div>
+        <div style="background:${card};border-radius:8px;padding:8px 10px;color:${ink};font-size:10px;font-weight:700">
+          Step 1: Oleskan tipis-tipis ke area pegal
+        </div>
+        <div class="sim-cta" style="background:${acc};color:${ink==='#fff'?'#111':'#fff'}">Klik link bio ➜</div>`;
+      break;
+    case 'calm_wellness':
+      html = `
+        <div class="sim-wellness">
+          <div class="sim-wellness-card" style="background:${card};color:${ink}">
+            <div class="sim-wellness-title">🌿 Minyak Urut Herbal</div>
+            <div class="sim-wellness-text">Campuran jahe, kunyit & sereh tradisional</div>
+          </div>
+        </div>
+        <div class="sim-caption" style="background:${card};color:${ink}">Redakan pegal secara alami ✨</div>`;
+      break;
+    case 'tips_listicle':
+      html = `
+        <div class="sim-hook" style="background:${card};color:${ink}">3 Tips Pegal Hilang</div>
+        <div class="sim-tips">
+          <div class="sim-tip"><span class="sim-tip-num" style="background:${acc};color:${ink==='#fff'?'#111':'#fff'}">1</span><span class="sim-tip-text">Urut merata dari bawah ke atas</span></div>
+          <div class="sim-tip"><span class="sim-tip-num" style="background:${acc};color:${ink==='#fff'?'#111':'#fff'}">2</span><span class="sim-tip-text">Diamkan 10 menit</span></div>
+          <div class="sim-tip"><span class="sim-tip-num" style="background:${acc};color:${ink==='#fff'?'#111':'#fff'}">3</span><span class="sim-tip-text">Pakai 2× sehari untuk hasil optimal</span></div>
+        </div>
+        <div class="sim-brand-mark" style="background:${card};color:${ink}">MUH ®</div>`;
+      break;
+    case 'ramuan_ritual':
+      html = `
+        <div class="sim-hook" style="background:${card};color:${ink}">🫖 Resep Seduh Herbal</div>
+        <div class="sim-ramuan">
+          <div class="sim-ramuan-item" style="background:${acc};color:${ink==='#fff'?'#111':'#fff'}">🫚 Jahe — 2 ruas</div>
+          <div class="sim-ramuan-item" style="background:${acc};color:${ink==='#fff'?'#111':'#fff'}">🌿 Sereh — 1 batang</div>
+        </div>
+        <div style="background:${card};border-radius:8px;padding:6px 10px;color:${ink};font-size:10px;font-weight:700;text-align:center">⏱️ Diamkan 5 menit</div>
+        <div class="sim-cta" style="background:rgba(0,0,0,0.6);color:#fff;font-size:9px">Produk herbal tradisional. Bukan obat.</div>`;
+      break;
+    case 'problem_solution':
+      html = `
+        <div class="sim-hook" style="background:${card};color:${ink}">🔧 Penyebab Pegal Kronis</div>
+        <div class="sim-chapters">
+          <div class="sim-chapter">😣 Masalah: Otot tegang akibat postur buruk</div>
+          <div class="sim-chapter">🔍 Penyebab: Sirkulasi darah kurang lancar</div>
+          <div class="sim-chapter solution">✅ Solusi: Pijat dengan Minyak Herbal</div>
+        </div>
+        <div class="sim-brand-mark" style="background:${card};color:${ink}">Dr. Budi · Ahli Herbal</div>`;
+      break;
+    case 'angka_banding':
+      html = `
+        <div class="sim-hook" style="background:${card};color:${ink}">⚖️ Minyak Biasa vs Herbal</div>
+        <div class="sim-compare">
+          <div class="sim-col sim-col-a">❌ Biasa<br>Kimia<br>Efek samping</div>
+          <div class="sim-col sim-col-b" style="background:${acc};color:${ink==='#fff'?'#111':'#fff'}">✅ Herbal<br>Alami<br>Aman harian</div>
+        </div>
+        <div style="background:${card};border-radius:8px;padding:5px;text-align:center;color:${ink};font-size:10px;font-weight:700">95% pengguna merasakan manfaat</div>`;
+      break;
+    case 'mitos_fakta':
+      html = `
+        <div class="sim-hook" style="background:${card};color:${ink}">❓ Minyak Herbal Cuma Mitos?</div>
+        <div class="sim-myth" style="background:rgba(220,38,38,0.85)">MITOS ✗</div>
+        <div style="background:${card};border-radius:8px;padding:8px 10px;color:${ink};font-size:10px;font-weight:600">
+          Kenapa? Kandungan jahe & kunyit sudah terbukti secara tradisional membantu relaksasi otot
+        </div>`;
+      break;
+    default:
+      html = `<div class="sim-caption">Preview template: ${selectedTemplate}</div>`;
+  }
+  overlay.innerHTML = html;
+}
+
+function updateSkin(val) {
+  selectedSkin = val;
+  updatePreview();
+  updatePreviewBadge();
+}
+
+function updatePreviewBadge() {
+  document.getElementById('preview-template-badge').textContent = `${selectedTemplate} · ${selectedSkin}`;
+}
+
+// =========================================
+// SCENARIO SWITCHING
+// =========================================
+function setScenario(scenario) {
+  currentScenario = scenario;
+  document.querySelectorAll('.scenario-btn').forEach((b,i) => {
+    b.classList.toggle('active', ['A','B','C','D','E','F','G'][i] === scenario);
+  });
+  applyScenario(scenario);
+}
+
+function applyScenario(s) {
+  // Reset all
+  hide('campaign-banner'); hide('template-changed-warning');
+  hide('audio-mismatch-alert'); hide('clip-mismatch-warning');
+  hide('audio-single-info'); hide('audio-per-clip-info');
+  hide('queue-hint-3x'); hide('plan-validation-err'); hide('plan-validation-warn');
+  show('plan-validation-ok');
+  show('finishing-details'); show('campaign-video-sel');
+  show('audio-tts-info'); hide('upload-video-area');
+  show('render-btn');
+  document.getElementById('render-btn').disabled = false;
+  document.getElementById('render-estimate').textContent = 'Estimasi: ~6–8 menit untuk 9 klip dengan template recipe_pop';
+
+  // Set audio select
+  document.getElementById('audio-source-sel').value = 'tts';
+
+  switch (s) {
+    case 'A': // Video dari campaign — jalur cepat
+      show('campaign-banner');
+      // Semua details terlipat kecuali banner
+      collapseAll();
+      selectedTemplate = 'recipe_pop';
+      buildTemplateGallery();
+      break;
+
+    case 'B': // Upload tanpa campaign
+      hide('campaign-video-sel');
+      show('upload-video-area');
+      hide('audio-tts-info');
+      // Tab plan ke AI
+      switchPlanTab('plan-tab-ai');
+      hide('plan-validation-ok');
+      document.getElementById('render-btn').disabled = true;
+      document.getElementById('render-estimate').textContent = 'Tombol aktif setelah plan tersedia';
+      expandAll();
+      selectedTemplate = 'none';
+      buildTemplateGallery();
+      break;
+
+    case 'C': // Template diganti dari campaign
+      show('campaign-banner');
+      show('template-changed-warning');
+      hide('plan-validation-ok');
+      show('plan-validation-err');
+      document.getElementById('plan-validation-err').textContent = '❌ Error: Plan campaign dibuat untuk recipe_pop. Template tips_listicle membutuhkan field berbeda (tips, punch_display). Buat plan baru dengan AI atau isi manual.';
+      document.getElementById('render-btn').disabled = true;
+      document.getElementById('render-estimate').textContent = 'Selesaikan error plan dulu';
+      expandAll();
+      selectedTemplate = 'tips_listicle';
+      buildTemplateGallery();
+      break;
+
+    case 'D': // Audio per klip, jumlah cocok
+      document.getElementById('audio-source-sel').value = 'per_clip';
+      hide('audio-tts-info');
+      show('audio-per-clip-info');
+      buildPerClipList(9, 9);
+      show('campaign-banner');
+      expandAll();
+      selectedTemplate = 'recipe_pop';
+      buildTemplateGallery();
+      break;
+
+    case 'E': // Audio per klip, jumlah tidak cocok
+      document.getElementById('audio-source-sel').value = 'per_clip';
+      hide('audio-tts-info');
+      show('audio-per-clip-info');
+      buildPerClipList(9, 7);
+      show('audio-mismatch-alert'); show('clip-mismatch-warning');
+      document.getElementById('render-btn').disabled = true;
+      document.getElementById('render-estimate').textContent = 'Samakan jumlah file audio dengan klip video';
+      expandAll();
+      selectedTemplate = 'recipe_pop';
+      buildTemplateGallery();
+      break;
+
+    case 'F': // Satu audio semua klip
+      document.getElementById('audio-source-sel').value = 'single';
+      hide('audio-tts-info');
+      show('audio-single-info');
+      show('campaign-banner');
+      expandAll();
+      selectedTemplate = 'recipe_pop';
+      buildTemplateGallery();
+      break;
+
+    case 'G': // Tanpa VO & Whisper
+      hide('audio-tts-info');
+      show('upload-video-area');
+      hide('campaign-video-sel');
+      show('audio-single-info');
+      document.getElementById('audio-source-sel').value = 'single';
+      document.getElementById('whisper-unavailable-info') && (document.getElementById('whisper-unavailable-info').style.display='block');
+      expandAll();
+      // Validation box jadi warning
+      hide('plan-validation-ok');
+      document.getElementById('plan-validation-warn').classList.remove('hidden');
+      document.getElementById('plan-validation-warn').innerHTML = '<div>⚠️ <strong>Caption dimatikan</strong> (tidak ada teks VO & Whisper tidak tersedia). Layer lain (hook, CTA, brand mark) tetap tampil.</div>';
+      selectedTemplate = 'calm_wellness';
+      buildTemplateGallery();
+      break;
+  }
+
+  updatePreview();
+  updatePreviewBadge();
+  updateClipCount();
+}
+
+function collapseAll() {
+  ['tpl-gallery-body','finishing-settings-body','brand-body','plan-body'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.classList.remove('open'); el.style.display='none'; }
+  });
+  ['tpl-arrow','settings-arrow','brand-arrow','plan-arrow'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('open');
+  });
+}
+
+function expandAll() {
+  ['tpl-gallery-body','finishing-settings-body','brand-body','plan-body'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.classList.add('open'); el.style.display='block'; }
+  });
+  ['tpl-arrow','settings-arrow','brand-arrow','plan-arrow'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('open');
+  });
+}
+
+// =========================================
+// QUEUE SIMULATION
+// =========================================
+const QUEUE_STAGES = [
+  { label: 'Menunggu produksi selesai (cek ulang 60 dtk)', dot: 'waiting', duration: 2000 },
+  { label: 'Sync klip 1/9', dot: 'running', duration: 1000 },
+  { label: 'Sync klip 3/9', dot: 'running', duration: 800 },
+  { label: 'Sync klip 6/9', dot: 'running', duration: 800 },
+  { label: 'Sync klip 9/9', dot: 'running', duration: 800 },
+  { label: 'Gabungkan semua klip', dot: 'running', duration: 1000 },
+  { label: 'Dijeda: produksi mulai, diantre ulang (1×)', dot: 'paused', duration: 2500 },
+  { label: 'Capture overlay 320/2.160 frame', dot: 'running', duration: 1000 },
+  { label: 'Capture overlay 1.240/2.160 frame', dot: 'running', duration: 1200 },
+  { label: 'Master pass (EBU R128 loudnorm)', dot: 'running', duration: 1200 },
+  { label: 'Selesai ✅', dot: 'done', duration: 0 },
+];
+
+function startRender() {
+  jobCounter++;
+  const jobId = `job_vs_${Date.now()}`;
+  const tpl = TEMPLATES.find(t=>t.id===selectedTemplate) || TEMPLATES[0];
+  const job = {
+    id: jobId,
+    label: `Render #${jobCounter} — ${tpl.label}`,
+    stageIdx: 0,
+    dot: 'waiting',
+    sub: '',
+    progress: 0,
+    yieldCount: 1,
+  };
+  queueJobs.unshift(job);
+  updateQueueCounter();
+  renderQueueList();
+  runJobStages(job);
+  if (jobCounter >= 3) {
+    document.getElementById('queue-hint-3x').classList.remove('hidden');
+  }
+}
+
+function runJobStages(job) {
+  if (job.stageIdx >= QUEUE_STAGES.length) return;
+  const stage = QUEUE_STAGES[job.stageIdx];
+  job.dot = stage.dot;
+  job.sub = stage.label;
+  job.progress = Math.round((job.stageIdx / (QUEUE_STAGES.length - 1)) * 100);
+  renderQueueList();
+  if (stage.duration > 0) {
+    setTimeout(() => {
+      job.stageIdx++;
+      runJobStages(job);
+    }, stage.duration);
+  }
+}
+
+function renderQueueList() {
+  const list = document.getElementById('queue-list');
+  if (queueJobs.length === 0) {
+    list.innerHTML = '<div class="text-muted" style="text-align:center;padding:16px 0">Belum ada job. Klik "Mulai Rendering Video" untuk menambah.</div>';
+    return;
+  }
+  list.innerHTML = queueJobs.map(job => `
+    <div class="queue-item">
+      <div class="queue-status-dot dot-${job.dot}"></div>
+      <div class="queue-content">
+        <div class="queue-label">${job.label}</div>
+        <div class="queue-sub">${job.sub || '—'}</div>
+        ${job.dot==='running'||job.dot==='waiting' ? `
+        <div class="progress-bar-wrap">
+          <div class="progress-bar" style="width:${job.progress}%"></div>
+        </div>` : ''}
+      </div>
+    </div>`).join('');
+  updateQueueCounter();
+}
+
+function updateQueueCounter() {
+  document.getElementById('queue-count-badge').textContent = queueJobs.length + ' job';
+}
+
+// =========================================
+// AUDIO SOURCE CHANGE
+// =========================================
+function onAudioSourceChange() {
+  const val = document.getElementById('audio-source-sel').value;
+  hide('audio-tts-info'); hide('audio-single-info'); hide('audio-per-clip-info');
+  hide('audio-mismatch-alert');
+  if (val === 'tts') show('audio-tts-info');
+  else if (val === 'single') show('audio-single-info');
+  else if (val === 'per_clip') { show('audio-per-clip-info'); buildPerClipList(9,9); }
+}
+
+function onVideoSourceChange() {
+  const val = document.getElementById('video-source-sel').value;
+  if (val === 'campaign') { show('campaign-video-sel'); hide('upload-video-area'); }
+  else { hide('campaign-video-sel'); show('upload-video-area'); }
+}
+
+function buildPerClipList(videoCount, audioCount) {
+  const list = document.getElementById('per-clip-list');
+  const rows = [];
+  for (let i = 1; i <= Math.max(videoCount, audioCount); i++) {
+    const hasVideo = i <= videoCount;
+    const hasAudio = i <= audioCount;
+    rows.push(`<div class="audio-clip-row">
+      <span class="clip-index">${i}</span>
+      <span style="color:${hasVideo?'var(--status-success)':'var(--status-danger)'}">🎞️${hasVideo?'':'❌'}</span>
+      <span class="clip-arrow">↔</span>
+      <span class="clip-filename">${hasAudio?'audio_klip_'+i+'.mp3':'—'}</span>
+      ${!hasAudio?'<span class="badge badge-danger">Kurang</span>':''}
+      ${!hasVideo?'<span class="badge badge-warning">Lebih</span>':''}
+    </div>`);
+  }
+  list.innerHTML = rows.join('');
+}
+
+// =========================================
+// UI HELPERS
+// =========================================
+function show(id) { const el=document.getElementById(id); if(el) el.classList.remove('hidden'); }
+function hide(id) { const el=document.getElementById(id); if(el) el.classList.add('hidden'); }
+
+function toggleCollapsible(bodyId, arrowId) {
+  const body = document.getElementById(bodyId);
+  const arrow = document.getElementById(arrowId);
+  if (body.classList.contains('open') || body.style.display==='block') {
+    body.classList.remove('open'); body.style.display='none';
+    if(arrow) arrow.classList.remove('open');
+  } else {
+    body.classList.add('open'); body.style.display='block';
+    if(arrow) arrow.classList.add('open');
+  }
+}
+
+function switchTab(panelId, btn) {
+  document.querySelectorAll('#plan-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(panelId).classList.add('active');
+}
+
+function switchPlanTab(panelId) {
+  document.querySelectorAll('#plan-tabs .tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', ['plan-tab-campaign','plan-tab-ai','plan-tab-manual'][i]===panelId);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => {
+    p.classList.toggle('active', p.id===panelId);
+  });
+}
+
+function useCampaignAsIs() {
+  collapseAll();
+  show('plan-validation-ok');
+  hide('template-changed-warning');
+  document.getElementById('render-btn').disabled = false;
+}
+
+function openFinishingCustomize() {
+  expandAll();
+}
+
+function simulateAIGenerate() {
+  document.getElementById('ai-plan-result').classList.remove('hidden');
+  document.getElementById('plan-validation-ok').classList.remove('hidden');
+  hide('plan-validation-err');
+  document.getElementById('render-btn').disabled = false;
+}
+
+function simulateTranscribe() {
+  document.getElementById('transcribe-result').classList.remove('hidden');
+}
+
+function togglePlay(btn) {
+  btn.textContent = btn.textContent === '▶' ? '⏸' : '▶';
+}
+
+function updateClipCount() {
+  const badge = document.getElementById('clip-count-badge');
+  badge.textContent = currentScenario === 'B' ? '— klip' : '9 klip';
+}
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme');
+  html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+}
+
+// =========================================
+// INIT
+// =========================================
+document.addEventListener('DOMContentLoaded', () => {
+  // Detect system theme
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  } else {
+    document.documentElement.setAttribute('data-theme', 'light');
+  }
+  buildTemplateGallery();
+  updatePreview();
+  applyScenario('A');
+});
+
+// Scrub timeline updates time display
+document.addEventListener('DOMContentLoaded', () => {
+  const scrub = document.getElementById('timeline-scrub');
+  if (scrub) scrub.addEventListener('input', function() {
+    const total = 72;
+    const cur = Math.round(this.value / 100 * total);
+    const m = Math.floor(cur/60);
+    const s = cur%60;
+    const tm = Math.floor(total/60); const ts = total%60;
+    document.getElementById('preview-time').textContent = `${m}:${String(s).padStart(2,'0')} / ${tm}:${String(ts).padStart(2,'0')}`;
+  });
+});
+</script>
+</body>
+</html>
