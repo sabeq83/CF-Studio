@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.50.1 — Kartu Konteks Menu & Perapian Folder (17/11/2026)
+- Kartu konteks ringkas untuk 22 menu + peta menu
+- Dokumen kerja dan skrip scratch dipindah ke folder terstruktur
+- Tanpa perubahan perilaku aplikasi
+
 ## V2.50.0 — Video Studio Finishing Render Engine (16/11/2026)
 - Integrasi 8 template finishing & Playwright overlay
 - Dukungan audio upload Mode A single & Mode B per-clip
