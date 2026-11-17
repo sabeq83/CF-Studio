@@ -27,6 +27,7 @@ Terakhir diperbarui: 17 November 2026
 | `USULAN_TEMPLATE_FINISHING_TAMBAHAN.md` | Usulan 5 Template Finishing Tambahan (total 7) |
 | `DRAF_BRAND_PROFILE_PTGIM_W2.md` | Draf isian brand profile baru Solusi Thermal ID & Ruang Akustik ID (Tahap 1 Week 2 CFA) |
 | `USULAN_VI_MULTI_LATAR_PTGIM.md` | Usulan: Visual Identity Multi-Latar untuk Solusi Thermal ID & Ruang Akustik ID (PT GIM) |
+| `USULAN_PERBAIKAN_KARTU_PRODUK_ENRICH_FOTO_TRUTH.md` | Usulan: tombol Enrich di kartu produk, tampilan & banding foto G-Labs, Product/Geometric Truth berbahasa Inggris |
 | `audit_produk_db_usulan.md` | Audit Forensik & Usulan Solusi Isolasi Database Produk MAKNA Flow |
 
 ## INSTRUKSI-AGENT
@@ -45,6 +46,7 @@ Terakhir diperbarui: 17 November 2026
 | `antigravity_hapus_instant_factory_sheets_autopilot_instructions.md` | Instruksi Antigravity — Hapus fitur Instant Factory & Sheets Autopilot (tabel DB dibiarkan, sambungan fitur aktif dibersihkan) |
 | `antigravity_mcp_tenant_default_instructions.md` | Instruksi Antigravity — MCP selalu kembali ke tenant default (switch tenant sementara, cf_reset_tenant, tenant terlihat di jawaban) |
 | `antigravity_ai_terpusat_TERPADU.md` | **Instruksi terpadu (pakai ini)** — Model AI terpusat di Settings, ringkas, langsung dikerjakan di atas branch hapus Instant/Sheets |
+| `antigravity_kartu_produk_enrich_foto_truth_instructions.md` | Instruksi: Truth produk wajib Bahasa Inggris (+ skrip terjemah data lama), tombol Enrich di kartu, tampilan & jendela banding foto G-Labs |
 | `antigravity_model_ai_terpusat_instructions.md` | Referensi detail untuk instruksi terpadu AI terpusat (bukti, nomor baris) |
 | `antigravity_scraper_foto_produk_revisi_02.md` | Revisi 02 Scraper Foto Produk — bug fatal foto clean, deteksi 404, tenant MCP, galeri lengkap, rubrik picker |
 | `antigravity_analitik_mingguan_instructions.md` | Instruksi Antigravity: Analitik Performa Konten via Repliz |
