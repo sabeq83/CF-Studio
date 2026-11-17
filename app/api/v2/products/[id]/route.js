@@ -16,9 +16,9 @@ export const GET = withTenantContext(async (req, { params }) => {
       return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 });
     }
     // Hanya proxy path lokal; jangan bungkus URL eksternal
-    const urlKeys = ['photo_url', 'raw_photo_url', 'clean_photo_url', 'cleaned_photo_url', 'generated_photo_url'];
+    const urlKeys = ['photo_url', 'raw_photo_url', 'clean_photo_url', 'cleaned_photo_url', 'generated_photo_url', 'previous_clean_photo_url'];
     for (const key of urlKeys) {
-      if (product[key] && !product[key].startsWith('http')) {
+      if (product[key] && !product[key].startsWith('http') && !product[key].startsWith('/api/')) {
         product[key] = `/api/v2/products/image?path=${encodeURIComponent(product[key])}`;
       }
     }

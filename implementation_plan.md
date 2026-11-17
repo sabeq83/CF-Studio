@@ -1,157 +1,143 @@
-# Implementation Plan: Model AI Terpusat di Settings
+# Implementation Plan: Bagian B — Perbaikan Kartu Produk, Jendela Banding & Penyimpanan Foto Sebelumnya (B1–B6)
 
-> Referensi tugas: [antigravity_ai_terpusat_TERPADU.md](file:///Users/sabeqmmursyid/_cfstudio/catatan-kerja/instruksi-agent/antigravity_ai_terpusat_TERPADU.md) & [antigravity_model_ai_terpusat_instructions.md](file:///Users/sabeqmmursyid/_cfstudio/catatan-kerja/instruksi-agent/antigravity_model_ai_terpusat_instructions.md)  
-> Branch aktif: `fitur/model-ai-terpusat` (dibuat dari `fitur/hapus-instant-sheets` @ `e731b1f`)
+> Referensi tugas: [antigravity_kartu_produk_enrich_foto_truth_instructions.md](file:///Users/sabeqmmursyid/_cfstudio/catatan-kerja/instruksi-agent/antigravity_kartu_produk_enrich_foto_truth_instructions.md)  
+> Mockup disetujui: [mockup_kartu_produk_foto_enrich.html](file:///Users/sabeqmmursyid/_cfstudio/public/mockup_kartu_produk_foto_enrich.html)  
+> Branch aktif: `hotfix/kartu-produk-foto-enrich` (dibuat dari `main` @ `82c21ff`)
 
 ## Ringkasan Tujuan
 
-1. Memusatkan seluruh pemanggilan Gemini teks & vision ke pengaturan tenant (`Settings`), tanpa penimpaan diam-diam ke model yang sudah mati (`gemini-1.5-flash-8b`, `gemini-1.5-flash`).
-2. Menyediakan satu fungsi pemilih terpusat `resolveModelChain({ role, taskType, modelOverride })` dengan 3 peran (`primary`, `light`, `vision`) serta key settings baru `gemini_model_light`.
-3. Memastikan setiap pemanggilan memakai rantai cadangan (`makeModelResilient` / `generateContentFlexible` / loop REST) tanpa duplikat dan membedakan `MODEL_BUSY` (503) dari `QUOTA_EXHAUSTED` (429 harian).
-4. Mencatat kuota pool key sesuai model aktual yang dipanggil, bukan model utama tenant secara membabi buta.
-5. Menyediakan mockup HTML Settings (`public/mockup_settings_model_ai.html`) untuk review pengguna sebelum mengubah UI React `app/settings/page.js`.
+1. **B1 — Tombol Enrich AI di Kartu Produk**: Mengembalikan tombol `🧠 Enrich AI` / `Enriching…` (spinner) / `🧠 Coba lagi` (ketika `enrichment_status === 'failed'` & `enrichment_retryable === true`) yang memanggil `handleReEnrichProduct(p.id)`, serta mengekspos `enrichment_retryable` di `GET /api/v2/products`.
+2. **B2 — Default Foto Bersih + Toggle Asli | Hasil AI + Badge Status**: Ekstrak helper murni `resolveDefaultCardPhotoTab(product)` (`clean_photo_url`/`cleaned_photo_url` -> `'cleaned'`, selain itu `'raw'`), tampilkan sakelar **Asli | Hasil AI** di bawah thumbnail (state lokal `viewTabs`), tampilkan badge pojok status foto (*Perlu ditinjau*, *Disetujui*, *Sedang dibuat*), tampilkan pesan error enrichment jika `failed`, dan ubah klik thumbnail agar membuka **Jendela Banding**.
+3. **B3 — Jendela Banding Foto Asli vs Hasil AI**: Perbarui modal review (`reviewModalProduct`) menjadi Jendela Banding 2 kolom (`Asli` vs `Hasil AI`, responsif di mobile, klik gambar untuk zoom), metadata sumber (`photo_provider`), status, `updated_at`, catatan peninjauan AI, dan tombol **Setujui** (saat `needs_review`), **Ganti Foto**, **Ulangi Generate** (konfirmasi + `/api/v2/products/regenerate-photos`), serta **Tolak, pakai foto sebelumnya** (B5).
+4. **B4 — Foto di Modal Detail (Tab Foto & AI)**: Tampilkan foto **Asli** (`raw_photo_url`) dan **Hasil AI** (`cleaned_photo_url || clean_photo_url`) secara read-only tepat di atas unggah foto raw (atau teks `"Belum ada"` jika kosong) dengan kemampuan klik untuk pratinjau penuh.
+5. **B5 — Simpan & Pulihkan Foto Sebelumnya**: Tambah kolom `previous_clean_photo_url TEXT` di `product_extractions`, simpan clean lama sebelum menimpa di `saveAndCommitCleanPhoto`, proxy URL di API `/api/v2/products` & `/api/v2/products/[id]`, dan dukung `action: 'revert_previous'` di `/api/v2/products/[id]/photo-review`.
+6. **B6 — Verifikasi**: Tambah unit test `tests/product-card-photo-view.test.js`, jalankan seluruh tes produk + `npm run build`, lalu deploy & uji di Dev (`5020`/`7020`) sebelum persiapan rilis bersama Bagian A (`hotfix/truth-bahasa-inggris`) setelah persetujuan pengguna.
 
 ---
 
 ## Execution Task List
 
-- [x] **Langkah 0**: Amankan perubahan di `fitur/hapus-instant-sheets` (`e731b1f`) dan buat branch `fitur/model-ai-terpusat`.
-- [x] **Audit Awal**: Inventarisasi pemanggil Gemini di `lib/` & `app/` serta verifikasi bukti error `gemini-1.5-flash-8b` pada tenant `tnt_mas-ibnu_e0eb25` di `staging.product_extractions`.
-- [x] **Mockup HTML UI Settings**: Buat `public/mockup_settings_model_ai.html` dengan semantic CSS tokens (Light & Dark mode).
-- [x] **Langkah 1 (`lib/gemini.js`)**: Implementasi `KNOWN_GEMINI_MODELS`, `DEFAULT_TEXT_MODEL`, `resolveModelChain`, pembersihan `MODULE_MODEL_MATRIX` & cascade dari model mati, pembaruan `resolveModelForTask`, `getResolvedGeminiModels` (termasuk string arg `'compliance_audit'`), `resolveStartFrameQcModel`, dan `generateWithImages`.
-- [x] **Langkah 2 & 3 (Pemanggil & Pencatatan Kuota/`MODEL_BUSY`)**: Perbarui `makeModelResilient`, `executeContentGeneration`, `executeWithKeyPool`, `lib/product-bulk-worker.js`, `app/api/v2/products/[id]/route.js`, `app/api/v2/brand-profiles/extract/route.js`, `lib/threads-series-generator.js`, `lib/re-recomm-engine.js`, `lib/universe-ai-builder.js`, `lib/visual-identity-ai-builder.js`, `lib/universe-ai-repository.js`, `lib/tenant-admin.js`, `lib/scheduler-processors.js`, `app/api/keys/route.js`, `lib/db.js`, dan `app/api/settings/route.js`.
-- [x] **Langkah 5a (Tes Otomatis)**: Tambah `tests/gemini-model-resolver.test.js` (termasuk penjaga `git grep` literal `gemini-<angka>`).
-- [x] **Langkah 5b (Skrip Dry-Run)**: Buat `scripts/report-effective-gemini-models.mjs` (`--schema dev|staging`, read-only) untuk tabel model sebelum vs sesudah per tenant.
-- [x] **Langkah 5c (Verifikasi & Deploy Dev)**: Jalankan semua tes + `npm run build`, deploy ke Dev (`5020`/`7020`), uji enrichment nyata & ubah model di Dev untuk verifikasi `[GEMINI_CALL]`, serta pasang UI Settings & rilis ke Staging sesuai persetujuan pengguna.
+- [x] **B5 (DB, Worker, API)**: Tambah `previous_clean_photo_url` di `lib/db-pg.js` & `lib/product-repository.js`, snapshot di `lib/product-bulk-worker.js`, proxy & `enrichment_retryable` di `app/api/v2/products/route.js` & `[id]/route.js`, serta `revert_previous` di `app/api/v2/products/[id]/photo-review/route.js`.
+- [x] **Helper Murni UI (`lib/product-card-photo-view.js`)**: Fungsi murni `resolveDefaultCardPhotoTab`, `resolveCardPhotoUrl`, `resolvePhotoStatusBadge`, dan `resolveEnrichButtonState`.
+- [x] **B1, B2, B3 (`app/products/page.js`)**: Implementasi tombol `Enrich AI`, sakelar `Asli | Hasil AI`, badge pojok foto, pesan gagal enrichment, klik thumbnail membuka Jendela Banding, dan Jendela Banding lengkap dengan 4 tombol aksi (`Setujui`, `Tolak, pakai foto sebelumnya`, `Ganti Foto`, `Ulangi Generate`).
+- [x] **B4 (`app/products/ProductDatabaseModal.js`)**: Pratinjau hanya-baca foto `Asli` vs `Hasil AI` (+ pratinjau klik perbesar) di Tab `visual_ai`.
+- [ ] **B6 (Unit Test, Build, Dev Deploy)**: Tambah `tests/product-card-photo-view.test.js`, jalankan unit test & build, push branch `hotfix/kartu-produk-foto-enrich`, deploy ke Dev, verifikasi kolom DB & endpoint Dev, dan buat laporan.
 
 ---
 
 ## Rencana Perubahan Kode (Before & After Snippets)
 
-### 1. [lib/gemini.js](file:///Users/sabeqmmursyid/_cfstudio/lib/gemini.js)
+### 1. [lib/db-pg.js](file:///Users/sabeqmmursyid/_cfstudio/lib/db-pg.js) & [lib/product-repository.js](file:///Users/sabeqmmursyid/_cfstudio/lib/product-repository.js) (B5)
 
 **Code Sebelum (Current/Before):**
 ```javascript
-export const GEMINI_CASCADE_ORDER_PAID = [
-  'gemini-2.5-flash',
-  'gemini-3.6-flash',
-  'gemini-3.5-flash',
-  'gemini-3.7-flash',
-  'gemini-3.8-flash',
-  'gemini-1.5-flash',
-  'gemini-1.5-flash-8b',
-  'gemini-flash-latest'
-];
-
-export const MODULE_MODEL_MATRIX = {
-  SCRAPER: { paid: 'gemini-1.5-flash-8b', free: 'gemini-3.6-flash', useKB: false },
-  ...
-};
+          ADD COLUMN IF NOT EXISTS normalized_source_url TEXT,
+          ADD COLUMN IF NOT EXISTS raw_photo_sha256 TEXT,
+          ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP;
 ```
 
 **Code Sesudah (Proposed/After):**
 ```javascript
-export const DEFAULT_TEXT_MODEL = 'gemini-3.6-flash';
-export const DEFAULT_FALLBACK_MODEL = 'gemini-3.6-flash';
-export const KNOWN_GEMINI_MODELS = [
-  'gemini-3.6-flash',
-  'gemini-3.8-flash',
-  'gemini-3.7-flash',
-  'gemini-3.5-flash',
-  'gemini-3.5-flash-lite',
-  'gemini-3.1-flash-lite',
-  'gemini-2.5-flash',
-  'gemini-2.5-flash-lite',
-  'gemini-flash-latest'
-];
-
-export const MODULE_MODEL_MATRIX = {
-  SCRAPER: { role: 'light', useKB: false },
-  PRODUCT_ENRICHMENT: { role: 'light', useKB: false },
-  OCR_EXTRACTION: { role: 'light', useKB: false },
-  BRAND_EXTRACTION: { role: 'light', useKB: false },
-  COMPLIANCE: { role: 'light', useKB: false },
-  DECONSTRUCT: { role: 'light', useKB: false },
-  START_FRAME_QC: { role: 'vision', useKB: false },
-  CAMPAIGN_PLANNER: { role: 'primary', useKB: true },
-  ...
-};
-
-export async function resolveModelChain({ role = null, taskType = null, modelOverride = null, explicitTier = null } = {}) {
-  // Membaca gemini_api_tier, gemini_smart_routing, gemini_model_primary,
-  // gemini_model_fallback, gemini_model_light, start_frame_visual_qc_model
-  // dan mengembalikan { model, chain, role, useKB, tier, primaryModel, fallbackModel, lightModel }
-}
+          ADD COLUMN IF NOT EXISTS normalized_source_url TEXT,
+          ADD COLUMN IF NOT EXISTS raw_photo_sha256 TEXT,
+          ADD COLUMN IF NOT EXISTS previous_clean_photo_url TEXT,
+          ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP;
 ```
 
-### 2. Error `MODEL_BUSY` vs `QUOTA_EXHAUSTED` & Tracking Pool Model di [lib/gemini.js](file:///Users/sabeqmmursyid/_cfstudio/lib/gemini.js)
+### 2. [lib/product-bulk-worker.js](file:///Users/sabeqmmursyid/_cfstudio/lib/product-bulk-worker.js) (B5 — `saveAndCommitCleanPhoto`)
 
 **Code Sebelum (Current/Before):**
 ```javascript
-// makeModelResilient & executeContentGeneration akhir loop:
-throw new Error(`QUOTA_EXHAUSTED: Semua model Gemini tidak tersedia setelah ${MAX_WATERFALL_CYCLES} putaran. Error terakhir: ${baseMsg}`);
-
-// executeWithKeyPool akhir loop:
-throw new Error('QUOTA_EXHAUSTED: Semua API Key yang dicoba dalam pool gagal karena rate limit atau high demand.');
+    await pgQuery(`
+      UPDATE product_extractions
+      SET clean_photo_url = $1,
+          cleaned_photo_url = $1,
+          photo_url = $1,
+          photo_status = $2,
+          photo_provider = $3,
+          photo_error = NULL,
+          extraction_status = $4,
+          updated_at = NOW()
+      WHERE id = $5 AND tenant_id = $6
+    `, [saved.relativePath, newStatus, provider, newExtractionStatus, productId, tenantId]);
 ```
 
 **Code Sesudah (Proposed/After):**
 ```javascript
-// Membedakan 503/high demand/overloaded dari 429 kuota harian:
-if (allFailuresWereBusy503) {
-  const err = new Error(`MODEL_BUSY (dapat diulang): model ${lastTriedModel} sedang sibuk`);
-  err.code = 'MODEL_BUSY';
-  err.retryable = true;
-  err.status = 503;
-  err.geminiModel = lastTriedModel;
-  throw err;
-}
+    await pgQuery(`
+      UPDATE product_extractions
+      SET previous_clean_photo_url = CASE
+            WHEN COALESCE(NULLIF(cleaned_photo_url, ''), NULLIF(clean_photo_url, '')) IS NOT NULL
+             AND COALESCE(NULLIF(cleaned_photo_url, ''), NULLIF(clean_photo_url, '')) <> $1
+            THEN COALESCE(NULLIF(cleaned_photo_url, ''), NULLIF(clean_photo_url, ''))
+            ELSE previous_clean_photo_url
+          END,
+          clean_photo_url = $1,
+          cleaned_photo_url = $1,
+          photo_url = $1,
+          photo_status = $2,
+          photo_provider = $3,
+          photo_error = NULL,
+          extraction_status = $4,
+          updated_at = NOW()
+      WHERE id = $5 AND tenant_id = $6
+    `, [saved.relativePath, newStatus, provider, newExtractionStatus, productId, tenantId]);
 ```
 
-### 3. [lib/product-bulk-worker.js](file:///Users/sabeqmmursyid/_cfstudio/lib/product-bulk-worker.js) & [app/api/v2/products/[id]/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/products/%5Bid%5D/route.js)
+### 3. [app/api/v2/products/[id]/photo-review/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/products/[id]/photo-review/route.js) (B5)
 
 **Code Sebelum (Current/Before):**
 ```javascript
-    const rawResponse = await executeWithKeyPool(1, async (apiKey) => {
-      const { GoogleGenerativeAI } = await import('@google/generative-ai');
-      const { getResolvedGeminiModels } = await import('./gemini.js');
-      const { resolvedPrimary } = await getResolvedGeminiModels({ taskType: 'SCRAPER' });
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({
-        model: resolvedPrimary,
-        generationConfig: { responseMimeType: 'application/json', temperature: 0.7 }
-      });
-      const result = await model.generateContent([{ text: prompt }]);
-      return result.response.text();
-    });
+    const action = body.action || 'approve';
+    if (action !== 'approve') {
+      return NextResponse.json({ success: false, error: `Action '${action}' tidak didukung. Gunakan 'approve'.` }, { status: 400 });
+    }
 ```
 
 **Code Sesudah (Proposed/After):**
 ```javascript
-    const resolved = await resolveModelChain({ role: 'light', taskType: 'PRODUCT_ENRICHMENT' });
-    const rawResponse = await runWithGeminiTrace({ stage: 'product_enrichment', item_id: id }, () =>
-      executeWithKeyPool(1, async (apiKey) => {
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({
-          model: resolved.model,
-          generationConfig: { responseMimeType: 'application/json', temperature: 0.7 }
-        });
-        const resilientModel = makeModelResilient(model, apiKey, resolved.model, true, null, {
-          role: 'light',
-          taskType: 'PRODUCT_ENRICHMENT'
-        });
-        const result = await resilientModel.generateContent([{ text: prompt }]);
-        return result.response.text();
-      }, { modelName: resolved.model })
-    );
+    const action = body.action || 'approve';
+    if (action === 'revert_previous') {
+      // Validasi previous_clean_photo_url ada, kembalikan clean_photo_url & cleaned_photo_url & photo_url
+      // ke previous_clean_photo_url, set photo_status = 'approved', photo_error = NULL, active_photo = 'cleaned_photo_url',
+      // dan kosongkan previous_clean_photo_url.
+    } else if (action !== 'approve') { ... }
 ```
-Serta pada `GET /api/v2/products/[id]` dan helper produk, menambahkan field terhitung `enrichment_retryable` yang bernilai `true` untuk `MODEL_BUSY` dan `QUOTA_EXHAUSTED` / 503 / 429.
 
-### 4. Pemanggil Langsung Lainnya
-- [app/api/v2/brand-profiles/extract/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/brand-profiles/extract/route.js): ganti `'gemini-2.5-flash'` menjadi `resolveModelChain({ role: 'light', taskType: 'BRAND_EXTRACTION' })` + `makeModelResilient`.
-- [lib/threads-series-generator.js](file:///Users/sabeqmmursyid/_cfstudio/lib/threads-series-generator.js): gunakan `resolveModelChain({ role: 'primary', taskType: 'THREADS_SERIES' })` & `makeModelResilient` (hapus fallback tertulis `'gemini-2.5-flash'`).
-- [lib/re-recomm-engine.js](file:///Users/sabeqmmursyid/_cfstudio/lib/re-recomm-engine.js): loop REST grounding mengikuti `chain` dari `resolveModelChain({ role: 'primary', taskType: 'RE_CAMPAIGN' })` tanpa `GEMINI_MODELS.PRIMARY` / `gemini-flash-latest` polos.
-- [lib/universe-ai-builder.js](file:///Users/sabeqmmursyid/_cfstudio/lib/universe-ai-builder.js), [lib/visual-identity-ai-builder.js](file:///Users/sabeqmmursyid/_cfstudio/lib/visual-identity-ai-builder.js), [lib/universe-ai-repository.js](file:///Users/sabeqmmursyid/_cfstudio/lib/universe-ai-repository.js): isi `meta.model` dengan model aktual yang berhasil dipakai (`result.actualModel`).
-- [lib/tenant-admin.js](file:///Users/sabeqmmursyid/_cfstudio/lib/tenant-admin.js): hapus `gemini_model: 'gemini-2.5-flash'`, salin pengaturan model Gemini (`gemini_api_tier`, `gemini_model_primary`, `gemini_model_fallback`, `gemini_model_light`, `gemini_smart_routing`, `gemini_context_caching`) dari `default_tenant`.
-- [lib/scheduler-processors.js](file:///Users/sabeqmmursyid/_cfstudio/lib/scheduler-processors.js), [app/api/keys/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/keys/route.js), [lib/db.js](file:///Users/sabeqmmursyid/_cfstudio/lib/db.js): gunakan `resolveModelChain` / `DEFAULT_TEXT_MODEL` terpusat.
-- [app/api/settings/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/settings/route.js): dukung baca & simpan `gemini_model_light` (kosong = `""`). UI `app/settings/page.js` dipasang setelah pengguna menyetujui mockup `public/mockup_settings_model_ai.html`.
+### 4. [app/api/v2/products/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/products/route.js) (B1 & B5)
+
+**Code Sebelum (Current/Before):**
+```javascript
+      const urlKeys = ['photo_url', 'raw_photo_url', 'clean_photo_url', 'cleaned_photo_url', 'generated_photo_url'];
+      for (const key of urlKeys) { ... }
+      return updated;
+```
+
+**Code Sesudah (Proposed/After):**
+```javascript
+      const urlKeys = ['photo_url', 'raw_photo_url', 'clean_photo_url', 'cleaned_photo_url', 'generated_photo_url', 'previous_clean_photo_url'];
+      for (const key of urlKeys) { ... }
+      updated.enrichment_retryable = isRetryableGeminiError(updated.enrichment_error);
+      return updated;
+```
+
+### 5. [app/products/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/products/page.js) & [app/products/ProductDatabaseModal.js](file:///Users/sabeqmmursyid/_cfstudio/app/products/ProductDatabaseModal.js) (B1, B2, B3, B4)
+
+**Code Sebelum (Current/Before):**
+```javascript
+const activeTab = viewTabs[p.id] || (p.active_photo === 'raw_photo_url' ? 'raw' : 'cleaned');
+const displayPhotoUrl = activeTab === 'raw' ? p.raw_photo_url : (p.cleaned_photo_url || p.clean_photo_url);
+// Thumbnail onclick -> setZoomedImage(displayPhotoUrl)
+// Footer hanya berisi Setujui, Ganti Foto, Detail, Hapus
+// Modal review 480px menampilkan 1 foto dan tombol Setujui
+```
+
+**Code Sesudah (Proposed/After):**
+```javascript
+const activeTab = viewTabs[p.id] || resolveDefaultCardPhotoTab(p);
+const displayPhotoUrl = resolveCardPhotoUrl(p, activeTab);
+// Thumbnail dengan badge pojok status + sakelar "Asli | Hasil AI" di bawahnya
+// Klik thumbnail -> membuka Jendela Banding (Asli vs Hasil AI side-by-side + metadata + zoom + Setujui / Tolak pakai foto sebelumnya / Ganti Foto / Ulangi Generate)
+// Footer menambahkan tombol Enrich AI / Enriching… / Coba lagi
+// Tab visual_ai di ProductDatabaseModal menambahkan pratinjau Asli vs Hasil AI read-only
+```
