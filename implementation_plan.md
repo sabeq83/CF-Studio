@@ -135,8 +135,8 @@ const tables = ['re_campaigns', 'pillar_campaigns'];
   - [x] Buat & jalankan unit test baru penolakan `video_source_type: 'instant_factory'` (status 400)
   - [x] Jalankan `npm run build`, `npm run test:mcp`, `npm run test:product-catalog`, serta tes unit terkait
 
-- [ ] **Task 5: Deploy ke Server Dev Mac Mini & Uji Manual**
-  - [ ] Commit dan push branch `fitur/hapus-instant-sheets`
-  - [ ] Deploy atomic ke Dev (`100.95.245.55:5020`)
-  - [ ] Verifikasi checklist manual di Dev dan periksa `dev-ui.err.log` (sekali, tanpa polling)
-  - [ ] Sajikan laporan akhir untuk pengguna
+- [x] **Task 5: Deploy ke Server Dev Mac Mini & Uji Manual**
+  - [x] Commit dan push branch `fitur/hapus-instant-sheets`
+  - [x] Deploy atomic ke Dev (`100.95.245.55:5020`)
+  - [x] Verifikasi log `dev-ui.err.log` (bersih dari error scheduler tick) & cek beranda Dev (siap untuk klik uji manual pengguna di UI)
+  - [x] Sajikan laporan akhir untuk pengguna
