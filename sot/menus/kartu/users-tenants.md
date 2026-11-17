@@ -1,6 +1,6 @@
 # Kartu Menu: User & Tenant Management
 
-Terakhir dicek: 17 November 2026 · Versi aplikasi: v2.50.0
+Terakhir dicek: 17 November 2026 · Versi aplikasi: v2.50.5 (branch `fitur/hapus-instant-sheets`)
 Alamat: `/settings/users` & `/settings/tenants` · Kelompok: SYSTEM · Kunci izin menu: `admin_only` & `superadmin_only`
 
 ## Fungsi
@@ -26,6 +26,7 @@ Pusat kontrol hak akses dan isolasi data organisasi. Halaman Users mengatur akun
 1. Halaman Users hanya dapat dibuka oleh role `admin` atau `superadmin`. Halaman Tenants **khusus `superadmin`**.
 2. Password baru dienkripsi (bcrypt); dilarang menulis plain password di kode atau log.
 3. Menonaktifkan menu di level tenant akan menyembunyikan menu tersebut bagi seluruh pengguna di dalam tenant terkait.
+4. Key izin lama `sheets_autopilot` dan `instant_campaign` sudah dihapus dari `ALL_MENU_KEYS` (baris lama di DB dibiarkan dan diabaikan UI).
 
 ## Belum ada / batasan
 - Belum ada fitur self-service registrasi publik (semua akun dibuat oleh admin).

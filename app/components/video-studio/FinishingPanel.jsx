@@ -43,7 +43,7 @@ export default function FinishingPanel({
 
   // 1. Fetch finishing source when campaign video is selected
   const fetchFinishingSource = async () => {
-    if (!videoSourceType || (videoSourceType !== 're_campaign' && videoSourceType !== 'instant_factory')) {
+    if (!videoSourceType || videoSourceType !== 're_campaign') {
       setSourceData(null);
       setConflict(false);
       return;

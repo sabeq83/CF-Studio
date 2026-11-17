@@ -1,317 +1,142 @@
-# Implementation Plan — Hotfix Scraper Foto Produk (Revisi 02 Bagian A)
+# Implementation Plan — Hapus Fitur Instant Factory & Sheets Autopilot
 
-Tanggal: 17 November 2026 · Branch: `hotfix/scraper-foto-r02` · Basis: `main` (`8370981`)
-Dokumen Panduan: [antigravity_scraper_foto_produk_revisi_02.md](file:///Users/sabeqmmursyid/_cfstudio/catatan-kerja/instruksi-agent/antigravity_scraper_foto_produk_revisi_02.md)
+Tanggal: 17 November 2026 · Branch: `fitur/hapus-instant-sheets` · Basis: `main` (`v2.50.4`)  
+Dokumen Panduan: [antigravity_hapus_instant_factory_sheets_autopilot_instructions.md](file:///Users/sabeqmmursyid/_cfstudio/catatan-kerja/instruksi-agent/antigravity_hapus_instant_factory_sheets_autopilot_instructions.md)
 
 ---
 
 ## 1. Ringkasan Tujuan
 
-Menyelesaikan perbaikan bug pada scraper foto produk di server Staging (S1–S4):
-- **S1 (FATAL)**: Memperbaiki `ReferenceError: processCleanInputPath is not defined` yang menyebabkan crop dan penghapusan latar belakang selalu gagal pada produk baru sejak v2.49.2. Mengintegrasikan kembali pipeline foto ke `processProductPhotoFromRaw()` serta menggabungkan seluruh alasan ke `photo_error` di `decidePhotoStatus()`.
-- **S2**: Mengembalikan HTTP status dari Playwright, mendeteksi halaman 404/produk tidak ditemukan dengan fungsi murni `detectNotFoundPage()`, menolak fallback AI Search Grounding jika halaman 404, tidak menyimpan produk 404 ke database, menambahkan ringkasan status job (`status_summary`), membuat endpoint `GET /api/v2/products/scrape/jobs/[jobId]`, dan menyediakan tool MCP `cf_get_scrape_status`.
-- **S3**: Memvalidasi URL kandidat gambar (menolak domain-only seperti `https://images.tokopedia.net` tanpa path gambar yang sah) serta men-decode entitas HTML (`&amp;` -> `&`) pada URL regex.
-- **S4**: Menyertakan `tenant_id: getActiveTenantId()` pada seluruh payload `createJob('product_scraper', ...)` dan `createJob('product_photo_replace', ...)`, serta memastikan query produk lama dibatasi pada tenant aktif (`WHERE tenant_id = ?`).
+Menghapus seluruh halaman, API route, worker, tick scheduler, dan integrasi UI/backend dari **Instant Factory** dan **Sheets Autopilot**, tanpa menghapus tabel database yang sudah ada dan tanpa mengganggu fitur aktif (Video Studio, ContentFlow, TTS Studio, Affiliate Studio, Scheduler, dan `pipeline-v54`).
+
+### Hasil Cek Database Awal (3 Schema: `dev`, `staging`, `public` — Read-Only)
+- `instant_campaigns`, `instant_campaign_items`, `instant_campaign_outputs`, `instant_campaign_configs`, `sheets_campaigns`, `sheets_jobs`, `pipeline_assets`: **0 baris** di ketiga schema.
+- `scheduler_jobs` (antrean `instant%` / `%sheets%`): **0 baris** di ketiga schema.
+- `settings` & `tenant_settings` (kunci `*instant*` / `*sheets*`): **0 baris** di ketiga schema.
+- `content_flow_items.source_type`: Tidak ada tipe `instant` maupun `sheets` di ketiga schema (`dev`: opc 903, re 126, multiplier 13, strategic 6, bridge 4, recipe 2; `staging`: opc 4137, re 702, multiplier 168, strategic 6, recipe 4; `public`: null 11, opc 5).
+
+### Temuan `pipeline-v54`
+- `app/pipeline/page.js` masih memanggil `/api/pipeline-v54/*`, dan `lib/product-repository.js` membersihkan `pipeline_assets` saat produk dihapus.
+- Oleh karena itu `app/api/pipeline-v54/**` dan fungsi `*PipelineAsset*` dipertahankan; label "Instant Factory Pipeline" di `lib/contentflow-ingest.js` diubah menjadi netral (`Pipeline v5.4`).
 
 ---
 
-## 2. Before & After Code Snippets
+## 2. Before & After Code Snippets (Tahap 1 & Tahap 2)
 
-### 2.1. `lib/scheduler-processors.js` (S1, S2, S4)
+### 2.1. `lib/campaign-scheduler.js` (Hapus Tick Instant & Sheets Autopilot)
 
 #### Sebelum (Current/Before):
 ```javascript
-// Baris ~10420
-const allProducts = await db.prepare('SELECT id, input_source, source_url, raw_photo_url, cleaned_photo_url, generated_photo_url, unique_selling_point, packaging_type, scraped_image_url, raw_description, t2i_prompt, i2v_action_prompt, product_name FROM product_extractions').all();
-
-// ... di dalam loop produk (baris ~10645)
-    let localPhotoPath = null;
-    let rawPhotoPath = null;
-    let cleanPhotoPath = null;
-    let generatedPhotoPath = null;
-
-// Baris ~10748, 10751, 10756, 10760, 10779 (processCleanInputPath tidak dideklarasikan)
-    processCleanInputPath = cropAbsPath;
-...
-    const cleanInputAbsPath = processCleanInputPath || path.join(process.cwd(), 'public', rawPhotoPath);
-
-// Baris ~10998
-  return {
-    processed: true,
-    results,
-    errors: Object.keys(scrapeErrors).length > 0 ? scrapeErrors : undefined
-  };
+import { getDb, listReCampaignItems, listPillarCampaignItems, getSetting, updateReCampaignItem, updatePillarCampaignItem, updateInstantCampaignItem, listInstantCampaignItems } from './db.js';
+import {
+  ...,
+  processInstantRowProductSourcing,
+  processInstantGenerator,
+  processInstantTts,
+  processInstantGlabs,
+  processInstantFfmpeg,
+  processInstantSocialPoster,
+  ...
+} from './scheduler-processors.js';
+import { runSyncWorker } from './sheets-autopilot-worker.js';
+// ...
+  // --- INSTANT CAMPAIGN TICKING ENGINE (v9.0) ---
+  const instantCampaigns = await db.prepare("SELECT * FROM instant_campaigns ...").all();
+  // ... (baris 921-1107)
+  // --- SHEETS AUTOPILOT SCHEDULER TICK (v10.5) ---
+  const isSchedulerActive = await getSetting('sheets_autopilot_scheduler_active') === 'true';
+  // ... (baris 1109-1130)
 ```
 
 #### Sesudah (Proposed/After):
 ```javascript
-// Filter tenant aktif
-const activeTenant = getActiveTenantId();
-const allProducts = await db.prepare('SELECT id, input_source, source_url, raw_photo_url, cleaned_photo_url, generated_photo_url, unique_selling_point, packaging_type, scraped_image_url, raw_description, t2i_prompt, i2v_action_prompt, product_name FROM product_extractions WHERE tenant_id = ?').all(activeTenant);
-
-// ... deklarasikan processCleanInputPath di awal loop
-    let localPhotoPath = null;
-    let rawPhotoPath = null;
-    let cleanPhotoPath = null;
-    let generatedPhotoPath = null;
-    let processCleanInputPath = null;
-
-// Integrasi aman dengan fallback path dan penanganan error terisolasi
-// S2: Deteksi error 404 agar tidak disimpan ke database
-// S2: Ringkasan status job
-  const totalUrls = urlList.length;
-  const successCount = results.length;
-  const errorCount = Object.keys(scrapeErrors).length;
-  let statusSummary = 'ok';
-  if (successCount === 0 && errorCount > 0) {
-    statusSummary = 'failed';
-  } else if (errorCount > 0) {
-    statusSummary = 'partial';
-  }
-
-  return {
-    processed: true,
-    results,
-    errors: Object.keys(scrapeErrors).length > 0 ? scrapeErrors : undefined,
-    status_summary: statusSummary
-  };
+import { getDb, listReCampaignItems, listPillarCampaignItems, getSetting, updateReCampaignItem, updatePillarCampaignItem } from './db.js';
+// Impor processor Instant & runSyncWorker dihapus
+// State lastSheetsSyncTime, isSheetsSyncRunning, dan tick loop Instant/Sheets dihapus
 ```
 
----
-
-### 2.2. `lib/product-photo-picker.js` (S1 & S3)
+### 2.2. `lib/gemini.js` (Bersihkan Entri Model Matrix)
 
 #### Sebelum (Current/Before):
 ```javascript
-export function decidePhotoStatus({
-  pickerNeedsReview = false,
-  pickerReason = null,
-  selectedCandidate = null,
-  finalCheck = null,
-  bgError = false,
-  hasNewPhoto = false
-} = {}) {
-  // 1. Jika picker menandai review (apapun alasannya), SELALU needs_review
-  if (pickerNeedsReview) {
-    return {
-      status: 'needs_review',
-      error: pickerReason || 'foto memuat orang/teks'
-    };
-  }
-
-  // 2. Jika penghapusan latar belakang gagal
-  if (bgError) {
-    return {
-      status: 'needs_review',
-      error: 'hapus latar belakang gagal'
-    };
-  }
-...
+  INSTANT_FACTORY: { paid: 'gemini-3.6-flash', free: 'gemini-3.6-flash', useKB: true },
+  MULTIPLIER_LAB: { paid: 'gemini-3.6-flash', free: 'gemini-3.6-flash', useKB: false },
+  BRIDGE_INJECT: { paid: 'gemini-3.6-flash', free: 'gemini-3.6-flash', useKB: false },
+  SHEETS_AUTOPILOT: { paid: 'gemini-3.6-flash', free: 'gemini-3.6-flash', useKB: true },
 ```
 
 #### Sesudah (Proposed/After):
 ```javascript
-export function decidePhotoStatus({
-  pickerNeedsReview = false,
-  pickerReason = null,
-  selectedCandidate = null,
-  finalCheck = null,
-  bgError = false,
-  hasNewPhoto = false
-} = {}) {
-  const reasons = [];
+  MULTIPLIER_LAB: { paid: 'gemini-3.6-flash', free: 'gemini-3.6-flash', useKB: false },
+  BRIDGE_INJECT: { paid: 'gemini-3.6-flash', free: 'gemini-3.6-flash', useKB: false },
+```
 
-  if (pickerNeedsReview) {
-    reasons.push(pickerReason || 'foto memuat orang/teks');
-  }
+### 2.3. `app/api/video-studio/render/route.js` & `lib/video-studio-finishing-source.js`
 
-  if (bgError) {
-    reasons.push('hapus latar belakang gagal');
-  }
+#### Sebelum (Current/Before):
+```javascript
+// render/route.js: memproses cabang video_source_type === 'instant_factory'
+// video-studio-finishing-source.js: mendukung 're_campaign' | 'instant_factory'
+```
 
-  if (hasNewPhoto && !finalCheck) {
-    reasons.push('pemeriksaan akhir foto tidak berjalan');
-  } else if (finalCheck?.error) {
-    reasons.push('pemeriksaan foto gagal');
-  } else if (finalCheck && (finalCheck.has_person || finalCheck.has_heavy_text)) {
-    reasons.push('foto memuat orang/teks');
-  }
-
-  if (selectedCandidate?.has_person) {
-    reasons.push('foto mentah memuat orang/model');
-  }
-
-  if (selectedCandidate?.product_visible === false) {
-    reasons.push('foto mentah tidak memuat produk utuh');
-  }
-
-  if (reasons.length > 0) {
-    // Deduping reasons
-    const uniqueReasons = [...new Set(reasons)];
-    return {
-      status: 'needs_review',
-      error: uniqueReasons.join('; ')
-    };
-  }
-
-  return {
-    status: 'approved',
-    error: null
-  };
+#### Sesudah (Proposed/After):
+```javascript
+// render/route.js: menolak eksplisit video_source_type === 'instant_factory' dengan status 400
+if (video_source_type === 'instant_factory') {
+  return NextResponse.json(
+    { success: false, error: 'Sumber video instant_factory sudah tidak didukung dan telah dihapus.' },
+    { status: 400 }
+  );
 }
+// video-studio-finishing-source.js: hanya mendukung 're_campaign' (dan sumber aktif lain)
 ```
 
----
-
-### 2.3. `lib/url-scraper.js` & `lib/playwright-scraper.js` (S2 & S3)
+### 2.4. `lib/db-pg.js` (Pertahankan Migrasi, Hapus Daftar CRUD `sheets_campaigns`)
 
 #### Sebelum (Current/Before):
 ```javascript
-// playwright-scraper.js
-await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
-...
-return { title, html, bodyText, images };
-
-// url-scraper.js
-  const addCandidate = (imgUrl, { w = 0, h = 0, alt = '', source = 'regex' } = {}) => {
-    if (!imgUrl || typeof imgUrl !== 'string') return;
-    const cleanUrl = imgUrl.replace(/\\/g, '').replace(/[.,;:]$/, '').trim();
-    if (!cleanUrl.startsWith('http')) return;
+const tables = ['re_campaigns', 'pillar_campaigns', 'sheets_campaigns'];
 ```
 
 #### Sesudah (Proposed/After):
 ```javascript
-// playwright-scraper.js
-const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
-const httpStatus = response ? response.status() : 200;
-...
-return { title, html, bodyText, images, httpStatus };
-
-// url-scraper.js
-export function isValidProductImageUrl(url) {
-  if (!url || typeof url !== 'string') return false;
-  try {
-    const parsed = new URL(url);
-    const pathname = (parsed.pathname || '').toLowerCase();
-    if (!pathname || pathname === '/' || pathname === '') return false;
-    const hasImageExt = /\.(?:jpg|jpeg|png|webp|avif)(?:[?#]|$)/i.test(pathname);
-    const hasPattern = pathname.includes('~tplv-') || pathname.includes('/img/');
-    return hasImageExt || hasPattern;
-  } catch (_) {
-    return false;
-  }
-}
-
-export function detectNotFoundPage({ httpStatus = 200, title = '', bodyText = '', html = '' } = {}) {
-  if (httpStatus === 404 || httpStatus === 410) {
-    return { notFound: true, reason: `HTTP status ${httpStatus}` };
-  }
-  const text = `${title} ${bodyText} ${html}`.toLowerCase();
-  const notFoundPatterns = [
-    'tujuanmu nggak ada',
-    'halaman tidak ditemukan',
-    'produk tidak ditemukan',
-    'produk ini tidak tersedia',
-    'page not found',
-    'produk ini tidak ada'
-  ];
-  for (const pattern of notFoundPatterns) {
-    if (text.includes(pattern)) {
-      return { notFound: true, reason: `Teks "${pattern}" terdeteksi di halaman` };
-    }
-  }
-
-  // Cek jika halaman tidak memiliki harga DAN tidak memiliki tanda detail produk
-  const hasPrice = /(?:rp|idr)\s*[\d.,]+/i.test(text);
-  const hasDetailMarker = /(?:detail produk|spesifikasi|deskripsi produk|informasi produk)/i.test(text);
-  if (!hasPrice && !hasDetailMarker && text.length < 500) {
-    return { notFound: true, reason: 'Halaman kosong tanpa indikator harga maupun detail produk' };
-  }
-
-  return { notFound: false, reason: null };
-}
-
-// Di parseHtml:
-const decodedUrl = imgUrl.replace(/&amp;/g, '&');
-if (!isValidProductImageUrl(decodedUrl)) return;
+const tables = ['re_campaigns', 'pillar_campaigns'];
 ```
 
 ---
 
-### 2.4. `app/api/v2/products/scrape/route.js` & `app/api/v2/products/[id]/photo-replace/route.js` (S4)
+## 3. Execution Task List
 
-#### Sebelum (Current/Before):
-```javascript
-// scrape/route.js:
-const allProducts = await db.prepare('SELECT id, input_source, source_url...').all();
-...
-const created = await createJob('product_scraper', { 
-  urls: chunk, 
-  category, 
-  tags, 
-  url_affiliates_map: urlAffiliatesMap, 
-  repair_mode,
-  refresh_photo: Boolean(refresh_photo),
-  reserved_ids: reservedIds
-});
-```
+- [x] **Task 1: Hapus Halaman, API, Worker, dan Dokumen Fitur Instant Factory & Sheets Autopilot (Tahap 1)**
+  - [x] Hapus `app/instant-factory/` dan `app/api/v2/instant-factory/`
+  - [x] Hapus `app/sheets-autopilot/` dan `app/api/sheets-autopilot/`
+  - [x] Hapus `lib/sheets-autopilot-worker.js`
+  - [x] Pindahkan `sot/menus/instant-factory.md` & `sot/menus/sheets-autopilot.md` ke `sot/menus/arsip/`
+  - [x] Hapus processor Instant & helper khusus Instant di `lib/scheduler-processors.js` (setelah audit pemakaian via `git grep`)
+  - [x] Hapus loop tick Instant & Sheets Autopilot di `lib/campaign-scheduler.js`
+  - [x] Bersihkan fungsi CRUD khusus `instant_campaign*` & `sheets_campaigns`/`sheets_jobs` di `lib/db.js` dan `lib/db-pg.js` (tanpa menghapus `CREATE/ALTER TABLE`)
 
-#### Sesudah (Proposed/After):
-```javascript
-// scrape/route.js:
-const activeTenant = getActiveTenantId();
-const allProducts = await db.prepare('SELECT id, input_source, source_url, raw_photo_url, cleaned_photo_url, generated_photo_url, unique_selling_point, packaging_type FROM product_extractions WHERE tenant_id = ?').all(activeTenant);
-...
-const created = await createJob('product_scraper', { 
-  tenant_id: activeTenant,
-  urls: chunk, 
-  category, 
-  tags, 
-  url_affiliates_map: urlAffiliatesMap, 
-  repair_mode,
-  refresh_photo: Boolean(refresh_photo),
-  reserved_ids: reservedIds
-});
-```
+- [x] **Task 2: Bersihkan Sambungan di Fitur Aktif (Tahap 2)**
+  - [x] Video Studio: bersihkan `app/video-studio/page.js`, `app/api/video-studio/campaign-videos/route.js`, `app/api/video-studio/render/route.js` (return 400 untuk `instant_factory`), `app/components/video-studio/FinishingPanel.jsx`, `lib/video-studio-finishing-source.js`, `lib/render-slot.js`
+  - [x] ContentFlow: bersihkan `app/content-flow/page.js` dan ubah label netral di `lib/contentflow-ingest.js` (`Pipeline v5.4`)
+  - [x] TTS Studio: bersihkan `app/api/tts-studio/campaign-data/route.js` dan `app/tts-studio/page.js`
+  - [x] Beranda & Pillar: bersihkan `app/page.js`, `app/terms/page.js`, periksa `app/pillar-campaigns/page.js`
+  - [x] Izin Menu & Users: bersihkan `lib/schema/user-schema.js` (pastikan UI izin toleran terhadap key lama)
+  - [x] Affiliate Studio: bersihkan `lib/affiliate-studio-production-adapter.js`, `lib/affiliate-studio-recommendation-adapter.js`, `lib/affiliate-studio-launch-adapter.js`
+  - [x] Logs, Scheduler, Naming & Gemini: bersihkan `lib/scheduler.js`, `app/api/scheduler/control/route.js`, `app/api/system-logs/route.js`, `lib/console-hook.js`, `lib/naming-helper.js`, `lib/gemini.js`
+  - [x] Perbarui tes & skrip: `tests/video-studio-finishing-source.test.mjs`, `tests/render-slot.test.js`, `tests/base64-image-reference.test.js`, `scripts/find-campaign.js`, `scripts/test-product-pipeline.js`
+  - [x] Perbarui SOT & Kartu Menu: `sot/menus/_PETA_MENU.md`, `sot/menus/kartu/video-studio.md`, `sot/menus/kartu/content-flow.md`, `sot/menus/kartu/tts-studio.md`, `sot/menus/kartu/users-tenants.md`
 
----
+- [x] **Task 3: Buat Skrip Dry-Run Tabel Legacy (Tahap 3)**
+  - [x] Buat `scripts/report-legacy-tables.mjs` dengan dukungan `--schema dev|staging|public` (read-only `SELECT COUNT`)
 
-## ## Execution Task List
+- [x] **Task 4: Verifikasi Audit `git grep` & Pengujian Otomatis**
+  - [x] Jalankan `git grep` akhir dan pastikan hanya sisa yang diizinkan
+  - [x] Buat & jalankan unit test baru penolakan `video_source_type: 'instant_factory'` (status 400)
+  - [x] Jalankan `npm run build`, `npm run test:mcp`, `npm run test:product-catalog`, serta tes unit terkait
 
-- [x] **Task 1: Perbaikan S1 (Fatal processCleanInputPath is not defined & multi-reason decidePhotoStatus)**
-  - [x] Deklarasikan `let processCleanInputPath = null;` di awal per-product loop `lib/scheduler-processors.js`
-  - [x] Integrasikan kembali alur foto produk ke fungsi yang terisolasi dan aman (`processProductPhotoFromRaw`)
-  - [x] Perbarui `decidePhotoStatus()` di `lib/product-photo-picker.js` agar menggabungkan semua alasan ke `photo_error`
-  - [x] Buat unit test alur pemrosesan foto end-to-end dengan mock di `tests/product-photo-flow.test.js`
-
-- [x] **Task 2: Perbaikan S2 (Deteksi 404 & Scraping Job Status)**
-  - [x] Kembalikan `httpStatus` di `lib/playwright-scraper.js`
-  - [x] Buat fungsi murni `detectNotFoundPage` di `lib/url-scraper.js`
-  - [x] Tolak AI Search Grounding fallback jika `PRODUCT_NOT_FOUND`
-  - [x] Lewati penyimpanan database di `processProductScraper` untuk URL 404 dan catat ke `errors`
-  - [x] Tambahkan `status_summary` (`failed`, `partial`, `ok`) pada hasil job
-  - [x] Buat endpoint route `app/api/v2/products/scrape/jobs/[jobId]/route.js`
-  - [x] Daftarkan tool MCP `cf_get_scrape_status` di `apps/mcp/tools.mjs`
-  - [x] Tambahkan fixture `tests/fixtures/tokopedia_404_2026.html` dan unit test di `tests/url-scraper-not-found.test.js`
-  - [x] Buat skrip dry-run `scripts/flag-not-found-products.mjs`
-
-- [x] **Task 3: Perbaikan S3 (Validasi URL Kandidat & Decode Entitas HTML)**
-  - [x] Tambahkan `isValidProductImageUrl` di `lib/url-scraper.js` (tolak URL domain-only dan non-image)
-  - [x] Terapkan decode `&amp;` -> `&` pada URL hasil regex
-  - [x] Terapkan validasi `isValidProductImageUrl` di `pickBestProductPhoto` dan cadangan ekstraksi
-  - [x] Buat unit test validasi URL di `tests/url-scraper-tokopedia-images.test.js`
-
-- [x] **Task 4: Perbaikan S4 (Tenant Sesi MCP Sampai ke Job & Tenant-Scoped Isolation)**
-  - [x] Tambahkan `tenant_id: getActiveTenantId()` di route `app/api/v2/products/scrape/route.js`
-  - [x] Tambahkan `tenant_id: getActiveTenantId()` di seluruh `createJob` pada `app/api/v2/products/[id]/photo-replace/route.js`
-  - [x] Batasi pencarian produk eksisting di route dan di `processProductScraper` dengan `WHERE tenant_id = ?`
-  - [x] Pastikan `createProductExtraction` menyimpan `tenant_id` dari konteks job
-  - [x] Buat skrip dry-run `scripts/move-product-tenant.mjs`
-  - [x] Tambahkan unit test isolasi tenant scraper di `tests/product-scraper-tenant.test.js`
-
-- [x] **Task 5: Verifikasi Menyeluruh & Laporan**
-  - [x] Jalankan seluruh suite tes: `node --test tests/*.test.js`, `npm run test:product-catalog`, `npm run test:mcp` (23 unit tests pass, product catalog pass, MCP 11 tests pass)
-  - [x] Jalankan `npm run build` (Next.js 16 build sukses)
-  - [x] Jalankan dry-run lokal Cuculemon (foto clean terbentuk, tidak ada ReferenceError) dan Texania (terdeteksi 404 tanpa fallback Gemini)
-  - [x] Jalankan skrip dry-run S1, S2, S4 untuk Staging
-  - [x] Susun laporan komprehensif ke pengguna dan minta izin untuk langkah rilis
+- [ ] **Task 5: Deploy ke Server Dev Mac Mini & Uji Manual**
+  - [ ] Commit dan push branch `fitur/hapus-instant-sheets`
+  - [ ] Deploy atomic ke Dev (`100.95.245.55:5020`)
+  - [ ] Verifikasi checklist manual di Dev dan periksa `dev-ui.err.log` (sekali, tanpa polling)
+  - [ ] Sajikan laporan akhir untuk pengguna

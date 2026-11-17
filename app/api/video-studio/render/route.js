@@ -33,6 +33,11 @@ export async function POST(request) {
     if (!video_source_type || !video_path) {
       return NextResponse.json({ success: false, error: 'Sumber video dan path video wajib diisi' }, { status: 400 });
     }
+    const { validateVideoStudioSourceType } = await import('@/lib/video-studio-finishing-source');
+    const sourceCheck = validateVideoStudioSourceType(video_source_type);
+    if (!sourceCheck.valid) {
+      return NextResponse.json({ success: false, error: sourceCheck.error }, { status: sourceCheck.status || 400 });
+    }
     if (!audio_source_type || !audio_path) {
       return NextResponse.json({ success: false, error: 'Sumber audio dan path audio wajib diisi' }, { status: 400 });
     }
@@ -126,12 +131,10 @@ export async function POST(request) {
 
         resolvedVideoPaths.push(resolvedPath);
       } else if (video_source_type === 'instant_factory') {
-        // Format ID: "if::<campaign_id>::scene<N>" — abs_path sudah di-resolve di API campaign-videos
-        // Kita re-resolve di sini via path yang dikirim langsung (abs_path sudah dikirim dari UI)
-        // Atau kita pakai video_path yang sudah berupa fs_path (/public/...)
-        const relPath = vp; // berupa "/path/to/clip.mp4" atau absolute
-        const absPath = path.isAbsolute(relPath) ? relPath : path.join(process.cwd(), 'public', relPath);
-        resolvedVideoPaths.push(absPath);
+        return NextResponse.json(
+          { success: false, error: "Sumber video 'instant_factory' sudah tidak didukung dan telah dihapus." },
+          { status: 400 }
+        );
       } else {
         resolvedVideoPaths.push(vp);
       }

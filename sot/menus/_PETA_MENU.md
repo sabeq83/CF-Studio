@@ -55,5 +55,6 @@ Sumber daftar menu: `lib/sidebar-nav.js`
 
 ## Catatan
 
-- Folder `app/` juga berisi halaman yang tidak muncul di sidebar (mis. `youtube-studio`, `affiliate-studio`, `instant-factory`, `sheets-autopilot`, `reports`, `system-health`). Dokumennya ada di folder ini, tetapi belum masuk peta.
+- Folder `app/` juga berisi halaman yang tidak muncul di sidebar (mis. `youtube-studio`, `affiliate-studio`, `reports`, `system-health`). Dokumennya ada di folder ini, tetapi belum masuk peta.
+- Dokumen lama fitur yang sudah dihapus (`instant-factory.md`, `sheets-autopilot.md`) diarsipkan di `sot/menus/arsip/`.
 - Dokumen rencana pengerjaan YouTube Studio dan Affiliate Studio tersimpan di subfolder `sot/menus/rencana/`.

@@ -761,7 +761,7 @@ function ContentFlowHubPageContent() {
       opc: { label: 'OPC Pillar', bg: 'var(--status-success-soft)', color: 'var(--status-success)', border: 'var(--status-success-soft)' },
       strategic: { label: 'Strategic (SC)', bg: 'var(--status-neutral-soft)', color: 'var(--status-neutral)', border: 'var(--status-neutral-soft)' },
       re: { label: 'Reverse Eng (RE)', bg: 'var(--status-warning-soft)', color: 'var(--status-warning)', border: 'var(--status-warning-soft)' },
-      instant: { label: 'Instant Factory', bg: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', border: 'rgba(236, 72, 153, 0.3)' },
+      pipeline: { label: 'Pipeline v5.4', bg: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', border: 'rgba(236, 72, 153, 0.3)' },
       recipe: { label: 'Recipe Labs', bg: 'rgba(139, 92, 246, 0.15)', color: '#a78bfa', border: 'rgba(139, 92, 246, 0.3)' },
       bridge: { label: 'Bridge Injector', bg: 'rgba(6, 182, 212, 0.15)', color: 'var(--link)', border: 'rgba(6, 182, 212, 0.3)' },
       multiplier: { label: 'Multiplier Lab', bg: 'var(--status-info-soft)', color: 'var(--link)', border: 'var(--border-subtle)' }
@@ -1281,7 +1281,6 @@ function ContentFlowHubPageContent() {
                   <option value="opc">🌱 OPC (Organic Pillar)</option>
                   <option value="strategic">🎯 Strategic Campaign</option>
                   <option value="re">🔄 Reverse Engineering</option>
-                  <option value="instant">⚡ Instant Factory</option>
                   <option value="recipe">🧪 Recipe Labs</option>
                   <option value="bridge">🔗 Bridge Injector</option>
                 </select>

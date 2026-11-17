@@ -13,7 +13,6 @@ function logToAll(message) {
     const files = [
       `re_campaign_logs_${tenantId}.txt`,
       `opc_logs_${tenantId}.txt`,
-      `instant_factory_logs_${tenantId}.txt`,
       `autopilot_logs_${tenantId}.txt`,
       `multiplier_logs_${tenantId}.txt`
     ];

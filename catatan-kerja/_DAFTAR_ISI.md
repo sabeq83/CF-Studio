@@ -6,6 +6,7 @@ Terakhir diperbarui: 17 November 2026
 
 | Nama File | Ringkasan / Judul |
 |---|---|
+| `USULAN_KONSISTENSI_VI_MULTIPLIER_NUTRIBAKE.md` | Analisis tenant default: identitas tangan, pengaruh blueprint, dan usulan penguncian VI Multiplier NutriBake |
 | `ANALISA_TENANT_MCP_MACMINI.md` | Analisa: Preset "tidak ditemukan" saat CF Autopipeline dijalankan dari Mac Mini |
 | `USULAN_ANALITIK_MINGGUAN_CFA.md` | Usulan: Analitik & Laporan Mingguan + Rencana Konten Pekan Depan |
 | `USULAN_AUDIT_TEMPLATE_FINISHING_GENERAL.md` | Usulan: Template Finishing Lebih General, Lebih Bersih |
@@ -40,6 +41,9 @@ Terakhir diperbarui: 17 November 2026
 | `antigravity_agent_instructions.md` | Instruksi Agent AI Antigravity — Implementasi Deconstruct URL Library |
 | `antigravity_scraper_foto_produk_instructions.md` | Instruksi Antigravity — Perbaikan Scraper Foto Produk (pilih foto produk saja, tanpa orang) |
 | `antigravity_scraper_foto_produk_revisi_01.md` | Revisi 01 Scraper Foto Produk — 4 celah backend, kualitas crop, tombol Setujui & Ganti Foto |
+| `antigravity_hapus_instant_factory_sheets_autopilot_instructions.md` | Instruksi Antigravity — Hapus fitur Instant Factory & Sheets Autopilot (tabel DB dibiarkan, sambungan fitur aktif dibersihkan) |
+| `antigravity_mcp_tenant_default_instructions.md` | Instruksi Antigravity — MCP selalu kembali ke tenant default (switch tenant sementara, cf_reset_tenant, tenant terlihat di jawaban) |
+| `antigravity_model_ai_terpusat_instructions.md` | Instruksi Antigravity — Model AI Gemini terpusat di Settings (model ringan, rantai cadangan, MODEL_BUSY vs kuota) |
 | `antigravity_scraper_foto_produk_revisi_02.md` | Revisi 02 Scraper Foto Produk — bug fatal foto clean, deteksi 404, tenant MCP, galeri lengkap, rubrik picker |
 | `antigravity_analitik_mingguan_instructions.md` | Instruksi Antigravity: Analitik Performa Konten via Repliz |
 | `antigravity_finishing_pass_cek_ulang.md` | Instruksi Antigravity: Cek Ulang Plan Finishing Pass (setelah Revisi 01) |

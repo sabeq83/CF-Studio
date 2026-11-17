@@ -1,6 +1,6 @@
 # Kartu Menu: TTS Studio
 
-Terakhir dicek: 17 November 2026 · Versi aplikasi: v2.50.0
+Terakhir dicek: 17 November 2026 · Versi aplikasi: v2.50.5 (branch `fitur/hapus-instant-sheets`)
 Alamat: `/tts-studio` · Kelompok: TOOLS · Kunci izin menu: `tts_studio`
 
 ## Fungsi
@@ -15,7 +15,7 @@ Studio pembuatan suara pengisi (voice-over) otomatis berbasis AI. Menghasilkan a
 
 ## Terhubung dengan
 - Menyuplai audio ke: Video Studio (`/video-studio` via batch TTS).
-- Menerima naskah dari: RE Campaign, Instant Factory, naskah manual.
+- Menerima naskah dari: RE Campaign dan naskah manual (tab Instant Factory sudah dihapus).
 - Perintah MCP: tidak ada perintah MCP khusus TTS Studio (digunakan internal oleh engine kampanye).
 
 ## Lokasi (untuk agent)

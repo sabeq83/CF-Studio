@@ -52,7 +52,7 @@ export default function HomePage() {
       label: 'Autopilot & Multi-Node',
       icon: '🤖',
       title: 'Automated Rendering & Social Ingest',
-      desc: 'Koneksi mulus Google Sheets ke pipeline rendering multi-node (Mac Mini + Windows GPU) dan publish otomatis ke TikTok, Facebook, & Instagram.'
+      desc: 'Otomasi terpadu dari riset produk ke pipeline rendering multi-node (Mac Mini + Windows GPU) dan publish otomatis ke TikTok, Facebook, & Instagram.'
     }
   ];
 
@@ -516,7 +516,7 @@ export default function HomePage() {
             {/* Feature 1 */}
             <div style={{ background: 'var(--surface)', border: '1px solid var(--border-subtle)', borderRadius: '16px', padding: '28px', transition: 'all 0.2s' }}>
               <div style={{ fontSize: '2rem', marginBottom: '14px' }}>🎬</div>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 10px 0' }}>Strategic &amp; Instant Campaigns</h3>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 10px 0' }}>Strategic Campaigns</h3>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, margin: 0 }}>
                 Eksekusi naskah, visual prompts, dan social media metadata dalam 1x call AI tanpa pipeline bertingkat yang rentan error.
               </p>
@@ -543,9 +543,9 @@ export default function HomePage() {
             {/* Feature 4 */}
             <div style={{ background: 'var(--surface)', border: '1px solid var(--border-subtle)', borderRadius: '16px', padding: '28px', transition: 'all 0.2s' }}>
               <div style={{ fontSize: '2rem', marginBottom: '14px' }}>🤖</div>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 10px 0' }}>Sheets Autopilot &amp; Ingestion</h3>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 10px 0' }}>ContentFlow Hub &amp; Social Sync</h3>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, margin: 0 }}>
-                Impor massal dari Google Sheets, validasi otomatis, dan penjadwalan langsung ke pipeline rendering multi-node.
+                Pusat kurasi, pelacakan afiliasi, dan distribusi konten siap tayang otomatis ke TikTok, YouTube, Instagram, &amp; Facebook.
               </p>
             </div>
 
