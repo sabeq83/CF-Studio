@@ -246,8 +246,8 @@ return NextResponse.json({ success: true, data: product });
   - [x] Jalankan `npm run test:product-catalog` dan `npm run test:mcp`
   - [x] Jalankan `npm run build` (Next.js kompilasi)
 
-- [ ] **Task 7: Push & Deploy ke Dev Mac Mini**
-  - [ ] Commit dan push branch `fitur/scraper-foto-galeri-r02` ke remote
-  - [ ] Deploy ke server Dev: `npm run deploy:dev:atomic -- --ref <full-sha> --apply --confirm-dev`
-  - [ ] Verifikasi Dev online (Port 5020 UI, Port 7020 API)
-  - [ ] Sajikan laporan ringkas, link Dev, dan checklist uji singkat untuk pengguna
+- [x] **Task 7: Push & Deploy ke Dev Mac Mini**
+  - [x] Commit dan push branch `fitur/scraper-foto-galeri-r02` ke remote
+  - [x] Deploy ke server Dev: `npm run deploy:dev:atomic -- --ref <full-sha> --apply --confirm-dev`
+  - [x] Verifikasi Dev online (Port 5020 UI, Port 7020 API)
+  - [x] Sajikan laporan ringkas, link Dev, dan checklist uji singkat untuk pengguna
