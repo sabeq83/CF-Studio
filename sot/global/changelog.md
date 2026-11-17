@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.51.0 — Hapus Instant Factory/Sheets Autopilot & Model AI Terpusat di Settings (17/11/2026)
+- Menghapus fitur usang Instant Factory dan Sheets Autopilot beserta UI, endpoint API, scheduler, dan arsip dokumentasi terkait
+- Memusatkan pemilih model Gemini teks dan vision ke menu Settings tenant lewat resolveModelChain dengan peran primary, light (gemini_model_light), dan vision
+- Menambahkan dropdown Model ringan (tugas kecil) serta memperbarui keterangan Smart Routing dan menghapus model mati gemini-1.5-flash-8b / gemini-1.5-flash
+- Melengkapi cadangan waterfall penuh di seluruh pemanggil teks/vision dan membedakan error MODEL_BUSY (503) dari QUOTA_EXHAUSTED (429)
+- Memperbaiki pencatatan kuota key pool ke model aktual yang dipanggil
+
 ## V2.50.4 — Hotfix Scraper Foto Produk: Foto Clean, Deteksi 404, Validasi URL & Tenant MCP (17/11/2026)
 - Perbaikan fatal processCleanInputPath is not defined
 - Deteksi halaman 404 dan endpoint status scraping
