@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.50.4 — Hotfix Scraper Foto Produk: Foto Clean, Deteksi 404, Validasi URL & Tenant MCP (17/11/2026)
+- Perbaikan fatal processCleanInputPath is not defined
+- Deteksi halaman 404 dan endpoint status scraping
+- Validasi URL gambar dan decode entitas HTML
+- Penerusan tenant_id sesi MCP ke job scheduler
+
 ## V2.50.3 — Link Instagram Asli dari Repliz (17/11/2026)
 - Link post Instagram yang dipublish lewat Repliz kini diambil dari Repliz Get One Content (shortcode resmi, mis. instagram.com/p/Df0ukAtnJO2/), menggantikan link susunan sendiri dari ID angka yang tidak bisa dibuka
 - Fungsi baru getReplizContent dan normalizeInstagramPermalink di lib/repliz-client.js; gagal mengambil link tidak menggagalkan job (tetap memakai link lama)
