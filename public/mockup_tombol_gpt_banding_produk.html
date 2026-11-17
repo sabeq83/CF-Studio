@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup — Tombol GPT Image 2 di Jendela Banding Produk</title>
+  <style>
+    /* Semantic Design Tokens — disalin langsung dari app/theme.css */
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --surface-subtle: #0c1422;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --surface-subtle: #ffffff;
+      --input-bg: #ffffff;
+      --overlay-subtle: rgba(30, 41, 59, 0.08);
+      --overlay-backdrop: rgba(15, 23, 42, 0.54);
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --text-disabled: #8794a6;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --link: #075ea8;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --status-neutral: #6548bd;
+      --status-neutral-soft: #f0ecfb;
+      --focus-ring: #6d4ed6;
+      --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+      --shadow-modal: 0 26px 80px rgba(31, 45, 61, 0.22);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      padding: 20px;
+    }
+
+    .page-wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Bar Kontrol Simulasi */
+    .sim-bar {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .sim-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .sim-sub {
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+    .sim-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .btn {
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+    .btn:hover:not(:disabled) {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+    .btn:disabled {
+      opacity: 0.52;
+      cursor: not-allowed;
+      color: var(--text-disabled);
+      background: var(--surface-subtle);
+    }
+    .btn-sm {
+      font-size: 12px;
+      padding: 6px 12px;
+    }
+    .btn-primary {
+      background: var(--action-primary);
+      border-color: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: var(--action-primary-hover);
+      border-color: var(--action-primary-hover);
+    }
+    .btn-gpt {
+      background: var(--status-neutral-soft);
+      border-color: var(--status-neutral);
+      color: var(--status-neutral);
+    }
+    .btn-gpt:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--status-neutral-soft) 72%, var(--status-neutral) 28%);
+    }
+    .btn-warning-soft {
+      background: var(--status-warning-soft);
+      border-color: var(--status-warning);
+      color: var(--status-warning);
+    }
+    .btn-toggle-active {
+      background: var(--status-info-soft);
+      border-color: var(--status-info);
+      color: var(--status-info);
+    }
+
+    /* Mini Preview Kartu Produk */
+    .card-preview {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .card-preview-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .card-thumb {
+      width: 54px;
+      height: 54px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    /* Badge Status */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+    }
+    .badge-success {
+      background: var(--status-success-soft);
+      border-color: var(--status-success);
+      color: var(--status-success);
+    }
+    .badge-info {
+      background: var(--status-info-soft);
+      border-color: var(--status-info);
+      color: var(--status-info);
+    }
+    .badge-danger {
+      background: var(--status-danger-soft);
+      border-color: var(--status-danger);
+      color: var(--status-danger);
+    }
+    .badge-warning {
+      background: var(--status-warning-soft);
+      border-color: var(--status-warning);
+      color: var(--status-warning);
+    }
+
+    /* Jendela Banding (meniru app/products/page.js) */
+    .modal-shell {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-modal);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .modal-title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .modal-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-top: 6px;
+      font-size: 11.5px;
+      color: var(--text-secondary);
+    }
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+      padding: 2px 6px;
+    }
+
+    .compare-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+
+    .photo-panel {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .photo-panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .photo-panel-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .mini-tabs {
+      display: inline-flex;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      padding: 2px;
+      gap: 2px;
+    }
+    .mini-tab {
+      font-family: inherit;
+      font-size: 10.5px;
+      font-weight: 600;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      padding: 3px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .mini-tab.active {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+    }
+
+    .photo-box {
+      width: 100%;
+      height: 260px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-subtle);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .model-label {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding-top: 2px;
+    }
+    .model-pill {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: var(--radius-xs);
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+    }
+
+    /* Kotak Error / Catatan */
+    .alert-box {
+      background: var(--surface-raised);
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      border-left: 3px solid var(--status-danger);
+      font-size: 12.5px;
+    }
+    .alert-box-title {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 2px;
+    }
+    .alert-box-text {
+      color: var(--status-danger);
+    }
+    .alert-box-hint {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Footer Tombol */
+    .modal-footer {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-subtle);
+    }
+    .footer-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .gpt-wrap {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .disabled-reason {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .footer-note {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    /* Spinner animasi */
+    .loading-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 20px;
+      text-align: center;
+      color: var(--status-info);
+    }
+    .spinner {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 3px solid var(--status-info-soft);
+      border-top-color: var(--status-info);
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Dialog Konfirmasi dalam Mockup */
+    .confirm-backdrop {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay-backdrop);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 50;
+      backdrop-filter: blur(4px);
+    }
+    .confirm-backdrop.open {
+      display: flex;
+    }
+    .confirm-dialog {
+      width: 100%;
+      max-width: 440px;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-modal);
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .confirm-title {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .confirm-desc {
+      margin: 0;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .confirm-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="page-wrap">
+    <!-- Panel Simulasi Interaktif -->
+    <div class="sim-bar">
+      <div>
+        <div class="sim-title">Mockup Review UI — Tombol "Ulangi dengan GPT" di Jendela Banding</div>
+        <div class="sim-sub">Uji kontras Light/Dark, tombol GPT nonaktif tanpa foto mentah, alur konfirmasi → loading → hasil/gagal, serta label model.</div>
+      </div>
+      <div class="sim-controls">
+        <button type="button" class="btn btn-sm" id="btnTheme" onclick="toggleTheme()">☀️ Mode Terang</button>
+        <button type="button" class="btn btn-sm btn-toggle-active" id="btnRawToggle" onclick="toggleRawServer()">📁 Foto Mentah: Tersedia</button>
+        <button type="button" class="btn btn-sm" id="btnFailToggle" onclick="toggleFailMode()">✅ Skenario GPT: Sukses</button>
+        <button type="button" class="btn btn-sm btn-toggle-active" id="btnModelKnownToggle" onclick="toggleModelKnown()">🏷️ Label Model: Diketahui</button>
+        <button type="button" class="btn btn-sm" onclick="resetDemo()">↺ Reset</button>
+      </div>
+    </div>
+
+    <!-- Preview Status di Kartu Produk -->
+    <div class="card-preview">
+      <div class="card-preview-left">
+        <div class="card-thumb" id="cardThumbSvg"></div>
+        <div>
+          <div style="font-size: 13px; font-weight: 700; color: var(--text-primary);">Serum Brightening Niacinamide 30ml</div>
+          <div style="font-size: 11.5px; color: var(--text-muted);" id="cardStatusSub">Tampilan status pada kartu produk di halaman /products</div>
+        </div>
+      </div>
+      <span class="badge badge-success" id="cardStatusBadge">Disetujui</span>
+    </div>
+
+    <!-- Modal Jendela Banding (Simulasi app/products/page.js) -->
+    <div class="modal-shell" role="dialog" aria-label="Bandingkan Foto Produk">
+      <!-- Header -->
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title">🔍 Bandingkan Foto Produk: Serum Brightening Niacinamide 30ml</h3>
+          <div class="modal-meta">
+            <span class="badge badge-success" id="modalBadge">Disetujui</span>
+            <span id="modalProviderText">Sumber foto bersih: <strong>G-Labs (Local Worker)</strong></span>
+            <span style="color: var(--text-muted);">• Diperbarui: 18 Nov 2026, 06.15</span>
+          </div>
+        </div>
+        <button type="button" class="modal-close" title="Tutup Jendela Banding" onclick="alert('Menutup jendela banding (simulasi)')">✕</button>
+      </div>
+
+      <!-- Panel Berdampingan: Kiri (Foto Lama / Asli) vs Kanan (Foto Baru / Hasil AI) -->
+      <div class="compare-grid">
+        <!-- Panel Kiri -->
+        <div class="photo-panel">
+          <div class="photo-panel-head">
+            <span class="photo-panel-title" id="leftPanelTitle">🕰️ Foto Lama (Sebelum GPT)</span>
+            <div class="mini-tabs">
+              <button type="button" class="mini-tab active" id="tabLeftPrev" onclick="setLeftTab('previous')">Foto Lama</button>
+              <button type="button" class="mini-tab" id="tabLeftRaw" onclick="setLeftTab('raw')">Foto Asli</button>
+            </div>
+          </div>
+          <div class="photo-box" id="leftPhotoBox"></div>
+          <div class="model-label" id="leftModelLabelRow">
+            <span>Model foto:</span>
+            <span class="model-pill" id="leftModelText">Foto lama: Nano Banana</span>
+          </div>
+        </div>
+
+        <!-- Panel Kanan -->
+        <div class="photo-panel">
+          <div class="photo-panel-head">
+            <span class="photo-panel-title">✨ Foto Baru (Hasil AI Studio)</span>
+            <span style="font-size: 11px; color: var(--text-muted);" id="rightRatioText">Rasio 1:1</span>
+          </div>
+          <div class="photo-box" id="rightPhotoBox"></div>
+          <div class="model-label" id="rightModelLabelRow">
+            <span>Model foto:</span>
+            <span class="model-pill" id="rightModelText">Foto baru: Nano Banana</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kotak Error (Muncul Saat Simulasi Gagal) -->
+      <div class="alert-box hidden" id="errorBox">
+        <div class="alert-box-title">Catatan Peninjauan AI / Gagal Generate:</div>
+        <div class="alert-box-text" id="errorText">G-Labs (GPT): Akun ChatGPT belum login atau batas kuota tercapai.</div>
+        <div class="alert-box-hint">Foto lama tetap dipertahankan utuh. Sistem tidak memindahkan permintaan secara diam-diam ke Nano Banana.</div>
+      </div>
+
+      <!-- Deretan Tombol Aksi -->
+      <div class="modal-footer">
+        <div class="footer-row">
+          <div class="btn-group">
+            <button type="button" class="btn btn-sm" id="btnReplace" onclick="alert('Membuka dialog Ganti Foto (perilaku lama).')">
+              🔄 Ganti Foto
+            </button>
+            <button type="button" class="btn btn-sm" id="btnNano" onclick="runNanoBanana()">
+              ✨ Ulangi Generate
+            </button>
+            <div class="gpt-wrap">
+              <button
+                type="button"
+                class="btn btn-sm btn-gpt"
+                id="btnGpt"
+                onclick="openGptConfirm()"
+                title="Generate ulang memakai GPT Image 2 (kuota akun ChatGPT di G-Labs)"
+              >
+                🧠 Ulangi dengan GPT
+              </button>
+              <span class="disabled-reason hidden" id="gptDisabledReason">Foto mentah belum tersimpan di server</span>
+            </div>
+            <button type="button" class="btn btn-sm btn-warning-soft hidden" id="btnRevert" onclick="revertOldPhoto()">
+              ↩ Kembalikan foto lama
+            </button>
+          </div>
+
+          <div class="btn-group">
+            <button type="button" class="btn btn-sm" onclick="alert('Menutup jendela banding (simulasi)')">Tutup</button>
+            <button type="button" class="btn btn-sm btn-primary" onclick="alert('Foto disetujui (simulasi)')">✅ Setujui</button>
+          </div>
+        </div>
+
+        <div class="footer-note">
+          <span>Catatan: Tombol GPT hanya untuk 1 produk. Tombol massal tetap Nano Banana.</span>
+          <span>Model fallback otomatis dinonaktifkan untuk tombol GPT.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dialog Konfirmasi GPT -->
+  <div class="confirm-backdrop" id="confirmBackdrop">
+    <div class="confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle">
+      <h4 class="confirm-title" id="confirmTitle">Generate ulang dengan GPT Image 2?</h4>
+      <p class="confirm-desc">
+        Generate ulang <strong>"Serum Brightening Niacinamide 30ml"</strong> dengan GPT Image 2?<br /><br />
+        Memakai kuota akun ChatGPT. Foto sekarang tetap disimpan dan bisa dikembalikan.
+      </p>
+      <div class="confirm-actions">
+        <button type="button" class="btn btn-sm" onclick="closeGptConfirm()">Batal</button>
+        <button type="button" class="btn btn-sm btn-primary" onclick="confirmRunGpt()">Ya, Buat dengan GPT</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      theme: 'dark',
+      hasLocalRaw: true,
+      failGpt: false,
+      modelKnown: true,
+      leftTab: 'previous',
+      status: 'approved', // approved | processing_gpt | failed
+      activeModel: 'nano_banana_2', // nano_banana_2 | gpt_image_2
+      previousModel: null,
+      hasPrevClean: false,
+      errorMessage: ''
+    };
+
+    function productSvg(variant) {
+      // Ilustrasi produk vektor memakai token warna tema agar kontras di dark & light mode
+      if (variant === 'raw') {
+        return `
+          <svg width="200" height="200" viewBox="0 0 200 200" aria-label="Ilustrasi Foto Mentah">
+            <rect x="8" y="8" width="184" height="184" rx="14" fill="var(--surface-interactive)" stroke="var(--border-subtle)" />
+            <path d="M16 144 L62 110 L108 134 L156 102 L184 128 L184 184 L16 184 Z" fill="var(--status-warning-soft)" />
+            <rect x="74" y="54" width="52" height="92" rx="10" fill="var(--surface)" stroke="var(--border-strong)" stroke-width="2" />
+            <rect x="86" y="34" width="28" height="22" rx="4" fill="var(--status-warning)" />
+            <rect x="82" y="76" width="36" height="40" rx="4" fill="var(--status-warning-soft)" stroke="var(--status-warning)" />
+            <text x="100" y="99" text-anchor="middle" font-size="9" font-weight="700" fill="var(--text-primary)">SERUM</text>
+            <text x="100" y="172" text-anchor="middle" font-size="10" fill="var(--text-muted)">Latar meja asli (mentah)</text>
+          </svg>
+        `;
+      }
+      if (variant === 'gpt') {
+        return `
+          <svg width="200" height="200" viewBox="0 0 200 200" aria-label="Ilustrasi Hasil GPT Image 2">
+            <rect x="8" y="8" width="184" height="184" rx="14" fill="var(--surface)" stroke="var(--status-neutral)" stroke-width="1.5" />
+            <ellipse cx="100" cy="156" rx="34" ry="8" fill="var(--overlay-subtle)" />
+            <rect x="74" y="52" width="52" height="96" rx="11" fill="var(--surface-raised)" stroke="var(--status-neutral)" stroke-width="2" />
+            <rect x="86" y="30" width="28" height="24" rx="5" fill="var(--status-neutral)" />
+            <rect x="81" y="74" width="38" height="44" rx="5" fill="var(--status-neutral-soft)" stroke="var(--status-neutral)" />
+            <text x="100" y="95" text-anchor="middle" font-size="9.5" font-weight="800" fill="var(--text-primary)">NIACIN</text>
+            <text x="100" y="108" text-anchor="middle" font-size="8" font-weight="700" fill="var(--status-neutral)">30 ml</text>
+            <text x="100" y="176" text-anchor="middle" font-size="10" fill="var(--status-neutral)">Studio 1:1 (GPT Image 2)</text>
+          </svg>
+        `;
+      }
+      return `
+        <svg width="200" height="200" viewBox="0 0 200 200" aria-label="Ilustrasi Hasil Nano Banana">
+          <rect x="8" y="8" width="184" height="184" rx="14" fill="var(--surface)" stroke="var(--border-strong)" />
+          <ellipse cx="100" cy="156" rx="32" ry="7" fill="var(--overlay-subtle)" />
+          <rect x="75" y="54" width="50" height="94" rx="10" fill="var(--surface-raised)" stroke="var(--action-primary)" stroke-width="2" />
+          <rect x="87" y="32" width="26" height="23" rx="4" fill="var(--action-primary)" />
+          <rect x="82" y="76" width="36" height="42" rx="4" fill="var(--status-info-soft)" stroke="var(--action-primary)" />
+          <text x="100" y="98" text-anchor="middle" font-size="9" font-weight="700" fill="var(--text-primary)">SERUM</text>
+          <text x="100" y="176" text-anchor="middle" font-size="10" fill="var(--text-muted)">Studio 1:1 (Nano Banana)</text>
+        </svg>
+      `;
+    }
+
+    function formatModelName(model) {
+      if (!state.modelKnown || !model) return null;
+      if (model === 'gpt_image_2') return 'GPT Image 2';
+      if (model === 'nano_banana_2' || model === 'nano_banana' || model === 'nano_banana_pro') return 'Nano Banana';
+      return model;
+    }
+
+    function render() {
+      document.documentElement.setAttribute('data-theme', state.theme);
+      document.getElementById('btnTheme').textContent = state.theme === 'dark' ? '☀️ Mode Terang' : '🌙 Mode Gelap';
+
+      const btnRaw = document.getElementById('btnRawToggle');
+      btnRaw.textContent = state.hasLocalRaw ? '📁 Foto Mentah: Tersedia' : '📁 Foto Mentah: Tidak Ada';
+      btnRaw.classList.toggle('btn-toggle-active', state.hasLocalRaw);
+
+      const btnFail = document.getElementById('btnFailToggle');
+      btnFail.textContent = state.failGpt ? '❌ Skenario GPT: Gagal' : '✅ Skenario GPT: Sukses';
+      btnFail.classList.toggle('btn-warning-soft', state.failGpt);
+
+      const btnKnown = document.getElementById('btnModelKnownToggle');
+      btnKnown.textContent = state.modelKnown ? '🏷️ Label Model: Diketahui' : '🏷️ Label Model: Tidak Diketahui';
+      btnKnown.classList.toggle('btn-toggle-active', state.modelKnown);
+
+      // Status badges (kartu + modal)
+      const cardBadge = document.getElementById('cardStatusBadge');
+      const modalBadge = document.getElementById('modalBadge');
+      const cardSub = document.getElementById('cardStatusSub');
+      cardBadge.className = 'badge';
+      modalBadge.className = 'badge';
+
+      if (state.status === 'processing_gpt') {
+        cardBadge.classList.add('badge-info');
+        modalBadge.classList.add('badge-info');
+        cardBadge.textContent = 'Sedang dibuat dengan GPT…';
+        modalBadge.textContent = 'Sedang dibuat dengan GPT…';
+        cardSub.textContent = 'Menunggu OpenAI GPT Image 2 melalui G-Labs (1 produk)';
+      } else if (state.status === 'failed') {
+        cardBadge.classList.add('badge-danger');
+        modalBadge.classList.add('badge-danger');
+        cardBadge.textContent = 'Gagal foto';
+        modalBadge.textContent = 'Gagal foto';
+        cardSub.textContent = 'Foto lama tetap aman & tidak berubah';
+      } else {
+        cardBadge.classList.add('badge-success');
+        modalBadge.classList.add('badge-success');
+        cardBadge.textContent = 'Disetujui';
+        modalBadge.textContent = 'Disetujui';
+        cardSub.textContent = 'Tampilan status pada kartu produk di halaman /products';
+      }
+
+      document.getElementById('cardThumbSvg').innerHTML = productSvg(state.activeModel === 'gpt_image_2' ? 'gpt' : 'nano');
+
+      // Panel kiri
+      document.getElementById('tabLeftPrev').classList.toggle('active', state.leftTab === 'previous');
+      document.getElementById('tabLeftRaw').classList.toggle('active', state.leftTab === 'raw');
+
+      const leftBox = document.getElementById('leftPhotoBox');
+      const leftTitle = document.getElementById('leftPanelTitle');
+      const leftModelRow = document.getElementById('leftModelLabelRow');
+      const leftModelText = document.getElementById('leftModelText');
+
+      if (state.leftTab === 'raw') {
+        leftTitle.textContent = '📷 Foto Asli (Mentah)';
+        leftBox.innerHTML = state.hasLocalRaw
+          ? productSvg('raw')
+          : '<span style="font-size:12px; color:var(--text-muted); padding:16px; text-align:center;">Foto mentah belum tersimpan di server (/uploads/...)</span>';
+        leftModelRow.classList.add('hidden');
+      } else {
+        leftTitle.textContent = state.hasPrevClean ? '🕰️ Foto Lama (Tersimpan)' : '📷 Foto Asli / Pembanding';
+        if (state.hasPrevClean) {
+          leftBox.innerHTML = productSvg(state.previousModel === 'gpt_image_2' ? 'gpt' : 'nano');
+          const prevLabel = formatModelName(state.previousModel);
+          if (prevLabel) {
+            leftModelRow.classList.remove('hidden');
+            leftModelText.textContent = `Foto lama: ${prevLabel}`;
+          } else {
+            leftModelRow.classList.add('hidden');
+          }
+        } else {
+          leftBox.innerHTML = state.hasLocalRaw
+            ? productSvg('raw')
+            : '<span style="font-size:12px; color:var(--text-muted); padding:16px; text-align:center;">Belum ada foto lama (klik "Ulangi dengan GPT" untuk simulasi)</span>';
+          leftModelRow.classList.add('hidden');
+        }
+      }
+
+      // Panel kanan
+      const rightBox = document.getElementById('rightPhotoBox');
+      const rightModelRow = document.getElementById('rightModelLabelRow');
+      const rightModelText = document.getElementById('rightModelText');
+
+      if (state.status === 'processing_gpt') {
+        rightBox.innerHTML = `
+          <div class="loading-state">
+            <div class="spinner"></div>
+            <div style="font-size:13px; font-weight:700;">Sedang dibuat dengan GPT…</div>
+            <div style="font-size:11.5px; color:var(--text-muted);">Memakai kuota akun ChatGPT di G-Labs. Foto lama tetap aman.</div>
+          </div>
+        `;
+        rightModelRow.classList.add('hidden');
+      } else {
+        rightBox.innerHTML = productSvg(state.activeModel === 'gpt_image_2' ? 'gpt' : 'nano');
+        const activeLabel = formatModelName(state.activeModel);
+        if (activeLabel) {
+          rightModelRow.classList.remove('hidden');
+          rightModelText.textContent = `${state.hasPrevClean ? 'Foto baru' : 'Foto aktif'}: ${activeLabel}`;
+        } else {
+          rightModelRow.classList.add('hidden');
+        }
+      }
+
+      // Error box
+      const errorBox = document.getElementById('errorBox');
+      if (state.status === 'failed' && state.errorMessage) {
+        errorBox.classList.remove('hidden');
+        document.getElementById('errorText').textContent = state.errorMessage;
+      } else {
+        errorBox.classList.add('hidden');
+      }
+
+      // Tombol-tombol footer
+      const isBusy = state.status === 'processing_gpt';
+      document.getElementById('btnReplace').disabled = isBusy;
+      document.getElementById('btnNano').disabled = isBusy;
+
+      const btnGpt = document.getElementById('btnGpt');
+      const gptReason = document.getElementById('gptDisabledReason');
+      btnGpt.disabled = isBusy || !state.hasLocalRaw;
+      btnGpt.title = state.hasLocalRaw
+        ? 'Generate ulang memakai GPT Image 2 (kuota akun ChatGPT di G-Labs)'
+        : 'Foto mentah belum tersimpan di server';
+      gptReason.classList.toggle('hidden', state.hasLocalRaw);
+
+      const btnRevert = document.getElementById('btnRevert');
+      btnRevert.classList.toggle('hidden', !state.hasPrevClean || isBusy);
+    }
+
+    function toggleTheme() {
+      state.theme = state.theme === 'dark' ? 'light' : 'dark';
+      render();
+    }
+
+    function toggleRawServer() {
+      state.hasLocalRaw = !state.hasLocalRaw;
+      render();
+    }
+
+    function toggleFailMode() {
+      state.failGpt = !state.failGpt;
+      render();
+    }
+
+    function toggleModelKnown() {
+      state.modelKnown = !state.modelKnown;
+      render();
+    }
+
+    function setLeftTab(tab) {
+      state.leftTab = tab;
+      render();
+    }
+
+    function openGptConfirm() {
+      if (!state.hasLocalRaw || state.status === 'processing_gpt') return;
+      document.getElementById('confirmBackdrop').classList.add('open');
+    }
+
+    function closeGptConfirm() {
+      document.getElementById('confirmBackdrop').classList.remove('open');
+    }
+
+    function confirmRunGpt() {
+      closeGptConfirm();
+      state.status = 'processing_gpt';
+      state.errorMessage = '';
+      render();
+
+      setTimeout(() => {
+        if (state.failGpt) {
+          state.status = 'failed';
+          state.errorMessage = 'G-Labs (GPT): Akun ChatGPT belum login atau batas kuota tercapai.';
+          render();
+          return;
+        }
+        state.previousModel = state.activeModel;
+        state.activeModel = 'gpt_image_2';
+        state.hasPrevClean = true;
+        state.leftTab = 'previous';
+        state.status = 'approved';
+        state.errorMessage = '';
+        render();
+      }, 1300);
+    }
+
+    function runNanoBanana() {
+      if (state.status === 'processing_gpt') return;
+      state.previousModel = state.activeModel;
+      state.activeModel = 'nano_banana_2';
+      state.hasPrevClean = true;
+      state.leftTab = 'previous';
+      state.status = 'approved';
+      state.errorMessage = '';
+      render();
+    }
+
+    function revertOldPhoto() {
+      if (!state.hasPrevClean) return;
+      const oldModel = state.previousModel || 'nano_banana_2';
+      state.activeModel = oldModel;
+      state.previousModel = null;
+      state.hasPrevClean = false;
+      state.status = 'approved';
+      state.errorMessage = '';
+      render();
+    }
+
+    function resetDemo() {
+      state.hasLocalRaw = true;
+      state.failGpt = false;
+      state.modelKnown = true;
+      state.leftTab = 'previous';
+      state.status = 'approved';
+      state.activeModel = 'nano_banana_2';
+      state.previousModel = null;
+      state.hasPrevClean = false;
+      state.errorMessage = '';
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>
