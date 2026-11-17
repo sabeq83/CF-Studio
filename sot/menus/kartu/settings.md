@@ -1,16 +1,18 @@
 # Kartu Menu: Settings
 
-Terakhir dicek: 17 November 2026 · Versi aplikasi: v2.50.0
+Terakhir dicek: 17 November 2026 · Versi aplikasi: v2.51.0
 Alamat: `/settings` · Kelompok: SYSTEM · Kunci izin menu: `system_settings`
 
 ## Fungsi
-Pusat konfigurasi sistem dan koneksi layanan pihak ketiga. Tempat mengatur kunci AI (Gemini Key Pool), status autentikasi Google OAuth & Google Drive, koneksi webhook GPU worker (G-Labs), serta opsi fitur eksperimental untuk organisasi yang aktif.
+Pusat konfigurasi sistem dan koneksi layanan pihak ketiga. Tempat mengatur model Gemini terpusat per peran (`primary`, `light`, `fallback`, Smart Routing), kunci AI (Gemini Key Pool), status autentikasi Google OAuth & Google Drive, koneksi webhook GPU worker (G-Labs), serta opsi fitur eksperimental untuk organisasi yang aktif.
 
 ## Alur pakai
-1. Masukkan dan kelola kunci Gemini AI untuk pemrosesan naskah dan gambar.
-2. Hubungkan atau perbaiki izin Google Drive untuk penyimpanan aset cloud.
-3. Konfigurasikan host dan kunci webhook G-Labs worker jika menggunakan GPU eksternal.
-4. Simpan pengaturan; perubahan langsung berlaku pada tenant aktif.
+1. Pilih mode tier (`Paid` / `Free`), **Model AI Utama**, **Model Cadangan Utama**, dan **Model ringan (tugas kecil)** (atau biarkan kosong *"Sama dengan model utama"*).
+2. Atur saklar Smart Routing: aktif = tugas kecil memakai Model ringan, mati = semua memakai Model utama.
+3. Masukkan dan kelola kunci Gemini AI untuk pemrosesan naskah dan gambar.
+4. Hubungkan atau perbaiki izin Google Drive untuk penyimpanan aset cloud.
+5. Konfigurasikan host dan kunci webhook G-Labs worker jika menggunakan GPU eksternal.
+6. Simpan pengaturan; perubahan langsung berlaku pada tenant aktif.
 
 ## Terhubung dengan
 - Menyediakan kredensial dan endpoint untuk: semua modul AI, rendering, penyimpanan drive, dan publishing.

@@ -1,6 +1,6 @@
 # Peta Menu CF Studio
 
-Terakhir dicek: 17 November 2026 · Versi aplikasi: v2.50.0
+Terakhir dicek: 17 November 2026 · Versi aplikasi: v2.51.0
 Sumber daftar menu: `lib/sidebar-nav.js`
 
 **Cara pakai (untuk agent):** cari menu yang dibahas di tabel, buka kartunya saja. Dokumen lengkap hanya dibuka jika kartu tidak cukup.

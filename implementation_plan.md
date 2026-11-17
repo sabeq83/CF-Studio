@@ -22,7 +22,7 @@
 - [x] **Langkah 2 & 3 (Pemanggil & Pencatatan Kuota/`MODEL_BUSY`)**: Perbarui `makeModelResilient`, `executeContentGeneration`, `executeWithKeyPool`, `lib/product-bulk-worker.js`, `app/api/v2/products/[id]/route.js`, `app/api/v2/brand-profiles/extract/route.js`, `lib/threads-series-generator.js`, `lib/re-recomm-engine.js`, `lib/universe-ai-builder.js`, `lib/visual-identity-ai-builder.js`, `lib/universe-ai-repository.js`, `lib/tenant-admin.js`, `lib/scheduler-processors.js`, `app/api/keys/route.js`, `lib/db.js`, dan `app/api/settings/route.js`.
 - [x] **Langkah 5a (Tes Otomatis)**: Tambah `tests/gemini-model-resolver.test.js` (termasuk penjaga `git grep` literal `gemini-<angka>`).
 - [x] **Langkah 5b (Skrip Dry-Run)**: Buat `scripts/report-effective-gemini-models.mjs` (`--schema dev|staging`, read-only) untuk tabel model sebelum vs sesudah per tenant.
-- [ ] **Langkah 5c (Verifikasi & Deploy Dev)**: Jalankan semua tes + `npm run build`, deploy ke Dev (`5020`/`7020`), uji enrichment nyata & ubah model di Dev untuk verifikasi `[GEMINI_CALL]`, lalu susun laporan balik ke pengguna.
+- [x] **Langkah 5c (Verifikasi & Deploy Dev)**: Jalankan semua tes + `npm run build`, deploy ke Dev (`5020`/`7020`), uji enrichment nyata & ubah model di Dev untuk verifikasi `[GEMINI_CALL]`, serta pasang UI Settings & rilis ke Staging sesuai persetujuan pengguna.
 
 ---
 
