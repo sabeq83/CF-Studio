@@ -983,6 +983,9 @@ export default function ProductDatabaseModal({
                           outline: 'none'
                         }}
                       />
+                      <p style={{ margin: '4px 0 0', fontSize: '11px', color: 'var(--text-muted)' }}>
+                        Ditulis dalam Bahasa Inggris — dipakai langsung untuk prompt gambar/video.
+                      </p>
                     </div>
 
                     <div>
@@ -1005,6 +1008,9 @@ export default function ProductDatabaseModal({
                           outline: 'none'
                         }}
                       />
+                      <p style={{ margin: '4px 0 0', fontSize: '11px', color: 'var(--text-muted)' }}>
+                        Ditulis dalam Bahasa Inggris — dipakai langsung untuk prompt gambar/video.
+                      </p>
                     </div>
 
                     <div>

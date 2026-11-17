@@ -1,157 +1,87 @@
-# Implementation Plan: Model AI Terpusat di Settings
+# Implementation Plan: Kartu Produk (Enrich & Foto G-Labs) + Truth Berbahasa Inggris
 
-> Referensi tugas: [antigravity_ai_terpusat_TERPADU.md](file:///Users/sabeqmmursyid/_cfstudio/catatan-kerja/instruksi-agent/antigravity_ai_terpusat_TERPADU.md) & [antigravity_model_ai_terpusat_instructions.md](file:///Users/sabeqmmursyid/_cfstudio/catatan-kerja/instruksi-agent/antigravity_model_ai_terpusat_instructions.md)  
-> Branch aktif: `fitur/model-ai-terpusat` (dibuat dari `fitur/hapus-instant-sheets` @ `e731b1f`)
-
-## Ringkasan Tujuan
-
-1. Memusatkan seluruh pemanggilan Gemini teks & vision ke pengaturan tenant (`Settings`), tanpa penimpaan diam-diam ke model yang sudah mati (`gemini-1.5-flash-8b`, `gemini-1.5-flash`).
-2. Menyediakan satu fungsi pemilih terpusat `resolveModelChain({ role, taskType, modelOverride })` dengan 3 peran (`primary`, `light`, `vision`) serta key settings baru `gemini_model_light`.
-3. Memastikan setiap pemanggilan memakai rantai cadangan (`makeModelResilient` / `generateContentFlexible` / loop REST) tanpa duplikat dan membedakan `MODEL_BUSY` (503) dari `QUOTA_EXHAUSTED` (429 harian).
-4. Mencatat kuota pool key sesuai model aktual yang dipanggil, bukan model utama tenant secara membabi buta.
-5. Menyediakan mockup HTML Settings (`public/mockup_settings_model_ai.html`) untuk review pengguna sebelum mengubah UI React `app/settings/page.js`.
+> Instruksi sumber: [antigravity_kartu_produk_enrich_foto_truth_instructions.md](file:///Users/sabeqmmursyid/_cfstudio/catatan-kerja/instruksi-agent/antigravity_kartu_produk_enrich_foto_truth_instructions.md)  
+> Tahap saat ini: **Bagian A (`hotfix/truth-bahasa-inggris`)** dulu, baru **Bagian B (`hotfix/kartu-produk-foto-enrich`)**.
 
 ---
 
 ## Execution Task List
 
-- [x] **Langkah 0**: Amankan perubahan di `fitur/hapus-instant-sheets` (`e731b1f`) dan buat branch `fitur/model-ai-terpusat`.
-- [x] **Audit Awal**: Inventarisasi pemanggil Gemini di `lib/` & `app/` serta verifikasi bukti error `gemini-1.5-flash-8b` pada tenant `tnt_mas-ibnu_e0eb25` di `staging.product_extractions`.
-- [x] **Mockup HTML UI Settings**: Buat `public/mockup_settings_model_ai.html` dengan semantic CSS tokens (Light & Dark mode).
-- [x] **Langkah 1 (`lib/gemini.js`)**: Implementasi `KNOWN_GEMINI_MODELS`, `DEFAULT_TEXT_MODEL`, `resolveModelChain`, pembersihan `MODULE_MODEL_MATRIX` & cascade dari model mati, pembaruan `resolveModelForTask`, `getResolvedGeminiModels` (termasuk string arg `'compliance_audit'`), `resolveStartFrameQcModel`, dan `generateWithImages`.
-- [x] **Langkah 2 & 3 (Pemanggil & Pencatatan Kuota/`MODEL_BUSY`)**: Perbarui `makeModelResilient`, `executeContentGeneration`, `executeWithKeyPool`, `lib/product-bulk-worker.js`, `app/api/v2/products/[id]/route.js`, `app/api/v2/brand-profiles/extract/route.js`, `lib/threads-series-generator.js`, `lib/re-recomm-engine.js`, `lib/universe-ai-builder.js`, `lib/visual-identity-ai-builder.js`, `lib/universe-ai-repository.js`, `lib/tenant-admin.js`, `lib/scheduler-processors.js`, `app/api/keys/route.js`, `lib/db.js`, dan `app/api/settings/route.js`.
-- [x] **Langkah 5a (Tes Otomatis)**: Tambah `tests/gemini-model-resolver.test.js` (termasuk penjaga `git grep` literal `gemini-<angka>`).
-- [x] **Langkah 5b (Skrip Dry-Run)**: Buat `scripts/report-effective-gemini-models.mjs` (`--schema dev|staging`, read-only) untuk tabel model sebelum vs sesudah per tenant.
-- [x] **Langkah 5c (Verifikasi & Deploy Dev)**: Jalankan semua tes + `npm run build`, deploy ke Dev (`5020`/`7020`), uji enrichment nyata & ubah model di Dev untuk verifikasi `[GEMINI_CALL]`, serta pasang UI Settings & rilis ke Staging sesuai persetujuan pengguna.
+### Bagian A — `hotfix/truth-bahasa-inggris` (Tanpa UI Mockup)
+- [x] **Persiapan Branch A**: Buat branch `hotfix/truth-bahasa-inggris` dari `main`.
+- [x] **A1 (Prompt Enrichment & Konstanta Bersama)**: Pindahkan definisi baku Product Truth (3–4 kalimat English) & Geometric Truth (2–3 kalimat English) ke konstanta bersama agar dipakai oleh `buildBatchProductTruthsPrompt` (`lib/prompts.js`) dan `buildEnrichmentPrompt` (`lib/product-bulk-worker.js`); jaga USP & kategori tetap Bahasa Indonesia.
+- [x] **A2 (Penjaga Bahasa)**: Buat `looksIndonesian(text)` dan helper terjemah cadangan di `lib/product-truth-language.js`, lalu integrasikan penjaga pasca-enrichment di `lib/product-bulk-worker.js` (1x call terjemah bila salah satu Truth berbahasa Indonesia; non-fatal bila gagal).
+- [x] **A3 (Skrip Data Lama)**: Buat `scripts/translate-product-truths.mjs` (`--schema <dev|staging>`, `--tenant`, `--limit`, `--apply` dengan default dry-run).
+- [x] **A4 (Keterangan Form Modal)**: Tambah teks bantu Bahasa Inggris ber-token `var(--text-muted)` di `app/products/ProductDatabaseModal.js`.
+- [x] **A5 (Unit Test & Build)**: Tambah `tests/product-truth-language.test.js` dan verifikasi semua tes produk + `npm run build`.
+- [ ] **A6 (Deploy & Uji Dev + Dry-Run Staging)**: Deploy `hotfix/truth-bahasa-inggris` ke Dev (`5020`/`7020`), uji enrich 1 produk di Dev (Truth English), jalankan `--apply` di Dev atau dry-run `--schema staging` (read-only) untuk laporan.
+
+### Bagian B — `hotfix/kartu-produk-foto-enrich` (UI — Mockup Dulu)
+- [ ] **B0 (Mockup HTML)**: Buat `public/mockup_kartu_produk_foto_enrich.html` (standalone, semantic tokens, light/dark, 3 kondisi kartu + jendela banding + tab foto modal Edit), deploy/tampilkan link HTTP ke pengguna untuk persetujuan sebelum edit UI React (`app/products/`).
+- [ ] **B1–B6**: Kerjakan tombol Enrich di kartu, thumbnail terbaru + sakelar Asli|Hasil AI + label status, jendela banding, tampilan foto di Modal Edit, tes unit pemilih foto default + `npm run build`, dan uji Dev (serta konfirmasi B5 migrasi DB hanya bila diizinkan).
 
 ---
 
-## Rencana Perubahan Kode (Before & After Snippets)
+## Rencana Perubahan Kode Bagian A (Before & After Snippets)
 
-### 1. [lib/gemini.js](file:///Users/sabeqmmursyid/_cfstudio/lib/gemini.js)
+### 1. Konstanta Bersama & Prompt Enrichment ([lib/product-truth-language.js](file:///Users/sabeqmmursyid/_cfstudio/lib/product-truth-language.js), [lib/prompts.js](file:///Users/sabeqmmursyid/_cfstudio/lib/prompts.js), [lib/product-bulk-worker.js](file:///Users/sabeqmmursyid/_cfstudio/lib/product-bulk-worker.js))
 
-**Code Sebelum (Current/Before):**
+**Code Sebelum (Current/Before) — `lib/product-bulk-worker.js`:**
 ```javascript
-export const GEMINI_CASCADE_ORDER_PAID = [
-  'gemini-2.5-flash',
-  'gemini-3.6-flash',
-  'gemini-3.5-flash',
-  'gemini-3.7-flash',
-  'gemini-3.8-flash',
-  'gemini-1.5-flash',
-  'gemini-1.5-flash-8b',
-  'gemini-flash-latest'
-];
-
-export const MODULE_MODEL_MATRIX = {
-  SCRAPER: { paid: 'gemini-1.5-flash-8b', free: 'gemini-3.6-flash', useKB: false },
-  ...
-};
+    {
+      "id": "ID produk asli",
+      "unique_selling_point": ["USP 1", "USP 2", "USP 3"],
+      "product_truth": "Fakta nyata produk dari perspektif konsumen (1-2 kalimat)",
+      "geometric_truth": "Deskripsi bentuk fisik, dimensi, dan visual kemasan (1-2 kalimat)",
+      "category": "Kategori produk",
+      "clean_photo_t2i_prompt": "Prompt Bahasa Inggris untuk foto produk clean berlatar putih — deskripsi produk, studio light, white background"
+    }
 ```
 
 **Code Sesudah (Proposed/After):**
 ```javascript
-export const DEFAULT_TEXT_MODEL = 'gemini-3.6-flash';
-export const DEFAULT_FALLBACK_MODEL = 'gemini-3.6-flash';
-export const KNOWN_GEMINI_MODELS = [
-  'gemini-3.6-flash',
-  'gemini-3.8-flash',
-  'gemini-3.7-flash',
-  'gemini-3.5-flash',
-  'gemini-3.5-flash-lite',
-  'gemini-3.1-flash-lite',
-  'gemini-2.5-flash',
-  'gemini-2.5-flash-lite',
-  'gemini-flash-latest'
-];
-
-export const MODULE_MODEL_MATRIX = {
-  SCRAPER: { role: 'light', useKB: false },
-  PRODUCT_ENRICHMENT: { role: 'light', useKB: false },
-  OCR_EXTRACTION: { role: 'light', useKB: false },
-  BRAND_EXTRACTION: { role: 'light', useKB: false },
-  COMPLIANCE: { role: 'light', useKB: false },
-  DECONSTRUCT: { role: 'light', useKB: false },
-  START_FRAME_QC: { role: 'vision', useKB: false },
-  CAMPAIGN_PLANNER: { role: 'primary', useKB: true },
-  ...
-};
-
-export async function resolveModelChain({ role = null, taskType = null, modelOverride = null, explicitTier = null } = {}) {
-  // Membaca gemini_api_tier, gemini_smart_routing, gemini_model_primary,
-  // gemini_model_fallback, gemini_model_light, start_frame_visual_qc_model
-  // dan mengembalikan { model, chain, role, useKB, tier, primaryModel, fallbackModel, lightModel }
-}
+// Konstanta PRODUCT_TRUTH_DEFINITIONS di lib/product-truth-language.js dipakai bersama oleh buildBatchProductTruthsPrompt & buildEnrichmentPrompt:
+// - product_truth: WAJIB Bahasa Inggris, 3-4 kalimat deskripsi tampilan luar kemasan (warna dominan, letak logo, teks utama, jenis tutup, aksen warna) untuk mengunci T2I.
+// - geometric_truth: WAJIB Bahasa Inggris, 2-3 kalimat struktur 3D & material/permukaan (silinder tegak, plastik doff, kaca bening, dll.) untuk I2V.
+// - unique_selling_point & category tetap Bahasa Indonesia (dipakai naskah VO).
 ```
 
-### 2. Error `MODEL_BUSY` vs `QUOTA_EXHAUSTED` & Tracking Pool Model di [lib/gemini.js](file:///Users/sabeqmmursyid/_cfstudio/lib/gemini.js)
+### 2. Penjaga Bahasa di `enrichProduct` ([lib/product-bulk-worker.js](file:///Users/sabeqmmursyid/_cfstudio/lib/product-bulk-worker.js))
 
 **Code Sebelum (Current/Before):**
 ```javascript
-// makeModelResilient & executeContentGeneration akhir loop:
-throw new Error(`QUOTA_EXHAUSTED: Semua model Gemini tidak tersedia setelah ${MAX_WATERFALL_CYCLES} putaran. Error terakhir: ${baseMsg}`);
+    const enriched = JSON.parse(rawResponse);
+    const item = (enriched.products || [enriched])[0];
+    if (!item) throw new Error('Gemini tidak mengembalikan data produk');
 
-// executeWithKeyPool akhir loop:
-throw new Error('QUOTA_EXHAUSTED: Semua API Key yang dicoba dalam pool gagal karena rate limit atau high demand.');
+    await pgQuery(`UPDATE product_extractions SET ...`, [..., item.product_truth || null, item.geometric_truth || null, ...]);
 ```
 
 **Code Sesudah (Proposed/After):**
 ```javascript
-// Membedakan 503/high demand/overloaded dari 429 kuota harian:
-if (allFailuresWereBusy503) {
-  const err = new Error(`MODEL_BUSY (dapat diulang): model ${lastTriedModel} sedang sibuk`);
-  err.code = 'MODEL_BUSY';
-  err.retryable = true;
-  err.status = 503;
-  err.geminiModel = lastTriedModel;
-  throw err;
-}
-```
+    const enriched = JSON.parse(rawResponse);
+    const rawItem = (enriched.products || [enriched])[0];
+    if (!rawItem) throw new Error('Gemini tidak mengembalikan data produk');
 
-### 3. [lib/product-bulk-worker.js](file:///Users/sabeqmmursyid/_cfstudio/lib/product-bulk-worker.js) & [app/api/v2/products/[id]/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/products/%5Bid%5D/route.js)
-
-**Code Sebelum (Current/Before):**
-```javascript
-    const rawResponse = await executeWithKeyPool(1, async (apiKey) => {
-      const { GoogleGenerativeAI } = await import('@google/generative-ai');
-      const { getResolvedGeminiModels } = await import('./gemini.js');
-      const { resolvedPrimary } = await getResolvedGeminiModels({ taskType: 'SCRAPER' });
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({
-        model: resolvedPrimary,
-        generationConfig: { responseMimeType: 'application/json', temperature: 0.7 }
-      });
-      const result = await model.generateContent([{ text: prompt }]);
-      return result.response.text();
+    const item = await ensureEnglishProductTruths(rawItem, {
+      itemId: id,
+      tenantId,
+      productName: product_name,
+      logger: (msg) => logToBulk(msg, tenantId)
     });
 ```
 
-**Code Sesudah (Proposed/After):**
-```javascript
-    const resolved = await resolveModelChain({ role: 'light', taskType: 'PRODUCT_ENRICHMENT' });
-    const rawResponse = await runWithGeminiTrace({ stage: 'product_enrichment', item_id: id }, () =>
-      executeWithKeyPool(1, async (apiKey) => {
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({
-          model: resolved.model,
-          generationConfig: { responseMimeType: 'application/json', temperature: 0.7 }
-        });
-        const resilientModel = makeModelResilient(model, apiKey, resolved.model, true, null, {
-          role: 'light',
-          taskType: 'PRODUCT_ENRICHMENT'
-        });
-        const result = await resilientModel.generateContent([{ text: prompt }]);
-        return result.response.text();
-      }, { modelName: resolved.model })
-    );
-```
-Serta pada `GET /api/v2/products/[id]` dan helper produk, menambahkan field terhitung `enrichment_retryable` yang bernilai `true` untuk `MODEL_BUSY` dan `QUOTA_EXHAUSTED` / 503 / 429.
+### 3. Keterangan Helper Bahasa Inggris di Modal Produk ([app/products/ProductDatabaseModal.js](file:///Users/sabeqmmursyid/_cfstudio/app/products/ProductDatabaseModal.js))
 
-### 4. Pemanggil Langsung Lainnya
-- [app/api/v2/brand-profiles/extract/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/brand-profiles/extract/route.js): ganti `'gemini-2.5-flash'` menjadi `resolveModelChain({ role: 'light', taskType: 'BRAND_EXTRACTION' })` + `makeModelResilient`.
-- [lib/threads-series-generator.js](file:///Users/sabeqmmursyid/_cfstudio/lib/threads-series-generator.js): gunakan `resolveModelChain({ role: 'primary', taskType: 'THREADS_SERIES' })` & `makeModelResilient` (hapus fallback tertulis `'gemini-2.5-flash'`).
-- [lib/re-recomm-engine.js](file:///Users/sabeqmmursyid/_cfstudio/lib/re-recomm-engine.js): loop REST grounding mengikuti `chain` dari `resolveModelChain({ role: 'primary', taskType: 'RE_CAMPAIGN' })` tanpa `GEMINI_MODELS.PRIMARY` / `gemini-flash-latest` polos.
-- [lib/universe-ai-builder.js](file:///Users/sabeqmmursyid/_cfstudio/lib/universe-ai-builder.js), [lib/visual-identity-ai-builder.js](file:///Users/sabeqmmursyid/_cfstudio/lib/visual-identity-ai-builder.js), [lib/universe-ai-repository.js](file:///Users/sabeqmmursyid/_cfstudio/lib/universe-ai-repository.js): isi `meta.model` dengan model aktual yang berhasil dipakai (`result.actualModel`).
-- [lib/tenant-admin.js](file:///Users/sabeqmmursyid/_cfstudio/lib/tenant-admin.js): hapus `gemini_model: 'gemini-2.5-flash'`, salin pengaturan model Gemini (`gemini_api_tier`, `gemini_model_primary`, `gemini_model_fallback`, `gemini_model_light`, `gemini_smart_routing`, `gemini_context_caching`) dari `default_tenant`.
-- [lib/scheduler-processors.js](file:///Users/sabeqmmursyid/_cfstudio/lib/scheduler-processors.js), [app/api/keys/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/keys/route.js), [lib/db.js](file:///Users/sabeqmmursyid/_cfstudio/lib/db.js): gunakan `resolveModelChain` / `DEFAULT_TEXT_MODEL` terpusat.
-- [app/api/settings/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/settings/route.js): dukung baca & simpan `gemini_model_light` (kosong = `""`). UI `app/settings/page.js` dipasang setelah pengguna menyetujui mockup `public/mockup_settings_model_ai.html`.
+**Code Sebelum (Current/Before):**
+```jsx
+<textarea ... value={formData.product_truth} ... />
+```
+
+**Code Sesudah (Proposed/After):**
+```jsx
+<textarea ... value={formData.product_truth} ... />
+<p style={{ margin: '4px 0 0', fontSize: '11px', color: 'var(--text-muted)' }}>
+  Ditulis dalam Bahasa Inggris — dipakai langsung untuk prompt gambar/video.
+</p>
+```
