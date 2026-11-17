@@ -49,6 +49,7 @@ export default function ProductDatabaseModal({
   const [rawPhotoPreview, setRawPhotoPreview] = useState(null);
   const [regenerateOnSave, setRegenerateOnSave] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(product);
+  const [previewZoomUrl, setPreviewZoomUrl] = useState(null);
 
   // New link form state
   const [newLinkBrandId, setNewLinkBrandId] = useState(brandId || '');
@@ -819,6 +820,126 @@ export default function ProductDatabaseModal({
                   ======================================================== */}
               {activeTab === 'visual_ai' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  {/* Pratinjau Foto Asli & Hasil AI (Read-only, B4) */}
+                  {activeProductId && (
+                    <div style={{
+                      padding: '14px',
+                      borderRadius: 'var(--radius-md)',
+                      background: 'var(--surface-raised)',
+                      border: '1px solid var(--border-subtle)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '10px'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)' }}>
+                          🖼️ Pratinjau Foto Tersimpan (Hanya Baca)
+                        </span>
+                        <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                          Klik gambar untuk memperbesar
+                        </span>
+                      </div>
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                        gap: '12px'
+                      }}>
+                        {/* Foto Asli */}
+                        <div style={{
+                          padding: '10px',
+                          borderRadius: 'var(--radius-sm)',
+                          background: 'var(--surface)',
+                          border: '1px solid var(--border-subtle)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '6px'
+                        }}>
+                          <span style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                            📷 Foto Asli
+                          </span>
+                          <div
+                            onClick={() => {
+                              if (currentProduct?.raw_photo_url) setPreviewZoomUrl(currentProduct.raw_photo_url);
+                            }}
+                            style={{
+                              width: '100%',
+                              height: '150px',
+                              borderRadius: 'var(--radius-sm)',
+                              border: '1px solid var(--border-subtle)',
+                              background: 'var(--surface-subtle)',
+                              overflow: 'hidden',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              cursor: currentProduct?.raw_photo_url ? 'zoom-in' : 'default'
+                            }}
+                          >
+                            {currentProduct?.raw_photo_url ? (
+                              <img
+                                src={currentProduct.raw_photo_url}
+                                alt="Foto Asli Produk"
+                                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                              />
+                            ) : (
+                              <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                                Belum ada
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Foto Hasil AI */}
+                        <div style={{
+                          padding: '10px',
+                          borderRadius: 'var(--radius-sm)',
+                          background: 'var(--surface)',
+                          border: '1px solid var(--border-subtle)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '6px'
+                        }}>
+                          <span style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                            ✨ Hasil AI (Clean Studio)
+                          </span>
+                          {(() => {
+                            const cleanPreviewUrl = currentProduct?.cleaned_photo_url || currentProduct?.clean_photo_url;
+                            return (
+                              <div
+                                onClick={() => {
+                                  if (cleanPreviewUrl) setPreviewZoomUrl(cleanPreviewUrl);
+                                }}
+                                style={{
+                                  width: '100%',
+                                  height: '150px',
+                                  borderRadius: 'var(--radius-sm)',
+                                  border: '1px solid var(--border-subtle)',
+                                  background: 'var(--surface-subtle)',
+                                  overflow: 'hidden',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  cursor: cleanPreviewUrl ? 'zoom-in' : 'default'
+                                }}
+                              >
+                                {cleanPreviewUrl ? (
+                                  <img
+                                    src={cleanPreviewUrl}
+                                    alt="Foto Hasil AI Produk"
+                                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                  />
+                                ) : (
+                                  <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                                    Belum ada
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Upload Foto Raw Produk & Provider */}
                   <div style={{
                     padding: '14px',
@@ -1405,6 +1526,68 @@ export default function ProductDatabaseModal({
           </form>
         )}
       </div>
+
+      {previewZoomUrl && (
+        <div
+          onClick={() => setPreviewZoomUrl(null)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'var(--overlay-backdrop)',
+            zIndex: 1300,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+            backdropFilter: 'blur(6px)'
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              position: 'relative',
+              background: 'var(--surface)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: 'var(--radius-lg)',
+              padding: '16px',
+              boxShadow: 'var(--shadow-modal)',
+              maxWidth: '90vw',
+              maxHeight: '85vh',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '10px'
+            }}
+          >
+            <img
+              src={previewZoomUrl}
+              alt="Pratinjau Penuh Foto Produk"
+              style={{
+                maxWidth: '75vw',
+                maxHeight: '70vh',
+                objectFit: 'contain',
+                borderRadius: 'var(--radius-sm)'
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => setPreviewZoomUrl(null)}
+              style={{
+                padding: '6px 14px',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--border-subtle)',
+                background: 'var(--surface-raised)',
+                color: 'var(--text-primary)',
+                cursor: 'pointer',
+                fontSize: '12px',
+                fontWeight: 600
+              }}
+            >
+              Tutup Pratinjau
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

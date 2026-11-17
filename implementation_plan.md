@@ -1,87 +1,40 @@
-# Implementation Plan: Kartu Produk (Enrich & Foto G-Labs) + Truth Berbahasa Inggris
+# Implementation Plan: Truth Berbahasa Inggris (A) & Kartu Produk + Jendela Banding (B)
 
-> Instruksi sumber: [antigravity_kartu_produk_enrich_foto_truth_instructions.md](file:///Users/sabeqmmursyid/_cfstudio/catatan-kerja/instruksi-agent/antigravity_kartu_produk_enrich_foto_truth_instructions.md)  
-> Tahap saat ini: **Bagian A (`hotfix/truth-bahasa-inggris`)** dulu, baru **Bagian B (`hotfix/kartu-produk-foto-enrich`)**.
+> Referensi tugas: [antigravity_kartu_produk_enrich_foto_truth_instructions.md](file:///Users/sabeqmmursyid/_cfstudio/catatan-kerja/instruksi-agent/antigravity_kartu_produk_enrich_foto_truth_instructions.md)  
+> Mockup disetujui: [mockup_kartu_produk_foto_enrich.html](file:///Users/sabeqmmursyid/_cfstudio/public/mockup_kartu_produk_foto_enrich.html)  
+> Branch sumber: `hotfix/truth-bahasa-inggris` & `hotfix/kartu-produk-foto-enrich`  
+> Target rilis: `main` -> Staging (`5010`/`7010`)
+
+## Ringkasan Tujuan
+
+1. **Bagian A — Truth Berbahasa Inggris**:
+   - Memastikan Product Truth (3–4 kalimat) & Geometric Truth (2–3 kalimat) selalu dihasilkan dalam bahasa Inggris untuk stabilitas video DNA AI.
+   - Menyediakan penjaga bahasa `ensureEnglishProductTruths` di worker pipeline serta skrip `scripts/translate-product-truths.mjs` (dry-run ready).
+   - Menambahkan teks panduan bahasa Inggris di modal detail produk.
+2. **Bagian B — Kartu Produk, Jendela Banding & Penyimpanan Foto Sebelumnya (B1–B6)**:
+   - Tombol `🧠 Enrich AI` / `Enriching…` / `🧠 Coba lagi` di kartu produk + pesan error ringkas.
+   - Default thumbnail foto bersih (`resolveDefaultCardPhotoTab`), badge pojok status foto, dan sakelar `Asli | Hasil AI`.
+   - Jendela Banding foto Asli vs Hasil AI berdampingan, metadata provider & `updated_at`, klik zoom, serta aksi `Setujui`, `Ganti Foto`, `Ulangi Generate`.
+   - Kolom database `previous_clean_photo_url`, snapshot foto clean lama sebelum ditimpa, dan tombol `↩️ Tolak, pakai foto sebelumnya` (`action: 'revert_previous'`).
+   - Pratinjau hanya-baca foto Asli & Hasil AI di tab Foto & AI modal produk.
 
 ---
 
 ## Execution Task List
 
-### Bagian A — `hotfix/truth-bahasa-inggris` (Tanpa UI Mockup)
-- [x] **Persiapan Branch A**: Buat branch `hotfix/truth-bahasa-inggris` dari `main`.
-- [x] **A1 (Prompt Enrichment & Konstanta Bersama)**: Pindahkan definisi baku Product Truth (3–4 kalimat English) & Geometric Truth (2–3 kalimat English) ke konstanta bersama agar dipakai oleh `buildBatchProductTruthsPrompt` (`lib/prompts.js`) dan `buildEnrichmentPrompt` (`lib/product-bulk-worker.js`); jaga USP & kategori tetap Bahasa Indonesia.
-- [x] **A2 (Penjaga Bahasa)**: Buat `looksIndonesian(text)` dan helper terjemah cadangan di `lib/product-truth-language.js`, lalu integrasikan penjaga pasca-enrichment di `lib/product-bulk-worker.js` (1x call terjemah bila salah satu Truth berbahasa Indonesia; non-fatal bila gagal).
-- [x] **A3 (Skrip Data Lama)**: Buat `scripts/translate-product-truths.mjs` (`--schema <dev|staging>`, `--tenant`, `--limit`, `--apply` dengan default dry-run).
-- [x] **A4 (Keterangan Form Modal)**: Tambah teks bantu Bahasa Inggris ber-token `var(--text-muted)` di `app/products/ProductDatabaseModal.js`.
-- [x] **A5 (Unit Test & Build)**: Tambah `tests/product-truth-language.test.js` dan verifikasi semua tes produk + `npm run build`.
-- [ ] **A6 (Deploy & Uji Dev + Dry-Run Staging)**: Deploy `hotfix/truth-bahasa-inggris` ke Dev (`5020`/`7020`), uji enrich 1 produk di Dev (Truth English), jalankan `--apply` di Dev atau dry-run `--schema staging` (read-only) untuk laporan.
+### Bagian A — `hotfix/truth-bahasa-inggris`
+- [x] **A1 (Prompt & Konstanta Bersama)**: Pindahkan definisi baku Product Truth & Geometric Truth ke bahasa Inggris di `lib/prompts.js` & `lib/product-bulk-worker.js`.
+- [x] **A2 (Penjaga Bahasa)**: Buat `lib/product-truth-language.js` dan integrasikan ke `lib/product-bulk-worker.js`.
+- [x] **A3 (Skrip Data Lama)**: Buat skrip dry-run/apply `scripts/translate-product-truths.mjs`.
+- [x] **A4 (Keterangan Form Modal)**: Tambahkan keterangan panduan bahasa Inggris di `app/products/ProductDatabaseModal.js`.
+- [x] **A5 (Unit Test & Verifikasi)**: Buat `tests/product-truth-language.test.js` (3/3 pass).
+- [x] **A6 (Uji Dev & Dry-Run Staging)**: Uji live enrichment di Dev (English Truth terverifikasi) dan jalankan dry-run Staging (281 baris diperiksa, 0 write).
 
-### Bagian B — `hotfix/kartu-produk-foto-enrich` (UI — Mockup Dulu)
-- [ ] **B0 (Mockup HTML)**: Buat `public/mockup_kartu_produk_foto_enrich.html` (standalone, semantic tokens, light/dark, 3 kondisi kartu + jendela banding + tab foto modal Edit), deploy/tampilkan link HTTP ke pengguna untuk persetujuan sebelum edit UI React (`app/products/`).
-- [ ] **B1–B6**: Kerjakan tombol Enrich di kartu, thumbnail terbaru + sakelar Asli|Hasil AI + label status, jendela banding, tampilan foto di Modal Edit, tes unit pemilih foto default + `npm run build`, dan uji Dev (serta konfirmasi B5 migrasi DB hanya bila diizinkan).
-
----
-
-## Rencana Perubahan Kode Bagian A (Before & After Snippets)
-
-### 1. Konstanta Bersama & Prompt Enrichment ([lib/product-truth-language.js](file:///Users/sabeqmmursyid/_cfstudio/lib/product-truth-language.js), [lib/prompts.js](file:///Users/sabeqmmursyid/_cfstudio/lib/prompts.js), [lib/product-bulk-worker.js](file:///Users/sabeqmmursyid/_cfstudio/lib/product-bulk-worker.js))
-
-**Code Sebelum (Current/Before) — `lib/product-bulk-worker.js`:**
-```javascript
-    {
-      "id": "ID produk asli",
-      "unique_selling_point": ["USP 1", "USP 2", "USP 3"],
-      "product_truth": "Fakta nyata produk dari perspektif konsumen (1-2 kalimat)",
-      "geometric_truth": "Deskripsi bentuk fisik, dimensi, dan visual kemasan (1-2 kalimat)",
-      "category": "Kategori produk",
-      "clean_photo_t2i_prompt": "Prompt Bahasa Inggris untuk foto produk clean berlatar putih — deskripsi produk, studio light, white background"
-    }
-```
-
-**Code Sesudah (Proposed/After):**
-```javascript
-// Konstanta PRODUCT_TRUTH_DEFINITIONS di lib/product-truth-language.js dipakai bersama oleh buildBatchProductTruthsPrompt & buildEnrichmentPrompt:
-// - product_truth: WAJIB Bahasa Inggris, 3-4 kalimat deskripsi tampilan luar kemasan (warna dominan, letak logo, teks utama, jenis tutup, aksen warna) untuk mengunci T2I.
-// - geometric_truth: WAJIB Bahasa Inggris, 2-3 kalimat struktur 3D & material/permukaan (silinder tegak, plastik doff, kaca bening, dll.) untuk I2V.
-// - unique_selling_point & category tetap Bahasa Indonesia (dipakai naskah VO).
-```
-
-### 2. Penjaga Bahasa di `enrichProduct` ([lib/product-bulk-worker.js](file:///Users/sabeqmmursyid/_cfstudio/lib/product-bulk-worker.js))
-
-**Code Sebelum (Current/Before):**
-```javascript
-    const enriched = JSON.parse(rawResponse);
-    const item = (enriched.products || [enriched])[0];
-    if (!item) throw new Error('Gemini tidak mengembalikan data produk');
-
-    await pgQuery(`UPDATE product_extractions SET ...`, [..., item.product_truth || null, item.geometric_truth || null, ...]);
-```
-
-**Code Sesudah (Proposed/After):**
-```javascript
-    const enriched = JSON.parse(rawResponse);
-    const rawItem = (enriched.products || [enriched])[0];
-    if (!rawItem) throw new Error('Gemini tidak mengembalikan data produk');
-
-    const item = await ensureEnglishProductTruths(rawItem, {
-      itemId: id,
-      tenantId,
-      productName: product_name,
-      logger: (msg) => logToBulk(msg, tenantId)
-    });
-```
-
-### 3. Keterangan Helper Bahasa Inggris di Modal Produk ([app/products/ProductDatabaseModal.js](file:///Users/sabeqmmursyid/_cfstudio/app/products/ProductDatabaseModal.js))
-
-**Code Sebelum (Current/Before):**
-```jsx
-<textarea ... value={formData.product_truth} ... />
-```
-
-**Code Sesudah (Proposed/After):**
-```jsx
-<textarea ... value={formData.product_truth} ... />
-<p style={{ margin: '4px 0 0', fontSize: '11px', color: 'var(--text-muted)' }}>
-  Ditulis dalam Bahasa Inggris — dipakai langsung untuk prompt gambar/video.
-</p>
-```
+### Bagian B — `hotfix/kartu-produk-foto-enrich`
+- [x] **B0 (Mockup HTML)**: Buat `public/mockup_kartu_produk_foto_enrich.html` dan sinkronkan ke Mac Mini untuk review pengguna.
+- [x] **B1 (Tombol Enrich AI di Kartu)**: Tombol `🧠 Enrich AI` / `Enriching…` / `🧠 Coba lagi` di footer kartu + `enrichment_retryable` di API.
+- [x] **B2 (Thumbnail & Sakelar)**: Default foto bersih, badge pojok status foto, sakelar `Asli | Hasil AI`, dan klik thumbnail membuka Jendela Banding.
+- [x] **B3 (Jendela Banding)**: Modal review 2 kolom Asli vs Hasil AI, metadata sumber/waktu, klik zoom, aksi Setujui, Ganti Foto, dan Ulangi Generate.
+- [x] **B4 (Pratinjau di Modal Detail)**: Tampilkan foto Asli & Hasil AI read-only (+ zoom) di tab Foto & AI.
+- [x] **B5 (Penyimpanan Foto Clean Sebelumnya)**: Kolom `previous_clean_photo_url` di `lib/db-pg.js` & `lib/product-repository.js`, snapshot di `lib/product-bulk-worker.js`, API revert di `photo-review`, dan tombol `↩️ Tolak, pakai foto sebelumnya`.
+- [x] **B6 (Unit Test & Deploy Dev)**: Tambah `tests/product-card-photo-view.test.js` (6/6 pass), jalankan seluruh tes produk (37/37 pass), verifikasi build & deploy ke Dev (`release_id=20261117T134452Z-a810fc6ec69b`).

@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup UI: Kartu Produk (Enrich, Foto AI &amp; Jendela Banding) | MAKNA Flow</title>
+  <style>
+    /* Standalone Semantic CSS Design Tokens mirrored from app/theme.css */
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-subtle: #0d1524;
+      --input-bg: #0c1422;
+      --overlay-backdrop: rgba(2, 6, 14, 0.78);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --btn-enrich-bg: var(--status-info-soft);
+      --btn-enrich-border: color-mix(in srgb, var(--status-info) 35%, transparent);
+      --btn-enrich-text: var(--status-info);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-subtle: #f5f8fc;
+      --input-bg: #ffffff;
+      --overlay-backdrop: rgba(15, 23, 42, 0.54);
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --status-neutral: #6548bd;
+      --status-neutral-soft: #f0ecfb;
+      --btn-enrich-bg: var(--status-info-soft);
+      --btn-enrich-border: color-mix(in srgb, var(--status-info) 35%, transparent);
+      --btn-enrich-text: var(--status-info);
+      --focus-ring: #6d4ed6;
+      --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+      --shadow-modal: 0 26px 80px rgba(31, 45, 61, 0.22);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px 16px 64px;
+      font-family: var(--font-sans);
+      background: var(--canvas);
+      color: var(--text-primary);
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .topbar h1 { margin: 0; font-size: 1.05rem; font-weight: 700; }
+    .topbar p { margin: 2px 0 0; font-size: 0.78rem; color: var(--text-muted); }
+
+    .section-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      margin: 0 0 10px;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 6px 11px;
+      border-radius: var(--radius-xs);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn:hover:not(:disabled) { border-color: var(--border-strong); background: var(--surface-interactive); }
+    .btn:disabled { opacity: 0.65; cursor: not-allowed; }
+
+    .btn-primary {
+      background: var(--action-primary);
+      border-color: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: var(--action-primary-hover);
+      border-color: var(--action-primary-hover);
+    }
+
+    .btn-enrich {
+      background: var(--btn-enrich-bg);
+      border-color: var(--btn-enrich-border);
+      color: var(--btn-enrich-text);
+    }
+
+    .btn-retry {
+      background: var(--status-warning-soft);
+      border-color: var(--status-warning);
+      color: var(--status-warning);
+    }
+
+    .btn-warning {
+      background: var(--status-warning-soft);
+      border-color: var(--status-warning);
+      color: var(--status-warning);
+    }
+
+    .btn-danger-outline {
+      background: transparent;
+      border-color: var(--border-subtle);
+      color: var(--status-danger);
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 18px;
+    }
+
+    .product-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-card);
+    }
+
+    .card-top {
+      display: flex;
+      gap: 14px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .thumb-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      width: 96px;
+      flex-shrink: 0;
+    }
+
+    .thumb-box {
+      position: relative;
+      width: 96px;
+      height: 96px;
+      border-radius: var(--radius-sm);
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      overflow: hidden;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .thumb-box img,
+    .thumb-box svg {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .thumb-badge {
+      position: absolute;
+      bottom: 4px;
+      left: 4px;
+      right: 4px;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 5px;
+      border-radius: 5px;
+      border: 1px solid transparent;
+      backdrop-filter: blur(4px);
+    }
+
+    .badge-warning {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border-color: var(--status-warning);
+    }
+
+    .badge-success {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border-color: var(--status-success);
+    }
+
+    .badge-info {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border-color: var(--status-info);
+    }
+
+    .badge-danger {
+      background: var(--status-danger-soft);
+      color: var(--status-danger);
+      border-color: var(--status-danger);
+    }
+
+    .photo-toggle {
+      display: inline-flex;
+      width: 100%;
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--input-bg);
+    }
+
+    .photo-toggle button {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 2px;
+      cursor: pointer;
+    }
+
+    .photo-toggle button.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    .card-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .card-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .card-sub {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .card-body {
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 0.76rem;
+      border-bottom: 1px solid var(--border-subtle);
+      flex: 1;
+    }
+
+    .alert-box {
+      padding: 8px 10px;
+      border-radius: var(--radius-xs);
+      font-size: 0.73rem;
+      border: 1px solid transparent;
+    }
+
+    .alert-warn {
+      background: var(--status-warning-soft);
+      border-color: var(--status-warning);
+      color: var(--text-primary);
+    }
+
+    .alert-danger {
+      background: var(--status-danger-soft);
+      border-color: var(--status-danger);
+      color: var(--text-primary);
+    }
+
+    .card-footer {
+      padding: 10px 12px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface);
+    }
+
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .panel-box {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .compare-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    @media (max-width: 760px) {
+      .compare-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .compare-pane {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .compare-pane-img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      max-height: 320px;
+      border-radius: var(--radius-sm);
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      cursor: zoom-in;
+    }
+
+    .edit-photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .edit-photo-box {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .edit-photo-frame {
+      height: 160px;
+      border-radius: var(--radius-xs);
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      cursor: zoom-in;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      background: var(--input-bg);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      font-size: 0.78rem;
+      font-family: var(--font-sans);
+    }
+
+    .spinner {
+      width: 11px;
+      height: 11px;
+      border: 2px solid var(--border-subtle);
+      border-top-color: var(--action-primary);
+      border-radius: 50%;
+      display: inline-block;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay-backdrop);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 1000;
+      backdrop-filter: blur(6px);
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal-dialog {
+      width: 100%;
+      max-width: 780px;
+      max-height: 92vh;
+      overflow-y: auto;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-modal);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div>
+        <h1>Mockup UI: Kartu Produk (Enrich, Foto Hasil AI &amp; Jendela Banding)</h1>
+        <p>Pratinjau 3 keadaan kartu, sakelar Asli | Hasil AI, jendela banding berdampingan, dan tampilan foto di Modal Edit.</p>
+      </div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button class="btn" id="toggleBusyCardBtn" type="button">⏳ Simulasikan "Enriching…"</button>
+        <button class="btn" id="toggleProcessingThumbBtn" type="button">🏭 Simulasikan "Sedang dibuat"</button>
+        <button class="btn" id="themeToggleBtn" type="button">☀️ Mode Terang</button>
+      </div>
+    </div>
+
+    <!-- 1. THREE PRODUCT CARD STATES -->
+    <div>
+      <h2 class="section-title">1. Tiga Keadaan Kartu Produk</h2>
+      <div class="cards-grid" id="cardsGrid"></div>
+    </div>
+
+    <!-- 2. EMBEDDED PREVIEW OF COMPARISON MODAL -->
+    <div class="panel-box">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+        <h2 class="section-title" style="margin: 0;">2. Pratinjau Jendela Banding (Klik thumbnail kartu atau ✅ Setujui untuk membuka pop-up)</h2>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-primary" type="button" onclick="openCompareModal('p1')">Buka Modal Banding (`needs_review`)</button>
+          <button class="btn" type="button" onclick="openCompareModal('p2')">Buka Modal Banding (`approved`)</button>
+        </div>
+      </div>
+
+      <div id="inlineCompareHost"></div>
+    </div>
+
+    <!-- 3. MODAL EDIT PRODUK — TAB FOTO & TRUTH HELPER -->
+    <div class="panel-box">
+      <h2 class="section-title">3. Tab Foto &amp; Kolom Truth di Modal Edit Produk (ProductDatabaseModal)</h2>
+
+      <div style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+        <span style="font-size: 0.78rem; color: var(--text-secondary);">Foto Asli dan Hasil AI tersimpan (hanya baca, klik untuk perbesar) ditampilkan di atas kolom unggah foto mentah:</span>
+        <button class="btn" type="button" id="toggleEmptyEditPhotoBtn">Toggle Kondisi "Belum ada"</button>
+      </div>
+
+      <div class="edit-photo-grid" id="editPhotoPreviewGrid"></div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; padding-top: 10px; border-top: 1px solid var(--border-subtle);">
+        <div>
+          <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary);">📷 Foto Produk Raw (Ganti Foto)</label>
+          <input type="file" class="form-input" />
+        </div>
+        <div>
+          <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary);">🤖 Provider Foto Clean</label>
+          <select class="form-input">
+            <option>🏭 G-Labs (Local Worker)</option>
+            <option>✨ Gemini AI Image</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-subtle);">
+        <div>
+          <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; color: var(--status-success);">🛡️ Product Truth (T2I Physics &amp; Packaging Lock)</label>
+          <textarea rows="3" class="form-input" readonly>The product is a 250ml matte white plastic spray bottle featuring a white and blue trigger head at the top. A bright green front label centers the NutriClean logo cleanly.</textarea>
+          <p style="margin: 4px 0 0; font-size: 11px; color: var(--text-muted);">Ditulis dalam Bahasa Inggris — dipakai langsung untuk prompt gambar/video.</p>
+        </div>
+        <div>
+          <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; color: var(--status-neutral);">📐 Geometric Truth (I2V Geometry &amp; Material Lock)</label>
+          <textarea rows="3" class="form-input" readonly>An upright cylindrical plastic spray bottle topped with a contoured trigger nozzle. The bottle has a satin matte plastic surface with soft studio light diffusion.</textarea>
+          <p style="margin: 4px 0 0; font-size: 11px; color: var(--text-muted);">Ditulis dalam Bahasa Inggris — dipakai langsung untuk prompt gambar/video.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL BANDING (POP-UP INTERAKTIF) -->
+  <div class="modal-backdrop" id="compareModalBackdrop" onclick="closeCompareModal()">
+    <div class="modal-dialog" onclick="event.stopPropagation()">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin: 0; font-size: 1rem; font-weight: 700;" id="modalTitle">🔍 Bandingkan Foto Produk</h3>
+        <button class="btn" type="button" onclick="closeCompareModal()">✕</button>
+      </div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- ZOOM MODAL -->
+  <div class="modal-backdrop" id="zoomBackdrop" onclick="closeZoom()">
+    <div class="modal-dialog" style="max-width: 520px; text-align: center;" onclick="event.stopPropagation()">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <strong id="zoomTitle">Perbesar Foto</strong>
+        <button class="btn" type="button" onclick="closeZoom()">✕</button>
+      </div>
+      <div id="zoomImgHost" style="min-height: 280px; display: flex; align-items: center; justify-content: center; background: var(--input-bg); border-radius: var(--radius-md); border: 1px solid var(--border-subtle); padding: 12px;"></div>
+    </div>
+  </div>
+
+  <script>
+    function makeSvgThumb(label, bgVar, fgVar, subtitle) {
+      return `
+        <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${label}">
+          <rect width="240" height="240" fill="var(--surface-raised)"/>
+          <rect x="28" y="28" width="184" height="150" rx="14" fill="var(${bgVar})" stroke="var(${fgVar})" stroke-width="2"/>
+          <circle cx="120" cy="96" r="34" fill="var(${fgVar})" opacity="0.22"/>
+          <rect x="92" y="64" width="56" height="72" rx="10" fill="var(${fgVar})"/>
+          <rect x="104" y="48" width="32" height="18" rx="4" fill="var(--text-primary)"/>
+          <text x="120" y="202" text-anchor="middle" fill="var(--text-primary)" font-size="14" font-weight="700" font-family="sans-serif">${label}</text>
+          <text x="120" y="220" text-anchor="middle" fill="var(--text-muted)" font-size="11" font-family="sans-serif">${subtitle}</text>
+        </svg>
+      `;
+    }
+
+    const state = {
+      cards: [
+        {
+          id: 'p1',
+          product_name: 'Rockwool Blanket Akustik 50mm',
+          category: 'Insulasi & Akustik',
+          brand_badge: '🔗 1 Brand Terhubung',
+          photo_status: 'needs_review',
+          photo_provider: 'G-Labs',
+          updated_at: '17 Nov 2026, 19:45 WIB',
+          photo_error: 'Foto mentah sebelumnya terdeteksi memuat teks watermark toko; hasil G-Labs clean siap ditinjau.',
+          raw_photo_url: true,
+          clean_photo_url: true,
+          enrichment_status: 'completed',
+          enrichment_retryable: false,
+          usp_preview: '• Peredam suara ruangan & studio berdensitas tinggi...'
+        },
+        {
+          id: 'p2',
+          product_name: 'NutriBake Premix Brownies Fudge',
+          category: 'Bahan Kue',
+          brand_badge: '🛍️ Multi-Brand (2 Link)',
+          photo_status: 'approved',
+          photo_provider: 'G-Labs',
+          updated_at: '17 Nov 2026, 18:10 WIB',
+          photo_error: null,
+          raw_photo_url: true,
+          clean_photo_url: true,
+          enrichment_status: 'completed',
+          enrichment_retryable: false,
+          usp_preview: '• Premix brownies fudgy panggang tanpa mixer...'
+        },
+        {
+          id: 'p3',
+          product_name: 'Madu Hutan Garlibee 250g',
+          category: 'Madu & Herbal',
+          brand_badge: '📦 Murni Non-Afiliasi',
+          photo_status: 'approved',
+          photo_provider: 'Gemini',
+          updated_at: '17 Nov 2026, 17:30 WIB',
+          photo_error: null,
+          raw_photo_url: true,
+          clean_photo_url: false,
+          enrichment_status: 'failed',
+          enrichment_retryable: true,
+          enrichment_error: 'MODEL_BUSY (dapat diulang): model gemini-3.6-flash sedang sibuk'
+        }
+      ],
+      viewTabs: {},
+      simulateBusyId: null,
+      simulateProcessingThumb: false,
+      editEmptyMode: false,
+      toast: ''
+    };
+
+    function getDefaultTab(p) {
+      return (p.cleaned_photo_url || p.clean_photo_url) ? 'cleaned' : 'raw';
+    }
+
+    function getActiveTab(p) {
+      return state.viewTabs[p.id] || getDefaultTab(p);
+    }
+
+    function getStatusCornerBadge(p) {
+      if (state.simulateProcessingThumb && p.id === 'p1') {
+        return { text: 'Sedang dibuat', cls: 'badge-info' };
+      }
+      if (p.photo_status === 'needs_review') return { text: 'Perlu ditinjau', cls: 'badge-warning' };
+      if (p.photo_status === 'approved') return { text: 'Disetujui', cls: 'badge-success' };
+      if (p.photo_status === 'processing' || p.photo_status === 'pending') return { text: 'Sedang dibuat', cls: 'badge-info' };
+      return null;
+    }
+
+    function renderThumbGraphic(p, tab) {
+      if (tab === 'cleaned' && p.clean_photo_url) {
+        return makeSvgThumb('HASIL AI', '--status-success-soft', '--status-success', `${p.photo_provider} Studio Clean`);
+      }
+      if (p.raw_photo_url) {
+        return makeSvgThumb('FOTO ASLI', '--status-info-soft', '--status-info', 'Foto Mentah Upload/Scrape');
+      }
+      return `<span style="font-size: 28px;">📦</span>`;
+    }
+
+    function renderCards() {
+      const grid = document.getElementById('cardsGrid');
+      grid.innerHTML = state.cards.map(p => {
+        const activeTab = getActiveTab(p);
+        const badge = getStatusCornerBadge(p);
+        const isEnriching = state.simulateBusyId === p.id || p.enrichment_status === 'pending' || p.enrichment_status === 'processing';
+        const isRetryableFail = p.enrichment_status === 'failed' && p.enrichment_retryable === true;
+
+        let enrichLabel = '🧠 Enrich AI';
+        let enrichClass = 'btn btn-enrich';
+        if (isEnriching) {
+          enrichLabel = `<span class="spinner"></span> Enriching…`;
+        } else if (isRetryableFail) {
+          enrichLabel = '🧠 Coba lagi';
+          enrichClass = 'btn btn-retry';
+        }
+
+        return `
+          <div class="product-card">
+            <div class="card-top">
+              <div class="thumb-col">
+                <div class="thumb-box" onclick="openCompareModal('${p.id}')" title="Klik untuk membuka jendela banding foto">
+                  ${renderThumbGraphic(p, activeTab)}
+                  ${badge ? `<span class="thumb-badge ${badge.cls}">${badge.text}</span>` : ''}
+                </div>
+                <div class="photo-toggle" role="group" aria-label="Pilih tampilan foto">
+                  <button type="button" class="${activeTab === 'raw' ? 'active' : ''}" onclick="setCardTab('${p.id}', 'raw')">Asli</button>
+                  <button type="button" class="${activeTab === 'cleaned' ? 'active' : ''}" onclick="setCardTab('${p.id}', 'cleaned')" ${p.clean_photo_url ? '' : 'disabled'}>Hasil AI</button>
+                </div>
+              </div>
+
+              <div class="card-info">
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: wrap;">
+                  <span class="badge-info" style="font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 999px;">${p.brand_badge}</span>
+                  <span style="font-size: 10.5px; color: var(--text-muted); background: var(--surface-raised); border: 1px solid var(--border-subtle); padding: 1px 6px; border-radius: 4px;">${p.category}</span>
+                </div>
+                <h3 class="card-title">${p.product_name}</h3>
+                <p class="card-sub">Default kartu: <strong>${getDefaultTab(p) === 'cleaned' ? 'Hasil AI (ada clean)' : 'Foto Asli (belum ada clean)'}</strong></p>
+                <p class="card-sub">Sumber foto: ${p.photo_provider} · ${p.updated_at}</p>
+              </div>
+            </div>
+
+            <div class="card-body">
+              ${p.enrichment_status === 'failed' ? `
+                <div class="alert-box alert-danger">
+                  <strong>Enrichment gagal (dapat diulang):</strong><br/>
+                  <span>${p.enrichment_error}</span>
+                </div>
+              ` : `
+                <div style="color: var(--text-secondary);">${p.usp_preview}</div>
+              `}
+              ${p.photo_status === 'needs_review' ? `
+                <div class="alert-box alert-warn">
+                  <strong>Catatan AI:</strong> ${p.photo_error}
+                </div>
+              ` : ''}
+            </div>
+
+            <div class="card-footer">
+              <span style="font-size: 11px; font-family: var(--font-mono); color: var(--text-muted);">ID: ${p.id}</span>
+              <div class="action-row">
+                <button type="button" class="${enrichClass}" ${isEnriching ? 'disabled' : ''} onclick="simulateEnrich('${p.id}')">${enrichLabel}</button>
+                ${p.photo_status === 'needs_review' ? `
+                  <button type="button" class="btn btn-warning" onclick="openCompareModal('${p.id}')">✅ Setujui</button>
+                ` : ''}
+                <button type="button" class="btn" onclick="alert('Membuka Modal Ganti Foto 3-Tab untuk ' + '${p.product_name}')">🔄 Ganti Foto</button>
+                <button type="button" class="btn" onclick="alert('Membuka Modal Edit / Detail Produk')">⚙️ Detail</button>
+                <button type="button" class="btn btn-danger-outline" title="Hapus Produk">✕</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderCompareContent(productId, includeOuterActions = true) {
+      const p = state.cards.find(c => c.id === productId) || state.cards[0];
+      const statusLabel = p.photo_status === 'needs_review' ? 'Perlu ditinjau' : (p.photo_status === 'approved' ? 'Disetujui' : 'Sedang dibuat');
+      return `
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; font-size: 0.78rem; color: var(--text-secondary);">
+          <div>
+            <strong>${p.product_name}</strong> · Sumber: <span class="badge-info" style="padding: 1px 6px; border-radius: 4px;">${p.photo_provider}</span> · Status: <strong>${statusLabel}</strong> · Diperbarui: ${p.updated_at}
+          </div>
+        </div>
+
+        <div class="compare-grid" style="margin-top: 10px;">
+          <div class="compare-pane">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <strong style="font-size: 0.82rem;">Foto Asli (Raw)</strong>
+              <span style="font-size: 0.7rem; color: var(--text-muted);">Klik foto untuk perbesar</span>
+            </div>
+            <div class="compare-pane-img" onclick="openZoom('Foto Asli — ${p.product_name}', '--status-info-soft', '--status-info', 'Foto Mentah Asli')">
+              ${p.raw_photo_url ? makeSvgThumb('FOTO ASLI', '--status-info-soft', '--status-info', 'Raw Upload / E-Commerce') : '<span style="color: var(--text-muted);">Belum ada</span>'}
+            </div>
+          </div>
+
+          <div class="compare-pane">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <strong style="font-size: 0.82rem;">Hasil AI (${p.photo_provider})</strong>
+              <span style="font-size: 0.7rem; color: var(--text-muted);">Klik foto untuk perbesar</span>
+            </div>
+            <div class="compare-pane-img" onclick="openZoom('Hasil AI — ${p.product_name}', '--status-success-soft', '--status-success', '${p.photo_provider} Clean Studio')">
+              ${p.clean_photo_url ? makeSvgThumb('HASIL AI', '--status-success-soft', '--status-success', p.photo_provider + ' Studio Clean') : '<span style="color: var(--text-muted);">Belum ada hasil AI</span>'}
+            </div>
+          </div>
+        </div>
+
+        ${p.photo_error ? `
+          <div class="alert-box alert-warn" style="margin-top: 10px;">
+            <strong>Catatan Peninjauan AI:</strong> ${p.photo_error}
+          </div>
+        ` : ''}
+
+        ${includeOuterActions ? `
+          <div style="display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-subtle);">
+            <button type="button" class="btn" onclick="alert('Membuka Modal Ganti Foto')">🔄 Ganti Foto</button>
+            <button type="button" class="btn" onclick="if (confirm('Ulangi generate foto clean untuk produk ini?')) alert('POST /api/v2/products/regenerate-photos dijalankan!')">✨ Ulangi Generate</button>
+            ${p.photo_status === 'needs_review' ? `
+              <button type="button" class="btn btn-primary" onclick="approveInMockup('${p.id}')">✅ Setujui Foto Ini</button>
+            ` : ''}
+          </div>
+        ` : ''}
+      `;
+    }
+
+    function renderEditPhotos() {
+      const host = document.getElementById('editPhotoPreviewGrid');
+      const hasPhotos = !state.editEmptyMode;
+      host.innerHTML = `
+        <div class="edit-photo-box">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 12px; font-weight: 700;">Foto Asli (Tersimpan)</span>
+            <span style="font-size: 10.5px; color: var(--text-muted);">Hanya baca</span>
+          </div>
+          <div class="edit-photo-frame" onclick="${hasPhotos ? "openZoom('Foto Asli Tersimpan', '--status-info-soft', '--status-info', 'raw_photo_url')" : ''}">
+            ${hasPhotos
+              ? makeSvgThumb('FOTO ASLI', '--status-info-soft', '--status-info', 'Klik untuk perbesar')
+              : '<span style="font-size: 12px; color: var(--text-muted);">Belum ada</span>'}
+          </div>
+        </div>
+
+        <div class="edit-photo-box">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 12px; font-weight: 700;">Hasil AI (G-Labs / Gemini)</span>
+            <span style="font-size: 10.5px; color: var(--text-muted);">Hanya baca</span>
+          </div>
+          <div class="edit-photo-frame" onclick="${hasPhotos ? "openZoom('Hasil AI Tersimpan', '--status-success-soft', '--status-success', 'cleaned_photo_url')" : ''}">
+            ${hasPhotos
+              ? makeSvgThumb('HASIL AI', '--status-success-soft', '--status-success', 'Klik untuk perbesar')
+              : '<span style="font-size: 12px; color: var(--text-muted);">Belum ada</span>'}
+          </div>
+        </div>
+      `;
+    }
+
+    window.setCardTab = function(id, tab) {
+      state.viewTabs[id] = tab;
+      renderCards();
+    };
+
+    window.simulateEnrich = function(id) {
+      state.simulateBusyId = id;
+      renderCards();
+      setTimeout(() => {
+        state.simulateBusyId = null;
+        const p = state.cards.find(x => x.id === id);
+        if (p && p.enrichment_status === 'failed') {
+          p.enrichment_status = 'completed';
+          p.enrichment_retryable = false;
+          p.usp_preview = '• Madu hutan murni kemasan botol kaca aman & higienis...';
+        }
+        renderCards();
+      }, 900);
+    };
+
+    window.approveInMockup = function(id) {
+      const p = state.cards.find(x => x.id === id);
+      if (p) {
+        p.photo_status = 'approved';
+        p.photo_error = null;
+      }
+      renderCards();
+      document.getElementById('inlineCompareHost').innerHTML = renderCompareContent('p1', true);
+      closeCompareModal();
+    };
+
+    window.openCompareModal = function(id) {
+      document.getElementById('modalBody').innerHTML = renderCompareContent(id, true);
+      document.getElementById('compareModalBackdrop').classList.add('open');
+    };
+
+    window.closeCompareModal = function() {
+      document.getElementById('compareModalBackdrop').classList.remove('open');
+    };
+
+    window.openZoom = function(title, bgVar, fgVar, sub) {
+      document.getElementById('zoomTitle').textContent = title;
+      document.getElementById('zoomImgHost').innerHTML = `<div style="width: 320px; height: 320px;">${makeSvgThumb(title.split('—')[0].trim(), bgVar, fgVar, sub)}</div>`;
+      document.getElementById('zoomBackdrop').classList.add('open');
+    };
+
+    window.closeZoom = function() {
+      document.getElementById('zoomBackdrop').classList.remove('open');
+    };
+
+    document.getElementById('toggleBusyCardBtn').onclick = () => {
+      state.simulateBusyId = state.simulateBusyId ? null : 'p2';
+      renderCards();
+    };
+
+    document.getElementById('toggleProcessingThumbBtn').onclick = () => {
+      state.simulateProcessingThumb = !state.simulateProcessingThumb;
+      renderCards();
+    };
+
+    document.getElementById('toggleEmptyEditPhotoBtn').onclick = () => {
+      state.editEmptyMode = !state.editEmptyMode;
+      renderEditPhotos();
+    };
+
+    const themeBtn = document.getElementById('themeToggleBtn');
+    themeBtn.onclick = () => {
+      const html = document.documentElement;
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      themeBtn.textContent = next === 'dark' ? '☀️ Mode Terang' : '🌙 Mode Gelap';
+    };
+
+    renderCards();
+    document.getElementById('inlineCompareHost').innerHTML = renderCompareContent('p1', true);
+    renderEditPhotos();
+  </script>
+</body>
+</html>
