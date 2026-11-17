@@ -40,12 +40,17 @@ async function runTests() {
 
   console.log('✅ Test 2 passed.');
 
-  // Test 3: Micro task (Scraper) uses lightweight model from Smart Routing
-  console.log('Test 3: Micro-task SCRAPER uses lightweight model...');
+  // Test 3: Micro task (Scraper) uses primary when light unset, or configured light model from Settings
+  console.log('Test 3: Micro-task SCRAPER respects Settings (primary when light empty, else gemini_model_light)...');
   setSetting('gemini_api_tier', 'paid');
+  setSetting('gemini_model_light', '');
+  const scraperFallbackPrimary = await resolveModelForTask('SCRAPER');
+  assert.strictEqual(scraperFallbackPrimary, 'gemini-3.7-flash-custom');
+
+  setSetting('gemini_model_light', 'gemini-3.5-flash-lite');
   const scraperModel = await resolveModelForTask('SCRAPER');
-  console.log('Resolved model for SCRAPER (paid):', scraperModel);
-  assert.strictEqual(scraperModel, 'gemini-1.5-flash-8b');
+  console.log('Resolved model for SCRAPER (paid, light set):', scraperModel);
+  assert.strictEqual(scraperModel, 'gemini-3.5-flash-lite');
 
   console.log('✅ Test 3 passed.');
 

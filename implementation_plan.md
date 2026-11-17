@@ -1,142 +1,157 @@
-# Implementation Plan — Hapus Fitur Instant Factory & Sheets Autopilot
+# Implementation Plan: Model AI Terpusat di Settings
 
-Tanggal: 17 November 2026 · Branch: `fitur/hapus-instant-sheets` · Basis: `main` (`v2.50.4`)  
-Dokumen Panduan: [antigravity_hapus_instant_factory_sheets_autopilot_instructions.md](file:///Users/sabeqmmursyid/_cfstudio/catatan-kerja/instruksi-agent/antigravity_hapus_instant_factory_sheets_autopilot_instructions.md)
+> Referensi tugas: [antigravity_ai_terpusat_TERPADU.md](file:///Users/sabeqmmursyid/_cfstudio/catatan-kerja/instruksi-agent/antigravity_ai_terpusat_TERPADU.md) & [antigravity_model_ai_terpusat_instructions.md](file:///Users/sabeqmmursyid/_cfstudio/catatan-kerja/instruksi-agent/antigravity_model_ai_terpusat_instructions.md)  
+> Branch aktif: `fitur/model-ai-terpusat` (dibuat dari `fitur/hapus-instant-sheets` @ `e731b1f`)
 
----
+## Ringkasan Tujuan
 
-## 1. Ringkasan Tujuan
-
-Menghapus seluruh halaman, API route, worker, tick scheduler, dan integrasi UI/backend dari **Instant Factory** dan **Sheets Autopilot**, tanpa menghapus tabel database yang sudah ada dan tanpa mengganggu fitur aktif (Video Studio, ContentFlow, TTS Studio, Affiliate Studio, Scheduler, dan `pipeline-v54`).
-
-### Hasil Cek Database Awal (3 Schema: `dev`, `staging`, `public` — Read-Only)
-- `instant_campaigns`, `instant_campaign_items`, `instant_campaign_outputs`, `instant_campaign_configs`, `sheets_campaigns`, `sheets_jobs`, `pipeline_assets`: **0 baris** di ketiga schema.
-- `scheduler_jobs` (antrean `instant%` / `%sheets%`): **0 baris** di ketiga schema.
-- `settings` & `tenant_settings` (kunci `*instant*` / `*sheets*`): **0 baris** di ketiga schema.
-- `content_flow_items.source_type`: Tidak ada tipe `instant` maupun `sheets` di ketiga schema (`dev`: opc 903, re 126, multiplier 13, strategic 6, bridge 4, recipe 2; `staging`: opc 4137, re 702, multiplier 168, strategic 6, recipe 4; `public`: null 11, opc 5).
-
-### Temuan `pipeline-v54`
-- `app/pipeline/page.js` masih memanggil `/api/pipeline-v54/*`, dan `lib/product-repository.js` membersihkan `pipeline_assets` saat produk dihapus.
-- Oleh karena itu `app/api/pipeline-v54/**` dan fungsi `*PipelineAsset*` dipertahankan; label "Instant Factory Pipeline" di `lib/contentflow-ingest.js` diubah menjadi netral (`Pipeline v5.4`).
+1. Memusatkan seluruh pemanggilan Gemini teks & vision ke pengaturan tenant (`Settings`), tanpa penimpaan diam-diam ke model yang sudah mati (`gemini-1.5-flash-8b`, `gemini-1.5-flash`).
+2. Menyediakan satu fungsi pemilih terpusat `resolveModelChain({ role, taskType, modelOverride })` dengan 3 peran (`primary`, `light`, `vision`) serta key settings baru `gemini_model_light`.
+3. Memastikan setiap pemanggilan memakai rantai cadangan (`makeModelResilient` / `generateContentFlexible` / loop REST) tanpa duplikat dan membedakan `MODEL_BUSY` (503) dari `QUOTA_EXHAUSTED` (429 harian).
+4. Mencatat kuota pool key sesuai model aktual yang dipanggil, bukan model utama tenant secara membabi buta.
+5. Menyediakan mockup HTML Settings (`public/mockup_settings_model_ai.html`) untuk review pengguna sebelum mengubah UI React `app/settings/page.js`.
 
 ---
 
-## 2. Before & After Code Snippets (Tahap 1 & Tahap 2)
+## Execution Task List
 
-### 2.1. `lib/campaign-scheduler.js` (Hapus Tick Instant & Sheets Autopilot)
+- [x] **Langkah 0**: Amankan perubahan di `fitur/hapus-instant-sheets` (`e731b1f`) dan buat branch `fitur/model-ai-terpusat`.
+- [x] **Audit Awal**: Inventarisasi pemanggil Gemini di `lib/` & `app/` serta verifikasi bukti error `gemini-1.5-flash-8b` pada tenant `tnt_mas-ibnu_e0eb25` di `staging.product_extractions`.
+- [x] **Mockup HTML UI Settings**: Buat `public/mockup_settings_model_ai.html` dengan semantic CSS tokens (Light & Dark mode).
+- [x] **Langkah 1 (`lib/gemini.js`)**: Implementasi `KNOWN_GEMINI_MODELS`, `DEFAULT_TEXT_MODEL`, `resolveModelChain`, pembersihan `MODULE_MODEL_MATRIX` & cascade dari model mati, pembaruan `resolveModelForTask`, `getResolvedGeminiModels` (termasuk string arg `'compliance_audit'`), `resolveStartFrameQcModel`, dan `generateWithImages`.
+- [x] **Langkah 2 & 3 (Pemanggil & Pencatatan Kuota/`MODEL_BUSY`)**: Perbarui `makeModelResilient`, `executeContentGeneration`, `executeWithKeyPool`, `lib/product-bulk-worker.js`, `app/api/v2/products/[id]/route.js`, `app/api/v2/brand-profiles/extract/route.js`, `lib/threads-series-generator.js`, `lib/re-recomm-engine.js`, `lib/universe-ai-builder.js`, `lib/visual-identity-ai-builder.js`, `lib/universe-ai-repository.js`, `lib/tenant-admin.js`, `lib/scheduler-processors.js`, `app/api/keys/route.js`, `lib/db.js`, dan `app/api/settings/route.js`.
+- [x] **Langkah 5a (Tes Otomatis)**: Tambah `tests/gemini-model-resolver.test.js` (termasuk penjaga `git grep` literal `gemini-<angka>`).
+- [x] **Langkah 5b (Skrip Dry-Run)**: Buat `scripts/report-effective-gemini-models.mjs` (`--schema dev|staging`, read-only) untuk tabel model sebelum vs sesudah per tenant.
+- [ ] **Langkah 5c (Verifikasi & Deploy Dev)**: Jalankan semua tes + `npm run build`, deploy ke Dev (`5020`/`7020`), uji enrichment nyata & ubah model di Dev untuk verifikasi `[GEMINI_CALL]`, lalu susun laporan balik ke pengguna.
 
-#### Sebelum (Current/Before):
+---
+
+## Rencana Perubahan Kode (Before & After Snippets)
+
+### 1. [lib/gemini.js](file:///Users/sabeqmmursyid/_cfstudio/lib/gemini.js)
+
+**Code Sebelum (Current/Before):**
 ```javascript
-import { getDb, listReCampaignItems, listPillarCampaignItems, getSetting, updateReCampaignItem, updatePillarCampaignItem, updateInstantCampaignItem, listInstantCampaignItems } from './db.js';
-import {
-  ...,
-  processInstantRowProductSourcing,
-  processInstantGenerator,
-  processInstantTts,
-  processInstantGlabs,
-  processInstantFfmpeg,
-  processInstantSocialPoster,
+export const GEMINI_CASCADE_ORDER_PAID = [
+  'gemini-2.5-flash',
+  'gemini-3.6-flash',
+  'gemini-3.5-flash',
+  'gemini-3.7-flash',
+  'gemini-3.8-flash',
+  'gemini-1.5-flash',
+  'gemini-1.5-flash-8b',
+  'gemini-flash-latest'
+];
+
+export const MODULE_MODEL_MATRIX = {
+  SCRAPER: { paid: 'gemini-1.5-flash-8b', free: 'gemini-3.6-flash', useKB: false },
   ...
-} from './scheduler-processors.js';
-import { runSyncWorker } from './sheets-autopilot-worker.js';
-// ...
-  // --- INSTANT CAMPAIGN TICKING ENGINE (v9.0) ---
-  const instantCampaigns = await db.prepare("SELECT * FROM instant_campaigns ...").all();
-  // ... (baris 921-1107)
-  // --- SHEETS AUTOPILOT SCHEDULER TICK (v10.5) ---
-  const isSchedulerActive = await getSetting('sheets_autopilot_scheduler_active') === 'true';
-  // ... (baris 1109-1130)
+};
 ```
 
-#### Sesudah (Proposed/After):
+**Code Sesudah (Proposed/After):**
 ```javascript
-import { getDb, listReCampaignItems, listPillarCampaignItems, getSetting, updateReCampaignItem, updatePillarCampaignItem } from './db.js';
-// Impor processor Instant & runSyncWorker dihapus
-// State lastSheetsSyncTime, isSheetsSyncRunning, dan tick loop Instant/Sheets dihapus
-```
+export const DEFAULT_TEXT_MODEL = 'gemini-3.6-flash';
+export const DEFAULT_FALLBACK_MODEL = 'gemini-3.6-flash';
+export const KNOWN_GEMINI_MODELS = [
+  'gemini-3.6-flash',
+  'gemini-3.8-flash',
+  'gemini-3.7-flash',
+  'gemini-3.5-flash',
+  'gemini-3.5-flash-lite',
+  'gemini-3.1-flash-lite',
+  'gemini-2.5-flash',
+  'gemini-2.5-flash-lite',
+  'gemini-flash-latest'
+];
 
-### 2.2. `lib/gemini.js` (Bersihkan Entri Model Matrix)
+export const MODULE_MODEL_MATRIX = {
+  SCRAPER: { role: 'light', useKB: false },
+  PRODUCT_ENRICHMENT: { role: 'light', useKB: false },
+  OCR_EXTRACTION: { role: 'light', useKB: false },
+  BRAND_EXTRACTION: { role: 'light', useKB: false },
+  COMPLIANCE: { role: 'light', useKB: false },
+  DECONSTRUCT: { role: 'light', useKB: false },
+  START_FRAME_QC: { role: 'vision', useKB: false },
+  CAMPAIGN_PLANNER: { role: 'primary', useKB: true },
+  ...
+};
 
-#### Sebelum (Current/Before):
-```javascript
-  INSTANT_FACTORY: { paid: 'gemini-3.6-flash', free: 'gemini-3.6-flash', useKB: true },
-  MULTIPLIER_LAB: { paid: 'gemini-3.6-flash', free: 'gemini-3.6-flash', useKB: false },
-  BRIDGE_INJECT: { paid: 'gemini-3.6-flash', free: 'gemini-3.6-flash', useKB: false },
-  SHEETS_AUTOPILOT: { paid: 'gemini-3.6-flash', free: 'gemini-3.6-flash', useKB: true },
-```
-
-#### Sesudah (Proposed/After):
-```javascript
-  MULTIPLIER_LAB: { paid: 'gemini-3.6-flash', free: 'gemini-3.6-flash', useKB: false },
-  BRIDGE_INJECT: { paid: 'gemini-3.6-flash', free: 'gemini-3.6-flash', useKB: false },
-```
-
-### 2.3. `app/api/video-studio/render/route.js` & `lib/video-studio-finishing-source.js`
-
-#### Sebelum (Current/Before):
-```javascript
-// render/route.js: memproses cabang video_source_type === 'instant_factory'
-// video-studio-finishing-source.js: mendukung 're_campaign' | 'instant_factory'
-```
-
-#### Sesudah (Proposed/After):
-```javascript
-// render/route.js: menolak eksplisit video_source_type === 'instant_factory' dengan status 400
-if (video_source_type === 'instant_factory') {
-  return NextResponse.json(
-    { success: false, error: 'Sumber video instant_factory sudah tidak didukung dan telah dihapus.' },
-    { status: 400 }
-  );
+export async function resolveModelChain({ role = null, taskType = null, modelOverride = null, explicitTier = null } = {}) {
+  // Membaca gemini_api_tier, gemini_smart_routing, gemini_model_primary,
+  // gemini_model_fallback, gemini_model_light, start_frame_visual_qc_model
+  // dan mengembalikan { model, chain, role, useKB, tier, primaryModel, fallbackModel, lightModel }
 }
-// video-studio-finishing-source.js: hanya mendukung 're_campaign' (dan sumber aktif lain)
 ```
 
-### 2.4. `lib/db-pg.js` (Pertahankan Migrasi, Hapus Daftar CRUD `sheets_campaigns`)
+### 2. Error `MODEL_BUSY` vs `QUOTA_EXHAUSTED` & Tracking Pool Model di [lib/gemini.js](file:///Users/sabeqmmursyid/_cfstudio/lib/gemini.js)
 
-#### Sebelum (Current/Before):
+**Code Sebelum (Current/Before):**
 ```javascript
-const tables = ['re_campaigns', 'pillar_campaigns', 'sheets_campaigns'];
+// makeModelResilient & executeContentGeneration akhir loop:
+throw new Error(`QUOTA_EXHAUSTED: Semua model Gemini tidak tersedia setelah ${MAX_WATERFALL_CYCLES} putaran. Error terakhir: ${baseMsg}`);
+
+// executeWithKeyPool akhir loop:
+throw new Error('QUOTA_EXHAUSTED: Semua API Key yang dicoba dalam pool gagal karena rate limit atau high demand.');
 ```
 
-#### Sesudah (Proposed/After):
+**Code Sesudah (Proposed/After):**
 ```javascript
-const tables = ['re_campaigns', 'pillar_campaigns'];
+// Membedakan 503/high demand/overloaded dari 429 kuota harian:
+if (allFailuresWereBusy503) {
+  const err = new Error(`MODEL_BUSY (dapat diulang): model ${lastTriedModel} sedang sibuk`);
+  err.code = 'MODEL_BUSY';
+  err.retryable = true;
+  err.status = 503;
+  err.geminiModel = lastTriedModel;
+  throw err;
+}
 ```
 
----
+### 3. [lib/product-bulk-worker.js](file:///Users/sabeqmmursyid/_cfstudio/lib/product-bulk-worker.js) & [app/api/v2/products/[id]/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/products/%5Bid%5D/route.js)
 
-## 3. Execution Task List
+**Code Sebelum (Current/Before):**
+```javascript
+    const rawResponse = await executeWithKeyPool(1, async (apiKey) => {
+      const { GoogleGenerativeAI } = await import('@google/generative-ai');
+      const { getResolvedGeminiModels } = await import('./gemini.js');
+      const { resolvedPrimary } = await getResolvedGeminiModels({ taskType: 'SCRAPER' });
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({
+        model: resolvedPrimary,
+        generationConfig: { responseMimeType: 'application/json', temperature: 0.7 }
+      });
+      const result = await model.generateContent([{ text: prompt }]);
+      return result.response.text();
+    });
+```
 
-- [x] **Task 1: Hapus Halaman, API, Worker, dan Dokumen Fitur Instant Factory & Sheets Autopilot (Tahap 1)**
-  - [x] Hapus `app/instant-factory/` dan `app/api/v2/instant-factory/`
-  - [x] Hapus `app/sheets-autopilot/` dan `app/api/sheets-autopilot/`
-  - [x] Hapus `lib/sheets-autopilot-worker.js`
-  - [x] Pindahkan `sot/menus/instant-factory.md` & `sot/menus/sheets-autopilot.md` ke `sot/menus/arsip/`
-  - [x] Hapus processor Instant & helper khusus Instant di `lib/scheduler-processors.js` (setelah audit pemakaian via `git grep`)
-  - [x] Hapus loop tick Instant & Sheets Autopilot di `lib/campaign-scheduler.js`
-  - [x] Bersihkan fungsi CRUD khusus `instant_campaign*` & `sheets_campaigns`/`sheets_jobs` di `lib/db.js` dan `lib/db-pg.js` (tanpa menghapus `CREATE/ALTER TABLE`)
+**Code Sesudah (Proposed/After):**
+```javascript
+    const resolved = await resolveModelChain({ role: 'light', taskType: 'PRODUCT_ENRICHMENT' });
+    const rawResponse = await runWithGeminiTrace({ stage: 'product_enrichment', item_id: id }, () =>
+      executeWithKeyPool(1, async (apiKey) => {
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({
+          model: resolved.model,
+          generationConfig: { responseMimeType: 'application/json', temperature: 0.7 }
+        });
+        const resilientModel = makeModelResilient(model, apiKey, resolved.model, true, null, {
+          role: 'light',
+          taskType: 'PRODUCT_ENRICHMENT'
+        });
+        const result = await resilientModel.generateContent([{ text: prompt }]);
+        return result.response.text();
+      }, { modelName: resolved.model })
+    );
+```
+Serta pada `GET /api/v2/products/[id]` dan helper produk, menambahkan field terhitung `enrichment_retryable` yang bernilai `true` untuk `MODEL_BUSY` dan `QUOTA_EXHAUSTED` / 503 / 429.
 
-- [x] **Task 2: Bersihkan Sambungan di Fitur Aktif (Tahap 2)**
-  - [x] Video Studio: bersihkan `app/video-studio/page.js`, `app/api/video-studio/campaign-videos/route.js`, `app/api/video-studio/render/route.js` (return 400 untuk `instant_factory`), `app/components/video-studio/FinishingPanel.jsx`, `lib/video-studio-finishing-source.js`, `lib/render-slot.js`
-  - [x] ContentFlow: bersihkan `app/content-flow/page.js` dan ubah label netral di `lib/contentflow-ingest.js` (`Pipeline v5.4`)
-  - [x] TTS Studio: bersihkan `app/api/tts-studio/campaign-data/route.js` dan `app/tts-studio/page.js`
-  - [x] Beranda & Pillar: bersihkan `app/page.js`, `app/terms/page.js`, periksa `app/pillar-campaigns/page.js`
-  - [x] Izin Menu & Users: bersihkan `lib/schema/user-schema.js` (pastikan UI izin toleran terhadap key lama)
-  - [x] Affiliate Studio: bersihkan `lib/affiliate-studio-production-adapter.js`, `lib/affiliate-studio-recommendation-adapter.js`, `lib/affiliate-studio-launch-adapter.js`
-  - [x] Logs, Scheduler, Naming & Gemini: bersihkan `lib/scheduler.js`, `app/api/scheduler/control/route.js`, `app/api/system-logs/route.js`, `lib/console-hook.js`, `lib/naming-helper.js`, `lib/gemini.js`
-  - [x] Perbarui tes & skrip: `tests/video-studio-finishing-source.test.mjs`, `tests/render-slot.test.js`, `tests/base64-image-reference.test.js`, `scripts/find-campaign.js`, `scripts/test-product-pipeline.js`
-  - [x] Perbarui SOT & Kartu Menu: `sot/menus/_PETA_MENU.md`, `sot/menus/kartu/video-studio.md`, `sot/menus/kartu/content-flow.md`, `sot/menus/kartu/tts-studio.md`, `sot/menus/kartu/users-tenants.md`
-
-- [x] **Task 3: Buat Skrip Dry-Run Tabel Legacy (Tahap 3)**
-  - [x] Buat `scripts/report-legacy-tables.mjs` dengan dukungan `--schema dev|staging|public` (read-only `SELECT COUNT`)
-
-- [x] **Task 4: Verifikasi Audit `git grep` & Pengujian Otomatis**
-  - [x] Jalankan `git grep` akhir dan pastikan hanya sisa yang diizinkan
-  - [x] Buat & jalankan unit test baru penolakan `video_source_type: 'instant_factory'` (status 400)
-  - [x] Jalankan `npm run build`, `npm run test:mcp`, `npm run test:product-catalog`, serta tes unit terkait
-
-- [x] **Task 5: Deploy ke Server Dev Mac Mini & Uji Manual**
-  - [x] Commit dan push branch `fitur/hapus-instant-sheets`
-  - [x] Deploy atomic ke Dev (`100.95.245.55:5020`)
-  - [x] Verifikasi log `dev-ui.err.log` (bersih dari error scheduler tick) & cek beranda Dev (siap untuk klik uji manual pengguna di UI)
-  - [x] Sajikan laporan akhir untuk pengguna
+### 4. Pemanggil Langsung Lainnya
+- [app/api/v2/brand-profiles/extract/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/brand-profiles/extract/route.js): ganti `'gemini-2.5-flash'` menjadi `resolveModelChain({ role: 'light', taskType: 'BRAND_EXTRACTION' })` + `makeModelResilient`.
+- [lib/threads-series-generator.js](file:///Users/sabeqmmursyid/_cfstudio/lib/threads-series-generator.js): gunakan `resolveModelChain({ role: 'primary', taskType: 'THREADS_SERIES' })` & `makeModelResilient` (hapus fallback tertulis `'gemini-2.5-flash'`).
+- [lib/re-recomm-engine.js](file:///Users/sabeqmmursyid/_cfstudio/lib/re-recomm-engine.js): loop REST grounding mengikuti `chain` dari `resolveModelChain({ role: 'primary', taskType: 'RE_CAMPAIGN' })` tanpa `GEMINI_MODELS.PRIMARY` / `gemini-flash-latest` polos.
+- [lib/universe-ai-builder.js](file:///Users/sabeqmmursyid/_cfstudio/lib/universe-ai-builder.js), [lib/visual-identity-ai-builder.js](file:///Users/sabeqmmursyid/_cfstudio/lib/visual-identity-ai-builder.js), [lib/universe-ai-repository.js](file:///Users/sabeqmmursyid/_cfstudio/lib/universe-ai-repository.js): isi `meta.model` dengan model aktual yang berhasil dipakai (`result.actualModel`).
+- [lib/tenant-admin.js](file:///Users/sabeqmmursyid/_cfstudio/lib/tenant-admin.js): hapus `gemini_model: 'gemini-2.5-flash'`, salin pengaturan model Gemini (`gemini_api_tier`, `gemini_model_primary`, `gemini_model_fallback`, `gemini_model_light`, `gemini_smart_routing`, `gemini_context_caching`) dari `default_tenant`.
+- [lib/scheduler-processors.js](file:///Users/sabeqmmursyid/_cfstudio/lib/scheduler-processors.js), [app/api/keys/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/keys/route.js), [lib/db.js](file:///Users/sabeqmmursyid/_cfstudio/lib/db.js): gunakan `resolveModelChain` / `DEFAULT_TEXT_MODEL` terpusat.
+- [app/api/settings/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/settings/route.js): dukung baca & simpan `gemini_model_light` (kosong = `""`). UI `app/settings/page.js` dipasang setelah pengguna menyetujui mockup `public/mockup_settings_model_ai.html`.

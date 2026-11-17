@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup Settings — Pengaturan Model AI Terpusat | MAKNA Flow</title>
+  <style>
+    /* Semantic tokens mirrored from app/theme.css */
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-subtle: #0d1524;
+      --input-bg: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-subtle: #f5f8fc;
+      --input-bg: #ffffff;
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --status-neutral: #6548bd;
+      --status-neutral-soft: #f0ecfb;
+      --focus-ring: #6d4ed6;
+      --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px 16px 48px;
+      font-family: var(--font-sans);
+      background: var(--canvas);
+      color: var(--text-primary);
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .topbar-title h1 {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .topbar-title p {
+      margin: 2px 0 0;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .toolbar-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      transition: all 0.15s ease;
+    }
+
+    .btn:hover { border-color: var(--border-strong); }
+
+    .btn-primary {
+      background: var(--action-primary);
+      border-color: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+      border-color: var(--action-primary-hover);
+    }
+
+    .btn-sm { padding: 6px 10px; font-size: 0.74rem; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .card-header h2 {
+      margin: 0;
+      font-size: 0.96rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+    }
+
+    .badge-success {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border-color: var(--status-success);
+    }
+
+    .badge-info {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border-color: var(--status-info);
+    }
+
+    .badge-warning {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border-color: var(--status-warning);
+    }
+
+    .badge-danger {
+      background: var(--status-danger-soft);
+      color: var(--status-danger);
+      border-color: var(--status-danger);
+    }
+
+    .badge-neutral {
+      background: var(--status-neutral-soft);
+      color: var(--status-neutral);
+      border-color: var(--status-neutral);
+    }
+
+    .tier-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .tier-card {
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      transition: all 0.15s ease;
+    }
+
+    .tier-card.active {
+      background: var(--surface-raised);
+      border-color: var(--action-primary);
+      box-shadow: var(--shadow-card);
+    }
+
+    .tier-card-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    .tier-card-desc {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    .model-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 9px 11px;
+      border-radius: var(--radius-sm);
+      background: var(--input-bg);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      font-size: 0.82rem;
+      font-family: var(--font-sans);
+    }
+
+    .form-input:focus {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 1px;
+    }
+
+    .help-text {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .new-field-ring {
+      padding: 12px;
+      border-radius: var(--radius-md);
+      background: color-mix(in srgb, var(--action-primary) 7%, var(--surface-subtle));
+      border: 1px dashed var(--action-primary);
+    }
+
+    .box-panel {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    .box-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .switch-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--action-primary);
+      cursor: pointer;
+    }
+
+    .role-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .role-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .role-row.highlight {
+      background: color-mix(in srgb, var(--action-primary) 8%, var(--surface-raised));
+      border-color: var(--action-primary);
+    }
+
+    .role-name {
+      font-weight: 700;
+      font-size: 0.8rem;
+      color: var(--text-primary);
+    }
+
+    .role-tasks {
+      font-size: 0.71rem;
+      color: var(--text-muted);
+    }
+
+    .mono-model {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.78rem;
+      color: var(--action-primary);
+    }
+
+    .chain-tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .chain-tab {
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 0.73rem;
+      font-weight: 600;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+
+    .chain-tab.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border-color: var(--action-primary);
+    }
+
+    .chain-list {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-top: 10px;
+    }
+
+    .chain-step {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 10px;
+      border-radius: 6px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      font-size: 0.78rem;
+    }
+
+    .chain-step.primary {
+      background: color-mix(in srgb, var(--action-primary) 10%, var(--surface-raised));
+      border-color: var(--action-primary);
+    }
+
+    .step-num {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.68rem;
+      font-weight: 800;
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      flex-shrink: 0;
+    }
+
+    .chain-step.primary .step-num {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    .sim-box {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      font-size: 0.76rem;
+    }
+
+    .sim-log {
+      margin-top: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      padding: 8px 10px;
+      border-radius: 6px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      white-space: pre-wrap;
+    }
+
+    .callout-note {
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      background: var(--status-info-soft);
+      border: 1px solid var(--status-info);
+      color: var(--text-primary);
+      font-size: 0.78rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="topbar-title">
+        <h1>Mockup UI: Menu Settings — Model AI Terpusat</h1>
+        <p>Pratinjau perubahan dropdown &amp; penjelasan Smart Routing sebelum dipasang ke React Settings.</p>
+      </div>
+      <div class="toolbar-actions">
+        <button class="btn btn-sm" id="presetIbnuBtn" type="button">Preset: Akun Mas Ibnu (Paid)</button>
+        <button class="btn btn-sm" id="presetDefaultBtn" type="button">Preset: Default (Free)</button>
+        <button class="btn btn-sm" id="themeToggleBtn" type="button">☀️ Mode Terang</button>
+      </div>
+    </div>
+
+    <div class="callout-note">
+      <strong>Ringkasan perubahan UI untuk review:</strong>
+      Menambah 1 dropdown <strong>Model ringan (tugas kecil)</strong> dengan opsi default <em>"Sama dengan model utama"</em>, menambah pilihan <strong>Model Cadangan</strong> yang jelas, membersihkan model yang sudah mati (<code>gemini-1.5-flash-8b</code> &amp; <code>gemini-1.5-flash</code>) dari semua daftar, serta memperjelas keterangan saklar Smart Routing.
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>🤖 Konfigurasi Model AI &amp; Mode Operasional</h2>
+        <span class="badge badge-success">✓ Model Mati Dibersihkan</span>
+      </div>
+
+      <!-- 1. Tier -->
+      <div class="form-group" style="margin-bottom: 14px;">
+        <span class="form-label">Mode Operasional API</span>
+      </div>
+      <div class="tier-grid">
+        <div class="tier-card active" id="tierPaidCard">
+          <div class="tier-card-title">
+            <span>💳 Paid Tier (Dedicated)</span>
+            <span class="badge badge-success">Rekomendasi</span>
+          </div>
+          <div class="tier-card-desc">
+            Memakai API Key berbayar milik tenant, mendukung Context Caching &amp; cadangan otomatis lintas model hidup.
+          </div>
+        </div>
+        <div class="tier-card" id="tierFreeCard">
+          <div class="tier-card-title">
+            <span>🔄 Free Tier (Rotasi Pool)</span>
+            <span class="badge badge-info">Pool Key</span>
+          </div>
+          <div class="tier-card-desc">
+            Rotasi multi-key gratis dengan pencatatan kuota per model yang benar-benar dipanggil.
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Primary, Fallback, and NEW Light Model -->
+      <div class="model-grid">
+        <div class="form-group">
+          <div class="form-label-row">
+            <label class="form-label" for="primarySelect">Model AI Utama (Tugas Kreatif &amp; Default)</label>
+          </div>
+          <select id="primarySelect" class="form-input"></select>
+          <p class="help-text">Dipakai untuk storyboard, naskah, OPC, RE, Multiplier, Recipe, Threads, YouTube Studio &amp; Builder.</p>
+        </div>
+
+        <div class="form-group">
+          <div class="form-label-row">
+            <label class="form-label" for="fallbackSelect">Model Cadangan Utama</label>
+          </div>
+          <select id="fallbackSelect" class="form-input"></select>
+          <p class="help-text">Dipakai otomatis saat model utama sedang sibuk (503) atau mencapai batas kuota.</p>
+        </div>
+      </div>
+
+      <div class="new-field-ring" style="margin-bottom: 16px;">
+        <div class="model-grid" style="margin-bottom: 0;">
+          <div class="form-group">
+            <div class="form-label-row">
+              <label class="form-label" for="lightSelect">Model ringan (tugas kecil)</label>
+              <span class="badge badge-neutral">BARU</span>
+            </div>
+            <select id="lightSelect" class="form-input">
+              <option value="">Sama dengan model utama</option>
+              <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (Hemat &amp; Cepat)</option>
+              <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite (Ultra Cepat)</option>
+              <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite (Ringan &amp; Stabil)</option>
+              <option value="gemini-2.5-flash">gemini-2.5-flash (Stabil &amp; Strict JSON)</option>
+              <option value="gemini-3.6-flash">gemini-3.6-flash (Workhorse Seimbang)</option>
+              <option value="gemini-flash-latest">gemini-flash-latest (Auto Latest)</option>
+            </select>
+            <p class="help-text">
+              Dipakai oleh scraper, enrichment produk, OCR, compliance, deconstruct &amp; ekstraksi brand ketika Smart Routing aktif. Jika dikosongkan, mengikuti Model AI Utama.
+            </p>
+          </div>
+
+          <div class="form-group">
+            <div class="form-label-row">
+              <label class="form-label" for="visionSelect">Pemeriksa Gambar (Info dari Tab Eksperimen)</label>
+              <span class="badge badge-info">Terhubung</span>
+            </div>
+            <select id="visionSelect" class="form-input">
+              <option value="">Otomatis (ikut Model ringan → Model utama)</option>
+              <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite</option>
+              <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+              <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite</option>
+              <option value="gemini-3.6-flash">gemini-3.6-flash</option>
+            </select>
+            <p class="help-text">
+              Diatur di tab Fitur Eksperimen. Saat kosong, memakai Model ringan (jika diisi) atau Model utama.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Smart Routing -->
+      <div class="box-panel">
+        <div class="box-header">
+          <div>
+            <div style="font-size: 0.84rem; font-weight: 700;">🎯 Smart Routing per Jenis Tugas</div>
+            <p class="help-text" id="smartRoutingDesc">
+              Aktif: tugas kecil memakai Model ringan. Mati: semua memakai Model utama.
+            </p>
+          </div>
+          <label class="switch-label">
+            <input type="checkbox" id="smartRoutingToggle" checked />
+            <span id="smartRoutingLabel">Smart Routing: Aktif</span>
+          </label>
+        </div>
+
+        <div class="role-list" id="rolePreviewList"></div>
+      </div>
+
+      <!-- 4. Waterfall Visualizer + Simulator -->
+      <div class="box-panel" style="margin-bottom: 16px;">
+        <div class="box-header">
+          <div>
+            <div style="font-size: 0.84rem; font-weight: 700;">🌊 Simulasi Urutan Model Cadangan (Tanpa Duplikat &amp; Tanpa Model Mati)</div>
+            <p class="help-text">Semua tugas teks &amp; vision sekarang memakai rantai cadangan yang seragam dari Settings.</p>
+          </div>
+          <div class="chain-tabs">
+            <button type="button" class="chain-tab active" data-role="primary">Peran: Utama</button>
+            <button type="button" class="chain-tab" data-role="light">Peran: Ringan</button>
+            <button type="button" class="chain-tab" data-role="vision">Peran: Gambar</button>
+          </div>
+        </div>
+
+        <div class="chain-list" id="chainList"></div>
+
+        <div class="sim-box">
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between;">
+            <strong>Simulasi Gangguan Saat Enrichment Produk:</strong>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+              <button type="button" class="btn btn-sm" id="simBusyRecoverBtn">Model #1 Sibuk (503) → Lolos di Cadangan</button>
+              <button type="button" class="btn btn-sm" id="simAllBusyBtn">Semua Model Sibuk (503)</button>
+              <button type="button" class="btn btn-sm" id="simQuotaBtn">Kuota Harian Habis (429)</button>
+            </div>
+          </div>
+          <div class="sim-log" id="simLog">Klik salah satu tombol simulasi di atas untuk melihat perilaku rantai cadangan &amp; pesan error.</div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <span class="help-text" id="saveHint">Data tersimpan ke pengaturan tenant: primary, fallback, light, smart_routing.</span>
+        <button type="button" class="btn btn-primary" id="saveBtn">💾 Simpan Pengaturan Model</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const MODELS_BY_TIER = {
+      paid: [
+        { value: 'gemini-3.6-flash', label: 'gemini-3.6-flash (Utama Seimbang — Rekomendasi)' },
+        { value: 'gemini-3.8-flash', label: 'gemini-3.8-flash (Generasi Terbaru)' },
+        { value: 'gemini-3.7-flash', label: 'gemini-3.7-flash (Hybrid Reasoning)' },
+        { value: 'gemini-3.5-flash', label: 'gemini-3.5-flash (Stabil)' },
+        { value: 'gemini-3.5-flash-lite', label: 'gemini-3.5-flash-lite (Hemat & Cepat)' },
+        { value: 'gemini-3.1-flash-lite', label: 'gemini-3.1-flash-lite (Ultra Cepat)' },
+        { value: 'gemini-2.5-flash', label: 'gemini-2.5-flash (Strict JSON & Stabil)' },
+        { value: 'gemini-2.5-flash-lite', label: 'gemini-2.5-flash-lite (Ringan)' },
+        { value: 'gemini-flash-latest', label: 'gemini-flash-latest (Auto Latest)' }
+      ],
+      free: [
+        { value: 'gemini-3.6-flash', label: 'gemini-3.6-flash (Utama Stabil — Rekomendasi)' },
+        { value: 'gemini-3.7-flash', label: 'gemini-3.7-flash (Hybrid Reasoning)' },
+        { value: 'gemini-3.8-flash', label: 'gemini-3.8-flash (Flash Terbaru)' },
+        { value: 'gemini-3.5-flash', label: 'gemini-3.5-flash (Safety Net)' },
+        { value: 'gemini-3.5-flash-lite', label: 'gemini-3.5-flash-lite (Hemat Kuota)' },
+        { value: 'gemini-3.1-flash-lite', label: 'gemini-3.1-flash-lite (Ringan)' },
+        { value: 'gemini-2.5-flash', label: 'gemini-2.5-flash (Stabil JSON)' },
+        { value: 'gemini-flash-latest', label: 'gemini-flash-latest (Auto Latest)' }
+      ]
+    };
+
+    const CASCADE_BASE = [
+      'gemini-3.6-flash',
+      'gemini-3.5-flash',
+      'gemini-3.7-flash',
+      'gemini-3.8-flash',
+      'gemini-2.5-flash',
+      'gemini-flash-latest'
+    ];
+
+    const state = {
+      tier: 'paid',
+      primary: 'gemini-3.8-flash',
+      fallback: 'gemini-3.6-flash',
+      light: '',
+      vision: 'gemini-3.1-flash-lite',
+      smartRouting: true,
+      activeRoleTab: 'light'
+    };
+
+    const primarySelect = document.getElementById('primarySelect');
+    const fallbackSelect = document.getElementById('fallbackSelect');
+    const lightSelect = document.getElementById('lightSelect');
+    const visionSelect = document.getElementById('visionSelect');
+    const smartRoutingToggle = document.getElementById('smartRoutingToggle');
+    const smartRoutingLabel = document.getElementById('smartRoutingLabel');
+    const rolePreviewList = document.getElementById('rolePreviewList');
+    const chainList = document.getElementById('chainList');
+    const simLog = document.getElementById('simLog');
+
+    function populateModelOptions(selectEl, tier, selectedValue) {
+      const opts = MODELS_BY_TIER[tier] || MODELS_BY_TIER.paid;
+      selectEl.innerHTML = opts.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+      if (opts.some(o => o.value === selectedValue)) {
+        selectEl.value = selectedValue;
+      } else {
+        selectEl.value = opts[0].value;
+      }
+    }
+
+    function resolveRoleModel(role) {
+      if (role === 'primary') return state.primary;
+      if (role === 'light') {
+        if (!state.smartRouting) return state.primary;
+        return state.light || state.primary;
+      }
+      if (role === 'vision') {
+        if (state.vision) return state.vision;
+        return state.smartRouting && state.light ? state.light : state.primary;
+      }
+      return state.primary;
+    }
+
+    function buildChain(role) {
+      const start = resolveRoleModel(role);
+      const raw = [start, state.fallback, state.primary, ...CASCADE_BASE];
+      const unique = [];
+      for (const m of raw) {
+        if (m && !unique.includes(m)) unique.push(m);
+      }
+      return unique;
+    }
+
+    function render() {
+      document.getElementById('tierPaidCard').classList.toggle('active', state.tier === 'paid');
+      document.getElementById('tierFreeCard').classList.toggle('active', state.tier === 'free');
+
+      populateModelOptions(primarySelect, state.tier, state.primary);
+      populateModelOptions(fallbackSelect, state.tier, state.fallback);
+      state.primary = primarySelect.value;
+      state.fallback = fallbackSelect.value;
+      lightSelect.value = state.light;
+      visionSelect.value = state.vision;
+      smartRoutingToggle.checked = state.smartRouting;
+      smartRoutingLabel.textContent = state.smartRouting ? 'Smart Routing: Aktif' : 'Smart Routing: Mati';
+
+      const primaryModel = resolveRoleModel('primary');
+      const lightModel = resolveRoleModel('light');
+      const visionModel = resolveRoleModel('vision');
+
+      const lightSource = !state.smartRouting
+        ? 'Smart Routing mati → ikut Model Utama'
+        : (state.light ? 'Dari dropdown Model ringan' : 'Model ringan kosong → ikut Model Utama');
+      const visionSource = state.vision
+        ? 'Dari dropdown Pemeriksa Gambar'
+        : (state.smartRouting && state.light ? 'Kosong → ikut Model ringan' : 'Kosong → ikut Model Utama');
+
+      rolePreviewList.innerHTML = [
+        {
+          title: '🎬 Peran Utama (primary)',
+          tasks: 'Storyboard, Naskah VO, OPC, RE, Multiplier, Recipe, Threads, YouTube Studio, Builder',
+          model: primaryModel,
+          source: 'Dari dropdown Model AI Utama',
+          highlight: true
+        },
+        {
+          title: '⚡ Peran Ringan (light)',
+          tasks: 'Scraper produk, Enrichment produk, OCR, Compliance audit, Deconstruct, Ekstraksi brand',
+          model: lightModel,
+          source: lightSource,
+          highlight: false
+        },
+        {
+          title: '👁️ Peran Pemeriksa Gambar (vision)',
+          tasks: 'Start-frame visual QC, pemilihan & verifikasi foto produk',
+          model: visionModel,
+          source: visionSource,
+          highlight: false
+        }
+      ].map(r => `
+        <div class="role-row ${r.highlight ? 'highlight' : ''}">
+          <div>
+            <div class="role-name">${r.title}</div>
+            <div class="role-tasks">${r.tasks}</div>
+          </div>
+          <div style="text-align: right;">
+            <div class="mono-model">${r.model}</div>
+            <div class="role-tasks">${r.source}</div>
+          </div>
+        </div>
+      `).join('');
+
+      document.querySelectorAll('.chain-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.role === state.activeRoleTab);
+      });
+
+      const chain = buildChain(state.activeRoleTab);
+      chainList.innerHTML = chain.map((m, i) => `
+        <div class="chain-step ${i === 0 ? 'primary' : ''}">
+          <span class="step-num">${i + 1}</span>
+          <span class="mono-model">${m}</span>
+          <span style="margin-left: auto; font-size: 0.72rem; color: var(--text-muted);">
+            ${i === 0 ? 'Dipanggil pertama sesuai Settings' : (i === chain.length - 1 ? 'Safety net terakhir' : `Cadangan #${i}`)}
+          </span>
+        </div>
+      `).join('');
+    }
+
+    document.getElementById('tierPaidCard').onclick = () => { state.tier = 'paid'; render(); };
+    document.getElementById('tierFreeCard').onclick = () => { state.tier = 'free'; render(); };
+    primarySelect.onchange = () => { state.primary = primarySelect.value; render(); };
+    fallbackSelect.onchange = () => { state.fallback = fallbackSelect.value; render(); };
+    lightSelect.onchange = () => { state.light = lightSelect.value; render(); };
+    visionSelect.onchange = () => { state.vision = visionSelect.value; render(); };
+    smartRoutingToggle.onchange = () => { state.smartRouting = smartRoutingToggle.checked; render(); };
+
+    document.querySelectorAll('.chain-tab').forEach(btn => {
+      btn.onclick = () => { state.activeRoleTab = btn.dataset.role; render(); };
+    });
+
+    document.getElementById('presetIbnuBtn').onclick = () => {
+      state.tier = 'paid';
+      state.primary = 'gemini-3.8-flash';
+      state.fallback = 'gemini-3.6-flash';
+      state.light = '';
+      state.vision = 'gemini-3.1-flash-lite';
+      state.smartRouting = true;
+      state.activeRoleTab = 'light';
+      render();
+      simLog.textContent = 'Preset Mas Ibnu aktif: tugas kecil tidak lagi diarahkan ke model mati gemini-1.5-flash-8b, melainkan memakai Model Utama (' + resolveRoleModel('light') + ') selama Model ringan kosong.';
+    };
+
+    document.getElementById('presetDefaultBtn').onclick = () => {
+      state.tier = 'free';
+      state.primary = 'gemini-3.5-flash-lite';
+      state.fallback = 'gemini-3.6-flash';
+      state.light = '';
+      state.vision = '';
+      state.smartRouting = true;
+      state.activeRoleTab = 'light';
+      render();
+      simLog.textContent = 'Preset Default Tenant aktif.';
+    };
+
+    document.getElementById('simBusyRecoverBtn').onclick = () => {
+      const chain = buildChain('light');
+      const m1 = chain[0];
+      const m2 = chain[1] || chain[0];
+      simLog.textContent =
+        `[GEMINI_CALL] stage=product_enrichment model=${m1} status=503 ok=false err="high demand"\n` +
+        `[Waterfall] ${m1} sibuk (503). Beralih ke cadangan → ${m2}\n` +
+        `[GEMINI_CALL] stage=product_enrichment model=${m2} status=200 ok=true\n` +
+        `[KeyPool] Kuota dicatat ke model=${m2} (bukan ${m1}). Produk berhasil diperkaya.`;
+    };
+
+    document.getElementById('simAllBusyBtn').onclick = () => {
+      const chain = buildChain('light');
+      simLog.textContent =
+        `Seluruh model (${chain.join(' → ')}) mengembalikan 503 high demand.\n` +
+        `Error disimpan: "MODEL_BUSY (dapat diulang): model ${chain[chain.length - 1]} sedang sibuk"\n` +
+        `Detail produk: enrichment_retryable = true (tombol Coba Lagi muncul, tidak diklaim kuota habis).`;
+    };
+
+    document.getElementById('simQuotaBtn').onclick = () => {
+      const chain = buildChain('light');
+      simLog.textContent =
+        `Google mengembalikan 429 daily quota (RPD) pada model ${chain[0]}.\n` +
+        `Key ditandai habis kuota KHUSUS untuk model=${chain[0]}, error berbunyi "QUOTA_EXHAUSTED: ...".`;
+    };
+
+    document.getElementById('saveBtn').onclick = () => {
+      document.getElementById('saveHint').textContent =
+        `Tersimpan (simulasi): tier=${state.tier}, primary=${state.primary}, fallback=${state.fallback}, light=${state.light || '"" (sama dgn utama)'}, smart_routing=${state.smartRouting ? 'on' : 'off'}.`;
+    };
+
+    const themeBtn = document.getElementById('themeToggleBtn');
+    themeBtn.onclick = () => {
+      const html = document.documentElement;
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      themeBtn.textContent = next === 'dark' ? '☀️ Mode Terang' : '🌙 Mode Gelap';
+    };
+
+    render();
+  </script>
+</body>
+</html>

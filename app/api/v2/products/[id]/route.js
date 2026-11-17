@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { withTenantContext } from '@/lib/auth';
 import { getActiveTenantId } from '@/lib/tenant-context';
 import { deleteProduct, getProductById, updateProduct } from '@/lib/product-repository';
+import { isRetryableGeminiError } from '@/lib/gemini';
 import { validateSingleProductUpdate, validateRawProductImage } from '@/lib/product-validation';
 import { saveRawProductImage } from '@/lib/product-image-storage';
 
@@ -21,6 +22,7 @@ export const GET = withTenantContext(async (req, { params }) => {
         product[key] = `/api/v2/products/image?path=${encodeURIComponent(product[key])}`;
       }
     }
+    product.enrichment_retryable = isRetryableGeminiError(product.enrichment_error);
     return NextResponse.json({ success: true, data: product });
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: error.status || 500 });

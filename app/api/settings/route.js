@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSetting, setSetting } from '@/lib/db';
-import { testGeminiConnection } from '@/lib/gemini';
+import { testGeminiConnection, DEFAULT_TEXT_MODEL, DEFAULT_FALLBACK_MODEL } from '@/lib/gemini';
 import { getCurrentUser, withTenantContext } from '@/lib/auth';
 import { isNewSecret, maskSecret } from '@/lib/secret-values';
 import {
@@ -50,8 +50,9 @@ export const GET = withTenantContext(async (request, _context, user) => {
         gemini_api_tier: await getSetting('gemini_api_tier') || 'paid',
         gemini_context_caching: await getSetting('gemini_context_caching') || 'on',
         gemini_smart_routing: await getSetting('gemini_smart_routing') || 'on',
-        gemini_model_primary: await getSetting('gemini_model_primary') || 'gemini-3.7-flash',
-        gemini_model_fallback: await getSetting('gemini_model_fallback') || 'gemini-3.6-flash',
+        gemini_model_primary: await getSetting('gemini_model_primary') || DEFAULT_TEXT_MODEL,
+        gemini_model_fallback: await getSetting('gemini_model_fallback') || DEFAULT_FALLBACK_MODEL,
+        gemini_model_light: (await getSetting('gemini_model_light', false)) ?? '',
         planner_scene_director: (await getSetting('planner_scene_director', false)) ?? EXPERIMENT_UNSET_DEFAULTS.planner_scene_director,
         metaphor_kit_engine: (await getSetting('metaphor_kit_engine', false)) ?? EXPERIMENT_UNSET_DEFAULTS.metaphor_kit_engine,
         start_frame_visual_qc: (await getSetting('start_frame_visual_qc', false)) ?? EXPERIMENT_UNSET_DEFAULTS.start_frame_visual_qc,
@@ -128,7 +129,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
       return NextResponse.json({ success: false, error: 'Hanya Admin tenant yang dapat mengelola credential.' }, { status: 403 });
     }
     const body = await request.json();
-    const { gemini_api_key, gemini_api_tier, gemini_context_caching, gemini_smart_routing, gemini_model_primary, gemini_model_fallback,
+    const { gemini_api_key, gemini_api_tier, gemini_context_caching, gemini_smart_routing, gemini_model_primary, gemini_model_fallback, gemini_model_light,
       google_client_id, google_client_secret,
       webhook_api_key, webhook_host, webhook_port, webhook_image_model, webhook_video_model,
       webhook_delay_enabled, webhook_delay_min, webhook_delay_max, webhook_t2i_pattern,
@@ -171,6 +172,9 @@ export const POST = withTenantContext(async (request, _context, user) => {
     }
     if (gemini_model_fallback !== undefined) {
       await setSetting('gemini_model_fallback', gemini_model_fallback);
+    }
+    if (gemini_model_light !== undefined) {
+      await setSetting('gemini_model_light', String(gemini_model_light ?? '').trim());
     }
     if (isNewSecret(minimax_api_key)) {
       await setSetting('minimax_api_key', minimax_api_key);
