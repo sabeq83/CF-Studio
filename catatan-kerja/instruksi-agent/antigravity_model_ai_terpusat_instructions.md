@@ -1,5 +1,7 @@
 # Instruksi Antigravity: Model AI Gemini Terpusat di Settings
 
+> **Pakai `antigravity_ai_terpusat_TERPADU.md` sebagai instruksi kerja.** Dokumen ini hanya referensi detail (bukti, nomor baris). Jika bertentangan, dokumen terpadu yang berlaku.
+
 ## Mandat
 
 Pengguna ingin **semua pilihan model Gemini mengikuti menu Settings** (per tenant), bukan daftar model yang tertanam di kode. Saat ini ada beberapa sumber pilihan model yang saling menimpa. Akibatnya model di Settings diabaikan untuk sebagian tugas, ada tugas yang memakai model yang sudah tidak ada, dan enrichment produk gagal tanpa model cadangan.

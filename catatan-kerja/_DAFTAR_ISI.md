@@ -44,7 +44,8 @@ Terakhir diperbarui: 17 November 2026
 | `antigravity_scraper_foto_produk_revisi_01.md` | Revisi 01 Scraper Foto Produk — 4 celah backend, kualitas crop, tombol Setujui & Ganti Foto |
 | `antigravity_hapus_instant_factory_sheets_autopilot_instructions.md` | Instruksi Antigravity — Hapus fitur Instant Factory & Sheets Autopilot (tabel DB dibiarkan, sambungan fitur aktif dibersihkan) |
 | `antigravity_mcp_tenant_default_instructions.md` | Instruksi Antigravity — MCP selalu kembali ke tenant default (switch tenant sementara, cf_reset_tenant, tenant terlihat di jawaban) |
-| `antigravity_model_ai_terpusat_instructions.md` | Instruksi Antigravity — Model AI Gemini terpusat di Settings (model ringan, rantai cadangan, MODEL_BUSY vs kuota) |
+| `antigravity_ai_terpusat_TERPADU.md` | **Instruksi terpadu (pakai ini)** — Model AI terpusat di Settings, ringkas, langsung dikerjakan di atas branch hapus Instant/Sheets |
+| `antigravity_model_ai_terpusat_instructions.md` | Referensi detail untuk instruksi terpadu AI terpusat (bukti, nomor baris) |
 | `antigravity_scraper_foto_produk_revisi_02.md` | Revisi 02 Scraper Foto Produk — bug fatal foto clean, deteksi 404, tenant MCP, galeri lengkap, rubrik picker |
 | `antigravity_analitik_mingguan_instructions.md` | Instruksi Antigravity: Analitik Performa Konten via Repliz |
 | `antigravity_finishing_pass_cek_ulang.md` | Instruksi Antigravity: Cek Ulang Plan Finishing Pass (setelah Revisi 01) |

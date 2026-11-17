@@ -2,6 +2,14 @@
 
 Tanggal: 17 November 2026. Tenant: `default_tenant`. Status: usulan, belum mengubah konfigurasi atau aplikasi.
 
+## Preferensi wardrobe pengguna — 17 November 2026
+
+Pengguna memilih model baju seperti pada video produk NutriBake yang diaudit: lengan panjang menutup lengan hingga pergelangan, manset rapi, kain polos linen atau katun dengan warna solid. Lengan tidak digulung. Warna dapat berganti antar-video sesuai palette brand, tetapi model dan warna pakaian harus konsisten sepanjang klip dalam satu video.
+
+Usulan implementasi: revisi VI NutriBake dari `forearms_exposed` dan deskripsi rolled sleeves menjadi `wrists_covered` dengan deskripsi lengan panjang serta fitted wrist cuffs. Selaraskan deskripsi wardrobe, prompt efektif, gambar acuan, dan QC di CFA, Auto Pipeline, kampanye produk, serta Multiplier. Hapus konflik dengan `required_negative_prompts` yang sekarang memuat `syari dress`; larangan tersebut perlu diganti dengan aturan framing tanpa wajah dan atribut busana yang memang tidak diinginkan agar tidak menolak model baju pilihan pengguna. Perubahan ini khusus identitas NutriBake; brand lain tetap mengikuti VI masing-masing.
+
+Ini menggantikan rekomendasi awal untuk mempertahankan rolled sleeves. Konfigurasi VI aktif belum diubah; perubahan dicatat sebagai keputusan desain dalam usulan.
+
 ## Kesimpulan
 
 Blueprint dapat memengaruhi hasil melalui deskripsi storyboard sumber, tetapi bukti yang ditemukan lebih kuat menunjuk pada identitas tangan yang tidak ditentukan di VI, variasi konfigurasi historis, dan generasi klip independen melalui pure T2V. Belum ada pembuktian visual terhadap klip yang dikeluhkan; warna kulit gelap atau keriput yang dilaporkan pengguna belum dicocokkan dengan video tertentu.
@@ -68,7 +76,7 @@ Stabilitas bukan hanya efek foto produk atau VI yang lebih rinci. Ada lapisan no
 
 ## Usulan prioritas
 
-1. **Perjelas subject VI terlebih dahulu.** Pisahkan deskripsi talent dari gaya kamera. Draf: “Same adult female baker aged 25–35 across all clips, light-to-medium warm beige skin tone, smooth natural skin with normal fine creases, slender fingers, short clean unpolished nails, no jewelry; hands and forearms only.” Ini pilihan casting untuk konsistensi brand, bukan penilaian warna kulit. Usia dan tone merupakan usulan untuk ditinjau pengguna. Pertahankan oatmeal rolled sleeves; jangan mencampurnya dengan aturan legacy lengan panjang hingga pergelangan.
+1. **Perjelas subject VI terlebih dahulu.** Pisahkan deskripsi talent dari gaya kamera. Draf: “Same adult female baker aged 25–35 across all clips, light-to-medium warm beige skin tone, smooth natural skin with normal fine creases, slender fingers, short clean unpolished nails, no jewelry; hands only, forearms fully covered by plain solid-color linen or cotton long sleeves with fitted wrist cuffs.” Ini pilihan casting untuk konsistensi brand, bukan penilaian warna kulit. Usia dan tone merupakan usulan untuk ditinjau pengguna. Model baju mengikuti preferensi pengguna: lengan panjang hingga pergelangan seperti video produk, dengan warna terkunci per-video dan dapat bervariasi antar-video; revisi VI agar tidak lagi meminta rolled sleeves.
 2. **Pisahkan warisan blueprint dari identitas brand.** Blueprint hanya mewariskan bahan, urutan aksi, teknik resep, pacing, dan struktur hook. VI mendominasi talent, pakaian, meja, pencahayaan, dan kamera. Saring atribut visual sumber yang bertentangan sebelum generasi.
 3. **Validasi setiap prompt sebelum dikirim ke renderer.** Pastikan anchor talent dan lingkungan wajib hadir konsisten pada semua klip yang menampilkan tangan. Tambahkan ulang blok VI secara deterministik; jangan hanya mengandalkan Gemini menyalin aturan. Jika VI gagal di-resolve, hentikan dengan pesan jelas, bukan melanjutkan fallback diam-diam.
 4. **Simpan snapshot VI dan versi per task.** Catat ID, versi, resolved subject, environment, negative prompts, dan mode visual. Retry memakai snapshot yang sama; perubahan VI diterapkan melalui regenerate eksplisit agar dapat diaudit.
