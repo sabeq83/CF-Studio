@@ -1,7 +1,7 @@
 # Instruksi Antigravity — Character Lock untuk Custom Storyboard (jalur CFA)
 
 > Tanggal: 17 November 2026 · Dicek terhadap `main` @ `1217eb6` (v2.50.1) · Prioritas: **tinggi** (syarat Week 2 PT GIM via CFA)
-> Ditulis oleh: Claude (review kode). Status: **belum dikerjakan** · Revisi terakhir: 17 Nov 2026 (prasyarat data siap, VI v3 ikut tersambung, catatan deploy Staging)
+> Ditulis oleh: Claude (review kode). Status: **SELESAI — dikerjakan Claude di v2.50.2 (lihat `catatan-kerja/laporan/LAPORAN_CHARACTER_LOCK_CUSTOM_STORYBOARD.md`); Antigravity tidak perlu mengerjakan** · Revisi terakhir: 17 Nov 2026 (prasyarat data siap, VI v3 ikut tersambung, catatan deploy Staging)
 > Rencana induk Claude: `implementation_plan.md` → "Temuan Tahap 3", opsi **C**
 > **Sebelum mulai:** arsipkan `implementation_plan.md` milik Claude yang sedang aktif ke `catatan-kerja/rencana/week2_ptgim_cfa_implementation_plan.md` (tambahkan ke `_DAFTAR_ISI.md`). Lalu buat `implementation_plan.md` baru untuk pekerjaan ini sesuai SOP (seksi `## Execution Task List` + Code Sebelum/Sesudah), dan perbarui centangnya selama bekerja.
 

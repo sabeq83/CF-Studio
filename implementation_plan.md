@@ -211,10 +211,10 @@ Instruksi: `catatan-kerja/instruksi-agent/antigravity_character_lock_custom_stor
 - [x] **5b.2** — Verifikasi pemanggil `buildOpcStartFrameRequest` memakai kampanye dari DB
 - [x] **5b.3** — Unit test `tests/custom-storyboard-character-lock.test.js` + regresi custom storyboard
 - [x] **5b.4** — `npm run build` (DISABLE_AUTO_MIGRATIONS=true)
-- [ ] **5b.5** — Rilis patch (release-non-interactive) + push
-- [ ] **5b.6** — Deploy Dev atomic → verifikasi
-- [ ] **5b.7** — Deploy Staging atomic (di luar jam 12:05–12:30 & tanpa produksi berjalan) → verifikasi
-- [ ] **5b.8** — Uji nyata Staging: log `[CharacterLock Async] … refs=1` + laporan
+- [x] **5b.5** — Rilis patch v2.50.2 (`7ef02a6`, tag `v2.50.2`) + push ke GitHub (17 Nov)
+- [x] **5b.6** — Deploy Dev atomic → verifikasi (release `20261117T025317Z-7ef02a6b2bd0`, UI 5020 = 200, API 7020 `/health` = 200, PM2 online)
+- [x] **5b.7** — Deploy Staging atomic 09:58 WIB (release `20261117T025550Z-7ef02a6b2bd0`; antrean kosong, 0 item CFA diproduksi). Verifikasi: `current` → rilis baru, UI 5010 = 200, API 7010 `/health` = 200, PM2 ui/api/mcp online dengan `pm_cwd` rilis baru, `PG_SEARCH_PATH=staging`, `PGPOOL_MAX=3`
+- [x] **5b.8** — Uji nyata Staging lolos: `cst_24aa4768bccb` (item #2226) → `[CharacterLock Async] Clip 1 & 2: characters=reno_thermal_engineer refs=1`, `model=nano_banana_pro`; latar ikut adegan. Laporan: `catatan-kerja/laporan/LAPORAN_CHARACTER_LOCK_CUSTOM_STORYBOARD.md`
 
 ### Tahap 6 — Go-live Week 2
 
@@ -269,8 +269,8 @@ Instruksi: `catatan-kerja/instruksi-agent/antigravity_character_lock_custom_stor
 - [x] **3e.3** — Disambungkan ke VI v4 Reno & Maya (`subject.universe_profile_id`, `universe_slug`, `character_keys`), VI versi 2 (17 Nov).
 - [x] **3e.3b** — Atas persetujuan pengguna, VI v3 (Editorial) juga disambungkan → versi 4 (17 Nov). Cadangan: `catatan-kerja/arsip-keluaran/backup_vi_v3_ptgim_20261117.json`. Efek: kampanye Editorial baru masuk `content_world = cartoon_universe` (`lib/pillar-campaign-ingest.js:179, 277`) dengan Character Lock aktif. Dua jadwal Editorial Thermal aktif (generate 12:05 & 12:20 WIB, 17 Nov) menjadi uji nyata pertama.
 - ⚠️ **Risiko:** gambar acuan berlatar pabrik (Reno) dan kantor (Maya). Model start frame bisa ikut meniru latar itu sehingga latar kurang bervariasi. Dinilai di Tahap 4; jika terjadi, buat lembar karakter berlatar polos.
-- [ ] **3e.4** — Cek di kode apakah jalur CFA edukasi melewati Character Lock (baca saja)
-- [ ] **3e.5** — Bila tidak, bahas cadangan dengan pengguna (jenis pengiriman lain / tambah ke instruksi Antigravity)
+- [x] **3e.4** — Jalur CFA edukasi tidak melewati Character Lock → diperbaiki di v2.50.2 (opsi C)
+- [x] **3e.5** — Dikerjakan langsung oleh Claude (Antigravity error), terbukti di Staging
 
 ### Tahap 4 — Video uji
 - [ ] **4.1** — Buat 4 item uji (T4, T5, A1, A6)
