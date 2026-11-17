@@ -19,7 +19,14 @@
 - Satu pesan uji (berlabel UJI) terkirim ke Telegram dan tercatat di log.
 - Putaran publish asli pertama (12:00) akan mengirim kabar "sudah tayang" untuk video 16–17 Nov yang slotnya kurang dari 24 jam lalu. Video yang lebih lama diperbarui tanpa notifikasi.
 
-**Tertunda: link Instagram (bagian 6 no. 1, langkah 0).** Uji fitur Get Content Repliz memerlukan kunci Repliz yang tersimpan di database CF Studio. Akses membaca database itu ditolak oleh pengaman sistem Claude, sehingga uji belum dijalankan. Sementara ini notifikasi menampilkan "📸 Instagram ✓ (link menyusul)". Isi `publish.instagram_username` di jalur/brand untuk menampilkan link halaman Reels akun.
+**Link Instagram SELESAI (17 Nov 2026, v2.50.3, sudah di Staging):**
+- Langkah 0 terbukti, setelah pengguna mengizinkan pembacaan kunci Repliz (schema `staging`, karena CFA memakai CF Studio Staging port 5010). Repliz Get Content mengembalikan link shortcode resmi, contohnya `instagram.com/p/Df0ukAtnJO2`, yang terbuka ke Reels NutriBake ID yang benar. **Tidak perlu menyambungkan Meta** (langkah 1–2 dibatalkan).
+- CF Studio (`lib/publishing-worker.js` + `lib/repliz-client.js`): setelah job Instagram tayang lewat Repliz, link resmi diambil dari Repliz. Kalau gagal, link lama tetap dipakai dan job tidak gagal.
+- Rilis v2.50.3 (commit `c0b5516`) sudah di-deploy ke Staging (release `20261117T034026Z-c0b55162947d`, UI 200, `/health` 200, PM2 online). Skrip backfill diperbaiki di commit `fa2586e`.
+- Backfill Staging `default_tenant`: **145 dari 147** link Instagram lama diperbaiki di `publishing_jobs` dan `content_flow_items`. Dua sisanya ditolak Instagram ("object does not exist"), kemungkinan post sudah dihapus.
+- Notifikasi CFA kini menampilkan link Instagram asli. Link cadangan "(link menyusul)" tetap ada sebagai pengaman.
+- **Belum:** Production (port 5000, schema `public`) belum di-deploy dan belum di-backfill. Ini hanya dilakukan atas instruksi eksplisit pengguna. CFA tidak bergantung pada Production.
+- Temuan sampingan: kolom `external_post_id` job Repliz selalu kosong, karena ID post tidak tersimpan oleh `markPublishingResult`. Backfill mengambil ID dari link lama. Perlu dicek terpisah.
 > Berlaku untuk: CF Autopipeline di Mac Mini (`masbenu@100.95.245.55`, folder `~/cf-autopipeline`). Skripnya ada di Mac Mini, bukan di repo CF Studio.
 > Disusun oleh: Claude (reviewer/planner) · Eksekutor: Antigravity, setelah disetujui pengguna
 
