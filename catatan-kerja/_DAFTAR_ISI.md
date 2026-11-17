@@ -6,6 +6,8 @@ Terakhir diperbarui: 17 November 2026
 
 | Nama File | Ringkasan / Judul |
 |---|---|
+| `USULAN_KONSISTENSI_VI_MULTIPLIER_NUTRIBAKE.md` | Analisis tenant default: identitas tangan, pengaruh blueprint, dan usulan penguncian VI Multiplier NutriBake |
+| `USULAN_VI_NUTRIBAKE_V5_BAKU_CFA.md` | Usulan VI NutriBake v5: membakukan tampilan video CFA (lengan panjang, palette warna, deskripsi tangan) ke Visual Identity |
 | `ANALISA_TENANT_MCP_MACMINI.md` | Analisa: Preset "tidak ditemukan" saat CF Autopipeline dijalankan dari Mac Mini |
 | `USULAN_ANALITIK_MINGGUAN_CFA.md` | Usulan: Analitik & Laporan Mingguan + Rencana Konten Pekan Depan |
 | `USULAN_AUDIT_TEMPLATE_FINISHING_GENERAL.md` | Usulan: Template Finishing Lebih General, Lebih Bersih |
@@ -40,6 +42,10 @@ Terakhir diperbarui: 17 November 2026
 | `antigravity_agent_instructions.md` | Instruksi Agent AI Antigravity — Implementasi Deconstruct URL Library |
 | `antigravity_scraper_foto_produk_instructions.md` | Instruksi Antigravity — Perbaikan Scraper Foto Produk (pilih foto produk saja, tanpa orang) |
 | `antigravity_scraper_foto_produk_revisi_01.md` | Revisi 01 Scraper Foto Produk — 4 celah backend, kualitas crop, tombol Setujui & Ganti Foto |
+| `antigravity_hapus_instant_factory_sheets_autopilot_instructions.md` | Instruksi Antigravity — Hapus fitur Instant Factory & Sheets Autopilot (tabel DB dibiarkan, sambungan fitur aktif dibersihkan) |
+| `antigravity_mcp_tenant_default_instructions.md` | Instruksi Antigravity — MCP selalu kembali ke tenant default (switch tenant sementara, cf_reset_tenant, tenant terlihat di jawaban) |
+| `antigravity_ai_terpusat_TERPADU.md` | **Instruksi terpadu (pakai ini)** — Model AI terpusat di Settings, ringkas, langsung dikerjakan di atas branch hapus Instant/Sheets |
+| `antigravity_model_ai_terpusat_instructions.md` | Referensi detail untuk instruksi terpadu AI terpusat (bukti, nomor baris) |
 | `antigravity_scraper_foto_produk_revisi_02.md` | Revisi 02 Scraper Foto Produk — bug fatal foto clean, deteksi 404, tenant MCP, galeri lengkap, rubrik picker |
 | `antigravity_analitik_mingguan_instructions.md` | Instruksi Antigravity: Analitik Performa Konten via Repliz |
 | `antigravity_finishing_pass_cek_ulang.md` | Instruksi Antigravity: Cek Ulang Plan Finishing Pass (setelah Revisi 01) |
@@ -99,6 +105,7 @@ Terakhir diperbarui: 17 November 2026
 | `LAPORAN_KARTU_MENU_DAN_PERAPIAN_FOLDER.md` | Laporan Pelaksanaan: Kartu Menu & Perapian Folder Proyek |
 | `LAPORAN_PERBAIKAN_SCRAPER_FOTO_PRODUK.md` | Laporan Resmi: Perbaikan Scraper Foto Produk E-Commerce (Pilih Foto Bersih) |
 | `LAPORAN_RILIS_DAN_DEPLOY_SCRAPER_FOTO_PRODUK.md` | Laporan Resmi Rilis, Deployment, & Verifikasi End-to-End Scraper Foto Produk |
+| `LAPORAN_HAPUS_INSTANT_FACTORY_SHEETS_AUTOPILOT.md` | Laporan Pelaksanaan: Penghapusan Fitur Instant Factory & Sheets Autopilot (Dev 5020) |
 | `RISET_KATA_KUNCI_PTGIM_W2.md` | Riset Kata Kunci Week 2 Solusi Thermal ID & Ruang Akustik ID (43 + 43, per kelompok latar) |
 | `maknagrid_published_facebook_videos.md` | Maknagrid Published Facebook Video IDs |
 

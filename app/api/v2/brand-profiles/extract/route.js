@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { executeWithKeyPool } from '@/lib/gemini';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { executeWithKeyPool, createResilientGeminiModel, resolveModelChain, runWithGeminiTrace } from '@/lib/gemini';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
@@ -59,19 +58,25 @@ Jika suatu field tidak ditemukan secara eksplisit dalam dokumen, buatlah interpr
   "brand_slogan_or_cta": "Slogan atau CTA utama brand (jika ada)"
 }`;
 
-    const responseText = await executeWithKeyPool(1, async (apiKey) => {
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({
-        model: 'gemini-2.5-flash',
-        generationConfig: {
-          temperature: 0.3,
-          maxOutputTokens: 4096,
-          responseMimeType: 'application/json',
-        }
-      });
-      const result = await model.generateContent(extractionPrompt);
-      return result.response.text();
-    });
+    const resolved = await resolveModelChain({ role: 'light', taskType: 'BRAND_EXTRACTION' });
+    const responseText = await runWithGeminiTrace({ stage: 'brand_extraction' }, () =>
+      executeWithKeyPool(1, async (apiKey) => {
+        const { model } = await createResilientGeminiModel({
+          apiKey,
+          role: 'light',
+          taskType: 'BRAND_EXTRACTION',
+          modelName: resolved.model,
+          generationConfig: {
+            temperature: 0.3,
+            maxOutputTokens: 4096,
+            responseMimeType: 'application/json',
+          },
+          isExplicitKey: true
+        });
+        const result = await model.generateContent(extractionPrompt);
+        return result.response.text();
+      }, { modelName: resolved.model, role: 'light', taskType: 'BRAND_EXTRACTION' })
+    );
 
     let extracted;
     try {

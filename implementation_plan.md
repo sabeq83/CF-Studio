@@ -1,317 +1,157 @@
-# Implementation Plan — Hotfix Scraper Foto Produk (Revisi 02 Bagian A)
+# Implementation Plan: Model AI Terpusat di Settings
 
-Tanggal: 17 November 2026 · Branch: `hotfix/scraper-foto-r02` · Basis: `main` (`8370981`)
-Dokumen Panduan: [antigravity_scraper_foto_produk_revisi_02.md](file:///Users/sabeqmmursyid/_cfstudio/catatan-kerja/instruksi-agent/antigravity_scraper_foto_produk_revisi_02.md)
+> Referensi tugas: [antigravity_ai_terpusat_TERPADU.md](file:///Users/sabeqmmursyid/_cfstudio/catatan-kerja/instruksi-agent/antigravity_ai_terpusat_TERPADU.md) & [antigravity_model_ai_terpusat_instructions.md](file:///Users/sabeqmmursyid/_cfstudio/catatan-kerja/instruksi-agent/antigravity_model_ai_terpusat_instructions.md)  
+> Branch aktif: `fitur/model-ai-terpusat` (dibuat dari `fitur/hapus-instant-sheets` @ `e731b1f`)
 
----
+## Ringkasan Tujuan
 
-## 1. Ringkasan Tujuan
-
-Menyelesaikan perbaikan bug pada scraper foto produk di server Staging (S1–S4):
-- **S1 (FATAL)**: Memperbaiki `ReferenceError: processCleanInputPath is not defined` yang menyebabkan crop dan penghapusan latar belakang selalu gagal pada produk baru sejak v2.49.2. Mengintegrasikan kembali pipeline foto ke `processProductPhotoFromRaw()` serta menggabungkan seluruh alasan ke `photo_error` di `decidePhotoStatus()`.
-- **S2**: Mengembalikan HTTP status dari Playwright, mendeteksi halaman 404/produk tidak ditemukan dengan fungsi murni `detectNotFoundPage()`, menolak fallback AI Search Grounding jika halaman 404, tidak menyimpan produk 404 ke database, menambahkan ringkasan status job (`status_summary`), membuat endpoint `GET /api/v2/products/scrape/jobs/[jobId]`, dan menyediakan tool MCP `cf_get_scrape_status`.
-- **S3**: Memvalidasi URL kandidat gambar (menolak domain-only seperti `https://images.tokopedia.net` tanpa path gambar yang sah) serta men-decode entitas HTML (`&amp;` -> `&`) pada URL regex.
-- **S4**: Menyertakan `tenant_id: getActiveTenantId()` pada seluruh payload `createJob('product_scraper', ...)` dan `createJob('product_photo_replace', ...)`, serta memastikan query produk lama dibatasi pada tenant aktif (`WHERE tenant_id = ?`).
+1. Memusatkan seluruh pemanggilan Gemini teks & vision ke pengaturan tenant (`Settings`), tanpa penimpaan diam-diam ke model yang sudah mati (`gemini-1.5-flash-8b`, `gemini-1.5-flash`).
+2. Menyediakan satu fungsi pemilih terpusat `resolveModelChain({ role, taskType, modelOverride })` dengan 3 peran (`primary`, `light`, `vision`) serta key settings baru `gemini_model_light`.
+3. Memastikan setiap pemanggilan memakai rantai cadangan (`makeModelResilient` / `generateContentFlexible` / loop REST) tanpa duplikat dan membedakan `MODEL_BUSY` (503) dari `QUOTA_EXHAUSTED` (429 harian).
+4. Mencatat kuota pool key sesuai model aktual yang dipanggil, bukan model utama tenant secara membabi buta.
+5. Menyediakan mockup HTML Settings (`public/mockup_settings_model_ai.html`) untuk review pengguna sebelum mengubah UI React `app/settings/page.js`.
 
 ---
 
-## 2. Before & After Code Snippets
+## Execution Task List
 
-### 2.1. `lib/scheduler-processors.js` (S1, S2, S4)
-
-#### Sebelum (Current/Before):
-```javascript
-// Baris ~10420
-const allProducts = await db.prepare('SELECT id, input_source, source_url, raw_photo_url, cleaned_photo_url, generated_photo_url, unique_selling_point, packaging_type, scraped_image_url, raw_description, t2i_prompt, i2v_action_prompt, product_name FROM product_extractions').all();
-
-// ... di dalam loop produk (baris ~10645)
-    let localPhotoPath = null;
-    let rawPhotoPath = null;
-    let cleanPhotoPath = null;
-    let generatedPhotoPath = null;
-
-// Baris ~10748, 10751, 10756, 10760, 10779 (processCleanInputPath tidak dideklarasikan)
-    processCleanInputPath = cropAbsPath;
-...
-    const cleanInputAbsPath = processCleanInputPath || path.join(process.cwd(), 'public', rawPhotoPath);
-
-// Baris ~10998
-  return {
-    processed: true,
-    results,
-    errors: Object.keys(scrapeErrors).length > 0 ? scrapeErrors : undefined
-  };
-```
-
-#### Sesudah (Proposed/After):
-```javascript
-// Filter tenant aktif
-const activeTenant = getActiveTenantId();
-const allProducts = await db.prepare('SELECT id, input_source, source_url, raw_photo_url, cleaned_photo_url, generated_photo_url, unique_selling_point, packaging_type, scraped_image_url, raw_description, t2i_prompt, i2v_action_prompt, product_name FROM product_extractions WHERE tenant_id = ?').all(activeTenant);
-
-// ... deklarasikan processCleanInputPath di awal loop
-    let localPhotoPath = null;
-    let rawPhotoPath = null;
-    let cleanPhotoPath = null;
-    let generatedPhotoPath = null;
-    let processCleanInputPath = null;
-
-// Integrasi aman dengan fallback path dan penanganan error terisolasi
-// S2: Deteksi error 404 agar tidak disimpan ke database
-// S2: Ringkasan status job
-  const totalUrls = urlList.length;
-  const successCount = results.length;
-  const errorCount = Object.keys(scrapeErrors).length;
-  let statusSummary = 'ok';
-  if (successCount === 0 && errorCount > 0) {
-    statusSummary = 'failed';
-  } else if (errorCount > 0) {
-    statusSummary = 'partial';
-  }
-
-  return {
-    processed: true,
-    results,
-    errors: Object.keys(scrapeErrors).length > 0 ? scrapeErrors : undefined,
-    status_summary: statusSummary
-  };
-```
+- [x] **Langkah 0**: Amankan perubahan di `fitur/hapus-instant-sheets` (`e731b1f`) dan buat branch `fitur/model-ai-terpusat`.
+- [x] **Audit Awal**: Inventarisasi pemanggil Gemini di `lib/` & `app/` serta verifikasi bukti error `gemini-1.5-flash-8b` pada tenant `tnt_mas-ibnu_e0eb25` di `staging.product_extractions`.
+- [x] **Mockup HTML UI Settings**: Buat `public/mockup_settings_model_ai.html` dengan semantic CSS tokens (Light & Dark mode).
+- [x] **Langkah 1 (`lib/gemini.js`)**: Implementasi `KNOWN_GEMINI_MODELS`, `DEFAULT_TEXT_MODEL`, `resolveModelChain`, pembersihan `MODULE_MODEL_MATRIX` & cascade dari model mati, pembaruan `resolveModelForTask`, `getResolvedGeminiModels` (termasuk string arg `'compliance_audit'`), `resolveStartFrameQcModel`, dan `generateWithImages`.
+- [x] **Langkah 2 & 3 (Pemanggil & Pencatatan Kuota/`MODEL_BUSY`)**: Perbarui `makeModelResilient`, `executeContentGeneration`, `executeWithKeyPool`, `lib/product-bulk-worker.js`, `app/api/v2/products/[id]/route.js`, `app/api/v2/brand-profiles/extract/route.js`, `lib/threads-series-generator.js`, `lib/re-recomm-engine.js`, `lib/universe-ai-builder.js`, `lib/visual-identity-ai-builder.js`, `lib/universe-ai-repository.js`, `lib/tenant-admin.js`, `lib/scheduler-processors.js`, `app/api/keys/route.js`, `lib/db.js`, dan `app/api/settings/route.js`.
+- [x] **Langkah 5a (Tes Otomatis)**: Tambah `tests/gemini-model-resolver.test.js` (termasuk penjaga `git grep` literal `gemini-<angka>`).
+- [x] **Langkah 5b (Skrip Dry-Run)**: Buat `scripts/report-effective-gemini-models.mjs` (`--schema dev|staging`, read-only) untuk tabel model sebelum vs sesudah per tenant.
+- [x] **Langkah 5c (Verifikasi & Deploy Dev)**: Jalankan semua tes + `npm run build`, deploy ke Dev (`5020`/`7020`), uji enrichment nyata & ubah model di Dev untuk verifikasi `[GEMINI_CALL]`, serta pasang UI Settings & rilis ke Staging sesuai persetujuan pengguna.
 
 ---
 
-### 2.2. `lib/product-photo-picker.js` (S1 & S3)
+## Rencana Perubahan Kode (Before & After Snippets)
 
-#### Sebelum (Current/Before):
+### 1. [lib/gemini.js](file:///Users/sabeqmmursyid/_cfstudio/lib/gemini.js)
+
+**Code Sebelum (Current/Before):**
 ```javascript
-export function decidePhotoStatus({
-  pickerNeedsReview = false,
-  pickerReason = null,
-  selectedCandidate = null,
-  finalCheck = null,
-  bgError = false,
-  hasNewPhoto = false
-} = {}) {
-  // 1. Jika picker menandai review (apapun alasannya), SELALU needs_review
-  if (pickerNeedsReview) {
-    return {
-      status: 'needs_review',
-      error: pickerReason || 'foto memuat orang/teks'
-    };
-  }
+export const GEMINI_CASCADE_ORDER_PAID = [
+  'gemini-2.5-flash',
+  'gemini-3.6-flash',
+  'gemini-3.5-flash',
+  'gemini-3.7-flash',
+  'gemini-3.8-flash',
+  'gemini-1.5-flash',
+  'gemini-1.5-flash-8b',
+  'gemini-flash-latest'
+];
 
-  // 2. Jika penghapusan latar belakang gagal
-  if (bgError) {
-    return {
-      status: 'needs_review',
-      error: 'hapus latar belakang gagal'
-    };
-  }
-...
+export const MODULE_MODEL_MATRIX = {
+  SCRAPER: { paid: 'gemini-1.5-flash-8b', free: 'gemini-3.6-flash', useKB: false },
+  ...
+};
 ```
 
-#### Sesudah (Proposed/After):
+**Code Sesudah (Proposed/After):**
 ```javascript
-export function decidePhotoStatus({
-  pickerNeedsReview = false,
-  pickerReason = null,
-  selectedCandidate = null,
-  finalCheck = null,
-  bgError = false,
-  hasNewPhoto = false
-} = {}) {
-  const reasons = [];
+export const DEFAULT_TEXT_MODEL = 'gemini-3.6-flash';
+export const DEFAULT_FALLBACK_MODEL = 'gemini-3.6-flash';
+export const KNOWN_GEMINI_MODELS = [
+  'gemini-3.6-flash',
+  'gemini-3.8-flash',
+  'gemini-3.7-flash',
+  'gemini-3.5-flash',
+  'gemini-3.5-flash-lite',
+  'gemini-3.1-flash-lite',
+  'gemini-2.5-flash',
+  'gemini-2.5-flash-lite',
+  'gemini-flash-latest'
+];
 
-  if (pickerNeedsReview) {
-    reasons.push(pickerReason || 'foto memuat orang/teks');
-  }
+export const MODULE_MODEL_MATRIX = {
+  SCRAPER: { role: 'light', useKB: false },
+  PRODUCT_ENRICHMENT: { role: 'light', useKB: false },
+  OCR_EXTRACTION: { role: 'light', useKB: false },
+  BRAND_EXTRACTION: { role: 'light', useKB: false },
+  COMPLIANCE: { role: 'light', useKB: false },
+  DECONSTRUCT: { role: 'light', useKB: false },
+  START_FRAME_QC: { role: 'vision', useKB: false },
+  CAMPAIGN_PLANNER: { role: 'primary', useKB: true },
+  ...
+};
 
-  if (bgError) {
-    reasons.push('hapus latar belakang gagal');
-  }
-
-  if (hasNewPhoto && !finalCheck) {
-    reasons.push('pemeriksaan akhir foto tidak berjalan');
-  } else if (finalCheck?.error) {
-    reasons.push('pemeriksaan foto gagal');
-  } else if (finalCheck && (finalCheck.has_person || finalCheck.has_heavy_text)) {
-    reasons.push('foto memuat orang/teks');
-  }
-
-  if (selectedCandidate?.has_person) {
-    reasons.push('foto mentah memuat orang/model');
-  }
-
-  if (selectedCandidate?.product_visible === false) {
-    reasons.push('foto mentah tidak memuat produk utuh');
-  }
-
-  if (reasons.length > 0) {
-    // Deduping reasons
-    const uniqueReasons = [...new Set(reasons)];
-    return {
-      status: 'needs_review',
-      error: uniqueReasons.join('; ')
-    };
-  }
-
-  return {
-    status: 'approved',
-    error: null
-  };
+export async function resolveModelChain({ role = null, taskType = null, modelOverride = null, explicitTier = null } = {}) {
+  // Membaca gemini_api_tier, gemini_smart_routing, gemini_model_primary,
+  // gemini_model_fallback, gemini_model_light, start_frame_visual_qc_model
+  // dan mengembalikan { model, chain, role, useKB, tier, primaryModel, fallbackModel, lightModel }
 }
 ```
 
----
+### 2. Error `MODEL_BUSY` vs `QUOTA_EXHAUSTED` & Tracking Pool Model di [lib/gemini.js](file:///Users/sabeqmmursyid/_cfstudio/lib/gemini.js)
 
-### 2.3. `lib/url-scraper.js` & `lib/playwright-scraper.js` (S2 & S3)
-
-#### Sebelum (Current/Before):
+**Code Sebelum (Current/Before):**
 ```javascript
-// playwright-scraper.js
-await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
-...
-return { title, html, bodyText, images };
+// makeModelResilient & executeContentGeneration akhir loop:
+throw new Error(`QUOTA_EXHAUSTED: Semua model Gemini tidak tersedia setelah ${MAX_WATERFALL_CYCLES} putaran. Error terakhir: ${baseMsg}`);
 
-// url-scraper.js
-  const addCandidate = (imgUrl, { w = 0, h = 0, alt = '', source = 'regex' } = {}) => {
-    if (!imgUrl || typeof imgUrl !== 'string') return;
-    const cleanUrl = imgUrl.replace(/\\/g, '').replace(/[.,;:]$/, '').trim();
-    if (!cleanUrl.startsWith('http')) return;
+// executeWithKeyPool akhir loop:
+throw new Error('QUOTA_EXHAUSTED: Semua API Key yang dicoba dalam pool gagal karena rate limit atau high demand.');
 ```
 
-#### Sesudah (Proposed/After):
+**Code Sesudah (Proposed/After):**
 ```javascript
-// playwright-scraper.js
-const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
-const httpStatus = response ? response.status() : 200;
-...
-return { title, html, bodyText, images, httpStatus };
-
-// url-scraper.js
-export function isValidProductImageUrl(url) {
-  if (!url || typeof url !== 'string') return false;
-  try {
-    const parsed = new URL(url);
-    const pathname = (parsed.pathname || '').toLowerCase();
-    if (!pathname || pathname === '/' || pathname === '') return false;
-    const hasImageExt = /\.(?:jpg|jpeg|png|webp|avif)(?:[?#]|$)/i.test(pathname);
-    const hasPattern = pathname.includes('~tplv-') || pathname.includes('/img/');
-    return hasImageExt || hasPattern;
-  } catch (_) {
-    return false;
-  }
+// Membedakan 503/high demand/overloaded dari 429 kuota harian:
+if (allFailuresWereBusy503) {
+  const err = new Error(`MODEL_BUSY (dapat diulang): model ${lastTriedModel} sedang sibuk`);
+  err.code = 'MODEL_BUSY';
+  err.retryable = true;
+  err.status = 503;
+  err.geminiModel = lastTriedModel;
+  throw err;
 }
-
-export function detectNotFoundPage({ httpStatus = 200, title = '', bodyText = '', html = '' } = {}) {
-  if (httpStatus === 404 || httpStatus === 410) {
-    return { notFound: true, reason: `HTTP status ${httpStatus}` };
-  }
-  const text = `${title} ${bodyText} ${html}`.toLowerCase();
-  const notFoundPatterns = [
-    'tujuanmu nggak ada',
-    'halaman tidak ditemukan',
-    'produk tidak ditemukan',
-    'produk ini tidak tersedia',
-    'page not found',
-    'produk ini tidak ada'
-  ];
-  for (const pattern of notFoundPatterns) {
-    if (text.includes(pattern)) {
-      return { notFound: true, reason: `Teks "${pattern}" terdeteksi di halaman` };
-    }
-  }
-
-  // Cek jika halaman tidak memiliki harga DAN tidak memiliki tanda detail produk
-  const hasPrice = /(?:rp|idr)\s*[\d.,]+/i.test(text);
-  const hasDetailMarker = /(?:detail produk|spesifikasi|deskripsi produk|informasi produk)/i.test(text);
-  if (!hasPrice && !hasDetailMarker && text.length < 500) {
-    return { notFound: true, reason: 'Halaman kosong tanpa indikator harga maupun detail produk' };
-  }
-
-  return { notFound: false, reason: null };
-}
-
-// Di parseHtml:
-const decodedUrl = imgUrl.replace(/&amp;/g, '&');
-if (!isValidProductImageUrl(decodedUrl)) return;
 ```
 
----
+### 3. [lib/product-bulk-worker.js](file:///Users/sabeqmmursyid/_cfstudio/lib/product-bulk-worker.js) & [app/api/v2/products/[id]/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/products/%5Bid%5D/route.js)
 
-### 2.4. `app/api/v2/products/scrape/route.js` & `app/api/v2/products/[id]/photo-replace/route.js` (S4)
-
-#### Sebelum (Current/Before):
+**Code Sebelum (Current/Before):**
 ```javascript
-// scrape/route.js:
-const allProducts = await db.prepare('SELECT id, input_source, source_url...').all();
-...
-const created = await createJob('product_scraper', { 
-  urls: chunk, 
-  category, 
-  tags, 
-  url_affiliates_map: urlAffiliatesMap, 
-  repair_mode,
-  refresh_photo: Boolean(refresh_photo),
-  reserved_ids: reservedIds
-});
+    const rawResponse = await executeWithKeyPool(1, async (apiKey) => {
+      const { GoogleGenerativeAI } = await import('@google/generative-ai');
+      const { getResolvedGeminiModels } = await import('./gemini.js');
+      const { resolvedPrimary } = await getResolvedGeminiModels({ taskType: 'SCRAPER' });
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({
+        model: resolvedPrimary,
+        generationConfig: { responseMimeType: 'application/json', temperature: 0.7 }
+      });
+      const result = await model.generateContent([{ text: prompt }]);
+      return result.response.text();
+    });
 ```
 
-#### Sesudah (Proposed/After):
+**Code Sesudah (Proposed/After):**
 ```javascript
-// scrape/route.js:
-const activeTenant = getActiveTenantId();
-const allProducts = await db.prepare('SELECT id, input_source, source_url, raw_photo_url, cleaned_photo_url, generated_photo_url, unique_selling_point, packaging_type FROM product_extractions WHERE tenant_id = ?').all(activeTenant);
-...
-const created = await createJob('product_scraper', { 
-  tenant_id: activeTenant,
-  urls: chunk, 
-  category, 
-  tags, 
-  url_affiliates_map: urlAffiliatesMap, 
-  repair_mode,
-  refresh_photo: Boolean(refresh_photo),
-  reserved_ids: reservedIds
-});
+    const resolved = await resolveModelChain({ role: 'light', taskType: 'PRODUCT_ENRICHMENT' });
+    const rawResponse = await runWithGeminiTrace({ stage: 'product_enrichment', item_id: id }, () =>
+      executeWithKeyPool(1, async (apiKey) => {
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({
+          model: resolved.model,
+          generationConfig: { responseMimeType: 'application/json', temperature: 0.7 }
+        });
+        const resilientModel = makeModelResilient(model, apiKey, resolved.model, true, null, {
+          role: 'light',
+          taskType: 'PRODUCT_ENRICHMENT'
+        });
+        const result = await resilientModel.generateContent([{ text: prompt }]);
+        return result.response.text();
+      }, { modelName: resolved.model })
+    );
 ```
+Serta pada `GET /api/v2/products/[id]` dan helper produk, menambahkan field terhitung `enrichment_retryable` yang bernilai `true` untuk `MODEL_BUSY` dan `QUOTA_EXHAUSTED` / 503 / 429.
 
----
-
-## ## Execution Task List
-
-- [x] **Task 1: Perbaikan S1 (Fatal processCleanInputPath is not defined & multi-reason decidePhotoStatus)**
-  - [x] Deklarasikan `let processCleanInputPath = null;` di awal per-product loop `lib/scheduler-processors.js`
-  - [x] Integrasikan kembali alur foto produk ke fungsi yang terisolasi dan aman (`processProductPhotoFromRaw`)
-  - [x] Perbarui `decidePhotoStatus()` di `lib/product-photo-picker.js` agar menggabungkan semua alasan ke `photo_error`
-  - [x] Buat unit test alur pemrosesan foto end-to-end dengan mock di `tests/product-photo-flow.test.js`
-
-- [x] **Task 2: Perbaikan S2 (Deteksi 404 & Scraping Job Status)**
-  - [x] Kembalikan `httpStatus` di `lib/playwright-scraper.js`
-  - [x] Buat fungsi murni `detectNotFoundPage` di `lib/url-scraper.js`
-  - [x] Tolak AI Search Grounding fallback jika `PRODUCT_NOT_FOUND`
-  - [x] Lewati penyimpanan database di `processProductScraper` untuk URL 404 dan catat ke `errors`
-  - [x] Tambahkan `status_summary` (`failed`, `partial`, `ok`) pada hasil job
-  - [x] Buat endpoint route `app/api/v2/products/scrape/jobs/[jobId]/route.js`
-  - [x] Daftarkan tool MCP `cf_get_scrape_status` di `apps/mcp/tools.mjs`
-  - [x] Tambahkan fixture `tests/fixtures/tokopedia_404_2026.html` dan unit test di `tests/url-scraper-not-found.test.js`
-  - [x] Buat skrip dry-run `scripts/flag-not-found-products.mjs`
-
-- [x] **Task 3: Perbaikan S3 (Validasi URL Kandidat & Decode Entitas HTML)**
-  - [x] Tambahkan `isValidProductImageUrl` di `lib/url-scraper.js` (tolak URL domain-only dan non-image)
-  - [x] Terapkan decode `&amp;` -> `&` pada URL hasil regex
-  - [x] Terapkan validasi `isValidProductImageUrl` di `pickBestProductPhoto` dan cadangan ekstraksi
-  - [x] Buat unit test validasi URL di `tests/url-scraper-tokopedia-images.test.js`
-
-- [x] **Task 4: Perbaikan S4 (Tenant Sesi MCP Sampai ke Job & Tenant-Scoped Isolation)**
-  - [x] Tambahkan `tenant_id: getActiveTenantId()` di route `app/api/v2/products/scrape/route.js`
-  - [x] Tambahkan `tenant_id: getActiveTenantId()` di seluruh `createJob` pada `app/api/v2/products/[id]/photo-replace/route.js`
-  - [x] Batasi pencarian produk eksisting di route dan di `processProductScraper` dengan `WHERE tenant_id = ?`
-  - [x] Pastikan `createProductExtraction` menyimpan `tenant_id` dari konteks job
-  - [x] Buat skrip dry-run `scripts/move-product-tenant.mjs`
-  - [x] Tambahkan unit test isolasi tenant scraper di `tests/product-scraper-tenant.test.js`
-
-- [x] **Task 5: Verifikasi Menyeluruh & Laporan**
-  - [x] Jalankan seluruh suite tes: `node --test tests/*.test.js`, `npm run test:product-catalog`, `npm run test:mcp` (23 unit tests pass, product catalog pass, MCP 11 tests pass)
-  - [x] Jalankan `npm run build` (Next.js 16 build sukses)
-  - [x] Jalankan dry-run lokal Cuculemon (foto clean terbentuk, tidak ada ReferenceError) dan Texania (terdeteksi 404 tanpa fallback Gemini)
-  - [x] Jalankan skrip dry-run S1, S2, S4 untuk Staging
-  - [x] Susun laporan komprehensif ke pengguna dan minta izin untuk langkah rilis
+### 4. Pemanggil Langsung Lainnya
+- [app/api/v2/brand-profiles/extract/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/brand-profiles/extract/route.js): ganti `'gemini-2.5-flash'` menjadi `resolveModelChain({ role: 'light', taskType: 'BRAND_EXTRACTION' })` + `makeModelResilient`.
+- [lib/threads-series-generator.js](file:///Users/sabeqmmursyid/_cfstudio/lib/threads-series-generator.js): gunakan `resolveModelChain({ role: 'primary', taskType: 'THREADS_SERIES' })` & `makeModelResilient` (hapus fallback tertulis `'gemini-2.5-flash'`).
+- [lib/re-recomm-engine.js](file:///Users/sabeqmmursyid/_cfstudio/lib/re-recomm-engine.js): loop REST grounding mengikuti `chain` dari `resolveModelChain({ role: 'primary', taskType: 'RE_CAMPAIGN' })` tanpa `GEMINI_MODELS.PRIMARY` / `gemini-flash-latest` polos.
+- [lib/universe-ai-builder.js](file:///Users/sabeqmmursyid/_cfstudio/lib/universe-ai-builder.js), [lib/visual-identity-ai-builder.js](file:///Users/sabeqmmursyid/_cfstudio/lib/visual-identity-ai-builder.js), [lib/universe-ai-repository.js](file:///Users/sabeqmmursyid/_cfstudio/lib/universe-ai-repository.js): isi `meta.model` dengan model aktual yang berhasil dipakai (`result.actualModel`).
+- [lib/tenant-admin.js](file:///Users/sabeqmmursyid/_cfstudio/lib/tenant-admin.js): hapus `gemini_model: 'gemini-2.5-flash'`, salin pengaturan model Gemini (`gemini_api_tier`, `gemini_model_primary`, `gemini_model_fallback`, `gemini_model_light`, `gemini_smart_routing`, `gemini_context_caching`) dari `default_tenant`.
+- [lib/scheduler-processors.js](file:///Users/sabeqmmursyid/_cfstudio/lib/scheduler-processors.js), [app/api/keys/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/keys/route.js), [lib/db.js](file:///Users/sabeqmmursyid/_cfstudio/lib/db.js): gunakan `resolveModelChain` / `DEFAULT_TEXT_MODEL` terpusat.
+- [app/api/settings/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/settings/route.js): dukung baca & simpan `gemini_model_light` (kosong = `""`). UI `app/settings/page.js` dipasang setelah pengguna menyetujui mockup `public/mockup_settings_model_ai.html`.

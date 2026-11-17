@@ -1657,7 +1657,7 @@ export default function OrganicPillarPage() {
                             <span style={{ fontSize: '2rem' }}>📂</span>
                             <div style={{ marginTop: 8, fontWeight: 500 }}>Seret & Lepas file .csv atau .xlsx Anda di sini</div>
                             <div style={{ fontSize: '0.75rem', color: 'var(--accent-color)', marginTop: 12, padding: '6px 14px', background: 'var(--surface-interactive)', borderRadius: 8, maxWidth: 650, display: 'inline-block', lineHeight: 1.4, textAlign: 'left', border: '1px solid var(--surface-interactive)' }}>
-                               💡 <b>Petunjuk OPC Massal:</b> Setiap baris wajib memiliki kolom <b>Pilar Konten</b>, <b>Hook</b>, <b>Visual Action</b>, dan <b>link_product</b> (untuk JIT Sourcing otomatis, pengunduhan gambar produk, & optimasi AI). Format ini diselaraskan dengan Sheets Autopilot agar berkas dapat digunakan secara kompatibel.
+                               💡 <b>Petunjuk OPC Massal:</b> Setiap baris wajib memiliki kolom <b>Pilar Konten</b>, <b>Hook</b>, <b>Visual Action</b>, dan <b>link_product</b> (untuk JIT Sourcing otomatis, pengunduhan gambar produk, & optimasi AI).
                                <a
                                  href="/opc_mass_template.csv"
                                  download

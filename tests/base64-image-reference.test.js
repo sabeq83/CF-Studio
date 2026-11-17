@@ -100,8 +100,7 @@ test('readLocalImageDataUrl produces valid Data URI for leading-slash public fil
 
   for (const rel of [
     '../app/api/v2/multiplier/[id]/regenerate-start-frames/route.js',
-    '../app/api/v2/multiplier/[id]/regenerate-t2i/route.js',
-    '../app/api/sheets-autopilot/repair-clip/route.js'
+    '../app/api/v2/multiplier/[id]/regenerate-t2i/route.js'
   ]) {
     const src = fs.readFileSync(new URL(rel, import.meta.url), 'utf8');
     assert.match(src, /readLocalImageDataUrl/);

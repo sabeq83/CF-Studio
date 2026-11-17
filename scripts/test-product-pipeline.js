@@ -23,7 +23,6 @@ process.env.PG_SEARCH_PATH = 'dev'; // Staging/dev schema
 const { createProduct, updateProduct, getProductById, listProducts } = await import('../lib/product-repository.js');
 const { validateSingleProductCreate, validateSingleProductUpdate, validateProductImportRow } = await import('../lib/product-validation.js');
 const { resolveProductPhotoProvider } = await import('../lib/product-photo-service.js');
-const { resolveProductImagePath } = await import('../lib/sheets-autopilot-worker.js');
 const { setSetting } = await import('../lib/db.js');
 
 const suffix = `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
@@ -127,39 +126,6 @@ try {
 
   // Clean up setting
   await tenantContext.run(tenantA, () => setSetting('product_photo_provider', ''));
-
-  // ==========================================
-  // Test 5: Photo Field Semantics (Clean -> Raw)
-  // ==========================================
-  console.log('Testing Photo Field Semantics...');
-  
-  // Write dummy files to disk so they exist for fs.existsSync check
-  const cleanImgPath = path.join(process.cwd(), 'public', 'uploads', 'products', 'clean', 'image.png');
-  const rawImgPath = path.join(process.cwd(), 'public', 'uploads', 'products', 'raw', 'image.png');
-  fs.mkdirSync(path.dirname(cleanImgPath), { recursive: true });
-  fs.mkdirSync(path.dirname(rawImgPath), { recursive: true });
-  fs.writeFileSync(cleanImgPath, 'dummy');
-  fs.writeFileSync(rawImgPath, 'dummy');
-
-  const productWithClean = {
-    clean_photo_url: '/uploads/products/clean/image.png',
-    raw_photo_url: '/uploads/products/raw/image.png',
-    generated_photo_url: '/uploads/products/generated/image.png'
-  };
-
-  const resolvedPath = resolveProductImagePath(productWithClean);
-  assert.equal(resolvedPath, '/uploads/products/clean/image.png', 'Prioritize clean_photo_url over generated/raw');
-
-  const productWithOnlyRaw = {
-    raw_photo_url: '/uploads/products/raw/image.png',
-    generated_photo_url: '/uploads/products/generated/image.png'
-  };
-  const resolvedPathRaw = resolveProductImagePath(productWithOnlyRaw);
-  assert.equal(resolvedPathRaw, '/uploads/products/raw/image.png', 'Prioritize raw_photo_url when clean is absent');
-
-  // Clean up physical dummy files
-  try { fs.unlinkSync(cleanImgPath); } catch (_) {}
-  try { fs.unlinkSync(rawImgPath); } catch (_) {}
 
   // ==========================================
   // Test 6: Retry & Error States

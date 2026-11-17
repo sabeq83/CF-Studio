@@ -1,6 +1,6 @@
 # Kartu Menu: Product Database
 
-Terakhir dicek: 17 November 2026 · Versi aplikasi: v2.50.4
+Terakhir dicek: 17 November 2026 · Versi aplikasi: v2.51.0
 Alamat: `/products` · Kelompok: PLANNING · Kunci izin menu: `product_database`
 
 ## Fungsi
@@ -28,6 +28,7 @@ Gudang data "DNA" produk jualan. Menyimpan info terstruktur (USP, target audiens
 4. Import CSV memiliki format kolom wajib — gunakan template export dulu sebelum import massal.
 5. Scraper Tokopedia mendeteksi halaman 404 / "Waduh, tujuanmu nggak ada!" dan membatalkan pipeline ekstraksi tanpa fallback grounding halusinasi.
 6. Scheduler scraping mengisolasi produk dan foto per tenant (`tenant_id`).
+7. Enrichment AI produk memakai `resolveModelChain({ role: 'light', taskType: 'PRODUCT_ENRICHMENT' })` dari Settings tenant dengan cadangan penuh; bila semua model sibuk (503) menghasilkan `MODEL_BUSY (dapat diulang)` (`enrichment_retryable: true` di detail produk).
 
 ## Belum ada / batasan
 - Scraper Playwright membutuhkan Chromium terinstall di server.

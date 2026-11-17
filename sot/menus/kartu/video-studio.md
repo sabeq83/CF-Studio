@@ -1,6 +1,6 @@
 # Kartu Menu: Video Studio
 
-Terakhir dicek: 17 November 2026 · Versi aplikasi: v2.50.0
+Terakhir dicek: 17 November 2026 · Versi aplikasi: v2.50.5 (branch `fitur/hapus-instant-sheets`)
 Alamat: `/video-studio` · Kelompok: TOOLS · Kunci izin menu: `ffmpeg_studio`
 
 ## Fungsi
@@ -18,8 +18,8 @@ Alat rakit video mandiri. Menggabungkan klip video dengan suara (voice-over), me
 `none`, `recipe_pop`, `problem_solution`, `tips_listicle`, `ramuan_ritual`, `calm_wellness`, `angka_banding`, `mitos_fakta`.
 
 ## Terhubung dengan
-- Butuh data dari: TTS Studio (suara), RE Campaign / Instant Factory (klip + rencana finishing asal), pustaka video.
-- Mesin finishing sama dengan yang dipakai RE Campaign, Instant Factory, dan Multiplier.
+- Butuh data dari: TTS Studio (suara), RE Campaign (klip + rencana finishing asal), pustaka video.
+- Mesin finishing sama dengan yang dipakai RE Campaign dan Multiplier.
 - Perintah MCP: tidak ada yang khusus Video Studio.
 
 ## Lokasi (untuk agent)
@@ -30,11 +30,12 @@ Alat rakit video mandiri. Menggabungkan klip video dengan suara (voice-over), me
 - Tabel data: `ffmpeg_studio_jobs`
 
 ## Aturan penting & jebakan
-1. **Video Studio selalu mengalah ke produksi.** Jika RE Campaign / Multiplier / Instant Factory sedang render, pekerjaan Video Studio menunggu atau dihentikan lalu diantre ulang. Render "lama" sering karena ini, bukan karena rusak.
+1. **Video Studio selalu mengalah ke produksi.** Jika RE Campaign / Multiplier sedang render, pekerjaan Video Studio menunggu atau dihentikan lalu diantre ulang. Render "lama" sering karena ini, bukan karena rusak.
 2. **Mode B wajib jumlah audio = jumlah klip.** Jika tidak sama, tombol render terkunci.
 3. **Caption butuh teks VO atau Whisper.** Jika dua-duanya tidak ada, caption otomatis dimatikan; elemen template lain tetap muncul.
 4. Rencana finishing yang belum lolos validasi mengunci tombol render (kecuali template `none`).
 5. Validasi rencana ikut memeriksa klaim berlebihan, terutama untuk produk herbal.
+6. Sumber `instant_factory` sudah dihapus dan ditolak dengan HTTP 400 oleh `/api/video-studio/render`.
 
 ## Belum ada / batasan
 - Tidak bisa dijalankan lewat MCP/skill; hanya lewat halaman web.
