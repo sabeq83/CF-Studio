@@ -1422,6 +1422,16 @@ export function createCfStudioServer(rawRequest) {
     ({ url, ...args }) => request('/api/v2/products/scrape', { body: { urls: url, ...args } })
   );
 
+  register(
+    'cf_get_scrape_status',
+    'Get real-time scraping job status, execution summary, results, and errors.',
+    {
+      job_id: z.union([z.string(), z.number()]).transform(v => String(v).trim())
+    },
+    false,
+    ({ job_id }) => request(`/api/v2/products/scrape/jobs/${encodeURIComponent(job_id)}`, { method: 'GET' })
+  );
+
   // 6. Visual Identity Tools (Pilar 2: Visual DNA Engine)
   register(
     'cf_generate_visual_identity',

@@ -38,6 +38,9 @@ Terakhir diperbarui: 17 November 2026
 | `INSTRUKSI_PERBAIKAN_JADWAL_CFA_MACMINI.md` | Instruksi untuk Agent Claude di Mac Mini: Perbaiki Jadwal CF Autopipeline |
 | `PETUNJUK_CFA_JADWAL_TELEGRAM_HEMAT_TOKEN.md` | Petunjuk CF Autopipeline: Jadwal per Brand, Notifikasi Telegram, dan Hemat Token |
 | `antigravity_agent_instructions.md` | Instruksi Agent AI Antigravity — Implementasi Deconstruct URL Library |
+| `antigravity_scraper_foto_produk_instructions.md` | Instruksi Antigravity — Perbaikan Scraper Foto Produk (pilih foto produk saja, tanpa orang) |
+| `antigravity_scraper_foto_produk_revisi_01.md` | Revisi 01 Scraper Foto Produk — 4 celah backend, kualitas crop, tombol Setujui & Ganti Foto |
+| `antigravity_scraper_foto_produk_revisi_02.md` | Revisi 02 Scraper Foto Produk — bug fatal foto clean, deteksi 404, tenant MCP, galeri lengkap, rubrik picker |
 | `antigravity_analitik_mingguan_instructions.md` | Instruksi Antigravity: Analitik Performa Konten via Repliz |
 | `antigravity_finishing_pass_cek_ulang.md` | Instruksi Antigravity: Cek Ulang Plan Finishing Pass (setelah Revisi 01) |
 | `antigravity_finishing_pass_instructions.md` | Instruksi Antigravity: Finishing Pass Video (Motion Text, Keyword Punch, Template) |
@@ -112,8 +115,8 @@ Terakhir diperbarui: 17 November 2026
 |---|---|
 | `backup_vi_v3_ptgim_20261117.json` | Cadangan VI v3 Reno & Maya sebelum disambungkan ke Universe (17 Nov 2026) |
 | `backup_brand_profile_ptgim_20261117.json` | Cadangan brand profile Solusi Thermal ID & Ruang Akustik ID sebelum perubahan 17 Nov 2026 |
-| `diff.txt` | ��d i f f   - - g i t   a / l i b / s h e e t s - a u t o p i l o t - w o r k e r . j s   b / l i b  |
-| `diff_wsl.txt` | ��d i f f   - - g i t   a / l i b / s h e e t s - a u t o p i l o t - w o r k e r . j s   b / l i b  |
+| `diff.txt` | ��diff --git a/lib/sheets-autopilot-worker.js b/lib |
+| `diff_wsl.txt` | ��diff --git a/lib/sheets-autopilot-worker.js b/lib |
 | `diff_wsl_utf8.txt` | diff --git a/lib/sheets-autopilot-worker.js b/lib/sheets-autopilot-worker.js |
 | `inspect_output.txt` | [PostgreSQL] Connection Pool initialized to 100.78.186.123:5432/maknaflow_db (schema: public) |
 | `prompt_output.txt` | Kamu adalah seorang Creative Director & Senior Copywriter di MAKNA Engine. |

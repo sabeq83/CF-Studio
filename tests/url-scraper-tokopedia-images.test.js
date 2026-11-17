@@ -64,3 +64,40 @@ test('P1 Regression: parseHtml still detects legacy Tokopedia and Shopee CDN URL
   assert.ok(urls.some(u => u.includes('cf.shopee.co.id')), 'Should detect cf.shopee.co.id');
   assert.ok(urls.some(u => u.includes('ecs7.tokopedia.net')), 'Should detect ecs7.tokopedia.net');
 });
+
+test('S3: parseHtml rejects bare domain images and decodes &amp; entities', () => {
+  const html = `
+    <html>
+      <head>
+        <meta property="og:image" content="https://images.tokopedia.net/">
+      </head>
+      <body>
+        <!-- Domain only without path or with trailing slash: must be rejected -->
+        <img src="https://images.tokopedia.net" alt="Invalid Domain Only 1">
+        <img src="https://images.tokopedia.net/" alt="Invalid Domain Only 2">
+        <!-- URL with &amp; signature params: must decode to & -->
+        <script>
+          const data = "https://images.tokopedia.net/img/cache/700/product/photo.jpg?x-expires=123&amp;x-signature=abc";
+        </script>
+        <!-- Valid URL -->
+        <img src="https://images.tokopedia.net/img/cache/700/product/item.jpeg.webp" alt="Valid Product Image">
+      </body>
+    </html>
+  `;
+
+  const parsed = parseHtml(html, 'https://www.tokopedia.com/product/test');
+  const urls = parsed.imageCandidates.map(c => c.url);
+
+  // Bare domain should be rejected
+  assert.equal(urls.includes('https://images.tokopedia.net'), false, 'Should reject bare domain');
+  assert.equal(urls.includes('https://images.tokopedia.net/'), false, 'Should reject bare domain with slash');
+
+  // Valid image with .jpeg.webp must pass
+  assert.ok(urls.some(u => u.includes('item.jpeg.webp')), 'Valid item.jpeg.webp should pass');
+
+  // &amp; in regex matches must be decoded to &
+  const signedUrl = urls.find(u => u.includes('photo.jpg'));
+  assert.ok(signedUrl, 'Signed photo.jpg should pass');
+  assert.ok(!signedUrl.includes('&amp;'), '&amp; must be decoded to &');
+  assert.ok(signedUrl.includes('&x-signature=abc'), '& signature parameter should be intact');
+});

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createJob, getDb } from '@/lib/db';
 import { withTenantContext } from '@/lib/auth';
+import { getActiveTenantId } from '@/lib/tenant-context';
 import fs from 'fs';
 import path from 'path';
 
@@ -34,8 +35,9 @@ export const POST = withTenantContext(async (req) => {
       return NextResponse.json({ success: false, error: 'Masukkan daftar URL produk atau file CSV terlebih dahulu.' }, { status: 400 });
     }
 
+    const activeTenant = getActiveTenantId();
     const db = getDb();
-    const allProducts = await db.prepare('SELECT id, input_source, source_url, raw_photo_url, cleaned_photo_url, generated_photo_url, unique_selling_point, packaging_type FROM product_extractions').all();
+    const allProducts = await db.prepare('SELECT id, input_source, source_url, raw_photo_url, cleaned_photo_url, generated_photo_url, unique_selling_point, packaging_type FROM product_extractions WHERE tenant_id = ?').all(activeTenant);
 
     const findExistingProduct = (targetUrl) => {
       const normalizedTarget = normalizeUrl(targetUrl);
@@ -184,6 +186,7 @@ export const POST = withTenantContext(async (req) => {
       const chunk = urlsToScrape.slice(i, i + batchSize);
       // Pass urlAffiliatesMap, repair_mode, refresh_photo, and reserved_ids in the job payload
       const created = await createJob('product_scraper', { 
+        tenant_id: activeTenant,
         urls: chunk, 
         category, 
         tags, 

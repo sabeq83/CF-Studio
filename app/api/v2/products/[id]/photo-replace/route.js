@@ -3,6 +3,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { withTenantContext } from '@/lib/auth';
 import { getProductById, updateProduct } from '@/lib/product-repository';
+import { getActiveTenantId } from '@/lib/tenant-context';
 import { createJob } from '@/lib/db';
 import { validateRawProductImage } from '@/lib/product-validation';
 
@@ -15,6 +16,7 @@ export const POST = withTenantContext(async (req, { params }) => {
       return NextResponse.json({ success: false, error: 'ID produk tidak valid.' }, { status: 400 });
     }
 
+    const activeTenant = getActiveTenantId();
     const product = await getProductById(id);
     if (!product) {
       return NextResponse.json({ success: false, error: 'Produk tidak ditemukan.' }, { status: 404 });
@@ -60,6 +62,7 @@ export const POST = withTenantContext(async (req, { params }) => {
       }
 
       const job = await createJob('product_scraper', {
+        tenant_id: activeTenant,
         urls: [sourceUrl],
         refresh_photo: true,
         reserved_ids: { [sourceUrl]: id }
@@ -137,6 +140,7 @@ export const POST = withTenantContext(async (req, { params }) => {
 
       const relativeRawPath = `/uploads/products/raw/${rawFilename}`;
       const job = await createJob('product_photo_replace', {
+        tenant_id: activeTenant,
         product_id: id,
         raw_path: relativeRawPath,
         origin: 'candidate',
@@ -181,6 +185,7 @@ export const POST = withTenantContext(async (req, { params }) => {
       const relativeRawPath = `/uploads/products/raw/${rawFilename}`;
       // Unggahan pengguna tidak perlu di-crop otomatis (run_crop: false)
       const job = await createJob('product_photo_replace', {
+        tenant_id: activeTenant,
         product_id: id,
         raw_path: relativeRawPath,
         origin: 'upload',
