@@ -107,6 +107,7 @@ Terakhir diperbarui: 17 November 2026
 | `LAPORAN_RILIS_DAN_DEPLOY_SCRAPER_FOTO_PRODUK.md` | Laporan Resmi Rilis, Deployment, & Verifikasi End-to-End Scraper Foto Produk |
 | `LAPORAN_HAPUS_INSTANT_FACTORY_SHEETS_AUTOPILOT.md` | Laporan Pelaksanaan: Penghapusan Fitur Instant Factory & Sheets Autopilot (Dev 5020) |
 | `LAPORAN_MODEL_AI_TERPUSAT_DAN_RILIS_V2510.md` | Laporan Pelaksanaan: Model AI Terpusat di Settings & Rilis v2.51.0 (Staging 5010) |
+| `LAPORAN_TRUTH_INGGRIS_DAN_MOCKUP_KARTU_PRODUK.md` | Laporan Pelaksanaan: Truth Berbahasa Inggris (Bagian A di Dev 5020) & Mockup Kartu Produk (Bagian B0) |
 | `RISET_KATA_KUNCI_PTGIM_W2.md` | Riset Kata Kunci Week 2 Solusi Thermal ID & Ruang Akustik ID (43 + 43, per kelompok latar) |
 | `maknagrid_published_facebook_videos.md` | Maknagrid Published Facebook Video IDs |
 
