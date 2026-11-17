@@ -100,6 +100,7 @@ Terakhir diperbarui: 17 November 2026
 | `LAPORAN_KARTU_MENU_DAN_PERAPIAN_FOLDER.md` | Laporan Pelaksanaan: Kartu Menu & Perapian Folder Proyek |
 | `LAPORAN_PERBAIKAN_SCRAPER_FOTO_PRODUK.md` | Laporan Resmi: Perbaikan Scraper Foto Produk E-Commerce (Pilih Foto Bersih) |
 | `LAPORAN_RILIS_DAN_DEPLOY_SCRAPER_FOTO_PRODUK.md` | Laporan Resmi Rilis, Deployment, & Verifikasi End-to-End Scraper Foto Produk |
+| `LAPORAN_SCRAPER_FOTO_PRODUK_REVISI_02.md` | Laporan Pelaksanaan: Scraper Foto Produk E-Commerce (Revisi 02) — Staging v2.50.4 & Fitur Dev |
 | `RISET_KATA_KUNCI_PTGIM_W2.md` | Riset Kata Kunci Week 2 Solusi Thermal ID & Ruang Akustik ID (43 + 43, per kelompok latar) |
 | `maknagrid_published_facebook_videos.md` | Maknagrid Published Facebook Video IDs |
 
