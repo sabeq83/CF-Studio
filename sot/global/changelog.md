@@ -1,5 +1,13 @@
 # Changelog
 
+## V2.52.0 — Truth Bahasa Inggris, Kartu Produk Baru, Jendela Banding & Revert Foto (17/11/2026)
+- Product Truth & Geometric Truth kini dalam bahasa Inggris baku untuk stabilitas video DNA AI
+- Penjaga bahasa ensureEnglishProductTruths & skrip translate-product-truths (dry-run ready)
+- Kartu produk baru dengan default foto bersih, sakelar Asli / Hasil AI lokal, badge pojok status, dan tombol Enrich AI
+- Jendela Banding foto Asli vs Hasil AI berdampingan dengan aksi Setujui, Ganti Foto, Ulangi Generate, dan Tolak pakai foto sebelumnya
+- Penyimpanan foto bersih sebelumnya ke kolom previous_clean_photo_url dan aksi revert_previous
+- Pratinjau hanya-baca foto Asli dan Hasil AI di tab Foto & AI modal detail produk
+
 ## V2.51.0 — Hapus Instant Factory/Sheets Autopilot & Model AI Terpusat di Settings (17/11/2026)
 - Menghapus fitur usang Instant Factory dan Sheets Autopilot beserta UI, endpoint API, scheduler, dan arsip dokumentasi terkait
 - Memusatkan pemilih model Gemini teks dan vision ke menu Settings tenant lewat resolveModelChain dengan peran primary, light (gemini_model_light), dan vision

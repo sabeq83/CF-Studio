@@ -117,7 +117,8 @@ Pengubahan dilakukan lewat menu Visual Identity di Staging, atau lewat MCP `cf_u
 - [x] Preset `multiplier_nutribake` (revisi 1 → 2) disambungkan ke VI uji. Kolom lain preset tidak berubah, termasuk mode `pure_t2v`.
 - [x] VI utama `vi_nutribake_modern_pastry` v4 **tidak diubah**. CFA dan Kampanye Produk masih memakai v4.
 - [ ] Uji 2 video Multiplier dan tinjau hasilnya.
-  - Uji 1: `mul_261117_d11lrc` ("Hack Nyemil Malam: Bikin Choco Chips Sehat Modal Bahan Dapur"). Blueprint sama dengan `mul_261117_vc3tw3` (pembanding VI v4), VI `vi_mwkmjhzd_f5a40b44` terkonfirmasi di task, tanpa produk bridging. Dibuat 17 Nov 2026 11:45 WIB.
+  - Uji 1: `mul_261117_d11lrc` ("Hack Nyemil Malam: Bikin Choco Chips Sehat Modal Bahan Dapur"). Blueprint sama dengan `mul_261117_vc3tw3` (pembanding VI v4), VI `vi_mwkmjhzd_f5a40b44` terkonfirmasi di task, tanpa produk bridging. Dibuat 17 Nov 2026 11:45 WIB. **Diblokir sebelum TTS** karena klaim "gula darah" di hook; revisi auditor 5 baris tidak cocok dengan 3 klip. Prompt sudah memuat anchor tangan & wardrobe VI baru, tetapi lokasi tertulis "Warm Indonesian home kitchen counter during late evening" (bukan quartz) — penulis naskah Multiplier menimpa environment VI.
+  - Uji 2: `mul_261117_44nefx` ("Coklat Mewah Modal Dapur: Solusi Cerdas Hemat Belanja Bulanan"), blueprint `6b8c12c0-6657-4384-bbbb-79c408cdadf5`, sudut ang_3 (hemat belanja, tanpa klaim kesehatan).
 - [ ] Jika lolos: salin isi VI uji ke VI utama (v5), kembalikan preset Multiplier ke `vi_nutribake_modern_pastry`, lalu arsipkan VI uji.
 
 **Cara membatalkan:** ubah `visual_identity_preset_id` preset `multiplier_nutribake` kembali ke `vi_nutribake_modern_pastry`.
