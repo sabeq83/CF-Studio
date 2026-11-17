@@ -21,6 +21,18 @@ export const GET = withTenantContext(async (req, { params }) => {
         product[key] = `/api/v2/products/image?path=${encodeURIComponent(product[key])}`;
       }
     }
+
+    // S9: Tambahkan field turunan retryable jika enrichment gagal akibat kuota/rate limit
+    const errText = (product.enrichment_error || '').toLowerCase();
+    const isQuota = errText.includes('quota') || errText.includes('rate limit') || errText.includes('resource_exhausted') || errText.includes('429') || errText.includes('503');
+    if (product.enrichment_status === 'failed' && isQuota) {
+      product.enrichment_retryable = true;
+      product.enrichment_retry_hint = 'Jalankan cf_enrich_product untuk mengulang';
+    } else {
+      product.enrichment_retryable = false;
+      product.enrichment_retry_hint = null;
+    }
+
     return NextResponse.json({ success: true, data: product });
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: error.status || 500 });

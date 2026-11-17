@@ -1,0 +1,87 @@
+{
+  "cuculemon": {
+    "best_index": 0,
+    "candidates": [
+      {
+        "index": 0,
+        "has_person": false,
+        "text_overlay": "light",
+        "text_area_pct": 8,
+        "is_infographic": false,
+        "is_collage": false,
+        "product_visible": true,
+        "score": 92
+      },
+      {
+        "index": 1,
+        "has_person": false,
+        "text_overlay": "light",
+        "text_area_pct": 18,
+        "is_infographic": false,
+        "is_collage": false,
+        "product_visible": true,
+        "score": 85
+      },
+      {
+        "index": 2,
+        "has_person": false,
+        "text_overlay": "none",
+        "text_area_pct": 0,
+        "is_infographic": false,
+        "is_collage": false,
+        "product_visible": true,
+        "score": 75
+      }
+    ]
+  },
+  "habarlic_person_banner": {
+    "best_index": 0,
+    "candidates": [
+      {
+        "index": 0,
+        "has_person": true,
+        "text_overlay": "heavy",
+        "text_area_pct": 45,
+        "is_infographic": false,
+        "is_collage": false,
+        "product_visible": true,
+        "score": 60
+      },
+      {
+        "index": 1,
+        "has_person": true,
+        "text_overlay": "heavy",
+        "text_area_pct": 50,
+        "is_infographic": true,
+        "is_collage": false,
+        "product_visible": true,
+        "score": 40
+      }
+    ]
+  },
+  "fallback_clean_candidate": {
+    "best_index": 0,
+    "candidates": [
+      {
+        "index": 0,
+        "has_person": false,
+        "text_overlay": "heavy",
+        "text_area_pct": 35,
+        "is_infographic": true,
+        "is_collage": false,
+        "product_visible": true,
+        "score": 74
+      },
+      {
+        "index": 1,
+        "has_person": true,
+        "text_overlay": "light",
+        "text_area_pct": 10,
+        "is_infographic": false,
+        "is_collage": false,
+        "product_visible": true,
+        "score": 65
+      }
+    ]
+  }
+}

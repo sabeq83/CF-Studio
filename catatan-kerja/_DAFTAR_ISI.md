@@ -88,6 +88,7 @@ Terakhir diperbarui: 17 November 2026
 | `rencana_penjadwalan_rolled_oat.md` | Rencana Penjadwalan Auto Pipeline — NutriBake (Rolled Oat Premium Sahabat) |
 | `scraper_foto_produk_implementation_plan.md` | Implementation Plan: Perbaikan Scraper Foto Produk (Pilih Foto Produk Saja) |
 | `scraper_foto_produk_revisi_01_plan.md` | Implementation Plan: Revisi 01 Scraper Foto Produk & Tinjau/Ganti Foto UI |
+| `scraper_foto_produk_revisi_02_bagian_a_plan.md` | Implementation Plan: Hotfix Scraper Foto Produk Revisi 02 Bagian A (v2.50.4, selesai) |
 | `vo_narasi_implementation_plan.md` | Rencana Implementasi Perbaikan Narasi VO End-to-End (Fase V0–V5) |
 
 ## LAPORAN

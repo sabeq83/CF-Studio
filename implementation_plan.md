@@ -1,317 +1,253 @@
-# Implementation Plan — Hotfix Scraper Foto Produk (Revisi 02 Bagian A)
+# Implementation Plan — Fitur Scraper Foto Galeri & Rubrik E-Commerce (Revisi 02 Bagian B)
 
-Tanggal: 17 November 2026 · Branch: `hotfix/scraper-foto-r02` · Basis: `main` (`8370981`)
-Dokumen Panduan: [antigravity_scraper_foto_produk_revisi_02.md](file:///Users/sabeqmmursyid/_cfstudio/catatan-kerja/instruksi-agent/antigravity_scraper_foto_produk_revisi_02.md)
+Tanggal: 17 November 2026 · Branch: `fitur/scraper-foto-galeri-r02` · Basis: `main` (`v2.50.4` / `b73ebd2`)  
+Dokumen Panduan: [antigravity_scraper_foto_produk_revisi_02.md](file:///Users/sabeqmmursyid/_cfstudio/catatan-kerja/instruksi-agent/antigravity_scraper_foto_produk_revisi_02.md)  
+Target Deployment: Server **Dev** Mac Mini (`100.95.245.55:5020`)
 
 ---
 
-## 1. Ringkasan Tujuan
+## 1. Ringkasan Tujuan (S5–S9 & Perbaikan Kecil)
 
-Menyelesaikan perbaikan bug pada scraper foto produk di server Staging (S1–S4):
-- **S1 (FATAL)**: Memperbaiki `ReferenceError: processCleanInputPath is not defined` yang menyebabkan crop dan penghapusan latar belakang selalu gagal pada produk baru sejak v2.49.2. Mengintegrasikan kembali pipeline foto ke `processProductPhotoFromRaw()` serta menggabungkan seluruh alasan ke `photo_error` di `decidePhotoStatus()`.
-- **S2**: Mengembalikan HTTP status dari Playwright, mendeteksi halaman 404/produk tidak ditemukan dengan fungsi murni `detectNotFoundPage()`, menolak fallback AI Search Grounding jika halaman 404, tidak menyimpan produk 404 ke database, menambahkan ringkasan status job (`status_summary`), membuat endpoint `GET /api/v2/products/scrape/jobs/[jobId]`, dan menyediakan tool MCP `cf_get_scrape_status`.
-- **S3**: Memvalidasi URL kandidat gambar (menolak domain-only seperti `https://images.tokopedia.net` tanpa path gambar yang sah) serta men-decode entitas HTML (`&amp;` -> `&`) pada URL regex.
-- **S4**: Menyertakan `tenant_id: getActiveTenantId()` pada seluruh payload `createJob('product_scraper', ...)` dan `createJob('product_photo_replace', ...)`, serta memastikan query produk lama dibatasi pada tenant aktif (`WHERE tenant_id = ?`).
+1. **S5 (Galeri Lengkap ≥ 5 Kandidat ≥ 600px)**:
+   - Pada `scrapeUrlPlaywright()` di `lib/playwright-scraper.js`: tambahkan interaksi thumbnail galeri (hover/klik hingga 8 thumbnail), tunggu `currentSrc` foto utama berganti untuk menangkap URL beresolusi tinggi dengan signature valid.
+   - Pemicu scroll galeri agar gambar lazy-load termuat.
+   - Eksperimen varian resolusi aman (coba `:700:0`/`:1200:0` atau `/img/cache/900/` hanya jika HTTP 200 dan Sharp membaca ≥ 600px; fallback ke `currentSrc`).
+   - Saring kandidat < 600px kecuali kandidat ≥ 600px kurang dari 2.
+   - Catat jumlah kandidat dan resolusi di log job dan data audit.
+
+2. **S6 (Rubrik Photo Picker Lebih Longgar untuk E-Commerce Indonesia)**:
+   - Tambahkan field schema `text_area_pct` (integer 0–100) dan `is_collage` (boolean) di `PHOTO_PICKER_SCHEMA`.
+   - Perbarui `PHOTO_PICKER_PROMPT` dengan contoh praktis e-commerce: label spesifikasi kecil ("750ml", "1000ML", "SU304"), garis dimensi, logo brand kecil di pojok, dan latar polos tidak menggugurkan jika produk utuh.
+   - Di `evaluateCandidateScores`: tolak hanya jika `has_person`, `is_collage`, `!product_visible`, atau (`is_infographic` dan `text_area_pct > 30`). `text_overlay` saja tidak lagi menggugurkan.
+   - Tambahkan fixture tes `tests/fixtures/photo_picker_cuculemon_eval.json` (Cuculemon lolos, banner berwajah Habarlic tetap ditolak).
+
+3. **S7 (Penanganan Kandidat Ditolak → Tetap Hasilkan Foto Clean untuk Ditinjau)**:
+   - Jika semua kandidat tertolak di rubrik ketat, tetapi ada kandidat **tanpa orang** dengan skor ≥ 70: pilih yang tertinggi, jalankan crop + rembg + final check, status `needs_review` dengan pesan `photo_error: "dipilih otomatis, perlu ditinjau"` (operator cukup klik "Setujui Foto").
+   - Jika semua kandidat memuat orang atau skor < 70: simpan raw saja tanpa clean, status `needs_review` (`"tidak ada foto layak, ganti foto manual"`).
+   - Lewati G-Labs untuk status `needs_review`.
+
+4. **S8 (Margin Spatial Crop 10% & Bypass Rembg Latar Putih)**:
+   - Ubah padding crop di `computeCropBox()` dari 6% menjadi **10%** per sisi (dibatasi 0–1000).
+   - Implementasikan fungsi murni `isPlainWhiteBackground(buffer)`: periksa strip tepi 4% di tiap sisi. Jika ≥ 95% piksel tepi memiliki luminansi ≥ 245 dan saturasi rendah, lewati rembg (cukup ratakan kanvas putih dengan sharp). Mencegah bagian kemasan putih terhapus.
+
+5. **S9 (Enrichment Gagal Kuota: Jelas dan Bisa Diulang)**:
+   - Di `lib/product-bulk-worker.js`: tangkap error kuota/rate limit/503 dan beri prefix `QUOTA_EXHAUSTED (dapat diulang): `.
+   - Di `app/api/v2/products/[id]/route.js`: tambahkan field dinamis `enrichment_retryable: true` dan hint retry jika error kuota.
+   - Verifikasi antrean ulang di `/api/v2/products/re-enrich` (`cf_enrich_product`).
+   - Buat/perbarui mockup UI untuk menampilkan badge retry kuota dan sinkronkan ke Mac Mini Staging untuk review.
+
+6. **Perbaikan Kecil**:
+   - Pastikan label trace Gemini pada crop dan final check menggunakan `traceContext: { stage: 'product_photo_crop' }` dan `product_photo_final_check` (bukan default `start_frame_visual_qc`).
 
 ---
 
 ## 2. Before & After Code Snippets
 
-### 2.1. `lib/scheduler-processors.js` (S1, S2, S4)
+### 2.1. `lib/product-photo-picker.js` (S6 & S7)
 
 #### Sebelum (Current/Before):
 ```javascript
-// Baris ~10420
-const allProducts = await db.prepare('SELECT id, input_source, source_url, raw_photo_url, cleaned_photo_url, generated_photo_url, unique_selling_point, packaging_type, scraped_image_url, raw_description, t2i_prompt, i2v_action_prompt, product_name FROM product_extractions').all();
-
-// ... di dalam loop produk (baris ~10645)
-    let localPhotoPath = null;
-    let rawPhotoPath = null;
-    let cleanPhotoPath = null;
-    let generatedPhotoPath = null;
-
-// Baris ~10748, 10751, 10756, 10760, 10779 (processCleanInputPath tidak dideklarasikan)
-    processCleanInputPath = cropAbsPath;
-...
-    const cleanInputAbsPath = processCleanInputPath || path.join(process.cwd(), 'public', rawPhotoPath);
-
-// Baris ~10998
-  return {
-    processed: true,
-    results,
-    errors: Object.keys(scrapeErrors).length > 0 ? scrapeErrors : undefined
-  };
-```
-
-#### Sesudah (Proposed/After):
-```javascript
-// Filter tenant aktif
-const activeTenant = getActiveTenantId();
-const allProducts = await db.prepare('SELECT id, input_source, source_url, raw_photo_url, cleaned_photo_url, generated_photo_url, unique_selling_point, packaging_type, scraped_image_url, raw_description, t2i_prompt, i2v_action_prompt, product_name FROM product_extractions WHERE tenant_id = ?').all(activeTenant);
-
-// ... deklarasikan processCleanInputPath di awal loop
-    let localPhotoPath = null;
-    let rawPhotoPath = null;
-    let cleanPhotoPath = null;
-    let generatedPhotoPath = null;
-    let processCleanInputPath = null;
-
-// Integrasi aman dengan fallback path dan penanganan error terisolasi
-// S2: Deteksi error 404 agar tidak disimpan ke database
-// S2: Ringkasan status job
-  const totalUrls = urlList.length;
-  const successCount = results.length;
-  const errorCount = Object.keys(scrapeErrors).length;
-  let statusSummary = 'ok';
-  if (successCount === 0 && errorCount > 0) {
-    statusSummary = 'failed';
-  } else if (errorCount > 0) {
-    statusSummary = 'partial';
-  }
-
-  return {
-    processed: true,
-    results,
-    errors: Object.keys(scrapeErrors).length > 0 ? scrapeErrors : undefined,
-    status_summary: statusSummary
-  };
-```
-
----
-
-### 2.2. `lib/product-photo-picker.js` (S1 & S3)
-
-#### Sebelum (Current/Before):
-```javascript
-export function decidePhotoStatus({
-  pickerNeedsReview = false,
-  pickerReason = null,
-  selectedCandidate = null,
-  finalCheck = null,
-  bgError = false,
-  hasNewPhoto = false
-} = {}) {
-  // 1. Jika picker menandai review (apapun alasannya), SELALU needs_review
-  if (pickerNeedsReview) {
-    return {
-      status: 'needs_review',
-      error: pickerReason || 'foto memuat orang/teks'
-    };
-  }
-
-  // 2. Jika penghapusan latar belakang gagal
-  if (bgError) {
-    return {
-      status: 'needs_review',
-      error: 'hapus latar belakang gagal'
-    };
-  }
-...
-```
-
-#### Sesudah (Proposed/After):
-```javascript
-export function decidePhotoStatus({
-  pickerNeedsReview = false,
-  pickerReason = null,
-  selectedCandidate = null,
-  finalCheck = null,
-  bgError = false,
-  hasNewPhoto = false
-} = {}) {
-  const reasons = [];
-
-  if (pickerNeedsReview) {
-    reasons.push(pickerReason || 'foto memuat orang/teks');
-  }
-
-  if (bgError) {
-    reasons.push('hapus latar belakang gagal');
-  }
-
-  if (hasNewPhoto && !finalCheck) {
-    reasons.push('pemeriksaan akhir foto tidak berjalan');
-  } else if (finalCheck?.error) {
-    reasons.push('pemeriksaan foto gagal');
-  } else if (finalCheck && (finalCheck.has_person || finalCheck.has_heavy_text)) {
-    reasons.push('foto memuat orang/teks');
-  }
-
-  if (selectedCandidate?.has_person) {
-    reasons.push('foto mentah memuat orang/model');
-  }
-
-  if (selectedCandidate?.product_visible === false) {
-    reasons.push('foto mentah tidak memuat produk utuh');
-  }
-
-  if (reasons.length > 0) {
-    // Deduping reasons
-    const uniqueReasons = [...new Set(reasons)];
-    return {
-      status: 'needs_review',
-      error: uniqueReasons.join('; ')
-    };
-  }
-
-  return {
-    status: 'approved',
-    error: null
-  };
-}
-```
-
----
-
-### 2.3. `lib/url-scraper.js` & `lib/playwright-scraper.js` (S2 & S3)
-
-#### Sebelum (Current/Before):
-```javascript
-// playwright-scraper.js
-await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
-...
-return { title, html, bodyText, images };
-
-// url-scraper.js
-  const addCandidate = (imgUrl, { w = 0, h = 0, alt = '', source = 'regex' } = {}) => {
-    if (!imgUrl || typeof imgUrl !== 'string') return;
-    const cleanUrl = imgUrl.replace(/\\/g, '').replace(/[.,;:]$/, '').trim();
-    if (!cleanUrl.startsWith('http')) return;
-```
-
-#### Sesudah (Proposed/After):
-```javascript
-// playwright-scraper.js
-const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
-const httpStatus = response ? response.status() : 200;
-...
-return { title, html, bodyText, images, httpStatus };
-
-// url-scraper.js
-export function isValidProductImageUrl(url) {
-  if (!url || typeof url !== 'string') return false;
-  try {
-    const parsed = new URL(url);
-    const pathname = (parsed.pathname || '').toLowerCase();
-    if (!pathname || pathname === '/' || pathname === '') return false;
-    const hasImageExt = /\.(?:jpg|jpeg|png|webp|avif)(?:[?#]|$)/i.test(pathname);
-    const hasPattern = pathname.includes('~tplv-') || pathname.includes('/img/');
-    return hasImageExt || hasPattern;
-  } catch (_) {
-    return false;
-  }
-}
-
-export function detectNotFoundPage({ httpStatus = 200, title = '', bodyText = '', html = '' } = {}) {
-  if (httpStatus === 404 || httpStatus === 410) {
-    return { notFound: true, reason: `HTTP status ${httpStatus}` };
-  }
-  const text = `${title} ${bodyText} ${html}`.toLowerCase();
-  const notFoundPatterns = [
-    'tujuanmu nggak ada',
-    'halaman tidak ditemukan',
-    'produk tidak ditemukan',
-    'produk ini tidak tersedia',
-    'page not found',
-    'produk ini tidak ada'
-  ];
-  for (const pattern of notFoundPatterns) {
-    if (text.includes(pattern)) {
-      return { notFound: true, reason: `Teks "${pattern}" terdeteksi di halaman` };
+export const PHOTO_PICKER_SCHEMA = {
+  type: 'object',
+  properties: {
+    best_index: { type: 'integer' },
+    candidates: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          index: { type: 'integer' },
+          has_person: { type: 'boolean' },
+          text_overlay: { type: 'string', enum: ['none', 'light', 'heavy'] },
+          is_infographic: { type: 'boolean' },
+          product_visible: { type: 'boolean' },
+          score: { type: 'integer' }
+        },
+        required: ['index', 'has_person', 'text_overlay', 'is_infographic', 'product_visible', 'score']
+      }
     }
-  }
+  },
+  required: ['best_index', 'candidates']
+};
 
-  // Cek jika halaman tidak memiliki harga DAN tidak memiliki tanda detail produk
-  const hasPrice = /(?:rp|idr)\s*[\d.,]+/i.test(text);
-  const hasDetailMarker = /(?:detail produk|spesifikasi|deskripsi produk|informasi produk)/i.test(text);
-  if (!hasPrice && !hasDetailMarker && text.length < 500) {
-    return { notFound: true, reason: 'Halaman kosong tanpa indikator harga maupun detail produk' };
-  }
-
-  return { notFound: false, reason: null };
-}
-
-// Di parseHtml:
-const decodedUrl = imgUrl.replace(/&amp;/g, '&');
-if (!isValidProductImageUrl(decodedUrl)) return;
-```
-
----
-
-### 2.4. `app/api/v2/products/scrape/route.js` & `app/api/v2/products/[id]/photo-replace/route.js` (S4)
-
-#### Sebelum (Current/Before):
-```javascript
-// scrape/route.js:
-const allProducts = await db.prepare('SELECT id, input_source, source_url...').all();
-...
-const created = await createJob('product_scraper', { 
-  urls: chunk, 
-  category, 
-  tags, 
-  url_affiliates_map: urlAffiliatesMap, 
-  repair_mode,
-  refresh_photo: Boolean(refresh_photo),
-  reserved_ids: reservedIds
-});
+// Di evaluateCandidateScores:
+const isAcceptable = !hasPerson && !isInfographic && textOverlay !== 'heavy' && productVisible;
 ```
 
 #### Sesudah (Proposed/After):
 ```javascript
-// scrape/route.js:
-const activeTenant = getActiveTenantId();
-const allProducts = await db.prepare('SELECT id, input_source, source_url, raw_photo_url, cleaned_photo_url, generated_photo_url, unique_selling_point, packaging_type FROM product_extractions WHERE tenant_id = ?').all(activeTenant);
-...
-const created = await createJob('product_scraper', { 
-  tenant_id: activeTenant,
-  urls: chunk, 
-  category, 
-  tags, 
-  url_affiliates_map: urlAffiliatesMap, 
-  repair_mode,
-  refresh_photo: Boolean(refresh_photo),
-  reserved_ids: reservedIds
-});
+export const PHOTO_PICKER_SCHEMA = {
+  type: 'object',
+  properties: {
+    best_index: { type: 'integer' },
+    candidates: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          index: { type: 'integer' },
+          has_person: { type: 'boolean' },
+          text_overlay: { type: 'string', enum: ['none', 'light', 'heavy'] },
+          text_area_pct: { type: 'integer' },
+          is_infographic: { type: 'boolean' },
+          is_collage: { type: 'boolean' },
+          product_visible: { type: 'boolean' },
+          score: { type: 'integer' }
+        },
+        required: ['index', 'has_person', 'text_overlay', 'text_area_pct', 'is_infographic', 'is_collage', 'product_visible', 'score']
+      }
+    }
+  },
+  required: ['best_index', 'candidates']
+};
+
+// Di evaluateCandidateScores:
+const isAcceptable = !hasPerson && !isCollage && productVisible && !(isInfographic && textAreaPct > 30);
+
+// S7 Fallback jika acceptable.length === 0:
+const eligibleWithoutPerson = evaluated.filter(c => !c.has_person && c.product_visible && c.score >= 70);
+if (eligibleWithoutPerson.length > 0) {
+  eligibleWithoutPerson.sort((a, b) => b.score - a.score || (b.w * b.h) - (a.w * a.h));
+  const fallback = eligibleWithoutPerson[0];
+  return {
+    selectedIndex: fallback.index,
+    selectedCandidate: fallback,
+    needsReview: true,
+    reason: 'dipilih otomatis, perlu ditinjau',
+    shouldAttemptClean: true,
+    evaluated
+  };
+}
 ```
 
 ---
 
-## ## Execution Task List
+### 2.2. `lib/product-photo-picker.js` (S8 Padding 10%)
 
-- [x] **Task 1: Perbaikan S1 (Fatal processCleanInputPath is not defined & multi-reason decidePhotoStatus)**
-  - [x] Deklarasikan `let processCleanInputPath = null;` di awal per-product loop `lib/scheduler-processors.js`
-  - [x] Integrasikan kembali alur foto produk ke fungsi yang terisolasi dan aman (`processProductPhotoFromRaw`)
-  - [x] Perbarui `decidePhotoStatus()` di `lib/product-photo-picker.js` agar menggabungkan semua alasan ke `photo_error`
-  - [x] Buat unit test alur pemrosesan foto end-to-end dengan mock di `tests/product-photo-flow.test.js`
+#### Sebelum (Current/Before):
+```javascript
+  const normW = Math.max(0, coords.xmax - coords.xmin);
+  const normH = Math.max(0, coords.ymax - coords.ymin);
+  const padX = Math.round(normW * 0.06);
+  const padY = Math.round(normH * 0.06);
+```
 
-- [x] **Task 2: Perbaikan S2 (Deteksi 404 & Scraping Job Status)**
-  - [x] Kembalikan `httpStatus` di `lib/playwright-scraper.js`
-  - [x] Buat fungsi murni `detectNotFoundPage` di `lib/url-scraper.js`
-  - [x] Tolak AI Search Grounding fallback jika `PRODUCT_NOT_FOUND`
-  - [x] Lewati penyimpanan database di `processProductScraper` untuk URL 404 dan catat ke `errors`
-  - [x] Tambahkan `status_summary` (`failed`, `partial`, `ok`) pada hasil job
-  - [x] Buat endpoint route `app/api/v2/products/scrape/jobs/[jobId]/route.js`
-  - [x] Daftarkan tool MCP `cf_get_scrape_status` di `apps/mcp/tools.mjs`
-  - [x] Tambahkan fixture `tests/fixtures/tokopedia_404_2026.html` dan unit test di `tests/url-scraper-not-found.test.js`
-  - [x] Buat skrip dry-run `scripts/flag-not-found-products.mjs`
+#### Sesudah (Proposed/After):
+```javascript
+  const normW = Math.max(0, coords.xmax - coords.xmin);
+  const normH = Math.max(0, coords.ymax - coords.ymin);
+  const padX = Math.round(normW * 0.10);
+  const padY = Math.round(normH * 0.10);
+```
 
-- [x] **Task 3: Perbaikan S3 (Validasi URL Kandidat & Decode Entitas HTML)**
-  - [x] Tambahkan `isValidProductImageUrl` di `lib/url-scraper.js` (tolak URL domain-only dan non-image)
-  - [x] Terapkan decode `&amp;` -> `&` pada URL hasil regex
-  - [x] Terapkan validasi `isValidProductImageUrl` di `pickBestProductPhoto` dan cadangan ekstraksi
-  - [x] Buat unit test validasi URL di `tests/url-scraper-tokopedia-images.test.js`
+---
 
-- [x] **Task 4: Perbaikan S4 (Tenant Sesi MCP Sampai ke Job & Tenant-Scoped Isolation)**
-  - [x] Tambahkan `tenant_id: getActiveTenantId()` di route `app/api/v2/products/scrape/route.js`
-  - [x] Tambahkan `tenant_id: getActiveTenantId()` di seluruh `createJob` pada `app/api/v2/products/[id]/photo-replace/route.js`
-  - [x] Batasi pencarian produk eksisting di route dan di `processProductScraper` dengan `WHERE tenant_id = ?`
-  - [x] Pastikan `createProductExtraction` menyimpan `tenant_id` dari konteks job
-  - [x] Buat skrip dry-run `scripts/move-product-tenant.mjs`
-  - [x] Tambahkan unit test isolasi tenant scraper di `tests/product-scraper-tenant.test.js`
+### 2.3. `lib/bg-remover.js` (S8 Bypass Rembg Latar Putih)
 
-- [x] **Task 5: Verifikasi Menyeluruh & Laporan**
-  - [x] Jalankan seluruh suite tes: `node --test tests/*.test.js`, `npm run test:product-catalog`, `npm run test:mcp` (23 unit tests pass, product catalog pass, MCP 11 tests pass)
-  - [x] Jalankan `npm run build` (Next.js 16 build sukses)
-  - [x] Jalankan dry-run lokal Cuculemon (foto clean terbentuk, tidak ada ReferenceError) dan Texania (terdeteksi 404 tanpa fallback Gemini)
-  - [x] Jalankan skrip dry-run S1, S2, S4 untuk Staging
-  - [x] Susun laporan komprehensif ke pengguna dan minta izin untuk langkah rilis
+#### Sebelum (Current/Before):
+```javascript
+// Langsung panggil rembg atau imgly tanpa cek warna latar belakang
+```
+
+#### Sesudah (Proposed/After):
+```javascript
+export async function isPlainWhiteBackground(bufferOrPath) {
+  // Cek piksel tepi 4% menggunakan Sharp raw
+  // Jika >= 95% piksel memiliki luminansi >= 245 dan deviasi warna (max - min) <= 15 -> return true
+}
+
+// Di createCleanProductShot:
+if (await isPlainWhiteBackground(inputImagePath)) {
+  // Lewati rembg, ratakan ke kanvas putih dengan sharp
+  await sharp(inputImagePath)
+    .flatten({ background: { r: 255, g: 255, b: 255 } })
+    .jpeg({ quality: 90 })
+    .toFile(finalOutputPath);
+  return `/uploads/products/clean/${outputFilename}`;
+}
+```
+
+---
+
+### 2.4. `lib/product-bulk-worker.js` & `app/api/v2/products/[id]/route.js` (S9)
+
+#### Sebelum (Current/Before):
+```javascript
+// Di worker:
+await pgQuery(`
+  UPDATE product_extractions
+  SET enrichment_status = 'failed',
+      enrichment_error = $1,
+...
+`, [err.message.slice(0, 500), id, tenantId]);
+
+// Di GET /api/v2/products/[id]:
+return NextResponse.json({ success: true, data: product });
+```
+
+#### Sesudah (Proposed/After):
+```javascript
+// Di worker:
+let enrichmentError = err.message.slice(0, 500);
+const msgLower = err.message.toLowerCase();
+if (msgLower.includes('quota') || msgLower.includes('rate limit') || msgLower.includes('resource_exhausted') || msgLower.includes('429') || msgLower.includes('503')) {
+  enrichmentError = `QUOTA_EXHAUSTED (dapat diulang): ${err.message}`.slice(0, 500);
+}
+...
+
+// Di GET /api/v2/products/[id]:
+const errText = (product.enrichment_error || '').toLowerCase();
+const isQuota = errText.includes('quota') || errText.includes('rate limit') || errText.includes('resource_exhausted') || errText.includes('429') || errText.includes('503');
+if (product.enrichment_status === 'failed' && isQuota) {
+  product.enrichment_retryable = true;
+  product.enrichment_retry_hint = 'Jalankan cf_enrich_product untuk mengulang';
+}
+return NextResponse.json({ success: true, data: product });
+```
+
+---
+
+## 3. Execution Task List
+
+- [x] **Task 1: S8 — Margin Crop 10% & Bypass Rembg Latar Putih**
+  - [x] Ubah padding crop di `computeCropBox()` dari 6% menjadi 10%
+  - [x] Implementasikan `isPlainWhiteBackground()` di `lib/bg-remover.js`
+  - [x] Integrasikan `isPlainWhiteBackground()` ke dalam `createCleanProductShot()`
+  - [x] Buat tes unit `tests/product-photo-crop-rembg.test.js`
+
+- [x] **Task 2: S6 & S7 — Rubrik Picker E-Commerce & Fallback Clean Needs Review**
+  - [x] Perbarui `PHOTO_PICKER_SCHEMA` dengan `text_area_pct` dan `is_collage`
+  - [x] Perbarui `PHOTO_PICKER_PROMPT` dengan instruksi & contoh e-commerce Indonesia
+  - [x] Perbarui `evaluateCandidateScores()` dengan aturan pelonggaran teks overlay
+  - [x] Tambahkan logika cabang S7: fallback skor ≥ 70 tanpa orang tetap clean `needs_review` (`shouldAttemptClean: true`), vs semua memuat orang/skor < 70 (`shouldAttemptClean: false`)
+  - [x] Integrasikan `shouldAttemptClean` di `lib/scheduler-processors.js`
+  - [x] Buat fixture `tests/fixtures/photo_picker_cuculemon_eval.json` dan tes unit `tests/product-photo-rubric.test.js`
+
+- [x] **Task 3: S5 — Galeri Lengkap Playwright Scraper (≥ 5 Kandidat ≥ 600px)**
+  - [x] Tambahkan interaksi thumbnail galeri (hover/klik hingga 8 thumbnail) di `lib/playwright-scraper.js`
+  - [x] Trigger scroll galeri dan tangkap `currentSrc` foto utama
+  - [x] Tambahkan validasi ukuran varian CDN (`:700:0`, `:1200:0`, `/cache/900/`) dengan fallback aman
+  - [x] Filter kandidat < 600px jika kandidat ≥ 600px sudah mencukupi (≥ 2)
+  - [x] Catat metrik jumlah kandidat dan resolusi pada log job dan audit
+
+- [x] **Task 4: S9 — Enrichment Gagal Kuota Jelas & Retryable + Mockup UI**
+  - [x] Tambahkan penanganan `QUOTA_EXHAUSTED (dapat diulang)` di `lib/product-bulk-worker.js`
+  - [x] Tambahkan field turunan `enrichment_retryable` dan hint di `app/api/v2/products/[id]/route.js`
+  - [x] Buat tes unit `tests/product-enrichment-retryable.test.js`
+  - [x] Perbarui mockup UI `public/mockup_foto_produk_review.html` untuk mendemonstrasikan badge retry kuota dan sinkronkan ke Staging Mac Mini
+
+- [x] **Task 5: Perbaikan Kecil — Trace Context Stage**
+  - [x] Berikan `traceContext: { stage: 'product_photo_crop' }` pada smart crop
+  - [x] Berikan `traceContext: { stage: 'product_photo_final_check' }` pada final check
+  - [x] Berikan `traceContext: { stage: 'product_photo_picker' }` pada photo picker
+
+- [x] **Task 6: Verifikasi Lokal Penuh**
+  - [x] Jalankan seluruh unit test (`node --test tests/*.test.js`)
+  - [x] Jalankan `npm run test:product-catalog` dan `npm run test:mcp`
+  - [x] Jalankan `npm run build` (Next.js kompilasi)
+
+- [ ] **Task 7: Push & Deploy ke Dev Mac Mini**
+  - [ ] Commit dan push branch `fitur/scraper-foto-galeri-r02` ke remote
+  - [ ] Deploy ke server Dev: `npm run deploy:dev:atomic -- --ref <full-sha> --apply --confirm-dev`
+  - [ ] Verifikasi Dev online (Port 5020 UI, Port 7020 API)
+  - [ ] Sajikan laporan ringkas, link Dev, dan checklist uji singkat untuk pengguna

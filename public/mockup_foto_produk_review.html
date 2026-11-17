@@ -308,6 +308,26 @@
       border: 1px solid var(--status-info);
     }
 
+    .badge-retryable {
+      background: var(--status-danger-soft);
+      color: var(--status-danger);
+      border: 1px solid var(--status-danger);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: var(--radius-xs);
+      font-size: 11px;
+      font-weight: 700;
+      transition: all 0.15s ease;
+    }
+
+    .badge-retryable:hover {
+      background: var(--status-danger);
+      color: #fff;
+    }
+
     @keyframes pulse {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.75; }
@@ -739,6 +759,39 @@
         </div>
       </div>
 
+      <!-- CARD 4: Cuculemon Tumbler (S9: enrichment gagal kuota retryable) -->
+      <div class="card" id="card-cuculemon" data-status="approved">
+        <div class="card-top">
+          <div class="thumb-box">
+            <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231e293b'/><rect x='35' y='20' width='30' height='60' rx='8' fill='%232dd4bf'/><rect x='42' y='12' width='16' height='8' rx='2' fill='%235eead4'/><text x='50' y='55' font-size='9' font-weight='bold' text-anchor='middle' fill='%23000'>1000ML</text></svg>" alt="Cuculemon Tumbler">
+          </div>
+          <div class="card-info">
+            <div class="tag-row">
+              <span class="badge-status badge-approved">✅ Foto Bersih (S6 Lolos)</span>
+              <span style="font-size: 11px; color: var(--text-muted); background: var(--surface-raised); padding: 2px 6px; border-radius: 4px;">Kitchen</span>
+            </div>
+            <h4 class="card-title">Cuculemon Tumbler Stainless Steel 1000ml</h4>
+            <div style="margin-top: 6px;">
+              <button class="badge-retryable" id="btn-retry-cuculemon" onclick="triggerRetryEnrichment('cuculemon')">
+                <span>⚠️ Enrichment gagal (kuota)</span>
+                <span style="text-decoration: underline; margin-left: 2px;">· Ulangi 🔄</span>
+              </button>
+            </div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+              ID: pe_1794900810596_563
+            </div>
+          </div>
+        </div>
+        <div class="card-actions">
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary" onclick="openReplaceModal('cuculemon')">
+              🔄 Ganti Foto
+            </button>
+          </div>
+          <span style="font-size: 11px; font-family: var(--font-mono); color: var(--text-muted);">Tokopedia</span>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -1045,6 +1098,23 @@
         document.getElementById('btn-approve-habarlic').style.display = 'none';
         showToast('Foto produk berhasil diganti & diverifikasi!');
       }, 1500);
+    }
+
+    // S9: Simulasi Retry Enrichment (Katalog Produk)
+    function triggerRetryEnrichment(id) {
+      const btn = document.getElementById('btn-retry-' + id);
+      if (!btn) return;
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳ Mengantrekan...</span>';
+      showToast('🔄 Memasukkan produk ke antrean AI Enrichment...', '⏳');
+
+      setTimeout(() => {
+        btn.innerHTML = '<span>✅ Sedang diproses AI</span>';
+        btn.style.background = 'var(--status-info-soft)';
+        btn.style.borderColor = 'var(--status-info)';
+        btn.style.color = 'var(--status-info)';
+        showToast('Produk berhasil diantrekan untuk AI Enrichment ulang!');
+      }, 1200);
     }
   </script>
 </body>
