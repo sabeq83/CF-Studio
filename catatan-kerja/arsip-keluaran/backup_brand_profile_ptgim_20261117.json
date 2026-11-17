@@ -1,0 +1,25 @@
+{
+  "dicadangkan": "2026-11-17",
+  "tenant": "tnt_pt-gim-sosmed_62d0d9",
+  "catatan": "Cadangan brand profile sebelum perubahan Tahap 1 (Week 2 CFA). Kolom lain (logo_url, brand_color, brand_tagline, default_cta_*, safety_notice_text, presenter_*, brand_location, finishing_*) bernilai null.",
+  "profil": [
+    {
+      "id": "22341d47-b091-461c-ae43-28b340675187",
+      "brand_name": "Solusi Thermal ID",
+      "tone_of_voice": "Profesional/Edukatif",
+      "visual_signature": "Photorealistic industrial building, hot metal roof, visible heat waves, thermal insulation layer, scientific cutaway visualization, orange-to-blue temperature contrast, clean technical graphics, cinematic lighting, realistic material texture.",
+      "editorial_brand_context": "Solusi Thermal ID adalah media edukasi dan solusi insulasi panas untuk rumah, ruko, gudang, pabrik, peternakan, serta bangunan komersial.\nBrand ini membantu audiens mengenali sumber panas pada bangunan dan memilih material yang sesuai, mulai dari Glasswool Standard, Glasswool Foil, Rockwool Blanket, Bubble Foil, hingga Alum Thermal.\nKonten disampaikan dengan bahasa sederhana, visual yang mudah dipahami, dan berorientasi pada solusi nyata sesuai jenis atap, kondisi bangunan, serta anggaran pelanggan.",
+      "editorial_content_goal": "Meningkatkan kesadaran bahwa suhu panas pada bangunan dapat dikurangi dengan insulasi yang tepat.\nMengenalkan fungsi dan keunggulan setiap produk insulasi panas.\nMembantu audiens membedakan material berdasarkan kebutuhan dan anggaran.\nMenampilkan penggunaan produk pada berbagai jenis bangunan.\nMembangun kepercayaan terhadap produk dan keahlian PT GIM.\nMengarahkan audiens untuk bertanya, berkonsultasi, meminta penawaran, atau membeli produk.",
+      "editorial_content_pillars_json": "[\"Kenali Masalah Panas\",\"Kenali Produk Thermal\",\"Pilih Material yang Tepat\",\"Solusi Berdasarkan Bangunan\",\"Demo dan Pembuktian\",\"Tips Aplikasi dan Pemasangan\",\"FAQ dan Konsultasi Thermal\"]"
+    },
+    {
+      "id": "d3eae712-7f86-4e1b-b117-edc9feaf4665",
+      "brand_name": "Ruang Akustik ID",
+      "tone_of_voice": "Profesional/Edukatif",
+      "visual_signature": "Modern acoustic room, visible sound waves, acoustic wall treatment, soundproofing material layers, dark navy interior, cyan waveform accents, cinematic lighting, symmetrical composition, realistic acoustic panel texture, premium technical visualization.",
+      "editorial_brand_context": "Ruang Akustik ID adalah media edukasi dan solusi untuk mengurangi kebisingan, kebocoran suara, serta gema di dalam ruangan.\nBrand ini membantu audiens memahami perbedaan antara material insulasi suara dan material treatment akustik, kemudian memilih produk yang sesuai: Rockwool Slab, Rockwool Blanket, Glasswool Board, Akustik Panel, Busa Telur, dan Busa Piramid.\nTarget pengguna meliputi rumah tinggal, kamar, studio musik, studio podcast, ruang meeting, kantor, sekolah, tempat ibadah, kafe, karaoke, hingga fasilitas industri.",
+      "editorial_content_goal": "Mengedukasi audiens mengenai kebisingan, kebocoran suara, gema, dan kualitas akustik.\nMeluruskan perbedaan antara peredam suara dan penyerap gema.\nMengenalkan fungsi dan aplikasi setiap produk.\nMembantu calon pelanggan menentukan material berdasarkan masalah ruangannya.\nMenunjukkan bahwa hasil akustik dipengaruhi oleh material, konstruksi, dan cara pemasangan.\nMenghasilkan konsultasi, permintaan produk, dan peluang proyek.",
+      "editorial_content_pillars_json": "[\"Kenali Masalah Suara\",\"Peredam vs Treatment Akustik\",\"Kenali Produk Akustik\",\"Solusi Berdasarkan Ruangan\",\"Sistem Konstruksi Peredam\",\"Treatment dan Estetika Ruangan\",\"Demo, FAQ, dan Konsultasi\"]"
+    }
+  ]
+}

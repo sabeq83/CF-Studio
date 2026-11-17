@@ -1,0 +1,272 @@
+{
+  "dicadangkan": "2026-11-17",
+  "catatan": "VI v3 Solusi Thermal & Ruang Akustik sebelum disambungkan ke Universe (Staging)",
+  "vi": [
+    {
+      "id": "ptgim_vi_ruang_akustik_v1_tnt_pt_gim_sosmed_62d0d9",
+      "tenant_id": "tnt_pt-gim-sosmed_62d0d9",
+      "preset_key": "ruang_akustik_id",
+      "label": "Ruang Akustik ID (Maya)",
+      "description": "Visual identity resmi Ruang Akustik ID: Karakter 3D Maya Acoustic Architect, peredaman suara ruang, interior premium, dan visualisasi gelombang suara cyan lembut.",
+      "status": "active",
+      "version": 3,
+      "config": {
+        "label": "Ruang Akustik ID (Maya)",
+        "style": {
+          "preset_key": "stylized_3d_character",
+          "aspect_ratio": "9:16",
+          "custom_description": "Pixar and DreamWorks style elegant 3D animation, charming expressive female character modeling, quiet luxury aesthetic lighting"
+        },
+        "camera": {
+          "framing": "editorial_wide",
+          "movement": "subtle_handheld",
+          "lens_look": "natural_50mm",
+          "perspective": "third_person",
+          "depth_of_field": "shallow"
+        },
+        "subject": {
+          "kind": "stylized_3d_character",
+          "faceless_mode": "not_applicable",
+          "universe_name": null,
+          "universe_slug": null,
+          "character_keys": [],
+          "character_count": 1,
+          "demographic_key": "custom",
+          "face_visibility": "allowed",
+          "population_mode": "single",
+          "custom_description": "charming stylized 3D stylish young female Acoustic Architect named Maya, beautiful expressive face, chic dark bob haircut, high-tech studio headphones around neck, tailored navy blue blazer with glowing electric cyan accents",
+          "universe_profile_id": null
+        },
+        "lighting": {
+          "contrast": "soft",
+          "preset_key": "custom",
+          "color_temperature": "warm_neutral",
+          "custom_description": "warm ambient interior architectural lighting with subtle neon electric cyan accents highlighting acoustic wall textures"
+        },
+        "wardrobe": {
+          "mode": "fixed",
+          "material": "premium matte tailored fabric",
+          "preset_key": "custom",
+          "accessories": [
+            "designer studio headphones",
+            "digital sound level analyzer"
+          ],
+          "primary_color": "#0F172A",
+          "sleeve_policy": "not_applicable",
+          "secondary_color": "#06B6D4",
+          "custom_description": "smart-casual navy tailored blazer with glowing electric cyan accents, dark inner top, modern designer studio headphones around neck"
+        },
+        "rendering": {
+          "finish": "soft_matte",
+          "geometry": "simplified_semi_realistic",
+          "textures": [
+            "clean_matte_3d",
+            "porous_acoustic_felt",
+            "slatted_walnut_wood",
+            "matte_dark_wall_panel"
+          ],
+          "shadow_style": "soft_ambient"
+        },
+        "guardrails": {
+          "extra_people": "prohibited",
+          "identity_drift": "prohibited",
+          "wardrobe_drift": "prohibited",
+          "face_visibility": "allowed",
+          "reflection_face": "allowed",
+          "intentional_crowd": "allowed_faceless",
+          "unintended_people": "prohibited",
+          "required_negative_prompts": [
+            "creepy realistic human face",
+            "uncanny valley photorealism",
+            "harsh cluttered background",
+            "amateur 2D clipart"
+          ]
+        },
+        "composition": {
+          "safe_zone": "vertical_social_ui",
+          "negative_space": "required",
+          "primary_idea_count": 1,
+          "primary_subject_count": 1
+        },
+        "description": "Visual identity edukasi akustik interior dan peredam gema bersama Maya Acoustic Architect.",
+        "environment": {
+          "props": [
+            "digital decibel meter",
+            "holographic sound spectrum tablet",
+            "acoustic diffuser slats"
+          ],
+          "preset_key": "custom",
+          "material_palette": [
+            "dark acoustic felt panel",
+            "warm walnut wood",
+            "soundproof double-glazed glass"
+          ],
+          "background_density": "balanced",
+          "custom_description": "luxury modern conference room and acoustic studio with dark 3D geometric acoustic wall panels, vertical walnut wood slats, and peaceful ambient evening lighting"
+        },
+        "mode_routing": {
+          "hook": "stylized_3d_character",
+          "context": "stylized_3d_character",
+          "mechanism": "symbolic_surrealism",
+          "conclusion": "stylized_3d_character",
+          "consequence": "commercial_product_cinematic",
+          "evidence_reveal": "commercial_product_cinematic"
+        },
+        "schema_version": "2",
+        "metaphor_engine": {
+          "enabled": true,
+          "pattern": "concept_to_object_to_action"
+        },
+        "visual_language": {
+          "primary_style": "stylized_3d_character",
+          "disabled_styles": [
+            "editorial_graphic_novel",
+            "shadow_silhouette",
+            "clay_political_theater"
+          ],
+          "supporting_styles": [
+            "commercial_product_cinematic",
+            "symbolic_surrealism"
+          ]
+        }
+      },
+      "created_by": null,
+      "created_at": "2026-10-07T21:43:07.252Z",
+      "updated_at": "2026-10-07T21:47:57.304Z",
+      "source": "user"
+    },
+    {
+      "id": "ptgim_vi_solusi_thermal_v1_tnt_pt_gim_sosmed_62d0d9",
+      "tenant_id": "tnt_pt-gim-sosmed_62d0d9",
+      "preset_key": "solusi_thermal_id",
+      "label": "Solusi Thermal ID (Reno)",
+      "description": "Visual identity resmi Solusi Thermal ID: Karakter 3D Reno Thermal Engineer, sains perpindahan panas, atap pabrik/bangunan metal, simulasi inframerah panas vs ruangan sejuk 21°C.",
+      "status": "active",
+      "version": 3,
+      "config": {
+        "label": "Solusi Thermal ID (Reno)",
+        "style": {
+          "preset_key": "stylized_3d_character",
+          "aspect_ratio": "9:16",
+          "custom_description": "Pixar and DreamWorks style charming 3D animation, crisp expressive character modeling, vibrant educational lighting, premium 3D render"
+        },
+        "camera": {
+          "framing": "editorial_wide",
+          "movement": "subtle_handheld",
+          "lens_look": "natural_50mm",
+          "perspective": "third_person",
+          "depth_of_field": "shallow"
+        },
+        "subject": {
+          "kind": "stylized_3d_character",
+          "faceless_mode": "not_applicable",
+          "universe_name": null,
+          "universe_slug": null,
+          "character_keys": [],
+          "character_count": 1,
+          "demographic_key": "custom",
+          "face_visibility": "allowed",
+          "population_mode": "single",
+          "custom_description": "charming stylized 3D young male Thermal Engineer named Reno, friendly expressive face with clear eyes, smart glasses, neat hair under electric blue safety helmet, dark navy jumpsuit with bright solar-orange thermal accents",
+          "universe_profile_id": null
+        },
+        "lighting": {
+          "contrast": "high_contrast",
+          "preset_key": "custom",
+          "color_temperature": "warm_neutral",
+          "custom_description": "vibrant 3D studio lighting with dual color temperature: blazing warm solar orange above roof and cool azure ambient glow beneath insulation"
+        },
+        "wardrobe": {
+          "mode": "fixed",
+          "material": "technical workwear fabric",
+          "preset_key": "custom",
+          "accessories": [
+            "smart tech glasses",
+            "infrared thermal tablet scanner"
+          ],
+          "primary_color": "#0F172A",
+          "sleeve_policy": "not_applicable",
+          "secondary_color": "#FF6B35",
+          "custom_description": "dark navy technical jumpsuit with bright solar-orange thermo stripes, electric blue safety helmet, smart glasses"
+        },
+        "rendering": {
+          "finish": "soft_matte",
+          "geometry": "simplified_semi_realistic",
+          "textures": [
+            "clean_matte_3d",
+            "shiny_aluminum_foil",
+            "corrugated_metal_roof",
+            "thermal_insulation_foam"
+          ],
+          "shadow_style": "soft_ambient"
+        },
+        "guardrails": {
+          "extra_people": "prohibited",
+          "identity_drift": "prohibited",
+          "wardrobe_drift": "prohibited",
+          "face_visibility": "allowed",
+          "reflection_face": "allowed",
+          "intentional_crowd": "allowed_faceless",
+          "unintended_people": "prohibited",
+          "required_negative_prompts": [
+            "creepy realistic human face",
+            "uncanny valley photorealism",
+            "amateur 2D clipart",
+            "dark gloomy horror mood"
+          ]
+        },
+        "composition": {
+          "safe_zone": "vertical_social_ui",
+          "negative_space": "required",
+          "primary_idea_count": 1,
+          "primary_subject_count": 1
+        },
+        "description": "Visual identity edukasi termal dan insulasi peredam panas atap bersama Reno Thermal Engineer.",
+        "environment": {
+          "props": [
+            "infrared thermal tablet",
+            "digital temperature display",
+            "3D cutaway roof model"
+          ],
+          "preset_key": "custom",
+          "material_palette": [
+            "corrugated zincalume metal",
+            "aluminum foil radiant barrier",
+            "structural steel beams"
+          ],
+          "background_density": "balanced",
+          "custom_description": "modern factory warehouse with corrugated metal roof, cross-section roof insulation diagram, bright warm sunbeams contrasting with cool blue conditioned interior"
+        },
+        "mode_routing": {
+          "hook": "stylized_3d_character",
+          "context": "stylized_3d_character",
+          "mechanism": "isometric_society",
+          "conclusion": "stylized_3d_character",
+          "consequence": "commercial_product_cinematic",
+          "evidence_reveal": "commercial_product_cinematic"
+        },
+        "schema_version": "2",
+        "metaphor_engine": {
+          "enabled": true,
+          "pattern": "concept_to_object_to_action"
+        },
+        "visual_language": {
+          "primary_style": "stylized_3d_character",
+          "disabled_styles": [
+            "editorial_graphic_novel",
+            "shadow_silhouette",
+            "clay_political_theater"
+          ],
+          "supporting_styles": [
+            "commercial_product_cinematic",
+            "isometric_society"
+          ]
+        }
+      },
+      "created_by": null,
+      "created_at": "2026-10-07T21:43:07.252Z",
+      "updated_at": "2026-10-07T21:47:57.304Z",
+      "source": "user"
+    }
+  ]
+}

@@ -14,6 +14,7 @@ Terakhir diperbarui: 17 November 2026
 | `USULAN_JADWAL_CLAUDE_DESKTOP_MACMINI.md` | Usulan: Menyusun Jadwal CF Autopipeline Sendiri lewat Claude Desktop di Mac Mini |
 | `USULAN_JALUR_FLEKSIBEL_CFA.md` | Usulan: Jalur Konten Fleksibel untuk CF Autopipeline (CFA) |
 | `USULAN_LINK_AFFILIATE_KOMENTAR_YOUTUBE.md` | Usulan: Link Affiliate Shopee di Komentar Pertama YouTube |
+| `USULAN_NOTIFIKASI_TELEGRAM_TAYANG_CFA.md` | Usulan: Notifikasi Telegram CFA — "Video Siap Ditonton" dan "Sudah Tayang + Link Post" |
 | `USULAN_PERBAIKAN_NARASI_VO_CFSTUDIO.md` | Usulan Perbaikan Narasi VO (Gemini) — Kampanye Pilar & Multiplier |
 | `USULAN_PERBAIKAN_PRESET_BRIDGING_AUTOPIPELINE.md` | Analisa & Usulan Perbaikan: Ketidaksesuaian Preset Bridging pada Kampanye `opc_261115_w7tsy0` |
 | `USULAN_PERBAIKAN_SCRAPER_FOTO_PRODUK.md` | Usulan: Perbaikan Scraper Foto Produk (pilih foto produk saja) |
@@ -22,12 +23,15 @@ Terakhir diperbarui: 17 November 2026
 | `USULAN_SOP_KARTU_KONTEKS_MENU.md` | USULAN — SOP Kartu Konteks Menu CF Studio (Hemat Token) |
 | `USULAN_SUMBER_VIDEO_VIDEO_STUDIO.md` | Usulan: Sumber Video di Video Studio Disambungkan ke Kampanye Aktif |
 | `USULAN_TEMPLATE_FINISHING_TAMBAHAN.md` | Usulan 5 Template Finishing Tambahan (total 7) |
+| `DRAF_BRAND_PROFILE_PTGIM_W2.md` | Draf isian brand profile baru Solusi Thermal ID & Ruang Akustik ID (Tahap 1 Week 2 CFA) |
+| `USULAN_VI_MULTI_LATAR_PTGIM.md` | Usulan: Visual Identity Multi-Latar untuk Solusi Thermal ID & Ruang Akustik ID (PT GIM) |
 | `audit_produk_db_usulan.md` | Audit Forensik & Usulan Solusi Isolasi Database Produk MAKNA Flow |
 
 ## INSTRUKSI-AGENT
 
 | Nama File | Ringkasan / Judul |
 |---|---|
+| `antigravity_character_lock_custom_storyboard_instructions.md` | Instruksi Antigravity — Character Lock untuk Custom Storyboard (jalur CFA, wajah Reno/Maya konsisten) |
 | `HANDOFF_ANTIGRAVITY_4_CELAH_MCP_PUBLISH.md` | Handoff Antigravity: 4 Celah CF Studio untuk CF Autopipeline (CFA) |
 | `HANDOFF_ANTIGRAVITY_FIX_TOPICCOMPLIANCE_CUSTOM_STORYBOARD.md` | Handoff Antigravity: Custom Storyboard `gemini_engineer` Selalu Gagal |
 | `HANDOFF_ANTIGRAVITY_MULTIPLIER_LOKASI_PER_KLIP.md` | Handoff Antigravity: Multiplier Selalu di "Meja Kayu", Lokasi per Klip Tidak Jalan |
@@ -71,6 +75,7 @@ Terakhir diperbarui: 17 November 2026
 | Nama File | Ringkasan / Judul |
 |---|---|
 | `analitik_mingguan_implementation_plan.md` | Implementation Plan: Analitik Performa Konten via Repliz (Paket Gold) |
+| `kartu_menu_dan_perapian_folder_implementation_plan.md` | Implementation Plan: Kartu Menu & Perapian Folder (v2.50.1, selesai) |
 | `deconstruct_lab_implementation_plan.md` | Implementation Plan — Rekonstruksi Deconstruct Lab |
 | `finishing_pass_implementation_plan.md` | Finishing Pass Implementation Plan & Execution Tracker (`v2.45.x`) — `(Revisi 03)` |
 | `finishing_satu_fokus_implementation_plan.md` | Implementation Plan: Finishing "Satu Fokus", Skin General & Babak Natural |
@@ -89,6 +94,7 @@ Terakhir diperbarui: 17 November 2026
 | `LAPORAN_KARTU_MENU_DAN_PERAPIAN_FOLDER.md` | Laporan Pelaksanaan: Kartu Menu & Perapian Folder Proyek |
 | `LAPORAN_PERBAIKAN_SCRAPER_FOTO_PRODUK.md` | Laporan Resmi: Perbaikan Scraper Foto Produk E-Commerce (Pilih Foto Bersih) |
 | `LAPORAN_RILIS_DAN_DEPLOY_SCRAPER_FOTO_PRODUK.md` | Laporan Resmi Rilis, Deployment, & Verifikasi End-to-End Scraper Foto Produk |
+| `RISET_KATA_KUNCI_PTGIM_W2.md` | Riset Kata Kunci Week 2 Solusi Thermal ID & Ruang Akustik ID (43 + 43, per kelompok latar) |
 | `maknagrid_published_facebook_videos.md` | Maknagrid Published Facebook Video IDs |
 
 ## KONTEN
@@ -102,6 +108,8 @@ Terakhir diperbarui: 17 November 2026
 
 | Nama File | Ringkasan / Judul |
 |---|---|
+| `backup_vi_v3_ptgim_20261117.json` | Cadangan VI v3 Reno & Maya sebelum disambungkan ke Universe (17 Nov 2026) |
+| `backup_brand_profile_ptgim_20261117.json` | Cadangan brand profile Solusi Thermal ID & Ruang Akustik ID sebelum perubahan 17 Nov 2026 |
 | `diff.txt` | ��d i f f   - - g i t   a / l i b / s h e e t s - a u t o p i l o t - w o r k e r . j s   b / l i b  |
 | `diff_wsl.txt` | ��d i f f   - - g i t   a / l i b / s h e e t s - a u t o p i l o t - w o r k e r . j s   b / l i b  |
 | `diff_wsl_utf8.txt` | diff --git a/lib/sheets-autopilot-worker.js b/lib/sheets-autopilot-worker.js |

@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.50.2 — Character Lock untuk Custom Storyboard (CFA) (17/11/2026)
+- Snapshot Visual Identity kini disimpan pada kampanye custom storyboard sehingga Character Lock (gambar acuan karakter Universe) aktif untuk jalur CFA
+- Pengaman: VI default tidak tersimpan bila id VI tidak ditemukan
+- Versi VI tidak lagi di-hardcode 1
+- Unit test baru tests/custom-storyboard-character-lock.test.js
+- Dokumen kerja Week 2 PT GIM (usulan VI multi-latar, draf brand profile, riset kata kunci, instruksi, cadangan)
+
 ## V2.50.1 — Kartu Konteks Menu & Perapian Folder (17/11/2026)
 - Kartu konteks ringkas untuk 22 menu + peta menu
 - Dokumen kerja dan skrip scratch dipindah ke folder terstruktur
