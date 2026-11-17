@@ -2,6 +2,8 @@
 
 > **Revisi 01 berlaku (setelah v2.49.1):** baca `antigravity_scraper_foto_produk_revisi_01.md`. Isinya: perbaikan 4 celah backend (audit 2,5 MB, status gagal tetap approved, refresh mengosongkan foto, repair membatalkan needs_review), kualitas crop, tombol Setujui Foto, dan fitur Ganti Foto di UI.
 
+> **Revisi 02 berlaku (uji staging 17 Nov 2026, v2.50.3):** baca `antigravity_scraper_foto_produk_revisi_02.md`. Isinya: bug fatal `processCleanInputPath is not defined` (foto clean tidak terbentuk sejak v2.49.2), deteksi halaman 404, filter kandidat domain-kosong, tenant MCP ke job, galeri lengkap, rubrik picker lebih longgar, margin crop 10% dan latar putih tanpa rembg, serta enrichment gagal kuota yang bisa diulang. Dibagi ke branch `hotfix/*` dan `fitur/*` sesuai SOP baru.
+
 ## Mandat
 
 Kerjakan usulan di `USULAN_PERBAIKAN_SCRAPER_FOTO_PRODUK.md` (root repo), bagian P1–P5 (P6 opsional), agar scraper produk (`cf_scrape_product_url` → job `product_scraper`) memilih **foto produk saja** (tanpa orang/wajah, tanpa banner promo) dan tidak lagi menandai foto bermasalah sebagai `approved`.
