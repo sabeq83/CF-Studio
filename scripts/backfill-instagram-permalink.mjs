@@ -3,9 +3,9 @@
  * (https://www.instagram.com/reel/<angka>/ — tidak bisa dibuka) menjadi link resmi shortcode
  * yang diambil dari Repliz Get One Content.
  *
- * Penggunaan (di server, schema mengikuti PG_SEARCH_PATH):
- *   node --env-file=.env.local scripts/backfill-instagram-permalink.mjs            # dry-run (tidak menulis)
- *   node --env-file=.env.local scripts/backfill-instagram-permalink.mjs --apply    # tulis perubahan
+ * Penggunaan (di server, schema mengikuti PG_SEARCH_PATH; set DISABLE_AUTO_MIGRATIONS=true):
+ *   DISABLE_AUTO_MIGRATIONS=true node --env-file=.env.local scripts/backfill-instagram-permalink.mjs            # dry-run (tidak menulis)
+ *   DISABLE_AUTO_MIGRATIONS=true node --env-file=.env.local scripts/backfill-instagram-permalink.mjs --apply    # tulis perubahan
  *   Opsional: --tenant=<tenant_id>  --limit=200
  */
 import { getPgPool } from '../lib/db-pg.js';
@@ -29,8 +29,10 @@ async function main() {
     FROM publishing_jobs j
     JOIN publishing_accounts a ON a.id = j.account_id AND a.tenant_id = j.tenant_id
     WHERE j.provider = 'repliz' AND j.platform = 'instagram' AND j.status = 'published'
-      AND j.external_post_id IS NOT NULL
-      AND (j.external_permalink IS NULL OR j.external_permalink ~ 'instagram\\.com/(reel|p)/[0-9]+/?$')
+      AND (
+        (j.external_permalink ~ 'instagram\\.com/(reel|p)/[0-9]+/?$')
+        OR (j.external_permalink IS NULL AND j.external_post_id IS NOT NULL)
+      )
       ${filter}
     ORDER BY j.published_at DESC NULLS LAST, j.updated_at DESC
     LIMIT $${params.length}`, params);
@@ -46,9 +48,12 @@ async function main() {
       const m = Object.fromEntries(s.rows.map((x) => [x.setting_key, x.setting_value]));
       credCache[r.tenant_id] = { apiUrl: m.repliz_api_url || 'https://api.repliz.com', accessKey: m.repliz_access_key, secretKey: m.repliz_secret_key };
     }
+    // external_post_id sering kosong; ID media Instagram juga ada di link lama .../reel/<angka>/
+    const postId = r.external_post_id || (String(r.external_permalink || '').match(/\/(?:reel|p)\/(\d+)\/?$/) || [])[1];
     let link = null;
     try {
-      const c = await getReplizContent(credCache[r.tenant_id], r.external_post_id, r.provider_account_id);
+      if (!postId) throw new Error('postId tidak ditemukan');
+      const c = await getReplizContent(credCache[r.tenant_id], postId, r.provider_account_id);
       link = normalizeInstagramPermalink(c?.url);
     } catch (err) {
       console.log(`  ✗ ${r.id}: ${err.message}`);
