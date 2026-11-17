@@ -197,6 +197,12 @@ Langkah:
 - **Jika karakter tidak konsisten:** coba varian dengan VI v4 aktif atau gambar acuan karakter. Laporkan sebelum lanjut.
 - Laporan: `catatan-kerja/laporan/LAPORAN_UJI_CFA_PTGIM.md` (link video + catatan per kriteria).
 
+### Tahap 4b — Perbaikan latar Maya & angka dB (17 Nov)
+- [x] **4b.1** — R1 aturan LOKASI KONSISTEN di `sudut_wajib` kedua jalur
+- [x] **4b.2** — R2/R3 `blok_gaya_t2i` Maya (charming, interior sederhana, tanpa angka) + pengaman serupa untuk Reno
+- [x] **4b.3** — Uji ulang 2 video Maya 18 Nov (2231, 2232): latar stabil, angka dB hilang → lolos
+- [ ] **4b.4** — R4 outro lebih panjang (menunggu keputusan pengguna)
+
 ### Tahap 5 — Instruksi Antigravity: Editorial Campaign latar variatif
 
 File baru: `catatan-kerja/instruksi-agent/antigravity_editorial_latar_variatif_karakter3d_instructions.md`, berisi:
@@ -259,9 +265,9 @@ Instruksi: `catatan-kerja/instruksi-agent/antigravity_character_lock_custom_stor
 - [x] **3.1** — Clone & rapikan preset `solusi_thermal_cfa`, `ruang_akustik_cfa` (17 Nov, revisi 2). Catatan: `cf_clone_preset` mengganti seluruh bagian yang di-override, sehingga dipulihkan dengan `cf_update_preset` berisi config lengkap.
 - [x] **3.2** — Buat VI v4 Reno `vi_mwk2cm17_3b3a3166` & Maya `vi_mwk2cm33_0c9f088c` (v3 tetap)
 - [x] **3.3** — Cek peran VI pada `direct_passthrough` di kode → **temuan: Character Lock kemungkinan besar TIDAK aktif** di jalur ini (lihat "Temuan Tahap 3")
-- [ ] **3.4** — Ubah `cfa-penulis/SKILL.md` (pengecualian karakter utama) di laptop & Mac Mini — setelah persetujuan
-- [ ] **3.5** — `tambah-brand` kedua brand + `panduan_brand` + `blok_gaya_t2i`
-- [ ] **3.6** — `simpan-jalur` kedua jalur (draft), lalu `cek-jalur`
+- [x] **3.4** — `cfa-penulis/SKILL.md` diberi pengecualian jalur berkarakter (pemicu: `sudut_wajib` memuat "KARAKTER UTAMA: <nama>"), laptop & Mac Mini identik (md5 `c8e970af…`)
+- [x] **3.5** — Brand `solusithermal` & `ruangakustik` terdaftar di CFA Mac Mini (tenant `tnt_pt-gim-sosmed_62d0d9`, id-ID) + `panduan_brand` + `blok_gaya_t2i` (cadangan `config.json.bak-20261117-ptgim`)
+- [x] **3.6** — Jalur `solusithermal-edukasi` & `ruangakustik-edukasi` tersimpan & lolos validasi (preset CFA, VI v4, 4 akun Repliz aktif, jam sebar 07:00–20:00, mode draft, video_per_hari=2 untuk uji). `maks_video_per_hari` CFA dinaikkan 8 → 30 (K1)
 
 ### Tahap 3e — Kunci wajah (Character Lock)
 - [x] **3e.1** — Gambar acuan Reno & Maya: **sudah ada** (`/uploads/reference_assets/ptgim_reno_character_sheet.jpg`, `ptgim_maya_character_sheet.jpg`, 1376×768, HTTP 200 di Staging; sama dengan screenshot pengguna)
@@ -273,10 +279,10 @@ Instruksi: `catatan-kerja/instruksi-agent/antigravity_character_lock_custom_stor
 - [x] **3e.5** — Dikerjakan langsung oleh Claude (Antigravity error), terbukti di Staging
 
 ### Tahap 4 — Video uji
-- [ ] **4.1** — Buat 4 item uji (T4, T5, A1, A6)
-- [ ] **4.2** — Riset → naskah → cek-naskah
-- [ ] **4.3** — Produksi 4 video (tanpa publish)
-- [ ] **4.4** — Tulis `LAPORAN_UJI_CFA_PTGIM.md` + link video → pengguna menonton & menilai
+- [x] **4.1** — 4 item uji dibuat (T4 ac netes air di indoor, T5 isolasi pipa steam, A1 suara tetangga terdengar, A6 plafon peredam suara hujan)
+- [x] **4.2** — Riset (1 pencarian/topik, fakta bersumber) → naskah (5 klip, VO 18–22 kata, klip 5 = outro) → `cek-naskah` lolos semua
+- [x] **4.3** — Produksi 4 video selesai (`cst_cbe176164a21`/2227, `cst_c7f9daf7c96b`/2228, `cst_d26797eeee78`/2229, `cst_df4507476942`/2230); Character Lock aktif 20/20 klip
+- [x] **4.4** — `catatan-kerja/laporan/LAPORAN_UJI_CFA_PTGIM.md` + lembar kontak; menunggu penilaian pengguna (temuan: latar Maya bergeser, angka dB melayang, VO klip 5 pendek)
 
 ### Tahap 5 — Instruksi Antigravity
 - [x] **5.0** — Tulis instruksi opsi C: Character Lock untuk custom storyboard → `catatan-kerja/instruksi-agent/antigravity_character_lock_custom_storyboard_instructions.md` (17 Nov)

@@ -91,6 +91,7 @@ Terakhir diperbarui: 17 November 2026
 
 | Nama File | Ringkasan / Judul |
 |---|---|
+| `LAPORAN_UJI_CFA_PTGIM.md` | Laporan Uji CFA PT GIM Week 2 — 4 video (Reno/Maya), temuan & rekomendasi go-live (+ lembar kontak `uji_cfa_ptgim_*_20261117.jpg`, termasuk uji ulang Maya) |
 | `LAPORAN_CHARACTER_LOCK_CUSTOM_STORYBOARD.md` | Laporan: Character Lock untuk Custom Storyboard (CFA) v2.50.2 — terbukti di Staging |
 | `LAPORAN_KARTU_MENU_DAN_PERAPIAN_FOLDER.md` | Laporan Pelaksanaan: Kartu Menu & Perapian Folder Proyek |
 | `LAPORAN_PERBAIKAN_SCRAPER_FOTO_PRODUK.md` | Laporan Resmi: Perbaikan Scraper Foto Produk E-Commerce (Pilih Foto Bersih) |
