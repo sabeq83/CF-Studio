@@ -20,6 +20,40 @@ const PHOTO_BADGE_TONE_STYLES = {
   danger: { background: 'var(--status-danger-soft)', color: 'var(--status-danger)', borderColor: 'var(--status-danger)' }
 };
 
+function isLocalRawUploadUrl(rawUrl) {
+  const val = String(rawUrl || '').trim();
+  if (!val) return false;
+  if (val.startsWith('/uploads')) return true;
+  if (val.startsWith('/api/v2/products/image?')) {
+    try {
+      const parsed = new URL(val, 'http://local');
+      return (parsed.searchParams.get('path') || '').startsWith('/uploads');
+    } catch {
+      return false;
+    }
+  }
+  return false;
+}
+
+function formatPhotoModelLabel(model) {
+  switch (model) {
+    case 'gpt_image_2':
+      return 'GPT Image 2';
+    case 'nano_banana_2':
+      return 'Nano Banana 2';
+    case 'nano_banana_pro':
+      return 'Nano Banana Pro';
+    case 'nano_banana_2_lite':
+      return 'Nano Banana 2 Lite';
+    case 'nano_banana':
+      return 'Nano Banana';
+    case 'gemini':
+      return 'Gemini AI Image';
+    default:
+      return null;
+  }
+}
+
 export default function ProductDatabasePage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -85,6 +119,7 @@ export default function ProductDatabasePage() {
   // Photo Review & Replace Modals (Revisi 01)
   const [photoStatusFilter, setPhotoStatusFilter] = useState('all');
   const [reviewModalProduct, setReviewModalProduct] = useState(null);
+  const [reviewLeftTab, setReviewLeftTab] = useState('previous'); // 'previous' | 'raw'
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [replaceModalProduct, setReplaceModalProduct] = useState(null);
   const [replaceTab, setReplaceTab] = useState(1); // 1: Listing, 2: Upload, 3: Rescrape
@@ -666,19 +701,24 @@ export default function ProductDatabasePage() {
     }
   }
 
-  // Fungsi untuk trigger generasi foto clean per-produk
-  async function handleRegeneratePhoto(productId) {
+  // Fungsi untuk trigger generasi foto clean per-produk (engine opsional: 'gpt_image_2')
+  async function handleRegeneratePhoto(productId, engine = null) {
     setRegeneratingPhotoId(productId);
     try {
       const res = await fetch('/api/v2/products/regenerate-photos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids: [productId] })
+        body: JSON.stringify(engine ? { ids: [productId], engine } : { ids: [productId] })
       });
       const data = await res.json();
       if (data.success) {
-        showToast(`✅ ${data.message}`);
-        fetchProducts(); // Refresh list agar UI terupdate dan memulai polling status
+        const firstResult = Array.isArray(data.results) ? data.results[0] : null;
+        if (firstResult && firstResult.status === 'skipped') {
+          showToast(firstResult.reason || 'Permintaan foto dilewati', 'error');
+        } else {
+          showToast(`✅ ${data.message}`);
+          fetchProducts(); // Refresh list agar UI terupdate dan memulai polling status
+        }
       } else {
         showToast(data.error || 'Gagal memulai render foto clean', 'error');
       }
@@ -1509,10 +1549,14 @@ export default function ProductDatabasePage() {
                                 border: '1px solid var(--border-subtle)',
                                 cursor: 'pointer'
                               }}
-                              onClick={() => setReviewModalProduct(p)}
+                              onClick={() => {
+                                setReviewLeftTab(p.previous_clean_photo_url ? 'previous' : 'raw');
+                                setReviewModalProduct(p);
+                              }}
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter' || e.key === ' ') {
                                   e.preventDefault();
+                                  setReviewLeftTab(p.previous_clean_photo_url ? 'previous' : 'raw');
                                   setReviewModalProduct(p);
                                 }
                               }}
@@ -1686,7 +1730,7 @@ export default function ProductDatabasePage() {
                               )}
                             </div>
                           )}
-                          {p.photo_status === 'processing' && (
+                          {(p.photo_status === 'processing' || (p.photo_status === 'pending' && p.photo_engine_request === 'gpt_image_2')) && (
                             <div style={{
                               display: 'inline-flex',
                               alignItems: 'center',
@@ -1700,7 +1744,24 @@ export default function ProductDatabasePage() {
                               border: '1px solid var(--status-info)',
                               marginTop: '3px'
                             }}>
-                              <span>⏳ Memproses Foto...</span>
+                              <span>{p.photo_engine_request === 'gpt_image_2' ? '⏳ Sedang dibuat dengan GPT…' : '⏳ Memproses Foto...'}</span>
+                            </div>
+                          )}
+                          {p.photo_status === 'failed' && p.photo_error && (
+                            <div style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              fontSize: '11px',
+                              fontWeight: 600,
+                              padding: '2px 8px',
+                              borderRadius: 'var(--radius-xs)',
+                              background: 'var(--status-danger-soft)',
+                              color: 'var(--status-danger)',
+                              border: '1px solid var(--status-danger)',
+                              marginTop: '3px'
+                            }}>
+                              <span>❌ Gagal foto: {p.photo_error}</span>
                             </div>
                           )}
 
@@ -1894,7 +1955,10 @@ export default function ProductDatabasePage() {
                             <button
                               type="button"
                               className="btn btn-warning btn-sm"
-                              onClick={() => setReviewModalProduct(p)}
+                              onClick={() => {
+                                setReviewLeftTab(p.previous_clean_photo_url ? 'previous' : 'raw');
+                                setReviewModalProduct(p);
+                              }}
                               style={{
                                 height: '28px',
                                 fontSize: '11.5px',
@@ -2364,14 +2428,21 @@ export default function ProductDatabasePage() {
         </div>
       )}
 
-      {/* MODAL 6: JENDELA BANDING FOTO ASLI VS HASIL AI (B3 & B5) */}
+      {/* MODAL 6: JENDELA BANDING FOTO ASLI VS HASIL AI (B3 & B5 & GPT Manual) */}
       {reviewModalProduct && (() => {
         const cleanUrl = reviewModalProduct.cleaned_photo_url || reviewModalProduct.clean_photo_url;
         const rawUrl = reviewModalProduct.raw_photo_url;
-        const hasPrevClean = Boolean(reviewModalProduct.previous_clean_photo_url);
+        const prevCleanUrl = reviewModalProduct.previous_clean_photo_url;
+        const hasPrevClean = Boolean(prevCleanUrl);
         const modalBadge = resolvePhotoStatusBadge(reviewModalProduct.photo_status);
         const modalBadgeStyle = modalBadge ? PHOTO_BADGE_TONE_STYLES[modalBadge.tone] : null;
         const canRegenerate = Boolean(reviewModalProduct.raw_photo_url || reviewModalProduct.scraped_image_url);
+        const hasLocalRaw = isLocalRawUploadUrl(reviewModalProduct.raw_photo_url);
+        const isPhotoBusy = regeneratingPhotoId === reviewModalProduct.id || ['pending', 'processing'].includes(reviewModalProduct.photo_status);
+        const showLeftPrev = hasPrevClean && reviewLeftTab === 'previous';
+        const leftImageUrl = showLeftPrev ? prevCleanUrl : rawUrl;
+        const activeModelLabel = formatPhotoModelLabel(reviewModalProduct.photo_model);
+        const previousModelLabel = formatPhotoModelLabel(reviewModalProduct.previous_photo_model);
         const updatedAtText = reviewModalProduct.updated_at
           ? new Date(reviewModalProduct.updated_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })
           : '-';
@@ -2429,11 +2500,13 @@ export default function ProductDatabasePage() {
                         background: modalBadgeStyle.background,
                         color: modalBadgeStyle.color
                       }}>
-                        {modalBadge.label}
+                        {reviewModalProduct.photo_engine_request === 'gpt_image_2' && ['pending', 'processing'].includes(reviewModalProduct.photo_status)
+                          ? 'Sedang dibuat dengan GPT…'
+                          : modalBadge.label}
                       </span>
                     )}
                     <span style={{ fontSize: '11.5px', color: 'var(--text-secondary)' }}>
-                      Sumber foto bersih: <strong>{formatPhotoProviderLabel(reviewModalProduct.photo_provider)}</strong>
+                      Sumber foto bersih: <strong>{activeModelLabel || formatPhotoProviderLabel(reviewModalProduct.photo_provider)}</strong>
                     </span>
                     <span style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
                       • Diperbarui: {updatedAtText}
@@ -2450,13 +2523,13 @@ export default function ProductDatabasePage() {
                 </button>
               </div>
 
-              {/* Side-by-side Asli vs Hasil AI */}
+              {/* Side-by-side Lama/Asli vs Foto Baru (Hasil AI) */}
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
                 gap: '14px'
               }}>
-                {/* Panel Kiri: Asli */}
+                {/* Panel Kiri: Foto Lama atau Foto Asli */}
                 <div style={{
                   background: 'var(--surface-raised)',
                   border: '1px solid var(--border-subtle)',
@@ -2466,14 +2539,58 @@ export default function ProductDatabasePage() {
                   flexDirection: 'column',
                   gap: '8px'
                 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
                     <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                      📷 Foto Asli (Mentah)
+                      {showLeftPrev ? '🕰️ Foto Lama (Tersimpan)' : '📷 Foto Asli (Mentah)'}
                     </span>
-                    {rawUrl && (
-                      <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                        Klik untuk zoom
-                      </span>
+                    {hasPrevClean ? (
+                      <div style={{
+                        display: 'inline-flex',
+                        background: 'var(--surface-subtle)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-xs)',
+                        padding: '2px',
+                        gap: '2px'
+                      }}>
+                        <button
+                          type="button"
+                          onClick={() => setReviewLeftTab('previous')}
+                          style={{
+                            border: 'none',
+                            borderRadius: '4px',
+                            padding: '2px 7px',
+                            fontSize: '10.5px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            background: showLeftPrev ? 'var(--surface-interactive)' : 'transparent',
+                            color: showLeftPrev ? 'var(--text-primary)' : 'var(--text-muted)'
+                          }}
+                        >
+                          Foto Lama
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setReviewLeftTab('raw')}
+                          style={{
+                            border: 'none',
+                            borderRadius: '4px',
+                            padding: '2px 7px',
+                            fontSize: '10.5px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            background: !showLeftPrev ? 'var(--surface-interactive)' : 'transparent',
+                            color: !showLeftPrev ? 'var(--text-primary)' : 'var(--text-muted)'
+                          }}
+                        >
+                          Foto Asli
+                        </button>
+                      </div>
+                    ) : (
+                      rawUrl && (
+                        <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                          Klik untuk zoom
+                        </span>
+                      )
                     )}
                   </div>
                   <div
@@ -2487,24 +2604,40 @@ export default function ProductDatabasePage() {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      cursor: rawUrl ? 'zoom-in' : 'default'
+                      cursor: leftImageUrl ? 'zoom-in' : 'default'
                     }}
                     onClick={() => {
-                      if (rawUrl) setZoomedImage(rawUrl);
+                      if (leftImageUrl) setZoomedImage(leftImageUrl);
                     }}
                   >
-                    {rawUrl ? (
+                    {leftImageUrl ? (
                       <img
-                        src={rawUrl}
-                        alt={`${reviewModalProduct.product_name} - Asli`}
+                        src={leftImageUrl}
+                        alt={`${reviewModalProduct.product_name} - ${showLeftPrev ? 'Foto Lama' : 'Asli'}`}
                         style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                       />
                     ) : (
                       <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                        Belum ada foto asli
+                        {showLeftPrev ? 'Belum ada foto lama' : 'Belum ada foto asli'}
                       </span>
                     )}
                   </div>
+                  {showLeftPrev && previousModelLabel && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11.5px', color: 'var(--text-secondary)' }}>
+                      <span>Model foto:</span>
+                      <span style={{
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        padding: '2px 8px',
+                        borderRadius: 'var(--radius-xs)',
+                        background: 'var(--surface-interactive)',
+                        border: '1px solid var(--border-subtle)',
+                        color: 'var(--text-primary)'
+                      }}>
+                        Foto lama: {previousModelLabel}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Panel Kanan: Hasil AI */}
@@ -2519,7 +2652,7 @@ export default function ProductDatabasePage() {
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)' }}>
-                      ✨ Hasil AI (Foto Bersih Studio)
+                      ✨ {hasPrevClean ? 'Foto Baru (Hasil AI Studio)' : 'Hasil AI (Foto Bersih Studio)'}
                     </span>
                     {cleanUrl && (
                       <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
@@ -2556,6 +2689,22 @@ export default function ProductDatabasePage() {
                       </span>
                     )}
                   </div>
+                  {activeModelLabel && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11.5px', color: 'var(--text-secondary)' }}>
+                      <span>Model foto:</span>
+                      <span style={{
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        padding: '2px 8px',
+                        borderRadius: 'var(--radius-xs)',
+                        background: 'var(--surface-interactive)',
+                        border: '1px solid var(--border-subtle)',
+                        color: 'var(--text-primary)'
+                      }}>
+                        {hasPrevClean ? 'Foto baru' : 'Foto aktif'}: {activeModelLabel}
+                      </span>
+                    </div>
+                  )}
                   {hasPrevClean && (
                     <div style={{
                       fontSize: '11px',
@@ -2622,83 +2771,121 @@ export default function ProductDatabasePage() {
               {/* Footer Actions */}
               <div style={{
                 display: 'flex',
-                flexWrap: 'wrap',
+                flexDirection: 'column',
                 gap: '8px',
-                justifyContent: 'space-between',
-                alignItems: 'center',
                 paddingTop: '8px',
                 borderTop: '1px solid var(--border-subtle)'
               }}>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                  <button
-                    type="button"
-                    className="btn btn-secondary btn-sm"
-                    disabled={isSubmittingReview}
-                    onClick={() => {
-                      const targetProduct = reviewModalProduct;
-                      setReviewModalProduct(null);
-                      setReplaceModalProduct(targetProduct);
-                      setReplaceTab(1);
-                      setSelectedCandidateIdx(0);
-                      setCustomUploadFile(null);
-                      setCustomUploadPreview(null);
-                    }}
-                  >
-                    🔄 Ganti Foto
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-secondary btn-sm"
-                    disabled={isSubmittingReview || !canRegenerate || regeneratingPhotoId === reviewModalProduct.id}
-                    onClick={() => {
-                      if (!window.confirm(`Ulangi generate foto bersih untuk "${reviewModalProduct.product_name}" dari foto aslinya?`)) {
-                        return;
-                      }
-                      const targetId = reviewModalProduct.id;
-                      setReviewModalProduct(null);
-                      handleRegeneratePhoto(targetId);
-                    }}
-                    title={canRegenerate ? 'Generate ulang foto bersih dari foto asli' : 'Foto asli belum tersedia'}
-                  >
-                    {regeneratingPhotoId === reviewModalProduct.id ? '⏳ Mengantrekan…' : '✨ Ulangi Generate'}
-                  </button>
-                  {hasPrevClean && (
+                <div style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '8px',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'flex-start' }}>
                     <button
                       type="button"
                       className="btn btn-secondary btn-sm"
                       disabled={isSubmittingReview}
-                      onClick={() => handleRevertPreviousPhoto(reviewModalProduct)}
-                      style={{
-                        background: 'var(--status-warning-soft)',
-                        borderColor: 'var(--status-warning)',
-                        color: 'var(--status-warning)',
-                        fontWeight: 600
+                      onClick={() => {
+                        const targetProduct = reviewModalProduct;
+                        setReviewModalProduct(null);
+                        setReplaceModalProduct(targetProduct);
+                        setReplaceTab(1);
+                        setSelectedCandidateIdx(0);
+                        setCustomUploadFile(null);
+                        setCustomUploadPreview(null);
                       }}
                     >
-                      ↩️ Tolak, pakai foto sebelumnya
+                      🔄 Ganti Foto
                     </button>
-                  )}
-                </div>
-
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => setReviewModalProduct(null)}
-                    disabled={isSubmittingReview}
-                  >
-                    Tutup
-                  </button>
-                  {reviewModalProduct.photo_status === 'needs_review' && (
                     <button
                       type="button"
-                      className="btn btn-primary"
-                      onClick={() => handleApprovePhoto(reviewModalProduct)}
+                      className="btn btn-secondary btn-sm"
+                      disabled={isSubmittingReview || !canRegenerate || isPhotoBusy}
+                      onClick={() => {
+                        if (!window.confirm(`Ulangi generate foto bersih untuk "${reviewModalProduct.product_name}" dari foto aslinya?`)) {
+                          return;
+                        }
+                        const targetId = reviewModalProduct.id;
+                        setReviewModalProduct(null);
+                        handleRegeneratePhoto(targetId);
+                      }}
+                      title={canRegenerate ? 'Generate ulang foto bersih dari foto asli' : 'Foto asli belum tersedia'}
+                    >
+                      {isPhotoBusy ? '⏳ Mengantrekan…' : '✨ Ulangi Generate'}
+                    </button>
+                    <div style={{ display: 'inline-flex', flexDirection: 'column', gap: '2px' }}>
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        disabled={isSubmittingReview || !hasLocalRaw || isPhotoBusy}
+                        onClick={() => {
+                          if (!window.confirm(`Generate ulang "${reviewModalProduct.product_name}" dengan GPT Image 2?\nMemakai kuota akun ChatGPT. Foto sekarang tetap disimpan dan bisa dikembalikan.`)) {
+                            return;
+                          }
+                          const targetId = reviewModalProduct.id;
+                          setReviewModalProduct(null);
+                          handleRegeneratePhoto(targetId, 'gpt_image_2');
+                        }}
+                        title={hasLocalRaw ? 'Generate ulang memakai GPT Image 2 (kuota akun ChatGPT di G-Labs)' : 'Foto mentah belum tersimpan di server'}
+                        style={{
+                          background: hasLocalRaw ? 'var(--status-neutral-soft)' : 'var(--surface-interactive)',
+                          borderColor: hasLocalRaw ? 'var(--status-neutral)' : 'var(--border-subtle)',
+                          color: hasLocalRaw ? 'var(--status-neutral)' : 'var(--text-disabled)',
+                          fontWeight: 600
+                        }}
+                      >
+                        🧠 Ulangi dengan GPT
+                      </button>
+                      {!hasLocalRaw && (
+                        <span style={{ fontSize: '10.5px', color: 'var(--text-muted)' }}>
+                          Foto mentah belum tersimpan di server
+                        </span>
+                      )}
+                    </div>
+                    {hasPrevClean && (
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        disabled={isSubmittingReview}
+                        onClick={() => handleRevertPreviousPhoto(reviewModalProduct)}
+                        style={{
+                          background: 'var(--status-warning-soft)',
+                          borderColor: 'var(--status-warning)',
+                          color: 'var(--status-warning)',
+                          fontWeight: 600
+                        }}
+                      >
+                        ↩️ Tolak, pakai foto sebelumnya
+                      </button>
+                    )}
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => setReviewModalProduct(null)}
                       disabled={isSubmittingReview}
                     >
-                      {isSubmittingReview ? '⏳ Memproses...' : '✅ Setujui'}
+                      Tutup
                     </button>
-                  )}
+                    {reviewModalProduct.photo_status === 'needs_review' && (
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={() => handleApprovePhoto(reviewModalProduct)}
+                        disabled={isSubmittingReview}
+                      >
+                        {isSubmittingReview ? '⏳ Memproses...' : '✅ Setujui'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                  Tombol GPT hanya untuk 1 produk. Tombol massal tetap Nano Banana.
                 </div>
               </div>
             </div>
