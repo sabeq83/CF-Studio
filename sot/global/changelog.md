@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.50.3 — Link Instagram Asli dari Repliz (17/11/2026)
+- Link post Instagram yang dipublish lewat Repliz kini diambil dari Repliz Get One Content (shortcode resmi, mis. instagram.com/p/Df0ukAtnJO2/), menggantikan link susunan sendiri dari ID angka yang tidak bisa dibuka
+- Fungsi baru getReplizContent dan normalizeInstagramPermalink di lib/repliz-client.js; gagal mengambil link tidak menggagalkan job (tetap memakai link lama)
+- Skrip backfill scripts/backfill-instagram-permalink.mjs (dry-run default, --apply untuk menulis) untuk memperbaiki link Instagram lama di publishing_jobs dan content_flow_items
+- Dipakai notifikasi Telegram CF Autopipeline "Sudah tayang + link post"
+
 ## V2.50.2 — Character Lock untuk Custom Storyboard (CFA) (17/11/2026)
 - Snapshot Visual Identity kini disimpan pada kampanye custom storyboard sehingga Character Lock (gambar acuan karakter Universe) aktif untuk jalur CFA
 - Pengaman: VI default tidak tersimpan bila id VI tidak ditemukan

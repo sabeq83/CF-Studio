@@ -1,6 +1,6 @@
 # Kartu Menu: ContentFlow Hub
 
-Terakhir dicek: 17 November 2026 · Versi aplikasi: v2.50.0
+Terakhir dicek: 17 November 2026 · Versi aplikasi: v2.50.3
 Alamat: `/content-flow` · Kelompok: PUBLISHING · Kunci izin menu: `content_flow`
 
 ## Fungsi
@@ -26,6 +26,7 @@ Pusat staging dan penjadwalan konten jadi. Semua video dan artikel yang selesai 
 1. Dokumen `sot/menus/contentflow-studio.md` kemungkinan milik halaman **lama** (`/contentflow-studio`), bukan `/content-flow` yang sekarang aktif — perlu dicek kecocokannya.
 2. Status slot: `draft` → `scheduled` → `published` / `failed`. Slot `failed` bisa di-retry.
 3. Akun publishing harus sudah terhubung di Settings sebelum bisa menjadwalkan.
+4. Link post (permalink) disusun dari postId Repliz, kecuali **Instagram** (sejak v2.50.3): link resmi shortcode diambil dari Repliz Get One Content (`getReplizContent`), karena postId Instagram berupa ID angka yang tidak bisa dibuka. Link lama diperbaiki dengan `scripts/backfill-instagram-permalink.mjs`.
 
 ## Belum ada / batasan
 - Kalender belum menampilkan konten dari platform lain yang posting manual (hanya yang lewat sistem ini).
