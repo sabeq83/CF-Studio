@@ -21,7 +21,7 @@
 - [x] **Helper Murni UI (`lib/product-card-photo-view.js`)**: Fungsi murni `resolveDefaultCardPhotoTab`, `resolveCardPhotoUrl`, `resolvePhotoStatusBadge`, dan `resolveEnrichButtonState`.
 - [x] **B1, B2, B3 (`app/products/page.js`)**: Implementasi tombol `Enrich AI`, sakelar `Asli | Hasil AI`, badge pojok foto, pesan gagal enrichment, klik thumbnail membuka Jendela Banding, dan Jendela Banding lengkap dengan 4 tombol aksi (`Setujui`, `Tolak, pakai foto sebelumnya`, `Ganti Foto`, `Ulangi Generate`).
 - [x] **B4 (`app/products/ProductDatabaseModal.js`)**: Pratinjau hanya-baca foto `Asli` vs `Hasil AI` (+ pratinjau klik perbesar) di Tab `visual_ai`.
-- [ ] **B6 (Unit Test, Build, Dev Deploy)**: Tambah `tests/product-card-photo-view.test.js`, jalankan unit test & build, push branch `hotfix/kartu-produk-foto-enrich`, deploy ke Dev, verifikasi kolom DB & endpoint Dev, dan buat laporan.
+- [x] **B6 (Unit Test, Build, Dev Deploy)**: Tambah `tests/product-card-photo-view.test.js`, jalankan unit test & build, push branch `hotfix/kartu-produk-foto-enrich`, deploy ke Dev, verifikasi kolom DB & endpoint Dev, dan buat laporan.
 
 ---
 
