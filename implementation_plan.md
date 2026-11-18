@@ -1,6 +1,6 @@
 # Implementation Plan — Produksi Bertahap, Pemulihan Otomatis & Notifikasi URGENT (CFA + CF Studio)
 
-Tanggal: 18 November 2026 · Status: **Bagian A terpasang di Mac Mini (18 Nov 2026 ±17.20) — menunggu malam pertama; Bagian B belum dimulai**
+Tanggal: 18 November 2026 · Status: **Bagian A terpasang di Mac Mini (18 Nov 2026 ±17.20) — menunggu malam pertama; Bagian B: kode selesai di `hotfix/start-frame-retry`, deploy Dev**
 Dasar: [ANALISA_NUTRIBAKE_18NOV_TIDAK_TAYANG.md](catatan-kerja/usulan/ANALISA_NUTRIBAKE_18NOV_TIDAK_TAYANG.md) (revisi 4)
 
 ## Ringkasan
@@ -591,16 +591,16 @@ async function runStep(itemId, name, processor, taskKey = itemId) {
 - [ ] Malam pertama: pantau jarak kirim 10–15 menit & log bebas deadlock/timeout, laporkan ke pengguna
 
 ### Bagian B — CF Studio (hotfix)
-- [ ] `git checkout main && git pull && git checkout -b hotfix/start-frame-retry`
-- [ ] B1 Hitungan percobaan: jalur tunggu tidak dihitung, kode transient diberi batas lebih longgar
-- [ ] B2 `activateCompletedStartFrame`: kunci & tulis `t2i_images_json` di transaksi yang sama
-- [ ] B3 `queueSingleStartFrameRevision` membawa klip yang sudah jadi (fungsi bersama `carryForwardCompletedAssets`)
-- [ ] B4 Opsi `only_missing` di `regenerate-start-frames`
-- [ ] B5 Klip kosong setelah pra-render T2I diantrekan ulang ke durable worker
-- [ ] B6 Watchdog pekerja gambar awal & `runStep` + field runtime baru di `scheduler-control`
-- [ ] B7 Temukan & perbaiki sumber `Release called on client…`
-- [ ] B8 Unit test + `npm run build`
-- [ ] Commit & push branch, deploy ke Dev (`deploy:dev:atomic` full SHA), uji 3 video serentak
+- [x] `git checkout main && git pull && git checkout -b hotfix/start-frame-retry`
+- [x] B1 Hitungan percobaan: jalur tunggu tidak dihitung, kode transient diberi batas lebih longgar — diperbaiki di klaim (`waiting_lane`/`provider_processing` = polling juga tidak dihitung)
+- [x] B2 `activateCompletedStartFrame`: kunci & tulis `t2i_images_json` di transaksi yang sama — koreksi: kasus #2245 ternyata timeout, bukan lost update; perbaikan tetap dipasang untuk mencegah saling tunggu lintas koneksi
+- [x] B3 `queueSingleStartFrameRevision` membawa klip yang sudah jadi (fungsi bersama `carryForwardCompletedAssets`)
+- [x] B4 Opsi `only_missing` di `regenerate-start-frames`
+- [x] B5 Klip kosong setelah pra-render T2I diantrekan ulang ke durable worker
+- [x] B6 Watchdog pekerja gambar awal & `runStep` + field runtime baru di `scheduler-control` — tanpa melepas paksa langkah penjadwal (mencegah proses ganda); hanya peringatan + status
+- [x] B7 Temukan & perbaiki sumber `Release called on client…` — sumber: `requestImageLane` (glabs-image-lane-service) melepas klien dua kali saat tryAcquire gagal
+- [x] B8 Unit test + `npm run build` — 3 tes baru + 22 tes terkait lulus; build OK
+- [x] Commit & push branch (`c338af5`), deploy ke Dev OK (release `20261118T104639Z-c338af5e17ee`, verifikasi SOP lolos) · [ ] uji 3 video serentak oleh pengguna
 - [ ] Laporkan hasil uji Dev ke pengguna, tunggu persetujuan naik Staging
 - [ ] Merge ke `main`, `release-non-interactive --type patch`, perbarui kartu menu terkait
 - [ ] Deploy Staging (`deploy:staging` SHA rilis) + verifikasi wajib SOP deployment
