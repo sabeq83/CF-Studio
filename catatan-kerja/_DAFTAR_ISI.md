@@ -1,6 +1,6 @@
 # Daftar Isi Dokumen Kerja (catatan-kerja)
 
-Terakhir diperbarui: 17 November 2026
+Terakhir diperbarui: 18 November 2026
 
 ## USULAN
 
@@ -28,12 +28,15 @@ Terakhir diperbarui: 17 November 2026
 | `DRAF_BRAND_PROFILE_PTGIM_W2.md` | Draf isian brand profile baru Solusi Thermal ID & Ruang Akustik ID (Tahap 1 Week 2 CFA) |
 | `USULAN_VI_MULTI_LATAR_PTGIM.md` | Usulan: Visual Identity Multi-Latar untuk Solusi Thermal ID & Ruang Akustik ID (PT GIM) |
 | `USULAN_PERBAIKAN_KARTU_PRODUK_ENRICH_FOTO_TRUTH.md` | Usulan: tombol Enrich di kartu produk, tampilan & banding foto G-Labs, Product/Geometric Truth berbahasa Inggris |
+| `REVIEW_USULAN_GPT_IMAGE2_FOTO_PRODUK.md` | Review & penyempurnaan usulan Codex: GPT Image 2 (G-Labs) untuk foto studio produk |
 | `audit_produk_db_usulan.md` | Audit Forensik & Usulan Solusi Isolasi Database Produk MAKNA Flow |
 
 ## INSTRUKSI-AGENT
 
 | Nama File | Ringkasan / Judul |
 |---|---|
+| `antigravity_aktifkan_batch_scraper_instructions.md` | Instruksi Antigravity — Aktifkan kembali tombol Batch Scraper (mockup dulu) + pengaman kuota/afiliasi + S3/S5/S6 (disetujui); S1/S2/S4/S7 menunggu keputusan |
+| `antigravity_gpt_regenerate_scraper_square_instructions.md` | Instruksi Antigravity — Tombol GPT Image 2 manual di jendela banding (mockup dulu) & foto scraper square Nano Banana 2 |
 | `antigravity_character_lock_custom_storyboard_instructions.md` | Instruksi Antigravity — Character Lock untuk Custom Storyboard (jalur CFA, wajah Reno/Maya konsisten) |
 | `HANDOFF_ANTIGRAVITY_4_CELAH_MCP_PUBLISH.md` | Handoff Antigravity: 4 Celah CF Studio untuk CF Autopipeline (CFA) |
 | `HANDOFF_ANTIGRAVITY_FIX_TOPICCOMPLIANCE_CUSTOM_STORYBOARD.md` | Handoff Antigravity: Custom Storyboard `gemini_engineer` Selalu Gagal |
@@ -97,6 +100,7 @@ Terakhir diperbarui: 17 November 2026
 | `scraper_foto_produk_implementation_plan.md` | Implementation Plan: Perbaikan Scraper Foto Produk (Pilih Foto Produk Saja) |
 | `scraper_foto_produk_revisi_01_plan.md` | Implementation Plan: Revisi 01 Scraper Foto Produk & Tinjau/Ganti Foto UI |
 | `vo_narasi_implementation_plan.md` | Rencana Implementasi Perbaikan Narasi VO End-to-End (Fase V0–V5) |
+| `gpt_regenerate_scraper_square_implementation_plan_arsip_20261118.md` | Arsip Implementation Plan: Tombol GPT Image 2 di Jendela Banding & Foto Scraper Square (v2.53.0) |
 
 ## LAPORAN
 
@@ -111,6 +115,7 @@ Terakhir diperbarui: 17 November 2026
 | `LAPORAN_MODEL_AI_TERPUSAT_DAN_RILIS_V2510.md` | Laporan Pelaksanaan: Model AI Terpusat di Settings & Rilis v2.51.0 (Staging 5010) |
 | `LAPORAN_TRUTH_INGGRIS_DAN_MOCKUP_KARTU_PRODUK.md` | Laporan Pelaksanaan: Truth Berbahasa Inggris (Bagian A di Dev 5020) & Mockup Kartu Produk (Bagian B0) |
 | `LAPORAN_BAGIAN_B_KARTU_PRODUK_FOTO_ENRICH.md` | Laporan Pelaksanaan Bagian B: Perbaikan Kartu Produk, Jendela Banding & Penyimpanan Foto Sebelumnya (B1–B6 di Dev 5020) |
+| `LAPORAN_GPT_REGENERATE_DAN_SCRAPER_SQUARE_DEV.md` | Laporan Pelaksanaan: Foto Scraper Square (Bagian A) & Tombol GPT Image 2 Manual di Jendela Banding (Bagian B, Dev 5020) |
 | `RISET_KATA_KUNCI_PTGIM_W2.md` | Riset Kata Kunci Week 2 Solusi Thermal ID & Ruang Akustik ID (43 + 43, per kelompok latar) |
 | `maknagrid_published_facebook_videos.md` | Maknagrid Published Facebook Video IDs |
 
@@ -133,3 +138,11 @@ Terakhir diperbarui: 17 November 2026
 | `inspect_output.txt` | [PostgreSQL] Connection Pool initialized to 100.78.186.123:5432/maknaflow_db (schema: public) |
 | `prompt_output.txt` | Kamu adalah seorang Creative Director & Senior Copywriter di MAKNA Engine. |
 
+
+## RENCANA AKTIF & ARSIP TERBARU
+
+| File | Ringkasan |
+|---|---|
+| [implementation_plan.md](../implementation_plan.md) | Rencana aktif: tombol GPT Image 2 manual di jendela banding + foto scraper square Nano Banana 2 |
+| [gpt_foto_produk_usulan_codex_arsip_20261118.md](rencana/gpt_foto_produk_usulan_codex_arsip_20261118.md) | Arsip usulan Codex: GPT Image 2 via Settings (digantikan rencana aktif) |
+| [truth_inggris_kartu_produk_implementation_plan_arsip_20261118.md](rencana/truth_inggris_kartu_produk_implementation_plan_arsip_20261118.md) | Arsip rencana sebelumnya: Truth Inggris dan kartu/jendela banding produk |

@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.53.0 — Foto Scraper Square & Tombol Manual GPT Image 2 (18/11/2026)
+- Generative polish scraper diubah ke nano_banana_2 rasio 1:1 (square)
+- Tombol manual Ulangi dengan GPT Image 2 di Jendela Banding (1 produk, konfirmasi kuota ChatGPT)
+- Pelacakan model foto aktif & sebelumnya (photo_model, previous_photo_model) serta pemulihan saat revert
+- Helper OpenAI GPT Image 2 (/api/openai/generate) tanpa fallback diam-diam & perbaikan unduh getFileUrl(file, taskId)
+
 ## V2.52.0 — Truth Bahasa Inggris, Kartu Produk Baru, Jendela Banding & Revert Foto (17/11/2026)
 - Product Truth & Geometric Truth kini dalam bahasa Inggris baku untuk stabilitas video DNA AI
 - Penjaga bahasa ensureEnglishProductTruths & skrip translate-product-truths (dry-run ready)

@@ -1,6 +1,6 @@
 # Kartu Menu: Product Database
 
-Terakhir dicek: 17 November 2026 · Versi aplikasi: v2.52.0
+Terakhir dicek: 18 November 2026 · Versi aplikasi: v2.53.0
 Alamat: `/products` · Kelompok: PLANNING · Kunci izin menu: `product_database`
 
 ## Fungsi
@@ -25,7 +25,7 @@ Gudang data "DNA" produk jualan. Menyimpan info terstruktur (USP, target audiens
 ## Aturan penting & jebakan
 1. Dokumen `sot/menus/products.md` masih menyebut **SQLite** dan `better-sqlite3` — sudah usang. Database sekarang PostgreSQL.
 2. Foto produk tersimpan lokal di `public/uploads/products/`; jalur relatif tersimpan di DB.
-3. Generative polish scraper memakai Nano Banana 2, rasio 1:1 (sejak pasca-v2.52.0), dan membutuhkan G-Labs API aktif (cek `tenant_settings`).
+3. Generative polish scraper memakai Nano Banana 2, rasio 1:1 (sejak v2.53.0), dan membutuhkan G-Labs API aktif (cek `tenant_settings`).
 4. Import CSV memiliki format kolom wajib — gunakan template export dulu sebelum import massal.
 5. Scraper Tokopedia mendeteksi halaman 404 / "Waduh, tujuanmu nggak ada!" dan membatalkan pipeline ekstraksi tanpa fallback grounding halusinasi.
 6. Scheduler scraping mengisolasi produk dan foto per tenant (`tenant_id`).
