@@ -9,6 +9,7 @@ import assert from 'node:assert/strict';
 const { __setGeminiTestHooks } = await import('../lib/gemini.js');
 const {
   resolveEnrichmentImageInput,
+  isPackagingManualLocked,
   resolveEnrichmentPackagingUpdates,
   generateProductEnrichmentWithGemini,
   buildEnrichmentPrompt
@@ -56,22 +57,44 @@ test('resolveEnrichmentImageInput memilih foto prioritas cleaned -> clean -> raw
   assert.equal(res3.imagePath, null);
 });
 
-test('resolveEnrichmentPackagingUpdates mengoreksi tebakan scraper saat packaging_status kosong, namun menjaga editan manual', () => {
-  // Kasus pe_1795007715441_445: tebakan awal Kardus Kotak, packaging_status masih kosong
-  const autoUpdate = resolveEnrichmentPackagingUpdates(
-    { packaging_status: null, packaging_type: 'Kardus Kotak', is_in_packaging: 1 },
-    { detected_packaging_type: 'Jar Plastik', detected_is_in_packaging: true }
-  );
+test('isPackagingManualLocked & resolveEnrichmentPackagingUpdates mengoreksi tebakan scraper meski packaging_status ter-backfill, namun menjaga editan manual', () => {
+  // Kasus pe_1795007715441_445: is_url=1, packaging_status ter-backfill 'packaged', raw_response.physical_state masih 'Kardus Kotak' -> BUKAN editan manual
+  const scraperGuessJob = {
+    is_url: 1,
+    packaging_status: 'packaged',
+    packaging_type: 'Kardus Kotak',
+    is_in_packaging: 1,
+    raw_response: JSON.stringify({ id: 'prod_01', physical_state: { is_in_packaging: true, packaging_type: 'Kardus Kotak' } })
+  };
+  assert.equal(isPackagingManualLocked(scraperGuessJob), false);
+  const autoUpdate = resolveEnrichmentPackagingUpdates(scraperGuessJob, {
+    detected_packaging_type: 'Jar Plastik',
+    detected_is_in_packaging: true
+  });
   assert.equal(autoUpdate.packagingType, 'Jar Plastik');
   assert.equal(autoUpdate.isInPackaging, 1);
+  assert.equal(autoUpdate.packagingStatus, 'packaged');
+  assert.equal(JSON.parse(autoUpdate.rawResponseJson).packaging_source, 'vision_enrich');
+  assert.equal(JSON.parse(autoUpdate.rawResponseJson).vision_packaging_type, 'Jar Plastik');
 
-  // Kasus editan manual pengguna di modal (packaging_status = 'packaged')
-  const manualLocked = resolveEnrichmentPackagingUpdates(
-    { packaging_status: 'packaged', packaging_type: 'Jar Plastik', is_in_packaging: 1 },
-    { detected_packaging_type: 'Standing Pouch', detected_is_in_packaging: true }
-  );
+  // Kasus editan manual pengguna di modal (packaging_source: 'manual')
+  const manualMarkedJob = {
+    is_url: 1,
+    packaging_status: 'packaged',
+    packaging_type: 'Jar Plastik',
+    is_in_packaging: 1,
+    raw_response: JSON.stringify({ packaging_source: 'manual', physical_state: { packaging_type: 'Kardus Kotak' } })
+  };
+  assert.equal(isPackagingManualLocked(manualMarkedJob), true);
+  const manualLocked = resolveEnrichmentPackagingUpdates(manualMarkedJob, {
+    detected_packaging_type: 'Standing Pouch',
+    detected_is_in_packaging: true
+  });
   assert.equal(manualLocked.packagingType, 'Jar Plastik');
-  assert.equal(manualLocked.isInPackaging, 1);
+  assert.equal(manualLocked.rawResponseJson, null);
+
+  // Kasus produk input manual (is_url = 0)
+  assert.equal(isPackagingManualLocked({ is_url: 0, packaging_status: 'packaged', packaging_type: 'Botol Kaca', raw_response: null }), true);
 });
 
 test('generateProductEnrichmentWithGemini mengirim inlineData foto bila tersedia dan text-only bila null', async () => {

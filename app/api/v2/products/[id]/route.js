@@ -8,6 +8,22 @@ import { saveRawProductImage } from '@/lib/product-image-storage';
 
 export const dynamic = 'force-dynamic';
 
+function markManualPackagingSourceIfChanged(existing, updateData) {
+  const pkgTypeChanged = updateData.packaging_type !== undefined
+    && String(updateData.packaging_type ?? '') !== String(existing?.packaging_type ?? '');
+  const pkgStatusChanged = updateData.packaging_status !== undefined
+    && String(updateData.packaging_status ?? '') !== String(existing?.packaging_status ?? '');
+  if (!pkgTypeChanged && !pkgStatusChanged) return null;
+
+  let base = {};
+  try {
+    base = existing?.raw_response ? JSON.parse(existing.raw_response) : {};
+  } catch (_) {
+    base = {};
+  }
+  return JSON.stringify({ ...base, packaging_source: 'manual' });
+}
+
 export const GET = withTenantContext(async (req, { params }) => {
   try {
     const { id } = await params;
@@ -135,6 +151,10 @@ export const PUT = withTenantContext(async (req, { params }) => {
       }
       filteredUpdate.i2v_action_prompt = null;
       filteredUpdate.t2i_prompt = null;
+      const manualRawJson = markManualPackagingSourceIfChanged(existing, filteredUpdate);
+      if (manualRawJson) {
+        filteredUpdate.raw_response = manualRawJson;
+      }
 
       const updated = await updateProduct(id, filteredUpdate);
       if (!updated) {
@@ -186,6 +206,10 @@ export const PUT = withTenantContext(async (req, { params }) => {
 
     updateData.i2v_action_prompt = null;
     updateData.t2i_prompt = null;
+    const manualRawJson = markManualPackagingSourceIfChanged(existing, updateData);
+    if (manualRawJson) {
+      updateData.raw_response = manualRawJson;
+    }
 
     const updated = await updateProduct(id, updateData);
     if (!updated) return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 });
