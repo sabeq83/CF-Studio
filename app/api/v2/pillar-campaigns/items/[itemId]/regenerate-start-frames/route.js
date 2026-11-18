@@ -6,7 +6,7 @@ import { buildOpcStartFrameRequest } from '@/lib/opc-start-frame-request';
 
 function parseJson(value, fallback = []) { try { return JSON.parse(value || ''); } catch { return fallback; } }
 
-export const POST = withTenantContext(async (_request, { params }) => {
+export const POST = withTenantContext(async (request, { params }) => {
   try {
     const { itemId } = await params;
     if (!itemId) return NextResponse.json({ success: false, error: 'itemId is required' }, { status: 400 });
@@ -18,8 +18,18 @@ export const POST = withTenantContext(async (_request, { params }) => {
     if (['queued', 'running'].includes(item.regenerate_start_frames_status)) {
       return NextResponse.json({ success: false, error: 'Regenerasi start frame sedang berjalan.' }, { status: 409 });
     }
-    const plan = parseJson(item.new_video_plan_json).filter(clip => clip.clip_index && clip.t2i_prompt);
+    const body = await request.json().catch(() => ({}));
+    let plan = parseJson(item.new_video_plan_json).filter(clip => clip.clip_index && clip.t2i_prompt);
     if (!plan.length) return NextResponse.json({ success: false, error: 'Tidak ada prompt T2I pada item ini.' }, { status: 400 });
+    // Hotfix 18 Nov 2026: only_missing=true -> hanya klip yang belum punya start frame yang dibuat ulang
+    // (klip yang sudah jadi dibawa ke revisi baru lewat carryForwardCompleted). Tanpa opsi ini perilaku lama tetap.
+    if (body?.only_missing === true) {
+      const currentPaths = parseJson(item.t2i_images_json, []);
+      plan = plan.filter(clip => !currentPaths[Number(clip.clip_index) - 1]);
+      if (!plan.length) {
+        return NextResponse.json({ success: true, message: 'Semua start frame sudah lengkap; tidak ada yang dibuat ulang.', itemId: Number(item.id), queued: 0 });
+      }
+    }
     const clips = plan.map(clip => ({
       clip_index: Number(clip.clip_index),
       context: {
