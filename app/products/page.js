@@ -54,6 +54,21 @@ function formatPhotoModelLabel(model) {
   }
 }
 
+function parseStudioPolishFailure(rawResponse) {
+  if (!rawResponse) return null;
+  let obj = rawResponse;
+  if (typeof rawResponse === 'string') {
+    try {
+      obj = JSON.parse(rawResponse);
+    } catch {
+      return null;
+    }
+  }
+  const sp = obj?.studio_polish;
+  if (!sp || (sp.status !== 'failed' && sp.status !== 'timeout')) return null;
+  return sp;
+}
+
 export default function ProductDatabasePage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -86,7 +101,7 @@ export default function ProductDatabasePage() {
   const [scraperCategory, setScraperCategory] = useState('');
   const [scraperTags, setScraperTags] = useState('');
   const [isSubmittingScraper, setIsSubmittingScraper] = useState(false);
-  const [repairMode, setRepairMode] = useState(true);
+  const [repairMode, setRepairMode] = useState(false);
 
   // Import/Export portability states
   const [showImportModal, setShowImportModal] = useState(false);
@@ -910,24 +925,27 @@ export default function ProductDatabasePage() {
               </button>
 
               <button
-                className="btn"
-                disabled
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setShowScraperModal(true)}
+                disabled={isSubmittingScraper}
+                title="Tempel hingga 50 link Shopee/Tokopedia untuk ditambahkan otomatis"
                 style={{
-                  background: 'rgba(30, 41, 59, 0.5)',
-                  border: '1px solid #334155',
-                  color: 'var(--text-muted)',
+                  background: 'var(--surface-interactive)',
+                  border: '1px solid var(--border-strong)',
+                  color: 'var(--text-primary)',
                   padding: '10px 16px',
                   borderRadius: '10px',
                   fontWeight: 600,
                   fontSize: '13px',
-                  cursor: 'not-allowed',
+                  cursor: isSubmittingScraper ? 'not-allowed' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
                   transition: 'all 0.2s ease'
                 }}
               >
-                🔒 Batch Scraper (Locked)
+                ⚡ Batch Scraper
               </button>
             </div>
           </div>
@@ -1786,6 +1804,31 @@ export default function ProductDatabasePage() {
                             </div>
                           )}
 
+                          {/* Catatan S5: Kegagalan foto studio tidak mengubah photo_status */}
+                          {(() => {
+                            const spFail = parseStudioPolishFailure(p.raw_response);
+                            if (!spFail) return null;
+                            return (
+                              <div style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                fontSize: '11px',
+                                fontWeight: 600,
+                                padding: '2px 8px',
+                                borderRadius: 'var(--radius-xs)',
+                                background: 'var(--status-warning-soft)',
+                                color: 'var(--status-warning)',
+                                border: '1px solid var(--status-warning)',
+                                marginTop: '3px'
+                              }}>
+                                <span>
+                                  ⚠️ Foto studio gagal dibuat ({spFail.error || spFail.status}) — foto bersih tetap dipakai.
+                                </span>
+                              </div>
+                            );
+                          })()}
+
                           {/* Tags or Short USP snippet */}
                           <div style={{
                             fontSize: '11px',
@@ -2212,9 +2255,9 @@ export default function ProductDatabasePage() {
                     style={{ marginTop: '3px' }}
                   />
                   <div>
-                    <span style={{ fontWeight: '600' }}>Perbaiki & Lengkapi Data Produk yang Sudah Ada</span>
+                    <span style={{ fontWeight: '600' }}>Perbaiki &amp; Lengkapi Data Produk yang Sudah Ada</span>
                     <p style={{ margin: '4px 0 0 0', fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
-                      Jika diaktifkan, URL produk yang sudah ada di database namun kekurangan aset visual (raw/clean/studio) atau USP/Kemasan akan di-scrape ulang/dilengkapi secara otomatis.
+                      Jika diaktifkan, URL produk yang sudah ada di database namun datanya belum lengkap akan di-scrape ulang. Memakai kuota G-Labs &amp; Gemini untuk setiap produk yang diperbaiki. Biarkan mati bila hanya menambah produk baru.
                     </p>
                   </div>
                 </label>
@@ -2227,6 +2270,19 @@ export default function ProductDatabasePage() {
                 <button type="submit" className="btn btn-primary" disabled={isSubmittingScraper}>
                   {isSubmittingScraper ? '⏳ Mengantrekan...' : '🚀 Scrape Sekarang'}
                 </button>
+              </div>
+
+              <div style={{
+                marginTop: '12px',
+                padding: '8px 12px',
+                borderRadius: 'var(--radius-xs)',
+                background: 'var(--surface-raised)',
+                border: '1px solid var(--border-subtle)',
+                fontSize: '0.75rem',
+                color: 'var(--text-muted)',
+                lineHeight: 1.4
+              }}>
+                Setiap produk baru membuat 1 foto studio (Nano Banana 2) dan memakai kuota G-Labs &amp; Gemini. Maks 50 URL.
               </div>
             </form>
           </div>
@@ -2754,6 +2810,23 @@ export default function ProductDatabasePage() {
                   </div>
                 </div>
               )}
+
+              {(() => {
+                const spFail = parseStudioPolishFailure(reviewModalProduct.raw_response);
+                if (!spFail) return null;
+                return (
+                  <div style={{
+                    background: 'var(--status-warning-soft)',
+                    border: '1px solid var(--status-warning)',
+                    padding: '10px 14px',
+                    borderRadius: 'var(--radius-sm)',
+                    fontSize: '12px',
+                    color: 'var(--status-warning)'
+                  }}>
+                    ⚠️ Foto studio gagal dibuat ({spFail.error || spFail.status}) — foto bersih tetap dipakai.
+                  </div>
+                );
+              })()}
 
               {reviewModalProduct.photo_status === 'needs_review' && (
                 <div style={{
