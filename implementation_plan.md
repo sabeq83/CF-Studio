@@ -33,9 +33,9 @@ Prinsip kunci:
 - [x] Buat `lib/product-research-repository.js` dengan isolasi `WHERE tenant_id = $1` di semua query dan klaim atomik (termasuk `lib/product-url-normalizer.js` & unit/integration test Tahap 2)
 
 ### Tahap 3 — API Ingest Operator (untuk TeleRadar)
-- [ ] Buat helper penyimpanan foto riset `saveResearchImage()` di `lib/product-research-image-storage.js` (`public/uploads/product-research/<tenant>/<batch>/`, validasi MIME & maks 5 MB)
-- [ ] Buat `app/api/operator/v2/product-research/batches/route.js` (`authenticateOperator(request, 'product_research:ingest')`, `runAsOperatorTenant`, idempotent upsert, maks 100 kandidat/batch)
-- [ ] Perbarui dokumentasi kredensial operator untuk scope `product_research:ingest`
+- [x] Buat helper penyimpanan foto riset `saveResearchImage()` di `lib/product-research-image-storage.js` (`public/uploads/product-research/<tenant>/<batch>/`, validasi MIME & maks 5 MB)
+- [x] Buat `app/api/operator/v2/product-research/batches/route.js` (`authenticateOperator(request, 'product_research:ingest')`, `runAsOperatorTenant`, idempotent upsert, maks 100 kandidat/batch)
+- [x] Perbarui dokumentasi kredensial operator untuk scope `product_research:ingest` (`sot/global/operator-api.md`) & verifikasi test ingest API (10/10 lolos)
 
 ### Tahap 4 — Halaman Radar Produk & Izin Menu (Pintu Berhenti 2 🛑)
 - [ ] Daftarkan kunci izin `product_research` di `lib/schema/user-schema.js` dan navigasi `/product-radar` di `lib/sidebar-nav.js`
@@ -143,3 +143,49 @@ export function normalizeProductUrl(url) {
 // - updateResearchCandidateCuration: optimistic locking dengan revision
 // - claimCandidatePromotion: transaksi + FOR UPDATE + klaim atomik di product_research_imports + reuse reserved_product_id saat retry
 ```
+
+### Tahap 3 — File Baru: `lib/product-research-image-storage.js`
+
+**Code Sebelum (Current/Before):**
+```text
+(Penyimpanan foto riset terisolasi dari product_extractions belum ada)
+```
+
+**Code Sesudah (Proposed/After):**
+```js
+// lib/product-research-image-storage.js
+// - Menggunakan ulang detectImageMime & sha256Hex dari lib/product-image-storage.js
+// - Batas ukuran 5 MB, hanya image/jpeg, image/png, image/webp
+// - Menyimpan ke public/uploads/product-research/<tenant>/<batch>/<candidate>_<kind>_<sha12>.<ext>
+// - Tidak pernah menyentuh tabel atau kolom foto product_extractions
+```
+
+### Tahap 3 — File Baru: `lib/product-research-ingest-service.js` & `app/api/operator/v2/product-research/batches/route.js`
+
+**Code Sebelum (Current/Before):**
+```text
+(Endpoint POST /api/operator/v2/product-research/batches belum ada)
+```
+
+**Code Sesudah (Proposed/After):**
+```js
+// app/api/operator/v2/product-research/batches/route.js
+// - authenticateOperator(request, 'product_research:ingest')
+// - runAsOperatorTenant(identity, ...) -> tenant_id di payload diabaikan total
+// - Mendukung application/json (base64) dan multipart/form-data
+// - Validasi maks 100 kandidat/batch, foto maks 5 MB, jpg/png/webp
+// - Mengembalikan summary (created/updated/skipped) dan status per kandidat
+```
+
+### Tahap 3 — Pembaruan Dokumentasi: `sot/global/operator-api.md`
+
+**Code Sebelum (Current/Before):**
+```markdown
+- Operator v2 mendukung research callback, status runs, dan exact revision approval untuk publishing.
+```
+
+**Code Sesudah (Proposed/After):**
+```markdown
+- Operator v2 mendukung research callback, status runs, exact revision approval untuk publishing, serta ingest kandidat Radar Produk (`product_research:ingest`).
+```
+*(Ditambah seksi dokumentasi scope `product_research:ingest` dan kontrak `POST /api/operator/v2/product-research/batches`.)*
