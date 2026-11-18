@@ -27,6 +27,8 @@ Terakhir diperbarui: 18 November 2026
 | `USULAN_TEMPLATE_FINISHING_TAMBAHAN.md` | Usulan 5 Template Finishing Tambahan (total 7) |
 | `DRAF_BRAND_PROFILE_PTGIM_W2.md` | Draf isian brand profile baru Solusi Thermal ID & Ruang Akustik ID (Tahap 1 Week 2 CFA) |
 | `USULAN_VI_MULTI_LATAR_PTGIM.md` | Usulan: Visual Identity Multi-Latar untuk Solusi Thermal ID & Ruang Akustik ID (PT GIM) |
+| `ANALISA_NUTRIBAKE_18NOV_TIDAK_TAYANG.md` | Analisa & usulan (rev. 2): NutriBake 18 Nov tidak tayang — produksi bertahap 5–10 menit, pemulihan otomatis CFA, notifikasi 🚨 URGENT per video |
+| `USULAN_JAM_TENANG_TELEGRAM_CFA.md` | Usulan: jam tenang Telegram CFA 22.00–04.00 WIB — pesan ditunda, dicek ulang, dikirim sebagai Ringkasan Malam + URGENT yang masih berlaku pukul 04.00 |
 | `USULAN_PERBAIKAN_KARTU_PRODUK_ENRICH_FOTO_TRUTH.md` | Usulan: tombol Enrich di kartu produk, tampilan & banding foto G-Labs, Product/Geometric Truth berbahasa Inggris |
 | `REVIEW_USULAN_GPT_IMAGE2_FOTO_PRODUK.md` | Review & penyempurnaan usulan Codex: GPT Image 2 (G-Labs) untuk foto studio produk |
 | `audit_produk_db_usulan.md` | Audit Forensik & Usulan Solusi Isolasi Database Produk MAKNA Flow |
@@ -43,6 +45,7 @@ Terakhir diperbarui: 18 November 2026
 | `HANDOFF_ANTIGRAVITY_FIX_TOPICCOMPLIANCE_CUSTOM_STORYBOARD.md` | Handoff Antigravity: Custom Storyboard `gemini_engineer` Selalu Gagal |
 | `HANDOFF_ANTIGRAVITY_MULTIPLIER_LOKASI_PER_KLIP.md` | Handoff Antigravity: Multiplier Selalu di "Meja Kayu", Lokasi per Klip Tidak Jalan |
 | `INSTRUKSI_PERBAIKAN_JADWAL_CFA_MACMINI.md` | Instruksi untuk Agent Claude di Mac Mini: Perbaiki Jadwal CF Autopipeline |
+| `INSTRUKSI_JADWAL_CEK_PRODUKSI_MACMINI.md` | Instruksi untuk Agent Claude di Mac Mini: pasang tugas CFA · Cek Produksi (tiap jam menit ke-05) & pindah Laporan token ke 21.30 |
 | `PETUNJUK_CFA_JADWAL_TELEGRAM_HEMAT_TOKEN.md` | Petunjuk CF Autopipeline: Jadwal per Brand, Notifikasi Telegram, dan Hemat Token |
 | `antigravity_agent_instructions.md` | Instruksi Agent AI Antigravity — Implementasi Deconstruct URL Library |
 | `antigravity_scraper_foto_produk_instructions.md` | Instruksi Antigravity — Perbaikan Scraper Foto Produk (pilih foto produk saja, tanpa orang) |
