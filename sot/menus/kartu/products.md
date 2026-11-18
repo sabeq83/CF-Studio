@@ -1,6 +1,6 @@
 # Kartu Menu: Product Database
 
-Terakhir dicek: 18 November 2026 · Versi aplikasi: v2.54.0
+Terakhir dicek: 19 November 2026 · Versi aplikasi: v2.55.0
 Alamat: `/products` · Kelompok: PLANNING · Kunci izin menu: `product_database`
 
 ## Fungsi
@@ -29,12 +29,13 @@ Gudang data "DNA" produk jualan. Menyimpan info terstruktur (USP, target audiens
 4. Import CSV memiliki format kolom wajib — gunakan template export dulu sebelum import massal.
 5. Scraper Tokopedia mendeteksi halaman 404 / "Waduh, tujuanmu nggak ada!" dan membatalkan pipeline ekstraksi tanpa fallback grounding halusinasi.
 6. Scheduler scraping mengisolasi produk dan foto per tenant (`tenant_id`).
-7. Enrichment AI produk memakai `resolveModelChain({ role: 'light', taskType: 'PRODUCT_ENRICHMENT' })` dari Settings tenant dengan cadangan penuh; bila semua model sibuk (503) menghasilkan `MODEL_BUSY (dapat diulang)` (`enrichment_retryable: true` di listing & detail produk).
+7. Enrichment AI produk memakai `resolveModelChain({ role: 'light', taskType: 'PRODUCT_ENRICHMENT' })` dari Settings tenant dengan cadangan penuh dan **Multimodal Vision** (membaca foto produk aktual via `resolveEnrichmentImageInput` agar kemasan, warna, tutup, dan label akurat); bila semua model sibuk (503) menghasilkan `MODEL_BUSY (dapat diulang)` (`enrichment_retryable: true` di detail produk bila `enrichment_status === 'failed'`, plus `enrichment_retry_hint`). Manual `packaging_type` pilihan pengguna tetap dijaga, sementara tebakan awal scraper otomatis dikoreksi dari pengamatan foto.
 8. Product Truth dan Geometric Truth wajib ditulis dalam Bahasa Inggris (3–4 kalimat Product Truth, 2–3 kalimat Geometric Truth) agar kompatibel dengan model video DNA AI, sementara USP dan Kategori tetap Bahasa Indonesia. Terdapat penjaga `ensureEnglishProductTruths` di worker pipeline.
 9. Kartu produk default menampilkan foto bersih Studio (Hasil AI) sebagai thumbnail. Sakelar "Asli | Hasil AI" bersifat lokal tanpa write database. Klik thumbnail membuka Jendela Banding foto Asli vs Hasil AI berdampingan dengan aksi Setujui, Ganti Foto, dan Ulangi Generate.
 10. Jika produk pernah digenerate ulang, versi clean sebelumnya disimpan di `previous_clean_photo_url` dan dapat dipulihkan lewat tombol "↩️ Tolak, pakai foto sebelumnya" (`POST /api/v2/products/[id]/photo-review` dengan `{ action: 'revert_previous' }`).
 11. Jendela banding punya tombol **🧠 Ulangi dengan GPT** (manual, 1 produk per klik, memakai kuota akun ChatGPT di G-Labs melalui `/api/openai/generate`; membutuhkan foto mentah lokal di `/uploads/...`; gagal tidak mengubah foto lama dan tidak pindah ke Nano Banana; label model foto lama & baru disimpan di `previous_photo_model` / `photo_model`).
 12. Tombol **⚡ Batch Scraper** aktif kembali (maks 50 URL/CSV, centang *Perbaiki & Lengkapi* default mati, CSV tidak menimpa link afiliasi kosong, antrean `product_scraper` maksimal 1 job berjalan sekaligus, dan kegagalan foto studio dicatat di `raw_response.studio_polish` tanpa mengubah `photo_status`).
+13. Scraper galeri & foto produk (Revisi 02 + Vision Deteksi Kemasan): Playwright mengambil ≥ 5 kandidat tajam (≥ 600px) dari galeri thumbnail, Photo Picker memakai rubrik longgar (`text_area_pct` ≤ 30% tidak menggugurkan, menolak orang/kolase) serta ikut mendeteksi `selected_packaging_type`, kandidat non-orang skor ≥ 70 dibuatkan foto clean berstatus `needs_review` (fallback S7), crop memakai ruang 10% + bypass `rembg` otomatis bila latar sudah putih polos (≥ 95%).
 
 ## Belum ada / batasan
 - Scraper Playwright membutuhkan Chromium terinstall di server.

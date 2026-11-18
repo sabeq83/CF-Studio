@@ -1,4 +1,4 @@
-AKTIF — fitur/scraper-foto-galeri-r02 (disinkronkan dengan main v2.54.1 pada 18 November 2026)
+DIARSIPKAN — fitur/scraper-foto-galeri-r02 (selesai, lolos uji Dev, digabung ke main & dirilis v2.55.0 pada 19 November 2026)
 
 # Implementation Plan — Fitur Scraper Foto Galeri & Rubrik E-Commerce (Revisi 02 Bagian B)
 

@@ -1,11 +1,12 @@
 # Daftar Isi Dokumen Kerja (catatan-kerja)
 
-Terakhir diperbarui: 18 November 2026
+Terakhir diperbarui: 19 November 2026
 
 ## USULAN
 
 | Nama File | Ringkasan / Judul |
 |---|---|
+| `USULAN_RADAR_PRODUK_TELERADAR_CFSTUDIO.md` | Analisis kode TeleRadar di Mac Mini dan usulan Radar Produk: inbox riset terpisah, kurasi, lalu promosi ke Database Produk |
 | `USULAN_KONSISTENSI_VI_MULTIPLIER_NUTRIBAKE.md` | Analisis tenant default: identitas tangan, pengaruh blueprint, dan usulan penguncian VI Multiplier NutriBake |
 | `USULAN_VI_NUTRIBAKE_V5_BAKU_CFA.md` | Usulan VI NutriBake v5: membakukan tampilan video CFA (lengan panjang, palette warna, deskripsi tangan) ke Visual Identity |
 | `ANALISA_TENANT_MCP_MACMINI.md` | Analisa: Preset "tidak ditemukan" saat CF Autopipeline dijalankan dari Mac Mini |
@@ -33,6 +34,7 @@ Terakhir diperbarui: 18 November 2026
 | `REVIEW_USULAN_GPT_IMAGE2_FOTO_PRODUK.md` | Review & penyempurnaan usulan Codex: GPT Image 2 (G-Labs) untuk foto studio produk |
 | `audit_produk_db_usulan.md` | Audit Forensik & Usulan Solusi Isolasi Database Produk MAKNA Flow |
 | `USULAN_PERBAIKAN_SCRAPER_LAMBAT_GEMINI_WATERFALL.md` | Analisa & Usulan Perbaikan: Scrape Produk di Dev Terlihat Diam >3 Menit (Macet di Waterfall Gemini 180 Detik) |
+| `USULAN_PERBAIKAN_ENRICH_VISION_KEMASAN_PRODUK.md` | Analisa & Usulan Perbaikan: Enrich AI & Scraper Salah Menebak Kemasan Produk (Buta Foto / Multimodal Vision Enrich) |
 
 ## INSTRUKSI-AGENT
 
@@ -105,7 +107,8 @@ Terakhir diperbarui: 18 November 2026
 | `scraper_foto_produk_implementation_plan.md` | Implementation Plan: Perbaikan Scraper Foto Produk (Pilih Foto Produk Saja) |
 | `scraper_foto_produk_revisi_01_plan.md` | Implementation Plan: Revisi 01 Scraper Foto Produk & Tinjau/Ganti Foto UI |
 | `scraper_foto_produk_revisi_02_bagian_a_plan.md` | Implementation Plan: Hotfix Scraper Foto Produk Revisi 02 Bagian A (v2.50.4, selesai) |
-| `scraper_foto_galeri_r02_implementation_plan.md` | **AKTIF (`fitur/scraper-foto-galeri-r02`)**: Implementation Plan Scraper Foto Galeri & Rubrik E-Commerce Revisi 02 Bagian B (S5–S9) |
+| `scraper_foto_galeri_r02_implementation_plan.md` | Arsip Implementation Plan: Scraper Foto Galeri & Rubrik E-Commerce Revisi 02 Bagian B S5–S9 (v2.55.0) |
+| `enrich_vision_kemasan_implementation_plan.md` | Arsip Implementation Plan: Enrich AI Multimodal Vision & Deteksi Kemasan Akurat (v2.55.0) |
 | `vo_narasi_implementation_plan.md` | Rencana Implementasi Perbaikan Narasi VO End-to-End (Fase V0–V5) |
 | `gpt_regenerate_scraper_square_implementation_plan_arsip_20261118.md` | Arsip Implementation Plan: Tombol GPT Image 2 di Jendela Banding & Foto Scraper Square (v2.53.0) |
 | `aktifkan_batch_scraper_implementation_plan_arsip_20261118.md` | Arsip Implementation Plan: Aktifkan Tombol Batch Scraper + Pengaman Kuota & Tahap 1B S3/S5/S6 (v2.54.0) |
@@ -153,7 +156,8 @@ Terakhir diperbarui: 18 November 2026
 | File | Ringkasan |
 |---|---|
 | [implementation_plan.md](../implementation_plan.md) | Rencana aktif `main`: Produksi Bertahap, Pemulihan Otomatis & Notifikasi URGENT (CFA Bagian A + Hotfix v2.54.1) |
-| [scraper_foto_galeri_r02_implementation_plan.md](rencana/scraper_foto_galeri_r02_implementation_plan.md) | Rencana aktif `fitur/scraper-foto-galeri-r02`: Scraper Foto Galeri & Rubrik E-Commerce Revisi 02 Bagian B (S5–S9) |
+| [enrich_vision_kemasan_implementation_plan.md](rencana/enrich_vision_kemasan_implementation_plan.md) | Arsip Implementation Plan: Enrich AI Multimodal Vision & Deteksi Kemasan Akurat (dirilis v2.55.0) |
+| [scraper_foto_galeri_r02_implementation_plan.md](rencana/scraper_foto_galeri_r02_implementation_plan.md) | Arsip Implementation Plan: Scraper Foto Galeri & Rubrik E-Commerce Revisi 02 Bagian B S5–S9 (dirilis v2.55.0) |
 | [aktifkan_batch_scraper_implementation_plan_arsip_20261118.md](rencana/aktifkan_batch_scraper_implementation_plan_arsip_20261118.md) | Arsip Implementation Plan: Batch Scraper Aktif Kembali & Tahap 1B (v2.54.0, 18 Nov 2026) |
 | [gpt_foto_produk_usulan_codex_arsip_20261118.md](rencana/gpt_foto_produk_usulan_codex_arsip_20261118.md) | Arsip usulan Codex: GPT Image 2 via Settings (digantikan rencana v2.53.0) |
 | [truth_inggris_kartu_produk_implementation_plan_arsip_20261118.md](rencana/truth_inggris_kartu_produk_implementation_plan_arsip_20261118.md) | Arsip rencana sebelumnya: Truth Inggris dan kartu/jendela banding produk |
