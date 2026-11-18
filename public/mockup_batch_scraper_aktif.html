@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup — Aktifkan Tombol Batch Scraper + S3/S5/S6</title>
+  <style>
+    /* Semantic Design Tokens — disalin dari app/theme.css */
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --surface-subtle: #0c1422;
+      --input-bg: #0c1422;
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --surface-subtle: #ffffff;
+      --input-bg: #ffffff;
+      --overlay-backdrop: rgba(15, 23, 42, 0.54);
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --text-disabled: #8794a6;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --status-neutral: #6548bd;
+      --status-neutral-soft: #f0ecfb;
+      --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+      --shadow-modal: 0 26px 80px rgba(31, 45, 61, 0.22);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      padding: 20px;
+    }
+
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .sim-bar {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      box-shadow: var(--shadow-card);
+    }
+    .sim-title {
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .sim-sub {
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+    .sim-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .btn {
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+    .btn:hover:not(:disabled) {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      color: var(--text-disabled);
+    }
+    .btn-sm {
+      font-size: 12px;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+    }
+    .btn-primary {
+      background: var(--action-primary);
+      border-color: var(--action-primary);
+      color: var(--on-action-primary);
+      font-weight: 700;
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: var(--action-primary-hover);
+      border-color: var(--action-primary-hover);
+    }
+    .btn-batch {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    /* Header halaman /products */
+    .page-header {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--shadow-card);
+    }
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    /* Banner scraper aktif di latar belakang */
+    .bg-banner {
+      background: var(--status-info-soft);
+      border: 1px solid var(--status-info);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2.5px solid var(--surface-interactive);
+      border-top-color: var(--status-info);
+      animation: spin 0.9s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      background: var(--status-success-soft);
+      border: 1px solid var(--status-success);
+      color: var(--status-success);
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: var(--shadow-card);
+      z-index: 60;
+    }
+
+    /* Kartu Produk Preview (menunjukkan catatan S5) */
+    .product-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      box-shadow: var(--shadow-card);
+    }
+    .thumb-box {
+      width: 86px;
+      height: 86px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .s5-warning {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+      padding: 4px 10px;
+      border-radius: var(--radius-xs);
+      background: var(--status-warning-soft);
+      border: 1px solid var(--status-warning);
+      color: var(--status-warning);
+      font-size: 11.5px;
+      font-weight: 600;
+    }
+    .badge-approved {
+      display: inline-block;
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--status-success-soft);
+      border: 1px solid var(--status-success);
+      color: var(--status-success);
+    }
+
+    /* Modal Batch Scraper */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay-backdrop);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 50;
+      backdrop-filter: blur(6px);
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-card {
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-modal);
+      padding: 22px;
+    }
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .form-label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+    .form-input,
+    .form-textarea {
+      width: 100%;
+      background: var(--input-bg);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-family: inherit;
+      font-size: 13px;
+    }
+    .form-textarea {
+      min-height: 130px;
+      font-family: monospace;
+      font-size: 12px;
+      resize: vertical;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 14px 0;
+    }
+    .repair-box {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      margin-bottom: 16px;
+    }
+    .quota-note {
+      margin-top: 12px;
+      padding: 8px 12px;
+      border-radius: var(--radius-xs);
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+    .stage-1b-box {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="toast hidden" id="toastBox"></div>
+
+  <div class="wrap">
+    <!-- Bar Simulasi Mockup -->
+    <div class="sim-bar">
+      <div>
+        <div class="sim-title">Mockup UI — Aktifkan Tombol Batch Scraper (Tahap 1 + Tahap 1B)</div>
+        <div class="sim-sub">Klik tombol "⚡ Batch Scraper" di header untuk membuka modal, lalu uji simulasi kirim dan sakelar Light/Dark.</div>
+      </div>
+      <div class="sim-controls">
+        <button type="button" class="btn btn-sm" id="btnTheme" onclick="toggleTheme()">☀️ Mode Terang</button>
+        <button type="button" class="btn btn-sm" onclick="openModal()">⚡ Buka Modal Scraper</button>
+        <button type="button" class="btn btn-sm" onclick="resetSim()">↺ Reset Simulasi</button>
+      </div>
+    </div>
+
+    <!-- Header /products -->
+    <div class="page-header">
+      <div>
+        <div style="font-size: 18px; font-weight: 800;">📦 Product Database</div>
+        <div style="font-size: 12px; color: var(--text-muted);">Kelola DNA produk, foto studio, dan impor batch link marketplace</div>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="btn btn-primary" onclick="alert('Membuka modal Add Product (tidak berubah)')">
+          ➕ Add Product
+        </button>
+        <button
+          type="button"
+          class="btn btn-batch"
+          id="btnBatchScraper"
+          title="Tempel hingga 50 link Shopee/Tokopedia untuk ditambahkan otomatis"
+          onclick="openModal()"
+        >
+          ⚡ Batch Scraper
+        </button>
+      </div>
+    </div>
+
+    <!-- Banner Scraper Aktif (muncul setelah kirim simulasi) -->
+    <div class="bg-banner hidden" id="bgBanner">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div class="spinner"></div>
+        <div style="font-size: 13px; font-weight: 600;">
+          Scraper aktif di latar belakang: <strong id="bgJobCount" style="color: var(--status-info);">1 tugas</strong> sedang dianalisis...
+        </div>
+      </div>
+      <div style="font-size: 11.5px; color: var(--text-muted);">
+        Halaman akan ter-refresh otomatis. (Antrean scraper berjalan 1 job per giliran — S6)
+      </div>
+    </div>
+
+    <!-- Preview Kartu Produk dengan Catatan S5 -->
+    <div class="product-card">
+      <div class="thumb-box">
+        <svg width="64" height="64" viewBox="0 0 64 64" aria-label="Ilustrasi Produk">
+          <rect x="4" y="4" width="56" height="56" rx="8" fill="var(--surface)" stroke="var(--border-strong)" />
+          <rect x="20" y="16" width="24" height="34" rx="4" fill="var(--action-primary)" opacity="0.25" stroke="var(--action-primary)" stroke-width="1.5" />
+          <rect x="26" y="10" width="12" height="7" rx="2" fill="var(--action-primary)" />
+          <text x="32" y="36" text-anchor="middle" font-size="8" font-weight="700" fill="var(--text-primary)">CLEAN</text>
+        </svg>
+      </div>
+      <div style="flex: 1; min-width: 0;">
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <span style="font-size: 14px; font-weight: 700;">Contoh Kartu Produk (Preview Catatan S5)</span>
+          <span class="badge-approved">Disetujui</span>
+        </div>
+        <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+          Status foto bersih tetap sah (approved) walaupun foto studio gagal dibuat.
+        </div>
+        <div class="s5-warning">
+          ⚠️ Foto studio gagal dibuat (G-Labs timeout 2 menit) — foto bersih tetap dipakai.
+        </div>
+      </div>
+    </div>
+
+    <!-- Ringkasan Tahap 1B yang ikut dikerjakan -->
+    <div class="stage-1b-box">
+      <strong>Cakupan Tahap 1B (belakang layar, berjalan bersamaan di Dev):</strong>
+      <ul style="margin: 6px 0 0 18px; padding: 0;">
+        <li><strong>S3:</strong> Satu aturan "data rumpang" untuk API &amp; worker — produk yang sudah punya foto bersih (`clean_photo_url` / `cleaned_photo_url`) dianggap lengkap tanpa mewajibkan `generated_photo_url`.</li>
+        <li><strong>S5:</strong> Kegagalan/timeout foto studio dicatat ke `raw_response.studio_polish` dan ditampilkan sebagai satu baris peringatan kuning (seperti kartu di atas), tanpa mengubah `photo_status` / `photo_error`.</li>
+        <li><strong>S6:</strong> Antrean `product_scraper` dibatasi maksimal 1 job berjalan sekaligus (mencegah beberapa Chromium &amp; G-Labs berjalan paralel; rescrape per produk ikut antre rapi).</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Modal Batch Product Scraper -->
+  <div class="modal-backdrop" id="scraperModal" onclick="closeModal()">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-label="Batch Product Scraper" onclick="event.stopPropagation()">
+      <div class="modal-head">
+        <h3 style="margin: 0; font-size: 16px;">⚡ Batch Product Scraper</h3>
+        <button type="button" onclick="closeModal()" style="background: transparent; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer;">✕</button>
+      </div>
+
+      <form onsubmit="submitDemo(event)">
+        <div style="display: flex; gap: 16px; margin-bottom: 14px; font-size: 13px;">
+          <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+            <input type="radio" name="inputType" value="urls" checked onchange="setInputType('urls')" />
+            Tulis URL Manual
+          </label>
+          <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+            <input type="radio" name="inputType" value="csv" onchange="setInputType('csv')" />
+            Unggah File CSV
+          </label>
+        </div>
+
+        <div id="urlsGroup">
+          <label class="form-label">Daftar URL Produk (Maks 50 URL, Satu per Baris) *</label>
+          <textarea class="form-textarea" id="urlsInput" placeholder="Tempel link Shopee atau Tokopedia di sini...&#10;https://shopee.co.id/produk-contoh-1&#10;https://tokopedia.com/toko/produk-contoh-2">https://shopee.co.id/serum-niacinamide-contoh-1
+https://tokopedia.com/toko/serum-vitamin-c-contoh-2</textarea>
+        </div>
+
+        <div id="csvGroup" class="hidden">
+          <label class="form-label">Unggah Berkas CSV (Maks 50 baris data) *</label>
+          <input type="file" accept=".csv" class="form-input" />
+          <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 6px;">
+            Kolom <strong>URL Affiliates</strong> yang kosong tidak akan menghapus link afiliasi lama yang sudah tersimpan.
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <label class="form-label">Kategori (Opsional)</label>
+            <input type="text" class="form-input" placeholder="Contoh: Skincare" />
+          </div>
+          <div>
+            <label class="form-label">Tags (Opsional, pisah koma)</label>
+            <input type="text" class="form-input" placeholder="Contoh: glowing, serum, lokal" />
+          </div>
+        </div>
+
+        <!-- Centang Perbaiki & Lengkapi (DEFAULT MATI sesuai 2.2-D) -->
+        <div class="repair-box">
+          <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-size: 13px; user-select: none;">
+            <input type="checkbox" id="repairCheckbox" style="margin-top: 3px;" />
+            <div>
+              <span style="font-weight: 700;">Perbaiki &amp; Lengkapi Data Produk yang Sudah Ada</span>
+              <p style="margin: 4px 0 0 0; font-size: 11.5px; color: var(--text-muted); line-height: 1.45;">
+                Jika diaktifkan, URL produk yang sudah ada di database namun datanya belum lengkap akan di-scrape ulang. Memakai kuota G-Labs &amp; Gemini untuk setiap produk yang diperbaiki. Biarkan mati bila hanya menambah produk baru.
+              </p>
+            </div>
+          </label>
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button type="button" class="btn btn-sm" onclick="closeModal()">Batal</button>
+          <button type="submit" class="btn btn-sm btn-primary">🚀 Scrape Sekarang</button>
+        </div>
+
+        <div class="quota-note">
+          Setiap produk baru membuat 1 foto studio (Nano Banana 2) dan memakai kuota G-Labs &amp; Gemini. Maks 50 URL.
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let theme = 'dark';
+    function toggleTheme() {
+      theme = theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', theme);
+      document.getElementById('btnTheme').textContent = theme === 'dark' ? '☀️ Mode Terang' : '🌙 Mode Gelap';
+    }
+    function openModal() {
+      document.getElementById('scraperModal').classList.add('open');
+    }
+    function closeModal() {
+      document.getElementById('scraperModal').classList.remove('open');
+    }
+    function setInputType(type) {
+      document.getElementById('urlsGroup').classList.toggle('hidden', type !== 'urls');
+      document.getElementById('csvGroup').classList.toggle('hidden', type !== 'csv');
+    }
+    function submitDemo(e) {
+      e.preventDefault();
+      const lines = (document.getElementById('urlsInput').value || '')
+        .split('\n')
+        .map(s => s.trim())
+        .filter(Boolean);
+      const count = Math.max(1, Math.min(50, lines.length));
+      closeModal();
+      const toast = document.getElementById('toastBox');
+      toast.textContent = `✅ ${count} produk baru dimasukkan ke antrean scraping.`;
+      toast.classList.remove('hidden');
+      document.getElementById('bgJobCount').textContent = `${Math.ceil(count / 20)} tugas`;
+      document.getElementById('bgBanner').classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 3200);
+    }
+    function resetSim() {
+      document.getElementById('repairCheckbox').checked = false;
+      document.getElementById('bgBanner').classList.add('hidden');
+      document.getElementById('toastBox').classList.add('hidden');
+      closeModal();
+    }
+  </script>
+</body>
+</html>
