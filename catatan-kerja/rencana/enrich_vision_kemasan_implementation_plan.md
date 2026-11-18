@@ -2,7 +2,7 @@
 
 Tanggal: 19 November 2026 (Asia/Jakarta)  
 Dasar analisa: [USULAN_PERBAIKAN_ENRICH_VISION_KEMASAN_PRODUK.md](file:///Users/sabeqmmursyid/_cfstudio/catatan-kerja/usulan/USULAN_PERBAIKAN_ENRICH_VISION_KEMASAN_PRODUK.md)  
-Status: **Sedang Dieksekusi (`fitur/enrich-vision-kemasan`)**  
+Status: **Selesai diimplementasikan & lolos uji live di Dev (`fitur/enrich-vision-kemasan`, menunggu persetujuan naik ke `main`/Staging)**  
 Aturan branch (SOP): Dikerjakan di branch baru `fitur/enrich-vision-kemasan` yang dibuat dari `main` terbaru (`v2.54.1`) agar tidak tercampur dengan branch `fitur/scraper-foto-galeri-r02`. Tidak ada perubahan UI maupun migrasi struktur database.
 
 ---
@@ -397,4 +397,4 @@ export const PHOTO_PICKER_SCHEMA = {
 - [x] Implementasikan `resolveEnrichmentImageInput`, `resolveEnrichmentPackagingUpdates`, dukungan `inlineData` di `generateProductEnrichmentWithGemini`, pembaruan `claimPendingEnrichmentProducts` + `enrichProduct` + `buildEnrichmentPrompt` di [lib/product-bulk-worker.js](file:///Users/sabeqmmursyid/_cfstudio/lib/product-bulk-worker.js).
 - [x] Implementasikan `selected_packaging_type` & `selected_is_in_packaging` di [lib/product-photo-picker.js](file:///Users/sabeqmmursyid/_cfstudio/lib/product-photo-picker.js) dan sambungkan ke [lib/scheduler-processors.js](file:///Users/sabeqmmursyid/_cfstudio/lib/scheduler-processors.js).
 - [x] Buat unit test `tests/product-enrich-vision.test.js` dan jalankan bersama `tests/gemini-model-resolver.test.js`, `tests/product-truth-language.test.js`, `tests/product-photo-picker.test.js`, dan `DISABLE_AUTO_MIGRATIONS=true npm run build`.
-- [ ] Commit, push branch `fitur/enrich-vision-kemasan`, deploy ke Dev (`http://100.95.245.55:5020`), dan verifikasi ulang dengan mengklik **Enrich AI** pada produk `pe_1795007715441_445` (*Timur Tengah Grainnola*) hingga `packaging_type`, `product_truth`, dan `geometric_truth` cocok dengan *plastic jar*.
+- [x] Commit, push branch `fitur/enrich-vision-kemasan`, deploy ke Dev (`http://100.95.245.55:5020`), dan verifikasi ulang dengan mengklik **Enrich AI** pada produk `pe_1795007715441_445` (*Timur Tengah Grainnola*) hingga `packaging_type`, `product_truth`, dan `geometric_truth` cocok dengan *plastic jar*.
