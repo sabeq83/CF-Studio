@@ -10,10 +10,9 @@ export default function TTSStudioPage() {
   const [sourceType, setSourceType] = useState('manual');
   const [manualText, setManualText] = useState('');
   
-  const [campaignData, setCampaignData] = useState({ autopilot: [], instant: [] });
+  const [campaignData, setCampaignData] = useState({ autopilot: [] });
   const [selectedAutopilotCamp, setSelectedAutopilotCamp] = useState('');
   const [selectedAutopilotItem, setSelectedAutopilotItem] = useState('');
-  const [selectedInstantCamp, setSelectedInstantCamp] = useState('');
   
   const [apiProvider, setApiProvider] = useState('minimax');
   const [targetLanguage, setTargetLanguage] = useState('id-ID');
@@ -79,17 +78,12 @@ export default function TTSStudioPage() {
       const item = camp?.items.find(i => i.item_id === Number(selectedAutopilotItem));
       return item ? item.clips : [];
     }
-    if (sourceType === 'instant') {
-      const camp = campaignData.instant.find(c => c.campaign_id === selectedInstantCamp);
-      return camp ? camp.clips : [];
-    }
     return [];
   }
 
   // Get display text for ref source
   function getSourceRefId() {
     if (sourceType === 'autopilot') return selectedAutopilotItem;
-    if (sourceType === 'instant') return selectedInstantCamp;
     return null;
   }
 
@@ -233,13 +227,6 @@ export default function TTSStudioPage() {
                   >
                     Ambil dari Autopilot
                   </button>
-                  <button
-                    type="button"
-                    className={`tab-btn ${sourceType === 'instant' ? 'active' : ''}`}
-                    onClick={() => setSourceType('instant')}
-                  >
-                    Instant Factory
-                  </button>
                 </div>
 
                 {sourceType === 'manual' && (
@@ -291,33 +278,6 @@ export default function TTSStudioPage() {
                         </select>
                       </>
                     )}
-
-                    {activeClipsPreview.length > 0 && (
-                      <div className="clips-preview-box">
-                        {activeClipsPreview.map((clipText, idx) => (
-                          <div key={idx} className="clip-preview-item">
-                            <strong>Klip {idx + 1}:</strong> {clipText}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {sourceType === 'instant' && (
-                  <div className="source-content">
-                    <label>Pilih Kampanye Instan:</label>
-                    <select
-                      value={selectedInstantCamp}
-                      onChange={e => setSelectedInstantCamp(e.target.value)}
-                    >
-                      <option value="">-- Pilih Kampanye Instan --</option>
-                      {campaignData.instant.map(camp => (
-                        <option key={camp.campaign_id} value={camp.campaign_id}>
-                          {camp.product_name} ({camp.campaign_id})
-                        </option>
-                      ))}
-                    </select>
 
                     {activeClipsPreview.length > 0 && (
                       <div className="clips-preview-box">

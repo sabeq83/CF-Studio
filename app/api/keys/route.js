@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getAllApiKeys, addApiKey, addApiKeysBulk, updateApiKey, deleteApiKey, deleteInvalidApiKeys, markApiKeyStatus, getPoolSummary, getSetting } from '@/lib/db';
-import { testGeminiConnection } from '@/lib/gemini';
+import { testGeminiConnection, resolveModelChain } from '@/lib/gemini';
 import { requireTenantAdmin } from '@/lib/auth';
 
 export async function GET(request) {
   try {
     requireTenantAdmin(request);
-    const primaryModel = (await getSetting('gemini_model_primary')) || 'gemini-3.6-flash';
+    const { model: primaryModel } = await resolveModelChain({ role: 'primary' });
     const keys = await getAllApiKeys({ modelName: primaryModel });
     const pool = await getPoolSummary({ modelName: primaryModel });
 

@@ -195,7 +195,7 @@ export default function TermsOfServicePage() {
                 <li>Generasi naskah video dan visual prompts menggunakan <strong>Single-Pass AI Engine</strong>.</li>
                 <li>Penyusunan naskah narasi sinematik multi-speaker melalui <strong>YouTube Studio</strong>.</li>
                 <li>Analisis dan multiplikasi hook konten viral melalui <strong>Deconstruct &amp; Multiplier Labs</strong>.</li>
-                <li>Penjadwalan massal melalui <strong>Sheets Autopilot</strong> dan distribusi otomatis ke TikTok, Facebook, dan Instagram.</li>
+                <li>Penjadwalan konten melalui <strong>ContentFlow &amp; Auto Pipeline</strong> serta distribusi otomatis ke TikTok, Facebook, dan Instagram.</li>
                 <li>Perenderan video terdistribusi melalui kluster server 3-node (Mac Mini, Windows GPU Worker, dan Database PostgreSQL).</li>
               </ul>
             </section>

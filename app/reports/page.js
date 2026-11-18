@@ -131,9 +131,9 @@ export default function ReportsPage() {
 
   let simInputRate = 0.25;
   let simOutputRate = 0.75;
-  if (simModel === 'gemini-1.5-flash-8b') {
-    simInputRate = 0.075;
-    simOutputRate = 0.30;
+  if (simModel === 'gemini-3.5-flash-lite') {
+    simInputRate = 0.10;
+    simOutputRate = 0.40;
   } else if (simModel === 'gemini-3.8-flash') {
     simInputRate = 0.30;
     simOutputRate = 0.90;
@@ -597,7 +597,7 @@ export default function ReportsPage() {
                         >
                           <option value="gemini-3.6-flash">gemini-3.6-flash ($0.25/1M in, $0.75/1M out) — Workhorse Utama</option>
                           <option value="gemini-3.8-flash">gemini-3.8-flash ($0.30/1M in, $0.90/1M out) — High-Speed Turbo</option>
-                          <option value="gemini-1.5-flash-8b">gemini-1.5-flash-8b ($0.075/1M in, $0.30/1M out) — Scraper/Lite</option>
+                          <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite ($0.10/1M in, $0.40/1M out) — Hemat / Ringan</option>
                           <option value="gemini-3.1-pro">gemini-3.1-pro ($1.75/1M in, $7.00/1M out) — Deep Reasoning</option>
                         </select>
                       </div>

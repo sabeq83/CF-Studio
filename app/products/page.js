@@ -3,6 +3,71 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import ProductDatabaseModal from './ProductDatabaseModal';
+import {
+  formatPhotoProviderLabel,
+  hasCleanPhoto,
+  hasRawPhoto,
+  resolveCardPhotoUrl,
+  resolveDefaultCardPhotoTab,
+  resolveEnrichButtonState,
+  resolvePhotoStatusBadge
+} from '@/lib/product-card-photo-view';
+
+const PHOTO_BADGE_TONE_STYLES = {
+  warning: { background: 'var(--status-warning-soft)', color: 'var(--status-warning)', borderColor: 'var(--status-warning)' },
+  success: { background: 'var(--status-success-soft)', color: 'var(--status-success)', borderColor: 'var(--status-success)' },
+  info: { background: 'var(--status-info-soft)', color: 'var(--status-info)', borderColor: 'var(--status-info)' },
+  danger: { background: 'var(--status-danger-soft)', color: 'var(--status-danger)', borderColor: 'var(--status-danger)' }
+};
+
+function isLocalRawUploadUrl(rawUrl) {
+  const val = String(rawUrl || '').trim();
+  if (!val) return false;
+  if (val.startsWith('/uploads')) return true;
+  if (val.startsWith('/api/v2/products/image?')) {
+    try {
+      const parsed = new URL(val, 'http://local');
+      return (parsed.searchParams.get('path') || '').startsWith('/uploads');
+    } catch {
+      return false;
+    }
+  }
+  return false;
+}
+
+function formatPhotoModelLabel(model) {
+  switch (model) {
+    case 'gpt_image_2':
+      return 'GPT Image 2';
+    case 'nano_banana_2':
+      return 'Nano Banana 2';
+    case 'nano_banana_pro':
+      return 'Nano Banana Pro';
+    case 'nano_banana_2_lite':
+      return 'Nano Banana 2 Lite';
+    case 'nano_banana':
+      return 'Nano Banana';
+    case 'gemini':
+      return 'Gemini AI Image';
+    default:
+      return null;
+  }
+}
+
+function parseStudioPolishFailure(rawResponse) {
+  if (!rawResponse) return null;
+  let obj = rawResponse;
+  if (typeof rawResponse === 'string') {
+    try {
+      obj = JSON.parse(rawResponse);
+    } catch {
+      return null;
+    }
+  }
+  const sp = obj?.studio_polish;
+  if (!sp || (sp.status !== 'failed' && sp.status !== 'timeout')) return null;
+  return sp;
+}
 
 export default function ProductDatabasePage() {
   const [products, setProducts] = useState([]);
@@ -36,7 +101,7 @@ export default function ProductDatabasePage() {
   const [scraperCategory, setScraperCategory] = useState('');
   const [scraperTags, setScraperTags] = useState('');
   const [isSubmittingScraper, setIsSubmittingScraper] = useState(false);
-  const [repairMode, setRepairMode] = useState(true);
+  const [repairMode, setRepairMode] = useState(false);
 
   // Import/Export portability states
   const [showImportModal, setShowImportModal] = useState(false);
@@ -69,6 +134,7 @@ export default function ProductDatabasePage() {
   // Photo Review & Replace Modals (Revisi 01)
   const [photoStatusFilter, setPhotoStatusFilter] = useState('all');
   const [reviewModalProduct, setReviewModalProduct] = useState(null);
+  const [reviewLeftTab, setReviewLeftTab] = useState('previous'); // 'previous' | 'raw'
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [replaceModalProduct, setReplaceModalProduct] = useState(null);
   const [replaceTab, setReplaceTab] = useState(1); // 1: Listing, 2: Upload, 3: Rescrape
@@ -119,7 +185,9 @@ export default function ProductDatabasePage() {
     setIsSubmittingReview(true);
     try {
       const res = await fetch(`/api/v2/products/${product.id}/photo-review`, {
-        method: 'POST'
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'approve' })
       });
       const data = await res.json();
       if (data.success) {
@@ -128,6 +196,30 @@ export default function ProductDatabasePage() {
         fetchProducts();
       } else {
         showToast(data.error || 'Gagal menyetujui foto', 'error');
+      }
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  }
+
+  async function handleRevertPreviousPhoto(product) {
+    if (!product?.previous_clean_photo_url) return;
+    setIsSubmittingReview(true);
+    try {
+      const res = await fetch(`/api/v2/products/${product.id}/photo-review`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'revert_previous' })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('↩️ Foto bersih dikembalikan ke versi sebelumnya.');
+        setReviewModalProduct(null);
+        fetchProducts();
+      } else {
+        showToast(data.error || 'Gagal mengembalikan foto sebelumnya', 'error');
       }
     } catch (err) {
       showToast(err.message, 'error');
@@ -624,19 +716,24 @@ export default function ProductDatabasePage() {
     }
   }
 
-  // Fungsi untuk trigger generasi foto clean per-produk
-  async function handleRegeneratePhoto(productId) {
+  // Fungsi untuk trigger generasi foto clean per-produk (engine opsional: 'gpt_image_2')
+  async function handleRegeneratePhoto(productId, engine = null) {
     setRegeneratingPhotoId(productId);
     try {
       const res = await fetch('/api/v2/products/regenerate-photos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids: [productId] })
+        body: JSON.stringify(engine ? { ids: [productId], engine } : { ids: [productId] })
       });
       const data = await res.json();
       if (data.success) {
-        showToast(`✅ ${data.message}`);
-        fetchProducts(); // Refresh list agar UI terupdate dan memulai polling status
+        const firstResult = Array.isArray(data.results) ? data.results[0] : null;
+        if (firstResult && firstResult.status === 'skipped') {
+          showToast(firstResult.reason || 'Permintaan foto dilewati', 'error');
+        } else {
+          showToast(`✅ ${data.message}`);
+          fetchProducts(); // Refresh list agar UI terupdate dan memulai polling status
+        }
       } else {
         showToast(data.error || 'Gagal memulai render foto clean', 'error');
       }
@@ -828,24 +925,27 @@ export default function ProductDatabasePage() {
               </button>
 
               <button
-                className="btn"
-                disabled
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setShowScraperModal(true)}
+                disabled={isSubmittingScraper}
+                title="Tempel hingga 50 link Shopee/Tokopedia untuk ditambahkan otomatis"
                 style={{
-                  background: 'rgba(30, 41, 59, 0.5)',
-                  border: '1px solid #334155',
-                  color: 'var(--text-muted)',
+                  background: 'var(--surface-interactive)',
+                  border: '1px solid var(--border-strong)',
+                  color: 'var(--text-primary)',
                   padding: '10px 16px',
                   borderRadius: '10px',
                   fontWeight: 600,
                   fontSize: '13px',
-                  cursor: 'not-allowed',
+                  cursor: isSubmittingScraper ? 'not-allowed' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
                   transition: 'all 0.2s ease'
                 }}
               >
-                🔒 Batch Scraper (Locked)
+                ⚡ Batch Scraper
               </button>
             </div>
           </div>
@@ -1350,10 +1450,11 @@ export default function ProductDatabasePage() {
                     : [];
 
                   // Resolve active photo URL
-                  const activeTab = viewTabs[p.id] || (p.active_photo === 'raw_photo_url' ? 'raw' : 'cleaned');
-                  const displayPhotoUrl = activeTab === 'raw'
-                    ? p.raw_photo_url
-                    : (p.cleaned_photo_url || p.clean_photo_url);
+                  const activeTab = viewTabs[p.id] || resolveDefaultCardPhotoTab(p);
+                  const displayPhotoUrl = resolveCardPhotoUrl(p, activeTab);
+                  const photoBadge = resolvePhotoStatusBadge(p.photo_status);
+                  const photoBadgeStyle = photoBadge ? PHOTO_BADGE_TONE_STYLES[photoBadge.tone] : null;
+                  const enrichState = resolveEnrichButtonState(p, reEnrichingId);
 
                   const brandLinks = Array.isArray(p.brand_links) ? p.brand_links : [];
                   const brandLinksCount = brandLinks.length;
@@ -1374,79 +1475,178 @@ export default function ProductDatabasePage() {
                         position: 'relative'
                       }}
                     >
-                      {/* Top Row: Horizontal Split (Thumbnail 80x80 on Left, Identity Info on Right) */}
+                      {/* Top Row: Horizontal Split (Thumbnail + Toggle on Left, Identity Info on Right) */}
                       <div style={{
                         display: 'flex',
                         gap: '14px',
                         padding: '14px 16px',
                         borderBottom: '1px solid var(--border-subtle)'
                       }}>
-                        {/* Thumbnail Container with Checkbox & Status */}
-                        <div style={{ position: 'relative', width: '80px', height: '80px', flexShrink: 0 }}>
-                          {/* Selection Checkbox */}
-                          <div style={{
-                            position: 'absolute',
-                            top: '4px',
-                            left: '4px',
-                            zIndex: 5,
-                            background: 'rgba(0, 0, 0, 0.55)',
-                            borderRadius: '4px',
-                            width: '20px',
-                            height: '20px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            backdropFilter: 'blur(4px)',
-                            border: selectedIds.includes(p.id) ? '1px solid var(--action-primary)' : '1px solid rgba(255,255,255,0.2)'
-                          }}>
-                            <input
-                              type="checkbox"
-                              checked={selectedIds.includes(p.id)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setSelectedIds(prev => [...prev, p.id]);
-                                } else {
-                                  setSelectedIds(prev => prev.filter(id => id !== p.id));
-                                }
-                              }}
-                              style={{
-                                width: '12px',
-                                height: '12px',
-                                cursor: 'pointer',
-                                margin: 0,
-                                accentColor: 'var(--action-primary)'
-                              }}
-                            />
-                          </div>
-
-                          {/* Thumbnail image or placeholder */}
-                          <div
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                              borderRadius: 'var(--radius-sm)',
-                              background: 'var(--surface-raised)',
+                        {/* Thumbnail + Asli / Hasil AI Toggle */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', width: '92px', flexShrink: 0 }}>
+                          <div style={{ position: 'relative', width: '92px', height: '92px' }}>
+                            {/* Selection Checkbox */}
+                            <div style={{
+                              position: 'absolute',
+                              top: '4px',
+                              left: '4px',
+                              zIndex: 5,
+                              background: 'var(--overlay-backdrop)',
+                              borderRadius: 'var(--radius-xs)',
+                              width: '20px',
+                              height: '20px',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              overflow: 'hidden',
-                              border: '1px solid var(--border-subtle)',
-                              cursor: displayPhotoUrl ? 'zoom-in' : 'pointer'
-                            }}
-                            onClick={() => {
-                              if (displayPhotoUrl) setZoomedImage(displayPhotoUrl);
-                              else handleEditProduct(p);
+                              backdropFilter: 'blur(4px)',
+                              border: selectedIds.includes(p.id) ? '1px solid var(--action-primary)' : '1px solid var(--border-strong)'
+                            }}>
+                              <input
+                                type="checkbox"
+                                checked={selectedIds.includes(p.id)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedIds(prev => [...prev, p.id]);
+                                  } else {
+                                    setSelectedIds(prev => prev.filter(id => id !== p.id));
+                                  }
+                                }}
+                                style={{
+                                  width: '12px',
+                                  height: '12px',
+                                  cursor: 'pointer',
+                                  margin: 0,
+                                  accentColor: 'var(--action-primary)'
+                                }}
+                              />
+                            </div>
+
+                            {/* Corner Photo Status Badge */}
+                            {photoBadge && photoBadgeStyle && (
+                              <span
+                                title={`Status foto: ${photoBadge.label}`}
+                                style={{
+                                  position: 'absolute',
+                                  bottom: '4px',
+                                  left: '4px',
+                                  right: '4px',
+                                  zIndex: 4,
+                                  textAlign: 'center',
+                                  fontSize: '9.5px',
+                                  fontWeight: 700,
+                                  lineHeight: 1.25,
+                                  padding: '2px 4px',
+                                  borderRadius: 'var(--radius-xs)',
+                                  border: `1px solid ${photoBadgeStyle.borderColor}`,
+                                  background: photoBadgeStyle.background,
+                                  color: photoBadgeStyle.color,
+                                  whiteSpace: 'nowrap',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  pointerEvents: 'none'
+                                }}
+                              >
+                                {photoBadge.label}
+                              </span>
+                            )}
+
+                            {/* Thumbnail image or placeholder (klik membuka Jendela Banding) */}
+                            <div
+                              role="button"
+                              tabIndex={0}
+                              title="Klik untuk membandingkan foto Asli & Hasil AI"
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                borderRadius: 'var(--radius-sm)',
+                                background: 'var(--surface-raised)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                overflow: 'hidden',
+                                border: '1px solid var(--border-subtle)',
+                                cursor: 'pointer'
+                              }}
+                              onClick={() => {
+                                setReviewLeftTab(p.previous_clean_photo_url ? 'previous' : 'raw');
+                                setReviewModalProduct(p);
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  setReviewLeftTab(p.previous_clean_photo_url ? 'previous' : 'raw');
+                                  setReviewModalProduct(p);
+                                }
+                              }}
+                            >
+                              {displayPhotoUrl ? (
+                                <img
+                                  src={displayPhotoUrl}
+                                  alt={p.product_name}
+                                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                />
+                              ) : (
+                                <span style={{ fontSize: '28px' }}>📦</span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Sakelar Asli | Hasil AI */}
+                          <div
+                            role="group"
+                            aria-label="Pilih tampilan foto"
+                            style={{
+                              display: 'grid',
+                              gridTemplateColumns: '1fr 1.2fr',
+                              gap: '2px',
+                              padding: '2px',
+                              borderRadius: 'var(--radius-xs)',
+                              background: 'var(--surface-raised)',
+                              border: '1px solid var(--border-subtle)'
                             }}
                           >
-                            {displayPhotoUrl ? (
-                              <img
-                                src={displayPhotoUrl}
-                                alt={p.product_name}
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                              />
-                            ) : (
-                              <span style={{ fontSize: '28px' }}>📦</span>
-                            )}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setViewTabs(prev => ({ ...prev, [p.id]: 'raw' }));
+                              }}
+                              title={hasRawPhoto(p) ? 'Tampilkan foto asli' : 'Foto asli belum tersedia'}
+                              style={{
+                                border: 'none',
+                                borderRadius: 'var(--radius-xs)',
+                                padding: '2px 3px',
+                                fontSize: '9.5px',
+                                fontWeight: activeTab === 'raw' ? 700 : 500,
+                                cursor: 'pointer',
+                                background: activeTab === 'raw' ? 'var(--action-primary)' : 'transparent',
+                                color: activeTab === 'raw' ? 'var(--on-action-primary)' : 'var(--text-secondary)',
+                                opacity: hasRawPhoto(p) ? 1 : 0.65
+                              }}
+                            >
+                              Asli
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setViewTabs(prev => ({ ...prev, [p.id]: 'cleaned' }));
+                              }}
+                              title={hasCleanPhoto(p) ? 'Tampilkan foto hasil AI' : 'Foto hasil AI belum tersedia'}
+                              style={{
+                                border: 'none',
+                                borderRadius: 'var(--radius-xs)',
+                                padding: '2px 3px',
+                                fontSize: '9.5px',
+                                fontWeight: activeTab === 'cleaned' ? 700 : 500,
+                                cursor: 'pointer',
+                                background: activeTab === 'cleaned' ? 'var(--action-primary)' : 'transparent',
+                                color: activeTab === 'cleaned' ? 'var(--on-action-primary)' : 'var(--text-secondary)',
+                                opacity: hasCleanPhoto(p) ? 1 : 0.65
+                              }}
+                            >
+                              Hasil AI
+                            </button>
                           </div>
                         </div>
 
@@ -1548,7 +1748,7 @@ export default function ProductDatabasePage() {
                               )}
                             </div>
                           )}
-                          {p.photo_status === 'processing' && (
+                          {(p.photo_status === 'processing' || (p.photo_status === 'pending' && p.photo_engine_request === 'gpt_image_2')) && (
                             <div style={{
                               display: 'inline-flex',
                               alignItems: 'center',
@@ -1562,9 +1762,72 @@ export default function ProductDatabasePage() {
                               border: '1px solid var(--status-info)',
                               marginTop: '3px'
                             }}>
-                              <span>⏳ Memproses Foto...</span>
+                              <span>{p.photo_engine_request === 'gpt_image_2' ? '⏳ Sedang dibuat dengan GPT…' : '⏳ Memproses Foto...'}</span>
                             </div>
                           )}
+                          {p.photo_status === 'failed' && p.photo_error && (
+                            <div style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              fontSize: '11px',
+                              fontWeight: 600,
+                              padding: '2px 8px',
+                              borderRadius: 'var(--radius-xs)',
+                              background: 'var(--status-danger-soft)',
+                              color: 'var(--status-danger)',
+                              border: '1px solid var(--status-danger)',
+                              marginTop: '3px'
+                            }}>
+                              <span>❌ Gagal foto: {p.photo_error}</span>
+                            </div>
+                          )}
+
+                          {/* Error Enrichment AI (B1) */}
+                          {p.enrichment_status === 'failed' && (
+                            <div style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              fontSize: '11px',
+                              fontWeight: 600,
+                              padding: '2px 8px',
+                              borderRadius: 'var(--radius-xs)',
+                              background: 'var(--status-danger-soft)',
+                              color: 'var(--status-danger)',
+                              border: '1px solid var(--status-danger)',
+                              marginTop: '3px'
+                            }}>
+                              <span>
+                                ⚠️ Enrich gagal{p.enrichment_error ? `: ${String(p.enrichment_error).slice(0, 75)}` : ''}
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Catatan S5: Kegagalan foto studio tidak mengubah photo_status */}
+                          {(() => {
+                            const spFail = parseStudioPolishFailure(p.raw_response);
+                            if (!spFail) return null;
+                            return (
+                              <div style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                fontSize: '11px',
+                                fontWeight: 600,
+                                padding: '2px 8px',
+                                borderRadius: 'var(--radius-xs)',
+                                background: 'var(--status-warning-soft)',
+                                color: 'var(--status-warning)',
+                                border: '1px solid var(--status-warning)',
+                                marginTop: '3px'
+                              }}>
+                                <span>
+                                  ⚠️ Foto studio gagal dibuat ({spFail.error || spFail.status}) — foto bersih tetap dipakai.
+                                </span>
+                              </div>
+                            );
+                          })()}
 
                           {/* Tags or Short USP snippet */}
                           <div style={{
@@ -1730,12 +1993,15 @@ export default function ProductDatabasePage() {
                           </button>
                         </div>
 
-                        <div style={{ display: 'flex', gap: '6px' }}>
+                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                           {p.photo_status === 'needs_review' && (
                             <button
                               type="button"
                               className="btn btn-warning btn-sm"
-                              onClick={() => setReviewModalProduct(p)}
+                              onClick={() => {
+                                setReviewLeftTab(p.previous_clean_photo_url ? 'previous' : 'raw');
+                                setReviewModalProduct(p);
+                              }}
                               style={{
                                 height: '28px',
                                 fontSize: '11.5px',
@@ -1748,11 +2014,54 @@ export default function ProductDatabasePage() {
                                 gap: '4px',
                                 fontWeight: 600
                               }}
-                              title="Setujui foto produk yang perlu peninjauan"
+                              title="Buka jendela banding & setujui foto produk"
                             >
                               ✅ Setujui
                             </button>
                           )}
+                          <button
+                            type="button"
+                            className="btn btn-secondary btn-sm"
+                            disabled={enrichState.disabled}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleReEnrichProduct(p.id);
+                            }}
+                            style={{
+                              height: '28px',
+                              fontSize: '11.5px',
+                              padding: '0 8px',
+                              background: enrichState.mode === 'retry' ? 'var(--status-warning-soft)' : 'var(--btn-enrich-bg)',
+                              borderColor: enrichState.mode === 'retry' ? 'var(--status-warning)' : 'var(--btn-enrich-border)',
+                              color: enrichState.mode === 'retry' ? 'var(--status-warning)' : 'var(--btn-enrich-text)',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              fontWeight: 600,
+                              opacity: enrichState.disabled ? 0.75 : 1,
+                              cursor: enrichState.disabled ? 'wait' : 'pointer'
+                            }}
+                            title={
+                              enrichState.mode === 'retry'
+                                ? 'Enrichment sebelumnya gagal — klik untuk mencoba lagi'
+                                : 'Jalankan AI Enrichment (Product Truth & Geometric Truth) produk ini'
+                            }
+                          >
+                            {enrichState.mode === 'loading' && (
+                              <span
+                                style={{
+                                  width: '11px',
+                                  height: '11px',
+                                  border: '2px solid currentColor',
+                                  borderTopColor: 'transparent',
+                                  borderRadius: '50%',
+                                  animation: 'spin 0.8s linear infinite',
+                                  display: 'inline-block'
+                                }}
+                              />
+                            )}
+                            {enrichState.label}
+                          </button>
                           <button
                             type="button"
                             className="btn btn-secondary btn-sm"
@@ -1946,9 +2255,9 @@ export default function ProductDatabasePage() {
                     style={{ marginTop: '3px' }}
                   />
                   <div>
-                    <span style={{ fontWeight: '600' }}>Perbaiki & Lengkapi Data Produk yang Sudah Ada</span>
+                    <span style={{ fontWeight: '600' }}>Perbaiki &amp; Lengkapi Data Produk yang Sudah Ada</span>
                     <p style={{ margin: '4px 0 0 0', fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
-                      Jika diaktifkan, URL produk yang sudah ada di database namun kekurangan aset visual (raw/clean/studio) atau USP/Kemasan akan di-scrape ulang/dilengkapi secara otomatis.
+                      Jika diaktifkan, URL produk yang sudah ada di database namun datanya belum lengkap akan di-scrape ulang. Memakai kuota G-Labs &amp; Gemini untuk setiap produk yang diperbaiki. Biarkan mati bila hanya menambah produk baru.
                     </p>
                   </div>
                 </label>
@@ -1961,6 +2270,19 @@ export default function ProductDatabasePage() {
                 <button type="submit" className="btn btn-primary" disabled={isSubmittingScraper}>
                   {isSubmittingScraper ? '⏳ Mengantrekan...' : '🚀 Scrape Sekarang'}
                 </button>
+              </div>
+
+              <div style={{
+                marginTop: '12px',
+                padding: '8px 12px',
+                borderRadius: 'var(--radius-xs)',
+                background: 'var(--surface-raised)',
+                border: '1px solid var(--border-subtle)',
+                fontSize: '0.75rem',
+                color: 'var(--text-muted)',
+                lineHeight: 1.4
+              }}>
+                Setiap produk baru membuat 1 foto studio (Nano Banana 2) dan memakai kuota G-Labs &amp; Gemini. Maks 50 URL.
               </div>
             </form>
           </div>
@@ -2097,31 +2419,32 @@ export default function ProductDatabasePage() {
       {zoomedImage && (
         <div className="modal-backdrop" style={{
           position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-          background: 'var(--overlay-backdrop)', zIndex: 1050,
+          background: 'var(--overlay-backdrop)', zIndex: 1200,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           backdropFilter: 'blur(10px)',
         }} onClick={() => setZoomedImage(null)}>
           <div style={{
             position: 'relative',
-            background: 'var(--bg-panel)',
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--radius)',
+            background: 'var(--surface)',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: 'var(--radius-lg)',
             padding: '20px',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+            boxShadow: 'var(--shadow-modal)',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             gap: '12px'
           }} onClick={e => e.stopPropagation()}>
             <button
+              type="button"
               onClick={() => setZoomedImage(null)}
               style={{
                 position: 'absolute',
                 top: '-15px',
                 right: '-15px',
-                background: 'var(--accent)',
+                background: 'var(--action-primary)',
                 border: 'none',
-                color: 'var(--text-primary)',
+                color: 'var(--on-action-primary)',
                 width: '32px',
                 height: '32px',
                 borderRadius: '50%',
@@ -2130,7 +2453,7 @@ export default function ProductDatabasePage() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 2px 10px var(--overlay-subtle)',
+                boxShadow: 'var(--shadow-card)',
                 zIndex: 10
               }}
             >
@@ -2140,13 +2463,13 @@ export default function ProductDatabasePage() {
               width: '600px',
               height: '600px',
               maxWidth: '90vw',
-              maxHeight: '90vw',
+              maxHeight: '75vh',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               overflow: 'hidden',
               borderRadius: 'var(--radius-sm)',
-              background: 'var(--overlay-subtle)'
+              background: 'var(--surface-raised)'
             }}>
               <img
                 src={zoomedImage}
@@ -2155,127 +2478,493 @@ export default function ProductDatabasePage() {
               />
             </div>
             <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-              Pratinjau Foto Produk (600x600 px)
+              Pratinjau Foto Produk (Klik di luar untuk menutup)
             </div>
           </div>
         </div>
       )}
 
-      {/* MODAL 6: KONFIRMASI PERSETUJUAN FOTO PRODUK (R6) */}
-      {reviewModalProduct && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100vw',
-            height: '100vh',
-            background: 'var(--overlay-backdrop)',
-            zIndex: 1000,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backdropFilter: 'blur(6px)',
-            padding: '20px'
-          }}
-          onClick={() => setReviewModalProduct(null)}
-        >
+      {/* MODAL 6: JENDELA BANDING FOTO ASLI VS HASIL AI (B3 & B5 & GPT Manual) */}
+      {reviewModalProduct && (() => {
+        const cleanUrl = reviewModalProduct.cleaned_photo_url || reviewModalProduct.clean_photo_url;
+        const rawUrl = reviewModalProduct.raw_photo_url;
+        const prevCleanUrl = reviewModalProduct.previous_clean_photo_url;
+        const hasPrevClean = Boolean(prevCleanUrl);
+        const modalBadge = resolvePhotoStatusBadge(reviewModalProduct.photo_status);
+        const modalBadgeStyle = modalBadge ? PHOTO_BADGE_TONE_STYLES[modalBadge.tone] : null;
+        const canRegenerate = Boolean(reviewModalProduct.raw_photo_url || reviewModalProduct.scraped_image_url);
+        const hasLocalRaw = isLocalRawUploadUrl(reviewModalProduct.raw_photo_url);
+        const isPhotoBusy = regeneratingPhotoId === reviewModalProduct.id || ['pending', 'processing'].includes(reviewModalProduct.photo_status);
+        const showLeftPrev = hasPrevClean && reviewLeftTab === 'previous';
+        const leftImageUrl = showLeftPrev ? prevCleanUrl : rawUrl;
+        const activeModelLabel = formatPhotoModelLabel(reviewModalProduct.photo_model);
+        const previousModelLabel = formatPhotoModelLabel(reviewModalProduct.previous_photo_model);
+        const updatedAtText = reviewModalProduct.updated_at
+          ? new Date(reviewModalProduct.updated_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })
+          : '-';
+
+        return (
           <div
-            className="card"
             style={{
-              width: '100%',
-              maxWidth: '480px',
-              background: 'var(--surface)',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: 'var(--radius-lg)',
-              boxShadow: 'var(--shadow-modal)',
-              padding: '20px',
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              background: 'var(--overlay-backdrop)',
+              zIndex: 1000,
               display: 'flex',
-              flexDirection: 'column',
-              gap: '16px'
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(6px)',
+              padding: '20px'
             }}
-            onClick={e => e.stopPropagation()}
+            onClick={() => setReviewModalProduct(null)}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)' }}>
-                🔍 Konfirmasi Persetujuan Foto Produk
-              </h3>
-              <button
-                type="button"
-                onClick={() => setReviewModalProduct(null)}
-                style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '18px', cursor: 'pointer' }}
-              >
-                ✕
-              </button>
-            </div>
-
-            <div style={{ textAlign: 'center' }}>
-              <div style={{
-                margin: '0 auto',
-                width: '180px',
-                height: '180px',
-                borderRadius: 'var(--radius-md)',
+            <div
+              className="card"
+              style={{
+                width: '100%',
+                maxWidth: '820px',
+                maxHeight: '90vh',
+                overflowY: 'auto',
+                background: 'var(--surface)',
                 border: '1px solid var(--border-subtle)',
-                overflow: 'hidden',
-                background: 'var(--surface-raised)',
+                borderRadius: 'var(--radius-lg)',
+                boxShadow: 'var(--shadow-modal)',
+                padding: '20px',
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
+                flexDirection: 'column',
+                gap: '16px'
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)' }}>
+                    🔍 Bandingkan Foto Produk: {reviewModalProduct.product_name}
+                  </h3>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', marginTop: '6px' }}>
+                    {modalBadge && modalBadgeStyle && (
+                      <span style={{
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        padding: '2px 8px',
+                        borderRadius: '999px',
+                        border: `1px solid ${modalBadgeStyle.borderColor}`,
+                        background: modalBadgeStyle.background,
+                        color: modalBadgeStyle.color
+                      }}>
+                        {reviewModalProduct.photo_engine_request === 'gpt_image_2' && ['pending', 'processing'].includes(reviewModalProduct.photo_status)
+                          ? 'Sedang dibuat dengan GPT…'
+                          : modalBadge.label}
+                      </span>
+                    )}
+                    <span style={{ fontSize: '11.5px', color: 'var(--text-secondary)' }}>
+                      Sumber foto bersih: <strong>{activeModelLabel || formatPhotoProviderLabel(reviewModalProduct.photo_provider)}</strong>
+                    </span>
+                    <span style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
+                      • Diperbarui: {updatedAtText}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setReviewModalProduct(null)}
+                  style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '18px', cursor: 'pointer' }}
+                  title="Tutup Jendela Banding"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Side-by-side Lama/Asli vs Foto Baru (Hasil AI) */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+                gap: '14px'
               }}>
-                <img
-                  src={reviewModalProduct.cleaned_photo_url || reviewModalProduct.raw_photo_url}
-                  alt={reviewModalProduct.product_name}
-                  style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                />
-              </div>
-            </div>
+                {/* Panel Kiri: Foto Lama atau Foto Asli */}
+                <div style={{
+                  background: 'var(--surface-raised)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '12px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                      {showLeftPrev ? '🕰️ Foto Lama (Tersimpan)' : '📷 Foto Asli (Mentah)'}
+                    </span>
+                    {hasPrevClean ? (
+                      <div style={{
+                        display: 'inline-flex',
+                        background: 'var(--surface-subtle)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-xs)',
+                        padding: '2px',
+                        gap: '2px'
+                      }}>
+                        <button
+                          type="button"
+                          onClick={() => setReviewLeftTab('previous')}
+                          style={{
+                            border: 'none',
+                            borderRadius: '4px',
+                            padding: '2px 7px',
+                            fontSize: '10.5px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            background: showLeftPrev ? 'var(--surface-interactive)' : 'transparent',
+                            color: showLeftPrev ? 'var(--text-primary)' : 'var(--text-muted)'
+                          }}
+                        >
+                          Foto Lama
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setReviewLeftTab('raw')}
+                          style={{
+                            border: 'none',
+                            borderRadius: '4px',
+                            padding: '2px 7px',
+                            fontSize: '10.5px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            background: !showLeftPrev ? 'var(--surface-interactive)' : 'transparent',
+                            color: !showLeftPrev ? 'var(--text-primary)' : 'var(--text-muted)'
+                          }}
+                        >
+                          Foto Asli
+                        </button>
+                      </div>
+                    ) : (
+                      rawUrl && (
+                        <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                          Klik untuk zoom
+                        </span>
+                      )
+                    )}
+                  </div>
+                  <div
+                    style={{
+                      width: '100%',
+                      height: '260px',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--border-subtle)',
+                      background: 'var(--surface-subtle)',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: leftImageUrl ? 'zoom-in' : 'default'
+                    }}
+                    onClick={() => {
+                      if (leftImageUrl) setZoomedImage(leftImageUrl);
+                    }}
+                  >
+                    {leftImageUrl ? (
+                      <img
+                        src={leftImageUrl}
+                        alt={`${reviewModalProduct.product_name} - ${showLeftPrev ? 'Foto Lama' : 'Asli'}`}
+                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                      />
+                    ) : (
+                      <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                        {showLeftPrev ? 'Belum ada foto lama' : 'Belum ada foto asli'}
+                      </span>
+                    )}
+                  </div>
+                  {showLeftPrev && previousModelLabel && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11.5px', color: 'var(--text-secondary)' }}>
+                      <span>Model foto:</span>
+                      <span style={{
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        padding: '2px 8px',
+                        borderRadius: 'var(--radius-xs)',
+                        background: 'var(--surface-interactive)',
+                        border: '1px solid var(--border-subtle)',
+                        color: 'var(--text-primary)'
+                      }}>
+                        Foto lama: {previousModelLabel}
+                      </span>
+                    </div>
+                  )}
+                </div>
 
-            <div style={{
-              background: 'var(--surface-raised)',
-              padding: '12px 14px',
-              borderRadius: 'var(--radius-sm)',
-              borderLeft: '3px solid var(--status-warning)'
-            }}>
-              <div style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '2px' }}>
-                Catatan Peninjauan AI:
+                {/* Panel Kanan: Hasil AI */}
+                <div style={{
+                  background: 'var(--surface-raised)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '12px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)' }}>
+                      ✨ {hasPrevClean ? 'Foto Baru (Hasil AI Studio)' : 'Hasil AI (Foto Bersih Studio)'}
+                    </span>
+                    {cleanUrl && (
+                      <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                        Klik untuk zoom
+                      </span>
+                    )}
+                  </div>
+                  <div
+                    style={{
+                      width: '100%',
+                      height: '260px',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--border-subtle)',
+                      background: 'var(--surface-subtle)',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: cleanUrl ? 'zoom-in' : 'default'
+                    }}
+                    onClick={() => {
+                      if (cleanUrl) setZoomedImage(cleanUrl);
+                    }}
+                  >
+                    {cleanUrl ? (
+                      <img
+                        src={cleanUrl}
+                        alt={`${reviewModalProduct.product_name} - Hasil AI`}
+                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                      />
+                    ) : (
+                      <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                        Belum ada foto hasil AI
+                      </span>
+                    )}
+                  </div>
+                  {activeModelLabel && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11.5px', color: 'var(--text-secondary)' }}>
+                      <span>Model foto:</span>
+                      <span style={{
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        padding: '2px 8px',
+                        borderRadius: 'var(--radius-xs)',
+                        background: 'var(--surface-interactive)',
+                        border: '1px solid var(--border-subtle)',
+                        color: 'var(--text-primary)'
+                      }}>
+                        {hasPrevClean ? 'Foto baru' : 'Foto aktif'}: {activeModelLabel}
+                      </span>
+                    </div>
+                  )}
+                  {hasPrevClean && (
+                    <div style={{
+                      fontSize: '11px',
+                      color: 'var(--text-secondary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '8px',
+                      paddingTop: '4px',
+                      borderTop: '1px dashed var(--border-subtle)'
+                    }}>
+                      <span>Versi bersih sebelumnya tersimpan dan bisa dikembalikan.</span>
+                      <button
+                        type="button"
+                        onClick={() => setZoomedImage(reviewModalProduct.previous_clean_photo_url)}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: 'var(--status-info)',
+                          cursor: 'pointer',
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          padding: 0,
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        Lihat versi lama
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
-              <div style={{ fontSize: '12.5px', color: 'var(--status-warning)' }}>
-                {reviewModalProduct.photo_error || 'Foto mentah memuat orang/model/teks'}
+
+              {/* Catatan Peninjauan AI / Error */}
+              {(reviewModalProduct.photo_error || reviewModalProduct.photo_status === 'needs_review') && (
+                <div style={{
+                  background: 'var(--surface-raised)',
+                  padding: '12px 14px',
+                  borderRadius: 'var(--radius-sm)',
+                  borderLeft: `3px solid ${reviewModalProduct.photo_status === 'failed' ? 'var(--status-danger)' : 'var(--status-warning)'}`
+                }}>
+                  <div style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '2px' }}>
+                    Catatan Peninjauan AI:
+                  </div>
+                  <div style={{ fontSize: '12.5px', color: reviewModalProduct.photo_status === 'failed' ? 'var(--status-danger)' : 'var(--status-warning)' }}>
+                    {reviewModalProduct.photo_error || 'Foto memerlukan peninjauan manual sebelum disetujui.'}
+                  </div>
+                </div>
+              )}
+
+              {(() => {
+                const spFail = parseStudioPolishFailure(reviewModalProduct.raw_response);
+                if (!spFail) return null;
+                return (
+                  <div style={{
+                    background: 'var(--status-warning-soft)',
+                    border: '1px solid var(--status-warning)',
+                    padding: '10px 14px',
+                    borderRadius: 'var(--radius-sm)',
+                    fontSize: '12px',
+                    color: 'var(--status-warning)'
+                  }}>
+                    ⚠️ Foto studio gagal dibuat ({spFail.error || spFail.status}) — foto bersih tetap dipakai.
+                  </div>
+                );
+              })()}
+
+              {reviewModalProduct.photo_status === 'needs_review' && (
+                <div style={{
+                  background: 'var(--status-danger-soft)',
+                  border: '1px solid var(--status-danger)',
+                  padding: '10px 14px',
+                  borderRadius: 'var(--radius-sm)',
+                  fontSize: '12px',
+                  color: 'var(--text-primary)'
+                }}>
+                  ⚠️ <strong>Peringatan Kepatuhan:</strong> Pastikan tidak ada wajah orang, model, atau tokoh publik di dalam foto sebelum menyetujui, agar video AI mematuhi regulasi periklanan.
+                </div>
+              )}
+
+              {/* Footer Actions */}
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+                paddingTop: '8px',
+                borderTop: '1px solid var(--border-subtle)'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '8px',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'flex-start' }}>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      disabled={isSubmittingReview}
+                      onClick={() => {
+                        const targetProduct = reviewModalProduct;
+                        setReviewModalProduct(null);
+                        setReplaceModalProduct(targetProduct);
+                        setReplaceTab(1);
+                        setSelectedCandidateIdx(0);
+                        setCustomUploadFile(null);
+                        setCustomUploadPreview(null);
+                      }}
+                    >
+                      🔄 Ganti Foto
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      disabled={isSubmittingReview || !canRegenerate || isPhotoBusy}
+                      onClick={() => {
+                        if (!window.confirm(`Ulangi generate foto bersih untuk "${reviewModalProduct.product_name}" dari foto aslinya?`)) {
+                          return;
+                        }
+                        const targetId = reviewModalProduct.id;
+                        setReviewModalProduct(null);
+                        handleRegeneratePhoto(targetId);
+                      }}
+                      title={canRegenerate ? 'Generate ulang foto bersih dari foto asli' : 'Foto asli belum tersedia'}
+                    >
+                      {isPhotoBusy ? '⏳ Mengantrekan…' : '✨ Ulangi Generate'}
+                    </button>
+                    <div style={{ display: 'inline-flex', flexDirection: 'column', gap: '2px' }}>
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        disabled={isSubmittingReview || !hasLocalRaw || isPhotoBusy}
+                        onClick={() => {
+                          if (!window.confirm(`Generate ulang "${reviewModalProduct.product_name}" dengan GPT Image 2?\nMemakai kuota akun ChatGPT. Foto sekarang tetap disimpan dan bisa dikembalikan.`)) {
+                            return;
+                          }
+                          const targetId = reviewModalProduct.id;
+                          setReviewModalProduct(null);
+                          handleRegeneratePhoto(targetId, 'gpt_image_2');
+                        }}
+                        title={hasLocalRaw ? 'Generate ulang memakai GPT Image 2 (kuota akun ChatGPT di G-Labs)' : 'Foto mentah belum tersimpan di server'}
+                        style={{
+                          background: hasLocalRaw ? 'var(--status-neutral-soft)' : 'var(--surface-interactive)',
+                          borderColor: hasLocalRaw ? 'var(--status-neutral)' : 'var(--border-subtle)',
+                          color: hasLocalRaw ? 'var(--status-neutral)' : 'var(--text-disabled)',
+                          fontWeight: 600
+                        }}
+                      >
+                        🧠 Ulangi dengan GPT
+                      </button>
+                      {!hasLocalRaw && (
+                        <span style={{ fontSize: '10.5px', color: 'var(--text-muted)' }}>
+                          Foto mentah belum tersimpan di server
+                        </span>
+                      )}
+                    </div>
+                    {hasPrevClean && (
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        disabled={isSubmittingReview}
+                        onClick={() => handleRevertPreviousPhoto(reviewModalProduct)}
+                        style={{
+                          background: 'var(--status-warning-soft)',
+                          borderColor: 'var(--status-warning)',
+                          color: 'var(--status-warning)',
+                          fontWeight: 600
+                        }}
+                      >
+                        ↩️ Tolak, pakai foto sebelumnya
+                      </button>
+                    )}
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => setReviewModalProduct(null)}
+                      disabled={isSubmittingReview}
+                    >
+                      Tutup
+                    </button>
+                    {reviewModalProduct.photo_status === 'needs_review' && (
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={() => handleApprovePhoto(reviewModalProduct)}
+                        disabled={isSubmittingReview}
+                      >
+                        {isSubmittingReview ? '⏳ Memproses...' : '✅ Setujui'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                  Tombol GPT hanya untuk 1 produk. Tombol massal tetap Nano Banana.
+                </div>
               </div>
-            </div>
-
-            <div style={{
-              background: 'var(--status-danger-soft)',
-              border: '1px solid var(--status-danger)',
-              padding: '10px 14px',
-              borderRadius: 'var(--radius-sm)',
-              fontSize: '12px',
-              color: 'var(--text-primary)'
-            }}>
-              ⚠️ <strong>Peringatan Kepatuhan:</strong> Pastikan tidak ada wajah orang, model, atau tokoh publik di dalam foto sebelum menyetujui, agar video AI mematuhi regulasi periklanan.
-            </div>
-
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '4px' }}>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setReviewModalProduct(null)}
-                disabled={isSubmittingReview}
-              >
-                Batal
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => handleApprovePhoto(reviewModalProduct)}
-                disabled={isSubmittingReview}
-              >
-                {isSubmittingReview ? '⏳ Memproses...' : 'Setujui Foto Ini'}
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* MODAL 7: GANTI FOTO 3-TAB (R7) */}
       {replaceModalProduct && (() => {

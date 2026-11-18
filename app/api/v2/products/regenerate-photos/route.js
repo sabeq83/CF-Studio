@@ -20,11 +20,20 @@ export const dynamic = 'force-dynamic';
 export const POST = withTenantContext(async (req) => {
   try {
     const body = await req.json();
-    const { ids, provider } = body;
+    const { ids, provider, engine } = body;
     const tenantId = getActiveTenantId();
+
+    const ALLOWED_ENGINES = [undefined, null, 'gpt_image_2'];
+    if (!ALLOWED_ENGINES.includes(engine)) {
+      return NextResponse.json({ success: false, error: 'Engine tidak dikenal.' }, { status: 400 });
+    }
 
     if (!ids || !Array.isArray(ids) || ids.length === 0) {
       return NextResponse.json({ success: false, error: 'Daftar ID produk wajib dikirim.' }, { status: 400 });
+    }
+
+    if (engine === 'gpt_image_2' && ids.length !== 1) {
+      return NextResponse.json({ success: false, error: 'GPT hanya untuk 1 produk per klik.' }, { status: 400 });
     }
 
     if (ids.length > 50) {
@@ -32,7 +41,10 @@ export const POST = withTenantContext(async (req) => {
     }
 
     const results = [];
-    const resolvedProvider = (provider && provider !== 'system_default') ? provider : null;
+    const resolvedProvider = engine === 'gpt_image_2'
+      ? 'glabs'
+      : ((provider && provider !== 'system_default') ? provider : null);
+    const requestedEngine = engine === 'gpt_image_2' ? 'gpt_image_2' : null;
 
     for (const id of ids) {
       try {
@@ -43,27 +55,61 @@ export const POST = withTenantContext(async (req) => {
           continue;
         }
 
-        // Produk harus punya raw_photo_url (lokal atau URL) untuk bisa diproses
-        if (!product.raw_photo_url && !product.scraped_image_url) {
+        // Tolak bila produk sedang pending atau processing agar tidak dobel kirim
+        if (['pending', 'processing'].includes(product.photo_status)) {
+          if (ids.length === 1) {
+            return NextResponse.json({
+              success: false,
+              error: 'Foto produk sedang dalam antrean atau diproses. Tunggu sampai selesai.'
+            }, { status: 409 });
+          }
+          results.push({ id, status: 'skipped', reason: 'Foto produk sedang diproses' });
+          continue;
+        }
+
+        if (engine === 'gpt_image_2') {
+          if (!String(product.raw_photo_url || '').startsWith('/uploads')) {
+            results.push({
+              id,
+              status: 'skipped',
+              reason: 'Foto mentah belum tersimpan di server — upload foto mentah dulu.'
+            });
+            continue;
+          }
+        } else if (!product.raw_photo_url && !product.scraped_image_url) {
+          // Jalur reguler: produk harus punya raw_photo_url (lokal atau URL)
           results.push({ id, status: 'skipped', reason: 'Tidak ada raw photo tersedia' });
           continue;
         }
 
         // Antrikan: set photo_status = pending, agar worker mengambil dan memproses
         // Jangan hapus clean_photo_url lama sebelum hasil baru selesai
+        const params = [id, tenantId, requestedEngine];
+        let providerSetSql = '';
+        if (resolvedProvider) {
+          params.push(resolvedProvider);
+          providerSetSql = `photo_provider = $${params.length},`;
+        }
+
         const updateRes = await pgQuery(`
           UPDATE product_extractions
           SET photo_status = 'pending',
               photo_error = NULL,
-              ${resolvedProvider ? 'photo_provider = $3,' : ''}
+              photo_engine_request = $3,
+              ${providerSetSql}
               extraction_status = 'pending_image',
               updated_at = NOW()
           WHERE id = $1 AND tenant_id = $2
           RETURNING id
-        `, resolvedProvider ? [id, tenantId, resolvedProvider] : [id, tenantId]);
+        `, params);
 
         if (updateRes.rowCount > 0) {
-          results.push({ id, status: 'queued', provider: resolvedProvider || 'system_default' });
+          results.push({
+            id,
+            status: 'queued',
+            provider: resolvedProvider || 'system_default',
+            engine: requestedEngine
+          });
         } else {
           results.push({ id, status: 'not_found' });
         }

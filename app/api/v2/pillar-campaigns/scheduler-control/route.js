@@ -8,13 +8,22 @@ async function buildSchedulerStatus() {
   const processEnabled = process.env.ENABLE_BACKGROUND_SERVICES !== 'false' && process.env.ENABLE_CAMPAIGN_SCHEDULER !== 'false';
   const workerEnabled = isWorkerEnabled();
   const runtime = getCampaignSchedulerRuntime();
+  let startFrameWorker = null;
+  try {
+    const { getStartFrameWorkerRuntime } = await import('@/lib/start-frame-worker');
+    const w = getStartFrameWorkerRuntime();
+    startFrameWorker = { running: w.running, busy: Boolean(w.running && w.tickStartedAt && w.currentAssetId), last_tick: w.lastTick,
+      last_claim_at: w.lastClaimAt || null, current_asset_id: w.currentAssetId || null,
+      stuck_recoveries: w.stuckRecoveries || 0, last_error: w.lastError || null };
+  } catch (_) {}
   return {
     configured,
     process_enabled: processEnabled,
     worker_enabled: workerEnabled,
     effective: configured && processEnabled && workerEnabled && runtime.running,
     node_role: getNodeRole(),
-    ...runtime
+    ...runtime,
+    start_frame_worker: startFrameWorker
   };
 }
 

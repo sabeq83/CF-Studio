@@ -1,6 +1,6 @@
 # Peta Menu CF Studio
 
-Terakhir dicek: 17 November 2026 · Versi aplikasi: v2.50.0
+Terakhir dicek: 17 November 2026 · Versi aplikasi: v2.51.0
 Sumber daftar menu: `lib/sidebar-nav.js`
 
 **Cara pakai (untuk agent):** cari menu yang dibahas di tabel, buka kartunya saja. Dokumen lengkap hanya dibuka jika kartu tidak cukup.
@@ -55,5 +55,6 @@ Sumber daftar menu: `lib/sidebar-nav.js`
 
 ## Catatan
 
-- Folder `app/` juga berisi halaman yang tidak muncul di sidebar (mis. `youtube-studio`, `affiliate-studio`, `instant-factory`, `sheets-autopilot`, `reports`, `system-health`). Dokumennya ada di folder ini, tetapi belum masuk peta.
+- Folder `app/` juga berisi halaman yang tidak muncul di sidebar (mis. `youtube-studio`, `affiliate-studio`, `reports`, `system-health`). Dokumennya ada di folder ini, tetapi belum masuk peta.
+- Dokumen lama fitur yang sudah dihapus (`instant-factory.md`, `sheets-autopilot.md`) diarsipkan di `sot/menus/arsip/`.
 - Dokumen rencana pengerjaan YouTube Studio dan Affiliate Studio tersimpan di subfolder `sot/menus/rencana/`.

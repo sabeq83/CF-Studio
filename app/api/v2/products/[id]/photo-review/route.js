@@ -24,8 +24,41 @@ export const POST = withTenantContext(async (req, { params }) => {
     }
 
     const action = body.action || 'approve';
+
+    if (action === 'revert_previous') {
+      const previousCleanUrl = product.previous_clean_photo_url;
+      if (!previousCleanUrl) {
+        return NextResponse.json({
+          success: false,
+          error: 'Foto bersih sebelumnya tidak tersedia untuk produk ini.'
+        }, { status: 409 });
+      }
+
+      const updates = {
+        clean_photo_url: previousCleanUrl,
+        cleaned_photo_url: previousCleanUrl,
+        photo_url: previousCleanUrl,
+        active_photo: 'cleaned_photo_url',
+        previous_clean_photo_url: null,
+        photo_model: product.previous_photo_model || null,
+        previous_photo_model: null,
+        photo_engine_request: null,
+        photo_status: 'approved',
+        photo_error: null,
+        photo_reviewed_at: new Date().toISOString()
+      };
+
+      const updated = await updateProduct(id, updates);
+
+      return NextResponse.json({
+        success: true,
+        message: 'Foto produk dikembalikan ke versi bersih sebelumnya.',
+        product: updated
+      });
+    }
+
     if (action !== 'approve') {
-      return NextResponse.json({ success: false, error: `Action '${action}' tidak didukung. Gunakan 'approve'.` }, { status: 400 });
+      return NextResponse.json({ success: false, error: `Action '${action}' tidak didukung. Gunakan 'approve' atau 'revert_previous'.` }, { status: 400 });
     }
 
     // R6: Hanya boleh disetujui jika berstatus needs_review

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createJob, getDb } from '@/lib/db';
 import { withTenantContext } from '@/lib/auth';
 import { getActiveTenantId } from '@/lib/tenant-context';
+import { assessProductCompleteness } from '@/lib/product-completeness';
 import fs from 'fs';
 import path from 'path';
 
@@ -37,7 +38,7 @@ export const POST = withTenantContext(async (req) => {
 
     const activeTenant = getActiveTenantId();
     const db = getDb();
-    const allProducts = await db.prepare('SELECT id, input_source, source_url, raw_photo_url, cleaned_photo_url, generated_photo_url, unique_selling_point, packaging_type FROM product_extractions WHERE tenant_id = ?').all(activeTenant);
+    const allProducts = await db.prepare('SELECT id, input_source, source_url, raw_photo_url, clean_photo_url, cleaned_photo_url, generated_photo_url, unique_selling_point, packaging_type, t2i_prompt, i2v_action_prompt FROM product_extractions WHERE tenant_id = ?').all(activeTenant);
 
     const findExistingProduct = (targetUrl) => {
       const normalizedTarget = normalizeUrl(targetUrl);
@@ -47,20 +48,9 @@ export const POST = withTenantContext(async (req) => {
       );
     };
 
-    const checkMissingComponents = (product) => {
-      const rawFileMissing = !product.raw_photo_url || !fs.existsSync(path.join(process.cwd(), 'public', product.raw_photo_url));
-      const cleanFileMissing = !product.cleaned_photo_url || !fs.existsSync(path.join(process.cwd(), 'public', product.cleaned_photo_url));
-      const studioFileMissing = !product.generated_photo_url || !fs.existsSync(path.join(process.cwd(), 'public', product.generated_photo_url));
-      const metadataMissing = !product.unique_selling_point || !product.packaging_type;
-
-      return {
-        rawFileMissing,
-        cleanFileMissing,
-        studioFileMissing,
-        metadataMissing,
-        anyMissing: rawFileMissing || cleanFileMissing || studioFileMissing || metadataMissing
-      };
-    };
+    const checkMissingComponents = (product) => assessProductCompleteness(product, {
+      fileExists: (rel) => Boolean(rel && fs.existsSync(path.join(process.cwd(), 'public', rel)))
+    });
 
     let urlsToScrape = [];
     let skippedCount = 0;
@@ -74,21 +64,32 @@ export const POST = withTenantContext(async (req) => {
       const uniqueCsvRows = [];
       const seenUrls = new Set();
       for (const row of csv_data) {
-        if (row.url && !seenUrls.has(row.url)) {
-          seenUrls.add(row.url);
-          uniqueCsvRows.push(row);
+        const trimmedUrl = typeof row?.url === 'string' ? row.url.trim() : '';
+        if (trimmedUrl && !seenUrls.has(trimmedUrl)) {
+          seenUrls.add(trimmedUrl);
+          uniqueCsvRows.push({ ...row, url: trimmedUrl });
         }
       }
 
+      if (uniqueCsvRows.length > 50) {
+        return NextResponse.json(
+          { success: false, error: `Maksimal 50 URL per batch. Anda memasukkan ${uniqueCsvRows.length}.` },
+          { status: 400 }
+        );
+      }
+
       for (const row of uniqueCsvRows) {
-        const url = row.url.trim();
+        const url = row.url;
         const affiliate = row.affiliate_link ? row.affiliate_link.trim() : '';
         if (url.startsWith('http://') || url.startsWith('https://')) {
           const existing = findExistingProduct(url);
           if (existing) {
-            // Update existing affiliate link directly
-            await db.prepare('UPDATE product_extractions SET affiliate_link = ? WHERE id = ?').run(affiliate, existing.id);
-            updatedCount++;
+            // Jangan menimpa affiliate link lama dengan string kosong; wajib filter tenant_id
+            if (affiliate) {
+              await db.prepare('UPDATE product_extractions SET affiliate_link = ? WHERE id = ? AND tenant_id = ?')
+                .run(affiliate, existing.id, activeTenant);
+              updatedCount++;
+            }
 
             if (refresh_photo) {
               urlsToScrape.push(url);
@@ -100,7 +101,11 @@ export const POST = withTenantContext(async (req) => {
                 urlsToScrape.push(url);
                 urlAffiliatesMap[url] = affiliate;
                 repairCount++;
+              } else {
+                skippedCount++;
               }
+            } else {
+              skippedCount++;
             }
           } else {
             urlsToScrape.push(url);
@@ -113,7 +118,7 @@ export const POST = withTenantContext(async (req) => {
       // Manual URLs Flow
       let urlList = [];
       if (Array.isArray(urls)) {
-        urlList = urls;
+        urlList = urls.map(u => String(u || '').trim()).filter(u => u.length > 0);
       } else if (typeof urls === 'string') {
         urlList = urls
           .split('\n')
@@ -126,6 +131,13 @@ export const POST = withTenantContext(async (req) => {
       }
 
       const uniqueUrls = Array.from(new Set(urlList));
+      if (uniqueUrls.length > 50) {
+        return NextResponse.json(
+          { success: false, error: `Maksimal 50 URL per batch. Anda memasukkan ${uniqueUrls.length}.` },
+          { status: 400 }
+        );
+      }
+
       for (const url of uniqueUrls) {
         if (url.startsWith('http://') || url.startsWith('https://')) {
           const existing = findExistingProduct(url);

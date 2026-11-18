@@ -1,5 +1,28 @@
+process.env.DISABLE_AUTO_MIGRATIONS = 'true';
+process.env.DISABLE_STARTUP_DB_CACHES = 'true';
+process.env.ENABLE_BACKGROUND_SERVICES = 'false';
+process.env.PG_SEARCH_PATH = process.env.PG_SEARCH_PATH || 'dev';
+
 import test from 'node:test';
 import assert from 'node:assert/strict';
+
+const { isRetryableGeminiError } = await import('../lib/gemini.js');
+
+function decorateProductRetryable(product) {
+  const p = { ...product };
+  p.enrichment_retryable = p.enrichment_status === 'failed' && isRetryableGeminiError(p.enrichment_error);
+  p.enrichment_retry_hint = p.enrichment_retryable ? 'Jalankan cf_enrich_product untuk mengulang' : null;
+  return p;
+}
+
+test('S9: isRetryableGeminiError mengenali pola kuota, 429, 503, rate limit, resource_exhausted, dan kata quota saja', () => {
+  assert.equal(isRetryableGeminiError('429 Too Many Requests'), true);
+  assert.equal(isRetryableGeminiError('503 Service Unavailable'), true);
+  assert.equal(isRetryableGeminiError('Rate limit reached for RPM'), true);
+  assert.equal(isRetryableGeminiError('RESOURCE_EXHAUSTED'), true);
+  assert.equal(isRetryableGeminiError('Daily quota limit hit'), true);
+  assert.equal(isRetryableGeminiError('SyntaxError: Unexpected token'), false);
+});
 
 test('S9: Quota error formatting logic prefixes QUOTA_EXHAUSTED', () => {
   const formatEnrichmentError = (errMsg) => {
@@ -20,23 +43,9 @@ test('S9: Quota error formatting logic prefixes QUOTA_EXHAUSTED', () => {
   assert.equal(standardFormatted, 'SyntaxError: Unexpected token');
 });
 
-test('S9: Product detail response decorates enrichment_retryable fields accurately', () => {
-  const decorateProduct = (product) => {
-    const p = { ...product };
-    const errText = (p.enrichment_error || '').toLowerCase();
-    const isQuota = errText.includes('quota') || errText.includes('rate limit') || errText.includes('resource_exhausted') || errText.includes('429') || errText.includes('503');
-    if (p.enrichment_status === 'failed' && isQuota) {
-      p.enrichment_retryable = true;
-      p.enrichment_retry_hint = 'Jalankan cf_enrich_product untuk mengulang';
-    } else {
-      p.enrichment_retryable = false;
-      p.enrichment_retry_hint = null;
-    }
-    return p;
-  };
-
-  // Case 1: Failed due to quota
-  const failedQuota = decorateProduct({
+test('S9: Product detail response decorates enrichment_retryable via isRetryableGeminiError only when status is failed', () => {
+  // Case 1: Failed due to quota / 429
+  const failedQuota = decorateProductRetryable({
     id: 'pe_test_1',
     enrichment_status: 'failed',
     enrichment_error: 'QUOTA_EXHAUSTED (dapat diulang): 429 Resource Exhausted'
@@ -44,8 +53,23 @@ test('S9: Product detail response decorates enrichment_retryable fields accurate
   assert.equal(failedQuota.enrichment_retryable, true);
   assert.equal(failedQuota.enrichment_retry_hint, 'Jalankan cf_enrich_product untuk mengulang');
 
-  // Case 2: Failed due to parse error (not quota)
-  const failedOther = decorateProduct({
+  // Case 2: Failed due to bare quota message or 503
+  const failedBareQuota = decorateProductRetryable({
+    id: 'pe_test_1b',
+    enrichment_status: 'failed',
+    enrichment_error: 'API key quota exhausted for today'
+  });
+  assert.equal(failedBareQuota.enrichment_retryable, true);
+
+  const failed503 = decorateProductRetryable({
+    id: 'pe_test_1c',
+    enrichment_status: 'failed',
+    enrichment_error: '503 High Demand'
+  });
+  assert.equal(failed503.enrichment_retryable, true);
+
+  // Case 3: Failed due to parse error (not quota/retryable)
+  const failedOther = decorateProductRetryable({
     id: 'pe_test_2',
     enrichment_status: 'failed',
     enrichment_error: 'Invalid JSON response from AI'
@@ -53,11 +77,11 @@ test('S9: Product detail response decorates enrichment_retryable fields accurate
   assert.equal(failedOther.enrichment_retryable, false);
   assert.equal(failedOther.enrichment_retry_hint, null);
 
-  // Case 3: Completed status
-  const completed = decorateProduct({
+  // Case 4: Completed status must stay false even if stale error text exists
+  const completed = decorateProductRetryable({
     id: 'pe_test_3',
     enrichment_status: 'completed',
-    enrichment_error: null
+    enrichment_error: '429 stale error'
   });
   assert.equal(completed.enrichment_retryable, false);
   assert.equal(completed.enrichment_retry_hint, null);

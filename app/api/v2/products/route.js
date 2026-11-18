@@ -11,6 +11,7 @@ import {
 import { saveRawProductImage, resolveImageBufferFromInput } from '@/lib/product-image-storage';
 import { pgQuery } from '@/lib/db-pg';
 import { listProductCatalog } from '@/lib/product-catalog-service';
+import { isRetryableGeminiError } from '@/lib/gemini';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,12 +40,13 @@ export const GET = withTenantContext(async (request) => {
     // Rewrite photo_urls: hanya proxy path lokal, jangan bungkus URL eksternal
     products = products.map(p => {
       const updated = { ...p };
-      const urlKeys = ['photo_url', 'raw_photo_url', 'clean_photo_url', 'cleaned_photo_url', 'generated_photo_url'];
+      const urlKeys = ['photo_url', 'raw_photo_url', 'clean_photo_url', 'cleaned_photo_url', 'generated_photo_url', 'previous_clean_photo_url'];
       for (const key of urlKeys) {
-        if (updated[key] && !updated[key].startsWith('http')) {
+        if (updated[key] && !updated[key].startsWith('http') && !updated[key].startsWith('/api/')) {
           updated[key] = `/api/v2/products/image?path=${encodeURIComponent(updated[key])}`;
         }
       }
+      updated.enrichment_retryable = isRetryableGeminiError(updated.enrichment_error);
       return updated;
     });
 

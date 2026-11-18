@@ -71,6 +71,7 @@ export default function SettingsPage() {
   const [geminiSmartRouting, setGeminiSmartRouting] = useState('on');
   const [geminiModelPrimary, setGeminiModelPrimary] = useState('gemini-3.6-flash');
   const [geminiModelFallback, setGeminiModelFallback] = useState('gemini-3.6-flash');
+  const [geminiModelLight, setGeminiModelLight] = useState('');
   const [geminiCustomModel, setGeminiCustomModel] = useState('');
   const [savingGeminiConfig, setSavingGeminiConfig] = useState(false);
 
@@ -319,7 +320,7 @@ export default function SettingsPage() {
       setGeminiSmartRouting(data.data.gemini_smart_routing || 'on');
 
       const primary = data.data.gemini_model_primary || 'gemini-3.6-flash';
-      const knownModels = ['gemini-3.6-flash', 'gemini-1.5-flash-8b', 'gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-3.7-flash', 'gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-flash-latest'];
+      const knownModels = ['gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest'];
       if (knownModels.includes(primary)) {
         setGeminiModelPrimary(primary);
         setGeminiCustomModel('');
@@ -328,6 +329,7 @@ export default function SettingsPage() {
         setGeminiCustomModel(primary);
       }
       setGeminiModelFallback(data.data.gemini_model_fallback || 'gemini-3.6-flash');
+      setGeminiModelLight(data.data.gemini_model_light || '');
 
       setFbPageId(data.data.fb_page_id || '');
       setFbPageIds(data.data.fb_page_ids || '');
@@ -745,6 +747,7 @@ export default function SettingsPage() {
           gemini_smart_routing: geminiSmartRouting,
           gemini_model_primary: activePrimaryModel,
           gemini_model_fallback: geminiModelFallback,
+          gemini_model_light: geminiModelLight,
         }),
       });
       const data = await res.json();
@@ -1337,9 +1340,6 @@ export default function SettingsPage() {
                       onClick={() => {
                         setGeminiApiTier('paid');
                         setGeminiContextCaching('on');
-                        if (geminiModelPrimary === 'gemini-3.8-flash' || geminiModelPrimary === 'gemini-3.5-flash') {
-                          setGeminiModelPrimary('gemini-3.6-flash');
-                        }
                       }}
                       style={{
                         padding: '12px 14px',
@@ -1358,7 +1358,7 @@ export default function SettingsPage() {
                         </span>
                       </div>
                       <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                        Katalog 8 model hemat (Rp 600 - Rp 1.600), Context Caching aktif (Diskon 75%), TPM tak terbatas.
+                        API Key berbayar milik tenant, Context Caching aktif (Diskon 75%), dan rantai cadangan lintas model aktif.
                       </div>
                     </div>
 
@@ -1366,9 +1366,6 @@ export default function SettingsPage() {
                       onClick={() => {
                         setGeminiApiTier('free');
                         setGeminiContextCaching('off');
-                        if (geminiModelPrimary === 'gemini-1.5-flash-8b' || geminiModelPrimary === 'gemini-3.1-flash-lite' || geminiModelPrimary === 'gemini-2.5-flash' || geminiModelPrimary === 'gemini-1.5-flash') {
-                          setGeminiModelPrimary('gemini-3.6-flash');
-                        }
                       }}
                       style={{
                         padding: '12px 14px',
@@ -1387,52 +1384,97 @@ export default function SettingsPage() {
                         </span>
                       </div>
                       <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                        Model Flash 3.5 - 3.8, rotasi akun multi-key, tanpa Context Caching.
+                        Rotasi multi-key gratis dengan pencatatan kuota per model aktual yang dipanggil, tanpa Context Caching.
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* 2. PRIMARY MODEL SELECTION */}
+                {/* 2. PRIMARY, FALLBACK & LIGHT MODEL SELECTION */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px', marginBottom: '16px' }}>
-                  <div className="form-group">
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px' }}>
+                    <div className="form-group">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                        <label className="form-label" style={{ margin: 0 }}>Pilihan Model AI Utama (Starting Primary)</label>
+                        <span style={{ fontSize: '10px', background: geminiApiTier === 'paid' ? 'var(--status-neutral-soft)' : 'var(--status-success-soft)', color: geminiApiTier === 'paid' ? 'var(--status-neutral)' : 'var(--status-success)', border: `1px solid ${geminiApiTier === 'paid' ? 'var(--status-neutral)' : 'var(--status-success)'}`, padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                          {geminiApiTier === 'paid' ? '💳 Paid Tier Catalog' : '✓ Free Tier Pool'}
+                        </span>
+                      </div>
+                      <select
+                        className="form-input"
+                        value={geminiModelPrimary}
+                        onChange={e => setGeminiModelPrimary(e.target.value)}
+                        style={{ background: 'var(--input-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
+                      >
+                        <option value="gemini-3.6-flash">gemini-3.6-flash (Utama Seimbang — Rekomendasi)</option>
+                        <option value="gemini-3.8-flash">gemini-3.8-flash (Generasi Terbaru)</option>
+                        <option value="gemini-3.7-flash">gemini-3.7-flash (Hybrid Reasoning / Thinking)</option>
+                        <option value="gemini-3.5-flash">gemini-3.5-flash (Generasi Stabil)</option>
+                        <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (Hemat &amp; Cepat)</option>
+                        <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite (Next-Gen Ultra Cepat)</option>
+                        <option value="gemini-2.5-flash">gemini-2.5-flash (Strict JSON &amp; Stabil)</option>
+                        <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite (Ringan &amp; Stabil)</option>
+                        <option value="gemini-flash-latest">gemini-flash-latest (Auto Latest Endpoint)</option>
+                        <option value="custom">✏️ Custom Model ID...</option>
+                      </select>
+                      <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                        Dipakai untuk semua tugas kreatif (storyboard, naskah, OPC, RE, Multiplier, Recipe, Threads, YouTube Studio, Builder).
+                      </p>
+                    </div>
+
+                    <div className="form-group">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                        <label className="form-label" style={{ margin: 0 }}>Model Cadangan Utama</label>
+                        <span style={{ fontSize: '10px', background: 'var(--status-info-soft)', color: 'var(--status-info)', border: '1px solid var(--status-info)', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                          Auto Fallback
+                        </span>
+                      </div>
+                      <select
+                        className="form-input"
+                        value={geminiModelFallback}
+                        onChange={e => setGeminiModelFallback(e.target.value)}
+                        style={{ background: 'var(--input-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
+                      >
+                        <option value="gemini-3.6-flash">gemini-3.6-flash (Cadangan Stabil — Rekomendasi)</option>
+                        <option value="gemini-3.5-flash">gemini-3.5-flash (Safety Net)</option>
+                        <option value="gemini-3.7-flash">gemini-3.7-flash (Hybrid Reasoning)</option>
+                        <option value="gemini-3.8-flash">gemini-3.8-flash (Generasi Terbaru)</option>
+                        <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (Hemat &amp; Cepat)</option>
+                        <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite (Ultra Cepat)</option>
+                        <option value="gemini-2.5-flash">gemini-2.5-flash (Strict JSON)</option>
+                        <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite (Ringan)</option>
+                        <option value="gemini-flash-latest">gemini-flash-latest (Auto Latest)</option>
+                      </select>
+                      <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                        Dipakai otomatis saat model pertama sibuk (503) atau tidak tersedia sebelum melanjutkan rantai cadangan.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Dropdown Model Ringan (Tugas Kecil) */}
+                  <div className="form-group" style={{ background: 'color-mix(in srgb, var(--action-primary) 7%, var(--surface-subtle))', border: '1px dashed var(--action-primary)', borderRadius: '10px', padding: '12px 14px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                      <label className="form-label" style={{ margin: 0 }}>Pilihan Model AI Utama (Starting Primary)</label>
-                      <span style={{ fontSize: '10px', background: geminiApiTier === 'paid' ? 'var(--status-neutral-soft)' : 'var(--status-success-soft)', color: geminiApiTier === 'paid' ? 'var(--status-neutral)' : 'var(--status-success)', border: `1px solid ${geminiApiTier === 'paid' ? 'var(--status-neutral)' : 'var(--status-success)'}`, padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
-                        {geminiApiTier === 'paid' ? '💳 Paid Tier Catalog (8 Model)' : '✓ Free Tier Ready (15 RPM)'}
+                      <label className="form-label" style={{ margin: 0 }}>Model ringan (tugas kecil)</label>
+                      <span style={{ fontSize: '10px', background: 'var(--status-neutral-soft)', color: 'var(--status-neutral)', border: '1px solid var(--status-neutral)', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                        Smart Routing
                       </span>
                     </div>
                     <select
                       className="form-input"
-                      value={geminiModelPrimary}
-                      onChange={e => setGeminiModelPrimary(e.target.value)}
+                      value={geminiModelLight}
+                      onChange={e => setGeminiModelLight(e.target.value)}
                       style={{ background: 'var(--input-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
                     >
-                      {geminiApiTier === 'paid' ? (
-                        <>
-                          <option value="gemini-3.6-flash">gemini-3.6-flash (Creative Sweet Spot — Rekomendasi Paid)</option>
-                          <option value="gemini-1.5-flash-8b">gemini-1.5-flash-8b (Ultra-Low Cost — Rp 600 / 1M)</option>
-                          <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite (Next-Gen Ultra Cepat)</option>
-                          <option value="gemini-2.5-flash">gemini-2.5-flash (Strict JSON & Compliance)</option>
-                          <option value="gemini-1.5-flash">gemini-1.5-flash (Standard Flash)</option>
-                          <option value="gemini-3.7-flash">gemini-3.7-flash (Hybrid Reasoning / Thinking)</option>
-                          <option value="gemini-3.8-flash">gemini-3.8-flash (Flash Terbaru)</option>
-                          <option value="gemini-flash-latest">gemini-flash-latest (Auto Latest Endpoint)</option>
-                          <option value="custom">✏️ Custom Model ID...</option>
-                        </>
-                      ) : (
-                        <>
-                          <option value="gemini-3.6-flash">gemini-3.6-flash (Generasi Stabil & Cepat — Rekomendasi Free)</option>
-                          <option value="gemini-3.7-flash">gemini-3.7-flash (Hybrid Reasoning / Thinking)</option>
-                          <option value="gemini-3.8-flash">gemini-3.8-flash (Flash Terbaru)</option>
-                          <option value="gemini-3.5-flash">gemini-3.5-flash (Standard Flash — Safety Net)</option>
-                          <option value="gemini-flash-latest">gemini-flash-latest (Auto Latest Flash)</option>
-                          <option value="custom">✏️ Custom Model ID...</option>
-                        </>
-                      )}
+                      <option value="">Sama dengan model utama</option>
+                      <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (Hemat &amp; Cepat)</option>
+                      <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite (Ultra Cepat)</option>
+                      <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite (Ringan &amp; Stabil)</option>
+                      <option value="gemini-2.5-flash">gemini-2.5-flash (Strict JSON &amp; Stabil)</option>
+                      <option value="gemini-3.6-flash">gemini-3.6-flash (Workhorse Seimbang)</option>
+                      <option value="gemini-flash-latest">gemini-flash-latest (Auto Latest)</option>
                     </select>
-                    <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                      Model ini akan diprioritaskan pertama kali. Jika Google mengembalikan error 503 (High Demand) atau 404 (Model Tidak Tersedia), sistem otomatis beralih ke model di bawahnya secara berurutan.
+                    <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '4px', marginBottom: 0 }}>
+                      Dipakai oleh scraper produk, enrichment produk, OCR, compliance audit, deconstruct, dan ekstraksi brand profile saat Smart Routing aktif. Jika dikosongkan, mengikuti Model AI Utama.
                     </p>
                   </div>
 
@@ -1467,10 +1509,10 @@ export default function SettingsPage() {
                   >
                     <div style={{ flex: '1 1 280px', minWidth: 0 }}>
                       <div style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>
-                        🧪 Pemeriksa Gambar Otomatis, Rem Kuota & Fitur Eksperimen
+                        🧪 Pemeriksa Gambar Otomatis, Rem Kuota &amp; Fitur Eksperimen
                       </div>
                       <div style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                        Pengaturan Sutradara Adegan, Mesin Metafora, Model & Mode Pemeriksa Gambar, serta Rem Kuota Harian sekarang dipusatkan di tab khusus agar lebih mudah dibaca per akun.
+                        Pengaturan Sutradara Adegan, Mesin Metafora, Model &amp; Mode Pemeriksa Gambar, serta Rem Kuota Harian sekarang dipusatkan di tab khusus agar lebih mudah dibaca per akun.
                       </div>
                     </div>
                     <button
@@ -1483,92 +1525,77 @@ export default function SettingsPage() {
                     </button>
                   </div>
 
-                  {/* 3. SMART MODULE-BASED MODEL ROUTING MATRIX (PAID TIER) */}
-                  {geminiApiTier === 'paid' && (
-                    <div style={{ background: 'var(--surface-subtle)', border: '1px solid var(--border-subtle)', borderRadius: '10px', padding: '14px', marginBottom: '8px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                        <div>
-                          <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)' }}>🎯 Matriks Alokasi Model per Modul (Smart Cost Optimization)</span>
-                          <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
-                            Otomatis memilih model paling efisien & hemat token sesuai jenis tugas backend.
-                          </p>
-                        </div>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', cursor: 'pointer', color: 'var(--action-primary)', fontWeight: 600 }}>
-                          <input
-                            type="checkbox"
-                            checked={geminiSmartRouting === 'on'}
-                            onChange={e => setGeminiSmartRouting(e.target.checked ? 'on' : 'off')}
-                          />
-                          Aktifkan Routing Cerdas
-                        </label>
+                  {/* 3. SMART ROUTING PANEL */}
+                  <div style={{ background: 'var(--surface-subtle)', border: '1px solid var(--border-subtle)', borderRadius: '10px', padding: '14px', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
+                      <div>
+                        <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)' }}>🎯 Smart Routing per Jenis Tugas</span>
+                        <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
+                          Aktif: tugas kecil memakai Model ringan. Mati: semua memakai Model utama.
+                        </p>
                       </div>
-
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.76rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', background: 'var(--surface-raised)', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
-                          <div>
-                            <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>📸 Ekstraksi OCR, Scraper URL & Token Filter</span>
-                            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Scraper IG/TikTok, OCR Foto Produk, Lexicon Audit</div>
-                          </div>
-                          <div style={{ textAlign: 'right' }}>
-                            <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--status-success)' }}>gemini-1.5-flash-8b</span>
-                            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>~Rp 600 / 1M (Zero-KB Bypass)</div>
-                          </div>
-                        </div>
-
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', background: 'var(--surface-raised)', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
-                          <div>
-                            <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>🛡️ TikTok Compliance & Deconstruct Lab</span>
-                            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Bedah Struktur Naskah Viral & Audit Kepatuhan Kebijakan</div>
-                          </div>
-                          <div style={{ textAlign: 'right' }}>
-                            <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--status-success)' }}>gemini-2.5-flash</span>
-                            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>~Rp 1.200 / 1M (Strict JSON Parser)</div>
-                          </div>
-                        </div>
-
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', background: 'rgba(45, 212, 191, 0.06)', borderRadius: '6px', border: '1px solid var(--action-primary)' }}>
-                          <div>
-                            <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>🎬 10 Menu Kampanye (Planner, Pillar, Recipe, RE, dll)</span>
-                            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Storyboard, Naskah VO, 10 Video DNA & Social Media Package</div>
-                          </div>
-                          <div style={{ textAlign: 'right' }}>
-                            <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--action-primary)' }}>gemini-3.6-flash</span>
-                            <div style={{ fontSize: '0.68rem', color: 'var(--status-success)' }}>✓ Master KB Caching (Diskon 75%)</div>
-                          </div>
-                        </div>
-
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', background: 'var(--surface-raised)', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
-                          <div>
-                            <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>🎙️ YouTube Studio Series & Multi-Speaker Narrative</span>
-                            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Episode Blueprint, Character Voice Sync & Strategic Planning</div>
-                          </div>
-                          <div style={{ textAlign: 'right' }}>
-                            <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--status-warning)' }}>gemini-3.7-flash</span>
-                            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Hybrid Reasoning / Deep Thinking</div>
-                          </div>
-                        </div>
-                      </div>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', cursor: 'pointer', color: 'var(--action-primary)', fontWeight: 600 }}>
+                        <input
+                          type="checkbox"
+                          checked={geminiSmartRouting === 'on'}
+                          onChange={e => setGeminiSmartRouting(e.target.checked ? 'on' : 'off')}
+                        />
+                        {geminiSmartRouting === 'on' ? 'Smart Routing: Aktif' : 'Smart Routing: Mati'}
+                      </label>
                     </div>
-                  )}
+
+                    {(() => {
+                      const activePrimaryDisplay = geminiModelPrimary === 'custom' ? (geminiCustomModel.trim() || 'custom-model') : geminiModelPrimary;
+                      const activeLightDisplay = (geminiSmartRouting === 'on' && geminiModelLight) ? geminiModelLight : activePrimaryDisplay;
+                      const lightSourceNote = geminiSmartRouting !== 'on'
+                        ? 'Smart Routing mati → ikut Model Utama'
+                        : (geminiModelLight ? 'Dari dropdown Model ringan' : 'Kosong → ikut Model Utama');
+                      return (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.76rem' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', background: 'color-mix(in srgb, var(--action-primary) 8%, var(--surface-raised))', borderRadius: '6px', border: '1px solid var(--action-primary)' }}>
+                            <div>
+                              <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>🎬 Tugas Kreatif (Peran Utama)</span>
+                              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Storyboard, Naskah VO, OPC, RE, Multiplier, Recipe, Threads, YouTube Studio, Builder</div>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                              <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--action-primary)' }}>{activePrimaryDisplay}</span>
+                              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Mengikuti Model AI Utama</div>
+                            </div>
+                          </div>
+
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', background: 'var(--surface-raised)', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
+                            <div>
+                              <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>⚡ Tugas Kecil (Peran Ringan)</span>
+                              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Scraper, Enrichment Produk, OCR, Compliance Audit, Deconstruct, Ekstraksi Brand</div>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                              <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--status-success)' }}>{activeLightDisplay}</span>
+                              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{lightSourceNote}</div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
 
                   {/* 4. EXPANDED WATERFALL SEQUENTIAL VISUALIZER */}
                   <div style={{ background: 'var(--surface-subtle)', border: '1px solid var(--border-subtle)', borderRadius: '10px', padding: '14px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                       <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)' }}>🌊 Rantai Eksekusi Berjenjang (Waterfall Fallback)</span>
                       <span style={{ fontSize: '10px', background: 'var(--status-success-soft)', color: 'var(--status-success)', border: '1px solid var(--status-success)', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
-                        🛡️ 0% Failure Guarantee
+                        🛡️ Auto-Fallback Aktif
                       </span>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                       {(() => {
-                        const paidCascade = ['gemini-3.6-flash', 'gemini-1.5-flash-8b', 'gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-3.7-flash', 'gemini-3.8-flash', 'gemini-flash-latest'];
-                        const freeCascade = ['gemini-3.6-flash', 'gemini-3.7-flash', 'gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-flash-latest'];
+                        const paidCascade = ['gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.7-flash', 'gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-flash-latest'];
+                        const freeCascade = ['gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.7-flash', 'gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-2.5-flash', 'gemini-flash-latest'];
                         const standardList = geminiApiTier === 'paid' ? paidCascade : freeCascade;
                         const activePrimary = geminiModelPrimary === 'custom' ? (geminiCustomModel.trim() || 'custom-model') : geminiModelPrimary;
                         const activeFallback = geminiModelFallback && geminiModelFallback.trim() ? geminiModelFallback.trim() : null;
 
                         const chain = [activePrimary];
-                        if (activeFallback && activeFallback !== activePrimary) {
+                        if (activeFallback && !chain.includes(activeFallback)) {
                           chain.push(activeFallback);
                         }
                         for (const m of standardList) {
@@ -1583,7 +1610,7 @@ export default function SettingsPage() {
                               alignItems: 'center',
                               gap: '10px',
                               padding: '6px 10px',
-                              background: idx === 0 ? 'rgba(45, 212, 191, 0.08)' : 'var(--surface-raised)',
+                              background: idx === 0 ? 'color-mix(in srgb, var(--action-primary) 10%, var(--surface-raised))' : 'var(--surface-raised)',
                               border: `1px solid ${idx === 0 ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
                               borderRadius: '6px',
                               fontSize: '0.78rem'

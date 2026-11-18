@@ -42,9 +42,8 @@ export default function VideoStudio() {
   const [videoDbIds, setVideoDbIds] = useState([]);
   const [videoSearch, setVideoSearch] = useState('');
   const [dbVideos, setDbVideos] = useState([]);
-  // Sumber dari RE Campaign & Instant Factory
+  // Sumber dari RE Campaign
   const [reCampaignVideos, setReCampaignVideos] = useState([]);
-  const [instantFactoryVideos, setInstantFactoryVideos] = useState([]);
   const [campaignVideoSearch, setCampaignVideoSearch] = useState('');
   const [selectedCampaignVideos, setSelectedCampaignVideos] = useState([]);
 
@@ -163,7 +162,6 @@ export default function VideoStudio() {
       const data = await res.json();
       if (data.success) {
         setReCampaignVideos(data.data.re_campaign || []);
-        setInstantFactoryVideos(data.data.instant_factory || []);
       }
     } catch (e) {
       console.error('Error fetching campaign videos:', e);
@@ -215,34 +213,6 @@ export default function VideoStudio() {
     });
   };
 
-  const handleToggleInstantFactoryVideo = (vid) => {
-    setSelectedCampaignVideos(prev => {
-      const exists = prev.find(v => v.id === vid.id);
-      if (exists) {
-        return prev.filter(v => v.id !== vid.id);
-      } else {
-        return [...prev, vid];
-      }
-    });
-  };
-
-  const handleSelectAllIf = () => {
-    const q = campaignVideoSearch.toLowerCase();
-    const filtered = instantFactoryVideos.filter(v => !q || v.label.toLowerCase().includes(q) || v.campaign_name.toLowerCase().includes(q));
-    setSelectedCampaignVideos(prev => {
-      const toAdd = filtered.filter(fv => !prev.find(pv => pv.id === fv.id));
-      return [...prev, ...toAdd];
-    });
-  };
-
-  const handleClearAllIf = () => {
-    const q = campaignVideoSearch.toLowerCase();
-    const filtered = instantFactoryVideos.filter(v => !q || v.label.toLowerCase().includes(q) || v.campaign_name.toLowerCase().includes(q));
-    setSelectedCampaignVideos(prev => {
-      return prev.filter(pv => !filtered.find(fv => fv.id === pv.id));
-    });
-  };
-
   const handleToggleDbVideo = (vidId) => {
     setVideoDbIds(prev => {
       if (prev.includes(vidId)) {
@@ -286,7 +256,7 @@ export default function VideoStudio() {
   }
 
   // Helper to calculate total selected video clips
-  const videoClipCount = videoSourceType === 're_campaign' || videoSourceType === 'instant_factory'
+  const videoClipCount = videoSourceType === 're_campaign'
     ? selectedCampaignVideos.length
     : (videoSourceType === 'upload' ? videoFiles.length : videoDbIds.length);
 
@@ -333,7 +303,7 @@ export default function VideoStudio() {
       if (videoSourceType === 'database' && videoDbIds.length === 0) {
         throw new Error('Silakan pilih minimal 1 video dari database.');
       }
-      if ((videoSourceType === 're_campaign' || videoSourceType === 'instant_factory') && selectedCampaignVideos.length === 0) {
+      if (videoSourceType === 're_campaign' && selectedCampaignVideos.length === 0) {
         throw new Error('Silakan pilih minimal 1 video dari kampanye.');
       }
       if (audioSourceType === 'upload') {
@@ -372,9 +342,6 @@ export default function VideoStudio() {
       } else if (videoSourceType === 're_campaign') {
         // Kirim ID item (format "re::<item_id>") — server resolve ke ffmpeg_output_path
         videoPath = JSON.stringify(selectedCampaignVideos.map(v => v.id));
-      } else if (videoSourceType === 'instant_factory') {
-        // Kirim fs_path klip Instant Factory — server resolve ke abs path
-        videoPath = JSON.stringify(selectedCampaignVideos.map(v => v.fs_path));
       } else {
         videoPath = JSON.stringify(videoDbIds);
       }
@@ -787,17 +754,6 @@ export default function VideoStudio() {
                         <span style={{ marginLeft: 4, background: 'rgba(99,102,241,0.3)', borderRadius: 8, padding: '0 5px', fontSize: '0.65rem' }}>{reCampaignVideos.length}</span>
                       )}
                     </button>
-                    <button
-                      type="button"
-                      className={`tab-btn ${videoSourceType === 'instant_factory' ? 'active' : ''}`}
-                      onClick={() => { setVideoSourceType('instant_factory'); setSelectedCampaignVideos([]); fetchCampaignVideos(); }}
-                      style={{ position: 'relative' }}
-                    >
-                      ⚡ Instant Factory
-                      {instantFactoryVideos.length > 0 && (
-                        <span style={{ marginLeft: 4, background: 'rgba(234,179,8,0.3)', borderRadius: 8, padding: '0 5px', fontSize: '0.65rem' }}>{instantFactoryVideos.length}</span>
-                      )}
-                    </button>
                   </div>
 
                   {videoSourceType === 'upload' ? (
@@ -926,84 +882,6 @@ export default function VideoStudio() {
                                             </div>
                                           );
                                         })}
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              ));
-                            })()}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  ) : videoSourceType === 'instant_factory' ? (
-                    <div className="db-select-box">
-                      <input
-                        type="text"
-                        placeholder="Cari video Instant Factory..."
-                        className="form-input"
-                        value={campaignVideoSearch}
-                        onChange={(e) => setCampaignVideoSearch(e.target.value)}
-                        style={{ marginBottom: '8px' }}
-                      />
-
-                      {selectedCampaignVideos.length > 0 && (
-                        <div style={{ background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.25)', borderRadius: '8px', padding: '8px', marginBottom: '8px' }}>
-                          <p style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--status-warning)', marginBottom: '4px' }}>✅ Terpilih ({selectedCampaignVideos.length}):</p>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', maxHeight: '100px', overflowY: 'auto' }}>
-                            {selectedCampaignVideos.map((v, idx) => (
-                              <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-interactive)', padding: '3px 6px', borderRadius: '4px', fontSize: '0.7rem' }}>
-                                <span style={{ color: 'var(--status-warning)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '85%' }}>{idx + 1}. {v.label}</span>
-                                <button type="button" style={{ background: 'transparent', border: 'none', color: 'var(--status-danger)', cursor: 'pointer' }} onClick={() => setSelectedCampaignVideos(prev => prev.filter((_, i) => i !== idx))}>×</button>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {instantFactoryVideos.length === 0 ? (
-                        <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem', padding: '16px 0' }}>
-                          <p>⚠️ Belum ada klip video dari Instant Factory yang ditemukan.</p>
-                          <p style={{ fontSize: '0.72rem', marginTop: 4 }}>Klip muncul jika pipeline Instant Factory menghasilkan file video per-scene.</p>
-                        </div>
-                      ) : (
-                        <>
-                          <div className="multi-select-actions">
-                            <button type="button" className="btn-link" onClick={handleSelectAllIf}>☑ Select All</button>
-                            <button type="button" className="btn-link" onClick={handleClearAllIf}>☒ Clear Filtered</button>
-                          </div>
-                          <div className="studio-multi-select-list">
-                            {(() => {
-                              const q = campaignVideoSearch.toLowerCase();
-                              const filtered = instantFactoryVideos.filter(v => !q || v.label.toLowerCase().includes(q) || v.campaign_name.toLowerCase().includes(q));
-                              if (filtered.length === 0) {
-                                return <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', padding: '8px', margin: 0, textAlign: 'center' }}>Tidak ada hasil pencarian.</p>;
-                              }
-
-                              const groups = {};
-                              filtered.forEach(v => {
-                                if (!groups[v.campaign_name]) groups[v.campaign_name] = [];
-                                groups[v.campaign_name].push(v);
-                              });
-
-                              return Object.entries(groups).map(([name, items]) => (
-                                <div key={name} style={{ display: 'flex', flexDirection: 'column' }}>
-                                  <div className="multi-select-group-header">⚡ {name}</div>
-                                  {items.map(v => {
-                                    const isSelected = !!selectedCampaignVideos.find(s => s.id === v.id);
-                                    return (
-                                      <div
-                                        key={v.id}
-                                        className={`multi-select-row ${isSelected ? 'selected' : ''}`}
-                                        onClick={() => handleToggleInstantFactoryVideo(v)}
-                                        style={{ marginLeft: '8px' }}
-                                      >
-                                        <input
-                                          type="checkbox"
-                                          checked={isSelected}
-                                          onChange={() => {}}
-                                        />
-                                        <span>{v.label}</span>
                                       </div>
                                     );
                                   })}
@@ -1488,11 +1366,9 @@ export default function VideoStudio() {
                   videoPaths={
                     videoSourceType === 're_campaign'
                       ? selectedCampaignVideos.map(v => v.id)
-                      : (videoSourceType === 'instant_factory'
-                          ? selectedCampaignVideos.map(v => v.fs_path)
-                          : (videoSourceType === 'upload'
-                              ? videoFiles.map(f => f.name)
-                              : videoDbIds))
+                      : (videoSourceType === 'upload'
+                          ? videoFiles.map(f => f.name)
+                          : videoDbIds)
                   }
                   audioSourceType={audioSourceType}
                   audioMode={audioMode}

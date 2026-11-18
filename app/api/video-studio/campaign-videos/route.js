@@ -8,13 +8,10 @@ export const dynamic = 'force-dynamic';
 /**
  * GET /api/video-studio/campaign-videos
  * 
- * Mengembalikan daftar video yang tersedia dari dua sumber:
- * 
- * 1. RE Campaign — dua level:
+ * Mengembalikan daftar video yang tersedia dari sumber:
+ * RE Campaign — dua level:
  *    a. Klip per-scene dari G-Labs (visual_clip_paths) — jika visual_status = 'completed'
  *    b. Video final FFmpeg (ffmpeg_output_path) — jika ffmpeg_status = 'completed'
- * 
- * 2. Instant Factory — klip per-scene dari storyboard (jika ada local_video_path)
  */
 export async function GET() {
   try {
@@ -114,54 +111,10 @@ export async function GET() {
       }
     }
 
-    // ─────────────────────────────────────────
-    // 2. Instant Factory: cek apakah ada video klip per-scene
-    // ─────────────────────────────────────────
-    const instantCampaigns = await db.prepare(`
-      SELECT ic.id, ic.product_name, ic.status, ico.unified_production_json
-      FROM instant_campaigns ic
-      LEFT JOIN instant_campaign_outputs ico ON ico.campaign_id = ic.id
-      WHERE ic.status = 'completed'
-        AND ico.unified_production_json IS NOT NULL
-      ORDER BY ic.created_at DESC
-    `).all();
-
-    const instantVideos = [];
-    for (const campaign of instantCampaigns) {
-      try {
-        const json = JSON.parse(campaign.unified_production_json);
-        const storyboard = json.production_storyboard || [];
-        for (let i = 0; i < storyboard.length; i++) {
-          const scene = storyboard[i];
-          const clipPath = scene.local_video_path || scene.rendered_clip_path || scene.clip_path || null;
-          if (clipPath) {
-            const absPath = path.isAbsolute(clipPath) ? clipPath : path.join(process.cwd(), 'public', clipPath);
-            if (fs.existsSync(absPath)) {
-              const relPath = path.isAbsolute(clipPath)
-                ? `/${path.relative(path.join(process.cwd(), 'public'), absPath).replace(/\\/g, '/')}`
-                : clipPath;
-              instantVideos.push({
-                id: `if::${campaign.id}::scene${i + 1}`,
-                label: `${campaign.product_name || 'Tanpa Nama'} › Scene ${i + 1}`,
-                campaign_name: campaign.product_name || 'Tanpa Nama',
-                campaign_id: campaign.id,
-                scene_index: i + 1,
-                fs_path: relPath,
-                abs_path: absPath,
-                exists: true,
-                source: 'instant_factory'
-              });
-            }
-          }
-        }
-      } catch {}
-    }
-
     return NextResponse.json({
       success: true,
       data: {
-        re_campaign: reCampaignVideos,
-        instant_factory: instantVideos
+        re_campaign: reCampaignVideos
       }
     });
 

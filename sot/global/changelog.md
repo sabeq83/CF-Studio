@@ -1,5 +1,41 @@
 # Changelog
 
+## V2.54.1 — Pemulihan Start Frame Otomatis (18/11/2026)
+- Klip gambar awal yang gagal saat pra-render diantrekan ulang otomatis
+- Menunggu antrean/polling G-Labs tidak dihitung sebagai percobaan gagal
+- Ulang satu klip membawa klip yang sudah jadi (hitungan tidak turun)
+- Regenerasi start frame mendukung only_missing
+- Pekerja start frame pulih sendiri bila menggantung + status di scheduler-control
+- Perbaikan pelepasan koneksi ganda yang menutupi deadlock
+
+## V2.54.0 — Batch Scraper Aktif Kembali (18/11/2026)
+- Tombol Batch Scraper aktif, maks 50 URL/CSV
+- CSV tidak menimpa link afiliasi kosong
+- Aturan data rumpang disatukan (S3)
+- Kegagalan foto studio tercatat (S5)
+- Maksimal 1 job scraper berjalan (S6)
+
+## V2.53.0 — Foto Scraper Square & Tombol Manual GPT Image 2 (18/11/2026)
+- Generative polish scraper diubah ke nano_banana_2 rasio 1:1 (square)
+- Tombol manual Ulangi dengan GPT Image 2 di Jendela Banding (1 produk, konfirmasi kuota ChatGPT)
+- Pelacakan model foto aktif & sebelumnya (photo_model, previous_photo_model) serta pemulihan saat revert
+- Helper OpenAI GPT Image 2 (/api/openai/generate) tanpa fallback diam-diam & perbaikan unduh getFileUrl(file, taskId)
+
+## V2.52.0 — Truth Bahasa Inggris, Kartu Produk Baru, Jendela Banding & Revert Foto (17/11/2026)
+- Product Truth & Geometric Truth kini dalam bahasa Inggris baku untuk stabilitas video DNA AI
+- Penjaga bahasa ensureEnglishProductTruths & skrip translate-product-truths (dry-run ready)
+- Kartu produk baru dengan default foto bersih, sakelar Asli / Hasil AI lokal, badge pojok status, dan tombol Enrich AI
+- Jendela Banding foto Asli vs Hasil AI berdampingan dengan aksi Setujui, Ganti Foto, Ulangi Generate, dan Tolak pakai foto sebelumnya
+- Penyimpanan foto bersih sebelumnya ke kolom previous_clean_photo_url dan aksi revert_previous
+- Pratinjau hanya-baca foto Asli dan Hasil AI di tab Foto & AI modal detail produk
+
+## V2.51.0 — Hapus Instant Factory/Sheets Autopilot & Model AI Terpusat di Settings (17/11/2026)
+- Menghapus fitur usang Instant Factory dan Sheets Autopilot beserta UI, endpoint API, scheduler, dan arsip dokumentasi terkait
+- Memusatkan pemilih model Gemini teks dan vision ke menu Settings tenant lewat resolveModelChain dengan peran primary, light (gemini_model_light), dan vision
+- Menambahkan dropdown Model ringan (tugas kecil) serta memperbarui keterangan Smart Routing dan menghapus model mati gemini-1.5-flash-8b / gemini-1.5-flash
+- Melengkapi cadangan waterfall penuh di seluruh pemanggil teks/vision dan membedakan error MODEL_BUSY (503) dari QUOTA_EXHAUSTED (429)
+- Memperbaiki pencatatan kuota key pool ke model aktual yang dipanggil
+
 ## V2.50.4 — Hotfix Scraper Foto Produk: Foto Clean, Deteksi 404, Validasi URL & Tenant MCP (17/11/2026)
 - Perbaikan fatal processCleanInputPath is not defined
 - Deteksi halaman 404 dan endpoint status scraping

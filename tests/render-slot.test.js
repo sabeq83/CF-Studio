@@ -87,7 +87,7 @@ test('Fase 4: acquireProductionSlot never throws even if slot directory is inval
     const slot = await acquireProductionSlot({
       env: 'test',
       jobRef: 'job_fail',
-      type: 'instant_factory'
+      type: 're_campaign'
     });
 
     assert.ok(slot);

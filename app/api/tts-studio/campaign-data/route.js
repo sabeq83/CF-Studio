@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { listReCampaigns, listReCampaignItems, getAllInstantCampaigns, getInstantCampaign } from '@/lib/db';
+import { listReCampaigns, listReCampaignItems } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,36 +41,10 @@ export async function GET() {
       }
     }
 
-    // 2. Fetch and format Instant Factory Campaigns
-    const instantCampaignsList = await getAllInstantCampaigns();
-    const instantData = [];
-
-    for (const campaignSummary of instantCampaignsList) {
-      const fullCampaign = await getInstantCampaign(campaignSummary.id);
-      if (fullCampaign && fullCampaign.output && fullCampaign.output.unified_production_json) {
-        try {
-          const parsed = JSON.parse(fullCampaign.output.unified_production_json);
-          const storyboard = parsed.production_storyboard || [];
-          const clips = storyboard.map(scene => scene.audio_segment?.voiceover_text || '').filter(text => text !== '');
-          
-          if (clips.length > 0) {
-            instantData.push({
-              campaign_id: fullCampaign.id,
-              product_name: fullCampaign.product_name || 'Tanpa Nama',
-              clips: clips
-            });
-          }
-        } catch (e) {
-          console.error(`Failed to parse unified_production_json for instant campaign ${campaignSummary.id}`, e);
-        }
-      }
-    }
-
     return NextResponse.json({
       success: true,
       data: {
-        autopilot: autopilotData,
-        instant: instantData
+        autopilot: autopilotData
       }
     });
 

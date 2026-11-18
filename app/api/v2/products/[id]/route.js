@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { withTenantContext } from '@/lib/auth';
 import { getActiveTenantId } from '@/lib/tenant-context';
 import { deleteProduct, getProductById, updateProduct } from '@/lib/product-repository';
+import { isRetryableGeminiError } from '@/lib/gemini';
 import { validateSingleProductUpdate, validateRawProductImage } from '@/lib/product-validation';
 import { saveRawProductImage } from '@/lib/product-image-storage';
 
@@ -15,24 +16,15 @@ export const GET = withTenantContext(async (req, { params }) => {
       return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 });
     }
     // Hanya proxy path lokal; jangan bungkus URL eksternal
-    const urlKeys = ['photo_url', 'raw_photo_url', 'clean_photo_url', 'cleaned_photo_url', 'generated_photo_url'];
+    const urlKeys = ['photo_url', 'raw_photo_url', 'clean_photo_url', 'cleaned_photo_url', 'generated_photo_url', 'previous_clean_photo_url'];
     for (const key of urlKeys) {
-      if (product[key] && !product[key].startsWith('http')) {
+      if (product[key] && !product[key].startsWith('http') && !product[key].startsWith('/api/')) {
         product[key] = `/api/v2/products/image?path=${encodeURIComponent(product[key])}`;
       }
     }
-
-    // S9: Tambahkan field turunan retryable jika enrichment gagal akibat kuota/rate limit
-    const errText = (product.enrichment_error || '').toLowerCase();
-    const isQuota = errText.includes('quota') || errText.includes('rate limit') || errText.includes('resource_exhausted') || errText.includes('429') || errText.includes('503');
-    if (product.enrichment_status === 'failed' && isQuota) {
-      product.enrichment_retryable = true;
-      product.enrichment_retry_hint = 'Jalankan cf_enrich_product untuk mengulang';
-    } else {
-      product.enrichment_retryable = false;
-      product.enrichment_retry_hint = null;
-    }
-
+    // S9: retryable hanya untuk enrichment yang gagal karena kuota/rate limit/503 (aturan pusat isRetryableGeminiError)
+    product.enrichment_retryable = product.enrichment_status === 'failed' && isRetryableGeminiError(product.enrichment_error);
+    product.enrichment_retry_hint = product.enrichment_retryable ? 'Jalankan cf_enrich_product untuk mengulang' : null;
     return NextResponse.json({ success: true, data: product });
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: error.status || 500 });
