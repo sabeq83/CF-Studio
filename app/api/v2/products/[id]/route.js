@@ -22,7 +22,9 @@ export const GET = withTenantContext(async (req, { params }) => {
         product[key] = `/api/v2/products/image?path=${encodeURIComponent(product[key])}`;
       }
     }
-    product.enrichment_retryable = isRetryableGeminiError(product.enrichment_error);
+    // S9: retryable hanya untuk enrichment yang gagal karena kuota/rate limit/503 (aturan pusat isRetryableGeminiError)
+    product.enrichment_retryable = product.enrichment_status === 'failed' && isRetryableGeminiError(product.enrichment_error);
+    product.enrichment_retry_hint = product.enrichment_retryable ? 'Jalankan cf_enrich_product untuk mengulang' : null;
     return NextResponse.json({ success: true, data: product });
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: error.status || 500 });

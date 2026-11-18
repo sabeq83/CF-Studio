@@ -36,35 +36,35 @@ test('P2: evaluateCandidateScores flags needsReview when all candidates contain 
   const aiResult = {
     best_index: 0,
     candidates: [
-      { index: 0, has_person: true, text_overlay: 'heavy', is_infographic: false, product_visible: true, score: 90 },
-      { index: 1, has_person: true, text_overlay: 'light', is_infographic: false, product_visible: true, score: 70 }
+      { index: 0, has_person: true, text_overlay: 'heavy', text_area_pct: 60, is_infographic: false, product_visible: true, score: 90 },
+      { index: 1, has_person: true, text_overlay: 'light', text_area_pct: 20, is_infographic: false, product_visible: true, score: 70 }
     ]
   };
 
   const evalResult = evaluateCandidateScores(candidates, aiResult);
   assert.equal(evalResult.needsReview, true);
-  assert.equal(evalResult.reason, 'semua kandidat memuat orang/teks');
+  assert.equal(evalResult.reason, 'tidak ada foto layak, ganti foto manual');
   assert.equal(evalResult.selectedIndex, 0, 'Falls back to highest score candidate');
 });
 
-test('P2: evaluateCandidateScores rejects infographics and heavy text overlays', () => {
+test('P2: evaluateCandidateScores rejects dominant infographics and collages', () => {
   const candidates = [
     { url: 'https://example.com/infographic.jpg', w: 1200, h: 1200, source: 'dom' },
-    { url: 'https://example.com/heavy_text.jpg', w: 1200, h: 1200, source: 'dom' },
+    { url: 'https://example.com/collage.jpg', w: 1200, h: 1200, source: 'dom' },
     { url: 'https://example.com/clean.jpg', w: 1000, h: 1000, source: 'dom' }
   ];
 
   const aiResult = {
     best_index: 0,
     candidates: [
-      { index: 0, has_person: false, text_overlay: 'none', is_infographic: true, product_visible: true, score: 95 },
-      { index: 1, has_person: false, text_overlay: 'heavy', is_infographic: false, product_visible: true, score: 90 },
-      { index: 2, has_person: false, text_overlay: 'light', is_infographic: false, product_visible: true, score: 75 }
+      { index: 0, has_person: false, text_overlay: 'heavy', text_area_pct: 60, is_infographic: true, is_collage: false, product_visible: true, score: 95 },
+      { index: 1, has_person: false, text_overlay: 'light', text_area_pct: 10, is_infographic: false, is_collage: true, product_visible: true, score: 90 },
+      { index: 2, has_person: false, text_overlay: 'light', text_area_pct: 15, is_infographic: false, is_collage: false, product_visible: true, score: 75 }
     ]
   };
 
   const evalResult = evaluateCandidateScores(candidates, aiResult);
-  assert.equal(evalResult.selectedIndex, 2, 'Should reject infographic and heavy text and pick clean photo');
+  assert.equal(evalResult.selectedIndex, 2, 'Should reject infographic and collage and pick clean photo');
   assert.equal(evalResult.needsReview, false);
 });
 
@@ -132,4 +132,24 @@ test('P4: decidePhotoStatus marks needs_review when person or error is detected'
     decidePhotoStatus({ pickerNeedsReview: false, finalCheck: { error: 'Gemini timeout' } }),
     { status: 'needs_review', error: 'pemeriksaan foto gagal' }
   );
+});
+
+test('S5: getResolutionVariants generates valid hi-res variants for Tokopedia and Shopee', async () => {
+  const { getResolutionVariants } = await import('../lib/product-photo-picker.js');
+
+  // 1. Tokopedia / ByteDance resize-jpeg
+  const topoResize = 'https://p16-oec-va.ibyteimg.com/tos-alisg-i-5142rr1fum/abc~tplv-5142rr1fum-resize-jpeg:200:0.jpeg';
+  const variants1 = getResolutionVariants(topoResize);
+  assert.ok(variants1.some(v => v.includes(':1200:0')));
+  assert.ok(variants1.some(v => v.includes(':700:0')));
+
+  // 2. Tokopedia img/cache/700/
+  const topoCache = 'https://images.tokopedia.net/img/cache/700/VqbcmM/2026/product.jpg';
+  const variants2 = getResolutionVariants(topoCache);
+  assert.ok(variants2.some(v => v.includes('/img/cache/900/')));
+
+  // 3. Shopee _tn
+  const shopeeTn = 'https://down-id.img.susercontent.com/file/id-11134207-7ras9-test_tn.jpg';
+  const variants3 = getResolutionVariants(shopeeTn);
+  assert.ok(variants3.some(v => !v.includes('_tn')));
 });

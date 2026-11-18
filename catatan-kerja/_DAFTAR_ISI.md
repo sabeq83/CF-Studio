@@ -104,6 +104,8 @@ Terakhir diperbarui: 18 November 2026
 | `rencana_penjadwalan_rolled_oat.md` | Rencana Penjadwalan Auto Pipeline — NutriBake (Rolled Oat Premium Sahabat) |
 | `scraper_foto_produk_implementation_plan.md` | Implementation Plan: Perbaikan Scraper Foto Produk (Pilih Foto Produk Saja) |
 | `scraper_foto_produk_revisi_01_plan.md` | Implementation Plan: Revisi 01 Scraper Foto Produk & Tinjau/Ganti Foto UI |
+| `scraper_foto_produk_revisi_02_bagian_a_plan.md` | Implementation Plan: Hotfix Scraper Foto Produk Revisi 02 Bagian A (v2.50.4, selesai) |
+| `scraper_foto_galeri_r02_implementation_plan.md` | **AKTIF (`fitur/scraper-foto-galeri-r02`)**: Implementation Plan Scraper Foto Galeri & Rubrik E-Commerce Revisi 02 Bagian B (S5–S9) |
 | `vo_narasi_implementation_plan.md` | Rencana Implementasi Perbaikan Narasi VO End-to-End (Fase V0–V5) |
 | `gpt_regenerate_scraper_square_implementation_plan_arsip_20261118.md` | Arsip Implementation Plan: Tombol GPT Image 2 di Jendela Banding & Foto Scraper Square (v2.53.0) |
 | `aktifkan_batch_scraper_implementation_plan_arsip_20261118.md` | Arsip Implementation Plan: Aktifkan Tombol Batch Scraper + Pengaman Kuota & Tahap 1B S3/S5/S6 (v2.54.0) |
@@ -117,6 +119,7 @@ Terakhir diperbarui: 18 November 2026
 | `LAPORAN_KARTU_MENU_DAN_PERAPIAN_FOLDER.md` | Laporan Pelaksanaan: Kartu Menu & Perapian Folder Proyek |
 | `LAPORAN_PERBAIKAN_SCRAPER_FOTO_PRODUK.md` | Laporan Resmi: Perbaikan Scraper Foto Produk E-Commerce (Pilih Foto Bersih) |
 | `LAPORAN_RILIS_DAN_DEPLOY_SCRAPER_FOTO_PRODUK.md` | Laporan Resmi Rilis, Deployment, & Verifikasi End-to-End Scraper Foto Produk |
+| `LAPORAN_SCRAPER_FOTO_PRODUK_REVISI_02.md` | Laporan Pelaksanaan: Scraper Foto Produk E-Commerce (Revisi 02) — Staging v2.50.4 & Fitur Dev |
 | `LAPORAN_HAPUS_INSTANT_FACTORY_SHEETS_AUTOPILOT.md` | Laporan Pelaksanaan: Penghapusan Fitur Instant Factory & Sheets Autopilot (Dev 5020) |
 | `LAPORAN_MODEL_AI_TERPUSAT_DAN_RILIS_V2510.md` | Laporan Pelaksanaan: Model AI Terpusat di Settings & Rilis v2.51.0 (Staging 5010) |
 | `LAPORAN_TRUTH_INGGRIS_DAN_MOCKUP_KARTU_PRODUK.md` | Laporan Pelaksanaan: Truth Berbahasa Inggris (Bagian A di Dev 5020) & Mockup Kartu Produk (Bagian B0) |
@@ -149,7 +152,8 @@ Terakhir diperbarui: 18 November 2026
 
 | File | Ringkasan |
 |---|---|
-| [implementation_plan.md](../implementation_plan.md) | Diarsipkan — Batch Scraper Tahap 1 + 1B (S3, S5, S6) selesai & dirilis v2.54.0 |
+| [implementation_plan.md](../implementation_plan.md) | Rencana aktif `main`: Produksi Bertahap, Pemulihan Otomatis & Notifikasi URGENT (CFA Bagian A + Hotfix v2.54.1) |
+| [scraper_foto_galeri_r02_implementation_plan.md](rencana/scraper_foto_galeri_r02_implementation_plan.md) | Rencana aktif `fitur/scraper-foto-galeri-r02`: Scraper Foto Galeri & Rubrik E-Commerce Revisi 02 Bagian B (S5–S9) |
 | [aktifkan_batch_scraper_implementation_plan_arsip_20261118.md](rencana/aktifkan_batch_scraper_implementation_plan_arsip_20261118.md) | Arsip Implementation Plan: Batch Scraper Aktif Kembali & Tahap 1B (v2.54.0, 18 Nov 2026) |
 | [gpt_foto_produk_usulan_codex_arsip_20261118.md](rencana/gpt_foto_produk_usulan_codex_arsip_20261118.md) | Arsip usulan Codex: GPT Image 2 via Settings (digantikan rencana v2.53.0) |
 | [truth_inggris_kartu_produk_implementation_plan_arsip_20261118.md](rencana/truth_inggris_kartu_produk_implementation_plan_arsip_20261118.md) | Arsip rencana sebelumnya: Truth Inggris dan kartu/jendela banding produk |
