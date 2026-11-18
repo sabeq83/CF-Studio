@@ -1,6 +1,6 @@
 # INSTRUKSI ANTIGRAVITY — Sinkronkan `main` ke `fitur/scraper-foto-galeri-r02` & Selesaikan Bentrok
 
-Tanggal: 18 November 2026 · Dari: Claude (reviewer/planner) · Untuk: Antigravity (eksekutor fitur scraper)
+Tanggal: 18 November 2026 · Dari: Claude (reviewer/planner) · Untuk: Antigravity (eksekutor fitur scraper) · Status: **disetujui pengguna — lanjutkan S5–S9**
 Dasar SOP: AGENTS.md → "SOP Alur Branch Dev vs Staging", Alur 2 Hotfix langkah 4 (*hotfix wajib dibawa ke branch fitur yang masih aktif*).
 
 ---
@@ -108,7 +108,23 @@ Catatan: Dev saat ini menjalankan rilis hotfix (`c338af5`). Deploy branch fitur 
 - Jangan memakai `git merge -X ours/theirs` untuk seluruh merge; selesaikan per file seperti di atas.
 - Jangan menghapus branch fitur; branch masih aktif.
 
-## 4. Laporan ke Pengguna (setelah selesai)
+## 4. Daftar Uji untuk Pengguna di Dev (sertakan di laporan, bahasa sederhana)
+
+Pengguna (18 Nov) memutuskan **melanjutkan S5–S9**. Siapkan uji berikut di Dev `http://100.95.245.55:5020` → menu Produk:
+
+| No | Uji | Hasil yang diharapkan | Kode |
+|---|---|---|---|
+| 1 | Scrape ulang produk **Cuculemon** (Shopee/Tokopedia) | Foto produk terpilih walau ada label kecil seperti "1000ML"; tidak ditolak | S6 |
+| 2 | Scrape ulang produk **Habarlic** (kotak putih) | Kemasan putih utuh, tidak bolong; latar putih tidak dihapus | S8 |
+| 3 | Scrape 1 produk dengan galeri banyak foto | Jendela banding menampilkan ≥ 5 kandidat foto tajam (≥ 600px) | S5 |
+| 4 | Lihat hasil foto clean | Produk tidak mepet ke tepi gambar (ada ruang ±10%) | S8 |
+| 5 | Produk yang semua fotonya "kurang ideal" (ada teks/infografis) | Muncul foto clean berstatus "dipilih otomatis, perlu ditinjau" + tombol Setujui Foto | S7 |
+| 6 | Kartu produk yang enrich-nya gagal karena kuota | Ada tanda "bisa diulang" + tombol ulangi enrich | S9 |
+| 7 | Fitur yang sudah ada tetap jalan: Batch Scraper, tombol GPT Image 2, jendela banding & revert foto | Tidak ada yang hilang/berubah | regresi |
+
+Tuliskan nama/URL produk uji yang Anda pakai di laporan, supaya pengguna bisa langsung mencoba.
+
+## 5. Laporan ke Pengguna (setelah selesai)
 Kirim ringkasan singkat berbahasa sederhana:
 1. Konflik apa saja yang diselesaikan dan keputusan per file.
 2. Hasil tes dan build.
