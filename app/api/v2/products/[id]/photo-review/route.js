@@ -40,6 +40,9 @@ export const POST = withTenantContext(async (req, { params }) => {
         photo_url: previousCleanUrl,
         active_photo: 'cleaned_photo_url',
         previous_clean_photo_url: null,
+        photo_model: product.previous_photo_model || null,
+        previous_photo_model: null,
+        photo_engine_request: null,
         photo_status: 'approved',
         photo_error: null,
         photo_reviewed_at: new Date().toISOString()

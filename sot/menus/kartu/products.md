@@ -33,6 +33,7 @@ Gudang data "DNA" produk jualan. Menyimpan info terstruktur (USP, target audiens
 8. Product Truth dan Geometric Truth wajib ditulis dalam Bahasa Inggris (3–4 kalimat Product Truth, 2–3 kalimat Geometric Truth) agar kompatibel dengan model video DNA AI, sementara USP dan Kategori tetap Bahasa Indonesia. Terdapat penjaga `ensureEnglishProductTruths` di worker pipeline.
 9. Kartu produk default menampilkan foto bersih Studio (Hasil AI) sebagai thumbnail. Sakelar "Asli | Hasil AI" bersifat lokal tanpa write database. Klik thumbnail membuka Jendela Banding foto Asli vs Hasil AI berdampingan dengan aksi Setujui, Ganti Foto, dan Ulangi Generate.
 10. Jika produk pernah digenerate ulang, versi clean sebelumnya disimpan di `previous_clean_photo_url` dan dapat dipulihkan lewat tombol "↩️ Tolak, pakai foto sebelumnya" (`POST /api/v2/products/[id]/photo-review` dengan `{ action: 'revert_previous' }`).
+11. Jendela banding punya tombol **🧠 Ulangi dengan GPT** (manual, 1 produk per klik, memakai kuota akun ChatGPT di G-Labs melalui `/api/openai/generate`; membutuhkan foto mentah lokal di `/uploads/...`; gagal tidak mengubah foto lama dan tidak pindah ke Nano Banana; label model foto lama & baru disimpan di `previous_photo_model` / `photo_model`).
 
 ## Belum ada / batasan
 - Scraper Playwright membutuhkan Chromium terinstall di server.
