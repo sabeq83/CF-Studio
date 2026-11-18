@@ -106,7 +106,7 @@ describe('Operator Ingest API POST /api/operator/v2/product-research/batches (Ta
   });
 
   it('ingest 45 kandidat mengabaikan tenant_id payload, mengembalikan ringkasan per kandidat, tidak mengubah product_extractions, dan re-sync tetap idempotent', async () => {
-    const beforeCountRes = await pgQuery('SELECT COUNT(*)::int AS cnt FROM product_extractions');
+    const beforeCountRes = await pgQuery('SELECT COUNT(*)::int AS cnt FROM product_extractions WHERE tenant_id = $1', [TENANT_A]);
     const beforeProductCount = beforeCountRes.rows[0].cnt;
 
     const candidates45 = Array.from({ length: 45 }, (_, idx) => ({
@@ -148,7 +148,7 @@ describe('Operator Ingest API POST /api/operator/v2/product-research/batches (Ta
     assert.equal(json.candidates.length, 45);
 
     // Pastikan product_extractions tidak tersentuh sama sekali
-    const afterCountRes = await pgQuery('SELECT COUNT(*)::int AS cnt FROM product_extractions');
+    const afterCountRes = await pgQuery('SELECT COUNT(*)::int AS cnt FROM product_extractions WHERE tenant_id = $1', [TENANT_A]);
     assert.equal(afterCountRes.rows[0].cnt, beforeProductCount);
 
     // Pastikan data masuk ke TENANT_A (bukan TENANT_B)

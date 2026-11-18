@@ -38,9 +38,9 @@ Prinsip kunci:
 - [x] Perbarui dokumentasi kredensial operator untuk scope `product_research:ingest` (`sot/global/operator-api.md`) & verifikasi test ingest API (10/10 lolos)
 
 ### Tahap 4 — Halaman Radar Produk & Izin Menu (Pintu Berhenti 2 🛑)
-- [ ] Daftarkan kunci izin `product_research` di `lib/schema/user-schema.js` dan navigasi `/product-radar` di `lib/sidebar-nav.js`
-- [ ] Buat API web: `GET /api/v2/product-research/candidates`, `GET/PATCH /api/v2/product-research/candidates/[id]`, `POST /api/v2/product-research/candidates/[id]/archive`, dan route foto terotorisasi tenant
-- [ ] Buat halaman `app/product-radar/page.js` beserta panel detail sesuai mockup yang disetujui
+- [x] Daftarkan kunci izin `product_research` di `lib/schema/user-schema.js` dan navigasi `/product-radar` di `lib/sidebar-nav.js` (serta `withProductResearchAccess` di `lib/auth.js`)
+- [x] Buat API web: `GET /api/v2/product-research/candidates`, `GET/PATCH /api/v2/product-research/candidates/[id]`, `POST /api/v2/product-research/candidates/[id]/archive`, dan route foto terotorisasi tenant
+- [x] Buat halaman `app/product-radar/page.js` beserta panel detail sesuai mockup yang disetujui
 - [ ] Verifikasi & deploy ke **Dev** (`http://100.95.245.55:5020/product-radar`)
 - [ ] **🛑 Berhenti:** Laporkan tautan Dev + daftar cek ke pengguna
 
@@ -189,3 +189,44 @@ export function normalizeProductUrl(url) {
 - Operator v2 mendukung research callback, status runs, exact revision approval untuk publishing, serta ingest kandidat Radar Produk (`product_research:ingest`).
 ```
 *(Ditambah seksi dokumentasi scope `product_research:ingest` dan kontrak `POST /api/operator/v2/product-research/batches`.)*
+
+### Tahap 4 — Izin Menu & Sidebar (`lib/schema/user-schema.js`, `lib/sidebar-nav.js`, `lib/auth.js`)
+
+**Code Sebelum (Current/Before):**
+```js
+// lib/schema/user-schema.js
+  { key: 'content_planner', label: 'Content Planner Calendar', category: 'PLANNING' },
+  { key: 'product_database', label: 'Product Database', category: 'PLANNING' },
+
+// lib/sidebar-nav.js
+  '/products': 'product_database',
+```
+
+**Code Sesudah (Proposed/After):**
+```js
+// lib/schema/user-schema.js
+  { key: 'content_planner', label: 'Content Planner Calendar', category: 'PLANNING' },
+  { key: 'product_research', label: 'Radar Produk', category: 'PLANNING' },
+  { key: 'product_database', label: 'Product Database', category: 'PLANNING' },
+
+// lib/sidebar-nav.js
+  '/product-radar': 'product_research',
+  '/products': 'product_database',
+// + entri navItems PLANNING & PLANNING_SECTION_HREFS + helper withProductResearchAccess di lib/auth.js
+```
+
+### Tahap 4 — Web API & Halaman React (`/product-radar`)
+
+**Code Sebelum (Current/Before):**
+```text
+(Halaman app/product-radar/page.js dan API /api/v2/product-research/candidates/* belum ada)
+```
+
+**Code Sesudah (Proposed/After):**
+```text
+- app/api/v2/product-research/candidates/route.js (GET daftar kandidat terfilter, paginasi, batch list, ringkasan KPI, info duplikat katalog read-only)
+- app/api/v2/product-research/candidates/[id]/route.js (GET detail + riwayat, PATCH edit kurator & target_url dengan revision check)
+- app/api/v2/product-research/candidates/[id]/archive/route.js (POST arsip/batal arsip tanpa menyentuh katalog)
+- app/api/v2/product-research/candidates/[id]/image/route.js (GET foto riset terotorisasi tenant)
+- app/product-radar/page.js + CandidateDetailDrawer.js + product-radar.module.css (100% semantic CSS tokens, sesuai mockup yang disetujui; tombol Masukkan disiapkan dengan status Tahap 5 atau info siap)
+```
