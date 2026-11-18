@@ -1,0 +1,2415 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup — Radar Produk (Kurasi Hasil TeleRadar · CF Studio)</title>
+  <style>
+    /* ==========================================================================
+       MAKNA Flow Semantic Design Tokens (Disalin utuh dari app/theme.css)
+       ========================================================================== */
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+      --sidebar-w: 248px;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --surface-subtle: #0d1522;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --border-color: #26354a;
+
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+
+      --link: #67e8f9;
+      --link-hover: #a5f3fc;
+
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --surface-subtle: #f7f9fc;
+      --input-bg: #ffffff;
+      --overlay-subtle: rgba(30, 41, 59, 0.08);
+      --overlay-backdrop: rgba(15, 23, 42, 0.54);
+
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --text-disabled: #8794a6;
+
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --border-color: #d8e0ea;
+
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+
+      --link: #075ea8;
+      --link-hover: #064b86;
+
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --status-neutral: #6548bd;
+      --status-neutral-soft: #f0ecfb;
+
+      --focus-ring: #6d4ed6;
+      --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+      --shadow-modal: 0 26px 80px rgba(31, 45, 61, 0.22);
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      color: var(--text-primary);
+    }
+
+    a { color: var(--link); text-decoration: none; }
+    a:hover { color: var(--link-hover); text-decoration: underline; }
+
+    :focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--focus-ring) 72%, transparent);
+      outline-offset: 2px;
+    }
+
+    /* ==========================================================================
+       Layout Shell (Sidebar + Main Workspace)
+       ========================================================================== */
+    .app-shell {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      background: var(--sidebar);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      padding: 16px 12px;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .brand-box {
+      padding: 8px 10px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .brand-title {
+      font-family: var(--font-mono);
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      color: var(--text-primary);
+    }
+    .brand-sub {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 2px;
+    }
+    .nav-section-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 6px 10px 4px;
+    }
+    .nav-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.86rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      border: 1px solid transparent;
+      cursor: pointer;
+      background: transparent;
+      text-align: left;
+      width: 100%;
+    }
+    .nav-item:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+    .nav-item.active {
+      background: color-mix(in srgb, var(--action-primary) 14%, transparent);
+      color: var(--action-primary);
+      border-color: color-mix(in srgb, var(--action-primary) 40%, transparent);
+      font-weight: 700;
+    }
+    .nav-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: var(--status-info-soft);
+      color: var(--status-info);
+    }
+    .sidebar-foot {
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .main-area {
+      flex: 1;
+      min-width: 0;
+      padding: 20px 24px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 1560px;
+    }
+
+    /* ==========================================================================
+       Simulation Banner & Page Header
+       ========================================================================== */
+    .mockup-banner {
+      background: var(--surface-raised);
+      border: 1px dashed var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 0.82rem;
+    }
+    .mockup-banner-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface);
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+    .pill-info {
+      background: var(--status-info-soft);
+      border-color: color-mix(in srgb, var(--status-info) 45%, transparent);
+      color: var(--status-info);
+    }
+    .pill-warning {
+      background: var(--status-warning-soft);
+      border-color: color-mix(in srgb, var(--status-warning) 45%, transparent);
+      color: var(--status-warning);
+    }
+    .pill-success {
+      background: var(--status-success-soft);
+      border-color: color-mix(in srgb, var(--status-success) 45%, transparent);
+      color: var(--status-success);
+    }
+    .pill-danger {
+      background: var(--status-danger-soft);
+      border-color: color-mix(in srgb, var(--status-danger) 45%, transparent);
+      color: var(--status-danger);
+    }
+    .pill-neutral {
+      background: var(--status-neutral-soft);
+      border-color: color-mix(in srgb, var(--status-neutral) 45%, transparent);
+      color: var(--status-neutral);
+    }
+
+    .page-header {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .page-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .page-title {
+      margin: 0;
+      font-size: 1.45rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+    .page-subtitle {
+      margin: 4px 0 10px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+    .observation-notice {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--status-warning-soft);
+      border: 1px solid color-mix(in srgb, var(--status-warning) 45%, transparent);
+      color: var(--status-warning);
+      font-size: 0.8rem;
+      font-weight: 650;
+    }
+
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ==========================================================================
+       Buttons & Controls
+       ========================================================================== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 13px;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 650;
+      cursor: pointer;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      transition: background var(--transition), border-color var(--transition), transform var(--transition);
+      white-space: nowrap;
+    }
+    .btn:hover:not(:disabled) {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+      transform: translateY(-1px);
+    }
+    .btn:disabled {
+      background: var(--surface-raised);
+      border-color: var(--border-subtle);
+      color: var(--text-disabled);
+      cursor: not-allowed;
+      transform: none;
+      opacity: 0.72;
+    }
+    .btn-primary {
+      background: var(--action-primary);
+      border-color: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: var(--action-primary-hover);
+      border-color: var(--action-primary-hover);
+      color: var(--on-action-primary);
+    }
+    .btn-info {
+      background: var(--status-info-soft);
+      border-color: color-mix(in srgb, var(--status-info) 45%, transparent);
+      color: var(--status-info);
+    }
+    .btn-warning {
+      background: var(--status-warning-soft);
+      border-color: color-mix(in srgb, var(--status-warning) 45%, transparent);
+      color: var(--status-warning);
+    }
+    .btn-danger {
+      background: var(--status-danger-soft);
+      border-color: color-mix(in srgb, var(--status-danger) 45%, transparent);
+      color: var(--status-danger);
+    }
+    .btn-success {
+      background: var(--status-success-soft);
+      border-color: color-mix(in srgb, var(--status-success) 45%, transparent);
+      color: var(--status-success);
+    }
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 0.76rem;
+      border-radius: var(--radius-xs);
+    }
+
+    .theme-toggle {
+      padding: 8px 12px;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 650;
+    }
+    .theme-toggle:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+
+    /* ==========================================================================
+       KPI Strip
+       ========================================================================== */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .kpi-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 650;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .kpi-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+    .kpi-breakdown {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .chip-filter {
+      font-size: 0.72rem;
+      font-weight: 650;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+    .chip-filter:hover {
+      border-color: var(--border-strong);
+      background: var(--surface-hover);
+    }
+
+    /* ==========================================================================
+       Filter Bar
+       ========================================================================== */
+    .filter-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .filter-grid {
+      display: grid;
+      grid-template-columns: 1.5fr repeat(6, minmax(120px, 1fr));
+      gap: 10px;
+      align-items: end;
+    }
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+    .field-label {
+      font-size: 0.72rem;
+      font-weight: 650;
+      color: var(--text-muted);
+    }
+    .form-control {
+      width: 100%;
+      height: 36px;
+      padding: 6px 10px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border-subtle);
+      background: var(--input-bg);
+      color: var(--text-primary);
+      font-size: 0.82rem;
+    }
+    .form-textarea {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border-subtle);
+      background: var(--input-bg);
+      color: var(--text-primary);
+      font-size: 0.84rem;
+      resize: vertical;
+      min-height: 76px;
+    }
+    option {
+      background: var(--surface);
+      color: var(--text-primary);
+    }
+
+    .filter-footer {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    /* ==========================================================================
+       Table Card
+       ========================================================================== */
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+    }
+    .table-scroll {
+      overflow-x: auto;
+    }
+    table.radar-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1140px;
+    }
+    .radar-table thead th {
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      text-align: left;
+      padding: 11px 10px;
+      border-bottom: 1px solid var(--border-subtle);
+      white-space: nowrap;
+    }
+    .radar-table tbody tr {
+      border-bottom: 1px solid var(--border-subtle);
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+    .radar-table tbody tr:hover {
+      background: var(--surface-hover);
+    }
+    .radar-table tbody tr.selected-row {
+      background: color-mix(in srgb, var(--action-primary) 9%, var(--surface));
+    }
+    .radar-table td {
+      padding: 10px;
+      vertical-align: middle;
+      font-size: 0.82rem;
+    }
+
+    .thumb-box {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+      color: var(--text-secondary);
+    }
+    .thumb-tag {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      font-size: 0.55rem;
+      text-align: center;
+      background: var(--overlay-backdrop);
+      color: var(--text-primary);
+      padding: 1px 2px;
+      letter-spacing: 0.02em;
+    }
+    .prod-name {
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+    .prod-sub {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .mono { font-family: var(--font-mono); }
+    .num-strong { font-weight: 750; font-variant-numeric: tabular-nums; }
+    .sub-note { font-size: 0.72rem; color: var(--text-muted); }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+    .badge-success { background: var(--status-success-soft); color: var(--status-success); border-color: color-mix(in srgb, var(--status-success) 35%, transparent); }
+    .badge-info { background: var(--status-info-soft); color: var(--status-info); border-color: color-mix(in srgb, var(--status-info) 35%, transparent); }
+    .badge-warning { background: var(--status-warning-soft); color: var(--status-warning); border-color: color-mix(in srgb, var(--status-warning) 35%, transparent); }
+    .badge-danger { background: var(--status-danger-soft); color: var(--status-danger); border-color: color-mix(in srgb, var(--status-danger) 35%, transparent); }
+    .badge-neutral { background: var(--status-neutral-soft); color: var(--status-neutral); border-color: color-mix(in srgb, var(--status-neutral) 35%, transparent); }
+    .badge-muted { background: var(--surface-interactive); color: var(--text-secondary); border-color: var(--border-subtle); }
+
+    .action-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      align-items: flex-start;
+    }
+    .action-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .disabled-hint {
+      font-size: 0.69rem;
+      color: var(--status-warning);
+      line-height: 1.25;
+      max-width: 175px;
+    }
+
+    .pagination-bar {
+      padding: 12px 16px;
+      background: var(--surface-raised);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    /* ==========================================================================
+       Slide-over Detail Panel
+       ========================================================================== */
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay-backdrop);
+      z-index: 200;
+      display: none;
+      justify-content: flex-end;
+    }
+    .drawer-backdrop.open {
+      display: flex;
+    }
+    .drawer-panel {
+      width: min(860px, 100vw);
+      height: 100vh;
+      background: var(--surface);
+      border-left: 1px solid var(--border-strong);
+      box-shadow: var(--shadow-modal);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .drawer-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .drawer-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .section-box {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .section-title {
+      font-size: 0.86rem;
+      font-weight: 750;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .two-col {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .sub-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .sub-card-title {
+      font-size: 0.74rem;
+      font-weight: 750;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .screenshot-preview {
+      border: 1px dashed var(--border-strong);
+      border-radius: var(--radius-sm);
+      background: var(--surface-subtle);
+      padding: 12px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .screenshot-thumb-lg {
+      width: 78px;
+      height: 78px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-interactive);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--text-secondary);
+      font-size: 0.68rem;
+      text-align: center;
+      padding: 4px;
+    }
+
+    .alert-box {
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      line-height: 1.45;
+      border: 1px solid transparent;
+    }
+    .alert-warning {
+      background: var(--status-warning-soft);
+      border-color: color-mix(in srgb, var(--status-warning) 45%, transparent);
+      color: var(--status-warning);
+    }
+    .alert-info {
+      background: var(--status-info-soft);
+      border-color: color-mix(in srgb, var(--status-info) 45%, transparent);
+      color: var(--status-info);
+    }
+    .alert-success {
+      background: var(--status-success-soft);
+      border-color: color-mix(in srgb, var(--status-success) 45%, transparent);
+      color: var(--status-success);
+    }
+    .alert-danger {
+      background: var(--status-danger-soft);
+      border-color: color-mix(in srgb, var(--status-danger) 45%, transparent);
+      color: var(--status-danger);
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .history-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.8rem;
+      padding: 8px 10px;
+      border-radius: var(--radius-xs);
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+    }
+    .history-time {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      margin-top: 2px;
+    }
+
+    /* ==========================================================================
+       Modal Dialog Konfirmasi Promosi
+       ========================================================================== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay-backdrop);
+      z-index: 300;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-backdrop.open {
+      display: flex;
+    }
+    .modal-dialog {
+      width: min(720px, 100%);
+      max-height: 90vh;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-modal);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .modal-body {
+      padding: 18px 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .modal-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .summary-buckets {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .bucket-card {
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+    }
+    .bucket-count {
+      font-size: 1.35rem;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+    .bucket-list {
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      background: var(--surface-raised);
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .bucket-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: var(--radius-xs);
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      font-size: 0.8rem;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 400;
+      background: var(--surface-raised);
+      border: 1px solid var(--action-primary);
+      color: var(--text-primary);
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-modal);
+      font-size: 0.84rem;
+      font-weight: 600;
+      display: none;
+      max-width: 420px;
+    }
+    .toast.show { display: block; }
+
+    @media (max-width: 1120px) {
+      .sidebar { display: none; }
+      .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 720px) {
+      .main-area { padding: 14px; }
+      .kpi-grid, .two-col, .summary-buckets, .filter-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Sidebar Preview -->
+    <aside class="sidebar" aria-label="Navigasi CF Studio">
+      <div class="brand-box">
+        <div>
+          <div class="brand-title">CF STUDIO</div>
+          <div class="brand-sub">MAKNA Flow · Planning</div>
+        </div>
+        <span class="pill pill-info">Dev UI</span>
+      </div>
+
+      <div>
+        <div class="nav-section-label">PLANNING</div>
+        <div class="nav-list">
+          <button class="nav-item" type="button" onclick="showToast('Simulasi: menu Content Planner')">
+            <span>🗓️ Content Planner</span>
+          </button>
+          <button class="nav-item active" type="button">
+            <span>📡 Radar Produk</span>
+            <span class="nav-badge" id="sidebarCountBadge">45</span>
+          </button>
+          <button class="nav-item" type="button" onclick="showToast('Simulasi: menu Product Database (/products)')">
+            <span>📦 Product Database</span>
+          </button>
+          <button class="nav-item" type="button" onclick="showToast('Simulasi: menu Recipe Library')">
+            <span>🍲 Recipe Library</span>
+          </button>
+          <button class="nav-item" type="button" onclick="showToast('Simulasi: menu Deconstruct Lab')">
+            <span>🔬 Deconstruct Lab</span>
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div class="nav-section-label">WORKFLOW</div>
+        <div class="nav-list">
+          <button class="nav-item" type="button" onclick="showToast('Kandidat riset tidak muncul di Auto Pipeline sebelum dimasukkan ke Database Produk')">
+            <span>⚡ Auto Pipeline</span>
+          </button>
+          <button class="nav-item" type="button" onclick="showToast('Kandidat riset tidak muncul di pemilih produk kampanye sebelum dimasukkan ke katalog')">
+            <span>🎬 RE Campaign</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="sidebar-foot">
+        <button class="theme-toggle" id="sidebarThemeBtn" type="button" onclick="toggleTheme()">
+          <span id="sidebarThemeIcon">☀️</span>
+          <span id="sidebarThemeLabel">Mode Terang</span>
+        </button>
+        <div class="sub-note" style="padding: 0 4px;">
+          Izin menu: <span class="mono">product_research</span><br/>
+          Kandidat terisolasi dari katalog
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-area">
+      <!-- Top Mockup Bar -->
+      <div class="mockup-banner">
+        <div class="mockup-banner-left">
+          <span class="pill pill-neutral">🧪 Mockup Interaktif Tahap 1</span>
+          <span style="color: var(--text-secondary);">
+            Klik baris untuk buka <strong>Panel Detail</strong> · Coba verifikasi URL status <strong>Terdekat</strong> · Centang baris untuk simulasi <strong>Dialog Konfirmasi Promosi</strong>.
+          </span>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+          <button class="btn btn-sm btn-info" type="button" onclick="openDemoConfirmationModal()">
+            📋 Simulasi Dialog Konfirmasi (Valid / Duplikat / Tertahan)
+          </button>
+          <button class="theme-toggle" type="button" onclick="toggleTheme()">
+            <span id="topThemeIcon">☀️</span>
+            <span id="topThemeLabel">Light Mode</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Page Header -->
+      <section class="page-header">
+        <div>
+          <div class="page-title-row">
+            <h1 class="page-title">📡 Radar Produk</h1>
+            <span class="pill pill-success">Hasil TeleRadar → Kurasi CF Studio</span>
+          </div>
+          <p class="page-subtitle">
+            Temukan, kurasi, lalu masukkan produk pilihan ke katalog. Kandidat di sini belum masuk ke Product Database maupun pemilih kampanye.
+          </p>
+          <div class="observation-notice" id="observationNotice">
+            <span>📸</span>
+            <span id="observationNoticeText">Angka dari screenshot per tanggal 17 Nov 2026, bukan data real-time</span>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="btn" type="button" id="reviewSelectedBtn" onclick="openSelectedConfirmationModal()" disabled>
+            🔍 Tinjau Pilihan (<span id="selectedCountLabel">0</span>)
+          </button>
+          <button class="btn btn-primary" type="button" onclick="resetDemoState()">
+            ↻ Reset Data Contoh
+          </button>
+        </div>
+      </section>
+
+      <!-- KPI Summary Strip -->
+      <section class="kpi-grid" aria-label="Ringkasan Batch">
+        <div class="kpi-card">
+          <div class="kpi-label">Total Kandidat Batch</div>
+          <div class="kpi-value" id="kpiTotal">45</div>
+          <div class="kpi-breakdown">
+            <span class="sub-note" id="kpiBatchSubtitle">Batch 2026-11-17 · TeleRadar</span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">Sebaran Tren</div>
+          <div class="kpi-value" id="kpiTrenHeadline">6 Naik</div>
+          <div class="kpi-breakdown">
+            <button class="chip-filter" type="button" onclick="quickFilter('trend', 'up')">↑ Naik (<span id="cntUp">6</span>)</button>
+            <button class="chip-filter" type="button" onclick="quickFilter('trend', 'stable')">→ Stabil (<span id="cntStable">28</span>)</button>
+            <button class="chip-filter" type="button" onclick="quickFilter('trend', 'down')">↓ Menurun (<span id="cntDown">11</span>)</button>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">Kecocokan URL</div>
+          <div class="kpi-value" id="kpiUrlHeadline">28 Siap URL</div>
+          <div class="kpi-breakdown">
+            <button class="chip-filter" type="button" onclick="quickFilter('urlStatus', 'official')">Resmi (<span id="cntOfficial">22</span>)</button>
+            <button class="chip-filter" type="button" onclick="quickFilter('urlStatus', 'listing')">Listing (<span id="cntListing">6</span>)</button>
+            <button class="chip-filter" type="button" onclick="quickFilter('urlStatus', 'nearest')">Terdekat (<span id="cntNearest">14</span>)</button>
+            <button class="chip-filter" type="button" onclick="quickFilter('urlStatus', 'not_found')">Tdk Ditemukan (<span id="cntNotFound">2</span>)</button>
+            <button class="chip-filter" type="button" onclick="quickFilter('urlStatus', 'user')">Pengguna (<span id="cntUser">1</span>)</button>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">Status Masuk Katalog</div>
+          <div class="kpi-value" id="kpiCatalogHeadline">1 Masuk</div>
+          <div class="kpi-breakdown">
+            <button class="chip-filter" type="button" onclick="quickFilter('processStatus', 'not_sent')">Belum (<span id="cntNotSent">41</span>)</button>
+            <button class="chip-filter" type="button" onclick="quickFilter('processStatus', 'needs_review')">Review (<span id="cntNeedsReview">2</span>)</button>
+            <button class="chip-filter" type="button" onclick="quickFilter('processStatus', 'in_catalog')">Masuk (<span id="cntInCatalog">1</span>)</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Filters -->
+      <section class="filter-card" aria-label="Filter Kandidat">
+        <div class="filter-grid">
+          <div class="field-group">
+            <label class="field-label" for="filterSearch">Cari Produk / Brand</label>
+            <input class="form-control" id="filterSearch" type="search" placeholder="Nama produk, brand, atau catatan..." oninput="applyFilters()" />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="filterBatch">Batch / Tanggal</label>
+            <select class="form-control" id="filterBatch" onchange="onBatchChange()">
+              <option value="2026-11-17">17 Nov 2026 (45)</option>
+              <option value="2026-11-10">10 Nov 2026 (6 contoh lama)</option>
+              <option value="all">Semua Batch</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="filterCategory">Kategori</label>
+            <select class="form-control" id="filterCategory" onchange="applyFilters()">
+              <option value="all">Semua Kategori</option>
+              <option value="Skincare & Kecantikan">Skincare & Kecantikan</option>
+              <option value="Minuman & Kopi">Minuman & Kopi</option>
+              <option value="Makanan Sehat">Makanan Sehat</option>
+              <option value="Rumah Tangga">Rumah Tangga</option>
+              <option value="Ibu & Bayi">Ibu & Bayi</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="filterTrend">Tren</label>
+            <select class="form-control" id="filterTrend" onchange="applyFilters()">
+              <option value="all">Semua Tren</option>
+              <option value="up">↑ Naik</option>
+              <option value="stable">→ Stabil</option>
+              <option value="down">↓ Menurun</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="filterUrlStatus">Status URL</label>
+            <select class="form-control" id="filterUrlStatus" onchange="applyFilters()">
+              <option value="all">Semua Status URL</option>
+              <option value="official">Resmi</option>
+              <option value="listing">Listing</option>
+              <option value="nearest">Terdekat (Tertahan)</option>
+              <option value="not_found">Tidak ditemukan</option>
+              <option value="user">Dari pengguna</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="filterCuration">Status Kurasi</label>
+            <select class="form-control" id="filterCuration" onchange="applyFilters()">
+              <option value="all">Semua Kurasi</option>
+              <option value="new">Baru</option>
+              <option value="needs_info">Perlu dilengkapi</option>
+              <option value="ready">Siap diajukan</option>
+              <option value="archived">Diarsipkan</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="filterProcess">Status Katalog</label>
+            <select class="form-control" id="filterProcess" onchange="applyFilters()">
+              <option value="all">Semua Proses</option>
+              <option value="not_sent">Belum dikirim</option>
+              <option value="queued">Antre</option>
+              <option value="processing">Diproses</option>
+              <option value="in_catalog">Masuk katalog</option>
+              <option value="needs_review">Perlu review</option>
+              <option value="failed">Gagal</option>
+            </select>
+          </div>
+        </div>
+        <div class="filter-footer">
+          <div id="filterResultInfo">Menampilkan 1–15 dari 45 kandidat</div>
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <label style="display:inline-flex; align-items:center; gap:6px; cursor:pointer;">
+              <span>Per halaman:</span>
+              <select class="form-control" id="pageSizeSelect" style="width:auto; height:30px; padding:2px 8px;" onchange="changePageSize()">
+                <option value="15" selected>15 baris</option>
+                <option value="25">25 baris</option>
+                <option value="50">Semua (50)</option>
+              </select>
+            </label>
+            <button class="btn btn-sm" type="button" onclick="resetFilters()">Reset Filter</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Candidate Table -->
+      <section class="table-card" aria-label="Tabel Kandidat Radar Produk">
+        <div class="table-scroll">
+          <table class="radar-table">
+            <thead>
+              <tr>
+                <th style="width:36px;">
+                  <input type="checkbox" id="selectPageCheckbox" aria-label="Pilih semua di halaman ini" onchange="toggleSelectPage(this.checked)" />
+                </th>
+                <th style="width:66px;">Foto</th>
+                <th style="min-width:220px;">Nama Produk</th>
+                <th>Kategori</th>
+                <th>Terjual / mgg</th>
+                <th>Tren</th>
+                <th>Komisi</th>
+                <th>Harga</th>
+                <th>Kecocokan URL</th>
+                <th>Status Kurasi</th>
+                <th>Status Proses</th>
+                <th style="min-width:190px;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="candidateTableBody"></tbody>
+          </table>
+        </div>
+        <div class="pagination-bar">
+          <div id="paginationSummary">Halaman 1 dari 3</div>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <button class="btn btn-sm" id="prevPageBtn" type="button" onclick="goPage(-1)">← Sebelumnya</button>
+            <button class="btn btn-sm" id="nextPageBtn" type="button" onclick="goPage(1)">Berikutnya →</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Slide-over Panel Detail -->
+  <div class="drawer-backdrop" id="detailDrawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" onclick="if(event.target===this) closeDrawer()">
+    <div class="drawer-panel">
+      <div class="drawer-header">
+        <div>
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <h2 id="drawerTitle" style="margin:0; font-size:1.12rem; font-weight:800;">Detail Kandidat</h2>
+            <span class="pill pill-info" id="drawerBatchPill">Batch 2026-11-17</span>
+            <span class="pill pill-warning" id="drawerObsPill">Angka screenshot 17 Nov 2026 · bukan real-time</span>
+          </div>
+          <div id="drawerSubMeta" class="sub-note" style="margin-top:4px;"></div>
+        </div>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <button class="btn btn-sm" type="button" onclick="navigateDrawer(-1)" title="Kandidat sebelumnya">↑ Prev</button>
+          <button class="btn btn-sm" type="button" onclick="navigateDrawer(1)" title="Kandidat berikutnya">↓ Next</button>
+          <button class="btn btn-sm" type="button" onclick="closeDrawer()">✕ Tutup</button>
+        </div>
+      </div>
+
+      <div class="drawer-body" id="drawerBody"></div>
+
+      <div class="drawer-footer" id="drawerFooter"></div>
+    </div>
+  </div>
+
+  <!-- Dialog Konfirmasi Promosi -->
+  <div class="modal-backdrop" id="promoModal" role="dialog" aria-modal="true" aria-labelledby="promoModalTitle" onclick="if(event.target===this) closePromoModal()">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div>
+          <h3 id="promoModalTitle" style="margin:0; font-size:1.05rem; font-weight:800;">Konfirmasi Masukkan ke Database Produk</h3>
+          <div class="sub-note">Ringkasan pemeriksaan URL, duplikat katalog, dan kandidat tertahan sebelum masuk antrean scraper.</div>
+        </div>
+        <button class="btn btn-sm" type="button" onclick="closePromoModal()">✕</button>
+      </div>
+      <div class="modal-body" id="promoModalBody"></div>
+      <div class="modal-footer" id="promoModalFooter"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toastBox" role="status" aria-live="polite"></div>
+
+  <script>
+    // =========================================================================
+    // Fictitious Dataset: 45 candidates in 2026-11-17
+    // Exact distribution required by prompt:
+    //   Trend: 6 Naik (up), 28 Stabil (stable), 11 Menurun (down) = 45
+    //   URL Status: 22 Resmi (official), 6 Listing (listing), 14 Terdekat (nearest),
+    //               2 Tidak ditemukan (not_found), 1 Dari pengguna (user) = 45
+    // Plus 6 older items in 2026-11-10 so batch filter is testable.
+    // =========================================================================
+
+    const CATALOG_DUPLICATE_URLS = {
+      'https://shopee.co.id/product/10221/8890123': {
+        cf_product_id: 'pe_1794102201_312',
+        name: 'Skintific 5X Ceramide Barrier Moisture Gel 30g',
+        photo_status: 'ready',
+        affiliate_url: 'https://s.shopee.co.id/aff-ceramide-30g'
+      },
+      'https://www.tokopedia.com/official/drip-coffee-sumatra-box': {
+        cf_product_id: 'pe_1794221190_108',
+        name: 'Kopi Tubruk Gayo Arabica Drip Bag 10 Sachet',
+        photo_status: 'ready',
+        affiliate_url: 'https://tokopedia.link/aff-gayo-drip'
+      }
+    };
+
+    const CATALOG_EXISTING_PRODUCTS = {
+      'pe_1794881020_104': {
+        cf_product_id: 'pe_1794881020_104',
+        name: 'Wardah UV Shield Essential Sunscreen Gel SPF 35',
+        product_truth_en: 'Lightweight daily facial sunscreen gel formulated for humid tropical climates, absorbing quickly without white cast.',
+        photo_status: 'ready'
+      },
+      'pe_1794910042_219': {
+        cf_product_id: 'pe_1794910042_219',
+        name: 'Granola Creations Cinnamon Raisin 400g',
+        product_truth_en: 'Baked rolled oat clusters infused with Indonesian cinnamon and sweet raisins in a resealable pouch.',
+        photo_status: 'failed_studio'
+      },
+      'pe_1794910880_224': {
+        cf_product_id: 'pe_1794910880_224',
+        name: 'Botol Minum Tritan Matte 1L Anti Bocor',
+        product_truth_en: 'BPA-free matte Tritan hydration bottle with flip-lock cap and time markers.',
+        photo_status: 'enrichment_busy'
+      }
+    };
+
+    const PRODUCT_SEEDS = [
+      // 1..6: Trend = up (6)
+      ['Serum Niacinamide 10% Brightening 20ml', 'GlowLab Official', 'Skincare & Kecantikan', 2450, 'up', '+38%', 18, 89000, 'official', 'https://shopee.co.id/product/10221/8890123', 'ready', 'not_sent', null, 'Duplikat URL ada di katalog (uji Hubungkan).'],
+      ['Matcha Latte Oat Premix 10 Sachet', 'Sora Tea ID', 'Minuman & Kopi', 1890, 'up', '+29%', 15, 74000, 'official', 'https://shopee.co.id/soratea/matcha-oat-10s', 'ready', 'not_sent', null, 'Penjualan naik tajam di segmen minuman kantor.'],
+      ['Minyak Kemiri Bakar Alami 100ml', 'Ratu Herbal', 'Skincare & Kecantikan', 1620, 'up', '+24%', 20, 49000, 'listing', 'https://www.tokopedia.com/ratuherbal/kemiri-100ml', 'new', 'not_sent', null, 'Komisi tinggi 20%, cocok untuk hook perawatan rambut.'],
+      ['Alat Pel Semprot Microfiber 360', 'HomeEase Store', 'Rumah Tangga', 1410, 'up', '+21%', 12, 118000, 'nearest', 'https://shopee.co.id/search-mirip/pel-semprot-360-v2', 'needs_info', 'not_sent', null, 'URL masih perkiraan mirip — perlu pastikan varian botol 400ml.'],
+      ['Biskuit MPASI Oat Pisang 120g', 'KecilSehat', 'Ibu & Bayi', 1180, 'up', '+19%', 14, 42000, 'official', 'https://shopee.co.id/kecils/biskuit-mpasi-pisang', 'ready', 'not_sent', null, 'Banyak dicari ibu muda untuk camilan praktis.'],
+      ['Sunscreen Gel SPF 35 PA+++ 40ml', 'Wardah Official', 'Skincare & Kecantikan', 3120, 'up', '+33%', 10, 38500, 'official', 'https://shopee.co.id/wardah/uv-shield-spf35-40ml', 'ready', 'in_catalog', 'pe_1794881020_104', 'Sudah selesai masuk ke Database Produk.'],
+
+      // 7..34: Trend = stable (28)
+      ['Kopi Drip Arabica Gayo 10 Sachet', 'Kopi Rimba', 'Minuman & Kopi', 980, 'stable', '+3%', 15, 85000, 'listing', 'https://www.tokopedia.com/official/drip-coffee-sumatra-box', 'ready', 'not_sent', null, 'Duplikat URL ada di katalog (uji Hubungkan).'],
+      ['Granola Panggang Kayu Manis 400g', 'Nusa Grain', 'Makanan Sehat', 910, 'stable', '+2%', 14, 68000, 'official', 'https://shopee.co.id/nusagrain/granola-cinnamon-400g', 'ready', 'needs_review', 'pe_1794910042_219', 'Foto studio AI gagal diproses — butuh pemulihan tanpa scrape ulang.'],
+      ['Botol Minum Tritan 1 Liter Matte', 'HydraMate', 'Rumah Tangga', 870, 'stable', '+1%', 12, 79000, 'listing', 'https://shopee.co.id/hydramate/tritan-1l-matte', 'ready', 'needs_review', 'pe_1794910880_224', 'Enrichment AI sebelumnya kena 503 sibuk — siap retry enrich.'],
+      ['Toner Centella Calming 150ml', 'DermaLeaf', 'Skincare & Kecantikan', 840, 'stable', '+4%', 16, 95000, 'official', 'https://shopee.co.id/dermaleaf/centella-toner-150', 'new', 'not_sent', null, 'Kandidat stabil dengan repeat order tinggi.'],
+      ['Susu Almond Unsweetened 1 Liter', 'PureNutri', 'Minuman & Kopi', 820, 'stable', '0%', 11, 56000, 'official', 'https://shopee.co.id/purenutri/almond-1l-unsweet', 'new', 'not_sent', null, 'Cocok untuk konten resep kopi rendah kalori.'],
+      ['Selai Kacang Mete Creamy 250g', 'Sari Biji', 'Makanan Sehat', 760, 'stable', '+2%', 15, 64000, 'user', 'https://shopee.co.id/saribiji/mete-creamy-250g', 'ready', 'not_sent', null, 'URL diperbaiki langsung oleh kurator (/url).'],
+      ['Rak Bumbu Dapur Besi 3 Susun', 'RapiRumah', 'Rumah Tangga', 745, 'stable', '+1%', 10, 129000, 'nearest', 'https://www.tokopedia.com/rapirumah-mirip/rak-3-susun', 'needs_info', 'not_sent', null, 'Beberapa toko jual model mirip; pastikan ukuran 40cm.'],
+      ['Sabun Bayi Head to Toe 400ml', 'LembutBaby', 'Ibu & Bayi', 730, 'stable', '+3%', 13, 52000, 'official', 'https://shopee.co.id/lembutbaby/wash-400ml', 'new', 'not_sent', null, 'Produk aman dan mudah dipraktikkan di video rumah.'],
+      ['Chia Seed Organik Meksiko 500g', 'GreenHarvest', 'Makanan Sehat', 710, 'stable', '0%', 16, 59000, 'official', 'https://shopee.co.id/greenharvest/chia-500g', 'ready', 'not_sent', null, 'Banyak dipakai untuk konten sarapan sehat.'],
+      ['Cokelat Bubuk Murni Tanpa Gula 250g', 'KakaoNusa', 'Minuman & Kopi', 690, 'stable', '+2%', 14, 48000, 'official', 'https://shopee.co.id/kakaonusa/pure-cocoa-250g', 'new', 'not_sent', null, 'Cocok untuk campaign resep minuman & baking.'],
+      ['Micellar Water Rose Sensitive 300ml', 'FloraSkin', 'Skincare & Kecantikan', 675, 'stable', '+1%', 15, 45000, 'official', 'https://shopee.co.id/floraskin/micellar-rose-300', 'new', 'not_sent', null, 'Harga terjangkau, volume tinggi.'],
+      ['Kotak Bekal Sekat 3 Stainless 304', 'BentoKu', 'Rumah Tangga', 660, 'stable', '0%', 12, 115000, 'nearest', 'https://shopee.co.id/bentoku-similar/kotak-304', 'needs_info', 'not_sent', null, 'Status Terdekat: listing belum tentu punya tutup klip 4 sisi.'],
+      ['Teh Hijau Melati Celup 50 Bag', 'DaunPagi', 'Minuman & Kopi', 640, 'stable', '-1%', 12, 34000, 'official', 'https://shopee.co.id/daunpagi/greentea-50', 'new', 'not_sent', null, 'Permintaan konsisten sepanjang bulan.'],
+      ['Clay Mask Mugwort Pore 50g', 'BumiCare', 'Skincare & Kecantikan', 625, 'stable', '+2%', 18, 72000, 'official', 'https://shopee.co.id/bumicare/mugwort-clay-50g', 'ready', 'not_sent', null, 'Komisi 18%, kemasan jar hijau mudah dikenali.'],
+      ['Kantong ASI 120ml Isi 30 Lembar', 'BundaSafe', 'Ibu & Bayi', 610, 'stable', '+1%', 11, 31000, 'official', 'https://shopee.co.id/bundasafe/kantong-asi-30', 'new', 'not_sent', null, 'Kebutuhan rutin ibu bekerja.'],
+      ['Minyak Zaitun Extra Virgin 250ml', 'MeditaOil', 'Makanan Sehat', 595, 'stable', '0%', 10, 88000, 'listing', 'https://www.tokopedia.com/meditaoil/evoo-250ml', 'new', 'not_sent', null, 'Listing distributor resmi terverifikasi.'],
+      ['Timbangan Dapur Digital Akurasi 0.1g', 'PresisiKit', 'Rumah Tangga', 580, 'stable', '+2%', 12, 65000, 'nearest', 'https://shopee.co.id/search/timbangan-01g-silver', 'needs_info', 'not_sent', null, 'Banyak model serupa tanpa baterai AAA.'],
+      ['Lip Balm Peptide Tinted Berry', 'BibirSehat', 'Skincare & Kecantikan', 565, 'stable', '+3%', 17, 54000, 'official', 'https://shopee.co.id/bibirsehat/peptide-berry', 'new', 'not_sent', null, 'Tren stabil, warna berry paling laris.'],
+      ['Rolled Oat Gluten Free 1kg', 'OatDaily', 'Makanan Sehat', 550, 'stable', '+1%', 13, 62000, 'official', 'https://shopee.co.id/oatdaily/rolled-oat-1kg', 'ready', 'not_sent', null, 'Cocok untuk konten sarapan cepat 5 menit.'],
+      ['Krim Ruam Popok Zinc Oxide 60g', 'BayiTenang', 'Ibu & Bayi', 530, 'stable', '0%', 14, 58000, 'official', 'https://shopee.co.id/bayitenang/ruam-zinc-60', 'new', 'not_sent', null, 'Rating 4.9 dari 3rb ulasan.'],
+      ['Dispenser Sabun Otomatis Sensor', 'SmartBath', 'Rumah Tangga', 515, 'stable', '-1%', 13, 135000, 'nearest', 'https://shopee.co.id/smartbath-mirip/dispenser-usb', 'needs_info', 'not_sent', null, 'Periksa apakah versi charger USB-C atau baterai.'],
+      ['Kopi Espresso Blend House 500g', 'RoastCraft', 'Minuman & Kopi', 500, 'stable', '+1%', 12, 112000, 'listing', 'https://www.tokopedia.com/roastcraft/espresso-500g', 'new', 'not_sent', null, 'Tersedia pilihan giling halus/biji utuh.'],
+      ['Eye Cream Caffeine Roll-On 15ml', 'MataSegar', 'Skincare & Kecantikan', 490, 'stable', '+2%', 16, 76000, 'nearest', 'https://shopee.co.id/matasegar-mirip/rollon-15ml', 'needs_info', 'not_sent', null, 'Status Terdekat: kemasan di screenshot tutup perak.'],
+      ['Madu Hutan Multiflora Murni 500g', 'RimbaNektar', 'Makanan Sehat', 475, 'stable', '0%', 15, 92000, 'official', 'https://shopee.co.id/rimbanektar/madu-500g', 'new', 'not_sent', null, 'Produk evergreen untuk campuran teh & oat.'],
+      ['Lampu Meja Belajar Lipat LED', 'TerangSpace', 'Rumah Tangga', 460, 'stable', '-2%', 11, 98000, 'nearest', 'https://shopee.co.id/terangspace-mirip/lampu-lipat', 'needs_info', 'not_sent', null, 'Belum dikonfirmasi kapasitas baterai 1800mAh.'],
+      ['Hair Mist Keratin Anti Kusut 100ml', 'SutraHair', 'Skincare & Kecantikan', 445, 'stable', '+1%', 17, 57000, 'nearest', 'https://shopee.co.id/sutrahair-mirip/keratin-mist-100', 'needs_info', 'not_sent', null, 'Status Terdekat: cek varian wangi floral vs vanilla.'],
+      ['Sereal Sarapan Kurma Almond 350g', 'BarakahFood', 'Makanan Sehat', 430, 'stable', '0%', 14, 53000, 'official', 'https://shopee.co.id/barakahfood/sereal-kurma-350', 'new', 'not_sent', null, 'Cocok untuk audiens keluarga.'],
+      ['Termometer Dahi Infrared Bayi', 'CekSuhu ID', 'Ibu & Bayi', 415, 'stable', '+1%', 10, 145000, 'nearest', 'https://www.tokopedia.com/ceksuhu-mirip/ir-bayi', 'needs_info', 'not_sent', null, 'Perlu pilih listing resmi agar garansi jelas.'],
+
+      // 35..45: Trend = down (11)
+      ['Body Scrub Coffee Arabica 200g', 'AromaSpa', 'Skincare & Kecantikan', 390, 'down', '-12%', 15, 49000, 'official', 'https://shopee.co.id/aromaspa/scrub-coffee-200', 'new', 'not_sent', null, 'Tren turun pasca promo tanggal kembar.'],
+      ['Pemeras Jeruk Mini Stainless', 'DapurRingkas', 'Rumah Tangga', 360, 'down', '-15%', 11, 44000, 'nearest', 'https://shopee.co.id/dapurringkas-mirip/pemeras-ss', 'needs_info', 'not_sent', null, 'Banyak varian tipis — pastikan ketebalan stainless.'],
+      ['Minuman Kolagen Peach 15 Sachet', 'BeautySip', 'Minuman & Kopi', 340, 'down', '-18%', 18, 139000, 'official', 'https://shopee.co.id/beautysip/kolagen-peach-15', 'new', 'not_sent', null, 'Komisi tetap tinggi meski tren mingguan melandai.'],
+      ['Keripik Tempe Oven Non-MSG 150g', 'CamilRenyah', 'Makanan Sehat', 310, 'down', '-9%', 12, 29000, 'listing', 'https://shopee.co.id/camilrenyah/tempe-oven-150', 'new', 'not_sent', null, 'Harga satuan rendah, pertimbangkan paket isi 3.'],
+      ['Sikat Botol Silikon Putar 3-in-1', 'BersihBaby', 'Ibu & Bayi', 295, 'down', '-11%', 13, 36000, 'nearest', 'https://shopee.co.id/bersihbaby-mirip/sikat-3in1', 'needs_info', 'not_sent', null, 'Perlu verifikasi apakah dapat dudukan pengering.'],
+      ['Peeling Solution AHA BHA 20ml', 'SkinAcid Lab', 'Skincare & Kecantikan', 280, 'down', '-14%', 16, 69000, 'official', 'https://shopee.co.id/skinacid/aha-bha-20ml', 'archived', 'not_sent', null, 'Diarsipkan kurator karena klaim sensitif kulit.'],
+      ['Tas Cooler ASI Dua Kompartemen', 'MamaGo', 'Ibu & Bayi', 260, 'down', '-16%', 11, 128000, 'nearest', 'https://shopee.co.id/mamago-mirip/cooler-2-komp', 'needs_info', 'not_sent', null, 'URL Terdekat — warna abu tua di screenshot tidak ada.'],
+      ['Matcha Whisk Set Bambu 4 Pcs', 'ZenBrew', 'Minuman & Kopi', 240, 'down', '-10%', 12, 119000, 'nearest', 'https://www.tokopedia.com/zenbrew-mirip/chasen-4pcs', 'needs_info', 'not_sent', null, 'Status Terdekat — cek apakah termasuk mangkuk keramik.'],
+      ['Kapsul Ekstrak Daun Kelor 60s', 'HerbaVits', 'Makanan Sehat', 225, 'down', '-13%', 15, 65000, 'not_found', '', 'needs_info', 'not_sent', null, 'Tidak ditemukan otomatis oleh TeleRadar — tempel URL manual.'],
+      ['Pengharum Ruangan Reed Diffuser Vanilla', 'LoomScent', 'Rumah Tangga', 210, 'down', '-19%', 14, 78000, 'nearest', 'https://shopee.co.id/loomscent-mirip/reed-vanilla', 'needs_info', 'not_sent', null, 'Botol di screenshot kotak bening, link terdekat bulat.'],
+      ['Cetakan Es Batu Silikon Tutup 24 Lubang', 'BekuRapi', 'Rumah Tangga', 190, 'down', '-22%', 10, 27000, 'not_found', '', 'needs_info', 'not_sent', null, 'Link produk tidak ditemukan di hasil riset.']
+    ];
+
+    const OLD_BATCH_SEEDS = [
+      ['Kopi Susu Aren Bottled 1L', 'KedaiPagi', 'Minuman & Kopi', 920, 'up', '+20%', 12, 65000, 'official', 'https://shopee.co.id/kedaipagi/aren-1l', 'ready', 'in_catalog', 'pe_1794881020_104', 'Data contoh batch 10 Nov 2026.'],
+      ['Facial Wash Amino Acid 100g', 'PureSkin', 'Skincare & Kecantikan', 780, 'stable', '+3%', 15, 52000, 'official', 'https://shopee.co.id/pureskin/amino-100g', 'ready', 'not_sent', null, 'Data contoh batch 10 Nov 2026.'],
+      ['Wadah Bumbu Kaca Tutup Bambu', 'DapurEstetik', 'Rumah Tangga', 510, 'stable', '0%', 11, 39000, 'nearest', 'https://shopee.co.id/dapurestetik-mirip/jar-bambu', 'needs_info', 'not_sent', null, 'Perlu verifikasi ukuran 250ml.'],
+      ['Biskuit Gandum Madu 200g', 'SnackSehat', 'Makanan Sehat', 430, 'down', '-8%', 12, 33000, 'listing', 'https://shopee.co.id/snacksehat/gandum-madu', 'new', 'not_sent', null, 'Data contoh batch 10 Nov 2026.'],
+      ['Celemek Makan Bayi Silikon', 'TinyBite', 'Ibu & Bayi', 390, 'stable', '+1%', 14, 29000, 'official', 'https://shopee.co.id/tinybite/bib-silikon', 'new', 'not_sent', null, 'Data contoh batch 10 Nov 2026.'],
+      ['Gelas Takar Kaca Tahan Panas 500ml', 'MeasurePro', 'Rumah Tangga', 310, 'down', '-11%', 10, 47000, 'not_found', '', 'needs_info', 'not_sent', null, 'URL belum ditemukan.']
+    ];
+
+    function buildCandidateList() {
+      const makeItems = (seeds, batchId, observedDate) => seeds.map((s, idx) => {
+        const [name, brand, category, sold, trend, trendDelta, commPct, price, urlStatus, url, curationStatus, processStatus, cfProductId, note] = s;
+        const commRp = Math.round((price * commPct) / 100);
+        const dupInfo = url && CATALOG_DUPLICATE_URLS[url] ? CATALOG_DUPLICATE_URLS[url] : null;
+        return {
+          id: `${batchId}_cand_${idx + 1}`,
+          rank: idx + 1,
+          batch_id: batchId,
+          observed_date: observedDate,
+          brand,
+          category,
+          sold_per_week: sold,
+          trend,
+          trend_delta: trendDelta,
+          commission_pct: commPct,
+          commission_rp: commRp,
+          price,
+          url_status: urlStatus,
+          source_url: url,
+          curation_status: curationStatus,
+          process_status: processStatus,
+          cf_product_id: cfProductId,
+          revision: 1,
+          research_data: {
+            name,
+            description: `${name} dari ${brand}. Terpantau terjual ${sold.toLocaleString('id-ID')}/minggu pada screenshot ${observedDate} dengan komisi afiliasi ${commPct}%.`,
+            usp: `• Harga kompetitif Rp${price.toLocaleString('id-ID')}\n• Komisi afiliasi ${commPct}% (±Rp${commRp.toLocaleString('id-ID')}/unit)\n• Tren mingguan: ${trend === 'up' ? 'Naik' : trend === 'down' ? 'Menurun' : 'Stabil'} (${trendDelta})`,
+            trend_note: note
+          },
+          curated_data: {
+            name,
+            description: `${name} — produk unggulan ${brand} untuk kategori ${category}.`,
+            usp: `• Harga terjangkau Rp${price.toLocaleString('id-ID')}\n• Komisi menarik ${commPct}%\n• Siap dikemas untuk sudut pandang edukasi & demo`,
+            target_url: urlStatus === 'official' || urlStatus === 'listing' || urlStatus === 'user' ? url : ''
+          },
+          duplicate_match: dupInfo,
+          history: [
+            { time: `${observedDate} 08:15`, text: `Masuk dari TeleRadar (batch ${batchId}, status URL: ${labelUrlStatus(urlStatus)})` },
+            ...(cfProductId ? [{ time: `${observedDate} 11:40`, text: `Pernah dipromosikan ke katalog (${cfProductId}) · status: ${labelProcessStatus(processStatus)}` }] : [])
+          ]
+        };
+      });
+
+      return [
+        ...makeItems(PRODUCT_SEEDS, '2026-11-17', '17 Nov 2026'),
+        ...makeItems(OLD_BATCH_SEEDS, '2026-11-10', '10 Nov 2026')
+      ];
+    }
+
+    let candidates = [];
+    let selectedIds = new Set();
+    let currentPage = 1;
+    let pageSize = 15;
+    let activeDrawerId = null;
+    let pendingPromoItems = [];
+
+    // =========================================================================
+    // Label & Badge Helpers
+    // =========================================================================
+    function formatRp(n) {
+      return 'Rp' + Number(n || 0).toLocaleString('id-ID');
+    }
+
+    function labelTrend(t) {
+      if (t === 'up') return '↑ Naik';
+      if (t === 'down') return '↓ Menurun';
+      return '→ Stabil';
+    }
+    function badgeTrend(t, delta) {
+      const cls = t === 'up' ? 'badge-success' : t === 'down' ? 'badge-danger' : 'badge-muted';
+      return `<span class="badge ${cls}">${labelTrend(t)} ${delta ? `<span style="opacity:.85;">(${delta})</span>` : ''}</span>`;
+    }
+
+    function labelUrlStatus(s) {
+      const map = {
+        official: 'Resmi',
+        listing: 'Listing',
+        nearest: 'Terdekat',
+        not_found: 'Tidak ditemukan',
+        user: 'Dari pengguna',
+        not_researched: 'Belum diriset'
+      };
+      return map[s] || s;
+    }
+    function badgeUrlStatus(s) {
+      const clsMap = {
+        official: 'badge-success',
+        listing: 'badge-info',
+        user: 'badge-neutral',
+        nearest: 'badge-warning',
+        not_found: 'badge-danger',
+        not_researched: 'badge-muted'
+      };
+      return `<span class="badge ${clsMap[s] || 'badge-muted'}">${labelUrlStatus(s)}</span>`;
+    }
+
+    function labelCurationStatus(s) {
+      const map = {
+        new: 'Baru',
+        needs_info: 'Perlu dilengkapi',
+        ready: 'Siap diajukan',
+        archived: 'Diarsipkan'
+      };
+      return map[s] || s;
+    }
+    function badgeCurationStatus(s) {
+      const clsMap = {
+        new: 'badge-info',
+        needs_info: 'badge-warning',
+        ready: 'badge-success',
+        archived: 'badge-muted'
+      };
+      return `<span class="badge ${clsMap[s] || 'badge-muted'}">${labelCurationStatus(s)}</span>`;
+    }
+
+    function labelProcessStatus(s) {
+      const map = {
+        not_sent: 'Belum dikirim',
+        queued: 'Antre',
+        processing: 'Diproses',
+        in_catalog: 'Masuk katalog',
+        needs_review: 'Perlu review',
+        failed: 'Gagal'
+      };
+      return map[s] || s;
+    }
+    function badgeProcessStatus(s) {
+      const clsMap = {
+        not_sent: 'badge-muted',
+        queued: 'badge-info',
+        processing: 'badge-info',
+        in_catalog: 'badge-success',
+        needs_review: 'badge-warning',
+        failed: 'badge-danger'
+      };
+      return `<span class="badge ${clsMap[s] || 'badge-muted'}">${labelProcessStatus(s)}</span>`;
+    }
+
+    function isUrlBlockedForPromote(c) {
+      const blockedStatus = ['nearest', 'not_found', 'not_researched'].includes(c.url_status);
+      const hasChosenTarget = Boolean((c.curated_data.target_url || '').trim());
+      return blockedStatus && !hasChosenTarget;
+    }
+
+    function getDuplicateMatch(c) {
+      const effectiveUrl = (c.curated_data.target_url || c.source_url || '').trim();
+      return CATALOG_DUPLICATE_URLS[effectiveUrl] || c.duplicate_match || null;
+    }
+
+    function getThumbSvg(category) {
+      const icon = category.includes('Skincare') ? '🧴'
+        : category.includes('Minuman') ? '🍵'
+        : category.includes('Makanan') ? '🥣'
+        : category.includes('Ibu') ? '🍼' : '🧺';
+      return `<div class="thumb-box" title="Foto pengenal dari screenshot TeleRadar (bukan foto studio katalog)">
+        <span style="font-size:1.3rem;">${icon}</span>
+        <span class="thumb-tag">SS Crop</span>
+      </div>`;
+    }
+
+    // =========================================================================
+    // Theme Toggle
+    // =========================================================================
+    function toggleTheme() {
+      const html = document.documentElement;
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      syncThemeButtons(next);
+    }
+    function syncThemeButtons(theme) {
+      const isDark = theme === 'dark';
+      document.getElementById('topThemeIcon').textContent = isDark ? '☀️' : '🌙';
+      document.getElementById('topThemeLabel').textContent = isDark ? 'Light Mode' : 'Dark Mode';
+      document.getElementById('sidebarThemeIcon').textContent = isDark ? '☀️' : '🌙';
+      document.getElementById('sidebarThemeLabel').textContent = isDark ? 'Mode Terang' : 'Mode Gelap';
+    }
+
+    // =========================================================================
+    // Filtering & KPIs
+    // =========================================================================
+    function getBatchCandidates() {
+      const batch = document.getElementById('filterBatch').value;
+      if (batch === 'all') return candidates;
+      return candidates.filter(c => c.batch_id === batch);
+    }
+
+    function getFilteredCandidates() {
+      const q = document.getElementById('filterSearch').value.trim().toLowerCase();
+      const cat = document.getElementById('filterCategory').value;
+      const trend = document.getElementById('filterTrend').value;
+      const urlStatus = document.getElementById('filterUrlStatus').value;
+      const curation = document.getElementById('filterCuration').value;
+      const proc = document.getElementById('filterProcess').value;
+
+      return getBatchCandidates().filter(c => {
+        if (q) {
+          const hay = `${c.curated_data.name} ${c.research_data.name} ${c.brand} ${c.research_data.trend_note}`.toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+        if (cat !== 'all' && c.category !== cat) return false;
+        if (trend !== 'all' && c.trend !== trend) return false;
+        if (urlStatus !== 'all' && c.url_status !== urlStatus) return false;
+        if (curation !== 'all' && c.curation_status !== curation) return false;
+        if (proc !== 'all' && c.process_status !== proc) return false;
+        return true;
+      });
+    }
+
+    function renderKpis() {
+      const base = getBatchCandidates();
+      const batchVal = document.getElementById('filterBatch').value;
+      document.getElementById('kpiTotal').textContent = base.length;
+      document.getElementById('sidebarCountBadge').textContent = base.length;
+
+      const obsLabel = batchVal === '2026-11-10'
+        ? 'Angka dari screenshot per tanggal 10 Nov 2026, bukan data real-time'
+        : batchVal === 'all'
+          ? 'Angka berasal dari tanggal screenshot masing-masing batch, bukan data real-time'
+          : 'Angka dari screenshot per tanggal 17 Nov 2026, bukan data real-time';
+      document.getElementById('observationNoticeText').textContent = obsLabel;
+      document.getElementById('kpiBatchSubtitle').textContent = batchVal === 'all' ? 'Semua batch · TeleRadar' : `Batch ${batchVal} · TeleRadar`;
+
+      const up = base.filter(c => c.trend === 'up').length;
+      const stable = base.filter(c => c.trend === 'stable').length;
+      const down = base.filter(c => c.trend === 'down').length;
+      document.getElementById('kpiTrenHeadline').textContent = `${up} Naik`;
+      document.getElementById('cntUp').textContent = up;
+      document.getElementById('cntStable').textContent = stable;
+      document.getElementById('cntDown').textContent = down;
+
+      const official = base.filter(c => c.url_status === 'official').length;
+      const listing = base.filter(c => c.url_status === 'listing').length;
+      const nearest = base.filter(c => c.url_status === 'nearest').length;
+      const notFound = base.filter(c => c.url_status === 'not_found').length;
+      const user = base.filter(c => c.url_status === 'user').length;
+      document.getElementById('kpiUrlHeadline').textContent = `${official + listing + user} Siap URL`;
+      document.getElementById('cntOfficial').textContent = official;
+      document.getElementById('cntListing').textContent = listing;
+      document.getElementById('cntNearest').textContent = nearest;
+      document.getElementById('cntNotFound').textContent = notFound;
+      document.getElementById('cntUser').textContent = user;
+
+      const notSent = base.filter(c => c.process_status === 'not_sent').length;
+      const needsRev = base.filter(c => c.process_status === 'needs_review').length;
+      const inCat = base.filter(c => c.process_status === 'in_catalog').length;
+      document.getElementById('kpiCatalogHeadline').textContent = `${inCat} Masuk`;
+      document.getElementById('cntNotSent').textContent = notSent;
+      document.getElementById('cntNeedsReview').textContent = needsRev;
+      document.getElementById('cntInCatalog').textContent = inCat;
+    }
+
+    function renderTable() {
+      const filtered = getFilteredCandidates();
+      const total = filtered.length;
+      const totalPages = Math.max(1, Math.ceil(total / pageSize));
+      if (currentPage > totalPages) currentPage = totalPages;
+      const start = (currentPage - 1) * pageSize;
+      const pageItems = filtered.slice(start, start + pageSize);
+
+      const tbody = document.getElementById('candidateTableBody');
+      if (pageItems.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding:32px; color:var(--text-muted);">Tidak ada kandidat yang sesuai dengan filter saat ini.</td></tr>`;
+      } else {
+        tbody.innerHTML = pageItems.map(c => {
+          const blocked = isUrlBlockedForPromote(c);
+          const dup = getDuplicateMatch(c);
+          const isChecked = selectedIds.has(c.id);
+          const domainHint = c.curated_data.target_url
+            ? (c.curated_data.target_url.includes('tokopedia') ? 'tokopedia.com' : 'shopee.co.id')
+            : (c.source_url ? 'perkiraan mirip' : 'belum ada URL');
+
+          let actionHtml = '';
+          if (c.process_status === 'in_catalog') {
+            actionHtml = `
+              <div class="action-row">
+                <button class="btn btn-sm btn-success" type="button" onclick="event.stopPropagation(); showToast('Membuka produk ${c.cf_product_id} di Database Produk (/products)')">
+                  ↗ Buka di Database Produk
+                </button>
+              </div>
+              <span class="sub-note mono">${c.cf_product_id}</span>
+            `;
+          } else if (c.process_status === 'needs_review') {
+            actionHtml = `
+              <div class="action-row">
+                <button class="btn btn-sm btn-warning" type="button" onclick="event.stopPropagation(); openDrawer('${c.id}')">
+                  🛠 Pulihkan Foto/Enrich
+                </button>
+              </div>
+              <span class="sub-note">Memakai aksi produk (${c.cf_product_id})</span>
+            `;
+          } else if (c.process_status === 'queued' || c.process_status === 'processing') {
+            actionHtml = `
+              <div class="action-row">
+                <button class="btn btn-sm btn-info" type="button" disabled>
+                  ⏳ ${labelProcessStatus(c.process_status)}...
+                </button>
+              </div>
+              <span class="sub-note">Menunggu worker scraper</span>
+            `;
+          } else if (dup && !blocked) {
+            actionHtml = `
+              <div class="action-row">
+                <button class="btn btn-sm btn-info" type="button" onclick="event.stopPropagation(); openSinglePromoModal('${c.id}')">
+                  🔗 Hubungkan Produk
+                </button>
+              </div>
+              <span class="sub-note">URL cocok: ${dup.cf_product_id}</span>
+            `;
+          } else if (blocked) {
+            actionHtml = `
+              <div class="action-row">
+                <button class="btn btn-sm btn-primary" type="button" disabled title="Pilih listing yang tepat dulu (status Terdekat / Tidak ditemukan)">
+                  Masukkan
+                </button>
+                <button class="btn btn-sm btn-warning" type="button" onclick="event.stopPropagation(); openDrawer('${c.id}', true)">
+                  Lengkapi URL
+                </button>
+              </div>
+              <span class="disabled-hint">
+                ${c.url_status === 'nearest' ? 'Label Terdekat: belum terbukti sama, pilih listing dulu' : 'URL belum ditemukan — lengkapi dulu'}
+              </span>
+            `;
+          } else {
+            actionHtml = `
+              <div class="action-row">
+                <button class="btn btn-sm btn-primary" type="button" onclick="event.stopPropagation(); openSinglePromoModal('${c.id}')">
+                  + Masukkan ke Database
+                </button>
+              </div>
+            `;
+          }
+
+          return `
+            <tr class="${isChecked ? 'selected-row' : ''}" onclick="openDrawer('${c.id}')">
+              <td onclick="event.stopPropagation()">
+                <input type="checkbox" ${isChecked ? 'checked' : ''} aria-label="Pilih ${c.curated_data.name}" onchange="toggleSelectItem('${c.id}', this.checked)" />
+              </td>
+              <td>${getThumbSvg(c.category)}</td>
+              <td>
+                <div class="prod-name">${c.curated_data.name}</div>
+                <div class="prod-sub">
+                  <span>#${c.rank} · ${c.brand}</span>
+                  ${dup && c.process_status === 'not_sent' ? `<span class="badge badge-info" style="font-size:0.65rem; padding:1px 6px;">Duplikat URL</span>` : ''}
+                  ${c.revision > 1 ? `<span class="badge badge-neutral" style="font-size:0.65rem; padding:1px 6px;">Diedit kurator</span>` : ''}
+                </div>
+              </td>
+              <td>${c.category}</td>
+              <td>
+                <div class="num-strong">${c.sold_per_week.toLocaleString('id-ID')}</div>
+                <div class="sub-note">per ${c.observed_date}</div>
+              </td>
+              <td>${badgeTrend(c.trend, c.trend_delta)}</td>
+              <td>
+                <div class="num-strong">${c.commission_pct}%</div>
+                <div class="sub-note">±${formatRp(c.commission_rp)}</div>
+              </td>
+              <td class="num-strong">${formatRp(c.price)}</td>
+              <td>
+                ${badgeUrlStatus(c.url_status)}
+                <div class="sub-note" style="margin-top:3px;">${domainHint}</div>
+              </td>
+              <td>${badgeCurationStatus(c.curation_status)}</td>
+              <td>${badgeProcessStatus(c.process_status)}</td>
+              <td><div class="action-cell">${actionHtml}</div></td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      const showingFrom = total === 0 ? 0 : start + 1;
+      const showingTo = Math.min(total, start + pageItems.length);
+      document.getElementById('filterResultInfo').textContent = `Menampilkan ${showingFrom}–${showingTo} dari ${total} kandidat (total batch: ${getBatchCandidates().length})`;
+      document.getElementById('paginationSummary').textContent = `Halaman ${currentPage} dari ${totalPages}`;
+      document.getElementById('prevPageBtn').disabled = currentPage <= 1;
+      document.getElementById('nextPageBtn').disabled = currentPage >= totalPages;
+
+      const allPageSelected = pageItems.length > 0 && pageItems.every(c => selectedIds.has(c.id));
+      document.getElementById('selectPageCheckbox').checked = allPageSelected;
+      updateSelectionBar();
+    }
+
+    function updateSelectionBar() {
+      const count = selectedIds.size;
+      document.getElementById('selectedCountLabel').textContent = count;
+      document.getElementById('reviewSelectedBtn').disabled = count === 0;
+    }
+
+    function toggleSelectItem(id, checked) {
+      if (checked) selectedIds.add(id);
+      else selectedIds.delete(id);
+      renderTable();
+    }
+
+    function toggleSelectPage(checked) {
+      const filtered = getFilteredCandidates();
+      const start = (currentPage - 1) * pageSize;
+      const pageItems = filtered.slice(start, start + pageSize);
+      pageItems.forEach(c => {
+        if (checked) selectedIds.add(c.id);
+        else selectedIds.delete(c.id);
+      });
+      renderTable();
+    }
+
+    function onBatchChange() {
+      currentPage = 1;
+      renderKpis();
+      renderTable();
+    }
+
+    function applyFilters() {
+      currentPage = 1;
+      renderTable();
+    }
+
+    function quickFilter(field, val) {
+      if (field === 'trend') document.getElementById('filterTrend').value = val;
+      if (field === 'urlStatus') document.getElementById('filterUrlStatus').value = val;
+      if (field === 'processStatus') document.getElementById('filterProcess').value = val;
+      applyFilters();
+    }
+
+    function resetFilters() {
+      document.getElementById('filterSearch').value = '';
+      document.getElementById('filterBatch').value = '2026-11-17';
+      document.getElementById('filterCategory').value = 'all';
+      document.getElementById('filterTrend').value = 'all';
+      document.getElementById('filterUrlStatus').value = 'all';
+      document.getElementById('filterCuration').value = 'all';
+      document.getElementById('filterProcess').value = 'all';
+      currentPage = 1;
+      renderKpis();
+      renderTable();
+    }
+
+    function changePageSize() {
+      pageSize = Number(document.getElementById('pageSizeSelect').value || 15);
+      currentPage = 1;
+      renderTable();
+    }
+
+    function goPage(delta) {
+      currentPage += delta;
+      renderTable();
+    }
+
+    // =========================================================================
+    // Detail Slide-over Panel
+    // =========================================================================
+    function openDrawer(id, focusUrl = false) {
+      activeDrawerId = id;
+      const c = candidates.find(item => item.id === id);
+      if (!c) return;
+
+      document.getElementById('drawerTitle').textContent = c.curated_data.name;
+      document.getElementById('drawerBatchPill').textContent = `Batch ${c.batch_id}`;
+      document.getElementById('drawerObsPill').textContent = `Angka dari screenshot per ${c.observed_date}, bukan data real-time`;
+      document.getElementById('drawerSubMeta').textContent = `Rank #${c.rank} · ${c.brand} · ${c.category} · Revisi #${c.revision}`;
+
+      const blocked = isUrlBlockedForPromote(c);
+      const dup = getDuplicateMatch(c);
+      const catalogItem = c.cf_product_id ? CATALOG_EXISTING_PRODUCTS[c.cf_product_id] : null;
+
+      let urlBannerHtml = '';
+      if (c.url_status === 'nearest') {
+        urlBannerHtml = `<div class="alert-box alert-warning">
+          <strong>⚠️ Kecocokan Terdekat (Belum Terbukti Produk Sama):</strong> TeleRadar hanya menemukan listing yang mirip. Tombol <strong>Masukkan ke Database Produk</strong> dinonaktifkan sampai Anda memverifikasi atau memilih URL listing yang tepat.
+        </div>`;
+      } else if (c.url_status === 'not_found') {
+        urlBannerHtml = `<div class="alert-box alert-danger">
+          <strong>⛔ URL Tidak Ditemukan:</strong> Tempel URL listing Shopee/Tokopedia yang valid lalu simpan sebelum mempromosikan kandidat ini.
+        </div>`;
+      } else if (dup && c.process_status === 'not_sent') {
+        urlBannerHtml = `<div class="alert-box alert-info">
+          <strong>🔗 Produk Sudah Ada di Database Produk (${dup.cf_product_id}):</strong> "${dup.name}". Memasukkan kandidat ini akan <strong>menghubungkan</strong> riwayat riset tanpa menimpa deskripsi, foto, atau link afiliasi produk.
+        </div>`;
+      } else if (c.url_status === 'user') {
+        urlBannerHtml = `<div class="alert-box alert-success">
+          <strong>✓ Listing Dipilih Kurator:</strong> URL tujuan sudah diverifikasi secara manual dan siap dimasukkan ke katalog.
+        </div>`;
+      }
+
+      let recoveryHtml = '';
+      if (c.process_status === 'needs_review') {
+        recoveryHtml = `
+          <div class="alert-box alert-warning" style="display:flex; flex-direction:column; gap:8px;">
+            <div>
+              <strong>🛠 Perlu Review Pemrosesan (${c.cf_product_id}):</strong> Produk sudah masuk ke Database Produk, namun tahap foto/enrichment gagal. Gunakan aksi pemulihan produk (tidak perlu scrape ulang).
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn btn-sm btn-warning" type="button" onclick="simulateRecovery('${c.id}', 'foto')">🖼 Ulangi Foto Studio (Produk)</button>
+              <button class="btn btn-sm btn-info" type="button" onclick="simulateRecovery('${c.id}', 'enrich')">✨ Jalankan Enrich AI (Produk)</button>
+              <button class="btn btn-sm" type="button" onclick="showToast('Membuka Jendela Banding Foto di Product Database')">🔍 Buka Jendela Banding</button>
+            </div>
+          </div>
+        `;
+      }
+
+      let catalogDiffHtml = '';
+      if (catalogItem) {
+        catalogDiffHtml = `
+          <div class="sub-card" style="border-color: color-mix(in srgb, var(--status-success) 40%, transparent);">
+            <div class="sub-card-title">
+              <span>📦 Data Katalog Aktif (${catalogItem.cf_product_id})</span>
+              <span class="badge badge-success">Product Truth Inggris</span>
+            </div>
+            <div style="font-size:0.82rem; color:var(--text-secondary);">
+              <strong>${catalogItem.name}</strong><br/>
+              ${catalogItem.product_truth_en}
+            </div>
+            <div class="sub-note">Teks katalog tidak menimpa edit kurator Anda di Radar Produk.</div>
+          </div>
+        `;
+      }
+
+      document.getElementById('drawerBody').innerHTML = `
+        <!-- 1. Screenshot Sumber vs Listing Tujuan -->
+        <section class="section-box">
+          <div class="section-title">
+            <span>1. Screenshot Sumber vs Listing Tujuan</span>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              ${badgeUrlStatus(c.url_status)}
+              ${badgeProcessStatus(c.process_status)}
+            </div>
+          </div>
+          ${urlBannerHtml}
+          ${recoveryHtml}
+          <div class="two-col">
+            <div class="sub-card">
+              <div class="sub-card-title">
+                <span>📸 Sumber Screenshot (TeleRadar)</span>
+                <span class="sub-note">${c.observed_date}</span>
+              </div>
+              <div class="screenshot-preview">
+                <div class="screenshot-thumb-lg">
+                  <span style="font-size:1.8rem;">${c.category.includes('Skincare') ? '🧴' : c.category.includes('Minuman') ? '🍵' : c.category.includes('Makanan') ? '🥣' : c.category.includes('Ibu') ? '🍼' : '🧺'}</span>
+                  <span>Foto Pengenal</span>
+                </div>
+                <div style="font-size:0.8rem; display:flex; flex-direction:column; gap:3px;">
+                  <strong>${c.research_data.name}</strong>
+                  <span>Terjual/mgg: <strong>${c.sold_per_week.toLocaleString('id-ID')}</strong> (${labelTrend(c.trend)} ${c.trend_delta})</span>
+                  <span>Harga: <strong>${formatRp(c.price)}</strong> · Komisi: <strong>${c.commission_pct}%</strong> (±${formatRp(c.commission_rp)})</span>
+                  <span class="sub-note">Foto screenshot hanya untuk pengenalan kurator, tidak disalin sebagai foto studio katalog.</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="sub-card">
+              <div class="sub-card-title">
+                <span>🔗 Listing Tujuan (E-Commerce)</span>
+                <span class="sub-note">Wajib diverifikasi bila Terdekat</span>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="drawerUrlInput">URL Listing Pilihan Kurator</label>
+                <input class="form-control mono" id="drawerUrlInput" type="url" value="${c.curated_data.target_url || ''}" placeholder="https://shopee.co.id/... atau https://www.tokopedia.com/..." />
+              </div>
+              ${c.source_url && !c.curated_data.target_url ? `
+                <div class="sub-note">
+                  URL perkiraan TeleRadar: <span class="mono">${c.source_url}</span>
+                </div>
+              ` : ''}
+              <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:4px;">
+                <button class="btn btn-sm btn-primary" type="button" onclick="verifyListingUrl('${c.id}')">
+                  ✓ Simpan & Tandai Listing Terverifikasi
+                </button>
+                ${c.source_url && !c.curated_data.target_url ? `
+                  <button class="btn btn-sm" type="button" onclick="useSuggestedUrl('${c.id}')">
+                    Pakai URL Perkiraan & Verifikasi
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+          ${catalogDiffHtml}
+        </section>
+
+        <!-- 2. Riset Asli vs Edit Kurator -->
+        <section class="section-box">
+          <div class="section-title">
+            <span>2. Riset Asli vs Edit Kurator</span>
+            ${badgeCurationStatus(c.curation_status)}
+          </div>
+          <div class="two-col">
+            <div class="sub-card">
+              <div class="sub-card-title">
+                <span>🤖 Hasil Riset Asli (Read-Only)</span>
+                <span class="sub-note">Tersinkron ulang aman</span>
+              </div>
+              <div style="font-size:0.82rem;"><strong>Nama:</strong> ${c.research_data.name}</div>
+              <div style="font-size:0.8rem; color:var(--text-secondary);">${c.research_data.description}</div>
+              <pre style="margin:0; font-family:var(--font-sans); font-size:0.78rem; white-space:pre-wrap; color:var(--text-secondary); background:var(--surface-raised); padding:8px; border-radius:6px; border:1px solid var(--border-subtle);">${c.research_data.usp}</pre>
+              <div class="sub-note"><strong>Catatan Tren:</strong> ${c.research_data.trend_note}</div>
+            </div>
+
+            <div class="sub-card">
+              <div class="sub-card-title">
+                <span>✍️ Edit Kurator (Tidak Pernah Ditimpa Sync)</span>
+                <span class="sub-note">Rev #${c.revision}</span>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="drawerEditName">Nama Kurasi</label>
+                <input class="form-control" id="drawerEditName" type="text" value="${c.curated_data.name}" />
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="drawerEditDesc">Deskripsi Kurasi</label>
+                <textarea class="form-textarea" id="drawerEditDesc">${c.curated_data.description}</textarea>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="drawerEditUsp">USP Kurasi</label>
+                <textarea class="form-textarea" id="drawerEditUsp">${c.curated_data.usp}</textarea>
+              </div>
+              <div style="display:flex; gap:8px; align-items:end; flex-wrap:wrap;">
+                <div class="field-group" style="flex:1; min-width:140px;">
+                  <label class="field-label" for="drawerEditCurationStatus">Status Kurasi</label>
+                  <select class="form-control" id="drawerEditCurationStatus">
+                    <option value="new" ${c.curation_status === 'new' ? 'selected' : ''}>Baru</option>
+                    <option value="needs_info" ${c.curation_status === 'needs_info' ? 'selected' : ''}>Perlu dilengkapi</option>
+                    <option value="ready" ${c.curation_status === 'ready' ? 'selected' : ''}>Siap diajukan</option>
+                    <option value="archived" ${c.curation_status === 'archived' ? 'selected' : ''}>Diarsipkan</option>
+                  </select>
+                </div>
+                <button class="btn btn-sm btn-primary" type="button" onclick="saveCuratorEdits('${c.id}')">
+                  💾 Simpan Edit Kurator
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. Riwayat Proses -->
+        <section class="section-box">
+          <div class="section-title">
+            <span>3. Riwayat Proses</span>
+            <span class="sub-note">Jejak audit kandidat</span>
+          </div>
+          <div class="history-list">
+            ${c.history.map(h => `
+              <div class="history-item">
+                <span class="history-time">${h.time}</span>
+                <span>${h.text}</span>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      `;
+
+      // Footer
+      let primaryBtnHtml = '';
+      if (c.process_status === 'in_catalog') {
+        primaryBtnHtml = `<button class="btn btn-success" type="button" onclick="showToast('Membuka ${c.cf_product_id} di Database Produk')">↗ Buka di Database Produk</button>`;
+      } else if (c.process_status === 'needs_review') {
+        primaryBtnHtml = `<button class="btn btn-warning" type="button" onclick="simulateRecovery('${c.id}', 'foto')">🛠 Pulihkan Sekarang</button>`;
+      } else if (dup && !blocked) {
+        primaryBtnHtml = `<button class="btn btn-info" type="button" onclick="openSinglePromoModal('${c.id}')">🔗 Hubungkan Produk yang Sudah Ada</button>`;
+      } else {
+        primaryBtnHtml = `<button class="btn btn-primary" type="button" ${blocked ? 'disabled title="Pilih listing dulu sebelum memasukkan ke Database Produk"' : `onclick="openSinglePromoModal('${c.id}')"`}>
+          + Masukkan ke Database Produk
+        </button>`;
+      }
+
+      document.getElementById('drawerFooter').innerHTML = `
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-sm" type="button" onclick="archiveCandidate('${c.id}')">
+            🗄 ${c.curation_status === 'archived' ? 'Batal Arsipkan' : 'Arsipkan Kandidat'}
+          </button>
+          <span class="sub-note">Arsip hanya menyembunyikan riset; tidak menghapus produk katalog.</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          ${primaryBtnHtml}
+        </div>
+      `;
+
+      document.getElementById('detailDrawer').classList.add('open');
+      if (focusUrl) {
+        setTimeout(() => {
+          const inp = document.getElementById('drawerUrlInput');
+          if (inp) inp.focus();
+        }, 50);
+      }
+    }
+
+    function closeDrawer() {
+      document.getElementById('detailDrawer').classList.remove('open');
+      activeDrawerId = null;
+    }
+
+    function navigateDrawer(delta) {
+      const filtered = getFilteredCandidates();
+      const idx = filtered.findIndex(c => c.id === activeDrawerId);
+      if (idx < 0) return;
+      const nextIdx = idx + delta;
+      if (nextIdx >= 0 && nextIdx < filtered.length) {
+        openDrawer(filtered[nextIdx].id);
+      }
+    }
+
+    function useSuggestedUrl(id) {
+      const c = candidates.find(item => item.id === id);
+      if (!c) return;
+      const cleanSample = (c.source_url || '').replace('-mirip', '').replace('search-mirip/', '');
+      document.getElementById('drawerUrlInput').value = cleanSample;
+      verifyListingUrl(id);
+    }
+
+    function verifyListingUrl(id) {
+      const c = candidates.find(item => item.id === id);
+      if (!c) return;
+      const val = document.getElementById('drawerUrlInput').value.trim();
+      if (!val || !/^https?:\/\//i.test(val)) {
+        showToast('Masukkan URL listing https:// yang valid terlebih dahulu.');
+        return;
+      }
+      c.curated_data.target_url = val;
+      c.url_status = 'user';
+      c.curation_status = 'ready';
+      c.revision += 1;
+      c.history.unshift({
+        time: 'Baru saja',
+        text: `Kurator memverifikasi listing tujuan (${val}) — tombol Masukkan kini aktif`
+      });
+      renderKpis();
+      renderTable();
+      openDrawer(id);
+      showToast('URL terverifikasi! Tombol Masukkan ke Database Produk kini aktif.');
+    }
+
+    function saveCuratorEdits(id) {
+      const c = candidates.find(item => item.id === id);
+      if (!c) return;
+      c.curated_data.name = document.getElementById('drawerEditName').value.trim() || c.curated_data.name;
+      c.curated_data.description = document.getElementById('drawerEditDesc').value.trim();
+      c.curated_data.usp = document.getElementById('drawerEditUsp').value.trim();
+      c.curation_status = document.getElementById('drawerEditCurationStatus').value;
+      c.revision += 1;
+      c.history.unshift({
+        time: 'Baru saja',
+        text: `Edit kurator disimpan (Rev #${c.revision}, status kurasi: ${labelCurationStatus(c.curation_status)})`
+      });
+      renderKpis();
+      renderTable();
+      openDrawer(id);
+      showToast(`Perubahan kurator disimpan (Rev #${c.revision}).`);
+    }
+
+    function archiveCandidate(id) {
+      const c = candidates.find(item => item.id === id);
+      if (!c) return;
+      const wasArchived = c.curation_status === 'archived';
+      c.curation_status = wasArchived ? 'new' : 'archived';
+      c.revision += 1;
+      c.history.unshift({
+        time: 'Baru saja',
+        text: wasArchived ? 'Kandidat dipulihkan dari arsip' : 'Kandidat diarsipkan (produk katalog tidak terpengaruh)'
+      });
+      renderKpis();
+      renderTable();
+      openDrawer(id);
+      showToast(wasArchived ? 'Kandidat dikeluarkan dari arsip.' : 'Kandidat diarsipkan. Produk di Database Produk tidak dihapus.');
+    }
+
+    function simulateRecovery(id, mode) {
+      const c = candidates.find(item => item.id === id);
+      if (!c) return;
+      c.process_status = 'in_catalog';
+      if (c.cf_product_id && CATALOG_EXISTING_PRODUCTS[c.cf_product_id]) {
+        CATALOG_EXISTING_PRODUCTS[c.cf_product_id].photo_status = 'ready';
+      }
+      c.history.unshift({
+        time: 'Baru saja',
+        text: mode === 'foto'
+          ? `Pemulihan foto studio berhasil pada ${c.cf_product_id} tanpa scrape ulang`
+          : `Enrichment AI selesai pada ${c.cf_product_id} tanpa scrape ulang`
+      });
+      renderKpis();
+      renderTable();
+      openDrawer(id);
+      showToast('Pemulihan berhasil! Status berubah menjadi Masuk katalog.');
+    }
+
+    // =========================================================================
+    // Dialog Konfirmasi Promosi (Valid / Duplikat / Tertahan)
+    // =========================================================================
+    function openSinglePromoModal(id) {
+      const c = candidates.find(item => item.id === id);
+      if (!c) return;
+      openPromoModal([c], 'Konfirmasi Masukkan ke Database Produk');
+    }
+
+    function openSelectedConfirmationModal() {
+      const picked = candidates.filter(c => selectedIds.has(c.id));
+      if (picked.length === 0) return;
+      openPromoModal(picked, `Ringkasan Promosi (${picked.length} Kandidat Dipilih)`);
+    }
+
+    function openDemoConfirmationModal() {
+      // Pick representative mix: 2 valid, 1 duplicate, 2 blocked (Terdekat + Tidak ditemukan)
+      const demoIds = [
+        '2026-11-17_cand_2', // valid official
+        '2026-11-17_cand_3', // valid listing
+        '2026-11-17_cand_1', // duplicate URL
+        '2026-11-17_cand_4', // blocked Terdekat
+        '2026-11-17_cand_43' // blocked Tidak ditemukan
+      ];
+      const picked = candidates.filter(c => demoIds.includes(c.id));
+      openPromoModal(picked, 'Simulasi Ringkasan Promosi (Valid / Duplikat / Tertahan)');
+    }
+
+    function openPromoModal(items, title) {
+      pendingPromoItems = items;
+      document.getElementById('promoModalTitle').textContent = title;
+
+      const validItems = [];
+      const dupItems = [];
+      const blockedItems = [];
+
+      items.forEach(c => {
+        if (c.process_status === 'in_catalog' || c.process_status === 'queued' || c.process_status === 'processing') {
+          blockedItems.push({ c, reason: `Sudah berstatus ${labelProcessStatus(c.process_status)} (tidak di-scrape ulang)` });
+        } else if (isUrlBlockedForPromote(c)) {
+          blockedItems.push({ c, reason: c.url_status === 'nearest' ? 'Status URL Terdekat — belum memilih listing' : 'URL tidak ditemukan' });
+        } else if (getDuplicateMatch(c)) {
+          dupItems.push({ c, dup: getDuplicateMatch(c) });
+        } else {
+          validItems.push(c);
+        }
+      });
+
+      const executableCount = validItems.length + dupItems.length;
+
+      document.getElementById('promoModalBody').innerHTML = `
+        <div class="summary-buckets">
+          <div class="bucket-card" style="border-color: color-mix(in srgb, var(--status-success) 45%, transparent);">
+            <div class="bucket-count" style="color:var(--status-success);">${validItems.length}</div>
+            <div style="font-size:0.8rem; font-weight:700;">Valid · Scrape Baru</div>
+            <div class="sub-note">Masuk antrean 1 per 1</div>
+          </div>
+          <div class="bucket-card" style="border-color: color-mix(in srgb, var(--status-info) 45%, transparent);">
+            <div class="bucket-count" style="color:var(--status-info);">${dupItems.length}</div>
+            <div style="font-size:0.8rem; font-weight:700;">Duplikat · Hubungkan</div>
+            <div class="sub-note">Tidak menimpa produk lama</div>
+          </div>
+          <div class="bucket-card" style="border-color: color-mix(in srgb, var(--status-warning) 45%, transparent);">
+            <div class="bucket-count" style="color:var(--status-warning);">${blockedItems.length}</div>
+            <div style="font-size:0.8rem; font-weight:700;">Tertahan · Dilewati</div>
+            <div class="sub-note">Tidak ikut terkirim</div>
+          </div>
+        </div>
+
+        ${validItems.length > 0 ? `
+          <div class="bucket-list">
+            <div style="font-size:0.78rem; font-weight:750; color:var(--status-success);">✅ Siap Dipromosikan ke Antrean Scraper</div>
+            ${validItems.map(c => `
+              <div class="bucket-row">
+                <div>
+                  <strong>${c.curated_data.name}</strong>
+                  <div class="sub-note mono">${c.curated_data.target_url || c.source_url}</div>
+                </div>
+                <span class="badge badge-success">Akan di-scrape</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+
+        ${dupItems.length > 0 ? `
+          <div class="bucket-list">
+            <div style="font-size:0.78rem; font-weight:750; color:var(--status-info);">🔗 Duplikat URL — Dihubungkan ke Produk Katalog</div>
+            ${dupItems.map(({ c, dup }) => `
+              <div class="bucket-row">
+                <div>
+                  <strong>${c.curated_data.name}</strong>
+                  <div class="sub-note">Cocok dengan <span class="mono">${dup.cf_product_id}</span> (${dup.name})</div>
+                </div>
+                <span class="badge badge-info">Hubungkan saja</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+
+        ${blockedItems.length > 0 ? `
+          <div class="bucket-list">
+            <div style="font-size:0.78rem; font-weight:750; color:var(--status-warning);">⛔ Tertahan (Tidak Ikut Terkirim)</div>
+            ${blockedItems.map(({ c, reason }) => `
+              <div class="bucket-row">
+                <div>
+                  <strong>${c.curated_data.name}</strong>
+                  <div class="sub-note">${reason}</div>
+                </div>
+                <span class="badge badge-warning">Tertahan</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+
+        <div class="alert-box alert-info">
+          Setiap produk baru mencadangkan ID unik (<span class="mono">reserved_product_id</span>) agar klik ganda atau coba ulang tidak membuat produk ganda. Antrean <span class="mono">product_scraper</span> memproses 1 job sekaligus.
+        </div>
+      `;
+
+      document.getElementById('promoModalFooter').innerHTML = `
+        <button class="btn" type="button" onclick="closePromoModal()">Batal</button>
+        <button class="btn btn-primary" type="button" ${executableCount === 0 ? 'disabled' : ''} onclick="executePromo()">
+          ✓ Konfirmasi & Jalankan (${executableCount} Produk)
+        </button>
+      `;
+
+      document.getElementById('promoModal').classList.add('open');
+    }
+
+    function closePromoModal() {
+      document.getElementById('promoModal').classList.remove('open');
+    }
+
+    function executePromo() {
+      let queuedCount = 0;
+      let linkedCount = 0;
+
+      pendingPromoItems.forEach(c => {
+        if (c.process_status === 'in_catalog' || c.process_status === 'queued' || c.process_status === 'processing') return;
+        if (isUrlBlockedForPromote(c)) return;
+
+        const dup = getDuplicateMatch(c);
+        if (dup) {
+          c.cf_product_id = dup.cf_product_id;
+          c.process_status = 'in_catalog';
+          c.history.unshift({
+            time: 'Baru saja',
+            text: `Dihubungkan ke produk katalog yang sudah ada (${dup.cf_product_id}) tanpa menimpa data katalog`
+          });
+          linkedCount++;
+        } else {
+          const reservedId = `pe_${Date.now().toString().slice(-8)}_${c.rank}`;
+          c.cf_product_id = reservedId;
+          c.process_status = 'queued';
+          c.history.unshift({
+            time: 'Baru saja',
+            text: `Diklaim untuk promosi (reserved_id: ${reservedId}) → masuk antrean product_scraper`
+          });
+          queuedCount++;
+
+          // Simulate background progression: queued -> processing -> in_catalog
+          setTimeout(() => {
+            c.process_status = 'processing';
+            renderTable();
+            if (activeDrawerId === c.id) openDrawer(c.id);
+          }, 900);
+
+          setTimeout(() => {
+            c.process_status = 'in_catalog';
+            CATALOG_EXISTING_PRODUCTS[reservedId] = {
+              cf_product_id: reservedId,
+              name: c.curated_data.name,
+              product_truth_en: 'Extracted product truth in English generated by catalog scraper without overwriting curator notes.',
+              photo_status: 'ready'
+            };
+            c.history.unshift({
+              time: 'Selesai',
+              text: `Produk ${reservedId} selesai dibuat di product_extractions (Masuk katalog)`
+            });
+            renderKpis();
+            renderTable();
+            if (activeDrawerId === c.id) openDrawer(c.id);
+          }, 2200);
+        }
+      });
+
+      selectedIds.clear();
+      closePromoModal();
+      renderKpis();
+      renderTable();
+      if (activeDrawerId) openDrawer(activeDrawerId);
+      showToast(`Berhasil diproses: ${queuedCount} masuk antrean scraper, ${linkedCount} dihubungkan ke produk yang ada.`);
+    }
+
+    // =========================================================================
+    // Toast & Init
+    // =========================================================================
+    let toastTimer = null;
+    function showToast(msg) {
+      const box = document.getElementById('toastBox');
+      box.textContent = msg;
+      box.classList.add('show');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => box.classList.remove('show'), 3600);
+    }
+
+    function resetDemoState() {
+      candidates = buildCandidateList();
+      selectedIds.clear();
+      closeDrawer();
+      closePromoModal();
+      resetFilters();
+      showToast('Data contoh 45 kandidat direset ke kondisi awal.');
+    }
+
+    candidates = buildCandidateList();
+    syncThemeButtons(document.documentElement.getAttribute('data-theme'));
+    renderKpis();
+    renderTable();
+  </script>
+</body>
+</html>
