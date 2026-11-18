@@ -1,6 +1,6 @@
 # Implementation Plan — Produksi Bertahap, Pemulihan Otomatis & Notifikasi URGENT (CFA + CF Studio)
 
-Tanggal: 18 November 2026 · Status: **Bagian A terpasang di Mac Mini (18 Nov 2026 ±17.20) — menunggu malam pertama; Bagian B: kode selesai di `hotfix/start-frame-retry`, deploy Dev**
+Tanggal: 18 November 2026 · Status: **Bagian A terpasang di Mac Mini (18 Nov 2026 ±17.20) — menunggu malam pertama; Bagian B: rilis v2.54.1 di Staging (18 Nov ±19.15)**
 Dasar: [ANALISA_NUTRIBAKE_18NOV_TIDAK_TAYANG.md](catatan-kerja/usulan/ANALISA_NUTRIBAKE_18NOV_TIDAK_TAYANG.md) (revisi 4)
 
 ## Ringkasan
@@ -600,12 +600,12 @@ async function runStep(itemId, name, processor, taskKey = itemId) {
 - [x] B6 Watchdog pekerja gambar awal & `runStep` + field runtime baru di `scheduler-control` — tanpa melepas paksa langkah penjadwal (mencegah proses ganda); hanya peringatan + status
 - [x] B7 Temukan & perbaiki sumber `Release called on client…` — sumber: `requestImageLane` (glabs-image-lane-service) melepas klien dua kali saat tryAcquire gagal
 - [x] B8 Unit test + `npm run build` — 3 tes baru + 22 tes terkait lulus; build OK
-- [x] Commit & push branch (`c338af5`), deploy ke Dev OK (release `20261118T104639Z-c338af5e17ee`, verifikasi SOP lolos) · [ ] uji 3 video serentak oleh pengguna
-- [ ] Laporkan hasil uji Dev ke pengguna, tunggu persetujuan naik Staging
-- [ ] Merge ke `main`, `release-non-interactive --type patch`, perbarui kartu menu terkait
-- [ ] Deploy Staging (`deploy:staging` SHA rilis) + verifikasi wajib SOP deployment
-- [ ] `git merge main` ke branch `fitur/*` yang aktif (bila ada)
-- [ ] Ubah pemulih CFA agar memakai `only_missing: true` (setelah B4 di Staging)
+- [x] Commit & push branch (`c338af5`), deploy ke Dev OK (release `20261118T104639Z-c338af5e17ee`, verifikasi SOP lolos) · [x] uji 3 video serentak di Dev lolos (#367–369 6/6 tanpa deadlock/timeout; ulang klip 2 tetap 5/6 → 6/6)
+- [x] Laporkan hasil uji Dev ke pengguna, tunggu persetujuan naik Staging (disetujui 18 Nov)
+- [x] Merge ke `main`, `release-non-interactive --type patch`, perbarui kartu menu terkait (v2.54.1, kartu Pillar Campaign)
+- [x] Deploy Staging (`deploy:staging` SHA rilis) + verifikasi wajib SOP deployment (release `20261118T121104Z-bec6b731f779`)
+- [ ] `git merge main` ke branch `fitur/*` yang aktif — DITUNDA: `fitur/scraper-foto-galeri-r02` bentrok di kode scraper (`app/api/v2/products/[id]/route.js`), diselesaikan pemilik fitur
+- [x] Ubah pemulih CFA agar memakai `only_missing: true` (setelah B4 di Staging)
 
 ### Penutup
 - [ ] Arsipkan rencana ini ke `catatan-kerja/rencana/` dan perbarui `_DAFTAR_ISI.md`
