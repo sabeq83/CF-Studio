@@ -1,6 +1,6 @@
 # Kartu Menu: Pillar Campaign
 
-Terakhir dicek: 17 November 2026 · Versi aplikasi: v2.50.0
+Terakhir dicek: 18 November 2026 · Versi aplikasi: v2.54.1
 Alamat: `/pillar-campaigns` · Kelompok: WORKFLOW · Kunci izin menu: `pillar_campaign`
 
 ## Fungsi
@@ -26,6 +26,9 @@ Mesin kampanye konten strategis berbasis pilar editorial. Mengambil baris dari C
 1. Pillar Campaign bersifat editorial — klaim produk eksplisit tidak sesuai di sini; gunakan RE Campaign untuk iklan produk.
 2. Ingest dari Content Planner via endpoint `ingest-planner`; baris yang sudah diingest tidak bisa dikirim ulang tanpa reset.
 3. Dokumen `sot/menus/STRATEGIC_PILLAR_CAMPAIGN.md` berisi panduan strategi (bukan panduan teknis).
+4. **Gambar awal (start frame) sejak v2.54.1**: klip yang gagal saat pra-render (timeout jalur G-Labs, deadlock) otomatis diantrekan ulang ke durable worker, jadi item tidak lagi diam di `partial`. Menunggu jalur/polling G-Labs tidak dihitung sebagai percobaan (batas 5; error sementara 8).
+5. **Regenerasi**: ulang satu klip (`items/[itemId]/regenerate-t2i`) kini membawa klip lain yang sudah jadi ke revisi baru (hitungan tidak turun). `items/[itemId]/regenerate-start-frames` menerima `{"only_missing": true}` untuk membuat ulang hanya klip kosong; tanpa opsi itu tetap membuat ulang semua klip.
+6. **Pantauan mesin**: `GET /api/v2/pillar-campaigns/scheduler-control` menampilkan `start_frame_worker` (last_tick, last_claim_at, stuck_recoveries) dan langkah penjadwal terlama. Pekerja start frame pulih sendiri bila satu putaran menggantung > 10 menit. Kirim produksi banyak video sekaligus tetap sebaiknya diberi jeda 10–15 menit (CFA sudah bertahap).
 
 ## Belum ada / batasan
 - Belum ada integrasi otomatis dari Content Planner ke Pillar Campaign (harus manual ingest).
