@@ -33,6 +33,7 @@ Terakhir diperbarui: 18 November 2026
 | `REVIEW_USULAN_GPT_IMAGE2_FOTO_PRODUK.md` | Review & penyempurnaan usulan Codex: GPT Image 2 (G-Labs) untuk foto studio produk |
 | `audit_produk_db_usulan.md` | Audit Forensik & Usulan Solusi Isolasi Database Produk MAKNA Flow |
 | `USULAN_PERBAIKAN_SCRAPER_LAMBAT_GEMINI_WATERFALL.md` | Analisa & Usulan Perbaikan: Scrape Produk di Dev Terlihat Diam >3 Menit (Macet di Waterfall Gemini 180 Detik) |
+| `USULAN_PERBAIKAN_ENRICH_VISION_KEMASAN_PRODUK.md` | Analisa & Usulan Perbaikan: Enrich AI & Scraper Salah Menebak Kemasan Produk (Buta Foto / Multimodal Vision Enrich) |
 
 ## INSTRUKSI-AGENT
 
@@ -104,6 +105,7 @@ Terakhir diperbarui: 18 November 2026
 | `rencana_penjadwalan_rolled_oat.md` | Rencana Penjadwalan Auto Pipeline — NutriBake (Rolled Oat Premium Sahabat) |
 | `scraper_foto_produk_implementation_plan.md` | Implementation Plan: Perbaikan Scraper Foto Produk (Pilih Foto Produk Saja) |
 | `scraper_foto_produk_revisi_01_plan.md` | Implementation Plan: Revisi 01 Scraper Foto Produk & Tinjau/Ganti Foto UI |
+| `enrich_vision_kemasan_implementation_plan.md` | **AKTIF (`fitur/enrich-vision-kemasan`)**: Enrich AI Multimodal Vision & Deteksi Kemasan Akurat |
 | `vo_narasi_implementation_plan.md` | Rencana Implementasi Perbaikan Narasi VO End-to-End (Fase V0–V5) |
 | `gpt_regenerate_scraper_square_implementation_plan_arsip_20261118.md` | Arsip Implementation Plan: Tombol GPT Image 2 di Jendela Banding & Foto Scraper Square (v2.53.0) |
 | `aktifkan_batch_scraper_implementation_plan_arsip_20261118.md` | Arsip Implementation Plan: Aktifkan Tombol Batch Scraper + Pengaman Kuota & Tahap 1B S3/S5/S6 (v2.54.0) |
