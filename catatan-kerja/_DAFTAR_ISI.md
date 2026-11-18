@@ -30,6 +30,7 @@ Terakhir diperbarui: 18 November 2026
 | `USULAN_PERBAIKAN_KARTU_PRODUK_ENRICH_FOTO_TRUTH.md` | Usulan: tombol Enrich di kartu produk, tampilan & banding foto G-Labs, Product/Geometric Truth berbahasa Inggris |
 | `REVIEW_USULAN_GPT_IMAGE2_FOTO_PRODUK.md` | Review & penyempurnaan usulan Codex: GPT Image 2 (G-Labs) untuk foto studio produk |
 | `audit_produk_db_usulan.md` | Audit Forensik & Usulan Solusi Isolasi Database Produk MAKNA Flow |
+| `USULAN_PERBAIKAN_SCRAPER_LAMBAT_GEMINI_WATERFALL.md` | Analisa & Usulan Perbaikan: Scrape Produk di Dev Terlihat Diam >3 Menit (Macet di Waterfall Gemini 180 Detik) |
 
 ## INSTRUKSI-AGENT
 
