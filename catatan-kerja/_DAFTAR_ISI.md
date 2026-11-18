@@ -46,6 +46,7 @@ Terakhir diperbarui: 18 November 2026
 | `HANDOFF_ANTIGRAVITY_MULTIPLIER_LOKASI_PER_KLIP.md` | Handoff Antigravity: Multiplier Selalu di "Meja Kayu", Lokasi per Klip Tidak Jalan |
 | `INSTRUKSI_PERBAIKAN_JADWAL_CFA_MACMINI.md` | Instruksi untuk Agent Claude di Mac Mini: Perbaiki Jadwal CF Autopipeline |
 | `INSTRUKSI_JADWAL_CEK_PRODUKSI_MACMINI.md` | Instruksi untuk Agent Claude di Mac Mini: pasang tugas CFA · Cek Produksi (tiap jam menit ke-05) & pindah Laporan token ke 21.30 |
+| `INSTRUKSI_ANTIGRAVITY_SINKRON_MAIN_SCRAPER_R02.md` | INSTRUKSI ANTIGRAVITY — sinkron `main` (v2.54.1) ke `fitur/scraper-foto-galeri-r02`, selesaikan bentrok `products/[id]/route.js`, rencana & daftar isi |
 | `PETUNJUK_CFA_JADWAL_TELEGRAM_HEMAT_TOKEN.md` | Petunjuk CF Autopipeline: Jadwal per Brand, Notifikasi Telegram, dan Hemat Token |
 | `antigravity_agent_instructions.md` | Instruksi Agent AI Antigravity — Implementasi Deconstruct URL Library |
 | `antigravity_scraper_foto_produk_instructions.md` | Instruksi Antigravity — Perbaikan Scraper Foto Produk (pilih foto produk saja, tanpa orang) |
