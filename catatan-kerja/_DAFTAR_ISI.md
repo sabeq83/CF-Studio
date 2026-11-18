@@ -40,6 +40,7 @@ Terakhir diperbarui: 19 November 2026
 
 | Nama File | Ringkasan / Judul |
 |---|---|
+| `antigravity_radar_produk_teleradar_instructions.md` | Instruksi Antigravity — Menu Radar Produk: hasil TeleRadar masuk tabel riset terpisah, kurasi, lalu promosi ke Database Produk (mockup dulu, 6 tahap dengan pintu berhenti) |
 | `antigravity_aktifkan_batch_scraper_instructions.md` | Instruksi Antigravity — Aktifkan kembali tombol Batch Scraper (mockup dulu) + pengaman kuota/afiliasi + S3/S5/S6 (disetujui); S1/S2/S4/S7 menunggu keputusan |
 | `antigravity_gpt_regenerate_scraper_square_instructions.md` | Instruksi Antigravity — Tombol GPT Image 2 manual di jendela banding (mockup dulu) & foto scraper square Nano Banana 2 |
 | `antigravity_character_lock_custom_storyboard_instructions.md` | Instruksi Antigravity — Character Lock untuk Custom Storyboard (jalur CFA, wajah Reno/Maya konsisten) |

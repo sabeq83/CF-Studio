@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.55.0 — Scraper Galeri Rubrik E-Commerce & Enrich Multimodal Vision (19/11/2026)
+- Scraper galeri >= 5 kandidat >= 600px, rubrik e-commerce longgar (S5-S6)
+- Fallback clean needs_review, crop 10% + bypass rembg latar putih (S7-S8)
+- Enrichment retryable memakai isRetryableGeminiError saat gagal (S9)
+- Enrich AI Multimodal Vision & deteksi kemasan dari foto dengan kunci edit manual
+
 ## V2.54.1 — Pemulihan Start Frame Otomatis (18/11/2026)
 - Klip gambar awal yang gagal saat pra-render diantrekan ulang otomatis
 - Menunggu antrean/polling G-Labs tidak dihitung sebagai percobaan gagal
