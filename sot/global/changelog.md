@@ -1,5 +1,13 @@
 # Changelog
 
+## V2.54.1 — Pemulihan Start Frame Otomatis (18/11/2026)
+- Klip gambar awal yang gagal saat pra-render diantrekan ulang otomatis
+- Menunggu antrean/polling G-Labs tidak dihitung sebagai percobaan gagal
+- Ulang satu klip membawa klip yang sudah jadi (hitungan tidak turun)
+- Regenerasi start frame mendukung only_missing
+- Pekerja start frame pulih sendiri bila menggantung + status di scheduler-control
+- Perbaikan pelepasan koneksi ganda yang menutupi deadlock
+
 ## V2.54.0 — Batch Scraper Aktif Kembali (18/11/2026)
 - Tombol Batch Scraper aktif, maks 50 URL/CSV
 - CSV tidak menimpa link afiliasi kosong
