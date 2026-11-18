@@ -1,6 +1,6 @@
 # Kartu Menu: Product Database
 
-Terakhir dicek: 18 November 2026 · Versi aplikasi: v2.53.0
+Terakhir dicek: 18 November 2026 · Versi aplikasi: v2.54.0
 Alamat: `/products` · Kelompok: PLANNING · Kunci izin menu: `product_database`
 
 ## Fungsi

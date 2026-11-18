@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.54.0 — Batch Scraper Aktif Kembali (18/11/2026)
+- Tombol Batch Scraper aktif, maks 50 URL/CSV
+- CSV tidak menimpa link afiliasi kosong
+- Aturan data rumpang disatukan (S3)
+- Kegagalan foto studio tercatat (S5)
+- Maksimal 1 job scraper berjalan (S6)
+
 ## V2.53.0 — Foto Scraper Square & Tombol Manual GPT Image 2 (18/11/2026)
 - Generative polish scraper diubah ke nano_banana_2 rasio 1:1 (square)
 - Tombol manual Ulangi dengan GPT Image 2 di Jendela Banding (1 produk, konfirmasi kuota ChatGPT)

@@ -102,6 +102,7 @@ Terakhir diperbarui: 18 November 2026
 | `scraper_foto_produk_revisi_01_plan.md` | Implementation Plan: Revisi 01 Scraper Foto Produk & Tinjau/Ganti Foto UI |
 | `vo_narasi_implementation_plan.md` | Rencana Implementasi Perbaikan Narasi VO End-to-End (Fase V0–V5) |
 | `gpt_regenerate_scraper_square_implementation_plan_arsip_20261118.md` | Arsip Implementation Plan: Tombol GPT Image 2 di Jendela Banding & Foto Scraper Square (v2.53.0) |
+| `aktifkan_batch_scraper_implementation_plan_arsip_20261118.md` | Arsip Implementation Plan: Aktifkan Tombol Batch Scraper + Pengaman Kuota & Tahap 1B S3/S5/S6 (v2.54.0) |
 
 ## LAPORAN
 
@@ -144,6 +145,7 @@ Terakhir diperbarui: 18 November 2026
 
 | File | Ringkasan |
 |---|---|
-| [implementation_plan.md](../implementation_plan.md) | Rencana aktif: tombol GPT Image 2 manual di jendela banding + foto scraper square Nano Banana 2 |
-| [gpt_foto_produk_usulan_codex_arsip_20261118.md](rencana/gpt_foto_produk_usulan_codex_arsip_20261118.md) | Arsip usulan Codex: GPT Image 2 via Settings (digantikan rencana aktif) |
+| [implementation_plan.md](../implementation_plan.md) | Diarsipkan — Batch Scraper Tahap 1 + 1B (S3, S5, S6) selesai & dirilis v2.54.0 |
+| [aktifkan_batch_scraper_implementation_plan_arsip_20261118.md](rencana/aktifkan_batch_scraper_implementation_plan_arsip_20261118.md) | Arsip Implementation Plan: Batch Scraper Aktif Kembali & Tahap 1B (v2.54.0, 18 Nov 2026) |
+| [gpt_foto_produk_usulan_codex_arsip_20261118.md](rencana/gpt_foto_produk_usulan_codex_arsip_20261118.md) | Arsip usulan Codex: GPT Image 2 via Settings (digantikan rencana v2.53.0) |
 | [truth_inggris_kartu_produk_implementation_plan_arsip_20261118.md](rencana/truth_inggris_kartu_produk_implementation_plan_arsip_20261118.md) | Arsip rencana sebelumnya: Truth Inggris dan kartu/jendela banding produk |
