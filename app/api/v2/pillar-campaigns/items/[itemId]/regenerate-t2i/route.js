@@ -79,9 +79,10 @@ export const POST = withTenantContext(async (req, { params }) => {
       clipCharacters = Array.from(new Set(clipCharacters));
     }
 
+    const effectiveTenantId = campaign?.tenant_id || rowPayload?.tenant_id || user?.tenantId || null;
     const { normalizeCharacterId } = await import('@/lib/universe-manifests');
     const { resolveClipReferenceImages } = await import('@/lib/cartoon-reference-resolver');
-    const normalizedClipChars = clipCharacters.map(normalizeCharacterId).filter(Boolean);
+    const normalizedClipChars = clipCharacters.map(c => normalizeCharacterId(c, { tenantId: effectiveTenantId })).filter(Boolean);
 
     const isCartoon = rowPayload.content_world === 'cartoon_universe' || campaign.content_world === 'cartoon_universe';
     let contextReferences = [];
@@ -95,6 +96,7 @@ export const POST = withTenantContext(async (req, { params }) => {
       const resolvedRefs = resolveClipReferenceImages({
         contentWorld: 'cartoon_universe',
         universeProfile: campaign.universe_profile || rowPayload.universe_profile || 'pawville',
+        tenantId: effectiveTenantId,
         universeSnapshot,
         clip: clipIndex,
         productReference: null,

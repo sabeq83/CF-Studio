@@ -1,5 +1,11 @@
-import { withTenantContext } from '@/lib/auth';
-import { getUniverseCharacters, createUniverseCharacter, getUniverseProfile } from '@/lib/db';
+import { withTenantContext } from '../../../../../../lib/auth.js';
+import { getUniverseCharacters, createUniverseCharacter, getUniverseProfile } from '../../../../../../lib/db.js';
+import {
+  validateCharacterKey,
+  buildCreateUniverseCharacterPayload,
+  isCharacterKeyConflictError
+} from '../../../../../../lib/universe-route-validation.js';
+import { refreshManifestCache } from '../../../../../../lib/universe-manifests.js';
 import { v4 as uuidv4 } from 'uuid';
 
 export const dynamic = 'force-dynamic';
@@ -16,14 +22,25 @@ export const GET = withTenantContext(async (req, { params }, user) => {
 export const POST = withTenantContext(async (req, { params }, user) => {
   const { id } = await params;
   const body = await req.json();
-  
-  if (!body.name || !body.character_key || !body.canonical_prompt) {
+
+  if (!body || !body.name || !body.character_key || !body.canonical_prompt) {
     return new Response(JSON.stringify({ success: false, error: 'Name, character_key, and canonical_prompt are required.' }), {
       status: 400,
       headers: { 'content-type': 'application/json' }
     });
   }
-  
+
+  if (!validateCharacterKey(body.character_key)) {
+    return new Response(JSON.stringify({
+      success: false,
+      error_code: 'INVALID_CHARACTER_KEY',
+      error: 'character_key must match /^[a-z0-9_]{2,64}$/.'
+    }), {
+      status: 400,
+      headers: { 'content-type': 'application/json' }
+    });
+  }
+
   const universe = await getUniverseProfile(id);
   if (!universe) {
     return new Response(JSON.stringify({ success: false, error: 'Universe not found.' }), {
@@ -31,10 +48,42 @@ export const POST = withTenantContext(async (req, { params }, user) => {
       headers: { 'content-type': 'application/json' }
     });
   }
-  
+
+  const existingChars = await getUniverseCharacters(id);
+  if ((existingChars || []).some(c => c.character_key === body.character_key)) {
+    return new Response(JSON.stringify({
+      success: false,
+      error_code: 'CHARACTER_KEY_EXISTS',
+      error: 'Character key already exists in this universe.'
+    }), {
+      status: 409,
+      headers: { 'content-type': 'application/json' }
+    });
+  }
+
   const charId = uuidv4();
-  await createUniverseCharacter({ id: charId, universe_id: id, ...body });
-  
+  const payload = buildCreateUniverseCharacterPayload(body, charId, id);
+  try {
+    await createUniverseCharacter(payload);
+  } catch (err) {
+    if (isCharacterKeyConflictError(err)) {
+      return new Response(JSON.stringify({
+        success: false,
+        error_code: 'CHARACTER_KEY_EXISTS',
+        error: 'Character key already exists in this universe.'
+      }), {
+        status: 409,
+        headers: { 'content-type': 'application/json' }
+      });
+    }
+    throw err;
+  }
+
+  await refreshManifestCache({
+    tenantId: user?.tenantId || universe.tenant_id,
+    universeId: id
+  }).catch(() => {});
+
   return new Response(JSON.stringify({ success: true, id: charId }), {
     status: 201,
     headers: { 'content-type': 'application/json' }
