@@ -46,5 +46,9 @@ Menjadi pintu kurasi hasil riset produk dari TeleRadar sebelum masuk ke katalog 
 - API untuk bot Telegram sudah ada (7.4, di repo); kode bot di Mac Mini belum dialihkan dan penghentian Google Sheets Fase B (7.5) belum dilakukan — menunggu persetujuan & jadwal cutover.
 - Kandidat berstatus arsip tidak bisa dipromosikan (web maupun bot).
 
+## Terhubung ke MCP
+- Perintah MCP Radar: `cf_list_radar_candidates`, `cf_get_radar_candidate`, `cf_get_radar_status`, `cf_submit_radar_candidates` (kode di `apps/mcp/tools.mjs`).
+- `cf_add_product` memblokir `source_url` yang sudah menjadi kandidat Radar (kode `RADAR_CANDIDATE_EXISTS`) agar hasil riset tidak memintas kurasi; bypass eksplisit `bypass_radar_check=true`.
+
 ## Dokumen lengkap
 [USULAN_RADAR_PRODUK_TELERADAR_CFSTUDIO.md](file:///Users/sabeqmmursyid/_cfstudio/catatan-kerja/usulan/USULAN_RADAR_PRODUK_TELERADAR_CFSTUDIO.md)

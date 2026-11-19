@@ -23,6 +23,8 @@ import { GET as candidatesGet } from '../../app/api/operator/v2/product-research
 import { GET as candidateDetailGet } from '../../app/api/operator/v2/product-research/candidates/[ref]/route.js';
 import { POST as candidateUrlPost } from '../../app/api/operator/v2/product-research/candidates/[ref]/url/route.js';
 import { POST as promotePost } from '../../app/api/operator/v2/product-research/promote/route.js';
+import { POST as submitPost } from '../../app/api/operator/v2/product-research/submit/route.js';
+import { GET as matchUrlGet } from '../../app/api/operator/v2/product-research/candidates/match-url/route.js';
 import { GET as statusGet } from '../../app/api/operator/v2/product-research/status/route.js';
 
 const runSuffix = crypto.randomUUID().slice(0, 8);
@@ -38,6 +40,7 @@ const TOKENS = {
   readA: `tok_bot_read_${crypto.randomBytes(12).toString('hex')}`,
   curateA: `tok_bot_curate_${crypto.randomBytes(12).toString('hex')}`,
   promoteA: `tok_bot_promote_${crypto.randomBytes(12).toString('hex')}`,
+  mcpA: `tok_bot_mcp_${crypto.randomBytes(12).toString('hex')}`,
   fullB: `tok_bot_full_b_${crypto.randomBytes(12).toString('hex')}`
 };
 const credIds = Object.keys(TOKENS).map(k => `op_bot_${k}_${runSuffix}`);
@@ -74,6 +77,7 @@ describe('API Operator Radar untuk Bot Telegram (Tahap 7.4)', () => {
       ['readA', TENANT_A, 'product_research:read'],
       ['curateA', TENANT_A, 'product_research:curate'],
       ['promoteA', TENANT_A, 'product_research:promote'],
+      ['mcpA', TENANT_A, 'product_research:mcp_promote'],
       ['fullB', TENANT_B, 'product_research:read,product_research:promote,product_research:curate']
     ];
     for (const [key, tenant, scopes] of creds) {
@@ -266,5 +270,49 @@ describe('API Operator Radar untuk Bot Telegram (Tahap 7.4)', () => {
       method: 'POST', token: TOKENS.fullB, body: { candidate_refs: [idLow], mode: 'preview', telegram_user_id: TG_OK }
     }));
     assert.equal(cross.status, 403);
+  });
+
+  it('MCP (7.6): submit wajib scope product_research:mcp_promote, tanpa identitas Telegram, requested_by mcp:<kredensial>, tertahan/arsip tidak terkirim', async () => {
+    const call = (token, body) => submitPost(req('/api/operator/v2/product-research/submit', { method: 'POST', token, body }));
+
+    // token bot (promote) & read tidak boleh memakai jalur MCP
+    assert.equal((await call(TOKENS.promoteA, { candidate_refs: ['2'], mode: 'execute' })).status, 403);
+    assert.equal((await call(TOKENS.readA, { candidate_refs: ['2'], mode: 'execute' })).status, 403);
+    assert.equal((await call(null, { candidate_refs: ['2'] })).status, 401);
+
+    const preview = await (await call(TOKENS.mcpA, { candidate_refs: ['2', '4'] })).json();
+    assert.equal(preview.mode, 'preview');
+    assert.equal(preview.summary.valid_count, 1);
+
+    const exec = await call(TOKENS.mcpA, { candidate_refs: ['2', '4'], mode: 'execute' });
+    assert.equal(exec.status, 200);
+    const data = await exec.json();
+    const q = data.results.find(r => r.status === 'queued');
+    assert.ok(q);
+    createdJobIds.push(q.job_id);
+    assert.equal(data.summary.queued, 1);
+    assert.equal(data.results.find(r => r.candidate_id === idArchived).status, 'skipped_blocked');
+
+    const imp = (await pgQuery(
+      `SELECT requested_by FROM product_research_imports WHERE tenant_id = $1 AND candidate_id = $2`,
+      [TENANT_A, idLow]
+    )).rows[0];
+    assert.equal(imp.requested_by, `mcp:op_bot_mcpA_${runSuffix}`);
+  });
+
+  it('MCP (7.6): match-url menemukan kandidat Radar (guard cf_add_product), butuh scope read, terisolasi tenant', async () => {
+    const url = `https://www.shopee.co.id/p/bot-high-${runSuffix}?utm_source=x`;
+    const path = `/api/operator/v2/product-research/candidates/match-url?url=${encodeURIComponent(url)}`;
+    assert.equal((await matchUrlGet(req(path, { token: TOKENS.ingestA }))).status, 403);
+
+    const hit = await (await matchUrlGet(req(path, { token: TOKENS.readA }))).json();
+    assert.equal(hit.matches.length, 1);
+    assert.equal(hit.matches[0].id, idHigh);
+
+    const none = await (await matchUrlGet(req(path, { token: TOKENS.fullB }))).json();
+    assert.equal(none.matches.length, 0);
+
+    const archivedUrl = `/api/operator/v2/product-research/candidates/match-url?url=${encodeURIComponent(`https://shopee.co.id/p/bot-arch-${runSuffix}`)}`;
+    assert.equal((await (await matchUrlGet(req(archivedUrl, { token: TOKENS.readA }))).json()).matches.length, 0);
   });
 });

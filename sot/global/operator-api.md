@@ -134,3 +134,7 @@ Scope terpisah (tidak saling mencakup; `product_research:ingest` tetap tidak bol
 
 - `telegram_user_id` **wajib** untuk `curate` dan `promote` dan harus terdaftar aktif di tabel `product_research_telegram_identities` untuk tenant kredensial (daftar via `scripts/radar-telegram-identity.mjs`). Riwayat impor mencatat `requested_by = telegram:<id>`.
 - Nomor kandidat (`external_candidate_id`) hanya dicocokkan pada batch terbaru tenant; kandidat arsip tidak pernah ikut terkirim.
+
+### Tambahan untuk MCP (7.6)
+- `GET /api/operator/v2/product-research/candidates/match-url?url=` (`product_research:read`): kandidat Radar non-arsip dengan `normalized_url` sama. Dipakai guard `cf_add_product`.
+- `POST /api/operator/v2/product-research/submit` `{candidate_refs[], mode}` (scope **`product_research:mcp_promote`**, terpisah dari `promote` milik bot): layanan promosi yang sama, tanpa identitas Telegram; `requested_by = mcp:<id kredensial>`.

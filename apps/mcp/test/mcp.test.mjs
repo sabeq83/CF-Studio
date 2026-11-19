@@ -624,3 +624,79 @@ test('HTTP authentication, origin and host protection, real MCP handshake', asyn
   assert.equal((await client.callTool({ name: 'cf_whoami' })).isError, undefined);
   assert.equal(calls, 1);
 });
+
+
+test('Radar Produk tools dispatch to operator radar endpoints (7.6)', async t => {
+  const calls = [];
+  const client = await connected(t, async (path, opts) => {
+    calls.push({ path, opts });
+    return { success: true, items: [], matches: [] };
+  });
+
+  const names = new Set((await client.listTools()).tools.map(x => x.name));
+  for (const n of ['cf_list_radar_candidates', 'cf_get_radar_candidate', 'cf_get_radar_status', 'cf_submit_radar_candidates']) {
+    assert.ok(names.has(n), `${n} harus terdaftar`);
+  }
+
+  await client.callTool({ name: 'cf_list_radar_candidates', arguments: { mode: 'top', trend: 'up', limit: 5 } });
+  assert.match(calls.at(-1).path, /^\/api\/operator\/v2\/product-research\/candidates\?/);
+  assert.match(calls.at(-1).path, /trend=up/);
+  assert.equal(calls.at(-1).opts.body, undefined);
+
+  await client.callTool({ name: 'cf_get_radar_candidate', arguments: { candidate_ref: '12' } });
+  assert.equal(calls.at(-1).path, '/api/operator/v2/product-research/candidates/12');
+
+  await client.callTool({ name: 'cf_get_radar_status', arguments: {} });
+  assert.equal(calls.at(-1).path, '/api/operator/v2/product-research/status');
+
+  // default preview: tidak ada efek samping
+  await client.callTool({ name: 'cf_submit_radar_candidates', arguments: { candidate_refs: ['1', '2'] } });
+  assert.equal(calls.at(-1).path, '/api/operator/v2/product-research/submit');
+  assert.equal(calls.at(-1).opts.body.mode, 'preview');
+  await client.callTool({ name: 'cf_submit_radar_candidates', arguments: { candidate_refs: ['1'], mode: 'execute' } });
+  assert.equal(calls.at(-1).opts.body.mode, 'execute');
+});
+
+test('cf_add_product: guard Radar memblokir URL kandidat riset, input manual & bypass tetap berjalan (7.6)', async t => {
+  const calls = [];
+  const client = await connected(t, async (path, opts) => {
+    calls.push({ path, opts });
+    if (path.startsWith('/api/operator/v2/product-research/candidates/match-url')) {
+      return String(path).includes('riset-ada')
+        ? { success: true, matches: [{ number: '7', name: 'Produk Riset', batch_label: '2026-11-17', process_status: 'not_sent', cf_product_id: null }] }
+        : { success: true, matches: [] };
+    }
+    return { success: true, id: 'pe-1' };
+  });
+
+  // 1. URL ada di Radar & belum masuk katalog -> diblokir, tidak POST ke /api/v2/products
+  const blocked = await client.callTool({
+    name: 'cf_add_product',
+    arguments: { product_name: 'X', source_url: 'https://shopee.co.id/riset-ada' }
+  });
+  assert.equal(blocked.structuredContent.code, 'RADAR_CANDIDATE_EXISTS');
+  assert.equal(calls.some(c => c.path === '/api/v2/products'), false);
+
+  // 2. bypass eksplisit -> lanjut, flag tidak bocor ke body
+  await client.callTool({
+    name: 'cf_add_product',
+    arguments: { product_name: 'X', source_url: 'https://shopee.co.id/riset-ada', bypass_radar_check: true }
+  });
+  const post = calls.find(c => c.path === '/api/v2/products');
+  assert.ok(post);
+  assert.equal('bypass_radar_check' in post.opts.body, false);
+
+  // 3. URL tidak ada di Radar -> berjalan normal
+  calls.length = 0;
+  await client.callTool({
+    name: 'cf_add_product',
+    arguments: { product_name: 'Y', source_url: 'https://shopee.co.id/bukan-riset' }
+  });
+  assert.equal(calls.at(-1).path, '/api/v2/products');
+
+  // 4. input manual tanpa source_url -> tidak ada pemeriksaan Radar sama sekali
+  calls.length = 0;
+  await client.callTool({ name: 'cf_add_product', arguments: { product_name: 'Z' } });
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].path, '/api/v2/products');
+});
