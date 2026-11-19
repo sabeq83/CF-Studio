@@ -88,14 +88,14 @@ Pekerjaan dibagi menjadi **tahap dengan pintu berhenti**. Di setiap pintu 🛑, 
   5. Pelacakan: `GET …/[id]/status` membaca status job via `scrape/jobs/[jobId]` logic dan keberadaan produk. **`job_id` bukan bukti selesai**; `in_catalog` hanya bila baris `product_extractions` dengan ID tersebut ada. Foto/enrichment gagal → `needs_review` + tombol pemulihan yang memakai aksi produk yang sudah ada (bukan scrape ulang).
   6. Kandidat yang sudah punya `cf_product_id` tidak boleh di-scrape ulang.
 - Teks hasil scrape tidak menimpa `curated_data`; tampilkan perbedaannya di panel detail. Aturan Product/Geometric Truth (Bahasa Inggris) tetap berlaku di katalog.
-- Bulk promotion **di luar cakupan tahap ini**.
+- Bulk promotion **di luar cakupan tahap ini** (lihat Tahap 7.1).
 - **🛑 Deploy ke Dev, laporkan. Tunggu pengguna.**
 
 ### Tahap 6 — Migrasi 1 Batch & Adapter TeleRadar 🛑 (perlu persetujuan terpisah)
 - Sebelum menyentuh Mac Mini: tulis rencana di `implementation_plan.md` dan minta persetujuan.
 - Skrip impor satu batch lama (`~/riset-produk/2026-11-17/data.json`) ke **Dev**: persetujuan lama **tidak** memicu promosi; `cf_product_id` lama disimpan sebagai referensi historis (tidak dicocokkan ke Staging dari Dev).
 - Adapter TeleRadar (di folder skill, luar repo): kirim batch ke API ingest; simpan JSON lokal sebagai buffer bila CF Studio tidak tersedia (status `unsynced`, kirim ulang nanti).
-- Perintah bot (`/top`, `/produk`, `/status`, `/url`) dan penghentian Sheets sebagai sumber persetujuan = **tahap lanjutan terpisah**, jangan dikerjakan sekarang. Selama belum dialihkan, jangan menjalankan dua konsumen promosi (Sheets Fase B dan Radar) untuk batch yang sama.
+- Perintah bot (`/top`, `/produk`, `/status`, `/url`) dan penghentian Sheets sebagai sumber persetujuan = **Tahap 7 (7.4 & 7.5)**, jangan dikerjakan sekarang. Selama belum dialihkan, jangan menjalankan dua konsumen promosi (Sheets Fase B dan Radar) untuk batch yang sama.
 
 ---
 
@@ -127,6 +127,19 @@ Pengguna adalah marketer — laporan dalam Bahasa Indonesia sederhana, tanpa det
 
 ---
 
-## 6. Di Luar Cakupan
+## 6. Pengembangan Selanjutnya (Tahap 7 — setelah Tahap 6 selesai & disetujui)
 
-Bulk approval, perbandingan tren lintas minggu, skor peluang, perintah bot lengkap, penghentian Google Sheets/Excel, perubahan `cf_add_product` atau importer ZIP, deployment Staging/Production.
+**Jangan dikerjakan sebelum Tahap 6 selesai dan pengguna memberi lampu hijau.** Setiap butir dikerjakan sebagai branch `fitur/*` sendiri (satu branch = satu fitur), dengan mockup dulu bila menyentuh UI, dan pintu berhenti 🛑 setelah deploy Dev.
+
+| # | Fitur | Catatan wajib |
+|---|---|---|
+| 7.1 | **Bulk approval** | Pilih banyak kandidat → tampilkan ringkasan valid / duplikat / tertahan sebelum eksekusi. Wajib memakai layanan promosi yang sama dengan Tahap 5 (klaim atomik per kandidat). Kandidat yang tertahan tidak ikut terkirim. Hormati batas antrean `product_scraper` (1 job berjalan sekaligus). |
+| 7.2 | **Perbandingan tren lintas minggu** | Cocokkan kandidat antarbatch (via `normalized_url`/`cf_product_id`; nama mirip hanya saran). Tiap minggu tetap disimpan sebagai pengamatan terpisah, tidak ditimpa. Tampilkan tanggal pengamatan di setiap angka. |
+| 7.3 | **Skor peluang** | Rumus transparan dan tertulis di kartu menu (mis. penjualan, tren, komisi, harga, kecocokan URL). Tampilkan rincian skor, bukan angka saja. Skor hanya bantuan urutan, bukan pemicu promosi otomatis. |
+| 7.4 | **Perintah bot lengkap** | Arahkan `/top`, `/produk`, `/status`, `/url`, `/kirim` ke API Radar. Bila `/kirim` menyetujui lewat bot, wajib scope terpisah `product_research:promote`, identitas pengguna Telegram yang terdaftar per tenant, dan layanan promosi yang sama. Kode bot berada di Mac Mini (luar repo) — minta persetujuan sebelum mengubah. |
+| 7.5 | **Penghentian Google Sheets/Excel** | Tetapkan waktu perpindahan bersama pengguna. Tarik edit Sheet terakhir dulu, impor ke Radar, lalu matikan `sheet_sync.py pull` dan Fase B lama. Sheets/Excel boleh tetap ada sebagai **ekspor satu arah** opsional. Tidak boleh ada dua konsumen promosi berjalan bersamaan. |
+| 7.6 | **Perubahan `cf_add_product`** | Tinjau ulang perintah MCP `cf_add_product` agar tidak menjadi jalan pintas yang melewati Radar untuk produk hasil riset (mis. tambah perintah MCP Radar: lihat kandidat, ajukan, cek status). Perilaku lama untuk input manual tetap berjalan; perubahan wajib dicatat di kartu `products.md` dan dokumentasi MCP. |
+
+## 7. Di Luar Cakupan (semua tahap)
+
+Perubahan importer ZIP, deployment Staging tanpa persetujuan, dan deployment Production.

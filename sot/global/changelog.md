@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.56.0 — Radar Produk TeleRadar Lengkap (Kurasi, Bulk Approval, Tren Lintas Minggu, Skor Peluang, Bot & MCP) (19/11/2026)
+- Menu Radar Produk (/product-radar) terisolasi dari katalog & kampanye
+- Bulk approval hingga 50 item dengan pratinjau Valid/Duplikat/Tertahan & antrean 1-per-1
+- Perbandingan tren lintas minggu & Skor Peluang transparan 0-100
+- API operator bot Telegram & tool MCP Radar dengan guard cf_add_product
+
 ## V2.55.0 — Scraper Galeri Rubrik E-Commerce & Enrich Multimodal Vision (19/11/2026)
 - Scraper galeri >= 5 kandidat >= 600px, rubrik e-commerce longgar (S5-S6)
 - Fallback clean needs_review, crop 10% + bypass rembg latar putih (S7-S8)

@@ -6,6 +6,7 @@ Terakhir diperbarui: 19 November 2026
 
 | Nama File | Ringkasan / Judul |
 |---|---|
+| [USULAN_MCP_UNIVERSE_REFERENCE_MANAGER.md](usulan/USULAN_MCP_UNIVERSE_REFERENCE_MANAGER.md) | Usulan MCP Universe, upload/approval referensi karakter, link VI dan preflight Character Lock; kasus Arka PT GIM Sosmed |
 | `USULAN_RADAR_PRODUK_TELERADAR_CFSTUDIO.md` | Analisis kode TeleRadar di Mac Mini dan usulan Radar Produk: inbox riset terpisah, kurasi, lalu promosi ke Database Produk |
 | `USULAN_KONSISTENSI_VI_MULTIPLIER_NUTRIBAKE.md` | Analisis tenant default: identitas tangan, pengaruh blueprint, dan usulan penguncian VI Multiplier NutriBake |
 | `USULAN_VI_NUTRIBAKE_V5_BAKU_CFA.md` | Usulan VI NutriBake v5: membakukan tampilan video CFA (lengan panjang, palette warna, deskripsi tangan) ke Visual Identity |
