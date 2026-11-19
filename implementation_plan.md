@@ -24,18 +24,19 @@
 - [x] Perbarui kartu menu `sot/menus/kartu/products.md` dan `sot/menus/kartu/product-radar.md` (catatan regresi v2.57.1)
 
 ### Tahap 3 — Merge, Rilis Patch & Deployment Staging
-- [ ] Checkout ke `main`, merge `--no-ff` dari branch `hotfix/scraper-normalize-url`
-- [ ] Jalankan `npm run release-non-interactive -- --type patch --title "Perbaikan ReferenceError normalizeUrl pada Scraper Produk" --points "Memperbaiki ReferenceError normalizeUrl menjadi normalizeProductUrl saat menyimpan produk baru ke Database Produk"`
-- [ ] Deploy release patch `v2.57.1` ke Staging via `npm run deploy:staging -- --ref <full-sha> --apply --confirm-staging`
-- [ ] Verifikasi kesehatan Staging (symlink `current`, PM2 online, UI 5010 HTTP 200, API 7010 /health HTTP 200, `PG_SEARCH_PATH=staging`, `PGPOOL_MAX=3`)
-- [ ] Hapus branch `hotfix/scraper-normalize-url` lokal dan remote
+- [x] Checkout ke `main`, merge `--no-ff` dari branch `hotfix/scraper-normalize-url`
+- [x] Jalankan `npm run release-non-interactive -- --type patch --title "Perbaikan ReferenceError normalizeUrl pada Scraper Produk" --points "Memperbaiki ReferenceError normalizeUrl menjadi normalizeProductUrl saat menyimpan produk baru ke Database Produk"`
+- [x] Deploy release patch `v2.57.1` ke Staging via `npm run deploy:staging -- --ref <full-sha> --apply --confirm-staging`
+- [x] Verifikasi kesehatan Staging (symlink `current`, PM2 online, UI 5010 HTTP 200, API 7010 /health HTTP 200, `PG_SEARCH_PATH=staging`, `PGPOOL_MAX=3`)
+- [x] Hapus branch `hotfix/scraper-normalize-url` lokal dan remote
 
 ### Tahap 4 — Verifikasi Pemulihan Produk di Staging
-- [ ] Jalankan retry promosi untuk kedua kandidat:
+- [x] Rilis patch `v2.57.1` aktif di server Staging
+- [ ] Pengguna atau operator memicu **↻ Coba Lagi** di Radar Produk Staging untuk produk:
   - `VITAMEAL Mix Berry 1 Box` (`prc_427f8d35-ad45-4d34-b2b5-c248625f0751`)
   - `ecentio Tumbler Stainless Vacuum 900ml` (`prc_9cb64e5e-c856-4b55-ab4c-4fa75fdf8a1a`)
-- [ ] Pantau job scraping hingga selesai dan pastikan keduanya berhasil masuk ke tabel `product_extractions` di Staging
-- [ ] Laporkan bukti keberhasilan kepada pengguna
+  - `TEXANIA SET Wajan Anti Lengket 30cm` (`prc_6833ab36-e5b1-41d8-8820-0b14c980f5c0`)
+- [ ] Verifikasi produk berhasil masuk ke tabel `product_extractions` dan tampil di `/products` Staging
 
 ---
 
