@@ -144,3 +144,53 @@ test('B3: route files use whitelist payload builders, 409 CHARACTER_KEY_EXISTS, 
   assert.match(charsRoute, /refreshManifestCache\(\{/);
   assert.doesNotMatch(charsRoute, /createUniverseCharacter\(\{\s*id:\s*charId,\s*universe_id:\s*id,\s*\.\.\.body\s*\}\)/);
 });
+
+test('B5: POST /api/v2/universe-profiles/[id]/characters enforces operator scope content:create and universe_manager menu flag', async (t) => {
+  const readOnlyToken = 'TEST_MOCK_OPERATOR_TOKEN_READONLY';
+  const disabledMenuToken = 'TEST_MOCK_OPERATOR_TOKEN_DISABLED_MENU';
+
+  activeSessionsCache[readOnlyToken] = {
+    id: 'op_readonly',
+    username: 'readonly_op',
+    role: 'admin',
+    tenantId: 'tnt_test_b5',
+    isOperator: true,
+    isMaster: false,
+    scopes: ['content:read'],
+    tenantDisabledMenus: []
+  };
+  activeSessionsCache[disabledMenuToken] = {
+    id: 'op_disabled',
+    username: 'disabled_menu_op',
+    role: 'admin',
+    tenantId: 'tnt_test_b5',
+    isOperator: true,
+    isMaster: false,
+    scopes: ['content:read', 'content:create', 'content:approve'],
+    tenantDisabledMenus: ['universe_manager']
+  };
+  t.after(() => {
+    delete activeSessionsCache[readOnlyToken];
+    delete activeSessionsCache[disabledMenuToken];
+  });
+
+  const makeReq = (tok) => new Request('http://localhost/api/v2/universe-profiles/univ_123/characters', {
+    method: 'POST',
+    headers: { authorization: `Bearer ${tok}`, 'content-type': 'application/json' },
+    body: JSON.stringify({
+      name: 'Arka',
+      character_key: 'arka_acoustic_consultant',
+      canonical_prompt: 'Test'
+    })
+  });
+
+  const resScope = await createCharacterPost(makeReq(readOnlyToken), { params: Promise.resolve({ id: 'univ_123' }) });
+  assert.equal(resScope.status, 403);
+  const bodyScope = await resScope.json();
+  assert.equal(bodyScope.error_code, 'SCOPE_REQUIRED');
+
+  const resMenu = await createCharacterPost(makeReq(disabledMenuToken), { params: Promise.resolve({ id: 'univ_123' }) });
+  assert.equal(resMenu.status, 403);
+  const bodyMenu = await resMenu.json();
+  assert.equal(bodyMenu.error_code, 'MENU_DISABLED');
+});
