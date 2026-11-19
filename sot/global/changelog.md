@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.57.0 — MCP Universe Reference Manager & Character Lock (19/11/2026)
+- 10 Tool Baru MCP Universe & Character Lock (cf_list_universes, cf_get_universe, cf_create_universe_character, cf_update_universe_character, cf_list_reference_assets, cf_upload_reference_asset, cf_approve_reference_asset, cf_reject_reference_asset, cf_link_visual_identity_universe, cf_preflight_character_lock)
+- Mode Character Lock strict dengan allowlist character_keys tanpa fallback diam-diam dan proteksi REFERENCE_NOT_RESOLVED
+- Approval aset referensi aman dari race condition dengan SELECT FOR UPDATE, validasi expected_sha256, dan invalidasi cache manifest otomatis
+- Upload aset referensi mendukung dedup SHA-256 otomatis dan batas dimensi 4096px / 16 MP
+- Endpoint audit universe-link dan character-lock-preflight untuk validasi pra-produksi
+
 ## V2.56.1 — Isolasi Tenant Universe (19/11/2026)
 - Manifest Universe dibatasi per tenant
 - ID karakter/Universe tidak bisa ditimpa data kiriman

@@ -1,6 +1,6 @@
 # Kartu Menu: Visual Identity
 
-Terakhir dicek: 19 November 2026 · Versi aplikasi: v2.56.1 (Branch Fitur: MCP Character Lock)
+Terakhir dicek: 19 November 2026 · Versi aplikasi: v2.57.0
 Alamat: `/settings/visual-identities` · Kelompok: PLANNING · Kunci izin menu: `operator_presets`
 
 ## Fungsi

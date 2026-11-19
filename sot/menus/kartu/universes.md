@@ -1,6 +1,6 @@
 # Kartu Menu: Universe Manager
 
-Terakhir dicek: 19 November 2026 · Versi aplikasi: v2.56.1 (Branch Fitur: MCP Character Lock)
+Terakhir dicek: 19 November 2026 · Versi aplikasi: v2.57.0
 Alamat: `/settings/universes` · Kelompok: PLANNING · Kunci izin menu: `universe_manager`
 
 ## Fungsi
