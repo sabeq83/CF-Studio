@@ -54,10 +54,17 @@ export default function ProductRadarPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(25);
 
-  // Detail Drawer, Confirmation Modal & Toast
+  // Detail Drawer, Single Confirmation, Bulk Selection & Toast
   const [activeCandidateId, setActiveCandidateId] = useState(null);
   const [confirmCandidate, setConfirmCandidate] = useState(null);
   const [promoting, setPromoting] = useState(false);
+
+  const [selectedIds, setSelectedIds] = useState(() => new Set());
+  const [bulkPreview, setBulkPreview] = useState(null);
+  const [bulkLoadingPreview, setBulkLoadingPreview] = useState(false);
+  const [bulkExecuting, setBulkExecuting] = useState(false);
+  const [trackedQueueItems, setTrackedQueueItems] = useState([]);
+
   const [toastMsg, setToastMsg] = useState('');
 
   const showToast = useCallback((msg) => {
@@ -119,11 +126,16 @@ export default function ProductRadarPage() {
 
     const timer = setInterval(async () => {
       try {
-        await Promise.all(
-          pendingItems.slice(0, 5).map(item =>
-            fetch(`/api/v2/product-research/candidates/${encodeURIComponent(item.id)}/status`, { cache: 'no-store' })
-          )
+        const statusResponses = await Promise.all(
+          pendingItems.slice(0, 5).map(async item => {
+            const r = await fetch(`/api/v2/product-research/candidates/${encodeURIComponent(item.id)}/status`, { cache: 'no-store' });
+            return r.ok ? r.json() : null;
+          })
         );
+        setTrackedQueueItems(prev => prev.map(q => {
+          const updated = statusResponses.find(s => s?.candidate?.id === q.candidate_id);
+          return updated ? { ...q, process_status: updated.candidate.process_status } : q;
+        }));
         await fetchCandidates();
       } catch {}
     }, 6000);
@@ -152,6 +164,122 @@ export default function ProductRadarPage() {
     if (activeIndex < 0) return;
     const target = items[activeIndex + delta];
     if (target) setActiveCandidateId(target.id);
+  };
+
+  const toggleSelectItem = (id, checked) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      const val = checked !== undefined ? checked : !next.has(id);
+      if (val) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  };
+
+  const toggleSelectPage = (checked) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      items.forEach(item => {
+        if (checked) next.add(item.id);
+        else next.delete(item.id);
+      });
+      return next;
+    });
+  };
+
+  const selectReadyOnPage = () => {
+    const readyItems = items.filter(i =>
+      !i.cf_product_id &&
+      !i.url_blocked &&
+      !['queued', 'processing', 'in_catalog'].includes(i.process_status)
+    );
+    if (readyItems.length === 0) {
+      showToast('Tidak ada kandidat siap URL yang belum diproses di halaman ini.');
+      return;
+    }
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      readyItems.forEach(i => next.add(i.id));
+      return next;
+    });
+    showToast(`${readyItems.length} kandidat siap URL ditambahkan ke pilihan.`);
+  };
+
+  const clearSelection = () => {
+    setSelectedIds(new Set());
+  };
+
+  const handleOpenBulkPreview = async () => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    if (ids.length > 50) {
+      showToast('Maksimal 50 kandidat per proses Bulk Approval.');
+      return;
+    }
+    setBulkLoadingPreview(true);
+    try {
+      const res = await fetch('/api/v2/product-research/candidates/bulk-promote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ candidate_ids: ids, mode: 'preview' })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Gagal menyiapkan ringkasan Bulk Approval.');
+      }
+      setBulkPreview(data);
+    } catch (err) {
+      showToast(err.message);
+    } finally {
+      setBulkLoadingPreview(false);
+    }
+  };
+
+  const handleExecuteBulk = async () => {
+    if (!bulkPreview) return;
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    setBulkExecuting(true);
+    try {
+      const res = await fetch('/api/v2/product-research/candidates/bulk-promote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ candidate_ids: ids, mode: 'execute' })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Gagal menjalankan Bulk Approval.');
+      }
+
+      const queuedRows = (data.results || [])
+        .filter(r => r.status === 'queued')
+        .map(r => ({
+          candidate_id: r.candidate_id,
+          name: r.name,
+          job_id: r.job_id,
+          reserved_product_id: r.reserved_product_id,
+          process_status: 'queued'
+        }));
+
+      if (queuedRows.length > 0) {
+        setTrackedQueueItems(prev => {
+          const existingIds = new Set(prev.map(x => x.candidate_id));
+          return [...queuedRows.filter(x => !existingIds.has(x.candidate_id)), ...prev].slice(0, 20);
+        });
+      }
+
+      const s = data.summary || {};
+      showToast(
+        `Bulk Approval selesai: ${s.queued || 0} masuk antrean (1-per-1), ${s.linked || 0} dihubungkan, ${s.skipped_blocked || 0} tertahan dilewati.`
+      );
+      setBulkPreview(null);
+      setSelectedIds(new Set());
+      await fetchCandidates();
+    } catch (err) {
+      showToast(err.message);
+    } finally {
+      setBulkExecuting(false);
+    }
   };
 
   const handleCheckStatus = async (candidateId) => {
@@ -205,12 +333,14 @@ export default function ProductRadarPage() {
   };
 
   const readyUrlCount = (summary.url_official || 0) + (summary.url_listing || 0) + (summary.url_user || 0);
+  const allPageSelected = items.length > 0 && items.every(item => selectedIds.has(item.id));
+  const activeProcessingCount = items.filter(i => i.process_status === 'processing').length;
 
   return (
     <div className="app-layout">
       <Sidebar />
       <main className="main-content">
-        <div className={styles.container}>
+        <div className={styles.container} style={{ paddingBottom: selectedIds.size > 0 ? '96px' : '32px' }}>
           {/* Page Header */}
           <section className={styles.pageHeader}>
             <div>
@@ -313,6 +443,42 @@ export default function ProductRadarPage() {
               </div>
             </div>
           </section>
+
+          {/* Live Queue Monitor for Bulk Runs */}
+          {trackedQueueItems.length > 0 && (
+            <section className={styles.queueMonitor} aria-label="Pemantau Antrean Product Scraper">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <strong style={{ fontSize: '0.88rem' }}>⚙️ Antrean <span className={styles.mono}>product_scraper</span></strong>
+                  <span className={`${styles.pill} ${styles.pillInfo}`}>
+                    Batas aman: 1 job berjalan sekaligus (Aktif: {activeProcessingCount} / 1)
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className={`${styles.btn} ${styles.btnSm}`}
+                  onClick={() => setTrackedQueueItems([])}
+                >
+                  Sembunyikan
+                </button>
+              </div>
+              <div className={styles.queueList}>
+                {trackedQueueItems.map(q => (
+                  <div key={q.candidate_id} className={styles.queueItem}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
+                      <strong>{q.name}</strong>
+                      <span className={`${styles.badge} ${toneClass(processStatusTone(q.process_status))}`}>
+                        {labelProcessStatus(q.process_status)}
+                      </span>
+                    </div>
+                    <div className={`${styles.subNote} ${styles.mono}`}>
+                      Job #{q.job_id} · {q.reserved_product_id}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Filters */}
           <section className={styles.filterCard} aria-label="Filter Kandidat">
@@ -430,8 +596,16 @@ export default function ProductRadarPage() {
             </div>
 
             <div className={styles.filterFooter}>
-              <div>
-                Menampilkan {items.length} dari {pagination.total} kandidat
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <span>Menampilkan {items.length} dari {pagination.total} kandidat</span>
+                <button type="button" className={`${styles.btn} ${styles.btnSm}`} onClick={selectReadyOnPage}>
+                  ✓ Pilih Siap URL di Halaman Ini
+                </button>
+                {selectedIds.size > 0 && (
+                  <button type="button" className={`${styles.btn} ${styles.btnSm}`} onClick={clearSelection}>
+                    ✕ Kosongkan Pilihan ({selectedIds.size})
+                  </button>
+                )}
               </div>
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
                 <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
@@ -460,6 +634,14 @@ export default function ProductRadarPage() {
               <table className={styles.radarTable}>
                 <thead>
                   <tr>
+                    <th style={{ width: '38px' }}>
+                      <input
+                        type="checkbox"
+                        checked={allPageSelected}
+                        onChange={(e) => toggleSelectPage(e.target.checked)}
+                        aria-label="Pilih semua kandidat di halaman ini"
+                      />
+                    </th>
                     <th style={{ width: '66px' }}>Foto</th>
                     <th style={{ minWidth: '220px' }}>Nama Produk</th>
                     <th>Kategori</th>
@@ -476,13 +658,13 @@ export default function ProductRadarPage() {
                 <tbody>
                   {loading && items.length === 0 ? (
                     <tr>
-                      <td colSpan={11} style={{ textAlign: 'center', padding: '36px', color: 'var(--text-muted)' }}>
+                      <td colSpan={12} style={{ textAlign: 'center', padding: '36px', color: 'var(--text-muted)' }}>
                         Memuat daftar kandidat Radar Produk...
                       </td>
                     </tr>
                   ) : items.length === 0 ? (
                     <tr>
-                      <td colSpan={11} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+                      <td colSpan={12} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
                         {batches.length === 0
                           ? 'Belum ada batch riset dari TeleRadar untuk tenant ini. Batch yang dikirim lewat API ingest akan muncul di sini untuk dikurasi.'
                           : 'Tidak ada kandidat yang cocok dengan filter saat ini.'}
@@ -494,9 +676,22 @@ export default function ProductRadarPage() {
                       const domainHint = extractDomainHint(c.effective_url);
                       const imgUrl = c.thumb_api_url || c.screenshot_api_url;
                       const isPending = ['queued', 'processing'].includes(c.process_status);
+                      const isChecked = selectedIds.has(c.id);
 
                       return (
-                        <tr key={c.id} onClick={() => setActiveCandidateId(c.id)}>
+                        <tr
+                          key={c.id}
+                          className={isChecked ? styles.selectedRow : undefined}
+                          onClick={() => setActiveCandidateId(c.id)}
+                        >
+                          <td onClick={(e) => e.stopPropagation()}>
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={(e) => toggleSelectItem(c.id, e.target.checked)}
+                              aria-label={`Pilih ${getDisplayName(c)}`}
+                            />
+                          </td>
                           <td>
                             <div className={styles.thumbBox} title="Foto pengenal screenshot TeleRadar">
                               {imgUrl ? (
@@ -666,6 +861,29 @@ export default function ProductRadarPage() {
         </div>
       </main>
 
+      {/* Sticky Bulk Action Bar */}
+      {selectedIds.size > 0 && (
+        <div className={styles.bulkBar} role="region" aria-label="Bilah Aksi Massal Radar Produk">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <strong style={{ fontSize: '0.9rem' }}>{selectedIds.size} kandidat dipilih</strong>
+            <span className={styles.subNote}>(maks 50 per eksekusi · tertahan otomatis dilewati)</span>
+          </div>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <button type="button" className={`${styles.btn} ${styles.btnSm}`} onClick={clearSelection}>
+              Batal
+            </button>
+            <button
+              type="button"
+              className={`${styles.btn} ${styles.btnPrimary}`}
+              disabled={bulkLoadingPreview}
+              onClick={handleOpenBulkPreview}
+            >
+              {bulkLoadingPreview ? 'Memeriksa...' : `🔍 Tinjau & Ajukan Pilihan (${selectedIds.size})`}
+            </button>
+          </div>
+        </div>
+      )}
+
       <CandidateDetailDrawer
         candidateId={activeCandidateId}
         onClose={() => setActiveCandidateId(null)}
@@ -748,6 +966,144 @@ export default function ProductRadarPage() {
                   : confirmCandidate.duplicate_match
                     ? '🔗 Konfirmasi & Hubungkan'
                     : '✓ Konfirmasi & Masukkan'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Dialog Konfirmasi Bulk Approval */}
+      {bulkPreview && (
+        <div
+          className={styles.modalBackdrop}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Ringkasan Bulk Approval Radar Produk"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !bulkExecuting) setBulkPreview(null);
+          }}
+        >
+          <div className={`${styles.modalDialog} ${styles.modalDialogBulk}`}>
+            <div className={styles.modalHeader}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800 }}>
+                  Ringkasan Bulk Approval ({bulkPreview.summary?.requested || 0} Kandidat)
+                </h3>
+                <div className={styles.subNote}>
+                  Kandidat tertahan otomatis dilewati dan tidak ikut terkirim ke antrean scraper.
+                </div>
+              </div>
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnSm}`}
+                disabled={bulkExecuting}
+                onClick={() => setBulkPreview(null)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className={`${styles.modalBody} ${styles.modalBodyScroll}`}>
+              <div className={styles.summaryBuckets}>
+                <div className={styles.bucketCard}>
+                  <div className={styles.bucketNum} style={{ color: 'var(--status-success)' }}>
+                    {bulkPreview.summary?.valid_count || 0}
+                  </div>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 700 }}>Valid · Scrape Baru</div>
+                  <div className={styles.subNote}>Klaim atomik & antre 1-per-1</div>
+                </div>
+                <div className={styles.bucketCard}>
+                  <div className={styles.bucketNum} style={{ color: 'var(--status-info)' }}>
+                    {bulkPreview.summary?.duplicate_count || 0}
+                  </div>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 700 }}>Duplikat · Hubungkan</div>
+                  <div className={styles.subNote}>Tanpa menimpa produk lama</div>
+                </div>
+                <div className={styles.bucketCard}>
+                  <div className={styles.bucketNum} style={{ color: 'var(--status-warning)' }}>
+                    {bulkPreview.summary?.blocked_count || 0}
+                  </div>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 700 }}>Tertahan · Dilewati</div>
+                  <div className={styles.subNote}>Tidak ikut terkirim</div>
+                </div>
+              </div>
+
+              {(bulkPreview.valid_items || []).length > 0 && (
+                <div className={styles.bucketList}>
+                  <strong style={{ fontSize: '0.78rem', color: 'var(--status-success)' }}>
+                    ✅ Siap Masuk Antrean product_scraper (1 Job Berjalan Sekaligus)
+                  </strong>
+                  {bulkPreview.valid_items.map(v => (
+                    <div key={v.id} className={styles.bucketRow}>
+                      <div style={{ minWidth: 0 }}>
+                        <strong>{v.name}</strong>
+                        <div className={`${styles.subNote} ${styles.mono}`} style={{ wordBreak: 'break-all' }}>
+                          {v.effective_url}
+                        </div>
+                      </div>
+                      <span className={`${styles.badge} ${styles.badgeSuccess}`}>Valid</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {(bulkPreview.duplicate_items || []).length > 0 && (
+                <div className={styles.bucketList}>
+                  <strong style={{ fontSize: '0.78rem', color: 'var(--status-info)' }}>
+                    🔗 Duplikat URL — Dihubungkan ke Produk Eksisting
+                  </strong>
+                  {bulkPreview.duplicate_items.map(d => (
+                    <div key={d.id} className={styles.bucketRow}>
+                      <div style={{ minWidth: 0 }}>
+                        <strong>{d.name}</strong>
+                        <div className={styles.subNote}>
+                          Cocok dengan <span className={styles.mono}>{d.duplicate_match?.cf_product_id}</span> ({d.duplicate_match?.product_name})
+                        </div>
+                      </div>
+                      <span className={`${styles.badge} ${styles.badgeInfo}`}>Hubungkan</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {(bulkPreview.blocked_items || []).length > 0 && (
+                <div className={styles.bucketList}>
+                  <strong style={{ fontSize: '0.78rem', color: 'var(--status-warning)' }}>
+                    ⛔ Tertahan — Tidak Ikut Terkirim
+                  </strong>
+                  {bulkPreview.blocked_items.map(b => (
+                    <div key={b.id} className={styles.bucketRow}>
+                      <div style={{ minWidth: 0 }}>
+                        <strong>{b.name}</strong>
+                        <div className={styles.subNote}>{b.reason}</div>
+                      </div>
+                      <span className={`${styles.badge} ${styles.badgeWarning}`}>Dilewati</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className={`${styles.alertBox} ${styles.alertInfo}`}>
+                Setiap kandidat memakai klaim atomik yang sama dengan promosi satuan dan mencadangkan <span className={styles.mono}>reserved_product_id</span>. Antrean <span className={styles.mono}>product_scraper</span> memproses maksimal <strong>{bulkPreview.queue_concurrency || 1} job sekaligus</strong> (antrean saat ini: {bulkPreview.queue_load?.running || 0} berjalan, {bulkPreview.queue_load?.pending || 0} menunggu).
+              </div>
+            </div>
+            <div className={styles.modalFooter}>
+              <button
+                type="button"
+                className={styles.btn}
+                disabled={bulkExecuting}
+                onClick={() => setBulkPreview(null)}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnPrimary}`}
+                disabled={bulkExecuting || ((bulkPreview.summary?.valid_count || 0) + (bulkPreview.summary?.duplicate_count || 0) === 0)}
+                onClick={handleExecuteBulk}
+              >
+                {bulkExecuting
+                  ? 'Memproses...'
+                  : `✓ Jalankan (${bulkPreview.summary?.valid_count || 0} Scrape + ${bulkPreview.summary?.duplicate_count || 0} Hubungkan)`}
               </button>
             </div>
           </div>

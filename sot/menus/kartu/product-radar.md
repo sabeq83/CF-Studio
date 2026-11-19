@@ -11,7 +11,7 @@ Menjadi pintu kurasi hasil riset produk dari TeleRadar sebelum masuk ke katalog 
 2. Kurator membuka **PLANNING → Radar Produk**, menyaring kandidat menurut batch, kategori, tren, status URL, status kurasi, atau status katalog.
 3. Klik baris untuk membuka panel detail: bandingkan screenshot sumber dengan listing tujuan, perbaiki URL/nama/deskripsi/USP di kolom **Edit Kurator** (aman dari sinkron ulang).
 4. Untuk kandidat berstatus URL **Terdekat** atau **Tidak ditemukan**, tombol **Masukkan** dinonaktifkan sampai kurator memverifikasi URL listing yang tepat.
-5. Tekan **Masukkan ke Database Produk** (atau **Hubungkan** jika URL sudah ada di katalog) untuk menjadwalkan scraping produk baru atau menautkan ke produk eksisting tanpa menimpa data katalog.
+5. Tekan **Masukkan ke Database Produk** (satuan) atau centang banyak kandidat untuk **Bulk Approval** (menampilkan ringkasan *Valid / Duplikat / Tertahan* sebelum eksekusi; kandidat tertahan tidak ikut terkirim dan antrean `product_scraper` berjalan 1 job sekaligus).
 
 ## Terhubung dengan
 - Sumber data: TeleRadar (`POST /api/operator/v2/product-research/batches`).
@@ -21,7 +21,7 @@ Menjadi pintu kurasi hasil riset produk dari TeleRadar sebelum masuk ke katalog 
 ## Lokasi (untuk agent)
 - Halaman & UI: `app/product-radar/page.js`, `app/product-radar/CandidateDetailDrawer.js`, `app/product-radar/radar-labels.js`, `app/product-radar/product-radar.module.css`
 - Layanan & Repository: `lib/product-research-repository.js`, `lib/product-research-ingest-service.js`, `lib/product-research-promotion-service.js`, `lib/product-research-image-storage.js`, `lib/product-url-normalizer.js`
-- API Web: `app/api/v2/product-research/candidates/` (`route.js`, `[id]/route.js`, `[id]/archive/route.js`, `[id]/image/route.js`, `[id]/promote/route.js`, `[id]/status/route.js`)
+- API Web: `app/api/v2/product-research/candidates/` (`route.js`, `bulk-promote/route.js`, `[id]/route.js`, `[id]/archive/route.js`, `[id]/image/route.js`, `[id]/promote/route.js`, `[id]/status/route.js`)
 - API Operator: `app/api/operator/v2/product-research/batches/route.js`
 - Tabel data: `product_research_batches`, `product_research_candidates`, `product_research_imports` (migrasi via `scripts/migrate-product-research.mjs`)
 
@@ -34,7 +34,8 @@ Menjadi pintu kurasi hasil riset produk dari TeleRadar sebelum masuk ke katalog 
 6. Aksi arsip kandidat hanya menyembunyikan kandidat riset dan tidak menghapus produk di `product_extractions`.
 
 ## Belum ada / batasan
-- Promosi dilakukan per satu kandidat; *bulk approval*, perbandingan tren lintas minggu, skor peluang, serta perintah bot lengkap direncanakan pada tahap lanjutan.
+- Bulk approval dibatasi maksimal 50 kandidat per permintaan dan selalu menjalankan klaim atomik per kandidat (antrean `product_scraper` berjalan 1 job sekaligus).
+- Perbandingan tren lintas minggu, skor peluang, serta perintah bot lengkap masih direncanakan pada tahap berikutnya (7.2–7.6).
 
 ## Dokumen lengkap
 [USULAN_RADAR_PRODUK_TELERADAR_CFSTUDIO.md](file:///Users/sabeqmmursyid/_cfstudio/catatan-kerja/usulan/USULAN_RADAR_PRODUK_TELERADAR_CFSTUDIO.md)

@@ -25,16 +25,16 @@ Menambahkan kemampuan memilih banyak kandidat sekaligus di halaman **Radar Produ
   - Dialog Konfirmasi Bulk Approval dengan rincian 3 kelompok (**Valid · Scrape Baru**, **Duplikat · Hubungkan**, **Tertahan · Tidak Ikut Terkirim**)
   - Panel Antrean Langsung (*1-per-1 slot aktif*) yang menyimulasikan eksekusi bertahap (`Antre` → `Diproses (1/1 slot)` → `Masuk katalog` + simulasi retry aman)
 - [x] Sinkronkan ke Mac Mini (`~/maknaflow-staging-atomic/current/public/mockup_radar_bulk_approval.html`); catatan: Next.js 16 production (`maknaflow-staging-ui`) meng-cache `public/` saat boot (return 404 sebelum reload)
-- [ ] **🛑 Berhenti:** Laporkan mockup ke pengguna & tunggu persetujuan tampilan/alur sebelum menulis kode React/API
+- [x] **🛑 Berhenti:** Laporkan mockup ke pengguna & tunggu persetujuan tampilan/alur sebelum menulis kode React/API
 
 ### Langkah 2 — Backend Bulk Preview & Bulk Promote API
-- [ ] Buat helper `previewBulkResearchPromotion(candidateIds)` & `promoteResearchCandidatesBulk(candidateIds, { requestedBy })` di `lib/product-research-promotion-service.js` (memanggil ulang `promoteResearchCandidate()` secara atomik per kandidat, menolak/melewati kandidat tertahan tanpa mengirim job, mengembalikan hasil per kandidat + status antrean `product_scraper`)
-- [ ] Buat `POST /api/v2/product-research/candidates/bulk-promote` (`withProductResearchAccess`, mendukung `mode: 'preview' | 'execute'`, batas maks 50 ID per request)
-- [ ] Tambahkan unit & integration test di `tests/product-research/bulk-promote.test.js` (klasifikasi valid/duplikat/tertahan, kandidat tertahan tidak terkirim, klaim atomik per kandidat, isolasi tenant, batas `product_scraper` 1 job berjalan sekaligus)
+- [x] Buat helper `previewBulkResearchPromotion(candidateIds)` & `promoteResearchCandidatesBulk(candidateIds, { requestedBy })` di `lib/product-research-promotion-service.js` (memanggil ulang `promoteResearchCandidate()` secara atomik per kandidat, menolak/melewati kandidat tertahan tanpa mengirim job, mengembalikan hasil per kandidat + status antrean `product_scraper`)
+- [x] Buat `POST /api/v2/product-research/candidates/bulk-promote` (`withProductResearchAccess`, mendukung `mode: 'preview' | 'execute'`, batas maks 50 ID per request)
+- [x] Tambahkan unit & integration test di `tests/product-research/bulk-promote.test.js` (klasifikasi valid/duplikat/tertahan, kandidat tertahan tidak terkirim, klaim atomik per kandidat, isolasi tenant, batas `product_scraper` 1 job berjalan sekaligus)
 
 ### Langkah 3 — UI Bulk Approval di `/product-radar` & Deploy Dev (Pintu Berhenti 🛑)
-- [ ] Tambahkan checkbox multi-pilih, bilah aksi massal, dialog ringkasan Valid/Duplikat/Tertahan, dan panel pantauan antrean bertahap di `app/product-radar/page.js` & `product-radar.module.css`
-- [ ] Perbarui `sot/menus/kartu/product-radar.md` untuk mencatat fitur Bulk Approval & batasannya
+- [x] Tambahkan checkbox multi-pilih, bilah aksi massal, dialog ringkasan Valid/Duplikat/Tertahan, dan panel pantauan antrean bertahap di `app/product-radar/page.js` & `product-radar.module.css`
+- [x] Perbarui `sot/menus/kartu/product-radar.md` untuk mencatat fitur Bulk Approval & batasannya
 - [ ] Jalankan seluruh test suite (`tests/product-research/*.test.js`), push branch, deploy ke **Dev**, dan verifikasi
 - [ ] **🛑 Berhenti:** Laporkan tautan Dev + daftar cek ke pengguna
 
@@ -61,4 +61,40 @@ Menambahkan kemampuan memilih banyak kandidat sekaligus di halaman **Radar Produ
 -->
 ```
 
-*(Potongan kode Sebelum/Sesudah untuk Langkah 2–3 akan dilengkapi setelah pengguna meninjau mockup Tahap 7.1.)*
+*(Potongan kode Sebelum/Sesudah untuk Langkah 2–3 — Tahap 7.1 Bulk Approval)*
+
+### Langkah 2 — Repository & Service Bulk Approval (`lib/product-research-repository.js`, `lib/product-research-promotion-service.js`, `app/api/v2/product-research/candidates/bulk-promote/route.js`)
+
+**Code Sebelum (Current/Before):**
+```text
+(Promosi hanya mendukung 1 kandidat per panggilan via POST /api/v2/product-research/candidates/[id]/promote)
+```
+
+**Code Sesudah (Proposed/After):**
+```js
+// lib/product-research-promotion-service.js
+export async function previewBulkResearchPromotion(candidateIds = []) { /* klasifikasi valid / duplikat / tertahan dalam tenant aktif */ }
+export async function promoteResearchCandidatesBulk(candidateIds = [], { requestedBy } = {}, deps = {}) {
+  /* Lewati kandidat tertahan; eksekusi valid & duplikat lewat promoteResearchCandidate() (klaim atomik Tahap 5), 1 job/kandidat sesuai QUEUE_CONCURRENCY.product_scraper = 1 */
+}
+
+// app/api/v2/product-research/candidates/bulk-promote/route.js
+// POST { candidate_ids, mode: 'preview' | 'execute' } dengan withProductResearchAccess
+```
+
+### Langkah 3 — UI Bulk Approval di `app/product-radar/page.js` & `product-radar.module.css`
+
+**Code Sebelum (Current/Before):**
+```jsx
+// app/product-radar/page.js
+// Tabel kandidat hanya memiliki tombol aksi satuan per baris dan dialog konfirmasi satuan.
+```
+
+**Code Sesudah (Proposed/After):**
+```jsx
+// app/product-radar/page.js
+// - Tambah kolom checkbox di tabel + pilih semua di halaman + tombol cepat pilih semua siap URL
+// - Tambah bilah mengambang pilihan massal (menampilkan jumlah terpilih)
+// - Tambah dialog ringkasan Bulk Approval (3 kartu: Valid / Duplikat / Tertahan tidak ikut terkirim) via mode:'preview' sebelum mode:'execute'
+// - Tambah kartu ringkas pemantau antrean (Slot product_scraper: 1 aktif sekaligus) & polling status
+```
