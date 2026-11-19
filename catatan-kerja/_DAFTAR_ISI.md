@@ -7,6 +7,7 @@ Terakhir diperbarui: 19 November 2026
 | Nama File | Ringkasan / Judul |
 |---|---|
 | [USULAN_MCP_UNIVERSE_REFERENCE_MANAGER.md](usulan/USULAN_MCP_UNIVERSE_REFERENCE_MANAGER.md) | Usulan MCP Universe, upload/approval referensi karakter, link VI dan preflight Character Lock; kasus Arka PT GIM Sosmed |
+| [REVIEW_USULAN_MCP_UNIVERSE_REFERENCE_MANAGER.md](usulan/REVIEW_USULAN_MCP_UNIVERSE_REFERENCE_MANAGER.md) | Review Claude atas usulan Codex MCP Universe: 5 temuan baru di kode (manifest salah tenant, fallback karakter diam-diam, spread body, tanpa scope), MVP 10 tool tanpa migrasi |
 | `USULAN_RADAR_PRODUK_TELERADAR_CFSTUDIO.md` | Analisis kode TeleRadar di Mac Mini dan usulan Radar Produk: inbox riset terpisah, kurasi, lalu promosi ke Database Produk |
 | `USULAN_KONSISTENSI_VI_MULTIPLIER_NUTRIBAKE.md` | Analisis tenant default: identitas tangan, pengaruh blueprint, dan usulan penguncian VI Multiplier NutriBake |
 | `USULAN_VI_NUTRIBAKE_V5_BAKU_CFA.md` | Usulan VI NutriBake v5: membakukan tampilan video CFA (lengan panjang, palette warna, deskripsi tangan) ke Visual Identity |
@@ -41,6 +42,7 @@ Terakhir diperbarui: 19 November 2026
 
 | Nama File | Ringkasan / Judul |
 |---|---|
+| [antigravity_mcp_universe_reference_manager_instructions.md](instruksi-agent/antigravity_mcp_universe_reference_manager_instructions.md) | Instruksi Antigravity — MCP Universe & Character Lock (kasus Arka): Bagian H hotfix isolasi tenant (B2+B3, naik Staging duluan) lalu Bagian F fitur: B1/B4/B5, 3 route baru, 10 tool MCP, mode strict, uji di Dev |
 | `antigravity_radar_produk_teleradar_instructions.md` | Instruksi Antigravity — Menu Radar Produk: hasil TeleRadar masuk tabel riset terpisah, kurasi, lalu promosi ke Database Produk (mockup dulu, 6 tahap dengan pintu berhenti) |
 | `antigravity_aktifkan_batch_scraper_instructions.md` | Instruksi Antigravity — Aktifkan kembali tombol Batch Scraper (mockup dulu) + pengaman kuota/afiliasi + S3/S5/S6 (disetujui); S1/S2/S4/S7 menunggu keputusan |
 | `antigravity_gpt_regenerate_scraper_square_instructions.md` | Instruksi Antigravity — Tombol GPT Image 2 manual di jendela banding (mockup dulu) & foto scraper square Nano Banana 2 |

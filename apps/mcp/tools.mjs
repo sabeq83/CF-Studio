@@ -4,6 +4,163 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { FINISHING_TEMPLATE_IDS } from '../../lib/finishing-template-registry.js';
 import { VO_CONTENT_CONTRACT_VALUES, VO_QUALITY_GATE_VALUES } from '../../lib/vo-contract-registry.js';
+import { ASSET_ROLES } from '../../lib/reference-asset-contract.js';
+
+const ALLOWED_REFERENCE_IMAGE_EXTS = new Map([
+  ['.png', 'image/png'],
+  ['.jpg', 'image/jpeg'],
+  ['.jpeg', 'image/jpeg'],
+  ['.webp', 'image/webp']
+]);
+const MAX_REFERENCE_BASE64_LENGTH = 14 * 1024 * 1024; // ~14 MB encoded -> <= 10 MB binary
+const MAX_REFERENCE_BINARY_BYTES = 10 * 1024 * 1024;  // 10 MB binary
+
+async function resolveReferenceAssetUploadInput({ image_base64, file_path, photo_url, filename }) {
+  if (photo_url) {
+    return {
+      error: {
+        success: false,
+        error_code: 'UNSUPPORTED_SOURCE',
+        error: 'photo_url / URL import is not supported in MVP. Provide exactly one of image_base64 or file_path (local file on the MCP host).'
+      }
+    };
+  }
+
+  const hasBase64 = Boolean(image_base64 && String(image_base64).trim());
+  const hasFilePath = Boolean(file_path && String(file_path).trim());
+  if (hasBase64 === hasFilePath) {
+    return {
+      error: {
+        success: false,
+        error_code: 'VALIDATION_ERROR',
+        error: 'Provide exactly one image source: either image_base64 or file_path.'
+      }
+    };
+  }
+
+  if (hasBase64) {
+    const raw = String(image_base64).trim();
+    let mimeType = 'image/png';
+    let b64Body = raw;
+    const dataUriMatch = raw.match(/^data:(image\/(?:png|jpeg|jpg|webp));base64,([\s\S]+)$/i);
+    if (dataUriMatch) {
+      mimeType = dataUriMatch[1].toLowerCase() === 'image/jpg' ? 'image/jpeg' : dataUriMatch[1].toLowerCase();
+      b64Body = dataUriMatch[2];
+    }
+    const compact = b64Body.replace(/\s+/g, '');
+    if (compact.length > MAX_REFERENCE_BASE64_LENGTH) {
+      return {
+        error: {
+          success: false,
+          error_code: 'UPLOAD_TOO_LARGE',
+          error: 'Encoded image_base64 exceeds maximum allowed length (~14 MB encoded / 10 MB binary).'
+        }
+      };
+    }
+    const buffer = Buffer.from(compact, 'base64');
+    if (!buffer.length) {
+      return {
+        error: {
+          success: false,
+          error_code: 'VALIDATION_ERROR',
+          error: 'Decoded image_base64 is empty.'
+        }
+      };
+    }
+    if (buffer.length > MAX_REFERENCE_BINARY_BYTES) {
+      return {
+        error: {
+          success: false,
+          error_code: 'UPLOAD_TOO_LARGE',
+          error: 'Decoded image exceeds maximum 10 MB binary limit.'
+        }
+      };
+    }
+    const ext = mimeType === 'image/jpeg' ? '.jpg' : (mimeType === 'image/webp' ? '.webp' : '.png');
+    return {
+      buffer,
+      mimeType,
+      filename: filename || `reference_upload${ext}`
+    };
+  }
+
+  // file_path branch — read on the MCP host filesystem
+  const rawPath = String(file_path).trim();
+  const ext = path.extname(rawPath).toLowerCase();
+  if (!ALLOWED_REFERENCE_IMAGE_EXTS.has(ext)) {
+    return {
+      error: {
+        success: false,
+        error_code: 'VALIDATION_ERROR',
+        error: `Unsupported file_path extension "${ext || '(none)'}". Allowed extensions: .png, .jpg, .jpeg, .webp.`
+      }
+    };
+  }
+
+  let resolvedPath;
+  try {
+    resolvedPath = await fs.realpath(rawPath);
+  } catch (err) {
+    return {
+      error: {
+        success: false,
+        error_code: 'OWNER_NOT_FOUND',
+        error: `Cannot access file_path "${rawPath}" on the MCP host: ${err.message}. Note that file_path is read on the MCP host machine; pass image_base64 if the file is on a remote client.`
+      }
+    };
+  }
+
+  const resolvedExt = path.extname(resolvedPath).toLowerCase();
+  if (!ALLOWED_REFERENCE_IMAGE_EXTS.has(resolvedExt)) {
+    return {
+      error: {
+        success: false,
+        error_code: 'VALIDATION_ERROR',
+        error: `Resolved file extension "${resolvedExt || '(none)'}" is not an allowed image type (.png, .jpg, .jpeg, .webp).`
+      }
+    };
+  }
+
+  let stat;
+  try {
+    stat = await fs.stat(resolvedPath);
+  } catch (err) {
+    return {
+      error: {
+        success: false,
+        error_code: 'OWNER_NOT_FOUND',
+        error: `Cannot stat file_path "${rawPath}" on the MCP host: ${err.message}.`
+      }
+    };
+  }
+
+  if (!stat.isFile()) {
+    return {
+      error: {
+        success: false,
+        error_code: 'VALIDATION_ERROR',
+        error: `file_path "${rawPath}" on the MCP host must point to a regular file.`
+      }
+    };
+  }
+
+  if (stat.size > MAX_REFERENCE_BINARY_BYTES) {
+    return {
+      error: {
+        success: false,
+        error_code: 'UPLOAD_TOO_LARGE',
+        error: 'Image file exceeds maximum 10 MB binary limit.'
+      }
+    };
+  }
+
+  const buffer = await fs.readFile(resolvedPath);
+  return {
+    buffer,
+    mimeType: ALLOWED_REFERENCE_IMAGE_EXTS.get(resolvedExt) || 'image/png',
+    filename: filename || path.basename(resolvedPath)
+  };
+}
 
 async function resolvePhotoInput({ photo_base64, photo_url, photo_file_path, filename }) {
   if (photo_base64) {
@@ -293,7 +450,7 @@ export function operatorClient({ baseUrl, token, fetchImpl = fetch }) {
     throw new Error('Remote Operator API requires HTTPS');
   }
   if (!token) throw new Error('CF_STUDIO_OPERATOR_API_TOKEN is required');
-  return async (path, { body, key, method, tenantOverride, timeoutMs = 120000 } = {}) => {
+  const client = async (path, { body, key, method, tenantOverride, timeoutMs = 120000 } = {}) => {
     try {
       const httpMethod = method || (body ? 'POST' : 'GET');
       const isFormData = typeof FormData !== 'undefined' && body instanceof FormData;
@@ -320,6 +477,7 @@ export function operatorClient({ baseUrl, token, fetchImpl = fetch }) {
           success: false,
           status: response.status,
           ...(errorPayload?.code ? { code: errorPayload.code } : {}),
+          ...(errorPayload?.error_code ? { error_code: errorPayload.error_code } : {}),
           error: errorPayload?.error || errorPayload?.message || `Operator request rejected (HTTP ${response.status}); check permissions, input, or ID.`,
           ...(errorPayload?.reconnectUrl ? { reconnectUrl: errorPayload.reconnectUrl } : {}),
           ...(errorPayload?.errors ? { details: errorPayload.errors } : {})
@@ -340,15 +498,81 @@ export function operatorClient({ baseUrl, token, fetchImpl = fetch }) {
       };
     }
   };
+  client.baseUrl = base.origin;
+  return client;
 }
 
 export function createCfStudioServer(rawRequest) {
   let activeTenantOverride = null;
+  let cachedOperatorTenantId = null;
   const request = (path, opts = {}) => {
     return rawRequest(path, {
       ...opts,
       tenantOverride: opts.tenantOverride || activeTenantOverride
     });
+  };
+
+  const resolveActiveSessionTenant = async () => {
+    if (activeTenantOverride) return activeTenantOverride;
+    if (cachedOperatorTenantId) return cachedOperatorTenantId;
+    const whoami = await request('/api/operator/v1/whoami');
+    const opTenant = whoami?.operator?.tenant_id || whoami?.tenant_id || null;
+    if (opTenant) cachedOperatorTenantId = opTenant;
+    return cachedOperatorTenantId;
+  };
+
+  const checkExpectedTenant = async (expectedTenantId) => {
+    if (!expectedTenantId) return null;
+    const activeTenant = await resolveActiveSessionTenant();
+    if (!activeTenant || activeTenant !== expectedTenantId) {
+      return {
+        success: false,
+        error_code: 'TENANT_MISMATCH',
+        error: `Active MCP session tenant "${activeTenant || 'unknown'}" does not match expected_tenant_id "${expectedTenantId}". Switch tenant with cf_switch_tenant first.`,
+        active_tenant: activeTenant || null,
+        expected_tenant_id: expectedTenantId
+      };
+    }
+    return null;
+  };
+
+  const toAbsolutePreviewUrl = (publicPath) => {
+    if (!publicPath || typeof publicPath !== 'string') return null;
+    if (/^https?:\/\//i.test(publicPath)) return publicPath;
+    const origin = rawRequest?.baseUrl || process.env.CF_STUDIO_OPERATOR_BASE_URL || process.env.MAKNA_OPERATOR_BASE_URL || 'http://127.0.0.1:5010';
+    try {
+      return new URL(publicPath, origin).toString();
+    } catch {
+      return publicPath;
+    }
+  };
+
+  const compactReferenceAsset = (asset) => {
+    if (!asset || typeof asset !== 'object') return asset;
+    return {
+      id: asset.id,
+      tenant_id: asset.tenant_id,
+      owner_type: asset.owner_type,
+      owner_id: asset.owner_id,
+      universe_id: asset.universe_id || null,
+      role: asset.asset_role || asset.role,
+      version: asset.version,
+      status: asset.status,
+      source_type: asset.source_type || null,
+      mime_type: asset.mime_type || null,
+      byte_size: asset.byte_size || null,
+      width: asset.width || null,
+      height: asset.height || null,
+      sha256: asset.sha256 || null,
+      public_path: asset.public_path || null,
+      preview_url: toAbsolutePreviewUrl(asset.public_path),
+      review_notes: asset.review_notes || null,
+      approved_by: asset.approved_by || null,
+      approved_at: asset.approved_at || null,
+      created_at: asset.created_at || null,
+      updated_at: asset.updated_at || null,
+      ...(asset.deduplicated ? { deduplicated: true } : {})
+    };
   };
 
   const server = new McpServer(
@@ -381,6 +605,7 @@ export function createCfStudioServer(rawRequest) {
   register('cf_whoami', 'Read configured CF Studio operator identity, active tenant, and scopes.', {}, true, async () => {
     const res = await request('/api/operator/v1/whoami');
     if (res && res.operator) {
+      if (res.operator.tenant_id) cachedOperatorTenantId = res.operator.tenant_id;
       res.operator.session_active_tenant = activeTenantOverride || res.operator.tenant_id;
     }
     return res;
@@ -388,6 +613,7 @@ export function createCfStudioServer(rawRequest) {
   register('makna_whoami', 'Read configured CF Studio operator identity, active tenant, and scopes (legacy alias).', {}, true, async () => {
     const res = await request('/api/operator/v1/whoami');
     if (res && res.operator) {
+      if (res.operator.tenant_id) cachedOperatorTenantId = res.operator.tenant_id;
       res.operator.session_active_tenant = activeTenantOverride || res.operator.tenant_id;
     }
     return res;
@@ -2148,6 +2374,325 @@ export function createCfStudioServer(rawRequest) {
     },
     false,
     body => request('/api/v2/threads-radar/schedule', { method: 'POST', body })
+  );
+
+  // 8. Universe Manager & Character Lock Reference Assets (MVP)
+  register(
+    'cf_list_universes',
+    'List active Universe profiles in the current tenant (compact summary). Requires scope: content:read.',
+    {
+      query: z.string().trim().max(100).optional().describe('Optional case-insensitive filter on name or slug')
+    },
+    true,
+    async ({ query }) => {
+      const res = await request('/api/v2/universe-profiles');
+      if (!res || res.success === false) return res;
+      let items = Array.isArray(res.data) ? res.data : [];
+      if (query) {
+        const q = query.toLowerCase();
+        items = items.filter(u =>
+          String(u.name || '').toLowerCase().includes(q)
+          || String(u.slug || '').toLowerCase().includes(q)
+        );
+      }
+      const compact = items.map(u => ({
+        id: u.id,
+        tenant_id: u.tenant_id,
+        slug: u.slug,
+        name: u.name,
+        status: u.status,
+        universe_type: u.universe_type || null,
+        version: u.version || 1,
+        updated_at: u.updated_at || null
+      }));
+      return {
+        success: true,
+        tenant_id: res.tenant_id || activeTenantOverride || cachedOperatorTenantId || null,
+        count: compact.length,
+        universes: compact
+      };
+    }
+  );
+
+  register(
+    'cf_get_universe',
+    'Get detailed Universe profile with characters, locations, and approved reference asset summary per character. Requires scope: content:read.',
+    {
+      universe_id: z.string().trim().min(1).describe('Universe profile ID')
+    },
+    true,
+    async ({ universe_id }) => {
+      const res = await request(`/api/v2/universe-profiles/${encodeURIComponent(universe_id)}`);
+      if (!res || res.success === false) return res;
+      const data = res.data || {};
+      const characters = Array.isArray(data.characters)
+        ? data.characters.map(c => ({
+            ...c,
+            approved_assets: c.approved_assets
+              ? {
+                  identity: c.approved_assets.identity
+                    ? { ...c.approved_assets.identity, preview_url: toAbsolutePreviewUrl(c.approved_assets.identity.public_path) }
+                    : null,
+                  character_sheet: c.approved_assets.character_sheet
+                    ? { ...c.approved_assets.character_sheet, preview_url: toAbsolutePreviewUrl(c.approved_assets.character_sheet.public_path) }
+                    : null
+                }
+              : null
+          }))
+        : [];
+      return {
+        success: true,
+        tenant_id: res.tenant_id || data.tenant_id || null,
+        universe: {
+          ...data,
+          characters
+        }
+      };
+    }
+  );
+
+  register(
+    'cf_create_universe_character',
+    'Create a new character inside a Universe profile. character_key must match /^[a-z0-9_]{2,64}$/. Requires scope: content:create.',
+    {
+      universe_id: z.string().trim().min(1).describe('Target Universe profile ID'),
+      name: z.string().trim().min(1).max(120).describe('Display name of the character'),
+      character_key: z.string().regex(/^[a-z0-9_]{2,64}$/, 'character_key must match /^[a-z0-9_]{2,64}$/').describe('Unique slug-style key in the universe'),
+      canonical_prompt: z.string().trim().min(1).describe('Detailed visual appearance prompt for character consistency'),
+      species: z.string().optional(),
+      breed: z.string().optional(),
+      body_shape: z.string().optional(),
+      fur_color: z.string().optional(),
+      eye_color: z.string().optional(),
+      wardrobe: z.string().optional(),
+      personality: z.string().optional(),
+      movement_style: z.string().optional(),
+      relative_size: z.string().optional(),
+      role: z.string().optional(),
+      depiction_mode: z.string().optional(),
+      forbidden_changes_json: z.array(z.string()).optional(),
+      expected_tenant_id: z.string().trim().min(1).optional().describe('Optional tenant guard checked before calling API')
+    },
+    false,
+    async ({ universe_id, expected_tenant_id, ...body }) => {
+      const mismatch = await checkExpectedTenant(expected_tenant_id);
+      if (mismatch) return mismatch;
+      return request(`/api/v2/universe-profiles/${encodeURIComponent(universe_id)}/characters`, {
+        method: 'POST',
+        body
+      });
+    }
+  );
+
+  register(
+    'cf_update_universe_character',
+    'Update an existing character in a Universe profile. Supports optimistic concurrency via expected_updated_at. Requires scope: content:create.',
+    {
+      universe_id: z.string().trim().min(1).describe('Universe profile ID'),
+      character_id: z.string().trim().min(1).describe('Character ID to update'),
+      name: z.string().trim().min(1).max(120).optional(),
+      character_key: z.string().regex(/^[a-z0-9_]{2,64}$/, 'character_key must match /^[a-z0-9_]{2,64}$/').optional(),
+      canonical_prompt: z.string().trim().min(1).optional(),
+      species: z.string().optional(),
+      breed: z.string().optional(),
+      body_shape: z.string().optional(),
+      fur_color: z.string().optional(),
+      eye_color: z.string().optional(),
+      wardrobe: z.string().optional(),
+      personality: z.string().optional(),
+      movement_style: z.string().optional(),
+      relative_size: z.string().optional(),
+      role: z.string().optional(),
+      depiction_mode: z.string().optional(),
+      forbidden_changes_json: z.array(z.string()).optional(),
+      expected_updated_at: z.string().trim().min(1).optional().describe('Optional updated_at token for optimistic concurrency'),
+      expected_tenant_id: z.string().trim().min(1).optional().describe('Optional tenant guard checked before calling API')
+    },
+    false,
+    async ({ universe_id, character_id, expected_tenant_id, ...body }) => {
+      const mismatch = await checkExpectedTenant(expected_tenant_id);
+      if (mismatch) return mismatch;
+      return request(`/api/v2/universe-profiles/${encodeURIComponent(universe_id)}/characters/${encodeURIComponent(character_id)}`, {
+        method: 'PUT',
+        body
+      });
+    }
+  );
+
+  register(
+    'cf_list_reference_assets',
+    'List managed visual reference assets filtered by owner_type, owner_id, role, or status with absolute preview_url. Requires scope: content:read.',
+    {
+      owner_type: z.enum(['character', 'location', 'universe', 'visual_identity']).optional(),
+      owner_id: z.string().trim().min(1).optional(),
+      role: z.enum(ASSET_ROLES).optional(),
+      status: z.enum(['generating', 'draft', 'approved', 'rejected', 'archived', 'failed']).optional()
+    },
+    true,
+    async ({ owner_type, owner_id, role, status }) => {
+      const qs = new URLSearchParams();
+      if (owner_type) qs.set('owner_type', owner_type);
+      if (owner_id) qs.set('owner_id', owner_id);
+      if (role) qs.set('role', role);
+      if (status) qs.set('status', status);
+      const queryStr = qs.toString() ? `?${qs.toString()}` : '';
+      const res = await request(`/api/v2/reference-assets${queryStr}`);
+      if (!res || res.success === false) return res;
+      const assets = (Array.isArray(res.data) ? res.data : []).map(compactReferenceAsset);
+      return {
+        success: true,
+        tenant_id: res.tenant_id || null,
+        count: assets.length,
+        assets
+      };
+    }
+  );
+
+  register(
+    'cf_upload_reference_asset',
+    'Upload a visual reference image as a draft version (provide exactly one of image_base64 or local MCP host file_path; URL import unsupported). Deduplicates identical SHA-256. Requires scope: content:create.',
+    {
+      owner_type: z.enum(['character', 'location', 'universe', 'visual_identity']),
+      owner_id: z.string().trim().min(1),
+      role: z.enum(ASSET_ROLES),
+      universe_id: z.string().trim().min(1).optional(),
+      image_base64: z.string().optional().describe('Base64 image data (max ~14 MB encoded / 10 MB binary)'),
+      file_path: z.string().optional().describe('Local file path on the MCP host (.png, .jpg, .jpeg, .webp)'),
+      photo_url: z.string().optional().describe('Not supported in MVP (rejected with clear error)'),
+      filename: z.string().trim().min(1).max(200).optional(),
+      expected_tenant_id: z.string().trim().min(1).optional().describe('Optional tenant guard checked before calling API')
+    },
+    false,
+    async ({ owner_type, owner_id, role, universe_id, image_base64, file_path, photo_url, filename, expected_tenant_id }) => {
+      const mismatch = await checkExpectedTenant(expected_tenant_id);
+      if (mismatch) return mismatch;
+
+      const resolved = await resolveReferenceAssetUploadInput({ image_base64, file_path, photo_url, filename });
+      if (resolved.error) return resolved.error;
+
+      const formData = new FormData();
+      formData.append('owner_type', owner_type);
+      formData.append('owner_id', owner_id);
+      formData.append('role', role);
+      if (universe_id) formData.append('universe_id', universe_id);
+      formData.append('file', new Blob([resolved.buffer], { type: resolved.mimeType }), resolved.filename);
+
+      const res = await request('/api/v2/reference-assets/upload', {
+        method: 'POST',
+        body: formData
+      });
+      if (!res || res.success === false) return res;
+      return {
+        success: true,
+        tenant_id: res.tenant_id || null,
+        deduplicated: Boolean(res.deduplicated || res.data?.deduplicated),
+        asset: compactReferenceAsset(res.data)
+      };
+    }
+  );
+
+  register(
+    'cf_approve_reference_asset',
+    'Approve a reviewed draft reference asset version. expected_sha256 is required to verify the exact reviewed image. Requires scope: content:approve.',
+    {
+      asset_id: z.string().trim().min(1).describe('Reference asset ID to approve'),
+      expected_sha256: z.string().trim().min(8).describe('Required SHA-256 checksum matching the reviewed draft asset'),
+      notes: z.string().max(500).optional(),
+      attestation: z.boolean().optional(),
+      expected_tenant_id: z.string().trim().min(1).optional().describe('Optional tenant guard checked before calling API')
+    },
+    false,
+    async ({ asset_id, expected_sha256, notes, attestation, expected_tenant_id }) => {
+      const mismatch = await checkExpectedTenant(expected_tenant_id);
+      if (mismatch) return mismatch;
+      const res = await request(`/api/v2/reference-assets/${encodeURIComponent(asset_id)}/approve`, {
+        method: 'POST',
+        body: {
+          expected_sha256,
+          ...(notes !== undefined ? { notes } : {}),
+          ...(attestation !== undefined ? { attestation } : {})
+        }
+      });
+      if (!res || res.success === false) return res;
+      return {
+        success: true,
+        tenant_id: res.tenant_id || null,
+        asset: compactReferenceAsset(res.data)
+      };
+    }
+  );
+
+  register(
+    'cf_reject_reference_asset',
+    'Reject a draft reference asset version without affecting the active approved version. reason is required. Requires scope: content:approve.',
+    {
+      asset_id: z.string().trim().min(1).describe('Draft reference asset ID to reject'),
+      reason: z.string().trim().min(1).max(500).describe('Required rejection reason'),
+      expected_tenant_id: z.string().trim().min(1).optional().describe('Optional tenant guard checked before calling API')
+    },
+    false,
+    async ({ asset_id, reason, expected_tenant_id }) => {
+      const mismatch = await checkExpectedTenant(expected_tenant_id);
+      if (mismatch) return mismatch;
+      const res = await request(`/api/v2/reference-assets/${encodeURIComponent(asset_id)}/reject`, {
+        method: 'POST',
+        body: { reason }
+      });
+      if (!res || res.success === false) return res;
+      return {
+        success: true,
+        tenant_id: res.tenant_id || null,
+        asset: compactReferenceAsset(res.data)
+      };
+    }
+  );
+
+  register(
+    'cf_link_visual_identity_universe',
+    'Link a Visual Identity preset to a Universe and character keys without altering other VI fields or schedules. Defaults to dry_run=true to preview diff. Requires scope: content:approve.',
+    {
+      visual_identity_id: z.string().trim().min(1),
+      universe_id: z.string().trim().min(1),
+      character_keys: z.array(z.string().trim().min(1)).min(1),
+      character_lock_mode: z.enum(['off', 'strict']).optional(),
+      dry_run: z.boolean().default(true).describe('When true (default), previews before/after diff without saving'),
+      expected_tenant_id: z.string().trim().min(1).optional().describe('Optional tenant guard checked before calling API')
+    },
+    false,
+    async ({ visual_identity_id, universe_id, character_keys, character_lock_mode, dry_run, expected_tenant_id }) => {
+      const mismatch = await checkExpectedTenant(expected_tenant_id);
+      if (mismatch) return mismatch;
+      return request(`/api/v2/visual-identities/${encodeURIComponent(visual_identity_id)}/universe-link`, {
+        method: 'POST',
+        body: {
+          universe_id,
+          character_keys,
+          ...(character_lock_mode !== undefined ? { character_lock_mode } : {}),
+          dry_run
+        }
+      });
+    }
+  );
+
+  register(
+    'cf_preflight_character_lock',
+    'Run a read-only Character Lock preflight check proving that approved reference assets, disk files, SHA-256 checksums, and production resolver align for a Visual Identity. Requires scope: content:read.',
+    {
+      visual_identity_id: z.string().trim().min(1),
+      mode: z.enum(['advisory', 'required']).default('advisory'),
+      sample_prompt: z.string().max(1000).optional().describe('Optional sample prompt (e.g. mentioning another character) to verify strict isolation')
+    },
+    true,
+    async ({ visual_identity_id, mode, sample_prompt }) => {
+      return request('/api/v2/reference-assets/character-lock-preflight', {
+        method: 'POST',
+        body: {
+          visual_identity_id,
+          mode,
+          ...(sample_prompt ? { sample_prompt } : {})
+        }
+      });
+    }
   );
 
   return server;

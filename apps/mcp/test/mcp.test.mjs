@@ -700,3 +700,200 @@ test('cf_add_product: guard Radar memblokir URL kandidat riset, input manual & b
   assert.equal(calls.length, 1);
   assert.equal(calls[0].path, '/api/v2/products');
 });
+
+test('Universe & Character Lock MVP: all 10 tools registered with schema, tenant guard, and upload/approve validation', async t => {
+  const fs = await import('node:fs/promises');
+  const os = await import('node:os');
+  const path = await import('node:path');
+
+  const calls = [];
+  const rawReq = async (reqPath, opts = {}) => {
+    calls.push({ path: reqPath, opts });
+    if (reqPath === '/api/operator/v1/whoami') {
+      return { success: true, operator: { id: 'op_1', tenant_id: 'tnt_pt-gim-sosmed_62d0d9', scopes: ['content:read', 'content:create', 'content:approve'] } };
+    }
+    if (reqPath.startsWith('/api/v2/reference-assets/upload')) {
+      return {
+        success: true,
+        tenant_id: 'tnt_pt-gim-sosmed_62d0d9',
+        deduplicated: false,
+        data: {
+          id: 'ref_arka_1',
+          tenant_id: 'tnt_pt-gim-sosmed_62d0d9',
+          owner_type: 'character',
+          owner_id: 'char_arka',
+          asset_role: 'identity',
+          version: 1,
+          status: 'draft',
+          sha256: 'abc1234567890',
+          public_path: '/uploads/reference-assets/tnt/character/char_arka/identity/v1/abc.png'
+        }
+      };
+    }
+    if (reqPath.startsWith('/api/v2/reference-assets?')) {
+      return {
+        success: true,
+        tenant_id: 'tnt_pt-gim-sosmed_62d0d9',
+        data: [
+          {
+            id: 'ref_arka_1',
+            tenant_id: 'tnt_pt-gim-sosmed_62d0d9',
+            owner_type: 'character',
+            owner_id: 'char_arka',
+            asset_role: 'identity',
+            version: 1,
+            status: 'approved',
+            sha256: 'abc1234567890',
+            public_path: '/uploads/reference-assets/tnt/character/char_arka/identity/v1/abc.png',
+            generation_prompt: 'huge internal prompt should be stripped'
+          }
+        ]
+      };
+    }
+    return { success: true, tenant_id: 'tnt_pt-gim-sosmed_62d0d9', data: [] };
+  };
+  rawReq.baseUrl = 'http://127.0.0.1:5020';
+
+  const client = await connected(t, rawReq);
+  const tools = (await client.listTools()).tools;
+  const toolNames = new Set(tools.map(x => x.name));
+
+  const expected10 = [
+    'cf_list_universes',
+    'cf_get_universe',
+    'cf_create_universe_character',
+    'cf_update_universe_character',
+    'cf_list_reference_assets',
+    'cf_upload_reference_asset',
+    'cf_approve_reference_asset',
+    'cf_reject_reference_asset',
+    'cf_link_visual_identity_universe',
+    'cf_preflight_character_lock'
+  ];
+  for (const name of expected10) {
+    assert.ok(toolNames.has(name), `Expected MCP tool "${name}" to be registered`);
+  }
+
+  // 1. expected_tenant_id mismatch is rejected on MCP side BEFORE calling API
+  calls.length = 0;
+  const mismatchRes = await client.callTool({
+    name: 'cf_create_universe_character',
+    arguments: {
+      universe_id: 'univ_1',
+      name: 'Arka',
+      character_key: 'arka_acoustic_consultant',
+      canonical_prompt: 'Indonesian acoustic consultant',
+      expected_tenant_id: 'tnt_wrong_tenant'
+    }
+  });
+  assert.equal(mismatchRes.isError, true);
+  assert.equal(mismatchRes.structuredContent.error_code, 'TENANT_MISMATCH');
+  assert.ok(calls.every(c => !c.path.includes('/characters')), 'Must NOT call character creation API on tenant mismatch');
+
+  // 2. Schema rejects invalid character_key and approve without expected_sha256
+  const invalidKeyRes = await client.callTool({
+    name: 'cf_create_universe_character',
+    arguments: {
+      universe_id: 'univ_1',
+      name: 'Arka',
+      character_key: 'Invalid Key!',
+      canonical_prompt: 'Prompt'
+    }
+  });
+  assert.equal(invalidKeyRes.isError, true);
+
+  const missingShaRes = await client.callTool({
+    name: 'cf_approve_reference_asset',
+    arguments: { asset_id: 'ref_arka_1' }
+  });
+  assert.equal(missingShaRes.isError, true);
+
+  // 3. Upload rejects photo_url and oversized base64 BEFORE calling API
+  calls.length = 0;
+  const urlReject = await client.callTool({
+    name: 'cf_upload_reference_asset',
+    arguments: {
+      owner_type: 'character',
+      owner_id: 'char_arka',
+      role: 'identity',
+      photo_url: 'https://example.com/arka.png'
+    }
+  });
+  assert.equal(urlReject.isError, true);
+  assert.equal(urlReject.structuredContent.error_code, 'UNSUPPORTED_SOURCE');
+  assert.equal(calls.length, 0);
+
+  const hugeBase64 = 'A'.repeat(14 * 1024 * 1024 + 10);
+  const bigReject = await client.callTool({
+    name: 'cf_upload_reference_asset',
+    arguments: {
+      owner_type: 'character',
+      owner_id: 'char_arka',
+      role: 'identity',
+      image_base64: hugeBase64
+    }
+  });
+  assert.equal(bigReject.isError, true);
+  assert.equal(bigReject.structuredContent.error_code, 'UPLOAD_TOO_LARGE');
+  assert.equal(calls.length, 0);
+
+  // 4. Upload via local file_path builds FormData and returns absolute preview_url
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'cf-mcp-upload-'));
+  t.after(() => fs.rm(tmpDir, { recursive: true, force: true }));
+  const imgFile = path.join(tmpDir, 'arka.png');
+  const pngBytes = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64');
+  await fs.writeFile(imgFile, pngBytes);
+
+  const uploadOk = await client.callTool({
+    name: 'cf_upload_reference_asset',
+    arguments: {
+      owner_type: 'character',
+      owner_id: 'char_arka',
+      role: 'identity',
+      file_path: imgFile,
+      expected_tenant_id: 'tnt_pt-gim-sosmed_62d0d9'
+    }
+  });
+  assert.equal(uploadOk.isError, undefined);
+  assert.equal(uploadOk.structuredContent.asset.preview_url, 'http://127.0.0.1:5020/uploads/reference-assets/tnt/character/char_arka/identity/v1/abc.png');
+  const uploadCall = calls.find(c => c.path === '/api/v2/reference-assets/upload');
+  assert.ok(uploadCall && uploadCall.opts.body instanceof FormData);
+
+  // 5. cf_list_reference_assets strips heavy fields and returns absolute preview_url
+  const listRes = await client.callTool({
+    name: 'cf_list_reference_assets',
+    arguments: { owner_type: 'character', owner_id: 'char_arka' }
+  });
+  assert.equal(listRes.structuredContent.count, 1);
+  assert.equal(listRes.structuredContent.assets[0].preview_url, 'http://127.0.0.1:5020/uploads/reference-assets/tnt/character/char_arka/identity/v1/abc.png');
+  assert.equal('generation_prompt' in listRes.structuredContent.assets[0], false);
+
+  // 6. cf_link_visual_identity_universe defaults dry_run=true
+  calls.length = 0;
+  await client.callTool({
+    name: 'cf_link_visual_identity_universe',
+    arguments: {
+      visual_identity_id: 'vi_1',
+      universe_id: 'univ_1',
+      character_keys: ['arka_acoustic_consultant'],
+      character_lock_mode: 'strict'
+    }
+  });
+  assert.equal(calls[0].path, '/api/v2/visual-identities/vi_1/universe-link');
+  assert.equal(calls[0].opts.body.dry_run, true);
+  assert.equal(calls[0].opts.body.character_lock_mode, 'strict');
+
+  // 7. cf_preflight_character_lock forwards mode & sample_prompt
+  calls.length = 0;
+  await client.callTool({
+    name: 'cf_preflight_character_lock',
+    arguments: {
+      visual_identity_id: 'vi_1',
+      mode: 'required',
+      sample_prompt: 'Maya in studio'
+    }
+  });
+  assert.equal(calls[0].path, '/api/v2/reference-assets/character-lock-preflight');
+  assert.equal(calls[0].opts.body.mode, 'required');
+  assert.equal(calls[0].opts.body.sample_prompt, 'Maya in studio');
+});
