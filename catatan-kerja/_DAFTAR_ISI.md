@@ -6,6 +6,8 @@ Terakhir diperbarui: 19 November 2026
 
 | Nama File | Ringkasan / Judul |
 |---|---|
+| [USULAN_PERBAIKAN_PROMOSI_RADAR_PRODUK_NORMALIZE_URL.md](usulan/USULAN_PERBAIKAN_PROMOSI_RADAR_PRODUK_NORMALIZE_URL.md) | Analisis & Usulan Hotfix: ReferenceError `normalizeUrl is not defined` pada promosi kandidat Radar Produk ke Database Produk (kasus Vitameal & ecentio) |
+| `USULAN_PERBAIKAN_RADAR_PRODUK_PROMOSI_GAGAL.md` | Pelengkap usulan normalizeUrl: dampak ke Database Produk biasa, kuota terbuang karena retry, test insert produk baru, dan analisis URL Listing Kurator yang hilang/tidak terpakai saat URL riset sudah ada |
 | [USULAN_MCP_UNIVERSE_REFERENCE_MANAGER.md](usulan/USULAN_MCP_UNIVERSE_REFERENCE_MANAGER.md) | Usulan MCP Universe, upload/approval referensi karakter, link VI dan preflight Character Lock; kasus Arka PT GIM Sosmed |
 | [REVIEW_USULAN_MCP_UNIVERSE_REFERENCE_MANAGER.md](usulan/REVIEW_USULAN_MCP_UNIVERSE_REFERENCE_MANAGER.md) | Review Claude atas usulan Codex MCP Universe: 5 temuan baru di kode (manifest salah tenant, fallback karakter diam-diam, spread body, tanpa scope), MVP 10 tool tanpa migrasi |
 | `USULAN_RADAR_PRODUK_TELERADAR_CFSTUDIO.md` | Analisis kode TeleRadar di Mac Mini dan usulan Radar Produk: inbox riset terpisah, kurasi, lalu promosi ke Database Produk |
@@ -42,6 +44,7 @@ Terakhir diperbarui: 19 November 2026
 
 | Nama File | Ringkasan / Judul |
 |---|---|
+| `antigravity_radar_hotfix_scraper_dan_url_kurator_instructions.md` | Instruksi Antigravity — A: hotfix scraper `normalizeUrl` (produk baru gagal disimpan, test jalur insert, pemulihan 3 kandidat); B: tombol Simpan & Tandai Terverifikasi menolak saat kolom kosong walau URL riset ada (mockup dulu) |
 | [antigravity_mcp_universe_reference_manager_instructions.md](instruksi-agent/antigravity_mcp_universe_reference_manager_instructions.md) | Instruksi Antigravity — MCP Universe & Character Lock (kasus Arka): Bagian H hotfix isolasi tenant (B2+B3, naik Staging duluan) lalu Bagian F fitur: B1/B4/B5, 3 route baru, 10 tool MCP, mode strict, uji di Dev |
 | `antigravity_radar_produk_teleradar_instructions.md` | Instruksi Antigravity — Menu Radar Produk: hasil TeleRadar masuk tabel riset terpisah, kurasi, lalu promosi ke Database Produk (mockup dulu, 6 tahap dengan pintu berhenti) |
 | `antigravity_aktifkan_batch_scraper_instructions.md` | Instruksi Antigravity — Aktifkan kembali tombol Batch Scraper (mockup dulu) + pengaman kuota/afiliasi + S3/S5/S6 (disetujui); S1/S2/S4/S7 menunggu keputusan |
