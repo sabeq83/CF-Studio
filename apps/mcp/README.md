@@ -106,6 +106,26 @@ HTTP endpoint: `/mcp`, authenticated using `Authorization: Bearer <CF_STUDIO_MCP
 - `cf_get_cluster_health`: Check real-time health of the 3-node cluster, services, API keys, and queue tasks.
 - `cf_get_studio_stats`: Get overview metrics on content production, stock availability, and publishing counts.
 
+### K. Universe Manager & Character Lock Reference Assets
+- `cf_list_universes` *(readOnly, scope `content:read`)*: List active Universe profiles in the current tenant (compact summary).
+- `cf_get_universe` *(readOnly, scope `content:read`)*: Get Universe details, characters, locations, and approved reference asset summary per character.
+- `cf_create_universe_character` *(scope `content:create`)*: Create a character in a Universe (`character_key` `/^[a-z0-9_]{2,64}$/`, supports `expected_tenant_id`).
+- `cf_update_universe_character` *(scope `content:create`)*: Update character attributes with optional `expected_updated_at` concurrency check (`expected_tenant_id` supported).
+- `cf_list_reference_assets` *(readOnly, scope `content:read`)*: List managed reference assets with absolute `preview_url` (no base64 payload).
+- `cf_upload_reference_asset` *(scope `content:create`)*: Upload a draft reference image via `image_base64` or local MCP-host `file_path` (`.png/.jpg/.jpeg/.webp`, ≤10 MB, SHA-256 deduplicated; `photo_url` unsupported in MVP).
+- `cf_approve_reference_asset` *(scope `content:approve`)*: Approve a reviewed draft asset (requires `expected_sha256`, idempotent, transactional `FOR UPDATE`, auto-invalidates manifest cache).
+- `cf_reject_reference_asset` *(scope `content:approve`)*: Reject a draft asset with required `reason` without disturbing the approved version.
+- `cf_link_visual_identity_universe` *(scope `content:approve`)*: Merge only `subject.universe_profile_id/universe_slug/character_keys/character_lock_mode` on a Visual Identity (defaults to `dry_run: true`, returns before/after diff & active schedule warnings without editing schedules).
+- `cf_preflight_character_lock` *(readOnly, scope `content:read`)*: Prove end-to-end Character Lock readiness (`approved_asset`, disk file & SHA-256 verification, strict resolver check against `sample_prompt`).
+
+#### Example Character Lock Workflow (Arka replacing Maya)
+1. `cf_switch_tenant` (`tnt_pt-gim-sosmed_62d0d9`) → `cf_list_universes` → `cf_get_universe` (Ruang Akustik ID).
+2. `cf_create_universe_character` with `character_key: "arka_acoustic_consultant"` and `expected_tenant_id`.
+3. `cf_upload_reference_asset` (`owner_type: "character"`, `role: "identity"`, clean single-character anchor via `file_path` or `image_base64`) → review `preview_url` and `sha256`.
+4. After explicit human review, `cf_approve_reference_asset` with `expected_sha256`.
+5. `cf_link_visual_identity_universe` (`dry_run: true`) → inspect diff → apply with `dry_run: false`, `character_lock_mode: "strict"`.
+6. `cf_preflight_character_lock` (`mode: "required"`, `sample_prompt: "Maya explains acoustic panels"`) → confirm `status: "ready"`, `blocking: false`, and only Arka's `approved_asset` in `resolved_assets`.
+
 ---
 
 ## 4. Local Client Configuration
