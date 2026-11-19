@@ -151,3 +151,37 @@ export function formatSignedDelta(val) {
   if (!Number.isFinite(n)) return null;
   return `${n >= 0 ? '+' : ''}${n.toLocaleString('id-ID')}`;
 }
+
+const RESEARCH_URL_UNVERIFIABLE = new Set(['nearest', 'not_found', 'not_researched']);
+
+/**
+ * Menentukan URL yang akan disimpan oleh tombol "Simpan & Tandai Terverifikasi".
+ * - mode 'typed'    : kolom berisi URL baru yang belum tersimpan → simpan URL ketikan.
+ * - mode 'saved'    : kolom sama dengan URL kurator tersimpan → simpan ulang (no-op aman).
+ * - mode 'research' : kolom kosong, belum ada URL kurator, dan URL riset layak (Resmi/Listing/Pengguna)
+ *                     → verifikasi URL riset apa adanya.
+ * - mode 'none'     : tidak ada URL yang bisa disimpan (URL riset kosong atau hanya hasil pencarian).
+ */
+export function resolveCuratorUrlSave(inputValue, candidate) {
+  const typed = String(inputValue || '').trim();
+  const saved = String(candidate?.curated_data?.target_url || '').trim();
+  const research = String(candidate?.source_url || '').trim();
+  const researchVerifiable = Boolean(research) && !RESEARCH_URL_UNVERIFIABLE.has(candidate?.url_status);
+
+  if (typed) {
+    return typed === saved
+      ? { url: typed, mode: 'saved', dirty: false }
+      : { url: typed, mode: 'typed', dirty: true };
+  }
+  if (!saved && researchVerifiable) {
+    return { url: research, mode: 'research', dirty: false };
+  }
+  return {
+    url: '',
+    mode: 'none',
+    dirty: false,
+    reason: research && !researchVerifiable
+      ? 'URL riset hanya hasil pencarian produk mirip. Tempel URL listing produk yang benar.'
+      : 'Tempel URL listing e-commerce produk ini terlebih dahulu.'
+  };
+}

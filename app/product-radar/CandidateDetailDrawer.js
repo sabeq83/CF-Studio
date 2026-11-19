@@ -19,7 +19,8 @@ import {
   labelProcessStatus,
   processStatusTone,
   scoreTierTone,
-  formatSignedDelta
+  formatSignedDelta,
+  resolveCuratorUrlSave
 } from './radar-labels';
 
 function toneClass(tone) {
@@ -49,6 +50,7 @@ export default function CandidateDetailDrawer({
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [urlNotice, setUrlNotice] = useState(null);
 
   const [targetUrl, setTargetUrl] = useState('');
   const [editName, setEditName] = useState('');
@@ -58,6 +60,7 @@ export default function CandidateDetailDrawer({
 
   const syncFormFromCandidate = useCallback((c) => {
     setCandidate(c);
+    setUrlNotice(null);
     setTargetUrl(c.curated_data?.target_url || '');
     setEditName(c.curated_data?.name || c.research_data?.name || '');
     setEditDesc(c.curated_data?.description || c.research_data?.description || '');
@@ -96,20 +99,22 @@ export default function CandidateDetailDrawer({
     }
   }, [candidateId, loadDetail]);
 
-  const handleSaveUrl = async () => {
-    const trimmed = targetUrl.trim();
-    if (!trimmed) {
-      onToast?.('Masukkan URL listing e-commerce terlebih dahulu.');
-      return;
+  // Menyimpan URL kurator. Mengembalikan kandidat terbaru bila berhasil, atau null bila gagal/ditolak.
+  const saveCuratorUrl = async () => {
+    const plan = resolveCuratorUrlSave(targetUrl, candidate);
+    if (!plan.url) {
+      setUrlNotice({ tone: 'danger', text: plan.reason });
+      return null;
     }
     setSaving(true);
     setErrorMsg('');
+    setUrlNotice(null);
     try {
       const res = await fetch(`/api/v2/product-research/candidates/${encodeURIComponent(candidate.id)}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          target_url: trimmed,
+          target_url: plan.url,
           url_status: 'user',
           curation_status: candidate.curation_status === 'needs_info' ? 'ready' : candidate.curation_status,
           expected_revision: candidate.revision
@@ -117,20 +122,42 @@ export default function CandidateDetailDrawer({
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
-        if (res.status === 409) {
-          setErrorMsg(data.error || 'Data telah diubah oleh kurator lain. Muat ulang detail.');
-          return;
-        }
-        throw new Error(data.error || 'Gagal menyimpan URL listing.');
+        const text = res.status === 409
+          ? (data.error || 'Data telah diubah oleh kurator lain. Muat ulang detail.')
+          : (data.error || 'Gagal menyimpan URL listing.');
+        setUrlNotice({ tone: 'danger', text });
+        return null;
       }
       syncFormFromCandidate(data.candidate);
       onUpdated?.(data.candidate);
-      onToast?.('URL listing diverifikasi & disimpan.');
+      const okText = plan.mode === 'research'
+        ? 'URL riset diverifikasi & disimpan sebagai URL kurator.'
+        : 'URL listing diverifikasi & disimpan.';
+      setUrlNotice({ tone: 'success', text: okText });
+      onToast?.(okText);
+      return data.candidate;
     } catch (err) {
-      setErrorMsg(err.message);
+      setUrlNotice({ tone: 'danger', text: err.message || 'Gagal menyimpan URL listing.' });
+      return null;
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleSaveUrl = async () => {
+    await saveCuratorUrl();
+  };
+
+  // URL ketikan yang belum disimpan ikut disimpan dulu agar promosi memakai URL yang terlihat di layar.
+  const handlePromoteClick = async () => {
+    const plan = resolveCuratorUrlSave(targetUrl, candidate);
+    if (plan.mode === 'typed') {
+      const updated = await saveCuratorUrl();
+      if (!updated) return;
+      onRequestPromote?.(updated);
+      return;
+    }
+    onRequestPromote?.(candidate);
   };
 
   const handleSaveCurator = async () => {
@@ -147,6 +174,9 @@ export default function CandidateDetailDrawer({
             usp: editUsp.trim()
           },
           curation_status: editCurationStatus,
+          ...(resolveCuratorUrlSave(targetUrl, candidate).mode === 'typed'
+            ? { target_url: targetUrl.trim(), url_status: 'user' }
+            : {}),
           expected_revision: candidate.revision
         })
       });
@@ -228,6 +258,8 @@ export default function CandidateDetailDrawer({
   };
 
   if (!candidateId) return null;
+
+  const urlPlan = resolveCuratorUrlSave(targetUrl, candidate);
 
   const observedText = candidate?.observed_at
     ? formatObservedDate(candidate.observed_at)
@@ -469,26 +501,46 @@ export default function CandidateDetailDrawer({
                         </a>
                       </div>
                     )}
+                    {urlPlan.mode === 'research' && (
+                      <div className={styles.subNote}>
+                        Kolom kosong: tombol di bawah akan memverifikasi URL riset di atas. Tempel URL lain bila listing yang benar berbeda.
+                      </div>
+                    )}
+                    {urlPlan.mode === 'typed' && (
+                      <div className={styles.subNote} style={{ color: 'var(--status-warning)', fontWeight: 600 }}>
+                        ● URL baru belum disimpan
+                      </div>
+                    )}
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
                       <button
                         type="button"
                         className={`${styles.btn} ${styles.btnSm} ${styles.btnPrimary}`}
-                        disabled={saving}
+                        disabled={saving || urlPlan.mode === 'none'}
+                        title={urlPlan.mode === 'none' ? urlPlan.reason : undefined}
                         onClick={handleSaveUrl}
                       >
-                        ✓ Simpan & Tandai Terverifikasi
+                        {urlPlan.mode === 'research'
+                          ? '✓ Verifikasi URL Riset'
+                          : '✓ Simpan & Tandai Terverifikasi'}
                       </button>
-                      {candidate.source_url && !targetUrl.trim() && (
-                        <button
-                          type="button"
-                          className={`${styles.btn} ${styles.btnSm}`}
-                          disabled={saving}
-                          onClick={() => setTargetUrl(candidate.source_url)}
-                        >
-                          Salin URL Riset ke Input
-                        </button>
-                      )}
                     </div>
+                    {urlPlan.mode === 'none' && !urlNotice && (
+                      <div className={styles.subNote} style={{ color: 'var(--status-warning)' }}>
+                        {urlPlan.reason}
+                      </div>
+                    )}
+                    {urlNotice && (
+                      <div
+                        role="status"
+                        className={styles.subNote}
+                        style={{
+                          color: urlNotice.tone === 'success' ? 'var(--status-success)' : 'var(--status-danger)',
+                          fontWeight: 600
+                        }}
+                      >
+                        {urlNotice.text}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -781,8 +833,8 @@ export default function CandidateDetailDrawer({
                 <button
                   type="button"
                   className={`${styles.btn} ${styles.btnInfo}`}
-                  disabled={candidate.url_blocked || saving}
-                  onClick={() => onRequestPromote?.(candidate)}
+                  disabled={(candidate.url_blocked && urlPlan.mode !== 'typed') || saving}
+                  onClick={handlePromoteClick}
                 >
                   🔗 Hubungkan Produk yang Sudah Ada
                 </button>
@@ -790,11 +842,13 @@ export default function CandidateDetailDrawer({
                 <button
                   type="button"
                   className={`${styles.btn} ${styles.btnPrimary}`}
-                  disabled={candidate.url_blocked || saving}
-                  title={candidate.url_blocked
+                  disabled={(candidate.url_blocked && urlPlan.mode !== 'typed') || saving}
+                  title={candidate.url_blocked && urlPlan.mode !== 'typed'
                     ? 'Pilih & verifikasi URL listing terlebih dahulu'
-                    : 'Masukkan kandidat ini ke Database Produk'}
-                  onClick={() => onRequestPromote?.(candidate)}
+                    : urlPlan.mode === 'typed'
+                      ? 'URL baru akan disimpan dulu, lalu kandidat dimasukkan ke Database Produk'
+                      : 'Masukkan kandidat ini ke Database Produk'}
+                  onClick={handlePromoteClick}
                 >
                   {candidate.process_status === 'failed'
                     ? '↻ Coba Lagi Masukkan ke Database'
