@@ -1303,11 +1303,30 @@ export function createCfStudioServer(rawRequest) {
       photo_url: z.string().max(2000).optional(),
       photo_file_path: z.string().max(1000).optional(),
       active_photo: z.enum(['raw_photo_url', 'clean_photo_url']).optional(),
-      auto_enrich_clean_photo: z.boolean().default(true)
+      auto_enrich_clean_photo: z.boolean().default(true),
+      bypass_radar_check: z.boolean().optional()
     },
     false,
-    async ({ photo_base64, photo_filename, photo_url, photo_file_path, ...args }) => {
+    async ({ photo_base64, photo_filename, photo_url, photo_file_path, bypass_radar_check, ...args }) => {
       try {
+        // Guard Radar Produk: produk hasil riset harus lewat kurasi Radar, bukan jalan pintas manual.
+        // Input manual tanpa source_url, atau URL yang tidak ada di Radar, tetap berjalan seperti biasa.
+        if (args.source_url && !bypass_radar_check) {
+          const match = await request(
+            `/api/operator/v2/product-research/candidates/match-url?url=${encodeURIComponent(args.source_url)}`
+          );
+          const hit = match?.success && Array.isArray(match.matches)
+            ? match.matches.find(m => !m.cf_product_id && m.process_status !== 'in_catalog')
+            : null;
+          if (hit) {
+            return {
+              success: false,
+              code: 'RADAR_CANDIDATE_EXISTS',
+              error: `URL ini sudah menjadi kandidat Radar Produk (#${hit.number} "${hit.name}", batch ${hit.batch_label}). Ajukan lewat Radar agar riwayat riset & kurasi tercatat: cf_submit_radar_candidates. Untuk tetap menambah manual, kirim ulang dengan bypass_radar_check=true.`,
+              candidate: hit
+            };
+          }
+        }
         const photoData = await resolvePhotoInput({
           photo_base64,
           photo_url,
@@ -1327,6 +1346,54 @@ export function createCfStudioServer(rawRequest) {
         return { success: false, error: err.message };
       }
     }
+  );
+
+  // 5b. Radar Produk (kurasi hasil riset TeleRadar sebelum masuk katalog)
+  register(
+    'cf_list_radar_candidates',
+    'List Radar Produk research candidates from the latest TeleRadar batch (mode "top" = highest opportunity score among not-yet-sent, non-archived; mode "list" = research rank order). Scores are ordering aids only.',
+    {
+      mode: z.enum(['top', 'list']).default('top'),
+      trend: z.enum(['up', 'stable', 'down']).optional(),
+      search: z.string().max(200).optional(),
+      limit: z.number().int().min(1).max(50).default(10)
+    },
+    true,
+    ({ mode, trend, search, limit }) => {
+      const params = new URLSearchParams({ mode, limit: String(limit) });
+      if (trend) params.set('trend', trend);
+      if (search) params.set('search', search);
+      return request(`/api/operator/v2/product-research/candidates?${params.toString()}`);
+    }
+  );
+
+  register(
+    'cf_get_radar_candidate',
+    'Get one Radar Produk candidate by batch number or id: details, transparent opportunity score breakdown, and cross-week history (each figure carries its observation date).',
+    { candidate_ref: z.string().trim().min(1).max(128) },
+    true,
+    ({ candidate_ref }) =>
+      request(`/api/operator/v2/product-research/candidates/${encodeURIComponent(candidate_ref)}`)
+  );
+
+  register(
+    'cf_get_radar_status',
+    'Summary of the latest Radar Produk batch (trend/URL/process status counts).',
+    {},
+    true,
+    () => request('/api/operator/v2/product-research/status')
+  );
+
+  register(
+    'cf_submit_radar_candidates',
+    'Submit Radar Produk candidates to the product catalog using the same atomic promotion service as the web UI (max 50, blocked candidates such as nearest/not_found URL or archived are skipped). Default mode "preview" has no side effects; use mode "execute" only after the user explicitly approved. Requires operator scope product_research:mcp_promote.',
+    {
+      candidate_refs: z.array(z.string().trim().min(1).max(128)).min(1).max(50),
+      mode: z.enum(['preview', 'execute']).default('preview')
+    },
+    false,
+    ({ candidate_refs, mode }) =>
+      request('/api/operator/v2/product-research/submit', { body: { candidate_refs, mode } })
   );
 
   register(

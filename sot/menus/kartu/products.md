@@ -13,8 +13,9 @@ Gudang data "DNA" produk jualan. Menyimpan info terstruktur (USP, target audiens
 4. Produk siap dipilih di pipeline kampanye (Auto Pipeline, RE Campaign, Pillar Campaign, dll.).
 
 ## Terhubung dengan
+- Pintu masuk baru: **Radar Produk** (`/product-radar`) — kandidat hasil riset TeleRadar dikurasi terlebih dahulu lalu dipromosikan ke katalog menggunakan `enqueueProductScrape`.
 - Dipakai oleh: hampir semua menu kampanye.
-- Perintah MCP: `cf_add_product`, `cf_upload_product_photo`, `cf_regenerate_product_photo`, `cf_enrich_product`, `cf_get_product_detail`, `cf_update_product`, `cf_scrape_product_url`, `cf_get_scrape_status`.
+- Perintah MCP: `cf_add_product` (diberi guard Radar: `source_url` yang sudah jadi kandidat Radar Produk diblokir kecuali `bypass_radar_check=true`; input manual tanpa URL tetap normal; lihat kartu `product-radar.md`), `cf_upload_product_photo`, `cf_regenerate_product_photo`, `cf_enrich_product`, `cf_get_product_detail`, `cf_update_product`, `cf_scrape_product_url`, `cf_get_scrape_status`.
 
 ## Lokasi (untuk agent)
 - Halaman: `app/products/page.js`, `app/products/ProductDatabaseModal.js`, `app/products/[id]/page.js`

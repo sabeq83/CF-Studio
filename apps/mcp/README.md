@@ -66,7 +66,9 @@ HTTP endpoint: `/mcp`, authenticated using `Authorization: Bearer <CF_STUDIO_MCP
 - `cf_trigger_schedule_now`: Immediately trigger an execution run for an existing schedule.
 
 ### D. Pillar 1: Product Database & Knowledge Catalog (Data Engine)
-- `cf_add_product`: Register a new product into the tenant catalog (manual/spec).
+- `cf_add_product`: Register a new product into the tenant catalog (manual/spec). If `source_url` matches a not-yet-promoted Radar Produk candidate it is blocked with `RADAR_CANDIDATE_EXISTS` (use `cf_submit_radar_candidates`); pass `bypass_radar_check=true` to add manually anyway. Manual input without `source_url` is unchanged.
+- `cf_list_radar_candidates` / `cf_get_radar_candidate` / `cf_get_radar_status`: read Radar Produk research candidates (scope `product_research:read`).
+- `cf_submit_radar_candidates`: promote candidates through the same atomic service as the web UI (default `preview`; `execute` needs scope `product_research:mcp_promote`).
 - `cf_enrich_product`: Trigger AI enrichment for product USP, truths, and clean photo prompt.
 - `cf_get_product_detail`: Retrieve full product details, status, truths, and extraction metadata.
 - `cf_update_product`: Update existing product information in the catalog.

@@ -10,7 +10,7 @@ Operator API menyediakan jalur headless untuk membuat Content Planner, mengubah 
 - Approval storyboard tanpa perubahan melalui API/CLI.
 - Membaca output `video_final.mp4`, caption, dan URL Nextcloud dari status job.
 - Social posting sengaja dinonaktifkan pada v1.
-- Operator v2 mendukung research callback, status runs, dan exact revision approval untuk publishing.
+- Operator v2 mendukung research callback, status runs, exact revision approval untuk publishing, serta ingest kandidat Radar Produk (`product_research:ingest`).
 
 ## Konfigurasi
 
@@ -97,3 +97,44 @@ Approval v1 memakai storyboard/VO/DNA yang telah dihasilkan tanpa perubahan. Gun
 3. Restart service MAKNA.
 4. Verifikasi request tanpa token ditolak dan request dengan token baru diterima.
 5. Hapus token lama dari environment client.
+
+---
+
+## Operator API v2 — Ingest Radar Produk (`product_research:ingest`)
+
+Endpoint: `POST /api/operator/v2/product-research/batches`
+
+### Kredensial & Scope
+- Menggunakan kredensial tabel `operator_credentials` (token hashed SHA-256) dengan scope **`product_research:ingest`**.
+- Tenant ditentukan eksklusif dari kredensial operator tervalidasi (`identity.tenantId`); field `tenant_id` di dalam payload JSON selalu **diabaikan**.
+- Token dengan scope `product_research:ingest` **tidak** berhak mempromosikan kandidat ke katalog `product_extractions` maupun membaca kandidat tenant lain. Promosi ke katalog dilakukan melalui sesi pengguna web dengan izin menu `product_research` (atau scope terpisah `product_research:promote` jika diaktifkan nanti).
+- Ingest hanya menulis ke tabel riset (`product_research_batches`, `product_research_candidates`) serta folder foto riset (`public/uploads/product-research/<tenant>/<batch>/`), **tidak pernah menyentuh `product_extractions`**.
+
+### Batas & Format Payload
+- Mendukung `application/json` (foto via `thumb_base64` / `screenshot_base64`) dan `multipart/form-data` (field `payload` JSON + file `thumb_<external_candidate_id>` / `screenshot_<external_candidate_id>`).
+- Maksimal **100 kandidat per batch**.
+- Foto maksimal **5 MB** dengan format tervalidasi magic-bytes **JPG, PNG, atau WebP**.
+- Sinkron ulang batch (`tenant_id + source + external_batch_id`) dan kandidat (`tenant_id + batch_id + external_candidate_id`) bersifat idempotent: memperbarui `research_data`, tanpa menimpa `curated_data`, `curation_status`, `process_status`, `cf_product_id`, ataupun URL pilihan kurator.
+- Respons mengembalikan ringkasan `{ summary: { total, created, updated, skipped }, candidates: [...] }` per kandidat.
+
+
+---
+
+## Operator API v2 — Radar Produk untuk Bot & MCP (Tahap 7.4/7.6)
+
+Scope terpisah (tidak saling mencakup; `product_research:ingest` tetap tidak boleh membaca/mempromosikan):
+
+| Scope | Endpoint | Fungsi |
+|---|---|---|
+| `product_research:read` | `GET /api/operator/v2/product-research/candidates?mode=top\|list&trend=&search=&limit=` | `/top`, `/naik`, `/stabil`, `/turun`, `/cari` (batch terbaru, urut skor; arsip disembunyikan) |
+| `product_research:read` | `GET /api/operator/v2/product-research/candidates/{nomor-atau-id}` | `/produk <no>`: detail + rincian skor + riwayat lintas minggu |
+| `product_research:read` | `GET /api/operator/v2/product-research/status` | `/status`: ringkasan batch terbaru |
+| `product_research:curate` | `POST .../candidates/{nomor-atau-id}/url` `{url, telegram_user_id}` | `/url <no> <link>` (status URL menjadi `user`) |
+| `product_research:promote` | `POST .../promote` `{candidate_refs[], mode: preview\|execute, telegram_user_id}` | `/kirim`: memakai layanan promosi yang sama dengan web (klaim atomik, maks 50, tertahan tidak terkirim) |
+
+- `telegram_user_id` **wajib** untuk `curate` dan `promote` dan harus terdaftar aktif di tabel `product_research_telegram_identities` untuk tenant kredensial (daftar via `scripts/radar-telegram-identity.mjs`). Riwayat impor mencatat `requested_by = telegram:<id>`.
+- Nomor kandidat (`external_candidate_id`) hanya dicocokkan pada batch terbaru tenant; kandidat arsip tidak pernah ikut terkirim.
+
+### Tambahan untuk MCP (7.6)
+- `GET /api/operator/v2/product-research/candidates/match-url?url=` (`product_research:read`): kandidat Radar non-arsip dengan `normalized_url` sama. Dipakai guard `cf_add_product`.
+- `POST /api/operator/v2/product-research/submit` `{candidate_refs[], mode}` (scope **`product_research:mcp_promote`**, terpisah dari `promote` milik bot): layanan promosi yang sama, tanpa identitas Telegram; `requested_by = mcp:<id kredensial>`.

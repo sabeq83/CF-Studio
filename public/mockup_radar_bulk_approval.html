@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup Tahap 7.1 — Bulk Approval Radar Produk (CF Studio)</title>
+  <style>
+    /* ==========================================================================
+       MAKNA Flow Semantic Design Tokens (Disalin dari app/theme.css)
+       ========================================================================== */
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --surface-subtle: #0d1522;
+      --input-bg: #0c1422;
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --surface-subtle: #f7f9fc;
+      --input-bg: #ffffff;
+      --overlay-backdrop: rgba(15, 23, 42, 0.54);
+
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --text-disabled: #8794a6;
+
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --status-neutral: #6548bd;
+      --status-neutral-soft: #f0ecfb;
+
+      --focus-ring: #6d4ed6;
+      --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+      --shadow-modal: 0 26px 80px rgba(31, 45, 61, 0.22);
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+    }
+
+    button, input, select { font-family: inherit; color: var(--text-primary); }
+    :focus-visible { outline: 3px solid color-mix(in srgb, var(--focus-ring) 72%, transparent); outline-offset: 2px; }
+
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 20px 24px 96px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .sim-bar {
+      background: var(--surface-raised);
+      border: 1px dashed var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 0.82rem;
+    }
+
+    .page-header {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .page-title { margin: 0; font-size: 1.4rem; font-weight: 800; }
+    .page-sub { margin: 4px 0 8px; color: var(--text-secondary); font-size: 0.88rem; }
+    .mono { font-family: var(--font-mono); }
+    .sub-note { font-size: 0.74rem; color: var(--text-muted); }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.73rem;
+      font-weight: 700;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface);
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+    .pill-info { background: var(--status-info-soft); border-color: color-mix(in srgb, var(--status-info) 45%, transparent); color: var(--status-info); }
+    .pill-success { background: var(--status-success-soft); border-color: color-mix(in srgb, var(--status-success) 45%, transparent); color: var(--status-success); }
+    .pill-warning { background: var(--status-warning-soft); border-color: color-mix(in srgb, var(--status-warning) 45%, transparent); color: var(--status-warning); }
+    .pill-danger { background: var(--status-danger-soft); border-color: color-mix(in srgb, var(--status-danger) 45%, transparent); color: var(--status-danger); }
+    .pill-neutral { background: var(--status-neutral-soft); border-color: color-mix(in srgb, var(--status-neutral) 45%, transparent); color: var(--status-neutral); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 13px;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 650;
+      cursor: pointer;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      transition: background var(--transition), border-color var(--transition), transform var(--transition);
+      white-space: nowrap;
+    }
+    .btn:hover:not(:disabled) { background: var(--surface-hover); border-color: var(--border-strong); transform: translateY(-1px); }
+    .btn:disabled { background: var(--surface-raised); color: var(--text-disabled); cursor: not-allowed; opacity: 0.65; transform: none; }
+    .btn-primary { background: var(--action-primary); border-color: var(--action-primary); color: var(--on-action-primary); }
+    .btn-primary:hover:not(:disabled) { background: var(--action-primary-hover); border-color: var(--action-primary-hover); color: var(--on-action-primary); }
+    .btn-info { background: var(--status-info-soft); border-color: color-mix(in srgb, var(--status-info) 45%, transparent); color: var(--status-info); }
+    .btn-warning { background: var(--status-warning-soft); border-color: color-mix(in srgb, var(--status-warning) 45%, transparent); color: var(--status-warning); }
+    .btn-sm { padding: 5px 10px; font-size: 0.76rem; border-radius: var(--radius-xs); }
+
+    /* Toolbar pilih cepat */
+    .quick-select-bar {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    /* Queue Monitor Card (1 slot aktif sekaligus) */
+    .queue-monitor {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      box-shadow: var(--shadow-card);
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .queue-monitor.active { display: flex; }
+    .queue-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 8px;
+    }
+    .queue-item {
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.8rem;
+    }
+
+    /* Table */
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+    }
+    .table-scroll { overflow-x: auto; }
+    table.radar-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 980px;
+    }
+    .radar-table thead th {
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+      font-size: 0.73rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      text-align: left;
+      padding: 11px 10px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .radar-table tbody tr {
+      border-bottom: 1px solid var(--border-subtle);
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+    .radar-table tbody tr:hover { background: var(--surface-hover); }
+    .radar-table tbody tr.selected { background: color-mix(in srgb, var(--action-primary) 10%, var(--surface)); }
+    .radar-table td { padding: 10px; vertical-align: middle; font-size: 0.82rem; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+    .badge-success { background: var(--status-success-soft); color: var(--status-success); border-color: color-mix(in srgb, var(--status-success) 35%, transparent); }
+    .badge-info { background: var(--status-info-soft); color: var(--status-info); border-color: color-mix(in srgb, var(--status-info) 35%, transparent); }
+    .badge-warning { background: var(--status-warning-soft); color: var(--status-warning); border-color: color-mix(in srgb, var(--status-warning) 35%, transparent); }
+    .badge-danger { background: var(--status-danger-soft); color: var(--status-danger); border-color: color-mix(in srgb, var(--status-danger) 35%, transparent); }
+    .badge-neutral { background: var(--status-neutral-soft); color: var(--status-neutral); border-color: color-mix(in srgb, var(--status-neutral) 35%, transparent); }
+    .badge-muted { background: var(--surface-interactive); color: var(--text-secondary); border-color: var(--border-subtle); }
+
+    /* Sticky Bottom Bulk Action Bar */
+    .bulk-bar {
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(1080px, calc(100vw - 24px));
+      background: var(--surface-raised);
+      border: 1px solid var(--action-primary);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-modal);
+      padding: 12px 18px;
+      display: none;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      z-index: 150;
+    }
+    .bulk-bar.visible { display: flex; }
+
+    /* Modal Dialog */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay-backdrop);
+      z-index: 300;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-dialog {
+      width: min(760px, 100%);
+      max-height: 90vh;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-modal);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .modal-body {
+      padding: 18px 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .modal-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .summary-buckets {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .bucket-card {
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+    }
+    .bucket-num { font-size: 1.4rem; font-weight: 800; line-height: 1.1; margin-bottom: 4px; }
+    .bucket-list {
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      background: var(--surface-raised);
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .bucket-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: var(--radius-xs);
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      font-size: 0.8rem;
+    }
+
+    .alert-info {
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--status-info-soft);
+      border: 1px solid color-mix(in srgb, var(--status-info) 45%, transparent);
+      color: var(--status-info);
+      font-size: 0.8rem;
+    }
+
+    .toast {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      z-index: 400;
+      background: var(--surface-raised);
+      border: 1px solid var(--action-primary);
+      color: var(--text-primary);
+      padding: 11px 15px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-modal);
+      font-size: 0.82rem;
+      font-weight: 600;
+      display: none;
+    }
+    .toast.show { display: block; }
+
+    @media (max-width: 720px) {
+      .container { padding: 14px 14px 120px; }
+      .summary-buckets { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="sim-bar">
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <span class="pill pill-neutral">🧪 Mockup Tahap 7.1 · Bulk Approval</span>
+        <span style="color:var(--text-secondary);">
+          Centang beberapa kandidat (termasuk yang <strong>Terdekat</strong> atau <strong>Duplikat</strong>), lalu lihat ringkasan sebelum eksekusi & simulasi antrean <strong>1 job berjalan sekaligus</strong>.
+        </span>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button class="btn btn-sm" type="button" onclick="resetDemo()">↻ Reset Simulasi</button>
+        <button class="btn btn-sm" type="button" onclick="toggleTheme()" id="themeBtn">☀️ Light Mode</button>
+      </div>
+    </div>
+
+    <section class="page-header">
+      <div>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <h1 class="page-title">📡 Radar Produk — Simulasi Bulk Approval (7.1)</h1>
+          <span class="pill pill-warning">📸 Angka screenshot per 17 Nov 2026 · bukan data real-time</span>
+        </div>
+        <p class="page-sub">
+          Setiap kandidat tetap diklaim secara atomik (memakai layanan promosi Tahap 5). Kandidat tertahan otomatis dilewati, dan antrean <span class="mono">product_scraper</span> berjalan <strong>1 produk sekaligus</strong>.
+        </p>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <span class="pill pill-info">Batas antrean scraper: 1 aktif / giliran</span>
+      </div>
+    </section>
+
+    <section class="quick-select-bar">
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <strong style="font-size:0.84rem;">Pilih Cepat Uji:</strong>
+        <button class="btn btn-sm btn-primary" type="button" onclick="selectMixSample()">✨ Pilih Campuran (4 Valid + 2 Duplikat + 2 Tertahan)</button>
+        <button class="btn btn-sm" type="button" onclick="selectAllReady()">✓ Pilih Semua yang Siap URL</button>
+        <button class="btn btn-sm" type="button" onclick="clearSelection()">✕ Kosongkan Pilihan</button>
+      </div>
+      <div class="sub-note" id="selectionMeta">Belum ada kandidat dipilih</div>
+    </section>
+
+    <!-- Live Queue Progress Panel (1 slot aktif sekaligus) -->
+    <section class="queue-monitor" id="queueMonitor" aria-live="polite">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <strong style="font-size:0.9rem;">⚙️ Pemantau Antrean <span class="mono">product_scraper</span></strong>
+          <span class="pill pill-info" id="queueSlotPill">Slot Aktif: 0 / 1</span>
+        </div>
+        <span class="sub-note" id="queueProgressText">Menunggu eksekusi...</span>
+      </div>
+      <div class="queue-list" id="queueList"></div>
+    </section>
+
+    <!-- Table -->
+    <section class="table-card">
+      <div class="table-scroll">
+        <table class="radar-table">
+          <thead>
+            <tr>
+              <th style="width:40px;"><input type="checkbox" id="selectAllBox" onchange="toggleSelectAll(this.checked)" aria-label="Pilih semua" /></th>
+              <th>Kandidat Produk</th>
+              <th>Kategori</th>
+              <th>Terjual / mgg</th>
+              <th>Tren</th>
+              <th>Komisi</th>
+              <th>Harga</th>
+              <th>Kecocokan URL</th>
+              <th>Status Proses</th>
+              <th>Hasil Klasifikasi</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- Sticky Bulk Action Bar -->
+  <div class="bulk-bar" id="bulkBar">
+    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+      <strong style="font-size:0.9rem;"><span id="bulkCount">0</span> kandidat dipilih:</strong>
+      <span class="pill pill-success" id="pillValid">0 Valid</span>
+      <span class="pill pill-info" id="pillDup">0 Duplikat (Hubungkan)</span>
+      <span class="pill pill-warning" id="pillBlocked">0 Tertahan (Dilewati)</span>
+    </div>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <button class="btn btn-sm" type="button" onclick="clearSelection()">Batal</button>
+      <button class="btn btn-primary" type="button" onclick="openConfirmModal()">
+        🔍 Tinjau & Ajukan ke Database Produk
+      </button>
+    </div>
+  </div>
+
+  <!-- Bulk Confirmation Modal -->
+  <div class="modal-backdrop" id="confirmModal" role="dialog" aria-modal="true" onclick="if(event.target===this) closeConfirmModal()">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div>
+          <h3 style="margin:0; font-size:1.05rem; font-weight:800;">Ringkasan Bulk Approval Sebelum Eksekusi</h3>
+          <div class="sub-note">Periksa jumlah Valid, Duplikat, dan Tertahan. Kandidat tertahan tidak ikut terkirim ke antrean.</div>
+        </div>
+        <button class="btn btn-sm" type="button" onclick="closeConfirmModal()">✕</button>
+      </div>
+      <div class="modal-body" id="confirmModalBody"></div>
+      <div class="modal-footer" id="confirmModalFooter"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toastBox"></div>
+
+  <script>
+    const INITIAL_ROWS = [
+      { id: 'c1', rank: 1, name: 'TEXANIA SET Wajan Anti Lengket 30cm', category: 'Cookware Sets', sold: 7800, trend: 'stable', commRp: 10508, price: 153000, urlStatus: 'official', url: 'https://tokopedia.com/texania/wajan-set-30cm', process: 'not_sent', dupId: null },
+      { id: 'c2', rank: 2, name: 'Serum Niacinamide 10% Brightening 20ml', category: 'Skincare', sold: 2450, trend: 'up', commRp: 16020, price: 89000, urlStatus: 'official', url: 'https://shopee.co.id/glowlab/niacinamide-20ml', process: 'not_sent', dupId: 'pe_1794102201_312' },
+      { id: 'c3', rank: 3, name: 'Matcha Latte Oat Premix 10 Sachet', category: 'Minuman', sold: 1890, trend: 'up', commRp: 11100, price: 74000, urlStatus: 'official', url: 'https://shopee.co.id/soratea/matcha-oat-10s', process: 'not_sent', dupId: null },
+      { id: 'c4', rank: 4, name: 'Alat Pel Semprot Microfiber 360', category: 'Rumah Tangga', sold: 1410, trend: 'up', commRp: 14160, price: 118000, urlStatus: 'nearest', url: 'https://shopee.co.id/search-mirip/pel-360', process: 'not_sent', dupId: null },
+      { id: 'c5', rank: 5, name: 'Minyak Kemiri Bakar Alami 100ml', category: 'Perawatan Rambut', sold: 1620, trend: 'up', commRp: 9800, price: 49000, urlStatus: 'listing', url: 'https://tokopedia.com/ratuherbal/kemiri-100ml', process: 'not_sent', dupId: null },
+      { id: 'c6', rank: 6, name: 'Kopi Drip Arabica Gayo 10 Sachet', category: 'Minuman', sold: 980, trend: 'stable', commRp: 12750, price: 85000, urlStatus: 'listing', url: 'https://tokopedia.com/official/drip-gayo-10', process: 'not_sent', dupId: 'pe_1794221190_108' },
+      { id: 'c7', rank: 7, name: 'Biskuit MPASI Oat Pisang 120g', category: 'Ibu & Bayi', sold: 1180, trend: 'up', commRp: 5880, price: 42000, urlStatus: 'user', url: 'https://shopee.co.id/kecils/mpasi-pisang', process: 'not_sent', dupId: null },
+      { id: 'c8', rank: 8, name: 'Kapsul Ekstrak Daun Kelor 60s', category: 'Makanan Sehat', sold: 225, trend: 'down', commRp: 9750, price: 65000, urlStatus: 'not_found', url: '', process: 'not_sent', dupId: null },
+      { id: 'c9', rank: 9, name: 'Sunscreen Gel SPF 35 PA+++ 40ml', category: 'Skincare', sold: 3120, trend: 'up', commRp: 3850, price: 38500, urlStatus: 'official', url: 'https://shopee.co.id/wardah/uv-spf35', process: 'in_catalog', cfId: 'pe_1794881020_104', dupId: null },
+      { id: 'c10', rank: 10, name: 'Clay Mask Mugwort Pore 50g', category: 'Skincare', sold: 625, trend: 'stable', commRp: 12960, price: 72000, urlStatus: 'official', url: 'https://shopee.co.id/bumicare/mugwort-50g', process: 'not_sent', dupId: null },
+      { id: 'c11', rank: 11, name: 'Kotak Bekal Sekat 3 Stainless 304', category: 'Rumah Tangga', sold: 660, trend: 'stable', commRp: 13800, price: 115000, urlStatus: 'nearest', url: 'https://shopee.co.id/bentoku-mirip/304', process: 'not_sent', dupId: null },
+      { id: 'c12', rank: 12, name: 'Rolled Oat Gluten Free 1kg', category: 'Makanan Sehat', sold: 550, trend: 'stable', commRp: 8060, price: 62000, urlStatus: 'official', url: 'https://shopee.co.id/oatdaily/oat-1kg', process: 'not_sent', dupId: null }
+    ];
+
+    let rows = [];
+    let selected = new Set();
+    let queueItems = [];
+    let queueTimer = null;
+
+    function formatRp(n) { return 'Rp' + Number(n || 0).toLocaleString('id-ID'); }
+    function labelUrl(s) {
+      return ({ official: 'Resmi', listing: 'Listing', user: 'Dari pengguna', nearest: 'Terdekat', not_found: 'Tidak ditemukan' })[s] || s;
+    }
+    function badgeUrl(s) {
+      const cls = s === 'official' ? 'badge-success' : s === 'listing' ? 'badge-info' : s === 'user' ? 'badge-neutral' : s === 'nearest' ? 'badge-warning' : 'badge-danger';
+      return `<span class="badge ${cls}">${labelUrl(s)}</span>`;
+    }
+    function labelProcess(s) {
+      return ({ not_sent: 'Belum dikirim', queued: 'Antre', processing: 'Diproses', in_catalog: 'Masuk katalog', failed: 'Gagal (Retry aman)' })[s] || s;
+    }
+    function badgeProcess(s) {
+      const cls = s === 'in_catalog' ? 'badge-success' : (s === 'queued' || s === 'processing') ? 'badge-info' : s === 'failed' ? 'badge-danger' : 'badge-muted';
+      return `<span class="badge ${cls}">${labelProcess(s)}</span>`;
+    }
+
+    function classifyCandidate(c) {
+      if (c.process === 'in_catalog' || c.cfId) {
+        return { bucket: 'blocked', reason: `Sudah di katalog (${c.cfId || 'aktif'})` };
+      }
+      if (c.process === 'queued' || c.process === 'processing') {
+        return { bucket: 'blocked', reason: `Sudah berstatus ${labelProcess(c.process)}` };
+      }
+      if (c.urlStatus === 'nearest' || c.urlStatus === 'not_found') {
+        return { bucket: 'blocked', reason: c.urlStatus === 'nearest' ? 'URL Terdekat — belum memilih listing' : 'URL tidak ditemukan' };
+      }
+      if (c.dupId) {
+        return { bucket: 'duplicate', reason: `Cocok dengan ${c.dupId} (hubungkan tanpa menimpa)` };
+      }
+      return { bucket: 'valid', reason: 'Siap masuk antrean product_scraper' };
+    }
+
+    function render() {
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = rows.map(c => {
+        const clsInfo = classifyCandidate(c);
+        const clsBadge = clsInfo.bucket === 'valid'
+          ? `<span class="badge badge-success">✓ Valid</span>`
+          : clsInfo.bucket === 'duplicate'
+            ? `<span class="badge badge-info">🔗 Duplikat</span>`
+            : `<span class="badge badge-warning">⛔ Tertahan</span>`;
+        const isChecked = selected.has(c.id);
+        return `
+          <tr class="${isChecked ? 'selected' : ''}" onclick="toggleRow('${c.id}')">
+            <td onclick="event.stopPropagation()">
+              <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleRow('${c.id}', this.checked)" />
+            </td>
+            <td>
+              <strong>${c.name}</strong>
+              <div class="sub-note">#${c.rank} · <span class="mono">${c.url || 'belum ada URL'}</span></div>
+            </td>
+            <td>${c.category}</td>
+            <td><strong>${c.sold.toLocaleString('id-ID')}</strong></td>
+            <td>${c.trend === 'up' ? '<span class="badge badge-success">↑ Naik</span>' : c.trend === 'down' ? '<span class="badge badge-danger">↓ Menurun</span>' : '<span class="badge badge-muted">→ Stabil</span>'}</td>
+            <td><strong>${formatRp(c.commRp)}</strong></td>
+            <td><strong>${formatRp(c.price)}</strong></td>
+            <td>${badgeUrl(c.urlStatus)}</td>
+            <td>${badgeProcess(c.process)}</td>
+            <td>${clsBadge}<div class="sub-note" style="margin-top:2px;">${clsInfo.reason}</div></td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('selectAllBox').checked = rows.length > 0 && rows.every(r => selected.has(r.id));
+      updateBulkBar();
+    }
+
+    function updateBulkBar() {
+      const picked = rows.filter(r => selected.has(r.id));
+      let valid = 0, dup = 0, blocked = 0;
+      picked.forEach(r => {
+        const b = classifyCandidate(r).bucket;
+        if (b === 'valid') valid++;
+        else if (b === 'duplicate') dup++;
+        else blocked++;
+      });
+
+      document.getElementById('bulkCount').textContent = picked.length;
+      document.getElementById('pillValid').textContent = `${valid} Valid`;
+      document.getElementById('pillDup').textContent = `${dup} Duplikat (Hubungkan)`;
+      document.getElementById('pillBlocked').textContent = `${blocked} Tertahan (Dilewati)`;
+      document.getElementById('selectionMeta').textContent = picked.length
+        ? `${picked.length} dipilih (${valid} valid, ${dup} duplikat, ${blocked} tertahan)`
+        : 'Belum ada kandidat dipilih';
+
+      document.getElementById('bulkBar').classList.toggle('visible', picked.length > 0);
+    }
+
+    function toggleRow(id, forceVal) {
+      const next = forceVal !== undefined ? forceVal : !selected.has(id);
+      if (next) selected.add(id);
+      else selected.delete(id);
+      render();
+    }
+
+    function toggleSelectAll(checked) {
+      if (checked) rows.forEach(r => selected.add(r.id));
+      else selected.clear();
+      render();
+    }
+
+    function selectMixSample() {
+      selected = new Set(['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c8', 'c10']);
+      render();
+      showToast('Dipilih 8 kandidat campuran: 4 Valid, 2 Duplikat, dan 2 Tertahan.');
+    }
+
+    function selectAllReady() {
+      selected = new Set(rows.filter(r => classifyCandidate(r).bucket !== 'blocked').map(r => r.id));
+      render();
+    }
+
+    function clearSelection() {
+      selected.clear();
+      render();
+    }
+
+    function openConfirmModal() {
+      const picked = rows.filter(r => selected.has(r.id));
+      const validList = [], dupList = [], blockedList = [];
+      picked.forEach(r => {
+        const cls = classifyCandidate(r);
+        if (cls.bucket === 'valid') validList.push(r);
+        else if (cls.bucket === 'duplicate') dupList.push(r);
+        else blockedList.push({ r, reason: cls.reason });
+      });
+
+      const executableCount = validList.length + dupList.length;
+
+      document.getElementById('confirmModalBody').innerHTML = `
+        <div class="summary-buckets">
+          <div class="bucket-card">
+            <div class="bucket-num" style="color:var(--status-success);">${validList.length}</div>
+            <div style="font-size:0.8rem; font-weight:700;">Valid · Scrape Baru</div>
+            <div class="sub-note">Klaim atomik & antre 1-per-1</div>
+          </div>
+          <div class="bucket-card">
+            <div class="bucket-num" style="color:var(--status-info);">${dupList.length}</div>
+            <div style="font-size:0.8rem; font-weight:700;">Duplikat · Hubungkan</div>
+            <div class="sub-note">Tautkan tanpa menimpa produk</div>
+          </div>
+          <div class="bucket-card">
+            <div class="bucket-num" style="color:var(--status-warning);">${blockedList.length}</div>
+            <div style="font-size:0.8rem; font-weight:700;">Tertahan · Dilewati</div>
+            <div class="sub-note">Tidak ikut terkirim ke scraper</div>
+          </div>
+        </div>
+
+        ${validList.length ? `
+          <div class="bucket-list">
+            <strong style="font-size:0.78rem; color:var(--status-success);">✅ Masuk Antrean product_scraper (1 Job Berjalan Sekaligus)</strong>
+            ${validList.map(r => `
+              <div class="bucket-row">
+                <div><strong>${r.name}</strong><div class="sub-note mono">${r.url}</div></div>
+                <span class="badge badge-success">Valid</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+
+        ${dupList.length ? `
+          <div class="bucket-list">
+            <strong style="font-size:0.78rem; color:var(--status-info);">🔗 Dihubungkan ke Produk Katalog Eksisting</strong>
+            ${dupList.map(r => `
+              <div class="bucket-row">
+                <div><strong>${r.name}</strong><div class="sub-note">Cocok URL dengan <span class="mono">${r.dupId}</span></div></div>
+                <span class="badge badge-info">Hubungkan</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+
+        ${blockedList.length ? `
+          <div class="bucket-list">
+            <strong style="font-size:0.78rem; color:var(--status-warning);">⛔ Tertahan (Otomatis Dilewati — Tidak Ikut Terkirim)</strong>
+            ${blockedList.map(({ r, reason }) => `
+              <div class="bucket-row">
+                <div><strong>${r.name}</strong><div class="sub-note">${reason}</div></div>
+                <span class="badge badge-warning">Dilewati</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+
+        <div class="alert-info">
+          Setiap produk valid memakai layanan promosi Tahap 5 (<span class="mono">promoteResearchCandidate</span>): klaim atomik per kandidat + cadangan <span class="mono">reserved_product_id</span>. Antrean <span class="mono">product_scraper</span> hanya menjalankan <strong>1 job sekaligus</strong>.
+        </div>
+      `;
+
+      document.getElementById('confirmModalFooter').innerHTML = `
+        <button class="btn" type="button" onclick="closeConfirmModal()">Batal</button>
+        <button class="btn btn-primary" type="button" ${executableCount === 0 ? 'disabled' : ''} onclick="executeBulk()">
+          ✓ Jalankan (${validList.length} Scrape + ${dupList.length} Hubungkan)
+        </button>
+      `;
+
+      document.getElementById('confirmModal').classList.add('open');
+    }
+
+    function closeConfirmModal() {
+      document.getElementById('confirmModal').classList.remove('open');
+    }
+
+    function executeBulk() {
+      const picked = rows.filter(r => selected.has(r.id));
+      let linked = 0;
+      const toQueue = [];
+
+      picked.forEach(r => {
+        const cls = classifyCandidate(r);
+        if (cls.bucket === 'duplicate') {
+          r.process = 'in_catalog';
+          r.cfId = r.dupId;
+          linked++;
+        } else if (cls.bucket === 'valid') {
+          const reservedId = `pe_${Date.now().toString().slice(-6)}_${r.rank}`;
+          r.process = 'queued';
+          r.reservedId = reservedId;
+          toQueue.push({
+            id: r.id,
+            name: r.name,
+            reservedId,
+            status: 'queued'
+          });
+        }
+      });
+
+      selected.clear();
+      closeConfirmModal();
+      render();
+
+      if (toQueue.length > 0) {
+        queueItems = [...queueItems, ...toQueue];
+        startQueueWorkerSimulation();
+      }
+      showToast(`Dieksekusi: ${toQueue.length} masuk antrean scraper (1-per-1), ${linked} dihubungkan, kandidat tertahan dilewati.`);
+    }
+
+    function startQueueWorkerSimulation() {
+      renderQueueMonitor();
+      if (queueTimer) return;
+      queueTimer = setInterval(() => {
+        const running = queueItems.find(q => q.status === 'processing');
+        if (running) {
+          running.status = 'in_catalog';
+          const row = rows.find(r => r.id === running.id);
+          if (row) {
+            row.process = 'in_catalog';
+            row.cfId = running.reservedId;
+          }
+        } else {
+          const next = queueItems.find(q => q.status === 'queued');
+          if (next) {
+            next.status = 'processing';
+            const row = rows.find(r => r.id === next.id);
+            if (row) row.process = 'processing';
+          }
+        }
+
+        render();
+        renderQueueMonitor();
+
+        if (!queueItems.some(q => q.status === 'queued' || q.status === 'processing')) {
+          clearInterval(queueTimer);
+          queueTimer = null;
+          showToast('Semua pekerjaan antrean Bulk Approval selesai masuk katalog!');
+        }
+      }, 1300);
+    }
+
+    function renderQueueMonitor() {
+      const mon = document.getElementById('queueMonitor');
+      if (queueItems.length === 0) {
+        mon.classList.remove('active');
+        return;
+      }
+      mon.classList.add('active');
+      const activeCount = queueItems.filter(q => q.status === 'processing').length;
+      const doneCount = queueItems.filter(q => q.status === 'in_catalog').length;
+      document.getElementById('queueSlotPill').textContent = `Slot Aktif: ${activeCount} / 1`;
+      document.getElementById('queueProgressText').textContent = `${doneCount} dari ${queueItems.length} selesai masuk katalog`;
+      document.getElementById('queueList').innerHTML = queueItems.map(q => `
+        <div class="queue-item">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
+            <strong>${q.name}</strong>
+            ${badgeProcess(q.status)}
+          </div>
+          <div class="sub-note mono">reserved_id: ${q.reservedId}</div>
+        </div>
+      `).join('');
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      document.getElementById('themeBtn').textContent = next === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+    }
+
+    let toastT = null;
+    function showToast(msg) {
+      const el = document.getElementById('toastBox');
+      el.textContent = msg;
+      el.classList.add('show');
+      if (toastT) clearTimeout(toastT);
+      toastT = setTimeout(() => el.classList.remove('show'), 3600);
+    }
+
+    function resetDemo() {
+      if (queueTimer) { clearInterval(queueTimer); queueTimer = null; }
+      rows = JSON.parse(JSON.stringify(INITIAL_ROWS));
+      queueItems = [];
+      selected.clear();
+      renderQueueMonitor();
+      selectMixSample();
+    }
+
+    resetDemo();
+  </script>
+</body>
+</html>

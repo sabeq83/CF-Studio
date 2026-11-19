@@ -1,6 +1,6 @@
 # Kartu Menu: Universe Manager
 
-Terakhir dicek: 17 November 2026 · Versi aplikasi: v2.50.0
+Terakhir dicek: 19 November 2026 (koreksi dokumentasi API/cache dari kode lokal; bukan rilis baru) · Versi aplikasi acuan: v2.50.0
 Alamat: `/settings/universes` · Kelompok: PLANNING · Kunci izin menu: `universe_manager`
 
 ## Fungsi
@@ -18,17 +18,17 @@ Pencipta dunia cerita brand. Mendefinisikan semesta fiksi atau semi-fiksi untuk 
 
 ## Lokasi (untuk agent)
 - Halaman: `app/settings/universes/page.js`
-- API: tidak ditemukan folder API terpisah — data diakses via `lib/universe-*.js`
+- API: `app/api/v2/universe-profiles/` (profil, characters, locations, episodes); referensi melalui `app/api/v2/reference-assets/` (upload, generate, approval, status).
 - Logika inti: `lib/universe-ai-builder.js`, `lib/universe-ai-repository.js`, `lib/universe-manifests.js`, `lib/universe-ai-suggest.js`
 - Tabel data: `universe_profiles`, `universe_characters`, `universe_locations`, `universe_episodes`
 
 ## Aturan penting & jebakan
 1. Universe tidak aktif otomatis — harus dipilih saat membuat kampanye berseri.
-2. `universe_manifests.js` di-cache di memori; restart PM2 bila manifest tidak update.
+2. `lib/universe-manifests.js` di-cache di memori dan menyediakan `refreshManifestCache()` serta loader async dengan opsi refresh. Periksa invalidasi antar-proses setelah perubahan; jangan menganggap restart PM2 sebagai alur pembaruan wajib.
 3. Karakter harus punya deskripsi visual detail agar AI image konsisten.
 
 ## Belum ada / batasan
-- Universe Manager belum bisa diakses via MCP; kelola lewat UI atau langsung ke DB.
+- Universe Manager belum memiliki tool khusus dalam katalog MCP yang diperiksa; gunakan UI/API resmi untuk menjaga validasi dan lifecycle referensi, bukan edit DB langsung.
 
 ## Dokumen lengkap
 `sot/menus/universe-manager.md`
