@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.57.2 — Perbaikan Tombol URL Kurator Radar Produk (19/11/2026)
+- Tombol Simpan & Tandai Terverifikasi kini memverifikasi URL riset saat kolom kosong (label Verifikasi URL Riset)
+- URL riset hasil pencarian (Terdekat) tetap wajib diganti URL listing
+- URL ketikan yang belum disimpan diberi penanda, ikut tersimpan saat Simpan Edit Kurator, dan disimpan dulu sebelum Masukkan ke Database Produk
+- Pesan sukses/gagal tampil menetap di bawah tombol
+
 ## V2.57.1 — Perbaikan ReferenceError normalizeUrl pada Scraper Produk (19/11/2026)
 - Memperbaiki ReferenceError normalizeUrl menjadi normalizeProductUrl saat menyimpan produk baru ke Database Produk
 - Test regresi jalur insert produk baru dan mapping URL afiliasi
