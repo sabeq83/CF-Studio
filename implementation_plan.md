@@ -50,13 +50,13 @@ Prinsip kunci:
 - [x] Buat `POST /api/v2/product-research/candidates/[id]/promote` dan `GET /api/v2/product-research/candidates/[id]/status` (tolak `nearest`/`not_found`/`not_researched`, cek duplikat URL, link existing, klaim atomik `reserved_product_id`, pemulihan `needs_review`)
 - [x] Lengkapi seluruh 10 skenario test di `tests/product-research/` (22/22 test lolos) + `npm run build`
 - [x] Buat kartu menu `sot/menus/kartu/product-radar.md`, perbarui `sot/menus/_PETA_MENU.md`, dan perbarui `sot/menus/kartu/products.md`
-- [ ] Deploy ke **Dev** & laporkan hasil verifikasi
+- [x] Deploy ke **Dev** & laporkan hasil verifikasi (SHA `5d3b52c2f30c961060a9c0f667f90aba37c149e2`, release `20261119T000919Z-5d3b52c2f30c`)
 - [ ] **🛑 Berhenti:** Tunggu persetujuan pengguna
 
 ### Tahap 6 — Migrasi 1 Batch & Adapter TeleRadar (Pintu Berhenti 4 🛑)
 - [x] Inspeksi read-only `~/riset-produk/2026-11-17/data.json` dan `~/.claude/skills/teleradar/scripts/` serta susun rencana Tahap 6 di `implementation_plan.md`
-- [ ] (Menunggu persetujuan pengguna untuk menyentuh Mac Mini) Buat skrip `scripts/import-teleradar-batch-to-dev.mjs` dan jalankan impor 1 batch lama (`~/riset-produk/2026-11-17/data.json`) ke schema `dev` (persetujuan lama tidak memicu promosi; `cf_product_id` lama hanya referensi historis)
-- [ ] (Menunggu persetujuan pengguna untuk menyentuh Mac Mini) Buat adapter `~/.claude/skills/teleradar/scripts/radar_sync.py` + pembaruan `SKILL.md` Fase A untuk kirim batch ke `POST /api/operator/v2/product-research/batches` dengan buffer lokal status `unsynced` (tanpa mengubah bot `/top`, `/produk`, `/status`, `/url` dan tanpa mematikan Sheets)
+- [x] Buat skrip `scripts/import-teleradar-batch-to-dev.mjs` + mapper `lib/teleradar-batch-mapper.js` + test, dan impor 1 batch lama (`~/riset-produk/2026-11-17/data.json`: 45 kandidat + 45 foto) ke schema `dev` (persetujuan lama tidak memicu promosi; `cf_product_id` lama hanya referensi historis)
+- [x] Buat adapter `~/.claude/skills/teleradar/scripts/radar_sync.py` + pembaruan `SKILL.md` Fase A untuk kirim batch ke `POST /api/operator/v2/product-research/batches` dengan buffer lokal status `unsynced` (teruji offline `unsynced` → `retry` `synced`; tanpa mengubah bot `/top`, `/produk`, `/status`, `/url` dan tanpa mematikan Sheets)
 
 ---
 
