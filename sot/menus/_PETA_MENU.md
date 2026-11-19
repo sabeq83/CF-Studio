@@ -10,6 +10,7 @@ Sumber daftar menu: `lib/sidebar-nav.js`
 | Menu | Alamat | Fungsi singkat | Kartu | Dokumen lengkap |
 |---|---|---|---|---|
 | Content Planner | `/content-planner` | Menyusun baris rencana konten strategis berbasis decision tree | ✅ [kartu](kartu/content-planner.md) | `content-planner.md` |
+| Radar Produk | `/product-radar` | Kurasi kandidat riset TeleRadar sebelum masuk ke katalog produk | ✅ [kartu](kartu/product-radar.md) | [usulan](../../catatan-kerja/usulan/USULAN_RADAR_PRODUK_TELERADAR_CFSTUDIO.md) |
 | Product Database | `/products` | Katalog DNA produk, ekstraksi AI, cropping, dan foto studio | ✅ [kartu](kartu/products.md) | `products.md` |
 | Recipe Library | `/recipe-library` | Perpustakaan resep terkurasi untuk video resep dan artikel | ✅ [kartu](kartu/recipe-library.md) | `recipe-labs.md` |
 | Deconstruct Lab | `/deconstruct` | Membedah video viral kompetitor menjadi blueprint terstruktur | ✅ [kartu](kartu/deconstruct.md) | `deconstruct.md` |

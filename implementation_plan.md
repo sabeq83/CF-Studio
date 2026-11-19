@@ -41,20 +41,22 @@ Prinsip kunci:
 - [x] Daftarkan kunci izin `product_research` di `lib/schema/user-schema.js` dan navigasi `/product-radar` di `lib/sidebar-nav.js` (serta `withProductResearchAccess` di `lib/auth.js`)
 - [x] Buat API web: `GET /api/v2/product-research/candidates`, `GET/PATCH /api/v2/product-research/candidates/[id]`, `POST /api/v2/product-research/candidates/[id]/archive`, dan route foto terotorisasi tenant
 - [x] Buat halaman `app/product-radar/page.js` beserta panel detail sesuai mockup yang disetujui
-- [ ] Verifikasi & deploy ke **Dev** (`http://100.95.245.55:5020/product-radar`)
+- [x] Verifikasi & deploy ke **Dev** (`http://100.95.245.55:5020/product-radar`, SHA `f30bb38bbc5859440cd767e381df255432795e88`, release `20261118T233905Z-f30bb38bbc58`)
 - [ ] **🛑 Berhenti:** Laporkan tautan Dev + daftar cek ke pengguna
 
 ### Tahap 5 — Promosi ke Database Produk (Pintu Berhenti 3 🛑)
-- [ ] Tambahkan unit test sebelum refaktor untuk `normalizeUrl` & kontrak `POST /api/v2/products/scrape`
-- [ ] Ekstrak `lib/product-url-normalizer.js` (T2) dan `enqueueProductScrape()` di `lib/product-catalog-service.js` (T3), lalu pakai di scrape route, scheduler processor, dan Radar
-- [ ] Buat `POST /api/v2/product-research/candidates/[id]/promote` dan `GET /api/v2/product-research/candidates/[id]/status` (tolak `nearest`/`not_found`/`not_researched`, cek duplikat URL, link existing, klaim atomik `reserved_product_id`, pemulihan `needs_review`)
-- [ ] Lengkapi seluruh 10 skenario test di `tests/product-research/` + `npm run build` + lint
-- [ ] Buat kartu menu `sot/menus/kartu/product-radar.md`, perbarui `sot/menus/_PETA_MENU.md`, dan perbarui `sot/menus/kartu/products.md`
+- [x] Tambahkan unit test sebelum refaktor untuk `normalizeUrl` & kontrak `POST /api/v2/products/scrape`
+- [x] Ekstrak `lib/product-url-normalizer.js` (T2) dan `enqueueProductScrape()` + `getProductScrapeJobStatus()` di `lib/product-catalog-service.js` (T3), lalu pakai di scrape route, scheduler processor, dan Radar
+- [x] Buat `POST /api/v2/product-research/candidates/[id]/promote` dan `GET /api/v2/product-research/candidates/[id]/status` (tolak `nearest`/`not_found`/`not_researched`, cek duplikat URL, link existing, klaim atomik `reserved_product_id`, pemulihan `needs_review`)
+- [x] Lengkapi seluruh 10 skenario test di `tests/product-research/` (22/22 test lolos) + `npm run build`
+- [x] Buat kartu menu `sot/menus/kartu/product-radar.md`, perbarui `sot/menus/_PETA_MENU.md`, dan perbarui `sot/menus/kartu/products.md`
 - [ ] Deploy ke **Dev** & laporkan hasil verifikasi
 - [ ] **🛑 Berhenti:** Tunggu persetujuan pengguna
 
 ### Tahap 6 — Migrasi 1 Batch & Adapter TeleRadar (Pintu Berhenti 4 🛑)
-- [ ] Susun rencana terpisah sebelum menyentuh kode di Mac Mini (`~/.claude/skills/teleradar/`) dan minta persetujuan eksplisit pengguna
+- [x] Inspeksi read-only `~/riset-produk/2026-11-17/data.json` dan `~/.claude/skills/teleradar/scripts/` serta susun rencana Tahap 6 di `implementation_plan.md`
+- [ ] (Menunggu persetujuan pengguna untuk menyentuh Mac Mini) Buat skrip `scripts/import-teleradar-batch-to-dev.mjs` dan jalankan impor 1 batch lama (`~/riset-produk/2026-11-17/data.json`) ke schema `dev` (persetujuan lama tidak memicu promosi; `cf_product_id` lama hanya referensi historis)
+- [ ] (Menunggu persetujuan pengguna untuk menyentuh Mac Mini) Buat adapter `~/.claude/skills/teleradar/scripts/radar_sync.py` + pembaruan `SKILL.md` Fase A untuk kirim batch ke `POST /api/operator/v2/product-research/batches` dengan buffer lokal status `unsynced` (tanpa mengubah bot `/top`, `/produk`, `/status`, `/url` dan tanpa mematikan Sheets)
 
 ---
 
@@ -229,4 +231,84 @@ export function normalizeProductUrl(url) {
 - app/api/v2/product-research/candidates/[id]/archive/route.js (POST arsip/batal arsip tanpa menyentuh katalog)
 - app/api/v2/product-research/candidates/[id]/image/route.js (GET foto riset terotorisasi tenant)
 - app/product-radar/page.js + CandidateDetailDrawer.js + product-radar.module.css (100% semantic CSS tokens, sesuai mockup yang disetujui; tombol Masukkan disiapkan dengan status Tahap 5 atau info siap)
+```
+
+### Tahap 5 — Refaktor T2 & T3 (`lib/product-catalog-service.js`, `app/api/v2/products/scrape/route.js`, `app/api/v2/products/scrape/jobs/[jobId]/route.js`, `lib/scheduler-processors.js`)
+
+**Code Sebelum (Current/Before):**
+```js
+// app/api/v2/products/scrape/route.js
+function normalizeUrl(url) { /* duplikat inline */ }
+export const POST = withTenantContext(async (req) => {
+  /* cek duplikat, reserved_ids, createJob('product_scraper', ...) inline */
+});
+
+// lib/scheduler-processors.js:9246
+const normalizeUrl = (url) => { /* duplikat inline kedua */ };
+```
+
+**Code Sesudah (Proposed/After):**
+```js
+// lib/product-catalog-service.js
+export async function enqueueProductScrape(input, deps = {}) { /* inti cek duplikat + reserved_ids + createJob */ }
+export async function getProductScrapeJobStatus(jobId) { /* baca status scheduler_jobs per tenant */ }
+
+// app/api/v2/products/scrape/route.js & lib/scheduler-processors.js
+import { normalizeProductUrl } from '@/lib/product-url-normalizer'; // satu helper bersama
+```
+
+### Tahap 5 — Promosi & Pelacakan Radar Produk (`lib/product-research-promotion-service.js`, `.../promote/route.js`, `.../status/route.js`)
+
+**Code Sebelum (Current/Before):**
+```text
+(Promosi dari Radar Produk hanya placeholder UI; belum ada endpoint promote/status)
+```
+
+**Code Sesudah (Proposed/After):**
+```js
+// POST /api/v2/product-research/candidates/[id]/promote
+// 1. Tolak url_status nearest/not_found/not_researched tanpa curated_data.target_url (HTTP 422)
+// 2. Tolak kandidat yang sudah punya cf_product_id (HTTP 409)
+// 3. Cek duplikat via normalized_url terhadap product_extractions tenant -> jika ada, Hubungkan tanpa menimpa produk
+// 4. Jika baru -> claimCandidatePromotion() (partial unique + reserved_product_id) -> enqueueProductScrape() -> markPromotionQueued() / markPromotionFailed()
+
+// GET /api/v2/product-research/candidates/[id]/status
+// - Membaca status job via getProductScrapeJobStatus() + verifikasi baris product_extractions
+// - in_catalog hanya jika baris product_extractions benar-benar ada
+// - photo_status/enrichment_status gagal -> needs_review dengan aksi pemulihan produk (tanpa scrape ulang)
+```
+
+---
+
+### Tahap 6 — Rencana Impor 1 Batch Lama ke Dev & Adapter TeleRadar di Mac Mini (Menunggu Persetujuan Sebelum Menyentuh Mac Mini)
+
+#### 6A. Skrip Impor 1 Batch Lama (`scripts/import-teleradar-batch-to-dev.mjs` — di repo)
+- **Sumber data:** salinan/bacaan `~/riset-produk/2026-11-17/data.json` (45 item `produk`) + foto `~/riset-produk/2026-11-17/foto/<no>.jpg`.
+- **Aturan keamanan:**
+  - Wajib hanya menargetkan schema **`dev`** (menolak `staging` dan `public`). Default `--dry-run`, perlu `--apply --confirm-dev` untuk menulis.
+  - Persetujuan lama (`disetujui: true`) **tidak pernah** memicu promosi atau membuat job `product_scraper`.
+  - `cf_product_id` lama dari Staging disimpan sebagai referensi historis di `research_data.legacy_staging_cf_product_id` dan `research_data.legacy_cf_status` (**tidak** diisi ke `product_research_candidates.cf_product_id` dan **tidak** dicocokkan terhadap Staging dari Dev).
+  - Pemetaan field TeleRadar → Radar Produk:
+    - `tren`: `Naik` → `up`, `Stabil` → `stable`, `Menurun` → `down`
+    - `status_url`: `Resmi` → `official`, `Listing` → `listing`, `Terdekat` → `nearest`, `Tidak ditemukan` → `not_found`, `Dari pengguna` → `user`
+    - `komisi` → `commission_rp`, `terjual` → `sold_per_week`, `toko` → `brand`, `no` → `external_candidate_id`
+    - `foto` lokal (`<no>.jpg`) diunggah lewat `saveResearchImage()` ke `public/uploads/product-research/<tenant>/2026-11-17/...` (dan disinkronkan ke `~/maknaflow-dev-atomic/shared/public/uploads/product-research/...`).
+
+#### 6B. Adapter TeleRadar di Mac Mini (`~/.claude/skills/teleradar/` — luar repo, **BELUM DISENTUH**)
+
+**Code Sebelum (Current/Before di `~/.claude/skills/teleradar/SKILL.md` Fase A):**
+```text
+- Fase A hanya menulis data.json lokal, potong_foto.py, nextcloud_foto.py, buat_excel.py, lalu sheet_sync.py push.
+- Belum ada pengiriman batch ke API Radar Produk CF Studio maupun status buffer lokal unsynced.
+```
+
+**Code Sesudah (Proposed/After di `~/.claude/skills/teleradar/`):**
+```text
+1. Cadangkan ~/.claude/skills/teleradar/ ke backup sebelum edit.
+2. Tambah ~/.claude/skills/teleradar/scripts/radar_sync.py:
+   - Membaca token & base URL dari env/konfigurasi lokal Mac Mini (~/.claude/skills/teleradar/.env atau $TG_CONF, TANPA menyimpan token di repo).
+   - Mengirim batch + 1..100 kandidat + thumbnail foto (base64/multipart) ke POST /api/operator/v2/product-research/batches (header Authorization: Bearer <token> dengan scope product_research:ingest).
+   - Menyimpan status sinkron lokal di data.json / radar_sync_state.json: jika CF Studio unreachable / HTTP >= 500 / timeout, tandai batch status "unsynced" agar bisa dikirim ulang saat run berikutnya (`radar_sync.py retry`) tanpa kehilangan data atau membuat duplikat.
+   - Tidak menyentuh teleradar_bot.py (/top, /produk, /status, /url = Tahap 7.4) dan tidak mematikan Sheets (Tahap 7.5).
+   - Aturan guard: jangan menjalankan dua konsumen promosi (Sheets Fase B dan Radar) bersamaan untuk batch yang sama.
 ```

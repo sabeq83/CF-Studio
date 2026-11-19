@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import styles from './product-radar.module.css';
 import {
@@ -39,52 +39,59 @@ export default function CandidateDetailDrawer({
   canNext,
   onUpdated,
   onToast,
-  onRequestPromotePlaceholder
+  onRequestPromote
 }) {
   const [candidate, setCandidate] = useState(null);
+  const [recoveryInfo, setRecoveryInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Form states
   const [targetUrl, setTargetUrl] = useState('');
   const [editName, setEditName] = useState('');
   const [editDesc, setEditDesc] = useState('');
   const [editUsp, setEditUsp] = useState('');
   const [editCurationStatus, setEditCurationStatus] = useState('new');
 
-  const loadDetail = async (id) => {
+  const syncFormFromCandidate = useCallback((c) => {
+    setCandidate(c);
+    setTargetUrl(c.curated_data?.target_url || '');
+    setEditName(c.curated_data?.name || c.research_data?.name || '');
+    setEditDesc(c.curated_data?.description || c.research_data?.description || '');
+    setEditUsp(c.curated_data?.usp || c.research_data?.usp || '');
+    setEditCurationStatus(c.curation_status || 'new');
+  }, []);
+
+  const loadDetail = useCallback(async (id, { reconcileStatus = false } = {}) => {
     setLoading(true);
     setErrorMsg('');
     try {
-      const res = await fetch(`/api/v2/product-research/candidates/${encodeURIComponent(id)}`, {
-        cache: 'no-store'
-      });
+      const url = reconcileStatus
+        ? `/api/v2/product-research/candidates/${encodeURIComponent(id)}/status`
+        : `/api/v2/product-research/candidates/${encodeURIComponent(id)}`;
+      const res = await fetch(url, { cache: 'no-store' });
       const data = await res.json();
       if (!res.ok || !data.success) {
         throw new Error(data.error || 'Gagal memuat detail kandidat.');
       }
-      const c = data.candidate;
-      setCandidate(c);
-      setTargetUrl(c.curated_data?.target_url || '');
-      setEditName(c.curated_data?.name || c.research_data?.name || '');
-      setEditDesc(c.curated_data?.description || c.research_data?.description || '');
-      setEditUsp(c.curated_data?.usp || c.research_data?.usp || '');
-      setEditCurationStatus(c.curation_status || 'new');
+      syncFormFromCandidate(data.candidate);
+      if (data.recovery) {
+        setRecoveryInfo(data.recovery);
+      } else {
+        setRecoveryInfo(null);
+      }
     } catch (err) {
       setErrorMsg(err.message);
     } finally {
       setLoading(false);
     }
-  };
+  }, [syncFormFromCandidate]);
 
   useEffect(() => {
     if (candidateId) {
-      loadDetail(candidateId);
+      loadDetail(candidateId, { reconcileStatus: true });
     }
-  }, [candidateId]);
-
-  if (!candidateId) return null;
+  }, [candidateId, loadDetail]);
 
   const handleSaveUrl = async () => {
     const trimmed = targetUrl.trim();
@@ -113,8 +120,7 @@ export default function CandidateDetailDrawer({
         }
         throw new Error(data.error || 'Gagal menyimpan URL listing.');
       }
-      setCandidate(data.candidate);
-      setEditCurationStatus(data.candidate.curation_status);
+      syncFormFromCandidate(data.candidate);
       onUpdated?.(data.candidate);
       onToast?.('URL listing diverifikasi & disimpan.');
     } catch (err) {
@@ -149,7 +155,7 @@ export default function CandidateDetailDrawer({
         }
         throw new Error(data.error || 'Gagal menyimpan edit kurator.');
       }
-      setCandidate(data.candidate);
+      syncFormFromCandidate(data.candidate);
       onUpdated?.(data.candidate);
       onToast?.(`Edit kurator disimpan (Rev #${data.candidate.revision}).`);
     } catch (err) {
@@ -174,8 +180,7 @@ export default function CandidateDetailDrawer({
       if (!res.ok || !data.success) {
         throw new Error(data.error || 'Gagal memperbarui status arsip.');
       }
-      setCandidate(data.candidate);
-      setEditCurationStatus(data.candidate.curation_status);
+      syncFormFromCandidate(data.candidate);
       onUpdated?.(data.candidate);
       onToast?.(willArchive
         ? 'Kandidat diarsipkan. Produk katalog tidak dihapus.'
@@ -187,12 +192,48 @@ export default function CandidateDetailDrawer({
     }
   };
 
+  const handleProductRecovery = async (mode) => {
+    const productId = candidate?.cf_product_id;
+    if (!productId) return;
+    setSaving(true);
+    setErrorMsg('');
+    try {
+      const endpoint = mode === 'photo'
+        ? '/api/v2/products/regenerate-photos'
+        : '/api/v2/products/re-enrich';
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: [productId] })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Gagal mengantrekan pemulihan produk.');
+      }
+      onToast?.(
+        mode === 'photo'
+          ? `Pemulihan foto studio diantrekan untuk produk ${productId} (tanpa scrape ulang).`
+          : `Enrich AI diantrekan ulang untuk produk ${productId} (tanpa scrape ulang).`
+      );
+      await loadDetail(candidate.id, { reconcileStatus: true });
+      onUpdated?.();
+    } catch (err) {
+      setErrorMsg(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (!candidateId) return null;
+
   const observedText = candidate?.observed_at
     ? formatObservedDate(candidate.observed_at)
     : (candidate?.external_batch_id || 'tanggal batch');
 
   const rd = candidate?.research_data || {};
   const previewImgUrl = candidate?.screenshot_api_url || candidate?.thumb_api_url || null;
+  const isQueuedOrProcessing = ['queued', 'processing'].includes(candidate?.process_status);
+  const needsRecovery = candidate?.process_status === 'needs_review' || recoveryInfo?.needed;
 
   return (
     <div
@@ -264,7 +305,7 @@ export default function CandidateDetailDrawer({
               <button
                 type="button"
                 className={`${styles.btn} ${styles.btnSm}`}
-                onClick={() => loadDetail(candidateId)}
+                onClick={() => loadDetail(candidateId, { reconcileStatus: true })}
               >
                 ↻ Muat Ulang
               </button>
@@ -281,13 +322,21 @@ export default function CandidateDetailDrawer({
               <section className={styles.sectionBox}>
                 <div className={styles.sectionTitle}>
                   <span>1. Screenshot Sumber vs Listing Tujuan</span>
-                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
                     <span className={`${styles.badge} ${toneClass(urlStatusTone(candidate.url_status))}`}>
                       {labelUrlStatus(candidate.url_status)}
                     </span>
                     <span className={`${styles.badge} ${toneClass(processStatusTone(candidate.process_status))}`}>
                       {labelProcessStatus(candidate.process_status)}
                     </span>
+                    <button
+                      type="button"
+                      className={`${styles.btn} ${styles.btnSm}`}
+                      onClick={() => loadDetail(candidate.id, { reconcileStatus: true })}
+                      title="Periksa status terbaru antrean scraper dan katalog"
+                    >
+                      ↻ Cek Status
+                    </button>
                   </div>
                 </div>
 
@@ -307,7 +356,49 @@ export default function CandidateDetailDrawer({
 
                 {candidate.duplicate_match && !candidate.cf_product_id && (
                   <div className={`${styles.alertBox} ${styles.alertInfo}`}>
-                    <strong>🔗 URL Sudah Ada di Katalog ({candidate.duplicate_match.cf_product_id}):</strong> &ldquo;{candidate.duplicate_match.product_name}&rdquo;. Kandidat ini nantinya ditautkan tanpa menimpa data produk yang sudah ada.
+                    <strong>🔗 URL Sudah Ada di Katalog ({candidate.duplicate_match.cf_product_id}):</strong> &ldquo;{candidate.duplicate_match.product_name}&rdquo;. Menekan <strong>Hubungkan Produk</strong> akan menautkan riwayat riset tanpa menimpa deskripsi, foto, atau link afiliasi produk.
+                  </div>
+                )}
+
+                {needsRecovery && candidate.cf_product_id && (
+                  <div className={`${styles.alertBox} ${styles.alertWarning}`} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div>
+                      <strong>🛠 Perlu Review Pemulihan ({candidate.cf_product_id}):</strong> Produk sudah masuk ke Database Produk, namun tahap foto studio atau AI enrichment belum selesai. Gunakan aksi pemulihan produk (tanpa scrape ulang):
+                      {recoveryInfo?.enrichment_error && (
+                        <div className={styles.subNote} style={{ marginTop: '4px' }}>
+                          Enrichment error: {recoveryInfo.enrichment_error}
+                        </div>
+                      )}
+                      {recoveryInfo?.studio_polish_error && (
+                        <div className={styles.subNote} style={{ marginTop: '2px' }}>
+                          Studio polish error: {recoveryInfo.studio_polish_error}
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      <button
+                        type="button"
+                        className={`${styles.btn} ${styles.btnSm} ${styles.btnWarning}`}
+                        disabled={saving}
+                        onClick={() => handleProductRecovery('photo')}
+                      >
+                        🖼 Ulangi Foto Studio (Produk)
+                      </button>
+                      <button
+                        type="button"
+                        className={`${styles.btn} ${styles.btnSm} ${styles.btnInfo}`}
+                        disabled={saving}
+                        onClick={() => handleProductRecovery('enrich')}
+                      >
+                        ✨ Jalankan Enrich AI (Produk)
+                      </button>
+                      <Link
+                        href={`/products?search=${encodeURIComponent(candidate.catalog_product?.product_name || getDisplayName(candidate))}`}
+                        className={`${styles.btn} ${styles.btnSm}`}
+                      >
+                        🔍 Buka Jendela Banding di Produk
+                      </Link>
+                    </div>
                   </div>
                 )}
 
@@ -335,7 +426,12 @@ export default function CandidateDetailDrawer({
                           Terjual/mgg: <strong>{rd.sold_per_week != null ? Number(rd.sold_per_week).toLocaleString('id-ID') : '—'}</strong> ({labelTrend(rd.trend)} {rd.trend_delta || ''})
                         </span>
                         <span>
-                          Harga: <strong>{formatRp(rd.price)}</strong> · Komisi: <strong>{rd.commission_pct != null ? `${rd.commission_pct}%` : '—'}</strong>
+                          Harga: <strong>{formatRp(rd.price)}</strong> · Komisi:{' '}
+                          <strong>
+                            {rd.commission_pct != null
+                              ? `${rd.commission_pct}%${rd.commission_rp != null ? ` (±${formatRp(rd.commission_rp)})` : ''}`
+                              : formatRp(rd.commission_rp)}
+                          </strong>
                         </span>
                         <span className={styles.subNote}>
                           Foto pengenal dari riset — tidak disalin ke kolom foto katalog.
@@ -396,17 +492,20 @@ export default function CandidateDetailDrawer({
                 {candidate.catalog_product && (
                   <div className={styles.subCard}>
                     <div className={styles.subCardTitle}>
-                      <span>📦 Produk Katalog Terhubung ({candidate.catalog_product.id})</span>
-                      <span className={`${styles.badge} ${styles.badgeSuccess}`}>Katalog Aktif</span>
+                      <span>📦 Perbandingan Katalog Aktif ({candidate.catalog_product.id})</span>
+                      <span className={`${styles.badge} ${styles.badgeSuccess}`}>Product & Geometric Truth (EN)</span>
                     </div>
-                    <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-                      <strong>{candidate.catalog_product.product_name}</strong>
+                    <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <div><strong>Nama di Katalog:</strong> {candidate.catalog_product.product_name}</div>
                       {candidate.catalog_product.product_truth && (
-                        <p style={{ margin: '6px 0 0' }}>{candidate.catalog_product.product_truth}</p>
+                        <div><strong>Product Truth:</strong> {candidate.catalog_product.product_truth}</div>
                       )}
-                    </div>
-                    <div className={styles.subNote}>
-                      Data katalog tidak menimpa edit kurator di Radar Produk.
+                      {candidate.catalog_product.geometric_truth && (
+                        <div><strong>Geometric Truth:</strong> {candidate.catalog_product.geometric_truth}</div>
+                      )}
+                      <div className={styles.subNote}>
+                        Photo: {candidate.catalog_product.photo_status || '—'} · Enrich: {candidate.catalog_product.enrichment_status || '—'} · Teks hasil scrape di katalog tidak menimpa edit kurator Anda.
+                      </div>
                     </div>
                   </div>
                 )}
@@ -521,6 +620,7 @@ export default function CandidateDetailDrawer({
                         Aksi <strong>{imp.action}</strong> · status <strong>{imp.status}</strong>
                         {imp.requested_by ? ` oleh ${imp.requested_by}` : ''}
                         {imp.reserved_product_id ? ` (ID: ${imp.reserved_product_id})` : ''}
+                        {imp.job_id ? ` (Job: ${imp.job_id})` : ''}
                         {imp.error ? ` — ${imp.error}` : ''}
                       </span>
                     </div>
@@ -547,11 +647,28 @@ export default function CandidateDetailDrawer({
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               {candidate.cf_product_id ? (
                 <Link
-                  href={`/products?search=${encodeURIComponent(candidate.catalog_product?.product_name || '')}`}
+                  href={`/products?search=${encodeURIComponent(candidate.catalog_product?.product_name || getDisplayName(candidate))}`}
                   className={`${styles.btn} ${styles.btnSuccess}`}
                 >
                   ↗ Buka di Database Produk
                 </Link>
+              ) : isQueuedOrProcessing ? (
+                <button
+                  type="button"
+                  className={`${styles.btn} ${styles.btnInfo}`}
+                  onClick={() => loadDetail(candidate.id, { reconcileStatus: true })}
+                >
+                  ⏳ {labelProcessStatus(candidate.process_status)} · Cek Status
+                </button>
+              ) : candidate.duplicate_match ? (
+                <button
+                  type="button"
+                  className={`${styles.btn} ${styles.btnInfo}`}
+                  disabled={candidate.url_blocked || saving}
+                  onClick={() => onRequestPromote?.(candidate)}
+                >
+                  🔗 Hubungkan Produk yang Sudah Ada
+                </button>
               ) : (
                 <button
                   type="button"
@@ -559,10 +676,12 @@ export default function CandidateDetailDrawer({
                   disabled={candidate.url_blocked || saving}
                   title={candidate.url_blocked
                     ? 'Pilih & verifikasi URL listing terlebih dahulu'
-                    : 'Masukkan ke Database Produk (eksekusi antrean diaktifkan di Tahap 5)'}
-                  onClick={() => onRequestPromotePlaceholder?.(candidate)}
+                    : 'Masukkan kandidat ini ke Database Produk'}
+                  onClick={() => onRequestPromote?.(candidate)}
                 >
-                  + Masukkan ke Database Produk
+                  {candidate.process_status === 'failed'
+                    ? '↻ Coba Lagi Masukkan ke Database'
+                    : '+ Masukkan ke Database Produk'}
                 </button>
               )}
             </div>

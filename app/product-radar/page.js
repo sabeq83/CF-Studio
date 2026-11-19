@@ -54,8 +54,10 @@ export default function ProductRadarPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(25);
 
-  // Detail Drawer & Toast
+  // Detail Drawer, Confirmation Modal & Toast
   const [activeCandidateId, setActiveCandidateId] = useState(null);
+  const [confirmCandidate, setConfirmCandidate] = useState(null);
+  const [promoting, setPromoting] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
 
   const showToast = useCallback((msg) => {
@@ -64,7 +66,7 @@ export default function ProductRadarPage() {
 
   useEffect(() => {
     if (!toastMsg) return undefined;
-    const t = setTimeout(() => setToastMsg(''), 3600);
+    const t = setTimeout(() => setToastMsg(''), 4000);
     return () => clearTimeout(t);
   }, [toastMsg]);
 
@@ -110,6 +112,25 @@ export default function ProductRadarPage() {
     fetchCandidates();
   }, [fetchCandidates]);
 
+  // Poll status otomatis untuk kandidat yang masih queued/processing
+  useEffect(() => {
+    const pendingItems = items.filter(i => ['queued', 'processing'].includes(i.process_status));
+    if (pendingItems.length === 0) return undefined;
+
+    const timer = setInterval(async () => {
+      try {
+        await Promise.all(
+          pendingItems.slice(0, 5).map(item =>
+            fetch(`/api/v2/product-research/candidates/${encodeURIComponent(item.id)}/status`, { cache: 'no-store' })
+          )
+        );
+        await fetchCandidates();
+      } catch {}
+    }, 6000);
+
+    return () => clearInterval(timer);
+  }, [items, fetchCandidates]);
+
   const activeBatchObj = batches.find(b => b.id === batchId) || batches[0] || null;
   const observationLabel = activeBatchObj
     ? `Angka dari screenshot per tanggal ${formatObservedDate(activeBatchObj.observed_at || activeBatchObj.synced_at)}, bukan data real-time`
@@ -133,8 +154,54 @@ export default function ProductRadarPage() {
     if (target) setActiveCandidateId(target.id);
   };
 
-  const handlePromotePlaceholder = (candidate) => {
-    showToast(`Kandidat "${getDisplayName(candidate)}" siap dipromosikan (URL valid). Jalur antrean promosi diaktifkan pada Tahap 5.`);
+  const handleCheckStatus = async (candidateId) => {
+    try {
+      const res = await fetch(`/api/v2/product-research/candidates/${encodeURIComponent(candidateId)}/status`, {
+        cache: 'no-store'
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Gagal memeriksa status.');
+      }
+      await fetchCandidates();
+      showToast(`Status kandidat diperbarui: ${labelProcessStatus(data.candidate?.process_status)}.`);
+    } catch (err) {
+      showToast(err.message);
+    }
+  };
+
+  const executePromote = async () => {
+    if (!confirmCandidate) return;
+    setPromoting(true);
+    try {
+      const res = await fetch(`/api/v2/product-research/candidates/${encodeURIComponent(confirmCandidate.id)}/promote`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Gagal mempromosikan kandidat.');
+      }
+
+      if (data.action === 'linked') {
+        showToast(`Produk dihubungkan ke katalog (${data.cf_product_id}) tanpa menimpa data produk yang sudah ada.`);
+      } else {
+        showToast(`Dimasukkan ke antrean product_scraper (Job ${data.job_id} · ID cadangan ${data.reserved_product_id}).`);
+      }
+
+      const promotedId = confirmCandidate.id;
+      setConfirmCandidate(null);
+      await fetchCandidates();
+      if (activeCandidateId === promotedId) {
+        setActiveCandidateId(null);
+        setTimeout(() => setActiveCandidateId(promotedId), 20);
+      }
+    } catch (err) {
+      showToast(err.message);
+      await fetchCandidates();
+    } finally {
+      setPromoting(false);
+    }
   };
 
   const readyUrlCount = (summary.url_official || 0) + (summary.url_listing || 0) + (summary.url_user || 0);
@@ -403,7 +470,7 @@ export default function ProductRadarPage() {
                     <th>Kecocokan URL</th>
                     <th>Status Kurasi</th>
                     <th>Status Proses</th>
-                    <th style={{ minWidth: '185px' }}>Aksi</th>
+                    <th style={{ minWidth: '195px' }}>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -426,6 +493,7 @@ export default function ProductRadarPage() {
                       const rd = c.research_data || {};
                       const domainHint = extractDomainHint(c.effective_url);
                       const imgUrl = c.thumb_api_url || c.screenshot_api_url;
+                      const isPending = ['queued', 'processing'].includes(c.process_status);
 
                       return (
                         <tr key={c.id} onClick={() => setActiveCandidateId(c.id)}>
@@ -469,8 +537,13 @@ export default function ProductRadarPage() {
                           </td>
                           <td>
                             <div className={styles.numStrong}>
-                              {rd.commission_pct != null ? `${rd.commission_pct}%` : '—'}
+                              {rd.commission_pct != null
+                                ? `${rd.commission_pct}%`
+                                : (rd.commission_rp != null ? formatRp(rd.commission_rp) : '—')}
                             </div>
+                            {rd.commission_pct != null && rd.commission_rp != null && (
+                              <div className={styles.subNote}>±{formatRp(rd.commission_rp)}</div>
+                            )}
                           </td>
                           <td className={styles.numStrong}>{formatRp(rd.price)}</td>
                           <td>
@@ -491,13 +564,29 @@ export default function ProductRadarPage() {
                           </td>
                           <td onClick={(e) => e.stopPropagation()}>
                             <div className={styles.actionCell}>
-                              {c.cf_product_id ? (
+                              {c.process_status === 'needs_review' && c.cf_product_id ? (
+                                <button
+                                  type="button"
+                                  className={`${styles.btn} ${styles.btnSm} ${styles.btnWarning}`}
+                                  onClick={() => setActiveCandidateId(c.id)}
+                                >
+                                  🛠 Pulihkan Foto/Enrich
+                                </button>
+                              ) : c.cf_product_id ? (
                                 <Link
                                   href={`/products?search=${encodeURIComponent(c.catalog_product?.product_name || getDisplayName(c))}`}
                                   className={`${styles.btn} ${styles.btnSm} ${styles.btnSuccess}`}
                                 >
                                   ↗ Buka Produk
                                 </Link>
+                              ) : isPending ? (
+                                <button
+                                  type="button"
+                                  className={`${styles.btn} ${styles.btnSm} ${styles.btnInfo}`}
+                                  onClick={() => handleCheckStatus(c.id)}
+                                >
+                                  ⏳ {labelProcessStatus(c.process_status)} · Cek
+                                </button>
                               ) : c.url_blocked ? (
                                 <>
                                   <div className={styles.actionRow}>
@@ -527,7 +616,7 @@ export default function ProductRadarPage() {
                                 <button
                                   type="button"
                                   className={`${styles.btn} ${styles.btnSm} ${styles.btnInfo}`}
-                                  onClick={() => handlePromotePlaceholder(c)}
+                                  onClick={() => setConfirmCandidate(c)}
                                 >
                                   🔗 Hubungkan
                                 </button>
@@ -535,9 +624,9 @@ export default function ProductRadarPage() {
                                 <button
                                   type="button"
                                   className={`${styles.btn} ${styles.btnSm} ${styles.btnPrimary}`}
-                                  onClick={() => handlePromotePlaceholder(c)}
+                                  onClick={() => setConfirmCandidate(c)}
                                 >
-                                  + Masukkan ke Database
+                                  {c.process_status === 'failed' ? '↻ Coba Lagi' : '+ Masukkan ke Database'}
                                 </button>
                               )}
                             </div>
@@ -585,8 +674,85 @@ export default function ProductRadarPage() {
         canNext={activeIndex >= 0 && activeIndex < items.length - 1}
         onUpdated={() => fetchCandidates()}
         onToast={showToast}
-        onRequestPromotePlaceholder={handlePromotePlaceholder}
+        onRequestPromote={(cand) => setConfirmCandidate(cand)}
       />
+
+      {/* Dialog Konfirmasi Promosi Satuan */}
+      {confirmCandidate && (
+        <div
+          className={styles.modalBackdrop}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Konfirmasi Masukkan ke Database Produk"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !promoting) setConfirmCandidate(null);
+          }}
+        >
+          <div className={styles.modalDialog}>
+            <div className={styles.modalHeader}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800 }}>
+                  {confirmCandidate.duplicate_match
+                    ? 'Hubungkan ke Produk Katalog'
+                    : 'Masukkan ke Database Produk'}
+                </h3>
+                <div className={styles.subNote}>
+                  Tinjau tujuan URL dan status duplikat sebelum menjalankan.
+                </div>
+              </div>
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnSm}`}
+                disabled={promoting}
+                onClick={() => setConfirmCandidate(null)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              <div>
+                <strong>{getDisplayName(confirmCandidate)}</strong>
+                <div className={`${styles.subNote} ${styles.mono}`} style={{ marginTop: '4px', wordBreak: 'break-all' }}>
+                  {confirmCandidate.effective_url}
+                </div>
+              </div>
+
+              {confirmCandidate.duplicate_match ? (
+                <div className={`${styles.alertBox} ${styles.alertInfo}`}>
+                  <strong>🔗 Produk Sudah Ada di Katalog ({confirmCandidate.duplicate_match.cf_product_id}):</strong> &ldquo;{confirmCandidate.duplicate_match.product_name}&rdquo;.<br />
+                  Kandidat ini akan <strong>dihubungkan</strong> tanpa menimpa deskripsi, foto studio, atau link afiliasi produk yang sudah ada.
+                </div>
+              ) : (
+                <div className={`${styles.alertBox} ${styles.alertSuccess}`}>
+                  <strong>✅ Siap Masuk Antrean Scraper:</strong> Sistem mencadangkan ID produk unik agar klik ganda atau coba ulang tidak membuat produk ganda. Teks hasil scrape di katalog (Product Truth Inggris) tidak akan menimpa edit kurator Anda.
+                </div>
+              )}
+            </div>
+            <div className={styles.modalFooter}>
+              <button
+                type="button"
+                className={styles.btn}
+                disabled={promoting}
+                onClick={() => setConfirmCandidate(null)}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                className={`${styles.btn} ${confirmCandidate.duplicate_match ? styles.btnInfo : styles.btnPrimary}`}
+                disabled={promoting}
+                onClick={executePromote}
+              >
+                {promoting
+                  ? 'Memproses...'
+                  : confirmCandidate.duplicate_match
+                    ? '🔗 Konfirmasi & Hubungkan'
+                    : '✓ Konfirmasi & Masukkan'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {toastMsg && (
         <div className={styles.toast} role="status" aria-live="polite">
