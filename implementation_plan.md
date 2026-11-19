@@ -35,7 +35,7 @@ Menambahkan kemampuan memilih banyak kandidat sekaligus di halaman **Radar Produ
 ### Langkah 3 — UI Bulk Approval di `/product-radar` & Deploy Dev (Pintu Berhenti 🛑)
 - [x] Tambahkan checkbox multi-pilih, bilah aksi massal, dialog ringkasan Valid/Duplikat/Tertahan, dan panel pantauan antrean bertahap di `app/product-radar/page.js` & `product-radar.module.css`
 - [x] Perbarui `sot/menus/kartu/product-radar.md` untuk mencatat fitur Bulk Approval & batasannya
-- [ ] Jalankan seluruh test suite (`tests/product-research/*.test.js`), push branch, deploy ke **Dev**, dan verifikasi
+- [x] Jalankan seluruh test suite (`tests/product-research/*.test.js`), push branch, deploy ke **Dev**, dan verifikasi
 - [ ] **🛑 Berhenti:** Laporkan tautan Dev + daftar cek ke pengguna
 
 ---
