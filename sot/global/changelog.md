@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.57.1 — Perbaikan ReferenceError normalizeUrl pada Scraper Produk (19/11/2026)
+- Memperbaiki ReferenceError normalizeUrl menjadi normalizeProductUrl saat menyimpan produk baru ke Database Produk
+- Test regresi jalur insert produk baru dan mapping URL afiliasi
+- Perbarui kartu menu products dan product-radar
+
 ## V2.57.0 — MCP Universe Reference Manager & Character Lock (19/11/2026)
 - 10 Tool Baru MCP Universe & Character Lock (cf_list_universes, cf_get_universe, cf_create_universe_character, cf_update_universe_character, cf_list_reference_assets, cf_upload_reference_asset, cf_approve_reference_asset, cf_reject_reference_asset, cf_link_visual_identity_universe, cf_preflight_character_lock)
 - Mode Character Lock strict dengan allowlist character_keys tanpa fallback diam-diam dan proteksi REFERENCE_NOT_RESOLVED
