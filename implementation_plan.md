@@ -41,9 +41,9 @@
 
 ### Tahap D — Kartu Menu, Deploy Dev & Uji Arka di Dev
 - [x] Perbarui kartu `sot/menus/kartu/universes.md` dan `sot/menus/kartu/visual-identities.md`
-- [ ] Push `fitur/mcp-universe-character-lock` dan deploy atomic ke **Dev** (`npm run deploy:dev:atomic -- --ref <full-sha> --apply --confirm-dev`)
-- [ ] Verifikasi kesehatan Dev wajib SOP (`current`, manifest, HTTP 200 UI/API, PM2 online, `pm_cwd`, `PG_SEARCH_PATH=dev`, `PGPOOL_MAX=3`)
-- [ ] Cek alur Arka di Dev (read-only/uji kesiapan via API/MCP Dev; tidak membuat video sampel dan tidak generate gambar sendiri tanpa persetujuan pengguna) & laporkan ke pengguna
+- [x] Push `fitur/mcp-universe-character-lock` dan deploy atomic ke **Dev** (`npm run deploy:dev:atomic -- --ref <full-sha> --apply --confirm-dev`)
+- [x] Verifikasi kesehatan Dev wajib SOP (`current`, manifest, HTTP 200 UI/API, PM2 online, `pm_cwd`, `PG_SEARCH_PATH=dev`, `PGPOOL_MAX=3`)
+- [x] Cek alur Arka di Dev (read-only/uji kesiapan via API/MCP Dev; tidak membuat video sampel dan tidak generate gambar sendiri tanpa persetujuan pengguna) & laporkan ke pengguna
 
 ---
 
