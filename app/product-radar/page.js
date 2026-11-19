@@ -19,7 +19,9 @@ import {
   curationStatusTone,
   labelProcessStatus,
   processStatusTone,
-  extractDomainHint
+  extractDomainHint,
+  scoreTierTone,
+  formatSignedDelta
 } from './radar-labels';
 
 function toneClass(tone) {
@@ -51,6 +53,9 @@ export default function ProductRadarPage() {
   const [urlStatus, setUrlStatus] = useState('all');
   const [curationStatus, setCurationStatus] = useState('all');
   const [processStatus, setProcessStatus] = useState('all');
+  const [sortBy, setSortBy] = useState('rank');
+  const [showFormula, setShowFormula] = useState(false);
+  const [expandedScoreIds, setExpandedScoreIds] = useState(() => new Set());
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(25);
 
@@ -88,6 +93,7 @@ export default function ProductRadarPage() {
       if (urlStatus !== 'all') params.set('url_status', urlStatus);
       if (curationStatus !== 'all') params.set('curation_status', curationStatus);
       if (processStatus !== 'all') params.set('process_status', processStatus);
+      if (sortBy && sortBy !== 'rank') params.set('sort_by', sortBy);
       if (search.trim()) params.set('search', search.trim());
       params.set('page', String(page));
       params.set('limit', String(limit));
@@ -113,7 +119,7 @@ export default function ProductRadarPage() {
     } finally {
       setLoading(false);
     }
-  }, [batchId, category, trend, urlStatus, curationStatus, processStatus, search, page, limit]);
+  }, [batchId, category, trend, urlStatus, curationStatus, processStatus, sortBy, search, page, limit]);
 
   useEffect(() => {
     fetchCandidates();
@@ -155,8 +161,18 @@ export default function ProductRadarPage() {
     setUrlStatus('all');
     setCurationStatus('all');
     setProcessStatus('all');
+    setSortBy('rank');
     setPage(1);
     if (batches[0]?.id) setBatchId(batches[0].id);
+  };
+
+  const toggleScoreBreakdown = (id) => {
+    setExpandedScoreIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   };
 
   const activeIndex = items.findIndex(i => i.id === activeCandidateId);
@@ -359,6 +375,13 @@ export default function ProductRadarPage() {
               </div>
             </div>
             <div className={styles.headerActions}>
+              <button
+                type="button"
+                className={styles.btn}
+                onClick={() => setShowFormula(v => !v)}
+              >
+                {showFormula ? '📐 Tutup Rumus Skor' : '📐 Rumus Skor Peluang'}
+              </button>
               <Link href="/products" className={styles.btn}>
                 📦 Buka Product Database
               </Link>
@@ -372,6 +395,40 @@ export default function ProductRadarPage() {
               </button>
             </div>
           </section>
+
+          {showFormula && (
+            <section className={styles.alertBox} style={{ background: 'var(--status-info-soft)', borderColor: 'color-mix(in srgb, var(--status-info) 35%, transparent)' }} aria-label="Rumus Transparan Skor Peluang">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
+                <div>
+                  <strong>🎯 Rumus Transparan Skor Peluang (Total 100 Poin · v1):</strong>{' '}
+                  <span className={styles.subNote}>Hanya membantu urutan kurasi — tidak pernah memicu promosi otomatis.</span>
+                </div>
+                <span className={`${styles.badge} ${styles.badgeInfo}`}>80–100 Prioritas Tinggi · 60–79 Potensial</span>
+              </div>
+              <div className={styles.formulaPopover}>
+                <div className={styles.formulaCard}>
+                  <strong>1. Penjualan/mg (30 pt)</strong>
+                  <div className={styles.subNote}>≥1.000 (30), 500–999 (24), 200–499 (18), 50–199 (12), 1–49 (6)</div>
+                </div>
+                <div className={styles.formulaCard}>
+                  <strong>2. Arah Tren (20 pt)</strong>
+                  <div className={styles.subNote}>↑ Naik (20), → Stabil (12), ↓ Menurun (4)</div>
+                </div>
+                <div className={styles.formulaCard}>
+                  <strong>3. Komisi/produk (20 pt)</strong>
+                  <div className={styles.subNote}>≥Rp25rb (20), Rp15–24rb (16), Rp8–14rb (12), Rp3–7rb (8), &gt;0 (4)</div>
+                </div>
+                <div className={styles.formulaCard}>
+                  <strong>4. Zona Harga (15 pt)</strong>
+                  <div className={styles.subNote}>Rp35–250rb (15), Rp20–34rb / Rp250–500rb (11), tepi (7), &gt;1jt (4)</div>
+                </div>
+                <div className={styles.formulaCard}>
+                  <strong>5. Kesiapan URL (15 pt)</strong>
+                  <div className={styles.subNote}>Resmi (15), Kurator (14), Listing (12), Terdekat (4), Tidak ada (0)</div>
+                </div>
+              </div>
+            </section>
+          )}
 
           {errorMsg && (
             <div className={`${styles.alertBox} ${styles.alertDanger}`}>
@@ -593,6 +650,20 @@ export default function ProductRadarPage() {
                   <option value="failed">Gagal</option>
                 </select>
               </div>
+
+              <div className={styles.fieldGroup}>
+                <label className={styles.fieldLabel} htmlFor="radarSortBy">Urutkan Kandidat</label>
+                <select
+                  id="radarSortBy"
+                  className={styles.formControl}
+                  value={sortBy}
+                  onChange={(e) => { setSortBy(e.target.value); setPage(1); }}
+                >
+                  <option value="rank">Ranking Riset Batch</option>
+                  <option value="score_desc">Skor Peluang Tertinggi (Bantu Urutan)</option>
+                  <option value="sold_delta_desc">Kenaikan Terjual Lintas Minggu (+)</option>
+                </select>
+              </div>
             </div>
 
             <div className={styles.filterFooter}>
@@ -645,10 +716,11 @@ export default function ProductRadarPage() {
                     <th style={{ width: '66px' }}>Foto</th>
                     <th style={{ minWidth: '220px' }}>Nama Produk</th>
                     <th>Kategori</th>
-                    <th>Terjual / mgg</th>
+                    <th>Terjual &amp; Lintas Minggu</th>
                     <th>Tren</th>
                     <th>Komisi</th>
                     <th>Harga</th>
+                    <th style={{ minWidth: '185px' }}>Skor Peluang</th>
                     <th>Kecocokan URL</th>
                     <th>Status Kurasi</th>
                     <th>Status Proses</th>
@@ -658,13 +730,13 @@ export default function ProductRadarPage() {
                 <tbody>
                   {loading && items.length === 0 ? (
                     <tr>
-                      <td colSpan={12} style={{ textAlign: 'center', padding: '36px', color: 'var(--text-muted)' }}>
+                      <td colSpan={13} style={{ textAlign: 'center', padding: '36px', color: 'var(--text-muted)' }}>
                         Memuat daftar kandidat Radar Produk...
                       </td>
                     </tr>
                   ) : items.length === 0 ? (
                     <tr>
-                      <td colSpan={12} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+                      <td colSpan={13} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
                         {batches.length === 0
                           ? 'Belum ada batch riset dari TeleRadar untuk tenant ini. Batch yang dikirim lewat API ingest akan muncul di sini untuk dikurasi.'
                           : 'Tidak ada kandidat yang cocok dengan filter saat ini.'}
@@ -677,6 +749,12 @@ export default function ProductRadarPage() {
                       const imgUrl = c.thumb_api_url || c.screenshot_api_url;
                       const isPending = ['queued', 'processing'].includes(c.process_status);
                       const isChecked = selectedIds.has(c.id);
+                      const sc = c.opportunity_score || null;
+                      const isScoreExp = expandedScoreIds.has(c.id);
+                      const wc = c.weekly_comparison || null;
+                      const prevObs = wc?.previous || null;
+                      const soldDeltaText = formatSignedDelta(wc?.deltas?.sold_delta);
+                      const rankDelta = wc?.deltas?.rank_delta;
 
                       return (
                         <tr
@@ -706,6 +784,11 @@ export default function ProductRadarPage() {
                             <div className={styles.prodSub}>
                               <span>
                                 {rd.rank ? `#${rd.rank}` : ''}
+                                {rankDelta != null && rankDelta !== 0 ? (
+                                  <strong style={{ color: rankDelta > 0 ? 'var(--status-success)' : 'var(--status-warning)', marginLeft: '4px' }}>
+                                    ({rankDelta > 0 ? `↑${rankDelta}` : `↓${Math.abs(rankDelta)}`})
+                                  </strong>
+                                ) : ''}
                                 {getDisplayBrand(c) ? ` · ${getDisplayBrand(c)}` : ''}
                               </span>
                               {c.duplicate_match && !c.cf_product_id && (
@@ -724,6 +807,23 @@ export default function ProductRadarPage() {
                             <div className={styles.subNote}>
                               per {formatObservedDate(c.observed_at || c.external_batch_id)}
                             </div>
+                            {prevObs && (
+                              <div className={styles.subNote} style={{ marginTop: '3px' }}>
+                                vs {prevObs.sold_per_week != null ? Number(prevObs.sold_per_week).toLocaleString('id-ID') : '—'} ({formatObservedDate(prevObs.observed_at || prevObs.external_batch_id)})
+                                {soldDeltaText && (
+                                  <strong style={{ color: wc.deltas.sold_delta >= 0 ? 'var(--status-success)' : 'var(--status-danger)', marginLeft: '4px' }}>
+                                    {soldDeltaText}{wc.deltas.sold_pct != null ? ` (${wc.deltas.sold_pct >= 0 ? '+' : ''}${wc.deltas.sold_pct}%)` : ''}
+                                  </strong>
+                                )}
+                              </div>
+                            )}
+                            {wc?.observations_count > 1 && (
+                              <div style={{ marginTop: '3px' }}>
+                                <span className={`${styles.badge} ${styles.badgeMuted}`}>
+                                  {wc.observations_count}x teramati ({wc.match_method})
+                                </span>
+                              </div>
+                            )}
                           </td>
                           <td>
                             <span className={`${styles.badge} ${toneClass(trendTone(rd.trend))}`}>
@@ -741,6 +841,44 @@ export default function ProductRadarPage() {
                             )}
                           </td>
                           <td className={styles.numStrong}>{formatRp(rd.price)}</td>
+                          <td onClick={(e) => e.stopPropagation()}>
+                            {sc ? (
+                              <div className={styles.scoreCell}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                                  <span className={`${styles.badge} ${toneClass(scoreTierTone(sc.tier))}`}>
+                                    {sc.total}/100 · {sc.tier_label}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    className={`${styles.btn} ${styles.btnSm}`}
+                                    onClick={() => toggleScoreBreakdown(c.id)}
+                                  >
+                                    {isScoreExp ? 'Tutup' : 'Rincian'}
+                                  </button>
+                                </div>
+                                <div className={styles.miniBreakdown} title="Penjualan / Tren / Komisi / Harga / URL">
+                                  {(sc.breakdown || []).map(b => (
+                                    <div key={b.key} className={styles.miniSeg}>
+                                      <span style={{ width: `${Math.round((b.score / b.max) * 100)}%` }} />
+                                    </div>
+                                  ))}
+                                </div>
+                                {isScoreExp && (
+                                  <div className={styles.scoreDetailBox}>
+                                    {(sc.breakdown || []).map(b => (
+                                      <div key={b.key} className={styles.scoreDetailRow}>
+                                        <span>{b.label}</span>
+                                        <strong>{b.score}/{b.max}</strong>
+                                      </div>
+                                    ))}
+                                    <div className={styles.subNote} style={{ marginTop: '3px' }}>
+                                      Bantu urutan saja
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ) : '—'}
+                          </td>
                           <td>
                             <span className={`${styles.badge} ${toneClass(urlStatusTone(c.url_status))}`}>
                               {labelUrlStatus(c.url_status)}

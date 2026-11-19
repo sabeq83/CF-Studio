@@ -1,5 +1,6 @@
 import { withProductResearchAccess } from '../../../../../lib/auth.js';
 import { normalizeProductUrl } from '../../../../../lib/product-url-normalizer.js';
+import { computeOpportunityScore, OPPORTUNITY_SCORE_RULES } from '../../../../../lib/product-research-opportunity-score.js';
 import {
   listResearchBatches,
   listResearchCategories,
@@ -30,6 +31,8 @@ function enrichCandidateRow(item, duplicateMap, catalogMap) {
     url_blocked: isCandidateUrlBlocked(item),
     duplicate_match: duplicateMatch,
     catalog_product: catalogProduct,
+    opportunity_score: item.opportunity_score || computeOpportunityScore(item),
+    weekly_comparison: item.weekly_comparison || null,
     thumb_api_url: item.thumb_path ? `/api/v2/product-research/candidates/${item.id}/image?kind=thumb` : null,
     screenshot_api_url: item.screenshot_path ? `/api/v2/product-research/candidates/${item.id}/image?kind=screenshot` : null
   };
@@ -45,6 +48,7 @@ export const GET = withProductResearchAccess(async (request) => {
     const curationStatus = searchParams.get('curation_status') || '';
     const processStatus = searchParams.get('process_status') || '';
     const search = searchParams.get('search') || '';
+    const sortBy = searchParams.get('sort_by') || 'rank';
     const page = Number(searchParams.get('page') || 1);
     const limit = Number(searchParams.get('limit') || 25);
 
@@ -62,6 +66,7 @@ export const GET = withProductResearchAccess(async (request) => {
         curationStatus,
         processStatus,
         search,
+        sortBy,
         page,
         limit
       }),
@@ -88,6 +93,7 @@ export const GET = withProductResearchAccess(async (request) => {
       batches,
       active_batch_id: effectiveBatchId,
       categories,
+      opportunity_score_rules: OPPORTUNITY_SCORE_RULES,
       items,
       pagination: result.pagination,
       summary: result.summary

@@ -1,11 +1,13 @@
 import { withProductResearchAccess } from '../../../../../../lib/auth.js';
+import { computeOpportunityScore } from '../../../../../../lib/product-research-opportunity-score.js';
 import {
   getResearchCandidateById,
   updateResearchCandidateCuration,
   resolveCandidateEffectiveUrl,
   isCandidateUrlBlocked,
   findCatalogDuplicatesByNormalizedUrls,
-  getCatalogProductsByIds
+  getCatalogProductsByIds,
+  getCandidateWeeklyHistory
 } from '../../../../../../lib/product-research-repository.js';
 
 export const runtime = 'nodejs';
@@ -13,13 +15,14 @@ export const dynamic = 'force-dynamic';
 
 async function buildCandidateDetailResponse(candidate) {
   const effectiveUrl = resolveCandidateEffectiveUrl(candidate);
-  const [dupMap, catMap] = await Promise.all([
+  const [dupMap, catMap, weeklyHistory] = await Promise.all([
     (!candidate.cf_product_id && effectiveUrl)
       ? findCatalogDuplicatesByNormalizedUrls([effectiveUrl])
       : Promise.resolve(new Map()),
     candidate.cf_product_id
       ? getCatalogProductsByIds([candidate.cf_product_id])
-      : Promise.resolve(new Map())
+      : Promise.resolve(new Map()),
+    getCandidateWeeklyHistory(candidate)
   ]);
 
   return {
@@ -32,6 +35,8 @@ async function buildCandidateDetailResponse(candidate) {
     catalog_product: candidate.cf_product_id
       ? (catMap.get(candidate.cf_product_id) || null)
       : null,
+    opportunity_score: computeOpportunityScore(candidate),
+    weekly_history: weeklyHistory,
     thumb_api_url: candidate.thumb_path ? `/api/v2/product-research/candidates/${candidate.id}/image?kind=thumb` : null,
     screenshot_api_url: candidate.screenshot_path ? `/api/v2/product-research/candidates/${candidate.id}/image?kind=screenshot` : null
   };

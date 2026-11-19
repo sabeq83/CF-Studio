@@ -1,100 +1,145 @@
-# Implementation Plan — Tahap 7.1: Bulk Approval Radar Produk
+# Implementation Plan — Tahap 7.2 & 7.3 Radar Produk (Tren Lintas Minggu & Skor Peluang)
 
-Tanggal: 19 November 2026  
-Branch: `fitur/radar-bulk-approval` (bercabang dari `fitur/radar-produk`)  
-Sumber Instruksi: [antigravity_radar_produk_teleradar_instructions.md](file:///Users/sabeqmmursyid/_cfstudio/catatan-kerja/instruksi-agent/antigravity_radar_produk_teleradar_instructions.md) (§6 Butir 7.1)
-
----
-
-## Ringkasan Fitur (7.1 Bulk Approval)
-
-Menambahkan kemampuan memilih banyak kandidat sekaligus di halaman **Radar Produk** (`/product-radar`), menampilkan **ringkasan terklasifikasi** (Valid / Duplikat / Tertahan) sebelum eksekusi, dan mengeksekusi promosi **melalui layanan promosi yang sama dengan Tahap 5** (`promoteResearchCandidate()` — klaim atomik per kandidat dengan `reserved_product_id` dan `enqueueProductScrape`), sambil:
-1. Menahan kandidat yang tidak valid (`Terdekat`, `Tidak ditemukan`, `Belum diriset` tanpa pilihan URL, atau sudah masuk/antre/diproses) agar **tidak ikut terkirim**.
-2. Memastikan tiap job `product_scraper` berisi maksimal 1 produk per klaim/job (atau antrean bertahap) sehingga batas `QUEUE_CONCURRENCY.product_scraper = 1` di `lib/scheduler.js` selalu dihormati tanpa membebani browser/worker.
-3. Memberi batas aman seleksi per batch eksekusi (mis. maks 25 atau 50 kandidat per permintaan) dan laporan hasil per kandidat (`queued`, `linked`, `skipped_blocked`, `conflict`, `failed`).
+- **Branch Kerja**: `fitur/radar-trends-and-score` (stacked dari `fitur/radar-bulk-approval`)
+- **Lingkup**:
+  1. **Tahap 7.2 — Perbandingan Tren Lintas Minggu**: Mencocokkan kandidat antarbatch via `normalized_url` (untuk URL terverifikasi `official`/`listing`/`user`) dan `cf_product_id`; menyimpan setiap minggu sebagai pengamatan terpisah tanpa menimpa batch lain; menampilkan tanggal pengamatan di setiap angka + delta antar-minggu + **Saran Nama Mirip** (hanya saran, tidak digabung otomatis).
+  2. **Tahap 7.3 — Skor Peluang**: Menghitung skor transparan (`0–100`) dari 5 komponen (**Penjualan/minggu maks 30**, **Arah Tren maks 20**, **Komisi maks 20**, **Zona Harga maks 15**, **Kecocokan URL maks 15**), menampilkan rincian lengkap (bukan angka saja), dan mendukung pengurutan. **Hanya alat bantu urutan, tidak pernah memicu promosi otomatis.**
+- **Tahap Selanjutnya (Terpisah setelah lolos uji Dev)**:
+  - `7.4` Perintah Bot Telegram (`/top`, `/produk`, `/status`, `/url`, `/kirim`) di Mac Mini (butuh persetujuan ubah kode bot eksternal).
+  - `7.5` Cutover & Penghentian Google Sheets Fase B (butuh jadwal cutover & tarik edit terakhir bersama pengguna).
+  - `7.6` Peninjauan `cf_add_product` & Penambahan MCP Radar (`product_research`).
 
 ---
 
 ## Execution Task List
 
 ### Langkah 1 — Mockup HTML Interaktif (Pintu Review UI 🛑)
-- [x] Siapkan branch `fitur/radar-bulk-approval` dari `fitur/radar-produk`
-- [x] Buat `public/mockup_radar_bulk_approval.html` mandiri (semantic CSS tokens dari `app/theme.css`, toggle Light/Dark) yang menyimulasikan:
-  - Checkbox multi-pilih + quick-select ("Pilih yang Siap di Halaman Ini" / "Pilih Campuran Uji" / "Bersihkan")
-  - Bilah aksi massal mengambang/lengket dengan ringkasan cepat (`X Valid`, `Y Duplikat`, `Z Tertahan`)
-  - Dialog Konfirmasi Bulk Approval dengan rincian 3 kelompok (**Valid · Scrape Baru**, **Duplikat · Hubungkan**, **Tertahan · Tidak Ikut Terkirim**)
-  - Panel Antrean Langsung (*1-per-1 slot aktif*) yang menyimulasikan eksekusi bertahap (`Antre` → `Diproses (1/1 slot)` → `Masuk katalog` + simulasi retry aman)
-- [x] Sinkronkan ke Mac Mini (`~/maknaflow-staging-atomic/current/public/mockup_radar_bulk_approval.html`); catatan: Next.js 16 production (`maknaflow-staging-ui`) meng-cache `public/` saat boot (return 404 sebelum reload)
-- [x] **🛑 Berhenti:** Laporkan mockup ke pengguna & tunggu persetujuan tampilan/alur sebelum menulis kode React/API
+- [x] Buat branch `fitur/radar-trends-and-score` di atas `fitur/radar-bulk-approval`
+- [x] Buat `public/mockup_radar_trends_score.html` mandiri (hanya memakai semantic CSS tokens dari `app/theme.css`, toggle Light/Dark) yang menyimulasikan:
+  - Kontrol pengurutan (**Ranking Riset**, **Skor Peluang Tertinggi**, **Kenaikan Terjual Lintas Minggu**) + banner/pill penjelas bahwa skor **hanya alat bantu urutan, bukan promosi otomatis**
+  - Kolom tabel **Terjual & Tren Lintas Minggu** dengan tanggal pengamatan di setiap angka (mis. `820/mg · 17 Nov` vs `540/mg · 10 Nov` -> `+280 (+52%)`) dan peringkat (`#1 ↑2`)
+  - Kolom **Skor Peluang** (`86/100 · Prioritas Tinggi`) dengan tombol klik/hover rincian 5 komponen transparan (`Penjualan 24/30`, `Tren 20/20`, `Komisi 16/20`, `Harga 15/15`, `URL 15/15`)
+  - Panel Detail (*Drawer*) berisi **Riwayat Lintas Minggu (Timeline Pengamatan Terpisah)** per tanggal batch + kotak terpisah **Saran Nama Mirip (lintas batch, tidak digabung otomatis)** + rincian **Skor Peluang**
+- [x] Sinkronkan mockup ke Staging Mac Mini (`~/maknaflow-staging-atomic/current/public/mockup_radar_trends_score.html`) & laporkan tautan/preview untuk review UI
+- [x] **🛑 Berhenti:** Tunggu persetujuan pengguna atas mockup sebelum mengubah kode backend & React
 
-### Langkah 2 — Backend Bulk Preview & Bulk Promote API
-- [x] Buat helper `previewBulkResearchPromotion(candidateIds)` & `promoteResearchCandidatesBulk(candidateIds, { requestedBy })` di `lib/product-research-promotion-service.js` (memanggil ulang `promoteResearchCandidate()` secara atomik per kandidat, menolak/melewati kandidat tertahan tanpa mengirim job, mengembalikan hasil per kandidat + status antrean `product_scraper`)
-- [x] Buat `POST /api/v2/product-research/candidates/bulk-promote` (`withProductResearchAccess`, mendukung `mode: 'preview' | 'execute'`, batas maks 50 ID per request)
-- [x] Tambahkan unit & integration test di `tests/product-research/bulk-promote.test.js` (klasifikasi valid/duplikat/tertahan, kandidat tertahan tidak terkirim, klaim atomik per kandidat, isolasi tenant, batas `product_scraper` 1 job berjalan sekaligus)
+### Langkah 2 — Backend Skor Peluang & Pencocokan Lintas Minggu
+- [x] Buat helper murni `lib/product-research-opportunity-score.js` berisi `SCORE_FORMULA_VERSION`, `OPPORTUNITY_WEIGHTS`, dan `computeOpportunityScore(candidate)` beserta rincian 5 komponen & keterangannya
+- [x] Tambahkan fungsi di `lib/product-research-repository.js`:
+  - `getCrossBatchHistoryMapForCandidates(candidates)` untuk membaca pengamatan lintas batch terisolasi `tenant_id` (pencocokan eksak via `cf_product_id` atau `normalized_url` terverifikasi `url_status IN ('official', 'listing', 'user')`), menghitung `previous` & `deltas` (`sold_delta`, `sold_pct`, `rank_delta`, `commission_delta`, `price_delta`), dan mengumpulkan `observations` terpisah per tanggal batch
+  - `findSimilarNameCandidatesAcrossBatches(candidate)` untuk menyarankan kemiripan nama dari batch lain sebagai **saran terpisah** (tanpa auto-merge)
+  - Dukungan `sortBy` (`rank` | `score_desc` | `sold_delta_desc`) pada `listResearchCandidates`
+- [x] Perbarui `app/api/v2/product-research/candidates/route.js`, `app/api/v2/product-research/candidates/[id]/route.js`, dan `lib/product-research-promotion-service.js` (`getResearchCandidatePromotionStatus`) untuk menyertakan `opportunity_score`, `weekly_comparison`, dan `weekly_history`
+- [x] Tambahkan unit & integration test di `tests/product-research/trends-and-score.test.js` (isolasi tenant, pencocokan eksak URL terverifikasi / `cf_product_id`, nama mirip hanya saran, `nearest` tidak dicocokkan otomatis, pengamatan minggu terpisah tidak ditimpa, rumus & rincian skor peluang, sorting `score_desc` & `sold_delta_desc`, tidak ada auto-promote)
 
-### Langkah 3 — UI Bulk Approval di `/product-radar` & Deploy Dev (Pintu Berhenti 🛑)
-- [x] Tambahkan checkbox multi-pilih, bilah aksi massal, dialog ringkasan Valid/Duplikat/Tertahan, dan panel pantauan antrean bertahap di `app/product-radar/page.js` & `product-radar.module.css`
-- [x] Perbarui `sot/menus/kartu/product-radar.md` untuk mencatat fitur Bulk Approval & batasannya
-- [x] Jalankan seluruh test suite (`tests/product-research/*.test.js`), push branch, deploy ke **Dev**, dan verifikasi
-- [ ] **🛑 Berhenti:** Laporkan tautan Dev + daftar cek ke pengguna
+### Langkah 3 — UI Radar Produk, Kartu Menu & Deploy Dev (Pintu Berhenti 🛑)
+- [x] Perbarui `app/product-radar/radar-labels.js`, `app/product-radar/page.js`, `app/product-radar/CandidateDetailDrawer.js`, dan `app/product-radar/product-radar.module.css` memakai semantic CSS tokens saja
+- [x] Perbarui `sot/menus/kartu/product-radar.md` untuk mendokumentasikan rumus transparan **Skor Peluang (100 poin)**, aturan **Perbandingan Lintas Minggu**, dan batasannya
+- [ ] Jalankan seluruh test suite (`tests/product-research/*.test.js`), `node --check`, commit & push `fitur/radar-trends-and-score`, deploy atomic ke **Dev**, dan verifikasi kesehatan Dev
+- [ ] **🛑 Berhenti:** Laporkan hasil di Dev + daftar cek ke pengguna sebelum lanjut ke Tahap 7.4/7.5/7.6
 
 ---
 
-## Rancangan Perubahan File (Code Sebelum & Sesudah)
+## Rancangan Perubahan Kode (Before & After)
 
-### Langkah 1 — File Baru: `public/mockup_radar_bulk_approval.html`
-
+### 1. Baru — `lib/product-research-opportunity-score.js`
 **Code Sebelum (Current/Before):**
-```text
-(Mockup khusus alur Bulk Approval Tahap 7.1 + simulasi antrean 1-per-1 belum ada)
-```
+*(Belum ada; skor peluang sebelumnya belum dihitung.)*
 
 **Code Sesudah (Proposed/After):**
-```html
-<!-- File baru: public/mockup_radar_bulk_approval.html -->
-<!-- Mockup standalone interaktif Tahap 7.1 Bulk Approval:
-     - Token semantik tertanam dari app/theme.css (Light/Dark mode)
-     - Multi-select checkboxes + tombol cepat pilih siap / campuran uji
-     - Bilah aksi massal dengan rincian real-time Valid / Duplikat / Tertahan
-     - Dialog konfirmasi 3 kelompok (kandidat tertahan jelas ditandai tidak ikut terkirim)
-     - Simulasi antrean product_scraper 1-per-1 (1 slot aktif, sisanya antre) + retry idempotent
--->
+```js
+export const OPPORTUNITY_SCORE_RULES = {
+  version: 'v1',
+  maxTotal: 100,
+  disclaimer: 'Skor hanya alat bantu urutan kurasi dan tidak pernah memicu promosi otomatis.',
+  components: [
+    { key: 'sold', label: 'Penjualan/minggu', max: 30 },
+    { key: 'trend', label: 'Arah tren', max: 20 },
+    { key: 'commission', label: 'Komisi/produk', max: 20 },
+    { key: 'price', label: 'Zona harga', max: 15 },
+    { key: 'url_match', label: 'Kesiapan URL', max: 15 }
+  ]
+};
+
+export function computeOpportunityScore(candidate) {
+  const rd = candidate?.research_data || {};
+  const cd = candidate?.curated_data || {};
+  // Hitung 5 komponen deterministik berdasarkan observed_at batch terkait + kembalikan breakdown lengkap
+  ...
+}
 ```
 
-*(Potongan kode Sebelum/Sesudah untuk Langkah 2–3 — Tahap 7.1 Bulk Approval)*
-
-### Langkah 2 — Repository & Service Bulk Approval (`lib/product-research-repository.js`, `lib/product-research-promotion-service.js`, `app/api/v2/product-research/candidates/bulk-promote/route.js`)
-
+### 2. Modifikasi — `app/api/v2/product-research/candidates/route.js`
 **Code Sebelum (Current/Before):**
-```text
-(Promosi hanya mendukung 1 kandidat per panggilan via POST /api/v2/product-research/candidates/[id]/promote)
+```js
+function enrichCandidateRow(item, duplicateMap, catalogMap) {
+  ...
+  return {
+    ...item,
+    effective_url: effectiveUrl,
+    effective_normalized_url: effectiveNormalizedUrl,
+    url_blocked: isCandidateUrlBlocked(item),
+    duplicate_match: duplicateMatch,
+    catalog_product: catalogProduct,
+    thumb_api_url: item.thumb_path ? `/api/v2/product-research/candidates/${item.id}/image?kind=thumb` : null,
+    screenshot_api_url: item.screenshot_path ? `/api/v2/product-research/candidates/${item.id}/image?kind=screenshot` : null
+  };
+}
 ```
 
 **Code Sesudah (Proposed/After):**
 ```js
-// lib/product-research-promotion-service.js
-export async function previewBulkResearchPromotion(candidateIds = []) { /* klasifikasi valid / duplikat / tertahan dalam tenant aktif */ }
-export async function promoteResearchCandidatesBulk(candidateIds = [], { requestedBy } = {}, deps = {}) {
-  /* Lewati kandidat tertahan; eksekusi valid & duplikat lewat promoteResearchCandidate() (klaim atomik Tahap 5), 1 job/kandidat sesuai QUEUE_CONCURRENCY.product_scraper = 1 */
+function enrichCandidateRow(item, duplicateMap, catalogMap, comparisonMap) {
+  ...
+  return {
+    ...item,
+    effective_url: effectiveUrl,
+    effective_normalized_url: effectiveNormalizedUrl,
+    url_blocked: isCandidateUrlBlocked(item),
+    duplicate_match: duplicateMatch,
+    catalog_product: catalogProduct,
+    opportunity_score: item.opportunity_score || computeOpportunityScore(item),
+    weekly_comparison: comparisonMap?.get(item.id) || item.weekly_comparison || null,
+    thumb_api_url: item.thumb_path ? `/api/v2/product-research/candidates/${item.id}/image?kind=thumb` : null,
+    screenshot_api_url: item.screenshot_path ? `/api/v2/product-research/candidates/${item.id}/image?kind=screenshot` : null
+  };
 }
-
-// app/api/v2/product-research/candidates/bulk-promote/route.js
-// POST { candidate_ids, mode: 'preview' | 'execute' } dengan withProductResearchAccess
 ```
 
-### Langkah 3 — UI Bulk Approval di `app/product-radar/page.js` & `product-radar.module.css`
-
+### 3. Modifikasi — `app/api/v2/product-research/candidates/[id]/route.js` & `lib/product-research-promotion-service.js`
 **Code Sebelum (Current/Before):**
-```jsx
-// app/product-radar/page.js
-// Tabel kandidat hanya memiliki tombol aksi satuan per baris dan dialog konfirmasi satuan.
+```js
+  return {
+    ...candidate,
+    effective_url: effectiveUrl,
+    url_blocked: isCandidateUrlBlocked(candidate),
+    ...
+  };
 ```
 
 **Code Sesudah (Proposed/After):**
-```jsx
-// app/product-radar/page.js
-// - Tambah kolom checkbox di tabel + pilih semua di halaman + tombol cepat pilih semua siap URL
-// - Tambah bilah mengambang pilihan massal (menampilkan jumlah terpilih)
-// - Tambah dialog ringkasan Bulk Approval (3 kartu: Valid / Duplikat / Tertahan tidak ikut terkirim) via mode:'preview' sebelum mode:'execute'
-// - Tambah kartu ringkas pemantau antrean (Slot product_scraper: 1 aktif sekaligus) & polling status
+```js
+  const [weeklyHistory, dupMap, catMap] = await Promise.all([
+    getCandidateWeeklyHistory(candidate),
+    ...
+  ]);
+  return {
+    ...candidate,
+    effective_url: effectiveUrl,
+    url_blocked: isCandidateUrlBlocked(candidate),
+    opportunity_score: computeOpportunityScore(candidate),
+    weekly_history: weeklyHistory,
+    ...
+  };
 ```
+
+### 4. Modifikasi — `app/product-radar/page.js`, `CandidateDetailDrawer.js`, `radar-labels.js`, `product-radar.module.css`
+**Code Sebelum (Current/Before):**
+- Kontrol filter hanya menyediakan batch, kategori, tren, status URL, status kurasi, dan status katalog.
+- Kolom tabel menampilkan terjual + catatan tren satu minggu saja; belum ada pembanding minggu lalu, delta, skor peluang + rincian 5 komponen, dan riwayat pengamatan terpisah di Drawer.
+
+**Code Sesudah (Proposed/After):**
+- Dropdown urutan (`Ranking Riset`, `Skor Peluang Tertinggi`, `Kenaikan Terjual Lintas Minggu`) dan catatan bantu (`Skor hanya bantuan urutan, bukan promosi otomatis`).
+- Sel **Terjual & Tren Lintas Minggu** menampilkan angka dengan tanggal pengamatan masing-masing + delta terhadap pengamatan sebelumnya.
+- Sel **Skor Peluang** menampilkan badge total skor + tombol rincian 5 komponen (Penjualan, Tren, Komisi, Harga, URL).
+- `CandidateDetailDrawer.js` menampilkan panel **Riwayat Lintas Minggu (Pengamatan Terpisah)**, bagian terpisah **Saran Nama Mirip (Lintas Batch)**, dan rincian lengkap **Skor Peluang**.

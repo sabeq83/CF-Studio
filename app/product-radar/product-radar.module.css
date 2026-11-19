@@ -852,3 +852,116 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Tahap 7.2 & 7.3 — Tren Lintas Minggu & Skor Peluang */
+.scoreCell {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 170px;
+}
+
+.miniBreakdown {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 3px;
+}
+
+.miniSeg {
+  height: 5px;
+  border-radius: 3px;
+  background: var(--surface-interactive);
+  overflow: hidden;
+}
+
+.miniSeg > span {
+  display: block;
+  height: 100%;
+  background: var(--action-primary);
+}
+
+.scoreDetailBox {
+  margin-top: 4px;
+  background: var(--surface-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  padding: 7px 9px;
+  font-size: 0.74rem;
+}
+
+.scoreDetailRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 0;
+}
+
+.formulaPopover {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.formulaCard {
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  padding: 8px 10px;
+  font-size: 0.75rem;
+}
+
+.timelineList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.timelineRow {
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  font-size: 0.81rem;
+  align-items: center;
+}
+
+.barTrack {
+  height: 7px;
+  border-radius: 999px;
+  background: var(--surface-interactive);
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.barFill {
+  height: 100%;
+  background: var(--action-primary);
+  border-radius: 999px;
+}
+
+.suggestBox {
+  background: var(--status-warning-soft);
+  border: 1px solid color-mix(in srgb, var(--status-warning) 35%, var(--border-subtle));
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+@media (max-width: 980px) {
+  .formulaPopover { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+  .formulaPopover { grid-template-columns: 1fr; }
+  .timelineRow { grid-template-columns: 1fr; }
+}

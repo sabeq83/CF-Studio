@@ -11,12 +11,15 @@ import {
   getDisplayCategory,
   getDisplayBrand,
   labelTrend,
+  trendTone,
   labelUrlStatus,
   urlStatusTone,
   labelCurationStatus,
   curationStatusTone,
   labelProcessStatus,
-  processStatusTone
+  processStatusTone,
+  scoreTierTone,
+  formatSignedDelta
 } from './radar-labels';
 
 function toneClass(tone) {
@@ -602,10 +605,124 @@ export default function CandidateDetailDrawer({
                 </div>
               </section>
 
-              {/* 3. Riwayat Proses */}
+              {/* 3. Perbandingan Tren Lintas Minggu */}
               <section className={styles.sectionBox}>
                 <div className={styles.sectionTitle}>
-                  <span>3. Riwayat Proses</span>
+                  <span>3. Perbandingan Tren Lintas Minggu</span>
+                  <span className={`${styles.badge} ${styles.badgeInfo}`}>
+                    {candidate.weekly_history?.observations?.length || 1} Pengamatan Terpisah
+                  </span>
+                </div>
+                <p className={styles.subNote} style={{ marginTop: 0, marginBottom: '10px' }}>
+                  Setiap batch minggu tetap disimpan terpisah tanpa saling menimpa. Pencocokan lintas minggu hanya dilakukan otomatis melalui{' '}
+                  <strong>{candidate.weekly_history?.matched_by === 'cf_product_id' ? 'ID Katalog' : candidate.weekly_history?.matched_by === 'normalized_url' ? 'URL Terverifikasi' : 'URL Terverifikasi / ID Katalog'}</strong>.
+                </p>
+
+                <div className={styles.timelineList}>
+                  {(candidate.weekly_history?.observations || []).map((obs) => {
+                    const obsDate = formatObservedDate(obs.observed_at || obs.external_batch_id);
+                    const deltaSold = formatSignedDelta(obs.deltas_from_previous?.sold_delta);
+                    const pct = obs.deltas_from_previous?.sold_pct;
+                    return (
+                      <div key={obs.candidate_id} className={styles.timelineRow}>
+                        <div>
+                          <strong>{obsDate}</strong>
+                          <div className={styles.subNote}>
+                            Batch {obs.external_batch_id}
+                            {obs.is_current ? ' · Aktif' : ''}
+                          </div>
+                        </div>
+                        <div>
+                          <div>
+                            <strong>
+                              {obs.sold_per_week != null ? `${Number(obs.sold_per_week).toLocaleString('id-ID')} terjual/mg` : 'Terjual —'}
+                            </strong>{' '}
+                            <span className={styles.subNote}>({obsDate})</span>
+                            {deltaSold && (
+                              <span
+                                style={{
+                                  marginLeft: '6px',
+                                  fontWeight: 700,
+                                  color: obs.deltas_from_previous.sold_delta >= 0 ? 'var(--status-success)' : 'var(--status-danger)'
+                                }}
+                              >
+                                {deltaSold}{pct != null ? ` (${pct >= 0 ? '+' : ''}${pct}%)` : ''}
+                              </span>
+                            )}
+                          </div>
+                          <div className={styles.subNote}>
+                            Harga: {formatRp(obs.price)} · Komisi: {formatRp(obs.commission_rp)} ({obsDate})
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                          {obs.rank != null && (
+                            <span className={`${styles.badge} ${styles.badgeMuted}`}>Rank #{obs.rank}</span>
+                          )}
+                          <span className={`${styles.badge} ${toneClass(trendTone(obs.trend))}`}>
+                            {labelTrend(obs.trend)}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {(candidate.weekly_history?.similar_name_suggestions || []).length > 0 && (
+                  <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <strong style={{ fontSize: '0.83rem' }}>
+                      💡 Saran Nama Mirip dari Batch Lain (Tidak Otomatis Digabung)
+                    </strong>
+                    {candidate.weekly_history.similar_name_suggestions.map((sug) => (
+                      <div key={sug.candidate_id} className={styles.suggestBox}>
+                        <div>
+                          <strong>{sug.name}</strong> · Kemiripan nama {sug.similarity_pct}%
+                        </div>
+                        <div className={styles.subNote}>
+                          Batch {sug.external_batch_id} ({formatObservedDate(sug.observed_at)}) · Terjual{' '}
+                          {sug.sold_per_week != null ? Number(sug.sold_per_week).toLocaleString('id-ID') : '—'} · URL:{' '}
+                          {labelUrlStatus(sug.url_status)}
+                        </div>
+                        <div className={styles.subNote}>{sug.note}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+
+              {/* 4. Rincian Skor Peluang */}
+              {candidate.opportunity_score && (
+                <section className={styles.sectionBox}>
+                  <div className={styles.sectionTitle}>
+                    <span>4. Rincian Skor Peluang (Rumus Transparan)</span>
+                    <span className={`${styles.badge} ${toneClass(scoreTierTone(candidate.opportunity_score.tier))}`}>
+                      {candidate.opportunity_score.total} / {candidate.opportunity_score.max} · {candidate.opportunity_score.tier_label}
+                    </span>
+                  </div>
+                  <p className={styles.subNote} style={{ marginTop: 0, marginBottom: '10px' }}>
+                    {candidate.opportunity_score.note}
+                  </p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {(candidate.opportunity_score.breakdown || []).map((b) => (
+                      <div key={b.key}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', gap: '8px' }}>
+                          <span>
+                            <strong>{b.label}</strong> — <span className={styles.subNote}>{b.detail}</span>
+                          </span>
+                          <strong>{b.score} / {b.max}</strong>
+                        </div>
+                        <div className={styles.barTrack}>
+                          <div className={styles.barFill} style={{ width: `${Math.round((b.score / b.max) * 100)}%` }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* 5. Riwayat Proses */}
+              <section className={styles.sectionBox}>
+                <div className={styles.sectionTitle}>
+                  <span>5. Riwayat Proses</span>
                   <span className={styles.subNote}>Jejak tindakan kandidat</span>
                 </div>
                 <div className={styles.historyList}>

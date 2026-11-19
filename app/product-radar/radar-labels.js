@@ -138,3 +138,16 @@ export function extractDomainHint(url) {
     return 'URL perlu cek';
   }
 }
+
+export function scoreTierTone(tier) {
+  if (tier === 'high') return 'success';
+  if (tier === 'medium') return 'info';
+  return 'warning';
+}
+
+export function formatSignedDelta(val) {
+  if (val === null || val === undefined || val === '') return null;
+  const n = Number(val);
+  if (!Number.isFinite(n)) return null;
+  return `${n >= 0 ? '+' : ''}${n.toLocaleString('id-ID')}`;
+}
