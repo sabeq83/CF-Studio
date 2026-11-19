@@ -3,15 +3,17 @@ import path from 'path';
 import { getUniverseManifest, getUniverseManifestAsync, ensureManifestsLoaded } from '../../../../../lib/universe-manifests.js';
 import { withTenantContext } from '../../../../../lib/auth.js';
 
-export const GET = withTenantContext(async (req) => {
+export const GET = withTenantContext(async (req, ...rest) => {
   try {
     await ensureManifestsLoaded();
+    const user = rest[rest.length - 1];
     const url = new URL(req.url);
     const profile = url.searchParams.get('profile') || 'pawville';
+    const tenantId = user?.tenantId || null;
 
-    let manifest = getUniverseManifest(profile);
+    let manifest = getUniverseManifest(profile, { tenantId });
     if (!manifest) {
-      manifest = await getUniverseManifestAsync(profile);
+      manifest = await getUniverseManifestAsync(profile, { tenantId });
     }
     if (!manifest) {
       return Response.json({ success: false, error: `Universe profile '${profile}' not found` }, { status: 404 });
@@ -49,9 +51,11 @@ export const GET = withTenantContext(async (req) => {
   }
 });
 
-export const POST = withTenantContext(async (req) => {
+export const POST = withTenantContext(async (req, ...rest) => {
   try {
     await ensureManifestsLoaded();
+    const user = rest[rest.length - 1];
+    const tenantId = user?.tenantId || null;
     const contentType = req.headers.get('content-type') || '';
     if (!contentType.includes('multipart/form-data')) {
       return Response.json({ success: false, error: 'Content type must be multipart/form-data' }, { status: 400 });
@@ -70,9 +74,9 @@ export const POST = withTenantContext(async (req) => {
     }
 
     // Strict validation of inputs to prevent path traversal
-    let manifest = getUniverseManifest(universeProfile);
+    let manifest = getUniverseManifest(universeProfile, { tenantId });
     if (!manifest) {
-      manifest = await getUniverseManifestAsync(universeProfile);
+      manifest = await getUniverseManifestAsync(universeProfile, { tenantId });
     }
     if (!manifest) {
       return Response.json({ success: false, error: 'Invalid universe profile' }, { status: 400 });
