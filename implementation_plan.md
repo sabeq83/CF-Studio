@@ -1,219 +1,189 @@
-# Implementation Plan — Bagian H: Hotfix Isolasi Tenant Universe (`hotfix/universe-tenant-isolation`)
+# Implementation Plan — Bagian F: MCP Universe & Character Lock (MVP Arka)
 
-- **Branch Kerja**: `hotfix/universe-tenant-isolation` (dari `main` @ `df4ed5a` / v2.56.0)
-- **Acuan Instruksi**: `catatan-kerja/instruksi-agent/antigravity_mcp_universe_reference_manager_instructions.md`
-- **Lingkup Hotfix (SOP Alur 2 — HANYA 0.2 & 0.3)**:
-  1. **0.2 (B2) Isolasi Tenant Manifest**:
-     - `getUniverseManifestAsync(slug, { forceRefresh, universeId, tenantId })`: cari by `universeId` lebih dulu; lookup slug wajib `WHERE slug = $1 AND tenant_id = $2` via `pgQuery` dengan tenant eksplisit (tidak bergantung pada interceptor di konteks `__none__`).
-     - Kunci cache `${tenant_id}:${slug}` + indeks by ID; `_characterNameMap` per tenant (`Map<tenantId, map>`). Pertahankan fallback statis PawVille.
-     - Resolver (`lib/cartoon-reference-resolver.js`) dan pemanggilnya meneruskan `tenantId` kampanye (`campaign.tenant_id` / `row.tenant_id`) ke manifest; snapshot kampanye (`universe_snapshot_json`) tetap diprioritaskan.
-     - `refreshManifestCache()` dan pemanggilan argumen lama tetap bekerja; tambahkan `refreshManifestCache({ tenantId, universeId })` untuk invalidasi selektif entri terkait.
-  2. **0.3 (B3) Hentikan Penimpaan ID & Whitelist Route Universe**:
-     - `POST /api/v2/universe-profiles` dan `POST /api/v2/universe-profiles/[id]/characters` memakai whitelist field eksplisit dan meletakkan ID buatan server (`id`, `universe_id`) di posisi **terakhir**.
-     - Validasi `character_key` dengan `/^[a-z0-9_]{2,64}$/`; konflik `(universe_id, character_key)` → HTTP 409 `CHARACTER_KEY_EXISTS` tanpa membocorkan error constraint database mentah.
-     - Setelah create karakter, panggil invalidasi cache selektif (`refreshManifestCache({ tenantId, universeId })`).
+- **Branch Kerja**: `fitur/mcp-universe-character-lock` (dari `main` @ v2.56.1 `55072ab98b6a130475727de931287567b5ed91c5`, setelah Hotfix Bagian H ter-merge dan ter-deploy ke Staging)
+- **Acuan Instruksi**:
+  - `catatan-kerja/instruksi-agent/antigravity_mcp_universe_reference_manager_instructions.md`
+  - `catatan-kerja/usulan/REVIEW_USULAN_MCP_UNIVERSE_REFERENCE_MANAGER.md`
+  - `catatan-kerja/usulan/USULAN_MCP_UNIVERSE_REFERENCE_MANAGER.md` (kontrak preflight bagian 7)
 - **Perubahan Database (Migrasi)**: **Tidak ada.**
 - **Perubahan UI**: **Tidak ada.**
-- **Tahap Berikutnya (Terpisah di Bagian F setelah Hotfix ter-merge ke `main`)**: `fitur/mcp-universe-character-lock` (0.1 B1, 0.4 B4, 0.5 R1, 0.6 B5, 0.7 upload dedup, Tahap A routes, Tahap B 10 tool MCP, Tahap C test, Tahap D deploy Dev & uji Arka).
-
----
-
-## Hasil Audit Wajib pada `main` (`df4ed5a`)
-
-| ID | File | Hasil Konfirmasi di `main` |
-|---|---|---|
-| B1 | `lib/universe-manifests.js` (:213, :226, :364) & `lib/reference-asset-repository.js` (:255) | **Terkonfirmasi.** `getApprovedReferenceAssetsForUniverse(profile.id)` dipanggil di dalam `tenantContext.run('__none__', ...)` sehingga `getActiveTenantId()` menghasilkan `'__none__'` dan query selalu kosong. (Ditangani di Bagian F.) |
-| B2 | `lib/universe-manifests.js` (`loadManifestsFromDb`, `getUniverseManifestAsync`, `_manifestCache`, `_characterNameMap`) | **Terkonfirmasi.** Lookup slug dilakukan lebih dulu daripada `universeId` di konteks `'__none__'` (tanpa filter tenant), `_manifestCache` dikunci `slug` saja, dan `_characterNameMap` global lintas tenant. **(Ditangani di Hotfix ini — 0.2.)** |
-| B3 | `app/api/v2/universe-profiles/route.js` (:33), `app/api/v2/universe-profiles/[id]/characters/route.js` (:36) | **Terkonfirmasi.** `{ id, ...body }` dan `{ id: charId, universe_id: id, ...body }` memungkinkan `body` menimpa `id` / `universe_id`; belum ada validasi format `character_key` maupun penanganan konflik 409 `CHARACTER_KEY_EXISTS`. **(Ditangani di Hotfix ini — 0.3.)** |
-| B4 | `lib/cartoon-reference-resolver.js` (:264-315, :391+) | **Terkonfirmasi.** Scan prompt tanpa allowlist, fallback ke `'si_wajan'` / karakter pertama manifest, gambar hilang hanya `console.warn`. (Ditangani di Bagian F.) |
-| B5 | `lib/auth.js` (`withTenantContext`, operator fallback) | **Terkonfirmasi.** Route Universe/aset hanya memakai `withTenantContext` tanpa cek scope operator (`content:read`/`content:create`/`content:approve`) dan tanpa cek `tenantDisabledMenus` untuk `universe_manager`. (Ditangani di Bagian F.) |
-| R1 | `lib/reference-asset-repository.js` (:105-113) | **Terkonfirmasi.** Cek `asset.status !== 'draft'` dilakukan sebelum `withPgTransaction`, belum ada `FOR UPDATE`, cek `expected_sha256`, idempotency, atau pemetaan error `23505` → `REVISION_CONFLICT`. (Ditangani di Bagian F.) |
-| R2 | `app/api/v2/universe-profiles/[id]/characters/[charId]/route.js` | **Catatan Audit Penting:** File `[charId]/route.js` **sudah ada** di `main` (GET/PUT/DELETE dasar), tetapi belum memverifikasi kepemilikan `universe_id`, belum memakai whitelist field/validasi `character_key` dipakai VI, belum mendukung `expected_updated_at`, belum menginvalidasi cache manifest, dan belum mengecek scope. Akan diperbarui pada Bagian F Tahap A. |
-| R3 | `apps/mcp/tools.mjs` (`resolvePhotoInput` :8, `request` :296, `register` :362) | **Terkonfirmasi.** Pola `resolvePhotoInput`, `FormData` pada `request`, dan `x-tenant-override` tersedia dan siap dipakai di Bagian F Tahap B. |
-| R4 | `lib/opc-start-frame-request.js` (:262-282), `lib/scheduler-processors.js` (:6506-6523) | **Terkonfirmasi.** `buildOpcStartFrameRequest` menangkap error resolver dan hanya `console.warn`; `scheduler-processors.js` belum menangani error khusus `REFERENCE_NOT_RESOLVED`. (Penanganan strict error di Bagian F; penerusan `tenantId` dikerjakan di Hotfix ini.) |
+- **Kompatibilitas**: Perilaku resolver untuk Visual Identity (VI) non-`strict` (termasuk PawVille / `si_wajan`) tetap **identik**.
 
 ---
 
 ## Execution Task List
 
-### Bagian H — Hotfix Isolasi Tenant (`hotfix/universe-tenant-isolation`)
-- [x] Baca dokumen acuan, konfirmasi audit B1–B5 & R1–R4 pada `main`, dan buat branch `hotfix/universe-tenant-isolation`
-- [x] **0.2 (B2)**: Perbarui `lib/universe-manifests.js` (lookup by `universeId` lebih dulu, lookup slug eksplisit `WHERE slug = $1 AND tenant_id = $2` via `pgQuery`, kunci cache `${tenant_id}:${slug}`, `_characterNameMap` per tenant `Map<tenantId, map>`, fallback statis PawVille tetap ada, `refreshManifestCache({ tenantId, universeId })` selektif + kompatibel argumen lama)
-- [x] **0.2 (B2)**: Teruskan `tenantId` kampanye/konteks pada `lib/cartoon-reference-resolver.js`, `lib/opc-start-frame-request.js`, `lib/scheduler-processors.js`, `app/api/v2/cartoon-universe/manifest/route.js`, `app/api/v2/pillar-campaigns/items/[itemId]/regenerate-t2i/route.js`, dan `lib/pillar-campaign-ingest.js`
-- [x] **0.3 (B3)**: Buat helper whitelist & validasi `lib/universe-route-validation.js`, lalu perbarui `app/api/v2/universe-profiles/route.js` dan `app/api/v2/universe-profiles/[id]/characters/route.js` (ID server terakhir, validasi `character_key`, konflik 409 `CHARACTER_KEY_EXISTS`, invalidasi cache 0.2 setelah create karakter)
-- [x] Tambah unit test wajib:
-  - `tests/universe-manifest-tenant-isolation.test.js` (B2: dua tenant slug sama tidak tertukar, lookup by ID dulu, `_characterNameMap` per tenant, `refreshManifestCache({ tenantId, universeId })` selektif, resolver meneruskan `tenantId`)
-  - `tests/universe-character-route-whitelist.test.js` (B3: body tidak bisa menimpa `id`/`universe_id`/`tenant_id`, validasi format `character_key`, konflik 409 `CHARACTER_KEY_EXISTS` tanpa bocor error DB, invalidasi cache dipanggil)
-- [x] Jalankan seluruh test wajib + regresi (`tests/test-cartoon-*.mjs`, `tests/reference-asset-and-sidebar-d.test.js`, `tests/base64-image-reference.test.js`) dan `npm run build`
-- [x] Commit dan push branch `hotfix/universe-tenant-isolation`
-- [x] **🛑 BERHENTI**: Laporkan hasil ke pengguna (bahasa sederhana, tanpa perubahan DB) dan minta persetujuan untuk merge ke `main`, rilis patch + perbarui `sot/menus/kartu/universes.md`, dan deploy ke Staging (disetujui 19 Nov 2026)
+### Tahap 0 — Perbaikan Fondasi (commit terpisah per butir)
+- [x] **0.1 (B1)**: Aset approved terbaca di manifest — perbarui `getApprovedReferenceAssetsForUniverse(universeId, tenantId)` di `lib/reference-asset-repository.js`, panggil dengan `profile.tenant_id` di `lib/universe-manifests.js`, tambahkan `identity_asset` (`approved_asset` | `legacy_path` | `fabricated_path`) per karakter di `buildManifestFromDb` sambil mempertahankan field lama
+- [ ] **0.4 (B4)**: Mode Character Lock `strict` di resolver — pertahankan `subject.character_lock_mode` (`'off'` | `'strict'`) di `lib/visual-identity-contract.js`; terapkan allowlist `viSubject.character_keys`, larangan fallback karakter lain, penolakan `fabricated_path`, error `REFERENCE_NOT_RESOLVED`, serta field diagnostik `resolvedCharacterAssets` di `lib/cartoon-reference-resolver.js` (async & sync); pastikan `lib/opc-start-frame-request.js` dan `lib/scheduler-processors.js` (R4) tidak menelan `REFERENCE_NOT_RESOLVED`
+- [ ] **0.5 (R1)**: Approval aman terhadap balapan — di `lib/reference-asset-repository.js` (`approveReferenceAsset`), pindahkan `SELECT … FOR UPDATE` ke dalam `withPgTransaction`, validasi `expected_sha256` (`CHECKSUM_MISMATCH`), idempoten bila sudah `approved` dengan sha sama, tangkap `23505` → `REVISION_CONFLICT`, dan invalidasi cache manifest (`refreshManifestCache`) setelah commit
+- [ ] **0.6 (B5)**: Cek scope & izin pada route Universe/aset/link — tambah helper `requireOperatorScope(user, scope)` + muat `tenantDisabledMenus` untuk operator di `lib/auth.js`; terapkan `content:read` / `content:create` / `content:approve` serta blokir bila menu `universe_manager` dinonaktifkan tenant (`403`)
+- [ ] **0.7**: Upload dedup checksum, konsistensi `universe_id`, dan batas dimensi — di `lib/reference-asset-storage.js` batasi dimensi maks 4096×4096 / 16 MP (`UPLOAD_TOO_LARGE`); di `lib/reference-asset-service.js` hitung `sha256` sebelum `reserveReferenceAssetVersion`, dedup draft/approved identik (`deduplicated: true`), dan validasi `universe_id === owner.universe_id` untuk `owner_type='character'` (`UNIVERSE_MISMATCH`)
+
+### Tahap A — Route Baru & Diperkeras
+- [ ] **A.1**: Perkeras `app/api/v2/universe-profiles/[id]/characters/[charId]/route.js` (`GET` + ringkasan aset approved; `PUT` whitelist field, kepemilikan Universe `[id]`, `expected_updated_at` → `REVISION_CONFLICT`, tolak ubah `character_key` jika dipakai VI → `CHARACTER_KEY_IN_USE`, invalidasi cache; `DELETE` kepemilikan + invalidasi cache) serta perkaya `GET /api/v2/universe-profiles/[id]` dengan ringkasan aset approved & `tenant_id`
+- [ ] **A.2**: Buat `app/api/v2/visual-identities/[id]/universe-link/route.js` (`POST`, `content:approve`, validasi VI/Universe/keys se-tenant, merge hanya `subject.universe_profile_id/universe_slug/universe_name/character_keys/character_lock_mode`, `dry_run` default `true`, kembalikan `{ before, after, diff, dry_run, warnings }`)
+- [ ] **A.3**: Buat `app/api/v2/reference-assets/character-lock-preflight/route.js` (`POST`, `content:read`, read-only, bangun manifest segar, cek VI stylized, konsistensi Universe/keys, `approved_asset` vs legacy/fabricated, verifikasi file & sha via `verifyManagedReference`, panggil resolver diagnostik termasuk uji `sample_prompt` mengandung nama karakter lain, kembalikan kontrak respons bagian 7 + `resolved_assets[].source`)
+- [ ] Pastikan semua route baru/terkait mengembalikan `tenant_id` efektif dan format error stabil `{ success: false, error_code, error }`
+
+### Tahap B — 10 Tool MCP (`apps/mcp/tools.mjs`)
+- [ ] Daftarkan 10 tool MCP (`cf_list_universes`, `cf_get_universe`, `cf_create_universe_character`, `cf_update_universe_character`, `cf_list_reference_assets`, `cf_upload_reference_asset`, `cf_approve_reference_asset`, `cf_reject_reference_asset`, `cf_link_visual_identity_universe`, `cf_preflight_character_lock`) dengan cek `expected_tenant_id` sisi MCP (`TENANT_MISMATCH`), validasi upload (`image_base64` XOR `file_path`, tolak `photo_url`, batas 14 MB base64 / 10 MB biner `UPLOAD_TOO_LARGE`, `fs.realpath` + file biasa + ekstensi `.png/.jpg/.jpeg/.webp`), dan teruskan `error_code` di `operatorClient`
+- [ ] Perbarui `apps/mcp/README.md` (daftar 10 tool baru + contoh alur Arka)
+- [ ] Tambah test di `apps/mcp/test/mcp.test.mjs` (registrasi 10 tool, validasi schema, `expected_tenant_id` mismatch, base64 kebesaran `UPLOAD_TOO_LARGE`, approve tanpa `expected_sha256` ditolak, `photo_url` ditolak)
+
+### Tahap C — Pengujian & Build
+- [ ] Perluas `tests/universe-manifest-tenant-isolation.test.js` untuk kasus B1 (`source: 'approved_asset'`, `'legacy_path'`, `'fabricated_path'`)
+- [ ] Buat `tests/cartoon-reference-resolver-strict.test.js` (strict async & sync, tanpa fallback, prompt menyebut Maya tidak menambah anchor Maya, anchor hilang → `REFERENCE_NOT_RESOLVED`, `fabricated_path` ditolak, non-strict identik perilaku lama)
+- [ ] Buat `tests/reference-asset-approve-concurrency.test.js` (balapan paralel, idempoten, `expected_sha256` beda → `CHECKSUM_MISMATCH`, `23505` → `REVISION_CONFLICT`)
+- [ ] Buat `tests/reference-asset-upload-dedup.test.js` (upload identik → `deduplicated: true` tanpa versi baru, `UNIVERSE_MISMATCH`, batas dimensi)
+- [ ] Perluas `tests/test-visual-identity-universe-link.mjs` (route link: dry-run tidak menulis, merge tidak menyentuh field lain, key tak dikenal ditolak)
+- [ ] Jalankan seluruh test baru, regresi (`tests/test-cartoon-*.mjs`, `tests/reference-asset-and-sidebar-d.test.js`, `tests/base64-image-reference.test.js`, `tests/universe-character-route-whitelist.test.js`), `npm run test:mcp`, dan `npm run build`
+
+### Tahap D — Kartu Menu, Deploy Dev & Uji Arka di Dev
+- [ ] Perbarui kartu `sot/menus/kartu/universes.md` dan `sot/menus/kartu/visual-identities.md`
+- [ ] Push `fitur/mcp-universe-character-lock` dan deploy atomic ke **Dev** (`npm run deploy:dev:atomic -- --ref <full-sha> --apply --confirm-dev`)
+- [ ] Verifikasi kesehatan Dev wajib SOP (`current`, manifest, HTTP 200 UI/API, PM2 online, `pm_cwd`, `PG_SEARCH_PATH=dev`, `PGPOOL_MAX=3`)
+- [ ] Cek alur Arka di Dev (read-only/uji kesiapan via API/MCP Dev; tidak membuat video sampel dan tidak generate gambar sendiri tanpa persetujuan pengguna) & laporkan ke pengguna
 
 ---
 
 ## Rancangan Perubahan Kode (Before & After)
 
-### 1. Modifikasi — `lib/universe-manifests.js`
+### 1. `lib/reference-asset-repository.js` & `lib/universe-manifests.js` (0.1 B1 + 0.5 R1)
 
 **Code Sebelum (Current/Before):**
 ```js
-let _manifestCache = null;       // { pawville: {...}, kitchentails: {...} }
-let _characterNameMap = null;    // { 'mochi': 'mochi', 'dr. paw': 'dr_paw', ... }
-let _cacheReady = false;
-let _cacheLoadPromise = null;
-
-// ...
-export async function getUniverseManifestAsync(universeProfile, { forceRefresh = false, universeId = null } = {}) {
-  // ...
-  let profile = cleanProfile
-    ? await tenantContext.run('__none__', () => getUniverseProfileBySlug(cleanProfile))
-    : null;
-  if (!profile && universeId) {
-    profile = await tenantContext.run('__none__', () => getUniverseProfile(universeId));
-  }
-  if (profile) {
-    // ...
-    _manifestCache[String(profile.slug || cleanProfile).toLowerCase()] = manifest;
-    if (!_characterNameMap) _characterNameMap = buildCharacterNameMap(characters || []);
-    return manifest;
-  }
+// lib/reference-asset-repository.js
+export async function getApprovedReferenceAssetsForUniverse(universeId) {
+  const tenantId = getActiveTenantId();
+  const res = await pgQuery(
+    `SELECT * FROM visual_reference_assets WHERE tenant_id = $1 AND universe_id = $2 AND status = 'approved'`,
+    [tenantId, universeId]
+  );
+  return res.rows;
 }
 
-export async function refreshManifestCache() {
-  _cacheLoadPromise = loadManifestsFromDb();
-  await _cacheLoadPromise;
+export async function approveReferenceAsset(id, review = {}, actor, ownerContext = null) {
+  const tenantId = getActiveTenantId();
+  const asset = await getReferenceAsset(id);
+  if (!asset) throw new Error('Asset not found');
+  if (asset.status !== 'draft') throw new Error('Only draft assets can be approved');
+  validateApprovalAttestation(asset, review.attestation, ownerContext);
+  return await withPgTransaction(async (client) => { /* ... */ });
 }
 ```
 
 **Code Sesudah (Proposed/After):**
 ```js
-import { getActiveTenantId, tenantContext } from './tenant-context.js';
+// lib/reference-asset-repository.js
+export async function getApprovedReferenceAssetsForUniverse(universeId, tenantId = getActiveTenantId()) {
+  const res = await pgQuery(
+    `SELECT * FROM visual_reference_assets WHERE tenant_id = $1 AND universe_id = $2 AND status = 'approved'`,
+    [tenantId, universeId]
+  );
+  return res.rows;
+}
 
-let _manifestCache = null;         // { '<tenantId>:<slug>': manifest }
-let _manifestById = new Map();     // Map<universeId, { tenantId, slug, cacheKey, manifest }>
-let _characterNameMap = new Map(); // Map<tenantId, { 'name': 'character_key' }>
-let _cacheReady = false;
-let _cacheLoadPromise = null;
-
-// Lookup order in getUniverseManifestAsync(universeProfile, { forceRefresh = false, universeId = null, tenantId = null }):
-// 1. If universeId is present, query by ID FIRST via pgQuery (with tenant_id filter when tenantId/active context is known).
-// 2. Otherwise query by slug with explicit tenant_id:
-//    SELECT * FROM universe_profiles WHERE slug = $1 AND tenant_id = $2 LIMIT 1
-// 3. Cache under `${profileTenantId}:${profileSlug}` and index by `profile.id`,
-//    update `_characterNameMap` ONLY for `profileTenantId`.
-// 4. Preserve PAWVILLE_STATIC_FALLBACK for slug 'pawville'.
-// 5. refreshManifestCache(options):
-//    - If options is { tenantId, universeId }, evict only matching cache entries & tenant name map.
-//    - Otherwise (no args or legacy string arg), reload all manifests from DB.
+export async function approveReferenceAsset(id, review = {}, actor, ownerContext = null) {
+  const tenantId = getActiveTenantId();
+  const approvedAsset = await withPgTransaction(async (client) => {
+    const locked = await client.query(
+      'SELECT * FROM visual_reference_assets WHERE id = $1 AND tenant_id = $2 FOR UPDATE',
+      [id, tenantId]
+    );
+    const asset = locked.rows[0];
+    if (!asset) { throw createCodedError('Asset not found', 'OWNER_NOT_FOUND', 404); }
+    if (review.expected_sha256 && asset.sha256 !== review.expected_sha256) {
+      throw createCodedError('Checksum mismatch', 'CHECKSUM_MISMATCH', 409);
+    }
+    if (asset.status === 'approved') return asset; // Idempotent
+    if (asset.status !== 'draft') {
+      throw createCodedError('Only draft assets can be approved', 'REVISION_CONFLICT', 409);
+    }
+    validateApprovalAttestation(asset, review.attestation, ownerContext);
+    // Demote previous approved, promote current, dual-write legacy, catch 23505 -> REVISION_CONFLICT
+  });
+  if (approvedAsset?.universe_id) {
+    await refreshManifestCache({ tenantId, universeId: approvedAsset.universe_id }).catch(() => {});
+  }
+  return approvedAsset;
+}
 ```
 
-### 2. Modifikasi — `lib/cartoon-reference-resolver.js` & Pemanggilnya
+```js
+// lib/universe-manifests.js — buildManifestFromDb per character
+const fabricatedPath = `/universe-assets/${profile.slug}/characters/${char.character_key}/v${char.version || 1}/identity-anchor.png`;
+const identityAsset = charIdentityAsset
+  ? { asset_id: charIdentityAsset.id, version: charIdentityAsset.version, sha256: charIdentityAsset.sha256, public_path: charIdentityAsset.public_path, source: 'approved_asset' }
+  : (char.reference_image_path
+      ? { public_path: char.reference_image_path, source: 'legacy_path' }
+      : { public_path: fabricatedPath, source: 'fabricated_path' });
+```
+
+### 2. `lib/cartoon-reference-resolver.js`, `lib/opc-start-frame-request.js`, `lib/scheduler-processors.js` (0.4 B4)
 
 **Code Sebelum (Current/Before):**
 ```js
 // lib/cartoon-reference-resolver.js
-export async function resolveClipReferenceImagesAsync({
-  contentWorld,
-  universeProfile,
-  universeProfileId = null,
-  universeSnapshot,
-  // ...
-}) {
-  // ...
-  let manifest = universeSnapshot?.manifest;
-  if (!manifest && (effectiveUniverseSlug || effectiveUniverseId)) {
-    manifest = await getUniverseManifestAsync(effectiveUniverseSlug, {
-      forceRefresh: true,
-      universeId: effectiveUniverseId
-    });
-  }
-  if (!manifest && effectiveUniverseSlug) {
-    manifest = getUniverseManifest(effectiveUniverseSlug);
-  }
+// Tanpa cek character_lock_mode; prompt scan menerima semua karakter manifest;
+// fallback ke 'si_wajan' & Object.keys(manifest.characters); gambar hilang hanya console.warn.
 ```
 
 **Code Sesudah (Proposed/After):**
 ```js
 // lib/cartoon-reference-resolver.js
-export async function resolveClipReferenceImagesAsync({
-  contentWorld,
-  universeProfile,
-  universeProfileId = null,
-  tenantId = null,
-  universeSnapshot,
-  // ...
-}) {
-  // ...
-  let manifest = universeSnapshot?.manifest;
-  if (!manifest && (effectiveUniverseSlug || effectiveUniverseId)) {
-    manifest = await getUniverseManifestAsync(effectiveUniverseSlug, {
-      forceRefresh: true,
-      universeId: effectiveUniverseId,
-      tenantId
-    });
-  }
-  if (!manifest && effectiveUniverseSlug) {
-    manifest = getUniverseManifest(effectiveUniverseSlug, { tenantId });
-  }
-```
-*(Pola yang sama diterapkan pada `resolveClipReferenceImages` sync serta pemanggil di `lib/opc-start-frame-request.js`, `lib/scheduler-processors.js`, `app/api/v2/cartoon-universe/manifest/route.js`, `app/api/v2/pillar-campaigns/items/[itemId]/regenerate-t2i/route.js`, dan `lib/pillar-campaign-ingest.js`.)*
-
-### 3. Baru — `lib/universe-route-validation.js`
-
-**Code Sebelum (Current/Before):**
-*(Belum ada; route melakukan spread `...body` langsung setelah ID server tanpa whitelist maupun validasi `character_key`.)*
-
-**Code Sesudah (Proposed/After):**
-```js
-export const CHARACTER_KEY_REGEX = /^[a-z0-9_]{2,64}$/;
-export const ALLOWED_UNIVERSE_PROFILE_FIELDS = [ /* daftar eksplisit kolom profil tanpa id/tenant_id */ ];
-export const ALLOWED_UNIVERSE_CHARACTER_FIELDS = [ /* daftar eksplisit kolom karakter tanpa id/universe_id/tenant_id */ ];
-
-export function pickAllowedFields(body, allowedFields) { ... }
-export function validateCharacterKey(key) { ... }
-export function buildCreateUniverseProfilePayload(body, id) {
-  return { ...pickAllowedFields(body, ALLOWED_UNIVERSE_PROFILE_FIELDS), id };
-}
-export function buildCreateUniverseCharacterPayload(body, charId, universeId) {
-  return { ...pickAllowedFields(body, ALLOWED_UNIVERSE_CHARACTER_FIELDS), id: charId, universe_id: universeId };
-}
-export function isCharacterKeyConflictError(err) { ... }
+const isStrictLock = viSubject.character_lock_mode === 'strict';
+// Pada isStrictLock (async & sync):
+// - Allowlist = viSubject.character_keys (harus non-empty & terdaftar di manifest)
+// - Hanya kunci yang ada di allowlist yang diterima dari clipCharacters/voiceSegments/promptText
+// - Jika kosong -> pakai kunci pertama allowlist di manifest (TANPA fallback si_wajan / Object.keys)
+// - Jika identity_asset.source === 'fabricated_path' atau file gagal dimuat -> throw Error dengan err.code = 'REFERENCE_NOT_RESOLVED'
+// - result.resolvedCharacterAssets = [{ character_key, asset_id, version, sha256, source, public_path }]
+// Pada non-strict: perilaku 100% identik dengan sebelumnya.
 ```
 
-### 4. Modifikasi — `app/api/v2/universe-profiles/route.js` & `app/api/v2/universe-profiles/[id]/characters/route.js`
+### 3. `lib/auth.js` (0.6 B5)
 
 **Code Sebelum (Current/Before):**
 ```js
-// app/api/v2/universe-profiles/route.js
-const id = uuidv4();
-await createUniverseProfile({ id, ...body });
-
-// app/api/v2/universe-profiles/[id]/characters/route.js
-const charId = uuidv4();
-await createUniverseCharacter({ id: charId, universe_id: id, ...body });
+// Operator token tidak memuat tenantDisabledMenus dan belum ada helper requireOperatorScope.
 ```
 
 **Code Sesudah (Proposed/After):**
 ```js
-// app/api/v2/universe-profiles/route.js
-const id = uuidv4();
-await createUniverseProfile(buildCreateUniverseProfilePayload(body, id));
-
-// app/api/v2/universe-profiles/[id]/characters/route.js
-if (!validateCharacterKey(body.character_key)) {
-  return Response.json({ success: false, error_code: 'INVALID_CHARACTER_KEY', error: 'character_key must match /^[a-z0-9_]{2,64}$/.' }, { status: 400 });
+export function hasOperatorScope(user, requiredScope) { ... }
+export function requireOperatorScope(user, requiredScope) {
+  // Jika user.isOperator dan bukan master dan tidak punya requiredScope -> 403 SCOPE_REQUIRED
 }
-const existingChars = await getUniverseCharacters(id);
-if ((existingChars || []).some(c => c.character_key === body.character_key)) {
-  return Response.json({ success: false, error_code: 'CHARACTER_KEY_EXISTS', error: 'Character key already exists in this universe.' }, { status: 409 });
+export function assertUniverseManagerAccess(user, requiredScope = 'content:read') {
+  // Cek tenantDisabledMenus.includes('universe_manager') -> 403, lalu requireOperatorScope
 }
-const charId = uuidv4();
-try {
-  await createUniverseCharacter(buildCreateUniverseCharacterPayload(body, charId, id));
-} catch (err) {
-  if (isCharacterKeyConflictError(err)) {
-    return Response.json({ success: false, error_code: 'CHARACTER_KEY_EXISTS', error: 'Character key already exists in this universe.' }, { status: 409 });
-  }
-  throw err;
-}
-await refreshManifestCache({ tenantId: user?.tenantId || universe.tenant_id, universeId: id });
 ```
+
+### 4. `lib/reference-asset-storage.js` & `lib/reference-asset-service.js` (0.7)
+
+**Code Sebelum (Current/Before):**
+```js
+// uploadReferenceAsset langsung memanggil reserveReferenceAssetVersion tanpa dedup sha256 dan tanpa cek universe_id === owner.universe_id.
+// processImageBuffer membaca width/height sharp tanpa batas dimensi.
+```
+
+**Code Sesudah (Proposed/After):**
+```js
+// lib/reference-asset-storage.js: validasi width <= 4096, height <= 4096, width * height <= 16_777_216 (UPLOAD_TOO_LARGE)
+// lib/reference-asset-service.js:
+// - Untuk owner_type === 'character': tolak jika universe_id dikirim dan !== owner.universe_id (400 UNIVERSE_MISMATCH); default owner.universe_id
+// - Hitung sha256 sebelum reserveReferenceAssetVersion; bila sudah ada draft/approved dengan sha sama untuk owner/role sama -> kembalikan { ...existing, deduplicated: true }
+```
+
+### 5. Route Baru & Diperkeras (Tahap A) & 10 Tool MCP (Tahap B)
+
+**Code Sebelum (Current/Before):**
+- `app/api/v2/universe-profiles/[id]/characters/[charId]/route.js`: belum cek kepemilikan `universe_id`, belum whitelist, belum cek `expected_updated_at` / `CHARACTER_KEY_IN_USE` / scope / invalidasi cache.
+- `app/api/v2/visual-identities/[id]/universe-link/route.js`: belum ada.
+- `app/api/v2/reference-assets/character-lock-preflight/route.js`: belum ada.
+- `apps/mcp/tools.mjs`: belum ada 10 tool Universe & Character Lock.
+
+**Code Sesudah (Proposed/After):**
+- Semua route menggunakan `assertUniverseManagerAccess(user, scope)`, menyertakan `tenant_id` di respons, dan memakai `{ success: false, error_code, error }` untuk seluruh kode error stabil (`TENANT_MISMATCH`, `OWNER_NOT_FOUND`, `UNIVERSE_MISMATCH`, `REVISION_CONFLICT`, `REFERENCE_NOT_APPROVED`, `REFERENCE_FILE_MISSING`, `CHECKSUM_MISMATCH`, `UPLOAD_TOO_LARGE`, `REFERENCE_NOT_RESOLVED`, `SCOPE_REQUIRED`, `CHARACTER_KEY_EXISTS`, `CHARACTER_KEY_IN_USE`).
+- `apps/mcp/tools.mjs` mendaftarkan 10 tool baru dengan validasi `expected_tenant_id` sisi MCP sebelum request API dan pembatasan upload gambar.
