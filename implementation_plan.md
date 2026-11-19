@@ -35,7 +35,7 @@
 ### Langkah 3 — UI Radar Produk, Kartu Menu & Deploy Dev (Pintu Berhenti 🛑)
 - [x] Perbarui `app/product-radar/radar-labels.js`, `app/product-radar/page.js`, `app/product-radar/CandidateDetailDrawer.js`, dan `app/product-radar/product-radar.module.css` memakai semantic CSS tokens saja
 - [x] Perbarui `sot/menus/kartu/product-radar.md` untuk mendokumentasikan rumus transparan **Skor Peluang (100 poin)**, aturan **Perbandingan Lintas Minggu**, dan batasannya
-- [ ] Jalankan seluruh test suite (`tests/product-research/*.test.js`), `node --check`, commit & push `fitur/radar-trends-and-score`, deploy atomic ke **Dev**, dan verifikasi kesehatan Dev
+- [x] Jalankan seluruh test suite (`tests/product-research/*.test.js`), `node --check`, commit & push `fitur/radar-trends-and-score`, deploy atomic ke **Dev**, dan verifikasi kesehatan Dev
 - [ ] **🛑 Berhenti:** Laporkan hasil di Dev + daftar cek ke pengguna sebelum lanjut ke Tahap 7.4/7.5/7.6
 
 ---
@@ -143,3 +143,31 @@ function enrichCandidateRow(item, duplicateMap, catalogMap, comparisonMap) {
 - Sel **Terjual & Tren Lintas Minggu** menampilkan angka dengan tanggal pengamatan masing-masing + delta terhadap pengamatan sebelumnya.
 - Sel **Skor Peluang** menampilkan badge total skor + tombol rincian 5 komponen (Penjualan, Tren, Komisi, Harga, URL).
 - `CandidateDetailDrawer.js` menampilkan panel **Riwayat Lintas Minggu (Pengamatan Terpisah)**, bagian terpisah **Saran Nama Mirip (Lintas Batch)**, dan rincian lengkap **Skor Peluang**.
+
+---
+
+## Tahap 7.4 (sisi bot Mac Mini) & 7.5 — RENCANA, MENUNGGU PERSETUJUAN 🛑
+
+Sisi repo sudah selesai & ter-deploy di Dev (API operator `read/curate/promote/mcp_promote`, tabel `product_research_telegram_identities`, tool MCP, guard `cf_add_product`). Yang tersisa menyentuh sistem hidup di Mac Mini dan Google Sheets, sehingga **tidak dijalankan sebelum disetujui**.
+
+### A. Ubah kode bot (`~/.claude/skills/teleradar/scripts/teleradar_bot.py`, luar repo)
+- Backup dulu ke `backup-<tanggal>-bot-radar/` (pola yang sama dengan backup 19 Nov).
+- `/top /naik /stabil /turun /cari /produk /status` → baca `GET /api/operator/v2/product-research/*` (token `product_research:read`), fallback ke `data.json` bila API gagal.
+- `/url <no> <link>` → `POST .../candidates/<no>/url` (token `curate`) bersama `telegram_user_id` pengirim.
+- `/kirim 1,6` → `POST .../promote` `mode=preview` lalu `execute` (token `promote`) bersama `telegram_user_id`; balasan bot memakai ringkasan Valid/Duplikat/Tertahan.
+- Token terpisah per scope disimpan di `.radar_env` (mode 600), tidak pernah ditulis ke repo/log.
+- Daftarkan ID Telegram yang boleh `/kirim` lewat `scripts/radar-telegram-identity.mjs`.
+- Lingkungan awal: **Dev (5020/7020)** dulu; Staging hanya setelah fitur lolos uji Dev & disetujui.
+
+### B. Cutover Google Sheets (7.5)
+1. Tetapkan jendela waktu bersama pengguna (tidak ada batch/edit Sheet berjalan).
+2. `sheet_sync.py pull` **terakhir kali** → impor edit Sheet (URL/persetujuan) ke Radar sebagai URL kurator; persetujuan lama TIDAK memicu promosi.
+3. Alihkan `/kirim` ke Radar (langkah A), lalu matikan `sheet_sync.py pull` dan Fase B lama (tidak boleh ada 2 konsumen promosi).
+4. Sheet/Excel tetap ada sebagai ekspor satu arah opsional (`push`).
+5. Rollback: kembalikan backup bot + aktifkan lagi Fase B (Radar tetap aman karena promosi idempotent).
+
+### Checklist
+- [x] 7.4 repo: API operator + identitas Telegram + test (Dev)
+- [x] 7.6 repo: tool MCP Radar + guard `cf_add_product` + test
+- [x] 7.4 Mac Mini: ubah kode bot (terhubung ke Dev 5020; identitas Telegram `1773294885` aktif; backup di `backup-20261119-bot-radar/`)
+- [ ] 7.5: cutover Google Sheets (**menunggu konfirmasi setelah penjelasan**)
