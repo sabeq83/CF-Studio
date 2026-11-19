@@ -43,7 +43,7 @@ Menjadi pintu kurasi hasil riset produk dari TeleRadar sebelum masuk ke katalog 
 
 ## Belum ada / batasan
 - Bulk approval dibatasi maksimal 50 kandidat per permintaan dan selalu menjalankan klaim atomik per kandidat (antrean `product_scraper` berjalan 1 job sekaligus).
-- API untuk bot Telegram sudah ada (7.4, di repo); kode bot di Mac Mini belum dialihkan dan penghentian Google Sheets Fase B (7.5) belum dilakukan — menunggu persetujuan & jadwal cutover.
+- API untuk bot Telegram sudah ada (7.4) dan bot Mac Mini (`teleradar_bot.py` + `radar_bot.py`) sudah diarahkan ke Staging; `sheet_sync.py pull` dan Fase B lama sudah dimatikan (7.5 cutover selesai), sedangkan Google Sheet hanya tersisa sebagai ekspor satu arah opsional (`push`).
 - Kandidat berstatus arsip tidak bisa dipromosikan (web maupun bot).
 
 ## Terhubung ke MCP

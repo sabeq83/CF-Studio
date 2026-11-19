@@ -169,5 +169,5 @@ Sisi repo sudah selesai & ter-deploy di Dev (API operator `read/curate/promote/m
 ### Checklist
 - [x] 7.4 repo: API operator + identitas Telegram + test (Dev)
 - [x] 7.6 repo: tool MCP Radar + guard `cf_add_product` + test
-- [x] 7.4 Mac Mini: ubah kode bot (terhubung ke Dev 5020; identitas Telegram `1773294885` aktif; backup di `backup-20261119-bot-radar/`)
-- [ ] 7.5: cutover Google Sheets (**menunggu konfirmasi setelah penjelasan**)
+- [x] 7.4 Mac Mini: ubah kode bot (terhubung ke Staging 5010; identitas Telegram `1773294885` aktif; backup di `backup-20261119-bot-radar/`)
+- [x] 7.5: cutover Google Sheets (`sheet_sync.py pull` terakhir + impor 45 kandidat `2026-11-17` ke Staging + `sheet_sync.py pull` & Fase B lama dimatikan; backup di `backup-20261119-cutover/`)
