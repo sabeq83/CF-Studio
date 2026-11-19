@@ -27,20 +27,20 @@
 - [x] Pastikan semua route baru/terkait mengembalikan `tenant_id` efektif dan format error stabil `{ success: false, error_code, error }`
 
 ### Tahap B — 10 Tool MCP (`apps/mcp/tools.mjs`)
-- [ ] Daftarkan 10 tool MCP (`cf_list_universes`, `cf_get_universe`, `cf_create_universe_character`, `cf_update_universe_character`, `cf_list_reference_assets`, `cf_upload_reference_asset`, `cf_approve_reference_asset`, `cf_reject_reference_asset`, `cf_link_visual_identity_universe`, `cf_preflight_character_lock`) dengan cek `expected_tenant_id` sisi MCP (`TENANT_MISMATCH`), validasi upload (`image_base64` XOR `file_path`, tolak `photo_url`, batas 14 MB base64 / 10 MB biner `UPLOAD_TOO_LARGE`, `fs.realpath` + file biasa + ekstensi `.png/.jpg/.jpeg/.webp`), dan teruskan `error_code` di `operatorClient`
-- [ ] Perbarui `apps/mcp/README.md` (daftar 10 tool baru + contoh alur Arka)
-- [ ] Tambah test di `apps/mcp/test/mcp.test.mjs` (registrasi 10 tool, validasi schema, `expected_tenant_id` mismatch, base64 kebesaran `UPLOAD_TOO_LARGE`, approve tanpa `expected_sha256` ditolak, `photo_url` ditolak)
+- [x] Daftarkan 10 tool MCP (`cf_list_universes`, `cf_get_universe`, `cf_create_universe_character`, `cf_update_universe_character`, `cf_list_reference_assets`, `cf_upload_reference_asset`, `cf_approve_reference_asset`, `cf_reject_reference_asset`, `cf_link_visual_identity_universe`, `cf_preflight_character_lock`) dengan cek `expected_tenant_id` sisi MCP (`TENANT_MISMATCH`), validasi upload (`image_base64` XOR `file_path`, tolak `photo_url`, batas 14 MB base64 / 10 MB biner `UPLOAD_TOO_LARGE`, `fs.realpath` + file biasa + ekstensi `.png/.jpg/.jpeg/.webp`), dan teruskan `error_code` di `operatorClient`
+- [x] Perbarui `apps/mcp/README.md` (daftar 10 tool baru + contoh alur Arka)
+- [x] Tambah test di `apps/mcp/test/mcp.test.mjs` (registrasi 10 tool, validasi schema, `expected_tenant_id` mismatch, base64 kebesaran `UPLOAD_TOO_LARGE`, approve tanpa `expected_sha256` ditolak, `photo_url` ditolak)
 
 ### Tahap C — Pengujian & Build
-- [ ] Perluas `tests/universe-manifest-tenant-isolation.test.js` untuk kasus B1 (`source: 'approved_asset'`, `'legacy_path'`, `'fabricated_path'`)
-- [ ] Buat `tests/cartoon-reference-resolver-strict.test.js` (strict async & sync, tanpa fallback, prompt menyebut Maya tidak menambah anchor Maya, anchor hilang → `REFERENCE_NOT_RESOLVED`, `fabricated_path` ditolak, non-strict identik perilaku lama)
-- [ ] Buat `tests/reference-asset-approve-concurrency.test.js` (balapan paralel, idempoten, `expected_sha256` beda → `CHECKSUM_MISMATCH`, `23505` → `REVISION_CONFLICT`)
-- [ ] Buat `tests/reference-asset-upload-dedup.test.js` (upload identik → `deduplicated: true` tanpa versi baru, `UNIVERSE_MISMATCH`, batas dimensi)
-- [ ] Perluas `tests/test-visual-identity-universe-link.mjs` (route link: dry-run tidak menulis, merge tidak menyentuh field lain, key tak dikenal ditolak)
-- [ ] Jalankan seluruh test baru, regresi (`tests/test-cartoon-*.mjs`, `tests/reference-asset-and-sidebar-d.test.js`, `tests/base64-image-reference.test.js`, `tests/universe-character-route-whitelist.test.js`), `npm run test:mcp`, dan `npm run build`
+- [x] Perluas `tests/universe-manifest-tenant-isolation.test.js` untuk kasus B1 (`source: 'approved_asset'`, `'legacy_path'`, `'fabricated_path'`)
+- [x] Buat `tests/cartoon-reference-resolver-strict.test.js` (strict async & sync, tanpa fallback, prompt menyebut Maya tidak menambah anchor Maya, anchor hilang → `REFERENCE_NOT_RESOLVED`, `fabricated_path` ditolak, non-strict identik perilaku lama)
+- [x] Buat `tests/reference-asset-approve-concurrency.test.js` (balapan paralel, idempoten, `expected_sha256` beda → `CHECKSUM_MISMATCH`, `23505` → `REVISION_CONFLICT`)
+- [x] Buat `tests/reference-asset-upload-dedup.test.js` (upload identik → `deduplicated: true` tanpa versi baru, `UNIVERSE_MISMATCH`, batas dimensi)
+- [x] Perluas `tests/test-visual-identity-universe-link.mjs` (route link: dry-run tidak menulis, merge tidak menyentuh field lain, key tak dikenal ditolak)
+- [x] Jalankan seluruh test baru, regresi (`tests/test-cartoon-*.mjs`, `tests/reference-asset-and-sidebar-d.test.js`, `tests/base64-image-reference.test.js`, `tests/universe-character-route-whitelist.test.js`), `npm run test:mcp`, dan `npm run build`
 
 ### Tahap D — Kartu Menu, Deploy Dev & Uji Arka di Dev
-- [ ] Perbarui kartu `sot/menus/kartu/universes.md` dan `sot/menus/kartu/visual-identities.md`
+- [x] Perbarui kartu `sot/menus/kartu/universes.md` dan `sot/menus/kartu/visual-identities.md`
 - [ ] Push `fitur/mcp-universe-character-lock` dan deploy atomic ke **Dev** (`npm run deploy:dev:atomic -- --ref <full-sha> --apply --confirm-dev`)
 - [ ] Verifikasi kesehatan Dev wajib SOP (`current`, manifest, HTTP 200 UI/API, PM2 online, `pm_cwd`, `PG_SEARCH_PATH=dev`, `PGPOOL_MAX=3`)
 - [ ] Cek alur Arka di Dev (read-only/uji kesiapan via API/MCP Dev; tidak membuat video sampel dan tidak generate gambar sendiri tanpa persetujuan pengguna) & laporkan ke pengguna
