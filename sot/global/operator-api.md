@@ -116,3 +116,21 @@ Endpoint: `POST /api/operator/v2/product-research/batches`
 - Foto maksimal **5 MB** dengan format tervalidasi magic-bytes **JPG, PNG, atau WebP**.
 - Sinkron ulang batch (`tenant_id + source + external_batch_id`) dan kandidat (`tenant_id + batch_id + external_candidate_id`) bersifat idempotent: memperbarui `research_data`, tanpa menimpa `curated_data`, `curation_status`, `process_status`, `cf_product_id`, ataupun URL pilihan kurator.
 - Respons mengembalikan ringkasan `{ summary: { total, created, updated, skipped }, candidates: [...] }` per kandidat.
+
+
+---
+
+## Operator API v2 — Radar Produk untuk Bot & MCP (Tahap 7.4/7.6)
+
+Scope terpisah (tidak saling mencakup; `product_research:ingest` tetap tidak boleh membaca/mempromosikan):
+
+| Scope | Endpoint | Fungsi |
+|---|---|---|
+| `product_research:read` | `GET /api/operator/v2/product-research/candidates?mode=top\|list&trend=&search=&limit=` | `/top`, `/naik`, `/stabil`, `/turun`, `/cari` (batch terbaru, urut skor; arsip disembunyikan) |
+| `product_research:read` | `GET /api/operator/v2/product-research/candidates/{nomor-atau-id}` | `/produk <no>`: detail + rincian skor + riwayat lintas minggu |
+| `product_research:read` | `GET /api/operator/v2/product-research/status` | `/status`: ringkasan batch terbaru |
+| `product_research:curate` | `POST .../candidates/{nomor-atau-id}/url` `{url, telegram_user_id}` | `/url <no> <link>` (status URL menjadi `user`) |
+| `product_research:promote` | `POST .../promote` `{candidate_refs[], mode: preview\|execute, telegram_user_id}` | `/kirim`: memakai layanan promosi yang sama dengan web (klaim atomik, maks 50, tertahan tidak terkirim) |
+
+- `telegram_user_id` **wajib** untuk `curate` dan `promote` dan harus terdaftar aktif di tabel `product_research_telegram_identities` untuk tenant kredensial (daftar via `scripts/radar-telegram-identity.mjs`). Riwayat impor mencatat `requested_by = telegram:<id>`.
+- Nomor kandidat (`external_candidate_id`) hanya dicocokkan pada batch terbaru tenant; kandidat arsip tidak pernah ikut terkirim.

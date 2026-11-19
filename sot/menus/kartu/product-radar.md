@@ -22,8 +22,8 @@ Menjadi pintu kurasi hasil riset produk dari TeleRadar sebelum masuk ke katalog 
 - Halaman & UI: `app/product-radar/page.js`, `app/product-radar/CandidateDetailDrawer.js`, `app/product-radar/radar-labels.js`, `app/product-radar/product-radar.module.css`
 - Layanan & Repository: `lib/product-research-repository.js`, `lib/product-research-opportunity-score.js`, `lib/product-research-ingest-service.js`, `lib/product-research-promotion-service.js`, `lib/product-research-image-storage.js`, `lib/product-url-normalizer.js`
 - API Web: `app/api/v2/product-research/candidates/` (`route.js`, `bulk-promote/route.js`, `[id]/route.js`, `[id]/archive/route.js`, `[id]/image/route.js`, `[id]/promote/route.js`, `[id]/status/route.js`)
-- API Operator: `app/api/operator/v2/product-research/batches/route.js`
-- Tabel data: `product_research_batches`, `product_research_candidates`, `product_research_imports` (migrasi via `scripts/migrate-product-research.mjs`)
+- API Operator: `app/api/operator/v2/product-research/batches/route.js` (ingest), `candidates/`, `candidates/[ref]/`, `candidates/[ref]/url/`, `promote/`, `status/` (bot Telegram; scope `read`/`curate`/`promote`, lihat `sot/global/operator-api.md`)
+- Tabel data: `product_research_batches`, `product_research_candidates`, `product_research_imports`, `product_research_telegram_identities` (migrasi via `scripts/migrate-product-research.mjs`)
 
 ## Aturan penting & jebakan
 1. Semua angka terjual/komisi/tren berasal dari tanggal pengamatan screenshot TeleRadar, bukan data marketplace real-time.
@@ -43,7 +43,8 @@ Menjadi pintu kurasi hasil riset produk dari TeleRadar sebelum masuk ke katalog 
 
 ## Belum ada / batasan
 - Bulk approval dibatasi maksimal 50 kandidat per permintaan dan selalu menjalankan klaim atomik per kandidat (antrean `product_scraper` berjalan 1 job sekaligus).
-- Perintah bot Telegram lengkap, cutover/penghentian sinkronisasi Google Sheets Fase B, dan peninjauan `cf_add_product` masih direncanakan pada tahap berikutnya (7.4–7.6).
+- API untuk bot Telegram sudah ada (7.4, di repo); kode bot di Mac Mini belum dialihkan dan penghentian Google Sheets Fase B (7.5) belum dilakukan — menunggu persetujuan & jadwal cutover.
+- Kandidat berstatus arsip tidak bisa dipromosikan (web maupun bot).
 
 ## Dokumen lengkap
 [USULAN_RADAR_PRODUK_TELERADAR_CFSTUDIO.md](file:///Users/sabeqmmursyid/_cfstudio/catatan-kerja/usulan/USULAN_RADAR_PRODUK_TELERADAR_CFSTUDIO.md)

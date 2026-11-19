@@ -105,6 +105,19 @@ CREATE INDEX IF NOT EXISTS idx_pri_tenant_candidate_created
 CREATE INDEX IF NOT EXISTS idx_pri_tenant_job
   ON product_research_imports (tenant_id, job_id)
   WHERE job_id IS NOT NULL;
+
+CREATE TABLE IF NOT EXISTS product_research_telegram_identities (
+  id TEXT PRIMARY KEY,
+  tenant_id TEXT NOT NULL,
+  telegram_user_id TEXT NOT NULL,
+  display_name TEXT,
+  status TEXT NOT NULL DEFAULT 'active',
+  created_by TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT uq_prti_tenant_telegram UNIQUE (tenant_id, telegram_user_id),
+  CONSTRAINT chk_prti_status CHECK (status IN ('active', 'revoked'))
+);
 `;
 
 export function parseMigrateArgs(argv = process.argv.slice(2)) {
@@ -158,7 +171,7 @@ export async function migrateProductResearch({ schema = 'dev', apply = false } =
       `SELECT table_name
        FROM information_schema.tables
        WHERE table_schema = $1
-         AND table_name IN ('product_research_batches', 'product_research_candidates', 'product_research_imports')
+         AND table_name IN ('product_research_batches', 'product_research_candidates', 'product_research_imports', 'product_research_telegram_identities')
        ORDER BY table_name ASC`,
       [schema]
     );
@@ -172,7 +185,8 @@ export async function migrateProductResearch({ schema = 'dev', apply = false } =
         tablesToEnsure: [
           'product_research_batches',
           'product_research_candidates',
-          'product_research_imports'
+          'product_research_imports',
+          'product_research_telegram_identities'
         ],
         applied: false,
       };
@@ -190,7 +204,7 @@ export async function migrateProductResearch({ schema = 'dev', apply = false } =
       `SELECT table_name
        FROM information_schema.tables
        WHERE table_schema = $1
-         AND table_name IN ('product_research_batches', 'product_research_candidates', 'product_research_imports')
+         AND table_name IN ('product_research_batches', 'product_research_candidates', 'product_research_imports', 'product_research_telegram_identities')
        ORDER BY table_name ASC`,
       [schema]
     );
