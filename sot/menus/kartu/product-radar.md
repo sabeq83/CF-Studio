@@ -1,6 +1,6 @@
 # Kartu Menu: Radar Produk
 
-Terakhir dicek: 19 November 2026 · Versi aplikasi: v2.55.0+fitur/radar-trends-and-score
+Terakhir dicek: 19 November 2026 · Versi aplikasi: v2.57.1
 Alamat: `/product-radar` · Kelompok: PLANNING · Kunci izin menu: `product_research`
 
 ## Fungsi

@@ -1,6 +1,6 @@
 # Kartu Menu: Product Database
 
-Terakhir dicek: 19 November 2026 · Versi aplikasi: v2.55.0
+Terakhir dicek: 19 November 2026 · Versi aplikasi: v2.57.1
 Alamat: `/products` · Kelompok: PLANNING · Kunci izin menu: `product_database`
 
 ## Fungsi
@@ -37,6 +37,7 @@ Gudang data "DNA" produk jualan. Menyimpan info terstruktur (USP, target audiens
 11. Jendela banding punya tombol **🧠 Ulangi dengan GPT** (manual, 1 produk per klik, memakai kuota akun ChatGPT di G-Labs melalui `/api/openai/generate`; membutuhkan foto mentah lokal di `/uploads/...`; gagal tidak mengubah foto lama dan tidak pindah ke Nano Banana; label model foto lama & baru disimpan di `previous_photo_model` / `photo_model`).
 12. Tombol **⚡ Batch Scraper** aktif kembali (maks 50 URL/CSV, centang *Perbaiki & Lengkapi* default mati, CSV tidak menimpa link afiliasi kosong, antrean `product_scraper` maksimal 1 job berjalan sekaligus, dan kegagalan foto studio dicatat di `raw_response.studio_polish` tanpa mengubah `photo_status`).
 13. Scraper galeri & foto produk (Revisi 02 + Vision Deteksi Kemasan): Playwright mengambil ≥ 5 kandidat tajam (≥ 600px) dari galeri thumbnail, Photo Picker memakai rubrik longgar (`text_area_pct` ≤ 30% tidak menggugurkan, menolak orang/kolase) serta ikut mendeteksi `selected_packaging_type`, kandidat non-orang skor ≥ 70 dibuatkan foto clean berstatus `needs_review` (fallback S7), crop memakai ruang 10% + bypass `rembg` otomatis bila latar sudah putih polos (≥ 95%).
+14. **Proteksi Normalisasi URL Afiliasi Produk Baru (v2.57.1):** Penentuan link afiliasi pada saat menyimpan produk baru ke `product_extractions` memakai `normalizeProductUrl` dari `lib/product-url-normalizer.js` dan dilindungi unit test regresi agar kebal dari ReferenceError.
 
 ## Belum ada / batasan
 - Scraper Playwright membutuhkan Chromium terinstall di server.
