@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.56.1 — Isolasi Tenant Universe (19/11/2026)
+- Manifest Universe dibatasi per tenant
+- ID karakter/Universe tidak bisa ditimpa data kiriman
+
 ## V2.56.0 — Radar Produk TeleRadar Lengkap (Kurasi, Bulk Approval, Tren Lintas Minggu, Skor Peluang, Bot & MCP) (19/11/2026)
 - Menu Radar Produk (/product-radar) terisolasi dari katalog & kampanye
 - Bulk approval hingga 50 item dengan pratinjau Valid/Duplikat/Tertahan & antrean 1-per-1

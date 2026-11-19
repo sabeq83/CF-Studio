@@ -46,7 +46,7 @@
   - `tests/universe-character-route-whitelist.test.js` (B3: body tidak bisa menimpa `id`/`universe_id`/`tenant_id`, validasi format `character_key`, konflik 409 `CHARACTER_KEY_EXISTS` tanpa bocor error DB, invalidasi cache dipanggil)
 - [x] Jalankan seluruh test wajib + regresi (`tests/test-cartoon-*.mjs`, `tests/reference-asset-and-sidebar-d.test.js`, `tests/base64-image-reference.test.js`) dan `npm run build`
 - [x] Commit dan push branch `hotfix/universe-tenant-isolation`
-- [ ] **🛑 BERHENTI**: Laporkan hasil ke pengguna (bahasa sederhana, tanpa perubahan DB) dan minta persetujuan untuk merge ke `main`, rilis patch + perbarui `sot/menus/kartu/universes.md`, dan deploy ke Staging
+- [x] **🛑 BERHENTI**: Laporkan hasil ke pengguna (bahasa sederhana, tanpa perubahan DB) dan minta persetujuan untuk merge ke `main`, rilis patch + perbarui `sot/menus/kartu/universes.md`, dan deploy ke Staging (disetujui 19 Nov 2026)
 
 ---
 

@@ -1,6 +1,6 @@
 # Kartu Menu: Universe Manager
 
-Terakhir dicek: 19 November 2026 (koreksi dokumentasi API/cache dari kode lokal; bukan rilis baru) · Versi aplikasi acuan: v2.50.0
+Terakhir dicek: 19 November 2026 · Versi aplikasi: v2.56.1
 Alamat: `/settings/universes` · Kelompok: PLANNING · Kunci izin menu: `universe_manager`
 
 ## Fungsi
@@ -24,8 +24,9 @@ Pencipta dunia cerita brand. Mendefinisikan semesta fiksi atau semi-fiksi untuk 
 
 ## Aturan penting & jebakan
 1. Universe tidak aktif otomatis — harus dipilih saat membuat kampanye berseri.
-2. `lib/universe-manifests.js` di-cache di memori dan menyediakan `refreshManifestCache()` serta loader async dengan opsi refresh. Periksa invalidasi antar-proses setelah perubahan; jangan menganggap restart PM2 sebagai alur pembaruan wajib.
-3. Karakter harus punya deskripsi visual detail agar AI image konsisten.
+2. **Isolasi tenant manifest (v2.56.1):** `lib/universe-manifests.js` mengunci cache manifest per `${tenant_id}:${slug}`, memisahkan peta nama karakter per tenant, memprioritaskan lookup `universeId`, serta membatasi lookup `slug` pada `tenant_id` eksplisit agar dua tenant dengan slug sama tidak pernah tertukar. `refreshManifestCache({ tenantId, universeId })` mendukung invalidasi selektif tanpa perlu restart PM2.
+3. **Proteksi ID & `character_key` (v2.56.1):** Pembuatan profil Universe dan karakter hanya menerima field dalam whitelist (ID server selalu ditetapkan terakhir); `character_key` wajib cocok `/^[a-z0-9_]{2,64}$/` dan duplikasi mengembalikan HTTP 409 `CHARACTER_KEY_EXISTS`.
+4. Karakter harus punya deskripsi visual detail agar AI image konsisten.
 
 ## Belum ada / batasan
 - Universe Manager belum memiliki tool khusus dalam katalog MCP yang diperiksa; gunakan UI/API resmi untuk menjaga validasi dan lifecycle referensi, bukan edit DB langsung.
