@@ -1,6 +1,6 @@
 # Kartu Menu: Radar Produk
 
-Terakhir dicek: 19 November 2026 · Versi aplikasi: v2.57.1
+Terakhir dicek: 19 November 2026 · Versi aplikasi: v2.57.2
 Alamat: `/product-radar` · Kelompok: PLANNING · Kunci izin menu: `product_research`
 
 ## Fungsi
@@ -33,7 +33,8 @@ Menjadi pintu kurasi hasil riset produk dari TeleRadar sebelum masuk ke katalog 
 5. Klaim promosi memakai *partial unique index* di `product_research_imports` dan mencadangkan `reserved_product_id` agar klik ganda atau retry tidak membuat produk ganda.
 6. Aksi arsip kandidat hanya menyembunyikan kandidat riset dan tidak menghapus produk di `product_extractions`.
 7. **Perbandingan Lintas Minggu**: Setiap batch mingguan tetap disimpan terpisah (tidak saling menimpa). Pencocokan otomatis antarbatch hanya memakai `cf_product_id` atau `normalized_url` terverifikasi (`official`/`listing`/`user`). Kemiripan nama hanya ditampilkan sebagai saran terpisah dan tidak digabung otomatis.
-8. **Rumus Skor Peluang (v1 · Total 100 Poin)**: Hanya membantu urutan kurasi dan **tidak pernah memicu promosi otomatis**:
+8. **Tombol URL Kurator (sejak v2.57.2)**: bila kolom URL kosong, belum ada URL kurator, dan URL riset berstatus Resmi/Listing/Pengguna, tombol berlabel **✓ Verifikasi URL Riset** dan menyimpan URL riset sebagai `curated_data.target_url`. URL riset berstatus Terdekat/Tidak ditemukan tidak bisa diverifikasi otomatis (wajib tempel URL listing). URL ketikan yang belum disimpan diberi penanda, ikut tersimpan saat **Simpan Edit Kurator**, dan otomatis disimpan dulu sebelum **Masukkan ke Database Produk**. Logika di `resolveCuratorUrlSave` (`app/product-radar/radar-labels.js`).
+9. **Rumus Skor Peluang (v1 · Total 100 Poin)**: Hanya membantu urutan kurasi dan **tidak pernah memicu promosi otomatis**:
    - **Penjualan/minggu (maks 30)**: `≥1.000` (30), `500–999` (24), `200–499` (18), `50–199` (12), `1–49` (6).
    - **Arah tren (maks 20)**: `up` (20), `stable` (12), `down` (4).
    - **Komisi/produk (maks 20)**: `≥Rp25.000` (20), `Rp15.000–24.999` (16), `Rp8.000–14.999` (12), `Rp3.000–7.999` (8), `1–2.999` (4).
