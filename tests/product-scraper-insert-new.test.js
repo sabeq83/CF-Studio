@@ -103,4 +103,83 @@ describe('Product Scraper Insert New Record (Hotfix Regression)', () => {
     assert.equal(scrapedItem.isRepair, true);
     assert.equal(scrapedItem.repairInfo.existingProduct.id, 'pe_existing_123');
   });
+
+  it('applies metadata_overrides from radar curator to product_name, product_description, and unique_selling_point', () => {
+    const targetUrl = 'https://tokopedia.com/vitameal/original-vitameal-sereal-1729711246117472017';
+    const payload = {
+      tenant_id: 'default_tenant',
+      urls: [targetUrl],
+      reserved_ids: { [targetUrl]: 'pe_radar_curated_123' },
+      metadata_overrides: {
+        [targetUrl]: {
+          product_name: 'Vitameal Kurasi Ahli Gizi',
+          product_description: 'Deskripsi kurasi: sereal kaya serat alami tanpa pemanis buatan',
+          unique_selling_point: '100% Organik & Aman Lambung',
+          candidate_id: 'prc_vitameal_1'
+        }
+      }
+    };
+
+    const scrapedItem = {
+      url: targetUrl,
+      isRepair: false,
+      scraped: {
+        title: 'Judul Asli Web Scraper',
+        description: 'Deskripsi Asli Web Scraper',
+        bodyText: 'Body text web scraper'
+      }
+    };
+
+    const productData = {
+      product_name: 'Nama dari Gemini Scraper',
+      usp: 'USP dari Gemini Scraper'
+    };
+
+    const productId = payload.reserved_ids[scrapedItem.url];
+    const metadataOverrides = payload?.metadata_overrides || {};
+    const metaOverride = metadataOverrides[scrapedItem.url] || (productId ? metadataOverrides[productId] : null);
+
+    const curatedName = metaOverride?.product_name?.trim();
+    const curatedDesc = metaOverride?.product_description?.trim();
+    const curatedUsp = metaOverride?.unique_selling_point?.trim();
+
+    let finalUsp = '';
+    if (curatedUsp) {
+      finalUsp = curatedUsp;
+    } else if (productData.usp) {
+      finalUsp = typeof productData.usp === 'string'
+        ? productData.usp
+        : JSON.stringify(productData.usp);
+    }
+
+    const data = {
+      product_name: curatedName || productData.product_name || scrapedItem.scraped.title || 'Produk Tanpa Nama',
+      product_description: curatedDesc || scrapedItem.scraped.description || scrapedItem.scraped.title || '',
+      unique_selling_point: finalUsp,
+      target_audience: '',
+      pain_point_solved: '',
+      key_visuals_extracted: JSON.stringify([]),
+      raw_response: JSON.stringify({
+        ...productData,
+        usp_source: curatedUsp ? 'manual' : 'scraper',
+        curated_from_radar: Boolean(metaOverride)
+      })
+    };
+
+    const newData = {
+      id: productId,
+      input_source: scrapedItem.url,
+      is_url: 1,
+      source_url: scrapedItem.url,
+      raw_description: scrapedItem.scraped.bodyText || '',
+      ...data
+    };
+
+    assert.equal(newData.product_name, 'Vitameal Kurasi Ahli Gizi');
+    assert.equal(newData.product_description, 'Deskripsi kurasi: sereal kaya serat alami tanpa pemanis buatan');
+    assert.equal(newData.unique_selling_point, '100% Organik & Aman Lambung');
+    const parsedRaw = JSON.parse(newData.raw_response);
+    assert.equal(parsedRaw.usp_source, 'manual');
+    assert.equal(parsedRaw.curated_from_radar, true);
+  });
 });

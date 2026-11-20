@@ -15,8 +15,10 @@ import { hashPassword } from '../../lib/schema/user-schema.js';
 import {
   upsertResearchBatch,
   upsertResearchCandidates,
-  getResearchCandidateById
+  getResearchCandidateById,
+  updateResearchCandidateCuration
 } from '../../lib/product-research-repository.js';
+import { isUspManualLocked } from '../../lib/product-bulk-worker.js';
 import {
   promoteResearchCandidate,
   getResearchCandidatePromotionStatus
@@ -390,5 +392,104 @@ describe('Promosi Radar Produk & Kontrak Scrape Route (Tahap 5)', () => {
     assert.equal(jobJson.success, true);
     assert.equal(String(jobJson.job_id), String(okJson.job_ids[0]));
     assert.equal(jobJson.queue_name, 'product_scraper');
+  });
+
+  it('V9: promosi kandidat meneruskan curated_data (name, description, usp) via metadata_overrides ke scheduler_jobs', async () => {
+    // 1. Buat kandidat dengan data kurasi lengkap
+    const extId = `cand_curated_${runSuffix}`;
+    const candUrl = `https://shopee.co.id/produk/curated-test-${runSuffix}`;
+    const upsertRes = await tenantContext.run(TENANT_A, () => upsertResearchCandidates(batchIdA, [{
+      external_candidate_id: extId,
+      url_status: 'official',
+      source_url: candUrl,
+      research_data: { name: 'Nama Riset Asli', description: 'Desc Riset Asli', usp: 'USP Riset Asli' }
+    }]));
+    const candId = upsertRes.results[0].candidate_id;
+
+    // 2. Simpan edit kurator
+    await tenantContext.run(TENANT_A, () => updateResearchCandidateCuration(candId, {
+      curatedData: {
+        name: 'Kopi Kurasi Premium Manusia',
+        description: 'Deskripsi hasil kurasi teliti oleh kurator',
+        usp: '100% Arabika Asli Pilihan'
+      },
+      curationStatus: 'ready'
+    }));
+
+    // 3. Jalankan promote
+    const promoteRes = await promotePost(
+      makeReq(`/api/v2/product-research/candidates/${candId}/promote`, { sessionToken: sessA }),
+      { params: Promise.resolve({ id: candId }) }
+    );
+    assert.equal(promoteRes.status, 200);
+    const promoteJson = await promoteRes.json();
+    assert.equal(promoteJson.action, 'queued');
+    createdJobIds.push(promoteJson.job_id);
+
+    // 4. Verifikasi job payload di scheduler_jobs
+    const jobRow = (await pgQuery('SELECT * FROM scheduler_jobs WHERE id = $1', [promoteJson.job_id])).rows[0];
+    const payload = typeof jobRow.payload === 'string' ? JSON.parse(jobRow.payload) : jobRow.payload;
+    assert.ok(payload.metadata_overrides);
+    const override = payload.metadata_overrides[candUrl];
+    assert.ok(override);
+    assert.equal(override.product_name, 'Kopi Kurasi Premium Manusia');
+    assert.equal(override.product_description, 'Deskripsi hasil kurasi teliti oleh kurator');
+    assert.equal(override.unique_selling_point, '100% Arabika Asli Pilihan');
+    assert.equal(override.candidate_id, candId);
+  });
+
+  it('V10: updateResearchCandidateCuration menyinkronkan name, description, dan usp ke product_extractions saat cf_product_id sudah ada', async () => {
+    const linkedProdId = `pe_sync_test_${runSuffix}`;
+    // 1. Buat produk di katalog
+    await pgQuery(
+      `INSERT INTO product_extractions (
+         id, tenant_id, product_name, product_description, unique_selling_point, source_url
+       ) VALUES ($1, $2, 'Nama Lama Katalog', 'Desc Lama', 'USP Lama', 'https://shopee.co.id/produk/test-reedit')`,
+      [linkedProdId, TENANT_A]
+    );
+
+    // 2. Buat kandidat yang sudah terhubung ke linkedProdId
+    const extId = `cand_reedit_${runSuffix}`;
+    const upsertRes = await tenantContext.run(TENANT_A, () => upsertResearchCandidates(batchIdA, [{
+      external_candidate_id: extId,
+      url_status: 'official',
+      source_url: 'https://shopee.co.id/produk/test-reedit',
+      research_data: { name: 'Riset Awal' }
+    }]));
+    const candId = upsertRes.results[0].candidate_id;
+
+    // Hubungkan cf_product_id
+    await pgQuery(
+      `UPDATE product_research_candidates SET cf_product_id = $1 WHERE id = $2`,
+      [linkedProdId, candId]
+    );
+
+    // 3. Edit kurator disimpan
+    await tenantContext.run(TENANT_A, () => updateResearchCandidateCuration(candId, {
+      curatedData: {
+        name: 'Nama Re-edit Kurator',
+        description: 'Deskripsi Baru Kurator',
+        usp: 'USP Baru Kurator'
+      }
+    }));
+
+    // 4. Periksa product_extractions sudah tersinkronisasi
+    const prodRow = (await pgQuery('SELECT * FROM product_extractions WHERE id = $1', [linkedProdId])).rows[0];
+    assert.equal(prodRow.product_name, 'Nama Re-edit Kurator');
+    assert.equal(prodRow.product_description, 'Deskripsi Baru Kurator');
+    assert.equal(prodRow.unique_selling_point, 'USP Baru Kurator');
+    const rawRes = typeof prodRow.raw_response === 'string' ? JSON.parse(prodRow.raw_response) : prodRow.raw_response;
+    assert.equal(rawRes?.usp_source, 'manual');
+
+    // Cleanup
+    await pgQuery('DELETE FROM product_extractions WHERE id = $1', [linkedProdId]);
+  });
+
+  it('V11: isUspManualLocked mengunci USP manual dan kurasi radar dari penimpaan AI Enrichment', () => {
+    assert.equal(isUspManualLocked({ raw_response: JSON.stringify({ usp_source: 'manual' }) }), true);
+    assert.equal(isUspManualLocked({ raw_response: JSON.stringify({ curated_from_radar: true }), unique_selling_point: 'USP Pilihan' }), true);
+    assert.equal(isUspManualLocked({ is_url: 0, unique_selling_point: 'USP Produk Manual' }), true);
+    assert.equal(isUspManualLocked({ raw_response: JSON.stringify({ usp_source: 'scraper' }), unique_selling_point: 'USP Web' }), false);
+    assert.equal(isUspManualLocked({ raw_response: null, unique_selling_point: '' }), false);
   });
 });

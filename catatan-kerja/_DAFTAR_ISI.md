@@ -1,11 +1,12 @@
 # Daftar Isi Dokumen Kerja (catatan-kerja)
 
-Terakhir diperbarui: 19 November 2026
+Terakhir diperbarui: 20 November 2026
 
 ## USULAN
 
 | Nama File | Ringkasan / Judul |
 |---|---|
+| [USULAN_PERBAIKAN_SINKRONISASI_KURASI_RADAR_PRODUK.md](usulan/USULAN_PERBAIKAN_SINKRONISASI_KURASI_RADAR_PRODUK.md) | Analisis & Usulan Perbaikan: Sinkronisasi Deskripsi dan USP Hasil Kurasi Radar Produk ke Database Produk (`product_extractions`), proteksi manual lock pada AI Enrichment, dan sinkronisasi re-edit |
 | [USULAN_PERBAIKAN_PROMOSI_RADAR_PRODUK_NORMALIZE_URL.md](usulan/USULAN_PERBAIKAN_PROMOSI_RADAR_PRODUK_NORMALIZE_URL.md) | Analisis & Usulan Hotfix: ReferenceError `normalizeUrl is not defined` pada promosi kandidat Radar Produk ke Database Produk (kasus Vitameal & ecentio) |
 | `USULAN_PERBAIKAN_RADAR_PRODUK_PROMOSI_GAGAL.md` | Pelengkap usulan normalizeUrl: dampak ke Database Produk biasa, kuota terbuang karena retry, test insert produk baru, dan analisis URL Listing Kurator yang hilang/tidak terpakai saat URL riset sudah ada |
 | [USULAN_MCP_UNIVERSE_REFERENCE_MANAGER.md](usulan/USULAN_MCP_UNIVERSE_REFERENCE_MANAGER.md) | Usulan MCP Universe, upload/approval referensi karakter, link VI dan preflight Character Lock; kasus Arka PT GIM Sosmed |
