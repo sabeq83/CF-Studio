@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.57.5 — Perbarui Alamat Repo di SOP (20/11/2026)
+- Alamat repository di SOP rilis dan SOP deployment atomic diganti dari maknaflow.git ke sabeq83/CF-Studio.git
+
 ## V2.57.4 — Abaikan Folder Peta Graphify di Git (20/11/2026)
 - Folder graphify-out (peta kode hasil graphify) ditambahkan ke .gitignore agar tidak ikut ter-commit
 
