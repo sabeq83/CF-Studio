@@ -1,6 +1,6 @@
 # Kartu Menu: Radar Produk
 
-Terakhir dicek: 19 November 2026 · Versi aplikasi: v2.57.2
+Terakhir dicek: 20 November 2026 · Versi aplikasi: v2.57.3
 Alamat: `/product-radar` · Kelompok: PLANNING · Kunci izin menu: `product_research`
 
 ## Fungsi
@@ -41,6 +41,7 @@ Menjadi pintu kurasi hasil riset produk dari TeleRadar sebelum masuk ke katalog 
    - **Zona harga (maks 15)**: `Rp35.000–250.000` (15), `Rp20.000–34.999` / `Rp250.001–500.000` (11), tepi `<20rb`/`500rb–1jt` (7), `>1jt` (4).
    - **Kesiapan URL (maks 15)**: `official` (15), `user` (14), `listing` (12), `nearest` (4), `not_found`/`not_researched` (0).
    - Label tingkat: `≥80` **Prioritas Tinggi**, `60–79` **Potensial**, `<60` **Perlu Tinjau**.
+10. **Sinkronisasi Kurasi ke Database Produk (sejak v2.57.3)**: Nama, deskripsi, dan USP hasil kurasi di seksi Edit Kurator diteruskan via `metadata_overrides` ke antrean `product_scraper` saat dipromosikan, dikunci (`usp_source: 'manual'`) agar tidak ditimpa oleh background AI Enrichment, serta otomatis disinkronkan ke `product_extractions` saat kurator menyimpan perubahan pada kandidat yang sudah masuk katalog.
 
 ## Belum ada / batasan
 - Bulk approval dibatasi maksimal 50 kandidat per permintaan dan selalu menjalankan klaim atomik per kandidat (antrean `product_scraper` berjalan 1 job sekaligus).
