@@ -339,5 +339,5 @@ if (source === 'upload') {
 - [x] Task 3: Modifikasi frontend `app/products/page.js` untuk menambahkan state & toggle kontrol Foto Profesional
 - [x] Task 4: Uji fungsional lokal (unit test / integration test script)
 - [x] Task 5: Perbarui kartu menu `sot/menus/kartu/products.md` sesuai SOP Konteks Menu
-- [ ] Task 6: Commit perubahan dan push branch `fitur/opsi-foto-profesional-produk` ke remote GitHub
+- [x] Task 6: Commit perubahan dan push branch `fitur/opsi-foto-profesional-produk` ke remote GitHub
 - [ ] Task 7: Deploy ke Server Dev Mac Mini (port 5020/7020) via Atomic Deployment dan verifikasi kesehatan
