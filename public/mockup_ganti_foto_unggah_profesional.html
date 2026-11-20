@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup — Opsi Foto Profesional pada Unggah Ganti Foto Produk</title>
+  <style>
+    /* Semantic Design Tokens — Sesuai SOP & app/theme.css */
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --surface-subtle: #0c1422;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --overlay-backdrop: rgba(2, 6, 14, 0.82);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.65);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --surface-subtle: #ffffff;
+      --input-bg: #ffffff;
+      --overlay-subtle: rgba(30, 41, 59, 0.08);
+      --overlay-backdrop: rgba(15, 23, 42, 0.6);
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --text-disabled: #8794a6;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --action-primary: #0d9488;
+      --action-primary-hover: #0f766e;
+      --on-action-primary: #ffffff;
+      --link: #0891b2;
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.1);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.1);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.1);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.1);
+      --status-neutral: #7c3aed;
+      --status-neutral-soft: rgba(124, 58, 237, 0.1);
+      --focus-ring: #7c3aed;
+      --shadow-card: 0 4px 18px rgba(15, 23, 42, 0.06);
+      --shadow-modal: 0 20px 60px rgba(15, 23, 42, 0.2);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      line-height: 1.5;
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+
+    /* Top Banner Info */
+    .mockup-banner {
+      background: var(--surface-raised);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .mockup-title {
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: var(--radius-xs);
+    }
+    .badge-primary { background: var(--action-primary); color: var(--on-action-primary); }
+    .badge-info { background: var(--status-info-soft); color: var(--status-info); }
+    .badge-success { background: var(--status-success-soft); color: var(--status-success); }
+    .badge-warning { background: var(--status-warning-soft); color: var(--status-warning); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 14px;
+      font-size: 12.5px;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: var(--transition);
+      user-select: none;
+    }
+    .btn-sm { padding: 4px 10px; font-size: 11.5px; }
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+    }
+    .btn-secondary {
+      background: var(--surface-raised);
+      border-color: var(--border-subtle);
+      color: var(--text-primary);
+    }
+    .btn-secondary:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    /* Page Header */
+    .page-header {
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .page-title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .page-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Product Grid */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    .product-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+    }
+    .product-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--border-strong);
+    }
+    .card-thumb-wrapper {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      background: #05080f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .card-thumb-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 8px;
+    }
+    .card-thumb-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 2;
+    }
+    .card-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      gap: 10px;
+    }
+    .product-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.4;
+    }
+    .product-category {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .product-usp {
+      font-size: 12px;
+      color: var(--text-secondary);
+      background: var(--surface-subtle);
+      padding: 8px 10px;
+      border-radius: var(--radius-xs);
+      border-left: 3px solid var(--action-primary);
+    }
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: auto;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    /* Modal Backdrop */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--overlay-backdrop);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+    }
+    .modal-dialog {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 580px;
+      box-shadow: var(--shadow-modal);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      animation: modalIn 0.18s ease-out;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.96) translateY(8px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-header {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .close-btn:hover { color: var(--text-primary); }
+
+    .modal-body {
+      padding: 20px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    /* Comparison Box */
+    .compare-box {
+      display: flex;
+      gap: 16px;
+      background: var(--surface-raised);
+      padding: 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      align-items: center;
+      justify-content: center;
+    }
+    .compare-side {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .compare-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .compare-label.active {
+      color: var(--action-primary);
+    }
+    .compare-img-box {
+      width: 86px;
+      height: 86px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .compare-img-box.current { border: 1px solid var(--border-subtle); }
+    .compare-img-box.new-target { border: 2px solid var(--action-primary); }
+    .compare-img { width: 100%; height: 100%; object-fit: contain; }
+
+    /* Tabs */
+    .tabs-nav {
+      display: flex;
+      border-bottom: 1px solid var(--border-subtle);
+      gap: 4px;
+    }
+    .tab-btn {
+      padding: 8px 14px;
+      font-size: 12.5px;
+      font-weight: 600;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .tab-btn.active {
+      color: var(--action-primary);
+      border-bottom-color: var(--action-primary);
+    }
+    .tab-btn:hover:not(.active) {
+      color: var(--text-primary);
+    }
+
+    /* Upload Box */
+    .upload-dropzone {
+      border: 2px dashed var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 24px 16px;
+      text-align: center;
+      background: var(--input-bg);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .upload-dropzone:hover {
+      border-color: var(--action-primary);
+      background: var(--surface-interactive);
+    }
+    .upload-icon { font-size: 32px; margin-bottom: 8px; }
+    .upload-title { font-weight: 700; font-size: 13px; color: var(--text-primary); }
+    .upload-subtitle { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    /* Sample Selector for Interactive Mockup */
+    .sample-preset-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .sample-preset-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .chip-btn {
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .chip-btn:hover, .chip-btn.active {
+      border-color: var(--action-primary);
+      color: var(--text-primary);
+      background: var(--surface-hover);
+    }
+
+    /* THE HERO FEATURE: Professional Photo Option Card */
+    .pro-option-card {
+      background: var(--surface-raised);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+    .pro-option-card.checked {
+      background: var(--surface-interactive);
+      border-color: var(--action-primary);
+      box-shadow: 0 0 0 1px var(--action-primary);
+    }
+    .pro-header-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .custom-checkbox {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      border: 2px solid var(--border-strong);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--input-bg);
+      flex-shrink: 0;
+      transition: var(--transition);
+    }
+    .pro-option-card.checked .custom-checkbox {
+      background: var(--action-primary);
+      border-color: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .pro-title-text {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .pro-desc-text {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+      padding-left: 30px;
+    }
+    .pro-status-callout {
+      margin-top: 4px;
+      padding: 8px 12px;
+      border-radius: var(--radius-xs);
+      font-size: 11.5px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-left: 30px;
+    }
+    .pro-status-callout.active {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid rgba(74, 222, 128, 0.25);
+    }
+    .pro-status-callout.inactive {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid rgba(96, 165, 250, 0.25);
+    }
+
+    .modal-footer {
+      padding: 14px 22px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      background: var(--surface-subtle);
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      border: 1px solid var(--border-strong);
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-modal);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 200;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: 0.25s ease;
+      pointer-events: none;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .toast-success { border-color: var(--status-success); }
+    .toast-info { border-color: var(--status-info); }
+
+    /* Comparison Table in Proposal Box */
+    .proposal-box {
+      margin-top: 36px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 24px;
+    }
+    .proposal-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      font-size: 12.5px;
+    }
+    .proposal-table th, .proposal-table td {
+      padding: 10px 14px;
+      border: 1px solid var(--border-subtle);
+      text-align: left;
+    }
+    .proposal-table th {
+      background: var(--surface-raised);
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Mockup Banner -->
+  <div class="mockup-banner">
+    <div class="mockup-title">
+      <span>🎨 SIMULASI INTERAKTIF — Opsi Foto Profesional (Ganti Foto Produk)</span>
+      <span class="badge badge-primary">SOP Mockup Sebelum Coding</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <button class="btn btn-secondary btn-sm" onclick="toggleTheme()">🌓 Ganti Tema (Light/Dark)</button>
+      <button class="btn btn-primary btn-sm" onclick="openReplaceModal()">🔄 Buka Modal Ganti Foto</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Header Produk -->
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Database Produk</h1>
+        <p class="page-desc">Katalog DNA produk aktif, ekstraksi AI, foto studio bersih, dan link afiliasi.</p>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <span class="badge badge-info">Tenant: default_tenant</span>
+        <span class="badge badge-success">3 Produk Tersimpan</span>
+      </div>
+    </div>
+
+    <!-- Product Card Grid -->
+    <div class="product-grid">
+      <!-- Card 1 (Active Target) -->
+      <div class="product-card" id="card-vitameal">
+        <div class="card-thumb-wrapper">
+          <span class="badge badge-success card-thumb-badge" id="card-status-badge">✓ Approved</span>
+          <img
+            id="card-main-img"
+            src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='200' viewBox='0 0 240 200'><rect width='240' height='200' fill='%23111827'/><rect x='60' y='30' width='120' height='140' rx='8' fill='%23fef08a'/><text x='120' y='95' font-family='sans-serif' font-size='14' font-weight='bold' fill='%23854d0e' text-anchor='middle'>VITAMEAL</text><text x='120' y='120' font-family='sans-serif' font-size='11' fill='%23a16207' text-anchor='middle'>Sereal Sehat 1 Box</text></svg>"
+            alt="Vitameal Sereal Sehat"
+            class="card-thumb-img"
+          />
+        </div>
+        <div class="card-body">
+          <div class="product-category">Breakfast Cereal, Granola · ID: pe_1732065849_431</div>
+          <div class="product-name">Original Vitameal Sereal Sehat Paket 1 Box</div>
+          <div class="product-usp" id="card-usp-text">
+            USP: 100% Organik & Rendah Gula, Aman Lambung
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="openReplaceModal()">
+              🔄 Ganti Foto
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="showToast('Membuka modal edit produk lengkap...', 'info')">
+              ✏️ Edit Data
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="product-card">
+        <div class="card-thumb-wrapper">
+          <span class="badge badge-success card-thumb-badge">✓ Approved</span>
+          <img
+            src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='200' viewBox='0 0 240 200'><rect width='240' height='200' fill='%23111827'/><rect x='80' y='25' width='80' height='150' rx='16' fill='%2394a3b8'/><text x='120' y='105' font-family='sans-serif' font-size='13' font-weight='bold' fill='%230f172a' text-anchor='middle'>ecentio</text><text x='120' y='125' font-family='sans-serif' font-size='10' fill='%23334155' text-anchor='middle'>Tumbler 900ml</text></svg>"
+            alt="ecentio Tumbler"
+            class="card-thumb-img"
+          />
+        </div>
+        <div class="card-body">
+          <div class="product-category">Dapur & Peralatan Minum · ID: pe_1732065849_812</div>
+          <div class="product-name">ecentio Tumbler Stainless Steel 900ml Vacuum Insulated</div>
+          <div class="product-usp">
+            USP: Tahan Dingin 24 Jam, Anti Bocor
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="showToast('Contoh simulasi aktif ada pada kartu Vitameal di sebelah kiri.', 'info')">
+              🔄 Ganti Foto
+            </button>
+            <button class="btn btn-secondary btn-sm">
+              ✏️ Edit Data
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="product-card">
+        <div class="card-thumb-wrapper">
+          <span class="badge badge-info card-thumb-badge">Needs Review</span>
+          <img
+            src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='200' viewBox='0 0 240 200'><rect width='240' height='200' fill='%23111827'/><circle cx='120' cy='100' r='55' fill='%23f59e0b'/><text x='120' y='105' font-family='sans-serif' font-size='13' font-weight='bold' fill='%23451a03' text-anchor='middle'>GARLIBEE</text></svg>"
+            alt="Garlibee"
+            class="card-thumb-img"
+          />
+        </div>
+        <div class="card-body">
+          <div class="product-category">Herbal & Madu · ID: pe_1732065849_994</div>
+          <div class="product-name">Garlibee Madu Bawang Putih Tunggal Fermentasi</div>
+          <div class="product-usp">
+            USP: Meningkatkan Imunitas & Stamina Alami
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="showToast('Contoh simulasi aktif ada pada kartu Vitameal di sebelah kiri.', 'info')">
+              🔄 Ganti Foto
+            </button>
+            <button class="btn btn-secondary btn-sm">
+              ✏️ Edit Data
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dokumen Penjelasan Usulan & Analisa -->
+    <div class="proposal-box">
+      <h2 style="font-size: 16px; font-weight: 800; margin-bottom: 8px;">📋 Rangkuman Usulan Fitur Baru</h2>
+      <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+        Ketika pengguna mengganti foto produk dengan opsi <strong>Unggah Sendiri</strong>, pengguna seringkali sudah menyiapkan foto studio profesional siap pakai (misal berlatar putih bersih, pencahayaan sempurna, atau foto marketing resmi brand). Memaksa foto tersebut masuk ke pipeline AI (background rembg dan AI check) seringkali menimbulkan efek samping: tepi produk terpotong (clipping), detail bayangan alami hilang, dan pengguna harus menunggu antrean worker latar belakang.
+      </p>
+
+      <table class="proposal-table">
+        <thead>
+          <tr>
+            <th style="width: 25%;">Mode</th>
+            <th style="width: 35%;">Alur & Pemrosesan</th>
+            <th style="width: 40%;">Hasil pada Produk</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <strong style="color: var(--action-primary);">⭐ Foto Profesional (Fitur Baru)</strong><br />
+              <span style="font-size: 11px; color: var(--text-muted);">Checkbox dicentang</span>
+            </td>
+            <td>
+              Foto disimpan langsung ke <code>/raw</code> dan <code>/clean</code>. <strong>Tidak membuat job background</strong>, tidak menjalankan rembg, dan tidak memicu regenerasi AI.
+            </td>
+            <td>
+              <ul>
+                <li>Foto 100% sesuai file asli pengguna (tanpa distorsi).</li>
+                <li>Langsung aktif & berstatus <code>Approved</code> (instan).</li>
+                <li>Hemat kuota GPU / worker server.</li>
+              </ul>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <strong style="color: var(--status-info);">🤖 AI Rembg (Mode Lama)</strong><br />
+              <span style="font-size: 11px; color: var(--text-muted);">Checkbox tidak dicentang</span>
+            </td>
+            <td>
+              Foto mentah dimasukkan ke antrean job <code>product_photo_replace</code> di background. Worker menjalankan rembg / sharp untuk menghapus background secara otomatis.
+            </td>
+            <td>
+              Cocok untuk foto mentah/kandidat yang masih memiliki background meja/toko berantakan. Status produk menjadi <code>processing</code> sementara waktu.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MODAL: Ganti Foto Produk (INTERACTIVE DEMO) -->
+  <div class="modal-backdrop" id="replaceModal" style="display: flex;">
+    <div class="modal-dialog">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <span>🔄 Ganti Foto Produk:</span>
+          <span style="font-weight: 500; font-size: 14px; color: var(--text-secondary);">Original Vitameal Sereal</span>
+        </h3>
+        <button type="button" class="close-btn" onclick="closeReplaceModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Comparison Header Box -->
+        <div class="compare-box">
+          <div class="compare-side">
+            <span class="compare-label">Foto Saat Ini</span>
+            <div class="compare-img-box current">
+              <img
+                src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='86' height='86' viewBox='0 0 86 86'><rect width='86' height='86' fill='%23111827'/><rect x='20' y='12' width='46' height='62' rx='4' fill='%23fef08a'/><text x='43' y='46' font-family='sans-serif' font-size='8' font-weight='bold' fill='%23854d0e' text-anchor='middle'>VITAMEAL</text></svg>"
+                alt="Foto Saat Ini"
+                class="compare-img"
+              />
+            </div>
+          </div>
+          <div style="font-size: 20px; color: var(--text-muted);">➡️</div>
+          <div class="compare-side">
+            <span class="compare-label active" id="preview-badge-label">Foto Pilihan Baru (Instan)</span>
+            <div class="compare-img-box new-target" id="preview-box">
+              <img
+                id="preview-target-img"
+                src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='86' height='86' viewBox='0 0 86 86'><rect width='86' height='86' fill='%23ffffff'/><rect x='18' y='10' width='50' height='66' rx='4' fill='%2315803d'/><text x='43' y='42' font-family='sans-serif' font-size='7' font-weight='bold' fill='%23ffffff' text-anchor='middle'>STUDIO PRO</text><text x='43' y='54' font-family='sans-serif' font-size='6' fill='%23bbf7d0' text-anchor='middle'>White Background</text></svg>"
+                alt="Foto Baru"
+                class="compare-img"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="tabs-nav">
+          <button type="button" class="tab-btn" onclick="selectTab(1)">1. Pilih dari Listing</button>
+          <button type="button" class="tab-btn active" onclick="selectTab(2)">2. Unggah Sendiri</button>
+          <button type="button" class="tab-btn" onclick="selectTab(3)">3. Ambil Ulang Otomatis</button>
+        </div>
+
+        <!-- TAB 2: Unggah Sendiri (FOKUS UTAMA) -->
+        <div id="tab2Content" style="display: flex; flex-direction: column; gap: 14px;">
+          <!-- Dropzone -->
+          <div class="upload-dropzone" onclick="triggerPresetSample('pro')">
+            <div class="upload-icon">📤</div>
+            <div class="upload-title" id="upload-filename-display">
+              vitameal_pro_studio_whitebg_2026.png (1.85 MB)
+            </div>
+            <div class="upload-subtitle">
+              Format JPG, PNG, atau WebP (Maksimal 15 MB) · Klik untuk simulasi ganti file
+            </div>
+          </div>
+
+          <!-- Quick Sample Switcher for Simulation -->
+          <div class="sample-preset-row">
+            <span class="sample-preset-label">Simulasikan File Unggahan:</span>
+            <button type="button" class="chip-btn active" id="chip-pro" onclick="triggerPresetSample('pro')">
+              📷 Foto Studio Putih (Pro)
+            </button>
+            <button type="button" class="chip-btn" id="chip-raw" onclick="triggerPresetSample('raw')">
+              📱 Foto Mentah HP (Perlu Rembg)
+            </button>
+          </div>
+
+          <!-- USULAN FITUR BARU: Checkbox Card Foto Profesional -->
+          <div class="pro-option-card checked" id="proOptionCard" onclick="toggleProOption()">
+            <div class="pro-header-row">
+              <div class="custom-checkbox" id="proCheckbox">✓</div>
+              <div class="pro-title-text">
+                <span>Foto ini sudah profesional / bersih</span>
+                <span class="badge badge-success" id="proBadge">⭐ Langsung Jadi</span>
+              </div>
+            </div>
+            <div class="pro-desc-text">
+              Gunakan foto ini langsung sebagai foto produk aktif <strong>tanpa hapus latar belakang (rembg)</strong> dan <strong>tanpa re-generate AI</strong>.
+            </div>
+            <div class="pro-status-callout active" id="proStatusCallout">
+              <span style="font-size: 14px;">⚡</span>
+              <div>
+                <strong>Penerapan Instan:</strong> Foto langsung berstatus <span style="font-family: var(--font-mono); font-weight: 700;">Approved</span> dan tampil di katalog tanpa antrean background worker.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 1 & 3 Dummy Placeholders -->
+        <div id="tab1Content" style="display: none; padding: 20px; text-align: center; color: var(--text-muted); font-size: 12.5px;">
+          (Simulasi tab listing: opsi 2 'Unggah Sendiri' adalah fokus perbaikan)
+        </div>
+        <div id="tab3Content" style="display: none; padding: 20px; text-align: center; color: var(--text-muted); font-size: 12.5px;">
+          (Simulasi tab rescrape Playwright)
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeReplaceModal()">
+          Batal
+        </button>
+        <button type="button" class="btn btn-primary" id="submitBtn" onclick="applyPhotoReplacement()">
+          ✓ Terapkan Langsung (Instan)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toastBox">
+    <span id="toastIcon">✅</span>
+    <span id="toastMsg">Notifikasi</span>
+  </div>
+
+  <script>
+    // State Simulai
+    let isProPhotoChecked = true;
+    let currentUploadedType = 'pro'; // 'pro' | 'raw'
+
+    const svgProStudio = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='86' height='86' viewBox='0 0 86 86'><rect width='86' height='86' fill='%23ffffff'/><rect x='18' y='10' width='50' height='66' rx='4' fill='%2315803d'/><text x='43' y='42' font-family='sans-serif' font-size='7' font-weight='bold' fill='%23ffffff' text-anchor='middle'>STUDIO PRO</text><text x='43' y='54' font-family='sans-serif' font-size='6' fill='%23bbf7d0' text-anchor='middle'>White Background</text></svg>";
+    const svgRawHp = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='86' height='86' viewBox='0 0 86 86'><rect width='86' height='86' fill='%233b4252'/><rect x='24' y='16' width='38' height='54' rx='3' fill='%23fcd34d'/><text x='43' y='44' font-family='sans-serif' font-size='7' font-weight='bold' fill='%2378350f' text-anchor='middle'>FOTO MENTAH</text><text x='43' y='56' font-family='sans-serif' font-size='5.5' fill='%2392400e' text-anchor='middle'>Meja Kayu Berantakan</text></svg>";
+
+    const cardSvgPro = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='200' viewBox='0 0 240 200'><rect width='240' height='200' fill='%23ffffff'/><rect x='60' y='25' width='120' height='150' rx='8' fill='%2315803d'/><text x='120' y='95' font-family='sans-serif' font-size='14' font-weight='bold' fill='%23ffffff' text-anchor='middle'>VITAMEAL</text><text x='120' y='120' font-family='sans-serif' font-size='11' fill='%23bbf7d0' text-anchor='middle'>Professional Studio Shot</text></svg>";
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const nextTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', nextTheme);
+      showToast(`Tema diubah ke ${nextTheme.toUpperCase()} Mode`, 'info');
+    }
+
+    function selectTab(idx) {
+      document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+        btn.classList.toggle('active', i + 1 === idx);
+      });
+      document.getElementById('tab1Content').style.display = idx === 1 ? 'block' : 'none';
+      document.getElementById('tab2Content').style.display = idx === 2 ? 'flex' : 'none';
+      document.getElementById('tab3Content').style.display = idx === 3 ? 'block' : 'none';
+
+      if (idx !== 2) {
+        document.getElementById('submitBtn').textContent = 'Terapkan Foto';
+      } else {
+        updateProOptionUI();
+      }
+    }
+
+    function triggerPresetSample(type) {
+      currentUploadedType = type;
+      document.getElementById('chip-pro').classList.toggle('active', type === 'pro');
+      document.getElementById('chip-raw').classList.toggle('active', type === 'raw');
+
+      const filenameEl = document.getElementById('upload-filename-display');
+      const targetImg = document.getElementById('preview-target-img');
+
+      if (type === 'pro') {
+        filenameEl.textContent = 'vitameal_pro_studio_whitebg_2026.png (1.85 MB)';
+        targetImg.src = svgProStudio;
+        // Otomatis centang opsi pro jika user memilih sampel foto studio
+        if (!isProPhotoChecked) {
+          isProPhotoChecked = true;
+          updateProOptionUI();
+        }
+      } else {
+        filenameEl.textContent = 'IMG_20261120_kamera_hp_mentah.jpg (4.20 MB)';
+        targetImg.src = svgRawHp;
+        // Otomatis matikan centang opsi pro jika foto mentah
+        if (isProPhotoChecked) {
+          isProPhotoChecked = false;
+          updateProOptionUI();
+        }
+      }
+    }
+
+    function toggleProOption() {
+      isProPhotoChecked = !isProPhotoChecked;
+      updateProOptionUI();
+    }
+
+    function updateProOptionUI() {
+      const card = document.getElementById('proOptionCard');
+      const checkbox = document.getElementById('proCheckbox');
+      const badge = document.getElementById('proBadge');
+      const callout = document.getElementById('proStatusCallout');
+      const submitBtn = document.getElementById('submitBtn');
+      const previewBadgeLabel = document.getElementById('preview-badge-label');
+
+      if (isProPhotoChecked) {
+        card.classList.add('checked');
+        checkbox.textContent = '✓';
+        badge.className = 'badge badge-success';
+        badge.textContent = '⭐ Langsung Jadi';
+
+        callout.className = 'pro-status-callout active';
+        callout.innerHTML = `
+          <span style="font-size: 14px;">⚡</span>
+          <div>
+            <strong>Penerapan Instan:</strong> Foto langsung berstatus <span style="font-family: var(--font-mono); font-weight: 700;">Approved</span> dan tampil di katalog tanpa antrean background worker.
+          </div>
+        `;
+
+        submitBtn.className = 'btn btn-primary';
+        submitBtn.textContent = '✓ Terapkan Langsung (Instan)';
+        previewBadgeLabel.textContent = 'Foto Pilihan Baru (Instan)';
+      } else {
+        card.classList.remove('checked');
+        checkbox.textContent = '';
+        badge.className = 'badge badge-info';
+        badge.textContent = '🤖 Butuh Rembg';
+
+        callout.className = 'pro-status-callout inactive';
+        callout.innerHTML = `
+          <span style="font-size: 14px;">🤖</span>
+          <div>
+            <strong>Proses Otomatis:</strong> Foto akan diantrekan ke <span style="font-family: var(--font-mono); font-weight: 700;">product_photo_replace</span> di background untuk hapus latar belakang AI.
+          </div>
+        `;
+
+        submitBtn.className = 'btn btn-primary';
+        submitBtn.textContent = '⚡ Proses Latar & Terapkan';
+        previewBadgeLabel.textContent = 'Foto Baru (Akan Di-rembg)';
+      }
+    }
+
+    function openReplaceModal() {
+      document.getElementById('replaceModal').style.display = 'flex';
+    }
+
+    function closeReplaceModal() {
+      document.getElementById('replaceModal').style.display = 'none';
+    }
+
+    function applyPhotoReplacement() {
+      const submitBtn = document.getElementById('submitBtn');
+      const originalText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Memproses...';
+
+      setTimeout(() => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+        closeReplaceModal();
+
+        const cardImg = document.getElementById('card-main-img');
+        const cardBadge = document.getElementById('card-status-badge');
+
+        if (isProPhotoChecked) {
+          cardImg.src = cardSvgPro;
+          cardBadge.className = 'badge badge-success card-thumb-badge';
+          cardBadge.textContent = '✓ Approved (Pro)';
+          showToast('✅ Foto profesional berhasil diterapkan langsung tanpa proses ulang!', 'success');
+        } else {
+          cardBadge.className = 'badge badge-warning card-thumb-badge';
+          cardBadge.textContent = '⏳ Processing';
+          showToast('⏳ Foto dikirim ke antrean background worker (rembg AI)...', 'info');
+          setTimeout(() => {
+            cardImg.src = cardSvgPro;
+            cardBadge.className = 'badge badge-success card-thumb-badge';
+            cardBadge.textContent = '✓ Approved';
+            showToast('✅ Worker background selesai menghapus latar!', 'success');
+          }, 2500);
+        }
+      }, 600);
+    }
+
+    function showToast(msg, type = 'success') {
+      const toast = document.getElementById('toastBox');
+      const icon = document.getElementById('toastIcon');
+      const text = document.getElementById('toastMsg');
+
+      toast.className = `toast toast-${type} show`;
+      icon.textContent = type === 'success' ? '✅' : 'ℹ️';
+      text.textContent = msg;
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3500);
+    }
+  </script>
+</body>
+</html>

@@ -141,6 +141,7 @@ export default function ProductDatabasePage() {
   const [selectedCandidateIdx, setSelectedCandidateIdx] = useState(0);
   const [customUploadFile, setCustomUploadFile] = useState(null);
   const [customUploadPreview, setCustomUploadPreview] = useState(null);
+  const [replaceDirectUse, setReplaceDirectUse] = useState(true);
   const [isSubmittingReplace, setIsSubmittingReplace] = useState(false);
 
   // Fetch products and active queue status
@@ -248,6 +249,7 @@ export default function ProductDatabasePage() {
         const formData = new FormData();
         formData.append('source', 'upload');
         formData.append('file', customUploadFile);
+        formData.append('direct_use', replaceDirectUse ? 'true' : 'false');
         body = formData;
       } else if (replaceTab === 3) {
         if (!replaceModalProduct.source_url) {
@@ -266,10 +268,12 @@ export default function ProductDatabasePage() {
       });
       const data = await res.json();
       if (data.success) {
-        showToast('⏳ Penggantian foto sedang diproses di background...');
-        setReplaceModalProduct(null);
-        setCustomUploadFile(null);
-        setCustomUploadPreview(null);
+        if (data.mode === 'direct') {
+          showToast('✅ Foto profesional berhasil diterapkan langsung!');
+        } else {
+          showToast('⏳ Penggantian foto sedang diproses di background...');
+        }
+        closeReplaceModal();
         fetchProducts();
       } else {
         showToast(data.error || 'Gagal mengganti foto', 'error');
@@ -279,6 +283,14 @@ export default function ProductDatabasePage() {
     } finally {
       setIsSubmittingReplace(false);
     }
+  }
+
+  function closeReplaceModal() {
+    setReplaceModalProduct(null);
+    setCustomUploadFile(null);
+    setCustomUploadPreview(null);
+    setReplaceDirectUse(true);
+    setSelectedCandidateIdx(0);
   }
 
   useEffect(() => {
@@ -2994,7 +3006,7 @@ export default function ProductDatabasePage() {
               backdropFilter: 'blur(6px)',
               padding: '20px'
             }}
-            onClick={() => setReplaceModalProduct(null)}
+            onClick={closeReplaceModal}
           >
             <div
               className="card"
@@ -3020,7 +3032,7 @@ export default function ProductDatabasePage() {
                 </h3>
                 <button
                   type="button"
-                  onClick={() => setReplaceModalProduct(null)}
+                  onClick={closeReplaceModal}
                   style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '18px', cursor: 'pointer' }}
                 >
                   ✕
@@ -3229,6 +3241,42 @@ export default function ProductDatabasePage() {
                       ✅ File terpilih: <strong>{customUploadFile.name}</strong> ({(customUploadFile.size / 1024 / 1024).toFixed(2)} MB)
                     </div>
                   )}
+
+                  {/* Toggle Foto Siap Pakai / Profesional */}
+                  <div
+                    style={{
+                      marginTop: '12px',
+                      padding: '12px 14px',
+                      borderRadius: 'var(--radius-md)',
+                      backgroundColor: replaceDirectUse ? 'var(--status-success-soft)' : 'var(--surface-raised)',
+                      border: `1px solid ${replaceDirectUse ? 'var(--status-success)' : 'var(--border-subtle)'}`,
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '12px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onClick={() => setReplaceDirectUse(!replaceDirectUse)}
+                  >
+                    <input
+                      type="checkbox"
+                      id="replace_direct_use_toggle"
+                      checked={replaceDirectUse}
+                      onChange={(e) => setReplaceDirectUse(e.target.checked)}
+                      style={{ marginTop: '3px', accentColor: 'var(--action-primary)', cursor: 'pointer' }}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <div style={{ userSelect: 'none' }}>
+                      <label htmlFor="replace_direct_use_toggle" style={{ fontWeight: 600, fontSize: '12.5px', color: 'var(--text-primary)', cursor: 'pointer', display: 'block' }}>
+                        Foto ini sudah siap pakai / profesional
+                      </label>
+                      <span style={{ fontSize: '11px', color: replaceDirectUse ? 'var(--status-success)' : 'var(--text-muted)', lineHeight: 1.35, display: 'block', marginTop: '2px' }}>
+                        {replaceDirectUse
+                          ? '✓ Gunakan langsung tanpa hapus latar belakang, tanpa antrean worker, dan tanpa AI regenerasi.'
+                          : '⚡ Sistem akan otomatis menghapus latar belakang & membersihkan foto via AI.'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -3263,7 +3311,7 @@ export default function ProductDatabasePage() {
                 <button
                   type="button"
                   className="btn btn-secondary"
-                  onClick={() => setReplaceModalProduct(null)}
+                  onClick={closeReplaceModal}
                   disabled={isSubmittingReplace}
                 >
                   Batal

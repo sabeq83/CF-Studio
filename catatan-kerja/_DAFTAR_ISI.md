@@ -6,6 +6,7 @@ Terakhir diperbarui: 20 November 2026
 
 | Nama File | Ringkasan / Judul |
 |---|---|
+| [USULAN_OPSI_FOTO_PROFESIONAL_UNGGAH_PRODUK.md](usulan/USULAN_OPSI_FOTO_PROFESIONAL_UNGGAH_PRODUK.md) | Usulan & Mockup: Opsi Foto Profesional Siap Pakai pada Modal Ganti Foto Produk (Tab Unggah Sendiri) tanpa hapus latar paksa, antrean worker, dan AI regenerasi |
 | [USULAN_PERBAIKAN_SINKRONISASI_KURASI_RADAR_PRODUK.md](usulan/USULAN_PERBAIKAN_SINKRONISASI_KURASI_RADAR_PRODUK.md) | Analisis & Usulan Perbaikan: Sinkronisasi Deskripsi dan USP Hasil Kurasi Radar Produk ke Database Produk (`product_extractions`), proteksi manual lock pada AI Enrichment, dan sinkronisasi re-edit |
 | [USULAN_PERBAIKAN_PROMOSI_RADAR_PRODUK_NORMALIZE_URL.md](usulan/USULAN_PERBAIKAN_PROMOSI_RADAR_PRODUK_NORMALIZE_URL.md) | Analisis & Usulan Hotfix: ReferenceError `normalizeUrl is not defined` pada promosi kandidat Radar Produk ke Database Produk (kasus Vitameal & ecentio) |
 | `USULAN_PERBAIKAN_RADAR_PRODUK_PROMOSI_GAGAL.md` | Pelengkap usulan normalizeUrl: dampak ke Database Produk biasa, kuota terbuang karena retry, test insert produk baru, dan analisis URL Listing Kurator yang hilang/tidak terpakai saat URL riset sudah ada |
