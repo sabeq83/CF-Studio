@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.57.4 — Abaikan Folder Peta Graphify di Git (20/11/2026)
+- Folder graphify-out (peta kode hasil graphify) ditambahkan ke .gitignore agar tidak ikut ter-commit
+
 ## V2.57.3 — Sinkronisasi Kurasi Radar Produk ke Database Produk (20/11/2026)
 - Penerusan deskripsi dan USP kurasi ke antrean scraper melalui metadata_overrides
 - Proteksi kunci manual USP pada background AI Enrichment
