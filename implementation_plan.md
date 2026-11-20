@@ -375,5 +375,5 @@ Menyinkronkan perubahan edit kurator langsung ke `product_extractions` bila kand
 - [x] Task 5: Update `lib/product-research-repository.js` (Sinkronisasi edit kurator ke `product_extractions`)
 - [x] Task 6: Tambahkan pengujian otomatis di `tests/product-research/promotion-and-scrape-contract.test.js` dan jalankan test
 - [x] Task 7: Verifikasi seluruh suite test `npm test tests/product-research/`
-- [ ] Task 8: Commit & push ke remote branch `fitur/sync-kurasi-radar-ke-produk`
-- [ ] Task 9: Deploy ke server Dev Mac Mini (`npm run deploy:dev:atomic -- --ref <full-sha> --apply --confirm-dev`) dan verifikasi status online
+- [x] Task 8: Commit & push ke remote branch `fitur/sync-kurasi-radar-ke-produk`
+- [x] Task 9: Deploy ke server Dev Mac Mini (`npm run deploy:dev:atomic -- --ref <full-sha> --apply --confirm-dev`) dan verifikasi status online
