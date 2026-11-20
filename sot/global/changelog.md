@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.57.3 — Sinkronisasi Kurasi Radar Produk ke Database Produk (20/11/2026)
+- Penerusan deskripsi dan USP kurasi ke antrean scraper melalui metadata_overrides
+- Proteksi kunci manual USP pada background AI Enrichment
+- Sinkronisasi instan edit kurator ke katalog jika kandidat sudah terhubung
+
 ## V2.57.2 — Perbaikan Tombol URL Kurator Radar Produk (19/11/2026)
 - Tombol Simpan & Tandai Terverifikasi kini memverifikasi URL riset saat kolom kosong (label Verifikasi URL Riset)
 - URL riset hasil pencarian (Terdekat) tetap wajib diganti URL listing
