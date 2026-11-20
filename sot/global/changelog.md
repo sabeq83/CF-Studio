@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.57.6 — Opsi Foto Profesional Siap Pakai pada Modal Ganti Foto Produk (20/11/2026)
+- Opsi langsung pasang foto profesional tanpa rembg dan AI
+- Update database instan status approved tanpa queue
+- Unit test regresi dan mockup interaktif produk
+
 ## V2.57.5 — Perbarui Alamat Repo di SOP (20/11/2026)
 - Alamat repository di SOP rilis dan SOP deployment atomic diganti dari maknaflow.git ke sabeq83/CF-Studio.git
 
