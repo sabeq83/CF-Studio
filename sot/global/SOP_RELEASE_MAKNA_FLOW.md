@@ -1,6 +1,6 @@
 # 📜 Standard Operating Procedure (SOP): Update Versi & Automatic Git Push — MAKNA Flow
 
-**Target Repository**: `https://github.com/sabeq83/maknaflow.git`  
+**Target Repository**: `https://github.com/sabeq83/CF-Studio.git`  
 **Nama Projek**: `maknaflow`  
 **Tujuan**: Standar Operasional Prosedur (SOP) untuk memperbarui versi aplikasi, mencatat riwayat pada `sot/global/changelog.md`, membuat git tag versi, dan melakukan `git push` otomatis ke GitHub remote.
 
@@ -79,7 +79,7 @@ git push origin main --tags
 
 ## 🧪 5. Checklist Verifikasi Pasca-Rilis
 - [ ] Versi di `package.json` dan `sot/global/changelog.md` sudah selaras.
-- [ ] Git commit dan Tag rilis (`vX.Y.Z`) telah berhasil terunggah di repository `https://github.com/sabeq83/maknaflow.git`.
+- [ ] Git commit dan Tag rilis (`vX.Y.Z`) telah berhasil terunggah di repository `https://github.com/sabeq83/CF-Studio.git`.
 - [ ] Skrip `node scripts/test-cluster-health.js` berjalan hijau (Clean Pass).
 
 ---

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative & Active  
 **Effective date**: 28 September 2026  
-**Repository**: `https://github.com/sabeq83/maknaflow.git`  
+**Repository**: `https://github.com/sabeq83/CF-Studio.git`  
 **Server**: Mac Mini `masbenu@100.95.245.55`
 
 ## 1. Purpose
