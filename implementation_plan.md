@@ -1,379 +1,343 @@
-# Implementation Plan - Sinkronisasi Kurasi Radar Produk ke Database Produk
+# Implementation Plan: Opsi Foto Profesional Siap Pakai pada Modal Ganti Foto Produk
 
-**Tanggal**: 20 November 2026  
-**Branch Target**: `fitur/sync-kurasi-radar-ke-produk`  
-**Tujuan**: Memastikan nama, deskripsi, dan USP yang dikurasi kurator di menu Radar Produk (`/product-radar`) otomatis terbawa ke Database Produk (`product_extractions`), terlindungi dari penimpaan AI Enrichment latar belakang, dan tersinkronisasi saat diedit ulang.
-
----
-
-## Proposed Changes & Code Snippets
-
-### 1. `lib/product-research-promotion-service.js`
-Mengekstrak teks kurasi (`name`, `description`, `usp`) dan meneruskannya sebagai `metadata_overrides` ke `enqueueProductScrape()`.
-
-#### Code Sebelum (Current/Before):
-```javascript
-  const enqueueFn = deps.enqueueProductScrapeFn || enqueueProductScrape;
-  const targetCategory = candidate.curated_data?.category || candidate.research_data?.category || '';
-
-  try {
-    const enqueueResult = await enqueueFn({
-      urls: [effectiveUrl],
-      category: targetCategory,
-      repair_mode: false,
-      refresh_photo: false,
-      reserved_ids: { [effectiveUrl]: claim.reservedProductId }
-    }, deps);
-```
-
-#### Code Sesudah (Proposed/After):
-```javascript
-  const enqueueFn = deps.enqueueProductScrapeFn || enqueueProductScrape;
-  const targetCategory = candidate.curated_data?.category || candidate.research_data?.category || '';
-
-  const curatedName = candidate.curated_data?.name?.trim() || candidate.research_data?.name?.trim() || '';
-  const curatedDesc = candidate.curated_data?.description?.trim() || candidate.research_data?.description?.trim() || '';
-  const curatedUsp = candidate.curated_data?.usp?.trim() || candidate.research_data?.usp?.trim() || '';
-
-  const metadataOverrides = {
-    [effectiveUrl]: {
-      product_name: curatedName || undefined,
-      product_description: curatedDesc || undefined,
-      unique_selling_point: curatedUsp || undefined,
-      candidate_id: candidate.id
-    }
-  };
-
-  try {
-    const enqueueResult = await enqueueFn({
-      urls: [effectiveUrl],
-      category: targetCategory,
-      repair_mode: false,
-      refresh_photo: false,
-      reserved_ids: { [effectiveUrl]: claim.reservedProductId },
-      metadata_overrides: metadataOverrides
-    }, deps);
-```
+**Branch**: `fitur/opsi-foto-profesional-produk`  
+**Menu Target**: Database Produk (`/products`)  
+**Tujuan**: Memberikan opsi kepada kurator untuk menggunakan foto yang diunggah secara langsung tanpa paksaan pemrosesan background removal (@imgly), AI Vision inspection (Gemini), antrean worker, atau AI regeneration.
 
 ---
 
-### 2. `lib/product-catalog-service.js`
-Menerima `metadata_overrides` pada `enqueueProductScrape` dan menyertakannya ke payload job `product_scraper`.
+## Proposed Changes
+
+### 1. Frontend: Modal Ganti Foto Produk (`app/products/page.js`)
+- Menambahkan state `replaceDirectUse` (default `true`) untuk mengontrol opsi foto profesional/siap pakai.
+- Menambahkan elemen UI checkbox / card interaktif pada tab "2. Unggah Sendiri" dengan semantic design tokens.
+- Mengirimkan parameter `direct_use` ke backend endpoint `POST /api/v2/products/[id]/photo-replace`.
+- Menangani respons instan: menampilkan toast sukses langsung tanpa jeda antrean jika mode `direct`.
+
+### 2. Backend: Endpoint Ganti Foto (`app/api/v2/products/[id]/photo-replace/route.js`)
+- Membaca parameter `direct_use` dari `FormData` atau JSON body.
+- Pada `source === 'upload'`, jika `direct_use === true`:
+  - Simpan file ke folder `public/uploads/products/raw/` (arsip) dan `public/uploads/products/clean/` (siap pakai).
+  - Update langsung record `product_extractions` via `updateProduct()`:
+    - `raw_photo_url`, `clean_photo_url`, `cleaned_photo_url`, `photo_url`
+    - `photo_status = 'approved'`, `photo_provider = 'manual_upload'`
+    - `photo_reviewed_at = NOW()`, `previous_clean_photo_url`
+  - Mengembalikan respons instan HTTP 200 `{ success: true, mode: 'direct', ... }`.
+  - Melewati pembuatan antrean scheduler `product_photo_replace`.
+
+---
+
+## Code Sebelum & Sesudah (Before & After Code Snippets)
+
+### File 1: `app/products/page.js`
 
 #### Code Sebelum (Current/Before):
-```javascript
-export async function enqueueProductScrape({
-  urls,
-  csv_data,
-  category,
-  tags,
-  repair_mode = true,
-  refresh_photo = false,
-  reserved_ids: suppliedReservedIds = null
-} = {}, deps = {}) {
+```jsx
+// Line 140
+const [replaceModalProduct, setReplaceModalProduct] = useState(null);
+const [replaceTab, setReplaceTab] = useState(1); // 1: Listing, 2: Upload, 3: Rescrape
+const [selectedCandidateIdx, setSelectedCandidateIdx] = useState(0);
+const [customUploadFile, setCustomUploadFile] = useState(null);
+const [customUploadPreview, setCustomUploadPreview] = useState(null);
+const [isSubmittingReplace, setIsSubmittingReplace] = useState(false);
 ...
-  for (let i = 0; i < urlsToScrape.length; i += batchSize) {
-    const chunk = urlsToScrape.slice(i, i + batchSize);
-    const created = await createJobFn('product_scraper', {
-      tenant_id: activeTenant,
-      urls: chunk,
-      category,
-      tags,
-      url_affiliates_map: urlAffiliatesMap,
-      repair_mode,
-      refresh_photo: Boolean(refresh_photo),
-      reserved_ids: reservedIds
-    });
-```
-
-#### Code Sesudah (Proposed/After):
-```javascript
-export async function enqueueProductScrape({
-  urls,
-  csv_data,
-  category,
-  tags,
-  repair_mode = true,
-  refresh_photo = false,
-  reserved_ids: suppliedReservedIds = null,
-  metadata_overrides = null
-} = {}, deps = {}) {
-...
-  for (let i = 0; i < urlsToScrape.length; i += batchSize) {
-    const chunk = urlsToScrape.slice(i, i + batchSize);
-    const created = await createJobFn('product_scraper', {
-      tenant_id: activeTenant,
-      urls: chunk,
-      category,
-      tags,
-      url_affiliates_map: urlAffiliatesMap,
-      repair_mode,
-      refresh_photo: Boolean(refresh_photo),
-      reserved_ids: reservedIds,
-      metadata_overrides: metadata_overrides || undefined
-    });
-```
-
----
-
-### 3. `lib/scheduler-processors.js`
-Menginjeksi metadata kurator saat `processProductScraper` membuat record di `product_extractions`, serta menandai `raw_response.usp_source = 'manual'`.
-
-#### Code Sebelum (Current/Before):
-```javascript
-    let finalUsp = '';
-    if (productData.usp) {
-      finalUsp = typeof productData.usp === 'string'
-        ? productData.usp
-        : JSON.stringify(productData.usp);
-    }
-
-    // Tentukan photo_url utama berdasarkan pointer active_photo
-    localPhotoPath = generatedPhotoPath || cleanPhotoPath || rawPhotoPath;
-
-    const data = {
-      product_name: productData.product_name || scrapedItem.scraped.title || 'Produk Tanpa Nama',
-      product_description: scrapedItem.scraped.description || scrapedItem.scraped.title || '',
-      unique_selling_point: finalUsp,
-      target_audience: '',
-      pain_point_solved: '',
-      key_visuals_extracted: JSON.stringify([]),
-      raw_response: JSON.stringify({
-        ...productData,
-        photo_selection_audit: photoPickerResult?.evaluation || null,
-        photo_final_check: finalCheckResult || null,
-        studio_polish: studioPolish
-      }),
-```
-
-#### Code Sesudah (Proposed/After):
-```javascript
-    const metadataOverrides = payload?.metadata_overrides || {};
-    const metaOverride = metadataOverrides[scrapedItem.url] || (productId ? metadataOverrides[productId] : null);
-
-    const curatedName = metaOverride?.product_name?.trim();
-    const curatedDesc = metaOverride?.product_description?.trim();
-    const curatedUsp = metaOverride?.unique_selling_point?.trim();
-
-    let finalUsp = '';
-    if (curatedUsp) {
-      finalUsp = curatedUsp;
-    } else if (productData.usp) {
-      finalUsp = typeof productData.usp === 'string'
-        ? productData.usp
-        : JSON.stringify(productData.usp);
-    }
-
-    // Tentukan photo_url utama berdasarkan pointer active_photo
-    localPhotoPath = generatedPhotoPath || cleanPhotoPath || rawPhotoPath;
-
-    const data = {
-      product_name: curatedName || productData.product_name || scrapedItem.scraped.title || 'Produk Tanpa Nama',
-      product_description: curatedDesc || scrapedItem.scraped.description || scrapedItem.scraped.title || '',
-      unique_selling_point: finalUsp,
-      target_audience: '',
-      pain_point_solved: '',
-      key_visuals_extracted: JSON.stringify([]),
-      raw_response: JSON.stringify({
-        ...productData,
-        photo_selection_audit: photoPickerResult?.evaluation || null,
-        photo_final_check: finalCheckResult || null,
-        studio_polish: studioPolish,
-        usp_source: curatedUsp ? 'manual' : 'scraper',
-        curated_from_radar: Boolean(metaOverride)
-      }),
-```
-
----
-
-### 4. `lib/product-bulk-worker.js`
-Menambahkan `isUspManualLocked(job)` agar background AI Enrichment tidak menimpa USP yang sudah dikurasi kurator atau diedit manual.
-
-#### Code Sebelum (Current/Before):
-```javascript
-async function enrichProduct(job) {
-  const { id, product_name, raw_description, product_description, is_url, raw_response, packaging_status, packaging_type, is_in_packaging, tenantId } = job;
-  const { imagePath, imageBuffer, mimeType } = resolveEnrichmentImageInput(job);
-  const hasManualPackaging = isPackagingManualLocked({ is_url, raw_response, packaging_status, packaging_type, is_in_packaging });
-  logToBulk(`[Enrichment] Memulai untuk "${product_name}" (${id})${imagePath ? ` [Vision: ${imagePath}]` : ' [Text-only]'}`, tenantId);
-
-  const description = raw_description || product_description || '';
-  const prompt = buildEnrichmentPrompt([{
-    id,
-    product_name,
-    raw_description: description,
-    packaging_status: hasManualPackaging ? packaging_status : null,
-    packaging_type: hasManualPackaging ? packaging_type : null,
-    has_attached_image: Boolean(imageBuffer)
-  }]);
-...
-    await pgQuery(`
-      UPDATE product_extractions
-      SET unique_selling_point = $1,
-          product_truth = $2,
-          geometric_truth = $3,
-          clean_photo_t2i_prompt = $4,
-          t2i_prompt = NULL,
-          i2v_action_prompt = NULL,
-          category = COALESCE($5, category),
-          packaging_type = COALESCE($6, packaging_type),
-          is_in_packaging = COALESCE($7, is_in_packaging),
-          packaging_status = COALESCE($8, packaging_status),
-          raw_response = COALESCE($9, raw_response),
-          enrichment_status = 'completed',
-          enrichment_error = NULL,
-          extraction_status = 'completed',
-          updated_at = NOW()
-      WHERE id = $10 AND tenant_id = $11
-    `, [
-      JSON.stringify(item.unique_selling_point || []),
-```
-
-#### Code Sesudah (Proposed/After):
-```javascript
-export function isUspManualLocked(job) {
-  const parsedRaw = parseRawResponseSafe(job?.raw_response);
-  if (parsedRaw?.usp_source === 'manual') return true;
-  if (parsedRaw?.curated_from_radar && job?.unique_selling_point && String(job.unique_selling_point).trim() !== '') return true;
-  return false;
+// Line 244-252 (di dalam handleExecuteReplacePhoto)
+} else if (replaceTab === 2) {
+  if (!customUploadFile) {
+    throw new Error('Pilih file gambar terlebih dahulu');
+  }
+  const formData = new FormData();
+  formData.append('source', 'upload');
+  formData.append('file', customUploadFile);
+  body = formData;
 }
 ...
-async function enrichProduct(job) {
-  const { id, product_name, raw_description, product_description, unique_selling_point, is_url, raw_response, packaging_status, packaging_type, is_in_packaging, tenantId } = job;
-  const { imagePath, imageBuffer, mimeType } = resolveEnrichmentImageInput(job);
-  const hasManualPackaging = isPackagingManualLocked({ is_url, raw_response, packaging_status, packaging_type, is_in_packaging });
-  const hasManualUsp = isUspManualLocked({ raw_response, unique_selling_point });
-  logToBulk(`[Enrichment] Memulai untuk "${product_name}" (${id})${imagePath ? ` [Vision: ${imagePath}]` : ' [Text-only]'}`, tenantId);
-
-  const description = raw_description || product_description || '';
-  const prompt = buildEnrichmentPrompt([{
-    id,
-    product_name,
-    raw_description: description,
-    packaging_status: hasManualPackaging ? packaging_status : null,
-    packaging_type: hasManualPackaging ? packaging_type : null,
-    unique_selling_point: hasManualUsp ? unique_selling_point : null,
-    has_attached_image: Boolean(imageBuffer)
-  }]);
+// Line 268-273
+if (data.success) {
+  showToast('⏳ Penggantian foto sedang diproses di background...');
+  setReplaceModalProduct(null);
+  setCustomUploadFile(null);
+  setCustomUploadPreview(null);
+  fetchProducts();
+}
 ...
-    const finalUsp = hasManualUsp ? unique_selling_point : JSON.stringify(item.unique_selling_point || []);
-    await pgQuery(`
-      UPDATE product_extractions
-      SET unique_selling_point = $1,
-          product_truth = $2,
-          geometric_truth = $3,
-          clean_photo_t2i_prompt = $4,
-          t2i_prompt = NULL,
-          i2v_action_prompt = NULL,
-          category = COALESCE($5, category),
-          packaging_type = COALESCE($6, packaging_type),
-          is_in_packaging = COALESCE($7, is_in_packaging),
-          packaging_status = COALESCE($8, packaging_status),
-          raw_response = COALESCE($9, raw_response),
-          enrichment_status = 'completed',
-          enrichment_error = NULL,
-          extraction_status = 'completed',
-          updated_at = NOW()
-      WHERE id = $10 AND tenant_id = $11
-    `, [
-      finalUsp,
+// Line 3227-3232 (di dalam replaceTab === 2)
+{customUploadFile && (
+  <div style={{ marginTop: '10px', fontSize: '12px', color: 'var(--status-success)' }}>
+    ✅ File terpilih: <strong>{customUploadFile.name}</strong> ({(customUploadFile.size / 1024 / 1024).toFixed(2)} MB)
+  </div>
+)}
+```
+
+#### Code Sesudah (Proposed/After):
+```jsx
+// Line 140
+const [replaceModalProduct, setReplaceModalProduct] = useState(null);
+const [replaceTab, setReplaceTab] = useState(1); // 1: Listing, 2: Upload, 3: Rescrape
+const [selectedCandidateIdx, setSelectedCandidateIdx] = useState(0);
+const [customUploadFile, setCustomUploadFile] = useState(null);
+const [customUploadPreview, setCustomUploadPreview] = useState(null);
+const [replaceDirectUse, setReplaceDirectUse] = useState(true);
+const [isSubmittingReplace, setIsSubmittingReplace] = useState(false);
+...
+// Line 244-252 (di dalam handleExecuteReplacePhoto)
+} else if (replaceTab === 2) {
+  if (!customUploadFile) {
+    throw new Error('Pilih file gambar terlebih dahulu');
+  }
+  const formData = new FormData();
+  formData.append('source', 'upload');
+  formData.append('file', customUploadFile);
+  formData.append('direct_use', replaceDirectUse ? 'true' : 'false');
+  body = formData;
+}
+...
+// Line 268-273
+if (data.success) {
+  if (data.mode === 'direct') {
+    showToast('✅ Foto profesional berhasil diterapkan langsung!');
+  } else {
+    showToast('⏳ Penggantian foto sedang diproses di background...');
+  }
+  setReplaceModalProduct(null);
+  setCustomUploadFile(null);
+  setCustomUploadPreview(null);
+  setReplaceDirectUse(true);
+  fetchProducts();
+}
+...
+// Line 3227-3260 (di dalam replaceTab === 2)
+{customUploadFile && (
+  <div style={{ marginTop: '10px', fontSize: '12px', color: 'var(--status-success)' }}>
+    ✅ File terpilih: <strong>{customUploadFile.name}</strong> ({(customUploadFile.size / 1024 / 1024).toFixed(2)} MB)
+  </div>
+)}
+
+<div
+  style={{
+    marginTop: '14px',
+    padding: '12px 14px',
+    borderRadius: 'var(--radius-md)',
+    backgroundColor: replaceDirectUse ? 'var(--status-success-soft)' : 'var(--surface-raised)',
+    border: `1px solid ${replaceDirectUse ? 'var(--status-success)' : 'var(--border-subtle)'}`,
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '12px',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease'
+  }}
+  onClick={() => setReplaceDirectUse(!replaceDirectUse)}
+>
+  <input
+    type="checkbox"
+    id="replace_direct_use_toggle"
+    checked={replaceDirectUse}
+    onChange={(e) => setReplaceDirectUse(e.target.checked)}
+    style={{ marginTop: '3px', accentColor: 'var(--action-primary)', cursor: 'pointer' }}
+    onClick={(e) => e.stopPropagation()}
+  />
+  <div style={{ userSelect: 'none' }}>
+    <label htmlFor="replace_direct_use_toggle" style={{ fontWeight: 600, fontSize: '12.5px', color: 'var(--text-primary)', cursor: 'pointer', display: 'block' }}>
+      Foto ini sudah siap pakai / profesional
+    </label>
+    <span style={{ fontSize: '11px', color: replaceDirectUse ? 'var(--status-success)' : 'var(--text-muted)', lineHeight: 1.35, display: 'block', marginTop: '2px' }}>
+      {replaceDirectUse
+        ? '✓ Gunakan langsung tanpa hapus latar belakang, tanpa antrean worker, dan tanpa AI regenerasi.'
+        : '⚡ Sistem akan otomatis menghapus latar belakang & membersihkan foto via AI.'}
+    </span>
+  </div>
+</div>
 ```
 
 ---
 
-### 5. `lib/product-research-repository.js`
-Menyinkronkan perubahan edit kurator langsung ke `product_extractions` bila kandidat sudah terhubung ke katalog (`existing.cf_product_id`).
+### File 2: `app/api/v2/products/[id]/photo-replace/route.js`
 
 #### Code Sebelum (Current/Before):
 ```javascript
-    const updatedRes = await client.query(
-      `UPDATE product_research_candidates
-       SET curated_data = $1::jsonb,
-           url_status = $2,
-           normalized_url = $3,
-           curation_status = $4,
-           revision = revision + 1,
-           updated_at = CURRENT_TIMESTAMP
-       WHERE id = $5 AND tenant_id = $6
-       RETURNING *`,
-      [
-        JSON.stringify(nextCuratedData),
-        nextUrlStatus,
-        nextNormalizedUrl,
-        nextCurationStatus,
-        candidateId,
-        tenantId
-      ]
-    );
+// Line 25-39
+const contentType = req.headers.get('content-type') || '';
+let source = '';
+let candidateIndex = null;
+let uploadFile = null;
 
-    return updatedRes.rows[0];
+if (contentType.includes('multipart/form-data')) {
+  const formData = await req.formData();
+  source = formData.get('source') || '';
+  candidateIndex = formData.get('candidate_index');
+  uploadFile = formData.get('file') || formData.get('photo');
+} else {
+  const body = await req.json();
+  source = body.source || '';
+  candidateIndex = body.candidate_index;
+}
+...
+// Line 163-206
+// 3. Opsi Unggah Foto Sendiri
+if (source === 'upload') {
+  if (!uploadFile || typeof uploadFile.arrayBuffer !== 'function') {
+    return NextResponse.json({
+      success: false,
+      error: 'File foto produk wajib diunggah untuk opsi upload.'
+    }, { status: 400 });
+  }
+
+  const fileBuffer = Buffer.from(await uploadFile.arrayBuffer());
+  const validation = validateRawProductImage(fileBuffer, uploadFile.name);
+  if (!validation.valid) {
+    return NextResponse.json({
+      success: false,
+      error: validation.error || 'Format atau ukuran file tidak valid (JPG/PNG/WebP maks 20MB).'
+    }, { status: 400 });
+  }
+
+  const rawFilename = `raw_${id}_${ts}.png`;
+  const rawAbsPath = path.join(rawDir, rawFilename);
+  fs.writeFileSync(rawAbsPath, fileBuffer);
+
+  const relativeRawPath = `/uploads/products/raw/${rawFilename}`;
+  // Unggahan pengguna tidak perlu di-crop otomatis (run_crop: false)
+  const job = await createJob('product_photo_replace', {
+    tenant_id: activeTenant,
+    product_id: id,
+    raw_path: relativeRawPath,
+    origin: 'upload',
+    run_crop: false
+  });
+
+  await updateProduct(id, {
+    photo_status: 'processing',
+    photo_provider: 'photo_replace',
+    photo_task_id: String(job?.id || '')
+  });
+
+  return NextResponse.json({
+    success: true,
+    mode: 'upload',
+    job_id: job?.id
+  });
+}
 ```
 
 #### Code Sesudah (Proposed/After):
 ```javascript
-    const updatedRes = await client.query(
-      `UPDATE product_research_candidates
-       SET curated_data = $1::jsonb,
-           url_status = $2,
-           normalized_url = $3,
-           curation_status = $4,
-           revision = revision + 1,
-           updated_at = CURRENT_TIMESTAMP
-       WHERE id = $5 AND tenant_id = $6
-       RETURNING *`,
-      [
-        JSON.stringify(nextCuratedData),
-        nextUrlStatus,
-        nextNormalizedUrl,
-        nextCurationStatus,
-        candidateId,
-        tenantId
-      ]
-    );
+// Line 25-41
+const contentType = req.headers.get('content-type') || '';
+let source = '';
+let candidateIndex = null;
+let uploadFile = null;
+let directUse = false;
 
-    // Sinkronkan ke katalog jika kandidat sudah memiliki cf_product_id
-    if (existing.cf_product_id) {
-      const prodSets = [];
-      const prodParams = [];
-      let pIdx = 1;
+if (contentType.includes('multipart/form-data')) {
+  const formData = await req.formData();
+  source = formData.get('source') || '';
+  candidateIndex = formData.get('candidate_index');
+  uploadFile = formData.get('file') || formData.get('photo');
+  directUse = formData.get('direct_use') === 'true' || formData.get('direct_use') === true;
+} else {
+  const body = await req.json();
+  source = body.source || '';
+  candidateIndex = body.candidate_index;
+  directUse = body.direct_use === true || body.direct_use === 'true';
+}
+...
+// Line 163-228
+// 3. Opsi Unggah Foto Sendiri
+if (source === 'upload') {
+  if (!uploadFile || typeof uploadFile.arrayBuffer !== 'function') {
+    return NextResponse.json({
+      success: false,
+      error: 'File foto produk wajib diunggah untuk opsi upload.'
+    }, { status: 400 });
+  }
 
-      if (curatedData?.name && curatedData.name.trim()) {
-        prodSets.push(`product_name = $${pIdx++}`);
-        prodParams.push(curatedData.name.trim());
-      }
-      if (curatedData?.description !== undefined && curatedData.description !== null) {
-        prodSets.push(`product_description = $${pIdx++}`);
-        prodParams.push(curatedData.description.trim());
-      }
-      if (curatedData?.usp !== undefined && curatedData.usp !== null) {
-        prodSets.push(`unique_selling_point = $${pIdx++}`);
-        prodParams.push(curatedData.usp.trim());
-        prodSets.push(`raw_response = jsonb_set(COALESCE(raw_response::jsonb, '{}'::jsonb), '{usp_source}', '"manual"')`);
-      }
+  const fileBuffer = Buffer.from(await uploadFile.arrayBuffer());
+  const validation = validateRawProductImage(fileBuffer, uploadFile.name);
+  if (!validation.valid) {
+    return NextResponse.json({
+      success: false,
+      error: validation.error || 'Format atau ukuran file tidak valid (JPG/PNG/WebP maks 20MB).'
+    }, { status: 400 });
+  }
 
-      if (prodSets.length > 0) {
-        prodSets.push(`updated_at = NOW()`);
-        prodParams.push(existing.cf_product_id, tenantId);
-        await client.query(
-          `UPDATE product_extractions SET ${prodSets.join(', ')} WHERE id = $${pIdx++} AND tenant_id = $${pIdx++}`,
-          prodParams
-        );
-      }
+  const rawFilename = `raw_${id}_${ts}.png`;
+  const rawAbsPath = path.join(rawDir, rawFilename);
+  fs.writeFileSync(rawAbsPath, fileBuffer);
+  const relativeRawPath = `/uploads/products/raw/${rawFilename}`;
+
+  // JIKA DIRECT USE: Foto profesional siap pakai langsung diterapkan
+  if (directUse) {
+    const cleanDir = path.join(process.cwd(), 'public', 'uploads', 'products', 'clean');
+    if (!fs.existsSync(cleanDir)) {
+      fs.mkdirSync(cleanDir, { recursive: true });
     }
+    const cleanFilename = `clean_${id}_${ts}.png`;
+    const cleanAbsPath = path.join(cleanDir, cleanFilename);
+    fs.writeFileSync(cleanAbsPath, fileBuffer);
 
-    return updatedRes.rows[0];
+    const relativeCleanPath = `/uploads/products/clean/${cleanFilename}`;
+    const previousClean = product.clean_photo_url || product.cleaned_photo_url || null;
+
+    const updates = {
+      raw_photo_url: relativeRawPath,
+      clean_photo_url: relativeCleanPath,
+      cleaned_photo_url: relativeCleanPath,
+      photo_url: relativeCleanPath,
+      active_photo: 'cleaned_photo_url',
+      previous_clean_photo_url: previousClean,
+      photo_status: 'approved',
+      photo_provider: 'manual_upload',
+      photo_error: null,
+      photo_task_id: null,
+      photo_reviewed_at: new Date().toISOString()
+    };
+
+    const updated = await updateProduct(id, updates);
+
+    return NextResponse.json({
+      success: true,
+      mode: 'direct',
+      message: 'Foto profesional berhasil dipasang langsung sebagai foto utama produk.',
+      data: {
+        photo_url: relativeCleanPath,
+        clean_photo_url: relativeCleanPath,
+        photo_status: 'approved'
+      },
+      product: updated
+    });
+  }
+
+  // JIKA NON-DIRECT: Jalankan alur background worker lama (rembg otomatis)
+  const job = await createJob('product_photo_replace', {
+    tenant_id: activeTenant,
+    product_id: id,
+    raw_path: relativeRawPath,
+    origin: 'upload',
+    run_crop: false
+  });
+
+  await updateProduct(id, {
+    photo_status: 'processing',
+    photo_provider: 'photo_replace',
+    photo_task_id: String(job?.id || '')
+  });
+
+  return NextResponse.json({
+    success: true,
+    mode: 'upload',
+    job_id: job?.id
+  });
+}
 ```
 
 ---
 
 ## Execution Task List
 
-- [x] Task 1: Update `lib/product-research-promotion-service.js` (Ekstrak & teruskan `metadata_overrides`)
-- [x] Task 2: Update `lib/product-catalog-service.js` (Dukungan `metadata_overrides` pada `enqueueProductScrape`)
-- [x] Task 3: Update `lib/scheduler-processors.js` (Injeksi metadata kurator & label `usp_source: 'manual'`)
-- [x] Task 4: Update `lib/product-bulk-worker.js` (Proteksi `isUspManualLocked` pada AI Enrichment)
-- [x] Task 5: Update `lib/product-research-repository.js` (Sinkronisasi edit kurator ke `product_extractions`)
-- [x] Task 6: Tambahkan pengujian otomatis di `tests/product-research/promotion-and-scrape-contract.test.js` dan jalankan test
-- [x] Task 7: Verifikasi seluruh suite test `npm test tests/product-research/`
-- [x] Task 8: Commit & push ke remote branch `fitur/sync-kurasi-radar-ke-produk`
-- [x] Task 9: Deploy ke server Dev Mac Mini (`npm run deploy:dev:atomic -- --ref <full-sha> --apply --confirm-dev`) dan verifikasi status online
+- [x] Task 1: Buat dan periksa branch `fitur/opsi-foto-profesional-produk`
+- [x] Task 2: Modifikasi backend `app/api/v2/products/[id]/photo-replace/route.js` untuk mendukung `direct_use`
+- [x] Task 3: Modifikasi frontend `app/products/page.js` untuk menambahkan state & toggle kontrol Foto Profesional
+- [x] Task 4: Uji fungsional lokal (unit test / integration test script)
+- [x] Task 5: Perbarui kartu menu `sot/menus/kartu/products.md` sesuai SOP Konteks Menu
+- [x] Task 6: Commit perubahan dan push branch `fitur/opsi-foto-profesional-produk` ke remote GitHub
+- [x] Task 7: Deploy ke Server Dev Mac Mini (port 5020/7020) via Atomic Deployment dan verifikasi kesehatan

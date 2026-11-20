@@ -1,11 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server.js';
 import path from 'node:path';
 import fs from 'node:fs';
-import { withTenantContext } from '@/lib/auth';
-import { getProductById, updateProduct } from '@/lib/product-repository';
-import { getActiveTenantId } from '@/lib/tenant-context';
-import { createJob } from '@/lib/db';
-import { validateRawProductImage } from '@/lib/product-validation';
+import { withTenantContext } from '../../../../../../lib/auth.js';
+import { getProductById, updateProduct } from '../../../../../../lib/product-repository.js';
+import { getActiveTenantId } from '../../../../../../lib/tenant-context.js';
+import { createJob } from '../../../../../../lib/db.js';
+import { validateRawProductImage } from '../../../../../../lib/product-validation.js';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,16 +26,19 @@ export const POST = withTenantContext(async (req, { params }) => {
     let source = '';
     let candidateIndex = null;
     let uploadFile = null;
+    let directUse = false;
 
     if (contentType.includes('multipart/form-data')) {
       const formData = await req.formData();
       source = formData.get('source') || '';
       candidateIndex = formData.get('candidate_index');
       uploadFile = formData.get('file') || formData.get('photo');
+      directUse = formData.get('direct_use') === 'true' || formData.get('direct_use') === true;
     } else {
       const body = await req.json();
       source = body.source || '';
       candidateIndex = body.candidate_index;
+      directUse = body.direct_use === true || body.direct_use === 'true';
     }
 
     if (!['candidate', 'upload', 'rescrape'].includes(source)) {
@@ -123,7 +126,7 @@ export const POST = withTenantContext(async (req, { params }) => {
       // Jika belum ada di disk lokal, unduh dari URL kandidat
       if (!fileReady && selectedCand.url && selectedCand.url.startsWith('http')) {
         try {
-          const { downloadECommerceImage } = await import('@/lib/url-scraper');
+          const { downloadECommerceImage } = await import('../../../../../../lib/url-scraper.js');
           await downloadECommerceImage(selectedCand.url, rawAbsPath);
           fileReady = fs.existsSync(rawAbsPath);
         } catch (dlErr) {
@@ -181,9 +184,51 @@ export const POST = withTenantContext(async (req, { params }) => {
       const rawFilename = `raw_${id}_${ts}.png`;
       const rawAbsPath = path.join(rawDir, rawFilename);
       fs.writeFileSync(rawAbsPath, fileBuffer);
-
       const relativeRawPath = `/uploads/products/raw/${rawFilename}`;
-      // Unggahan pengguna tidak perlu di-crop otomatis (run_crop: false)
+
+      // JIKA DIRECT USE: Foto profesional siap pakai langsung diterapkan tanpa rembg & AI
+      if (directUse) {
+        const cleanDir = path.join(process.cwd(), 'public', 'uploads', 'products', 'clean');
+        if (!fs.existsSync(cleanDir)) {
+          fs.mkdirSync(cleanDir, { recursive: true });
+        }
+        const cleanFilename = `clean_${id}_${ts}.png`;
+        const cleanAbsPath = path.join(cleanDir, cleanFilename);
+        fs.writeFileSync(cleanAbsPath, fileBuffer);
+
+        const relativeCleanPath = `/uploads/products/clean/${cleanFilename}`;
+        const previousClean = product.clean_photo_url || product.cleaned_photo_url || null;
+
+        const updates = {
+          raw_photo_url: relativeRawPath,
+          clean_photo_url: relativeCleanPath,
+          cleaned_photo_url: relativeCleanPath,
+          photo_url: relativeCleanPath,
+          active_photo: 'cleaned_photo_url',
+          previous_clean_photo_url: previousClean,
+          photo_status: 'approved',
+          photo_provider: 'manual_upload',
+          photo_error: null,
+          photo_task_id: null,
+          photo_reviewed_at: new Date().toISOString()
+        };
+
+        const updated = await updateProduct(id, updates);
+
+        return NextResponse.json({
+          success: true,
+          mode: 'direct',
+          message: 'Foto profesional berhasil dipasang langsung sebagai foto utama produk.',
+          data: {
+            photo_url: relativeCleanPath,
+            clean_photo_url: relativeCleanPath,
+            photo_status: 'approved'
+          },
+          product: updated
+        });
+      }
+
+      // JIKA NON-DIRECT: Alur lama via background scheduler (rembg otomatis)
       const job = await createJob('product_photo_replace', {
         tenant_id: activeTenant,
         product_id: id,
