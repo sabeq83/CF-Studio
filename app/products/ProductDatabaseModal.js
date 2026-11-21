@@ -324,6 +324,7 @@ export default function ProductDatabaseModal({
 
   return (
     <div
+      className="modal-backdrop-responsive"
       style={{
         position: 'fixed',
         top: 0,
@@ -341,6 +342,7 @@ export default function ProductDatabaseModal({
       onClick={onClose}
     >
       <div
+        className="modal-dialog-responsive"
         style={{
           width: '100%',
           maxWidth: '720px',

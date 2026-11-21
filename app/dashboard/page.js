@@ -58,7 +58,7 @@ export default function Dashboard() {
     <div className="layout-with-sidebar">
       <Sidebar />
 
-      <main className="main-content" style={{ padding: '32px 36px', background: 'var(--bg-primary)', minHeight: '100vh', color: 'var(--text-primary)' }}>
+      <main className="main-content page-content-responsive" style={{ background: 'var(--bg-primary)', minHeight: '100vh', color: 'var(--text-primary)' }}>
         <div style={{ maxWidth: '1380px', width: '100%', margin: '0 auto' }}>
 
           {/* HEADER */}
@@ -103,7 +103,7 @@ export default function Dashboard() {
           </div>
 
           {/* BARIS 1: 4 EXECUTIVE METRIC CARDS */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+          <div className="dashboard-metrics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px', marginBottom: '24px' }}>
 
             {/* Card 1: Content Ready */}
             <div style={{
@@ -183,7 +183,7 @@ export default function Dashboard() {
               </span>
               <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Pintas Akses Modul Utama</span>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+            <div className="dashboard-launchpad-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
 
               <Link
                 href="/content-flow"
@@ -324,7 +324,7 @@ export default function Dashboard() {
           </div>
 
           {/* BARIS 3: RECENT CONTENT (LEFT) & PLATFORM READINESS (RIGHT) */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.8fr) minmax(0, 1fr)', gap: '20px', alignItems: 'start' }}>
+          <div className="dashboard-columns-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.8fr) minmax(0, 1fr)', gap: '20px', alignItems: 'start' }}>
 
             {/* Left Box: 5 Recent Content Flow Items */}
             <div style={{ padding: '24px', borderRadius: '18px', background: 'var(--bg-card)', border: '1px solid var(--border)', boxShadow: '0 12px 40px var(--overlay-subtle)', backdropFilter: 'blur(20px)' }}>

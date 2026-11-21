@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Mockup Layout Mobile CF Studio — Tahap 2 (Prioritas 1 & 2)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* MAKNA Flow Semantic CSS Tokens (Disalin dari app/theme.css) */
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --sidebar-w: 260px;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --overlay-backdrop: rgba(2, 6, 14, 0.78);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --link-hover: #a5f3fc;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.6);
+
+      --top-nav-h: 52px;
+      --bottom-nav-h: 56px;
+      --page-padding: 16px;
+      --card-padding: 16px;
+      --modal-padding: 18px;
+      --header-gap: 16px;
+      --header-title-size: clamp(1.25rem, 5vw, 1.45rem);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --input-bg: #ffffff;
+      --overlay-subtle: rgba(30, 41, 59, 0.08);
+      --overlay-backdrop: rgba(15, 23, 42, 0.54);
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --text-disabled: #8794a6;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --link: #075ea8;
+      --link-hover: #064b86;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --status-neutral: #6548bd;
+      --status-neutral-soft: #f0ecfb;
+      --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+      --shadow-modal: 0 26px 80px rgba(31, 45, 61, 0.22);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: #020408;
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      overflow-x: hidden;
+    }
+
+    /* Toolbar Kontrol Penguji */
+    .tester-toolbar {
+      width: 100%;
+      background: #0d1522;
+      border-bottom: 1px solid #23354d;
+      padding: 10px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 2000;
+      font-size: 13px;
+    }
+    .tester-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .tester-badge {
+      background: #2dd4bf20;
+      color: #2dd4bf;
+      border: 1px solid #2dd4bf50;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .tester-btn {
+      background: #1a273b;
+      border: 1px solid #324765;
+      color: #f4f7fb;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .tester-btn:hover { background: #23354d; }
+    .tester-btn.active {
+      background: #2dd4bf;
+      color: #042f2e;
+      border-color: #2dd4bf;
+      font-weight: 700;
+    }
+
+    /* Tab Switcher Halaman */
+    .page-tabs-bar {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .page-tab-btn {
+      padding: 6px 14px;
+      border-radius: 8px;
+      background: #152234;
+      border: 1px solid #283c55;
+      color: #cbd5e1;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .page-tab-btn.active {
+      background: #3b82f6;
+      color: #ffffff;
+      border-color: #3b82f6;
+      box-shadow: 0 2px 10px rgba(59, 130, 246, 0.4);
+    }
+
+    /* Frame Simulator */
+    .simulator-wrapper {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      padding: 20px 10px;
+      flex: 1;
+    }
+    .device-container {
+      width: 100%;
+      max-width: 390px; /* Default iPhone 15 */
+      height: 860px;
+      max-height: calc(100vh - 120px);
+      background: var(--canvas);
+      border: 2px solid #2a3a50;
+      border-radius: 36px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 0 10px #131b26;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      transition: max-width 0.3s ease;
+    }
+    .device-container.mode-compact { max-width: 360px; }
+    .device-container.mode-iphone { max-width: 390px; }
+    .device-container.mode-tablet { max-width: 768px; }
+    .device-container.mode-fullscreen {
+      max-width: 100% !important;
+      height: 100vh !important;
+      max-height: 100vh !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+    }
+
+    /* Bilah Atas Mobile (52px) */
+    .mobile-top-bar {
+      height: var(--top-nav-h);
+      background: var(--sidebar);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      flex-shrink: 0;
+    }
+    .brand-brandmark {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+    .brand-logo-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #00D2FF 0%, #2563EB 50%, #7C3AED 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+      flex-shrink: 0;
+    }
+    .brand-logo-icon svg { width: 16px; height: 16px; fill: #ffffff; }
+    .brand-title-wrap { display: flex; flex-direction: column; }
+    .brand-title { font-size: 14px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; }
+    .brand-subtitle { font-size: 10px; color: var(--action-primary); font-weight: 600; }
+
+    .menu-trigger-btn {
+      height: 44px;
+      min-width: 44px;
+      padding: 0 12px;
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .menu-trigger-btn:active { background: var(--surface-hover); transform: scale(0.96); }
+
+    /* Area Konten Scrollable */
+    .mobile-main-content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: var(--page-padding);
+      padding-bottom: calc(var(--bottom-nav-h) + 24px);
+      -webkit-overflow-scrolling: touch;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Bilah Navigasi Bawah (56px) */
+    .mobile-bottom-bar {
+      height: var(--bottom-nav-h);
+      background: var(--sidebar);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.25);
+    }
+    .bottom-nav-item {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 600;
+      background: none;
+      border: none;
+      cursor: pointer;
+      min-height: 44px;
+    }
+    .bottom-nav-item.active { color: var(--action-primary); }
+    .bottom-nav-icon { font-size: 17px; line-height: 1; }
+
+    /* Elemen Halaman: Chips Bar */
+    .chips-scroll-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .chip-item {
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .chip-item.active {
+      background: var(--status-info-soft);
+      border-color: var(--status-info);
+      color: var(--status-info);
+      font-weight: 700;
+    }
+
+    /* Elemen Halaman: Stepper Wizard (Auto Pipeline) */
+    .stepper-scroll-track {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 8px 4px;
+      border-radius: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+    }
+    .step-node {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+      color: var(--text-muted);
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      flex-shrink: 0;
+    }
+    .step-node.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border-color: var(--action-primary);
+      font-weight: 700;
+    }
+
+    /* Elemen Halaman: Feed Cards (ContentFlow Hub) */
+    .content-feed-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+    }
+    .feed-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .feed-brand-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid var(--status-info);
+    }
+    .feed-hook-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.4;
+    }
+    .platform-status-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      background: var(--surface-raised);
+      padding: 8px;
+      border-radius: 8px;
+    }
+    .platform-btn {
+      padding: 8px 4px;
+      border-radius: 6px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      font-size: 10px;
+      font-weight: 700;
+      text-align: center;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      min-height: 44px;
+      justify-content: center;
+    }
+    .platform-btn.published {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border-color: var(--status-success);
+    }
+
+    /* Elemen Halaman: Kartu Kandidat TeleRadar */
+    .radar-candidate-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .radar-card-top {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .radar-thumb-box {
+      width: 72px;
+      height: 72px;
+      border-radius: 10px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+    .radar-info-box {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .radar-score-pill {
+      align-self: flex-start;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 800;
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border: 1px solid var(--status-warning);
+    }
+
+    /* Modal Lembar Bawah */
+    .modal-sheet-backdrop {
+      position: absolute;
+      inset: 0;
+      background: var(--overlay-backdrop);
+      backdrop-filter: blur(4px);
+      z-index: 600;
+      display: flex;
+      align-items: flex-end;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .modal-sheet-backdrop.open { opacity: 1; pointer-events: auto; }
+    .bottom-sheet-panel {
+      width: 100%;
+      max-height: 92dvh;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-bottom: none;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      transform: translateY(100%);
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: var(--shadow-modal);
+    }
+    .modal-sheet-backdrop.open .bottom-sheet-panel { transform: translateY(0); }
+    .sheet-handle {
+      width: 36px;
+      height: 4px;
+      background: var(--border-strong);
+      border-radius: 999px;
+      margin: 10px auto 4px;
+    }
+    .btn-full-44 {
+      width: 100%;
+      min-height: 44px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. TOOLBAR PENGUJI INTERAKTIF -->
+  <header class="tester-toolbar">
+    <div class="tester-row">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="tester-badge">MOCKUP TAHAP 2</span>
+        <span style="font-weight: 700; font-size: 13px;">Pemolesan 5 Halaman Kerja</span>
+      </div>
+      <div style="display: flex; gap: 6px;">
+        <button class="tester-btn" onclick="setDeviceWidth('compact')">360px (HP)</button>
+        <button class="tester-btn active" onclick="setDeviceWidth('iphone')">390px (iPhone)</button>
+        <button class="tester-btn" onclick="setDeviceWidth('tablet')">768px (Tablet)</button>
+        <button class="tester-btn" onclick="setDeviceWidth('fullscreen')">Layar Penuh</button>
+        <button class="tester-btn" id="themeBtn" onclick="toggleTheme()">🌙 Gelap</button>
+      </div>
+    </div>
+
+    <!-- Pilihan Halaman (5 Tab Prioritas 1 & 2) -->
+    <div class="page-tabs-bar">
+      <button class="page-tab-btn active" onclick="switchPage('dashboard')">◈ P1: Dashboard</button>
+      <button class="page-tab-btn" onclick="switchPage('autopipeline')">⚡ P1: Auto Pipeline</button>
+      <button class="page-tab-btn" onclick="switchPage('contentflow')">📊 P2: ContentFlow Hub</button>
+      <button class="page-tab-btn" onclick="switchPage('radar')">📡 P2: Radar Produk</button>
+      <button class="page-tab-btn" onclick="switchPage('products')">📦 P2: Database Produk</button>
+    </div>
+  </header>
+
+  <!-- 2. SIMULATOR HP -->
+  <main class="simulator-wrapper">
+    <div class="device-container mode-iphone" id="deviceContainer">
+
+      <!-- Bilah Atas Mobile -->
+      <nav class="mobile-top-bar">
+        <div class="brand-brandmark">
+          <div class="brand-logo-icon">
+            <svg viewBox="0 0 24 24"><path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm4 3v6l6-3-6-3z"/></svg>
+          </div>
+          <div class="brand-title-wrap">
+            <span class="brand-title" id="pageTitleText">Dashboard</span>
+            <span class="brand-subtitle">● Prioritas 1 &amp; 2</span>
+          </div>
+        </div>
+        <button class="menu-trigger-btn" onclick="alert('Menu drawer terbuka!')">
+          <span>☰</span>
+          <span>Menu</span>
+        </button>
+      </nav>
+
+      <!-- Area Konten Dinamis Berdasarkan Halaman Terpilih -->
+      <section class="mobile-main-content" id="mainContentArea">
+
+        <!-- ==================== HALAMAN 1: DASHBOARD ==================== -->
+        <div id="view-dashboard" class="page-view">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <div>
+              <h2 style="font-size: 18px; font-weight: 800; margin: 0;">Ringkasan Eksekutif</h2>
+              <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Metrik kinerja &amp; pintasan cepat</p>
+            </div>
+            <button class="tester-btn" style="padding: 6px 10px; font-size: 11px;">🔄 Refresh</button>
+          </div>
+
+          <!-- 2x2 Metric Cards -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
+            <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 12px;">
+              <div style="font-size: 10px; color: var(--link); font-weight: 700; text-transform: uppercase;">🎥 SIAP PUBLISH</div>
+              <div style="font-size: 22px; font-weight: 800; color: var(--link); font-family: var(--font-mono); margin: 6px 0;">24</div>
+              <div style="font-size: 10px; color: var(--status-success); font-weight: 600;">↑ 5 video baru</div>
+            </div>
+            <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 12px;">
+              <div style="font-size: 10px; color: var(--status-success); font-weight: 700; text-transform: uppercase;">⚡ KAMPANYE AKTIF</div>
+              <div style="font-size: 22px; font-weight: 800; color: var(--status-success); font-family: var(--font-mono); margin: 6px 0;">8</div>
+              <div style="font-size: 10px; color: var(--text-muted); font-weight: 600;">OPC &amp; RE</div>
+            </div>
+            <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 12px;">
+              <div style="font-size: 10px; color: var(--status-warning); font-weight: 700; text-transform: uppercase;">📦 KATALOG SKU</div>
+              <div style="font-size: 22px; font-weight: 800; color: var(--status-warning); font-family: var(--font-mono); margin: 6px 0;">64</div>
+              <div style="font-size: 10px; color: var(--text-muted); font-weight: 600;">Semua Tenant</div>
+            </div>
+            <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 12px;">
+              <div style="font-size: 10px; color: var(--status-neutral); font-weight: 700; text-transform: uppercase;">🟢 CLUSTER</div>
+              <div style="font-size: 18px; font-weight: 800; color: var(--status-neutral); font-family: var(--font-mono); margin: 8px 0 6px;">3 / 3 Node</div>
+              <div style="font-size: 10px; color: var(--status-success); font-weight: 600;">PostgreSQL OK</div>
+            </div>
+          </div>
+
+          <!-- Quick Actions (2 Kolom di HP) -->
+          <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius); padding: 14px; margin-bottom: 16px;">
+            <div style="font-size: 11px; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 10px;">⚡ Quick Action Launchpad</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              <button class="tester-btn" style="min-height: 44px; justify-content: flex-start;" onclick="switchPage('contentflow')">
+                <span>📱</span><span>ContentFlow</span>
+              </button>
+              <button class="tester-btn" style="min-height: 44px; justify-content: flex-start;" onclick="switchPage('autopipeline')">
+                <span>⚡</span><span>Auto Pipeline</span>
+              </button>
+              <button class="tester-btn" style="min-height: 44px; justify-content: flex-start;" onclick="switchPage('radar')">
+                <span>📡</span><span>Radar Produk</span>
+              </button>
+              <button class="tester-btn" style="min-height: 44px; justify-content: flex-start;" onclick="switchPage('products')">
+                <span>📦</span><span>Database Produk</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== HALAMAN 2: AUTO PIPELINE ==================== -->
+        <div id="view-autopipeline" class="page-view" style="display: none;">
+          <h2 style="font-size: 18px; font-weight: 800; margin-bottom: 4px;">Wizard Auto Pipeline</h2>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Konfigurasi batch generasi video otomatis</p>
+
+          <!-- Stepper Scrollable Track -->
+          <div class="stepper-scroll-track" style="margin-bottom: 16px;">
+            <div class="step-node active"><span>1</span><span>Brand &amp; Target</span></div>
+            <div class="step-node"><span>2</span><span>Format &amp; Hook</span></div>
+            <div class="step-node"><span>3</span><span>Voiceover AI</span></div>
+            <div class="step-node"><span>4</span><span>Visual Identity</span></div>
+            <div class="step-node"><span>5</span><span>Review &amp; Render</span></div>
+          </div>
+
+          <!-- Form Kontrol Mobile -->
+          <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius); padding: 14px; display: flex; flex-direction: column; gap: 12px;">
+            <div>
+              <label style="font-size: 12px; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 6px;">Pilih Akun Brand</label>
+              <select style="width: 100%; height: 44px; background: var(--input-bg); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); padding: 0 10px; font-size: 16px;">
+                <option>@ruangakustik (Peredam Ruangan)</option>
+                <option>@solusithermal (Insulasi Panas)</option>
+                <option>@nutribake (Pangan Sehat)</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size: 12px; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 6px;">Preset Video AI</label>
+              <select style="width: 100%; height: 44px; background: var(--input-bg); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); padding: 0 10px; font-size: 16px;">
+                <option>Educational Explainer (9:16)</option>
+                <option>Problem Solver Viral (9:16)</option>
+              </select>
+            </div>
+            <button class="btn-full-44" style="background: var(--action-primary); color: var(--on-action-primary); margin-top: 6px;">
+              <span>Lanjut ke Langkah 2 ➔</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ==================== HALAMAN 3: CONTENTFLOW HUB ==================== -->
+        <div id="view-contentflow" class="page-view" style="display: none;">
+          <h2 style="font-size: 18px; font-weight: 800; margin-bottom: 4px;">ContentFlow Hub</h2>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Pelacak &amp; manajemen publikasi konten</p>
+
+          <!-- Filter Chips Bar -->
+          <div class="chips-scroll-bar" style="margin-bottom: 14px;">
+            <span class="chip-item active">🌐 Semua (48)</span>
+            <span class="chip-item">🏷️ @ruangakustik</span>
+            <span class="chip-item">🏷️ @solusithermal</span>
+            <span class="chip-item">🏷️ @nutribake</span>
+          </div>
+
+          <!-- Feed Card 1 -->
+          <div class="content-feed-card">
+            <div class="feed-card-header">
+              <span class="feed-brand-badge">@ruangakustik</span>
+              <span style="font-size: 10px; color: var(--status-success); font-weight: 700;">● Video Ready</span>
+            </div>
+            <div class="feed-hook-title">Cara Redam Suara Tetangga Bising Tanpa Renovasi Tembok</div>
+            <div class="platform-status-grid">
+              <button class="platform-btn published">
+                <span>🎵 TikTok</span>
+                <span>Published</span>
+              </button>
+              <button class="platform-btn">
+                <span>📘 Facebook</span>
+                <span>Draft</span>
+              </button>
+              <button class="platform-btn">
+                <span>📸 Instagram</span>
+                <span>Ready</span>
+              </button>
+            </div>
+            <button class="btn-full-44" style="background: var(--surface-interactive); border: 1px solid var(--border-subtle); color: var(--text-primary);" onclick="openBottomSheet('Detail Konten #CF-4091')">
+              <span>🔍 Detail &amp; Publish Sekarang</span>
+            </button>
+          </div>
+
+          <!-- Feed Card 2 -->
+          <div class="content-feed-card" style="margin-top: 10px;">
+            <div class="feed-card-header">
+              <span class="feed-brand-badge" style="color: var(--status-warning); border-color: var(--status-warning); background: var(--status-warning-soft);">@solusithermal</span>
+              <span style="font-size: 10px; color: var(--status-warning); font-weight: 700;">⚡ Scheduled</span>
+            </div>
+            <div class="feed-hook-title">Suhu Kamar Turun 4 Derajat dengan Cat Penolak Panas</div>
+            <div class="platform-status-grid">
+              <button class="platform-btn">
+                <span>🎵 TikTok</span>
+                <span>Scheduled</span>
+              </button>
+              <button class="platform-btn">
+                <span>📘 Facebook</span>
+                <span>Scheduled</span>
+              </button>
+              <button class="platform-btn">
+                <span>📸 Instagram</span>
+                <span>Scheduled</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== HALAMAN 4: RADAR PRODUK ==================== -->
+        <div id="view-radar" class="page-view" style="display: none;">
+          <h2 style="font-size: 18px; font-weight: 800; margin-bottom: 4px;">Radar Produk</h2>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Kurasi produk viral TeleRadar</p>
+
+          <div class="chips-scroll-bar" style="margin-bottom: 14px;">
+            <span class="chip-item active">🔥 Semua Viral</span>
+            <span class="chip-item">🎵 TikTok Shop</span>
+            <span class="chip-item">🟠 Shopee</span>
+            <span class="chip-item">🟢 Tokopedia</span>
+          </div>
+
+          <!-- Kandidat Card 1 -->
+          <div class="radar-candidate-card">
+            <div class="radar-card-top">
+              <div class="radar-thumb-box">🎧</div>
+              <div class="radar-info-box">
+                <span class="radar-score-pill">★ Skor Viral: 94/100</span>
+                <div style="font-size: 13px; font-weight: 700; line-height: 1.3;">Busa Akustik Segitiga Piramida 50x50cm</div>
+                <div style="font-size: 11px; color: var(--status-success); font-weight: 700;">Omset: Rp 42.5 Jt / bln</div>
+              </div>
+            </div>
+            <button class="btn-full-44" style="background: var(--action-primary); color: var(--on-action-primary);" onclick="openBottomSheet('Kurasi TeleRadar: Busa Akustik')">
+              <span>✨ Kurasi &amp; Promosikan ke Database</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ==================== HALAMAN 5: DATABASE PRODUK ==================== -->
+        <div id="view-products" class="page-view" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div>
+              <h2 style="font-size: 18px; font-weight: 800; margin: 0;">Database Produk</h2>
+              <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Katalog SKU &amp; aset visual AI</p>
+            </div>
+            <button class="tester-btn" style="background: var(--action-primary); color: var(--on-action-primary); font-weight: 700;" onclick="openBottomSheet('Tambah Produk Baru')">+ Produk</button>
+          </div>
+
+          <!-- Kartu Produk 1 -->
+          <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius); padding: 14px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="height: 140px; border-radius: 10px; background: var(--surface-raised); border: 1px solid var(--border-subtle); display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+              <span style="font-size: 42px;">📦</span>
+              <div style="position: absolute; bottom: 8px; right: 8px; display: flex; gap: 4px;">
+                <span style="font-size: 10px; padding: 2px 8px; border-radius: 4px; background: var(--action-primary); color: var(--on-action-primary); font-weight: 700;">Clean Photo</span>
+              </div>
+            </div>
+            <div>
+              <div style="font-size: 14px; font-weight: 800; color: var(--text-primary);">Panel Akustik Fabric Custom</div>
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">SKU: #AKU-FAB-01 · 3 USP Terdefinisi</div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              <button class="btn-full-44" style="background: var(--surface-interactive); border: 1px solid var(--border-subtle); color: var(--text-primary);" onclick="openBottomSheet('Ganti Foto: Panel Akustik')">
+                <span>🖼️ Ganti Foto</span>
+              </button>
+              <button class="btn-full-44" style="background: var(--status-info-soft); border: 1px solid var(--status-info); color: var(--status-info);" onclick="alert('Enrich AI dijalankan!')">
+                <span>✨ Re-Enrich AI</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Bilah Bawah Mobile (56px) -->
+      <nav class="mobile-bottom-bar">
+        <button class="bottom-nav-item active" id="bnav-dash" onclick="switchPage('dashboard')">
+          <span class="bottom-nav-icon">◈</span>
+          <span>Dashboard</span>
+        </button>
+        <button class="bottom-nav-item" id="bnav-pipe" onclick="switchPage('autopipeline')">
+          <span class="bottom-nav-icon">⚡</span>
+          <span>Pipeline</span>
+        </button>
+        <button class="bottom-nav-item" id="bnav-flow" onclick="switchPage('contentflow')">
+          <span class="bottom-nav-icon">📊</span>
+          <span>ContentFlow</span>
+        </button>
+        <button class="bottom-nav-item" onclick="alert('Menu drawer dibuka!')">
+          <span class="bottom-nav-icon">☰</span>
+          <span>Menu</span>
+        </button>
+      </nav>
+
+      <!-- Bottom Sheet Modal Dialog -->
+      <div class="modal-sheet-backdrop" id="bottomSheet" onclick="closeBottomSheet()">
+        <div class="bottom-sheet-panel" onclick="event.stopPropagation()">
+          <div class="sheet-handle"></div>
+          <div style="padding: 12px 18px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
+            <h4 style="font-size: 15px; font-weight: 700;" id="sheetTitle">Detail Interaktif</h4>
+            <button style="background: none; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer;" onclick="closeBottomSheet()">✕</button>
+          </div>
+          <div style="padding: 16px 18px; display: flex; flex-direction: column; gap: 12px;">
+            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+              Dialog ini tampil menempel rapi dari bawah layar pada HP (bottom sheet), sehingga mudah dioperasikan dengan jempol dan tidak menghalangi bilah browser.
+            </p>
+            <input type="text" placeholder="Catatan tambahan kurator..." style="height: 44px; background: var(--input-bg); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); padding: 0 12px; font-size: 16px;">
+          </div>
+          <div style="padding: 12px 18px 24px; border-top: 1px solid var(--border-subtle); display: flex; gap: 10px;">
+            <button class="btn-full-44" style="background: var(--surface-interactive); color: var(--text-primary); flex: 1;" onclick="closeBottomSheet()">Batal</button>
+            <button class="btn-full-44" style="background: var(--action-primary); color: var(--on-action-primary); flex: 2;" onclick="alert('Aksi tersimpan!'); closeBottomSheet();">Konfirmasi</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    function setDeviceWidth(mode) {
+      const dev = document.getElementById('deviceContainer');
+      dev.className = 'device-container';
+      const btns = document.querySelectorAll('.tester-row .tester-btn');
+      btns.forEach(b => b.classList.remove('active'));
+
+      if (mode === 'compact') dev.classList.add('mode-compact');
+      else if (mode === 'iphone') dev.classList.add('mode-iphone');
+      else if (mode === 'tablet') dev.classList.add('mode-tablet');
+      else if (mode === 'fullscreen') dev.classList.add('mode-fullscreen');
+
+      event.target.classList.add('active');
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      document.getElementById('themeBtn').innerHTML = next === 'dark' ? '🌙 Gelap' : '☀️ Terang';
+    }
+
+    function switchPage(pageKey) {
+      document.querySelectorAll('.page-view').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.page-tab-btn').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.bottom-nav-item').forEach(el => el.classList.remove('active'));
+
+      const targetView = document.getElementById('view-' + pageKey);
+      if (targetView) targetView.style.display = 'block';
+
+      // Update header title
+      const titleMap = {
+        dashboard: 'Dashboard',
+        autopipeline: 'Auto Pipeline',
+        contentflow: 'ContentFlow Hub',
+        radar: 'Radar Produk',
+        products: 'Database Produk'
+      };
+      document.getElementById('pageTitleText').innerText = titleMap[pageKey] || 'CF Studio';
+
+      // Update active tab button
+      const activeTab = Array.from(document.querySelectorAll('.page-tab-btn')).find(b => b.innerText.toLowerCase().includes(pageKey.replace('auto', '')));
+      if (activeTab) activeTab.classList.add('active');
+
+      // Update bottom nav
+      if (pageKey === 'dashboard') document.getElementById('bnav-dash')?.classList.add('active');
+      if (pageKey === 'autopipeline') document.getElementById('bnav-pipe')?.classList.add('active');
+      if (pageKey === 'contentflow') document.getElementById('bnav-flow')?.classList.add('active');
+    }
+
+    function openBottomSheet(title) {
+      document.getElementById('sheetTitle').innerText = title;
+      document.getElementById('bottomSheet').classList.add('open');
+    }
+    function closeBottomSheet() {
+      document.getElementById('bottomSheet').classList.remove('open');
+    }
+  </script>
+</body>
+</html>

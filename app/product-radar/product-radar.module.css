@@ -964,4 +964,21 @@
 @media (max-width: 640px) {
   .formulaPopover { grid-template-columns: 1fr; }
   .timelineRow { grid-template-columns: 1fr; }
+  .drawerBackdrop {
+    align-items: flex-end !important;
+    justify-content: center !important;
+  }
+  .drawerPanel {
+    width: 100vw !important;
+    max-height: 92dvh !important;
+    height: auto !important;
+    border-top-left-radius: 20px !important;
+    border-top-right-radius: 20px !important;
+    border-left: none !important;
+    border-top: 1px solid var(--border-strong) !important;
+    animation: slideUpMobile 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+  .container {
+    padding: var(--page-padding) !important;
+  }
 }

@@ -2651,9 +2651,9 @@ export default function AutoPipelinePage() {
     <div className="app-layout" style={{ display: 'flex', minHeight: '100vh', background: 'var(--canvas)' }}>
       <Sidebar />
 
-      <main className="main-content" style={{ flex: 1, minWidth: 0, overflowY: 'auto' }}>
+      <main className="main-content" style={{ flex: 1, minWidth: 0, overflowY: 'auto', overflowX: 'hidden', maxWidth: '100vw' }}>
         {/* Top Header */}
-        <header style={{
+        <header className="auto-pipeline-header" style={{
           height: 60,
           borderBottom: '1px solid var(--border-subtle)',
           background: 'var(--surface)',
@@ -2713,7 +2713,7 @@ export default function AutoPipelinePage() {
         </header>
 
         {/* Content Container (Single-Column) */}
-        <div style={{
+        <div className="auto-pipeline-container" style={{
           maxWidth: '1200px',
           margin: '0 auto',
           padding: '2rem',
@@ -2762,7 +2762,7 @@ export default function AutoPipelinePage() {
           )}
 
           {/* Hero Banner */}
-          <section style={{
+          <section className="auto-pipeline-section" style={{
             background: 'linear-gradient(135deg, var(--surface) 0%, var(--surface-raised) 100%)',
             border: '1px solid var(--border-subtle)',
             borderRadius: 'var(--radius-lg)',
@@ -2798,7 +2798,7 @@ export default function AutoPipelinePage() {
           </section>
 
           {/* Main Navigation Tabs */}
-          <div style={{
+          <div className="auto-pipeline-tabs" style={{
             display: 'flex',
             gap: '0.5rem',
             background: 'var(--surface)',
@@ -2868,7 +2868,7 @@ export default function AutoPipelinePage() {
           {activeTab === 'pipeline' && (
             <>
           {/* BARIS 1: Form Konfigurasi 1-Klik (Clean UI & Terintegrasi Preset Manager) */}
-          <section style={{
+          <section className="auto-pipeline-section" style={{
             background: 'var(--surface)',
             border: '1px solid var(--border-subtle)',
             borderRadius: 'var(--radius-lg)',
@@ -2924,7 +2924,7 @@ export default function AutoPipelinePage() {
                 <label style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
                   1. Pilih Tipe Kampanye
                 </label>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem' }}>
+                <div className="auto-pipeline-campaign-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem' }}>
                   {[
                     { key: 'product_campaign', icon: '🛍️', label: 'Video Produk', desc: 'Promosi produk katalog, showcase USP & unboxing 1-pass', color: 'var(--status-success)' },
                     { key: 'editorial_campaign', icon: '📖', label: 'Video Editorial', desc: 'Pilar brand, hook tension & storytelling edukatif 1-pass', color: 'var(--status-info)' },
@@ -2979,13 +2979,18 @@ export default function AutoPipelinePage() {
               </div>
 
               {/* STEP 2: BRAND PROFILE, PRESET VIDEO & EXECUTION MODE (DI ATAS) */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
-                gap: '1rem'
-              }}>
+              <div
+                className="auto-pipeline-field-grid"
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
+                  gap: '1rem',
+                  width: '100%',
+                  maxWidth: '100%'
+                }}
+              >
                 {/* 1. Brand Profile */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', minWidth: 0, maxWidth: '100%', width: '100%' }}>
                   <label style={{
                     fontSize: '0.82rem',
                     fontWeight: 600,
@@ -3000,6 +3005,9 @@ export default function AutoPipelinePage() {
                     value={selectedBrandId}
                     onChange={(e) => setSelectedBrandId(e.target.value)}
                     style={{
+                      width: '100%',
+                      maxWidth: '100%',
+                      minWidth: 0,
                       height: '42px',
                       boxSizing: 'border-box',
                       background: 'var(--input-bg)',
@@ -3008,7 +3016,8 @@ export default function AutoPipelinePage() {
                       padding: '0 0.85rem',
                       fontSize: '0.88rem',
                       color: 'var(--text-primary)',
-                      outline: 'none'
+                      outline: 'none',
+                      textOverflow: 'ellipsis'
                     }}
                   >
                     {brands.map(b => (
@@ -3020,7 +3029,7 @@ export default function AutoPipelinePage() {
                 </div>
 
                 {/* 2. Preset Konfigurasi Video (Preset Manager) */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', minWidth: 0, maxWidth: '100%', width: '100%' }}>
                   <label style={{
                     fontSize: '0.82rem',
                     fontWeight: 600,
@@ -3045,6 +3054,9 @@ export default function AutoPipelinePage() {
                     value={selectedPresetKey}
                     onChange={(e) => handlePresetKeyChange(e.target.value)}
                     style={{
+                      width: '100%',
+                      maxWidth: '100%',
+                      minWidth: 0,
                       height: '42px',
                       boxSizing: 'border-box',
                       background: 'var(--input-bg)',
@@ -3054,7 +3066,8 @@ export default function AutoPipelinePage() {
                       fontSize: '0.88rem',
                       fontWeight: 700,
                       color: 'var(--text-primary)',
-                      outline: 'none'
+                      outline: 'none',
+                      textOverflow: 'ellipsis'
                     }}
                   >
                     {(() => {
@@ -3109,7 +3122,7 @@ export default function AutoPipelinePage() {
                 </div>
 
                 {/* 3. Mode Eksekusi */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', minWidth: 0, maxWidth: '100%', width: '100%' }}>
                   <label style={{
                     fontSize: '0.82rem',
                     fontWeight: 600,
@@ -3121,6 +3134,9 @@ export default function AutoPipelinePage() {
                     value={executionMode}
                     onChange={(e) => setExecutionMode(e.target.value)}
                     style={{
+                      width: '100%',
+                      maxWidth: '100%',
+                      minWidth: 0,
                       height: '42px',
                       boxSizing: 'border-box',
                       background: 'var(--input-bg)',
@@ -3129,7 +3145,8 @@ export default function AutoPipelinePage() {
                       padding: '0 0.85rem',
                       fontSize: '0.88rem',
                       color: 'var(--text-primary)',
-                      outline: 'none'
+                      outline: 'none',
+                      textOverflow: 'ellipsis'
                     }}
                   >
                     <option value="full_autopilot">⚡ Full Autopilot (Langsung Produksi Video)</option>
@@ -3180,7 +3197,7 @@ export default function AutoPipelinePage() {
                 </div>
 
                 {/* 4 Specs Badges */}
-                <div style={{
+                <div className="auto-pipeline-specs-grid" style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
                   gap: '0.75rem'

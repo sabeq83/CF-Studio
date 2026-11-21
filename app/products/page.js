@@ -1450,7 +1450,7 @@ export default function ProductDatabasePage() {
                 )}
               </div>
 
-              <div style={{
+              <div className="product-catalog-grid" style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))',
                 gap: '18px'

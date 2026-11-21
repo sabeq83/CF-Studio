@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.57.8 — Pemolesan Layout Mobile Tahap 2: Prioritas 1 & 2 (21/11/2026)
+- Dashboard (/dashboard): Padding semantik mobile, 4 metrik eksekutif 2 kolom, quick launchpad 2 kolom sentuh 44px, recent items & progress publikasi 1 kolom vertikal
+- Auto Pipeline (/auto-pipeline): Header fleksibel anti-overflow, form section responsif, proteksi field Brand, Preset Video, dan Mode Eksekusi 1 kolom penuh di mobile, opsi select text-overflow ellipsis, dan tab navigasi vertikal di layar HP
+- ContentFlow Hub (/content-flow): Filter bar multi-level 1 kolom di HP, kartu video feed adaptif vertikal, dan bilah aksi massal melayang di atas bilah bawah navigasi
+- Radar Produk (/product-radar): Filter bar kurasi chip responsif dan drawer detail kandidat TeleRadar otomatis menjadi bottom sheet di layar <= 640px
+- Database Produk (/products): Grid katalog produk anti-bocor horizontal dan modal dialog tambah/edit produk & ganti foto AI terkonversi menjadi bottom sheet
+
 ## V2.57.7 — Fondasi Bersama Layout Mobile CF Studio (21/11/2026)
 - Tiga breakpoint responsif: Desktop (>1024px utuh), Tablet (641-1024px), dan HP (≤640px)
 - Komponen MobileNav bersama di dalam Sidebar: Bilah Atas (52px), Drawer menu akordeon (100dvh), dan Bilah Bawah (56px) 4 tujuan utama
