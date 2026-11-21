@@ -11,6 +11,13 @@
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
   --sidebar-w: 260px;
   --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --top-nav-h: 52px;
+  --bottom-nav-h: 56px;
+  --page-padding: 32px;
+  --card-padding: 24px;
+  --modal-padding: 28px;
+  --header-gap: 32px;
+  --header-title-size: 1.8rem;
   --canvas: #080c14;
   --sidebar: #0c121e;
   --surface: #101827;
@@ -122,6 +129,16 @@
   --btn-bulk-enrich-text: #ffffff;
   --btn-bulk-photo-bg: linear-gradient(135deg, #ffa502 0%, #ff7f50 100%);
   --btn-bulk-photo-text: #ffffff;
+}
+
+@media (max-width: 640px) {
+  :root {
+    --page-padding: 16px;
+    --card-padding: 16px;
+    --modal-padding: 16px;
+    --header-gap: 16px;
+    --header-title-size: clamp(1.25rem, 5vw, 1.45rem);
+  }
 }
 
 [data-theme='light'] {

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useState, useEffect, Suspense, useMemo } from 'react';
 import ThemeToggle from './ThemeToggle';
 import ContentFlowLogo from './ContentFlowLogo';
+import MobileNav from './MobileNav';
 import { menuKeyMap, navItems, PLANNING_SECTION_HREFS } from '../../lib/sidebar-nav';
 
 function getSectionForPath(pathname, sections) {
@@ -119,7 +120,8 @@ function SidebarContent() {
     : [];
 
   return (
-    <aside className="sidebar">
+    <>
+      <aside className="sidebar">
       <div className="sidebar-brand" style={{ padding: '16px 14px', borderBottom: '1px solid var(--border)' }}>
         <Link href="/dashboard" style={{ textDecoration: 'none', display: 'block' }}>
           <ContentFlowLogo variant="horizontal" size="sm" showTagline={true} />
@@ -341,6 +343,16 @@ function SidebarContent() {
         )}
       </div>
     </aside>
+
+    <MobileNav
+      user={user}
+      groupedSections={groupedSections}
+      pathname={pathname}
+      currentAccount={currentAccount}
+      userBrandAccounts={userBrandAccounts}
+      handleLogout={handleLogout}
+    />
+  </>
   );
 }
 

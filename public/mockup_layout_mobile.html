@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Mockup Layout Mobile CF Studio — Tahap 1 Fondasi Bersama</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    /* MAKNA Flow Semantic CSS Tokens (Disalin langsung dari app/theme.css) */
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --sidebar-w: 260px;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --overlay-backdrop: rgba(2, 6, 14, 0.78);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --link-hover: #a5f3fc;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.6);
+
+      /* Token Skala Mobile */
+      --top-nav-h: 52px;
+      --bottom-nav-h: 56px;
+      --page-padding: 16px;
+      --card-padding: 16px;
+      --modal-padding: 18px;
+      --header-gap: 16px;
+      --header-title-size: clamp(1.25rem, 5vw, 1.45rem);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --input-bg: #ffffff;
+      --overlay-subtle: rgba(30, 41, 59, 0.08);
+      --overlay-backdrop: rgba(15, 23, 42, 0.54);
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --text-disabled: #8794a6;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --link: #075ea8;
+      --link-hover: #064b86;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+      --shadow-modal: 0 26px 80px rgba(31, 45, 61, 0.22);
+    }
+
+    /* Reset dasar */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: #020408;
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0;
+      margin: 0;
+      overflow-x: hidden;
+    }
+
+    /* Toolbar kontrol penguji (di atas simulator) */
+    .tester-toolbar {
+      width: 100%;
+      background: #0d1522;
+      border-bottom: 1px solid #23354d;
+      padding: 10px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      z-index: 2000;
+      font-size: 13px;
+    }
+    .tester-toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .tester-badge {
+      background: #2dd4bf20;
+      color: #2dd4bf;
+      border: 1px solid #2dd4bf50;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .tester-btn {
+      background: #1a273b;
+      border: 1px solid #324765;
+      color: #f4f7fb;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .tester-btn:hover {
+      background: #23354d;
+    }
+    .tester-btn.active {
+      background: #2dd4bf;
+      color: #042f2e;
+      border-color: #2dd4bf;
+      font-weight: 700;
+    }
+
+    /* Pembungkus Simulator */
+    .simulator-wrapper {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      padding: 20px 10px;
+      flex: 1;
+    }
+
+    /* Frame Simulasi HP */
+    .device-container {
+      width: 100%;
+      max-width: 412px; /* Default Pixel / modern phone */
+      height: 860px;
+      max-height: calc(100vh - 80px);
+      background: var(--canvas);
+      border: 2px solid #2a3a50;
+      border-radius: 36px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 0 10px #131b26;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      transition: max-width 0.3s ease;
+    }
+
+    /* Mode Layar Penuh Responsif (menyerupai HP sungguhan saat dibuka di HP) */
+    .device-container.mode-fullscreen {
+      max-width: 100% !important;
+      height: 100vh !important;
+      max-height: 100vh !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+    }
+    .device-container.mode-iphone { max-width: 390px; }
+    .device-container.mode-compact { max-width: 360px; }
+    .device-container.mode-tablet { max-width: 768px; }
+
+    /* ===== BILAH ATAS (TOP BAR - 52px) ===== */
+    .mobile-top-bar {
+      height: var(--top-nav-h);
+      background: var(--sidebar);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      flex-shrink: 0;
+    }
+    .brand-brandmark {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+    .brand-logo-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #00D2FF 0%, #2563EB 50%, #7C3AED 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+      flex-shrink: 0;
+    }
+    .brand-logo-icon svg {
+      width: 16px;
+      height: 16px;
+      fill: #ffffff;
+    }
+    .brand-title-wrap {
+      display: flex;
+      flex-direction: column;
+    }
+    .brand-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+    .brand-subtitle {
+      font-size: 10px;
+      color: var(--action-primary);
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    /* Tombol Menu Bilah Atas */
+    .menu-trigger-btn {
+      height: 44px;
+      min-width: 44px;
+      padding: 0 12px;
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .menu-trigger-btn:active {
+      transform: scale(0.96);
+      background: var(--surface-hover);
+    }
+    .menu-trigger-icon {
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    /* ===== AREA KONTEN (MAIN SCROLLABLE CONTENT) ===== */
+    .mobile-main-content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: var(--page-padding);
+      padding-bottom: calc(var(--bottom-nav-h) + 24px);
+      -webkit-overflow-scrolling: touch;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .page-header {
+      margin-bottom: 4px;
+    }
+    .page-header h2 {
+      font-size: var(--header-title-size);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.25;
+      margin-bottom: 4px;
+    }
+    .page-header p {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    /* Status Chip Bar */
+    .status-chip-row {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .status-chip {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .status-chip.active {
+      background: var(--status-info-soft);
+      border-color: var(--status-info);
+      color: var(--status-info);
+    }
+
+    /* Kartu Metrik (Stats Grid - 2 Kolom Pengecualian) */
+    .mock-stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .mock-stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .mock-stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .mock-stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+    }
+    .mock-stat-badge {
+      font-size: 10px;
+      color: var(--status-success);
+      font-weight: 600;
+    }
+
+    /* Kartu Standar Konten (1 Kolom di HP) */
+    .mock-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: var(--card-padding);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .mock-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .mock-card-title {
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-action-primary {
+      height: 44px;
+      min-width: 44px;
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 16px;
+      transition: all var(--transition);
+      box-shadow: 0 2px 8px rgba(45, 212, 191, 0.25);
+    }
+    .btn-action-primary:active {
+      transform: scale(0.98);
+      background: var(--action-primary-hover);
+    }
+
+    /* Kalender 7 Kolom (Pengecualian Pelindung Grid) */
+    .calendar-container {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+      gap: 4px;
+      margin-top: 8px;
+    }
+    .cal-day-header {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 4px 0;
+    }
+    .cal-cell {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 6px 2px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      min-height: 44px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+    }
+    .cal-cell.today {
+      border-color: var(--action-primary);
+      background: var(--surface-interactive);
+      color: var(--action-primary);
+      font-weight: 700;
+    }
+    .cal-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--action-primary);
+    }
+
+    /* Tabel dengan Horizontal Scroll Indicator */
+    .table-scroll-wrapper {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+    .table-hint {
+      padding: 6px 12px;
+      background: var(--surface-raised);
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .table-scroll-container {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    table.mock-table {
+      width: 100%;
+      min-width: 540px; /* Tabel sengaja lebar untuk membuktikan wadah scroll berfungsi */
+      border-collapse: collapse;
+      font-size: 12px;
+      text-align: left;
+    }
+    table.mock-table th {
+      background: var(--surface-raised);
+      padding: 10px 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    table.mock-table td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+    }
+    .badge-status {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .badge-success { background: var(--status-success-soft); color: var(--status-success); }
+    .badge-warning { background: var(--status-warning-soft); color: var(--status-warning); }
+
+    /* ===== BILAH BAWAH (BOTTOM NAV - 56px) ===== */
+    .mobile-bottom-bar {
+      height: var(--bottom-nav-h);
+      background: var(--sidebar);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.2);
+    }
+    .bottom-nav-item {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      background: none;
+      border: none;
+      transition: all 0.15s ease;
+      min-height: 44px;
+    }
+    .bottom-nav-item:active {
+      background: var(--surface-interactive);
+    }
+    .bottom-nav-item.active {
+      color: var(--action-primary);
+    }
+    .bottom-nav-icon {
+      font-size: 17px;
+      line-height: 1;
+    }
+
+    /* ===== DRAWER NAVIGASI HP (SLIDE-IN 100dvh) ===== */
+    .drawer-backdrop {
+      position: absolute;
+      inset: 0;
+      background: var(--overlay-backdrop);
+      backdrop-filter: blur(4px);
+      z-index: 500;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .drawer-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .nav-drawer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 82%;
+      max-width: 320px;
+      background: var(--sidebar);
+      border-right: 1px solid var(--border-subtle);
+      z-index: 501;
+      transform: translateX(-100%);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-modal);
+    }
+    .nav-drawer.open {
+      transform: translateX(0);
+    }
+
+    .drawer-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .drawer-close-btn {
+      width: 44px;
+      height: 44px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .drawer-close-btn:active {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+    }
+
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Accordion Section */
+    .drawer-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      padding: 8px 12px 4px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+    .drawer-section-title:active {
+      background: var(--surface-interactive);
+    }
+    .drawer-nav-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin-top: 4px;
+    }
+    .drawer-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-decoration: none;
+      min-height: 44px;
+      transition: all 0.15s ease;
+    }
+    .drawer-nav-item:active {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+    }
+    .drawer-nav-item.active {
+      background: var(--surface-interactive);
+      color: var(--action-primary);
+      font-weight: 700;
+    }
+    .drawer-nav-item .icon {
+      font-size: 15px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .drawer-footer {
+      padding: 14px 16px;
+      border-top: 1px solid var(--border-subtle);
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .drawer-user-info {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .drawer-user-name {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    /* ===== MODAL LEMBAR BAWAH (BOTTOM SHEET) ===== */
+    .modal-backdrop-preview {
+      position: absolute;
+      inset: 0;
+      background: var(--overlay-backdrop);
+      backdrop-filter: blur(4px);
+      z-index: 600;
+      display: flex;
+      align-items: flex-end; /* Nempel di bawah pada mobile */
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .modal-backdrop-preview.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .bottom-sheet-modal {
+      width: 100%;
+      max-height: 92dvh;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-bottom: none;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      transform: translateY(100%);
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: var(--shadow-modal);
+    }
+    .modal-backdrop-preview.open .bottom-sheet-modal {
+      transform: translateY(0);
+    }
+
+    /* Handle drag bar di atas sheet */
+    .sheet-handle-bar {
+      width: 40px;
+      height: 4px;
+      background: var(--border-strong);
+      border-radius: 999px;
+      margin: 10px auto 4px auto;
+    }
+
+    .modal-header {
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .modal-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .modal-close-btn {
+      width: 44px;
+      height: 44px;
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: var(--text-muted);
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-close-btn:active {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+    }
+
+    .modal-body {
+      padding: 16px 18px;
+      overflow-y: auto;
+      max-height: 60vh;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .form-input-control {
+      height: 44px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0 12px;
+      color: var(--text-primary);
+      font-size: 16px; /* Mencegah auto-zoom iPhone */
+      outline: none;
+      font-family: var(--font-sans);
+    }
+    .form-input-control:focus {
+      border-color: var(--action-primary);
+    }
+
+    .modal-footer {
+      padding: 12px 18px calc(12px + env(safe-area-inset-bottom, 0px)) 18px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      gap: 10px;
+      background: var(--surface-raised);
+    }
+    .btn-secondary {
+      height: 44px;
+      min-width: 44px;
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 0 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOOLBAR PENGUJI (Untuk beralih ukuran & tema langsung di browser) -->
+  <header class="tester-toolbar">
+    <div class="tester-toolbar-left">
+      <span class="tester-badge">MOCKUP LAYOUT MOBILE — TAHAP 1</span>
+      <span style="color: #94a3b8; font-size: 12px;">Pilih Lebar Layar:</span>
+      <button class="tester-btn" onclick="setDeviceMode('compact')">360px (HP Kecil)</button>
+      <button class="tester-btn active" onclick="setDeviceMode('iphone')">390px (iPhone / Modern)</button>
+      <button class="tester-btn" onclick="setDeviceMode('tablet')">768px (Tablet)</button>
+      <button class="tester-btn" onclick="setDeviceMode('fullscreen')">Layar Penuh (100%)</button>
+    </div>
+    <div>
+      <button class="tester-btn" id="themeToggleBtn" onclick="toggleTheme()">
+        🌙 Mode: Gelap (Dark)
+      </button>
+    </div>
+  </header>
+
+  <!-- PEMBUNGKUS SIMULASI -->
+  <main class="simulator-wrapper">
+    <div class="device-container mode-iphone" id="deviceContainer">
+
+      <!-- 1. BILAH ATAS (TOP BAR - 52px) -->
+      <nav class="mobile-top-bar" aria-label="Bilah Atas Mobile">
+        <a href="#dashboard" class="brand-brandmark">
+          <div class="brand-logo-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm4 3v6l6-3-6-3z"/>
+            </svg>
+          </div>
+          <div class="brand-title-wrap">
+            <span class="brand-title">CF Studio</span>
+            <span class="brand-subtitle">● Cluster Online</span>
+          </div>
+        </a>
+
+        <!-- Tombol Menu Bilah Atas: Ikon + Teks (Bukan burger polos) -->
+        <button class="menu-trigger-btn" onclick="openDrawer()" aria-label="Buka Menu Navigasi">
+          <span class="menu-trigger-icon">☰</span>
+          <span>Menu</span>
+        </button>
+      </nav>
+
+      <!-- 2. KONTEN UTAMA (SCROLLABLE AREA) -->
+      <section class="mobile-main-content">
+        <div class="page-header">
+          <h2>Dashboard Produksi</h2>
+          <p>Pantauan orkestrasi konten otomatis &amp; status pipeline.</p>
+        </div>
+
+        <div class="status-chip-row">
+          <span class="status-chip active">● Semua Saluran (12)</span>
+          <span class="status-chip">⚡ Pipeline Aktif (4)</span>
+          <span class="status-chip">📡 Radar 14 Baru</span>
+          <span class="status-chip">🎬 Remotion Idle</span>
+        </div>
+
+        <!-- Kartu Statistik (2 Kolom Pengecualian di Layar Sempit) -->
+        <div class="mock-stats-grid">
+          <div class="mock-stat-card">
+            <span class="mock-stat-label">Total Video Bulan Ini</span>
+            <span class="mock-stat-value">148</span>
+            <span class="mock-stat-badge">↑ 18% dari target</span>
+          </div>
+          <div class="mock-stat-card">
+            <span class="mock-stat-label">Antrean Render</span>
+            <span class="mock-stat-value">3</span>
+            <span class="mock-stat-badge" style="color: var(--status-info);">● 2 Worker Aktif</span>
+          </div>
+        </div>
+
+        <!-- Kartu 1: Aksi Uji Modal Bottom Sheet -->
+        <article class="mock-card">
+          <div class="mock-card-header">
+            <h3 class="mock-card-title">📱 Uji Lembar Bawah (Modal Bottom Sheet)</h3>
+          </div>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+            Pada HP (&le;640px), modal tidak lagi melayang di tengah layar yang sempit, melainkan menempel rapi dari bawah (bottom sheet) dengan sudut atas membulat.
+          </p>
+          <button class="btn-action-primary" onclick="openModal()">
+            <span>✨ Buka Modal Uji Lembar Bawah</span>
+          </button>
+        </article>
+
+        <!-- Kartu 2: Kalender 7 Hari (Pengecualian Pelindung Grid) -->
+        <article class="mock-card">
+          <div class="mock-card-header">
+            <h3 class="mock-card-title">🗓️ Jadwal Rilis (7 Hari Tetap 7 Kolom)</h3>
+          </div>
+          <p style="font-size: 12px; color: var(--text-muted);">
+            Aturan pelindung grid inline mengecualikan kalender <code>repeat(7, 1fr)</code> agar tidak menumpuk menjadi 1 kolom vertikal.
+          </p>
+          <div class="calendar-container">
+            <div class="cal-day-header">Sen</div>
+            <div class="cal-day-header">Sel</div>
+            <div class="cal-day-header">Rab</div>
+            <div class="cal-day-header">Kam</div>
+            <div class="cal-day-header">Jum</div>
+            <div class="cal-day-header">Sab</div>
+            <div class="cal-day-header">Min</div>
+
+            <div class="cal-cell"><span>17</span></div>
+            <div class="cal-cell"><span>18</span><div class="cal-dot"></div></div>
+            <div class="cal-cell"><span>19</span><div class="cal-dot"></div></div>
+            <div class="cal-cell"><span>20</span></div>
+            <div class="cal-cell today"><span>21</span><div class="cal-dot"></div></div>
+            <div class="cal-cell"><span>22</span></div>
+            <div class="cal-cell"><span>23</span></div>
+          </div>
+        </article>
+
+        <!-- Kartu 3: Tabel Lebar dengan Indikator Scroll Mendatar -->
+        <article class="mock-card">
+          <div class="mock-card-header">
+            <h3 class="mock-card-title">📊 Tabel Konten Terkini (Bebas Geser Bocor)</h3>
+          </div>
+          <p style="font-size: 12px; color: var(--text-muted);">
+            Tabel dibungkus wadah gulir lokal. Halaman utama HP tidak akan pernah bergoyang atau bergeser ke samping.
+          </p>
+          <div class="table-scroll-wrapper">
+            <div class="table-hint">
+              <span>↔️</span>
+              <span>Geser tabel ke samping untuk melihat kolom lengkap:</span>
+            </div>
+            <div class="table-scroll-container">
+              <table class="mock-table">
+                <thead>
+                  <tr>
+                    <th>ID Klip</th>
+                    <th>Judul Topik Konten</th>
+                    <th>Brand / Akun</th>
+                    <th>Format</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>#CF-4091</code></td>
+                    <td>Peredam Gema Studio Podcast</td>
+                    <td>@ruangakustik</td>
+                    <td>Reels 9:16</td>
+                    <td><span class="badge-status badge-success">Selesai</span></td>
+                    <td><button class="tester-btn" style="padding: 4px 8px;">Lihat</button></td>
+                  </tr>
+                  <tr>
+                    <td><code>#CF-4092</code></td>
+                    <td>Isolasi Panas Atap Pabrik</td>
+                    <td>@solusithermal</td>
+                    <td>Shorts 9:16</td>
+                    <td><span class="badge-status badge-warning">Rendering</span></td>
+                    <td><button class="tester-btn" style="padding: 4px 8px;">Pantau</button></td>
+                  </tr>
+                  <tr>
+                    <td><code>#CF-4093</code></td>
+                    <td>Resep Roti Lembut Tahan 4 Hari</td>
+                    <td>@nutribake</td>
+                    <td>TikTok 9:16</td>
+                    <td><span class="badge-status badge-success">Terbit</span></td>
+                    <td><button class="tester-btn" style="padding: 4px 8px;">Metrik</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- 3. BILAH BAWAH (BOTTOM NAVIGATION - 56px) -->
+      <nav class="mobile-bottom-bar" aria-label="Bilah Navigasi Bawah">
+        <button class="bottom-nav-item active" onclick="alert('Navigasi: Dashboard')">
+          <span class="bottom-nav-icon">◈</span>
+          <span>Dashboard</span>
+        </button>
+        <button class="bottom-nav-item" onclick="alert('Navigasi: Auto Pipeline')">
+          <span class="bottom-nav-icon">⚡</span>
+          <span>Pipeline</span>
+        </button>
+        <button class="bottom-nav-item" onclick="alert('Navigasi: ContentFlow Hub')">
+          <span class="bottom-nav-icon">📊</span>
+          <span>ContentFlow</span>
+        </button>
+        <button class="bottom-nav-item" onclick="openDrawer()">
+          <span class="bottom-nav-icon">☰</span>
+          <span>Menu</span>
+        </button>
+      </nav>
+
+      <!-- 4. DRAWER MENU MOBILE (SLIDE-IN DARI KIRI) -->
+      <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
+      <aside class="nav-drawer" id="navDrawer" aria-label="Menu Navigasi Mobile">
+        <div class="drawer-header">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div class="brand-logo-icon" style="width: 24px; height: 24px;">
+              <svg viewBox="0 0 24 24" style="width: 14px; height: 14px;"><path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm4 3v6l6-3-6-3z"/></svg>
+            </div>
+            <span style="font-weight: 700; font-size: 14px;">Navigasi CF Studio</span>
+          </div>
+          <button class="drawer-close-btn" onclick="closeDrawer()" aria-label="Tutup Menu">✕</button>
+        </div>
+
+        <div class="drawer-body">
+          <div style="padding: 4px 10px; background: var(--surface-raised); border-radius: 6px; font-size: 11px; color: var(--text-muted);">
+            🏢 Tenant: <strong>Solusi Akustik</strong> (@ruangakustik)
+          </div>
+
+          <!-- Section 1: Dashboard -->
+          <a href="#dashboard" class="drawer-nav-item active" onclick="closeDrawer()">
+            <span class="icon">◈</span>
+            <span>Dashboard</span>
+          </a>
+
+          <!-- Section 2: PLANNING -->
+          <div>
+            <div class="drawer-section-title" onclick="toggleAccordion('sec-planning')">
+              <span>PLANNING</span>
+              <span id="icon-planning">▾</span>
+            </div>
+            <div class="drawer-nav-list" id="sec-planning">
+              <a href="#planner" class="drawer-nav-item" onclick="closeDrawer()"><span class="icon">🗓️</span><span>Content Planner</span></a>
+              <a href="#radar" class="drawer-nav-item" onclick="closeDrawer()"><span class="icon">📡</span><span>Radar Produk</span></a>
+              <a href="#products" class="drawer-nav-item" onclick="closeDrawer()"><span class="icon">📦</span><span>Product Database</span></a>
+              <a href="#presets" class="drawer-nav-item" onclick="closeDrawer()"><span class="icon">🎛️</span><span>Preset Manager</span></a>
+            </div>
+          </div>
+
+          <!-- Section 3: WORKFLOW -->
+          <div>
+            <div class="drawer-section-title" onclick="toggleAccordion('sec-workflow')">
+              <span>WORKFLOW</span>
+              <span id="icon-workflow">▾</span>
+            </div>
+            <div class="drawer-nav-list" id="sec-workflow">
+              <a href="#pipeline" class="drawer-nav-item" onclick="closeDrawer()"><span class="icon">⚡</span><span>Auto Pipeline</span></a>
+              <a href="#threads" class="drawer-nav-item" onclick="closeDrawer()"><span class="icon">🧵</span><span>Threads Labs</span></a>
+              <a href="#recampaign" class="drawer-nav-item" onclick="closeDrawer()"><span class="icon">🎬</span><span>RE Campaign</span></a>
+              <a href="#recipelabs" class="drawer-nav-item" onclick="closeDrawer()"><span class="icon">🍳</span><span>Recipe Labs</span></a>
+            </div>
+          </div>
+
+          <!-- Section 4: PUBLISHING -->
+          <div>
+            <div class="drawer-section-title" onclick="toggleAccordion('sec-publishing')">
+              <span>PUBLISHING</span>
+              <span id="icon-publishing">▾</span>
+            </div>
+            <div class="drawer-nav-list" id="sec-publishing">
+              <a href="#contentflow" class="drawer-nav-item" onclick="closeDrawer()"><span class="icon">📊</span><span>ContentFlow Hub</span></a>
+              <a href="#exporter" class="drawer-nav-item" onclick="closeDrawer()"><span class="icon">📱</span><span>Recipe Exporter</span></a>
+            </div>
+          </div>
+
+          <!-- Section 5: SYSTEM -->
+          <div>
+            <div class="drawer-section-title" onclick="toggleAccordion('sec-system')">
+              <span>SYSTEM</span>
+              <span id="icon-system">▾</span>
+            </div>
+            <div class="drawer-nav-list" id="sec-system">
+              <a href="#settings" class="drawer-nav-item" onclick="closeDrawer()"><span class="icon">⚙</span><span>Settings</span></a>
+              <a href="#users" class="drawer-nav-item" onclick="closeDrawer()"><span class="icon">👥</span><span>User Management</span></a>
+            </div>
+          </div>
+        </div>
+
+        <div class="drawer-footer">
+          <div class="drawer-user-info">
+            Masuk sebagai: <span class="drawer-user-name">masbenu</span> (superadmin)
+          </div>
+          <button class="tester-btn" style="width: 100%; justify-content: center; color: var(--status-danger); border-color: var(--status-danger-soft);" onclick="alert('Logout demo')">
+            🚪 Keluar / Logout
+          </button>
+        </div>
+      </aside>
+
+      <!-- 5. MODAL BOTTOM SHEET PREVIEW -->
+      <div class="modal-backdrop-preview" id="modalBackdrop" onclick="closeModal(event)">
+        <div class="bottom-sheet-modal" id="modalSheet" onclick="event.stopPropagation()">
+          <div class="sheet-handle-bar"></div>
+          <div class="modal-header">
+            <h4 class="modal-title">Form Input Mobile</h4>
+            <button class="modal-close-btn" onclick="closeModal()" aria-label="Tutup Modal">✕</button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label class="form-label">Nama Proyek Konten</label>
+              <input type="text" class="form-input-control" value="Revisi Hook Akustik Ruang Tamu" placeholder="Masukkan judul...">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Sudut Pembahasan (Angle)</label>
+              <input type="text" class="form-input-control" value="Masalah Gema Ruangan saat WFH" placeholder="Tentukan angle...">
+            </div>
+            <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
+              Ukuran teks form diatur 16px untuk mencegah browser Safari di iOS melakukan pembesaran otomatis (auto-zoom) yang mengganggu navigasi.
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal()">Batal</button>
+            <button class="btn-action-primary" style="flex: 1;" onclick="alert('Perubahan disimpan!'); closeModal();">Simpan Konfigurasi</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    // State Drawer
+    function openDrawer() {
+      document.getElementById('drawerBackdrop').classList.add('open');
+      document.getElementById('navDrawer').classList.add('open');
+    }
+    function closeDrawer() {
+      document.getElementById('drawerBackdrop').classList.remove('open');
+      document.getElementById('navDrawer').classList.remove('open');
+    }
+
+    // State Modal
+    function openModal() {
+      document.getElementById('modalBackdrop').classList.add('open');
+    }
+    function closeModal(e) {
+      document.getElementById('modalBackdrop').classList.remove('open');
+    }
+
+    // Accordion Toggle
+    function toggleAccordion(id) {
+      const el = document.getElementById(id);
+      const isHidden = el.style.display === 'none';
+      el.style.display = isHidden ? 'flex' : 'none';
+    }
+
+    // Toggle Mode Gelap / Terang
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      document.getElementById('themeToggleBtn').innerHTML = next === 'dark' 
+        ? '🌙 Mode: Gelap (Dark)' 
+        : '☀️ Mode: Terang (Light)';
+    }
+
+    // Beralih Ukuran Simulasi HP
+    function setDeviceMode(mode) {
+      const dev = document.getElementById('deviceContainer');
+      dev.className = 'device-container';
+      
+      const buttons = document.querySelectorAll('.tester-toolbar .tester-btn');
+      buttons.forEach(b => b.classList.remove('active'));
+
+      if (mode === 'compact') {
+        dev.classList.add('mode-compact');
+      } else if (mode === 'iphone') {
+        dev.classList.add('mode-iphone');
+      } else if (mode === 'tablet') {
+        dev.classList.add('mode-tablet');
+      } else if (mode === 'fullscreen') {
+        dev.classList.add('mode-fullscreen');
+      }
+
+      // Highlight active button
+      event.target.classList.add('active');
+    }
+
+    // Tutup saat tombol Esc ditekan
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeDrawer();
+        closeModal();
+      }
+    });
+  </script>
+</body>
+</html>

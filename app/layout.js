@@ -1,6 +1,12 @@
 import './globals.css';
 import './theme.css';
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+};
+
 export const metadata = {
   metadataBase: new URL('https://contentflow-stg.ast402.my.id'),
   title: {
