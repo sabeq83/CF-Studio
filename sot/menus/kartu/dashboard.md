@@ -1,10 +1,16 @@
 # Kartu Menu: Dashboard
 
-Terakhir dicek: 17 November 2026 · Versi aplikasi: v2.50.0
+Terakhir dicek: 21 November 2026 · Versi aplikasi: v2.57.7
 Alamat: `/dashboard` · Kelompok: SYSTEM · Kunci izin menu: (semua pengguna)
 
 ## Fungsi
 Halaman pembuka setelah login. Menyajikan ringkasan aktivitas produksi: job terbaru, status antrean, statistik konten, dan notifikasi penting. Tidak ada tindakan produksi dari halaman ini — hanya visibilitas.
+
+## Tata Letak Mobile & Responsif (Tahap 1 Fondasi Bersama)
+- Pada desktop (>1024px), sidebar desktop tetap berada di sisi kiri (260px) tanpa perubahan.
+- Pada HP (≤640px) dan tablet (641-1024px), sidebar desktop disembunyikan dan digantikan dengan MobileNav (Bilah Atas 52px dengan tombol "Menu" membuka drawer navigasi 100dvh).
+- Pada HP (≤640px), tersedia bilah bawah navigasi cepat (56px) untuk 4 aksi utama: Dashboard, Auto Pipeline, ContentFlow Hub, dan Menu.
+- Grid statistik otomatis tersusun 2 kolom di HP dan kartu metrik/tabel tersusun 1 kolom tanpa kebocoran geser samping (zero horizontal scroll leak).
 
 ## Alur pakai
 1. Buka setelah login; halaman muat otomatis data terbaru.
