@@ -500,7 +500,7 @@ export default function VisualIdentityStudioPage() {
   return (
     <div className="app-layout">
       <Sidebar />
-      <main className="main-content">
+      <main className="main-content page-content-responsive">
         <div className="page-container">
           {/* Header */}
           <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 14 }}>

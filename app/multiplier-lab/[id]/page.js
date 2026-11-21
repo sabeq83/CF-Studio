@@ -732,8 +732,8 @@ function CampaignDetailPageContent() {
   return (
     <div className="app-layout">
       <Sidebar />
-      <main className="main-content">
-        <div style={{ padding: '24px 32px', maxWidth: '1200px', margin: '0 auto' }}>
+      <main className="main-content page-content-responsive">
+        <div className="page-container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
         
         {toast && (
           <div className={`toast ${toast.type === 'error' ? 'toast-error' : 'toast-success'}`}>

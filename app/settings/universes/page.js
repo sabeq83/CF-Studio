@@ -484,7 +484,7 @@ export default function UniverseManagerPage() {
   return (
     <div className="app-layout">
       <Sidebar />
-      <main className="main-content">
+      <main className="main-content page-content-responsive">
         <div className="page-container">
         <div className="page-header" style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
@@ -1210,12 +1210,12 @@ export default function UniverseManagerPage() {
 
         {/* Tahap 3.6: Starter Picker Modal */}
         {showStarterPicker && (
-          <div style={{
+          <div className="modal-backdrop-responsive" style={{
             position: 'fixed', inset: 0, background: 'var(--overlay-backdrop)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             zIndex: 1000, padding: '20px'
           }}>
-            <div style={{
+            <div className="modal-dialog-responsive" style={{
               background: 'var(--bg-secondary)', borderRadius: '16px', padding: '32px',
               width: '100%', maxWidth: '800px', maxHeight: '90vh',
               overflowY: 'auto', border: '1px solid #2d2d4e'

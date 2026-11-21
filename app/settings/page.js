@@ -1081,7 +1081,7 @@ export default function SettingsPage() {
   return (
     <div className="app-layout">
       <Sidebar />
-      <main className="main-content">
+      <main className="main-content page-content-responsive">
         <div className="page-container">
           <div className="page-header" style={{ marginBottom: '20px' }}>
             <h2>⚙ Settings</h2>

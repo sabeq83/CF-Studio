@@ -380,7 +380,7 @@ export default function DeconstructPage() {
     <div className="app-layout">
       <Sidebar />
       
-      <main className="main-content">
+      <main className="main-content page-content-responsive">
         <div className="page-container">
         {/* Header Section */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
@@ -766,7 +766,7 @@ export default function DeconstructPage() {
 
         {/* Modal: Simpan URL */}
         {showSaveModal && (
-          <div style={{
+          <div className="modal-backdrop-responsive" style={{
             position: 'fixed',
             top: 0,
             left: 0,
@@ -779,11 +779,12 @@ export default function DeconstructPage() {
             justifyContent: 'center',
             zIndex: 999
           }}>
-            <div style={{
+            <div className="modal-dialog-responsive" style={{
               background: 'var(--overlay-subtle)',
               border: '1px solid var(--border)',
               borderRadius: 'var(--radius-sm)',
               width: 500,
+              maxWidth: '100%',
               padding: 24,
               boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)'
             }}>
@@ -985,7 +986,7 @@ export default function DeconstructPage() {
 
         {/* Modal: Konfirmasi Enqueue */}
         {showEnqueueModal && (
-          <div style={{
+          <div className="modal-backdrop-responsive" style={{
             position: 'fixed',
             top: 0,
             left: 0,
@@ -998,11 +999,12 @@ export default function DeconstructPage() {
             justifyContent: 'center',
             zIndex: 999
           }}>
-            <div style={{
+            <div className="modal-dialog-responsive" style={{
               background: 'var(--overlay-subtle)',
               border: '1px solid var(--border)',
               borderRadius: 'var(--radius-sm)',
               width: 440,
+              maxWidth: '100%',
               padding: 24,
               boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)'
             }}>

@@ -1881,7 +1881,7 @@ return (
     <div className="app-layout">
       <Sidebar />
 
-      <main className="main-content">
+      <main className="main-content page-content-responsive">
         <div className="page-container">
         {toast && (
           <div style={{

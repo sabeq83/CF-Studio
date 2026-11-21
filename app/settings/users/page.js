@@ -212,7 +212,7 @@ export default function UserManagementPage() {
   return (
     <div className="app-container">
       <Sidebar />
-      <main className="main-content">
+      <main className="main-content page-content-responsive">
         <div className="page-container">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px' }}>
             <div>
@@ -330,14 +330,14 @@ export default function UserManagementPage() {
 
           {/* Edit User Modal */}
           {isModalOpen && (
-            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'var(--overlay-backdrop)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
-              <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '650px', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div className="modal-backdrop-responsive" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'var(--overlay-backdrop)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
+              <div className="modal-dialog-responsive" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '650px', maxHeight: '90vh', overflowY: 'auto' }}>
                 <h2 style={{ fontSize: '1.4rem', margin: '0 0 20px 0', color: 'var(--text-primary)' }}>
                   {editingUser ? `✏️ Edit Pengguna: ${editingUser.username}` : '➕ Tambah Pengguna Baru'}
                 </h2>
 
                 <form onSubmit={handleSubmit}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                  <div className="form-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                     <div>
                       <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>Username</label>
                       <input
@@ -438,8 +438,8 @@ export default function UserManagementPage() {
 
           {/* Dedicated Password Change Modal */}
           {isPasswordModalOpen && passwordTargetUser && (
-            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'var(--overlay-backdrop)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1010, padding: '20px' }}>
-              <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '450px' }}>
+            <div className="modal-backdrop-responsive" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'var(--overlay-backdrop)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1010, padding: '20px' }}>
+              <div className="modal-dialog-responsive" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '450px' }}>
                 <h2 style={{ fontSize: '1.3rem', margin: '0 0 8px 0', color: 'var(--status-warning)' }}>
                   🔑 Ubah Password: {passwordTargetUser.username}
                 </h2>

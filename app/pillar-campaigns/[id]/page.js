@@ -3682,8 +3682,8 @@ export default function PillarCampaignDetailPage() {
   return (
     <div className="app-layout">
       <Sidebar />
-      <main className="main-content">
-        <div style={{ padding: '24px 32px', maxWidth: '1200px', margin: '0 auto' }}>
+      <main className="main-content page-content-responsive">
+        <div className="page-container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
             <Link href="/pillar-campaigns" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.85rem' }}>

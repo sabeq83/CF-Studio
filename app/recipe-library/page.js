@@ -272,8 +272,8 @@ export default function RecipeLibraryPage() {
     <div className="app-layout">
       <Sidebar />
 
-      <main className="main-content">
-        <div className="page-container" style={{ maxWidth: '1280px', margin: '0 auto', padding: '32px 24px' }}>
+      <main className="main-content page-content-responsive">
+        <div className="page-container" style={{ maxWidth: '1280px', margin: '0 auto' }}>
           {/* Toast Notification */}
           {toastMessage && (
             <div style={{
@@ -683,7 +683,7 @@ export default function RecipeLibraryPage() {
 
       {/* MODAL URL SCRAPER (COOKPAD & MULTI-PLATFORM) */}
       {showScraperModal && (
-        <div style={{
+        <div className="modal-backdrop-responsive" style={{
           position: 'fixed',
           top: 0,
           left: 0,
@@ -696,7 +696,7 @@ export default function RecipeLibraryPage() {
           zIndex: 1000,
           padding: '20px'
         }}>
-          <div style={{
+          <div className="modal-dialog-responsive" style={{
             backgroundColor: 'var(--surface)',
             border: '1px solid var(--border-subtle)',
             borderRadius: 'var(--radius-lg)',
@@ -764,7 +764,7 @@ export default function RecipeLibraryPage() {
                 borderRadius: 'var(--radius-sm)',
                 padding: '18px'
               }}>
-                <div style={{
+                <div className="form-grid-4" style={{
                   display: 'grid',
                   gridTemplateColumns: '220px 1fr 180px 140px',
                   gap: '14px',
@@ -1146,7 +1146,7 @@ export default function RecipeLibraryPage() {
 
       {/* MODAL IMPOR BATCH RESEP */}
       {showImportModal && (
-        <div style={{
+        <div className="modal-backdrop-responsive" style={{
           position: 'fixed',
           top: 0,
           left: 0,
@@ -1159,7 +1159,7 @@ export default function RecipeLibraryPage() {
           zIndex: 1000,
           padding: '20px'
         }}>
-          <div style={{
+          <div className="modal-dialog-responsive" style={{
             backgroundColor: 'var(--surface)',
             border: '1px solid var(--border-subtle)',
             borderRadius: 'var(--radius-lg)',

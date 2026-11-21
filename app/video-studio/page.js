@@ -508,7 +508,7 @@ export default function VideoStudio() {
   return (
     <div className="app-layout">
       <Sidebar />
-      <main className="main-content">
+      <main className="main-content page-content-responsive">
         <div className="page-container">
           <div className="page-header" style={{ marginBottom: '16px' }}>
             <h2>🎞 Standalone Video Studio</h2>
@@ -573,7 +573,7 @@ export default function VideoStudio() {
           )}
 
           {studioMode === 'remotion' ? (
-            <div style={{
+            <div className="video-studio-grid" style={{
               display: 'grid',
               gridTemplateColumns: 'minmax(420px, 1fr) 420px',
               gap: '24px',

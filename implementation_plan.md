@@ -44,13 +44,13 @@ Tahap 3 merupakan **finalisasi menyeluruh** dari proyek Layout Mobile CF Studio,
 - [x] Task 3: Susun rencana pelaksanaan lengkap di `implementation_plan.md`
 - [x] Task 4: Buat Mockup HTML Mandiri (`public/mockup_layout_mobile_tahap3.html`) mencakup 4 grup modul (Planning, Workflow, Tools, System)
 - [x] Task 5: Sinkronkan mockup ke Mac mini Staging (`http://100.95.245.55:5010/mockup_layout_mobile_tahap3.html`)
-- [ ] Task 6: **STOP & REVIEW** — Laporkan tautan mockup ke pengguna dan tunggu konfirmasi/persetujuan sebelum mengedit kode React
-- [ ] Task 7: Implementasi penguatan aturan CSS sistemik di `app/globals.css`
-- [ ] Task 8: Terapkan penyesuaian mobile di modul PLANNING (Content Planner, Recipe Library, Deconstruct, Presets, VI, Universe, Brand Profiles)
-- [ ] Task 9: Terapkan penyesuaian mobile di modul WORKFLOW (Threads Labs, RE Campaign, Pillar Campaign, Recipe Labs, Multiplier, Bridging)
-- [ ] Task 10: Terapkan penyesuaian mobile di modul TOOLS & PUBLISHING (Recipe Exporter, Video Studio, TTS Studio)
-- [ ] Task 11: Terapkan penyesuaian mobile di modul SYSTEM (Settings, Users, Tenants)
-- [ ] Task 12: Jalankan verifikasi lokal (build Next.js, cluster health)
+- [x] Task 6: **STOP & REVIEW** — Laporkan tautan mockup ke pengguna dan tunggu konfirmasi/persetujuan sebelum mengedit kode React (Disetujui Pengguna)
+- [x] Task 7: Implementasi penguatan aturan CSS sistemik di `app/globals.css`
+- [x] Task 8: Terapkan penyesuaian mobile di modul PLANNING (Content Planner, Recipe Library, Deconstruct, Presets, VI, Universe, Brand Profiles)
+- [x] Task 9: Terapkan penyesuaian mobile di modul WORKFLOW (Threads Labs, RE Campaign, Pillar Campaign, Recipe Labs, Multiplier, Bridging)
+- [x] Task 10: Terapkan penyesuaian mobile di modul TOOLS & PUBLISHING (Recipe Exporter, Video Studio, TTS Studio)
+- [x] Task 11: Terapkan penyesuaian mobile di modul SYSTEM (Settings, Users, Tenants)
+- [x] Task 12: Jalankan verifikasi lokal (build Next.js, cluster health)
 - [ ] Task 13: Commit dan push branch `fitur/layout-mobile-tahap3` ke GitHub origin
 - [ ] Task 14: Deploy ke Server Dev (`http://100.95.245.55:5020`) via `npm run deploy:dev:atomic -- --ref <full-sha> --apply --confirm-dev`
 - [ ] Task 15: Verifikasi hasil di Dev dan sajikan laporan akhir beserta checklist uji HP kepada pengguna

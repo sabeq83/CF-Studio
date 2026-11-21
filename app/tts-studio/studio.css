@@ -15,6 +15,17 @@
   }
 }
 
+@media (max-width: 640px) {
+  .tts-studio-container {
+    padding: var(--page-padding, 16px);
+    gap: 16px;
+  }
+  .tts-control-panel,
+  .tts-track-panel {
+    padding: 16px;
+  }
+}
+
 /* Common Card Style */
 .tts-control-panel,
 .tts-track-panel {

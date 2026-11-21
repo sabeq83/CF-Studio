@@ -31,7 +31,7 @@ export default function ThreadsLabsPage() {
   return (
     <div className="layout-with-sidebar">
       <Sidebar />
-      <main className="main-content" style={{ padding: '24px 32px' }}>
+      <main className="main-content page-content-responsive">
         <div className="page-container" style={{ maxWidth: '1440px', margin: '0 auto' }}>
           {authLoading ? (
             <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>

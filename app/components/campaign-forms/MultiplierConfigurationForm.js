@@ -2688,8 +2688,8 @@ if (captureMode) return <><CampaignConfigurationWizard validateStep={validateStu
 return (
     <div className="app-layout">
       <Sidebar />
-      <main className="main-content">
-        <div style={{ padding: '24px 32px', maxWidth: '1200px', margin: '0 auto' }}>
+      <main className="main-content page-content-responsive">
+        <div className="page-container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
 
         {/* Header Section */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
