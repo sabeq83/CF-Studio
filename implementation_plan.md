@@ -397,6 +397,6 @@ export default function RootLayout({ children }) {
 - [x] Task 8: Tambahkan ekspor `viewport` di `app/layout.js`
 - [x] Task 9: Buat komponen `app/components/MobileNav.js` dan sematkan ke `app/components/Sidebar.js`
 - [x] Task 10: Jalankan verifikasi lokal (build Next.js, test regression desktop, tes overflow)
-- [ ] Task 11: Commit dan push branch `fitur/layout-mobile` ke GitHub origin
-- [ ] Task 12: Deploy ke Server Dev (`http://100.95.245.55:5020`) via `npm run deploy:dev:atomic -- --ref <full-sha> --apply --confirm-dev`
-- [ ] Task 13: Verifikasi hasil di Dev dan sajikan laporan akhir beserta checklist uji HP kepada pengguna
+- [x] Task 11: Commit dan push branch `fitur/layout-mobile` ke GitHub origin
+- [x] Task 12: Deploy ke Server Dev (`http://100.95.245.55:5020`) via `npm run deploy:dev:atomic -- --ref <full-sha> --apply --confirm-dev`
+- [x] Task 13: Verifikasi hasil di Dev dan sajikan laporan akhir beserta checklist uji HP kepada pengguna
