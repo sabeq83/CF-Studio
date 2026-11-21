@@ -40,6 +40,7 @@ Terakhir diperbarui: 20 November 2026
 | `REVIEW_USULAN_GPT_IMAGE2_FOTO_PRODUK.md` | Review & penyempurnaan usulan Codex: GPT Image 2 (G-Labs) untuk foto studio produk |
 | `audit_produk_db_usulan.md` | Audit Forensik & Usulan Solusi Isolasi Database Produk MAKNA Flow |
 | `USULAN_LAYOUT_MOBILE_CFSTUDIO.md` | Usulan perbaikan layout mobile CF Studio (menu HP, titik patah, grid, modal, urutan halaman) berbasis antislop-layoutmobile |
+| `USULAN_LAYOUT_MOBILE_TAHAP2.md` | Usulan pemolesan layout mobile Tahap 2: Dashboard, Auto Pipeline, ContentFlow Hub, Radar Produk, dan Product Database |
 | `USULAN_PERBAIKAN_SCRAPER_LAMBAT_GEMINI_WATERFALL.md` | Analisa & Usulan Perbaikan: Scrape Produk di Dev Terlihat Diam >3 Menit (Macet di Waterfall Gemini 180 Detik) |
 | `USULAN_PERBAIKAN_ENRICH_VISION_KEMASAN_PRODUK.md` | Analisa & Usulan Perbaikan: Enrich AI & Scraper Salah Menebak Kemasan Produk (Buta Foto / Multimodal Vision Enrich) |
 
@@ -49,6 +50,7 @@ Terakhir diperbarui: 20 November 2026
 |---|---|
 | `antigravity_radar_hotfix_scraper_dan_url_kurator_instructions.md` | Instruksi Antigravity — A: hotfix scraper `normalizeUrl` (produk baru gagal disimpan, test jalur insert, pemulihan 3 kandidat); B: tombol Simpan & Tandai Terverifikasi menolak saat kolom kosong walau URL riset ada (mockup dulu) |
 | [antigravity_layout_mobile_tahap1_instructions.md](instruksi-agent/antigravity_layout_mobile_tahap1_instructions.md) | Instruksi Antigravity — Layout Mobile Tahap 1 (fondasi bersama): mockup dulu, MobileNav di dalam Sidebar, tiga titik patah, aturan pelindung global, uji di Dev, desktop tidak boleh berubah |
+| [antigravity_layout_mobile_tahap2_instructions.md](instruksi-agent/antigravity_layout_mobile_tahap2_instructions.md) | Instruksi Antigravity — Layout Mobile Tahap 2 (Prioritas 1 & 2): pemolesan 5 halaman utama (Dashboard, Auto Pipeline, ContentFlow Hub, Radar Produk, Product Database), mockup dulu, uji di Dev |
 | [antigravity_mcp_universe_reference_manager_instructions.md](instruksi-agent/antigravity_mcp_universe_reference_manager_instructions.md) | Instruksi Antigravity — MCP Universe & Character Lock (kasus Arka): Bagian H hotfix isolasi tenant (B2+B3, naik Staging duluan) lalu Bagian F fitur: B1/B4/B5, 3 route baru, 10 tool MCP, mode strict, uji di Dev |
 | `antigravity_radar_produk_teleradar_instructions.md` | Instruksi Antigravity — Menu Radar Produk: hasil TeleRadar masuk tabel riset terpisah, kurasi, lalu promosi ke Database Produk (mockup dulu, 6 tahap dengan pintu berhenti) |
 | `antigravity_aktifkan_batch_scraper_instructions.md` | Instruksi Antigravity — Aktifkan kembali tombol Batch Scraper (mockup dulu) + pengaman kuota/afiliasi + S3/S5/S6 (disetujui); S1/S2/S4/S7 menunggu keputusan |

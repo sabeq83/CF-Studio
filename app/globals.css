@@ -1039,20 +1039,119 @@ body {
   }
 
   /* Modal Lembar Bawah (Bottom Sheet) */
-  .modal-backdrop {
+  .modal-backdrop,
+  .modal-backdrop-responsive {
     align-items: flex-end !important;
     padding: 0 !important;
   }
-  .modal {
+  .modal,
+  .modal-backdrop > .modal,
+  .modal-backdrop > .card,
+  .modal-backdrop-responsive > .modal-dialog-responsive {
     width: 100% !important;
     max-width: 100% !important;
     max-height: 92dvh !important;
     border-bottom-left-radius: 0 !important;
     border-bottom-right-radius: 0 !important;
     border-bottom: none !important;
+    border-top-left-radius: 20px !important;
+    border-top-right-radius: 20px !important;
     padding: var(--modal-padding) !important;
     margin: 0 !important;
     animation: slideUpMobile 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+
+  /* Pemolesan Halaman Spesifik (Tahap 2 Prioritas 1 & 2) */
+  .page-content-responsive {
+    padding: var(--page-padding) !important;
+  }
+  .dashboard-metrics-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+  .dashboard-launchpad-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+  .dashboard-columns-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  .auto-pipeline-container {
+    padding: var(--page-padding) !important;
+    gap: 1.25rem !important;
+  }
+  .auto-pipeline-header {
+    padding: 0 1rem !important;
+    height: auto !important;
+    min-height: 52px !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  .contentflow-card-item {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    padding: 14px !important;
+  }
+  .contentflow-filter-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+  .contentflow-filter-grid-5 {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+  .contentflow-bulk-dock {
+    bottom: calc(var(--bottom-nav-h) + 12px) !important;
+    width: calc(100vw - 32px) !important;
+    max-width: 100% !important;
+    padding: 10px 14px !important;
+    gap: 10px !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+  }
+  .auto-pipeline-tabs {
+    flex-direction: column !important;
+  }
+  .product-catalog-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .contentflow-view-tabs {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    flex-wrap: nowrap !important;
+    padding-bottom: 8px !important;
+  }
+  .custom-schedule-scroll {
+    justify-content: flex-start !important;
+    padding-left: 8px !important;
+  }
+
+  /* Cegah overflow pada grid minmax yang melebihi lebar layar HP */
+  [style*="minmax(360px"],
+  [style*="minmax(380px"],
+  [style*="minmax(450px"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Base styles untuk helper responsif (Desktop Default) */
+.page-content-responsive {
+  padding: 32px 36px;
+}
+.auto-pipeline-container {
+  padding: 2rem;
+}
+.auto-pipeline-header {
+  padding: 0 2rem;
+}
+@media (max-width: 1024px) {
+  .page-content-responsive {
+    padding: 24px;
+  }
+  .dashboard-columns-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
   }
 }
 

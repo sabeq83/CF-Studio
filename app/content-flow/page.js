@@ -788,7 +788,7 @@ function ContentFlowHubPageContent() {
     <div className="layout-with-sidebar">
       <Sidebar />
 
-      <main className="main-content" style={{ padding: '28px 32px', background: 'var(--bg-primary)', minHeight: '100vh', color: 'var(--text-primary)' }}>
+      <main className="main-content page-content-responsive" style={{ background: 'var(--bg-primary)', minHeight: '100vh', color: 'var(--text-primary)' }}>
         {/* Centered Main Container (1050px) setara OPC / RE */}
         <div style={{ maxWidth: '1050px', margin: '0 auto' }}>
           {/* Toast Notification */}
@@ -1253,7 +1253,7 @@ function ContentFlowHubPageContent() {
           {/* Multi-level Search & Filter Panel */}
           <div style={{ padding: '20px', borderRadius: '16px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', marginBottom: '24px', boxShadow: '0 8px 24px var(--overlay-subtle)' }}>
             {/* Row 1: Universal Search & Metadata Filters (4 Columns) */}
-            <div style={{ display: 'grid', gridTemplateColumns: '180px minmax(180px, 1fr) minmax(180px, 1fr) 180px', gap: '12px', marginBottom: '14px' }}>
+            <div className="contentflow-filter-grid" style={{ display: 'grid', gridTemplateColumns: '180px minmax(180px, 1fr) minmax(180px, 1fr) 180px', gap: '12px', marginBottom: '14px' }}>
               {/* Universal Search */}
               <div className="contentflow-compact-filter" style={{ position: 'relative' }}>
                 <SearchIcon style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', width: 14, height: 14, color: 'var(--text-muted)' }} />
@@ -1327,7 +1327,7 @@ function ContentFlowHubPageContent() {
             </div>
 
             {/* Row 2: Platform Status Filters + Reset Button (5 Columns dengan YouTube) */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px', paddingTop: '14px', borderTop: '1px solid var(--border-subtle)', alignItems: 'center' }}>
+            <div className="contentflow-filter-grid-5" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px', paddingTop: '14px', borderTop: '1px solid var(--border-subtle)', alignItems: 'center' }}>
               <div>
                 <select
                   value={youtubeFilter}
@@ -1519,6 +1519,7 @@ function ContentFlowHubPageContent() {
                 return (
                   <div
                     key={item.id}
+                    className="contentflow-card-item"
                     style={{
                       background: isSelected ? 'var(--surface-raised)' : 'var(--bg-secondary)',
                       border: isSelected
@@ -1880,7 +1881,7 @@ function ContentFlowHubPageContent() {
 
           {/* Floating Bulk Actions Dock */}
           {selectedItemIds.size > 0 && (
-            <div style={{
+            <div className="contentflow-bulk-dock" style={{
               position: 'fixed',
               bottom: '24px',
               left: '50%',

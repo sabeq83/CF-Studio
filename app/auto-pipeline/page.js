@@ -2653,7 +2653,7 @@ export default function AutoPipelinePage() {
 
       <main className="main-content" style={{ flex: 1, minWidth: 0, overflowY: 'auto' }}>
         {/* Top Header */}
-        <header style={{
+        <header className="auto-pipeline-header" style={{
           height: 60,
           borderBottom: '1px solid var(--border-subtle)',
           background: 'var(--surface)',
@@ -2713,7 +2713,7 @@ export default function AutoPipelinePage() {
         </header>
 
         {/* Content Container (Single-Column) */}
-        <div style={{
+        <div className="auto-pipeline-container" style={{
           maxWidth: '1200px',
           margin: '0 auto',
           padding: '2rem',
@@ -2798,7 +2798,7 @@ export default function AutoPipelinePage() {
           </section>
 
           {/* Main Navigation Tabs */}
-          <div style={{
+          <div className="auto-pipeline-tabs" style={{
             display: 'flex',
             gap: '0.5rem',
             background: 'var(--surface)',
