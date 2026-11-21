@@ -1,7 +1,11 @@
 # Changelog
 
-## V2.57.7 — Pembaruan Otomatis (21/11/2026)
-- Pembaruan internal dan optimasi sistem.
+## V2.57.7 — Fondasi Bersama Layout Mobile CF Studio (21/11/2026)
+- Tiga breakpoint responsif: Desktop (>1024px utuh), Tablet (641-1024px), dan HP (≤640px)
+- Komponen MobileNav bersama di dalam Sidebar: Bilah Atas (52px), Drawer menu akordeon (100dvh), dan Bilah Bawah (56px) 4 tujuan utama
+- Aturan pelindung global: grid inline dipaksa 1 kolom kecuali kalender 7 hari dan stats mini 2 kolom
+- Modal responsif otomatis menjadi bottom sheet di layar HP (lebar 100%, max-height 92dvh)
+- Wadah gulir lokal tabel bebas geser samping dan touch target minimum 44px
 
 ## V2.57.6 — Opsi Foto Profesional Siap Pakai pada Modal Ganti Foto Produk (20/11/2026)
 - Opsi langsung pasang foto profesional tanpa rembg dan AI
