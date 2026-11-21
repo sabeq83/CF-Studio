@@ -71,6 +71,6 @@ Tahap 2 berfokus pada **pemolesan interior 5 halaman kerja utama** CF Studio:
 - [x] Task 11: Terapkan penyesuaian mobile di `app/product-radar/page.js` & `product-radar.module.css`
 - [x] Task 12: Terapkan penyesuaian mobile di `app/products/page.js` & `app/products/ProductDatabaseModal.js`
 - [x] Task 13: Jalankan verifikasi lokal (build Next.js, test regression desktop, cluster health)
-- [ ] Task 14: Commit dan push branch `fitur/layout-mobile-tahap2` ke GitHub origin
-- [ ] Task 15: Deploy ke Server Dev (`http://100.95.245.55:5020`) via `npm run deploy:dev:atomic -- --ref <full-sha> --apply --confirm-dev`
-- [ ] Task 16: Verifikasi hasil di Dev dan sajikan laporan akhir beserta checklist uji HP kepada pengguna
+- [x] Task 14: Commit dan push branch `fitur/layout-mobile-tahap2` ke GitHub origin (`65e8a05b`)
+- [x] Task 15: Deploy ke Server Dev (`http://100.95.245.55:5020`) via `npm run deploy:dev:atomic -- --ref <full-sha> --apply --confirm-dev` (Release: `20261121T051556Z-65e8a05b5c9e`)
+- [x] Task 16: Verifikasi hasil di Dev dan sajikan laporan akhir beserta checklist uji HP kepada pengguna
