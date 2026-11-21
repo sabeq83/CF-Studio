@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.57.7 — Pembaruan Otomatis (21/11/2026)
+- Pembaruan internal dan optimasi sistem.
+
 ## V2.57.6 — Opsi Foto Profesional Siap Pakai pada Modal Ganti Foto Produk (20/11/2026)
 - Opsi langsung pasang foto profesional tanpa rembg dan AI
 - Update database instan status approved tanpa queue
