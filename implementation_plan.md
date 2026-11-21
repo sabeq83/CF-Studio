@@ -42,8 +42,8 @@ Tahap 3 merupakan **finalisasi menyeluruh** dari proyek Layout Mobile CF Studio,
 - [x] Task 1: Buat branch git `fitur/layout-mobile-tahap3` dari `main`
 - [x] Task 2: Susun dokumen usulan dan instruksi agen Tahap 3 di `catatan-kerja/`
 - [x] Task 3: Susun rencana pelaksanaan lengkap di `implementation_plan.md`
-- [ ] Task 4: Buat Mockup HTML Mandiri (`public/mockup_layout_mobile_tahap3.html`) mencakup 4 grup modul (Planning, Workflow, Tools, System)
-- [ ] Task 5: Sinkronkan mockup ke Mac mini Staging (`http://100.95.245.55:5010/mockup_layout_mobile_tahap3.html`)
+- [x] Task 4: Buat Mockup HTML Mandiri (`public/mockup_layout_mobile_tahap3.html`) mencakup 4 grup modul (Planning, Workflow, Tools, System)
+- [x] Task 5: Sinkronkan mockup ke Mac mini Staging (`http://100.95.245.55:5010/mockup_layout_mobile_tahap3.html`)
 - [ ] Task 6: **STOP & REVIEW** — Laporkan tautan mockup ke pengguna dan tunggu konfirmasi/persetujuan sebelum mengedit kode React
 - [ ] Task 7: Implementasi penguatan aturan CSS sistemik di `app/globals.css`
 - [ ] Task 8: Terapkan penyesuaian mobile di modul PLANNING (Content Planner, Recipe Library, Deconstruct, Presets, VI, Universe, Brand Profiles)
