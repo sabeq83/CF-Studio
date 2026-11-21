@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Mockup Mandiri: Layout Mobile CF Studio — Tahap 3 (Finalisasi 16 Menu Tersisa)</title>
+  <style>
+    /* ===== CSS RESET & SEMANTIC TOKENS ===== */
+    :root {
+      --canvas: #090d16;
+      --surface: #0f172a;
+      --surface-raised: #1e293b;
+      --surface-interactive: #334155;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.18);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --text-disabled: #475569;
+      --action-primary: #0284c7;
+      --action-hover: #0369a1;
+      --on-action-primary: #ffffff;
+      --status-success: #10b981;
+      --status-success-soft: rgba(16, 185, 129, 0.15);
+      --status-warning: #f59e0b;
+      --status-warning-soft: rgba(245, 158, 11, 0.15);
+      --status-danger: #ef4444;
+      --status-danger-soft: rgba(239, 68, 68, 0.15);
+      --status-info: #06b6d4;
+      --status-info-soft: rgba(6, 182, 212, 0.15);
+      --status-purple: #a855f7;
+      --status-purple-soft: rgba(168, 85, 247, 0.15);
+      --status-rose: #f43f5e;
+      --status-rose-soft: rgba(244, 63, 94, 0.15);
+      --top-nav-h: 52px;
+      --bottom-nav-h: 56px;
+      --page-padding: 16px;
+      --radius: 14px;
+      --radius-sm: 8px;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    [data-theme="light"] {
+      --canvas: #f1f5f9;
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #e2e8f0;
+      --border-subtle: rgba(0, 0, 0, 0.08);
+      --border-strong: rgba(0, 0, 0, 0.18);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --text-disabled: #94a3b8;
+      --action-primary: #0284c7;
+      --action-hover: #0369a1;
+      --on-action-primary: #ffffff;
+      --status-success: #059669;
+      --status-success-soft: rgba(5, 150, 105, 0.12);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.12);
+      --status-danger: #dc2626;
+      --status-danger-soft: rgba(220, 38, 38, 0.12);
+      --status-info: #0891b2;
+      --status-info-soft: rgba(8, 145, 178, 0.12);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: #020617;
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 1. KONTROL TESTER (DESKTOP BAR DI ATAS) */
+    .tester-top-bar {
+      background: #0b0f19;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding: 10px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 100;
+    }
+    .tester-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .tester-badge {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid var(--status-success);
+      color: var(--status-success);
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .tester-btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tester-btn {
+      background: #1e293b;
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #e2e8f0;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tester-btn:hover { background: #334155; }
+    .tester-btn.active {
+      background: var(--action-primary);
+      color: #fff;
+      border-color: var(--action-primary);
+    }
+
+    /* Pilihan Tab Mockup */
+    .page-tabs-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .page-tab-btn {
+      background: #1e293b;
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #94a3b8;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .page-tab-btn.active {
+      background: #38bdf8;
+      color: #041527;
+      border-color: #38bdf8;
+    }
+
+    /* 2. SIMULATOR WRAPPER */
+    .simulator-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 10px;
+      background: radial-gradient(circle at center, #111827 0%, #030712 100%);
+    }
+
+    .device-container {
+      background: var(--canvas);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 36px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+      width: 390px;
+      height: 844px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      transition: width 0.3s ease;
+    }
+    .device-container.mode-compact { width: 360px; height: 800px; }
+    .device-container.mode-tablet { width: 768px; height: 960px; border-radius: 24px; }
+    .device-container.mode-fullscreen { width: 100%; height: 100vh; border-radius: 0; border: none; }
+
+    /* 3. MOBILE UI SHELL (SESUAI DESAIN TAHAP 1) */
+    .mobile-header {
+      height: var(--top-nav-h);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    .mobile-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 14px;
+    }
+    .mobile-brand-badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      font-weight: 700;
+    }
+
+    .mobile-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--page-padding);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding-bottom: calc(var(--bottom-nav-h) + 20px);
+    }
+
+    .mobile-footer {
+      height: var(--bottom-nav-h);
+      background: var(--surface);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 20;
+    }
+    .bnav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      font-size: 10px;
+      color: var(--text-muted);
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 6px;
+    }
+    .bnav-item.active { color: #38bdf8; font-weight: 700; }
+    .bnav-icon { font-size: 16px; }
+
+    /* 4. MODUL COMPONENTS */
+    .module-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+    }
+    .module-title {
+      font-size: 14px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .btn-44 {
+      min-height: 44px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-strong);
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 0 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      width: 100%;
+    }
+    .btn-44-primary {
+      background: var(--action-primary);
+      border-color: var(--action-primary);
+      color: #fff;
+    }
+
+    /* Chips Bar */
+    .chips-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .chip {
+      padding: 6px 12px;
+      border-radius: 20px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .chip.active {
+      background: var(--action-primary);
+      color: #fff;
+      border-color: var(--action-primary);
+    }
+
+    /* Form Controls Touch-Friendly */
+    .input-touch {
+      width: 100%;
+      height: 44px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 0 12px;
+      color: var(--text-primary);
+      font-size: 16px; /* Cegah zoom iOS */
+      outline: none;
+    }
+
+    /* Table Wrapper Anti-Bocor */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface);
+      -webkit-overflow-scrolling: touch;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      text-align: left;
+      min-width: 480px; /* sengaja lebar untuk membuktikan scroll horizontal aman */
+    }
+    .data-table th, .data-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .data-table th {
+      background: var(--surface-raised);
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    /* 5. BOTTOM SHEET SIMULATOR */
+    .sheet-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      z-index: 50;
+      display: none;
+      align-items: flex-end;
+      backdrop-filter: blur(4px);
+    }
+    .sheet-panel {
+      width: 100%;
+      max-height: 90%;
+      background: var(--surface);
+      border-top: 1px solid var(--border-strong);
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      animation: slideUp 0.25s ease;
+      overflow-y: auto;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. BILAH KONTROL TESTER (DESKTOP) -->
+  <header class="tester-top-bar">
+    <div class="tester-row">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-weight: 800; font-size: 14px;">📱 CF Studio Mobile — Mockup Tahap 3 (Finalisasi 16 Menu)</span>
+        <span class="tester-badge">v2.57.8 Staging Ready</span>
+      </div>
+      <div class="tester-btn-group">
+        <button class="tester-btn" onclick="setDevice('compact')">360px (Compact)</button>
+        <button class="tester-btn active" id="btn-390" onclick="setDevice('standard')">390px (Standard)</button>
+        <button class="tester-btn" onclick="setDevice('tablet')">768px (Tablet)</button>
+        <button class="tester-btn" onclick="setDevice('fullscreen')">Layar Penuh</button>
+        <button class="tester-btn" onclick="toggleTheme()">🌓 Ganti Tema</button>
+      </div>
+    </div>
+
+    <!-- Pilihan Tab Modul Tahap 3 -->
+    <div class="page-tabs-bar">
+      <button class="page-tab-btn active" onclick="switchTab('threads')">🧵 1. Threads Labs</button>
+      <button class="page-tab-btn" onclick="switchTab('planner')">🗓️ 2. Content Planner</button>
+      <button class="page-tab-btn" onclick="switchTab('campaigns')">🌱 3. Kampanye (OPC & RE)</button>
+      <button class="page-tab-btn" onclick="switchTab('presets')">🎛️ 4. Presets & VI</button>
+      <button class="page-tab-btn" onclick="switchTab('tools')">🎞 5. Video & TTS Studio</button>
+      <button class="page-tab-btn" onclick="switchTab('system')">👥 6. System & Users</button>
+    </div>
+  </header>
+
+  <!-- 2. SIMULATOR HP -->
+  <main class="simulator-wrapper">
+    <div class="device-container" id="deviceBox">
+
+      <!-- Bilah Atas Mobile (52px) -->
+      <header class="mobile-header">
+        <div class="mobile-brand">
+          <span>⚡</span>
+          <span id="pageTitleText">Threads Labs</span>
+          <span class="mobile-brand-badge">P3 Final</span>
+        </div>
+        <button class="tester-btn" style="padding: 4px 8px; font-size: 11px;" onclick="openSheet('Menu Navigasi Mobile')">
+          <span>☰</span>
+          <span>Menu</span>
+        </button>
+      </header>
+
+      <!-- Area Konten Halaman Mobile -->
+      <div class="mobile-body">
+
+        <!-- ==================== TAB 1: THREADS LABS ==================== -->
+        <div id="view-threads" class="view-section">
+          <div class="chips-bar">
+            <span class="chip active">Semua Akun (3)</span>
+            <span class="chip">@ruangakustik</span>
+            <span class="chip">@solusithermal</span>
+            <span class="chip">@nutribake</span>
+          </div>
+
+          <!-- Kartu Peluang Balasan (Opportunity Card) -->
+          <div class="module-card">
+            <div class="module-title">
+              <span style="font-size: 12px; color: var(--status-info);">🧵 Peluang Balasan #TL-104</span>
+              <span style="font-size: 10px; color: var(--status-success); font-weight: 700;">● Skor 94/100</span>
+            </div>
+            <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.4;">
+              <strong>@konsumen:</strong> "Tembok kamar tidur saya nempel rumah tetangga dan suara TV-nya tembus banget, ada solusi tanpa roboh tembok?"
+            </p>
+            <div style="background: var(--surface-raised); border-left: 3px solid var(--action-primary); padding: 8px 10px; border-radius: 4px; font-size: 11px;">
+              <strong style="color: var(--action-primary);">Draft Jawaban AI:</strong> Gunakan peredam panel akustik busa densitas 30kg/m³ dengan air-gap 2cm untuk redam transmisi frekuensi vokal.
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px;">
+              <button class="btn-44 btn-44-primary" onclick="alert('Balasan disetujui & dijadwalkan!')">✓ Approve</button>
+              <button class="btn-44" onclick="openSheet('Edit Naskah Balasan Threads')">✏️ Edit Draft</button>
+            </div>
+          </div>
+
+          <!-- Statistik Aktivitas Akun -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="module-card" style="text-align: center;">
+              <span style="font-size: 11px; color: var(--text-muted);">Dipindai Hari Ini</span>
+              <strong style="font-size: 18px; color: var(--text-primary); margin-top: 4px;">148 Post</strong>
+            </div>
+            <div class="module-card" style="text-align: center;">
+              <span style="font-size: 11px; color: var(--text-muted);">Balasan Terkirim</span>
+              <strong style="font-size: 18px; color: var(--status-success); margin-top: 4px;">32 Selesai</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== TAB 2: CONTENT PLANNER ==================== -->
+        <div id="view-planner" class="view-section" style="display: none;">
+          <div class="module-title" style="margin-bottom: 6px;">
+            <span>🗓️ Antrean Konten Pekan Ini</span>
+            <button class="tester-btn" style="padding: 4px 10px; font-size: 11px;" onclick="openSheet('Tambah Rencana Konten Baru')">+ Buat Ide</button>
+          </div>
+
+          <!-- Mini Kalender 7 Hari -->
+          <div class="module-card" style="padding: 10px;">
+            <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center;">
+              <div style="font-size: 10px; color: var(--text-muted);">Sen</div>
+              <div style="font-size: 10px; color: var(--text-muted);">Sel</div>
+              <div style="font-size: 10px; color: var(--text-muted);">Rab</div>
+              <div style="font-size: 10px; color: var(--text-muted);">Kam</div>
+              <div style="font-size: 10px; color: var(--text-muted);">Jum</div>
+              <div style="font-size: 10px; color: var(--text-muted);">Sab</div>
+              <div style="font-size: 10px; color: var(--text-muted);">Min</div>
+
+              <div style="padding: 6px 0; border-radius: 6px; font-size: 11px; background: var(--surface-interactive); font-weight: 700;">17</div>
+              <div style="padding: 6px 0; border-radius: 6px; font-size: 11px; background: var(--surface-interactive); font-weight: 700;">18</div>
+              <div style="padding: 6px 0; border-radius: 6px; font-size: 11px; background: var(--surface-interactive); font-weight: 700;">19</div>
+              <div style="padding: 6px 0; border-radius: 6px; font-size: 11px; background: var(--surface-interactive); font-weight: 700;">20</div>
+              <div style="padding: 6px 0; border-radius: 6px; font-size: 11px; background: var(--action-primary); color: #fff; font-weight: 800;">21</div>
+              <div style="padding: 6px 0; border-radius: 6px; font-size: 11px; background: var(--surface-raised);">22</div>
+              <div style="padding: 6px 0; border-radius: 6px; font-size: 11px; background: var(--surface-raised);">23</div>
+            </div>
+          </div>
+
+          <!-- Item Antrean Konten -->
+          <div class="module-card">
+            <div style="display: flex; justify-content: space-between; font-size: 11px;">
+              <span style="color: var(--status-warning); font-weight: 700;">📦 Produk: Cat Peredam Panas</span>
+              <span style="color: var(--text-muted);">Hari ini, 15:00</span>
+            </div>
+            <strong style="font-size: 13px;">Tips Dapur Tidak Pengap Meski Tanpa Exhaust Fan</strong>
+            <div style="display: flex; gap: 6px;">
+              <span style="font-size: 10px; background: var(--surface-raised); padding: 2px 6px; border-radius: 4px;">OPC 8 Klip</span>
+              <span style="font-size: 10px; background: var(--status-info-soft); color: var(--status-info); padding: 2px 6px; border-radius: 4px;">Ready to Produce</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== TAB 3: KAMPANYE (OPC & RE) ==================== -->
+        <div id="view-campaigns" class="view-section" style="display: none;">
+          <div class="chips-bar">
+            <span class="chip active">Semua Kampanye</span>
+            <span class="chip">Pillar (OPC)</span>
+            <span class="chip">Reverse Eng (RE)</span>
+            <span class="chip">Multiplier</span>
+          </div>
+
+          <!-- Kartu Kampanye Aktif -->
+          <div class="module-card">
+            <div class="module-title">
+              <span style="color: var(--status-success);">🌱 OPC #261121-GIM01</span>
+              <span style="font-size: 10px; background: var(--status-success-soft); color: var(--status-success); padding: 2px 6px; border-radius: 4px;">8 Klip Selesai</span>
+            </div>
+            <strong style="font-size: 13px;">Cara Pasang Busa Akustik Tanpa Merusak Cat Tembok</strong>
+            <p style="font-size: 11px; color: var(--text-muted);">Preset: GIM Story-Lock • VO: Minimax Expressive • Video: Google Veo</p>
+            <div style="display: flex; gap: 8px; margin-top: 4px;">
+              <button class="btn-44 btn-44-primary" onclick="openSheet('Storyboard 8 Klip Kampanye')">🎬 Tinjau Storyboard</button>
+            </div>
+          </div>
+
+          <!-- Kartu Multiplier 10-Angles -->
+          <div class="module-card">
+            <div class="module-title">
+              <span style="color: var(--status-purple);">🔀 Multiplier Lab #ML-99</span>
+              <span style="font-size: 10px; color: var(--text-muted);">10 Variasi Hook</span>
+            </div>
+            <strong style="font-size: 13px;">Remix Konten Viral: Solusi Kamar Panas Berdengung</strong>
+            <button class="btn-44" onclick="openSheet('Daftar 10 Sudut Sudut Video Multiplier')">🔍 Lihat 10 Variasi Angle</button>
+          </div>
+        </div>
+
+        <!-- ==================== TAB 4: PRESETS & VI ==================== -->
+        <div id="view-presets" class="view-section" style="display: none;">
+          <div class="module-title" style="margin-bottom: 6px;">
+            <span>🎛️ Preset Konfigurasi Video</span>
+            <button class="tester-btn" style="padding: 4px 10px; font-size: 11px;" onclick="openSheet('Buat Preset Baru')">+ Tambah</button>
+          </div>
+
+          <!-- Kartu Preset 1 -->
+          <div class="module-card">
+            <div class="module-title">
+              <span>⭐ Ruang Akustik Studio Pro</span>
+              <span style="font-size: 10px; background: var(--status-info-soft); color: var(--status-info); padding: 2px 6px; border-radius: 4px;">Bridging Active</span>
+            </div>
+            <p style="font-size: 11px; color: var(--text-secondary);">8 Klip @ 4 detik • Visual Engine: Hybrid Lock • Subtitle: Motion Pop</p>
+            <button class="btn-44" onclick="openSheet('Rincian Konfigurasi Preset')">⚙️ Edit Konfigurasi</button>
+          </div>
+
+          <!-- Kartu Visual Identity (VI) -->
+          <div class="module-card">
+            <div class="module-title">
+              <span>🎨 Visual Identity: NutriBake Modern</span>
+              <span style="font-size: 10px; background: var(--status-purple-soft); color: var(--status-purple); padding: 2px 6px; border-radius: 4px;">Character Lock</span>
+            </div>
+            <p style="font-size: 11px; color: var(--text-secondary);">Karakter: Chef Maya • Latar: Dapur Minimalis Marmer • Lighting: Soft Warm</p>
+            <button class="btn-44" onclick="openSheet('Manajemen Aset Referensi VI')">🧬 Kelola Referensi Karakter</button>
+          </div>
+        </div>
+
+        <!-- ==================== TAB 5: VIDEO & TTS STUDIO ==================== -->
+        <div id="view-tools" class="view-section" style="display: none;">
+          <!-- Tool 1: TTS Studio -->
+          <div class="module-card">
+            <div class="module-title">
+              <span>🎙️ TTS Studio (Generator Voice-Over)</span>
+            </div>
+            <label style="font-size: 11px; color: var(--text-muted);">Pilih Voice Persona:</label>
+            <select class="input-touch">
+              <option>Budi (Minimax - Energetic Tech)</option>
+              <option>Rina (Minimax - Warm Conversational)</option>
+              <option>Maya (ElevenLabs - Professional Narrative)</option>
+            </select>
+            <label style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Naskah Narasi:</label>
+            <textarea class="input-touch" style="height: 72px; padding: 8px 12px; font-size: 14px;" placeholder="Ketik narasi di sini...">Tembok kamar kamu bising suara tetangga? Jangan renovasi dulu sebelum coba trik ini!</textarea>
+            <button class="btn-44 btn-44-primary" onclick="alert('Audio VO berhasil dirender!')">▶ Render Audio Sample</button>
+          </div>
+
+          <!-- Tool 2: Video Studio Finishing -->
+          <div class="module-card">
+            <div class="module-title">
+              <span>🎞 Finishing Video FFmpeg</span>
+            </div>
+            <div style="background: #000; height: 140px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 12px;">
+              [ Player Video 9:16 Vertikal ]
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 11px;">
+              <span>Subtitel: Dynamic Pop</span>
+              <span>Audio: BGM Lo-Fi Dapur</span>
+            </div>
+            <button class="btn-44" onclick="alert('Render finishing dimulai!')">✂️ Gabung Klip & Ekspor MP4</button>
+          </div>
+        </div>
+
+        <!-- ==================== TAB 6: SYSTEM & USERS ==================== -->
+        <div id="view-system" class="view-section" style="display: none;">
+          <div class="module-title" style="margin-bottom: 6px;">
+            <span>👥 User & Tenant Management</span>
+            <button class="tester-btn" style="padding: 4px 10px; font-size: 11px;" onclick="openSheet('Tambah User Operator Baru')">+ User</button>
+          </div>
+
+          <!-- Tabel Data User dengan Scroll Anti-Bocor -->
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Nama User</th>
+                  <th>Role</th>
+                  <th>Tenant / Organisasi</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Mas Benu</strong><br><span style="color: var(--text-muted); font-size: 10px;">admin@cfstudio.com</span></td>
+                  <td><span style="background: var(--status-info-soft); color: var(--status-info); padding: 2px 6px; border-radius: 4px; font-size: 10px;">Admin</span></td>
+                  <td>Internal Enterprise</td>
+                  <td><span style="color: var(--status-success);">Active</span></td>
+                  <td><button class="tester-btn" style="padding: 2px 6px; font-size: 10px;" onclick="openSheet('Edit Akses User')">Edit</button></td>
+                </tr>
+                <tr>
+                  <td><strong>Operator 1</strong><br><span style="color: var(--text-muted); font-size: 10px;">operator@gim.co.id</span></td>
+                  <td><span style="background: var(--surface-interactive); color: var(--text-secondary); padding: 2px 6px; border-radius: 4px; font-size: 10px;">Operator</span></td>
+                  <td>PT GIM Sosmed</td>
+                  <td><span style="color: var(--status-success);">Active</span></td>
+                  <td><button class="tester-btn" style="padding: 2px 6px; font-size: 10px;" onclick="openSheet('Edit Akses User')">Edit</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pengaturan Sistem -->
+          <div class="module-card" style="margin-top: 10px;">
+            <div class="module-title">
+              <span>⚙️ Pengaturan Fitur Otonom</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; min-height: 44px;">
+              <span style="font-size: 12px;">Auto-Publish ke ContentFlow Hub</span>
+              <input type="checkbox" checked style="width: 20px; height: 20px;">
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; min-height: 44px; border-top: 1px solid var(--border-subtle); padding-top: 6px;">
+              <span style="font-size: 12px;">Google Veo Native Video Model</span>
+              <input type="checkbox" checked style="width: 20px; height: 20px;">
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bilah Bawah Mobile (56px) -->
+      <footer class="mobile-footer">
+        <button class="bnav-item" onclick="switchTab('threads')">
+          <span class="bnav-icon">🧵</span>
+          <span>Threads</span>
+        </button>
+        <button class="bnav-item" onclick="switchTab('planner')">
+          <span class="bnav-icon">🗓️</span>
+          <span>Planner</span>
+        </button>
+        <button class="bnav-item" onclick="switchTab('campaigns')">
+          <span class="bnav-icon">🌱</span>
+          <span>Kampanye</span>
+        </button>
+        <button class="bnav-item" onclick="openSheet('Menu Seluruh CF Studio')">
+          <span class="bnav-icon">☰</span>
+          <span>Menu</span>
+        </button>
+      </footer>
+
+      <!-- Bottom Sheet Modal Simulator -->
+      <div class="sheet-backdrop" id="sheetBackdrop" onclick="closeSheet()">
+        <div class="sheet-panel" onclick="event.stopPropagation()">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px;">
+            <strong id="sheetTitleText" style="font-size: 14px;">Detail Modal Lembar Bawah</strong>
+            <button class="tester-btn" style="padding: 4px 8px; font-size: 11px;" onclick="closeSheet()">✕ Tutup</button>
+          </div>
+          <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;" id="sheetDescText">
+            Ini adalah simulasi bottom sheet responsif di layar HP. Seluruh form input, tombol aksi, dan drawer pada 16 menu tersisa otomatis muncul dari bawah layar dengan jangkauan jempol yang nyaman.
+          </p>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <label style="font-size: 11px; color: var(--text-muted);">Contoh Input Field (Font 16px Anti-Zoom):</label>
+            <input type="text" class="input-touch" value="Nilai parameter contoh...">
+            <button class="btn-44 btn-44-primary" onclick="closeSheet()">Simpan &amp; Terapkan</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    function setDevice(mode) {
+      const box = document.getElementById('deviceBox');
+      box.className = 'device-container';
+      if (mode === 'compact') box.classList.add('mode-compact');
+      if (mode === 'tablet') box.classList.add('mode-tablet');
+      if (mode === 'fullscreen') box.classList.add('mode-fullscreen');
+
+      document.querySelectorAll('.tester-btn-group .tester-btn').forEach(b => b.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+    }
+
+    function toggleTheme() {
+      const cur = document.documentElement.getAttribute('data-theme');
+      document.documentElement.setAttribute('data-theme', cur === 'light' ? 'dark' : 'light');
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.view-section').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.page-tab-btn').forEach(el => el.classList.remove('active'));
+
+      const target = document.getElementById('view-' + tabId);
+      if (target) target.style.display = 'block';
+
+      const titles = {
+        threads: 'Threads Labs',
+        planner: 'Content Planner',
+        campaigns: 'Kampanye (OPC & RE)',
+        presets: 'Presets & VI',
+        tools: 'Video & TTS Studio',
+        system: 'System & Users'
+      };
+      document.getElementById('pageTitleText').innerText = titles[tabId] || 'CF Studio';
+
+      // Set active button
+      const activeBtn = Array.from(document.querySelectorAll('.page-tab-btn')).find(b => b.onclick.toString().includes(tabId));
+      if (activeBtn) activeBtn.classList.add('active');
+    }
+
+    function openSheet(title) {
+      document.getElementById('sheetTitleText').innerText = title || 'Lembar Bawah (Bottom Sheet)';
+      document.getElementById('sheetBackdrop').style.display = 'flex';
+    }
+
+    function closeSheet() {
+      document.getElementById('sheetBackdrop').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
