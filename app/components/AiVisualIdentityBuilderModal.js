@@ -299,6 +299,7 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
 
   return (
     <div
+      className="modal-backdrop-responsive"
       style={{
         position: 'fixed',
         inset: 0,
@@ -313,6 +314,7 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
       }}
     >
       <div
+        className="modal-dialog-responsive"
         style={{
           backgroundColor: 'var(--surface)',
           border: '1px solid var(--border-strong)',

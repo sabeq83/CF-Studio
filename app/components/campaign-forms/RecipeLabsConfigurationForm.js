@@ -2274,7 +2274,7 @@ if (captureMode) return <><CampaignConfigurationWizard validateStep={validateStu
 return (
     <div className="app-layout">
       <Sidebar />
-      <main className="main-content">
+      <main className="main-content page-content-responsive">
         <div className="page-container">
           {/* Header */}
           <div className="page-header">

@@ -111,7 +111,7 @@ export default function RecipeExporterPage() {
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary)' }}>
       <Sidebar />
-      <main className="main-content" style={{ flex: 1, padding: '24px 32px', overflowY: 'auto' }}>
+      <main className="main-content page-content-responsive" style={{ flex: 1, overflowY: 'auto' }}>
         <div style={{ maxWidth: '1440px', margin: '0 auto' }}>
           
           {/* Top Bar Navigation */}

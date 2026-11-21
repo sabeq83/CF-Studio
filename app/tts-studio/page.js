@@ -199,7 +199,7 @@ export default function TTSStudioPage() {
   return (
     <div className="app-layout">
       <Sidebar />
-      <main className="main-content">
+      <main className="main-content page-content-responsive">
         <div className="tts-studio-container">
           
           {/* PANEL KIRI: SELECTOR SUMBER DAN KONFIGURASI */}

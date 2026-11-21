@@ -114,7 +114,7 @@ export default function TenantManagementPage() {
   return (
     <div className="layout-with-sidebar">
       <Sidebar />
-      <main className="main-content">
+      <main className="main-content page-content-responsive">
         <div className="page-header">
           <div><h1>Tenant Management</h1><p>Control-plane untuk tenant, modul sidebar, dan admin organisasi.</p></div>
         </div>
@@ -201,7 +201,7 @@ export default function TenantManagementPage() {
 
         {/* MODAL KELOLA MODUL MENU TENANT */}
         {menuModalTenant && (
-          <div style={{
+          <div className="modal-backdrop-responsive" style={{
             position: 'fixed',
             top: 0,
             left: 0,
@@ -215,7 +215,7 @@ export default function TenantManagementPage() {
             zIndex: 1000,
             padding: 20
           }}>
-            <div className="card" style={{ width: '100%', maxWidth: '750px', maxHeight: '90vh', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
+            <div className="modal-dialog-responsive card" style={{ width: '100%', maxWidth: '750px', maxHeight: '90vh', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
 
               {/* Modal Header */}
               <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

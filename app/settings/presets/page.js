@@ -506,7 +506,7 @@ export default function PresetsPage() {
   return (
     <div className="app-layout">
       <Sidebar />
-      <main className="main-content">
+      <main className="main-content page-content-responsive">
         <div className="page-container">
         <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div>
@@ -692,7 +692,7 @@ export default function PresetsPage() {
                 )}
               </div>
             ) : (
-              <div style={{
+              <div className="preset-cards-grid" style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))',
                 gap: '16px'

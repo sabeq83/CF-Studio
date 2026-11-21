@@ -599,7 +599,7 @@ export default function ProductBridgeInjectPage() {
     <div className="app-container" style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-app)' }}>
       <Sidebar />
 
-      <main className="main-content" style={{ flex: 1, padding: '24px 32px', overflowY: 'auto' }}>
+      <main className="main-content page-content-responsive" style={{ flex: 1, overflowY: 'auto' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
 
           {toast && (
@@ -623,7 +623,7 @@ export default function ProductBridgeInjectPage() {
 
           {/* Verification Modal Popup */}
           {showVerificationModal && (
-            <div style={{
+            <div className="modal-backdrop-responsive" style={{
               position: 'fixed',
               top: 0,
               left: 0,
@@ -637,7 +637,7 @@ export default function ProductBridgeInjectPage() {
               alignItems: 'center',
               padding: '20px'
             }}>
-              <div style={{
+              <div className="modal-dialog-responsive" style={{
                 background: 'var(--bg-card)',
                 border: '1px solid var(--border)',
                 borderRadius: '8px',
