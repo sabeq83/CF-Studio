@@ -1113,6 +1113,29 @@ body {
   .auto-pipeline-tabs {
     flex-direction: column !important;
   }
+  .auto-pipeline-field-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.85rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .auto-pipeline-field-grid > div {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+  .auto-pipeline-field-grid select {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+  .auto-pipeline-section {
+    padding: 1.15rem 1rem !important;
+  }
+  .auto-pipeline-campaign-grid,
+  .auto-pipeline-specs-grid {
+    grid-template-columns: 1fr !important;
+  }
   .product-catalog-grid {
     grid-template-columns: 1fr !important;
   }
@@ -1153,6 +1176,10 @@ body {
     grid-template-columns: 1fr !important;
     gap: 16px !important;
   }
+  .auto-pipeline-field-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
 }
 
 /* Sentuhan Coarse (HP & Tablet Layar Sentuh) */
@@ -1169,6 +1196,8 @@ body {
   }
   input, select, textarea {
     font-size: 16px !important; /* cegah iOS auto-zoom */
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 }
 
