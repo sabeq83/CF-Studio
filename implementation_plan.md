@@ -53,4 +53,5 @@ Tahap 3 merupakan **finalisasi menyeluruh** dari proyek Layout Mobile CF Studio,
 - [x] Task 12: Jalankan verifikasi lokal (build Next.js, cluster health)
 - [x] Task 13: Commit dan push branch `fitur/layout-mobile-tahap3` ke GitHub origin (Commit `25faaf1`)
 - [x] Task 14: Deploy ke Server Dev (`http://100.95.245.55:5020`) via `npm run deploy:dev:atomic -- --ref 25faaf1fb321538f9a06768c4b48522566b8cc5c --apply --confirm-dev` (Release `20261121T063609Z-25faaf1fb321`)
-- [ ] Task 15: Verifikasi hasil di Dev dan sajikan laporan akhir beserta checklist uji HP kepada pengguna (Menunggu Uji Pengguna)
+- [x] Task 15: Verifikasi hasil di Dev dan sajikan laporan akhir beserta checklist uji HP kepada pengguna (Disetujui Pengguna)
+- [x] Task 16: Merge ke `main`, rilis `v2.57.9`, dan deploy ke Staging (`http://100.95.245.55:5010`) via `deploy:staging`
