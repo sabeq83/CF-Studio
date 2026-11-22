@@ -58,9 +58,9 @@ Mengimplementasikan sistem pengumpulan dan pelaporan analitik performa konten ha
 
 ### Fase 5: UI & Mockup HTML (Gerbang Review)
 - [x] Task 5.1: Buat file mockup mandiri `public/mockup_analitik_performa.html` (CSS tokens inline, dark/light mode, data netral)
-- [ ] Task 5.2: Deploy mockup ke server Dev (`http://100.95.245.55:5020/mockup_analitik_performa.html`)
-- [ ] Task 5.3: **STOP & REVIEW**: Laporkan link mockup ke pengguna dan tunggu persetujuan sebelum implementasi React UI
-- [ ] Task 5.4: Implementasi halaman antarmuka Performa di aplikasi web menggunakan 100% semantic CSS tokens
+- [x] Task 5.2: Deploy mockup ke server Dev (`http://100.95.245.55:5020/mockup_analitik_performa.html`)
+- [x] Task 5.3: **STOP & REVIEW**: Laporkan link mockup ke pengguna dan tunggu persetujuan sebelum implementasi React UI (DISETUJUI)
+- [x] Task 5.4: Implementasi halaman antarmuka Performa di aplikasi web (`app/performance/page.js` dan `lib/sidebar-nav.js`) menggunakan 100% semantic CSS tokens
 
 ### Fase 6: CFA Scripts (Dikerjakan Claude di ~/cf-autopipeline)
 - [ ] Task 6.1: Dikoordinasikan dengan Claude setelah API Fase 3 siap

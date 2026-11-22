@@ -36,6 +36,7 @@ Sumber daftar menu: `lib/sidebar-nav.js`
 | Menu | Alamat | Fungsi singkat | Kartu | Dokumen lengkap |
 |---|---|---|---|---|
 | ContentFlow Hub | `/content-flow` | Staging konten jadi, slot kalender tayang, dan sinkronisasi status | ✅ [kartu](kartu/content-flow.md) | `contentflow-studio.md` |
+| Performa Konten | `/performance` | Analitik performa konten lintas platform (Meta & Repliz), perbandingan pekan & skor | ✅ [kartu](kartu/performance.md) | [rencana](../../catatan-kerja/rencana/analitik_mingguan_implementation_plan.md) |
 | Recipe Exporter | `/recipe-exporter` | Pengemasan dan ekspor resep (aset gambar, teks, video) ke cloud | ✅ [kartu](kartu/recipe-exporter.md) | `recipe-labs.md` |
 
 ## TOOLS — alat bantu
