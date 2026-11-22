@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup: Analitik Performa Konten (Gelombang 1)</title>
+  <style>
+    /* 100% Self-Contained Semantic Design Tokens */
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --canvas: #090e17;
+      --sidebar: #0f172a;
+      --surface: #111c2e;
+      --surface-raised: #17243b;
+      --surface-interactive: #1e304d;
+      --surface-hover: #263c61;
+      --input-bg: #0d1524;
+      --overlay-subtle: rgba(0, 0, 0, 0.3);
+      --overlay-backdrop: rgba(3, 7, 18, 0.75);
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --text-disabled: #64748b;
+      --border-subtle: #24354f;
+      --border-strong: #3b5275;
+      --action-primary: #06b6d4;
+      --action-primary-hover: #22d3ee;
+      --on-action-primary: #082f49;
+      --link: #38bdf8;
+      --link-hover: #7dd3fc;
+      --status-info: #3b82f6;
+      --status-info-soft: rgba(59, 130, 246, 0.16);
+      --status-success: #10b981;
+      --status-success-soft: rgba(16, 185, 129, 0.16);
+      --status-warning: #f59e0b;
+      --status-warning-soft: rgba(245, 158, 11, 0.16);
+      --status-danger: #ef4444;
+      --status-danger-soft: rgba(239, 68, 68, 0.16);
+      --shadow-card: 0 10px 28px rgba(0, 0, 0, 0.35);
+      --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.6);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f1f5f9;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --input-bg: #ffffff;
+      --overlay-subtle: rgba(15, 23, 42, 0.08);
+      --overlay-backdrop: rgba(15, 23, 42, 0.5);
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --text-disabled: #94a3b8;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --action-primary: #0891b2;
+      --action-primary-hover: #0e7490;
+      --on-action-primary: #ffffff;
+      --link: #0284c7;
+      --link-hover: #0369a1;
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.1);
+      --status-success: #059669;
+      --status-success-soft: rgba(5, 150, 105, 0.1);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.1);
+      --status-danger: #dc2626;
+      --status-danger-soft: rgba(220, 38, 38, 0.1);
+      --shadow-card: 0 8px 24px rgba(15, 23, 42, 0.06);
+      --shadow-modal: 0 16px 48px rgba(15, 23, 42, 0.15);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      padding: 24px 32px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1360px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .header-titles h1 {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-titles p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      border: 1px solid transparent;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+    }
+
+    .btn-secondary {
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+      border-color: var(--border-subtle);
+    }
+    .btn-secondary:hover {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+    }
+
+    /* Filter Bar */
+    .filter-panel {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      box-shadow: var(--shadow-card);
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 160px;
+      flex: 1;
+    }
+
+    .filter-group label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .select-control {
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 8px 12px;
+      border-radius: var(--radius-xs);
+      font-size: 13px;
+      outline: none;
+      transition: var(--transition);
+    }
+    .select-control:focus {
+      border-color: var(--action-primary);
+    }
+
+    /* Warning Box: Facebook Unconnected */
+    .alert-box {
+      background: var(--status-warning-soft);
+      border: 1px solid var(--status-warning);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .alert-icon {
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .alert-body h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--status-warning);
+      margin-bottom: 4px;
+    }
+
+    .alert-body p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    .alert-body .action-link {
+      color: var(--link);
+      font-weight: 600;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    /* Summary Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+
+    .stat-meta {
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .growth-up {
+      color: var(--status-success);
+      font-weight: 600;
+    }
+    .growth-down {
+      color: var(--status-danger);
+      font-weight: 600;
+    }
+
+    /* Brand Breakdown Cards */
+    .brand-section {
+      margin-bottom: 28px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .brand-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .brand-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .brand-name {
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .brand-meta-badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .brand-metric-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      padding: 5px 0;
+      color: var(--text-secondary);
+    }
+    .brand-metric-val {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* Table Component */
+    .table-container {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+      overflow-x: auto;
+      margin-bottom: 28px;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    .data-table th {
+      background: var(--surface-raised);
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      white-space: nowrap;
+    }
+
+    .data-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      vertical-align: middle;
+    }
+
+    .data-table tr:hover {
+      background: var(--surface-raised);
+    }
+
+    .video-cell {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      max-width: 340px;
+    }
+
+    .video-thumb {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-xs);
+      background: var(--surface-interactive);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .video-info {
+      overflow: hidden;
+    }
+
+    .video-title {
+      font-weight: 600;
+      color: var(--text-primary);
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      margin-bottom: 4px;
+    }
+
+    .badges-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .badge-multiplier { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+    .badge-recipe { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+    .badge-affiliate { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+    .badge-editorial { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+
+    .badge-win { background: var(--status-success-soft); color: var(--status-success); }
+    .badge-weak { background: var(--status-danger-soft); color: var(--status-danger); }
+    .badge-immature { background: var(--status-warning-soft); color: var(--status-warning); }
+
+    .badge-meta { background: rgba(24, 119, 242, 0.15); color: #3b82f6; }
+    .badge-repliz { background: rgba(236, 72, 153, 0.15); color: #f472b6; }
+    .badge-disconnected { background: rgba(148, 163, 184, 0.15); color: #94a3b8; }
+
+    .score-badge {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+    }
+
+    /* Accounts Grid */
+    .accounts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    .account-item {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .account-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .account-name {
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .account-platform {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      border: 1px solid var(--status-success);
+      border-radius: var(--radius-sm);
+      padding: 12px 20px;
+      box-shadow: var(--shadow-modal);
+      display: none;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      z-index: 1000;
+    }
+
+    /* Responsiveness */
+    @media (max-width: 768px) {
+      body { padding: 16px; }
+      .filter-panel { flex-direction: column; align-items: stretch; }
+      .top-header { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header Bar -->
+  <header class="top-header">
+    <div class="header-titles">
+      <h1>
+        <span>📊</span> Analitik Performa Konten
+        <span class="badge badge-recipe" style="font-size: 12px; font-weight: normal;">Gelombang 1</span>
+      </h1>
+      <p>Pelaporan metrik lintas platform: Facebook via App Meta, Instagram, TikTok, YouTube & Threads via Repliz API</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" id="btnThemeToggle" title="Ganti Tema">🌓 Tema</button>
+      <button class="btn btn-primary" id="btnCollect" title="Tarik metrik terbaru">
+        <span id="collectSpinner" style="display:none;">⏳</span>
+        <span>⚡ Ambil Data Sekarang</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Filter Bar -->
+  <section class="filter-panel">
+    <div class="filter-group">
+      <label for="periodSelect">Rentang Pekan</label>
+      <select id="periodSelect" class="select-control">
+        <option value="7d" selected>7 Hari Terakhir</option>
+        <option value="14d">14 Hari Terakhir</option>
+        <option value="30d">30 Hari Terakhir</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label for="brandSelect">Filter Brand</label>
+      <select id="brandSelect" class="select-control">
+        <option value="all" selected>Semua Brand</option>
+        <option value="dapurbotani">Dapur Botani</option>
+        <option value="nutribake">NutriBake ID</option>
+        <option value="habitfolk">HabitFolk</option>
+        <option value="siasatsehat">Siasat Sehat</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label for="typeSelect">Jenis Video</label>
+      <select id="typeSelect" class="select-control">
+        <option value="all" selected>Semua Jenis</option>
+        <option value="multiplier">Multiplier</option>
+        <option value="resep">Resep Organik</option>
+        <option value="produk">Produk Afiliasi</option>
+        <option value="editorial">Editorial</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label for="platformSelect">Platform</label>
+      <select id="platformSelect" class="select-control">
+        <option value="all" selected>Semua Platform</option>
+        <option value="facebook">Facebook</option>
+        <option value="instagram">Instagram</option>
+        <option value="tiktok">TikTok</option>
+        <option value="youtube">YouTube</option>
+        <option value="threads">Threads</option>
+      </select>
+    </div>
+  </section>
+
+  <!-- Alert: Facebook Belum Terhubung ke App Meta -->
+  <div class="alert-box">
+    <div class="alert-icon">⚠️</div>
+    <div class="alert-body">
+      <h4>Halaman Facebook Belum Terhubung ke App Meta</h4>
+      <p>
+        Halaman <strong>HabitFolk</strong> dan <strong>Sedekah Al-Quran</strong> belum memiliki Page Access Token dari App Meta CF Studio. 
+        Metrik video Reels dan jangkauan organik Facebook membutuhkan izin langsung Graph API v25.0. 
+        Data saat ini berstatus <em>Belum Terhubung</em> (bukan angka 0 palsu).
+        <br>
+        <strong>Cara menghubungkan:</strong> Masuk ke <span class="action-link">Settings → Meta Publishing Accounts</span>, pilih halaman terkait dan otorisasi izin Graph API.
+      </p>
+    </div>
+  </div>
+
+  <!-- Executive Summary Cards -->
+  <section class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Total Tayangan (Views)</div>
+      <div class="stat-value">124.850</div>
+      <div class="stat-meta">
+        <span class="growth-up">↑ +18,4%</span>
+        <span>vs 7 hari sebelumnya</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Jangkauan (Reach)</div>
+      <div class="stat-value">88.420</div>
+      <div class="stat-meta">
+        <span class="growth-up">↑ +12,1%</span>
+        <span>vs 7 hari sebelumnya</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Interaksi</div>
+      <div class="stat-value">9.640</div>
+      <div class="stat-meta">
+        <span class="growth-up">↑ +24,8%</span>
+        <span>likes, komentar, shares, saves</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Pengikut Baru Bersih</div>
+      <div class="stat-value">+342</div>
+      <div class="stat-meta">
+        <span class="growth-up">↑ +8,5%</span>
+        <span>pertumbuhan followers net</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Video CF Studio Tayang</div>
+      <div class="stat-value">18 Video</div>
+      <div class="stat-meta">
+        <span>100% diproduksi otomatis</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ringkasan Per Brand -->
+  <section class="brand-section">
+    <h3 class="section-title">🏢 Performa Menurut Brand</h3>
+    <div class="brand-grid">
+      <!-- Dapur Botani -->
+      <div class="brand-card" data-brand="dapurbotani">
+        <div class="brand-card-header">
+          <span class="brand-name">🌿 Dapur Botani</span>
+          <span class="brand-meta-badge">6 Video Tayang</span>
+        </div>
+        <div class="brand-metric-row">
+          <span>Tayangan:</span>
+          <span class="brand-metric-val">58.420 <span class="growth-up" style="font-size:11px;">(+22%)</span></span>
+        </div>
+        <div class="brand-metric-row">
+          <span>Jangkauan:</span>
+          <span class="brand-metric-val">41.100</span>
+        </div>
+        <div class="brand-metric-row">
+          <span>Interaksi:</span>
+          <span class="brand-metric-val">4.890</span>
+        </div>
+        <div class="brand-metric-row">
+          <span>Pengikut Baru:</span>
+          <span class="brand-metric-val">+184</span>
+        </div>
+      </div>
+
+      <!-- NutriBake ID -->
+      <div class="brand-card" data-brand="nutribake">
+        <div class="brand-card-header">
+          <span class="brand-name">🥖 NutriBake ID</span>
+          <span class="brand-meta-badge">8 Video Tayang</span>
+        </div>
+        <div class="brand-metric-row">
+          <span>Tayangan:</span>
+          <span class="brand-metric-val">44.200 <span class="growth-up" style="font-size:11px;">(+14%)</span></span>
+        </div>
+        <div class="brand-metric-row">
+          <span>Jangkauan:</span>
+          <span class="brand-metric-val">32.900</span>
+        </div>
+        <div class="brand-metric-row">
+          <span>Interaksi:</span>
+          <span class="brand-metric-val">3.410</span>
+        </div>
+        <div class="brand-metric-row">
+          <span>Pengikut Baru:</span>
+          <span class="brand-metric-val">+112</span>
+        </div>
+      </div>
+
+      <!-- HabitFolk -->
+      <div class="brand-card" data-brand="habitfolk">
+        <div class="brand-card-header">
+          <span class="brand-name">☕ HabitFolk</span>
+          <span class="brand-meta-badge">4 Video Tayang</span>
+        </div>
+        <div class="brand-metric-row">
+          <span>Tayangan:</span>
+          <span class="brand-metric-val">22.230 <span class="growth-down" style="font-size:11px;">(-4%)</span></span>
+        </div>
+        <div class="brand-metric-row">
+          <span>Jangkauan:</span>
+          <span class="brand-metric-val">14.420</span>
+        </div>
+        <div class="brand-metric-row">
+          <span>Interaksi:</span>
+          <span class="brand-metric-val">1.340</span>
+        </div>
+        <div class="brand-metric-row">
+          <span>Pengikut Baru:</span>
+          <span class="brand-metric-val">+46</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tabel Performa Video -->
+  <section class="brand-section">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+      <h3 class="section-title" style="margin-bottom:0;">🎬 Peringkat Video & Skor Keterlibatan</h3>
+      <span style="font-size:12px; color:var(--text-muted);">Diurutkan berdasarkan Skor Keterlibatan Tertinggi</span>
+    </div>
+    
+    <div class="table-container">
+      <table class="data-table" id="postsTable">
+        <thead>
+          <tr>
+            <th>Video & Konten</th>
+            <th>Brand & Platform</th>
+            <th>Waktu Publikasi</th>
+            <th>Jangkauan / Views</th>
+            <th>Durasi Tonton</th>
+            <th>Klik Web</th>
+            <th>Interaksi</th>
+            <th>Skor</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Row 1: Menang (Resep Dapur Botani) -->
+          <tr data-brand="dapurbotani" data-type="resep" data-platform="instagram">
+            <td>
+              <div class="video-cell">
+                <div class="video-thumb">🥗</div>
+                <div class="video-info">
+                  <div class="video-title" title="Jus Detox Bit Wortel untuk Kulit Glowing">Jus Detox Bit Wortel untuk Kulit Glowing</div>
+                  <div class="badges-row">
+                    <span class="badge badge-recipe">Resep Organik</span>
+                    <span class="badge" style="background:var(--surface-interactive); color:var(--text-muted);">IG Reels</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div style="font-weight:600; color:var(--text-primary);">Dapur Botani</div>
+              <div class="badges-row" style="margin-top:2px;">
+                <span class="badge badge-repliz">Repliz API</span>
+              </div>
+            </td>
+            <td>
+              <div>20 Nov 2026</div>
+              <div style="font-size:11px; color:var(--text-muted);">19:30 WIB</div>
+            </td>
+            <td>
+              <div style="font-weight:600; color:var(--text-primary);">28.450 tayang</div>
+              <div style="font-size:11px; color:var(--text-muted);">19.200 jangkauan</div>
+            </td>
+            <td>
+              <div>18,4 detik</div>
+              <div style="font-size:11px; color:var(--status-success);">Lolos 64%</div>
+            </td>
+            <td>-</td>
+            <td>
+              <div>❤️ 1.840 &nbsp; 💬 142</div>
+              <div style="font-size:11px; color:var(--text-muted);">↗ 290 share &nbsp; 🔖 410 simpan</div>
+            </td>
+            <td>
+              <span class="score-badge">5.356</span>
+            </td>
+            <td>
+              <span class="badge badge-win">🏆 Menang</span>
+            </td>
+          </tr>
+
+          <!-- Row 2: Facebook Meta App (Dapur Botani) -->
+          <tr data-brand="dapurbotani" data-type="multiplier" data-platform="facebook">
+            <td>
+              <div class="video-cell">
+                <div class="video-thumb">🌿</div>
+                <div class="video-info">
+                  <div class="video-title" title="Hack Dapur 3 Menit: Kurkumin & Omega-3 Pereda Peradangan">Hack Dapur 3 Menit: Kurkumin & Omega-3 Pereda Peradangan</div>
+                  <div class="badges-row">
+                    <span class="badge badge-multiplier">Multiplier</span>
+                    <span class="badge" style="background:var(--surface-interactive); color:var(--text-muted);">FB Reels</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div style="font-weight:600; color:var(--text-primary);">Dapur Botani</div>
+              <div class="badges-row" style="margin-top:2px;">
+                <span class="badge badge-meta">Meta App (Graph v25.0)</span>
+              </div>
+            </td>
+            <td>
+              <div>19 Nov 2026</div>
+              <div style="font-size:11px; color:var(--text-muted);">14:15 WIB</div>
+            </td>
+            <td>
+              <div style="font-weight:600; color:var(--text-primary);">16.890 tayang</div>
+              <div style="font-size:11px; color:var(--text-muted);">12.400 jangkauan</div>
+            </td>
+            <td>
+              <div>14,2 detik</div>
+              <div style="font-size:11px; color:var(--text-muted);">Tot: 66,5 jam</div>
+            </td>
+            <td>
+              <span style="font-weight:600; color:var(--action-primary);">84 klik</span>
+            </td>
+            <td>
+              <div>❤️ 920 &nbsp; 💬 58</div>
+              <div style="font-size:11px; color:var(--text-muted);">↗ 88 share</div>
+            </td>
+            <td>
+              <span class="score-badge">1.702</span>
+            </td>
+            <td>
+              <span class="badge badge-win">🏆 Menang</span>
+            </td>
+          </tr>
+
+          <!-- Row 3: Produk Afiliasi TikTok (NutriBake ID) -->
+          <tr data-brand="nutribake" data-type="produk" data-platform="tiktok">
+            <td>
+              <div class="video-cell">
+                <div class="video-thumb">🍞</div>
+                <div class="video-info">
+                  <div class="video-title" title="Roti Sourdough Praktis Tanpa Uleni">Roti Sourdough Praktis Tanpa Uleni</div>
+                  <div class="badges-row">
+                    <span class="badge badge-affiliate">Produk Afiliasi</span>
+                    <span class="badge" style="background:var(--surface-interactive); color:var(--text-muted);">TikTok</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div style="font-weight:600; color:var(--text-primary);">NutriBake ID</div>
+              <div class="badges-row" style="margin-top:2px;">
+                <span class="badge badge-repliz">Repliz API</span>
+              </div>
+            </td>
+            <td>
+              <div>21 Nov 2026</div>
+              <div style="font-size:11px; color:var(--text-muted);">11:00 WIB</div>
+            </td>
+            <td>
+              <div style="font-weight:600; color:var(--text-primary);">12.140 tayang</div>
+              <div style="font-size:11px; color:var(--text-muted);">9.800 jangkauan</div>
+            </td>
+            <td>
+              <div>12,0 detik</div>
+              <div style="font-size:11px; color:var(--status-success);">Lolos 51%</div>
+            </td>
+            <td>
+              <span style="font-weight:600; color:var(--action-primary);">142 klik</span>
+            </td>
+            <td>
+              <div>❤️ 620 &nbsp; 💬 32</div>
+              <div style="font-size:11px; color:var(--text-muted);">↗ 45 share &nbsp; 🔖 112 simpan</div>
+            </td>
+            <td>
+              <span class="score-badge">1.673</span>
+            </td>
+            <td>
+              <span class="badge badge-immature">⏳ Belum Matang (&lt;72j)</span>
+            </td>
+          </tr>
+
+          <!-- Row 4: YouTube Shorts (NutriBake ID) -->
+          <tr data-brand="nutribake" data-type="editorial" data-platform="youtube">
+            <td>
+              <div class="video-cell">
+                <div class="video-thumb">🌾</div>
+                <div class="video-info">
+                  <div class="video-title" title="5 Tanda Ragi Sudah Mati Sebelum Dipakai">5 Tanda Ragi Sudah Mati Sebelum Dipakai</div>
+                  <div class="badges-row">
+                    <span class="badge badge-editorial">Editorial</span>
+                    <span class="badge" style="background:var(--surface-interactive); color:var(--text-muted);">Shorts</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div style="font-weight:600; color:var(--text-primary);">NutriBake ID</div>
+              <div class="badges-row" style="margin-top:2px;">
+                <span class="badge badge-repliz">Repliz API</span>
+              </div>
+            </td>
+            <td>
+              <div>18 Nov 2026</div>
+              <div style="font-size:11px; color:var(--text-muted);">08:00 WIB</div>
+            </td>
+            <td>
+              <div style="font-weight:600; color:var(--text-primary);">8.420 tayang</div>
+              <div style="font-size:11px; color:var(--text-muted);">-</div>
+            </td>
+            <td>
+              <div>22,5 detik</div>
+              <div style="font-size:11px; color:var(--text-muted);">Tot: 52,6 jam</div>
+            </td>
+            <td>-</td>
+            <td>
+              <div>❤️ 410 &nbsp; 💬 28</div>
+              <div style="font-size:11px; color:var(--text-muted);">↗ 18 share</div>
+            </td>
+            <td>
+              <span class="score-badge">584</span>
+            </td>
+            <td>
+              <span class="badge" style="background:var(--surface-interactive); color:var(--text-secondary);">Standar</span>
+            </td>
+          </tr>
+
+          <!-- Row 5: Facebook Belum Terhubung (HabitFolk) -->
+          <tr data-brand="habitfolk" data-type="editorial" data-platform="facebook">
+            <td>
+              <div class="video-cell">
+                <div class="video-thumb">☕</div>
+                <div class="video-info">
+                  <div class="video-title" title="Ritual Pagi 15 Menit Tanpa Ponsel">Ritual Pagi 15 Menit Tanpa Ponsel</div>
+                  <div class="badges-row">
+                    <span class="badge badge-editorial">Editorial</span>
+                    <span class="badge" style="background:var(--surface-interactive); color:var(--text-muted);">FB Video</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div style="font-weight:600; color:var(--text-primary);">HabitFolk</div>
+              <div class="badges-row" style="margin-top:2px;">
+                <span class="badge badge-disconnected">Belum Terhubung Meta</span>
+              </div>
+            </td>
+            <td>
+              <div>17 Nov 2026</div>
+              <div style="font-size:11px; color:var(--text-muted);">07:15 WIB</div>
+            </td>
+            <td>
+              <div style="color:var(--text-muted); font-style:italic;">Data belum ada</div>
+            </td>
+            <td>-</td>
+            <td>-</td>
+            <td>
+              <div style="color:var(--text-muted); font-style:italic;">Perlu hubungkan Meta</div>
+            </td>
+            <td>
+              <span class="score-badge" style="color:var(--text-muted);">-</span>
+            </td>
+            <td>
+              <span class="badge badge-weak">Perlu Ditautkan</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Status Akun & Sumber Data -->
+  <section class="brand-section">
+    <h3 class="section-title">🔗 Status Akun Publishing & Sumber Metrik</h3>
+    <div class="accounts-grid">
+      <!-- Akun 1 -->
+      <div class="account-item">
+        <div class="account-left">
+          <div class="account-name">Dapur Botani (Facebook)</div>
+          <div class="account-platform">Platform: Facebook Page &bull; Provider: Meta Graph API v25.0</div>
+        </div>
+        <div>
+          <span class="badge badge-meta">✓ Insights Aktif (Meta)</span>
+        </div>
+      </div>
+
+      <!-- Akun 2 -->
+      <div class="account-item">
+        <div class="account-left">
+          <div class="account-name">NutriBake ID (Facebook)</div>
+          <div class="account-platform">Platform: Facebook Page &bull; Provider: Meta Graph API v25.0</div>
+        </div>
+        <div>
+          <span class="badge badge-meta">✓ Insights Aktif (Meta)</span>
+        </div>
+      </div>
+
+      <!-- Akun 3 -->
+      <div class="account-item">
+        <div class="account-left">
+          <div class="account-name">Dapur Botani (Instagram)</div>
+          <div class="account-platform">Platform: Instagram Reels &bull; Provider: Repliz API Gold</div>
+        </div>
+        <div>
+          <span class="badge badge-repliz">✓ Insights Lengkap (Repliz)</span>
+        </div>
+      </div>
+
+      <!-- Akun 4 -->
+      <div class="account-item">
+        <div class="account-left">
+          <div class="account-name">NutriBake ID (TikTok)</div>
+          <div class="account-platform">Platform: TikTok &bull; Provider: Repliz API Gold</div>
+        </div>
+        <div>
+          <span class="badge badge-repliz">✓ Retention &amp; Skip Rate (Repliz)</span>
+        </div>
+      </div>
+
+      <!-- Akun 5 -->
+      <div class="account-item">
+        <div class="account-left">
+          <div class="account-name">NutriBake ID (YouTube)</div>
+          <div class="account-platform">Platform: YouTube Shorts &bull; Provider: Repliz API Gold</div>
+        </div>
+        <div>
+          <span class="badge badge-repliz">✓ Views &amp; Watch Time (Repliz)</span>
+        </div>
+      </div>
+
+      <!-- Akun 6 -->
+      <div class="account-item">
+        <div class="account-left">
+          <div class="account-name">HabitFolk (Facebook)</div>
+          <div class="account-platform">Platform: Facebook Page &bull; Provider: Repliz (Hanya Posting)</div>
+        </div>
+        <div>
+          <span class="badge badge-disconnected">⚠️ Belum Terhubung Meta App</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Feedback Toast -->
+<div class="toast" id="feedbackToast">
+  <span>✅</span>
+  <span id="toastMsg">Simulasi pengambilan metrik berhasil dijalankan.</span>
+</div>
+
+<script>
+  // Theme Toggle
+  const btnThemeToggle = document.getElementById('btnThemeToggle');
+  btnThemeToggle.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+    const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', nextTheme);
+  });
+
+  // Collect Button Simulation
+  const btnCollect = document.getElementById('btnCollect');
+  const spinner = document.getElementById('collectSpinner');
+  const toast = document.getElementById('feedbackToast');
+  const toastMsg = document.getElementById('toastMsg');
+
+  btnCollect.addEventListener('click', () => {
+    btnCollect.disabled = true;
+    spinner.style.display = 'inline-block';
+
+    setTimeout(() => {
+      btnCollect.disabled = false;
+      spinner.style.display = 'none';
+      toastMsg.textContent = 'Pengumpulan selesai: 6 akun diproses, 168 baris metrik harian dinormalisasi.';
+      toast.style.display = 'inline-flex';
+      setTimeout(() => { toast.style.display = 'none'; }, 4000);
+    }, 1200);
+  });
+
+  // Client-side Filtering
+  const brandSelect = document.getElementById('brandSelect');
+  const typeSelect = document.getElementById('typeSelect');
+  const platformSelect = document.getElementById('platformSelect');
+  const tableRows = document.querySelectorAll('#postsTable tbody tr');
+  const brandCards = document.querySelectorAll('.brand-card');
+
+  function applyFilters() {
+    const brand = brandSelect.value;
+    const type = typeSelect.value;
+    const platform = platformSelect.value;
+
+    // Filter Brand Cards
+    brandCards.forEach(card => {
+      if (brand === 'all' || card.getAttribute('data-brand') === brand) {
+        card.style.display = 'block';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+
+    // Filter Table Rows
+    tableRows.forEach(row => {
+      const rowBrand = row.getAttribute('data-brand');
+      const rowType = row.getAttribute('data-type');
+      const rowPlatform = row.getAttribute('data-platform');
+
+      const matchBrand = (brand === 'all' || rowBrand === brand);
+      const matchType = (type === 'all' || rowType === type);
+      const matchPlatform = (platform === 'all' || rowPlatform === platform);
+
+      if (matchBrand && matchType && matchPlatform) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    });
+  }
+
+  brandSelect.addEventListener('change', applyFilters);
+  typeSelect.addEventListener('change', applyFilters);
+  platformSelect.addEventListener('change', applyFilters);
+</script>
+
+</body>
+</html>

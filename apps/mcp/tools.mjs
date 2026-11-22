@@ -2695,6 +2695,75 @@ export function createCfStudioServer(rawRequest) {
     }
   );
 
+  register(
+    'cf_get_account_metrics',
+    'Get aggregated content performance metrics for publishing accounts over a period (7d, 14d, 30d) with previous-period growth comparison. Requires scope: content:read.',
+    {
+      brand_id: z.string().trim().min(1).optional().describe('Optional brand ID filter'),
+      platform: z.enum(['facebook', 'instagram', 'tiktok', 'youtube', 'threads']).optional().describe('Optional platform filter'),
+      period: z.enum(['7d', '14d', '30d']).default('7d').describe('Analytics period window'),
+      account_id: z.string().trim().min(1).optional().describe('Optional specific publishing account ID')
+    },
+    true,
+    async ({ brand_id, platform, period, account_id }) => {
+      const qs = new URLSearchParams();
+      if (brand_id) qs.set('brandId', brand_id);
+      if (platform) qs.set('platform', platform);
+      if (period) qs.set('period', period);
+      if (account_id) qs.set('accountId', account_id);
+      const queryStr = qs.toString();
+      return request(`/api/v2/analytics/accounts${queryStr ? `?${queryStr}` : ''}`);
+    }
+  );
+
+  register(
+    'cf_get_post_metrics',
+    'Get post-level performance metrics, watch duration, and engagement scores for published content. Requires scope: content:read.',
+    {
+      brand_id: z.string().trim().min(1).optional().describe('Optional brand ID filter'),
+      platform: z.enum(['facebook', 'instagram', 'tiktok', 'youtube', 'threads']).optional().describe('Optional platform filter'),
+      tag: z.enum(['h24', 'h72', 'd7', 'latest']).default('latest').describe('Snapshot age tag'),
+      limit: z.number().int().min(1).max(200).default(50).describe('Max posts to return'),
+      offset: z.number().int().min(0).default(0).describe('Offset for pagination'),
+      sort_by: z.enum(['engagement_score', 'views', 'reach', 'likes', 'comments', 'shares', 'saves', 'avg_watch_sec', 'post_created_at']).default('engagement_score').describe('Sort field'),
+      order: z.enum(['desc', 'asc']).default('desc').describe('Sort order'),
+      insight_available: z.boolean().optional().describe('Filter by insight availability')
+    },
+    true,
+    async ({ brand_id, platform, tag, limit, offset, sort_by, order, insight_available }) => {
+      const qs = new URLSearchParams();
+      if (brand_id) qs.set('brandId', brand_id);
+      if (platform) qs.set('platform', platform);
+      if (tag) qs.set('tag', tag);
+      if (limit) qs.set('limit', String(limit));
+      if (offset) qs.set('offset', String(offset));
+      if (sort_by) qs.set('sortBy', sort_by);
+      if (order) qs.set('order', order);
+      if (insight_available !== undefined) qs.set('insightAvailable', String(insight_available));
+      const queryStr = qs.toString();
+      return request(`/api/v2/analytics/posts${queryStr ? `?${queryStr}` : ''}`);
+    }
+  );
+
+  register(
+    'cf_collect_metrics_now',
+    'Trigger immediate collection of performance metrics from Meta Graph API and Repliz for all active accounts or a specific account. Requires scope: content:publish.',
+    {
+      dry_run: z.boolean().default(false).describe('When true, tests API connectivity and counts without writing to database'),
+      account_id: z.string().trim().min(1).optional().describe('Optional specific publishing account ID to collect')
+    },
+    false,
+    async ({ dry_run, account_id }) => {
+      return request('/api/v2/analytics/collect', {
+        method: 'POST',
+        body: {
+          dryRun: dry_run,
+          accountId: account_id
+        }
+      });
+    }
+  );
+
   return server;
 }
 

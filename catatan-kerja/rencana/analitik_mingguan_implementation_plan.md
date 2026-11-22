@@ -6,7 +6,8 @@ Instruksi agent: [antigravity_analitik_mingguan_instructions.md](antigravity_ana
 Referensi API: `https://api.repliz.com/public-json` (OpenAPI 3.0)
 
 > **GERBANG:**
-> 1. **Fase 0 (uji baca API)** wajib dilaporkan dulu. Bila `insight` Facebook kosong atau ID posting tidak cocok, berhenti dan laporkan.
+> 0. **Status 22 Nov 2026:** Fase 0 selesai. Baca **bagian 3B** dulu, ia menggantikan bagian lain bila bertentangan.
+> 1. ~~Fase 0 (uji baca API) wajib dilaporkan dulu~~: sudah dilaporkan, ID cocok, jalur Meta terbukti.
 > 2. **Fase 5 (halaman Performa di web app)** wajib mockup HTML dulu dan menunggu persetujuan pengguna.
 
 ---
@@ -82,6 +83,56 @@ Kelebihan jalur ini: untuk Reels Facebook ada **rata-rata durasi tonton**, yang 
 - `repliz-metrics-collector.js` → ganti nama logis menjadi pengambil gabungan: per akun Facebook Repliz, cari akun `meta` dengan nama/page yang sama (pencocokan `display_name` + konfirmasi `generatedId` Repliz = `facebook_page_id`). Kalau ada dan izinnya lengkap → sumber `meta_api`, kalau tidak → `repliz`.
 - Kolom `source` (`repliz` / `meta_api`) di `account_metric_daily` dan `post_metric_snapshots`.
 - `publishing_accounts.insights_status` juga diisi untuk akun `meta` (`ok` / `missing_permission`).
+
+---
+
+## 3B. Hasil Fase 0 & Keputusan Arsitektur Final (22 Nov 2026)
+
+Sumber: [LAPORAN_UJI_INSIGHT_FACEBOOK_2_HALAMAN.md](../laporan/LAPORAN_UJI_INSIGHT_FACEBOOK_2_HALAMAN.md) dan [LAPORAN_UJI_INSIGHT_INSTAGRAM.md](../laporan/LAPORAN_UJI_INSIGHT_INSTAGRAM.md). **Bagian ini menggantikan bagian lain di dokumen ini bila bertentangan.**
+
+### 3B.1 Sumber data per platform
+
+| Platform | Sumber | Alasan (hasil uji) |
+|---|---|---|
+| **Facebook** | **App Meta pengguna** (Graph API v25.0, token halaman `ContentFlow`) | Meta berhasil: angka halaman, posting, dan Reels (termasuk durasi tonton). Repliz Facebook mengembalikan HTTP 200 tetapi **semua angka 0** |
+| **Instagram** | **Repliz** | Repliz lengkap (views, reach, like, komentar, share, simpan, durasi tonton, skip rate). Meta ditolak error `(#10)` karena token tidak punya `instagram_manage_insights`. Izin itu **tidak perlu ditambah sekarang** |
+| TikTok, YouTube, Threads | Repliz | Tidak diuji ulang, tidak terkena masalah izin Facebook. Diverifikasi saat Fase 1 |
+
+Saat izin `instagram_manage_insights` suatu hari ditambahkan, ID posting Instagram sudah identik antara Meta dan Repliz, jadi pergantian sumber mudah.
+
+### 3B.2 Koreksi terhadap rencana awal
+
+| No | Rencana awal | Koreksi berdasarkan uji |
+|---|---|---|
+| K1 | Kolom `external_post_id` dipakai untuk mencari posting | Untuk posting lewat Repliz kolom itu **kosong (NULL)**. Pakai `COALESCE(external_post_id, provider_state_json->>'postId')` di semua kueri |
+| K2 | Akun "perlu reconnect" dideteksi dari `summary` bernilai null | Repliz Facebook mengembalikan **angka 0, bukan null**. Facebook tidak lagi bergantung ke Repliz, dan untuk sumber Repliz berlaku aturan nol mencurigakan (K3) |
+| K3 | – | **Aturan "nol mencurigakan":** bila posting berumur lebih dari 24 jam dan semua metrik utama (`views`, `reach`, `like`, `comment`, `share`) bernilai 0 dari Repliz, simpan sebagai `NULL` dengan `insight_available=false`, jangan simpan 0. Nol benar-benar bisa terjadi untuk video baru, tapi bukan untuk semuanya sekaligus |
+| K4 | Pencocokan akun Facebook Repliz dengan akun `meta` lewat nama tampilan | **Cocokkan lewat ID halaman:** bagian depan `postId` (`{page_id}_{post_id}`) = `publishing_accounts.facebook_page_id` akun `meta`. Tidak perlu pencocokan nama |
+| K5 | Cek izin lewat `/me/permissions` | Token yang tersimpan adalah **Page Access Token**. Gunakan `GET /debug_token`. `/me/permissions` dan field `tasks` tidak berlaku untuk token halaman |
+| K6 | Ambil `video_id` Reels dari field `attachments` | Field itu **sudah deprecated**. Ambil dari permalink (`/reel/{video_id}`) atau field `object_id` |
+| K7 | Metrik halaman `page_impressions_unique` | Mengembalikan null. Pakai `page_media_view` |
+| K8 | Satuan durasi tonton seragam | Meta memberi **milidetik**, Repliz memberi **detik**. Normalisasi ke detik di `repliz-metrics-normalizer.js` |
+
+### 3B.3 Metrik Facebook lewat Meta (terbukti berhasil)
+
+| Tingkat | Metrik | Kolom tujuan |
+|---|---|---|
+| Halaman (harian) | `page_media_view`, `page_views_total`, `page_post_engagements`, `page_follows`, `page_daily_follows_unique` | `account_metric_daily.views`, `profile_views`, `engagement`, `followers_total`, `new_follows` |
+| Posting | `post_media_view`, `post_total_media_view_unique`, `post_clicks`, `post_reactions_by_type_total` | `views`, `reach`, `clicks`, `reactions` |
+| Posting (field dasar) | `reactions.summary`, `comments.summary`, `shares` | `reactions`, `comments`, `shares` |
+| Reels (`/{video-id}/video_insights`) | `blue_reels_play_count`, `post_video_avg_time_watched` (ms), `post_video_view_time` (ms) | `views` (pemutaran Reels), `avg_watch_sec`, `total_watch_sec` |
+
+### 3B.4 Cakupan halaman: yang jadi kendala
+
+App Meta saat ini hanya terhubung ke **3 halaman Facebook**: Dapur Botani, NutriBake ID, Sedekah Al-Quran Al-Izzah. Halaman Facebook lain di Repliz (Siasat Sehat, NutriBlend ID, Ruang Akustik ID, Solusi Thermal ID, Jasa Insulasi ID, HabitFolk, SnackLab ID, BakeCraft ID, Cerita Sehat, Wa'y Siyasi) **belum** terhubung ke app Meta, sehingga insight Facebook-nya kosong.
+
+- **Gelombang 1 (langsung):** Dapur Botani dan NutriBake ID (dua brand CFA utama) + semua akun Instagram, TikTok, YouTube, Threads lewat Repliz.
+- **Gelombang 2 (setelah Gelombang 1 stabil):** pengguna menambahkan halaman lain ke app Meta lewat menu Settings → Meta Publishing Accounts (pemilih halaman sudah ada). Satu kali login ke app Meta dengan semua halaman dicentang, tanpa reconnect satu per satu di Repliz. Pengambil data otomatis mengenali akun baru lewat K4.
+- Untuk halaman Facebook yang belum ada di Meta, pengambil menyimpan `insights_status = 'unavailable'` dan laporan menulis "Facebook belum terhubung ke app Meta" (bukan angka 0).
+
+### 3B.5 Perubahan nama arsitektur
+
+`lib/repliz-metrics-collector.js` diganti nama menjadi **`lib/metrics-collector.js`** (pengambil gabungan). Tambahan: `lib/meta-insights-client.js` (Graph: `debug_token`, insight halaman, insight posting, `video_insights`). Kolom `source` (`repliz` / `meta_api`) wajib di `account_metric_daily` dan `post_metric_snapshots`. `insights_status` memakai nilai `ok` / `unavailable` / `suspect_zero` (menggantikan `needs_reconnect`).
 
 ---
 
@@ -328,13 +379,12 @@ Pembagi 0 atau null → skor null. Label `menang`/`lemah` dihitung di skrip CFA 
 
 ## Execution Task List
 
-### Fase 0: Uji baca API (wajib lapor)
-- [ ] Skrip `scripts/test-repliz-analytics-readonly.mjs` (kunci dari `tenant_settings`/env, tidak dicetak)
-- [ ] Panggil statistik akun untuk 1 halaman Facebook per tenant aktif, catat apakah `summary` terisi
-- [ ] Ambil 3 `publishing_jobs` published terbaru, panggil statistik posting dengan `external_post_id`, catat apakah cocok (bukan 404) dan apakah `insight` terisi
-- [ ] Panggil `GET /public/content` 1 halaman, bandingkan format `id` dengan `external_post_id`
-- [ ] **Uji jalur app Meta (3A)** di server Staging (token didekripsi di server, tidak dicetak): untuk akun `meta` Dapur Botani & NutriBake ID, cek izin token (`read_insights`, `pages_read_engagement`), panggil insight halaman 7 hari, dan insight 3 posting yang dipublish lewat Repliz (pakai `external_post_id`). Catat metrik yang benar-benar tersedia di versi Graph yang dipakai, termasuk Reels (`video_insights`)
-- [ ] Lapor ke pengguna: daftar halaman yang **perlu reconnect**, kecocokan ID, contoh angka dari **Repliz vs app Meta** untuk 1 video yang sama. **Berhenti bila ID tidak cocok atau token Meta tidak punya izin insight**
+### Fase 0: Uji baca API (SELESAI 22 Nov 2026, lihat bagian 3B)
+- [x] Uji Facebook 2 halaman lewat Meta dan Repliz (LAPORAN_UJI_INSIGHT_FACEBOOK_2_HALAMAN.md)
+- [x] Uji Instagram 2 akun lewat Meta dan Repliz (LAPORAN_UJI_INSIGHT_INSTAGRAM.md)
+- [x] Kecocokan ID posting terbukti (Facebook `{page_id}_{post_id}`, Instagram ID angka)
+- [x] Keputusan sumber: Facebook = Meta, Instagram/TikTok/YouTube/Threads = Repliz
+- [ ] Uji ringan TikTok, YouTube, Threads lewat Repliz (1 akun per platform, hanya membaca) agar normalizer teruji dengan angka riil. Dikerjakan di awal Fase 1
 
 ### Fase 1: Fondasi data
 - [ ] Fungsi baru di `lib/repliz-client.js`

@@ -1,6 +1,6 @@
 # Daftar Isi Dokumen Kerja (catatan-kerja)
 
-Terakhir diperbarui: 20 November 2026
+Terakhir diperbarui: 22 November 2026
 
 ## USULAN
 
@@ -87,6 +87,7 @@ Terakhir diperbarui: 20 November 2026
 | `antigravity_scraper_foto_produk_instructions.md` | Instruksi Antigravity: Perbaikan Scraper Foto Produk (pilih foto produk saja, tanpa orang) |
 | `antigravity_scraper_foto_produk_revisi_01.md` | Revisi 01: Scraper Foto Produk (setelah v2.49.1) + Tinjau & Ganti Foto di UI |
 | `antigravity_uji_insight_2_halaman.md` | Instruksi Antigravity: Uji Insight Facebook 2 Halaman (Hanya Membaca) |
+| `antigravity_uji_insight_instagram.md` | Instruksi Antigravity: Uji Insight Instagram 2 Akun via Meta Graph & Repliz (Hanya Membaca) |
 | `antigravity_video_studio_finishing_render_instructions.md` | Instruksi Antigravity: Render Penuh dengan Finishing Template di Video Studio |
 | `antigravity_video_studio_sumber_kampanye_instructions.md` | Instruksi Antigravity: Sumber Video dari Kampanye Aktif di Video Studio |
 | `antigravity_vo_narasi_instructions.md` | Instruksi Agent: Perbaikan Narasi VO (Kampanye Pilar & Multiplier) |
@@ -132,6 +133,9 @@ Terakhir diperbarui: 20 November 2026
 
 | Nama File | Ringkasan / Judul |
 |---|---|
+| [LAPORAN_UJI_INSIGHT_FACEBOOK_2_HALAMAN.md](laporan/LAPORAN_UJI_INSIGHT_FACEBOOK_2_HALAMAN.md) | Laporan Uji Insight Facebook 2 Halaman (Hanya Membaca): Dapur Botani & NutriBake ID via App Meta (Graph API v25.0) vs Repliz API |
+| [LAPORAN_UJI_INSIGHT_INSTAGRAM.md](laporan/LAPORAN_UJI_INSIGHT_INSTAGRAM.md) | Laporan Uji Insight Instagram 2 Akun (Hanya Membaca): @dapur_botani & @nutribake_id via App Meta (Graph API v25.0) vs Repliz API |
+| [LAPORAN_UJI_INSIGHT_TIKTOK_YOUTUBE_THREADS.md](laporan/LAPORAN_UJI_INSIGHT_TIKTOK_YOUTUBE_THREADS.md) | Laporan Uji Insight TikTok, YouTube, dan Threads via Repliz API (Hanya Membaca) |
 | `LAPORAN_UJI_CFA_PTGIM.md` | Laporan Uji CFA PT GIM Week 2 — 4 video (Reno/Maya), temuan & rekomendasi go-live (+ lembar kontak `uji_cfa_ptgim_*_20261117.jpg`, termasuk uji ulang Maya) |
 | `LAPORAN_CHARACTER_LOCK_CUSTOM_STORYBOARD.md` | Laporan: Character Lock untuk Custom Storyboard (CFA) v2.50.2 — terbukti di Staging |
 | `LAPORAN_KARTU_MENU_DAN_PERAPIAN_FOLDER.md` | Laporan Pelaksanaan: Kartu Menu & Perapian Folder Proyek |
