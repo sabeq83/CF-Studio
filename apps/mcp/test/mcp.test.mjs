@@ -76,6 +76,7 @@ test('discovery of all CF Studio tools across 7 studio pillars and legacy aliase
 
   // Pilar 4: Viral Deconstruction
   assert.ok(toolNames.has('cf_ingest_viral_video'));
+  assert.ok(toolNames.has('cf_start_deconstruct'));
   assert.ok(toolNames.has('cf_list_deconstructed_assets'));
   assert.ok(toolNames.has('cf_search_blueprints'));
   assert.ok(toolNames.has('cf_get_deconstructed_blueprint'));

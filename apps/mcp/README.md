@@ -35,7 +35,7 @@ HTTP endpoint: `/mcp`, authenticated using `Authorization: Bearer <CF_STUDIO_MCP
 
 ---
 
-## 3. Registered Tools Catalog (61 Tools across 7 Studio Pillars)
+## 3. Registered Tools Catalog (62 Tools across 7 Studio Pillars)
 
 ### A. Discovery, Identity & Status
 - `cf_whoami`: Read configured CF Studio operator identity, tenant, and scopes. (Legacy alias: `makna_whoami`)
@@ -89,6 +89,7 @@ HTTP endpoint: `/mcp`, authenticated using `Authorization: Bearer <CF_STUDIO_MCP
 
 ### G. Pillar 4: Viral Research & Multiplier Lab (Deconstruction Engine)
 - `cf_ingest_viral_video`: Ingest viral video URL into Deconstruct Lab for AI pattern extraction.
+- `cf_start_deconstruct`: Start AI deconstruction (download, Gemini video analysis, blueprint extraction) for ingested assets with status `saved` or `failed` (max 50 per call; **uses Gemini quota** — avoid mass runs).
 - `cf_list_deconstructed_assets`: Search finished deconstructed viral video blueprints.
 - `cf_search_blueprints`: Search viral blueprints by Facebook Reel URL, TikTok URL, UUID, or keyword to bind to schedules.
 - `cf_get_deconstructed_blueprint`: Get detailed viral pattern breakdown and storyboard of a deconstructed asset.
