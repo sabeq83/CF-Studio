@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.58.0 — Blueprint-Product Smart Matcher, promo_role & Autopilot 2+2 (23/11/2026)
+- Tambah klasifikasi promo_role (alat_dapur, bahan_resep, lainnya) dan sinkronisasi otomatis ke matcher
+- Tambah engine indeks blueprint_product_matches serta UI Deconstruct Lab, Multiplier Labs, dan Auto Pipeline
+- Tambah mode jadwal Auto Smart Match 2+2 anti-duplikat dan perluasan tool MCP
+
 ## V2.57.13 — Pengaman Auto-Repair VO Kosong & Fallback Key Dinamis Multiplier (23/11/2026)
 - Tambah fallback regex pencocokan key VO dinamis di extractSceneVoText
 - Tambah 1x auto-repair otomatis untuk adegan VO kosong saat remaking sebelum T2I/TTS
