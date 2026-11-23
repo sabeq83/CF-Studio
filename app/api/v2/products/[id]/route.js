@@ -5,8 +5,8 @@ import { deleteProduct, getProductById, updateProduct } from '@/lib/product-repo
 import { isRetryableGeminiError } from '@/lib/gemini';
 import { validateSingleProductUpdate, validateRawProductImage } from '@/lib/product-validation';
 import { saveRawProductImage } from '@/lib/product-image-storage';
-import { pgQuery } from '@/lib/db-pg';
 import { PROMO_ROLES } from '@/lib/blueprint-product-matcher-shared';
+import { syncProductPromoRoleInMatches } from '@/lib/blueprint-product-matcher';
 
 export const dynamic = 'force-dynamic';
 
@@ -164,11 +164,8 @@ export const PUT = withTenantContext(async (req, { params }) => {
       if (!updated) {
         return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 });
       }
-      if (filteredUpdate.promo_role && PROMO_ROLES.includes(filteredUpdate.promo_role)) {
-        await pgQuery(
-          `UPDATE blueprint_product_matches SET promo_role = $1, updated_at = CURRENT_TIMESTAMP WHERE tenant_id = $2 AND product_id = $3`,
-          [filteredUpdate.promo_role, tenantId, id]
-        ).catch(() => {});
+      if (filteredUpdate.promo_role !== undefined) {
+        await syncProductPromoRoleInMatches(tenantId, updated).catch(() => {});
       }
       return NextResponse.json({ success: true, message: 'Product updated', data: updated });
     }
@@ -198,15 +195,19 @@ export const PUT = withTenantContext(async (req, { params }) => {
       }
     }
 
-    if (updateData.promo_role !== undefined && updateData.promo_role !== null && updateData.promo_role !== '') {
-      const normalizedRole = String(updateData.promo_role).trim().toLowerCase();
-      if (!PROMO_ROLES.includes(normalizedRole)) {
-        return NextResponse.json({
-          success: false,
-          error: 'promo_role hanya menerima "alat_dapur", "bahan_resep", atau "lainnya"'
-        }, { status: 400 });
+    if (updateData.promo_role !== undefined) {
+      if (updateData.promo_role === null || updateData.promo_role === '') {
+        updateData.promo_role = null;
+      } else {
+        const normalizedRole = String(updateData.promo_role).trim().toLowerCase();
+        if (!PROMO_ROLES.includes(normalizedRole)) {
+          return NextResponse.json({
+            success: false,
+            error: 'promo_role hanya menerima "alat_dapur", "bahan_resep", atau "lainnya"'
+          }, { status: 400 });
+        }
+        updateData.promo_role = normalizedRole;
       }
-      updateData.promo_role = normalizedRole;
     }
 
     // active_photo validation (only clean_photo_url | raw_photo_url)
@@ -234,11 +235,8 @@ export const PUT = withTenantContext(async (req, { params }) => {
 
     const updated = await updateProduct(id, updateData);
     if (!updated) return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 });
-    if (updateData.promo_role && PROMO_ROLES.includes(updateData.promo_role)) {
-      await pgQuery(
-        `UPDATE blueprint_product_matches SET promo_role = $1, updated_at = CURRENT_TIMESTAMP WHERE tenant_id = $2 AND product_id = $3`,
-        [updateData.promo_role, tenantId, id]
-      ).catch(() => {});
+    if (updateData.promo_role !== undefined) {
+      await syncProductPromoRoleInMatches(tenantId, updated).catch(() => {});
     }
     return NextResponse.json({ success: true, message: 'Product updated', data: updated });
   } catch (error) {

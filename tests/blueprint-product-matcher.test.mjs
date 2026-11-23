@@ -95,4 +95,10 @@ test('scoreBlueprintAgainstProduct memberi skor tinggi ke alat dan bahan yang re
     { id: 'pe_1784449324420_841', product_name: 'Borosilicate Teko Kaca dengan Tutup Kayu dan Infuser', category: 'Peralatan Dapur' }
   );
   assert.equal(blockedScore.score, 0);
+
+  // Produk dengan override manual promo_role='lainnya' tetap diklasifikasikan 'lainnya' meski namanya mengandung bahan resep
+  assert.equal(
+    classifyProductPromoRole({ product_name: 'Matcha Kapsul Ekstrak', category: 'Minuman & Teh', promo_role: 'lainnya' }),
+    'lainnya'
+  );
 });
