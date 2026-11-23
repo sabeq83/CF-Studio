@@ -22,7 +22,7 @@
 - [x] **Tahap 4 (API & Repo)**: Perluas `lib/product-repository.js`, `lib/product-catalog-service.js`, `lib/product-validation.js`, `app/api/v2/products/route.js`, `app/api/v2/products/[id]/route.js`, `lib/db.js`, `app/api/v2/deconstruct/route.js`, serta tambah `app/api/v2/deconstruct/matches/route.js`
 - [x] **Tahap 5 (Autopilot 2+2 & MCP)**: Tambah mode `auto_smart_match` + `target_promo_role` (`alat_dapur`/`bahan_resep`) + anti-duplikat (14 hari blueprint, 4 hari produk) di `lib/auto-pipeline-scheduler-runner.js` & `lib/autonomous-engine.js`, serta perluas tool `apps/mcp/tools.mjs`
 - [x] **Tahap 6 (UI React/Next.js — pasca persetujuan mockup)**: Implementasikan perubahan UI di `app/deconstruct/page.js`, `app/products/page.js`, `app/products/ProductDatabaseModal.js`, `app/components/campaign-forms/MultiplierConfigurationForm.js`, dan `app/auto-pipeline/page.js` (100% Semantic CSS Tokens)
-- [ ] **Tahap 7 (Verifikasi & Deploy Dev)**: Tambah unit test `tests/blueprint-product-matcher.test.mjs`, jalankan `PG_SEARCH_PATH=dev node --test tests/blueprint-product-matcher.test.mjs`, `DISABLE_AUTO_MIGRATIONS=true PG_SEARCH_PATH=dev npm run build`, backfill indeks di Dev, perbarui kartu menu di `sot/menus/kartu/`, push branch `fitur/smart-matcher-2plus2`, dan deploy ke **Dev (`5020/7020`)**
+- [x] **Tahap 7 (Verifikasi & Deploy Dev)**: Tambah unit test `tests/blueprint-product-matcher.test.mjs`, jalankan `PG_SEARCH_PATH=dev node --test tests/blueprint-product-matcher.test.mjs`, `DISABLE_AUTO_MIGRATIONS=true PG_SEARCH_PATH=dev npm run build`, backfill indeks di Dev, perbarui kartu menu di `sot/menus/kartu/`, push branch `fitur/smart-matcher-2plus2`, dan deploy ke **Dev (`5020/7020`)**
 
 ---
 
