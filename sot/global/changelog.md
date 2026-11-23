@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.57.10 — Alat MCP cf_start_deconstruct (23/11/2026)
+- Alat MCP baru untuk memulai dekonstruksi aset yang sudah diingest
+- Pemeriksaan status sebelum antre
+- Tes paritas MCP
+
 ## V2.57.9 — Finalisasi Layout Mobile Tahap 3: Seluruh 16 Modul Tersisa (21/11/2026)
 - Penguatan CSS Sistemik: Proteksi tabel universal bebas overflow (`display: block`, `max-width: 100%`, `overflow-x: auto`), modal & drawer otomatis bertransformasi menjadi bottom sheet (`.modal-backdrop-responsive`, `border-radius: 20px 20px 0 0`, `max-height: 92dvh`), serta pengamanan input, select, dan textarea (16px font, `max-width: 100%`, `min-width: 0`).
 - Modul Planning: Responsivitas penuh pada Content Planner, Recipe Library, Deconstruct Lab, Preset Manager, Visual Identity Studio v2, Universe Manager, dan Brand Profile Manager. Modal builder dan starter picker terkonversi menjadi bottom sheet.
