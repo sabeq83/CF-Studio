@@ -8,6 +8,7 @@ import {
   resolveCampaignProductPhotoPath,
   resolveCampaignProductReference
 } from '../lib/product-reference-resolver.js';
+import { resolveCampaignProductPhotoMeta } from '../lib/product-photo-policy.js';
 import {
   buildProductSnapshot,
   buildAutonomousBridgingConfig
@@ -164,4 +165,28 @@ test('P2: buildMultiplierStartFrameRequest throws ProductReferenceUnavailableErr
   } finally {
     fs.rmSync(tmpRoot, { recursive: true, force: true });
   }
+});
+
+test('P3: resolveCampaignProductPhotoMeta returns accurate source labels and paths for bridging preview', () => {
+  const prod = {
+    id: 'pe_p3',
+    product_name: 'Beorganik Peanut Butter',
+    raw_photo_url: '/uploads/products/raw.png',
+    clean_photo_url: '/uploads/products/clean.jpg',
+    active_photo: 'raw_photo_url'
+  };
+
+  const rawMeta = resolveCampaignProductPhotoMeta(prod);
+  assert.equal(rawMeta.path, '/uploads/products/raw.png');
+  assert.equal(rawMeta.sourceField, 'raw_photo_url');
+  assert.match(rawMeta.sourceLabel, /Foto Asli/);
+
+  const cleanMeta = resolveCampaignProductPhotoMeta({ ...prod, active_photo: 'clean_photo_url' });
+  assert.equal(cleanMeta.path, '/uploads/products/clean.jpg');
+  assert.equal(cleanMeta.sourceField, 'clean_photo_url');
+  assert.match(cleanMeta.sourceLabel, /Foto Bersih/);
+
+  const fallbackMeta = resolveCampaignProductPhotoMeta(null, ['/uploads/products/snap.jpg']);
+  assert.equal(fallbackMeta.path, '/uploads/products/snap.jpg');
+  assert.equal(fallbackMeta.sourceField, 'fallback');
 });

@@ -11,6 +11,9 @@ import Link from 'next/link';
 import { GRID_LAYOUT_COORDINATES } from '@/lib/core/GridCoordinates';
 import { buildMultiplierSchedulePairs } from '@/lib/multiplier-pairing';
 import { buildRecipeProductSubmitFields } from '@/lib/recipe-product-matcher-shared';
+import BridgingProductReferenceCard from '../components/BridgingProductReferenceCard';
+import { resolveCampaignProductPhotoPath } from '@/lib/product-photo-policy';
+import { resolvePhotoStatusBadge } from '@/lib/product-card-photo-view';
 
 const LAYOUT_PRESET_METADATA = {
   3: [
@@ -4817,7 +4820,8 @@ export default function AutoPipelinePage() {
                           ) : filteredInstantMultiplierProducts.map((prod) => {
                             const activeProdId = instantMultiplierProductId || catalogProducts[0]?.id;
                             const isSelected = activeProdId === prod.id;
-                            const imgUrl = prod.clean_photo_url || prod.photo_url;
+                            const imgUrl = resolveCampaignProductPhotoPath(prod);
+                            const photoStatusBadge = resolvePhotoStatusBadge(prod.photo_status);
                             return (
                               <div
                                 key={prod.id}
@@ -4861,8 +4865,23 @@ export default function AutoPipelinePage() {
                                   <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={prod.product_name}>
                                     {prod.product_name}
                                   </div>
-                                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                    {prod.category || 'Produk Katalog'}
+                                  <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+                                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                      {prod.category || 'Produk Katalog'}
+                                    </span>
+                                    {photoStatusBadge && (
+                                      <span style={{
+                                        fontSize: '0.6rem',
+                                        fontWeight: 700,
+                                        padding: '0px 5px',
+                                        borderRadius: '999px',
+                                        background: photoStatusBadge.tone === 'success' ? 'var(--status-success-soft)' : 'var(--status-warning-soft)',
+                                        color: photoStatusBadge.tone === 'success' ? 'var(--status-success)' : 'var(--status-warning)',
+                                        border: `1px solid ${photoStatusBadge.tone === 'success' ? 'var(--status-success)' : 'var(--status-warning)'}`
+                                      }}>
+                                        {photoStatusBadge.shortLabel}
+                                      </span>
+                                    )}
                                   </div>
                                 </div>
                                 <div style={{
@@ -4891,6 +4910,7 @@ export default function AutoPipelinePage() {
                           const selProd = catalogProducts.find(p => p.id === (instantMultiplierProductId || catalogProducts[0]?.id));
                           if (!selBp || !selProd) return null;
                           return (
+                            <>
                             <div style={{
                               background: 'var(--status-success-soft)',
                               border: '1px solid var(--status-success)',
@@ -4909,6 +4929,12 @@ export default function AutoPipelinePage() {
                               </span>
                               <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--status-success)' }}>Product-Aware Hook ON</span>
                             </div>
+                            <BridgingProductReferenceCard
+                              product={selProd}
+                              bridgeSegments={activePresetConfig?.product_bridging?.bridge_segments}
+                              isBridgingActive={activePresetConfig?.product_bridging?.is_bridging_active !== false}
+                            />
+                            </>
                           );
                         })()}
                       </div>
@@ -8473,7 +8499,8 @@ export default function AutoPipelinePage() {
                               <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', padding: '0.6rem' }}>Tidak ada produk yang sesuai filter.</div>
                             ) : filteredSchedMultiplierProducts.map((prod) => {
                               const isProdChecked = schedMultiplierProductIds.includes(prod.id);
-                              const imgUrl = prod.clean_photo_url || prod.photo_url;
+                              const imgUrl = resolveCampaignProductPhotoPath(prod);
+                              const photoStatusBadge = resolvePhotoStatusBadge(prod.photo_status);
                               return (
                                 <div
                                   key={prod.id}
@@ -8512,8 +8539,21 @@ export default function AutoPipelinePage() {
                                     <div style={{ fontSize: '0.76rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={prod.product_name}>
                                       {prod.product_name}
                                     </div>
-                                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                      {prod.category || 'Produk Katalog'}
+                                    <div style={{ fontSize: '0.64rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.3rem', flexWrap: 'wrap' }}>
+                                      <span>{prod.category || 'Produk Katalog'}</span>
+                                      {photoStatusBadge && (
+                                        <span style={{
+                                          fontSize: '0.58rem',
+                                          fontWeight: 700,
+                                          padding: '0px 4px',
+                                          borderRadius: '999px',
+                                          background: photoStatusBadge.tone === 'success' ? 'var(--status-success-soft)' : 'var(--status-warning-soft)',
+                                          color: photoStatusBadge.tone === 'success' ? 'var(--status-success)' : 'var(--status-warning)',
+                                          border: `1px solid ${photoStatusBadge.tone === 'success' ? 'var(--status-success)' : 'var(--status-warning)'}`
+                                        }}>
+                                          {photoStatusBadge.shortLabel}
+                                        </span>
+                                      )}
                                     </div>
                                   </div>
                                   <div style={{
@@ -8536,6 +8576,17 @@ export default function AutoPipelinePage() {
                               );
                             })}
                           </div>
+                          {schedMultiplierProductIds.length > 0 && (() => {
+                            const primarySchedProd = catalogProducts.find(p => p.id === schedMultiplierProductIds[0]);
+                            if (!primarySchedProd) return null;
+                            return (
+                              <BridgingProductReferenceCard
+                                compact
+                                product={primarySchedProd}
+                                note={schedMultiplierProductIds.length > 1 ? `(${schedMultiplierProductIds.length} produk dipilih untuk jadwal; pratinjau menampilkan produk pertama.)` : null}
+                              />
+                            );
+                          })()}
                         </div>
                       )}
 

@@ -1,6 +1,7 @@
 'use client';
 
 import Sidebar from '../../components/Sidebar';
+import BridgingProductReferenceCard from '../../components/BridgingProductReferenceCard';
 import { useEffect, useState, useRef, Suspense } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { normalizeAudioConfig, syncAudioConfigKeyValue } from '@/lib/multiplier-audio-config';
@@ -1402,9 +1403,12 @@ function CampaignDetailPageContent() {
                                     )}
 
                                     {/* Start Frame Grid Preview */}
-                                    {bridging.visualMode === 'hybrid_lock' && (
-                                      <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: 8, padding: 20 }}>
-                                         <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    {(bridgingConfig?.visualMode || bridging?.visualMode) === 'hybrid_lock' && (() => {
+                                      const sfBridgePlan = resolveBridgePlan(readBridgeInputs(bridgingConfig, { target_clips_count: storyboard.length || 4 }, { defaultActive: true }));
+                                      const hasBridgingProduct = Boolean(task.target_product_id || task.product_ref || snap?.product_image_url || bridgingConfig?.productRefImagePath);
+                                      return (
+                                      <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: 8, padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                         <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
                                            <span style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                                              🖼️ Grid Preview Start Frame Gambar (T2I)
                                            </span>
@@ -1419,8 +1423,8 @@ function CampaignDetailPageContent() {
                                                  style={{
                                                    fontSize: '0.72rem',
                                                    padding: '4px 10px',
-                                                   background: isBatchRunning ? 'rgba(155, 89, 182, 0.4)' : 'rgba(155, 89, 182, 0.15)',
-                                                   borderColor: 'rgba(155, 89, 182, 0.3)',
+                                                   background: isBatchRunning ? 'var(--status-purple-soft)' : 'var(--surface-raised)',
+                                                   borderColor: 'var(--status-purple)',
                                                    color: 'var(--text-primary)',
                                                    cursor: isBatchRunning ? 'not-allowed' : 'pointer'
                                                  }}
@@ -1433,8 +1437,18 @@ function CampaignDetailPageContent() {
                                              );
                                            })()}
                                          </div>
-                                        
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 16, marginTop: 12 }}>
+
+                                         {hasBridgingProduct && sfBridgePlan.active && (
+                                           <BridgingProductReferenceCard
+                                             compact
+                                             product={task.product_ref || (snap?.product_image_url ? { product_name: snap.product_name, photo_url: snap.product_image_url } : null)}
+                                             fallbackPath={bridgingConfig?.productRefImagePath || snap?.product_image_url}
+                                             bridgeSegments={bridgingConfig?.bridge_segments}
+                                             isBridgingActive={sfBridgePlan.active}
+                                           />
+                                         )}
+
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 14 }}>
                                           {storyboard.map((clip, cidx) => {
                                             const t2iImagesList = task.t2i_images_json ? JSON.parse(task.t2i_images_json) : [];
                                             const imgPath = t2iImagesList[cidx];
@@ -1442,11 +1456,40 @@ function CampaignDetailPageContent() {
                                             const isRegening = regeneratingT2I[taskKey];
                                             const isReplacing = replacingSF[taskKey];
                                             const isBatchRunning = task.regenerate_start_frames_status === 'running' || !!batchRegeneratingSF[task.id];
+                                            const isBridge = sfBridgePlan.isProductClip(cidx + 1);
+                                            const segRole = sfBridgePlan.getClipRole(cidx + 1);
 
                                             return (
-                                              <div key={cidx} style={{ display: 'flex', flexDirection: 'column', gap: 8, background: 'var(--overlay-subtle)', padding: 10, borderRadius: 6, border: '1px solid var(--border)' }}>
-                                                <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--accent-light)' }}>
-                                                  Klip #{cidx + 1}
+                                              <div
+                                                key={cidx}
+                                                style={{
+                                                  display: 'flex',
+                                                  flexDirection: 'column',
+                                                  gap: 8,
+                                                  background: isBridge ? 'var(--surface)' : 'var(--overlay-subtle)',
+                                                  padding: 10,
+                                                  borderRadius: 6,
+                                                  border: isBridge ? '1.5px solid var(--status-purple)' : '1px solid var(--border)'
+                                                }}
+                                              >
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 4 }}>
+                                                  <span style={{ fontSize: '0.72rem', fontWeight: 700, color: isBridge ? 'var(--status-purple)' : 'var(--accent-light)' }}>
+                                                    Klip #{cidx + 1}
+                                                  </span>
+                                                  <span style={{
+                                                    fontSize: '0.62rem',
+                                                    fontWeight: 700,
+                                                    padding: '1px 6px',
+                                                    borderRadius: 999,
+                                                    background: isBridge ? 'var(--status-purple-soft)' : 'var(--status-info-soft)',
+                                                    color: isBridge ? 'var(--status-purple)' : 'var(--status-info)',
+                                                    border: `1px solid ${isBridge ? 'var(--status-purple)' : 'var(--status-info)'}`
+                                                  }}>
+                                                    {isBridge ? (segRole === 'recall' ? 'Bridge Recall' : 'Bridge Intro') : 'Non-Bridging'}
+                                                  </span>
+                                                </div>
+                                                <div style={{ fontSize: '0.64rem', color: 'var(--text-muted)', lineHeight: 1.3 }}>
+                                                  {isBridge ? 'category: subject + Identity Lock' : 'Tanpa foto produk (bebas kemasan)'}
                                                 </div>
                                                 <div style={{ width: '100%', height: 160, borderRadius: 4, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)' }}>
                                                   {imgPath ? (
@@ -1499,7 +1542,8 @@ function CampaignDetailPageContent() {
                                           })}
                                         </div>
                                       </div>
-                                    )}
+                                      );
+                                    })()}
 
                                     {/* Bulk Copy Toolbar */}
                                     <div style={{

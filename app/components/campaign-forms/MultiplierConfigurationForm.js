@@ -6,7 +6,9 @@ import { captureCanonicalFormData } from '@/lib/campaign-configuration/capture';
 import Sidebar from '../Sidebar';
 import VisualIdentitySelector from '../VisualIdentitySelector';
 import BridgeSegmentsEditor from './BridgeSegmentsEditor';
+import BridgingProductReferenceCard from '../BridgingProductReferenceCard';
 import { normalizeBridgePayload } from '@/lib/bridging/bridge-plan';
+import { resolveCampaignProductPhotoPath } from '@/lib/product-photo-policy';
 import { useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { getWordsPerClipOptions, getDefaultWordsPerClip, VIDEO_MODELS } from '@/lib/words-per-clip-presets';
@@ -921,7 +923,7 @@ function MultiplierLabPageContent({ mode = 'direct', onCapture, onSuccess, onCan
                           (combinationRows.length > 0 && combinationRows.every(r => r.campaign_type === 'pure_storytelling'));
 
       const dbProduct = targetProductId ? products.find(p => p.id === targetProductId) : null;
-      const dbPhotoUrl = dbProduct ? (dbProduct.cleaned_photo_url || dbProduct.clean_photo_url || dbProduct.raw_photo_url) : null;
+      const dbPhotoUrl = dbProduct ? resolveCampaignProductPhotoPath(dbProduct) : null;
 
       const cleanCampaignName = campaignName.trim() || `[ MULTIPLIER ] - ${accountName ? accountName + ' - ' : ''}${editorialTopic.trim() || 'Kampanye Multiplier'}`;
       const targetInitialStatus = submitMode === 'draft' ? 'draft' : 'pending_resolution';
@@ -2596,19 +2598,18 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit} style={{ disp
 
                           {visualMode === 'hybrid_lock' && (() => {
                             const dbProduct = targetProductId ? products.find(p => p.id === targetProductId) : null;
-                            const dbPhotoUrl = dbProduct ? (dbProduct.cleaned_photo_url || dbProduct.clean_photo_url || dbProduct.raw_photo_url) : null;
+                            const dbPhotoUrl = dbProduct ? resolveCampaignProductPhotoPath(dbProduct) : null;
 
                             return (
                               <div style={{ background: 'var(--overlay-subtle)', padding: 16, borderRadius: 8, border: '1px solid var(--border)' }}>
                                 <h4 style={{ margin: '0 0 10px', fontSize: '0.85rem', fontWeight: 700 }}>📸 Foto Acuan Produk (Optional)</h4>
-                                {dbPhotoUrl ? (
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: 16, background: "var(--surface-interactive)", padding: 10, borderRadius: 6, border: '1px solid var(--border-subtle)' }}>
-                                    <img src={dbPhotoUrl} alt="Db Ref" style={{ width: 50, height: 50, objectFit: 'cover', borderRadius: 4, border: '1px solid var(--border)' }} />
-                                    <div>
-                                      <div style={{ fontSize: '0.78rem', color: 'var(--success)', fontWeight: 600 }}>🔒 Terkunci (Menggunakan Foto Pustaka)</div>
-                                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Produk: {dbProduct.product_name}</div>
-                                    </div>
-                                  </div>
+                                {dbProduct ? (
+                                  <BridgingProductReferenceCard
+                                    product={dbProduct}
+                                    fallbackPath={dbPhotoUrl}
+                                    bridgeSegments={bridgeSegments}
+                                    isBridgingActive={isBridgingActive}
+                                  />
                                 ) : (
                                   <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                                     <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} id="product-ref-upload-acc" />
@@ -3588,7 +3589,7 @@ return (
 
               <div style={{ padding: 24, overflowY: 'auto' }}>
                 {(() => {
-                  const displayPhotoUrl = selectedProductForModal.cleaned_photo_url || selectedProductForModal.clean_photo_url || selectedProductForModal.raw_photo_url;
+                  const displayPhotoUrl = resolveCampaignProductPhotoPath(selectedProductForModal);
 
                   let uspPoints = [];
                   if (selectedProductForModal.usp_points_json) {
