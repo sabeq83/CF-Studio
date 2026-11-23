@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.57.12 — Hotfix Normalisasi VO Multiplier & Sinkronisasi Simpan (23/11/2026)
+- Normalisasi alias dan typo key VO Gemini (termasuk narrating_transcript) menjadi narration_transcript dan narration
+- Sinkronkan field narration dan narration_transcript saat simpan editan di Multiplier Labs (update-creative)
+- Baca editan narration di worker TTS, filter klaim pre-TTS, Native Veo, dan export Markdown dengan guard error VO kosong
+
 ## V2.57.11 — Opsi Campaign Multiplier & Recipe Labs di Preset Manager (23/11/2026)
 - Lengkapi opsi campaign_kinds (multiplier_campaign & recipe_labs) di form Preset Manager saat buat/edit/clone preset
 - Sertakan multiplier_campaign saat Simpan Form sebagai Preset di Multiplier Labs
