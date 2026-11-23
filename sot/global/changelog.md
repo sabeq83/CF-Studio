@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.57.13 — Pengaman Auto-Repair VO Kosong & Fallback Key Dinamis Multiplier (23/11/2026)
+- Tambah fallback regex pencocokan key VO dinamis di extractSceneVoText
+- Tambah 1x auto-repair otomatis untuk adegan VO kosong saat remaking sebelum T2I/TTS
+- Tahan task di waiting_approval dengan pesan jelas bila VO masih kosong setelah auto-repair
+
 ## V2.57.12 — Hotfix Normalisasi VO Multiplier & Sinkronisasi Simpan (23/11/2026)
 - Normalisasi alias dan typo key VO Gemini (termasuk narrating_transcript) menjadi narration_transcript dan narration
 - Sinkronkan field narration dan narration_transcript saat simpan editan di Multiplier Labs (update-creative)
