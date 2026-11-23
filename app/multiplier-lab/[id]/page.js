@@ -7,6 +7,7 @@ import { normalizeAudioConfig, syncAudioConfigKeyValue } from '@/lib/multiplier-
 import { GEMINI_VOICES, MINIMAX_VOICES, MINIMAX_ENGLISH_VOICES } from '@/lib/voice-constants';
 import { resolveBridgePlan, readBridgeInputs } from '@/lib/bridging/bridge-plan';
 import { getMultiplierWaitingBadge } from '@/lib/vo-status-ui';
+import { extractSceneVoText } from '@/lib/tts-text-sanitizer';
 
 function renderPhaseBadge(task) {
   let text = '⚡ Fase 1 : Pending';
@@ -287,7 +288,7 @@ function CampaignDetailPageContent() {
               const p = prompts[idx] || {};
               return {
                 ...scene,
-                narration: scene.narration_transcript || scene.voiceover || scene.narration || '',
+                narration: extractSceneVoText(scene, { preferEdited: true }),
                 t2i_prompt: p.t2i_prompt || '',
                 i2v_prompt: p.i2v_prompt || p.t2v_prompt || ''
               };
@@ -1694,7 +1695,13 @@ function CampaignDetailPageContent() {
                                                 value={clip.narration || ''}
                                                 onChange={(e) => {
                                                   const updated = [...storyboard];
-                                                  updated[cidx].narration = e.target.value;
+                                                  const val = e.target.value;
+                                                  updated[cidx] = {
+                                                    ...updated[cidx],
+                                                    narration: val,
+                                                    narration_transcript: val,
+                                                    ...(typeof updated[cidx]?.voiceover === 'string' ? { voiceover: val } : {})
+                                                  };
                                                   setEditedStoryboards(prev => ({ ...prev, [task.id]: updated }));
                                                 }}
                                                 rows={2}

@@ -6,6 +6,7 @@ Terakhir diperbarui: 20 November 2026
 
 | Nama File | Ringkasan / Judul |
 |---|---|
+| [USULAN_PERBAIKAN_VO_MULTIPLIER_TYPO_DAN_SIMPAN.md](usulan/USULAN_PERBAIKAN_VO_MULTIPLIER_TYPO_DAN_SIMPAN.md) | Analisa & Usulan Perbaikan: VO Klip 6 kosong akibat typo Gemini `narrating_transcript` dan tetap error MiniMax `2013` setelah disimpan karena `update-creative` & worker TTS tidak membaca `scene.narration` (`mul_261123_qrz4yq`) |
 | [USULAN_PERBAIKAN_PRESET_MULTIPLIER_AUTOPIPELINE.md](usulan/USULAN_PERBAIKAN_PRESET_MULTIPLIER_AUTOPIPELINE.md) | Analisa & Usulan Perbaikan: Preset Video Multiplier di Auto Pipeline hanya muncul Multiplier Remix, opsi Campaign Multiplier & Recipe Labs hilang di checkbox Preset Manager, serta `campaign_kinds` Save as Preset di Multiplier Labs |
 | [USULAN_OPSI_FOTO_PROFESIONAL_UNGGAH_PRODUK.md](usulan/USULAN_OPSI_FOTO_PROFESIONAL_UNGGAH_PRODUK.md) | Usulan & Mockup: Opsi Foto Profesional Siap Pakai pada Modal Ganti Foto Produk (Tab Unggah Sendiri) tanpa hapus latar paksa, antrean worker, dan AI regenerasi |
 | [USULAN_PERBAIKAN_SINKRONISASI_KURASI_RADAR_PRODUK.md](usulan/USULAN_PERBAIKAN_SINKRONISASI_KURASI_RADAR_PRODUK.md) | Analisis & Usulan Perbaikan: Sinkronisasi Deskripsi dan USP Hasil Kurasi Radar Produk ke Database Produk (`product_extractions`), proteksi manual lock pada AI Enrichment, dan sinkronisasi re-edit |
