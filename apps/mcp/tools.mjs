@@ -196,6 +196,10 @@ function buildScheduleItemPayload(args = {}, { isUpdate = false } = {}) {
     visual_identity_preset_id,
     bridging_mode,
     product_aware_angle,
+    selection_mode,
+    target_promo_role,
+    lookback_blueprint_days,
+    lookback_product_days,
     recipe_detail_in_caption,
     pairing_mode,
     post_objective,
@@ -231,6 +235,10 @@ function buildScheduleItemPayload(args = {}, { isUpdate = false } = {}) {
     ...(visual_identity_preset_id !== undefined ? { visual_identity_preset_id } : {}),
     ...(bridging_mode !== undefined ? { bridging_mode } : {}),
     ...(product_aware_angle !== undefined ? { product_aware_angle } : {}),
+    ...(selection_mode !== undefined ? { selection_mode } : {}),
+    ...(target_promo_role !== undefined ? { target_promo_role } : {}),
+    ...(lookback_blueprint_days !== undefined ? { lookback_blueprint_days } : {}),
+    ...(lookback_product_days !== undefined ? { lookback_product_days } : {}),
     ...(recipe_detail_in_caption !== undefined ? { recipe_detail_in_caption } : {}),
     ...(pairing_mode !== undefined ? { pairing_mode } : {}),
     ...(post_objective !== undefined ? { post_objective } : {}),
@@ -1358,6 +1366,10 @@ export function createCfStudioServer(rawRequest) {
     deconstruct_asset_id: z.string().max(100).optional(),
     bridging_mode: z.enum(['select_existing', 'product_aware_angle', 'bridge_injection', 'none']).optional(),
     product_aware_angle: z.boolean().optional(),
+    selection_mode: z.enum(['manual', 'auto_smart_match']).optional(),
+    target_promo_role: z.enum(['alat_dapur', 'bahan_resep', 'any']).optional(),
+    lookback_blueprint_days: z.number().int().min(1).max(90).optional(),
+    lookback_product_days: z.number().int().min(1).max(30).optional(),
     pairing_mode: z.enum(['single_product', 'rotating_products', 'no_product']).optional(),
     post_objective: z.enum(['personal_product', 'affiliate_recommendation', 'pure_organic']).optional(),
     account_id: z.string().max(100).optional(),
@@ -1896,10 +1908,13 @@ export function createCfStudioServer(rawRequest) {
 
   register(
     'cf_list_deconstructed_assets',
-    'Search finished deconstructed viral video blueprints.',
+    'Search finished deconstructed viral video blueprints with optional Brand Fit and Promo Role smart matches.',
     {
       q: z.string().max(200).optional(),
       niche: z.string().max(100).optional(),
+      brand_id: z.string().max(100).optional(),
+      promo_role: z.enum(['all', 'alat_dapur', 'bahan_resep']).optional(),
+      include_matches: z.boolean().default(true),
       limit: z.number().int().min(1).max(50).default(20)
     },
     true,
@@ -1915,19 +1930,28 @@ export function createCfStudioServer(rawRequest) {
 
   register(
     'cf_search_blueprints',
-    'Search viral deconstruction blueprints by Facebook Reel URL, TikTok URL, UUID, niche, or topic keyword to retrieve the blueprint UUID and metadata for auto pipeline schedule binding.',
+    'Search viral deconstruction blueprints by Facebook Reel URL, TikTok URL, UUID, niche, or topic keyword with optional Brand Fit and Promo Role recommendations.',
     {
       query: z.string().trim().min(1).max(500),
       niche: z.string().max(100).optional(),
+      brand_id: z.string().max(100).optional(),
+      promo_role: z.enum(['all', 'alat_dapur', 'bahan_resep']).optional(),
+      include_matches: z.boolean().default(true),
       limit: z.number().int().min(1).max(50).default(10)
     },
     true,
-    ({ query, niche, limit }) =>
-      request(
-        `/api/v2/deconstruct?assets=true&q=${encodeURIComponent(query)}&limit=${limit}${
-          niche ? `&niche=${encodeURIComponent(niche)}` : ''
-        }`
-      )
+    ({ query, niche, brand_id, promo_role, include_matches, limit }) => {
+      const qs = new URLSearchParams({
+        assets: 'true',
+        q: query,
+        limit: String(limit),
+        ...(niche ? { niche } : {}),
+        ...(brand_id ? { brand_id } : {}),
+        ...(promo_role ? { promo_role } : {}),
+        include_matches: String(include_matches !== false),
+      });
+      return request(`/api/v2/deconstruct?${qs.toString()}`);
+    }
   );
 
   register(

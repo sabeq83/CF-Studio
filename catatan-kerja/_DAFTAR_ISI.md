@@ -1,11 +1,14 @@
 # Daftar Isi Dokumen Kerja (catatan-kerja)
 
-Terakhir diperbarui: 20 November 2026
+Terakhir diperbarui: 23 November 2026
 
 ## USULAN
 
 | Nama File | Ringkasan / Judul |
 |---|---|
+| [USULAN_SMART_MATCHER_DAN_KUOTA_2PLUS2_MULTIPLIER.md](usulan/USULAN_SMART_MATCHER_DAN_KUOTA_2PLUS2_MULTIPLIER.md) | Usulan Solusi 3 Lapisan: Blueprint–Product Smart Matcher (Alat Dapur vs Bahan Resep) dan Kuota Harian 2+2 Video Multiplier untuk `nutribake`, `dapurbotani`, dan `siasatsehat` |
+| [DAFTAR_30_ALAT_DAPUR_BLUEPRINT_20K_500K.md](usulan/DAFTAR_30_ALAT_DAPUR_BLUEPRINT_20K_500K.md) | Daftar 30 Produk Alat Dapur & Alat Masak (Rp 20K–500K) berbasis audit 213 blueprint Deconstruction Lab & katalog untuk bridging `nutribake`, `dapurbotani`, dan `siasatsehat` |
+| [DAFTAR_30_ALAT_DAPUR_MASUK_DB.csv](usulan/DAFTAR_30_ALAT_DAPUR_MASUK_DB.csv) | Tabel CSV 30 Produk Alat Dapur hasil Apify MCP yang sudah diperkaya & diinput ke Product Database `default_tenant` (`pe_...`, harga, rating, status enrichment & clean photo) |
 | [USULAN_PERBAIKAN_VO_MULTIPLIER_TYPO_DAN_SIMPAN.md](usulan/USULAN_PERBAIKAN_VO_MULTIPLIER_TYPO_DAN_SIMPAN.md) | Analisa & Usulan Perbaikan: VO Klip 6 kosong akibat typo Gemini `narrating_transcript` dan tetap error MiniMax `2013` setelah disimpan karena `update-creative` & worker TTS tidak membaca `scene.narration` (`mul_261123_qrz4yq`) |
 | [USULAN_PERBAIKAN_PRESET_MULTIPLIER_AUTOPIPELINE.md](usulan/USULAN_PERBAIKAN_PRESET_MULTIPLIER_AUTOPIPELINE.md) | Analisa & Usulan Perbaikan: Preset Video Multiplier di Auto Pipeline hanya muncul Multiplier Remix, opsi Campaign Multiplier & Recipe Labs hilang di checkbox Preset Manager, serta `campaign_kinds` Save as Preset di Multiplier Labs |
 | [USULAN_OPSI_FOTO_PROFESIONAL_UNGGAH_PRODUK.md](usulan/USULAN_OPSI_FOTO_PROFESIONAL_UNGGAH_PRODUK.md) | Usulan & Mockup: Opsi Foto Profesional Siap Pakai pada Modal Ganti Foto Produk (Tab Unggah Sendiri) tanpa hapus latar paksa, antrean worker, dan AI regenerasi |
@@ -172,7 +175,8 @@ Terakhir diperbarui: 20 November 2026
 
 | File | Ringkasan |
 |---|---|
-| [implementation_plan.md](../implementation_plan.md) | Rencana aktif `main`: Produksi Bertahap, Pemulihan Otomatis & Notifikasi URGENT (CFA Bagian A + Hotfix v2.54.1) |
+| [implementation_plan.md](../implementation_plan.md) | Rencana aktif `fitur/smart-matcher-2plus2`: Blueprint–Product Smart Matcher, Peran Produk (`promo_role`), Mockup UI & Autopilot Kuota 2+2 Video Multiplier |
+| [multiplier_vo_auto_repair_arsip_20261123.md](rencana/multiplier_vo_auto_repair_arsip_20261123.md) | Arsip Implementation Plan: Pengaman Auto-Repair VO Kosong & Fallback Key Dinamis Multiplier (dirilis v2.57.13) |
 | [enrich_vision_kemasan_implementation_plan.md](rencana/enrich_vision_kemasan_implementation_plan.md) | Arsip Implementation Plan: Enrich AI Multimodal Vision & Deteksi Kemasan Akurat (dirilis v2.55.0) |
 | [scraper_foto_galeri_r02_implementation_plan.md](rencana/scraper_foto_galeri_r02_implementation_plan.md) | Arsip Implementation Plan: Scraper Foto Galeri & Rubrik E-Commerce Revisi 02 Bagian B S5–S9 (dirilis v2.55.0) |
 | [aktifkan_batch_scraper_implementation_plan_arsip_20261118.md](rencana/aktifkan_batch_scraper_implementation_plan_arsip_20261118.md) | Arsip Implementation Plan: Batch Scraper Aktif Kembali & Tahap 1B (v2.54.0, 18 Nov 2026) |

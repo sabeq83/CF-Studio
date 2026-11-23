@@ -29,6 +29,9 @@ function MultiplierLabPageContent({ mode = 'direct', onCapture, onSuccess, onCan
   const [selectedProductIds, setSelectedProductIds] = useState([]);
   const [combinationRows, setCombinationRows] = useState([]);
   const [nicheFilter, setNicheFilter] = useState('');
+  const [bpMatchBrandFilter, setBpMatchBrandFilter] = useState('');
+  const [bpMatchRoleFilter, setBpMatchRoleFilter] = useState('');
+  const [blueprintRecommendations, setBlueprintRecommendations] = useState({ alat_dapur: [], bahan_resep: [], loading: false });
   const [niches, setNiches] = useState([]);
   const [selectedBlueprintForModal, setSelectedBlueprintForModal] = useState(null);
   const [productSearchQuery, setProductSearchQuery] = useState('');
@@ -493,10 +496,18 @@ function MultiplierLabPageContent({ mode = 'direct', onCapture, onSuccess, onCan
     }
   };
 
-  const fetchAssets = async (query = '', niche = '') => {
+  const fetchAssets = async (query = '', niche = '', brandId = bpMatchBrandFilter, promoRole = bpMatchRoleFilter) => {
     setLoadingAssets(true);
     try {
-      const res = await fetch(`/api/v2/deconstruct?assets=true&q=${encodeURIComponent(query)}&niche=${encodeURIComponent(niche)}`);
+      const qs = new URLSearchParams({
+        assets: 'true',
+        q: query,
+        niche,
+        limit: '40',
+        ...(brandId ? { brand_id: brandId } : {}),
+        ...(promoRole ? { promo_role: promoRole } : {}),
+      });
+      const res = await fetch(`/api/v2/deconstruct?${qs.toString()}`);
       const data = await res.json();
       if (data.success) {
         setAssets(data.assets || []);
@@ -507,6 +518,35 @@ function MultiplierLabPageContent({ mode = 'direct', onCapture, onSuccess, onCan
       setLoadingAssets(false);
     }
   };
+
+  useEffect(() => {
+    const bpId = selectedAssetId || selectedBlueprintIds[0] || '';
+    if (!bpId) {
+      setBlueprintRecommendations({ alat_dapur: [], bahan_resep: [], loading: false });
+      return;
+    }
+    let cancelled = false;
+    setBlueprintRecommendations(prev => ({ ...prev, loading: true }));
+    const brandParam = selectedBrandId || bpMatchBrandFilter || '';
+    fetch(`/api/v2/deconstruct/matches?blueprint_id=${encodeURIComponent(bpId)}&brand_id=${encodeURIComponent(brandParam)}`)
+      .then(r => r.json())
+      .then(d => {
+        if (cancelled) return;
+        if (d.success && d.grouped) {
+          setBlueprintRecommendations({
+            alat_dapur: d.grouped.alat_dapur || [],
+            bahan_resep: d.grouped.bahan_resep || [],
+            loading: false,
+          });
+        } else {
+          setBlueprintRecommendations({ alat_dapur: [], bahan_resep: [], loading: false });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setBlueprintRecommendations({ alat_dapur: [], bahan_resep: [], loading: false });
+      });
+    return () => { cancelled = true; };
+  }, [selectedAssetId, selectedBlueprintIds, selectedBrandId, bpMatchBrandFilter]);
 
   const generateCombinationRows = () => {
     let rows = [];
@@ -1158,18 +1198,18 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit} style={{ disp
                     📹 Pilih Blueprint Video Target ({workflowMode === 'multi_blueprint_one_product' || workflowMode === 'multi_blueprint_one_angle' ? 'Bisa Pilih Banyak' : 'Pilih Satu'})
                   </label>
 
-                  <div style={{ display: 'flex', gap: 12, marginBottom: 12, marginTop: 8 }}>
+                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 12, marginTop: 8 }}>
                     <input
                       type="text"
                       className="form-input"
-                      style={{ fontSize: '0.8rem', flex: 2 }}
+                      style={{ fontSize: '0.8rem', flex: '2 1 220px' }}
                       placeholder="🔍 Cari blueprint berdasarkan URL, niche, tags, resume..."
                       value={assetSearchQuery}
                       onChange={e => setAssetSearchQuery(e.target.value)}
                     />
                     <select
                       className="form-input"
-                      style={{ fontSize: '0.8rem', flex: 1 }}
+                      style={{ fontSize: '0.8rem', flex: '1 1 130px' }}
                       value={nicheFilter}
                       onChange={e => setNicheFilter(e.target.value)}
                     >
@@ -1178,9 +1218,40 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit} style={{ disp
                         <option key={n} value={n}>{n}</option>
                       ))}
                     </select>
+                    <select
+                      aria-label="Filter Brand Fit Blueprint"
+                      className="form-input"
+                      style={{ fontSize: '0.8rem', flex: '1 1 130px' }}
+                      value={bpMatchBrandFilter}
+                      onChange={e => {
+                        const val = e.target.value;
+                        setBpMatchBrandFilter(val);
+                        fetchAssets(assetSearchQuery, nicheFilter, val, bpMatchRoleFilter);
+                      }}
+                    >
+                      <option value="">-- Brand Fit --</option>
+                      {brandProfiles.map(b => (
+                        <option key={b.id} value={b.id}>{b.brand_name}</option>
+                      ))}
+                    </select>
+                    <select
+                      aria-label="Filter Jenis Bridging Blueprint"
+                      className="form-input"
+                      style={{ fontSize: '0.8rem', flex: '1 1 130px' }}
+                      value={bpMatchRoleFilter}
+                      onChange={e => {
+                        const val = e.target.value;
+                        setBpMatchRoleFilter(val);
+                        fetchAssets(assetSearchQuery, nicheFilter, bpMatchBrandFilter, val);
+                      }}
+                    >
+                      <option value="">-- Semua Bridging --</option>
+                      <option value="alat_dapur">Alat Dapur</option>
+                      <option value="bahan_resep">Bahan Resep</option>
+                    </select>
                     <button
                       type="button"
-                      onClick={() => fetchAssets(assetSearchQuery, nicheFilter)}
+                      onClick={() => fetchAssets(assetSearchQuery, nicheFilter, bpMatchBrandFilter, bpMatchRoleFilter)}
                       className="btn btn-secondary"
                       style={{ fontSize: '0.8rem', padding: '6px 14px' }}
                     >
@@ -1232,10 +1303,25 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit} style={{ disp
                               boxShadow: isSelected ? "0 0 10px var(--surface-interactive)" : 'none'
                             }}
                           >
-                            <div style={{ display: 'flex', justify: 'space-between', alignItems: 'flex-start' }}>
-                              <span style={{ fontSize: '0.62rem', background: "var(--surface-interactive)", padding: '2px 6px', borderRadius: 4, textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700 }}>
-                                niche: {a.niche || 'General'}
-                              </span>
+                            <div style={{ display: 'flex', justify: 'space-between', alignItems: 'flex-start', gap: 6, flexWrap: 'wrap' }}>
+                              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', alignItems: 'center' }}>
+                                <span style={{ fontSize: '0.62rem', background: "var(--surface-interactive)", padding: '2px 6px', borderRadius: 4, textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700 }}>
+                                  niche: {a.niche || 'General'}
+                                </span>
+                                {a.is_food_safe === false && (
+                                  <span style={{ fontSize: '0.62rem', background: 'var(--status-danger-soft)', color: 'var(--status-danger)', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>
+                                    Non-Pangan
+                                  </span>
+                                )}
+                                {a.match_summary && Object.keys(a.match_summary).length > 0 && (() => {
+                                  const firstEntry = Object.entries(a.match_summary)[0];
+                                  return firstEntry ? (
+                                    <span style={{ fontSize: '0.62rem', background: 'var(--status-info-soft)', color: 'var(--status-info)', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>
+                                      {firstEntry[0]}: {firstEntry[1].alat_dapur || 0} Alat · {firstEntry[1].bahan_resep || 0} Bahan
+                                    </span>
+                                  ) : null;
+                                })()}
+                              </div>
                               <div style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid var(--border)', background: isSelected ? 'var(--accent)' : 'transparent', display: 'flex', alignItems: 'center', justify: 'center', fontSize: '0.6rem', color: "var(--text-primary)", fontWeight: 'bold' }}>
                                 {isSelected && '✓'}
                               </div>
@@ -1727,6 +1813,57 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit} style={{ disp
 
                     {bridgingMode === 'select_existing' && (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        {(blueprintRecommendations.loading || blueprintRecommendations.alat_dapur.length > 0 || blueprintRecommendations.bahan_resep.length > 0) && (
+                          <div style={{ padding: 10, borderRadius: 'var(--radius-sm)', background: 'var(--surface-raised)', border: '1px solid var(--border-strong)', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                            <div style={{ fontSize: '0.76rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                              Direkomendasikan untuk Blueprint Ini
+                            </div>
+                            {blueprintRecommendations.loading ? (
+                              <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Memuat rekomendasi produk cocok...</div>
+                            ) : (
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 10 }}>
+                                {[
+                                  { key: 'alat_dapur', label: 'Alat Dapur Cocok', items: blueprintRecommendations.alat_dapur, badgeBg: 'var(--status-info-soft)', badgeColor: 'var(--status-info)' },
+                                  { key: 'bahan_resep', label: 'Bahan Resep Cocok', items: blueprintRecommendations.bahan_resep, badgeBg: 'var(--status-success-soft)', badgeColor: 'var(--status-success)' }
+                                ].map(group => (
+                                  <div key={group.key} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: group.badgeColor }}>{group.label} ({group.items.length})</span>
+                                    {group.items.slice(0, 3).map(rec => {
+                                      const activeRec = targetProductId === rec.product_id;
+                                      return (
+                                        <button
+                                          key={rec.id}
+                                          type="button"
+                                          onClick={() => setTargetProductId(rec.product_id)}
+                                          style={{
+                                            textAlign: 'left',
+                                            padding: '6px 8px',
+                                            borderRadius: 'var(--radius-xs)',
+                                            background: activeRec ? 'var(--surface-interactive)' : 'var(--surface)',
+                                            border: `1px solid ${activeRec ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            gap: 6
+                                          }}
+                                        >
+                                          <span style={{ minWidth: 0 }}>
+                                            <span style={{ display: 'block', fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rec.product_name}</span>
+                                            <span style={{ display: 'block', fontSize: '0.67rem', color: 'var(--text-muted)' }}>{rec.match_reason}</span>
+                                          </span>
+                                          <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 6px', borderRadius: 'var(--radius-xs)', background: group.badgeBg, color: group.badgeColor, flexShrink: 0 }}>
+                                            {rec.match_score}
+                                          </span>
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
                         <div style={{ display: 'flex', gap: 12 }}>
                           <input
                             type="text"
@@ -1828,6 +1965,57 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit} style={{ disp
 
                     {bridgingMode === 'select_existing' && (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        {(blueprintRecommendations.loading || blueprintRecommendations.alat_dapur.length > 0 || blueprintRecommendations.bahan_resep.length > 0) && (
+                          <div style={{ padding: 10, borderRadius: 'var(--radius-sm)', background: 'var(--surface-raised)', border: '1px solid var(--border-strong)', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                            <div style={{ fontSize: '0.76rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                              Direkomendasikan untuk Blueprint Ini
+                            </div>
+                            {blueprintRecommendations.loading ? (
+                              <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Memuat rekomendasi produk cocok...</div>
+                            ) : (
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 10 }}>
+                                {[
+                                  { key: 'alat_dapur', label: 'Alat Dapur Cocok', items: blueprintRecommendations.alat_dapur, badgeBg: 'var(--status-info-soft)', badgeColor: 'var(--status-info)' },
+                                  { key: 'bahan_resep', label: 'Bahan Resep Cocok', items: blueprintRecommendations.bahan_resep, badgeBg: 'var(--status-success-soft)', badgeColor: 'var(--status-success)' }
+                                ].map(group => (
+                                  <div key={group.key} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: group.badgeColor }}>{group.label} ({group.items.length})</span>
+                                    {group.items.slice(0, 3).map(rec => {
+                                      const activeRec = targetProductId === rec.product_id;
+                                      return (
+                                        <button
+                                          key={rec.id}
+                                          type="button"
+                                          onClick={() => setTargetProductId(rec.product_id)}
+                                          style={{
+                                            textAlign: 'left',
+                                            padding: '6px 8px',
+                                            borderRadius: 'var(--radius-xs)',
+                                            background: activeRec ? 'var(--surface-interactive)' : 'var(--surface)',
+                                            border: `1px solid ${activeRec ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            gap: 6
+                                          }}
+                                        >
+                                          <span style={{ minWidth: 0 }}>
+                                            <span style={{ display: 'block', fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rec.product_name}</span>
+                                            <span style={{ display: 'block', fontSize: '0.67rem', color: 'var(--text-muted)' }}>{rec.match_reason}</span>
+                                          </span>
+                                          <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 6px', borderRadius: 'var(--radius-xs)', background: group.badgeBg, color: group.badgeColor, flexShrink: 0 }}>
+                                            {rec.match_score}
+                                          </span>
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
                         <div style={{ display: 'flex', gap: 12 }}>
                           <input
                             type="text"

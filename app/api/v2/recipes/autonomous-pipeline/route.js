@@ -101,6 +101,36 @@ export const GET = withTenantContext(async (request, _ctx, user) => {
         bpSql += ` ORDER BY created_at DESC LIMIT 200`;
         const bpRes = await pgQuery(bpSql, bpParams);
         blueprints = bpRes.rows || [];
+        if (blueprints.length > 0) {
+          try {
+            const bpIds = blueprints.map(b => b.id);
+            const mRes = await pgQuery(
+              `SELECT m.deconstruct_asset_id, m.brand_profile_id, b.brand_name, m.promo_role, m.is_food_safe, COUNT(*)::int AS cnt
+               FROM blueprint_product_matches m
+               LEFT JOIN brand_profiles b ON b.id = m.brand_profile_id AND b.tenant_id = m.tenant_id
+               WHERE m.tenant_id = $1 AND m.deconstruct_asset_id = ANY($2::text[])
+               GROUP BY m.deconstruct_asset_id, m.brand_profile_id, b.brand_name, m.promo_role, m.is_food_safe`,
+              [tenantId, bpIds]
+            );
+            const byBp = new Map();
+            for (const mr of mRes.rows) {
+              if (!byBp.has(mr.deconstruct_asset_id)) byBp.set(mr.deconstruct_asset_id, { is_food_safe: mr.is_food_safe, brands: {} });
+              const bucket = byBp.get(mr.deconstruct_asset_id);
+              const bKey = mr.brand_name || mr.brand_profile_id;
+              if (!bucket.brands[bKey]) bucket.brands[bKey] = { brand_profile_id: mr.brand_profile_id, alat_dapur: 0, bahan_resep: 0 };
+              if (mr.promo_role === 'alat_dapur') bucket.brands[bKey].alat_dapur = mr.cnt;
+              if (mr.promo_role === 'bahan_resep') bucket.brands[bKey].bahan_resep = mr.cnt;
+            }
+            blueprints = blueprints.map(b => {
+              const s = byBp.get(b.id);
+              return {
+                ...b,
+                is_food_safe: s ? s.is_food_safe : !/(skincare|home\s*care)/i.test(b.niche || ''),
+                match_summary: s ? s.brands : {},
+              };
+            });
+          } catch (_) {}
+        }
       } catch (bpErr) {
         console.warn('[Autonomous Pipeline GET] blueprints fetch warning:', bpErr.message);
       }

@@ -12,6 +12,7 @@ import { saveRawProductImage, resolveImageBufferFromInput } from '@/lib/product-
 import { pgQuery } from '@/lib/db-pg';
 import { listProductCatalog } from '@/lib/product-catalog-service';
 import { isRetryableGeminiError } from '@/lib/gemini';
+import { classifyProductPromoRole } from '@/lib/blueprint-product-matcher-shared';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,6 +23,7 @@ export const GET = withTenantContext(async (request) => {
     const category = searchParams.get('category') || '';
     const affiliateStatus = searchParams.get('affiliate_status') || 'all';
     const photoStatus = searchParams.get('photo_status') || 'all';
+    const promoRole = searchParams.get('promo_role') || 'all';
     const brandId = searchParams.get('brand_id') || 'all';
     const sort = searchParams.get('sort') || 'newest';
 
@@ -30,6 +32,7 @@ export const GET = withTenantContext(async (request) => {
       category,
       affiliateStatus,
       photoStatus,
+      promoRole,
       brandId,
       cursor: searchParams.get('cursor'),
       limit: searchParams.get('limit') || 100,
@@ -134,6 +137,7 @@ export const POST = withTenantContext(async (req) => {
       productData.photo_status = 'approved';
       productData.import_status = 'completed';
       productData.extraction_status = 'pending';
+      productData.promo_role = classifyProductPromoRole(productData);
 
       const product = await createProduct(productData);
 
@@ -211,7 +215,14 @@ export const POST = withTenantContext(async (req) => {
       enrichment_status: 'pending',
       photo_status: shouldAutoClean ? 'pending' : 'approved',
       import_status: 'completed',
-      extraction_status: 'pending'
+      extraction_status: 'pending',
+      promo_role: classifyProductPromoRole({
+        promo_role: body.promo_role,
+        product_name: body.product_name,
+        category: body.category,
+        tags: body.tags,
+        product_description: body.product_description || body.raw_description || '',
+      })
     };
 
     const product = await createProduct(data);

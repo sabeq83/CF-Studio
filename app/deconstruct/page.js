@@ -21,6 +21,10 @@ export default function DeconstructPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedNiche, setSelectedNiche] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
+  const [selectedMatchBrand, setSelectedMatchBrand] = useState('');
+  const [selectedMatchRole, setSelectedMatchRole] = useState('');
+  const [brandProfiles, setBrandProfiles] = useState([]);
+  const [reindexingMatches, setReindexingMatches] = useState(false);
 
   // Bulk Selection
   const [selectedIds, setSelectedIds] = useState(new Set());
@@ -93,6 +97,10 @@ export default function DeconstructPage() {
   useEffect(() => {
     fetchSchedulerStatus();
     pollLogs();
+    fetch('/api/v2/brand-profiles')
+      .then(r => r.json())
+      .then(d => { if (d.success && Array.isArray(d.data)) setBrandProfiles(d.data); })
+      .catch(() => {});
 
     logIntervalRef.current = setInterval(() => {
       pollLogs();
@@ -122,6 +130,8 @@ export default function DeconstructPage() {
         q: searchQuery,
         niche: selectedNiche,
         status: selectedStatus,
+        ...(selectedMatchBrand ? { brand_id: selectedMatchBrand } : {}),
+        ...(selectedMatchRole ? { promo_role: selectedMatchRole } : {}),
         page: page.toString(),
         limit: limit.toString()
       });
@@ -144,9 +154,31 @@ export default function DeconstructPage() {
     }
   }
 
+  async function handleBackfillMatches() {
+    setReindexingMatches(true);
+    try {
+      const res = await fetch('/api/v2/deconstruct/matches', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(`Indeks Smart Matcher diperbarui (${data.assets_processed || 0} blueprint, ${data.total_matches || 0} kecocokan)`);
+        fetchLibrary(true);
+      } else {
+        showToast(data.error || 'Gagal memperbarui indeks kecocokan', 'error');
+      }
+    } catch (_) {
+      showToast('Gagal menghubungi endpoint Smart Matcher', 'error');
+    } finally {
+      setReindexingMatches(false);
+    }
+  }
+
   useEffect(() => {
     fetchLibrary();
-  }, [searchQuery, selectedNiche, selectedStatus, page]);
+  }, [searchQuery, selectedNiche, selectedStatus, selectedMatchBrand, selectedMatchRole, page]);
 
   // Polling logic for actively downloading, uploading, or analyzing assets
   useEffect(() => {
@@ -541,6 +573,59 @@ export default function DeconstructPage() {
               <option value="deconstructed">Selesai</option>
               <option value="failed">Gagal</option>
             </select>
+
+            {/* Filter Brand Fit */}
+            <select
+              aria-label="Filter Brand Fit"
+              value={selectedMatchBrand}
+              onChange={(e) => { setSelectedMatchBrand(e.target.value); setPage(1); }}
+              style={{
+                background: 'var(--surface-interactive)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-sm)',
+                padding: '8px 12px',
+                color: 'var(--text-primary)',
+                fontSize: '0.82rem',
+                outline: 'none',
+                minWidth: 145
+              }}
+            >
+              <option value="">Semua Brand Fit</option>
+              {brandProfiles.map((b) => (
+                <option key={b.id} value={b.id}>{b.brand_name}</option>
+              ))}
+            </select>
+
+            {/* Filter Jenis Bridging */}
+            <select
+              aria-label="Filter Jenis Bridging"
+              value={selectedMatchRole}
+              onChange={(e) => { setSelectedMatchRole(e.target.value); setPage(1); }}
+              style={{
+                background: 'var(--surface-interactive)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-sm)',
+                padding: '8px 12px',
+                color: 'var(--text-primary)',
+                fontSize: '0.82rem',
+                outline: 'none',
+                minWidth: 155
+              }}
+            >
+              <option value="">Semua Jenis Bridging</option>
+              <option value="alat_dapur">Alat Dapur Cocok</option>
+              <option value="bahan_resep">Bahan Resep Cocok</option>
+            </select>
+
+            <button
+              type="button"
+              onClick={handleBackfillMatches}
+              disabled={reindexingMatches}
+              className="btn btn-secondary"
+              style={{ padding: '8px 12px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
+            >
+              {reindexingMatches ? 'Menyinkronkan...' : 'Sinkron Indeks Matcher'}
+            </button>
           </div>
 
           {/* Contextual Bulk Action */}
@@ -600,7 +685,8 @@ export default function DeconstructPage() {
                     <th>URL</th>
                     <th style={{ width: 130 }}>Niche</th>
                     <th style={{ width: 110 }}>Proses</th>
-                    <th style={{ width: 260 }}>Masalah Utama & Solusi</th>
+                    <th style={{ width: 220 }}>Kecocokan Produk</th>
+                    <th style={{ width: 250 }}>Masalah Utama & Solusi</th>
                     <th style={{ width: 140 }}>Tgl Input</th>
                     <th style={{ width: 140 }}>Tgl Analisis</th>
                     <th style={{ width: 100, textAlign: 'center' }}>Aksi</th>
@@ -674,6 +760,39 @@ export default function DeconstructPage() {
                           }}>
                             {statusOpt.label}
                           </span>
+                        </td>
+                        <td>
+                          {asset.status !== 'deconstructed' ? (
+                            <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Menunggu analisis</span>
+                          ) : asset.is_food_safe === false ? (
+                            <span style={{
+                              display: 'inline-block',
+                              fontSize: '0.72rem',
+                              fontWeight: 700,
+                              padding: '3px 8px',
+                              borderRadius: 'var(--radius-xs)',
+                              background: 'var(--status-danger-soft)',
+                              color: 'var(--status-danger)'
+                            }}>
+                              Non-Pangan
+                            </span>
+                          ) : asset.match_summary && Object.keys(asset.match_summary).length > 0 ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                              {Object.entries(asset.match_summary).slice(0, 3).map(([bName, counts]) => (
+                                <div key={bName} style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', fontSize: '0.72rem' }}>
+                                  <span style={{ fontWeight: 700, color: 'var(--text-secondary)', minWidth: 74 }}>{bName}</span>
+                                  <span style={{ background: 'var(--status-info-soft)', color: 'var(--status-info)', padding: '1px 6px', borderRadius: 'var(--radius-xs)', fontWeight: 700 }}>
+                                    Alat: {counts.alat_dapur || 0}
+                                  </span>
+                                  <span style={{ background: 'var(--status-success-soft)', color: 'var(--status-success)', padding: '1px 6px', borderRadius: 'var(--radius-xs)', fontWeight: 700 }}>
+                                    Bahan: {counts.bahan_resep || 0}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Belum terindeks</span>
+                          )}
                         </td>
                         <td>
                           <div style={{ maxWidth: 260 }}>

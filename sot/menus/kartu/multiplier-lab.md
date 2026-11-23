@@ -1,6 +1,6 @@
 # Kartu Menu: Multiplier Labs
 
-Terakhir dicek: 23 November 2026 · Versi aplikasi: v2.57.13
+Terakhir dicek: 23 November 2026 · Versi aplikasi: v2.58.0 (fitur/smart-matcher-2plus2)
 Alamat: `/multiplier-lab` (form) dan `/multiplier-lab/<id>` (detail hasil) · Kelompok: WORKFLOW · Kunci izin menu: `multiplier_lab`
 
 ## Fungsi
@@ -26,7 +26,7 @@ Pembuka viral tanpa sebut produk → jembatan ke produk → bukti/hasil → ajak
 - Form: `app/components/campaign-forms/MultiplierConfigurationForm.js` (halaman `app/multiplier-lab/page.js` hanya pembungkus)
 - Detail: `app/multiplier-lab/[id]/page.js`
 - API: `app/api/v2/multiplier/` — `route`, `generate-angles`, `[id]`, `[id]/approve`, `[id]/retry`, `[id]/update-creative`, `[id]/regenerate-t2i`, `[id]/regenerate-start-frames`, `[id]/replace-start-frame`, `[id]/sync-contentflow`, `[id]/sync-nextcloud`
-- Logika inti: `lib/re-multiplier-worker.js` (± 1.800 baris — cari dengan kata kunci), `lib/multiplier-angle-generator.js`, `lib/multiplier-pairing.js`, `lib/multiplier-audio-config.js`
+- Logika inti: `lib/re-multiplier-worker.js` (± 1.800 baris — cari dengan kata kunci), `lib/multiplier-angle-generator.js`, `lib/multiplier-pairing.js`, `lib/multiplier-audio-config.js`, `lib/blueprint-product-matcher.js` (`GET /api/v2/deconstruct/matches` untuk rekomendasi Alat Dapur vs Bahan Resep)
 - Pedoman naskah: `kb/MULTIPLIER_BRIDGING_GUIDE.md`
 - Tabel data: `re_multiplier_tasks` (terhubung ke `re_deconstructed_assets`)
 

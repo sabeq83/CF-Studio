@@ -1,0 +1,1952 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup UI: Blueprint-Product Smart Matcher & Kuota 2+2 CF Studio</title>
+  <style>
+    /* Semantic Design Tokens: disalin langsung dari app/theme.css */
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --link-hover: #a5f3fc;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --input-bg: #ffffff;
+      --overlay-subtle: rgba(30, 41, 59, 0.08);
+      --overlay-backdrop: rgba(15, 23, 42, 0.54);
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --text-disabled: #8794a6;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --link: #075ea8;
+      --link-hover: #064b86;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --status-neutral: #6548bd;
+      --status-neutral-soft: #f0ecfb;
+      --focus-ring: #6d4ed6;
+      --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+      --shadow-modal: 0 26px 80px rgba(31, 45, 61, 0.22);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    a {
+      color: var(--link);
+      text-decoration: none;
+    }
+    a:hover {
+      color: var(--link-hover);
+      text-decoration: underline;
+    }
+
+    a[href],
+    button:not(:disabled),
+    select:not(:disabled),
+    input[type='checkbox']:not(:disabled),
+    input[type='radio']:not(:disabled),
+    label[for],
+    [role='tab']:not([aria-disabled='true']) {
+      cursor: pointer;
+    }
+
+    button:disabled,
+    select:disabled,
+    input:disabled {
+      cursor: not-allowed;
+      opacity: 0.58;
+    }
+
+    :focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--focus-ring) 72%, transparent);
+      outline-offset: 2px;
+    }
+
+    input, select, textarea, button {
+      font-family: inherit;
+      font-size: inherit;
+      color: var(--text-primary);
+    }
+
+    /* Top Header */
+    .app-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border-subtle);
+      position: sticky;
+      top: 0;
+      z-index: 30;
+    }
+
+    .app-header-inner {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .brand-mark {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-tag {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: var(--radius-xs);
+      background: var(--status-warning-soft);
+      border: 1px solid var(--status-warning);
+      color: var(--status-warning);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .app-title {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 750;
+      letter-spacing: -0.015em;
+      color: var(--text-primary);
+    }
+
+    .app-subtitle {
+      margin: 2px 0 0;
+      font-size: 0.84rem;
+      color: var(--text-secondary);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 0.86rem;
+      transition: background-color var(--transition), border-color var(--transition);
+    }
+
+    .btn:hover:not(:disabled) {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+
+    .btn-primary {
+      background: var(--action-primary);
+      border-color: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--action-primary-hover);
+      border-color: var(--action-primary-hover);
+    }
+
+    .btn-compact {
+      min-height: 36px;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+    }
+
+    /* Navigation Tabs */
+    .view-nav {
+      background: var(--surface-raised);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .view-nav-inner {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .tablist {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      min-height: 44px;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface);
+      color: var(--text-secondary);
+      font-weight: 650;
+      font-size: 0.85rem;
+      transition: background-color var(--transition), border-color var(--transition), color var(--transition);
+    }
+
+    .tab-btn:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+      border-color: var(--border-strong);
+    }
+
+    .tab-btn[aria-selected='true'] {
+      background: var(--status-info-soft);
+      border-color: var(--status-info);
+      color: var(--status-info);
+    }
+
+    .state-switcher {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .state-switcher label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .form-control {
+      min-height: 40px;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--input-bg);
+      color: var(--text-primary);
+      font-size: 0.86rem;
+    }
+
+    .form-control-compact {
+      min-height: 36px;
+      padding: 6px 10px;
+      font-size: 0.8rem;
+    }
+
+    /* Main Workspace */
+    .main-container {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 24px 20px 48px;
+    }
+
+    .view-panel {
+      display: none;
+    }
+    .view-panel.is-active {
+      display: block;
+    }
+
+    /* Section Header */
+    .panel-intro {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .panel-intro h2 {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .panel-intro p {
+      margin: 4px 0 0;
+      color: var(--text-secondary);
+      font-size: 0.86rem;
+      max-width: 72ch;
+    }
+
+    .audit-footnote {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+    }
+
+    /* Toolbar Filter */
+    .filter-bar {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr auto;
+      gap: 12px;
+      align-items: end;
+      margin-bottom: 18px;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      min-width: 0;
+    }
+
+    .field-group label {
+      font-size: 0.76rem;
+      font-weight: 650;
+      color: var(--text-secondary);
+    }
+
+    /* Status Badges & Role Pills */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border-radius: var(--radius-xs);
+      font-size: 0.75rem;
+      font-weight: 650;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .badge-alat {
+      background: var(--status-info-soft);
+      border-color: color-mix(in srgb, var(--status-info) 45%, transparent);
+      color: var(--status-info);
+    }
+
+    .badge-bahan {
+      background: var(--status-success-soft);
+      border-color: color-mix(in srgb, var(--status-success) 45%, transparent);
+      color: var(--status-success);
+    }
+
+    .badge-lainnya {
+      background: var(--surface-interactive);
+      border-color: var(--border-strong);
+      color: var(--text-secondary);
+    }
+
+    .badge-warning {
+      background: var(--status-warning-soft);
+      border-color: color-mix(in srgb, var(--status-warning) 45%, transparent);
+      color: var(--status-warning);
+    }
+
+    .badge-danger {
+      background: var(--status-danger-soft);
+      border-color: color-mix(in srgb, var(--status-danger) 45%, transparent);
+      color: var(--status-danger);
+    }
+
+    /* Data Table (Tab 1: Deconstruct Lab) */
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+      width: 100%;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 820px;
+    }
+
+    th {
+      text-align: left;
+      padding: 12px 14px;
+      background: var(--surface-raised);
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    td {
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      vertical-align: top;
+      font-size: 0.85rem;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background: var(--surface-hover);
+    }
+
+    .mono-id {
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      color: var(--text-muted);
+    }
+
+    .bp-title {
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .bp-meta {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+
+    .match-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .match-row-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .brand-chip {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      min-width: 78px;
+    }
+
+    /* Asymmetric Split Workspace (Tab 2: Multiplier / Auto Pipeline) */
+    .split-workspace {
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .work-pane {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px;
+    }
+
+    .work-pane-focal {
+      box-shadow: var(--shadow-card);
+      border-color: var(--border-strong);
+    }
+
+    .pane-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+    }
+
+    .pane-head h3 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .bp-select-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 440px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .bp-option-btn {
+      width: 100%;
+      text-align: left;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: border-color var(--transition), background-color var(--transition);
+    }
+
+    .bp-option-btn:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+
+    .bp-option-btn[aria-pressed='true'] {
+      background: var(--surface-interactive);
+      border-color: var(--action-primary);
+    }
+
+    .recommendation-group {
+      margin-bottom: 18px;
+    }
+
+    .recommendation-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .rec-group-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin: 0 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .product-rec-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .product-rec-btn {
+      width: 100%;
+      text-align: left;
+      padding: 11px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .product-rec-btn:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+
+    .product-rec-btn[aria-pressed='true'] {
+      background: var(--status-success-soft);
+      border-color: var(--status-success);
+    }
+
+    .score-pill {
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: var(--radius-xs);
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      flex-shrink: 0;
+    }
+
+    .selected-pair-summary {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: var(--radius-sm);
+      background: var(--surface-raised);
+      border: 1px solid var(--border-strong);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* Tab 3: Product Database promo_role */
+    .pill-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .pill-filter {
+      min-height: 38px;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface);
+      color: var(--text-secondary);
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    .pill-filter[aria-pressed='true'] {
+      background: var(--action-primary);
+      border-color: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    .product-rows {
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    .product-row-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+    }
+
+    .product-row-item:last-child {
+      border-bottom: none;
+    }
+
+    /* Tab 4: 2+2 Schedule Matrix */
+    .quota-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .slot-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .slot-row {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: grid;
+      grid-template-columns: 92px 1fr auto;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .slot-time {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text-primary);
+      padding: 8px 10px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      text-align: center;
+    }
+
+    /* States (Empty, Loading, Error) */
+    .ui-state-box {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 36px 24px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .ui-state-box h3 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .ui-state-box p {
+      margin: 0;
+      max-width: 52ch;
+      color: var(--text-secondary);
+    }
+
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 3px solid var(--border-subtle);
+      border-top-color: var(--action-primary);
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Modal Dialog */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay-backdrop);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 60;
+    }
+
+    .modal-backdrop.is-open {
+      display: flex;
+    }
+
+    .modal-panel {
+      width: 100%;
+      max-width: 480px;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-modal);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .modal-body {
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .modal-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .radio-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+    }
+
+    .radio-card input {
+      margin-top: 3px;
+    }
+
+    /* Live Feedback Region */
+    .feedback-banner {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--status-success);
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      font-weight: 600;
+      font-size: 0.85rem;
+      display: none;
+    }
+    .feedback-banner.is-visible {
+      display: block;
+    }
+
+    /* Mobile Breakpoints (R-03) */
+    @media (max-width: 900px) {
+      .filter-bar {
+        grid-template-columns: 1fr 1fr;
+      }
+      .split-workspace,
+      .quota-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .filter-bar {
+        grid-template-columns: 1fr;
+      }
+      .slot-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      .slot-time {
+        text-align: left;
+      }
+      .app-header-inner,
+      .view-nav-inner,
+      .main-container {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="app-header-inner">
+      <div>
+        <div class="brand-mark">
+          <h1 class="app-title">Blueprint-Product Smart Matcher &amp; Kuota 2+2</h1>
+          <span class="brand-tag">SIMULASI MOCKUP HTML</span>
+        </div>
+        <p class="app-subtitle">Pratinjau interaksi Deconstruct Lab, Multiplier / Auto Pipeline, Product Database (promo_role), dan Jadwal 2 Alat + 2 Bahan per brand.</p>
+      </div>
+      <div class="header-actions">
+        <button type="button" id="themeToggleBtn" class="btn" aria-pressed="false">
+          <span id="themeToggleLabel">Mode Terang</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="view-nav" aria-label="Simulasi Modul CF Studio">
+    <div class="view-nav-inner">
+      <div class="tablist" role="tablist" aria-label="Halaman Target">
+        <button type="button" class="tab-btn" role="tab" id="tab-deconstruct" aria-selected="true" aria-controls="panel-deconstruct">1. Deconstruct Lab</button>
+        <button type="button" class="tab-btn" role="tab" id="tab-multiplier" aria-selected="false" aria-controls="panel-multiplier">2. Multiplier &amp; Auto Pipeline</button>
+        <button type="button" class="tab-btn" role="tab" id="tab-products" aria-selected="false" aria-controls="panel-products">3. Product Database (promo_role)</button>
+        <button type="button" class="tab-btn" role="tab" id="tab-schedule" aria-selected="false" aria-controls="panel-schedule">4. Jadwal Kuota 2+2 Harian</button>
+      </div>
+
+      <div class="state-switcher">
+        <label for="uiStateSelect">Simulasi Status UI:</label>
+        <select id="uiStateSelect" class="form-control form-control-compact">
+          <option value="ready">Data Normal</option>
+          <option value="loading">Loading</option>
+          <option value="empty">Kosong (Filter Nihil)</option>
+          <option value="error">Error Koneksi</option>
+        </select>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main-container">
+    <!-- TAB 1: DECONSTRUCT LAB -->
+    <section id="panel-deconstruct" class="view-panel is-active" role="tabpanel" aria-labelledby="tab-deconstruct">
+      <div class="panel-intro">
+        <div>
+          <h2>Deconstruct Lab: Filter Brand Fit &amp; Jenis Bridging</h2>
+          <p>Operator melihat kecocokan tiap blueprint ke produk riil per brand tanpa perlu menghafal isi 213 blueprint secara manual.</p>
+        </div>
+        <div class="audit-footnote">Data contoh memakai ID blueprint &amp; produk riil Staging; angka kecocokan di sini adalah simulasi aturan pencocokan.</div>
+      </div>
+
+      <div class="filter-bar">
+        <div class="field-group">
+          <label for="decSearchInput">Cari Blueprint (topik, niche, ID reel, atau kata kunci)</label>
+          <input type="text" id="decSearchInput" class="form-control" placeholder="Contoh: brownies, kunyit, matcha, blender..." />
+        </div>
+        <div class="field-group">
+          <label for="decBrandSelect">Brand Fit</label>
+          <select id="decBrandSelect" class="form-control">
+            <option value="all">Semua Brand</option>
+            <option value="nutribake">nutribake (75 produk)</option>
+            <option value="dapurbotani">dapurbotani (135 produk)</option>
+            <option value="siasatsehat">siasatsehat (24 produk)</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label for="decRoleSelect">Jenis Bridging</label>
+          <select id="decRoleSelect" class="form-control">
+            <option value="all">Semua Peran</option>
+            <option value="alat_dapur">Alat Dapur Saja</option>
+            <option value="bahan_resep">Bahan Resep Saja</option>
+          </select>
+        </div>
+        <button type="button" id="decResetBtn" class="btn btn-compact">Reset Filter</button>
+      </div>
+
+      <div id="decContentMount"></div>
+    </section>
+
+    <!-- TAB 2: MULTIPLIER & AUTO PIPELINE PICKER -->
+    <section id="panel-multiplier" class="view-panel" role="tabpanel" aria-labelledby="tab-multiplier" hidden>
+      <div class="panel-intro">
+        <div>
+          <h2>Multiplier Labs &amp; Auto Pipeline: Rekomendasi Pasangan Otomatis</h2>
+          <p>Pilih Brand dan Blueprint untuk melihat rekomendasi produk teratas yang dikelompokkan ke Alat Dapur Cocok dan Bahan Resep Cocok.</p>
+        </div>
+        <div class="field-group" style="min-width: 220px;">
+          <label for="mulBrandSelect">Brand Aktif</label>
+          <select id="mulBrandSelect" class="form-control">
+            <option value="nutribake">nutribake</option>
+            <option value="dapurbotani">dapurbotani</option>
+            <option value="siasatsehat">siasatsehat</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="mulContentMount"></div>
+    </section>
+
+    <!-- TAB 3: PRODUCT DATABASE (PROMO_ROLE) -->
+    <section id="panel-products" class="view-panel" role="tabpanel" aria-labelledby="tab-products" hidden>
+      <div class="panel-intro">
+        <div>
+          <h2>Product Database: Klasifikasi Peran Promosi (promo_role)</h2>
+          <p>Auto-klasifikasi awal dari kategori dan nama produk, dilengkapi tombol ubah manual bila perlu koreksi antara Alat Dapur, Bahan Resep, atau Lainnya.</p>
+        </div>
+        <div class="audit-footnote">Termasuk 7 alat dapur yang baru Anda tautkan ke ketiga brand (siasatsehat: 24 produk aktif).</div>
+      </div>
+
+      <div id="prodContentMount"></div>
+    </section>
+
+    <!-- TAB 4: JADWAL KUOTA 2+2 HARIAN -->
+    <section id="panel-schedule" class="view-panel" role="tabpanel" aria-labelledby="tab-schedule" hidden>
+      <div class="panel-intro">
+        <div>
+          <h2>Auto Pipeline Schedules: Mode Auto Smart Match 2+2 Harian</h2>
+          <p>Setiap brand menjalankan 4 slot harian terstruktur (2 Alat Dapur + 2 Bahan Resep) dengan aturan rotasi anti-duplikat blueprint 14 hari dan produk 4 hari.</p>
+        </div>
+        <div class="audit-footnote">42 jadwal aktif Anda saat ini tidak diubah pada tahap simulasi ini.</div>
+      </div>
+
+      <div id="schedContentMount"></div>
+    </section>
+  </main>
+
+  <!-- DIALOG EDIT PROMO_ROLE -->
+  <div id="roleModalBackdrop" class="modal-backdrop" role="presentation">
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="roleModalTitle">
+      <div class="modal-header">
+        <h3 id="roleModalTitle">Ubah Peran Promosi Produk</h3>
+        <button type="button" id="closeRoleModalBtn" class="btn btn-compact" aria-label="Tutup dialog">Tutup</button>
+      </div>
+      <form id="roleEditForm">
+        <div class="modal-body">
+          <div>
+            <div style="font-weight: 700;" id="modalProductName">Nama Produk</div>
+            <div class="mono-id" id="modalProductId">ID</div>
+          </div>
+
+          <fieldset style="border: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px;">
+            <legend style="font-size: 0.82rem; font-weight: 700; margin-bottom: 6px; color: var(--text-secondary);">Pilih Peran Promosi (promo_role)</legend>
+            <label class="radio-card" for="roleOptAlat">
+              <input type="radio" id="roleOptAlat" name="promoRoleChoice" value="alat_dapur" />
+              <span>
+                <strong>Alat Dapur (alat_dapur)</strong><br />
+                <span style="font-size: 0.78rem; color: var(--text-secondary);">Peralatan masak, elektronik dapur, wadah, alat ukur, cetakan.</span>
+              </span>
+            </label>
+            <label class="radio-card" for="roleOptBahan">
+              <input type="radio" id="roleOptBahan" name="promoRoleChoice" value="bahan_resep" />
+              <span>
+                <strong>Bahan Resep (bahan_resep)</strong><br />
+                <span style="font-size: 0.78rem; color: var(--text-secondary);">Bahan kue, rempah, bubuk minuman, pemanis, superfood.</span>
+              </span>
+            </label>
+            <label class="radio-card" for="roleOptLainnya">
+              <input type="radio" id="roleOptLainnya" name="promoRoleChoice" value="lainnya" />
+              <span>
+                <strong>Lainnya (lainnya)</strong><br />
+                <span style="font-size: 0.78rem; color: var(--text-secondary);">Produk non-dapur atau kapsul siap minum yang tidak masuk kuota 2+2 resep/alat.</span>
+              </span>
+            </label>
+          </fieldset>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="cancelRoleModalBtn" class="btn btn-compact">Batal</button>
+          <button type="submit" class="btn btn-primary btn-compact">Simpan Peran</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const BLUEPRINTS = [
+        {
+          id: '53c70747',
+          title: 'Brownies kukus cokelat 1 telur tanpa mixer',
+          niche: 'Baking',
+          foodSafe: true,
+          methods: ['kukus/steamer', 'aduk adonan', 'timbangan'],
+          matches: {
+            nutribake: {
+              alat_dapur: [
+                { id: 'pe_1795244192996_846', name: 'Sinda Steamer 30 cm 2 Susun', score: 94, reason: 'Metode utama blueprint mengukus adonan brownies' },
+                { id: 'pe_1782648834064_82', name: 'Timbangan Dapur Digital SF-400 10kg', score: 87, reason: 'Takaran tepat tepung & cokelat pada adonan baking' }
+              ],
+              bahan_resep: [
+                { id: 'pe_1786588017962_4710', name: 'Premix Cocoa Powder Premium', score: 96, reason: 'Resep memakai bubuk cokelat sebagai rasa inti' }
+              ]
+            },
+            dapurbotani: {
+              alat_dapur: [
+                { id: 'pe_1795244192996_846', name: 'Sinda Steamer 30 cm 2 Susun', score: 94, reason: 'Panci kukus 2 susun cocok untuk adonan kue kukus' }
+              ],
+              bahan_resep: [
+                { id: 'pe_1781998087509_929', name: 'Beorganik Peanut Butter', score: 82, reason: 'Alternatif selai olesan / campuran brownies sehat' }
+              ]
+            },
+            siasatsehat: {
+              alat_dapur: [
+                { id: 'pe_1795244192996_846', name: 'Sinda Steamer 30 cm 2 Susun', score: 90, reason: 'Masak sehat metode kukus tanpa minyak berlebih' }
+              ],
+              bahan_resep: []
+            }
+          }
+        },
+        {
+          id: 'ba977b0a',
+          title: 'Teh rebusan cengkeh jeruk nipis untuk hangat tenggorokan',
+          niche: 'Health',
+          foodSafe: true,
+          methods: ['rebus/infuse', 'peras jeruk'],
+          matches: {
+            siasatsehat: {
+              alat_dapur: [
+                { id: 'pe_1784449324420_841', name: 'Borosilicate Teko Kaca dengan Tutup Kayu dan Infuser', score: 97, reason: 'Adegan 2 menyeduh cengkeh & irisan nipis di teko kaca transparan' },
+                { id: 'pe_1781360120731_877', name: 'Alat Pemeras Jeruk Lemon Stainless', score: 89, reason: 'Adegan 3 memeras perasan jeruk nipis ke seduhan' }
+              ],
+              bahan_resep: [
+                { id: 'pe_1783235604763_116', name: 'Nutrifarm Kayu Manis Bubuk', score: 88, reason: 'Pasangan rempah hangat untuk seduhan cengkeh' }
+              ]
+            },
+            nutribake: {
+              alat_dapur: [
+                { id: 'pe_1784449324420_841', name: 'Borosilicate Teko Kaca dengan Tutup Kayu dan Infuser', score: 91, reason: 'Visual seduhan herbal jernih di kaca borosilikat' }
+              ],
+              bahan_resep: []
+            },
+            dapurbotani: {
+              alat_dapur: [
+                { id: 'pe_1784449324420_841', name: 'Borosilicate Teko Kaca dengan Tutup Kayu dan Infuser', score: 95, reason: 'Teko infuser cocok untuk racikan herbal alami' },
+                { id: 'pe_1781360120731_877', name: 'Alat Pemeras Jeruk Lemon Stainless', score: 89, reason: 'Memeras jeruk nipis/lemon cepat tanpa biji' }
+              ],
+              bahan_resep: [
+                { id: 'pe_1782444159898_590', name: 'Nutrifarm Kunyit Bubuk', score: 84, reason: 'Tambahan rempah rimpang pada minuman imunitas' }
+              ]
+            }
+          }
+        },
+        {
+          id: 'bd18c93e',
+          title: 'Jus detoks wortel timun lemon segar tanpa ribet',
+          niche: 'Health',
+          foodSafe: true,
+          methods: ['blender/jus', 'peras lemon'],
+          matches: {
+            siasatsehat: {
+              alat_dapur: [
+                { id: 'pe_1780712278685', name: 'Blender Philips 3000 Series HR2042/13', score: 98, reason: 'Adegan 3 menghaluskan potongan wortel & timun' },
+                { id: 'pe_1781360120731_877', name: 'Alat Pemeras Jeruk Lemon Stainless', score: 86, reason: 'Menambah perasan lemon murni ke hasil jus' }
+              ],
+              bahan_resep: [
+                { id: 'pe_sync_1781148697787_757', name: 'Nutrifarm Chia Seeds', score: 85, reason: 'Topping serat chia pada minuman jus segar' }
+              ]
+            },
+            dapurbotani: {
+              alat_dapur: [
+                { id: 'pe_1780712278685', name: 'Blender Philips 3000 Series HR2042/13', score: 96, reason: 'Blender harian bertenaga untuk sayur keras (wortel)' }
+              ],
+              bahan_resep: [
+                { id: 'pe_sync_1781148697787_757', name: 'Nutrifarm Chia Seeds', score: 86, reason: 'Cocok ditambahkan setelah jus disaring' }
+              ]
+            },
+            nutribake: {
+              alat_dapur: [
+                { id: 'pe_1780712278685', name: 'Blender Philips 3000 Series HR2042/13', score: 92, reason: 'Adegan blender buah/sayur langsung masuk' }
+              ],
+              bahan_resep: []
+            }
+          }
+        },
+        {
+          id: '036ce860',
+          title: 'Iced matcha latte rendah kalori ala kafe rumahan',
+          niche: 'Health',
+          foodSafe: true,
+          methods: ['frother/whisk', 'takar bubuk'],
+          matches: {
+            siasatsehat: {
+              alat_dapur: [
+                { id: 'pe_1781420173223_989', name: 'Goto Shane Milk Frother Portable', score: 97, reason: 'Mengocok bubuk matcha & membuat microfoam susu cepat' }
+              ],
+              bahan_resep: [
+                { id: 'pe_1784449324420_662', name: 'Nutrifarm Organic Premium Matcha Powder', score: 99, reason: 'Bahan inti resep: bubuk matcha organik' }
+              ]
+            },
+            nutribake: {
+              alat_dapur: [
+                { id: 'pe_1781420173223_989', name: 'Goto Shane Milk Frother Portable', score: 95, reason: 'Frother portable ringkas untuk minuman kafe' }
+              ],
+              bahan_resep: [
+                { id: 'pe_1784449324420_662', name: 'Nutrifarm Organic Premium Matcha Powder', score: 95, reason: 'Matcha murni tanpa gula tambahan' }
+              ]
+            },
+            dapurbotani: {
+              alat_dapur: [
+                { id: 'pe_1781420173223_989', name: 'Goto Shane Milk Frother Portable', score: 95, reason: 'Larutkan matcha tanpa gumpal dalam 15 detik' }
+              ],
+              bahan_resep: [
+                { id: 'pe_1784449324420_662', name: 'Nutrifarm Organic Premium Matcha Powder', score: 97, reason: 'Produk inti matcha pada video' }
+              ]
+            }
+          }
+        },
+        {
+          id: '2375eebd',
+          title: 'Es krim cokelat alpukat halus 3 bahan di rumah',
+          niche: 'Cooking',
+          foodSafe: true,
+          methods: ['chopper/food processor', 'timbangan'],
+          matches: {
+            dapurbotani: {
+              alat_dapur: [
+                { id: 'pe_1781420171521_196', name: 'SAMONO Blender Chopper Elektrik MC200', score: 96, reason: 'Chopper serbaguna menghaluskan adonan beku kental' }
+              ],
+              bahan_resep: [
+                { id: 'pe_1786588017962_4710', name: 'Premix Cocoa Powder Premium', score: 94, reason: 'Pemberi rasa cokelat pekat rendah kalori' }
+              ]
+            },
+            nutribake: {
+              alat_dapur: [
+                { id: 'pe_1781420171521_196', name: 'SAMONO Blender Chopper Elektrik MC200', score: 94, reason: 'Chopper kuat menghaluskan buah beku + kacang' }
+              ],
+              bahan_resep: [
+                { id: 'pe_1786588017962_4710', name: 'Premix Cocoa Powder Premium', score: 95, reason: 'Bahan utama es krim cokelat' }
+              ]
+            },
+            siasatsehat: {
+              alat_dapur: [
+                { id: 'pe_1781420171521_196', name: 'SAMONO Blender Chopper Elektrik MC200', score: 92, reason: 'Praktis membuat dessert sehat tanpa es krim pabrikan' }
+              ],
+              bahan_resep: []
+            }
+          }
+        },
+        {
+          id: 'bp_skin_01',
+          title: 'Masker wajah alami lidah buaya & kunyit (Topikal)',
+          niche: 'Skincare',
+          foodSafe: false,
+          methods: ['aplikasi wajah/topikal'],
+          matches: {
+            nutribake: { alat_dapur: [], bahan_resep: [] },
+            dapurbotani: { alat_dapur: [], bahan_resep: [] },
+            siasatsehat: { alat_dapur: [], bahan_resep: [] }
+          }
+        }
+      ];
+
+      const PRODUCTS = [
+        { id: 'pe_1780712278685', name: 'Blender Philips 3000 Series HR2042/13', category: 'Peralatan Dapur', brands: ['nutribake', 'dapurbotani', 'siasatsehat'], promo_role: 'alat_dapur', photo_ready: true },
+        { id: 'pe_1784449324420_841', name: 'Borosilicate Teko Kaca dengan Tutup Kayu dan Infuser', category: 'Teko Teh & Kopi', brands: ['nutribake', 'dapurbotani', 'siasatsehat'], promo_role: 'alat_dapur', photo_ready: true },
+        { id: 'pe_1781420171521_196', name: 'SAMONO Blender Chopper Elektrik MC200', category: 'Kitchen Appliances', brands: ['nutribake', 'dapurbotani', 'siasatsehat'], promo_role: 'alat_dapur', photo_ready: true },
+        { id: 'pe_1781360120731_877', name: 'Alat Pemeras Jeruk Lemon Stainless', category: 'Peralatan Dapur', brands: ['nutribake', 'dapurbotani', 'siasatsehat'], promo_role: 'alat_dapur', photo_ready: true },
+        { id: 'pe_1795244192996_846', name: 'Sinda Steamer 30 cm 2 Susun', category: 'Peralatan Masak', brands: ['nutribake', 'dapurbotani', 'siasatsehat'], promo_role: 'alat_dapur', photo_ready: true },
+        { id: 'pe_1781420173223_989', name: 'Goto Shane Milk Frother Portable', category: 'Mixer & Milk Frother', brands: ['nutribake', 'dapurbotani', 'siasatsehat'], promo_role: 'alat_dapur', photo_ready: true },
+        { id: 'pe_1782648834064_82', name: 'Timbangan Dapur Digital SF-400 10kg', category: 'Timbangan Dapur', brands: ['nutribake', 'dapurbotani', 'siasatsehat'], promo_role: 'alat_dapur', photo_ready: true },
+        { id: 'pe_1786588017962_4710', name: 'Premix Cocoa Powder Premium', category: 'Bahan Kue', brands: ['nutribake', 'dapurbotani'], promo_role: 'bahan_resep', photo_ready: true },
+        { id: 'pe_1784449324420_662', name: 'Nutrifarm Organic Premium Matcha Powder', category: 'Minuman & Teh', brands: ['siasatsehat', 'dapurbotani'], promo_role: 'bahan_resep', photo_ready: true },
+        { id: 'pe_1782444159898_590', name: 'Nutrifarm Kunyit Bubuk', category: 'Rempah & Herbal', brands: ['dapurbotani', 'siasatsehat'], promo_role: 'bahan_resep', photo_ready: true },
+        { id: 'pe_sync_1781148697787_757', name: 'Nutrifarm Chia Seeds', category: 'Superfood', brands: ['dapurbotani', 'siasatsehat', 'nutribake'], promo_role: 'bahan_resep', photo_ready: true },
+        { id: 'pe_1783235604763_116', name: 'Nutrifarm Kayu Manis Bubuk', category: 'Rempah & Herbal', brands: ['siasatsehat', 'nutribake'], promo_role: 'bahan_resep', photo_ready: true }
+      ];
+
+      const state = {
+        activeTab: 'deconstruct',
+        uiState: 'ready',
+        decQuery: '',
+        decBrand: 'all',
+        decRole: 'all',
+        mulBrand: 'siasatsehat',
+        mulSelectedBpId: 'ba977b0a',
+        mulSelectedProdId: 'pe_1784449324420_841',
+        mulFeedback: '',
+        prodRoleFilter: 'all',
+        prodQuery: '',
+        editingProdId: null,
+        prodFeedback: '',
+        schedBrand: 'siasatsehat',
+        schedLookbackBp: 14,
+        schedLookbackProd: 4,
+        schedDryRunOffset: 0,
+        schedMessage: ''
+      };
+
+      const roleLabel = {
+        alat_dapur: 'Alat Dapur',
+        bahan_resep: 'Bahan Resep',
+        lainnya: 'Lainnya'
+      };
+
+      const roleBadgeClass = {
+        alat_dapur: 'badge-alat',
+        bahan_resep: 'badge-bahan',
+        lainnya: 'badge-lainnya'
+      };
+
+      function escapeHtml(str) {
+        return String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      // Theme Toggle
+      const themeToggleBtn = document.getElementById('themeToggleBtn');
+      const themeToggleLabel = document.getElementById('themeToggleLabel');
+      themeToggleBtn.addEventListener('click', () => {
+        const html = document.documentElement;
+        const nextTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', nextTheme);
+        themeToggleBtn.setAttribute('aria-pressed', nextTheme === 'light' ? 'true' : 'false');
+        themeToggleLabel.textContent = nextTheme === 'dark' ? 'Mode Terang' : 'Mode Gelap';
+      });
+
+      // Tabs Navigation + Keyboard Support
+      const tabButtons = Array.from(document.querySelectorAll('[role="tab"]'));
+      const tabPanels = {
+        deconstruct: document.getElementById('panel-deconstruct'),
+        multiplier: document.getElementById('panel-multiplier'),
+        products: document.getElementById('panel-products'),
+        schedule: document.getElementById('panel-schedule')
+      };
+
+      function switchTab(tabKey) {
+        state.activeTab = tabKey;
+        tabButtons.forEach((btn) => {
+          const key = btn.id.replace('tab-', '');
+          const selected = key === tabKey;
+          btn.setAttribute('aria-selected', selected ? 'true' : 'false');
+          const panel = tabPanels[key];
+          if (selected) {
+            panel.classList.add('is-active');
+            panel.removeAttribute('hidden');
+          } else {
+            panel.classList.remove('is-active');
+            panel.setAttribute('hidden', 'hidden');
+          }
+        });
+        renderActiveTab();
+      }
+
+      tabButtons.forEach((btn, index) => {
+        btn.addEventListener('click', () => switchTab(btn.id.replace('tab-', '')));
+        btn.addEventListener('keydown', (e) => {
+          if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            const next = tabButtons[(index + 1) % tabButtons.length];
+            next.focus();
+            switchTab(next.id.replace('tab-', ''));
+          } else if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            const prev = tabButtons[(index - 1 + tabButtons.length) % tabButtons.length];
+            prev.focus();
+            switchTab(prev.id.replace('tab-', ''));
+          }
+        });
+      });
+
+      // UI State Simulator
+      const uiStateSelect = document.getElementById('uiStateSelect');
+      uiStateSelect.addEventListener('change', (e) => {
+        state.uiState = e.target.value;
+        renderActiveTab();
+      });
+
+      function renderGlobalUiState(targetEl, contextLabel) {
+        if (state.uiState === 'loading') {
+          targetEl.innerHTML = `
+            <div class="ui-state-box" role="status" aria-live="polite">
+              <div class="spinner" aria-hidden="true"></div>
+              <h3>Memuat indeks kecocokan (${escapeHtml(contextLabel)})...</h3>
+              <p>Mengambil skor pasangan blueprint dan produk aktif pada tenant default_tenant.</p>
+            </div>
+          `;
+          return true;
+        }
+        if (state.uiState === 'empty') {
+          targetEl.innerHTML = `
+            <div class="ui-state-box">
+              <h3>Tidak ada hasil yang cocok pada filter ini</h3>
+              <p>Periksa filter Brand Fit atau Jenis Bridging, atau jalankan sinkronisasi indeks untuk menghitung kecocokan terbaru.</p>
+              <button type="button" class="btn btn-primary btn-compact" data-action="recover-state">Tampilkan Data Normal</button>
+            </div>
+          `;
+          targetEl.querySelector('[data-action="recover-state"]').addEventListener('click', () => {
+            state.uiState = 'ready';
+            uiStateSelect.value = 'ready';
+            renderActiveTab();
+          });
+          return true;
+        }
+        if (state.uiState === 'error') {
+          targetEl.innerHTML = `
+            <div class="ui-state-box" role="alert">
+              <span class="badge badge-danger">Koneksi Terputus</span>
+              <h3>Gagal memuat data rekomendasi ${escapeHtml(contextLabel)}</h3>
+              <p>Endpoint /api/v2/deconstruct/matches tidak merespons. Coba muat ulang atau periksa log server.</p>
+              <button type="button" class="btn btn-compact" data-action="retry-state">Coba Lagi</button>
+            </div>
+          `;
+          targetEl.querySelector('[data-action="retry-state"]').addEventListener('click', () => {
+            state.uiState = 'ready';
+            uiStateSelect.value = 'ready';
+            renderActiveTab();
+          });
+          return true;
+        }
+        return false;
+      }
+
+      // TAB 1: DECONSTRUCT LAB
+      const decSearchInput = document.getElementById('decSearchInput');
+      const decBrandSelect = document.getElementById('decBrandSelect');
+      const decRoleSelect = document.getElementById('decRoleSelect');
+      const decResetBtn = document.getElementById('decResetBtn');
+      const decContentMount = document.getElementById('decContentMount');
+
+      decSearchInput.addEventListener('input', (e) => { state.decQuery = e.target.value; renderDeconstruct(); });
+      decBrandSelect.addEventListener('change', (e) => { state.decBrand = e.target.value; renderDeconstruct(); });
+      decRoleSelect.addEventListener('change', (e) => { state.decRole = e.target.value; renderDeconstruct(); });
+      decResetBtn.addEventListener('click', () => {
+        state.decQuery = '';
+        state.decBrand = 'all';
+        state.decRole = 'all';
+        decSearchInput.value = '';
+        decBrandSelect.value = 'all';
+        decRoleSelect.value = 'all';
+        renderDeconstruct();
+      });
+
+      function renderDeconstruct() {
+        if (renderGlobalUiState(decContentMount, 'Deconstruct Lab')) return;
+
+        const q = state.decQuery.trim().toLowerCase();
+        const filtered = BLUEPRINTS.filter((bp) => {
+          if (q && !(bp.title.toLowerCase().includes(q) || bp.niche.toLowerCase().includes(q) || bp.id.toLowerCase().includes(q) || bp.methods.join(' ').toLowerCase().includes(q))) {
+            return false;
+          }
+          if (state.decBrand !== 'all') {
+            if (!bp.foodSafe) return false;
+            const bm = bp.matches[state.decBrand] || { alat_dapur: [], bahan_resep: [] };
+            if (state.decRole === 'alat_dapur') return bm.alat_dapur.length > 0;
+            if (state.decRole === 'bahan_resep') return bm.bahan_resep.length > 0;
+            return bm.alat_dapur.length + bm.bahan_resep.length > 0;
+          }
+          if (state.decRole !== 'all') {
+            if (!bp.foodSafe) return false;
+            return Object.values(bp.matches).some((m) => (m[state.decRole] || []).length > 0);
+          }
+          return true;
+        });
+
+        if (filtered.length === 0) {
+          decContentMount.innerHTML = `
+            <div class="ui-state-box">
+              <h3>Tidak ada blueprint cocok dengan "${escapeHtml(state.decQuery || state.decBrand)}"</h3>
+              <p>Ubah kata kunci pencarian atau pilih "Semua Peran" untuk melihat seluruh pustaka blueprint.</p>
+              <button type="button" id="decInlineReset" class="btn btn-compact">Reset Filter</button>
+            </div>
+          `;
+          decContentMount.querySelector('#decInlineReset').addEventListener('click', () => decResetBtn.click());
+          return;
+        }
+
+        const brandKeys = state.decBrand === 'all' ? ['nutribake', 'dapurbotani', 'siasatsehat'] : [state.decBrand];
+
+        const rowsHtml = filtered.map((bp) => {
+          const matchHtml = !bp.foodSafe
+            ? `<span class="badge badge-danger">Non-Pangan (Diblokir untuk brand kuliner)</span>`
+            : `<div class="match-stack">${brandKeys.map((bk) => {
+                const m = bp.matches[bk] || { alat_dapur: [], bahan_resep: [] };
+                const alatCount = m.alat_dapur.length;
+                const bahanCount = m.bahan_resep.length;
+                return `
+                  <div class="match-row-pills">
+                    <span class="brand-chip">${bk}</span>
+                    ${state.decRole !== 'bahan_resep' ? `<span class="badge badge-alat">Alat: ${alatCount}</span>` : ''}
+                    ${state.decRole !== 'alat_dapur' ? `<span class="badge badge-bahan">Bahan: ${bahanCount}</span>` : ''}
+                  </div>
+                `;
+              }).join('')}</div>`;
+
+          return `
+            <tr>
+              <td>
+                <div class="mono-id">${bp.id}</div>
+                <span class="badge ${bp.foodSafe ? 'badge-lainnya' : 'badge-warning'}" style="margin-top: 6px;">${bp.niche}</span>
+              </td>
+              <td>
+                <div class="bp-title">${escapeHtml(bp.title)}</div>
+                <div class="bp-meta">Aksi terdeteksi: ${escapeHtml(bp.methods.join(', '))}</div>
+              </td>
+              <td>${matchHtml}</td>
+              <td>
+                ${bp.foodSafe
+                  ? `<button type="button" class="btn btn-primary btn-compact" data-jump-bp="${bp.id}">Pilih Produk Pasangan</button>`
+                  : `<span class="bp-meta">Tidak direkomendasikan</span>`}
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        decContentMount.innerHTML = `
+          <div class="table-card">
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width: 120px;">Blueprint / Niche</th>
+                    <th>Topik &amp; Aksi Visual Terdeteksi</th>
+                    <th style="width: 280px;">Ringkasan Kecocokan Produk</th>
+                    <th style="width: 190px;">Aksi Lanjut</th>
+                  </tr>
+                </thead>
+                <tbody>${rowsHtml}</tbody>
+              </table>
+            </div>
+          </div>
+        `;
+
+        decContentMount.querySelectorAll('[data-jump-bp]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const bpId = btn.getAttribute('data-jump-bp');
+            state.mulSelectedBpId = bpId;
+            if (state.decBrand !== 'all') {
+              state.mulBrand = state.decBrand;
+              document.getElementById('mulBrandSelect').value = state.decBrand;
+            }
+            const bp = BLUEPRINTS.find((b) => b.id === bpId);
+            const bm = bp?.matches[state.mulBrand];
+            const firstProd = bm?.alat_dapur?.[0]?.id || bm?.bahan_resep?.[0]?.id || '';
+            state.mulSelectedProdId = firstProd;
+            state.mulFeedback = '';
+            switchTab('multiplier');
+          });
+        });
+      }
+
+      // TAB 2: MULTIPLIER & AUTO PIPELINE PICKER
+      const mulBrandSelect = document.getElementById('mulBrandSelect');
+      const mulContentMount = document.getElementById('mulContentMount');
+
+      mulBrandSelect.addEventListener('change', (e) => {
+        state.mulBrand = e.target.value;
+        const bp = BLUEPRINTS.find((b) => b.id === state.mulSelectedBpId);
+        const bm = bp?.matches[state.mulBrand];
+        state.mulSelectedProdId = bm?.alat_dapur?.[0]?.id || bm?.bahan_resep?.[0]?.id || '';
+        state.mulFeedback = '';
+        renderMultiplier();
+      });
+
+      function renderMultiplier() {
+        if (renderGlobalUiState(mulContentMount, 'Multiplier Smart Picker')) return;
+
+        const foodBlueprints = BLUEPRINTS.filter((b) => b.foodSafe);
+        const activeBp = foodBlueprints.find((b) => b.id === state.mulSelectedBpId) || foodBlueprints[0];
+        state.mulSelectedBpId = activeBp.id;
+
+        const brandMatches = activeBp.matches[state.mulBrand] || { alat_dapur: [], bahan_resep: [] };
+        const allMatched = [...brandMatches.alat_dapur, ...brandMatches.bahan_resep];
+        const selectedProd = allMatched.find((p) => p.id === state.mulSelectedProdId) || allMatched[0] || null;
+        if (selectedProd) state.mulSelectedProdId = selectedProd.id;
+
+        const bpListHtml = foodBlueprints.map((bp) => {
+          const bm = bp.matches[state.mulBrand] || { alat_dapur: [], bahan_resep: [] };
+          const pressed = bp.id === activeBp.id;
+          return `
+            <button type="button" class="bp-option-btn" aria-pressed="${pressed ? 'true' : 'false'}" data-select-bp="${bp.id}">
+              <div style="display:flex; justify-content:space-between; width:100%; align-items:center; gap:8px;">
+                <span class="mono-id">${bp.id} (${bp.niche})</span>
+                <span style="display:flex; gap:6px;">
+                  <span class="badge badge-alat">Alat: ${bm.alat_dapur.length}</span>
+                  <span class="badge badge-bahan">Bahan: ${bm.bahan_resep.length}</span>
+                </span>
+              </div>
+              <div style="font-weight:700; color:var(--text-primary);">${escapeHtml(bp.title)}</div>
+            </button>
+          `;
+        }).join('');
+
+        const renderRecGroup = (items, roleKey, title) => {
+          if (!items.length) {
+            return `
+              <div class="recommendation-group">
+                <div class="rec-group-title">
+                  <span>${title}</span>
+                  <span class="badge badge-lainnya">0 cocok</span>
+                </div>
+                <div class="bp-meta" style="padding: 10px 12px; border: 1px dashed var(--border-subtle); border-radius: var(--radius-sm);">
+                  Belum ada produk kategori ${roleLabel[roleKey]} milik brand ${state.mulBrand} yang cocok dengan metode blueprint ini.
+                </div>
+              </div>
+            `;
+          }
+          return `
+            <div class="recommendation-group">
+              <div class="rec-group-title">
+                <span>${title}</span>
+                <span class="badge ${roleBadgeClass[roleKey]}">${items.length} rekomendasi</span>
+              </div>
+              <div class="product-rec-list">
+                ${items.map((item) => {
+                  const pressed = item.id === state.mulSelectedProdId;
+                  return `
+                    <button type="button" class="product-rec-btn" aria-pressed="${pressed ? 'true' : 'false'}" data-select-prod="${item.id}">
+                      <div>
+                        <div style="font-weight:700; color:var(--text-primary);">${escapeHtml(item.name)}</div>
+                        <div class="bp-meta">${escapeHtml(item.reason)}</div>
+                        <div class="mono-id" style="margin-top:3px;">${item.id}</div>
+                      </div>
+                      <span class="score-pill" title="Simulasi skor kecocokan">Skor ${item.score}</span>
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `;
+        };
+
+        mulContentMount.innerHTML = `
+          <div class="split-workspace">
+            <div class="work-pane">
+              <div class="pane-head">
+                <h3>1. Pilih Blueprint (${state.mulBrand})</h3>
+                <span class="mono-id">${foodBlueprints.length} blueprint pangan</span>
+              </div>
+              <div class="bp-select-list">${bpListHtml}</div>
+            </div>
+
+            <div class="work-pane work-pane-focal">
+              <div class="pane-head">
+                <h3>2. Direkomendasikan untuk Blueprint Ini</h3>
+                <span class="badge badge-warning">Simulasi Skor Matcher</span>
+              </div>
+              ${renderRecGroup(brandMatches.alat_dapur, 'alat_dapur', 'Alat Dapur Cocok')}
+              ${renderRecGroup(brandMatches.bahan_resep, 'bahan_resep', 'Bahan Resep Cocok')}
+
+              <div class="selected-pair-summary">
+                <div>
+                  <div style="font-size:0.76rem; color:var(--text-muted); font-weight:700;">Pasangan Terpilih (${state.mulBrand})</div>
+                  <div style="font-weight:700;">
+                    ${selectedProd ? `${escapeHtml(activeBp.id)} + ${escapeHtml(selectedProd.name)}` : 'Belum ada produk terpilih'}
+                  </div>
+                </div>
+                <button type="button" id="mulConfirmBtn" class="btn btn-primary btn-compact" ${selectedProd ? '' : 'disabled'}>
+                  Simulasikan Buat Draft Multiplier
+                </button>
+              </div>
+              <div id="mulFeedbackBanner" class="feedback-banner ${state.mulFeedback ? 'is-visible' : ''}" role="status" aria-live="polite">
+                ${escapeHtml(state.mulFeedback)}
+              </div>
+            </div>
+          </div>
+        `;
+
+        mulContentMount.querySelectorAll('[data-select-bp]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            state.mulSelectedBpId = btn.getAttribute('data-select-bp');
+            const bp = foodBlueprints.find((b) => b.id === state.mulSelectedBpId);
+            const bm = bp?.matches[state.mulBrand];
+            state.mulSelectedProdId = bm?.alat_dapur?.[0]?.id || bm?.bahan_resep?.[0]?.id || '';
+            state.mulFeedback = '';
+            renderMultiplier();
+          });
+        });
+
+        mulContentMount.querySelectorAll('[data-select-prod]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            state.mulSelectedProdId = btn.getAttribute('data-select-prod');
+            state.mulFeedback = '';
+            renderMultiplier();
+          });
+        });
+
+        const confirmBtn = mulContentMount.querySelector('#mulConfirmBtn');
+        if (confirmBtn) {
+          confirmBtn.addEventListener('click', () => {
+            if (!selectedProd) return;
+            state.mulFeedback = `Simulasi terkirim: ${state.mulBrand} | Blueprint ${activeBp.id} dipasangkan ke ${selectedProd.name} (${selectedProd.id}).`;
+            renderMultiplier();
+          });
+        }
+      }
+
+      // TAB 3: PRODUCT DATABASE (PROMO_ROLE)
+      const prodContentMount = document.getElementById('prodContentMount');
+
+      function renderProducts() {
+        if (renderGlobalUiState(prodContentMount, 'Product Database')) return;
+
+        const q = state.prodQuery.trim().toLowerCase();
+        const filtered = PRODUCTS.filter((p) => {
+          if (state.prodRoleFilter !== 'all' && p.promo_role !== state.prodRoleFilter) return false;
+          if (q && !(p.name.toLowerCase().includes(q) || p.id.toLowerCase().includes(q) || p.category.toLowerCase().includes(q))) return false;
+          return true;
+        });
+
+        const counts = {
+          all: PRODUCTS.length,
+          alat_dapur: PRODUCTS.filter((p) => p.promo_role === 'alat_dapur').length,
+          bahan_resep: PRODUCTS.filter((p) => p.promo_role === 'bahan_resep').length,
+          lainnya: PRODUCTS.filter((p) => p.promo_role === 'lainnya').length
+        };
+
+        prodContentMount.innerHTML = `
+          <div class="pill-tabs" role="group" aria-label="Filter Peran Promosi">
+            <button type="button" class="pill-filter" aria-pressed="${state.prodRoleFilter === 'all' ? 'true' : 'false'}" data-role-filter="all">Semua (${counts.all})</button>
+            <button type="button" class="pill-filter" aria-pressed="${state.prodRoleFilter === 'alat_dapur' ? 'true' : 'false'}" data-role-filter="alat_dapur">Alat Dapur (${counts.alat_dapur})</button>
+            <button type="button" class="pill-filter" aria-pressed="${state.prodRoleFilter === 'bahan_resep' ? 'true' : 'false'}" data-role-filter="bahan_resep">Bahan Resep (${counts.bahan_resep})</button>
+            <button type="button" class="pill-filter" aria-pressed="${state.prodRoleFilter === 'lainnya' ? 'true' : 'false'}" data-role-filter="lainnya">Lainnya (${counts.lainnya})</button>
+          </div>
+
+          <div style="margin-bottom: 14px; max-width: 420px;">
+            <label for="prodSearchInput" style="display:block; font-size:0.78rem; font-weight:650; margin-bottom:5px; color:var(--text-secondary);">Cari produk di sampel katalog</label>
+            <input type="text" id="prodSearchInput" class="form-control" style="width:100%;" value="${escapeHtml(state.prodQuery)}" placeholder="Contoh: Philips, Steamer, Matcha, Kunyit..." />
+          </div>
+
+          ${filtered.length === 0 ? `
+            <div class="ui-state-box">
+              <h3>Tidak ada produk di filter "${escapeHtml(roleLabel[state.prodRoleFilter] || state.prodQuery)}"</h3>
+              <p>Pilih tab Semua atau ubah peran promosi produk dari daftar lain.</p>
+              <button type="button" id="resetProdFilterBtn" class="btn btn-compact">Tampilkan Semua</button>
+            </div>
+          ` : `
+            <div class="product-rows">
+              ${filtered.map((p) => `
+                <div class="product-row-item">
+                  <div>
+                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                      <strong style="color:var(--text-primary);">${escapeHtml(p.name)}</strong>
+                      <span class="badge ${roleBadgeClass[p.promo_role]}">${roleLabel[p.promo_role]}</span>
+                    </div>
+                    <div class="bp-meta" style="margin-top:3px;">
+                      <span class="mono-id">${p.id}</span> · Kategori: ${escapeHtml(p.category)} · Brand: ${escapeHtml(p.brands.join(', '))}
+                    </div>
+                  </div>
+                  <button type="button" class="btn btn-compact" data-edit-role="${p.id}">Ubah Peran</button>
+                </div>
+              `).join('')}
+            </div>
+          `}
+
+          <div id="prodFeedbackBanner" class="feedback-banner ${state.prodFeedback ? 'is-visible' : ''}" role="status" aria-live="polite">
+            ${escapeHtml(state.prodFeedback)}
+          </div>
+        `;
+
+        prodContentMount.querySelectorAll('[data-role-filter]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            state.prodRoleFilter = btn.getAttribute('data-role-filter');
+            renderProducts();
+          });
+        });
+
+        const searchEl = prodContentMount.querySelector('#prodSearchInput');
+        if (searchEl) {
+          searchEl.addEventListener('input', (e) => {
+            state.prodQuery = e.target.value;
+            renderProducts();
+            const newInput = document.getElementById('prodSearchInput');
+            if (newInput) {
+              newInput.focus();
+              newInput.setSelectionRange(state.prodQuery.length, state.prodQuery.length);
+            }
+          });
+        }
+
+        const resetProdBtn = prodContentMount.querySelector('#resetProdFilterBtn');
+        if (resetProdBtn) {
+          resetProdBtn.addEventListener('click', () => {
+            state.prodRoleFilter = 'all';
+            state.prodQuery = '';
+            renderProducts();
+          });
+        }
+
+        prodContentMount.querySelectorAll('[data-edit-role]').forEach((btn) => {
+          btn.addEventListener('click', () => openRoleModal(btn.getAttribute('data-edit-role'), btn));
+        });
+      }
+
+      // Role Edit Modal
+      const roleModalBackdrop = document.getElementById('roleModalBackdrop');
+      const roleEditForm = document.getElementById('roleEditForm');
+      const closeRoleModalBtn = document.getElementById('closeRoleModalBtn');
+      const cancelRoleModalBtn = document.getElementById('cancelRoleModalBtn');
+      let lastTriggerEl = null;
+
+      function openRoleModal(prodId, triggerEl) {
+        const prod = PRODUCTS.find((p) => p.id === prodId);
+        if (!prod) return;
+        lastTriggerEl = triggerEl || null;
+        state.editingProdId = prodId;
+        document.getElementById('modalProductName').textContent = prod.name;
+        document.getElementById('modalProductId').textContent = prod.id;
+        const radio = document.querySelector(`input[name="promoRoleChoice"][value="${prod.promo_role}"]`);
+        if (radio) radio.checked = true;
+        roleModalBackdrop.classList.add('is-open');
+        closeRoleModalBtn.focus();
+      }
+
+      function closeRoleModal() {
+        roleModalBackdrop.classList.remove('is-open');
+        state.editingProdId = null;
+        if (lastTriggerEl && typeof lastTriggerEl.focus === 'function') {
+          lastTriggerEl.focus();
+        }
+      }
+
+      closeRoleModalBtn.addEventListener('click', closeRoleModal);
+      cancelRoleModalBtn.addEventListener('click', closeRoleModal);
+      roleModalBackdrop.addEventListener('click', (e) => {
+        if (e.target === roleModalBackdrop) closeRoleModal();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && roleModalBackdrop.classList.contains('is-open')) {
+          closeRoleModal();
+        }
+      });
+
+      roleEditForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const checked = document.querySelector('input[name="promoRoleChoice"]:checked');
+        const prod = PRODUCTS.find((p) => p.id === state.editingProdId);
+        if (checked && prod) {
+          prod.promo_role = checked.value;
+          state.prodFeedback = `Peran promosi "${prod.name}" diperbarui menjadi ${roleLabel[checked.value]} (${checked.value}).`;
+        }
+        closeRoleModal();
+        renderProducts();
+      });
+
+      // TAB 4: SCHEDULE MATRIX 2+2
+      const schedContentMount = document.getElementById('schedContentMount');
+
+      function pickSlotResolution(brandKey, roleKey, slotOffset) {
+        const candidates = [];
+        BLUEPRINTS.filter((b) => b.foodSafe).forEach((bp) => {
+          const list = (bp.matches[brandKey] && bp.matches[brandKey][roleKey]) || [];
+          list.forEach((prod) => {
+            candidates.push({ bpId: bp.id, bpTitle: bp.title, prodId: prod.id, prodName: prod.name, score: prod.score, reason: prod.reason });
+          });
+        });
+        if (candidates.length === 0) return null;
+        return candidates[(slotOffset + state.schedDryRunOffset) % candidates.length];
+      }
+
+      function renderSchedule() {
+        if (renderGlobalUiState(schedContentMount, 'Jadwal Kuota 2+2')) return;
+
+        const slots = [
+          { slot: 1, time: '06:15', role: 'alat_dapur', title: 'Slot Pagi: Product Bridging Alat Dapur #1' },
+          { slot: 2, time: '11:30', role: 'bahan_resep', title: 'Slot Siang: Product Bridging Bahan Resep #1' },
+          { slot: 3, time: '16:15', role: 'alat_dapur', title: 'Slot Sore: Product Bridging Alat Dapur #2' },
+          { slot: 4, time: '19:30', role: 'bahan_resep', title: 'Slot Malam: Product Bridging Bahan Resep #2' }
+        ];
+
+        const slotsHtml = slots.map((s, idx) => {
+          const pick = pickSlotResolution(state.schedBrand, s.role, idx);
+          return `
+            <div class="slot-row">
+              <div class="slot-time">${s.time} WIB</div>
+              <div>
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:4px;">
+                  <strong>${s.title}</strong>
+                  <span class="badge ${roleBadgeClass[s.role]}">${roleLabel[s.role]}</span>
+                </div>
+                ${pick ? `
+                  <div class="bp-meta">
+                    Hasil rotasi simulasi: <strong>${escapeHtml(pick.bpId)}</strong> (${escapeHtml(pick.bpTitle)}) + <strong>${escapeHtml(pick.prodName)}</strong>
+                  </div>
+                ` : `
+                  <div class="bp-meta">
+                    Belum ada pasangan ${roleLabel[s.role]} pada data contoh brand ${state.schedBrand} (perlu mapping bahan_resep lebih banyak).
+                  </div>
+                `}
+              </div>
+              <span class="badge badge-lainnya">Auto Smart Match</span>
+            </div>
+          `;
+        }).join('');
+
+        schedContentMount.innerHTML = `
+          <div class="quota-layout">
+            <div class="work-pane">
+              <div class="pane-head">
+                <h3>Pengaturan Rotasi Kuota 2+2</h3>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:14px;">
+                <div class="field-group">
+                  <label for="schedBrandSelect">Brand Target</label>
+                  <select id="schedBrandSelect" class="form-control">
+                    <option value="nutribake" ${state.schedBrand === 'nutribake' ? 'selected' : ''}>nutribake</option>
+                    <option value="dapurbotani" ${state.schedBrand === 'dapurbotani' ? 'selected' : ''}>dapurbotani</option>
+                    <option value="siasatsehat" ${state.schedBrand === 'siasatsehat' ? 'selected' : ''}>siasatsehat</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label for="schedBpDaysInput">Jeda Anti-Duplikat Blueprint (hari)</label>
+                  <input type="number" id="schedBpDaysInput" class="form-control" min="1" max="60" value="${state.schedLookbackBp}" />
+                </div>
+                <div class="field-group">
+                  <label for="schedProdDaysInput">Jeda Anti-Duplikat Produk (hari)</label>
+                  <input type="number" id="schedProdDaysInput" class="form-control" min="1" max="30" value="${state.schedLookbackProd}" />
+                </div>
+                <button type="button" id="schedSimulateBtn" class="btn btn-primary">Putar Simulasi Pilihan Hari Berikutnya</button>
+                <div id="schedFeedbackBanner" class="feedback-banner ${state.schedMessage ? 'is-visible' : ''}" role="status" aria-live="polite">
+                  ${escapeHtml(state.schedMessage)}
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="slot-list">${slotsHtml}</div>
+            </div>
+          </div>
+        `;
+
+        schedContentMount.querySelector('#schedBrandSelect').addEventListener('change', (e) => {
+          state.schedBrand = e.target.value;
+          state.schedMessage = '';
+          renderSchedule();
+        });
+        schedContentMount.querySelector('#schedBpDaysInput').addEventListener('change', (e) => {
+          state.schedLookbackBp = Math.max(1, Number(e.target.value) || 14);
+        });
+        schedContentMount.querySelector('#schedProdDaysInput').addEventListener('change', (e) => {
+          state.schedLookbackProd = Math.max(1, Number(e.target.value) || 4);
+        });
+        schedContentMount.querySelector('#schedSimulateBtn').addEventListener('click', () => {
+          state.schedDryRunOffset += 1;
+          state.schedMessage = `Simulasi rotasi hari ke-${state.schedDryRunOffset + 1} dijalankan untuk ${state.schedBrand} (jeda blueprint ${state.schedLookbackBp}h, jeda produk ${state.schedLookbackProd}h).`;
+          renderSchedule();
+        });
+      }
+
+      function renderActiveTab() {
+        if (state.activeTab === 'deconstruct') renderDeconstruct();
+        else if (state.activeTab === 'multiplier') renderMultiplier();
+        else if (state.activeTab === 'products') renderProducts();
+        else if (state.activeTab === 'schedule') renderSchedule();
+      }
+
+      renderActiveTab();
+    })();
+  </script>
+</body>
+</html>
