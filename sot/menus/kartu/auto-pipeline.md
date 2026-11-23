@@ -1,6 +1,6 @@
 # Kartu Menu: Auto Pipeline
 
-Terakhir dicek: 23 November 2026 · Versi aplikasi: v2.58.0 (fitur/smart-matcher-2plus2)
+Terakhir dicek: 24 November 2026 · Versi aplikasi: v2.58.1 (hotfix/autopipeline-1click)
 Alamat: `/auto-pipeline` · Kelompok: WORKFLOW · Kunci izin menu: `auto_pipeline`
 
 ## Fungsi
@@ -46,6 +46,7 @@ Pabrik konten otomatis. Dari satu masukan (produk, topik, resep, atau blueprint)
 5. Jadwal CF Autopipeline (CFA) versi skill Claude adalah sistem **terpisah** dari tab Schedules di menu ini; jangan dicampur saat menganalisa.
 6. Dropdown preset Video Multiplier (`multiplier_campaign`) hanya menampilkan preset dengan `campaign_kinds` memuat `multiplier_campaign` (bisa ditambah dengan meng-clone atau mencentang `Campaign Multiplier` di Preset Manager).
 7. Mode jadwal `selection_mode: 'auto_smart_match'` pada `multiplier_campaign` otomatis memilih pasangan `(blueprint, product)` dari `blueprint_product_matches` sesuai `target_promo_role` (`alat_dapur` / `bahan_resep`) sambil menghindari pengulangan blueprint 14 hari & produk 4 hari (`pickNextSmartMatchPair`), serta tersedia aksi `setup_multiplier_2plus2_quota` pada `POST /api/v2/recipes/auto-pipeline-schedules`.
+8. Eksekusi 1-klik (`POST /api/v2/recipes/autonomous-pipeline`) melakukan isolasi tenant yang konsisten pada aset blueprint Multiplier, menampilkan feedback validasi inline saat prasyarat belum lengkap, dan polling progress `recipe_labs` dilayani oleh `GET /api/v2/recipes/autonomous-pipeline/status`.
 
 ## Belum ada / batasan
 - Jumlah dan isi jadwal aktif berubah-ubah; jangan mengutip daftar jadwal dari dokumen, cek langsung lewat `cf_list_schedules`.
