@@ -1,6 +1,6 @@
 # Kartu Menu: Auto Pipeline
 
-Terakhir dicek: 17 November 2026 · Versi aplikasi: v2.51.0
+Terakhir dicek: 23 November 2026 · Versi aplikasi: v2.57.9+
 Alamat: `/auto-pipeline` · Kelompok: WORKFLOW · Kunci izin menu: `auto_pipeline`
 
 ## Fungsi
@@ -44,6 +44,7 @@ Pabrik konten otomatis. Dari satu masukan (produk, topik, resep, atau blueprint)
 3. **Publish otomatis aktif secara bawaan** pada jadwal baru (`auto_publish_enabled`). Matikan jika ingin tinjau dulu.
 4. Status antrean: `queued` → `processing` → `completed` / `failed` / `cancelled`. Status jadwal: `active`, `paused`, `archived`.
 5. Jadwal CF Autopipeline (CFA) versi skill Claude adalah sistem **terpisah** dari tab Schedules di menu ini; jangan dicampur saat menganalisa.
+6. Dropdown preset Video Multiplier (`multiplier_campaign`) hanya menampilkan preset dengan `campaign_kinds` memuat `multiplier_campaign` (bisa ditambah dengan meng-clone atau mencentang `Campaign Multiplier` di Preset Manager).
 
 ## Belum ada / batasan
 - Jumlah dan isi jadwal aktif berubah-ubah; jangan mengutip daftar jadwal dari dokumen, cek langsung lewat `cf_list_schedules`.

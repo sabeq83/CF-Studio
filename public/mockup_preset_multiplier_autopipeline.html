@@ -1,0 +1,1613 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup Perbaikan Preset Video Multiplier: Preset Manager &amp; Auto Pipeline</title>
+  <style>
+    /* Semantic Design Tokens (dari app/theme.css) */
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --transition: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --surface-subtle: #0c1422;
+      --input-bg: #0c1422;
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --border-color: var(--border-subtle);
+
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --link-hover: #a5f3fc;
+
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-purple: #c084fc;
+      --status-purple-soft: rgba(192, 132, 252, 0.14);
+      --status-rose: #f43f5e;
+      --status-rose-soft: rgba(244, 63, 94, 0.14);
+
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --surface-subtle: #ffffff;
+      --input-bg: #ffffff;
+      --overlay-backdrop: rgba(15, 23, 42, 0.54);
+
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --text-disabled: #8794a6;
+
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --border-color: var(--border-subtle);
+
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --link: #075ea8;
+      --link-hover: #064b86;
+
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --status-purple: #7c3aed;
+      --status-purple-soft: #f5f3ff;
+      --status-rose: #be123c;
+      --status-rose-soft: #fff1f2;
+
+      --focus-ring: #6d4ed6;
+      --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+      --shadow-modal: 0 26px 80px rgba(31, 45, 61, 0.22);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    button,
+    select,
+    input[type="checkbox"],
+    input[type="radio"],
+    a[href] {
+      cursor: pointer;
+    }
+
+    button:disabled,
+    input:disabled,
+    select:disabled {
+      cursor: not-allowed;
+      opacity: 0.58;
+    }
+
+    :focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--focus-ring) 78%, transparent);
+      outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition: none !important;
+      }
+    }
+
+    /* Top Control Bar */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 12px 24px;
+    }
+
+    .topbar-inner {
+      max-width: 1220px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .topbar-title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .topbar-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .topbar-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .topbar-controls {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .segmented {
+      display: inline-flex;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 3px;
+      gap: 3px;
+    }
+
+    .segmented-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 7px 12px;
+      min-height: 36px;
+      border-radius: var(--radius-xs);
+      transition: background var(--transition), color var(--transition);
+    }
+
+    .segmented-btn:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+
+    .segmented-btn[aria-pressed="true"] {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    .segmented-btn.is-bug[aria-pressed="true"] {
+      background: var(--status-danger-soft);
+      color: var(--status-danger);
+      border: 1px solid var(--status-danger);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 0.84rem;
+      font-weight: 600;
+      padding: 9px 15px;
+      min-height: 40px;
+      border: 1px solid transparent;
+      text-decoration: none;
+      transition: background var(--transition), border-color var(--transition), color var(--transition);
+    }
+
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--action-primary-hover);
+    }
+
+    .btn-secondary {
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      border-color: var(--border-subtle);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+
+    .btn-sm {
+      min-height: 34px;
+      padding: 6px 11px;
+      font-size: 0.78rem;
+    }
+
+    /* Main Container */
+    .shell {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 24px 20px 64px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Screen Switcher Navigation */
+    .screen-nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 12px;
+    }
+
+    .screen-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      min-height: 44px;
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-size: 0.86rem;
+      font-weight: 600;
+      transition: background var(--transition), border-color var(--transition), color var(--transition);
+    }
+
+    .screen-tab:hover {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+    }
+
+    .screen-tab[aria-selected="true"] {
+      background: var(--surface-interactive);
+      border-color: var(--action-primary);
+      color: var(--action-primary);
+    }
+
+    .tab-count {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: var(--surface-raised);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .screen-tab[aria-selected="true"] .tab-count {
+      background: var(--status-info-soft);
+      color: var(--action-primary);
+      border-color: transparent;
+    }
+
+    /* Status Callout */
+    .callout {
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 0.85rem;
+    }
+
+    .callout.is-info {
+      background: var(--status-info-soft);
+      border-color: color-mix(in srgb, var(--status-info) 45%, transparent);
+    }
+
+    .callout.is-warning {
+      background: var(--status-warning-soft);
+      border-color: color-mix(in srgb, var(--status-warning) 50%, transparent);
+    }
+
+    .callout.is-success {
+      background: var(--status-success-soft);
+      border-color: color-mix(in srgb, var(--status-success) 50%, transparent);
+    }
+
+    .callout.is-danger {
+      background: var(--status-danger-soft);
+      border-color: color-mix(in srgb, var(--status-danger) 50%, transparent);
+    }
+
+    /* Page Header */
+    .page-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .page-head h1 {
+      font-size: 1.55rem;
+      font-weight: 800;
+      letter-spacing: -0.015em;
+      color: var(--text-primary);
+    }
+
+    .page-head p {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+    }
+
+    /* Filter Tabs inside Preset Manager */
+    .kind-tabs {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 2px;
+    }
+
+    .kind-tab {
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 0.84rem;
+      font-weight: 600;
+      padding: 10px 14px;
+      min-height: 44px;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 2px solid transparent;
+      transition: color var(--transition), border-color var(--transition);
+    }
+
+    .kind-tab:hover {
+      color: var(--text-primary);
+    }
+
+    .kind-tab[aria-selected="true"] {
+      color: var(--action-primary);
+      border-bottom-color: var(--action-primary);
+    }
+
+    /* Preset Cards Grid */
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 16px;
+    }
+
+    .preset-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: border-color var(--transition);
+    }
+
+    .preset-card:hover {
+      border-color: var(--border-strong);
+    }
+
+    .preset-card.is-highlighted {
+      border-color: var(--action-primary);
+    }
+
+    .preset-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .preset-name {
+      font-size: 0.96rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .preset-key {
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+      word-break: break-all;
+    }
+
+    .pill {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border-subtle);
+      white-space: nowrap;
+    }
+
+    .pill-system {
+      background: var(--surface);
+      color: var(--text-muted);
+    }
+
+    .pill-custom {
+      background: var(--status-purple-soft);
+      color: var(--status-purple);
+      border-color: color-mix(in srgb, var(--status-purple) 45%, transparent);
+    }
+
+    .pill-kind {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border-color: color-mix(in srgb, var(--status-info) 40%, transparent);
+    }
+
+    .pill-kind.is-multiplier {
+      background: var(--status-purple-soft);
+      color: var(--status-purple);
+      border-color: color-mix(in srgb, var(--status-purple) 45%, transparent);
+    }
+
+    .pill-kind.is-recipe-labs {
+      background: var(--status-rose-soft);
+      color: var(--status-rose);
+      border-color: color-mix(in srgb, var(--status-rose) 45%, transparent);
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .spec-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 8px 0;
+      border-top: 1px dashed var(--border-subtle);
+      border-bottom: 1px dashed var(--border-subtle);
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .spec-item {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      padding: 2px 7px;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: auto;
+    }
+
+    /* Form Controls */
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+    }
+
+    .form-label {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .form-input,
+    .form-select {
+      width: 100%;
+      min-height: 42px;
+      padding: 8px 12px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.88rem;
+    }
+
+    .form-select.is-primary-select {
+      border: 1.5px solid var(--action-primary);
+      font-weight: 700;
+    }
+
+    .campaign-fieldset {
+      margin-top: 16px;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      background: var(--surface-raised);
+    }
+
+    .campaign-fieldset legend {
+      padding: 0 6px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .campaign-checkbox-grid {
+      display: flex;
+      gap: 14px 20px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .checkbox-option {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 38px;
+      padding: 4px 10px;
+      border-radius: var(--radius-xs);
+      border: 1px solid transparent;
+      font-size: 0.86rem;
+      color: var(--text-primary);
+      background: var(--surface);
+      transition: border-color var(--transition), background var(--transition);
+    }
+
+    .checkbox-option:hover {
+      border-color: var(--border-strong);
+      background: var(--surface-hover);
+    }
+
+    .checkbox-option.is-new-fix {
+      border-color: color-mix(in srgb, var(--action-primary) 55%, transparent);
+    }
+
+    .checkbox-option input[type="checkbox"] {
+      width: 17px;
+      height: 17px;
+      accent-color: var(--action-primary);
+    }
+
+    .fix-tag {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: var(--status-success-soft);
+      color: var(--status-success);
+    }
+
+    .field-hint {
+      margin-top: 8px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .field-error {
+      margin-top: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--status-danger);
+    }
+
+    /* Auto Pipeline Campaign Type Grid */
+    .pipeline-type-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+    }
+
+    .pipeline-type-card {
+      text-align: left;
+      font-family: inherit;
+      background: var(--surface-raised);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: border-color var(--transition), background var(--transition);
+    }
+
+    .pipeline-type-card:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+
+    .pipeline-type-card[aria-pressed="true"] {
+      background: var(--surface-interactive);
+      border-color: var(--status-purple);
+    }
+
+    .pipeline-type-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pipeline-type-name {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .pipeline-type-card[aria-pressed="true"] .pipeline-type-name {
+      color: var(--status-purple);
+    }
+
+    .pipeline-type-state {
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--border-subtle);
+      color: var(--text-muted);
+    }
+
+    .pipeline-type-card[aria-pressed="true"] .pipeline-type-state {
+      background: var(--status-purple);
+      color: #ffffff;
+    }
+
+    .pipeline-type-desc {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .pipeline-fields-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      align-items: start;
+    }
+
+    .preset-inspector {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .inspector-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+
+    .code-inline {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--surface-interactive);
+      color: var(--link);
+    }
+
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 60;
+      max-width: 420px;
+      background: var(--surface-interactive);
+      border: 1px solid var(--action-primary);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      box-shadow: var(--shadow-modal);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.84rem;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .footer {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 20px;
+      border-top: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    @media (max-width: 640px) {
+      .topbar {
+        padding: 10px 14px;
+      }
+      .shell {
+        padding: 16px 14px 72px;
+      }
+      .card {
+        padding: 16px;
+      }
+      .btn,
+      .screen-tab,
+      .kind-tab {
+        min-height: 44px;
+      }
+      .preset-grid,
+      .pipeline-type-grid,
+      .pipeline-fields-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-title-group">
+        <div class="topbar-title">Mockup Interaktif: Preset Video Multiplier &amp; Preset Manager</div>
+        <div class="topbar-sub">Simulasi alur Clone / Edit Preset di Preset Manager sampai muncul di Auto Pipeline (Video Multiplier)</div>
+      </div>
+      <div class="topbar-controls">
+        <div class="segmented" role="group" aria-label="Pilih skenario simulasi">
+          <button type="button" id="modeAfterBtn" class="segmented-btn" aria-pressed="true">Sesudah Perbaikan</button>
+          <button type="button" id="modeBeforeBtn" class="segmented-btn is-bug" aria-pressed="false">Kondisi Sekarang (Bug)</button>
+        </div>
+        <button type="button" id="themeToggleBtn" class="btn btn-secondary btn-sm" aria-label="Ganti tema Light atau Dark">
+          Tema: Dark
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <nav class="screen-nav" aria-label="Simulasi halaman CF Studio">
+      <button type="button" id="navPresetsBtn" class="screen-tab" aria-selected="true">
+        1. Preset Manager (/settings/presets)
+        <span class="tab-count" id="navPresetsCount">4</span>
+      </button>
+      <button type="button" id="navAutoPipelineBtn" class="screen-tab" aria-selected="false">
+        2. Auto Pipeline (/auto-pipeline)
+        <span class="tab-count" id="navMultiplierCount">1</span>
+      </button>
+      <button type="button" id="navMultiplierLabBtn" class="screen-tab" aria-selected="false">
+        3. Multiplier Labs: Save as Preset
+      </button>
+    </nav>
+
+    <div id="scenarioBanner" class="callout is-info" role="status">
+      <div id="scenarioBannerText"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button type="button" id="quickCloneDemoBtn" class="btn btn-primary btn-sm">Simulasikan Clone Multiplier Remix</button>
+        <button type="button" id="resetDemoBtn" class="btn btn-secondary btn-sm">Reset Data Awal</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 1: PRESET MANAGER -->
+    <section id="screenPresets" aria-labelledby="presetsHeading">
+      <div class="page-head" style="margin-bottom:16px;">
+        <div>
+          <h1 id="presetsHeading">Preset Manager</h1>
+          <p>Kelola preset strategi kreatif dan visual terpusat untuk otomatisasi kampanye.</p>
+        </div>
+        <button type="button" id="createPresetBtn" class="btn btn-primary">+ Create Preset</button>
+      </div>
+
+      <!-- List Mode -->
+      <div id="presetsListView" style="display:flex;flex-direction:column;gap:16px;">
+        <div class="kind-tabs" role="tablist" aria-label="Filter kategori preset">
+          <button type="button" class="kind-tab" data-kind-tab="all" aria-selected="true">Semua Preset <span class="tab-count" data-count="all">0</span></button>
+          <button type="button" class="kind-tab" data-kind-tab="recipe_campaign" aria-selected="false">Resep Kuliner <span class="tab-count" data-count="recipe_campaign">0</span></button>
+          <button type="button" class="kind-tab" data-kind-tab="product_campaign" aria-selected="false">Produk E-Commerce <span class="tab-count" data-count="product_campaign">0</span></button>
+          <button type="button" class="kind-tab" data-kind-tab="brand_editorial" aria-selected="false">Brand Editorial <span class="tab-count" data-count="brand_editorial">0</span></button>
+          <button type="button" class="kind-tab" data-kind-tab="multiplier_campaign" aria-selected="false">Multiplier Remix <span class="tab-count" data-count="multiplier_campaign">0</span></button>
+          <button type="button" class="kind-tab" data-kind-tab="recipe_labs" aria-selected="false">Recipe Labs <span class="tab-count" data-count="recipe_labs">0</span></button>
+        </div>
+
+        <div id="presetsGrid" class="preset-grid"></div>
+      </div>
+
+      <!-- Edit / Clone Form Mode -->
+      <form id="presetFormView" class="card hidden" novalidate>
+        <div class="page-head" style="margin-bottom:18px;">
+          <div>
+            <h2 id="formModeTitle" style="font-size:1.2rem;font-weight:700;">Clone Preset</h2>
+            <p id="formModeSubtitle" style="font-size:0.84rem;color:var(--text-secondary);margin-top:2px;">
+              Atur identitas preset dan jenis campaign yang diizinkan memakai preset ini.
+            </p>
+          </div>
+          <button type="button" id="cancelFormBtn" class="btn btn-secondary btn-sm">Kembali ke Daftar</button>
+        </div>
+
+        <div class="form-grid-2">
+          <label class="form-label">
+            Nama / Label Preset
+            <input type="text" id="formLabelInput" class="form-input" placeholder="Contoh: NutriBake Multiplier 4 Klip" required />
+          </label>
+          <label class="form-label">
+            Key Preset (Unique ID)
+            <input type="text" id="formKeyInput" class="form-input" placeholder="Contoh: nutribake_multiplier_4klip" required />
+          </label>
+        </div>
+
+        <fieldset class="campaign-fieldset">
+          <legend>Digunakan untuk Campaign</legend>
+          <div id="campaignKindsContainer" class="campaign-checkbox-grid"></div>
+          <p id="campaignKindsHint" class="field-hint"></p>
+          <p id="campaignKindsError" class="field-error hidden">Pilih minimal satu jenis campaign.</p>
+        </fieldset>
+
+        <div class="form-grid-2" style="margin-top:16px;">
+          <label class="form-label">
+            Model Video
+            <select id="formVideoModel" class="form-select">
+              <option value="veo_31_lite">Veo 3.1 Lite</option>
+              <option value="omni_flash">Omni Flash</option>
+              <option value="remotion_explainer_v1">Remotion Explainer v1</option>
+            </select>
+          </label>
+          <label class="form-label">
+            Jumlah Klip x Durasi
+            <select id="formClipSpec" class="form-select">
+              <option value="5x5">5 klip x 5 detik</option>
+              <option value="4x8">4 klip x 8 detik</option>
+              <option value="6x4">6 klip x 4 detik</option>
+            </select>
+          </label>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;flex-wrap:wrap;">
+          <button type="button" id="cancelFormFooterBtn" class="btn btn-secondary">Batal</button>
+          <button type="submit" id="savePresetBtn" class="btn btn-primary">Save Preset</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- SCREEN 2: AUTO PIPELINE -->
+    <section id="screenAutoPipeline" class="hidden" aria-labelledby="autoPipelineHeading">
+      <div class="page-head" style="margin-bottom:16px;">
+        <div>
+          <h1 id="autoPipelineHeading">Auto Pipeline</h1>
+          <p>Pilih tipe kampanye, brand, dan preset konfigurasi untuk produksi otomatis.</p>
+        </div>
+        <button type="button" id="goToPresetsFromApBtn" class="btn btn-secondary">
+          Kelola di Preset Manager
+        </button>
+      </div>
+
+      <div class="card" style="display:flex;flex-direction:column;gap:20px;">
+        <div>
+          <div style="font-size:0.86rem;font-weight:700;color:var(--text-secondary);margin-bottom:10px;">
+            1. Pilih Tipe Kampanye
+          </div>
+          <div class="pipeline-type-grid" id="pipelineTypeGrid"></div>
+        </div>
+
+        <div class="pipeline-fields-grid">
+          <div class="form-label">
+            <label for="apBrandSelect">2. Brand Profile</label>
+            <select id="apBrandSelect" class="form-select">
+              <option value="nutribake">NutriBake (@nutribake)</option>
+              <option value="dapur_botani">Dapur Botani (@dapurbotani)</option>
+              <option value="habitfolk">HabitFolk (@habitfolk)</option>
+            </select>
+          </div>
+
+          <div class="form-label">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+              <label for="apPresetSelect">3. Preset Video</label>
+              <span class="pill" style="background:var(--status-success-soft);color:var(--status-success);border-color:transparent;">Preset-Driven</span>
+            </div>
+            <select id="apPresetSelect" class="form-select is-primary-select"></select>
+            <div id="apPresetHelper" class="field-hint"></div>
+          </div>
+
+          <div class="form-label">
+            <label for="apExecutionSelect">4. Mode Eksekusi</label>
+            <select id="apExecutionSelect" class="form-select">
+              <option value="full_autopilot">Full Autopilot (Langsung Jadi)</option>
+              <option value="manual_review">Manual Review Storyboard</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="apPresetEmptyState" class="callout is-warning hidden">
+          <div>
+            <strong>Belum ada preset yang cocok untuk tipe campaign ini.</strong>
+            <div style="font-size:0.8rem;color:var(--text-secondary);margin-top:2px;">
+              Buka Preset Manager untuk meng-clone atau mencentang campaign yang diinginkan.
+            </div>
+          </div>
+          <button type="button" id="emptyOpenPresetManagerBtn" class="btn btn-primary btn-sm">Buka Preset Manager</button>
+        </div>
+
+        <div id="apInspector" class="preset-inspector">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+            <strong id="inspectorTitle" style="font-size:0.9rem;">Konfigurasi Preset Aktif</strong>
+            <span id="inspectorSourcePill" class="pill pill-system">System</span>
+          </div>
+          <div id="inspectorMeta" class="inspector-meta"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 3: MULTIPLIER LABS SAVE AS PRESET -->
+    <section id="screenMultiplierLab" class="hidden" aria-labelledby="mlHeading">
+      <div class="page-head" style="margin-bottom:16px;">
+        <div>
+          <h1 id="mlHeading">Multiplier Labs: Save as Preset</h1>
+          <p>Simulasi perbaikan payload ketika menyimpan preset langsung dari form Multiplier Labs (/multiplier-lab).</p>
+        </div>
+      </div>
+
+      <div class="card" style="display:flex;flex-direction:column;gap:16px;">
+        <div class="form-grid-2">
+          <label class="form-label">
+            Nama Preset Baru dari Multiplier Labs
+            <input type="text" id="mlPresetLabelInput" class="form-input" value="Dapur Botani Multiplier Hook" />
+          </label>
+          <label class="form-label">
+            Key Preset
+            <input type="text" id="mlPresetKeyInput" class="form-input" value="dapur_botani_multiplier_hook" />
+          </label>
+        </div>
+
+        <label class="checkbox-option" style="align-self:flex-start;">
+          <input type="checkbox" id="mlBridgingCheck" checked />
+          <span>Aktifkan Product Bridging</span>
+        </label>
+
+        <div class="preset-inspector">
+          <strong style="font-size:0.86rem;">Payload <span class="code-inline">campaign_kinds</span> yang dikirim ke API:</strong>
+          <pre id="mlPayloadPreview" style="font-family:var(--font-mono);font-size:0.8rem;color:var(--link);overflow-x:auto;padding-top:4px;"></pre>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+          <button type="button" id="mlSavePresetBtn" class="btn btn-primary">Simpan Preset dari Multiplier Labs</button>
+          <span id="mlFeedback" style="font-size:0.82rem;color:var(--text-secondary);"></span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>CF Studio Mockup: Perbaikan Preset Video Multiplier</span>
+    <span>Gunakan tombol Kondisi Sekarang vs Sesudah Perbaikan di atas untuk membandingkan alur.</span>
+  </footer>
+
+  <div id="toast" class="toast hidden" role="status" aria-live="polite">
+    <span id="toastText"></span>
+    <button type="button" id="toastCloseBtn" class="btn btn-secondary btn-sm" aria-label="Tutup notifikasi">Tutup</button>
+  </div>
+
+  <script>
+    (function () {
+      const ALL_CAMPAIGN_KINDS = [
+        { id: 'brand_editorial', label: 'Brand Editorial', badge: 'Brand Editorial', isFix: false },
+        { id: 'product_campaign', label: 'Product Campaign', badge: 'Produk', isFix: false },
+        { id: 'recipe_campaign', label: 'Recipe Campaign', badge: 'Resep Kuliner', isFix: false },
+        { id: 'multiplier_campaign', label: 'Campaign Multiplier (Multiplier Remix)', badge: 'Multiplier', isFix: true },
+        { id: 'recipe_labs', label: 'Recipe Labs (Teks & Foto)', badge: 'Recipe Labs', isFix: true }
+      ];
+
+      const BEFORE_CAMPAIGN_KINDS = ALL_CAMPAIGN_KINDS.slice(0, 3);
+
+      const PIPELINE_TYPES = [
+        { key: 'product_campaign', label: 'Video Produk', desc: 'Promosi produk katalog dan showcase USP.' },
+        { key: 'editorial_campaign', label: 'Video Editorial', desc: 'Pilar brand dan storytelling edukatif.' },
+        { key: 'recipe_campaign', label: 'Video Resep', desc: 'Food reels dan panduan memasak.' },
+        { key: 'multiplier_campaign', label: 'Video Multiplier', desc: 'Remix angle dan hook dari blueprint viral.' },
+        { key: 'recipe_labs', label: 'Resep Teks & Foto', desc: 'Artikel resep dan grid foto komposit.' }
+      ];
+
+      const INITIAL_PRESETS = [
+        {
+          key: 'multiplier_deconstruct_remix',
+          label: 'Multiplier Deconstruct Remix',
+          is_system: true,
+          campaign_kinds: ['multiplier_campaign'],
+          video_model: 'veo_31_lite',
+          clip_spec: '5x5',
+          bridging: 'Bridge Klip 4'
+        },
+        {
+          key: 'nutribake_product_softsell',
+          label: 'NutriBake Product Softsell',
+          is_system: false,
+          campaign_kinds: ['product_campaign'],
+          video_model: 'veo_31_lite',
+          clip_spec: '4x8',
+          bridging: 'Bridge Klip 3'
+        },
+        {
+          key: 'brand_editorial_campaign',
+          label: 'Brand Editorial Campaign',
+          is_system: true,
+          campaign_kinds: ['brand_editorial'],
+          video_model: 'veo_31_lite',
+          clip_spec: '4x8',
+          bridging: 'Non-Bridging'
+        },
+        {
+          key: 'recipe_campaign',
+          label: 'Recipe Campaign Default',
+          is_system: true,
+          campaign_kinds: ['recipe_campaign'],
+          video_model: 'omni_flash',
+          clip_spec: '6x4',
+          bridging: 'Non-Bridging'
+        }
+      ];
+
+      const state = {
+        mode: 'after', // 'after' | 'before'
+        screen: 'presets', // 'presets' | 'autopipeline' | 'multiplierlab'
+        activeKindTab: 'all',
+        editingMode: false,
+        editingIsNew: true,
+        editingOriginalKey: null,
+        formKinds: ['multiplier_campaign'],
+        apPipelineType: 'multiplier_campaign',
+        apBrand: 'nutribake',
+        apSelectedPresetKey: 'multiplier_deconstruct_remix',
+        presets: JSON.parse(JSON.stringify(INITIAL_PRESETS))
+      };
+
+      const el = (id) => document.getElementById(id);
+
+      function showToast(msg) {
+        el('toastText').textContent = msg;
+        el('toast').classList.remove('hidden');
+      }
+
+      function hideToast() {
+        el('toast').classList.add('hidden');
+      }
+
+      function matchesBrand(preset, brand) {
+        const target = (preset.key + ' ' + preset.label).toLowerCase().replace(/[\s_-]+/g, '');
+        const cleanBrand = String(brand || '').toLowerCase().replace(/[\s_-]+/g, '');
+        return cleanBrand.length >= 3 && target.includes(cleanBrand);
+      }
+
+      function getFilteredPresetsForAp(pipelineType, brand) {
+        const normalized = pipelineType === 'editorial_campaign' ? 'brand_editorial' : pipelineType;
+        const matched = state.presets
+          .filter(p => (p.campaign_kinds || []).includes(normalized))
+          .map(p => ({ ...p, is_brand_match: matchesBrand(p, brand) }));
+
+        matched.sort((a, b) => {
+          if (a.is_brand_match !== b.is_brand_match) return a.is_brand_match ? -1 : 1;
+          return a.label.localeCompare(b.label);
+        });
+        return matched;
+      }
+
+      function updateNavCounts() {
+        el('navPresetsCount').textContent = String(state.presets.length);
+        const mulCount = state.presets.filter(p => p.campaign_kinds.includes('multiplier_campaign')).length;
+        el('navMultiplierCount').textContent = String(mulCount);
+      }
+
+      function renderBanner() {
+        const banner = el('scenarioBanner');
+        const txt = el('scenarioBannerText');
+        const quickBtn = el('quickCloneDemoBtn');
+        banner.className = 'callout ' + (state.mode === 'after' ? 'is-info' : 'is-warning');
+        if (state.mode === 'before') {
+          txt.innerHTML = '<strong>Kondisi Sekarang (Bug):</strong> Checkbox "Digunakan untuk Campaign" hanya punya 3 opsi (tanpa Campaign Multiplier), sehingga clone atau edit preset tidak bisa ditandai untuk Video Multiplier.';
+          quickBtn.textContent = 'Lihat Bug saat Clone Multiplier';
+        } else {
+          txt.innerHTML = '<strong>Sesudah Perbaikan:</strong> Checkbox "Digunakan untuk Campaign" menampilkan semua 5 jenis campaign termasuk <strong>Campaign Multiplier</strong> dan <strong>Recipe Labs</strong>. Preset yang di-clone atau dicentang langsung muncul di Auto Pipeline.';
+          quickBtn.textContent = 'Simulasikan Clone Multiplier Remix';
+        }
+      }
+
+      function renderPresetCards() {
+        const kinds = ['all', 'recipe_campaign', 'product_campaign', 'brand_editorial', 'multiplier_campaign', 'recipe_labs'];
+        kinds.forEach(k => {
+          const countEl = document.querySelector('[data-count="' + k + '"]');
+          if (countEl) {
+            const count = k === 'all'
+              ? state.presets.length
+              : state.presets.filter(p => p.campaign_kinds.includes(k)).length;
+            countEl.textContent = String(count);
+          }
+        });
+
+        document.querySelectorAll('.kind-tab').forEach(btn => {
+          btn.setAttribute('aria-selected', btn.dataset.kindTab === state.activeKindTab ? 'true' : 'false');
+        });
+
+        const list = state.activeKindTab === 'all'
+          ? state.presets
+          : state.presets.filter(p => p.campaign_kinds.includes(state.activeKindTab));
+
+        const grid = el('presetsGrid');
+        if (list.length === 0) {
+          grid.innerHTML = '<div class="card" style="grid-column:1/-1;">Belum ada preset pada kategori ini.</div>';
+          return;
+        }
+
+        grid.innerHTML = list.map(p => {
+          const kindBadges = p.campaign_kinds.map(k => {
+            const meta = ALL_CAMPAIGN_KINDS.find(item => item.id === k);
+            const cls = k === 'multiplier_campaign' ? 'pill-kind is-multiplier' : (k === 'recipe_labs' ? 'pill-kind is-recipe-labs' : 'pill-kind');
+            return '<span class="pill ' + cls + '">' + (meta ? meta.badge : k) + '</span>';
+          }).join('');
+
+          const editBtn = p.is_system
+            ? '<button type="button" class="btn btn-secondary btn-sm" disabled title="Preset sistem tidak dapat diedit langsung">Terkunci</button>'
+            : '<button type="button" class="btn btn-secondary btn-sm" data-action="edit" data-key="' + p.key + '">Edit</button>';
+
+          return (
+            '<article class="preset-card' + (p.campaign_kinds.includes('multiplier_campaign') ? ' is-highlighted' : '') + '">' +
+              '<div class="preset-card-top">' +
+                '<div>' +
+                  '<div class="preset-name">' + p.label + '</div>' +
+                  '<div class="preset-key">' + p.key + '</div>' +
+                '</div>' +
+                '<span class="pill ' + (p.is_system ? 'pill-system' : 'pill-custom') + '">' + (p.is_system ? 'System' : 'Custom') + '</span>' +
+              '</div>' +
+              '<div class="badge-row">' + kindBadges + '</div>' +
+              '<div class="spec-row">' +
+                '<span class="spec-item">' + p.video_model + '</span>' +
+                '<span class="spec-item">' + p.clip_spec + '</span>' +
+                '<span class="spec-item">' + p.bridging + '</span>' +
+              '</div>' +
+              '<div class="card-actions">' +
+                '<button type="button" class="btn btn-primary btn-sm" data-action="clone" data-key="' + p.key + '">Clone</button>' +
+                editBtn +
+              '</div>' +
+            '</article>'
+          );
+        }).join('');
+      }
+
+      function renderCampaignCheckboxes() {
+        const list = state.mode === 'before' ? BEFORE_CAMPAIGN_KINDS : ALL_CAMPAIGN_KINDS;
+        const container = el('campaignKindsContainer');
+        container.innerHTML = list.map(item => {
+          const checked = state.formKinds.includes(item.id) ? 'checked' : '';
+          const newBadge = (state.mode === 'after' && item.isFix) ? '<span class="fix-tag">Baru ditambahkan</span>' : '';
+          return (
+            '<label class="checkbox-option' + (state.mode === 'after' && item.isFix ? ' is-new-fix' : '') + '">' +
+              '<input type="checkbox" data-kind-checkbox="' + item.id + '" ' + checked + ' />' +
+              '<span>' + item.label + '</span>' +
+              newBadge +
+            '</label>'
+          );
+        }).join('');
+
+        if (state.mode === 'before') {
+          el('campaignKindsHint').textContent = 'Bug saat ini: Campaign Multiplier dan Recipe Labs tidak tersedia di pilihan checkbox ini.';
+        } else {
+          el('campaignKindsHint').textContent = 'Anda dapat mencentang lebih dari satu jenis campaign, misalnya Product Campaign sekaligus Campaign Multiplier agar preset brand muncul di Video Multiplier.';
+        }
+
+        const hasKinds = state.formKinds.length > 0;
+        el('campaignKindsError').classList.toggle('hidden', hasKinds);
+      }
+
+      function openPresetForm({ modeType, preset }) {
+        state.editingMode = true;
+        if (modeType === 'create') {
+          state.editingIsNew = true;
+          state.editingOriginalKey = null;
+          el('formModeTitle').textContent = 'Create Preset Baru';
+          el('formLabelInput').value = '';
+          el('formKeyInput').value = '';
+          el('formKeyInput').disabled = false;
+          el('formVideoModel').value = 'veo_31_lite';
+          el('formClipSpec').value = '5x5';
+          state.formKinds = state.mode === 'after' ? ['multiplier_campaign'] : ['brand_editorial'];
+        } else if (modeType === 'clone') {
+          state.editingIsNew = true;
+          state.editingOriginalKey = null;
+          el('formModeTitle').textContent = 'Clone Preset: ' + preset.label;
+          el('formLabelInput').value = preset.label + ' (NutriBake)';
+          el('formKeyInput').value = preset.key + '_nutribake';
+          el('formKeyInput').disabled = false;
+          el('formVideoModel').value = preset.video_model || 'veo_31_lite';
+          el('formClipSpec').value = preset.clip_spec || '5x5';
+          state.formKinds = [...preset.campaign_kinds];
+        } else {
+          state.editingIsNew = false;
+          state.editingOriginalKey = preset.key;
+          el('formModeTitle').textContent = 'Edit Preset: ' + preset.label;
+          el('formLabelInput').value = preset.label;
+          el('formKeyInput').value = preset.key;
+          el('formKeyInput').disabled = true;
+          el('formVideoModel').value = preset.video_model || 'veo_31_lite';
+          el('formClipSpec').value = preset.clip_spec || '4x8';
+          state.formKinds = [...preset.campaign_kinds];
+        }
+
+        el('presetsListView').classList.add('hidden');
+        el('presetFormView').classList.remove('hidden');
+        renderCampaignCheckboxes();
+      }
+
+      function closePresetForm() {
+        state.editingMode = false;
+        el('presetFormView').classList.add('hidden');
+        el('presetsListView').classList.remove('hidden');
+        renderPresetCards();
+      }
+
+      function renderAutoPipeline() {
+        const typeGrid = el('pipelineTypeGrid');
+        typeGrid.innerHTML = PIPELINE_TYPES.map(t => {
+          const active = state.apPipelineType === t.key;
+          return (
+            '<button type="button" class="pipeline-type-card" data-pipeline-type="' + t.key + '" aria-pressed="' + (active ? 'true' : 'false') + '">' +
+              '<div class="pipeline-type-top">' +
+                '<span class="pipeline-type-name">' + t.label + '</span>' +
+                '<span class="pipeline-type-state">' + (active ? 'AKTIF' : 'PILIH') + '</span>' +
+              '</div>' +
+              '<span class="pipeline-type-desc">' + t.desc + '</span>' +
+            '</button>'
+          );
+        }).join('');
+
+        const filtered = getFilteredPresetsForAp(state.apPipelineType, state.apBrand);
+        const select = el('apPresetSelect');
+
+        if (!filtered.some(p => p.key === state.apSelectedPresetKey)) {
+          state.apSelectedPresetKey = filtered[0] ? filtered[0].key : '';
+        }
+
+        if (filtered.length === 0) {
+          select.innerHTML = '<option value="">Tidak ada preset yang kompatibel</option>';
+          select.disabled = true;
+          el('apPresetEmptyState').classList.remove('hidden');
+          el('apInspector').classList.add('hidden');
+        } else {
+          select.disabled = false;
+          el('apPresetEmptyState').classList.add('hidden');
+          el('apInspector').classList.remove('hidden');
+
+          const brandMatched = filtered.filter(p => p.is_brand_match);
+          const generalList = filtered.filter(p => !p.is_brand_match);
+          const brandName = el('apBrandSelect').selectedOptions[0].textContent.split(' (')[0];
+
+          if (brandMatched.length > 0) {
+            let html = '<optgroup label="Preset Khusus ' + brandName + ' (' + brandMatched.length + ')">';
+            html += brandMatched.map(p => '<option value="' + p.key + '">' + p.label + ' [' + p.bridging + ']</option>').join('');
+            html += '</optgroup>';
+            if (generalList.length > 0) {
+              html += '<optgroup label="Preset Umum & Alternatif (' + generalList.length + ')">';
+              html += generalList.map(p => '<option value="' + p.key + '">' + p.label + ' [' + p.bridging + ']</option>').join('');
+              html += '</optgroup>';
+            }
+            select.innerHTML = html;
+          } else {
+            select.innerHTML = filtered.map(p => '<option value="' + p.key + '">' + p.label + ' [' + p.bridging + ']</option>').join('');
+          }
+          select.value = state.apSelectedPresetKey;
+        }
+
+        const helper = el('apPresetHelper');
+        if (state.apPipelineType === 'multiplier_campaign' && filtered.length <= 1) {
+          if (state.mode === 'after') {
+            helper.innerHTML = 'Menampilkan preset bertag Campaign Multiplier (' + filtered.length + ' tersedia). Untuk menambah preset brand Anda, clone atau centang "Campaign Multiplier" di <button type="button" class="btn btn-secondary btn-sm" id="inlineJumpPresetsBtn" style="margin-left:4px;">Preset Manager</button>.';
+            const jumpBtn = el('inlineJumpPresetsBtn');
+            if (jumpBtn) jumpBtn.addEventListener('click', () => switchScreen('presets'));
+          } else {
+            helper.textContent = 'Hanya 1 preset muncul karena preset lain tidak memiliki opsi centang Campaign Multiplier.';
+          }
+        } else {
+          helper.textContent = 'Ditemukan ' + filtered.length + ' preset kompatibel untuk tipe kampanye ini.';
+        }
+
+        const activePreset = filtered.find(p => p.key === state.apSelectedPresetKey);
+        if (activePreset) {
+          el('inspectorTitle').textContent = 'Preset Aktif: ' + activePreset.label;
+          el('inspectorSourcePill').textContent = activePreset.is_system ? 'System' : 'Custom';
+          el('inspectorSourcePill').className = 'pill ' + (activePreset.is_system ? 'pill-system' : 'pill-custom');
+          el('inspectorMeta').innerHTML =
+            '<span>Key: <span class="code-inline">' + activePreset.key + '</span></span>' +
+            '<span>Model: <strong>' + activePreset.video_model + '</strong></span>' +
+            '<span>Durasi: <strong>' + activePreset.clip_spec + '</strong></span>' +
+            '<span>Campaign Kinds: <span class="code-inline">' + activePreset.campaign_kinds.join(', ') + '</span></span>';
+        }
+      }
+
+      function renderMultiplierLab() {
+        const bridging = el('mlBridgingCheck').checked;
+        let kinds;
+        if (state.mode === 'before') {
+          kinds = bridging ? ['product_campaign'] : ['brand_editorial'];
+        } else {
+          kinds = bridging ? ['multiplier_campaign', 'product_campaign'] : ['multiplier_campaign'];
+        }
+        el('mlPayloadPreview').textContent = JSON.stringify({
+          key: el('mlPresetKeyInput').value.trim() || 'custom_multiplier_preset',
+          label: el('mlPresetLabelInput').value.trim() || 'Custom Multiplier Preset',
+          campaign_kinds: kinds
+        }, null, 2);
+      }
+
+      function switchScreen(screen) {
+        state.screen = screen;
+        el('navPresetsBtn').setAttribute('aria-selected', screen === 'presets' ? 'true' : 'false');
+        el('navAutoPipelineBtn').setAttribute('aria-selected', screen === 'autopipeline' ? 'true' : 'false');
+        el('navMultiplierLabBtn').setAttribute('aria-selected', screen === 'multiplierlab' ? 'true' : 'false');
+
+        el('screenPresets').classList.toggle('hidden', screen !== 'presets');
+        el('screenAutoPipeline').classList.toggle('hidden', screen !== 'autopipeline');
+        el('screenMultiplierLab').classList.toggle('hidden', screen !== 'multiplierlab');
+
+        if (screen === 'presets') {
+          if (state.editingMode) renderCampaignCheckboxes();
+          else renderPresetCards();
+        } else if (screen === 'autopipeline') {
+          renderAutoPipeline();
+        } else {
+          renderMultiplierLab();
+        }
+      }
+
+      function setMode(mode) {
+        state.mode = mode;
+        el('modeAfterBtn').setAttribute('aria-pressed', mode === 'after' ? 'true' : 'false');
+        el('modeBeforeBtn').setAttribute('aria-pressed', mode === 'before' ? 'true' : 'false');
+        renderBanner();
+        if (state.screen === 'presets' && state.editingMode) renderCampaignCheckboxes();
+        if (state.screen === 'autopipeline') renderAutoPipeline();
+        if (state.screen === 'multiplierlab') renderMultiplierLab();
+      }
+
+      // Event listeners
+      el('modeAfterBtn').addEventListener('click', () => setMode('after'));
+      el('modeBeforeBtn').addEventListener('click', () => setMode('before'));
+
+      el('themeToggleBtn').addEventListener('click', () => {
+        const root = document.documentElement;
+        const current = root.getAttribute('data-theme') || 'dark';
+        const next = current === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        el('themeToggleBtn').textContent = 'Tema: ' + (next === 'dark' ? 'Dark' : 'Light');
+      });
+
+      el('navPresetsBtn').addEventListener('click', () => switchScreen('presets'));
+      el('navAutoPipelineBtn').addEventListener('click', () => switchScreen('autopipeline'));
+      el('navMultiplierLabBtn').addEventListener('click', () => switchScreen('multiplierlab'));
+      el('goToPresetsFromApBtn').addEventListener('click', () => switchScreen('presets'));
+      el('emptyOpenPresetManagerBtn').addEventListener('click', () => switchScreen('presets'));
+
+      el('quickCloneDemoBtn').addEventListener('click', () => {
+        switchScreen('presets');
+        const mulPreset = state.presets.find(p => p.key === 'multiplier_deconstruct_remix') || state.presets[0];
+        openPresetForm({ modeType: 'clone', preset: mulPreset });
+      });
+
+      el('resetDemoBtn').addEventListener('click', () => {
+        state.presets = JSON.parse(JSON.stringify(INITIAL_PRESETS));
+        state.apPipelineType = 'multiplier_campaign';
+        state.apSelectedPresetKey = 'multiplier_deconstruct_remix';
+        closePresetForm();
+        updateNavCounts();
+        if (state.screen === 'autopipeline') renderAutoPipeline();
+        if (state.screen === 'multiplierlab') renderMultiplierLab();
+        showToast('Data simulasi dikembalikan ke kondisi awal.');
+      });
+
+      el('createPresetBtn').addEventListener('click', () => {
+        openPresetForm({ modeType: 'create' });
+      });
+
+      el('cancelFormBtn').addEventListener('click', closePresetForm);
+      el('cancelFormFooterBtn').addEventListener('click', closePresetForm);
+
+      document.querySelectorAll('.kind-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.activeKindTab = btn.dataset.kindTab;
+          renderPresetCards();
+        });
+      });
+
+      el('presetsGrid').addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-action]');
+        if (!btn) return;
+        const preset = state.presets.find(p => p.key === btn.dataset.key);
+        if (!preset) return;
+        openPresetForm({ modeType: btn.dataset.action, preset });
+      });
+
+      el('campaignKindsContainer').addEventListener('change', (e) => {
+        const box = e.target.closest('input[data-kind-checkbox]');
+        if (!box) return;
+        const kind = box.dataset.kindCheckbox;
+        if (box.checked) {
+          if (!state.formKinds.includes(kind)) state.formKinds.push(kind);
+        } else {
+          state.formKinds = state.formKinds.filter(k => k !== kind);
+        }
+        el('campaignKindsError').classList.toggle('hidden', state.formKinds.length > 0);
+      });
+
+      el('presetFormView').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const label = el('formLabelInput').value.trim();
+        const key = el('formKeyInput').value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+        if (!label || !key) {
+          showToast('Label dan Key preset wajib diisi.');
+          return;
+        }
+        if (state.formKinds.length === 0) {
+          el('campaignKindsError').classList.remove('hidden');
+          showToast('Pilih minimal satu jenis campaign.');
+          return;
+        }
+
+        const videoModel = el('formVideoModel').value;
+        const clipSpec = el('formClipSpec').value;
+
+        if (state.editingIsNew) {
+          if (state.presets.some(p => p.key === key)) {
+            showToast('Key "' + key + '" sudah ada. Gunakan key unik lain.');
+            return;
+          }
+          state.presets.push({
+            key,
+            label,
+            is_system: false,
+            campaign_kinds: [...state.formKinds],
+            video_model: videoModel,
+            clip_spec: clipSpec,
+            bridging: 'Bridge Klip 4'
+          });
+        } else {
+          const target = state.presets.find(p => p.key === state.editingOriginalKey);
+          if (target) {
+            target.label = label;
+            target.campaign_kinds = [...state.formKinds];
+            target.video_model = videoModel;
+            target.clip_spec = clipSpec;
+          }
+        }
+
+        state.apSelectedPresetKey = key;
+        closePresetForm();
+        updateNavCounts();
+        showToast('Preset "' + label + '" tersimpan. Cek tab 2. Auto Pipeline untuk melihat hasilnya.');
+      });
+
+      el('pipelineTypeGrid').addEventListener('click', (e) => {
+        const card = e.target.closest('button[data-pipeline-type]');
+        if (!card) return;
+        state.apPipelineType = card.dataset.pipelineType;
+        renderAutoPipeline();
+      });
+
+      el('apBrandSelect').addEventListener('change', (e) => {
+        state.apBrand = e.target.value;
+        renderAutoPipeline();
+      });
+
+      el('apPresetSelect').addEventListener('change', (e) => {
+        state.apSelectedPresetKey = e.target.value;
+        renderAutoPipeline();
+      });
+
+      el('mlPresetLabelInput').addEventListener('input', renderMultiplierLab);
+      el('mlPresetKeyInput').addEventListener('input', renderMultiplierLab);
+      el('mlBridgingCheck').addEventListener('change', renderMultiplierLab);
+
+      el('mlSavePresetBtn').addEventListener('click', () => {
+        const label = el('mlPresetLabelInput').value.trim();
+        const key = el('mlPresetKeyInput').value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+        const bridging = el('mlBridgingCheck').checked;
+        if (!label || !key) {
+          showToast('Label dan Key wajib diisi.');
+          return;
+        }
+        const kinds = state.mode === 'before'
+          ? (bridging ? ['product_campaign'] : ['brand_editorial'])
+          : (bridging ? ['multiplier_campaign', 'product_campaign'] : ['multiplier_campaign']);
+
+        const existing = state.presets.find(p => p.key === key);
+        if (existing) {
+          existing.label = label;
+          existing.campaign_kinds = kinds;
+        } else {
+          state.presets.push({
+            key,
+            label,
+            is_system: false,
+            campaign_kinds: kinds,
+            video_model: 'veo_31_lite',
+            clip_spec: '5x5',
+            bridging: bridging ? 'Bridge Klip 4' : 'Non-Bridging'
+          });
+        }
+        updateNavCounts();
+        el('mlFeedback').textContent = 'Tersimpan dengan campaign_kinds: [' + kinds.join(', ') + ']';
+        showToast('Preset "' + label + '" disimpan dari Multiplier Labs.');
+      });
+
+      el('toastCloseBtn').addEventListener('click', hideToast);
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          hideToast();
+          if (state.editingMode) closePresetForm();
+        }
+      });
+
+      // Init
+      renderBanner();
+      updateNavCounts();
+      renderPresetCards();
+      renderMultiplierLab();
+    })();
+  </script>
+</body>
+</html>

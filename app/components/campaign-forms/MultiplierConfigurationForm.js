@@ -285,7 +285,7 @@ function MultiplierLabPageContent({ mode = 'direct', onCapture, onSuccess, onCan
     const presetConfig = {
       schema_version: '2',
       label: newPresetLabel.trim(),
-      campaign_kinds: isBridgingActive ? ['product_campaign'] : ['brand_editorial'],
+      campaign_kinds: isBridgingActive ? ['multiplier_campaign', 'product_campaign'] : ['multiplier_campaign'],
       basic_strategy: {
         narrative_mode: narrativeMode,
         voice_provider: voiceProvider,

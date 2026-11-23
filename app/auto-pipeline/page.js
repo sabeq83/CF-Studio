@@ -971,7 +971,14 @@ export default function AutoPipelinePage() {
           const opList = data.operator_presets || [];
           setOperatorPresets(opList);
 
-          let effectiveKey = opList[0]?.key || (instantCampaignType === 'product_campaign' ? 'product_campaign' : (instantCampaignType === 'editorial_campaign' ? 'brand_editorial_campaign' : 'recipe_campaign_default'));
+          const fallbackKeyByType = {
+            product_campaign: 'product_campaign',
+            editorial_campaign: 'brand_editorial_campaign',
+            multiplier_campaign: 'multiplier_deconstruct_remix',
+            recipe_labs: 'recipe_labs_editorial_food',
+            recipe_campaign: 'recipe_campaign'
+          };
+          let effectiveKey = opList[0]?.key || fallbackKeyByType[instantCampaignType] || 'recipe_campaign';
           setSelectedPresetKey(prevKey => {
             if (prevKey && opList.some(p => p.key === prevKey)) {
               effectiveKey = prevKey;
@@ -1470,7 +1477,11 @@ export default function AutoPipelinePage() {
     setSchedCampaignType(initialType);
     setSchedName(computeFormattedScheduleName(initialType, currentBrand, replizAccounts, ''));
     setSchedBrandId(currentBrand?.id || '');
-    setSchedPresetKey(selectedPresetKey || 'habitfolk_6clips_quick');
+    setSchedPresetKey(
+      instantCampaignType === 'multiplier_campaign' && selectedPresetKey
+        ? selectedPresetKey
+        : 'multiplier_deconstruct_remix'
+    );
     setSchedGenTime('05:00');
     setSchedPubTime('09:00');
     setSchedTopic(initialTopic);
@@ -3119,6 +3130,14 @@ export default function AutoPipelinePage() {
                       ));
                     })()}
                   </select>
+                  {instantCampaignType === 'multiplier_campaign' && operatorPresets.length <= 1 && (
+                    <div style={{ fontSize: '0.73rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                      Menampilkan preset bertag Campaign Multiplier. Untuk menambah preset brand Anda, clone atau centang &quot;Campaign Multiplier&quot; di{' '}
+                      <Link href="/settings/presets" style={{ color: 'var(--link)', fontWeight: 600 }}>
+                        Preset Manager
+                      </Link>.
+                    </div>
+                  )}
                 </div>
 
                 {/* 3. Mode Eksekusi */}
