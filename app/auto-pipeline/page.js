@@ -6,7 +6,7 @@ import ScheduleTableView from '../components/ScheduleTableView';
 import ThreadsSeriesForm from './ThreadsSeriesForm';
 import AutoPipelineQueueDrawer from '../components/AutoPipelineQueueDrawer';
 import RecipeProductBridgingControl from '../components/RecipeProductBridgingControl';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { GRID_LAYOUT_COORDINATES } from '@/lib/core/GridCoordinates';
 import { buildMultiplierSchedulePairs } from '@/lib/multiplier-pairing';
@@ -772,6 +772,9 @@ export default function AutoPipelinePage() {
   const [loadingCampaigns, setLoadingCampaigns] = useState(true);
   const [batchesFilterType, setBatchesFilterType] = useState('all');
   const [toast, setToast] = useState(null);
+  const [launchError, setLaunchError] = useState('');
+  const toastTimerRef = useRef(null);
+  const blueprintSearchMountedRef = useRef(false);
 
   // Factual Visualizer State
   const [activeCampaignId, setActiveCampaignId] = useState(null);
@@ -783,7 +786,13 @@ export default function AutoPipelinePage() {
 
   function showToast(msg, type = 'success') {
     setToast({ msg, type });
-    setTimeout(() => setToast(null), 4500);
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => setToast(null), 5000);
+  }
+
+  function reportLaunchError(msg) {
+    setLaunchError(msg);
+    showToast(msg, 'error');
   }
 
   // Factual Pipeline Status Poller
@@ -929,6 +938,10 @@ export default function AutoPipelinePage() {
 
   // Server-Side Search Debounce untuk Deconstruct Blueprint (Tab 1 Launcher)
   useEffect(() => {
+    if (!blueprintSearchMountedRef.current) {
+      blueprintSearchMountedRef.current = true;
+      return;
+    }
     const handler = setTimeout(() => {
       fetchBlueprints(blueprintSearchQuery);
     }, 350);
@@ -992,11 +1005,13 @@ export default function AutoPipelinePage() {
   // 2. Fetch Presets dynamically when selected brand or instantCampaignType changes
   useEffect(() => {
     if (!selectedBrandId) return;
+    let cancelled = false;
     async function fetchPresets() {
       try {
         const url = `/api/v2/recipes/autonomous-pipeline?brand=${encodeURIComponent(selectedBrandId)}&pipeline_type=${encodeURIComponent(instantCampaignType)}`;
         const res = await fetch(url);
         const data = await res.json();
+        if (cancelled) return;
         if (data.success) {
           const opList = data.operator_presets || [];
           setOperatorPresets(opList);
@@ -1008,16 +1023,12 @@ export default function AutoPipelinePage() {
             recipe_labs: 'recipe_labs_editorial_food',
             recipe_campaign: 'recipe_campaign'
           };
-          let effectiveKey = opList[0]?.key || fallbackKeyByType[instantCampaignType] || 'recipe_campaign';
-          setSelectedPresetKey(prevKey => {
-            if (prevKey && opList.some(p => p.key === prevKey)) {
-              effectiveKey = prevKey;
-              return prevKey;
-            }
-            const brandMatch = opList.find(p => p.is_brand_match);
-            effectiveKey = brandMatch ? brandMatch.key : effectiveKey;
-            return effectiveKey;
-          });
+          const brandMatch = opList.find(p => p.is_brand_match);
+          const hasPrevInList = selectedPresetKey && opList.some(p => p.key === selectedPresetKey);
+          const effectiveKey = hasPrevInList
+            ? selectedPresetKey
+            : (brandMatch?.key || opList[0]?.key || fallbackKeyByType[instantCampaignType] || 'recipe_campaign');
+          setSelectedPresetKey(effectiveKey);
 
           const matchedPreset = opList.find(p => p.key === effectiveKey);
           const initialConfig = matchedPreset?.config || matchedPreset || opList[0]?.config || opList[0] || data.default_preset || null;
@@ -1036,10 +1047,11 @@ export default function AutoPipelinePage() {
           setPresetHint(`Terfilter khusus brand ${currentBrandObj?.brand_name || selectedBrandId}`);
         }
       } catch (e) {
-        console.warn('[AutoPipeline] Error fetching presets:', e);
+        if (!cancelled) console.warn('[AutoPipeline] Error fetching presets:', e);
       }
     }
     fetchPresets();
+    return () => { cancelled = true; };
   }, [selectedBrandId, instantCampaignType, brands]);
 
   function handlePresetKeyChange(newKey) {
@@ -1076,6 +1088,7 @@ export default function AutoPipelinePage() {
   // 4. Trigger 1-Click Pipeline (Support Product, Editorial, and Recipe Campaigns)
   async function handleLaunchPipeline(e) {
     e.preventDefault();
+    setLaunchError('');
 
     let targetTopic = topic;
     let targetCategory = category || 'makanan_utama';
@@ -1087,7 +1100,7 @@ export default function AutoPipelinePage() {
     if (instantCampaignType === 'product_campaign') {
       const effectiveProdId = instantProductId || (catalogProducts[0]?.id || null);
       if (!effectiveProdId) {
-        showToast('Pilih produk dari katalog terlebih dahulu.', 'error');
+        reportLaunchError('Pilih produk dari katalog terlebih dahulu.');
         return;
       }
       const prod = catalogProducts.find(p => p.id === effectiveProdId);
@@ -1098,7 +1111,7 @@ export default function AutoPipelinePage() {
       if (instantEditorialMode === 'keyword') {
         const kw = instantEditorialKeyword.trim();
         if (!kw) {
-          showToast('Masukkan kata kunci target editorial terlebih dahulu.', 'error');
+          reportLaunchError('Masukkan kata kunci target editorial terlebih dahulu.');
           return;
         }
         targetTopic = kw;
@@ -1107,7 +1120,7 @@ export default function AutoPipelinePage() {
       } else {
         const effectivePillar = instantPillar || (modalAvailablePillars[0] || 'Eat Better, Not Perfect');
         if (!effectivePillar) {
-          showToast('Pilih pilar brand terlebih dahulu.', 'error');
+          reportLaunchError('Pilih pilar brand terlebih dahulu.');
           return;
         }
         targetTopic = effectivePillar;
@@ -1115,29 +1128,45 @@ export default function AutoPipelinePage() {
         targetPillar = effectivePillar;
       }
     } else if (instantCampaignType === 'multiplier_campaign') {
-      targetDeconstructId = instantBlueprintId || (blueprints[0]?.id || null);
-      if (!targetDeconstructId) {
-        showToast('Pilih Blueprint video referensi Deconstruct Lab terlebih dahulu.', 'error');
+      if (loadingBlueprints) {
+        reportLaunchError('Daftar blueprint masih dimuat. Tunggu sebentar lalu coba lagi.');
         return;
+      }
+      if (blueprints.length === 0) {
+        reportLaunchError('Belum ada blueprint di Deconstruct Lab untuk akun/tenant ini.');
+        return;
+      }
+      if (filteredInstantBlueprints.length === 0) {
+        reportLaunchError('Tidak ada blueprint yang cocok dengan filter pencarian atau bridging saat ini. Reset filter terlebih dahulu.');
+        return;
+      }
+      const matchedBp = filteredInstantBlueprints.find(b => b.id === instantBlueprintId) || filteredInstantBlueprints[0];
+      targetDeconstructId = matchedBp?.id || null;
+      if (!targetDeconstructId) {
+        reportLaunchError('Pilih Blueprint video referensi Deconstruct Lab terlebih dahulu.');
+        return;
+      }
+      if (targetDeconstructId !== instantBlueprintId) {
+        setInstantBlueprintId(targetDeconstructId);
       }
       if (instantMultiplierBridgingMode === 'select_existing') {
         targetProductId = instantMultiplierProductId || (catalogProducts[0]?.id || null);
         if (!targetProductId) {
-          showToast('Pilih produk dari katalog atau ganti mode ke Tanpa Produk Spesifik.', 'error');
+          reportLaunchError('Pilih produk dari katalog atau ganti mode ke Tanpa Produk Spesifik.');
           return;
         }
       }
       if (executionMode === 'manual_review' && multiplierAngles.length > 0) {
         targetChosenAngle = multiplierAngles[selectedAngleIndex] || multiplierAngles[0];
       }
-      const bpObj = blueprints.find(b => b.id === targetDeconstructId);
+      const bpObj = matchedBp;
       const prodObj = targetProductId ? catalogProducts.find(p => p.id === targetProductId) : null;
       const baseTitle = targetChosenAngle?.title || bpObj?.core_problem || 'Multiplier Remix Hook';
       targetTopic = prodObj ? `${baseTitle} × ${prodObj.product_name}` : baseTitle;
       targetCategory = 'multiplier';
     } else if (instantCampaignType === 'recipe_labs') {
       if (!recipeLabsTopic || !recipeLabsTopic.trim()) {
-        showToast('Topik / Nama menu resep wajib diisi.', 'error');
+        reportLaunchError('Topik / Nama menu resep wajib diisi.');
         return;
       }
       targetTopic = recipeLabsTopic.trim();
@@ -1145,19 +1174,19 @@ export default function AutoPipelinePage() {
     } else if (instantCampaignType === 'threads_series') {
       if (threadsObjective === 'personal_product') {
         if (!threadsPersonalProductName.trim()) {
-          showToast('Nama produk / jasa pribadi wajib diisi.', 'error');
+          reportLaunchError('Nama produk / jasa pribadi wajib diisi.');
           return;
         }
         targetTopic = threadsPersonalProductName.trim();
       } else if (threadsObjective === 'affiliate_shopee') {
         if (!threadsAffiliateProductTitle.trim()) {
-          showToast('Judul produk affiliate Shopee wajib diisi.', 'error');
+          reportLaunchError('Judul produk affiliate Shopee wajib diisi.');
           return;
         }
         targetTopic = threadsAffiliateProductTitle.trim();
       } else {
         if (!threadsPureOrganicTopic.trim()) {
-          showToast('Topik cerita murni / edukasi wajib diisi.', 'error');
+          reportLaunchError('Topik cerita murni / edukasi wajib diisi.');
           return;
         }
         targetTopic = threadsPureOrganicTopic.trim();
@@ -1165,11 +1194,11 @@ export default function AutoPipelinePage() {
       targetCategory = 'threads_series';
     } else {
       if (!topic || !topic.trim()) {
-        showToast('Topik resep wajib diisi.', 'error');
+        reportLaunchError('Topik resep wajib diisi.');
         return;
       }
       if (instantRecipeProductMode === 'manual' && !instantRecipeProductId) {
-        showToast('Pilih produk dari katalog atau ubah mode ke Auto Katalog / Tanpa Produk.', 'error');
+        reportLaunchError('Pilih produk dari katalog atau ubah mode ke Auto Katalog / Tanpa Produk.');
         return;
       }
       targetTopic = topic.trim();
@@ -1237,9 +1266,16 @@ export default function AutoPipelinePage() {
         })
       });
 
-      const data = await res.json();
+      const rawBody = await res.text();
+      let data = {};
+      try {
+        data = rawBody ? JSON.parse(rawBody) : {};
+      } catch {
+        data = { success: false, error: `Respons server tidak valid (HTTP ${res.status})` };
+      }
 
-      if (data.success) {
+      if (res.ok && data.success) {
+        setLaunchError('');
         if (instantCampaignType === 'threads_series') {
           showToast(`Utas Berseri Threads ("${data.theme || targetTopic}") berhasil dibuat (${data.series?.length || 5} Part)! 🧵✨`);
           fetchThreadsSeriesPosts();
@@ -1259,10 +1295,10 @@ export default function AutoPipelinePage() {
         showToast(`Kampanye ${typeLabel} (${data.campaign_id || data.task_id}) berhasil diluncurkan! Melacak progres produksi faktual... 🚀`);
         fetchRecentCampaigns();
       } else {
-        showToast('Gagal meluncurkan pipeline: ' + (data.error || 'Terjadi kesalahan sistem'), 'error');
+        reportLaunchError('Gagal meluncurkan pipeline: ' + (data.error || `HTTP ${res.status} - Terjadi kesalahan sistem`));
       }
     } catch (err) {
-      showToast('Error request: ' + err.message, 'error');
+      reportLaunchError('Error request: ' + err.message);
     } finally {
       setIsLaunching(false);
     }
@@ -2691,6 +2727,45 @@ export default function AutoPipelinePage() {
   const filteredInstantMultiplierProducts = filterProductsByQuery(catalogProducts, instantMultiplierProductSearch);
   const filteredSchedMultiplierProducts = filterProductsByQuery(catalogProducts, schedMultiplierProductSearch);
 
+  const filteredInstantBlueprints = blueprints.filter(bp => {
+    if (instantMultiplierBpRoleFilter !== 'all') {
+      if (bp.is_food_safe === false) return false;
+      const ms = bp.match_summary || {};
+      const brandEntry = Object.entries(ms).find(([bName, vals]) =>
+        vals?.brand_profile_id === selectedBrandId || bName.toLowerCase() === (brands.find(b => b.id === selectedBrandId)?.brand_name || '').toLowerCase()
+      )?.[1];
+      if (brandEntry) {
+        if (instantMultiplierBpRoleFilter === 'alat_dapur' && (brandEntry.alat_dapur || 0) === 0) return false;
+        if (instantMultiplierBpRoleFilter === 'bahan_resep' && (brandEntry.bahan_resep || 0) === 0) return false;
+      } else {
+        const hasRoleAnywhere = Object.values(ms).some(v =>
+          instantMultiplierBpRoleFilter === 'alat_dapur' ? (v?.alat_dapur || 0) > 0 : (v?.bahan_resep || 0) > 0
+        );
+        if (Object.keys(ms).length > 0 && !hasRoleAnywhere) return false;
+      }
+    }
+    if (!blueprintSearchQuery.trim()) return true;
+    const q = blueprintSearchQuery.toLowerCase().trim();
+    const reelId = extractReelId(bp.source_url);
+    return (
+      (reelId && reelId.includes(q)) ||
+      (bp.source_url && bp.source_url.toLowerCase().includes(q)) ||
+      (bp.core_problem && bp.core_problem.toLowerCase().includes(q)) ||
+      (bp.core_solution && bp.core_solution.toLowerCase().includes(q)) ||
+      (bp.niche && bp.niche.toLowerCase().includes(q)) ||
+      (bp.tags && (Array.isArray(bp.tags) ? bp.tags.join(' ') : String(bp.tags)).toLowerCase().includes(q)) ||
+      (bp.viral_pattern_summary && bp.viral_pattern_summary.toLowerCase().includes(q)) ||
+      (bp.original_caption && bp.original_caption.toLowerCase().includes(q))
+    );
+  });
+
+  useEffect(() => {
+    if (instantCampaignType !== 'multiplier_campaign') return;
+    if (filteredInstantBlueprints.length > 0 && !filteredInstantBlueprints.some(b => b.id === instantBlueprintId)) {
+      setInstantBlueprintId(filteredInstantBlueprints[0].id);
+    }
+  }, [instantCampaignType, filteredInstantBlueprints, instantBlueprintId]);
+
   function toggleSchedMultiplierProduct(prodId) {
     if (editingSchedule || schedMultiplierPairMode === 'one_product') {
       setSchedMultiplierProductIds([prodId]);
@@ -2807,22 +2882,51 @@ export default function AutoPipelinePage() {
             </div>
           )}
 
-          {/* Toast Notification */}
+          {/* Floating Toast Notification (always visible regardless of scroll depth) */}
           {toast && (
-            <div style={{
-              padding: '0.85rem 1.25rem',
-              borderRadius: 'var(--radius-md)',
-              background: toast.type === 'error' ? 'var(--status-danger-soft)' : 'var(--status-success-soft)',
-              color: toast.type === 'error' ? 'var(--status-danger)' : 'var(--status-success)',
-              border: `1px solid ${toast.type === 'error' ? 'var(--status-danger)' : 'var(--status-success)'}`,
-              fontSize: '0.88rem',
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}>
-              <span>{toast.type === 'error' ? '⚠️' : '✅'}</span>
-              <span>{toast.msg}</span>
+            <div
+              role="alert"
+              style={{
+                position: 'fixed',
+                top: '1.25rem',
+                right: '1.25rem',
+                zIndex: 9999,
+                maxWidth: 'min(480px, calc(100vw - 2rem))',
+                padding: '0.85rem 1.15rem',
+                borderRadius: 'var(--radius-md)',
+                background: toast.type === 'error' ? 'var(--status-danger-soft)' : 'var(--status-success-soft)',
+                color: toast.type === 'error' ? 'var(--status-danger)' : 'var(--status-success)',
+                border: `1.5px solid ${toast.type === 'error' ? 'var(--status-danger)' : 'var(--status-success)'}`,
+                boxShadow: 'var(--shadow-modal)',
+                fontSize: '0.88rem',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '0.75rem'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span>{toast.type === 'error' ? '⚠️' : '✅'}</span>
+                <span>{toast.msg}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setToast(null)}
+                aria-label="Tutup notifikasi"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'inherit',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  fontWeight: 700,
+                  padding: '0 0.25rem',
+                  lineHeight: 1
+                }}
+              >
+                ✕
+              </button>
             </div>
           )}
 
@@ -3002,7 +3106,11 @@ export default function AutoPipelinePage() {
                     return (
                       <div
                         key={t.key}
-                        onClick={() => setInstantCampaignType(t.key)}
+                        onClick={() => {
+                          setLaunchError('');
+                          setSelectedPresetKey('');
+                          setInstantCampaignType(t.key);
+                        }}
                         style={{
                           background: isSelected ? 'var(--surface-interactive)' : 'var(--surface-raised)',
                           border: `1.5px solid ${isSelected ? t.color : 'var(--border-subtle)'}`,
@@ -4379,39 +4487,7 @@ export default function AutoPipelinePage() {
                         Belum ada video di Deconstruct Lab. Silakan lakukan dekonstruksi video di menu Deconstruct Lab terlebih dahulu.
                       </div>
                     ) : (() => {
-                      const filteredBlueprints = blueprints.filter(bp => {
-                        if (instantMultiplierBpRoleFilter !== 'all') {
-                          if (bp.is_food_safe === false) return false;
-                          const ms = bp.match_summary || {};
-                          const brandEntry = Object.entries(ms).find(([bName, vals]) =>
-                            vals?.brand_profile_id === selectedBrandId || bName.toLowerCase() === (brands.find(b => b.id === selectedBrandId)?.brand_name || '').toLowerCase()
-                          )?.[1];
-                          if (brandEntry) {
-                            if (instantMultiplierBpRoleFilter === 'alat_dapur' && (brandEntry.alat_dapur || 0) === 0) return false;
-                            if (instantMultiplierBpRoleFilter === 'bahan_resep' && (brandEntry.bahan_resep || 0) === 0) return false;
-                          } else {
-                            const hasRoleAnywhere = Object.values(ms).some(v =>
-                              instantMultiplierBpRoleFilter === 'alat_dapur' ? (v?.alat_dapur || 0) > 0 : (v?.bahan_resep || 0) > 0
-                            );
-                            if (Object.keys(ms).length > 0 && !hasRoleAnywhere) return false;
-                          }
-                        }
-                        if (!blueprintSearchQuery.trim()) return true;
-                        const q = blueprintSearchQuery.toLowerCase().trim();
-                        const reelId = extractReelId(bp.source_url);
-                        return (
-                          (reelId && reelId.includes(q)) ||
-                          (bp.source_url && bp.source_url.toLowerCase().includes(q)) ||
-                          (bp.core_problem && bp.core_problem.toLowerCase().includes(q)) ||
-                          (bp.core_solution && bp.core_solution.toLowerCase().includes(q)) ||
-                          (bp.niche && bp.niche.toLowerCase().includes(q)) ||
-                          (bp.tags && (Array.isArray(bp.tags) ? bp.tags.join(' ') : String(bp.tags)).toLowerCase().includes(q)) ||
-                          (bp.viral_pattern_summary && bp.viral_pattern_summary.toLowerCase().includes(q)) ||
-                          (bp.original_caption && bp.original_caption.toLowerCase().includes(q))
-                        );
-                      });
-
-                      if (filteredBlueprints.length === 0) {
+                      if (filteredInstantBlueprints.length === 0) {
                         return (
                           <div style={{
                             textAlign: 'center',
@@ -4426,10 +4502,13 @@ export default function AutoPipelinePage() {
                             alignItems: 'center',
                             gap: '0.4rem'
                           }}>
-                            <span>🔍 Tidak ada blueprint yang cocok dengan "{blueprintSearchQuery}"</span>
+                            <span>🔍 Tidak ada blueprint yang cocok dengan filter saat ini.</span>
                             <button
                               type="button"
-                              onClick={() => setBlueprintSearchQuery('')}
+                              onClick={() => {
+                                setBlueprintSearchQuery('');
+                                setInstantMultiplierBpRoleFilter('all');
+                              }}
                               style={{
                                 background: 'var(--status-purple-soft)',
                                 color: 'var(--status-purple)',
@@ -4441,13 +4520,13 @@ export default function AutoPipelinePage() {
                                 cursor: 'pointer'
                               }}
                             >
-                              Reset Filter Pencarian
+                              Reset Filter Blueprint
                             </button>
                           </div>
                         );
                       }
 
-                      return filteredBlueprints.map(bp => {
+                      return filteredInstantBlueprints.map(bp => {
                         const isSelected = instantBlueprintId === bp.id;
                         const rId = extractReelId(bp.source_url);
                         const title = bp.core_problem || bp.core_solution || bp.original_caption || bp.source_url;
@@ -5588,6 +5667,38 @@ export default function AutoPipelinePage() {
                       Otomatis mencocokkan produk brand dan menghasilkan CTA adaptif (FB: link Shopee aktif, Non-FB: Link di Bio). Uncheck jika ingin video viral 1-klik murni edukasi tanpa jualan.
                     </span>
                   </div>
+                </div>
+              )}
+
+              {launchError && (
+                <div
+                  role="alert"
+                  style={{
+                    padding: '0.8rem 1rem',
+                    borderRadius: 'var(--radius-sm)',
+                    background: 'var(--status-danger-soft)',
+                    color: 'var(--status-danger)',
+                    border: '1px solid var(--status-danger)',
+                    fontSize: '0.84rem',
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '0.6rem'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span>⚠️</span>
+                    <span>{launchError}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setLaunchError('')}
+                    aria-label="Tutup pesan error"
+                    style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontWeight: 700 }}
+                  >
+                    ✕
+                  </button>
                 </div>
               )}
 

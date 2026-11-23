@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.58.1 — Hotfix Tombol 1-Klik Auto Pipeline (Multiplier & All Types) (24/11/2026)
+- Isolasi tenant blueprint Multiplier pada route autonomous-pipeline
+- Feedback validasi inline saat prasyarat form Auto Pipeline belum lengkap
+- Endpoint status polling recipe_labs /api/v2/recipes/autonomous-pipeline/status
+- Perbarui kartu menu auto-pipeline
+
 ## V2.58.0 — Blueprint-Product Smart Matcher, promo_role & Autopilot 2+2 (23/11/2026)
 - Tambah klasifikasi promo_role (alat_dapur, bahan_resep, lainnya) dan sinkronisasi otomatis ke matcher
 - Tambah engine indeks blueprint_product_matches serta UI Deconstruct Lab, Multiplier Labs, dan Auto Pipeline
