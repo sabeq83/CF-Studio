@@ -13,7 +13,8 @@ import {
   prepareTtsSpeechText,
   sanitizeVoiceoverItems,
   extractSceneVoText,
-  normalizeStoryboardVoFields
+  normalizeStoryboardVoFields,
+  repairMissingSceneVoiceovers
 } from '../lib/tts-text-sanitizer.js';
 import {
   buildMultiplierPhase2Prompt,
@@ -211,4 +212,41 @@ test('extractSceneVoText dan normalizeStoryboardVoFields menangani typo AI narra
   assert.equal(normalizedFromUi[0].narration_transcript, 'Buruan dicoba, produk ori ada di keranjang ya!');
   assert.equal(normalizedFromUi[0].narration, 'Buruan dicoba, produk ori ada di keranjang ya!');
   assert.equal('narrating_transcript' in normalizedFromUi[0], false);
+});
+
+test('extractSceneVoText fallback dinamis menangkap typo key baru dan mengabaikan field non-VO', () => {
+  const unknownTypo = {
+    scene: 6,
+    voice_provider: 'minimax',
+    voice_persona: 'Indonesian_professional_anchor_vv2',
+    narration_language: 'id-ID',
+    narration_script_custom: 'Coba varian terbaru hari ini juga!'
+  };
+  assert.equal(extractSceneVoText(unknownTypo), 'Coba varian terbaru hari ini juga!');
+});
+
+test('repairMissingSceneVoiceovers mengisi adegan VO kosong via 1x repair dan melaporkan jika masih kosong', async () => {
+  const storyboard = [
+    { scene: 1, visual_description: 'Buka kemasan', narration_transcript: 'Hook pembuka yang menarik.' },
+    { scene: 2, visual_description: 'Tampilkan hasil akhir', narration_transcript: '' }
+  ];
+
+  const repaired = await repairMissingSceneVoiceovers({
+    storyboard,
+    generateFn: async () => '{"repairs":[{"scene":2,"narration_transcript":"Yuk cobain sekarang sebelum kehabisan!"}]}',
+    parseJsonFn: JSON.parse,
+    productName: 'Monggo Dark Chocolate'
+  });
+  assert.deepEqual(repaired.repairedIndices, [1]);
+  assert.deepEqual(repaired.stillMissingScenes, []);
+  assert.equal(repaired.storyboard[1].narration_transcript, 'Yuk cobain sekarang sebelum kehabisan!');
+  assert.equal(repaired.storyboard[1].narration, 'Yuk cobain sekarang sebelum kehabisan!');
+
+  const stillEmpty = await repairMissingSceneVoiceovers({
+    storyboard,
+    generateFn: async () => '{"repairs":[]}',
+    parseJsonFn: JSON.parse
+  });
+  assert.deepEqual(stillEmpty.repairedIndices, []);
+  assert.deepEqual(stillEmpty.stillMissingScenes, [2]);
 });
