@@ -11,8 +11,8 @@ Branch target: `fitur/mcp-start-deconstruct` (dibuat dari `main`).
 - [x] 4. Tambahkan 10 kasus uji paritas `cf_start_deconstruct` di `tests/test-mcp-tools-parity.test.js`
 - [x] 5. Jalankan `npm test --prefix apps/mcp` dan `node --test tests/test-mcp-tools-parity.test.js`
 - [x] 6. Commit dan push branch `fitur/mcp-start-deconstruct` (tanpa `npm run release`)
-- [ ] 7. Deploy atomic branch ke server Dev (`5020/7020`)
-- [ ] 8. Verifikasi nyata melalui `npm run mcp:stdio` ke API Dev + cek versi `yt-dlp` di Mac Mini
+- [x] 7. Deploy atomic branch ke server Dev (`5020/7020`)
+- [x] 8. Verifikasi nyata melalui `npm run mcp:stdio` ke API Dev + cek versi `yt-dlp` di Mac Mini
 
 ---
 
