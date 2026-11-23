@@ -82,23 +82,25 @@ export const GET = withTenantContext(async (request, _ctx, user) => {
         let bpSql = `
           SELECT id, source_url, original_caption, viral_pattern_summary, niche, core_problem, core_solution, tags, created_at
           FROM re_deconstructed_assets
+          WHERE tenant_id = $1
+            AND status = 'deconstructed'
         `;
-        const bpParams = [];
+        const bpParams = [tenantId];
         if (bpSearch) {
           bpSql += `
-            WHERE (
-              source_url ILIKE $1 
-              OR id::text ILIKE $1 
-              OR core_problem ILIKE $1 
-              OR core_solution ILIKE $1 
-              OR niche ILIKE $1 
-              OR (tags IS NOT NULL AND tags::text ILIKE $1)
-              OR viral_pattern_summary ILIKE $1
+            AND (
+              source_url ILIKE $2
+              OR id::text ILIKE $2
+              OR core_problem ILIKE $2
+              OR core_solution ILIKE $2
+              OR niche ILIKE $2
+              OR (tags IS NOT NULL AND tags::text ILIKE $2)
+              OR viral_pattern_summary ILIKE $2
             )
           `;
           bpParams.push(`%${bpSearch}%`);
         }
-        bpSql += ` ORDER BY created_at DESC LIMIT 200`;
+        bpSql += ` ORDER BY created_at DESC LIMIT 250`;
         const bpRes = await pgQuery(bpSql, bpParams);
         blueprints = bpRes.rows || [];
         if (blueprints.length > 0) {

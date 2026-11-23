@@ -157,6 +157,112 @@ export const GET = withTenantContext(async (request, _context, user) => {
       });
     }
 
+    // Recipe Labs Campaign Handler (recipe_...)
+    if (campaignId && campaignId.startsWith('recipe_')) {
+      const rcp = await db.prepare('SELECT * FROM recipe_campaigns WHERE id = ?').get(campaignId);
+      if (!rcp) {
+        return NextResponse.json({
+          success: true,
+          campaign: null,
+          stages: null,
+          is_completed: false,
+          telemetry: {
+            timestamp: new Date().toLocaleTimeString('id-ID'),
+            message: `Kampanye Recipe Labs ${campaignId} tidak ditemukan.`
+          }
+        });
+      }
+
+      const rcpItem = await db.prepare(
+        'SELECT * FROM recipe_items WHERE campaign_id = ? ORDER BY created_at ASC LIMIT 1'
+      ).get(rcp.id);
+
+      let cfg = {};
+      try {
+        cfg = typeof rcp.config_json === 'string' ? JSON.parse(rcp.config_json) : (rcp.config_json || {});
+      } catch (_) {}
+
+      const itemStatus = String(rcpItem?.status || rcp.status || 'pending_gemini').toLowerCase();
+      const isDone = itemStatus === 'completed' || rcp.status === 'completed';
+      const isFailed = itemStatus === 'failed' || itemStatus === 'error' || rcp.status === 'failed';
+      const hasScript = Boolean(rcpItem?.recipe_title || rcpItem?.recipe_markdown_text);
+      const hasGrid = Boolean(rcpItem?.img_grid_path);
+      const hasPhotos = Boolean(rcpItem?.img_1_raw_path || rcpItem?.img_4_plated_path || hasGrid);
+      const hasFbPost = Boolean(rcpItem?.fb_post_id || rcpItem?.fb_post_status === 'posted' || rcpItem?.fb_post_status === 'scheduled');
+      const totalSlots = Number(rcp.images_per_recipe || 4);
+
+      const s1 = { step: 1, status: 'completed', title: 'Planner / Setup', desc: 'Recipe Labs Config', badge: `✓ ${totalSlots} Slot` };
+      const s2 = {
+        step: 2,
+        status: hasScript ? 'completed' : (isFailed ? 'failed' : 'processing'),
+        title: 'Naskah Resep AI',
+        desc: 'Gemini Artikel & Prompt',
+        badge: hasScript ? '✓ Artikel Siap' : (isFailed ? 'Gagal Naskah' : 'Menyusun Resep...')
+      };
+      const s3 = {
+        step: 3,
+        status: hasScript ? 'completed' : (isFailed ? 'failed' : 'idle'),
+        title: 'Prompt Visual Grid',
+        desc: rcp.visual_style || 'Nordic Studio',
+        badge: hasScript ? `✓ ${totalSlots} Prompt` : 'Menunggu'
+      };
+      const s4 = {
+        step: 4,
+        status: hasPhotos || isDone ? 'completed' : (isFailed ? 'failed' : (hasScript ? 'processing' : 'idle')),
+        title: 'Foto AI Generator',
+        desc: `G-Labs (${totalSlots} Foto)`,
+        badge: hasPhotos || isDone ? '✓ Foto AI Siap' : (hasScript ? 'Membuat Foto...' : 'Menunggu')
+      };
+      const s5 = {
+        step: 5,
+        status: hasGrid || isDone ? 'completed' : (isFailed ? 'failed' : (hasPhotos ? 'processing' : 'idle')),
+        title: 'Composite Grid',
+        desc: rcp.selected_layout_id || 'Layout 12-Slot',
+        badge: hasGrid || isDone ? '✓ Kolase Siap' : (hasPhotos ? 'Merakit Grid...' : 'Menunggu')
+      };
+      const s6 = {
+        step: 6,
+        status: isDone ? 'completed' : (isFailed ? 'failed' : (hasGrid ? 'processing' : 'idle')),
+        title: 'Cloud Storage',
+        desc: 'Nextcloud Assets',
+        badge: isDone ? '✓ Tersimpan' : (hasGrid ? 'Menyimpan...' : 'Menunggu')
+      };
+      const s7 = {
+        step: 7,
+        status: isDone ? 'completed' : (isFailed ? 'failed' : 'idle'),
+        title: 'Publish & Sync',
+        desc: 'Facebook & ContentFlow',
+        badge: hasFbPost ? '✓ Published FB' : (isDone ? '✓ Selesai' : 'Menunggu')
+      };
+
+      const now = new Date();
+      const timeStr = `[${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}]`;
+      const telemetryMsg = isDone
+        ? '✓ Kampanye Recipe Labs selesai diproses dan gambar grid siap 🚀'
+        : (isFailed
+          ? '⚠️ Proses Recipe Labs gagal. Cek log atau detail menu Recipe Labs.'
+          : (hasPhotos ? 'Merakit kolase grid komposit dan mengunggah hasil...' : (hasScript ? 'Memproses foto AI di G-Labs...' : 'Gemini AI sedang menyusun artikel resep & prompt foto...')));
+
+      return NextResponse.json({
+        success: true,
+        campaign: {
+          id: rcp.id,
+          name: cfg.topic || rcp.custom_category || `Recipe Labs: ${rcp.id}`,
+          topic: rcpItem?.recipe_title || cfg.topic || rcp.custom_category || rcp.id,
+          status: rcpItem?.status || rcp.status,
+          item_id: rcpItem?.id || null,
+          drive_link: rcp.nextcloud_folder_url || null,
+          contentflow_hub_synced: isDone
+        },
+        stages: { s1, s2, s3, s4, s5, s6, s7 },
+        is_completed: isDone,
+        telemetry: {
+          timestamp: timeStr,
+          message: telemetryMsg
+        }
+      });
+    }
+
     let campaign = null;
     if (campaignId) {
       campaign = await db.prepare('SELECT * FROM pillar_campaigns WHERE id = ?').get(campaignId);
