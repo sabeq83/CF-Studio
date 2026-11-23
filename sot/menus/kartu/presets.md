@@ -1,6 +1,6 @@
 # Kartu Menu: Preset Manager
 
-Terakhir dicek: 23 November 2026 · Versi aplikasi: v2.57.9+
+Terakhir dicek: 23 November 2026 · Versi aplikasi: v2.57.11
 Alamat: `/settings/presets` · Kelompok: PLANNING · Kunci izin menu: `operator_presets`
 
 ## Fungsi

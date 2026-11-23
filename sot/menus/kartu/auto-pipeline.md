@@ -1,6 +1,6 @@
 # Kartu Menu: Auto Pipeline
 
-Terakhir dicek: 23 November 2026 · Versi aplikasi: v2.57.9+
+Terakhir dicek: 23 November 2026 · Versi aplikasi: v2.57.11
 Alamat: `/auto-pipeline` · Kelompok: WORKFLOW · Kunci izin menu: `auto_pipeline`
 
 ## Fungsi
