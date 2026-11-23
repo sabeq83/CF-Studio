@@ -1,19 +1,19 @@
-# Implementation Plan: Hotfix Normalisasi VO Multiplier (Typo Key AI & Sinkronisasi Simpan UI)
+# Implementation Plan: Pengaman Auto-Repair VO Kosong & Fallback Key Dinamis Multiplier
 
-**Branch**: `hotfix/multiplier-vo-typo-and-save`  
-**Dasar Usulan**: [USULAN_PERBAIKAN_VO_MULTIPLIER_TYPO_DAN_SIMPAN.md](catatan-kerja/usulan/USULAN_PERBAIKAN_VO_MULTIPLIER_TYPO_DAN_SIMPAN.md)
+**Branch**: `hotfix/multiplier-vo-auto-repair`  
+**Dasar**: Lanjutan pengaman dari `v2.57.12` agar VO klip kosong di tahap `remaking` otomatis diperbaiki sebelum masuk T2I/TTS.
 
 ---
 
 ## Execution Task List
 
-- [x] Buat branch `hotfix/multiplier-vo-typo-and-save` dari `main` terbaru
+- [x] Buat branch `hotfix/multiplier-vo-auto-repair` dari `main` terbaru
 - [x] Susun `implementation_plan.md` dengan `Code Sebelum` & `Code Sesudah`
-- [x] Tambahkan `extractSceneVoText` dan `normalizeStoryboardVoFields` di `lib/tts-text-sanitizer.js`
-- [x] Sinkronkan VO pada `app/api/v2/multiplier/[id]/update-creative/route.js` & `app/multiplier-lab/[id]/page.js`
-- [x] Normalisasi output Gemini & gunakan `extractSceneVoText` + guard VO kosong di `lib/re-multiplier-worker.js`
-- [x] Tambahkan unit test regresi di `tests/tts-text-sanitizer.test.mjs` dan perbarui `sot/menus/kartu/multiplier-lab.md`
-- [x] Jalankan unit test & `npm run build` verifikasi lokal
+- [x] Tambah fallback regex pencocokan key dinamis di `extractSceneVoText()` dan helper `repairMissingSceneVoiceovers()` di `lib/tts-text-sanitizer.js`
+- [x] Pasang auto-repair 1x di tahap `remaking` & guard `waiting_approval` bila VO masih kosong di `lib/re-multiplier-worker.js`
+- [x] Tambah unit test di `tests/tts-text-sanitizer.test.mjs` dan perbarui `sot/menus/kartu/multiplier-lab.md`
+- [x] Jalankan `PG_SEARCH_PATH=dev node --test tests/tts-text-sanitizer.test.mjs` & `DISABLE_AUTO_MIGRATIONS=true PG_SEARCH_PATH=dev npm run build`
+- [x] Merge ke `main`, rilis patch `v2.57.13`, dan deploy ke Staging
 
 ---
 
@@ -22,45 +22,17 @@
 ### 1. `lib/tts-text-sanitizer.js`
 
 **Code Sebelum (Current/Before):**
-```js
-export function sanitizeVoiceoverItems(items = [], opts = {}) {
-  ...
-    for (const key of ['narration', 'narration_transcript', 'voiceover', 'voice_over', 'new_vo']) {
-```
+`extractSceneVoText()` hanya memeriksa daftar key statis `SCENE_VO_KEYS_DEFAULT` / `SCENE_VO_KEYS_EDITED`.
 
 **Code Sesudah (Proposed/After):**
-Menambahkan `extractSceneVoText(entry, { preferEdited })` dan `normalizeStoryboardVoFields(items, { preferEdited })` yang menangani alias & typo AI (`narrating_transcript`, `narration_transcript`, `narration`, `voiceover`, `voice_over`, dll.) serta menyertakan `'narrating_transcript'` pada `sanitizeVoiceoverItems`.
+1. Menambahkan fallback pencocokan key dinamis (`FUZZY_VO_KEY_RE` dengan `FUZZY_VO_EXCLUDE_RE`) jika semua key eksplisit kosong.
+2. Menambahkan `repairMissingSceneVoiceovers()` untuk mendeteksi adegan yang VO-nya kosong, menjalankan 1x repair ke Gemini, dan melaporkan `repairedIndices` serta `stillMissingScenes`.
 
-### 2. `app/api/v2/multiplier/[id]/update-creative/route.js`
+### 2. `lib/re-multiplier-worker.js`
 
 **Code Sebelum (Current/Before):**
-```js
-    const prompts = (storyboard || []).map((s, idx) => ({ ... }));
-    ...
-    JSON.stringify(storyboard || []),
-```
+Setelah `parseGeminiJSON`, `voiceover` langsung masuk ke audit compliance tanpa mengecek apakah ada adegan yang VO-nya kosong, dan `nextStatus` langsung menuju `generating_t2i` / `generating_audio`.
 
 **Code Sesudah (Proposed/After):**
-Menjalankan `normalizeStoryboardVoFields(storyboard, { preferEdited: true })` sebelum menyusun `prompts` dan menyimpan `remake_storyboard_json` agar `narration_transcript` & `narration` selalu sinkron.
-
-### 3. `app/multiplier-lab/[id]/page.js`
-
-**Code Sebelum (Current/Before):**
-```js
-narration: scene.narration_transcript || scene.voiceover || scene.narration || '',
-...
-updated[cidx].narration = e.target.value;
-```
-
-**Code Sesudah (Proposed/After):**
-Memakai `extractSceneVoText(scene, { preferEdited: true })` saat memuat storyboard, dan saat edit memperbarui `narration` sekaligus `narration_transcript`.
-
-### 4. `lib/re-multiplier-worker.js`
-
-**Code Sebelum (Current/Before):**
-```js
-const rawText = storyboard[c].narration_transcript || storyboard[c].voiceover || '';
-```
-
-**Code Sesudah (Proposed/After):**
-Menjalankan `normalizeStoryboardVoFields` setelah sanitasi output Gemini, menggunakan `extractSceneVoText(..., { preferEdited: true })` di TTS (`1107`), claim filter (`1063`), Native Veo (`1290`), dan Markdown export (`1631`), serta guard error informatif bila VO adegan kosong sebelum memanggil TTS API.
+1. Menjalankan `repairMissingSceneVoiceovers()` bila terdeteksi adegan VO kosong saat TTS aktif sebelum audit compliance.
+2. Jika masih ada adegan yang kosong setelah repair, mengeset `auditNeedsManualReview = true` dengan pesan jelas sehingga task tertahan di `waiting_approval` sebelum membuang kuota T2I/TTS.
