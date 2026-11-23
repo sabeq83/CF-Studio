@@ -11,7 +11,9 @@ import {
   shouldInjectMinimaxMicroActing,
   stripTtsMarkupTags,
   prepareTtsSpeechText,
-  sanitizeVoiceoverItems
+  sanitizeVoiceoverItems,
+  extractSceneVoText,
+  normalizeStoryboardVoFields
 } from '../lib/tts-text-sanitizer.js';
 import {
   buildMultiplierPhase2Prompt,
@@ -182,4 +184,31 @@ test('generateMotionTextFrames membersihkan tag TTS dari teks motion subtitle', 
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }
+});
+
+test('extractSceneVoText dan normalizeStoryboardVoFields menangani typo AI narrating_transcript serta editan UI narration', () => {
+  const aiTypoScene = {
+    scene: 6,
+    narrating_transcript: 'Yuk cobain bikin camilan sehat ini sekarang juga.'
+  };
+  assert.equal(extractSceneVoText(aiTypoScene), 'Yuk cobain bikin camilan sehat ini sekarang juga.');
+
+  const normalizedFromAi = normalizeStoryboardVoFields([aiTypoScene]);
+  assert.equal(normalizedFromAi[0].narration_transcript, 'Yuk cobain bikin camilan sehat ini sekarang juga.');
+  assert.equal(normalizedFromAi[0].narration, 'Yuk cobain bikin camilan sehat ini sekarang juga.');
+  assert.equal('narrating_transcript' in normalizedFromAi[0], false);
+
+  const editedInUiScene = {
+    scene: 6,
+    narrating_transcript: 'Teks lama AI.',
+    narration: 'Buruan dicoba, produk ori ada di keranjang ya!'
+  };
+  assert.equal(
+    extractSceneVoText(editedInUiScene, { preferEdited: true }),
+    'Buruan dicoba, produk ori ada di keranjang ya!'
+  );
+  const normalizedFromUi = normalizeStoryboardVoFields([editedInUiScene], { preferEdited: true });
+  assert.equal(normalizedFromUi[0].narration_transcript, 'Buruan dicoba, produk ori ada di keranjang ya!');
+  assert.equal(normalizedFromUi[0].narration, 'Buruan dicoba, produk ori ada di keranjang ya!');
+  assert.equal('narrating_transcript' in normalizedFromUi[0], false);
 });

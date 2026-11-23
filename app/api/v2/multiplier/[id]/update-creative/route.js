@@ -3,6 +3,7 @@ import { dbRun, getMultiplierTaskById } from '@/lib/db';
 import { withTenantContext } from '@/lib/auth';
 import { normalizeAudioConfig } from '@/lib/multiplier-audio-config';
 import { normalizeBridgePayload } from '@/lib/bridging/bridge-plan';
+import { normalizeStoryboardVoFields } from '@/lib/tts-text-sanitizer';
 
 export const POST = withTenantContext(async (req, { params }) => {
   try {
@@ -16,8 +17,10 @@ export const POST = withTenantContext(async (req, { params }) => {
       return NextResponse.json({ success: false, error: 'Task tidak ditemukan' }, { status: 404 });
     }
 
+    const normalizedStoryboard = normalizeStoryboardVoFields(Array.isArray(storyboard) ? storyboard : [], { preferEdited: true });
+
     // Map storyboard to prompts structure
-    const prompts = (storyboard || []).map((s, idx) => ({
+    const prompts = normalizedStoryboard.map((s, idx) => ({
       clip: s.scene || (idx + 1),
       t2i_prompt: s.t2i_prompt || '',
       i2v_prompt: s.i2v_prompt || '',
@@ -26,7 +29,7 @@ export const POST = withTenantContext(async (req, { params }) => {
     }));
 
     const normalizedAudio = normalizeAudioConfig(audioConfig || {});
-    const targetClipsCount = Array.isArray(storyboard) && storyboard.length > 0 ? storyboard.length : null;
+    const targetClipsCount = normalizedStoryboard.length > 0 ? normalizedStoryboard.length : null;
     const bridgeNorm = normalizeBridgePayload(bridgingConfig || {}, vsoConfig || {}, {
       targetClips: targetClipsCount,
       defaultActive: bridgingConfig?.campaign_type !== 'pure_storytelling' && bridgingConfig?.is_bridging_active !== false
@@ -54,7 +57,7 @@ export const POST = withTenantContext(async (req, { params }) => {
           yt_title = COALESCE(?, yt_title)
       WHERE id = ?
     `, [
-      JSON.stringify(storyboard || []),
+      JSON.stringify(normalizedStoryboard),
       JSON.stringify(prompts),
       JSON.stringify(vsoConfig || {}),
       JSON.stringify(normalizedBridging),

@@ -1,6 +1,6 @@
 # Kartu Menu: Multiplier Labs
 
-Terakhir dicek: 17 November 2026 · Versi aplikasi: v2.50.0
+Terakhir dicek: 23 November 2026 · Versi aplikasi: v2.57.12
 Alamat: `/multiplier-lab` (form) dan `/multiplier-lab/<id>` (detail hasil) · Kelompok: WORKFLOW · Kunci izin menu: `multiplier_lab`
 
 ## Fungsi
@@ -36,6 +36,7 @@ Pembuka viral tanpa sebut produk → jembatan ke produk → bukti/hasil → ajak
 3. Karakter, pakaian, dan pencahayaan harus konsisten mengikuti Visual Identity aktif.
 4. Ada dua alamat API mirip: `/api/v2/multiplier/` (utama) dan `/api/v2/multiplier-lab/` (hanya sinkron). Jangan tertukar.
 5. Render akhir memakai slot produksi, jadi membuat Video Studio menunggu.
+6. Editor detail & worker TTS menormalisasi key VO adegan (`narration` ↔ `narration_transcript`, termasuk alias/typo AI seperti `narrating_transcript`) saat generate dan saat `update-creative`.
 
 ## Belum ada / batasan
 - Blueprint harus sudah dibedah di Deconstruct Lab; menu ini tidak membedah video sendiri.
