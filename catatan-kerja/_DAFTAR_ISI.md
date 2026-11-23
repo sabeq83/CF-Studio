@@ -6,6 +6,7 @@ Terakhir diperbarui: 23 November 2026
 
 | Nama File | Ringkasan / Judul |
 |---|---|
+| [USULAN_PERBAIKAN_MULTIPLIER_BRIDGING_FOTO_PRODUK.md](usulan/USULAN_PERBAIKAN_MULTIPLIER_BRIDGING_FOTO_PRODUK.md) | Analisa `mul_261124_swv95p` (preset `multiplier_deconstruct_remix_produk_nutribake`) & Usulan Perbaikan: Multiplier mengabaikan `active_photo`, belum memakai `[HIGHEST PRIORITY PRODUCT IDENTITY LOCK]` / reference wrapper seperti OPC, serta pratinjau foto referensi produk |
 | [USULAN_SMART_MATCHER_DAN_KUOTA_2PLUS2_MULTIPLIER.md](usulan/USULAN_SMART_MATCHER_DAN_KUOTA_2PLUS2_MULTIPLIER.md) | Usulan Solusi 3 Lapisan: Blueprint–Product Smart Matcher (Alat Dapur vs Bahan Resep) dan Kuota Harian 2+2 Video Multiplier untuk `nutribake`, `dapurbotani`, dan `siasatsehat` |
 | [DAFTAR_30_ALAT_DAPUR_BLUEPRINT_20K_500K.md](usulan/DAFTAR_30_ALAT_DAPUR_BLUEPRINT_20K_500K.md) | Daftar 30 Produk Alat Dapur & Alat Masak (Rp 20K–500K) berbasis audit 213 blueprint Deconstruction Lab & katalog untuk bridging `nutribake`, `dapurbotani`, dan `siasatsehat` |
 | [DAFTAR_30_ALAT_DAPUR_MASUK_DB.csv](usulan/DAFTAR_30_ALAT_DAPUR_MASUK_DB.csv) | Tabel CSV 30 Produk Alat Dapur hasil Apify MCP yang sudah diperkaya & diinput ke Product Database `default_tenant` (`pe_...`, harga, rating, status enrichment & clean photo) |
