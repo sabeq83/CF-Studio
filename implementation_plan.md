@@ -1,57 +1,166 @@
-# Implementation Plan: Layout Mobile CF Studio — Tahap 3 (Finalisasi Seluruh 16 Menu Tersisa)
+# Implementation Plan: Opsi Campaign Multiplier & Recipe Labs di Preset Manager, Auto Pipeline, dan Multiplier Labs
 
-**Branch**: `fitur/layout-mobile-tahap3`  
-**Penyusun**: Antigravity  
-**Dasar Usulan**: `catatan-kerja/usulan/USULAN_LAYOUT_MOBILE_TAHAP3.md` & `catatan-kerja/instruksi-agent/antigravity_layout_mobile_tahap3_instructions.md`  
-**Filter Desain**: `antislop-layoutmobile` + `antislop` (core, Mode DURING)
-
----
-
-## 1. Ringkasan & Ruang Lingkup
-
-Tahap 3 merupakan **finalisasi menyeluruh** dari proyek Layout Mobile CF Studio, memoles 16 menu tersisa agar 100% halaman nyaman digunakan di layar HP ($\le 640\text{px}$) dan tablet ($641 - 1024\text{px}$):
-
-- **Grup 1: PLANNING**:
-  1. Content Planner (`app/content-planner/page.js`)
-  2. Recipe Library (`app/recipe-library/page.js`)
-  3. Deconstruct Lab (`app/deconstruct/page.js`)
-  4. Preset Manager (`app/settings/presets/page.js`)
-  5. Visual Identity (`app/settings/visual-identities/page.js`)
-  6. Universe Manager (`app/settings/universes/page.js`)
-  7. Brand Profile Manager (`app/settings/brand-profiles/page.js`)
-- **Grup 2: WORKFLOW**:
-  8. Threads Labs (`app/threads-labs/page.js`)
-  9. RE Campaign (`app/re-campaigns/page.js`) & Detail (`app/re-campaigns/[id]/page.js`)
-  10. Pillar Campaign (`app/pillar-campaigns/page.js`) & Detail (`app/pillar-campaigns/[id]/page.js`)
-  11. Recipe Labs (`app/recipe-labs/page.js`)
-  12. Multiplier Labs (`app/multiplier-lab/page.js`) & Detail (`app/multiplier-lab/[id]/page.js`)
-  13. Product Bridging (`app/product-bridge-inject/page.js`)
-- **Grup 3: TOOLS & PUBLISHING**:
-  14. Recipe Exporter (`app/recipe-exporter/page.js`)
-  15. Video Studio (`app/video-studio/page.js`)
-  16. TTS Studio (`app/tts-studio/page.js`)
-- **Grup 4: SYSTEM**:
-  17. System Settings (`app/settings/page.js`)
-  18. User Management (`app/settings/users/page.js`)
-  19. Tenant Management (`app/settings/tenants/page.js`)
+**Branch**: `fitur/preset-multiplier-options`  
+**Dasar Usulan**: [USULAN_PERBAIKAN_PRESET_MULTIPLIER_AUTOPIPELINE.md](catatan-kerja/usulan/USULAN_PERBAIKAN_PRESET_MULTIPLIER_AUTOPIPELINE.md)  
+**Mockup Disetujui**: [mockup_preset_multiplier_autopipeline.html](public/mockup_preset_multiplier_autopipeline.html)
 
 ---
 
-## 2. Execution Task List
+## Execution Task List
 
-- [x] Task 1: Buat branch git `fitur/layout-mobile-tahap3` dari `main`
-- [x] Task 2: Susun dokumen usulan dan instruksi agen Tahap 3 di `catatan-kerja/`
-- [x] Task 3: Susun rencana pelaksanaan lengkap di `implementation_plan.md`
-- [x] Task 4: Buat Mockup HTML Mandiri (`public/mockup_layout_mobile_tahap3.html`) mencakup 4 grup modul (Planning, Workflow, Tools, System)
-- [x] Task 5: Sinkronkan mockup ke Mac mini Staging (`http://100.95.245.55:5010/mockup_layout_mobile_tahap3.html`)
-- [x] Task 6: **STOP & REVIEW** — Laporkan tautan mockup ke pengguna dan tunggu konfirmasi/persetujuan sebelum mengedit kode React (Disetujui Pengguna)
-- [x] Task 7: Implementasi penguatan aturan CSS sistemik di `app/globals.css`
-- [x] Task 8: Terapkan penyesuaian mobile di modul PLANNING (Content Planner, Recipe Library, Deconstruct, Presets, VI, Universe, Brand Profiles)
-- [x] Task 9: Terapkan penyesuaian mobile di modul WORKFLOW (Threads Labs, RE Campaign, Pillar Campaign, Recipe Labs, Multiplier, Bridging)
-- [x] Task 10: Terapkan penyesuaian mobile di modul TOOLS & PUBLISHING (Recipe Exporter, Video Studio, TTS Studio)
-- [x] Task 11: Terapkan penyesuaian mobile di modul SYSTEM (Settings, Users, Tenants)
-- [x] Task 12: Jalankan verifikasi lokal (build Next.js, cluster health)
-- [x] Task 13: Commit dan push branch `fitur/layout-mobile-tahap3` ke GitHub origin (Commit `25faaf1`)
-- [x] Task 14: Deploy ke Server Dev (`http://100.95.245.55:5020`) via `npm run deploy:dev:atomic -- --ref 25faaf1fb321538f9a06768c4b48522566b8cc5c --apply --confirm-dev` (Release `20261121T063609Z-25faaf1fb321`)
-- [x] Task 15: Verifikasi hasil di Dev dan sajikan laporan akhir beserta checklist uji HP kepada pengguna (Disetujui Pengguna)
-- [x] Task 16: Merge ke `main`, rilis `v2.57.9`, dan deploy ke Staging (`http://100.95.245.55:5010`) via `deploy:staging`
+- [x] Buat branch `fitur/preset-multiplier-options` dari `main` terbaru
+- [x] Susun `implementation_plan.md` dengan `Code Sebelum` & `Code Sesudah`
+- [x] Lengkapi opsi `multiplier_campaign` dan `recipe_labs` di fieldset `Digunakan untuk Campaign` pada `app/settings/presets/page.js`
+- [x] Perbaiki `campaign_kinds` pada *Save as Preset* di `app/components/campaign-forms/MultiplierConfigurationForm.js`
+- [x] Perbaiki fallback preset key `multiplier_campaign` dan tambahkan petunjuk cepat ke Preset Manager di `app/auto-pipeline/page.js`
+- [x] Tambahkan unit test kompatibilitas `multiplier_campaign` dan `recipe_labs` di `tests/operator-preset-roundtrip.test.js`
+- [x] Perbarui kartu menu `sot/menus/kartu/presets.md` dan `sot/menus/kartu/auto-pipeline.md`
+- [x] Jalankan unit test & build verifikasi lokal (`npm run build` / `node --test`)
+- [x] Commit & push branch `fitur/preset-multiplier-options`, lalu deploy ke Dev (`http://100.95.245.55:5020`)
+
+---
+
+## Perubahan Kode (Before & After)
+
+### 1. `app/settings/presets/page.js`
+
+**Code Sebelum (Current/Before):**
+```jsx
+              <fieldset style={{marginTop:16,border:'1px solid var(--border-color)',borderRadius:8,padding:12}}><legend>Digunakan untuk Campaign</legend><div style={{display:'flex',gap:18,flexWrap:'wrap'}}>{[['brand_editorial','Brand Editorial'],['product_campaign','Product Campaign'],['recipe_campaign','Recipe Campaign']].map(([kind,label])=><label key={kind} style={{display:'flex',gap:7,alignItems:'center'}}><input type="checkbox" checked={form.campaign_kinds.includes(kind)} onChange={event=>setForm({...form,campaign_kinds:event.target.checked?[...new Set([...form.campaign_kinds,kind])]:form.campaign_kinds.filter(value=>value!==kind)})}/>{label}</label>)}</div>{form.campaign_kinds.length===0&&<small style={{color:'var(--status-danger)'}}>Pilih minimal satu jenis campaign.</small>}</fieldset>
+```
+
+**Code Sesudah (Proposed/After):**
+```jsx
+              <fieldset style={{ marginTop: 16, border: '1px solid var(--border-color)', borderRadius: 8, padding: 12 }}>
+                <legend>Digunakan untuk Campaign</legend>
+                <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap' }}>
+                  {[
+                    ['brand_editorial', 'Brand Editorial'],
+                    ['product_campaign', 'Product Campaign'],
+                    ['recipe_campaign', 'Recipe Campaign'],
+                    ['multiplier_campaign', 'Campaign Multiplier (Multiplier Remix)'],
+                    ['recipe_labs', 'Recipe Labs (Teks & Foto)']
+                  ].map(([kind, label]) => (
+                    <label key={kind} style={{ display: 'flex', gap: 7, alignItems: 'center', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={form.campaign_kinds.includes(kind)}
+                        onChange={event =>
+                          setForm({
+                            ...form,
+                            campaign_kinds: event.target.checked
+                              ? [...new Set([...form.campaign_kinds, kind])]
+                              : form.campaign_kinds.filter(value => value !== kind)
+                          })
+                        }
+                      />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+                {form.campaign_kinds.includes('multiplier_campaign') && (
+                  <small style={{ display: 'block', marginTop: 8, color: 'var(--text-muted)' }}>
+                    Preset ini akan tampil di Auto Pipeline saat memilih tipe kampanye Video Multiplier.
+                  </small>
+                )}
+                {form.campaign_kinds.length === 0 && (
+                  <small style={{ display: 'block', marginTop: 6, color: 'var(--status-danger)' }}>
+                    Pilih minimal satu jenis campaign.
+                  </small>
+                )}
+              </fieldset>
+```
+
+---
+
+### 2. `app/components/campaign-forms/MultiplierConfigurationForm.js`
+
+**Code Sebelum (Current/Before):**
+```js
+    const presetConfig = {
+      schema_version: '2',
+      label: newPresetLabel.trim(),
+      campaign_kinds: isBridgingActive ? ['product_campaign'] : ['brand_editorial'],
+```
+
+**Code Sesudah (Proposed/After):**
+```js
+    const presetConfig = {
+      schema_version: '2',
+      label: newPresetLabel.trim(),
+      campaign_kinds: isBridgingActive ? ['multiplier_campaign', 'product_campaign'] : ['multiplier_campaign'],
+```
+
+---
+
+### 3. `app/auto-pipeline/page.js`
+
+**Code Sebelum (Current/Before) — Fallback key & openCreateScheduleModal:**
+```js
+          let effectiveKey = opList[0]?.key || (instantCampaignType === 'product_campaign' ? 'product_campaign' : (instantCampaignType === 'editorial_campaign' ? 'brand_editorial_campaign' : 'recipe_campaign_default'));
+```
+```js
+    setSchedPresetKey(selectedPresetKey || 'habitfolk_6clips_quick');
+```
+
+**Code Sesudah (Proposed/After):**
+```js
+          const fallbackKeyByType = {
+            product_campaign: 'product_campaign',
+            editorial_campaign: 'brand_editorial_campaign',
+            multiplier_campaign: 'multiplier_deconstruct_remix',
+            recipe_labs: 'recipe_labs_editorial_food',
+            recipe_campaign: 'recipe_campaign'
+          };
+          let effectiveKey = opList[0]?.key || fallbackKeyByType[instantCampaignType] || 'recipe_campaign';
+```
+```js
+    setSchedPresetKey(
+      instantCampaignType === 'multiplier_campaign' && selectedPresetKey
+        ? selectedPresetKey
+        : 'multiplier_deconstruct_remix'
+    );
+```
+
+**Code Sebelum (Current/Before) — Dropdown Preset Video:**
+```jsx
+                    })()}
+                  </select>
+                </div>
+```
+
+**Code Sesudah (Proposed/After):**
+```jsx
+                    })()}
+                  </select>
+                  {instantCampaignType === 'multiplier_campaign' && operatorPresets.length <= 1 && (
+                    <div style={{ fontSize: '0.73rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                      Menampilkan preset bertag Campaign Multiplier. Untuk menambah preset brand Anda, clone atau centang &quot;Campaign Multiplier&quot; di{' '}
+                      <Link href="/settings/presets" style={{ color: 'var(--link)', fontWeight: 600 }}>
+                        Preset Manager
+                      </Link>.
+                    </div>
+                  )}
+                </div>
+```
+
+---
+
+### 4. `tests/operator-preset-roundtrip.test.js`
+
+**Code Sebelum (Current/Before):**
+```js
+  assert.equal(isOperatorPresetCompatible('nutribake_editorial_v1', 'brand_editorial'), true);
+  assert.equal(isOperatorPresetCompatible('nutribake_editorial_v1', 'product_campaign'), false);
+});
+```
+
+**Code Sesudah (Proposed/After):**
+```js
+  assert.equal(isOperatorPresetCompatible('nutribake_editorial_v1', 'brand_editorial'), true);
+  assert.equal(isOperatorPresetCompatible('nutribake_editorial_v1', 'product_campaign'), false);
+  assert.equal(isOperatorPresetCompatible('multiplier_deconstruct_remix', 'multiplier_campaign'), true);
+  assert.equal(isOperatorPresetCompatible('recipe_labs_editorial_food', 'recipe_labs'), true);
+});
+```
+Plus tambahan test multi-tenant custom preset dengan `campaign_kinds: ['multiplier_campaign', 'product_campaign']` untuk memastikan `listOperatorPresetsForCampaignKind('multiplier_campaign', ...)` meloloskan preset clone/custom yang mencentang `multiplier_campaign`.

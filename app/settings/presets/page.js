@@ -869,7 +869,44 @@ export default function PresetsPage() {
                   />
                 </label>
               </div>
-              <fieldset style={{marginTop:16,border:'1px solid var(--border-color)',borderRadius:8,padding:12}}><legend>Digunakan untuk Campaign</legend><div style={{display:'flex',gap:18,flexWrap:'wrap'}}>{[['brand_editorial','Brand Editorial'],['product_campaign','Product Campaign'],['recipe_campaign','Recipe Campaign']].map(([kind,label])=><label key={kind} style={{display:'flex',gap:7,alignItems:'center'}}><input type="checkbox" checked={form.campaign_kinds.includes(kind)} onChange={event=>setForm({...form,campaign_kinds:event.target.checked?[...new Set([...form.campaign_kinds,kind])]:form.campaign_kinds.filter(value=>value!==kind)})}/>{label}</label>)}</div>{form.campaign_kinds.length===0&&<small style={{color:'var(--status-danger)'}}>Pilih minimal satu jenis campaign.</small>}</fieldset>
+              <fieldset style={{ marginTop: 16, border: '1px solid var(--border-color)', borderRadius: 8, padding: 12 }}>
+                <legend>Digunakan untuk Campaign</legend>
+                <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap' }}>
+                  {[
+                    ['brand_editorial', 'Brand Editorial'],
+                    ['product_campaign', 'Product Campaign'],
+                    ['recipe_campaign', 'Recipe Campaign'],
+                    ['multiplier_campaign', 'Campaign Multiplier (Multiplier Remix)'],
+                    ['recipe_labs', 'Recipe Labs (Teks & Foto)']
+                  ].map(([kind, label]) => (
+                    <label key={kind} style={{ display: 'flex', gap: 7, alignItems: 'center', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={form.campaign_kinds.includes(kind)}
+                        onChange={event =>
+                          setForm({
+                            ...form,
+                            campaign_kinds: event.target.checked
+                              ? [...new Set([...form.campaign_kinds, kind])]
+                              : form.campaign_kinds.filter(value => value !== kind)
+                          })
+                        }
+                      />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+                {form.campaign_kinds.includes('multiplier_campaign') && (
+                  <small style={{ display: 'block', marginTop: 8, color: 'var(--text-muted)' }}>
+                    Preset ini akan tampil di Auto Pipeline saat memilih tipe kampanye Video Multiplier.
+                  </small>
+                )}
+                {form.campaign_kinds.length === 0 && (
+                  <small style={{ display: 'block', marginTop: 6, color: 'var(--status-danger)' }}>
+                    Pilih minimal satu jenis campaign.
+                  </small>
+                )}
+              </fieldset>
             </div>
 
             {/* Accordion Panels */}

@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   listOperatorPresets,
+  listOperatorPresetsForCampaignKind,
   resolveOperatorPreset,
   getOperatorPresetConfig,
   isOperatorPresetCompatible,
@@ -98,6 +99,8 @@ test('Preset Compatibility: Product campaigns match product presets and reject e
   assert.equal(isOperatorPresetCompatible('dapurbotani_kampanye_produk_4_klip', 'product_campaign'), true);
   assert.equal(isOperatorPresetCompatible('nutribake_editorial_v1', 'brand_editorial'), true);
   assert.equal(isOperatorPresetCompatible('nutribake_editorial_v1', 'product_campaign'), false);
+  assert.equal(isOperatorPresetCompatible('multiplier_deconstruct_remix', 'multiplier_campaign'), true);
+  assert.equal(isOperatorPresetCompatible('recipe_labs_editorial_food', 'recipe_labs'), true);
 });
 
 test('Multi-Tenant Isolation: Tenant A custom presets are strictly isolated from Tenant B', () => {
@@ -142,4 +145,37 @@ test('Multi-Tenant Isolation: Tenant A custom presets are strictly isolated from
   assert.equal(listB.length, 6);
   assert.ok(listB.some(p => p.key === 'beta_exclusive_preset'));
   assert.ok(!listB.some(p => p.key === 'alpha_exclusive_preset'), 'Tenant B must NOT see Tenant A preset');
+});
+
+test('Multiplier Preset Filtering: Cloned or multi-kind multiplier presets appear in multiplier_campaign list', () => {
+  const tenantMul = 'tenant_multiplier_filter_test';
+  hydrateOperatorPresetCache(tenantMul, {
+    multiplier_nutribake_clone: {
+      schema_version: '2',
+      label: 'Multiplier NutriBake Clone',
+      campaign_kinds: ['multiplier_campaign'],
+      basic_strategy: { narrative_mode: 'Storytelling' },
+      visual_engine: { visual_style: 'Realistic' },
+      product_bridging: { is_bridging_active: true, bridge_at_clip: 4, bridge_duration_clips: 1 },
+      visual_swap: { is_vso_active: true },
+      workflow: { approval_mode: 'storyboard' }
+    },
+    nutribake_multi_kind: {
+      schema_version: '2',
+      label: 'NutriBake Multi-Kind',
+      campaign_kinds: ['product_campaign', 'multiplier_campaign'],
+      basic_strategy: { narrative_mode: 'auto' },
+      visual_engine: { visual_style: 'UGC' },
+      product_bridging: { is_bridging_active: true, bridge_at_clip: 3, bridge_duration_clips: 1 },
+      visual_swap: { is_vso_active: false },
+      workflow: { approval_mode: 'start_frames' }
+    }
+  });
+
+  const multiplierPresets = listOperatorPresetsForCampaignKind('multiplier_campaign', 'NutriBake', tenantMul);
+  const keys = multiplierPresets.map(p => p.key);
+  assert.ok(keys.includes('multiplier_deconstruct_remix'), 'Master multiplier preset must be included');
+  assert.ok(keys.includes('multiplier_nutribake_clone'), 'Cloned multiplier preset must be included');
+  assert.ok(keys.includes('nutribake_multi_kind'), 'Multi-kind preset with multiplier_campaign must be included');
+  assert.equal(multiplierPresets[0].is_brand_match, true, 'Brand-matched multiplier presets should sort first');
 });
