@@ -311,3 +311,288 @@ test('6. cf_submit_custom_storyboard accepts preset_key alone without requiring 
     await close();
   }
 });
+
+test('7. cf_start_deconstruct: pre-flight status check, batching, deduplication, error handling, and schema validation', async () => {
+  // Case 1: All IDs have status "saved" -> process called once with all IDs, batch_id forwarded
+  {
+    const { client, calls, close } = await setupTestMcpClient(async (path) => {
+      if (path.startsWith('/api/v2/deconstruct/assets/')) {
+        return { success: true, asset: { id: path.split('/').pop(), status: 'saved' } };
+      }
+      if (path === '/api/v2/deconstruct/scheduler-control') {
+        return { success: true, isSchedulerActive: true };
+      }
+      if (path === '/api/v2/deconstruct/process') {
+        return { success: true, batch_id: 'batch_all_saved', enqueued_count: 2 };
+      }
+      return { success: true };
+    });
+    try {
+      const res = await client.callTool({
+        name: 'cf_start_deconstruct',
+        arguments: { asset_ids: ['dec_1', 'dec_2'] }
+      });
+      assert.equal(res.isError, undefined);
+      assert.equal(res.structuredContent.success, true);
+      assert.equal(res.structuredContent.batch_id, 'batch_all_saved');
+      assert.equal(res.structuredContent.enqueued_count, 2);
+      assert.deepEqual(res.structuredContent.enqueued_ids, ['dec_1', 'dec_2']);
+      assert.deepEqual(res.structuredContent.skipped, []);
+      assert.deepEqual(res.structuredContent.not_found, []);
+      assert.deepEqual(res.structuredContent.warnings, []);
+      assert.match(res.structuredContent.next_step, /cf_get_deconstruct_status/);
+      const processCalls = calls.filter(c => c.path === '/api/v2/deconstruct/process');
+      assert.equal(processCalls.length, 1);
+      assert.deepEqual(processCalls[0].opts.body.asset_ids, ['dec_1', 'dec_2']);
+    } finally {
+      await close();
+    }
+  }
+
+  // Case 2: Mixed saved/failed/analyzing/deconstructed -> only saved+failed sent, rest in skipped with status
+  {
+    const statuses = {
+      a_saved: 'saved',
+      a_failed: 'failed',
+      a_analyzing: 'analyzing',
+      a_done: 'deconstructed'
+    };
+    const { client, calls, close } = await setupTestMcpClient(async (path) => {
+      if (path.startsWith('/api/v2/deconstruct/assets/')) {
+        const id = path.split('/').pop();
+        return { success: true, asset: { id, status: statuses[id] } };
+      }
+      if (path === '/api/v2/deconstruct/scheduler-control') {
+        return { success: true, isSchedulerActive: true };
+      }
+      if (path === '/api/v2/deconstruct/process') {
+        return { success: true, batch_id: 'batch_mixed' };
+      }
+      return { success: true };
+    });
+    try {
+      const res = await client.callTool({
+        name: 'cf_start_deconstruct',
+        arguments: { asset_ids: ['a_saved', 'a_analyzing', 'a_failed', 'a_done'] }
+      });
+      assert.equal(res.structuredContent.batch_id, 'batch_mixed');
+      assert.equal(res.structuredContent.enqueued_count, 2);
+      assert.deepEqual(res.structuredContent.enqueued_ids, ['a_saved', 'a_failed']);
+      assert.deepEqual(res.structuredContent.skipped, [
+        { id: 'a_analyzing', status: 'analyzing' },
+        { id: 'a_done', status: 'deconstructed' }
+      ]);
+      const processCalls = calls.filter(c => c.path === '/api/v2/deconstruct/process');
+      assert.equal(processCalls.length, 1);
+      assert.deepEqual(processCalls[0].opts.body.asset_ids, ['a_saved', 'a_failed']);
+    } finally {
+      await close();
+    }
+  }
+
+  // Case 3: None eligible -> process NOT called, enqueued_count: 0, batch_id: null
+  {
+    const { client, calls, close } = await setupTestMcpClient(async (path) => {
+      if (path.startsWith('/api/v2/deconstruct/assets/')) {
+        return { success: true, asset: { id: path.split('/').pop(), status: 'deconstructed' } };
+      }
+      if (path === '/api/v2/deconstruct/scheduler-control') {
+        return { success: true, isSchedulerActive: true };
+      }
+      return { success: true };
+    });
+    try {
+      const res = await client.callTool({
+        name: 'cf_start_deconstruct',
+        arguments: { asset_ids: ['done_1', 'done_2'] }
+      });
+      assert.equal(res.isError, undefined);
+      assert.equal(res.structuredContent.success, true);
+      assert.equal(res.structuredContent.batch_id, null);
+      assert.equal(res.structuredContent.enqueued_count, 0);
+      assert.deepEqual(res.structuredContent.enqueued_ids, []);
+      assert.deepEqual(res.structuredContent.skipped, [
+        { id: 'done_1', status: 'deconstructed' },
+        { id: 'done_2', status: 'deconstructed' }
+      ]);
+      assert.equal(calls.some(c => c.path === '/api/v2/deconstruct/process'), false);
+    } finally {
+      await close();
+    }
+  }
+
+  // Case 4: 404 ID -> added to not_found, other eligible IDs still processed
+  {
+    const { client, calls, close } = await setupTestMcpClient(async (path) => {
+      if (path === '/api/v2/deconstruct/assets/missing_id') {
+        return { success: false, status: 404, error: 'Aset tidak ditemukan' };
+      }
+      if (path.startsWith('/api/v2/deconstruct/assets/')) {
+        return { success: true, asset: { id: 'valid_id', status: 'saved' } };
+      }
+      if (path === '/api/v2/deconstruct/scheduler-control') {
+        return { success: true, isSchedulerActive: true };
+      }
+      if (path === '/api/v2/deconstruct/process') {
+        return { success: true, batch_id: 'batch_partial_404' };
+      }
+      return { success: true };
+    });
+    try {
+      const res = await client.callTool({
+        name: 'cf_start_deconstruct',
+        arguments: { asset_ids: ['missing_id', 'valid_id'] }
+      });
+      assert.equal(res.structuredContent.batch_id, 'batch_partial_404');
+      assert.equal(res.structuredContent.enqueued_count, 1);
+      assert.deepEqual(res.structuredContent.enqueued_ids, ['valid_id']);
+      assert.deepEqual(res.structuredContent.not_found, ['missing_id']);
+      const processCalls = calls.filter(c => c.path === '/api/v2/deconstruct/process');
+      assert.equal(processCalls.length, 1);
+      assert.deepEqual(processCalls[0].opts.body.asset_ids, ['valid_id']);
+    } finally {
+      await close();
+    }
+  }
+
+  // Case 5: 401/500 error while reading asset -> tool stops and returns error, process NOT called
+  for (const statusCode of [401, 500]) {
+    const { client, calls, close } = await setupTestMcpClient(async (path) => {
+      if (path.startsWith('/api/v2/deconstruct/assets/')) {
+        return { success: false, status: statusCode, error: `HTTP ${statusCode} failure` };
+      }
+      return { success: true };
+    });
+    try {
+      const res = await client.callTool({
+        name: 'cf_start_deconstruct',
+        arguments: { asset_ids: ['dec_1', 'dec_2'] }
+      });
+      assert.equal(res.isError, true);
+      assert.equal(res.structuredContent.success, false);
+      assert.equal(res.structuredContent.status, statusCode);
+      assert.equal(calls.length, 1);
+      assert.equal(calls.some(c => c.path === '/api/v2/deconstruct/process'), false);
+    } finally {
+      await close();
+    }
+  }
+
+  // Case 6: isSchedulerActive: false -> warnings populated, process still runs
+  {
+    const { client, calls, close } = await setupTestMcpClient(async (path) => {
+      if (path.startsWith('/api/v2/deconstruct/assets/')) {
+        return { success: true, asset: { id: 'dec_1', status: 'saved' } };
+      }
+      if (path === '/api/v2/deconstruct/scheduler-control') {
+        return { success: true, isSchedulerActive: false };
+      }
+      if (path === '/api/v2/deconstruct/process') {
+        return { success: true, batch_id: 'batch_sched_off' };
+      }
+      return { success: true };
+    });
+    try {
+      const res = await client.callTool({
+        name: 'cf_start_deconstruct',
+        arguments: { asset_ids: ['dec_1'] }
+      });
+      assert.equal(res.structuredContent.batch_id, 'batch_sched_off');
+      assert.equal(res.structuredContent.warnings.length, 1);
+      assert.match(res.structuredContent.warnings[0], /inactive/i);
+      assert.equal(calls.some(c => c.path === '/api/v2/deconstruct/process'), true);
+    } finally {
+      await close();
+    }
+  }
+
+  // Case 7: Duplicate IDs in input are checked and sent only once
+  {
+    const { client, calls, close } = await setupTestMcpClient(async (path) => {
+      if (path.startsWith('/api/v2/deconstruct/assets/')) {
+        return { success: true, asset: { id: 'dup_1', status: 'saved' } };
+      }
+      if (path === '/api/v2/deconstruct/scheduler-control') {
+        return { success: true, isSchedulerActive: true };
+      }
+      if (path === '/api/v2/deconstruct/process') {
+        return { success: true, batch_id: 'batch_dedup' };
+      }
+      return { success: true };
+    });
+    try {
+      const res = await client.callTool({
+        name: 'cf_start_deconstruct',
+        arguments: { asset_ids: ['dup_1', 'dup_1', 'dup_1'] }
+      });
+      assert.equal(res.structuredContent.enqueued_count, 1);
+      assert.deepEqual(res.structuredContent.enqueued_ids, ['dup_1']);
+      const assetGets = calls.filter(c => c.path.startsWith('/api/v2/deconstruct/assets/'));
+      assert.equal(assetGets.length, 1);
+      const processCall = calls.find(c => c.path === '/api/v2/deconstruct/process');
+      assert.deepEqual(processCall.opts.body.asset_ids, ['dup_1']);
+    } finally {
+      await close();
+    }
+  }
+
+  // Case 8 & 9: Schema rejects empty list, >50 IDs, blank ID; registered with readOnlyHint: false
+  {
+    const { client, calls, close } = await setupTestMcpClient(async () => ({ success: true }));
+    try {
+      const { tools } = await client.listTools();
+      const tool = tools.find(t => t.name === 'cf_start_deconstruct');
+      assert.ok(tool, 'cf_start_deconstruct must be registered');
+      assert.equal(tool.annotations?.readOnlyHint, false);
+
+      const emptyRes = await client.callTool({
+        name: 'cf_start_deconstruct',
+        arguments: { asset_ids: [] }
+      });
+      assert.equal(emptyRes.isError, true);
+
+      const tooManyRes = await client.callTool({
+        name: 'cf_start_deconstruct',
+        arguments: { asset_ids: Array.from({ length: 51 }, (_, i) => `id_${i}`) }
+      });
+      assert.equal(tooManyRes.isError, true);
+
+      const blankIdRes = await client.callTool({
+        name: 'cf_start_deconstruct',
+        arguments: { asset_ids: ['   '] }
+      });
+      assert.equal(blankIdRes.isError, true);
+
+      assert.equal(calls.length, 0);
+    } finally {
+      await close();
+    }
+  }
+
+  // Case 10: process fails (success: false) -> error propagated, not hidden
+  {
+    const { client, close } = await setupTestMcpClient(async (path) => {
+      if (path.startsWith('/api/v2/deconstruct/assets/')) {
+        return { success: true, asset: { id: 'dec_1', status: 'saved' } };
+      }
+      if (path === '/api/v2/deconstruct/scheduler-control') {
+        return { success: true, isSchedulerActive: true };
+      }
+      if (path === '/api/v2/deconstruct/process') {
+        return { success: false, status: 500, error: 'Database queue error' };
+      }
+      return { success: true };
+    });
+    try {
+      const res = await client.callTool({
+        name: 'cf_start_deconstruct',
+        arguments: { asset_ids: ['dec_1'] }
+      });
+      assert.equal(res.isError, true);
+      assert.equal(res.structuredContent.success, false);
+      assert.equal(res.structuredContent.error, 'Database queue error');
+    } finally {
+      await close();
+    }
+  }
+});

@@ -2217,6 +2217,68 @@ export function createCfStudioServer(rawRequest) {
   );
 
   register(
+    'cf_start_deconstruct',
+    'Start AI deconstruction (download, Gemini video analysis, blueprint extraction) for videos already registered with cf_ingest_viral_video (status "saved" or "failed"). Uses Gemini quota. Max 50 assets per call; already-processed or in-progress assets are skipped. Returns batch_id; track it with cf_get_deconstruct_status.',
+    {
+      asset_ids: z.array(z.string().trim().min(1).max(128)).min(1).max(50)
+    },
+    false,
+    async ({ asset_ids }) => {
+      const ids = [...new Set(asset_ids)];
+      const eligible = [];
+      const skipped = [];
+      const notFound = [];
+
+      for (const id of ids) {
+        const res = await request(`/api/v2/deconstruct/assets/${encodeURIComponent(id)}`);
+        if (res?.success === false) {
+          if (res.status === 404) {
+            notFound.push(id);
+            continue;
+          }
+          return res;
+        }
+        const status = res?.asset?.status || 'unknown';
+        if (status === 'saved' || status === 'failed') eligible.push(id);
+        else skipped.push({ id, status });
+      }
+
+      const warnings = [];
+      const scheduler = await request('/api/v2/deconstruct/scheduler-control');
+      if (scheduler?.success !== false && scheduler?.isSchedulerActive === false) {
+        warnings.push('Deconstruct scheduler is inactive; queued assets will not be processed until it is re-enabled.');
+      }
+
+      if (eligible.length === 0) {
+        return {
+          success: true,
+          batch_id: null,
+          enqueued_count: 0,
+          enqueued_ids: [],
+          skipped,
+          not_found: notFound,
+          warnings,
+          message: 'No asset has status "saved" or "failed"; nothing was queued.'
+        };
+      }
+
+      const started = await request('/api/v2/deconstruct/process', { body: { asset_ids: eligible } });
+      if (started?.success === false) return started;
+
+      return {
+        success: true,
+        batch_id: started.batch_id,
+        enqueued_count: eligible.length,
+        enqueued_ids: eligible,
+        skipped,
+        not_found: notFound,
+        warnings,
+        next_step: 'Track progress with cf_get_deconstruct_status using batch_id.'
+      };
+    }
+  );
+
+  register(
     'cf_list_multiplier_tasks',
     'List Multiplier Lab production tasks (optionally filtered by batch_id) along with video task status and ContentFlow sync state.',
     {
