@@ -27,6 +27,7 @@ export default function ProductDatabaseModal({
     product_name: product?.product_name || product?.name || '',
     product_description: product?.product_description || product?.description || '',
     category: product?.category || '',
+    promo_role: product?.promo_role || '',
     tags: Array.isArray(product?.tags) ? product.tags.join(', ') : (product?.tags || ''),
     affiliate_link: product?.affiliate_link || product?.affiliate_url || '',
     source_url: product?.source_url || '',
@@ -81,6 +82,7 @@ export default function ProductDatabaseModal({
           product_name: p.product_name || '',
           product_description: p.product_description || p.raw_description || '',
           category: p.category || '',
+          promo_role: p.promo_role || '',
           tags: Array.isArray(p.tags) ? p.tags.join(', ') : (p.tags || ''),
           affiliate_link: p.affiliate_link || '',
           source_url: p.source_url || '',
@@ -197,6 +199,7 @@ export default function ProductDatabaseModal({
         product_description: formData.product_description.trim(),
         raw_description: formData.product_description.trim(),
         category: formData.category.trim() || null,
+        promo_role: formData.promo_role || null,
         tags: formData.tags.trim() || null,
         affiliate_link: formData.affiliate_link.trim() || null,
         source_url: formData.source_url.trim() || null,
@@ -568,15 +571,41 @@ export default function ProductDatabaseModal({
                         style={{
                           width: '100%',
                           padding: '10px 12px',
-                          borderRadius: 'var(--radius-sm, 8px)',
-                          border: '1px solid var(--border-subtle, #26354a)',
-                          background: 'var(--input-bg, #0c1422)',
-                          color: 'var(--text-primary, #f4f7fb)',
+                          borderRadius: 'var(--radius-sm)',
+                          border: '1px solid var(--border-subtle)',
+                          background: 'var(--input-bg)',
+                          color: 'var(--text-primary)',
                           fontSize: '13px',
                           outline: 'none'
                         }}
                       />
                     </div>
+                  </div>
+
+                  {/* Peran Promosi (Smart Matcher) */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-secondary)' }}>
+                      Peran Promosi (Smart Matcher)
+                    </label>
+                    <select
+                      value={formData.promo_role}
+                      onChange={e => setFormData({ ...formData, promo_role: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        borderRadius: 'var(--radius-sm)',
+                        border: '1px solid var(--border-subtle)',
+                        background: 'var(--input-bg)',
+                        color: 'var(--text-primary)',
+                        fontSize: '13px',
+                        outline: 'none'
+                      }}
+                    >
+                      <option value="">Auto-Deteksi dari Kategori &amp; Nama</option>
+                      <option value="alat_dapur">Alat Dapur &amp; Masak (alat_dapur)</option>
+                      <option value="bahan_resep">Bahan Resep &amp; Herbal (bahan_resep)</option>
+                      <option value="lainnya">Lainnya / Non-Kuliner (lainnya)</option>
+                    </select>
                   </div>
 
                   {/* Tags & Default Fallback Link */}

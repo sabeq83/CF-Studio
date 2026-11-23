@@ -133,6 +133,7 @@ export default function ProductDatabasePage() {
 
   // Photo Review & Replace Modals (Revisi 01)
   const [photoStatusFilter, setPhotoStatusFilter] = useState('all');
+  const [promoRoleFilter, setPromoRoleFilter] = useState('all');
   const [reviewModalProduct, setReviewModalProduct] = useState(null);
   const [reviewLeftTab, setReviewLeftTab] = useState('previous'); // 'previous' | 'raw'
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
@@ -145,14 +146,18 @@ export default function ProductDatabasePage() {
   const [isSubmittingReplace, setIsSubmittingReplace] = useState(false);
 
   // Fetch products and active queue status
-  async function fetchProducts(overrideAffiliateStatus = null, overrideBrandId = null, overridePhotoStatus = null) {
+  async function fetchProducts(overrideAffiliateStatus = null, overrideBrandId = null, overridePhotoStatus = null, overridePromoRole = null) {
     try {
       const effStatus = overrideAffiliateStatus !== null ? overrideAffiliateStatus : affiliateStatus;
       const effBrand = overrideBrandId !== null ? overrideBrandId : selectedBrandId;
       const effPhoto = overridePhotoStatus !== null ? overridePhotoStatus : photoStatusFilter;
+      const effRole = overridePromoRole !== null ? overridePromoRole : promoRoleFilter;
       let url = `/api/v2/products?search=${encodeURIComponent(search)}&category=${encodeURIComponent(selectedCategory)}&affiliate_status=${encodeURIComponent(effStatus)}&brand_id=${encodeURIComponent(effBrand)}`;
       if (effPhoto && effPhoto !== 'all') {
         url += `&photo_status=${encodeURIComponent(effPhoto)}`;
+      }
+      if (effRole && effRole !== 'all') {
+        url += `&promo_role=${encodeURIComponent(effRole)}`;
       }
       const res = await fetch(url);
       const data = await res.json();
@@ -179,7 +184,7 @@ export default function ProductDatabasePage() {
 
   useEffect(() => {
     fetchProducts();
-  }, [selectedCategory, affiliateStatus, selectedBrandId, photoStatusFilter]);
+  }, [selectedCategory, affiliateStatus, selectedBrandId, photoStatusFilter, promoRoleFilter]);
 
   async function handleApprovePhoto(product) {
     if (!product) return;
@@ -1226,7 +1231,7 @@ export default function ProductDatabasePage() {
               <span>📸 Perlu Ditinjau</span>
               <span style={{
                 background: photoStatusFilter === 'needs_review' ? 'var(--status-warning)' : 'var(--surface-interactive)',
-                color: photoStatusFilter === 'needs_review' ? '#000' : 'var(--text-primary)',
+                color: photoStatusFilter === 'needs_review' ? 'var(--on-action-primary)' : 'var(--text-primary)',
                 padding: '2px 7px',
                 borderRadius: '999px',
                 fontSize: '11px',
@@ -1235,6 +1240,32 @@ export default function ProductDatabasePage() {
                 {affiliateCounts.needs_review || 0}
               </span>
             </div>
+
+            {[
+              { key: 'alat_dapur', label: 'Alat Dapur' },
+              { key: 'bahan_resep', label: 'Bahan Resep' }
+            ].map(roleOpt => {
+              const active = promoRoleFilter === roleOpt.key;
+              return (
+                <button
+                  key={roleOpt.key}
+                  type="button"
+                  onClick={() => setPromoRoleFilter(active ? 'all' : roleOpt.key)}
+                  style={{
+                    background: active ? 'var(--status-info-soft)' : 'var(--surface)',
+                    border: `1px solid ${active ? 'var(--status-info)' : 'var(--border-subtle)'}`,
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '8px 14px',
+                    fontSize: '12.5px',
+                    fontWeight: active ? 700 : 500,
+                    cursor: 'pointer',
+                    color: active ? 'var(--status-info)' : 'var(--text-primary)'
+                  }}
+                >
+                  {roleOpt.label}
+                </button>
+              );
+            })}
           </div>
 
           {/* Filters & Search Bar */}
@@ -1702,6 +1733,21 @@ export default function ProductDatabasePage() {
                                 whiteSpace: 'nowrap'
                               }}>
                                 📦 Murni Non-Afiliasi
+                              </span>
+                            )}
+
+                            {p.promo_role && (
+                              <span style={{
+                                fontSize: '10.5px',
+                                fontWeight: 700,
+                                color: p.promo_role === 'alat_dapur' ? 'var(--status-info)' : (p.promo_role === 'bahan_resep' ? 'var(--status-success)' : 'var(--text-secondary)'),
+                                background: p.promo_role === 'alat_dapur' ? 'var(--status-info-soft)' : (p.promo_role === 'bahan_resep' ? 'var(--status-success-soft)' : 'var(--surface-interactive)'),
+                                padding: '2px 7px',
+                                borderRadius: 'var(--radius-xs)',
+                                border: '1px solid var(--border-subtle)',
+                                whiteSpace: 'nowrap'
+                              }}>
+                                {p.promo_role === 'alat_dapur' ? 'Alat Dapur' : (p.promo_role === 'bahan_resep' ? 'Bahan Resep' : 'Lainnya')}
                               </span>
                             )}
 
