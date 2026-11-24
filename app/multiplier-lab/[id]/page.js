@@ -9,6 +9,12 @@ import { GEMINI_VOICES, MINIMAX_VOICES, MINIMAX_ENGLISH_VOICES } from '@/lib/voi
 import { resolveBridgePlan, readBridgeInputs } from '@/lib/bridging/bridge-plan';
 import { getMultiplierWaitingBadge } from '@/lib/vo-status-ui';
 import { extractSceneVoText } from '@/lib/tts-text-sanitizer';
+import {
+  getMultiplierAudioEngineMode,
+  getMultiplierResumeInfo,
+  isMultiplierTtsOptional,
+  resolveMultiplierFailedStage
+} from '@/lib/multiplier-resume';
 
 function safeJsonParse(raw, fallback) {
   if (raw === null || raw === undefined || raw === '') return fallback;
@@ -555,13 +561,17 @@ function CampaignDetailPageContent() {
     }
   };
 
-  const handleRetryTask = async (taskId) => {
+  const handleRetryTask = async (taskId, mode = 'smart_resume') => {
+    if (mode === 'restart_all') {
+      const confirmed = confirm('Ulangi baris ini dari awal (resolving, Gemini storyboard, start frame T2I, dan video G-Labs)? Aset yang sudah jadi pada tahap awal akan dibuat ulang.');
+      if (!confirmed) return;
+    }
     setRetryingTask(prev => ({ ...prev, [taskId]: true }));
     try {
       const res = await fetch('/api/v2/multiplier', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'retry_task', taskId })
+        body: JSON.stringify({ action: 'retry_task', taskId, mode })
       });
       const data = await res.json();
       if (data.success) {
@@ -600,6 +610,9 @@ function CampaignDetailPageContent() {
 
   const getStageStatus = (task, stageName) => {
     const taskStatus = task.status;
+    const audioCfg = safeJsonParse(task.audio_config_json, {});
+    const vsoCfg = safeJsonParse(task.vso_config_json, {});
+    const ttsOptional = isMultiplierTtsOptional(audioCfg, vsoCfg);
     let activeStage = 'resolving';
 
     if (taskStatus === 'pending_resolution' || taskStatus === 'resolving_product') {
@@ -616,49 +629,26 @@ function CampaignDetailPageContent() {
       activeStage = 'visuals';
     } else if (taskStatus === 'ffmpeg_muxing') {
       activeStage = 'ffmpeg';
+    } else if (taskStatus === 'uploading_assets') {
+      activeStage = 'cloud';
     } else if (taskStatus === 'completed') {
       activeStage = 'completed';
     } else if (taskStatus === 'failed') {
-      if (!task.remake_storyboard_json || task.remake_storyboard_json === '[]') {
-        activeStage = 'remaking_failed';
-      } else {
-        let hasT2i = false;
-        try {
-          const t2iImgs = JSON.parse(task.t2i_images_json || '[]');
-          hasT2i = Array.isArray(t2iImgs) && t2iImgs.length > 0 && t2iImgs.some(img => img !== null);
-        } catch (_) {}
-
-        if (!hasT2i) {
-          activeStage = 't2i_failed';
-        } else {
-          let hasAudio = false;
-          try {
-            const audioConfig = JSON.parse(task.audio_config_json || '{}');
-            hasAudio = !!audioConfig.combined_audio_path;
-          } catch (_) {}
-
-          if (!hasAudio) {
-            activeStage = 'tts_failed';
-          } else if (!task.video_paths_json || task.video_paths_json === '[]') {
-            activeStage = 'visuals_failed';
-          } else if (!task.ffmpeg_output_path) {
-            activeStage = 'ffmpeg_failed';
-          } else {
-            activeStage = 'cloud_failed';
-          }
-        }
-      }
+      activeStage = `${resolveMultiplierFailedStage(task, task.artifacts)}_failed`;
     }
 
     const stages = ['resolving', 'remaking', 't2i', 'tts', 'visuals', 'ffmpeg', 'cloud'];
     const targetIdx = stages.indexOf(stageName);
 
-    if (activeStage === 'completed') return 'success';
+    if (activeStage === 'completed') {
+      return stageName === 'tts' && ttsOptional ? 'skipped' : 'success';
+    }
 
     if (activeStage.endsWith('_failed')) {
       const failedStage = activeStage.replace('_failed', '');
       const failedIdx = stages.indexOf(failedStage);
       if (targetIdx === failedIdx) return 'danger';
+      if (stageName === 'tts' && ttsOptional && failedIdx > 3) return 'skipped';
       if (targetIdx < failedIdx) return 'success';
       return 'pending';
     }
@@ -669,12 +659,14 @@ function CampaignDetailPageContent() {
     }
 
     const currentIdx = stages.indexOf(activeStage);
+    if (stageName === 'tts' && ttsOptional && currentIdx > 3) return 'skipped';
     if (targetIdx === currentIdx) return 'active';
     if (targetIdx < currentIdx) return 'success';
     return 'pending';
   };
 
   const renderPipelineStatus = (task) => {
+    const audioEngineMode = getMultiplierAudioEngineMode(task);
     const stages = [
       { label: 'Resolving', name: 'resolving' },
       { label: 'Storyboard', name: 'remaking' },
@@ -699,10 +691,17 @@ function CampaignDetailPageContent() {
             bg = 'var(--status-success-soft)';
             border = '1px solid var(--status-success-soft)';
             labelText = `✓ ${stage.label}`;
+          } else if (status === 'skipped') {
+            color = 'var(--text-muted)';
+            bg = 'var(--surface-interactive)';
+            border = '1px dashed var(--border-subtle)';
+            labelText = stage.name === 'tts' && audioEngineMode === 'no_vo'
+              ? '🔇 Tanpa VO (Skipped)'
+              : '⚡ Native Veo (Skipped)';
           } else if (status === 'danger') {
             color = 'var(--text-primary)';
             bg = 'var(--status-danger-soft)';
-            border = '1px solid var(--status-danger-soft)';
+            border = '1px solid var(--status-danger)';
             labelText = `✗ ${stage.label} (Gagal)`;
           } else if (status === 'active') {
             color = 'var(--text-primary)';
@@ -716,13 +715,13 @@ function CampaignDetailPageContent() {
               <span style={{ fontSize: '0.72rem', fontWeight: 600, padding: '4px 10px', borderRadius: 6, background: bg, color, border }}>
                 {labelText}
               </span>
-              {(status === 'success' || status === 'danger') && (
+              {(status === 'success' || status === 'danger' || status === 'skipped') && (
                 <button
                   type="button"
                   onClick={() => handleTriggerRetry(task.id, stage.name)}
                   style={{
-                    background: status === 'danger' ? 'var(--danger)' : 'var(--surface-interactive)',
-                    color: status === 'danger' ? 'var(--text-primary)' : 'var(--text-muted)',
+                    background: status === 'danger' ? 'var(--status-danger)' : 'var(--surface-interactive)',
+                    color: status === 'danger' ? 'var(--on-action-primary)' : 'var(--text-muted)',
                     border: status === 'danger' ? 'none' : '1px solid var(--border-subtle)',
                     borderRadius: 4,
                     padding: '2px 8px',
@@ -1167,26 +1166,30 @@ function CampaignDetailPageContent() {
                       </td>
                       <td style={{ padding: '14px 16px', textAlign: 'right' }}>
                         <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', alignItems: 'center' }}>
-                          {task.status === 'failed' && (
-                            <button
-                              type="button"
-                              className="btn btn-sm"
-                              disabled={retryingTask[task.id]}
-                              onClick={() => handleRetryTask(task.id)}
-                              style={{
-                                background: 'var(--status-warning-soft)',
-                                color: 'var(--status-warning)',
-                                border: '1px solid rgba(245, 158, 11, 0.3)',
-                                padding: '4px 8px',
-                                fontSize: '0.75rem',
-                                fontWeight: 600,
-                                borderRadius: 4,
-                                cursor: 'pointer'
-                              }}
-                            >
-                              {retryingTask[task.id] ? '⏳...' : '🔄 Retry Baris'}
-                            </button>
-                          )}
+                          {task.status === 'failed' && (() => {
+                            const resumeInfo = getMultiplierResumeInfo(task, task.artifacts);
+                            return (
+                              <button
+                                type="button"
+                                className="btn btn-sm"
+                                disabled={retryingTask[task.id]}
+                                onClick={() => handleRetryTask(task.id, 'smart_resume')}
+                                title={`Lanjutkan langsung dari tahap ${resumeInfo.label}`}
+                                style={{
+                                  background: 'var(--status-warning-soft)',
+                                  color: 'var(--status-warning)',
+                                  border: '1px solid var(--status-warning)',
+                                  padding: '4px 8px',
+                                  fontSize: '0.75rem',
+                                  fontWeight: 600,
+                                  borderRadius: 4,
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                {retryingTask[task.id] ? '⏳...' : `▶️ Lanjutkan (${resumeInfo.shortLabel})`}
+                              </button>
+                            );
+                          })()}
                           <button
                             type="button"
                             className="btn btn-secondary btn-sm"
@@ -1205,11 +1208,67 @@ function CampaignDetailPageContent() {
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                             
                             {/* Pipeline status */}
-                            <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: 8, padding: '16px 20px' }}>
-                              <div style={{ fontWeight: 700, fontSize: '0.78rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
-                                ⚙️ Pipeline Rendering Status
+                            <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border-subtle)', borderRadius: 8, padding: '16px 20px' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                                <div style={{ fontWeight: 700, fontSize: '0.78rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
+                                  ⚙️ Pipeline Rendering Status
+                                </div>
+                                {task.status === 'failed' && (() => {
+                                  const resumeInfo = getMultiplierResumeInfo(task, task.artifacts);
+                                  return (
+                                    <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                                      <button
+                                        type="button"
+                                        disabled={retryingTask[task.id]}
+                                        onClick={() => handleRetryTask(task.id, 'smart_resume')}
+                                        style={{
+                                          background: 'var(--status-warning-soft)',
+                                          color: 'var(--status-warning)',
+                                          border: '1px solid var(--status-warning)',
+                                          borderRadius: 6,
+                                          padding: '4px 10px',
+                                          fontSize: '0.72rem',
+                                          fontWeight: 700,
+                                          cursor: 'pointer'
+                                        }}
+                                      >
+                                        {retryingTask[task.id] ? '⏳...' : `▶️ Lanjutkan (${resumeInfo.label})`}
+                                      </button>
+                                      <button
+                                        type="button"
+                                        disabled={retryingTask[task.id]}
+                                        onClick={() => handleRetryTask(task.id, 'restart_all')}
+                                        style={{
+                                          background: 'var(--surface)',
+                                          color: 'var(--text-muted)',
+                                          border: '1px solid var(--border-subtle)',
+                                          borderRadius: 6,
+                                          padding: '4px 10px',
+                                          fontSize: '0.72rem',
+                                          fontWeight: 600,
+                                          cursor: 'pointer'
+                                        }}
+                                      >
+                                        🔁 Ulang dari Awal
+                                      </button>
+                                    </div>
+                                  );
+                                })()}
                               </div>
                               {renderPipelineStatus(task)}
+                              {task.status === 'failed' && task.error_message && (
+                                <div style={{
+                                  marginTop: 10,
+                                  padding: '8px 12px',
+                                  borderRadius: 6,
+                                  background: 'var(--status-danger-soft)',
+                                  border: '1px solid var(--status-danger)',
+                                  color: 'var(--text-primary)',
+                                  fontSize: '0.75rem'
+                                }}>
+                                  <strong>Error:</strong> {task.error_message}
+                                </div>
+                              )}
                             </div>
 
                             {task.status === 'waiting_approval' && task.error_message && (() => {

@@ -5,6 +5,7 @@ import path from 'path';
 import { 
   getMultiplierTasks, 
   getMultiplierTasksByBatchId,
+  getMultiplierTaskById,
   createMultiplierTask,
   getSetting,
   setSetting,
@@ -12,6 +13,7 @@ import {
 } from '@/lib/db';
 import { generateCampaignId } from '@/lib/id-generator';
 import { normalizeBridgePayload } from '@/lib/bridging/bridge-plan';
+import { inspectMultiplierTaskArtifacts } from '@/lib/multiplier-artifacts';
 
 function applyNormalizedBridgingConfig(bridgingConfig, vsoConfig) {
   const defaultActive = bridgingConfig?.campaign_type !== 'pure_storytelling' && bridgingConfig?.is_bridging_active !== false;
@@ -94,6 +96,7 @@ export const GET = withTenantContext(async (request) => {
       task.content_flow_item_id = matchedCf ? matchedCf.id : null;
       task.content_flow_video_id = matchedCf ? matchedCf.video_id : null;
       task.product_ref = task.target_product_id ? (productMap[task.target_product_id] || null) : null;
+      task.artifacts = inspectMultiplierTaskArtifacts(task, glabsTasks);
     }
     const isSchedulerActive = await getSetting('multiplier_scheduler_active') !== 'false';
     return NextResponse.json({ success: true, tasks, isSchedulerActive });
@@ -130,14 +133,45 @@ export const PATCH = withTenantContext(async (request) => {
       if (!targetTaskId) {
         return NextResponse.json({ success: false, error: 'taskId wajib disertakan untuk aksi retry_task' }, { status: 400 });
       }
+
+      const task = await getMultiplierTaskById(targetTaskId);
+      if (!task) {
+        return NextResponse.json({ success: false, error: 'Task tidak ditemukan' }, { status: 404 });
+      }
+      if (task.status !== 'failed') {
+        return NextResponse.json({
+          success: false,
+          error: `Task ${targetTaskId} berstatus '${task.status}', hanya task 'failed' yang bisa di-retry.`
+        }, { status: 409 });
+      }
+
+      const mode = body.mode === 'restart_all' ? 'restart_all' : 'smart_resume';
+      let nextStatus = 'pending_resolution';
+      let resumedLabel = 'Dari Awal';
+      let artifacts = null;
+
+      if (mode === 'smart_resume') {
+        const glabsTasks = await dbAll('SELECT task_id, status, video_url FROM glabs_tasks WHERE campaign_id = ? ORDER BY item_id ASC', [targetTaskId]);
+        artifacts = inspectMultiplierTaskArtifacts(task, glabsTasks);
+        nextStatus = artifacts.recommended_resume_stage || 'pending_resolution';
+        resumedLabel = artifacts.recommended_resume_label || nextStatus;
+      }
+
       const result = await dbRun(`
-        UPDATE re_multiplier_tasks 
-        SET status = 'pending_resolution', error_message = NULL 
+        UPDATE re_multiplier_tasks
+        SET status = ?, error_message = NULL, failed_stage = NULL
         WHERE id = ? AND status = 'failed'
-      `, [targetTaskId]);
-      return NextResponse.json({ 
-        success: true, 
-        message: `Task ${targetTaskId} berhasil dimasukkan kembali ke antrean pemrosesan.`,
+      `, [nextStatus, targetTaskId]);
+
+      return NextResponse.json({
+        success: true,
+        resumed_stage: nextStatus,
+        resumed_label: resumedLabel,
+        mode,
+        artifacts,
+        message: mode === 'restart_all'
+          ? `Task ${targetTaskId} diulang dari awal (pending_resolution).`
+          : `Task ${targetTaskId} dilanjutkan langsung dari tahap ${resumedLabel} (${nextStatus}).`,
         affected: result.changes || result.rowCount || 0
       });
     }

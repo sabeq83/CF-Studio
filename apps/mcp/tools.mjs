@@ -2351,12 +2351,16 @@ export function createCfStudioServer(rawRequest) {
 
   register(
     'cf_retry_multiplier_task',
-    'Retry a failed Multiplier Lab task back into pending_resolution queue.',
+    'Retry a failed Multiplier Lab task. By default smart-resumes from the latest completed stage (e.g. ffmpeg_muxing when clips already exist); pass mode="restart_all" to restart from pending_resolution.',
     {
-      task_id: z.string().trim().min(1).max(128)
+      task_id: z.string().trim().min(1).max(128),
+      mode: z.enum(['smart_resume', 'restart_all']).optional()
     },
     false,
-    ({ task_id }) => request('/api/v2/multiplier', { method: 'PATCH', body: { action: 'retry_task', taskId: task_id } })
+    ({ task_id, mode }) => request('/api/v2/multiplier', {
+      method: 'PATCH',
+      body: { action: 'retry_task', taskId: task_id, ...(mode ? { mode } : {}) }
+    })
   );
 
   register(
