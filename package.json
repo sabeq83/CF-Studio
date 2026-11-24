@@ -23,6 +23,7 @@
     "setup:node2-wsl": "ssh -p 2222 vibe-server 'wsl -- bash -lc \"cd ~ && bash <(cat) && echo DONE\"' < scripts/setup-node2-wsl.sh",
     "build": "next build --webpack",
     "start": "next start",
+    "mockup:serve": "node scripts/serve-mockups.mjs",
     "staging:setup": "node scripts/local-staging/setup.js",
     "staging:build": "node scripts/local-staging/run.js build",
     "staging:start": "node scripts/local-staging/run.js start",
