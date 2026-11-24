@@ -9,6 +9,7 @@ import {
   resolveCampaignProductReference
 } from '../lib/product-reference-resolver.js';
 import { resolveCampaignProductPhotoMeta } from '../lib/product-photo-policy.js';
+import { resolveBridgePlan, readBridgeInputs } from '../lib/bridging/bridge-plan.js';
 import {
   buildProductSnapshot,
   buildAutonomousBridgingConfig
@@ -189,4 +190,22 @@ test('P3: resolveCampaignProductPhotoMeta returns accurate source labels and pat
   const fallbackMeta = resolveCampaignProductPhotoMeta(null, ['/uploads/products/snap.jpg']);
   assert.equal(fallbackMeta.path, '/uploads/products/snap.jpg');
   assert.equal(fallbackMeta.sourceField, 'fallback');
+});
+
+test('Multiplier Detail uses valid resolveBridgePlan.zoneOf API instead of nonexistent getClipRole', () => {
+  const detailSource = fs.readFileSync(path.join(process.cwd(), 'app/multiplier-lab/[id]/page.js'), 'utf8');
+  assert.equal(/\.getClipRole\s*\(/.test(detailSource), false, 'app/multiplier-lab/[id]/page.js must not call getClipRole');
+  assert.match(detailSource, /sfBridgePlan\.zoneOf\(/);
+
+  const plan = resolveBridgePlan(readBridgeInputs({
+    is_bridging_active: true,
+    bridge_segments: [
+      { at_clip: 4, duration_clips: 1, role: 'intro' },
+      { at_clip: 6, duration_clips: 1, role: 'recall' }
+    ]
+  }, { target_clips_count: 6 }, { defaultActive: true }));
+
+  assert.equal(plan.zoneOf(4), 'intro');
+  assert.equal(plan.zoneOf(6), 'recall');
+  assert.equal(plan.zoneOf(1), 'pre');
 });
