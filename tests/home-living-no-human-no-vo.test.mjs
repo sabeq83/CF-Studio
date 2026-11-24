@@ -24,7 +24,10 @@ import {
 } from '../lib/start-frame-visual-qc.js';
 import { compileVeoAmbientOnlyPrompt } from '../lib/veo-native-audio.js';
 import { normalizeAudioConfig } from '../lib/multiplier-audio-config.js';
-import { getSystemVisualIdentity } from '../lib/visual-identity-system-presets.js';
+import {
+  getSystemVisualIdentity,
+  listSystemVisualIdentities,
+} from '../lib/visual-identity-system-presets.js';
 import {
   getOperatorPresetConfig,
   buildPresetHydratedGlobalFields
@@ -271,6 +274,18 @@ test('Pipeline workers, scheduler, processor, and MCP schemas wire No-VO without
   assert.ok(dbPgSrc.includes('ADD COLUMN IF NOT EXISTS audio_engine_mode'));
   assert.ok(dbPgSrc.includes('ADD COLUMN IF NOT EXISTS no_vo_audio_bed'));
   assert.ok(dbPgSrc.includes('ADD COLUMN IF NOT EXISTS on_screen_text_mode'));
+
+  const homeInterior = getSystemVisualIdentity('home_living_serene_interior');
+  assert.equal(homeInterior.label, 'Home & Living — Serene Interior (Zero-Human)');
+  assert.equal(homeInterior.version, 1);
+  const homeStillLife = getSystemVisualIdentity('home_living_product_still_life');
+  assert.equal(homeStillLife.label, 'Home & Living — Product Still Life (Zero-Human)');
+  assert.equal(homeStillLife.version, 1);
+
+  for (const sysVi of listSystemVisualIdentities()) {
+    assert.ok(typeof sysVi.label === 'string' && sysVi.label.trim().length > 0, `System VI ${sysVi.key} missing label`);
+    assert.ok(Number(sysVi.version) >= 1, `System VI ${sysVi.key} missing version`);
+  }
 
   const mcpSrc = fs.readFileSync(path.join(ROOT, 'apps/mcp/tools.mjs'), 'utf8');
   assert.ok(mcpSrc.includes('AUDIO_ENGINE_MODE_VALUES'));

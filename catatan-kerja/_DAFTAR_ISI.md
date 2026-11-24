@@ -6,6 +6,7 @@ Terakhir diperbarui: 24 November 2026
 
 | Nama File | Ringkasan / Judul |
 |---|---|
+| [USULAN_PERBAIKAN_NAMA_2_VI_HOME_LIVING.md](usulan/USULAN_PERBAIKAN_NAMA_2_VI_HOME_LIVING.md) | Analisa penyebab 2 VI sistem Home & Living baru muncul tanpa nama di Dev (`name` vs `label`) serta usulan penamaan & fallback |
 | [USULAN_AUDIT_RETRY_VIDEO_MULTIPLIER_RESUME_STAGE.md](usulan/USULAN_AUDIT_RETRY_VIDEO_MULTIPLIER_RESUME_STAGE.md) | Audit total jalur Retry video Multiplier (`re_multiplier_tasks` & UI/API/MCP) dan usulan Smart Resume agar kegagalan di FFmpeg/Cloud/Visuals tidak mengulang dari Gemini & start frame T2I |
 | [USULAN_PERBAIKAN_CRASH_DETAIL_MULTIPLIER_LAB.md](usulan/USULAN_PERBAIKAN_CRASH_DETAIL_MULTIPLIER_LAB.md) | Analisa error halaman detail kampanye `mul_261124_4eeox4` (`This page couldn't load`): data berada di Dev `5020`, crash `TypeError: sfBridgePlan.getClipRole is not a function` pada `zoneOf`, serta pengaman `safeJsonParse` & empty-state |
 | [USULAN_PERBAIKAN_MULTIPLIER_BRIDGING_FOTO_PRODUK.md](usulan/USULAN_PERBAIKAN_MULTIPLIER_BRIDGING_FOTO_PRODUK.md) | Analisa `mul_261124_swv95p` (preset `multiplier_deconstruct_remix_produk_nutribake`) & Usulan Perbaikan: Multiplier mengabaikan `active_photo`, belum memakai `[HIGHEST PRIORITY PRODUCT IDENTITY LOCK]` / reference wrapper seperti OPC, serta pratinjau foto referensi produk |
