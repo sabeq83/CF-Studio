@@ -2471,6 +2471,7 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit} style={{ disp
                           <option value="Storytelling">Storytelling (Bercerita / Daily-life)</option>
                           <option value="Problem-Solution">Problem-Solution (Masalah & Solusi)</option>
                           <option value="Educational">Educational (Tutorial / Penjelasan Ilmiah)</option>
+                          <option value="Direct_Showcase">Direct Showcase (Shopee 2 Klip — Produk di Klip 1)</option>
                           <option value="Pet-Story-Arc">🐾 Pet Story Arc (7-Beat Cartoon Universe)</option>
                         </select>
                       </div>

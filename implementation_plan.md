@@ -1,502 +1,332 @@
-# Implementation Plan: Visual Identity Tanpa Manusia (`environment_object_only`) & Mode Video Tanpa VO (`no_vo`)
+# Implementation Plan: VI & Preset Shopee 2 Klip (Try-On & Unboxing, Produk Langsung di Klip 1, VO / Tanpa VO)
 
-**Sumber Usulan:** [/Users/sabeqmmursyid/cf-autopipeline/usulan-cf-studio-home-living-no-human-no-vo.md](file:///Users/sabeqmmursyid/cf-autopipeline/usulan-cf-studio-home-living-no-human-no-vo.md)  
-**Target Branch Kerja:** `fitur/home-living-no-human-no-vo` (dibuat dari `main` setelah mockup HTML disetujui)  
-**Mockup HTML Pra-Eksekusi:** [public/mockup_home_living_no_human_no_vo.html](file:///Users/sabeqmmursyid/_cfstudio/public/mockup_home_living_no_human_no_vo.html)
+**Sumber Usulan:** [usulan-cf-studio-shopee-2klip-tryon-unboxing.md](file:///Users/sabeqmmursyid/cf-autopipeline/usulan-cf-studio-shopee-2klip-tryon-unboxing.md)  
+**Target Branch Kerja:** `fitur/shopee-2klip-tryon-unboxing` (dibuat dari `main` `v2.60.0` saat eksekusi dimulai)  
+**Catatan Prasyarat:** Fondasi mode Tanpa VO (`audio_engine_mode = 'no_vo'`, `compileVeoAmbientOnlyPrompt`, serta guard FFmpeg `isTtsOptionalMode` pada `lib/scheduler-processors.js:4214` & `8543`) sudah aktif dan dirilis pada `v2.60.0` — tidak perlu diimplementasikan ulang.  
+**Catatan UI Mockup:** Perubahan UI hanya menambahkan 1 `<option value="Direct_Showcase">` di dropdown `Narrative Mode` pada 3 form yang sudah ada (`presets/page.js`, `MultiplierConfigurationForm.js`, `PillarConfigurationForm.js`), sedangkan VI & Preset baru otomatis tampil di daftar sistem yang ada. Mohon konfirmasi jika ingin langsung dikerjakan tanpa mockup HTML terpisah.
 
 ---
 
 ## Execution Task List
 
-### Tahap 0 — Persiapan & Review Mockup
-- [x] Review mockup interaktif [public/mockup_home_living_no_human_no_vo.html](file:///Users/sabeqmmursyid/_cfstudio/public/mockup_home_living_no_human_no_vo.html) oleh pengguna
-- [x] Buat branch `fitur/home-living-no-human-no-vo` dari `main` terbaru
+### Tahap 0 — Persiapan Branch
+- [x] Buat dan checkout branch baru `fitur/shopee-2klip-tryon-unboxing` dari `main` terbaru (`v2.60.0`)
 
-### Tahap 1 — Fondasi Backend & Kontrak Visual Identity (`environment_object_only`)
-- [x] Tambah enum `'environment_object_only'`, `POPULATION_MODES: 'none'`, `WARDROBE_MODES: 'not_applicable'`, `CAMERA_FRAMINGS` interior/still life, aturan normalisasi, dan `isEnvironmentObjectOnlyVisualConfig` di [lib/visual-identity-contract.js](file:///Users/sabeqmmursyid/_cfstudio/lib/visual-identity-contract.js)
-- [x] Tambah cabang resolver Zero-Human (`subject_prompt`, `wardrobe_prompt = ''`, anti-human/hand negatives, `legacy.character_concept`) di [lib/visual-override-resolver.js](file:///Users/sabeqmmursyid/_cfstudio/lib/visual-override-resolver.js)
-- [x] Tambah mandat ke-3 `ZERO-HUMAN / SPACE & OBJECT ONLY` & sembunyikan blok wardrobe/sleeve di [lib/visual-identity-allocator.js](file:///Users/sabeqmmursyid/_cfstudio/lib/visual-identity-allocator.js)
-- [x] Perbarui [lib/start-frame-visual-qc.js](file:///Users/sabeqmmursyid/_cfstudio/lib/start-frame-visual-qc.js) agar `environment_object_only` wajib `hand_count === 0` dan me-skip penalti `wardrobe_color_match` / `exposed_forearm`
+### Tahap 1 — Prompt Story Curve, Zoning & Guard `bridgeAtClip === 1` (`targetClips = 2`)
+- [x] Perbarui `buildDynamicStoryCurveGuideline` di [lib/kb/dynamic-story-curve.js](file:///Users/sabeqmmursyid/_cfstudio/lib/kb/dynamic-story-curve.js) agar menerima `narrativeMode`, menambahkan cabang 2 klip `Direct_Showcase` (`clipsCount === 2 && (bridgeAtClip === 1 || narrativeMode === 'Direct_Showcase')`), dan menghapus `KLIP 2 SAMPAI 1` saat `clipsCount === 2`
+- [x] Perhalus wording zona `intro` di [lib/bridging/bridge-prompt-zones.js](file:///Users/sabeqmmursyid/_cfstudio/lib/bridging/bridge-prompt-zones.js) saat `bridgeAtClip === 1` (tanpa menyebut "menjawab konteks klip sebelumnya")
+- [x] Perbaiki guard `bridgeAtClip === 1`, rentang produk penuh (`productClips.length >= targetClips`), dan tambahkan mandat `Direct_Showcase` di [lib/prompts.js](file:///Users/sabeqmmursyid/_cfstudio/lib/prompts.js) (`buildReverseEngineeringPrompt`, `buildReverseEngineeringBridgePrompt`, `buildPillarSharedPromptContext`, `buildOrganicPillarPrompt`, `buildMultiplierPhase2Prompt`)
 
-### Tahap 2 — Fondasi Backend Mode Tanpa VO (`no_vo`) & FFmpeg Pipeline
-- [x] Tambah `compileVeoAmbientOnlyPrompt` (foley/ambience tanpa dialog & tanpa musik) di [lib/veo-native-audio.js](file:///Users/sabeqmmursyid/_cfstudio/lib/veo-native-audio.js)
-- [x] Perbaiki guard skip FFmpeg di [lib/scheduler-processors.js](file:///Users/sabeqmmursyid/_cfstudio/lib/scheduler-processors.js) (baris ~4178 & ~8444) agar `audio_engine_mode` bernilai `'native_veo'` atau `'no_vo'` tetap lanjut ke FFmpeg muxing
-- [x] Tambah cabang `isNoVoMode` dan dukungan `no_vo_audio_bed` (`native_sfx_ambience`, `bgm_only`, `native_sfx_plus_bgm`, `silent`) serta `scene.on_screen_text` di [lib/video-studio-processor.js](file:///Users/sabeqmmursyid/_cfstudio/lib/video-studio-processor.js)
-- [x] Izinkan konfigurasi `audio_engine_mode`, `no_vo_audio_bed`, `on_screen_text_mode`, `ffmpegSfxVolume`, dan `ffmpegBgmVolume` di [lib/multiplier-audio-config.js](file:///Users/sabeqmmursyid/_cfstudio/lib/multiplier-audio-config.js)
-- [x] Perbarui [lib/re-multiplier-worker.js](file:///Users/sabeqmmursyid/_cfstudio/lib/re-multiplier-worker.js) & [lib/autonomous-engine.js](file:///Users/sabeqmmursyid/_cfstudio/lib/autonomous-engine.js) untuk memisahkan `no_vo` vs `native_veo`, meneruskan `enable_tts = 0`, `no_vo_audio_bed`, dan `compileVeoAmbientOnlyPrompt`
-- [x] Longgarkan validasi `voiceover_text` saat `audio_engine_mode === 'no_vo'` di [lib/custom-storyboard-pipeline.js](file:///Users/sabeqmmursyid/_cfstudio/lib/custom-storyboard-pipeline.js)
-- [x] Tambah aturan *Action Translation (Zero-Human)* dan *No-VO Visual Storytelling* di [lib/prompts.js](file:///Users/sabeqmmursyid/_cfstudio/lib/prompts.js) (`buildReverseEngineeringPrompt`, `buildOrganicPillarPrompt`, `buildCustomStoryboardPromptEngineerPrompt`, `buildMultiplierPhase2Prompt`)
+### Tahap 2 — Visual Identity Schema v2, Metaphor Policy & Visual QC Klip 1 Produk
+- [x] Tambahkan `shopee_unboxing_pov_hands` dan `shopee_tryon_faceless_fit` ke `SYSTEM_VISUAL_IDENTITIES` di [lib/visual-identity-system-presets.js](file:///Users/sabeqmmursyid/_cfstudio/lib/visual-identity-system-presets.js)
+- [x] Pertahankan `metaphorEngine.hands_policy === 'modest_hands_active'` pada mode non-metaphor (`metaphor_engine.enabled = false`) saat subjek kompatibel tangan aktif di [lib/metaphor-policy.js](file:///Users/sabeqmmursyid/_cfstudio/lib/metaphor-policy.js)
+- [x] Perbarui `deriveQcContext` dan label wardrobe di [lib/start-frame-visual-qc.js](file:///Users/sabeqmmursyid/_cfstudio/lib/start-frame-visual-qc.js) agar Klip 1 produk dengan `metaphor_engine.enabled === false` (`hands_only` / `crop_below_neck`) diperiksa sebagai `PRODUCT/HERO FRAME` bertangan POV/tubuh tanpa wajah (`expectsObjectOnly = false`) dan menghormati deskripsi wardrobe tetap VI (tidak jatuh ke `resolveVideoVariety`)
 
-### Tahap 3 — Preset Sistem, UI & Skema MCP
-- [x] Tambah preset sistem VI `home_living_serene_interior` dan `home_living_product_still_life` di [lib/visual-identity-system-presets.js](file:///Users/sabeqmmursyid/_cfstudio/lib/visual-identity-system-presets.js)
-- [x] Tambah dukungan `no_vo` & preset `multiplier_home_living_no_vo_asmr` di [lib/operator-presets.js](file:///Users/sabeqmmursyid/_cfstudio/lib/operator-presets.js)
-- [x] Perbarui UI [app/settings/visual-identities/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/settings/visual-identities/page.js) & [app/components/AiVisualIdentityBuilderModal.js](file:///Users/sabeqmmursyid/_cfstudio/app/components/AiVisualIdentityBuilderModal.js) untuk `environment_object_only`
-- [x] Perbarui UI [app/settings/presets/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/settings/presets/page.js) dengan opsi `🔇 Mode 3: Tanpa VO`, audio bed, dan filter chip
-- [x] Tambah override `audio_engine_mode`, `no_vo_audio_bed`, dan `on_screen_text_mode` di [app/auto-pipeline/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/auto-pipeline/page.js) & [lib/auto-pipeline-scheduler-runner.js](file:///Users/sabeqmmursyid/_cfstudio/lib/auto-pipeline-scheduler-runner.js)
-- [x] Ganti kontrol `enable_tts` menjadi selector 3 mode di [PillarConfigurationForm.js](file:///Users/sabeqmmursyid/_cfstudio/app/components/campaign-forms/PillarConfigurationForm.js), [MultiplierConfigurationForm.js](file:///Users/sabeqmmursyid/_cfstudio/app/components/campaign-forms/MultiplierConfigurationForm.js), [app/pillar-campaigns/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/pillar-campaigns/page.js), dan [app/pillar-campaigns/[id]/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/pillar-campaigns/%5Bid%5D/page.js)
-- [x] Perbarui skema tool MCP di [apps/mcp/tools.mjs](file:///Users/sabeqmmursyid/_cfstudio/apps/mcp/tools.mjs) (`cf_run_auto_pipeline`, `cf_create_schedule`, `cf_update_schedule`, `cf_submit_custom_storyboard`, `cf_create_multiplier_video`, `cf_create_product_video`, `cf_create_visual_identity`)
+### Tahap 3 — Operator Preset 2 Klip & Opsi Dropdown `Direct_Showcase`
+- [x] Tambahkan `shopee_2clip_showcase_vo` dan `shopee_2clip_showcase_no_vo` di [lib/operator-presets.js](file:///Users/sabeqmmursyid/_cfstudio/lib/operator-presets.js) (`campaign_kinds: ['multiplier_campaign', 'product_campaign']`)
+- [x] Tambahkan opsi `<option value="Direct_Showcase">` di dropdown `Narrative Mode` pada [app/settings/presets/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/settings/presets/page.js), [MultiplierConfigurationForm.js](file:///Users/sabeqmmursyid/_cfstudio/app/components/campaign-forms/MultiplierConfigurationForm.js), dan [PillarConfigurationForm.js](file:///Users/sabeqmmursyid/_cfstudio/app/components/campaign-forms/PillarConfigurationForm.js)
 
-### Tahap 4 — Verifikasi Unit Test, Build & Deploy Dev
-- [x] Tambah dan jalankan unit test VI `environment_object_only` & mode `no_vo` (`PG_SEARCH_PATH=dev node --test ...`)
-- [x] Jalankan `DISABLE_AUTO_MIGRATIONS=true PG_SEARCH_PATH=dev npm run build`
-- [x] Push branch `fitur/home-living-no-human-no-vo`, deploy ke **Dev (`5020/7020`)**, dan uji E2E 1 kampanye Home Living
+### Tahap 4 — Unit Test, Build Lokal & Deploy Dev
+- [x] Buat unit test [tests/shopee-2clip-showcase.test.mjs](file:///Users/sabeqmmursyid/_cfstudio/tests/shopee-2clip-showcase.test.mjs) (verifikasi bebas frasa pre-bridge saat `bridgeAtClip === 1`, bebas `KLIP 2 SAMPAI 1`, validasi Schema v2 kedua VI baru, QC verdict `hands_only` & `crop_below_neck`, dan hidrasi 2 preset Shopee)
+- [x] Jalankan seluruh unit test (`PG_SEARCH_PATH=dev node --test ...`) dan build lokal (`DISABLE_AUTO_MIGRATIONS=true PG_SEARCH_PATH=dev npm run build`)
+- [x] Push branch `fitur/shopee-2klip-tryon-unboxing` dan deploy atomic ke **Dev (`5020/7020`)** untuk uji render 1 video Unboxing (Tanpa VO) + 1 video Try-On (Dengan VO)
 
 ---
 
 ## Rincian Perubahan Kode (Code Sebelum & Sesudah)
 
-### 1. [lib/visual-identity-contract.js](file:///Users/sabeqmmursyid/_cfstudio/lib/visual-identity-contract.js)
+### 1. [lib/kb/dynamic-story-curve.js](file:///Users/sabeqmmursyid/_cfstudio/lib/kb/dynamic-story-curve.js)
 
 **Code Sebelum (Current/Before):**
 ```js
-export const SUBJECT_KINDS = ['human', 'blank_face_3d', 'animal', 'mascot_object', 'stylized_3d_character', 'stylized_cartoon_character'];
-...
-export const POPULATION_MODES = ['single', 'group', 'crowd', 'single_group_or_crowd'];
-...
-export const WARDROBE_MODES = ['fixed', 'sequential', 'stable_random', 'custom'];
-...
-export const CAMERA_FRAMINGS = [
-  'hands_closeup',
-  'forearms_and_hands',
-  'crop_below_neck',
-  'back_view',
-  'full_body_blank_face',
-  'object_or_animal',
-  'editorial_wide',
-  'environmental_wide',
-  'isometric',
-  'top_down_system',
-  'silhouette_profile',
-  'over_shoulder_faceless',
-  'extreme_scale_metaphor'
-];
-```
-*(Serta `validateAndNormalizeVisualIdentity` baris 331–390 yang memaksa `character_count >= 1`, `wardrobe.sleeve_policy = 'wrists_covered'`, dan `camera.framing = 'forearms_and_hands'`.)*
-
-**Code Sesudah (Proposed/After):**
-```js
-export const SUBJECT_KINDS = ['human', 'blank_face_3d', 'animal', 'mascot_object', 'stylized_3d_character', 'stylized_cartoon_character', 'environment_object_only'];
-export const POPULATION_MODES = ['single', 'group', 'crowd', 'single_group_or_crowd', 'none'];
-export const WARDROBE_MODES = ['fixed', 'sequential', 'stable_random', 'custom', 'not_applicable'];
-export const CAMERA_FRAMINGS = [
-  'hands_closeup', 'forearms_and_hands', 'crop_below_neck', 'back_view',
-  'full_body_blank_face', 'object_or_animal', 'editorial_wide', 'environmental_wide',
-  'interior_showcase', 'product_still_life', 'top_down_flatlay', 'before_after_frame',
-  'isometric', 'top_down_system', 'silhouette_profile', 'over_shoulder_faceless', 'extreme_scale_metaphor'
-];
-
-// Dalam validateAndNormalizeVisualIdentity:
-if (result.subject.kind === 'environment_object_only') {
-  result.subject.faceless_mode = 'not_applicable';
-  result.subject.demographic_key = 'not_applicable';
-  result.subject.character_count = 0;
-  result.subject.population_mode = 'none';
-  result.wardrobe = {
-    mode: 'not_applicable',
-    preset_key: 'not_applicable',
-    sleeve_policy: 'not_applicable',
-    custom_description: '',
-    accessories: [],
-    palette: []
-  };
-  result.metaphor_engine.hands_policy = 'zero_hands';
-  result.guardrails = {
-    ...result.guardrails,
-    human_presence: 'prohibited',
-    hands_visibility: 'prohibited',
-    face_visibility: 'prohibited',
-    reflection_face: 'prohibited',
-    unintended_people: 'prohibited',
-    extra_people: 'prohibited',
-    intentional_crowd: 'prohibited',
-    wardrobe_drift: 'not_applicable'
-  };
-  const humanOnlyFramings = ['forearms_and_hands', 'hands_closeup', 'back_view', 'crop_below_neck'];
-  if (!result.camera.framing || humanOnlyFramings.includes(result.camera.framing)) {
-    result.camera.framing = result.camera.lens_look === 'macro_closeup' ? 'object_or_animal' : 'environmental_wide';
-  }
-}
-
-export function isEnvironmentObjectOnlyVisualConfig({ campaign = null, row = null, visualOverrides = null, structured = null } = {}) {
-  const resolvedStructured = structured || safeParseVoJson(visualOverrides)?.structured || safeParseVoJson(visualOverrides)
-    || safeParseVoJson(campaign?.visual_overrides_json)?.structured || safeParseVoJson(row?.visual_overrides_json)?.structured || null;
-  return String(resolvedStructured?.subject?.kind || '').trim().toLowerCase() === 'environment_object_only';
-}
-```
-
----
-
-### 2. [lib/visual-override-resolver.js](file:///Users/sabeqmmursyid/_cfstudio/lib/visual-override-resolver.js)
-
-**Code Sebelum (Current/Before):**
-```js
-  // 3. Resolve Wardrobe Prompt
-  let wardrobePrompt = 'wearing clean attire';
-  if (config.wardrobe?.preset_key === 'not_applicable') {
-    wardrobePrompt = (config.wardrobe.custom_description && config.wardrobe.custom_description.trim())
-      ? config.wardrobe.custom_description.trim()
-      : 'not applicable (natural character surface finish only, no human clothing)';
-  } ...
-  // 6. Resolve Camera Prompt
-  let defaultFraming = 'forearms_and_hands';
-  ...
-  // 8. Resolve Negative Prompt
-  const defaultNegatives = (isFaceAllowed || isCartoonOrStylized)
-    ? ['photorealistic human face', ...]
-    : isMascot
-      ? ['ugly', 'deformed', ...]
-      : ['visible human face', 'eyes', 'nose', 'mouth', 'human portrait', 'unintended people'];
-  ...
-  const legacy = {
-    character_concept: isMascot ? 'mascot' : (isCartoonOrStylized ? 'stylized_3d' : 'faceless'),
-```
-
-**Code Sesudah (Proposed/After):**
-```js
-  const isEnvironmentOnly = config.subject?.kind === 'environment_object_only';
-  if (isEnvironmentOnly) {
-    const customDesc = config.subject?.custom_description?.trim();
-    subjectPrompt = customDesc
-      ? `Strictly zero humans, zero people, zero hands, zero fingers, zero arms, zero human silhouettes. Pure architectural space and physical object cinematography: ${customDesc}`
-      : 'Strictly zero humans, zero people, zero hands, zero fingers, zero arms, zero human silhouettes. Focus 100% on calm interior rooms, furniture, surfaces, and physical home-living objects/products in place.';
-  }
-  ...
-  if (isEnvironmentOnly) {
-    wardrobePrompt = '';
-  }
-  ...
-  if (isEnvironmentOnly) {
-    defaultFraming = config.camera?.framing || 'environmental_wide';
-    defaultPerspective = config.camera?.perspective || 'third_person';
-  }
-  ...
-  const defaultNegatives = isEnvironmentOnly
-    ? ['human', 'person', 'people', 'hands', 'hand', 'fingers', 'arms', 'forearms', 'wrists', 'body parts', 'human silhouette', 'shadow of person', 'face', 'eyes', 'portrait', 'clothing', 'sleeves', 'mannequin', 'reflected person']
-    : ((isFaceAllowed || isCartoonOrStylized) ? [...] : isMascot ? [...] : [...]);
-  ...
-  character_concept: isEnvironmentOnly ? 'environment_object_only' : (isMascot ? 'mascot' : (isCartoonOrStylized ? 'stylized_3d' : 'faceless')),
-```
-
----
-
-### 3. [lib/visual-identity-allocator.js](file:///Users/sabeqmmursyid/_cfstudio/lib/visual-identity-allocator.js)
-
-**Code Sebelum (Current/Before):**
-```js
-  const isStylizedChar = ...;
-  const isFacelessMandate = !isStylizedChar;
-  ...
-  const wardrobeDesc = (!isFacelessMandate || wardrobe.preset_key === 'not_applicable')
-    ? (wardrobe.custom_description || 'natural character surface finish only (no human clothing)')
-    : ...;
-  const charConceptDesc = isFacelessMandate
-    ? 'STRICTLY FACELESS (Semua figur manusia tampil tanpa mata/hidung/mulut, atau dari sudut belakang/siluet/potong siku ke bawah).'
-    : 'FULL 3D STYLIZED ANIMATED CHARACTER (...)';
-```
-
-**Code Sesudah (Proposed/After):**
-```js
-  const isEnvironmentOnly = subjectKindLower === 'environment_object_only';
-  const isStylizedChar = !isEnvironmentOnly && (...);
-  const isFacelessMandate = !isStylizedChar && !isEnvironmentOnly;
-  ...
-  const wardrobeDesc = isEnvironmentOnly
-    ? ''
-    : ((!isFacelessMandate || wardrobe.preset_key === 'not_applicable') ? ... : ...);
-  const charConceptDesc = isEnvironmentOnly
-    ? 'ZERO-HUMAN / SPACE & OBJECT ONLY MANDATE (Dilarang memunculkan manusia, bagian tubuh, tangan, jari, lengan, punggung, siluet, maupun bayangan orang di seluruh klip T2I/I2V/T2V).'
-    : (isFacelessMandate ? 'STRICTLY FACELESS (...)' : 'FULL 3D STYLIZED ANIMATED CHARACTER (...)');
-```
-
----
-
-### 4. [lib/start-frame-visual-qc.js](file:///Users/sabeqmmursyid/_cfstudio/lib/start-frame-visual-qc.js)
-
-**Code Sebelum (Current/Before):**
-```js
-  const handRule = expectsObjectOnly
-    ? 'Opening hook frame MUST have 0 human hands, fingers, or arms (hand_count MUST be 0). Flag exposed_forearm=true or reasons if any hand/arm appears.'
-    : ...;
-  const wardrobeRule = (handsPolicy === 'modest_hands_active' && !expectsObjectOnly)
-    ? `Expected solid plain sleeves ...`
-    : 'Object-only or no locked wardrobe: set wardrobe_color_match=true.';
-```
-
-**Code Sesudah (Proposed/After):**
-```js
-  const isEnvOnly = Boolean(environmentOnly) || isEnvironmentObjectOnlyVisualConfig({ campaign, row });
-  const handRule = isEnvOnly
-    ? 'ZERO-HUMAN VISUAL IDENTITY: EVERY frame MUST have 0 humans, 0 hands, 0 fingers, 0 arms, and 0 human silhouettes (hand_count MUST be 0). Fail immediately if any human/body part is detected with hint: "Remove all humans, hands, arms, and body parts; show only the empty interior room and physical product/objects."'
-    : (expectsObjectOnly ? ... : ...);
-  const wardrobeRule = isEnvOnly
-    ? 'Environment/object only VI: no humans or wardrobe expected; set wardrobe_color_match=true and skip exposed_forearm/wardrobe checks.'
-    : ...;
-```
-
----
-
-### 5. [lib/veo-native-audio.js](file:///Users/sabeqmmursyid/_cfstudio/lib/veo-native-audio.js)
-
-**Code Sebelum (Current/Before):**
-```js
-export function compileVeoNativeAudioPrompt({
-  basePrompt,
-  narrationText = '',
-  persona = 'Kore',
+export function buildDynamicStoryCurveGuideline({
+  campaignKind = 'brand_editorial', // 'brand_editorial' | 'product_campaign' | 'multiplier'
+  targetClips = 4,
+  bridgeAtClip = 2,
+  bridgeDurationClips = 1,
+  bridgePlan = null,
   language = 'id-ID',
-  withSfx = true,
-  withAmbience = true,
-  antiMusic = true
-}) { ... }
-```
-
-**Code Sesudah (Proposed/After):**
-```js
-export function compileVeoAmbientOnlyPrompt({
-  basePrompt,
-  sfxCue = '',
-  withSfx = true,
-  withAmbience = true,
-  antiMusic = true
+  brandVoice = '',
+  targetAudience = '',
+  objective = ''
 }) {
-  if (!basePrompt) return '';
-  const cleanBase = basePrompt.replace(/\s*Audio direction:[\s\S]*$/i, '').trim();
-  const cueText = String(sfxCue || '').trim();
-  const directives = [
-    `AUDIO DIRECTION: Pure natural room ambience and tactile object foley only${cueText ? ` (${cueText})` : ''}. STRICTLY ZERO spoken words, ZERO voiceover, ZERO narration, ZERO human speech${antiMusic ? ', ZERO background music' : ''}.`
-  ];
-  if (withSfx && cueText) directives.push(`[SFX] Subtle physical room/object sound event: ${cueText}.`);
-  if (withAmbience) directives.push('[AMBIENCE] Quiet natural residential room tone without human voices.');
-  return `${cleanBase}\n\nAudio direction:\n${directives.join('\n')}`;
-}
-```
+  ...
+STRUKTUR KURVA CERITA PROPORSIONAL:
+1. KLIP 1 (HOOK / OPENING - 3 Detik Pertama):
+   - Wajib memikat perhatian instan penonton dan menghentikan scrolling.
+   ${isEditorial 
+     ? '- Gunakan hook emosional, pertanyaan menggelitik, atau sudut pandang kontraintuitif tanpa menyebut nama produk.' 
+     : (isMultiplier
+       ? '- Ambil hook viral / emosional kuat dari referensi asli untuk memikat audiens sebelum mengenalkan produk.'
+       : '- Tampilkan visual masalah nyata, rasa frustrasi sehari-hari, atau situasi sebelum produk digunakan.')}
 
----
-
-### 6. [lib/scheduler-processors.js](file:///Users/sabeqmmursyid/_cfstudio/lib/scheduler-processors.js)
-
-**Code Sebelum (Current/Before — baris ~4178 & ~8444):**
-```js
-  if (campaign.enable_glabs === 0 || campaign.enable_tts === 0) {
-    updateReCampaignItem(item.id, {
-      ffmpeg_status: 'skipped',
-      ffmpeg_output_path: 'skipped',
-      social_post_status: finalSocialPostStatus
-    });
-    return { processed: true, item_id: item.id, message: `Workflow dependencies (G-Labs/TTS) are inactive. Skipped FFmpeg stage. Social posting set to ${finalSocialPostStatus}.` };
-  }
-```
-*(Sama pada baris 8444 untuk `updatePillarCampaignItem`.)*
-
-**Code Sesudah (Proposed/After — diekstrak ke helper atau kondisi seragam di kedua fungsi):**
-```js
-  const isTtsOptionalMode = ['native_veo', 'no_vo'].includes(campaign.audio_engine_mode);
-  if (campaign.enable_glabs === 0 || (campaign.enable_tts === 0 && !isTtsOptionalMode)) {
-    updateReCampaignItem(item.id, {
-      ffmpeg_status: 'skipped',
-      ffmpeg_output_path: 'skipped',
-      social_post_status: finalSocialPostStatus
-    });
-    return { processed: true, item_id: item.id, message: `Workflow dependencies (G-Labs/TTS) are inactive. Skipped FFmpeg stage. Social posting set to ${finalSocialPostStatus}.` };
-  }
-```
-*(Demikian pula untuk cabang Pillar Campaign pada baris 8444; serta pastikan stage TTS di processor RE & Pillar men-skip TTS saat `audio_engine_mode === 'no_vo'` tanpa error.)*
-
----
-
-### 7. [lib/video-studio-processor.js](file:///Users/sabeqmmursyid/_cfstudio/lib/video-studio-processor.js)
-
-**Code Sebelum (Current/Before):**
-```js
-  const isNativeVeoAudio = Boolean(jobConfig.audioEngineMode === 'native_veo' || jobConfig.isNativeVeo || (!hasAudioFile && anyVideoHasAudio));
+2. KLIP 2 SAMPAI ${clipsCount - 1} (PROGRESSION / INTI PESAN & SEAMLESS BRIDGING):
+   - Total adegan di tengah: ${clipsCount - 2} klip. Eskalasi alur cerita secara bertahap dan mulus.
 ```
 
 **Code Sesudah (Proposed/After):**
 ```js
-  const isNoVoMode = jobConfig.audioEngineMode === 'no_vo';
-  const noVoAudioBed = jobConfig.noVoAudioBed || 'native_sfx_ambience';
-  const useVeoVideoAudio = isNoVoMode
-    ? ['native_sfx_ambience', 'native_sfx_plus_bgm'].includes(noVoAudioBed) && anyVideoHasAudio
-    : Boolean(jobConfig.audioEngineMode === 'native_veo' || jobConfig.isNativeVeo || (!hasAudioFile && anyVideoHasAudio));
-  // Ketika isNoVoMode === true:
-  // - Nonaktifkan speed-stretch berbasis panjang TTS (smart_sync)
-  // - silent / bgm_only (tanpa BGM file): fallback anullsrc + mix BGM sesuai ffmpegBgmVolume jika ada
-  // - native_sfx_ambience / native_sfx_plus_bgm: pakai stream audio klip Veo + BGM bila tersedia
-  // - Overlay motion text: baca dari scene.on_screen_text ketika onScreenTextMode !== 'off'
+export function buildDynamicStoryCurveGuideline({
+  campaignKind = 'brand_editorial', // 'brand_editorial' | 'product_campaign' | 'multiplier'
+  targetClips = 4,
+  bridgeAtClip = 2,
+  bridgeDurationClips = 1,
+  bridgePlan = null,
+  narrativeMode = 'Storytelling',
+  language = 'id-ID',
+  brandVoice = '',
+  targetAudience = '',
+  objective = ''
+}) {
+  const isDirectShowcase = !isEditorial && (
+    narrativeMode === 'Direct_Showcase' ||
+    (clipsCount <= 2 && Number(bridgeAtClip) <= 1)
+  );
+  // Jika clipsCount === 2 && isDirectShowcase:
+  // Cetak STRUKTUR KURVA CERITA 2 KLIP (DIRECT SHOWCASE / SHOPEE):
+  //   1. KLIP 1 (INSTANT PRODUCT REVEAL / UNBOXING / TRY-ON): produk langsung terlihat sejak detik ke-1
+  //   2. KLIP 2 (PROOF, DETAIL & SOFT CTA): detail fisik/fit/fungsi + soft CTA
+  // Jika clipsCount === 2 && !isDirectShowcase:
+  //   Langsung 1. KLIP 1 (HOOK / OPENING) -> 2. KLIP 2 (BRIDGING & RESOLUTION / CTA), tanpa "KLIP 2 SAMPAI 1 (Total adegan di tengah: 0 klip)".
 ```
 
 ---
 
-### 8. [lib/multiplier-audio-config.js](file:///Users/sabeqmmursyid/_cfstudio/lib/multiplier-audio-config.js)
+### 2. [lib/bridging/bridge-prompt-zones.js](file:///Users/sabeqmmursyid/_cfstudio/lib/bridging/bridge-prompt-zones.js)
 
 **Code Sebelum (Current/Before):**
 ```js
-  const enableTts = raw.enable_tts !== undefined ? Boolean(raw.enable_tts) : (raw.enableTts !== undefined ? Boolean(raw.enableTts) : true);
+export function buildBridgeZoningContract(plan, options = {}) {
+  const {
+    mode = 'multiplier', // 'multiplier' | 'pillar'
+    productName = '',
+    productUsp = '',
+    promoStyle = 'Softselling',
+    mandatoryOutroLine = ''
+  } = options;
   ...
-  const ffmpegSfxVolume = 0.00;
-  const ffmpegBgmVolume = 0.00;
+    return `🚨 PRODUCT BRIDGING & STRICT CLIP ZONING CONTRACT (TOTAL ${targetClipsCount} KLIP, BRIDGING MULAI KLIP #${bridgeAtClip}):
+${bridgeAtClip > 1 ? `1. **ZONA PRE-BRIDGING (${preBridgeRange})**: ...` : ''}
+${bridgeAtClip > 1 ? '2' : '1'}. **TITIK PIVOT BRIDGING (TEPAT DI KLIP #${bridgeAtClip})**: Di sinilah produk "${productName}" pertama kali diperkenalkan secara halus sebagai kunci/solusi alami yang menjawab konteks klip sebelumnya. Hubungkan USP produk ("${productUsp}") ke aksi visual adegan tanpa terdengar seperti iklan yang dipaksakan.
+```
+*(Serta baris 61 pada multi-segment: `sebagai jawaban alami atas konteks sebelumnya` untuk `z.start === 1`.)*
+
+**Code Sesudah (Proposed/After):**
+```js
+    const introReasonText = bridgeAtClip === 1
+      ? `Di sinilah produk "${productName}" langsung ditampilkan dan diperkenalkan sejak detik pertama (Direct Showcase / Unboxing / Try-On). Hubungkan USP produk ("${productUsp}") secara visual & natural.`
+      : `Di sinilah produk "${productName}" pertama kali diperkenalkan secara halus sebagai kunci/solusi alami yang menjawab konteks klip sebelumnya. Hubungkan USP produk ("${productUsp}") ke aksi visual adegan tanpa terdengar seperti iklan yang dipaksakan.`;
+```
+*(Hal serupa pada baris 61: bila `z.start === 1`, pakai wording langsung tampil pada Klip 1 tanpa merujuk klip sebelumnya.)*
+
+---
+
+### 3. [lib/prompts.js](file:///Users/sabeqmmursyid/_cfstudio/lib/prompts.js)
+
+**Code Sebelum (Current/Before):**
+1. Caller `buildDynamicStoryCurveGuideline` (baris 1043, 2213, 4393) belum mengirim `narrativeMode`.
+2. `buildReverseEngineeringPrompt` (baris 1291–1307) & `buildReverseEngineeringBridgePrompt` (baris 1600–1615) hanya memuat aturan `Storytelling`, `Problem-Solution`, `Educational`.
+3. `buildReverseEngineeringBridgePrompt` (baris 1641–1713):
+   - Mencetak `- PADA KLIP DI LUAR RENTANG TERSEBUT (Klip sebelum ke-${bridgeAtClip} atau sesudah ke-${productEndClip}): DILARANG KERAS...` bahkan ketika `bridgeAtClip === 1 && productEndClip >= targetClips`.
+   - Mencetak `[ZONA 1: RETENSI VIRAL] (Klip 1 hingga Klip ${bridgeAtClip - 1})` tanpa cek `bridgeAtClip > 1` (menjadi `Klip 1 hingga Klip 0`).
+4. `buildPillarSharedPromptContext`:
+   - Baris 2455–2613: `const maxPreBridgeClip = Math.max(1, bridgeAtClip - 1);` mencetak blok `PADA KLIP 1 s/d 1 (PRE-BRIDGING)` dan `DILARANG MEMPERKENALKAN PRODUK SEBELUM KLIP 1!` ketika `bridgeAtClip === 1`.
+   - Baris 3023–3035: mencetak `- PADA KLIP DI LUAR RENTANG TERSEBUT (Klip sebelum ke-1 atau sesudah ke-2)` dan `menghubungkan masalah di Klip 1 dengan penggunaan produk di Klip ke-1` meski semua klip adalah klip produk.
+5. `buildOrganicPillarPrompt` (baris 3561–3579): tidak punya cabang `Direct_Showcase`, dan mencetak `Klip 2 s/d ${bridgeAtClip - 1}` saat `bridgeAtClip === 1`.
+6. `buildMultiplierPhase2Prompt`:
+   - Baris 4367–4377: meski semua klip masuk segmen produk (`bridgePlan.productClips.length >= targetClipsCount`), baris 4367 tetap mencetak `Untuk klip di luar rentang produk (Klip sebelum ke-1 atau sesudah ke-2):` lengkap dengan skema `Geometric Truth: strictly no product shown`.
+   - Baris 4409: selalu mewajibkan `"Sebelum nama produk disebutkan di klip pivot..."` meski `bridgeAtClip === 1`.
+
+**Code Sesudah (Proposed/After):**
+```js
+// 1. Teruskan `narrativeMode` pada seluruh pemanggilan `buildDynamicStoryCurveGuideline`.
+// 2. Definisikan helper `buildDirectShowcaseNarrativeRule(targetClips)` dan `hasDirectShowcaseMode({ narrativeMode, bridgeAtClip, targetClips })`
+//    yang aktif bila `narrativeMode === 'Direct_Showcase'` atau `(bridgeAtClip <= 1 && targetClips <= 2)`.
+// 3. Di buildReverseEngineeringBridgePrompt (1641–1713):
+const clampedProductEndClip = bridgeDurationClips > 0 ? Math.min(targetClips, bridgeAtClip + bridgeDurationClips - 1) : targetClips;
+const hasPreBridgeZones = bridgeAtClip > 1;
+const hasOutsideProductRange = bridgeAtClip > 1 || clampedProductEndClip < targetClips;
+// Guard blok "PADA KLIP DI LUAR RENTANG TERSEBUT" dengan hasOutsideProductRange,
+// dan bungkus "[ZONA 1: RETENSI VIRAL]" dengan `${hasPreBridgeZones ? ... : ''}`.
+
+// 4. Di buildPillarSharedPromptContext (2455–2613 & 3023–3035):
+const hasPreBridge = bridgeAtClip > 1;
+const maxPreBridgeClip = hasPreBridge ? (bridgeAtClip - 1) : 0;
+// Semua blok PRE-BRIDGING (2468, 2498–2517, 2555–2561, 2599–2605) hanya dicetak bila `hasPreBridge === true`.
+// Di productInstruction (3023–3035), hanya cetak "PADA KLIP DI LUAR RENTANG TERSEBUT" bila `(bridgeAtClip > 1 || productEndClip < targetClips)`.
+
+// 5. Di buildMultiplierPhase2Prompt (4360–4377 & 4405–4473):
+const hasNonProductClips = isPureStorytelling || bridgePlan.productClips.length < targetClipsCount;
+// Hanya render instruksi & skema T2I/I2V non-produk (baris 4367–4377) bila `hasNonProductClips === true`.
+// Di sentenceIntegrityAndToneContract, sesuaikan poin #3 jika `bridgeAtClip === 1` / `Direct_Showcase` agar mendukung instant reveal di Klip 1.
+```
+
+---
+
+### 4. [lib/visual-identity-system-presets.js](file:///Users/sabeqmmursyid/_cfstudio/lib/visual-identity-system-presets.js)
+
+**Code Sebelum (Current/Before):**
+```js
+// SYSTEM_VISUAL_IDENTITIES berakhir di `home_living_product_still_life` (baris 1303).
 ```
 
 **Code Sesudah (Proposed/After):**
 ```js
-  const audioEngineMode = raw.audio_engine_mode || raw.audioEngineMode || 'minimax_tts';
-  const noVoAudioBed = raw.no_vo_audio_bed || raw.noVoAudioBed || 'native_sfx_ambience';
-  const onScreenTextMode = raw.on_screen_text_mode || raw.onScreenTextMode || 'short_caption_overlay';
-  const enableTts = audioEngineMode === 'no_vo' || audioEngineMode === 'native_veo'
-    ? false
-    : (raw.enable_tts !== undefined ? Boolean(raw.enable_tts) : (raw.enableTts !== undefined ? Boolean(raw.enableTts) : true));
-  const ffmpegSfxVolume = raw.ffmpeg_sfx_volume !== undefined ? Number(raw.ffmpeg_sfx_volume) : (raw.ffmpegSfxVolume !== undefined ? Number(raw.ffmpegSfxVolume) : 0.00);
-  const ffmpegBgmVolume = raw.ffmpeg_bgm_volume !== undefined ? Number(raw.ffmpeg_bgm_volume) : (raw.ffmpegBgmVolume !== undefined ? Number(raw.ffmpegBgmVolume) : 0.00);
+// Tambahkan 2 entry ke SYSTEM_VISUAL_IDENTITIES:
+// 1. `shopee_unboxing_pov_hands` ("Shopee Unboxing — Hands-Only POV"):
+//    - subject.kind: 'human', faceless_mode: 'hands_only', custom_description POV hands unboxing parcel
+//    - visual_language.primary_style: 'commercial_product_cinematic', supporting_styles: ['cinematic_realistic']
+//    - metaphor_engine: { enabled: false, mode: 'off', hands_policy: 'modest_hands_active', product_entry: 'inside_metaphor', lighting_arc: 'none', compact_prompts: true }
+//    - wardrobe: mode 'fixed', sleeve_policy 'wrists_covered', clean neutral knit/cotton long-sleeve
+//    - camera: framing 'forearms_and_hands', perspective 'first_person', lens_look 'natural_50mm', movement 'subtle_handheld'
+//    - guardrails: face_visibility 'prohibited', reflection_face 'prohibited', unintended_people 'prohibited'
+//
+// 2. `shopee_tryon_faceless_fit` ("Shopee Try-On — Faceless Fit Check"):
+//    - subject.kind: 'human', faceless_mode: 'crop_below_neck', custom_description chin/collarbone down mirror fit check
+//    - visual_language.primary_style: 'cinematic_realistic', supporting_styles: ['commercial_product_cinematic']
+//    - metaphor_engine: { enabled: false, mode: 'off', hands_policy: 'modest_hands_active', product_entry: 'inside_metaphor', lighting_arc: 'none', compact_prompts: true }
+//    - wardrobe: mode 'fixed', sleeve_policy 'wrists_covered', minimalist neutral everyday outfit
+//    - camera: framing 'crop_below_neck', perspective 'third_person', lens_look 'natural_50mm', movement 'slow_pan'
+//    - guardrails: face_visibility 'prohibited', reflection_face 'prohibited', unintended_people 'prohibited'
 ```
 
 ---
 
-### 9. [lib/re-multiplier-worker.js](file:///Users/sabeqmmursyid/_cfstudio/lib/re-multiplier-worker.js) & [lib/autonomous-engine.js](file:///Users/sabeqmmursyid/_cfstudio/lib/autonomous-engine.js)
+### 5. [lib/metaphor-policy.js](file:///Users/sabeqmmursyid/_cfstudio/lib/metaphor-policy.js)
 
-**Code Sebelum (Current/Before — `lib/re-multiplier-worker.js` baris ~1066 & ~1319):**
+**Code Sebelum (Current/Before):**
 ```js
-  const isNativeVeo = audioConfig.audio_engine_mode === 'native_veo' || vsoConfig.audio_engine_mode === 'native_veo' || audioConfig.enableTts === 0 || audioConfig.enable_tts === false;
-  ...
-  const isNativeVeo = audioConfig.audio_engine_mode === 'native_veo' || aesthetics.audio_engine_mode === 'native_veo';
-  if (isNativeVeo) { ... compileVeoNativeAudioPrompt(...); }
-```
-
-**Code Sesudah (Proposed/After — `lib/re-multiplier-worker.js`):**
-```js
-  const audioMode = audioConfig.audio_engine_mode || vsoConfig.audio_engine_mode || 'minimax_tts';
-  const isNoVo = audioMode === 'no_vo';
-  const isNativeVeo = audioMode === 'native_veo';
-  if (isNoVo || isNativeVeo || audioConfig.enableTts === 0 || audioConfig.enable_tts === false) {
-    // Skip TTS eksternal; tandai skipped atau generating_visuals
+  if ((!isMetaphoricFaceless && !explicitHookOnly) || isInvestigativeFaceless || (sceneDirectorActive && rawEngineMode === 'off')) {
+    reasons.push(isInvestigativeFaceless ? 'investigative_faceless_locked' : (sceneDirectorActive && rawEngineMode === 'off' ? 'metaphor_engine_mode_off' : 'not_metaphoric_faceless'));
+    return {
+      active: false,
+      mode: 'off',
+      environmentPolicy: structured.environment?.policy === 'planner_driven' ? 'planner_driven' : 'brand_locked',
+      handsPolicy: isInvestigativeFaceless || !sceneDirectorActive ? 'zero_hands' : (metaphorEngine.hands_policy === 'modest_hands_active' ? 'modest_hands_active' : 'zero_hands'),
+      ...
+    };
   }
-  ...
-  const noVoBed = audioConfig.no_vo_audio_bed || aesthetics.no_vo_audio_bed || 'native_sfx_ambience';
-  const wantVeoAudio = isNativeVeo || (isNoVo && ['native_sfx_ambience', 'native_sfx_plus_bgm'].includes(noVoBed));
-  if (isNoVo && wantVeoAudio) {
-    const { compileVeoAmbientOnlyPrompt } = await import('./veo-native-audio.js');
-    finalPrompt = compileVeoAmbientOnlyPrompt({
-      basePrompt: expectedPrompt,
-      sfxCue: storyboard[c - 1]?.ambient_sfx_cue || '',
-      withSfx: true,
-      withAmbience: true,
-      antiMusic: audioConfig.anti_music_guardrail !== undefined ? Boolean(audioConfig.anti_music_guardrail) : true
-    });
-  } else if (isNativeVeo && clipNarration) {
-    finalPrompt = compileVeoNativeAudioPrompt(...);
+```
+
+**Code Sesudah (Proposed/After):**
+```js
+  if ((!isMetaphoricFaceless && !explicitHookOnly) || isInvestigativeFaceless || (sceneDirectorActive && rawEngineMode === 'off')) {
+    const canKeepModestHands = !isInvestigativeFaceless
+      && metaphorEngine.hands_policy === 'modest_hands_active'
+      && (!structured.subject || (
+        (structured.subject.kind || 'human') === 'human'
+        && HANDS_COMPATIBLE_FACELESS_MODES.has(structured.subject.faceless_mode || 'hands_only')
+      ));
+    reasons.push(isInvestigativeFaceless ? 'investigative_faceless_locked' : (sceneDirectorActive && rawEngineMode === 'off' ? 'metaphor_engine_mode_off' : 'not_metaphoric_faceless'));
+    return {
+      active: false,
+      mode: 'off',
+      environmentPolicy: structured.environment?.policy === 'planner_driven' ? 'planner_driven' : 'brand_locked',
+      handsPolicy: canKeepModestHands ? 'modest_hands_active' : 'zero_hands',
+      ...
+    };
   }
-  // Kirim noSoundOverride: wantVeoAudio
-```
-
-**Code Sebelum (Current/Before — `lib/autonomous-engine.js` baris ~1239–1240):**
-```js
-  const effectiveAudioEngineMode = overrides?.audio_engine_mode || overrides?.audio?.audio_engine_mode || presetConfig?.workflow?.audio_engine_mode || presetConfig?.basic_strategy?.audio_engine_mode || 'minimax_tts';
-  const isMultiplierNativeVeo = effectiveAudioEngineMode === 'native_veo';
-  ...
-    enableTts: isMultiplierNativeVeo ? 0 : 1,
-    enable_tts: !isMultiplierNativeVeo,
-```
-
-**Code Sesudah (Proposed/After — `lib/autonomous-engine.js` di seluruh jalur product, editorial, & multiplier):**
-```js
-  const effectiveAudioEngineMode = overrides?.audio_engine_mode || overrides?.audio?.audio_engine_mode || presetConfig?.workflow?.audio_engine_mode || presetConfig?.basic_strategy?.audio_engine_mode || 'minimax_tts';
-  const isNoVo = effectiveAudioEngineMode === 'no_vo';
-  const isMultiplierNativeVeo = effectiveAudioEngineMode === 'native_veo';
-  const noVoAudioBed = overrides?.no_vo_audio_bed || presetConfig?.workflow?.no_vo_audio_bed || 'native_sfx_ambience';
-  const onScreenTextMode = overrides?.on_screen_text_mode || presetConfig?.workflow?.on_screen_text_mode || 'short_caption_overlay';
-  const shouldDisableTts = isMultiplierNativeVeo || isNoVo || presetConfig?.workflow?.enable_tts === false;
-  ...
-    enableTts: shouldDisableTts ? 0 : 1,
-    enable_tts: !shouldDisableTts,
-    no_vo_audio_bed: noVoAudioBed,
-    on_screen_text_mode: onScreenTextMode,
 ```
 
 ---
 
-### 10. [lib/custom-storyboard-pipeline.js](file:///Users/sabeqmmursyid/_cfstudio/lib/custom-storyboard-pipeline.js)
+### 6. [lib/start-frame-visual-qc.js](file:///Users/sabeqmmursyid/_cfstudio/lib/start-frame-visual-qc.js)
 
 **Code Sebelum (Current/Before):**
 ```js
-  for (let i = 0; i < rawScenes.length; i++) {
-    const s = rawScenes[i] || {};
-    if (!String(s.voiceover_text || '').trim()) {
-      throw new Error(`Scene #${i + 1} wajib mengisi voiceover_text.`);
-    }
-    ...
-  }
-  ...
-  const enableTts = isNativeVeo ? 0 : (pWorkflow.enable_tts !== undefined ? (pWorkflow.enable_tts ? 1 : 0) : 1);
+  const isEnvironmentOnly = isEnvironmentObjectOnlyVisualConfig({ campaign, row: item });
+  const isMetaphoric = campaign?.visual_style === 'metaphoric_faceless' || Boolean(policy?.active);
+  const metaphorMode = policy?.mode || (isMetaphoric ? 'full_metaphor' : 'off');
+  const handsPolicy = isEnvironmentOnly
+    ? 'zero_hands'
+    : (policy?.handsPolicy || (environmentPolicy === 'planner_driven' ? 'modest_hands_active' : 'zero_hands'));
+  const expectsObjectOnly = isEnvironmentOnly || ((isMetaphoric || metaphorMode === 'hook_only') && (cIdx === 1 || handsPolicy === 'zero_hands'));
+  const savedWardrobe = parsedResult?.resolved_wardrobe_color || campaign?.resolved_wardrobe_color;
+  const fallbackVariety = (item?.id || campaign?.id) ? resolveVideoVariety(item?.id || campaign?.id) : null;
+  const expectedWardrobeLabel = (!isEnvironmentOnly && handsPolicy === 'modest_hands_active' && !expectsObjectOnly)
+    ? (savedWardrobe?.label || fallbackVariety?.wardrobeColorLabel || '')
+    : '';
 ```
 
 **Code Sesudah (Proposed/After):**
 ```js
-  const requestedAudioMode = storyboard.audio_engine_mode || rawDna.audio_engine_mode || pWorkflow.audio_engine_mode || pBasic.audio_engine_mode || 'minimax_tts';
-  const isNoVo = requestedAudioMode === 'no_vo';
-  for (let i = 0; i < rawScenes.length; i++) {
-    const s = rawScenes[i] || {};
-    if (!isNoVo && !String(s.voiceover_text || '').trim()) {
-      throw new Error(`Scene #${i + 1} wajib mengisi voiceover_text.`);
-    }
-    ...
-  }
-  ...
-  const enableTts = (isNativeVeo || isNoVo) ? 0 : (pWorkflow.enable_tts !== undefined ? (pWorkflow.enable_tts ? 1 : 0) : 1);
-  // Simpan on_screen_text & ambient_sfx_cue pada normalisasi scenes
-```
-
----
-
-### 11. [lib/prompts.js](file:///Users/sabeqmmursyid/_cfstudio/lib/prompts.js)
-
-**Code Sebelum (Current/Before):**
-```js
-// buildReverseEngineeringPrompt (baris 1175-1179) & buildMultiplierPhase2Prompt (baris 3997-4056):
-1. Konsep Karakter  : ${targetConcept} ...
-2. Demografi Subjek : ${targetCharacter}
-3. Pakaian / Wardrobe: ${targetWardrobe}
-4. Pencahayaan / Light: ${targetLighting}
-5. KONSISTENSI WARDROBE WAJIB ...
-```
-
-**Code Sesudah (Proposed/After):**
-```js
-// Bila isEnvironmentOnly === true (environment_object_only):
-// - Sembunyikan baris Wardrobe & WARDROBE CONSISTENCY.
-// - Suntikkan blok ZERO-HUMAN ACTION TRANSLATION RULE (Deconstruct -> Zero-Human):
-//   • Tangan menata/merapikan -> Before-After kontras ruang statis / slow pan
-//   • Tangan memegang produk -> Hero Product Staging + camera push-in
-//   • Tangan mengoperasikan alat -> gerak mekanis/lingkungan mandiri (tanpa "a hand picks up" / "holding")
-// Bila audio_engine_mode === 'no_vo':
-// - Ganti aturan WPC/Breathless Syntax dengan NO-VO VISUAL STORYTELLING CONTRACT:
-//   • Isi new_vo / narration_transcript = ""
-//   • Outputkan on_screen_text (maks 3-7 kata) & ambient_sfx_cue (foley ruangan bahasa Inggris)
+  const rawVisualOverrides = parseJson(campaign?.visual_overrides_json || item?.visual_overrides_json, {});
+  const viStructured = rawVisualOverrides?.structured || rawVisualOverrides || {};
+  const viFacelessMode = viStructured?.subject?.faceless_mode || campaign?.faceless_mode || '';
+  const viMetaphorOffWithActiveHands = Boolean(
+    !isEnvironmentOnly
+    && viStructured?.metaphor_engine?.enabled === false
+    && viStructured?.metaphor_engine?.hands_policy === 'modest_hands_active'
+    && (viStructured?.subject?.kind || 'human') === 'human'
+    && ['hands_only', 'first_person_pov', 'crop_below_neck'].includes(viFacelessMode || 'hands_only')
+  );
+  const isDirectProductClip1 = Boolean(req.required && bridgePlan.firstBridgeClip === 1 && viStructured?.metaphor_engine?.enabled === false);
+  const handsPolicy = isEnvironmentOnly
+    ? 'zero_hands'
+    : (viMetaphorOffWithActiveHands ? 'modest_hands_active' : (policy?.handsPolicy || (environmentPolicy === 'planner_driven' ? 'modest_hands_active' : 'zero_hands')));
+  const expectsObjectOnly = isEnvironmentOnly
+    || (!isDirectProductClip1 && (isMetaphoric || metaphorMode === 'hook_only') && (cIdx === 1 || handsPolicy === 'zero_hands'));
+  const hasPalette = Array.isArray(viStructured?.wardrobe?.palette) && viStructured.wardrobe.palette.length > 0;
+  const fixedViWardrobeDesc = viStructured?.wardrobe?.mode === 'fixed' && !hasPalette
+    ? (viStructured?.wardrobe?.custom_description || '')
+    : '';
+  const expectedWardrobeLabel = (!isEnvironmentOnly && handsPolicy === 'modest_hands_active' && !expectsObjectOnly)
+    ? (savedWardrobe?.label || fixedViWardrobeDesc || fallbackVariety?.wardrobeColorLabel || '')
+    : '';
 ```
 
 ---
 
-### 12. [lib/visual-identity-system-presets.js](file:///Users/sabeqmmursyid/_cfstudio/lib/visual-identity-system-presets.js) & [lib/operator-presets.js](file:///Users/sabeqmmursyid/_cfstudio/lib/operator-presets.js)
+### 7. [lib/operator-presets.js](file:///Users/sabeqmmursyid/_cfstudio/lib/operator-presets.js)
 
 **Code Sebelum (Current/Before):**
-- `lib/visual-identity-system-presets.js` belum memiliki preset `subject.kind: 'environment_object_only'`.
-- `lib/operator-presets.js` belum memiliki preset `multiplier_home_living_no_vo_asmr`.
+```js
+// PRESETS berakhir di `multiplier_home_living_no_vo_asmr` (baris 684).
+```
 
 **Code Sesudah (Proposed/After):**
-- Tambah `home_living_serene_interior` dan `home_living_product_still_life` di `SYSTEM_VISUAL_IDENTITIES` dengan `subject.kind: 'environment_object_only'` dan `wardrobe.mode: 'not_applicable'`.
-- Tambah `multiplier_home_living_no_vo_asmr` (`campaign_kinds: ['multiplier_campaign', 'product_campaign']`, `audio_engine_mode: 'no_vo'`, `no_vo_audio_bed: 'native_sfx_ambience'`, `visual_identity_preset_id: 'home_living_serene_interior'`) di `OPERATOR_PRESETS`.
+```js
+// Tambahkan 2 preset sistem pada PRESETS:
+// 1. `shopee_2clip_showcase_vo` ("Shopee 2 Klip Direct Showcase (Dengan VO — Omni Flash)")
+//    - campaign_kinds: ['multiplier_campaign', 'product_campaign']
+//    - basic_strategy: narrative_mode 'Direct_Showcase', audio_engine_mode 'minimax_tts', mandatory_outro_line 'Cek keranjang sekarang ya!'
+//    - visual_engine: { visual_style: 'UGC', visual_mode: 'hybrid_lock', video_model: 'omni_flash', clip_duration: 4, face_visibility: 'Faceless', target_clips_count: 2, words_per_clip: '8-12 kata', aspect_ratio: '9:16' }
+//    - product_bridging: { is_bridging_active: true, bridging_mode: 'select_existing', bridge_at_clip: 1, bridge_duration_clips: 2, bridge_segments: [{ at_clip: 1, duration_clips: 2, role: 'intro' }] }
+//    - visual_swap: visual_identity_preset_id 'shopee_unboxing_pov_hands'
+//    - workflow: enable_tts true, audio_engine_mode 'minimax_tts', enable_motion_text true, ffmpeg_sync_option 'smart_sync'
+//
+// 2. `shopee_2clip_showcase_no_vo` ("Shopee 2 Klip Direct Showcase (Tanpa VO / ASMR — Omni Flash)")
+//    - campaign_kinds: ['multiplier_campaign', 'product_campaign']
+//    - basic_strategy: narrative_mode 'Direct_Showcase', audio_engine_mode 'no_vo', no_vo_audio_bed 'native_sfx_ambience', on_screen_text_mode 'short_caption_overlay', mandatory_outro_line ''
+//    - visual_engine: sama, words_per_clip '0 kata'
+//    - product_bridging: sama (at_clip: 1, duration_clips: 2)
+//    - visual_swap: visual_identity_preset_id 'shopee_unboxing_pov_hands'
+//    - workflow: enable_tts false, audio_engine_mode 'no_vo', no_vo_audio_bed 'native_sfx_ambience', on_screen_text_mode 'short_caption_overlay', ffmpeg_sync_option 'shortest'
+```
 
 ---
 
-### 13. UI & MCP (`app/settings/*`, `app/auto-pipeline/page.js`, `app/components/campaign-forms/*`, `app/pillar-campaigns/*`, `apps/mcp/tools.mjs`)
+### 8. Dropdown UI `Narrative Mode` ([app/settings/presets/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/settings/presets/page.js), [MultiplierConfigurationForm.js](file:///Users/sabeqmmursyid/_cfstudio/app/components/campaign-forms/MultiplierConfigurationForm.js), [PillarConfigurationForm.js](file:///Users/sabeqmmursyid/_cfstudio/app/components/campaign-forms/PillarConfigurationForm.js))
 
 **Code Sebelum (Current/Before):**
-- [app/settings/visual-identities/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/settings/visual-identities/page.js) & `AiVisualIdentityBuilderModal.js`: selalu merender field demographic & wardrobe.
-- [app/settings/presets/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/settings/presets/page.js) baris 1249–1301: grid 2 kartu `minimax_tts` vs `native_veo`; filter chip hanya `native_veo`.
-- [PillarConfigurationForm.js](file:///Users/sabeqmmursyid/_cfstudio/app/components/campaign-forms/PillarConfigurationForm.js) baris 389 & 642: `enable_tts: true` / checkbox tunggal.
-- [apps/mcp/tools.mjs](file:///Users/sabeqmmursyid/_cfstudio/apps/mcp/tools.mjs) baris 1106: `voiceover_text: z.string().trim().min(1)`.
+```jsx
+<option value="Storytelling">Storytelling</option>
+<option value="Problem-Solution">Problem-Solution</option>
+<option value="Educational">Educational</option>
+```
 
 **Code Sesudah (Proposed/After):**
-- Form VI menyembunyikan section *Demographic / Faceless Mode / Wardrobe / Sleeve Policy / Character Lock* ketika `subject.kind === 'environment_object_only'`.
-- Form Preset Manager menjadi grid 3 kartu termasuk **`🔇 Mode 3: Tanpa VO (Visual / ASMR)`** + sub-opsi `no_vo_audio_bed` & `on_screen_text_mode` + filter chip `🔇 Tanpa VO`.
-- Auto Pipeline (1-Click & Schedule Modal), `PillarConfigurationForm.js`, `MultiplierConfigurationForm.js`, dan `app/pillar-campaigns/[id]/page.js` memakai selector 3 mode `audio_engine_mode` + badge `🔇 Tanpa VO` / status `Dilewati (Mode Tanpa VO)`.
-- [lib/auto-pipeline-scheduler-runner.js](file:///Users/sabeqmmursyid/_cfstudio/lib/auto-pipeline-scheduler-runner.js) meneruskan `audio_engine_mode`, `no_vo_audio_bed`, dan `on_screen_text_mode` dari `pipeline_config_json` ke `autonomous-engine.js`.
-- [apps/mcp/tools.mjs](file:///Users/sabeqmmursyid/_cfstudio/apps/mcp/tools.mjs) menerima `voiceover_text` kosong bila `audio_engine_mode === 'no_vo'` serta menambahkan parameter `audio_engine_mode`, `no_vo_audio_bed`, dan `on_screen_text_mode` pada tool pipeline/schedule/campaign.
+```jsx
+<option value="Storytelling">Storytelling</option>
+<option value="Problem-Solution">Problem-Solution</option>
+<option value="Educational">Educational</option>
+<option value="Direct_Showcase">Direct Showcase (Produk Langsung Klip 1 / Shopee 2 Klip)</option>
+```
+
+---
+
+### 9. [tests/shopee-2clip-showcase.test.mjs](file:///Users/sabeqmmursyid/_cfstudio/tests/shopee-2clip-showcase.test.mjs) (File Baru)
+- Menguji `buildDynamicStoryCurveGuideline`, `buildBridgeZoningContract`, `buildOrganicPillarPrompt`, `buildReverseEngineeringBridgePrompt`, dan `buildMultiplierPhase2Prompt` dengan `targetClips = 2`, `bridge_at_clip = 1`, `bridge_duration_clips = 2`, `narrative_mode = 'Direct_Showcase'`: memastikan tidak ada frasa `KLIP 2 SAMPAI 1`, `Klip 1 hingga Klip 0`, `PADA KLIP 1 s/d 1 (PRE-BRIDGING)`, atau `strictly no product shown`.
+- Menguji `getSystemVisualIdentity('shopee_unboxing_pov_hands')` dan `getSystemVisualIdentity('shopee_tryon_faceless_fit')` via `validateAndNormalizeVisualIdentity`.
+- Menguji `deriveQcContext` + `evaluateQcChecklistVerdict` pada Klip 1 produk (`hands_only` & `crop_below_neck`) agar lulus tanpa false positive `pre_bridge_product` maupun `zero_hands`.
+- Menguji `resolveOperatorPreset` untuk `shopee_2clip_showcase_vo` & `shopee_2clip_showcase_no_vo`.

@@ -1059,6 +1059,7 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit}>
                       <option value="Storytelling">Storytelling (Bercerita / Vlog)</option>
                       <option value="Promo Hard Sell">Promo Hard Sell (Langsung Penawaran)</option>
                       <option value="Educational Review">Educational Review (Edukasi & Ulasan)</option>
+                      <option value="Direct_Showcase">Direct Showcase (Shopee 2 Klip — Produk di Klip 1)</option>
                     </select>
                   </div>
 

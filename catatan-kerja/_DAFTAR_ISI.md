@@ -180,7 +180,8 @@ Terakhir diperbarui: 24 November 2026
 
 | File | Ringkasan |
 |---|---|
-| [implementation_plan.md](../implementation_plan.md) | Rencana aktif `fitur/smart-matcher-2plus2`: Blueprint–Product Smart Matcher, Peran Produk (`promo_role`), Mockup UI & Autopilot Kuota 2+2 Video Multiplier |
+| [implementation_plan.md](../implementation_plan.md) | Rencana aktif `fitur/shopee-2klip-tryon-unboxing`: VI & Preset Shopee 2 Klip (`shopee_unboxing_pov_hands`, `shopee_tryon_faceless_fit`, `Direct_Showcase`, guard `bridgeAtClip === 1`, VO & No-VO) |
+| [home_living_no_human_no_vo_arsip_20261124.md](rencana/home_living_no_human_no_vo_arsip_20261124.md) | Arsip Implementation Plan: Visual Identity Tanpa Manusia (`environment_object_only`) & Mode Video Tanpa VO (`no_vo`) (dirilis v2.60.0) |
 | [multiplier_vo_auto_repair_arsip_20261123.md](rencana/multiplier_vo_auto_repair_arsip_20261123.md) | Arsip Implementation Plan: Pengaman Auto-Repair VO Kosong & Fallback Key Dinamis Multiplier (dirilis v2.57.13) |
 | [enrich_vision_kemasan_implementation_plan.md](rencana/enrich_vision_kemasan_implementation_plan.md) | Arsip Implementation Plan: Enrich AI Multimodal Vision & Deteksi Kemasan Akurat (dirilis v2.55.0) |
 | [scraper_foto_galeri_r02_implementation_plan.md](rencana/scraper_foto_galeri_r02_implementation_plan.md) | Arsip Implementation Plan: Scraper Foto Galeri & Rubrik E-Commerce Revisi 02 Bagian B S5–S9 (dirilis v2.55.0) |
