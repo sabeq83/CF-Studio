@@ -254,6 +254,7 @@ test('Pipeline workers, scheduler, processor, and MCP schemas wire No-VO without
   const procSrc = fs.readFileSync(path.join(ROOT, 'lib/video-studio-processor.js'), 'utf8');
   assert.ok(procSrc.includes("const isNoVoMode = jobConfig.audioEngineMode === 'no_vo';"));
   assert.ok(procSrc.includes("audioEngineMode === 'no_vo'"));
+  assert.ok(procSrc.includes('if (!isNativeVeoAudio && sfxVolume > 0)'));
 
   const cspSrc = fs.readFileSync(path.join(ROOT, 'lib/custom-storyboard-pipeline.js'), 'utf8');
   assert.ok(cspSrc.includes("audioEngineMode === 'no_vo'"));
