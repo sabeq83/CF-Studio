@@ -1,6 +1,6 @@
 # Kartu Menu: Pillar Campaign
 
-Terakhir dicek: 24 November 2026 · Versi aplikasi: v2.60.0
+Terakhir dicek: 24 November 2026 · Versi aplikasi: v2.61.0
 Alamat: `/pillar-campaigns` · Kelompok: WORKFLOW · Kunci izin menu: `pillar_campaign`
 
 ## Fungsi
@@ -30,6 +30,7 @@ Mesin kampanye konten strategis berbasis pilar editorial. Mengambil baris dari C
 5. **Regenerasi**: ulang satu klip (`items/[itemId]/regenerate-t2i`) kini membawa klip lain yang sudah jadi ke revisi baru (hitungan tidak turun). `items/[itemId]/regenerate-start-frames` menerima `{"only_missing": true}` untuk membuat ulang hanya klip kosong; tanpa opsi itu tetap membuat ulang semua klip.
 6. **Pantauan mesin**: `GET /api/v2/pillar-campaigns/scheduler-control` menampilkan `start_frame_worker` (last_tick, last_claim_at, stuck_recoveries) dan langkah penjadwal terlama. Pekerja start frame pulih sendiri bila satu putaran menggantung > 10 menit. Kirim produksi banyak video sekaligus tetap sebaiknya diberi jeda 10–15 menit (CFA sudah bertahap).
 7. **Mode Tanpa VO (`no_vo`) & Guard Polling G-Labs (`lib/glabs-poll-guard.js`)**: Form & API Pillar mendukung `audio_engine_mode`, `no_vo_audio_bed`, dan `on_screen_text_mode`. Scheduler mencegah loop polling zombie pada item `workflow_status = 'completed'` (`shouldSkipZombiePillarPoll`), membatasi unduhan clip G-Labs dengan timeout 15 detik, dan menghentikan retry error jaringan sementara setelah batas percobaan (`GLABS_MAX_POLL_NETWORK_RETRIES = 6`).
+8. **Shopee 2 Klip `Direct_Showcase` (`bridge_at_clip: 1`):** `PillarConfigurationForm.js` menyediakan opsi `Direct_Showcase`; `lib/prompts.js` dan `lib/kb/dynamic-story-curve.js` tidak lagi mencetak `PADA KLIP 1 s/d 1 (PRE-BRIDGING)` maupun `KLIP 2 SAMPAI 1`, dan `lib/start-frame-visual-qc.js` menilai Klip 1 unboxing (`hands_only`) serta try-on (`crop_below_neck`) sebagai `PRODUCT/HERO FRAME`.
 
 ## Belum ada / batasan
 - Belum ada integrasi otomatis dari Content Planner ke Pillar Campaign (harus manual ingest).

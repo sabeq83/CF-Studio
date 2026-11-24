@@ -1,6 +1,6 @@
 # Kartu Menu: RE Campaign
 
-Terakhir dicek: 24 November 2026 · Versi aplikasi: v2.60.0
+Terakhir dicek: 24 November 2026 · Versi aplikasi: v2.61.0
 Alamat: `/re-campaigns` · Kelompok: WORKFLOW · Kunci izin menu: `re_campaign`
 
 ## Fungsi
@@ -28,6 +28,7 @@ Mesin kampanye video produk berbasis reverse engineering. Mengambil blueprint da
 2. Render final memakai slot produksi (`lib/render-slot.js`); Video Studio mengalah saat RE Campaign merender.
 3. Status item: `pending` → `processing` → `completed` / `failed`. Jangan re-render item `completed` tanpa alasan.
 4. Mendukung konfigurasi `audio_engine_mode` (`minimax_tts` / `no_vo`), `no_vo_audio_bed`, dan `on_screen_text_mode`, serta guard polling G-Labs (`lib/glabs-poll-guard.js`) dengan timeout unduhan 15 detik dan batas retry jaringan.
+5. Mendukung `Direct_Showcase` & `bridge_at_clip = 1` pada `buildReverseEngineeringPrompt` / `buildReverseEngineeringBridgePrompt` tanpa mencetak zona `Klip 1 hingga Klip 0` atau larangan pra-produk saat seluruh klip merupakan klip produk.
 
 ## Belum ada / batasan
 - Render massal (bulk render) tersedia tapi membutuhkan antrian; tidak instan.

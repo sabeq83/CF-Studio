@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.61.0 — VI & Preset Shopee 2 Klip Direct Showcase (Unboxing & Try-On) (24/11/2026)
+- Tambah 2 System VI shopee_unboxing_pov_hands dan shopee_tryon_faceless_fit
+- Tambah 2 Operator Preset shopee_2clip_showcase_vo dan shopee_2clip_showcase_no_vo serta opsi UI Direct_Showcase
+- Perbaiki kurva cerita 2 klip, zona intro Klip 1, dan guard bridgeAtClip=1 di dynamic-story-curve, bridge-prompt-zones, dan prompts.js
+- Pertahankan modest_hands_active pada metaphor-policy & start-frame-visual-qc untuk Klip 1 produk
+- Perbarui 5 kartu menu terdampak
+
 ## V2.60.0 — Zero-Human Home & Living, Mode Tanpa VO, Smart Resume Multiplier & Guard Polling G-Labs (24/11/2026)
 - Tambah Visual Identity zero_human dan 2 system VI Home & Living lengkap dengan metadata label
 - Tambah mode audio_engine_mode no_vo dan on_screen_text_mode di Auto Pipeline, Multiplier, Pillar, RE, dan Preset

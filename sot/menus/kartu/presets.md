@@ -1,6 +1,6 @@
 # Kartu Menu: Preset Manager
 
-Terakhir dicek: 24 November 2026 · Versi aplikasi: v2.60.0
+Terakhir dicek: 24 November 2026 · Versi aplikasi: v2.61.0
 Alamat: `/settings/presets` · Kelompok: PLANNING · Kunci izin menu: `operator_presets`
 
 ## Fungsi
@@ -26,6 +26,7 @@ Perpustakaan preset strategi produksi yang bisa dipilih saat menjalankan kampany
 3. Menghapus preset yang sedang dipakai jadwal aktif tidak memblokir jadwal (jadwal menyimpan konfigurasi sendiri).
 4. Form edit/clone menyediakan seluruh 5 opsi `Digunakan untuk Campaign` (`brand_editorial`, `product_campaign`, `recipe_campaign`, `multiplier_campaign`, `recipe_labs`) dan mendukung multi-centang agar satu preset bisa dipakai di lebih dari satu jenis pipeline.
 5. `lib/operator-presets.js` mendukung konfigurasi audio `audio_engine_mode`, `no_vo_audio_bed`, dan `on_screen_text_mode` sehingga mode Tanpa VO (`no_vo`) dapat disimpan di preset.
+6. Tersedia 2 preset sistem Shopee 2 Klip (`shopee_2clip_showcase_vo` & `shopee_2clip_showcase_no_vo`, model `omni_flash`, `2 × 4 dtk`, `bridge_at_clip: 1`, `bridge_duration_clips: 2`, `narrative_mode: 'Direct_Showcase'`), serta opsi dropdown `Direct_Showcase` pada form editor Preset Manager.
 
 ## Belum ada / batasan
 - Belum ada versioning preset; perubahan preset langsung overwrite.
