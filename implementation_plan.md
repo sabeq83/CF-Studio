@@ -39,7 +39,7 @@
 ### Tahap 4 — Verifikasi Unit Test, Build & Deploy Dev
 - [x] Tambah dan jalankan unit test VI `environment_object_only` & mode `no_vo` (`PG_SEARCH_PATH=dev node --test ...`)
 - [x] Jalankan `DISABLE_AUTO_MIGRATIONS=true PG_SEARCH_PATH=dev npm run build`
-- [ ] Push branch `fitur/home-living-no-human-no-vo`, deploy ke **Dev (`5020/7020`)**, dan uji E2E 1 kampanye Home Living
+- [x] Push branch `fitur/home-living-no-human-no-vo`, deploy ke **Dev (`5020/7020`)**, dan uji E2E 1 kampanye Home Living
 
 ---
 
