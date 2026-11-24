@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.60.0 — Zero-Human Home & Living, Mode Tanpa VO, Smart Resume Multiplier & Guard Polling G-Labs (24/11/2026)
+- Tambah Visual Identity zero_human dan 2 system VI Home & Living lengkap dengan metadata label
+- Tambah mode audio_engine_mode no_vo dan on_screen_text_mode di Auto Pipeline, Multiplier, Pillar, RE, dan Preset
+- Tambah Smart Resume Retry, tracking failed_stage, idempoten T2I, timeout T2I 120s, dan fix filtergraph SFX Multiplier
+- Tambah lib/glabs-poll-guard.js untuk timeout download 15s, batas retry jaringan, dan cegah zombie poll Pillar
+- Perbarui kartu menu terdampak
+
 ## V2.59.0 — Konsistensi Foto Produk Bridging Multiplier, Identity Lock T2I & UI Preview (24/11/2026)
 - Hormati active_photo produk via resolver terpusat product-photo-policy dan product-reference-resolver
 - Terapkan kontrak Identity Lock, subject wrapper, expected_reference_sha256s, webhookOverride, dan sanitasi non-bridging pada T2I Multiplier

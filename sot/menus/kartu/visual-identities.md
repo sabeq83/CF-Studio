@@ -1,6 +1,6 @@
 # Kartu Menu: Visual Identity
 
-Terakhir dicek: 19 November 2026 · Versi aplikasi: v2.57.0
+Terakhir dicek: 24 November 2026 · Versi aplikasi: v2.60.0
 Alamat: `/settings/visual-identities` · Kelompok: PLANNING · Kunci izin menu: `operator_presets`
 
 ## Fungsi
@@ -33,6 +33,7 @@ Studio karakter visual brand. Menyimpan preset gaya visual yang menentukan tampi
 4. **Character Lock & Strict Mode:** VI dengan `subject.kind = stylized_3d_character` yang mengisi `subject.universe_profile_id` / `universe_slug` + `character_keys` akan melampirkan gambar acuan karakter Universe di tiap start frame.
    - Bila `character_lock_mode = 'strict'`, sistem mengisolasi karakter secara mutlak: hanya karakter dalam daftar `character_keys` yang di-resolve, prompt intrusion (seperti kemunculan nama karakter lain) diabaikan, dan jika aset referensi belum berstatus `approved` atau file hilang dari disk maka eksekusi start frame langsung digagalkan dengan error `REFERENCE_NOT_RESOLVED` tanpa fallback.
 5. Bila id VI tidak ditemukan, resolver jatuh ke VI default (Muslimah Sage Kitchen); custom storyboard tidak menyimpan snapshot default itu.
+6. Mendukung `zero_human` (`subject.kind`) untuk konten tanpa figur manusia, serta menyediakan 2 System VI Home & Living: `Home & Living — Serene Interior (Zero-Human)` dan `Home & Living — Product Still Life (Zero-Human)` dengan fallback label di `lib/visual-identity-system-presets.js`.
 
 ## Belum ada / batasan
 - Belum ada preview live gaya visual sebelum dikonfirmasi.

@@ -1,6 +1,6 @@
 # Kartu Menu: Multiplier Labs
 
-Terakhir dicek: 24 November 2026 · Versi aplikasi: v2.59.0 (fitur/multiplier-bridging-foto)
+Terakhir dicek: 24 November 2026 · Versi aplikasi: v2.60.0
 Alamat: `/multiplier-lab` (form) dan `/multiplier-lab/<id>` (detail hasil) · Kelompok: WORKFLOW · Kunci izin menu: `multiplier_lab`
 
 ## Fungsi
@@ -26,7 +26,7 @@ Pembuka viral tanpa sebut produk → jembatan ke produk → bukti/hasil → ajak
 - Form: `app/components/campaign-forms/MultiplierConfigurationForm.js` (halaman `app/multiplier-lab/page.js` hanya pembungkus)
 - Detail: `app/multiplier-lab/[id]/page.js`
 - API: `app/api/v2/multiplier/` — `route`, `generate-angles`, `[id]`, `[id]/approve`, `[id]/retry`, `[id]/update-creative`, `[id]/regenerate-t2i`, `[id]/regenerate-start-frames`, `[id]/replace-start-frame`, `[id]/sync-contentflow`, `[id]/sync-nextcloud`
-- Logika inti: `lib/re-multiplier-worker.js` (± 1.800 baris — cari dengan kata kunci), `lib/multiplier-start-frame-request.js`, `lib/product-photo-policy.js`, `lib/product-reference-resolver.js`, `lib/multiplier-angle-generator.js`, `lib/multiplier-pairing.js`, `lib/multiplier-audio-config.js`, `lib/blueprint-product-matcher.js` (`GET /api/v2/deconstruct/matches` untuk rekomendasi Alat Dapur vs Bahan Resep)
+- Logika inti: `lib/re-multiplier-worker.js` (± 1.800 baris — cari dengan kata kunci), `lib/multiplier-resume.js`, `lib/multiplier-artifacts.js`, `lib/multiplier-start-frame-request.js`, `lib/product-photo-policy.js`, `lib/product-reference-resolver.js`, `lib/multiplier-angle-generator.js`, `lib/multiplier-pairing.js`, `lib/multiplier-audio-config.js`, `lib/blueprint-product-matcher.js` (`GET /api/v2/deconstruct/matches` untuk rekomendasi Alat Dapur vs Bahan Resep)
 - Komponen pratinjau foto bridging: `app/components/BridgingProductReferenceCard.js`
 - Pedoman naskah: `kb/MULTIPLIER_BRIDGING_GUIDE.md`
 - Tabel data: `re_multiplier_tasks` (terhubung ke `re_deconstructed_assets`)
@@ -40,6 +40,7 @@ Pembuka viral tanpa sebut produk → jembatan ke produk → bukti/hasil → ajak
 6. Editor detail & worker TTS menormalisasi key VO adegan (`narration` ↔ `narration_transcript`, termasuk alias/typo AI seperti `narrating_transcript` dan pencocokan dinamis) saat generate dan saat `update-creative`; jika ada VO adegan kosong saat `remaking`, worker menjalankan 1× auto-repair dan menahan ke `waiting_approval` bila tetap kosong sebelum tahap T2I/TTS.
 7. Resolusi foto produk bridging menghormati `active_photo` (`resolveCampaignProductPhotoPath`) dan kontrak T2I `buildMultiplierStartFrameRequest` (`{ category: 'subject' }`, `[HIGHEST PRIORITY PRODUCT IDENTITY LOCK]`, `expected_reference_sha256s`, `webhookOverride`, sanitasi non-bridging, fail-fast bila file hilang); halaman detail memakai `zoneOf`, `safeJsonParse`, empty-state batch, dan kartu `BridgingProductReferenceCard`.
 8. **Smart Resume & Retry (`retry_task` / `failed_stage`):** Worker menyimpan `failed_stage`, `handleT2iGeneration` me-reuse start frame per klip yang sudah ada di disk, dan tombol retry baris (`smart_resume`) melanjutkan langsung dari tahap terakhir yang gagal (mis. `ffmpeg_muxing` bila klip `.mp4` sudah lengkap atau `uploading_assets` bila video final sudah dirender) tanpa mengulang Gemini/T2I; `getStageStatus` juga mendukung mode `no_vo` / `native_veo`.
+9. **Mode Tanpa VO (`no_vo`) & T2I Polling 120s:** Form Multiplier (`MultiplierConfigurationForm.js`) mendukung pemilihan `audio_engine_mode: 'no_vo'` beserta `no_vo_audio_bed` dan `on_screen_text_mode`, worker melewatkan TTS tanpa menulis kolom non-eksis, dan polling T2I diperpanjang hingga 120 detik dengan logging kegagalan.
 
 ## Belum ada / batasan
 - Blueprint harus sudah dibedah di Deconstruct Lab; menu ini tidak membedah video sendiri.

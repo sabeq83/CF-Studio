@@ -1,6 +1,6 @@
 # Kartu Menu: Preset Manager
 
-Terakhir dicek: 23 November 2026 · Versi aplikasi: v2.57.11
+Terakhir dicek: 24 November 2026 · Versi aplikasi: v2.60.0
 Alamat: `/settings/presets` · Kelompok: PLANNING · Kunci izin menu: `operator_presets`
 
 ## Fungsi
@@ -25,6 +25,7 @@ Perpustakaan preset strategi produksi yang bisa dipilih saat menjalankan kampany
 2. Preset tidak memuat data brand; brand dipilih terpisah saat membuat kampanye.
 3. Menghapus preset yang sedang dipakai jadwal aktif tidak memblokir jadwal (jadwal menyimpan konfigurasi sendiri).
 4. Form edit/clone menyediakan seluruh 5 opsi `Digunakan untuk Campaign` (`brand_editorial`, `product_campaign`, `recipe_campaign`, `multiplier_campaign`, `recipe_labs`) dan mendukung multi-centang agar satu preset bisa dipakai di lebih dari satu jenis pipeline.
+5. `lib/operator-presets.js` mendukung konfigurasi audio `audio_engine_mode`, `no_vo_audio_bed`, dan `on_screen_text_mode` sehingga mode Tanpa VO (`no_vo`) dapat disimpan di preset.
 
 ## Belum ada / batasan
 - Belum ada versioning preset; perubahan preset langsung overwrite.

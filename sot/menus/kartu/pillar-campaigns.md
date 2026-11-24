@@ -1,6 +1,6 @@
 # Kartu Menu: Pillar Campaign
 
-Terakhir dicek: 18 November 2026 · Versi aplikasi: v2.54.1
+Terakhir dicek: 24 November 2026 · Versi aplikasi: v2.60.0
 Alamat: `/pillar-campaigns` · Kelompok: WORKFLOW · Kunci izin menu: `pillar_campaign`
 
 ## Fungsi
@@ -19,7 +19,7 @@ Mesin kampanye konten strategis berbasis pilar editorial. Mengambil baris dari C
 ## Lokasi (untuk agent)
 - Halaman: `app/pillar-campaigns/page.js`, `app/pillar-campaigns/[id]/page.js`
 - API: `app/api/v2/pillar-campaigns/` (route, [id], bulk, ingest-planner, items)
-- Logika inti: `lib/pillar-campaign-approval.js`, `lib/pillar-campaign-ingest.js`
+- Logika inti: `lib/pillar-campaign-approval.js`, `lib/pillar-campaign-ingest.js`, `lib/glabs-poll-guard.js`
 - Tabel data: `pillar_campaigns`, `strategic_campaigns` (tenant-isolated)
 
 ## Aturan penting & jebakan
@@ -29,6 +29,7 @@ Mesin kampanye konten strategis berbasis pilar editorial. Mengambil baris dari C
 4. **Gambar awal (start frame) sejak v2.54.1**: klip yang gagal saat pra-render (timeout jalur G-Labs, deadlock) otomatis diantrekan ulang ke durable worker, jadi item tidak lagi diam di `partial`. Menunggu jalur/polling G-Labs tidak dihitung sebagai percobaan (batas 5; error sementara 8).
 5. **Regenerasi**: ulang satu klip (`items/[itemId]/regenerate-t2i`) kini membawa klip lain yang sudah jadi ke revisi baru (hitungan tidak turun). `items/[itemId]/regenerate-start-frames` menerima `{"only_missing": true}` untuk membuat ulang hanya klip kosong; tanpa opsi itu tetap membuat ulang semua klip.
 6. **Pantauan mesin**: `GET /api/v2/pillar-campaigns/scheduler-control` menampilkan `start_frame_worker` (last_tick, last_claim_at, stuck_recoveries) dan langkah penjadwal terlama. Pekerja start frame pulih sendiri bila satu putaran menggantung > 10 menit. Kirim produksi banyak video sekaligus tetap sebaiknya diberi jeda 10–15 menit (CFA sudah bertahap).
+7. **Mode Tanpa VO (`no_vo`) & Guard Polling G-Labs (`lib/glabs-poll-guard.js`)**: Form & API Pillar mendukung `audio_engine_mode`, `no_vo_audio_bed`, dan `on_screen_text_mode`. Scheduler mencegah loop polling zombie pada item `workflow_status = 'completed'` (`shouldSkipZombiePillarPoll`), membatasi unduhan clip G-Labs dengan timeout 15 detik, dan menghentikan retry error jaringan sementara setelah batas percobaan (`GLABS_MAX_POLL_NETWORK_RETRIES = 6`).
 
 ## Belum ada / batasan
 - Belum ada integrasi otomatis dari Content Planner ke Pillar Campaign (harus manual ingest).

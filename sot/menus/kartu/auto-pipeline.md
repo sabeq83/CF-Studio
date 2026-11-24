@@ -1,6 +1,6 @@
 # Kartu Menu: Auto Pipeline
 
-Terakhir dicek: 24 November 2026 · Versi aplikasi: v2.59.0 (fitur/multiplier-bridging-foto)
+Terakhir dicek: 24 November 2026 · Versi aplikasi: v2.60.0
 Alamat: `/auto-pipeline` · Kelompok: WORKFLOW · Kunci izin menu: `auto_pipeline`
 
 ## Fungsi
@@ -48,6 +48,7 @@ Pabrik konten otomatis. Dari satu masukan (produk, topik, resep, atau blueprint)
 7. Mode jadwal `selection_mode: 'auto_smart_match'` pada `multiplier_campaign` otomatis memilih pasangan `(blueprint, product)` dari `blueprint_product_matches` sesuai `target_promo_role` (`alat_dapur` / `bahan_resep`) sambil menghindari pengulangan blueprint 14 hari & produk 4 hari (`pickNextSmartMatchPair`), serta tersedia aksi `setup_multiplier_2plus2_quota` pada `POST /api/v2/recipes/auto-pipeline-schedules`.
 8. Eksekusi 1-klik (`POST /api/v2/recipes/autonomous-pipeline`) melakukan isolasi tenant yang konsisten pada aset blueprint Multiplier, menampilkan feedback validasi inline saat prasyarat belum lengkap, dan polling progress `recipe_labs` dilayani oleh `GET /api/v2/recipes/autonomous-pipeline/status`.
 9. Pemilihan produk Video Multiplier di tab Pipeline & Schedule menampilkan thumbnail foto aktif sesuai `active_photo` (`resolveCampaignProductPhotoPath`), status tinjauan (`photo_status`), serta kartu pratinjau `BridgingProductReferenceCard` beserta tautan cepat ke Product Database.
+10. Tab Pipeline & Schedule meneruskan konfigurasi `audio_engine_mode` (`minimax_tts` / `no_vo`), `no_vo_audio_bed`, dan `on_screen_text_mode` untuk mode produksi tanpa voice-over serta mendukung Visual Identity `zero_human`.
 
 ## Belum ada / batasan
 - Jumlah dan isi jadwal aktif berubah-ubah; jangan mengutip daftar jadwal dari dokumen, cek langsung lewat `cf_list_schedules`.
