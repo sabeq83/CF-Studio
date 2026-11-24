@@ -261,6 +261,8 @@ test('Pipeline workers, scheduler, processor, and MCP schemas wire No-VO without
 
   const reMulSrc = fs.readFileSync(path.join(ROOT, 'lib/re-multiplier-worker.js'), 'utf8');
   assert.ok(reMulSrc.includes('compileVeoAmbientOnlyPrompt'));
+  assert.ok(!reMulSrc.includes('tts_audio_path:'));
+  assert.ok(!reMulSrc.includes('tts_batch_id:'));
 
   const dbPgSrc = fs.readFileSync(path.join(ROOT, 'lib/db-pg.js'), 'utf8');
   assert.ok(dbPgSrc.includes('ADD COLUMN IF NOT EXISTS audio_engine_mode'));
