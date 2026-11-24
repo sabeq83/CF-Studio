@@ -69,6 +69,9 @@ export default function PillarConfigurationForm({
   const [wordsPerClip, setWordsPerClip] = useState('20-22 kata');
   const [visualMode, setVisualMode] = useState('pure_t2v'); // 'hybrid_lock' | 'pure_t2v'
   const [executionMode, setExecutionMode] = useState('full_autopilot');
+  const [audioEngineMode, setAudioEngineMode] = useState('minimax_tts');
+  const [noVoAudioBed, setNoVoAudioBed] = useState('native_sfx_ambience');
+  const [onScreenTextMode, setOnScreenTextMode] = useState('short_caption_overlay');
   const [enableTts, setEnableTts] = useState(true);
   const [enableGlabs, setEnableGlabs] = useState(true);
   const [enableFfmpeg, setEnableFfmpeg] = useState(true);
@@ -312,13 +315,19 @@ export default function PillarConfigurationForm({
     }
 
     // Accordion 5: Workflow Defaults
-    if (config.workflow) {
-      if (config.workflow.enable_tts !== undefined) setEnableTts(Boolean(config.workflow.enable_tts));
-      if (config.workflow.enable_glabs !== undefined) setEnableGlabs(Boolean(config.workflow.enable_glabs));
-      if (config.workflow.enable_ffmpeg !== undefined) setEnableFfmpeg(Boolean(config.workflow.enable_ffmpeg));
-      if (config.workflow.enable_social_post !== undefined) setEnableSocialPost(Boolean(config.workflow.enable_social_post));
-      if (config.workflow.ffmpeg_sync_option) setFfmpegSyncOption(config.workflow.ffmpeg_sync_option);
-      if (config.workflow.ffmpeg_video_scale !== undefined) setFfmpegVideoScale(Number(config.workflow.ffmpeg_video_scale));
+    if (config.workflow || config.basic_strategy) {
+      const wf = config.workflow || {};
+      const bs = config.basic_strategy || {};
+      const nextAudioMode = wf.audio_engine_mode || bs.audio_engine_mode || (wf.enable_tts === false ? 'native_veo' : 'minimax_tts');
+      setAudioEngineMode(nextAudioMode);
+      setNoVoAudioBed(wf.no_vo_audio_bed || bs.no_vo_audio_bed || 'native_sfx_ambience');
+      setOnScreenTextMode(wf.on_screen_text_mode || bs.on_screen_text_mode || 'short_caption_overlay');
+      setEnableTts(nextAudioMode === 'minimax_tts' && (wf.enable_tts !== undefined ? Boolean(wf.enable_tts) : true));
+      if (wf.enable_glabs !== undefined) setEnableGlabs(Boolean(wf.enable_glabs));
+      if (wf.enable_ffmpeg !== undefined) setEnableFfmpeg(Boolean(wf.enable_ffmpeg));
+      if (wf.enable_social_post !== undefined) setEnableSocialPost(Boolean(wf.enable_social_post));
+      if (wf.ffmpeg_sync_option) setFfmpegSyncOption(wf.ffmpeg_sync_option);
+      if (wf.ffmpeg_video_scale !== undefined) setFfmpegVideoScale(Number(wf.ffmpeg_video_scale));
     }
   };
 
@@ -386,7 +395,10 @@ export default function PillarConfigurationForm({
       },
       workflow: {
         approval_mode: 'storyboard',
-        enable_tts: true,
+        audio_engine_mode: audioEngineMode,
+        no_vo_audio_bed: noVoAudioBed,
+        on_screen_text_mode: onScreenTextMode,
+        enable_tts: audioEngineMode === 'minimax_tts' && Boolean(enableTts),
         enable_glabs: true,
         enable_ffmpeg: true,
         enable_social_post: false,
@@ -639,7 +651,10 @@ export default function PillarConfigurationForm({
           target_demographic: targetDemographic,
           target_demographic_custom: targetDemographicCustom,
           nextcloud_parent_folder: nextcloudParentFolder.trim(),
-          enable_tts: enableTts ? 1 : 0,
+          audio_engine_mode: audioEngineMode,
+          no_vo_audio_bed: noVoAudioBed,
+          on_screen_text_mode: onScreenTextMode,
+          enable_tts: audioEngineMode === 'minimax_tts' && enableTts ? 1 : 0,
           enable_glabs: enableGlabs ? 1 : 0,
           enable_ffmpeg: enableFfmpeg ? 1 : 0,
           enable_social_post: enableSocialPost ? 1 : 0,
@@ -1500,9 +1515,21 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit}>
                     <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>Tahapan Workflow Aktif:</label>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
 
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface)', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
-                        <span style={{ fontSize: '12px', color: 'var(--text-primary)', fontWeight: 500 }}>Enable TTS (Voiceover)</span>
-                        <input type="checkbox" checked={enableTts} onChange={e => setEnableTts(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, background: 'var(--surface)', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+                        <span style={{ fontSize: '12px', color: 'var(--text-primary)', fontWeight: 600 }}>Mode Audio / VO</span>
+                        <select
+                          value={audioEngineMode}
+                          onChange={e => {
+                            const nextMode = e.target.value;
+                            setAudioEngineMode(nextMode);
+                            setEnableTts(nextMode === 'minimax_tts');
+                          }}
+                          style={{ padding: '6px 8px', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '6px', fontSize: '12px' }}
+                        >
+                          <option value="minimax_tts">🎙️ TTS Voiceover (MiniMax/Gemini)</option>
+                          <option value="native_veo">🔊 Native Veo 3.1 Audio</option>
+                          <option value="no_vo">🔇 Tanpa VO (ASMR / Visual)</option>
+                        </select>
                       </div>
 
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface)', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
@@ -1523,8 +1550,38 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit}>
                     </div>
                   </div>
 
+                  {/* Mode Tanpa VO Sub-Options */}
+                  {audioEngineMode === 'no_vo' && (
+                    <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '14px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      <div>
+                        <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Bed Audio Non-VO:</label>
+                        <select
+                          style={{ width: '100%', padding: '10px', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px', fontSize: '13px' }}
+                          value={noVoAudioBed}
+                          onChange={e => setNoVoAudioBed(e.target.value)}
+                        >
+                          <option value="native_sfx_ambience">SFX &amp; Ambience Ruangan Alami</option>
+                          <option value="bgm_only">Musik BGM Instrumental Saja</option>
+                          <option value="native_sfx_plus_bgm">SFX Ruangan + BGM Campur</option>
+                          <option value="silent">Senyap Total (Silent)</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Teks Layar Pengganti Cerita:</label>
+                        <select
+                          style={{ width: '100%', padding: '10px', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px', fontSize: '13px' }}
+                          value={onScreenTextMode}
+                          onChange={e => setOnScreenTextMode(e.target.value)}
+                        >
+                          <option value="short_caption_overlay">Aktif — Teks Singkat 3-6 Kata</option>
+                          <option value="off">Nonaktif — Visual Murni</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Audio settings */}
-                  {enableTts && (
+                  {audioEngineMode === 'minimax_tts' && enableTts && (
                     <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '14px' }}>
                       <label style={{ fontSize: '13px', fontWeight: 700, color: 'var(--status-neutral)', display: 'block', marginBottom: '8px' }}>🔊 TTS Audio Engine Settings</label>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>

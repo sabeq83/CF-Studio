@@ -1017,7 +1017,9 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
                       Subject System
                     </span>
                     <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {proposal.config?.subject?.kind} ({proposal.config?.subject?.faceless_mode})
+                      {proposal.config?.subject?.kind === 'environment_object_only'
+                        ? '🏠 Zero-Human (Space & Object Only)'
+                        : `${proposal.config?.subject?.kind} (${proposal.config?.subject?.faceless_mode})`}
                     </span>
                   </div>
 

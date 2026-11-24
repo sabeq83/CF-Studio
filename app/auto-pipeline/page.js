@@ -306,6 +306,12 @@ export default function AutoPipelinePage() {
   const [schedReplizAccountIds, setSchedReplizAccountIds] = useState([]);
   const [schedAutoPublish, setSchedAutoPublish] = useState(true);
   const [schedPostAffiliateLink, setSchedPostAffiliateLink] = useState(true);
+  const [instantAudioModeOverride, setInstantAudioModeOverride] = useState('preset'); // 'preset' | 'minimax_tts' | 'native_veo' | 'no_vo'
+  const [instantNoVoAudioBed, setInstantNoVoAudioBed] = useState('native_sfx_ambience');
+  const [instantOnScreenTextMode, setInstantOnScreenTextMode] = useState('short_caption_overlay');
+  const [schedAudioModeOverride, setSchedAudioModeOverride] = useState('preset'); // 'preset' | 'minimax_tts' | 'native_veo' | 'no_vo'
+  const [schedNoVoAudioBed, setSchedNoVoAudioBed] = useState('native_sfx_ambience');
+  const [schedOnScreenTextMode, setSchedOnScreenTextMode] = useState('short_caption_overlay');
   const [instantPostAffiliateLink, setInstantPostAffiliateLink] = useState(true);
   const [instantGenerateRecipe, setInstantGenerateRecipe] = useState(true);
   const [schedGenerateRecipe, setSchedGenerateRecipe] = useState(true);
@@ -437,8 +443,13 @@ export default function AutoPipelinePage() {
   const videoModelName = rawVideoModel === 'veo_31_lite' ? 'Google Veo (8s)' : 'Veo Omni Flash (4s)';
   const bs = activePresetConfig?.basic_strategy || {};
   const wf = activePresetConfig?.workflow || {};
-  const audioEngineMode = wf.audio_engine_mode || bs.audio_engine_mode || 'minimax_tts';
+  const presetAudioEngineMode = wf.audio_engine_mode || bs.audio_engine_mode || 'minimax_tts';
+  const audioEngineMode = instantAudioModeOverride !== 'preset' ? instantAudioModeOverride : presetAudioEngineMode;
   const isNativeVeo = audioEngineMode === 'native_veo';
+  const isNoVoMode = audioEngineMode === 'no_vo';
+  const effectiveNoVoAudioBed = instantAudioModeOverride === 'no_vo'
+    ? instantNoVoAudioBed
+    : (wf.no_vo_audio_bed || bs.no_vo_audio_bed || 'native_sfx_ambience');
   const googleVoicePersona = wf.google_voice_persona || bs.google_voice_persona || 'Kore';
   const rawVoicePersona = bs.voice_persona || activePresetConfig?.voice_persona || 'English_causual_narrator_vv1';
   const voicePersonaName = rawVoicePersona.replace(/_/g, ' ');
@@ -1255,6 +1266,16 @@ export default function AutoPipelinePage() {
           visual_style: recipeLabsVisualStyle,
           post_to_facebook: postToFacebook,
           post_link_affiliate: instantPostAffiliateLink,
+          ...(instantAudioModeOverride !== 'preset' ? {
+            audio_engine_mode: instantAudioModeOverride,
+            no_vo_audio_bed: instantNoVoAudioBed,
+            on_screen_text_mode: instantOnScreenTextMode,
+            overrides: {
+              audio_engine_mode: instantAudioModeOverride,
+              no_vo_audio_bed: instantNoVoAudioBed,
+              on_screen_text_mode: instantOnScreenTextMode
+            }
+          } : {}),
           generate_recipe: (instantCampaignType === 'multiplier_campaign' || instantCampaignType === 'recipe_campaign') ? instantGenerateRecipe : undefined,
           // Parameter Khusus Threads Series Utas Berseri
           post_objective: threadsObjective,
@@ -1611,6 +1632,9 @@ export default function AutoPipelinePage() {
       fetchProducts();
     }
     setSchedPostAffiliateLink(true);
+    setSchedAudioModeOverride('preset');
+    setSchedNoVoAudioBed('native_sfx_ambience');
+    setSchedOnScreenTextMode('short_caption_overlay');
     setSchedGenerateRecipe(true);
     setSchedRecipeProductMode('auto');
     setSchedRecipeProductId('');
@@ -1696,6 +1720,9 @@ export default function AutoPipelinePage() {
 
     setSchedSelectedCep(schedCfg.selected_cep || 'auto');
     setSchedPostAffiliateLink(schedCfg.post_link_affiliate !== false);
+    setSchedAudioModeOverride(schedCfg.audio_engine_mode || 'preset');
+    setSchedNoVoAudioBed(schedCfg.no_vo_audio_bed || 'native_sfx_ambience');
+    setSchedOnScreenTextMode(schedCfg.on_screen_text_mode || 'short_caption_overlay');
     setSchedGenerateRecipe(schedCfg.generate_recipe !== false);
     if (pType === 'recipe_campaign') {
       const initMode = schedCfg.product_mode
@@ -1878,6 +1905,10 @@ export default function AutoPipelinePage() {
                             }
                           : { visual_identity_preset_id: schedViId }))));
         editPipelineConfig.post_link_affiliate = schedPostAffiliateLink;
+        const schedAudioOverrideFields = schedAudioModeOverride !== 'preset'
+          ? { audio_engine_mode: schedAudioModeOverride, no_vo_audio_bed: schedNoVoAudioBed, on_screen_text_mode: schedOnScreenTextMode }
+          : {};
+        Object.assign(editPipelineConfig, schedAudioOverrideFields);
         if (schedCampaignType === 'multiplier_campaign' || schedCampaignType === 'recipe_campaign') {
           editPipelineConfig.generate_recipe = schedGenerateRecipe;
         }
@@ -1915,6 +1946,9 @@ export default function AutoPipelinePage() {
         if (!data.success) throw new Error(data.error || 'Gagal memperbarui jadwal');
         showToast('Jadwal berhasil diperbarui! ✅');
       } else {
+        const schedAudioOverrideFields = schedAudioModeOverride !== 'preset'
+          ? { audio_engine_mode: schedAudioModeOverride, no_vo_audio_bed: schedNoVoAudioBed, on_screen_text_mode: schedOnScreenTextMode }
+          : {};
         // Create mode: Cek apakah Batch atau Single
         if (schedCampaignType === 'product_campaign' && selectedProductIds.length > 1) {
           // BATCH PRODUK: 1 Produk = 1 Baris Jadwal Mandiri
@@ -1955,7 +1989,7 @@ export default function AutoPipelinePage() {
               repliz_account_ids: schedReplizAccountIds,
               auto_publish_enabled: schedAutoPublish,
               timezone: 'Asia/Jakarta',
-              pipeline_config: { product_id: prodId, product_name: prodName, selected_cep: schedSelectedCep || 'auto', promotion_context: promoCtx, post_link_affiliate: schedPostAffiliateLink }
+              pipeline_config: { product_id: prodId, product_name: prodName, selected_cep: schedSelectedCep || 'auto', promotion_context: promoCtx, post_link_affiliate: schedPostAffiliateLink, ...schedAudioOverrideFields }
             };
           });
 
@@ -2010,7 +2044,8 @@ export default function AutoPipelinePage() {
                 content_pillar: kw, 
                 keyword: kw, 
                 use_brand_pillars: false, 
-                post_link_affiliate: schedPostAffiliateLink 
+                post_link_affiliate: schedPostAffiliateLink,
+                ...schedAudioOverrideFields
               }
             };
           });
@@ -2059,7 +2094,7 @@ export default function AutoPipelinePage() {
               repliz_account_ids: schedReplizAccountIds,
               auto_publish_enabled: schedAutoPublish,
               timezone: 'Asia/Jakarta',
-              pipeline_config: { content_pillar: pillar, post_link_affiliate: schedPostAffiliateLink }
+              pipeline_config: { content_pillar: pillar, post_link_affiliate: schedPostAffiliateLink, ...schedAudioOverrideFields }
             };
           });
 
@@ -2114,6 +2149,7 @@ export default function AutoPipelinePage() {
               pipeline_config: {
                 generate_recipe: schedGenerateRecipe,
                 post_link_affiliate: schedPostAffiliateLink,
+                ...schedAudioOverrideFields,
                 ...buildRecipeProductSubmitFields(schedRecipeProductMode, schedRecipeProductId)
               }
             };
@@ -2182,7 +2218,8 @@ export default function AutoPipelinePage() {
                 product_aware_angle: true,
                 execution_mode: 'full_autopilot',
                 generate_recipe: schedGenerateRecipe,
-                post_link_affiliate: schedPostAffiliateLink
+                post_link_affiliate: schedPostAffiliateLink,
+                ...schedAudioOverrideFields
               }
             };
           });
@@ -2241,7 +2278,8 @@ export default function AutoPipelinePage() {
                 product_id: prodId,
                 selected_cep: schedSelectedCep || 'auto',
                 promotion_context: angleText,
-                post_link_affiliate: schedPostAffiliateLink
+                post_link_affiliate: schedPostAffiliateLink,
+                ...schedAudioOverrideFields
               }
             };
           });
@@ -2376,6 +2414,7 @@ export default function AutoPipelinePage() {
                               }
                             : { visual_identity_preset_id: schedViIdSingle }))));
           pipelineConfigPayload.post_link_affiliate = schedPostAffiliateLink;
+          Object.assign(pipelineConfigPayload, schedAudioOverrideFields);
           if (schedCampaignType === 'multiplier_campaign' || schedCampaignType === 'recipe_campaign') {
             pipelineConfigPayload.generate_recipe = schedGenerateRecipe;
           }
@@ -3381,6 +3420,59 @@ export default function AutoPipelinePage() {
                 </div>
 
                 {/* 4 Specs Badges */}
+                <div style={{
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '0.75rem 0.9rem',
+                  display: 'grid',
+                  gridTemplateColumns: instantAudioModeOverride === 'no_vo' ? '1.3fr 1fr 1fr' : '1fr',
+                  gap: '0.75rem',
+                  alignItems: 'end'
+                }}>
+                  <label style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                    <span>🔊 Override Mode Audio / VO (Opsional)</span>
+                    <select
+                      value={instantAudioModeOverride}
+                      onChange={e => setInstantAudioModeOverride(e.target.value)}
+                      style={{ padding: '0.45rem 0.6rem', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: '0.8rem' }}
+                    >
+                      <option value="preset">Ikuti Bawaan Preset ({presetAudioEngineMode})</option>
+                      <option value="minimax_tts">🎙️ Paksa Pakai TTS Voiceover</option>
+                      <option value="native_veo">🔊 Paksa Native Veo 3.1 Audio</option>
+                      <option value="no_vo">🔇 Paksa Mode Tanpa VO (ASMR / Visual)</option>
+                    </select>
+                  </label>
+                  {instantAudioModeOverride === 'no_vo' && (
+                    <>
+                      <label style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                        <span>Bed Audio Non-VO</span>
+                        <select
+                          value={instantNoVoAudioBed}
+                          onChange={e => setInstantNoVoAudioBed(e.target.value)}
+                          style={{ padding: '0.45rem 0.6rem', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: '0.8rem' }}
+                        >
+                          <option value="native_sfx_ambience">SFX Ruangan Alami</option>
+                          <option value="bgm_only">BGM Instrumental</option>
+                          <option value="native_sfx_plus_bgm">SFX + BGM</option>
+                          <option value="silent">Senyap Total</option>
+                        </select>
+                      </label>
+                      <label style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                        <span>Teks Layar Cerita</span>
+                        <select
+                          value={instantOnScreenTextMode}
+                          onChange={e => setInstantOnScreenTextMode(e.target.value)}
+                          style={{ padding: '0.45rem 0.6rem', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: '0.8rem' }}
+                        >
+                          <option value="short_caption_overlay">Teks Layar Singkat</option>
+                          <option value="off">Visual Murni (Off)</option>
+                        </select>
+                      </label>
+                    </>
+                  )}
+                </div>
+
                 <div className="auto-pipeline-specs-grid" style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
@@ -3416,7 +3508,9 @@ export default function AutoPipelinePage() {
                       Model AI & Voice-Over
                     </span>
                     <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                      {isNativeVeo ? (
+                      {isNoVoMode ? (
+                        <>🤖 {videoModelName} • <span style={{ color: 'var(--status-warning)' }}>🔇 Tanpa VO [{effectiveNoVoAudioBed}]</span></>
+                      ) : isNativeVeo ? (
                         <>🤖 {videoModelName} • <span style={{ color: 'var(--status-success)' }}>🔊 Native Veo [{googleVoicePersona}]</span> ({targetLanguage})</>
                       ) : (
                         <>🤖 {videoModelName} • 🎙️ {voicePersonaName} ({targetLanguage})</>
@@ -9521,6 +9615,60 @@ export default function AutoPipelinePage() {
                     </div>
                   </div>
                 )}
+
+                {/* 🔊 Override Mode Audio / VO untuk Jadwal Ini */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: schedAudioModeOverride === 'no_vo' ? '1.3fr 1fr 1fr' : '1fr',
+                  gap: '0.65rem',
+                  background: 'var(--surface-raised)',
+                  padding: '0.75rem 1rem',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--border-subtle)',
+                  marginTop: '0.5rem'
+                }}>
+                  <label style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                    <span>🔊 Mode Audio / VO Jadwal</span>
+                    <select
+                      value={schedAudioModeOverride}
+                      onChange={e => setSchedAudioModeOverride(e.target.value)}
+                      style={{ height: '38px', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0 0.7rem', color: 'var(--text-primary)', fontSize: '0.82rem' }}
+                    >
+                      <option value="preset">Ikuti Bawaan Preset</option>
+                      <option value="minimax_tts">🎙️ Paksa TTS Voiceover</option>
+                      <option value="native_veo">🔊 Paksa Native Veo 3.1</option>
+                      <option value="no_vo">🔇 Paksa Mode Tanpa VO (ASMR / Visual)</option>
+                    </select>
+                  </label>
+                  {schedAudioModeOverride === 'no_vo' && (
+                    <>
+                      <label style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                        <span>Bed Audio Non-VO</span>
+                        <select
+                          value={schedNoVoAudioBed}
+                          onChange={e => setSchedNoVoAudioBed(e.target.value)}
+                          style={{ height: '38px', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0 0.7rem', color: 'var(--text-primary)', fontSize: '0.82rem' }}
+                        >
+                          <option value="native_sfx_ambience">SFX Ruangan Alami</option>
+                          <option value="bgm_only">BGM Saja</option>
+                          <option value="native_sfx_plus_bgm">SFX + BGM</option>
+                          <option value="silent">Senyap Total</option>
+                        </select>
+                      </label>
+                      <label style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                        <span>Teks Layar Cerita</span>
+                        <select
+                          value={schedOnScreenTextMode}
+                          onChange={e => setSchedOnScreenTextMode(e.target.value)}
+                          style={{ height: '38px', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '0 0.7rem', color: 'var(--text-primary)', fontSize: '0.82rem' }}
+                        >
+                          <option value="short_caption_overlay">Teks Singkat (3-6 Kata)</option>
+                          <option value="off">Visual Murni (Off)</option>
+                        </select>
+                      </label>
+                    </>
+                  )}
+                </div>
 
                 {/* 🛒 Toggle Kontrol Post Link Affiliate Shopee & Link di Bio */}
                 <div style={{

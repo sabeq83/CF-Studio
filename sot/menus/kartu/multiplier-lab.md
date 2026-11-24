@@ -39,6 +39,7 @@ Pembuka viral tanpa sebut produk → jembatan ke produk → bukti/hasil → ajak
 5. Render akhir memakai slot produksi, jadi membuat Video Studio menunggu.
 6. Editor detail & worker TTS menormalisasi key VO adegan (`narration` ↔ `narration_transcript`, termasuk alias/typo AI seperti `narrating_transcript` dan pencocokan dinamis) saat generate dan saat `update-creative`; jika ada VO adegan kosong saat `remaking`, worker menjalankan 1× auto-repair dan menahan ke `waiting_approval` bila tetap kosong sebelum tahap T2I/TTS.
 7. Resolusi foto produk bridging menghormati `active_photo` (`resolveCampaignProductPhotoPath`) dan kontrak T2I `buildMultiplierStartFrameRequest` (`{ category: 'subject' }`, `[HIGHEST PRIORITY PRODUCT IDENTITY LOCK]`, `expected_reference_sha256s`, `webhookOverride`, sanitasi non-bridging, fail-fast bila file hilang); halaman detail memakai `zoneOf`, `safeJsonParse`, empty-state batch, dan kartu `BridgingProductReferenceCard`.
+8. **Smart Resume & Retry (`retry_task` / `failed_stage`):** Worker menyimpan `failed_stage`, `handleT2iGeneration` me-reuse start frame per klip yang sudah ada di disk, dan tombol retry baris (`smart_resume`) melanjutkan langsung dari tahap terakhir yang gagal (mis. `ffmpeg_muxing` bila klip `.mp4` sudah lengkap atau `uploading_assets` bila video final sudah dirender) tanpa mengulang Gemini/T2I; `getStageStatus` juga mendukung mode `no_vo` / `native_veo`.
 
 ## Belum ada / batasan
 - Blueprint harus sudah dibedah di Deconstruct Lab; menu ini tidak membedah video sendiri.

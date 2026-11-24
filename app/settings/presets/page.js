@@ -69,6 +69,8 @@ const initialForm = {
   // Section 5: workflow
   approval_mode: 'storyboard',
   audio_engine_mode: 'minimax_tts',
+  no_vo_audio_bed: 'native_sfx_ambience',
+  on_screen_text_mode: 'short_caption_overlay',
   google_voice_persona: 'Kore',
   enable_native_sfx: true,
   enable_native_ambience: true,
@@ -170,11 +172,13 @@ function mapPresetToForm(p) {
     // workflow
     approval_mode: wf.approval_mode || 'storyboard',
     audio_engine_mode: wf.audio_engine_mode || bs.audio_engine_mode || 'minimax_tts',
+    no_vo_audio_bed: wf.no_vo_audio_bed || bs.no_vo_audio_bed || 'native_sfx_ambience',
+    on_screen_text_mode: wf.on_screen_text_mode || bs.on_screen_text_mode || 'short_caption_overlay',
     google_voice_persona: wf.google_voice_persona || bs.google_voice_persona || 'Kore',
     enable_native_sfx: wf.enable_native_sfx !== undefined ? Boolean(wf.enable_native_sfx) : (bs.enable_native_sfx !== undefined ? Boolean(bs.enable_native_sfx) : true),
     enable_native_ambience: wf.enable_native_ambience !== undefined ? Boolean(wf.enable_native_ambience) : (bs.enable_native_ambience !== undefined ? Boolean(bs.enable_native_ambience) : true),
     anti_music_guardrail: wf.anti_music_guardrail !== undefined ? Boolean(wf.anti_music_guardrail) : (bs.anti_music_guardrail !== undefined ? Boolean(bs.anti_music_guardrail) : true),
-    enable_tts: Boolean(wf.enable_tts),
+    enable_tts: (wf.audio_engine_mode || bs.audio_engine_mode) === 'no_vo' || (wf.audio_engine_mode || bs.audio_engine_mode) === 'native_veo' ? false : Boolean(wf.enable_tts),
     voice_provider: bs.voice_provider || 'minimax',
     voice_persona: bs.voice_persona || 'Indonesian_professional_anchor_vv2',
     voice_speed: Number(bs.voice_speed ?? 1.0),
@@ -225,6 +229,8 @@ function mapFormToPayload(f) {
       basic_strategy: {
         narrative_mode: f.narrative_mode,
         audio_engine_mode: f.audio_engine_mode || 'minimax_tts',
+        no_vo_audio_bed: f.no_vo_audio_bed || 'native_sfx_ambience',
+        on_screen_text_mode: f.on_screen_text_mode || 'short_caption_overlay',
         google_voice_persona: f.google_voice_persona || 'Kore',
         enable_native_sfx: Boolean(f.enable_native_sfx),
         enable_native_ambience: Boolean(f.enable_native_ambience),
@@ -284,11 +290,13 @@ function mapFormToPayload(f) {
       workflow: {
         approval_mode: f.approval_mode,
         audio_engine_mode: f.audio_engine_mode || 'minimax_tts',
+        no_vo_audio_bed: f.no_vo_audio_bed || 'native_sfx_ambience',
+        on_screen_text_mode: f.on_screen_text_mode || 'short_caption_overlay',
         google_voice_persona: f.google_voice_persona || 'Kore',
         enable_native_sfx: Boolean(f.enable_native_sfx),
         enable_native_ambience: Boolean(f.enable_native_ambience),
         anti_music_guardrail: Boolean(f.anti_music_guardrail),
-        enable_tts: Boolean(f.enable_tts),
+        enable_tts: f.audio_engine_mode === 'minimax_tts' ? Boolean(f.enable_tts) : false,
         voice_provider: f.voice_provider,
         voice_persona: f.voice_persona,
         elevenlabs_model: f.elevenlabs_model || 'eleven_multilingual_v2',
@@ -485,7 +493,8 @@ export default function PresetsPage() {
     // 2. Audio Engine filter
     const audioMode = p.config?.workflow?.audio_engine_mode || p.config?.basic_strategy?.audio_engine_mode || 'minimax_tts';
     if (audioFilter === 'native_veo' && audioMode !== 'native_veo') return false;
-    if (audioFilter === 'minimax_tts' && audioMode === 'native_veo') return false;
+    if (audioFilter === 'minimax_tts' && audioMode !== 'minimax_tts') return false;
+    if (audioFilter === 'no_vo' && audioMode !== 'no_vo') return false;
 
     // 3. Type filter
     if (typeFilter === 'system' && !p.is_system) return false;
@@ -606,8 +615,9 @@ export default function PresetsPage() {
                 <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Audio:</span>
                 {[
                   { id: 'all', label: 'Semua' },
+                  { id: 'minimax_tts', label: '🎙️ Minimax' },
                   { id: 'native_veo', label: '🔊 Native Veo' },
-                  { id: 'minimax_tts', label: '🎙️ Minimax' }
+                  { id: 'no_vo', label: '🔇 Tanpa VO' }
                 ].map(item => {
                   const active = audioFilter === item.id;
                   return (
@@ -765,7 +775,19 @@ export default function PresetsPage() {
                             </span>
                           ))}
 
-                          {audioMode === 'native_veo' ? (
+                          {audioMode === 'no_vo' ? (
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 600,
+                              padding: '2px 7px',
+                              borderRadius: 'var(--radius-xs)',
+                              backgroundColor: 'var(--status-warning-soft)',
+                              color: 'var(--status-warning)',
+                              border: '1px solid var(--status-warning)'
+                            }}>
+                              🔇 Tanpa VO [{config.workflow?.no_vo_audio_bed || config.basic_strategy?.no_vo_audio_bed || 'native_sfx_ambience'}]
+                            </span>
+                          ) : audioMode === 'native_veo' ? (
                             <span style={{
                               fontSize: '11px',
                               fontWeight: 600,
@@ -1223,8 +1245,13 @@ export default function PresetsPage() {
                         </select>
                       </label>
                       <label className="form-label" style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 24 }}>
-                        <input type="checkbox" checked={form.enable_tts} onChange={e => setForm({ ...form, enable_tts: e.target.checked })} />
-                        Enable TTS Voice-Over
+                        <input
+                          type="checkbox"
+                          checked={form.audio_engine_mode === 'minimax_tts' && form.enable_tts}
+                          disabled={form.audio_engine_mode !== 'minimax_tts'}
+                          onChange={e => setForm({ ...form, enable_tts: e.target.checked })}
+                        />
+                        Enable TTS Voice-Over {form.audio_engine_mode !== 'minimax_tts' ? '(Nonaktif oleh Mode Audio)' : ''}
                       </label>
                     </div>
 
@@ -1242,40 +1269,40 @@ export default function PresetsPage() {
                           🎙️ Audio Generation Engine
                         </label>
                         <p style={{ margin: 0, fontSize: 12, color: 'var(--text-muted)' }}>
-                          Tentukan apakah audio narasi dihasilkan via Minimax TTS eksternal atau disintesis native langsung oleh Google Veo 3.1.
+                          Pilih antara MiniMax TTS Mux, Native Veo 3.1 Audio, atau Mode Tanpa VO (Visual / ASMR / Teks Layar).
                         </p>
                       </div>
 
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 12 }}>
                         {/* Mode 1 Card */}
                         <div
-                          onClick={() => setForm({ ...form, audio_engine_mode: 'minimax_tts' })}
+                          onClick={() => setForm({ ...form, audio_engine_mode: 'minimax_tts', enable_tts: true })}
                           style={{
                             padding: 14,
                             borderRadius: 8,
-                            border: form.audio_engine_mode !== 'native_veo' ? '2px solid var(--action-primary)' : '1px solid var(--border-subtle)',
-                            background: form.audio_engine_mode !== 'native_veo' ? 'var(--surface-interactive)' : 'var(--surface)',
+                            border: form.audio_engine_mode === 'minimax_tts' ? '2px solid var(--action-primary)' : '1px solid var(--border-subtle)',
+                            background: form.audio_engine_mode === 'minimax_tts' ? 'var(--surface-interactive)' : 'var(--surface)',
                             cursor: 'pointer',
                             transition: 'all 0.15s ease'
                           }}
                         >
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                            <strong style={{ fontSize: 13, color: 'var(--text-primary)' }}>🎙️ Mode 1: Minimax TTS Mux</strong>
+                            <strong style={{ fontSize: 13, color: 'var(--text-primary)' }}>🎙️ Mode 1: Minimax TTS</strong>
                             <input
                               type="radio"
                               name="audio_engine_mode"
-                              checked={form.audio_engine_mode !== 'native_veo'}
-                              onChange={() => setForm({ ...form, audio_engine_mode: 'minimax_tts' })}
+                              checked={form.audio_engine_mode === 'minimax_tts'}
+                              onChange={() => setForm({ ...form, audio_engine_mode: 'minimax_tts', enable_tts: true })}
                             />
                           </div>
                           <p style={{ margin: 0, fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-                            Narasi voice-over dibuat lewat MiniMax TTS, video Veo di-render silent, lalu di-mux otomatis dengan FFmpeg.
+                            Narasi voice-over dibuat lewat MiniMax / Gemini / ElevenLabs TTS lalu di-mux dengan FFmpeg.
                           </p>
                         </div>
 
                         {/* Mode 2 Card */}
                         <div
-                          onClick={() => setForm({ ...form, audio_engine_mode: 'native_veo' })}
+                          onClick={() => setForm({ ...form, audio_engine_mode: 'native_veo', enable_tts: false })}
                           style={{
                             padding: 14,
                             borderRadius: 8,
@@ -1286,19 +1313,80 @@ export default function PresetsPage() {
                           }}
                         >
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                            <strong style={{ fontSize: 13, color: 'var(--text-primary)' }}>🔊 Mode 2: Native Veo 3.1 Audio</strong>
+                            <strong style={{ fontSize: 13, color: 'var(--text-primary)' }}>🔊 Mode 2: Native Veo 3.1</strong>
                             <input
                               type="radio"
                               name="audio_engine_mode"
                               checked={form.audio_engine_mode === 'native_veo'}
-                              onChange={() => setForm({ ...form, audio_engine_mode: 'native_veo' })}
+                              onChange={() => setForm({ ...form, audio_engine_mode: 'native_veo', enable_tts: false })}
                             />
                           </div>
                           <p style={{ margin: 0, fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-                            Suara dialog &amp; Foley SFX digenerate langsung oleh Google Veo 3.1 diffusion. <strong>⚡ Hemat kuota TTS Minimax.</strong>
+                            Suara dialog &amp; Foley SFX digenerate langsung oleh Google Veo 3.1 diffusion. <strong>⚡ Hemat kuota TTS.</strong>
+                          </p>
+                        </div>
+
+                        {/* Mode 3 Card: Tanpa VO */}
+                        <div
+                          onClick={() => setForm({ ...form, audio_engine_mode: 'no_vo', enable_tts: false, enable_audio_segment: false, enable_vo_audit: 0 })}
+                          style={{
+                            padding: 14,
+                            borderRadius: 8,
+                            border: form.audio_engine_mode === 'no_vo' ? '2px solid var(--action-primary)' : '1px solid var(--border-subtle)',
+                            background: form.audio_engine_mode === 'no_vo' ? 'var(--surface-interactive)' : 'var(--surface)',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                            <strong style={{ fontSize: 13, color: 'var(--text-primary)' }}>🔇 Mode 3: Tanpa VO (ASMR)</strong>
+                            <input
+                              type="radio"
+                              name="audio_engine_mode"
+                              checked={form.audio_engine_mode === 'no_vo'}
+                              onChange={() => setForm({ ...form, audio_engine_mode: 'no_vo', enable_tts: false, enable_audio_segment: false, enable_vo_audit: 0 })}
+                            />
+                          </div>
+                          <p style={{ margin: 0, fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                            <strong>0% Voiceover.</strong> Visual ruangan/produk murni dengan ASMR/SFX alami, BGM opsional, atau teks layar singkat.
                           </p>
                         </div>
                       </div>
+
+                      {/* Mode 3 Options: Tanpa VO */}
+                      {form.audio_engine_mode === 'no_vo' && (
+                        <div style={{ borderTop: '1px dashed var(--border-color)', paddingTop: 14, display: 'grid', gap: 12 }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                            <label className="form-label">
+                              Bed Audio (Lapisan Suara Non-VO)
+                              <select
+                                className="form-select"
+                                value={form.no_vo_audio_bed || 'native_sfx_ambience'}
+                                onChange={e => setForm({ ...form, no_vo_audio_bed: e.target.value })}
+                              >
+                                <option value="native_sfx_ambience">SFX &amp; Ambience Ruangan Alami (Veo Foley)</option>
+                                <option value="bgm_only">Musik BGM Instrumental Saja</option>
+                                <option value="native_sfx_plus_bgm">Campuran SFX Ruangan + BGM</option>
+                                <option value="silent">Senyap Total (Pure Silent Visual)</option>
+                              </select>
+                            </label>
+                            <label className="form-label">
+                              Teks Layar Pengganti Cerita (Storytelling Overlay)
+                              <select
+                                className="form-select"
+                                value={form.on_screen_text_mode || 'short_caption_overlay'}
+                                onChange={e => setForm({ ...form, on_screen_text_mode: e.target.value })}
+                              >
+                                <option value="short_caption_overlay">Aktif — Teks Layar Singkat (3-6 Kata)</option>
+                                <option value="off">Nonaktif — Visual Murni Tanpa Teks</option>
+                              </select>
+                            </label>
+                          </div>
+                          <div style={{ fontSize: 11.5, color: 'var(--text-secondary)', background: 'var(--status-warning-soft)', border: '1px solid var(--status-warning)', borderRadius: 6, padding: '8px 12px' }}>
+                            🔇 <strong>Mode Tanpa VO Aktif:</strong> Tahap MiniMax/Gemini TTS akan dilewati (<code>skipped</code>), naskah VO dikosongkan, dan FFmpeg tetap me-render video akhir + audio bed pilihan.
+                          </div>
+                        </div>
+                      )}
 
                       {/* Mode 2 Options */}
                       {form.audio_engine_mode === 'native_veo' && (
@@ -1358,7 +1446,7 @@ export default function PresetsPage() {
                       )}
                     </div>
 
-                    {form.audio_engine_mode !== 'native_veo' && form.enable_tts && (
+                    {form.audio_engine_mode === 'minimax_tts' && form.enable_tts && (
                       <fieldset style={{ border: '1px solid var(--border-color)', borderRadius: 8, padding: 16, display: 'grid', gap: 12 }}>
                         <legend style={{ padding: '0 8px', fontSize: 13, fontWeight: 600 }}>🔊 TTS Audio Engine Settings</legend>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 }}>

@@ -747,10 +747,12 @@ export default function PillarCampaignDetailPage() {
               border = '1px solid rgba(16, 185, 129, 0.5)';
               label = `✓ ${stage.label}`;
             } else if (stage.status === 'skipped') {
-              color = 'rgba(255, 255, 255, 0.4)';
+              color = 'var(--text-muted)';
               bg = 'var(--surface-interactive)';
               border = '1px dashed var(--border-subtle)';
-              label = `⚡ ${stage.label}`;
+              label = stage.key === 'tts' && campaign?.audio_engine_mode === 'no_vo'
+                ? '🔇 Tanpa VO (Skipped)'
+                : `⚡ ${stage.label}`;
             } else if (stage.status === 'danger') {
               color = 'var(--text-primary)';
               bg = 'var(--status-danger-soft)';
@@ -1655,7 +1657,10 @@ export default function PillarCampaignDetailPage() {
         setWorkflowSettings(prev => ({
           ...prev,
           [item.id]: {
-            enable_tts: campaign.enable_tts !== 0,
+            audio_engine_mode: campaign.audio_engine_mode || (campaign.enable_tts === 0 ? 'native_veo' : 'minimax_tts'),
+            no_vo_audio_bed: campaign.no_vo_audio_bed || 'native_sfx_ambience',
+            on_screen_text_mode: campaign.on_screen_text_mode || 'short_caption_overlay',
+            enable_tts: campaign.enable_tts !== 0 && campaign.audio_engine_mode !== 'no_vo' && campaign.audio_engine_mode !== 'native_veo',
             enable_glabs: campaign.enable_glabs !== 0,
             enable_ffmpeg: campaign.enable_ffmpeg !== 0,
             voice_provider: campaign.voice_provider || 'minimax',
@@ -1867,7 +1872,7 @@ export default function PillarCampaignDetailPage() {
         }
       }
 
-      if (settings.enable_tts) {
+      if (settings.enable_tts && settings.audio_engine_mode !== 'no_vo' && settings.audio_engine_mode !== 'native_veo') {
         const missingVoClips = [];
         plan.forEach((p, idx) => {
           if (!p.new_vo || p.new_vo.trim() === '') {
@@ -1893,7 +1898,10 @@ export default function PillarCampaignDetailPage() {
             ig_caption: sc.ig_caption,
             yt_title: sc.yt_title,
             yt_desc: sc.yt_desc,
-            enable_tts: settings.enable_tts,
+            audio_engine_mode: settings.audio_engine_mode || 'minimax_tts',
+            no_vo_audio_bed: settings.no_vo_audio_bed || 'native_sfx_ambience',
+            on_screen_text_mode: settings.on_screen_text_mode || 'short_caption_overlay',
+            enable_tts: settings.audio_engine_mode === 'minimax_tts' && settings.enable_tts,
             enable_glabs: settings.enable_glabs,
             enable_ffmpeg: settings.enable_ffmpeg,
             voice_provider: settings.voice_provider,
@@ -1954,7 +1962,10 @@ export default function PillarCampaignDetailPage() {
             ig_caption: sc.ig_caption,
             yt_title: sc.yt_title,
             yt_desc: sc.yt_desc,
-            enable_tts: settings.enable_tts,
+            audio_engine_mode: settings.audio_engine_mode || 'minimax_tts',
+            no_vo_audio_bed: settings.no_vo_audio_bed || 'native_sfx_ambience',
+            on_screen_text_mode: settings.on_screen_text_mode || 'short_caption_overlay',
+            enable_tts: settings.audio_engine_mode === 'minimax_tts' && settings.enable_tts,
             enable_glabs: settings.enable_glabs,
             enable_ffmpeg: settings.enable_ffmpeg,
             voice_provider: settings.voice_provider,
@@ -3220,14 +3231,54 @@ export default function PillarCampaignDetailPage() {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <label className="switch">
-                      <input type="checkbox" checked={!!settings.enable_tts} disabled={isReadOnly} onChange={() => toggleSetting('enable_tts')} />
-                      <span className="slider round"></span>
-                    </label>
-                    <span style={{ fontSize: '0.78rem', fontWeight: 600 }}>Generate TTS (Audio Voiceover)</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '0.78rem', fontWeight: 600 }}>Mode Audio / VO:</span>
+                    <select
+                      disabled={isReadOnly}
+                      value={settings.audio_engine_mode || (settings.enable_tts ? 'minimax_tts' : 'native_veo')}
+                      onChange={(e) => {
+                        const mode = e.target.value;
+                        updateSettingField('audio_engine_mode', mode);
+                        updateSettingField('enable_tts', mode === 'minimax_tts');
+                      }}
+                      style={{ padding: '6px 10px', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '6px', fontSize: '0.78rem' }}
+                    >
+                      <option value="minimax_tts">🎙️ Generate TTS (Audio Voiceover)</option>
+                      <option value="native_veo">🔊 Native Veo 3.1 Audio (Tanpa TTS Eksternal)</option>
+                      <option value="no_vo">🔇 Tanpa VO (ASMR / Visual / Teks Layar)</option>
+                    </select>
                   </div>
-                  {settings.enable_tts && (
+                  {settings.audio_engine_mode === 'no_vo' && (
+                    <div style={{ background: 'var(--status-warning-soft)', border: '1px solid var(--status-warning)', borderRadius: '6px', padding: '10px 12px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.68rem', color: 'var(--text-secondary)', marginBottom: '4px', fontWeight: 600 }}>Bed Audio Non-VO</label>
+                        <select
+                          disabled={isReadOnly}
+                          value={settings.no_vo_audio_bed || 'native_sfx_ambience'}
+                          onChange={(e) => updateSettingField('no_vo_audio_bed', e.target.value)}
+                          style={{ width: '100%', padding: '6px 8px', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '4px', fontSize: '0.75rem' }}
+                        >
+                          <option value="native_sfx_ambience">SFX &amp; Ambience Ruangan Alami</option>
+                          <option value="bgm_only">Musik BGM Saja</option>
+                          <option value="native_sfx_plus_bgm">SFX Ruangan + BGM</option>
+                          <option value="silent">Senyap Total</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.68rem', color: 'var(--text-secondary)', marginBottom: '4px', fontWeight: 600 }}>Teks Layar Cerita</label>
+                        <select
+                          disabled={isReadOnly}
+                          value={settings.on_screen_text_mode || 'short_caption_overlay'}
+                          onChange={(e) => updateSettingField('on_screen_text_mode', e.target.value)}
+                          style={{ width: '100%', padding: '6px 8px', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '4px', fontSize: '0.75rem' }}
+                        >
+                          <option value="short_caption_overlay">Aktif — Teks Singkat 3-6 Kata</option>
+                          <option value="off">Nonaktif — Visual Murni</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
+                  {settings.audio_engine_mode === 'minimax_tts' && settings.enable_tts && (
                     <div style={{ background: 'var(--overlay-subtle)', border: '1px solid var(--surface-interactive)', borderRadius: '6px', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       <div>
                         <label style={{ display: 'block', fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 600 }}>Voice Provider</label>

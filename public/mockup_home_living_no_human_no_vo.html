@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup UI — Visual Identity Tanpa Manusia & Mode Video Tanpa VO (No-VO)</title>
+  <style>
+    :root, [data-theme="dark"] {
+      --canvas: #0b0f17;
+      --surface: #131a26;
+      --surface-raised: #1a2333;
+      --surface-interactive: #212c40;
+      --input-bg: #0f1622;
+      --border-subtle: rgba(148, 163, 184, 0.16);
+      --border-strong: rgba(148, 163, 184, 0.32);
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #14b8a6;
+      --on-action-primary: #062825;
+      --status-success: #22c55e;
+      --status-success-soft: rgba(34, 197, 94, 0.14);
+      --status-warning: #f59e0b;
+      --status-warning-soft: rgba(245, 158, 11, 0.14);
+      --status-info: #38bdf8;
+      --status-info-soft: rgba(56, 189, 248, 0.14);
+      --status-danger: #f87171;
+      --status-danger-soft: rgba(248, 113, 113, 0.14);
+      --status-purple: #a855f7;
+      --status-purple-soft: rgba(168, 85, 247, 0.14);
+      --shadow-card: 0 10px 28px rgba(0, 0, 0, 0.32);
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+    }
+
+    [data-theme="light"] {
+      --canvas: #f4f6f9;
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #edf2f7;
+      --input-bg: #ffffff;
+      --border-subtle: rgba(15, 23, 42, 0.11);
+      --border-strong: rgba(15, 23, 42, 0.25);
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --action-primary: #0d9488;
+      --action-primary-hover: #0f766e;
+      --on-action-primary: #ffffff;
+      --status-success: #15803d;
+      --status-success-soft: rgba(21, 128, 61, 0.12);
+      --status-warning: #b45309;
+      --status-warning-soft: rgba(180, 83, 9, 0.12);
+      --status-info: #0369a1;
+      --status-info-soft: rgba(3, 105, 161, 0.12);
+      --status-danger: #b91c1c;
+      --status-danger-soft: rgba(185, 28, 28, 0.12);
+      --status-purple: #7e22ce;
+      --status-purple-soft: rgba(126, 34, 206, 0.12);
+      --shadow-card: 0 4px 16px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--canvas);
+      color: var(--text-primary);
+      line-height: 1.5;
+      padding: 24px 16px 64px;
+    }
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .title { font-size: 1.25rem; font-weight: 800; margin: 0; }
+    .subtitle { font-size: 0.84rem; color: var(--text-muted); margin-top: 3px; }
+    .btn {
+      border: 1px solid var(--border-strong);
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border-color: var(--action-primary);
+    }
+    .tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      background: var(--surface);
+      padding: 6px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+    }
+    .tab-btn {
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-secondary);
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .section-title {
+      font-size: 0.98rem;
+      font-weight: 800;
+      margin: 0;
+      color: var(--text-primary);
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 12px;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+    .input, .select, .textarea {
+      width: 100%;
+      background: var(--input-bg);
+      color: var(--text-primary);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      font-size: 0.82rem;
+      font-family: inherit;
+    }
+    .option-card {
+      padding: 13px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .option-card.selected {
+      border: 2px solid var(--action-primary);
+      background: var(--surface-interactive);
+    }
+    .option-card.disabled {
+      opacity: 0.45;
+      pointer-events: none;
+      border-style: dashed;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 9px;
+      border-radius: 999px;
+      font-size: 0.71rem;
+      font-weight: 700;
+      width: fit-content;
+    }
+    .badge-ok { background: var(--status-success-soft); color: var(--status-success); border: 1px solid var(--status-success); }
+    .badge-warn { background: var(--status-warning-soft); color: var(--status-warning); border: 1px solid var(--status-warning); }
+    .badge-info { background: var(--status-info-soft); color: var(--status-info); border: 1px solid var(--status-info); }
+    .badge-danger { background: var(--status-danger-soft); color: var(--status-danger); border: 1px solid var(--status-danger); }
+    .badge-purple { background: var(--status-purple-soft); color: var(--status-purple); border: 1px solid var(--status-purple); }
+    .code-box {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.74rem;
+      color: var(--text-secondary);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .chip-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .chip {
+      padding: 5px 11px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      border: 1px solid var(--border-strong);
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+    .chip.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border-color: var(--action-primary);
+    }
+    .scene-row {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 74px 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div>
+        <h1 class="title">Mockup UI: Home Living Zero-Human & Mode Tanpa VO (No-VO / ASMR)</h1>
+        <div class="subtitle">Simulasi 4 permukaan UI CF Studio sebelum pengerjaan kode backend &amp; React</div>
+      </div>
+      <div class="chip-row">
+        <button class="btn" onclick="applyHomeLivingRecommended()">Terapkan Paket Rekomendasi Home Living</button>
+        <button class="btn" onclick="toggleTheme()">Ganti Tema (Light / Dark)</button>
+      </div>
+    </div>
+
+    <div class="tabs" id="tabBar"></div>
+    <div id="tabContent"></div>
+  </div>
+
+  <script>
+    const state = {
+      activeTab: 'vi',
+      // Tab 1: Visual Identity
+      viSubjectKind: 'environment_object_only',
+      viPresetKey: 'home_living_serene_interior',
+      viEnvPolicy: 'planner_driven',
+      viCameraFraming: 'interior_showcase',
+      viLighting: 'Morning natural window light, calm architectural shadows',
+      viCustomDesc: 'Calm minimalist residential interiors, neatly arranged storage, warm oak wood, matte ceramic and linen surfaces',
+      // Tab 2: Operator Preset
+      presetFilter: 'no_vo',
+      presetAudioMode: 'no_vo',
+      presetAudioBed: 'native_sfx_ambience',
+      presetOnScreenMode: 'short_caption_overlay',
+      // Tab 3: Auto Pipeline & Schedule
+      apFlowTab: 'one_click',
+      apPipelineType: 'multiplier_campaign',
+      apPresetAudio: 'no_vo',
+      apAudioOverride: 'follow_preset',
+      apAudioBedOverride: 'native_sfx_ambience',
+      apTextModeOverride: 'short_caption_overlay',
+      // Tab 4: Pillar Campaign & Detail
+      pillarAudioMode: 'no_vo',
+      pillarAudioBed: 'native_sfx_plus_bgm'
+    };
+
+    const TABS = [
+      { id: 'vi', label: '1. Visual Identity (Zero-Human)' },
+      { id: 'preset', label: '2. Preset Manager (Mode No-VO)' },
+      { id: 'autopipeline', label: '3. Auto Pipeline & Skedul' },
+      { id: 'pillar', label: '4. Pillar Form & Detail Output' }
+    ];
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    }
+
+    function applyHomeLivingRecommended() {
+      state.viSubjectKind = 'environment_object_only';
+      state.viPresetKey = 'home_living_serene_interior';
+      state.viEnvPolicy = 'planner_driven';
+      state.viCameraFraming = 'interior_showcase';
+      state.presetAudioMode = 'no_vo';
+      state.presetAudioBed = 'native_sfx_ambience';
+      state.presetOnScreenMode = 'short_caption_overlay';
+      state.apAudioOverride = 'no_vo';
+      state.apAudioBedOverride = 'native_sfx_ambience';
+      state.pillarAudioMode = 'no_vo';
+      render();
+    }
+
+    function setTab(id) {
+      state.activeTab = id;
+      render();
+    }
+
+    function selectViPreset(presetKey) {
+      state.viPresetKey = presetKey;
+      state.viSubjectKind = 'environment_object_only';
+      if (presetKey === 'home_living_product_still_life') {
+        state.viCameraFraming = 'product_still_life';
+        state.viEnvPolicy = 'brand_locked';
+        state.viCustomDesc = 'Editorial tabletop and shelf still life with warm oak wood, travertine stone, and clean product placement';
+      } else {
+        state.viCameraFraming = 'interior_showcase';
+        state.viEnvPolicy = 'planner_driven';
+        state.viCustomDesc = 'Calm minimalist residential interiors, neatly arranged storage, warm oak wood, matte ceramic and linen surfaces';
+      }
+      render();
+    }
+
+    function renderViTab() {
+      const isEnvOnly = state.viSubjectKind === 'environment_object_only';
+      const promptOutput = isEnvOnly
+        ? {
+            subject_prompt: `Strictly zero humans, zero people, zero hands, zero fingers, zero arms, zero human silhouettes. Pure architectural space and physical object cinematography: ${state.viCustomDesc}`,
+            wardrobe_prompt: '(kosong — dinonaktifkan)',
+            camera_prompt: `camera framing is ${state.viCameraFraming}, zero foreground hands`,
+            negative_prompt: 'human, person, people, hands, hand, fingers, arms, forearms, wrists, body parts, human silhouette, face, eyes, clothing, sleeves, mannequin, reflected person',
+            qc_policy: 'hand_count MUST = 0 (tolak keras bila ada tangan); wardrobe_color_match = SKIP'
+          }
+        : {
+            subject_prompt: 'Faceless talent focusing on clean forearms and modest long-sleeve hands in action...',
+            wardrobe_prompt: 'Everyday modest civilian long sleeve attire, wrists covered',
+            camera_prompt: 'camera framing is forearms_and_hands, perspective is first_person',
+            negative_prompt: 'visible human face, eyes, nose, mouth, human portrait, unintended people',
+            qc_policy: 'hand_count <= 2; wardrobe_color_match = ENFORCED'
+          };
+
+      return `
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+            <div>
+              <h2 class="section-title">Visual Identity Studio &amp; AI Builder (` + '`app/settings/visual-identities/page.js`' + `)</h2>
+              <div class="subtitle">Pilih <code>Subject Kind</code> untuk menguji penyembunyian otomatis field Manusia/Wardrobe serta guard Zero-Human.</div>
+            </div>
+            <div class="chip-row">
+              <button class="chip ${state.viPresetKey === 'home_living_serene_interior' ? 'active' : ''}" onclick="selectViPreset('home_living_serene_interior')">Preset: home_living_serene_interior</button>
+              <button class="chip ${state.viPresetKey === 'home_living_product_still_life' ? 'active' : ''}" onclick="selectViPreset('home_living_product_still_life')">Preset: home_living_product_still_life</button>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              <div class="field">
+                <label class="label">Subject Kind (SUBJECT_KINDS)</label>
+                <select class="select" onchange="state.viSubjectKind=this.value; render();">
+                  <option value="environment_object_only" ${isEnvOnly ? 'selected' : ''}>🏠 Ruangan &amp; Objek Saja (environment_object_only — Zero Human)</option>
+                  <option value="human" ${state.viSubjectKind === 'human' ? 'selected' : ''}>🙋 Manusia Faceless (human — Hands / POV / Back View)</option>
+                  <option value="stylized_3d_character" ${state.viSubjectKind === 'stylized_3d_character' ? 'selected' : ''}>🧸 Karakter 3D Animasi (stylized_3d_character)</option>
+                </select>
+              </div>
+
+              ${isEnvOnly ? `
+                <div style="padding:10px 12px; border-radius:var(--radius-sm); background:var(--status-success-soft); border:1px solid var(--status-success); font-size:0.78rem;">
+                  <strong>Mode Zero-Human Aktif:</strong> Section <em>Demographic</em>, <em>Faceless Mode</em>, <em>Wardrobe</em>, <em>Sleeve Policy</em>, dan <em>Character Lock</em> disembunyikan otomatis dan dinormalisasi ke <code>not_applicable</code>.
+                </div>
+              ` : `
+                <div style="padding:12px; border-radius:var(--radius-sm); background:var(--surface-raised); border:1px solid var(--border-strong); display:grid; gap:10px;">
+                  <strong style="font-size:0.8rem;">Bagian Manusia &amp; Wardrobe (Hanya muncul jika bukan environment_object_only)</strong>
+                  <div class="grid-2">
+                    <div class="field"><label class="label">Faceless Mode</label><input class="input" value="hands_only" readonly /></div>
+                    <div class="field"><label class="label">Sleeve Policy &amp; Wardrobe</label><input class="input" value="wrists_covered (fixed)" readonly /></div>
+                  </div>
+                </div>
+              `}
+
+              <div class="grid-2">
+                <div class="field">
+                  <label class="label">Environment Policy</label>
+                  <select class="select" onchange="state.viEnvPolicy=this.value; render();">
+                    <option value="planner_driven" ${state.viEnvPolicy === 'planner_driven' ? 'selected' : ''}>planner_driven (Ruangan Dinamis per Produk)</option>
+                    <option value="brand_locked" ${state.viEnvPolicy === 'brand_locked' ? 'selected' : ''}>brand_locked (Meja / Latar Tetap)</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label class="label">Camera Framing</label>
+                  <select class="select" onchange="state.viCameraFraming=this.value; render();">
+                    <option value="interior_showcase" ${state.viCameraFraming === 'interior_showcase' ? 'selected' : ''}>interior_showcase</option>
+                    <option value="product_still_life" ${state.viCameraFraming === 'product_still_life' ? 'selected' : ''}>product_still_life</option>
+                    <option value="top_down_flatlay" ${state.viCameraFraming === 'top_down_flatlay' ? 'selected' : ''}>top_down_flatlay</option>
+                    <option value="before_after_frame" ${state.viCameraFraming === 'before_after_frame' ? 'selected' : ''}>before_after_frame</option>
+                    <option value="environmental_wide" ${state.viCameraFraming === 'environmental_wide' ? 'selected' : ''}>environmental_wide</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="label">Interior Palette / Physical Subject Notes</label>
+                <textarea class="textarea" rows="3" oninput="state.viCustomDesc=this.value;">${state.viCustomDesc}</textarea>
+              </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="font-size:0.84rem;">Preview Output Resolver &amp; QC Guardrail</strong>
+                <span class="badge ${isEnvOnly ? 'badge-ok' : 'badge-info'}">
+                  ${isEnvOnly ? '✓ 0 Manusia · 0 Tangan · Wardrobe OFF' : 'Mode Subjek / Karakter Aktif'}
+                </span>
+              </div>
+              <div class="code-box">${JSON.stringify(promptOutput, null, 2)}</div>
+              ${isEnvOnly ? `
+                <div style="padding:10px 12px; border-radius:var(--radius-sm); background:var(--status-purple-soft); border:1px solid var(--status-purple); font-size:0.76rem;">
+                  <strong>Action Translation Rule (Deconstruct → Zero-Human):</strong><br/>
+                  • Adegan tangan merapikan rak/kulkas di blueprint viral otomatis diubah menjadi <strong>Before–After statis / slow pan kamera</strong>.<br/>
+                  • Aksi tangan memegang produk diubah menjadi <strong>Hero Product Staging + dolly push-in</strong> tanpa kata kerja pemicu tangan di I2V.
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderPresetTab() {
+      const mode = state.presetAudioMode;
+      const isNoVo = mode === 'no_vo';
+      return `
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+            <div>
+              <h2 class="section-title">Operator Preset Manager (` + '`app/settings/presets/page.js`' + `)</h2>
+              <div class="subtitle">Menambahkan pilihan <strong>Mode 3: Tanpa VO</strong> dan chip filter <code>🔇 Tanpa VO</code> serta preset bawaan <code>multiplier_home_living_no_vo_asmr</code>.</div>
+            </div>
+            <div class="chip-row">
+              <span style="font-size:0.76rem; color:var(--text-muted);">Filter Audio List:</span>
+              <button class="chip ${state.presetFilter === 'all' ? 'active' : ''}" onclick="state.presetFilter='all'; render();">Semua</button>
+              <button class="chip ${state.presetFilter === 'minimax_tts' ? 'active' : ''}" onclick="state.presetFilter='minimax_tts'; render();">🎙️ TTS</button>
+              <button class="chip ${state.presetFilter === 'native_veo' ? 'active' : ''}" onclick="state.presetFilter='native_veo'; render();">🔊 Native Veo</button>
+              <button class="chip ${state.presetFilter === 'no_vo' ? 'active' : ''}" onclick="state.presetFilter='no_vo'; render();">🔇 Tanpa VO</button>
+            </div>
+          </div>
+
+          <div class="grid-3">
+            <div class="option-card ${mode === 'minimax_tts' ? 'selected' : ''}" onclick="state.presetAudioMode='minimax_tts'; render();">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong>🎙️ Mode 1: MiniMax / TTS</strong>
+                <input type="radio" ${mode === 'minimax_tts' ? 'checked' : ''} readonly />
+              </div>
+              <span style="font-size:0.75rem; color:var(--text-secondary);">Narasi VO lewat TTS eksternal, lalu FFmpeg sinkronisasi audio + video.</span>
+            </div>
+
+            <div class="option-card ${mode === 'native_veo' ? 'selected' : ''}" onclick="state.presetAudioMode='native_veo'; render();">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong>🔊 Mode 2: Native Veo VO</strong>
+                <input type="radio" ${mode === 'native_veo' ? 'checked' : ''} readonly />
+              </div>
+              <span style="font-size:0.75rem; color:var(--text-secondary);">Dialog bicara dan foley disintesis langsung oleh Google Veo 3.1.</span>
+            </div>
+
+            <div class="option-card ${isNoVo ? 'selected' : ''}" onclick="state.presetAudioMode='no_vo'; render();">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong>🔇 Mode 3: Tanpa VO (ASMR/Visual)</strong>
+                <input type="radio" ${isNoVo ? 'checked' : ''} readonly />
+              </div>
+              <span style="font-size:0.75rem; color:var(--text-secondary);">0 ucapan/dialog. Fokus foley ruangan, BGM, atau silent + teks layar pendek.</span>
+            </div>
+          </div>
+
+          ${isNoVo ? `
+            <div style="padding:14px; border-radius:var(--radius-md); background:var(--surface-raised); border:1px dashed var(--action-primary); display:flex; flex-direction:column; gap:12px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                <strong style="font-size:0.84rem;">Pengaturan Khusus Mode Tanpa VO (Dropdown Voice Provider / Persona / WPC otomatis disembunyikan)</strong>
+                <span class="badge badge-warn">enable_tts = 0 · VO Gate = skipped · FFmpeg = TETAP JALAN</span>
+              </div>
+              <div class="grid-2">
+                <div class="field">
+                  <label class="label">No-VO Audio Bed (` + '`no_vo_audio_bed`' + `)</label>
+                  <select class="select" onchange="state.presetAudioBed=this.value; render();">
+                    <option value="native_sfx_ambience" ${state.presetAudioBed === 'native_sfx_ambience' ? 'selected' : ''}>native_sfx_ambience — Foley &amp; Ambience Ruangan Veo (Zero Speech)</option>
+                    <option value="bgm_only" ${state.presetAudioBed === 'bgm_only' ? 'selected' : ''}>bgm_only — Musik Latar BGM saat FFmpeg Mux</option>
+                    <option value="native_sfx_plus_bgm" ${state.presetAudioBed === 'native_sfx_plus_bgm' ? 'selected' : ''}>native_sfx_plus_bgm — Foley Natural Veo + BGM Lembut</option>
+                    <option value="silent" ${state.presetAudioBed === 'silent' ? 'selected' : ''}>silent — Tanpa Suara (anullsrc untuk musik manual TikTok/IG)</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label class="label">Teks Layar (` + '`on_screen_text_mode`' + `)</label>
+                  <select class="select" onchange="state.presetOnScreenMode=this.value; render();">
+                    <option value="short_caption_overlay" ${state.presetOnScreenMode === 'short_caption_overlay' ? 'selected' : ''}>short_caption_overlay — Teks Layar Singkat (3–7 kata/klip)</option>
+                    <option value="off" ${state.presetOnScreenMode === 'off' ? 'selected' : ''}>off — Murni Visual Bersih Tanpa Teks</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          ` : `
+            <div style="padding:12px; border-radius:var(--radius-sm); background:var(--surface-raised); border:1px solid var(--border-subtle); font-size:0.78rem; color:var(--text-muted);">
+              Pengaturan Voice Provider / Persona / Speed / Words Per Clip tetap ditampilkan normal untuk mode ${mode}.
+            </div>
+          `}
+        </div>
+      `;
+    }
+
+    function renderAutoPipelineTab() {
+      const effectiveMode = state.apAudioOverride === 'follow_preset' ? state.apPresetAudio : state.apAudioOverride;
+      const isNoVoOverride = effectiveMode === 'no_vo';
+      return `
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+            <div>
+              <h2 class="section-title">Auto Pipeline 1-Click &amp; Modal Jadwal (` + '`app/auto-pipeline/page.js`' + `)</h2>
+              <div class="subtitle">Override mode audio/VO bisa diatur langsung per run maupun tersimpan di <code>pipeline_config_json</code> jadwal.</div>
+            </div>
+            <div class="chip-row">
+              <button class="chip ${state.apFlowTab === 'one_click' ? 'active' : ''}" onclick="state.apFlowTab='one_click'; render();">1-Click Pipeline</button>
+              <button class="chip ${state.apFlowTab === 'schedule' ? 'active' : ''}" onclick="state.apFlowTab='schedule'; render();">Modal Buat/Edit Skedul</button>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              <div class="field">
+                <label class="label">Jenis Pipeline</label>
+                <select class="select" onchange="state.apPipelineType=this.value; render();">
+                  <option value="multiplier_campaign" ${state.apPipelineType === 'multiplier_campaign' ? 'selected' : ''}>Video Multiplier (Home Living Deconstruct)</option>
+                  <option value="product_campaign" ${state.apPipelineType === 'product_campaign' ? 'selected' : ''}>Product Campaign</option>
+                  <option value="editorial_campaign" ${state.apPipelineType === 'editorial_campaign' ? 'selected' : ''}>Editorial Campaign</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="label">Preset Strategi &amp; Visual Identity</label>
+                <input class="input" value="multiplier_home_living_no_vo_asmr · VI: home_living_serene_interior" readonly />
+              </div>
+              <div class="field">
+                <label class="label">Override Mode Audio / VO (${state.apFlowTab === 'one_click' ? 'Run Saat Ini' : 'Tersimpan di Jadwal'})</label>
+                <select class="select" onchange="state.apAudioOverride=this.value; render();">
+                  <option value="follow_preset" ${state.apAudioOverride === 'follow_preset' ? 'selected' : ''}>Ikuti Preset (Default → saat ini: ${state.apPresetAudio})</option>
+                  <option value="minimax_tts" ${state.apAudioOverride === 'minimax_tts' ? 'selected' : ''}>🎙️ Dengan VO (TTS Eksternal)</option>
+                  <option value="native_veo" ${state.apAudioOverride === 'native_veo' ? 'selected' : ''}>🔊 Dengan VO (Native Veo)</option>
+                  <option value="no_vo" ${state.apAudioOverride === 'no_vo' ? 'selected' : ''}>🔇 Tanpa VO (Visual / ASMR)</option>
+                </select>
+              </div>
+              ${isNoVoOverride ? `
+                <div class="grid-2">
+                  <div class="field">
+                    <label class="label">Audio Bed</label>
+                    <select class="select" onchange="state.apAudioBedOverride=this.value; render();">
+                      <option value="native_sfx_ambience" ${state.apAudioBedOverride === 'native_sfx_ambience' ? 'selected' : ''}>Native SFX / ASMR Ruangan</option>
+                      <option value="bgm_only" ${state.apAudioBedOverride === 'bgm_only' ? 'selected' : ''}>BGM Only</option>
+                      <option value="native_sfx_plus_bgm" ${state.apAudioBedOverride === 'native_sfx_plus_bgm' ? 'selected' : ''}>Native SFX + BGM</option>
+                      <option value="silent" ${state.apAudioBedOverride === 'silent' ? 'selected' : ''}>Silent (Tanpa Suara)</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label class="label">Teks Layar</label>
+                    <select class="select" onchange="state.apTextModeOverride=this.value; render();">
+                      <option value="short_caption_overlay" ${state.apTextModeOverride === 'short_caption_overlay' ? 'selected' : ''}>Teks Singkat (3–7 kata)</option>
+                      <option value="off" ${state.apTextModeOverride === 'off' ? 'selected' : ''}>Murni Visual (Tanpa Teks)</option>
+                    </select>
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <strong style="font-size:0.84rem;">Payload yang Dikirim ke Runner / ` + '`autonomous-engine.js`' + `</strong>
+              <div class="code-box">${JSON.stringify({
+                pipeline_type: state.apPipelineType,
+                preset_key: 'multiplier_home_living_no_vo_asmr',
+                visual_identity_preset_id: 'home_living_serene_interior',
+                audio_engine_mode: effectiveMode,
+                enable_tts: effectiveMode === 'minimax_tts' ? 1 : 0,
+                ...(isNoVoOverride ? {
+                  no_vo_audio_bed: state.apAudioBedOverride,
+                  on_screen_text_mode: state.apTextModeOverride
+                } : {})
+              }, null, 2)}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderPillarTab() {
+      const isNoVo = state.pillarAudioMode === 'no_vo';
+      const clips = [
+        { idx: 1, beat: 'Hook Problem (Ruangan Kosong)', onScreen: 'Rak dapur berantakan bikin sempit?', sfx: 'subtle morning room tone, wooden cabinet creak' },
+        { idx: 2, beat: 'Before / Transisi Ruang', onScreen: 'Cuma butuh 1 rak susun tepat ukuran', sfx: 'clean sliding ceramic jar sound, soft natural breeze' },
+        { idx: 3, beat: 'Hero Product Staging (Bridge)', onScreen: 'Rak Bumbu 3 Susun Kayu Oak', sfx: 'crisp wooden rack settle on marble countertop' },
+        { idx: 4, beat: 'After Reveal + CTA', onScreen: 'Dapur lega seketika · Cek keranjang', sfx: 'calm indoor morning ambience, soft glass clink' }
+      ];
+
+      return `
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+            <div>
+              <h2 class="section-title">Pillar / Multiplier Form &amp; Halaman Detail Kampanye</h2>
+              <div class="subtitle">Mengganti checkbox tunggal <code>enable_tts</code> menjadi selector 3 mode audio + status TTS jelas di detail.</div>
+            </div>
+            <div class="chip-row">
+              <span class="badge ${isNoVo ? 'badge-purple' : 'badge-info'}">
+                ${isNoVo ? '🔇 Mode: Tanpa VO (Visual / ASMR)' : `Mode Audio: ${state.pillarAudioMode}`}
+              </span>
+              <span class="badge badge-ok">
+                ${isNoVo ? 'TTS: Dilewati (Mode Tanpa VO) · FFmpeg: AKTIF' : 'TTS: Aktif · FFmpeg: AKTIF'}
+              </span>
+            </div>
+          </div>
+
+          <div class="grid-2" style="background:var(--surface-raised); padding:14px; border-radius:var(--radius-md); border:1px solid var(--border-subtle);">
+            <div class="field">
+              <label class="label">Selector Audio Engine Mode (Menggantikan checkbox enable_tts)</label>
+              <select class="select" onchange="state.pillarAudioMode=this.value; render();">
+                <option value="no_vo" ${isNoVo ? 'selected' : ''}>🔇 Tanpa VO (Visual / ASMR) — enable_tts = 0, FFmpeg tetap render</option>
+                <option value="minimax_tts" ${state.pillarAudioMode === 'minimax_tts' ? 'selected' : ''}>🎙️ Dengan VO (TTS Eksternal)</option>
+                <option value="native_veo" ${state.pillarAudioMode === 'native_veo' ? 'selected' : ''}>🔊 Dengan VO (Native Veo Dialogue)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="label">No-VO Audio Bed saat FFmpeg Mux</label>
+              <select class="select" ${!isNoVo ? 'disabled' : ''} onchange="state.pillarAudioBed=this.value; render();">
+                <option value="native_sfx_ambience" ${state.pillarAudioBed === 'native_sfx_ambience' ? 'selected' : ''}>Native SFX / ASMR Ruangan</option>
+                <option value="native_sfx_plus_bgm" ${state.pillarAudioBed === 'native_sfx_plus_bgm' ? 'selected' : ''}>Native SFX + BGM Lembut</option>
+                <option value="bgm_only" ${state.pillarAudioBed === 'bgm_only' ? 'selected' : ''}>BGM Only</option>
+                <option value="silent" ${state.pillarAudioBed === 'silent' ? 'selected' : ''}>Silent (anullsrc)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <strong style="font-size:0.84rem;">Simulasi Output Storyboard Home Living (Zero-Human + ${isNoVo ? 'No-VO' : 'VO'})</strong>
+            ${clips.map(c => `
+              <div class="scene-row">
+                <div>
+                  <span class="badge badge-info">Klip #${c.idx}</span>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:4px; font-size:0.78rem;">
+                  <strong>${c.beat}</strong>
+                  ${isNoVo ? `
+                    <div><code>new_vo: ""</code> <span style="color:var(--text-muted);">(kosong)</span></div>
+                    <div><strong>on_screen_text:</strong> <span class="badge badge-purple">${c.onScreen}</span></div>
+                    <div><strong>ambient_sfx_cue (Veo Foley Only):</strong> <span style="color:var(--text-secondary);">${c.sfx}</span></div>
+                  ` : `
+                    <div><strong>new_vo:</strong> "Dapur terasa sempit? Coba tata ulang dengan rak susun minimalis ini..."</div>
+                  `}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function render() {
+      document.getElementById('tabBar').innerHTML = TABS.map(t => `
+        <button class="tab-btn ${state.activeTab === t.id ? 'active' : ''}" onclick="setTab('${t.id}')">${t.label}</button>
+      `).join('');
+
+      let html = '';
+      if (state.activeTab === 'vi') html = renderViTab();
+      else if (state.activeTab === 'preset') html = renderPresetTab();
+      else if (state.activeTab === 'autopipeline') html = renderAutoPipelineTab();
+      else html = renderPillarTab();
+
+      document.getElementById('tabContent').innerHTML = html;
+    }
+
+    render();
+  </script>
+</body>
+</html>

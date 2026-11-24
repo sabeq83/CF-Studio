@@ -136,6 +136,9 @@ function MultiplierLabPageContent({ mode = 'direct', onCapture, onSuccess, onCan
   const [productFilenameDeclare, setProductFilenameDeclare] = useState('');
   const [visualMode, setVisualMode] = useState('hybrid_lock');
 
+  const [audioEngineMode, setAudioEngineMode] = useState('minimax_tts');
+  const [noVoAudioBed, setNoVoAudioBed] = useState('native_sfx_ambience');
+  const [onScreenTextMode, setOnScreenTextMode] = useState('short_caption_overlay');
   const [enableTts, setEnableTts] = useState(true);
   const [voiceProvider, setVoiceProvider] = useState('minimax');
   const [voicePersona, setVoicePersona] = useState('Indonesian_casual_reporter_vv2');
@@ -268,15 +271,21 @@ function MultiplierLabPageContent({ mode = 'direct', onCapture, onSuccess, onCan
     }
 
     // Workflow Settings
-    if (config.workflow) {
-      setEnableTts(Boolean(config.workflow.enable_tts));
-      setEnableGlabs(Boolean(config.workflow.enable_glabs));
-      setEnableFfmpeg(Boolean(config.workflow.enable_ffmpeg));
-      setEnableSocialPost(Boolean(config.workflow.enable_social_post));
-      setFfmpegSyncOption(config.workflow.ffmpeg_sync_option || 'smart_sync');
-      setFfmpegVideoScale(Number(config.workflow.ffmpeg_video_scale ?? 1.0));
-      setFfmpegSfxVolume(Number(config.workflow.ffmpeg_sfx_volume ?? 0.0));
-      setFfmpegBgmVolume(Number(config.workflow.ffmpeg_bgm_volume ?? 0.0));
+    if (config.workflow || config.basic_strategy) {
+      const wf = config.workflow || {};
+      const bs = config.basic_strategy || {};
+      const nextAudioMode = wf.audio_engine_mode || bs.audio_engine_mode || (wf.enable_tts === false ? 'native_veo' : 'minimax_tts');
+      setAudioEngineMode(nextAudioMode);
+      setNoVoAudioBed(wf.no_vo_audio_bed || bs.no_vo_audio_bed || 'native_sfx_ambience');
+      setOnScreenTextMode(wf.on_screen_text_mode || bs.on_screen_text_mode || 'short_caption_overlay');
+      setEnableTts(nextAudioMode === 'minimax_tts' && (wf.enable_tts !== undefined ? Boolean(wf.enable_tts) : true));
+      if (wf.enable_glabs !== undefined) setEnableGlabs(Boolean(wf.enable_glabs));
+      if (wf.enable_ffmpeg !== undefined) setEnableFfmpeg(Boolean(wf.enable_ffmpeg));
+      if (wf.enable_social_post !== undefined) setEnableSocialPost(Boolean(wf.enable_social_post));
+      setFfmpegSyncOption(wf.ffmpeg_sync_option || 'smart_sync');
+      setFfmpegVideoScale(Number(wf.ffmpeg_video_scale ?? 1.0));
+      setFfmpegSfxVolume(Number(wf.ffmpeg_sfx_volume ?? 0.0));
+      setFfmpegBgmVolume(Number(wf.ffmpeg_bgm_volume ?? 0.0));
     }
   };
 
@@ -343,7 +352,10 @@ function MultiplierLabPageContent({ mode = 'direct', onCapture, onSuccess, onCan
       },
       workflow: {
         approval_mode: 'storyboard',
-        enable_tts: Boolean(enableTts),
+        audio_engine_mode: audioEngineMode,
+        no_vo_audio_bed: noVoAudioBed,
+        on_screen_text_mode: onScreenTextMode,
+        enable_tts: audioEngineMode === 'minimax_tts' && Boolean(enableTts),
         enable_glabs: Boolean(enableGlabs),
         enable_ffmpeg: Boolean(enableFfmpeg),
         enable_social_post: Boolean(enableSocialPost),
@@ -996,7 +1008,8 @@ function MultiplierLabPageContent({ mode = 'direct', onCapture, onSuccess, onCan
           campaignName: cleanCampaignName,
           accountName: accountName || null,
           brandProfileId: selectedBrandId || null,
-          enableTts, voiceProvider, voicePersona, voiceSpeed, voiceVolume, ttsModelQuality,
+          audioEngineMode, noVoAudioBed, onScreenTextMode,
+          enableTts: audioEngineMode === 'minimax_tts' && Boolean(enableTts), voiceProvider, voicePersona, voiceSpeed, voiceVolume, ttsModelQuality,
           enableGlabs, enableFfmpeg, targetLanguage, ffmpegSyncOption, syncMode,
           ffmpegVideoScale, ffmpegSfxVolume, ffmpegBgmVolume, enableSocialPost,
           nextcloudParentFolder, targetDemographic, targetDemographicCustom, aiDirective,
@@ -2256,12 +2269,51 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit} style={{ disp
                         )}
                       </div>
 
-                      {/* Konfigurasi Voiceover (TTS) */}
+                      {/* Konfigurasi Audio & Voiceover */}
                       <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: 14, marginTop: 10, marginBottom: 14 }}>
                         <label style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--action-primary)', display: 'block', marginBottom: 10 }}>
-                          🎙️ Konfigurasi Voiceover (TTS)
+                          🎙️ Mode Audio &amp; Voiceover
                         </label>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                        <div className="form-group" style={{ marginBottom: 12 }}>
+                          <select
+                            className="form-input"
+                            value={audioEngineMode}
+                            onChange={e => {
+                              const nextMode = e.target.value;
+                              setAudioEngineMode(nextMode);
+                              setEnableTts(nextMode === 'minimax_tts');
+                            }}
+                          >
+                            <option value="minimax_tts">🎙️ Mode 1: TTS Voiceover (MiniMax / Gemini)</option>
+                            <option value="native_veo">🔊 Mode 2: Native Veo 3.1 Audio</option>
+                            <option value="no_vo">🔇 Mode 3: Tanpa VO (ASMR / Visual / Teks Layar)</option>
+                          </select>
+                        </div>
+
+                        {audioEngineMode === 'no_vo' && (
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12, padding: 12, borderRadius: 8, background: 'var(--status-warning-soft)', border: '1px solid var(--status-warning)' }}>
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                              <label className="form-label">Bed Audio Non-VO</label>
+                              <select className="form-input" value={noVoAudioBed} onChange={e => setNoVoAudioBed(e.target.value)}>
+                                <option value="native_sfx_ambience">SFX &amp; Ambience Ruangan Alami</option>
+                                <option value="bgm_only">Musik BGM Saja</option>
+                                <option value="native_sfx_plus_bgm">SFX Ruangan + BGM</option>
+                                <option value="silent">Senyap Total (Silent)</option>
+                              </select>
+                            </div>
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                              <label className="form-label">Teks Layar Cerita</label>
+                              <select className="form-input" value={onScreenTextMode} onChange={e => setOnScreenTextMode(e.target.value)}>
+                                <option value="short_caption_overlay">Aktif — Teks Singkat 3-6 Kata</option>
+                                <option value="off">Nonaktif — Visual Murni</option>
+                              </select>
+                            </div>
+                          </div>
+                        )}
+
+                        {audioEngineMode === 'minimax_tts' && (
+                          <>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                           <div className="form-group">
                             <label className="form-label">Voice Provider</label>
                             <select
@@ -2305,19 +2357,21 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit} style={{ disp
                               style={{ width: '100%', accentColor: 'var(--action-primary)' }}
                             />
                           </div>
-                          <div className="form-group">
-                            <label className="form-label">Voice Volume ({voiceVolume}x)</label>
-                            <input
-                              type="range"
-                              min="0.0"
-                              max="2.0"
-                              step="0.1"
-                              value={voiceVolume}
-                              onChange={e => setVoiceVolume(parseFloat(e.target.value))}
-                              style={{ width: '100%', accentColor: 'var(--action-primary)' }}
-                            />
+                            <div className="form-group">
+                              <label className="form-label">Voice Volume ({voiceVolume}x)</label>
+                              <input
+                                type="range"
+                                min="0.0"
+                                max="2.0"
+                                step="0.1"
+                                value={voiceVolume}
+                                onChange={e => setVoiceVolume(parseFloat(e.target.value))}
+                                style={{ width: '100%', accentColor: 'var(--action-primary)' }}
+                              />
+                            </div>
                           </div>
-                        </div>
+                          </>
+                        )}
                       </div>
 
                       <div className="form-group">

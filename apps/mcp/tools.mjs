@@ -14,6 +14,9 @@ const ALLOWED_REFERENCE_IMAGE_EXTS = new Map([
 ]);
 const MAX_REFERENCE_BASE64_LENGTH = 14 * 1024 * 1024; // ~14 MB encoded -> <= 10 MB binary
 const MAX_REFERENCE_BINARY_BYTES = 10 * 1024 * 1024;  // 10 MB binary
+const AUDIO_ENGINE_MODE_VALUES = ['minimax_tts', 'native_veo', 'no_vo'];
+const NO_VO_AUDIO_BED_VALUES = ['native_sfx_ambience', 'bgm_only', 'native_sfx_plus_bgm', 'silent'];
+const ON_SCREEN_TEXT_MODE_VALUES = ['short_caption_overlay', 'off'];
 
 async function resolveReferenceAssetUploadInput({ image_base64, file_path, photo_url, filename }) {
   if (photo_url) {
@@ -211,6 +214,9 @@ function buildScheduleItemPayload(args = {}, { isUpdate = false } = {}) {
     affiliate_product_title,
     affiliate_product_link,
     pure_organic_topic,
+    audio_engine_mode,
+    no_vo_audio_bed,
+    on_screen_text_mode,
     execution_mode,
     pipeline_config,
     schedule_mode,
@@ -250,6 +256,9 @@ function buildScheduleItemPayload(args = {}, { isUpdate = false } = {}) {
     ...(affiliate_product_title !== undefined ? { affiliate_product_title } : {}),
     ...(affiliate_product_link !== undefined ? { affiliate_product_link } : {}),
     ...(pure_organic_topic !== undefined ? { pure_organic_topic } : {}),
+    ...(audio_engine_mode !== undefined ? { audio_engine_mode } : {}),
+    ...(no_vo_audio_bed !== undefined ? { no_vo_audio_bed } : {}),
+    ...(on_screen_text_mode !== undefined ? { on_screen_text_mode } : {}),
     ...(execution_mode ? { execution_mode } : {})
   };
 
@@ -790,6 +799,9 @@ export function createCfStudioServer(rawRequest) {
       bridge_segments: z.array(bridgeSegmentSchema).max(3).optional(),
       voice_provider: z.enum(['gemini', 'minimax', 'elevenlabs']).optional(),
       voice_persona: z.string().max(120).optional(),
+      audio_engine_mode: z.enum(AUDIO_ENGINE_MODE_VALUES).optional(),
+      no_vo_audio_bed: z.enum(NO_VO_AUDIO_BED_VALUES).optional(),
+      on_screen_text_mode: z.enum(ON_SCREEN_TEXT_MODE_VALUES).optional(),
       finishing_template: z.enum(FINISHING_TEMPLATE_IDS).optional(),
       caption_mode: z.enum(['hybrid', 'keyword_only', 'full']).optional(),
       loudness_target: z.number().min(-24).max(-6).optional(),
@@ -948,6 +960,9 @@ export function createCfStudioServer(rawRequest) {
       generate_recipe: z.boolean().default(true),
       post_link_affiliate: z.boolean().default(true),
       visual_identity_preset_id: z.string().max(100).optional(),
+      audio_engine_mode: z.enum(AUDIO_ENGINE_MODE_VALUES).optional(),
+      no_vo_audio_bed: z.enum(NO_VO_AUDIO_BED_VALUES).optional(),
+      on_screen_text_mode: z.enum(ON_SCREEN_TEXT_MODE_VALUES).optional(),
       bridge_at_clip: z.number().int().min(1).max(12).optional(),
       bridge_duration_clips: z.number().int().min(0).max(12).optional(),
       bridge_segments: z.array(bridgeSegmentSchema).max(3).optional(),
@@ -1079,6 +1094,9 @@ export function createCfStudioServer(rawRequest) {
     clip_duration: z.number().min(1).max(15).optional(),
     target_ai_engine: z.string().default('Google Veo (8s)'),
     visual_identity_preset_id: z.string().max(100).optional(),
+    audio_engine_mode: z.enum(AUDIO_ENGINE_MODE_VALUES).optional(),
+    no_vo_audio_bed: z.enum(NO_VO_AUDIO_BED_VALUES).optional(),
+    on_screen_text_mode: z.enum(ON_SCREEN_TEXT_MODE_VALUES).optional(),
     enable_audio_segment: z.boolean().optional(),
     sfx_setting: z.string().optional(),
     enable_motion_text: z.boolean().default(true),
@@ -1103,7 +1121,9 @@ export function createCfStudioServer(rawRequest) {
 
   const storyboardSceneSchema = z.object({
     scene_index: z.number().int().min(1).max(12).optional(),
-    voiceover_text: z.string().trim().min(1),
+    voiceover_text: z.string().trim().optional().default(''),
+    on_screen_text: z.string().trim().max(120).optional(),
+    ambient_sfx_cue: z.string().trim().max(250).optional(),
     visual_action: z.string().trim().min(1).optional(),
     visual_description: z.string().trim().min(1).optional(),
     visual_prompt: z.string().trim().min(1).optional(),
@@ -1138,6 +1158,9 @@ export function createCfStudioServer(rawRequest) {
     auto_sync_contentflow: z.boolean().optional(),
     post_link_affiliate: z.boolean().optional(),
     visual_identity_preset_id: z.string().max(100).optional(),
+    audio_engine_mode: z.enum(AUDIO_ENGINE_MODE_VALUES).optional(),
+    no_vo_audio_bed: z.enum(NO_VO_AUDIO_BED_VALUES).optional(),
+    on_screen_text_mode: z.enum(ON_SCREEN_TEXT_MODE_VALUES).optional(),
     content_pillar: z.string().max(200).optional(),
     creative_brief: z.string().max(1000).optional(),
     narrative_mode: z.string().max(80).optional(),
@@ -1187,6 +1210,13 @@ export function createCfStudioServer(rawRequest) {
       }
       if (!storyboard.title || !Array.isArray(storyboard.scenes) || storyboard.scenes.length === 0) {
         return { success: false, error: 'Sertakan (title + scenes) untuk single storyboard atau array items (1-12) untuk batch.' };
+      }
+      const resolvedAudioMode = storyboard.audio_engine_mode || storyboard.video_dna?.audio_engine_mode || 'minimax_tts';
+      if (resolvedAudioMode !== 'no_vo') {
+        const missingIdx = storyboard.scenes.findIndex(s => !String(s.voiceover_text || '').trim());
+        if (missingIdx >= 0) {
+          return { success: false, error: `Scene #${missingIdx + 1} wajib mengisi voiceover_text (kecuali audio_engine_mode="no_vo").` };
+        }
       }
       return request('/api/v2/recipes/autonomous-pipeline', {
         key: idempotency_key,
@@ -1314,6 +1344,9 @@ export function createCfStudioServer(rawRequest) {
       selected_angle: z.union([z.record(z.any()), z.string().max(300), z.null()]).optional(),
       generate_recipe: z.boolean().optional(),
       preset_key: z.string().max(100).optional(),
+      audio_engine_mode: z.enum(AUDIO_ENGINE_MODE_VALUES).optional(),
+      no_vo_audio_bed: z.enum(NO_VO_AUDIO_BED_VALUES).optional(),
+      on_screen_text_mode: z.enum(ON_SCREEN_TEXT_MODE_VALUES).optional(),
       bridge_at_clip: z.number().int().min(1).max(12).optional(),
       bridge_duration_clips: z.number().int().min(0).max(12).optional(),
       bridge_segments: z.array(bridgeSegmentSchema).max(3).optional(),
@@ -1380,6 +1413,9 @@ export function createCfStudioServer(rawRequest) {
     affiliate_product_title: z.string().max(200).optional(),
     affiliate_product_link: z.string().max(500).optional(),
     pure_organic_topic: z.string().max(500).optional(),
+    audio_engine_mode: z.enum(AUDIO_ENGINE_MODE_VALUES).optional(),
+    no_vo_audio_bed: z.enum(NO_VO_AUDIO_BED_VALUES).optional(),
+    on_screen_text_mode: z.enum(ON_SCREEN_TEXT_MODE_VALUES).optional(),
     execution_mode: z.enum(['full_autopilot', 'semi_autopilot']).optional(),
     pipeline_config: z.record(z.any()).optional()
   };
@@ -1755,7 +1791,7 @@ export function createCfStudioServer(rawRequest) {
 
   register(
     'cf_create_visual_identity',
-    'Register a structured Visual Identity preset in the tenant.',
+    'Register a structured Visual Identity preset in the tenant (supports subject.kind: "human", "stylized_3d_character", "environment_object_only" for zero-human interior/still life, etc.).',
     {
       label: z.string().trim().min(1).max(200),
       preset_key: z.string().max(100).optional(),
@@ -2315,12 +2351,16 @@ export function createCfStudioServer(rawRequest) {
 
   register(
     'cf_retry_multiplier_task',
-    'Retry a failed Multiplier Lab task back into pending_resolution queue.',
+    'Retry a failed Multiplier Lab task. By default smart-resumes from the latest completed stage (e.g. ffmpeg_muxing when clips already exist); pass mode="restart_all" to restart from pending_resolution.',
     {
-      task_id: z.string().trim().min(1).max(128)
+      task_id: z.string().trim().min(1).max(128),
+      mode: z.enum(['smart_resume', 'restart_all']).optional()
     },
     false,
-    ({ task_id }) => request('/api/v2/multiplier', { method: 'PATCH', body: { action: 'retry_task', taskId: task_id } })
+    ({ task_id, mode }) => request('/api/v2/multiplier', {
+      method: 'PATCH',
+      body: { action: 'retry_task', taskId: task_id, ...(mode ? { mode } : {}) }
+    })
   );
 
   register(
