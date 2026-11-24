@@ -1,6 +1,7 @@
 'use client';
 
 import Sidebar from '../../components/Sidebar';
+import BridgingProductReferenceCard from '../../components/BridgingProductReferenceCard';
 import { useEffect, useState, useRef, Suspense } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { normalizeAudioConfig, syncAudioConfigKeyValue } from '@/lib/multiplier-audio-config';
@@ -8,6 +9,16 @@ import { GEMINI_VOICES, MINIMAX_VOICES, MINIMAX_ENGLISH_VOICES } from '@/lib/voi
 import { resolveBridgePlan, readBridgeInputs } from '@/lib/bridging/bridge-plan';
 import { getMultiplierWaitingBadge } from '@/lib/vo-status-ui';
 import { extractSceneVoText } from '@/lib/tts-text-sanitizer';
+
+function safeJsonParse(raw, fallback) {
+  if (raw === null || raw === undefined || raw === '') return fallback;
+  if (typeof raw !== 'string') return raw;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return fallback;
+  }
+}
 
 function renderPhaseBadge(task) {
   let text = '⚡ Fase 1 : Pending';
@@ -431,8 +442,8 @@ function CampaignDetailPageContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           storyboard: editedStoryboards[taskId],
-          vsoConfig: JSON.parse(task.vso_config_json || '{}'),
-          bridgingConfig: JSON.parse(task.bridging_config_json || '{}'),
+          vsoConfig: safeJsonParse(task.vso_config_json, {}),
+          bridgingConfig: safeJsonParse(task.bridging_config_json, {}),
           audioConfig: currentAudio,
           newCaption: editedCaptions[taskId],
           ytTitle: editedYtTitles[taskId]
@@ -567,9 +578,9 @@ function CampaignDetailPageContent() {
   };
 
   const firstTask = tasks[0];
-  const bridging = firstTask ? JSON.parse(firstTask.bridging_config_json || '{}') : {};
-  const aesthetics = firstTask ? JSON.parse(firstTask.vso_config_json || '{}') : {};
-  const audio = firstTask ? JSON.parse(firstTask.audio_config_json || '{}') : {};
+  const bridging = firstTask ? safeJsonParse(firstTask.bridging_config_json, {}) : {};
+  const aesthetics = firstTask ? safeJsonParse(firstTask.vso_config_json, {}) : {};
+  const audio = firstTask ? safeJsonParse(firstTask.audio_config_json, {}) : {};
 
   // Calculate campaign status
   let overallStatus = 'draft';
@@ -1027,21 +1038,35 @@ function CampaignDetailPageContent() {
               </tr>
             </thead>
             <tbody>
-              {tasks.map((task, idx) => {
-                let snap = {};
-                try {
-                  snap = task.product_snapshot_json ? (typeof task.product_snapshot_json === 'string' ? JSON.parse(task.product_snapshot_json) : task.product_snapshot_json) : {};
-                } catch (_) {}
-
-                let bridgingConfig = {};
-                try {
-                  bridgingConfig = task.bridging_config_json ? (typeof task.bridging_config_json === 'string' ? JSON.parse(task.bridging_config_json) : task.bridging_config_json) : {};
-                } catch (_) {}
-
-                let audioConfig = {};
-                try {
-                  audioConfig = task.audio_config_json ? (typeof task.audio_config_json === 'string' ? JSON.parse(task.audio_config_json) : task.audio_config_json) : {};
-                } catch (_) {}
+              {loading ? (
+                <tr>
+                  <td colSpan={4} style={{ padding: '32px 16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.88rem' }}>
+                    Memuat detail kampanye Multiplier Lab...
+                  </td>
+                </tr>
+              ) : tasks.length === 0 ? (
+                <tr>
+                  <td colSpan={4} style={{ padding: '32px 20px', textAlign: 'center' }}>
+                    <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: 10, maxWidth: 520, padding: '16px 20px', borderRadius: 'var(--radius-sm)', background: 'var(--status-warning-soft)', border: '1px solid var(--status-warning)', color: 'var(--text-primary)' }}>
+                      <strong style={{ fontSize: '0.92rem' }}>Kampanye <code>{id}</code> tidak ditemukan di server/environment ini.</strong>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                        Pastikan Anda membuka server yang sesuai (Dev vs Staging) atau kembali ke daftar Multiplier Lab.
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => router.push('/multiplier-lab')}
+                        className="btn btn-secondary btn-sm"
+                        style={{ marginTop: 4 }}
+                      >
+                        ← Kembali ke Multiplier Lab
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ) : tasks.map((task, idx) => {
+                const snap = safeJsonParse(task.product_snapshot_json, {});
+                const bridgingConfig = safeJsonParse(task.bridging_config_json, {});
+                const audioConfig = safeJsonParse(task.audio_config_json, {});
 
                 const isEnglish = (audioConfig.targetLanguage === 'en-US' || audioConfig.target_language === 'en-US' || task.target_language === 'en-US');
 
@@ -1276,7 +1301,7 @@ function CampaignDetailPageContent() {
                                         📖 Alur Storyboard Dekonstruksi Asli
                                       </div>
                                       {(() => {
-                                        const originalStoryboard = task.original_storyboard_json ? JSON.parse(task.original_storyboard_json) : [];
+                                        const originalStoryboard = safeJsonParse(task.original_storyboard_json, []);
                                         if (originalStoryboard.length === 0) {
                                           return <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem', fontStyle: 'italic' }}>Tidak ada data storyboard dekonstruksi asli.</div>;
                                         }
@@ -1402,9 +1427,12 @@ function CampaignDetailPageContent() {
                                     )}
 
                                     {/* Start Frame Grid Preview */}
-                                    {bridging.visualMode === 'hybrid_lock' && (
-                                      <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: 8, padding: 20 }}>
-                                         <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    {(bridgingConfig?.visualMode || bridging?.visualMode) === 'hybrid_lock' && (() => {
+                                      const sfBridgePlan = resolveBridgePlan(readBridgeInputs(bridgingConfig, { target_clips_count: storyboard.length || 4 }, { defaultActive: true }));
+                                      const hasBridgingProduct = Boolean(task.target_product_id || task.product_ref || snap?.product_image_url || bridgingConfig?.productRefImagePath);
+                                      return (
+                                      <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: 8, padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                         <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
                                            <span style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                                              🖼️ Grid Preview Start Frame Gambar (T2I)
                                            </span>
@@ -1419,8 +1447,8 @@ function CampaignDetailPageContent() {
                                                  style={{
                                                    fontSize: '0.72rem',
                                                    padding: '4px 10px',
-                                                   background: isBatchRunning ? 'rgba(155, 89, 182, 0.4)' : 'rgba(155, 89, 182, 0.15)',
-                                                   borderColor: 'rgba(155, 89, 182, 0.3)',
+                                                   background: isBatchRunning ? 'var(--status-purple-soft)' : 'var(--surface-raised)',
+                                                   borderColor: 'var(--status-purple)',
                                                    color: 'var(--text-primary)',
                                                    cursor: isBatchRunning ? 'not-allowed' : 'pointer'
                                                  }}
@@ -1433,20 +1461,59 @@ function CampaignDetailPageContent() {
                                              );
                                            })()}
                                          </div>
-                                        
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 16, marginTop: 12 }}>
+
+                                         {hasBridgingProduct && sfBridgePlan.active && (
+                                           <BridgingProductReferenceCard
+                                             compact
+                                             product={task.product_ref || (snap?.product_image_url ? { product_name: snap.product_name, photo_url: snap.product_image_url } : null)}
+                                             fallbackPath={bridgingConfig?.productRefImagePath || snap?.product_image_url}
+                                             bridgeSegments={bridgingConfig?.bridge_segments}
+                                             isBridgingActive={sfBridgePlan.active}
+                                           />
+                                         )}
+
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 14 }}>
                                           {storyboard.map((clip, cidx) => {
-                                            const t2iImagesList = task.t2i_images_json ? JSON.parse(task.t2i_images_json) : [];
-                                            const imgPath = t2iImagesList[cidx];
+                                            const t2iImagesList = safeJsonParse(task.t2i_images_json, []);
+                                            const imgPath = Array.isArray(t2iImagesList) ? t2iImagesList[cidx] : null;
                                             const taskKey = `${task.id}_${cidx + 1}`;
                                             const isRegening = regeneratingT2I[taskKey];
                                             const isReplacing = replacingSF[taskKey];
                                             const isBatchRunning = task.regenerate_start_frames_status === 'running' || !!batchRegeneratingSF[task.id];
+                                            const isBridge = sfBridgePlan.isProductClip(cidx + 1);
+                                            const segRole = sfBridgePlan.zoneOf(cidx + 1);
 
                                             return (
-                                              <div key={cidx} style={{ display: 'flex', flexDirection: 'column', gap: 8, background: 'var(--overlay-subtle)', padding: 10, borderRadius: 6, border: '1px solid var(--border)' }}>
-                                                <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--accent-light)' }}>
-                                                  Klip #{cidx + 1}
+                                              <div
+                                                key={cidx}
+                                                style={{
+                                                  display: 'flex',
+                                                  flexDirection: 'column',
+                                                  gap: 8,
+                                                  background: isBridge ? 'var(--surface)' : 'var(--overlay-subtle)',
+                                                  padding: 10,
+                                                  borderRadius: 6,
+                                                  border: isBridge ? '1.5px solid var(--status-purple)' : '1px solid var(--border)'
+                                                }}
+                                              >
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 4 }}>
+                                                  <span style={{ fontSize: '0.72rem', fontWeight: 700, color: isBridge ? 'var(--status-purple)' : 'var(--accent-light)' }}>
+                                                    Klip #{cidx + 1}
+                                                  </span>
+                                                  <span style={{
+                                                    fontSize: '0.62rem',
+                                                    fontWeight: 700,
+                                                    padding: '1px 6px',
+                                                    borderRadius: 999,
+                                                    background: isBridge ? 'var(--status-purple-soft)' : 'var(--status-info-soft)',
+                                                    color: isBridge ? 'var(--status-purple)' : 'var(--status-info)',
+                                                    border: `1px solid ${isBridge ? 'var(--status-purple)' : 'var(--status-info)'}`
+                                                  }}>
+                                                    {isBridge ? (segRole === 'recall' ? 'Bridge Recall' : 'Bridge Intro') : 'Non-Bridging'}
+                                                  </span>
+                                                </div>
+                                                <div style={{ fontSize: '0.64rem', color: 'var(--text-muted)', lineHeight: 1.3 }}>
+                                                  {isBridge ? 'category: subject + Identity Lock' : 'Tanpa foto produk (bebas kemasan)'}
                                                 </div>
                                                 <div style={{ width: '100%', height: 160, borderRadius: 4, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)' }}>
                                                   {imgPath ? (
@@ -1499,7 +1566,8 @@ function CampaignDetailPageContent() {
                                           })}
                                         </div>
                                       </div>
-                                    )}
+                                      );
+                                    })()}
 
                                     {/* Bulk Copy Toolbar */}
                                     <div style={{
@@ -2261,8 +2329,8 @@ function CampaignDetailPageContent() {
                                       </thead>
                                       <tbody>
                                         {storyboard.map((clip, cidx) => {
-                                          const t2iImagesList = task.t2i_images_json ? JSON.parse(task.t2i_images_json) : [];
-                                          const startFrame = t2iImagesList[cidx];
+                                          const t2iImagesList = safeJsonParse(task.t2i_images_json, []);
+                                          const startFrame = Array.isArray(t2iImagesList) ? t2iImagesList[cidx] : null;
                                           const glabsTask = task.glabs_tasks?.find(gt => gt.clip_index === cidx + 1);
 
                                           return (

@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup P3 — Pratinjau Foto Referensi Produk Bridging Multiplier</title>
+  <style>
+    :root, [data-theme="dark"] {
+      --canvas: #0b0f17;
+      --surface: #131a26;
+      --surface-raised: #1a2333;
+      --surface-interactive: #212c40;
+      --border-subtle: rgba(148, 163, 184, 0.16);
+      --border-strong: rgba(148, 163, 184, 0.3);
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --action-primary: #2dd4bf;
+      --on-action-primary: #062825;
+      --status-success: #22c55e;
+      --status-success-soft: rgba(34, 197, 94, 0.14);
+      --status-warning: #f59e0b;
+      --status-warning-soft: rgba(245, 158, 11, 0.14);
+      --status-info: #38bdf8;
+      --status-info-soft: rgba(56, 189, 248, 0.14);
+      --status-purple: #a855f7;
+      --status-purple-soft: rgba(168, 85, 247, 0.14);
+      --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.3);
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+    }
+
+    [data-theme="light"] {
+      --canvas: #f5f7fa;
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #edf2f7;
+      --border-subtle: rgba(15, 23, 42, 0.11);
+      --border-strong: rgba(15, 23, 42, 0.24);
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --action-primary: #0d9488;
+      --on-action-primary: #ffffff;
+      --status-success: #15803d;
+      --status-success-soft: rgba(21, 128, 61, 0.12);
+      --status-warning: #b45309;
+      --status-warning-soft: rgba(180, 83, 9, 0.12);
+      --status-info: #0369a1;
+      --status-info-soft: rgba(3, 105, 161, 0.12);
+      --status-purple: #7e22ce;
+      --status-purple-soft: rgba(126, 34, 206, 0.12);
+      --shadow-card: 0 4px 16px rgba(15, 23, 42, 0.07);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--canvas);
+      color: var(--text-primary);
+      line-height: 1.5;
+      padding: 24px 16px 64px;
+    }
+    .container {
+      max-width: 1020px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .title { font-size: 1.2rem; font-weight: 800; margin: 0; }
+    .subtitle { font-size: 0.84rem; color: var(--text-muted); margin-top: 2px; }
+    .btn {
+      border: 1px solid var(--border-strong);
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border-color: var(--action-primary);
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 14px;
+    }
+    .prod-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      cursor: pointer;
+    }
+    .prod-card.selected {
+      background: var(--surface-interactive);
+      border: 1.5px solid var(--status-success);
+    }
+    .thumb-sm {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-align: center;
+      flex-shrink: 0;
+      background: var(--surface);
+      color: var(--text-secondary);
+      padding: 3px;
+    }
+    .ref-preview-box {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+    }
+    .thumb-lg {
+      width: 68px;
+      height: 68px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--action-primary);
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-align: center;
+      padding: 6px;
+      flex-shrink: 0;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .badge-warn {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border: 1px solid var(--status-warning);
+    }
+    .badge-ok {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+    }
+    .badge-info {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid var(--status-info);
+    }
+    .badge-purple {
+      background: var(--status-purple-soft);
+      color: var(--status-purple);
+      border: 1px solid var(--status-purple);
+    }
+    .clip-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+      gap: 10px;
+    }
+    .clip-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.78rem;
+    }
+    .clip-card.bridge {
+      border-color: var(--status-purple);
+      background: var(--surface-interactive);
+    }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.72rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div>
+        <h1 class="title">Mockup P3: Pratinjau Foto Referensi Klip Bridging Multiplier</h1>
+        <div class="subtitle">Simulasi tampilan Auto Pipeline &amp; Multiplier Lab sebelum produksi Start Frame T2I</div>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button class="btn" id="themeToggle" onclick="toggleTheme()">Ganti Tema (Light / Dark)</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <strong>1. Simulasi Kartu Produk di Auto Pipeline / Multiplier Configurator</strong>
+        <span style="font-size:0.78rem; color:var(--text-muted);">Klik produk untuk menguji perubahan panel Foto Referensi</span>
+      </div>
+      <div class="grid-2" id="productList"></div>
+
+      <div class="ref-preview-box" id="refPreview"></div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <strong>2. Simulasi Lock Referensi di Multiplier Lab (Preset 6 Klip, Bridging Klip 4 &amp; 6)</strong>
+        <span class="badge badge-purple">Identity Lock Aktif pada Klip 4 &amp; 6</span>
+      </div>
+      <div class="clip-row" id="clipGrid"></div>
+    </div>
+  </div>
+
+  <script>
+    const PRODUCTS = [
+      {
+        id: 'pe_1781998087509_929',
+        name: 'Beorganik Peanut Butter',
+        category: 'Bahan Resep',
+        active_photo: 'clean_photo_url',
+        photo_status: 'needs_review',
+        visualTag: 'Jar Label Putih',
+        rawTag: '5 Jar Tutup Hijau',
+        cleanTag: 'Jar Tutup Putih'
+      },
+      {
+        id: 'pe_1780712278685',
+        name: 'Blender Philips 3000 Series HR2042/13',
+        category: 'Alat Dapur',
+        active_photo: 'raw_photo_url',
+        photo_status: 'approved',
+        visualTag: 'Blender Asli',
+        rawTag: 'Foto Asli Disetujui',
+        cleanTag: 'Foto Bersih'
+      }
+    ];
+
+    let selectedId = PRODUCTS[0].id;
+    let overrideTab = null;
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    }
+
+    function selectProduct(id) {
+      selectedId = id;
+      overrideTab = null;
+      render();
+    }
+
+    function setPhotoStatus(status) {
+      const p = PRODUCTS.find(x => x.id === selectedId);
+      if (p) p.photo_status = status;
+      render();
+    }
+
+    function setActiveField(field) {
+      const p = PRODUCTS.find(x => x.id === selectedId);
+      if (p) p.active_photo = field;
+      render();
+    }
+
+    function render() {
+      const listEl = document.getElementById('productList');
+      listEl.innerHTML = PRODUCTS.map(p => {
+        const isSel = p.id === selectedId;
+        const activeLabel = p.active_photo === 'raw_photo_url' ? p.rawTag : p.cleanTag;
+        return `
+          <div class="prod-card ${isSel ? 'selected' : ''}" onclick="selectProduct('${p.id}')">
+            <div class="thumb-sm">${activeLabel}</div>
+            <div style="flex:1; min-width:0;">
+              <div style="font-weight:700; font-size:0.86rem;">${p.name}</div>
+              <div style="font-size:0.74rem; color:var(--text-muted);">${p.category} · Sumber: <span class="mono">${p.active_photo}</span></div>
+            </div>
+            <span class="badge ${p.photo_status === 'approved' ? 'badge-ok' : 'badge-warn'}">
+              ${p.photo_status === 'approved' ? 'Disetujui' : 'Perlu Tinjau'}
+            </span>
+          </div>
+        `;
+      }).join('');
+
+      const activeProd = PRODUCTS.find(x => x.id === selectedId);
+      const isApproved = activeProd.photo_status === 'approved';
+      const fieldLabel = activeProd.active_photo === 'raw_photo_url' ? 'Foto Asli (raw_photo_url)' : 'Foto Bersih (clean_photo_url)';
+      const visualPreview = activeProd.active_photo === 'raw_photo_url' ? activeProd.rawTag : activeProd.cleanTag;
+
+      document.getElementById('refPreview').innerHTML = `
+        <div class="thumb-lg">
+          <span>${visualPreview}</span>
+        </div>
+        <div style="flex:1; min-width:240px; display:flex; flex-direction:column; gap:6px;">
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <strong style="font-size:0.88rem;">Foto Referensi yang Diteruskan ke Klip Bridging (Klip 4 &amp; 6):</strong>
+            <span class="badge badge-info">${fieldLabel}</span>
+            <span class="badge ${isApproved ? 'badge-ok' : 'badge-warn'}">
+              ${isApproved ? '✓ Foto Sudah Disetujui' : '⚠ Status: Perlu Ditinjau (needs_review)'}
+            </span>
+          </div>
+          <div style="font-size:0.78rem; color:var(--text-secondary);">
+            ${isApproved
+              ? 'Identitas visual kemasan produk terkunci ke foto terlampir ([HIGHEST PRIORITY PRODUCT IDENTITY LOCK]).'
+              : 'Foto produk ini belum disetujui di Product Database. Periksa kecocokan kemasan di menu Products sebelum produksi massal.'}
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:2px;">
+            <button class="btn" onclick="setActiveField('clean_photo_url')">Simulasi active_photo: clean_photo_url</button>
+            <button class="btn" onclick="setActiveField('raw_photo_url')">Simulasi active_photo: raw_photo_url</button>
+            <button class="btn btn-primary" onclick="setPhotoStatus('${isApproved ? 'needs_review' : 'approved'}')">
+              ${isApproved ? 'Ubah ke Perlu Tinjau' : 'Simulasi Setujui Foto'}
+            </button>
+          </div>
+        </div>
+      `;
+
+      const clips = [1, 2, 3, 4, 5, 6];
+      document.getElementById('clipGrid').innerHTML = clips.map(c => {
+        const isBridge = c === 4 || c === 6;
+        return `
+          <div class="clip-card ${isBridge ? 'bridge' : ''}">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <strong>Klip ${c}</strong>
+              <span class="badge ${isBridge ? 'badge-purple' : 'badge-info'}">
+                ${isBridge ? (c === 4 ? 'Bridge Intro' : 'Bridge Recall') : 'Non-Bridging'}
+              </span>
+            </div>
+            <div style="color:var(--text-secondary);">
+              ${isBridge
+                ? `Referensi: <strong>${visualPreview}</strong><br><span class="mono">category: subject + Identity Lock</span>`
+                : 'Tanpa foto produk (prompt bersih dari nama produk &amp; kemasan)'}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    render();
+  </script>
+</body>
+</html>

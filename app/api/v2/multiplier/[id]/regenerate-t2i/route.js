@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server';
-import { getDb, dbRun, getMultiplierTaskById, getSetting } from '@/lib/db';
+import { getDb, dbRun, getMultiplierTaskById, getSetting, getBrandProfile } from '@/lib/db';
 import { generateImage, getTaskStatus, getFileUrl } from '@/lib/webhook-client';
 import fs from 'fs';
 import path from 'path';
 import { withTenantContext } from '@/lib/auth';
-import { resolveBridgePlan, readBridgeInputs } from '@/lib/bridging/bridge-plan';
-import { readLocalImageDataUrl } from '@/lib/base64-image-reference';
+import { buildMultiplierStartFrameRequest } from '@/lib/multiplier-start-frame-request';
 
 export const POST = withTenantContext(async (req, { params }) => {
   try {
@@ -23,29 +22,35 @@ export const POST = withTenantContext(async (req, { params }) => {
     }
 
     const imageModel = await getSetting('webhook_image_model') || 'nano_banana_pro';
-    
-    // Resolve product image base64 if present
-    let productBase64 = null;
+    const db = getDb();
     let bridging = {};
     try {
       bridging = JSON.parse(task.bridging_config_json || '{}');
     } catch (_) {}
 
-    const imagePath = bridging.product_ref_image_path || bridging.productRefImagePath;
-    productBase64 = imagePath ? readLocalImageDataUrl(imagePath) : null;
-
-    console.log(`[Multiplier UI Regenerate] Submitting T2I task for clip ${clipIndex}...`);
+    const targetProdId = bridging.targetProductId || task.target_product_id || null;
+    const liveProduct = targetProdId
+      ? await db.prepare('SELECT * FROM product_extractions WHERE id = ?').get(targetProdId).catch(() => null)
+      : null;
+    const brandProfile = task.brand_profile_id
+      ? await getBrandProfile(task.brand_profile_id).catch(() => null)
+      : null;
 
     const aesthetics = (() => { try { return JSON.parse(task.vso_config_json || '{}'); } catch { return {}; } })();
-    const bridgePlan = resolveBridgePlan(readBridgeInputs(bridging, aesthetics, { defaultActive: true }));
-    const isBridgeClip = bridgePlan.isProductClip(clipIndex);
-
-    const t2iResult = await generateImage({
+    const built = buildMultiplierStartFrameRequest({
+      task,
+      clipIndex,
       prompt: t2i_prompt,
-      model: imageModel,
-      aspect_ratio: '9:16',
-      reference_images: (isBridgeClip && productBase64) ? [productBase64] : undefined
+      product: liveProduct,
+      bridging,
+      aesthetics,
+      imageModel,
+      webhookOverride: brandProfile
     });
+
+    console.log(`[Multiplier UI Regenerate] Submitting T2I task for clip ${clipIndex} (bridge=${built.isBridgeClip}, ref=${built.audit.referenceSourceField || 'none'})...`);
+
+    const t2iResult = await generateImage(built.providerRequest);
 
     if (!t2iResult || !t2iResult.task_id) {
       return NextResponse.json({ success: false, error: "Gagal mengirim tugas T2I ke G-Labs" }, { status: 500 });

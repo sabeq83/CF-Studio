@@ -69,6 +69,19 @@ export const GET = withTenantContext(async (request) => {
         if (cf.id) syncedMap[cf.id] = cf;
       }
     }
+    const productIds = [...new Set(tasks.map(t => t.target_product_id).filter(Boolean))];
+    const productMap = {};
+    if (productIds.length > 0) {
+      const prodPlaceholders = productIds.map(() => '?').join(',');
+      const prodRows = await dbAll(
+        `SELECT id, product_name, active_photo, photo_status, clean_photo_url, cleaned_photo_url, raw_photo_url, generated_photo_url, photo_url
+         FROM product_extractions WHERE id IN (${prodPlaceholders})`,
+        productIds
+      );
+      for (const p of prodRows) {
+        productMap[p.id] = p;
+      }
+    }
     for (const task of tasks) {
       const glabsTasks = await dbAll('SELECT * FROM glabs_tasks WHERE campaign_id = ? ORDER BY item_id ASC', [task.id]);
       task.glabs_tasks = glabsTasks.map(gt => ({
@@ -80,6 +93,7 @@ export const GET = withTenantContext(async (request) => {
       task.is_synced_to_contentflow = Boolean(matchedCf);
       task.content_flow_item_id = matchedCf ? matchedCf.id : null;
       task.content_flow_video_id = matchedCf ? matchedCf.video_id : null;
+      task.product_ref = task.target_product_id ? (productMap[task.target_product_id] || null) : null;
     }
     const isSchedulerActive = await getSetting('multiplier_scheduler_active') !== 'false';
     return NextResponse.json({ success: true, tasks, isSchedulerActive });

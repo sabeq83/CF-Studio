@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server';
-import { dbRun, getMultiplierTaskById, getSetting } from '@/lib/db';
+import { getDb, dbRun, getMultiplierTaskById, getSetting, getBrandProfile } from '@/lib/db';
 import { generateImage, getTaskStatus, getFileUrl } from '@/lib/webhook-client';
 import fs from 'fs';
 import path from 'path';
 import { withTenantContext } from '@/lib/auth';
-import { resolveBridgePlan, readBridgeInputs } from '@/lib/bridging/bridge-plan';
-import { readLocalImageDataUrl } from '@/lib/base64-image-reference';
+import { buildMultiplierStartFrameRequest } from '@/lib/multiplier-start-frame-request';
 
 export const POST = withTenantContext(async (req, { params }) => {
   try {
@@ -55,17 +54,21 @@ export const POST = withTenantContext(async (req, { params }) => {
 async function runTaskRegenerateStartFramesBackground(taskId, task, prompts) {
   try {
     const imageModel = await getSetting('webhook_image_model') || 'nano_banana_pro';
-    
+    const db = getDb();
     let bridging = {};
     try {
       bridging = JSON.parse(task.bridging_config_json || '{}');
     } catch (_) {}
 
-    const imagePath = bridging.product_ref_image_path || bridging.productRefImagePath;
-    const productBase64 = imagePath ? readLocalImageDataUrl(imagePath) : null;
+    const targetProdId = bridging.targetProductId || task.target_product_id || null;
+    const liveProduct = targetProdId
+      ? await db.prepare('SELECT * FROM product_extractions WHERE id = ?').get(targetProdId).catch(() => null)
+      : null;
+    const brandProfile = task.brand_profile_id
+      ? await getBrandProfile(task.brand_profile_id).catch(() => null)
+      : null;
 
     const aesthetics = (() => { try { return JSON.parse(task.vso_config_json || '{}'); } catch { return {}; } })();
-    const bridgePlan = resolveBridgePlan(readBridgeInputs(bridging, { ...aesthetics, target_clips_count: prompts.length }, { defaultActive: true }));
     const totalCount = prompts.length;
     
     for (let i = 0; i < totalCount; i++) {
@@ -75,16 +78,20 @@ async function runTaskRegenerateStartFramesBackground(taskId, task, prompts) {
 
       if (!promptText) continue;
 
-      console.log(`[Multiplier SF Batch] Processing clip ${clipIndex} for task ${taskId}...`);
-
-      const isBridgeClip = bridgePlan.isProductClip(clipIndex);
-
-      const t2iResult = await generateImage({
+      const built = buildMultiplierStartFrameRequest({
+        task,
+        clipIndex,
         prompt: promptText,
-        model: imageModel,
-        aspect_ratio: '9:16',
-        reference_images: (isBridgeClip && productBase64) ? [productBase64] : undefined
+        product: liveProduct,
+        bridging,
+        aesthetics: { ...aesthetics, target_clips_count: prompts.length },
+        imageModel,
+        webhookOverride: brandProfile
       });
+
+      console.log(`[Multiplier SF Batch] Processing clip ${clipIndex} for task ${taskId} (bridge=${built.isBridgeClip}, ref=${built.audit.referenceSourceField || 'none'})...`);
+
+      const t2iResult = await generateImage(built.providerRequest);
 
       if (!t2iResult?.task_id) {
         console.error(`[Multiplier SF Batch] Clip ${clipIndex} failed to submit`);
