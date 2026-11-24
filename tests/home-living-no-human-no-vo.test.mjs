@@ -263,6 +263,8 @@ test('Pipeline workers, scheduler, processor, and MCP schemas wire No-VO without
   assert.ok(reMulSrc.includes('compileVeoAmbientOnlyPrompt'));
   assert.ok(!reMulSrc.includes('tts_audio_path:'));
   assert.ok(!reMulSrc.includes('tts_batch_id:'));
+  assert.ok(reMulSrc.includes('const maxAttempts = 60;'));
+  assert.ok(reMulSrc.includes('glabs_task=${t2iResult.task_id}'));
 
   const dbPgSrc = fs.readFileSync(path.join(ROOT, 'lib/db-pg.js'), 'utf8');
   assert.ok(dbPgSrc.includes('ADD COLUMN IF NOT EXISTS audio_engine_mode'));
