@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.59.0 — Konsistensi Foto Produk Bridging Multiplier, Identity Lock T2I & UI Preview (24/11/2026)
+- Hormati active_photo produk via resolver terpusat product-photo-policy dan product-reference-resolver
+- Terapkan kontrak Identity Lock, subject wrapper, expected_reference_sha256s, webhookOverride, dan sanitasi non-bridging pada T2I Multiplier
+- Tambahkan pratinjau foto referensi BridgingProductReferenceCard di Auto Pipeline, Multiplier Form, dan Multiplier Lab
+- Perbaiki zoneOf, safeJsonParse, dan empty-state halaman detail Multiplier Lab
+- Perbarui kartu menu auto-pipeline dan multiplier-lab
+
 ## V2.58.1 — Hotfix Tombol 1-Klik Auto Pipeline (Multiplier & All Types) (24/11/2026)
 - Isolasi tenant blueprint Multiplier pada route autonomous-pipeline
 - Feedback validasi inline saat prasyarat form Auto Pipeline belum lengkap
