@@ -137,6 +137,9 @@ export default function OrganicPillarPage() {
   const [visualStylePreset, setVisualStylePreset] = useState('3d_claymation_cozy');
 
   // Section 5: Workflow & Audio Settings
+  const [audioEngineMode, setAudioEngineMode] = useState('minimax_tts');
+  const [noVoAudioBed, setNoVoAudioBed] = useState('native_sfx_ambience');
+  const [onScreenTextMode, setOnScreenTextMode] = useState('short_caption_overlay');
   const [enableTts, setEnableTts] = useState(false);
   const [voiceProvider, setVoiceProvider] = useState('minimax');
   const [voicePersona, setVoicePersona] = useState('Indonesian_SweetGirl');
@@ -267,25 +270,31 @@ export default function OrganicPillarPage() {
     }
 
     // Workflow Settings
-    if (config.workflow) {
-      if (config.workflow.approval_mode === 'none') {
+    if (config.workflow || config.basic_strategy) {
+      const wf = config.workflow || {};
+      const bs = config.basic_strategy || {};
+      const nextAudioMode = wf.audio_engine_mode || bs.audio_engine_mode || (wf.enable_tts === false ? 'native_veo' : 'minimax_tts');
+      setAudioEngineMode(nextAudioMode);
+      setNoVoAudioBed(wf.no_vo_audio_bed || bs.no_vo_audio_bed || 'native_sfx_ambience');
+      setOnScreenTextMode(wf.on_screen_text_mode || bs.on_screen_text_mode || 'short_caption_overlay');
+      if (wf.approval_mode === 'none') {
         setExecutionMode('full_autopilot');
       } else {
         setExecutionMode('manual_review');
       }
-      setEnableTts(Boolean(config.workflow.enable_tts));
-      setEnableGlabs(Boolean(config.workflow.enable_glabs));
-      setEnableFfmpeg(Boolean(config.workflow.enable_ffmpeg));
-      setEnableSocialPost(Boolean(config.workflow.enable_social_post));
-      setUploadMarkdown(config.workflow.upload_markdown !== undefined ? Boolean(config.workflow.upload_markdown) : true);
-      setUploadSpreadsheet(Boolean(config.workflow.upload_spreadsheet));
+      setEnableTts(nextAudioMode === 'minimax_tts' && Boolean(wf.enable_tts));
+      setEnableGlabs(Boolean(wf.enable_glabs));
+      setEnableFfmpeg(Boolean(wf.enable_ffmpeg));
+      setEnableSocialPost(Boolean(wf.enable_social_post));
+      setUploadMarkdown(wf.upload_markdown !== undefined ? Boolean(wf.upload_markdown) : true);
+      setUploadSpreadsheet(Boolean(wf.upload_spreadsheet));
 
-      setFfmpegSyncOption(config.workflow.ffmpeg_sync_option || 'smart_sync');
-      setFfmpegVideoScale(Number(config.workflow.ffmpeg_video_scale ?? 1.0));
-      setFfmpegSfxVolume(Number(config.workflow.ffmpeg_sfx_volume ?? 0.0));
-      setFfmpegBgmVolume(Number(config.workflow.ffmpeg_bgm_volume ?? 0.0));
-      setFacebookPageId(config.workflow.facebook_page_id || '');
-      setFacebookServerUrl(config.workflow.facebook_server_url || '');
+      setFfmpegSyncOption(wf.ffmpeg_sync_option || 'smart_sync');
+      setFfmpegVideoScale(Number(wf.ffmpeg_video_scale ?? 1.0));
+      setFfmpegSfxVolume(Number(wf.ffmpeg_sfx_volume ?? 0.0));
+      setFfmpegBgmVolume(Number(wf.ffmpeg_bgm_volume ?? 0.0));
+      setFacebookPageId(wf.facebook_page_id || '');
+      setFacebookServerUrl(wf.facebook_server_url || '');
     }
   };
 
@@ -351,7 +360,10 @@ export default function OrganicPillarPage() {
       },
       workflow: {
         approval_mode: executionMode === 'full_autopilot' ? 'none' : 'start_frames',
-        enable_tts: Boolean(enableTts),
+        audio_engine_mode: audioEngineMode,
+        no_vo_audio_bed: noVoAudioBed,
+        on_screen_text_mode: onScreenTextMode,
+        enable_tts: audioEngineMode === 'minimax_tts' && Boolean(enableTts),
         enable_glabs: Boolean(enableGlabs),
         enable_ffmpeg: Boolean(enableFfmpeg),
         enable_social_post: Boolean(enableSocialPost),
@@ -393,10 +405,10 @@ export default function OrganicPillarPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!enableTts || !enableGlabs) {
+    if ((audioEngineMode === 'minimax_tts' && !enableTts) || !enableGlabs) {
       setEnableFfmpeg(false);
     }
-  }, [enableTts, enableGlabs]);
+  }, [audioEngineMode, enableTts, enableGlabs]);
 
   useEffect(() => {
     const today = new Date();
@@ -746,7 +758,10 @@ export default function OrganicPillarPage() {
           visual_overrides_json: isVsoActive && visualIdentity.preset_id === 'custom' ? visualIdentity.visual_overrides_json : null,
           visual_identity_preset_id: isVsoActive ? visualIdentity.preset_id : null,
           visual_identity_inline_config: isVsoActive && visualIdentity.preset_id === 'inline' ? visualIdentity.inline_config : null,
-          enable_tts: enableTts,
+          audio_engine_mode: audioEngineMode,
+          no_vo_audio_bed: noVoAudioBed,
+          on_screen_text_mode: onScreenTextMode,
+          enable_tts: audioEngineMode === 'minimax_tts' && enableTts,
           enable_glabs: enableGlabs,
           enable_ffmpeg: enableFfmpeg,
           enable_social_post: enableSocialPost,
@@ -893,7 +908,10 @@ export default function OrganicPillarPage() {
       formData.append('video_model', videoModel);
       formData.append('clip_duration', String(clipDuration));
       formData.append('words_per_clip', wordsPerClip);
-      formData.append('enable_tts', enableTts ? '1' : '0');
+      formData.append('audio_engine_mode', audioEngineMode);
+      formData.append('no_vo_audio_bed', noVoAudioBed);
+      formData.append('on_screen_text_mode', onScreenTextMode);
+      formData.append('enable_tts', audioEngineMode === 'minimax_tts' && enableTts ? '1' : '0');
       formData.append('enable_glabs', enableGlabs ? '1' : '0');
       formData.append('enable_ffmpeg', enableFfmpeg ? '1' : '0');
       formData.append('enable_social_post', enableSocialPost ? '1' : '0');
@@ -2155,9 +2173,22 @@ export default function OrganicPillarPage() {
                         <label className="form-label" style={{ marginBottom: 10 }}>Tahapan Workflow Aktif</label>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
 
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface-interactive)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border-color)' }}>
-                            <span style={{ fontSize: '0.85rem', color: 'var(--text-color)', fontWeight: '500' }}>Enable TTS (Voiceover)</span>
-                            <input type="checkbox" checked={enableTts} onChange={e => setEnableTts(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, background: 'var(--surface-interactive)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border-color)' }}>
+                            <span style={{ fontSize: '0.85rem', color: 'var(--text-color)', fontWeight: '600' }}>Mode Audio / VO</span>
+                            <select
+                              className="form-input"
+                              value={audioEngineMode}
+                              onChange={e => {
+                                const nextMode = e.target.value;
+                                setAudioEngineMode(nextMode);
+                                setEnableTts(nextMode === 'minimax_tts');
+                              }}
+                              style={{ fontSize: '0.8rem', padding: '6px 8px' }}
+                            >
+                              <option value="minimax_tts">🎙️ TTS Voiceover (MiniMax/Gemini)</option>
+                              <option value="native_veo">🔊 Native Veo 3.1 Audio</option>
+                              <option value="no_vo">🔇 Tanpa VO (ASMR / Visual)</option>
+                            </select>
                           </div>
 
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface-interactive)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border-color)' }}>
@@ -2178,8 +2209,29 @@ export default function OrganicPillarPage() {
                         </div>
                       </div>
 
+                      {audioEngineMode === 'no_vo' && (
+                        <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: 14, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                          <div>
+                            <label className="form-label" style={{ fontSize: '0.78rem' }}>Bed Audio Non-VO</label>
+                            <select className="form-input" value={noVoAudioBed} onChange={e => setNoVoAudioBed(e.target.value)}>
+                              <option value="native_sfx_ambience">SFX &amp; Ambience Ruangan Alami</option>
+                              <option value="bgm_only">Musik BGM Saja</option>
+                              <option value="native_sfx_plus_bgm">SFX Ruangan + BGM</option>
+                              <option value="silent">Senyap Total (Silent)</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="form-label" style={{ fontSize: '0.78rem' }}>Teks Layar Cerita</label>
+                            <select className="form-input" value={onScreenTextMode} onChange={e => setOnScreenTextMode(e.target.value)}>
+                              <option value="short_caption_overlay">Aktif — Teks Singkat 3-6 Kata</option>
+                              <option value="off">Nonaktif — Visual Murni</option>
+                            </select>
+                          </div>
+                        </div>
+                      )}
+
                       {/* Audio settings */}
-                      {enableTts && (
+                      {audioEngineMode === 'minimax_tts' && enableTts && (
                         <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: 14 }}>
                           <label className="form-label" style={{ fontWeight: 600, color: 'var(--accent-color)' }}>🔊 TTS Audio Engine Settings</label>
                           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 8 }}>

@@ -904,58 +904,95 @@ export default function VisualIdentityStudioPage() {
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
                   <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                    Tautkan ke Universe Profile
-                    <select
-                      value={config.subject?.universe_profile_id || config.subject?.universe_slug || ''}
-                      onChange={(e) => handleUniverseProfileChange(e.target.value)}
-                      style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '13px' }}
-                    >
-                      <option value="">-- Tanpa Universe (Manual / Standalone) --</option>
-                      {universeProfiles.map(u => (
-                        <option key={u.id} value={u.id}>{u.name} ({u.slug})</option>
-                      ))}
-                    </select>
-                  </label>
-                  <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
                     Subject Kind
                     <select
                       value={config.subject?.kind || 'human'}
-                      onChange={(e) => updateConfigField('subject', 'kind', e.target.value)}
+                      onChange={(e) => {
+                        const nextKind = e.target.value;
+                        if (nextKind === 'environment_object_only') {
+                          setConfig(prev => ({
+                            ...prev,
+                            subject: {
+                              ...prev.subject,
+                              kind: 'environment_object_only',
+                              faceless_mode: 'not_applicable',
+                              demographic_key: 'not_applicable',
+                              character_count: 0,
+                              population_mode: 'none',
+                              universe_profile_id: undefined,
+                              universe_slug: undefined
+                            },
+                            wardrobe: {
+                              ...prev.wardrobe,
+                              mode: 'not_applicable',
+                              preset_key: 'not_applicable',
+                              sleeve_policy: 'not_applicable',
+                              custom_description: ''
+                            }
+                          }));
+                        } else {
+                          updateConfigField('subject', 'kind', nextKind);
+                        }
+                      }}
                       style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '13px' }}
                     >
                       {SUBJECT_KINDS.map(kind => (
-                        <option key={kind} value={kind}>{kind.replace(/_/g, ' ')}</option>
+                        <option key={kind} value={kind}>
+                          {kind === 'environment_object_only' ? '🏠 Ruangan & Objek Saja (environment_object_only)' : kind.replace(/_/g, ' ')}
+                        </option>
                       ))}
                     </select>
                   </label>
-                  <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                    Faceless Mode
-                    <select
-                      value={config.subject?.faceless_mode || 'featureless_editorial'}
-                      onChange={(e) => updateConfigField('subject', 'faceless_mode', e.target.value)}
-                      style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '13px' }}
-                    >
-                      {ALL_FACELESS_MODES.map(mode => (
-                        <option key={mode} value={mode}>{mode.replace(/_/g, ' ')}</option>
-                      ))}
-                    </select>
-                  </label>
-                  <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                    Population Mode
-                    <select
-                      value={config.subject?.population_mode || 'single_group_or_crowd'}
-                      onChange={(e) => updateConfigField('subject', 'population_mode', e.target.value)}
-                      style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '13px' }}
-                    >
-                      {POPULATION_MODES.map(pop => (
-                        <option key={pop} value={pop}>{pop.replace(/_/g, ' ')}</option>
-                      ))}
-                    </select>
-                  </label>
+
+                  {config.subject?.kind === 'environment_object_only' ? (
+                    <div style={{ gridColumn: '1 / -1', background: 'var(--status-info-soft)', border: '1px solid var(--status-info)', borderRadius: 'var(--radius-sm, 6px)', padding: '10px 14px', fontSize: '12px', color: 'var(--text-primary)' }}>
+                      <strong>🏠 Mode Zero-Human (Ruangan &amp; Objek Saja) Aktif:</strong> Universe Profile, Demographic, Faceless Mode, Wardrobe, dan Sleeve Policy disembunyikan dan dikunci ke <code>not_applicable</code> (0 manusia, 0 tangan, 0 pakaian).
+                    </div>
+                  ) : (
+                    <>
+                      <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                        Tautkan ke Universe Profile
+                        <select
+                          value={config.subject?.universe_profile_id || config.subject?.universe_slug || ''}
+                          onChange={(e) => handleUniverseProfileChange(e.target.value)}
+                          style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '13px' }}
+                        >
+                          <option value="">-- Tanpa Universe (Manual / Standalone) --</option>
+                          {universeProfiles.map(u => (
+                            <option key={u.id} value={u.id}>{u.name} ({u.slug})</option>
+                          ))}
+                        </select>
+                      </label>
+                      <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                        Faceless Mode
+                        <select
+                          value={config.subject?.faceless_mode || 'featureless_editorial'}
+                          onChange={(e) => updateConfigField('subject', 'faceless_mode', e.target.value)}
+                          style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '13px' }}
+                        >
+                          {ALL_FACELESS_MODES.map(mode => (
+                            <option key={mode} value={mode}>{mode.replace(/_/g, ' ')}</option>
+                          ))}
+                        </select>
+                      </label>
+                      <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                        Population Mode
+                        <select
+                          value={config.subject?.population_mode || 'single_group_or_crowd'}
+                          onChange={(e) => updateConfigField('subject', 'population_mode', e.target.value)}
+                          style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '13px' }}
+                        >
+                          {POPULATION_MODES.map(pop => (
+                            <option key={pop} value={pop}>{pop.replace(/_/g, ' ')}</option>
+                          ))}
+                        </select>
+                      </label>
+                    </>
+                  )}
                 </div>
 
                 {/* Character Gallery Card Preview */}
-                {selectedUniverseData && selectedUniverseData.characters?.length > 0 && (
+                {config.subject?.kind !== 'environment_object_only' && selectedUniverseData && selectedUniverseData.characters?.length > 0 && (
                   <div style={{ marginTop: 8, background: 'var(--surface)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm, 6px)', padding: 14 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                       <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)' }}>
@@ -993,10 +1030,12 @@ export default function VisualIdentityStudioPage() {
                 )}
 
                 <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                  Custom Subject Description
+                  {config.subject?.kind === 'environment_object_only' ? 'Space, Surface & Material Focus Description' : 'Custom Subject Description'}
                   <input
                     type="text"
-                    placeholder="e.g. Contemporary Southeast Asian citizens, diverse ages, everyday modest civilian attire"
+                    placeholder={config.subject?.kind === 'environment_object_only'
+                      ? 'e.g. Zero-human minimalist Scandinavian oak living room with ceramic decor and afternoon sunlight'
+                      : 'e.g. Contemporary Southeast Asian citizens, diverse ages, everyday modest civilian attire'}
                     value={config.subject?.custom_description || ''}
                     onChange={(e) => updateConfigField('subject', 'custom_description', e.target.value)}
                     style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '13px' }}
@@ -1154,20 +1193,32 @@ export default function VisualIdentityStudioPage() {
                 <h3 style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--status-danger)', margin: '0 0 6px' }}>
                   Locked Deterministic Guardrails
                 </h3>
-                <ul style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: 3, paddingLeft: 16, margin: 0 }}>
-                  <li>Face Visibility is locked to <strong style={{ color: 'var(--text-primary)' }}>PROHIBITED</strong>.</li>
-                  <li>Reflections showing human faces is locked to <strong style={{ color: 'var(--text-primary)' }}>PROHIBITED</strong>.</li>
-                  <li>Unintended extra people in generation is locked to <strong style={{ color: 'var(--text-primary)' }}>PROHIBITED</strong>.</li>
-                  <li>Intentional crowds are <strong style={{ color: 'var(--text-primary)' }}>ALLOWED FACELESS</strong> (strictly featureless / turned away).</li>
-                </ul>
+                {config.subject?.kind === 'environment_object_only' ? (
+                  <ul style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: 3, paddingLeft: 16, margin: 0 }}>
+                    <li>Human Presence &amp; Silhouettes are locked to <strong style={{ color: 'var(--text-primary)' }}>STRICTLY PROHIBITED</strong> (0 humans).</li>
+                    <li>Hands, Fingers, Forearms &amp; Body Parts are locked to <strong style={{ color: 'var(--text-primary)' }}>STRICTLY PROHIBITED</strong> (<code>hand_count = 0</code>).</li>
+                    <li>Clothing, Sleeves &amp; Mannequins are <strong style={{ color: 'var(--text-primary)' }}>NOT APPLICABLE / PROHIBITED</strong>.</li>
+                    <li>Reflections showing people are locked to <strong style={{ color: 'var(--text-primary)' }}>PROHIBITED</strong>.</li>
+                  </ul>
+                ) : (
+                  <ul style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: 3, paddingLeft: 16, margin: 0 }}>
+                    <li>Face Visibility is locked to <strong style={{ color: 'var(--text-primary)' }}>PROHIBITED</strong>.</li>
+                    <li>Reflections showing human faces is locked to <strong style={{ color: 'var(--text-primary)' }}>PROHIBITED</strong>.</li>
+                    <li>Unintended extra people in generation is locked to <strong style={{ color: 'var(--text-primary)' }}>PROHIBITED</strong>.</li>
+                    <li>Intentional crowds are <strong style={{ color: 'var(--text-primary)' }}>ALLOWED FACELESS</strong> (strictly featureless / turned away).</li>
+                  </ul>
+                )}
               </div>
 
               {editingPreset && !editingPreset.isNew && editingPreset.source === 'user' && (
                 <ReferenceAssetManager
                   ownerType="visual_identity"
                   ownerId={editingPreset.id}
-                  allowedRoles={['visual_style', 'location', 'wardrobe', 'palette_sheet', 'character_sheet']}
+                  allowedRoles={config.subject?.kind === 'environment_object_only'
+                    ? ['visual_style', 'location', 'palette_sheet']
+                    : ['visual_style', 'location', 'wardrobe', 'palette_sheet', 'character_sheet']}
                   requiresAttestation={
+                    config.subject?.kind !== 'environment_object_only' &&
                     !isStylizedCharacterVisualConfig({ visualOverrides: config }) &&
                     ['human', 'blank_face_3d'].includes(config.subject?.kind || 'human')
                   }

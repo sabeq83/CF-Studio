@@ -99,7 +99,19 @@ export const PATCH = withTenantContext(async (request, { params }, user) => {
     if (body.enable_glabs !== undefined) {
       updates.enable_glabs = body.enable_glabs ? 1 : 0;
     }
-    if (body.enable_tts !== undefined) {
+    if (body.audio_engine_mode !== undefined) {
+      updates.audio_engine_mode = body.audio_engine_mode;
+      if (body.audio_engine_mode === 'no_vo' || body.audio_engine_mode === 'native_veo') {
+        updates.enable_tts = 0;
+      }
+    }
+    if (body.no_vo_audio_bed !== undefined) {
+      updates.no_vo_audio_bed = body.no_vo_audio_bed;
+    }
+    if (body.on_screen_text_mode !== undefined) {
+      updates.on_screen_text_mode = body.on_screen_text_mode;
+    }
+    if (body.enable_tts !== undefined && updates.enable_tts === undefined) {
       updates.enable_tts = body.enable_tts ? 1 : 0;
     }
     if (body.enable_ffmpeg !== undefined) {

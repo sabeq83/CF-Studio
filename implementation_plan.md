@@ -1,265 +1,502 @@
-# Implementation Plan: Blueprint–Product Smart Matcher & Kuota Harian 2+2 Video Multiplier
+# Implementation Plan: Visual Identity Tanpa Manusia (`environment_object_only`) & Mode Video Tanpa VO (`no_vo`)
 
-**Branch Kerja:** `fitur/smart-matcher-2plus2` *(dibuat dari `main` terbaru sesuai SOP Dev vs Staging)*  
-**Rujukan Usulan:** [USULAN_SMART_MATCHER_DAN_KUOTA_2PLUS2_MULTIPLIER.md](catatan-kerja/usulan/USULAN_SMART_MATCHER_DAN_KUOTA_2PLUS2_MULTIPLIER.md)  
-**Target Brand:** `nutribake` (`75` produk), `dapurbotani` (`135` produk), `siasatsehat` (`24` produk — termasuk 7 alat dapur yang baru ditautkan pengguna).  
-**Target Kuota:** 4 video Multiplier/hari/brand = 12 video/hari (**2 Alat Dapur + 2 Bahan Resep**).
-
-> [!IMPORTANT]
-> **Kontrol Database & Deployment (SOP Wajib):**
-> 1. Semua perubahan UI React/Next.js **dilarang** dikerjakan sebelum mockup interaktif `public/mockup_smart_matcher_2plus2.html` disinkronkan ke Staging (`http://100.95.245.55:5010/mockup_smart_matcher_2plus2.html`) dan direview pengguna.
-> 2. Fitur mengubah struktur database (`promo_role` di `product_extractions` + tabel `blueprint_product_matches`), sehingga wajib diuji terlebih dahulu di **Dev (5020/7020)** sebelum naik ke `main`/Staging.
-> 3. **Catatan Data Katalog:** 7 alat dapur eksisting (`pe_1780712278685`, `pe_1784449324420_841`, `pe_1781420171521_196`, `pe_1781360120731_877`, `pe_1795244192996_846`, `pe_1781420173223_989`, `pe_1782648834064_82`) sudah terkonfirmasi aktif pada ketiga brand, sementara `pe_1795092448042_8649` sudah terhapus. Sebanyak 30 alat dapur baru hasil Apify (`pe_1795430545113_749` s/d `pe_1795430743937_7057`) sudah berada di `default_tenant` dan dapat ikut ditautkan ke `brand_products` bila ingin masuk rotasi otomatis.
+**Sumber Usulan:** [/Users/sabeqmmursyid/cf-autopipeline/usulan-cf-studio-home-living-no-human-no-vo.md](file:///Users/sabeqmmursyid/cf-autopipeline/usulan-cf-studio-home-living-no-human-no-vo.md)  
+**Target Branch Kerja:** `fitur/home-living-no-human-no-vo` (dibuat dari `main` setelah mockup HTML disetujui)  
+**Mockup HTML Pra-Eksekusi:** [public/mockup_home_living_no_human_no_vo.html](file:///Users/sabeqmmursyid/_cfstudio/public/mockup_home_living_no_human_no_vo.html)
 
 ---
 
 ## Execution Task List
 
-- [x] Buat branch `fitur/smart-matcher-2plus2` dari `main` terbaru
-- [x] **Tahap 1 (Mockup UI)**: Buat mockup interaktif `public/mockup_smart_matcher_2plus2.html` (Deconstruct Lab filter & badge, Product Database `promo_role`, Multiplier/Auto Pipeline Smart Recommendations, Wizard Jadwal 2+2), sinkronkan ke Staging `5010`, dan minta review pengguna
-- [x] **Tahap 2 (Skema DB)**: Tambah kolom `promo_role` di `product_extractions` + tabel indeks `blueprint_product_matches` di `lib/db-pg.js` dan backfill nilai awal `promo_role`
-- [x] **Tahap 3 (Engine Matcher)**: Buat `lib/blueprint-product-matcher.js` (klasifikasi `promo_role`, ekstraksi aksi/bahan blueprint, penanda `is_food_safe`, skoring per brand, dan backfill 213 blueprint) + hook otomatis saat deconstruct selesai di `lib/scheduler-processors.js`
-- [x] **Tahap 4 (API & Repo)**: Perluas `lib/product-repository.js`, `lib/product-catalog-service.js`, `lib/product-validation.js`, `app/api/v2/products/route.js`, `app/api/v2/products/[id]/route.js`, `lib/db.js`, `app/api/v2/deconstruct/route.js`, serta tambah `app/api/v2/deconstruct/matches/route.js`
-- [x] **Tahap 5 (Autopilot 2+2 & MCP)**: Tambah mode `auto_smart_match` + `target_promo_role` (`alat_dapur`/`bahan_resep`) + anti-duplikat (14 hari blueprint, 4 hari produk) di `lib/auto-pipeline-scheduler-runner.js` & `lib/autonomous-engine.js`, serta perluas tool `apps/mcp/tools.mjs`
-- [x] **Tahap 6 (UI React/Next.js — pasca persetujuan mockup)**: Implementasikan perubahan UI di `app/deconstruct/page.js`, `app/products/page.js`, `app/products/ProductDatabaseModal.js`, `app/components/campaign-forms/MultiplierConfigurationForm.js`, dan `app/auto-pipeline/page.js` (100% Semantic CSS Tokens)
-- [x] **Tahap 7 (Verifikasi & Deploy Dev)**: Tambah unit test `tests/blueprint-product-matcher.test.mjs`, jalankan `PG_SEARCH_PATH=dev node --test tests/blueprint-product-matcher.test.mjs`, `DISABLE_AUTO_MIGRATIONS=true PG_SEARCH_PATH=dev npm run build`, backfill indeks di Dev, perbarui kartu menu di `sot/menus/kartu/`, push branch `fitur/smart-matcher-2plus2`, dan deploy ke **Dev (`5020/7020`)**
+### Tahap 0 — Persiapan & Review Mockup
+- [x] Review mockup interaktif [public/mockup_home_living_no_human_no_vo.html](file:///Users/sabeqmmursyid/_cfstudio/public/mockup_home_living_no_human_no_vo.html) oleh pengguna
+- [x] Buat branch `fitur/home-living-no-human-no-vo` dari `main` terbaru
+
+### Tahap 1 — Fondasi Backend & Kontrak Visual Identity (`environment_object_only`)
+- [x] Tambah enum `'environment_object_only'`, `POPULATION_MODES: 'none'`, `WARDROBE_MODES: 'not_applicable'`, `CAMERA_FRAMINGS` interior/still life, aturan normalisasi, dan `isEnvironmentObjectOnlyVisualConfig` di [lib/visual-identity-contract.js](file:///Users/sabeqmmursyid/_cfstudio/lib/visual-identity-contract.js)
+- [x] Tambah cabang resolver Zero-Human (`subject_prompt`, `wardrobe_prompt = ''`, anti-human/hand negatives, `legacy.character_concept`) di [lib/visual-override-resolver.js](file:///Users/sabeqmmursyid/_cfstudio/lib/visual-override-resolver.js)
+- [x] Tambah mandat ke-3 `ZERO-HUMAN / SPACE & OBJECT ONLY` & sembunyikan blok wardrobe/sleeve di [lib/visual-identity-allocator.js](file:///Users/sabeqmmursyid/_cfstudio/lib/visual-identity-allocator.js)
+- [x] Perbarui [lib/start-frame-visual-qc.js](file:///Users/sabeqmmursyid/_cfstudio/lib/start-frame-visual-qc.js) agar `environment_object_only` wajib `hand_count === 0` dan me-skip penalti `wardrobe_color_match` / `exposed_forearm`
+
+### Tahap 2 — Fondasi Backend Mode Tanpa VO (`no_vo`) & FFmpeg Pipeline
+- [x] Tambah `compileVeoAmbientOnlyPrompt` (foley/ambience tanpa dialog & tanpa musik) di [lib/veo-native-audio.js](file:///Users/sabeqmmursyid/_cfstudio/lib/veo-native-audio.js)
+- [x] Perbaiki guard skip FFmpeg di [lib/scheduler-processors.js](file:///Users/sabeqmmursyid/_cfstudio/lib/scheduler-processors.js) (baris ~4178 & ~8444) agar `audio_engine_mode` bernilai `'native_veo'` atau `'no_vo'` tetap lanjut ke FFmpeg muxing
+- [x] Tambah cabang `isNoVoMode` dan dukungan `no_vo_audio_bed` (`native_sfx_ambience`, `bgm_only`, `native_sfx_plus_bgm`, `silent`) serta `scene.on_screen_text` di [lib/video-studio-processor.js](file:///Users/sabeqmmursyid/_cfstudio/lib/video-studio-processor.js)
+- [x] Izinkan konfigurasi `audio_engine_mode`, `no_vo_audio_bed`, `on_screen_text_mode`, `ffmpegSfxVolume`, dan `ffmpegBgmVolume` di [lib/multiplier-audio-config.js](file:///Users/sabeqmmursyid/_cfstudio/lib/multiplier-audio-config.js)
+- [x] Perbarui [lib/re-multiplier-worker.js](file:///Users/sabeqmmursyid/_cfstudio/lib/re-multiplier-worker.js) & [lib/autonomous-engine.js](file:///Users/sabeqmmursyid/_cfstudio/lib/autonomous-engine.js) untuk memisahkan `no_vo` vs `native_veo`, meneruskan `enable_tts = 0`, `no_vo_audio_bed`, dan `compileVeoAmbientOnlyPrompt`
+- [x] Longgarkan validasi `voiceover_text` saat `audio_engine_mode === 'no_vo'` di [lib/custom-storyboard-pipeline.js](file:///Users/sabeqmmursyid/_cfstudio/lib/custom-storyboard-pipeline.js)
+- [x] Tambah aturan *Action Translation (Zero-Human)* dan *No-VO Visual Storytelling* di [lib/prompts.js](file:///Users/sabeqmmursyid/_cfstudio/lib/prompts.js) (`buildReverseEngineeringPrompt`, `buildOrganicPillarPrompt`, `buildCustomStoryboardPromptEngineerPrompt`, `buildMultiplierPhase2Prompt`)
+
+### Tahap 3 — Preset Sistem, UI & Skema MCP
+- [x] Tambah preset sistem VI `home_living_serene_interior` dan `home_living_product_still_life` di [lib/visual-identity-system-presets.js](file:///Users/sabeqmmursyid/_cfstudio/lib/visual-identity-system-presets.js)
+- [x] Tambah dukungan `no_vo` & preset `multiplier_home_living_no_vo_asmr` di [lib/operator-presets.js](file:///Users/sabeqmmursyid/_cfstudio/lib/operator-presets.js)
+- [x] Perbarui UI [app/settings/visual-identities/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/settings/visual-identities/page.js) & [app/components/AiVisualIdentityBuilderModal.js](file:///Users/sabeqmmursyid/_cfstudio/app/components/AiVisualIdentityBuilderModal.js) untuk `environment_object_only`
+- [x] Perbarui UI [app/settings/presets/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/settings/presets/page.js) dengan opsi `🔇 Mode 3: Tanpa VO`, audio bed, dan filter chip
+- [x] Tambah override `audio_engine_mode`, `no_vo_audio_bed`, dan `on_screen_text_mode` di [app/auto-pipeline/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/auto-pipeline/page.js) & [lib/auto-pipeline-scheduler-runner.js](file:///Users/sabeqmmursyid/_cfstudio/lib/auto-pipeline-scheduler-runner.js)
+- [x] Ganti kontrol `enable_tts` menjadi selector 3 mode di [PillarConfigurationForm.js](file:///Users/sabeqmmursyid/_cfstudio/app/components/campaign-forms/PillarConfigurationForm.js), [MultiplierConfigurationForm.js](file:///Users/sabeqmmursyid/_cfstudio/app/components/campaign-forms/MultiplierConfigurationForm.js), [app/pillar-campaigns/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/pillar-campaigns/page.js), dan [app/pillar-campaigns/[id]/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/pillar-campaigns/%5Bid%5D/page.js)
+- [x] Perbarui skema tool MCP di [apps/mcp/tools.mjs](file:///Users/sabeqmmursyid/_cfstudio/apps/mcp/tools.mjs) (`cf_run_auto_pipeline`, `cf_create_schedule`, `cf_update_schedule`, `cf_submit_custom_storyboard`, `cf_create_multiplier_video`, `cf_create_product_video`, `cf_create_visual_identity`)
+
+### Tahap 4 — Verifikasi Unit Test, Build & Deploy Dev
+- [x] Tambah dan jalankan unit test VI `environment_object_only` & mode `no_vo` (`PG_SEARCH_PATH=dev node --test ...`)
+- [x] Jalankan `DISABLE_AUTO_MIGRATIONS=true PG_SEARCH_PATH=dev npm run build`
+- [ ] Push branch `fitur/home-living-no-human-no-vo`, deploy ke **Dev (`5020/7020`)**, dan uji E2E 1 kampanye Home Living
 
 ---
 
-## Rincian Perubahan Kode (Before & After)
+## Rincian Perubahan Kode (Code Sebelum & Sesudah)
 
-### 1. Skema Database (`lib/db-pg.js`)
-
-**Code Sebelum (Current/Before)** *(baris 1173–1196 & 1942–1957)*:
-```js
-await client.query(`
-  ALTER TABLE product_extractions
-  ADD COLUMN IF NOT EXISTS page TEXT,
-  ...
-  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP;
-`);
-await client.query(`CREATE INDEX IF NOT EXISTS idx_product_extractions_enrichment_status ON product_extractions(tenant_id, enrichment_status, created_at);`);
-```
-`product_extractions` belum memiliki kolom peran promosi (`promo_role`), dan belum ada tabel cache hasil pencocokan blueprint × produk.
-
-**Code Sesudah (Proposed/After)**:
-```js
-await client.query(`
-  ALTER TABLE product_extractions
-  ADD COLUMN IF NOT EXISTS promo_role TEXT;
-`);
-await client.query(`
-  CREATE INDEX IF NOT EXISTS idx_product_extractions_promo_role
-  ON product_extractions(tenant_id, promo_role);
-`);
-
-await client.query(`
-  CREATE TABLE IF NOT EXISTS blueprint_product_matches (
-    id TEXT PRIMARY KEY,
-    tenant_id TEXT NOT NULL DEFAULT 'default_tenant',
-    deconstruct_asset_id TEXT NOT NULL REFERENCES re_deconstructed_assets(id) ON DELETE CASCADE,
-    brand_profile_id TEXT NOT NULL,
-    product_id TEXT NOT NULL REFERENCES product_extractions(id) ON DELETE CASCADE,
-    promo_role TEXT NOT NULL,
-    match_score INTEGER NOT NULL DEFAULT 0,
-    match_reason TEXT,
-    matched_keywords_json JSONB NOT NULL DEFAULT '[]'::jsonb,
-    is_food_safe BOOLEAN NOT NULL DEFAULT TRUE,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
-  );
-`);
-await client.query(`
-  CREATE UNIQUE INDEX IF NOT EXISTS idx_blueprint_product_matches_uniq
-  ON blueprint_product_matches(tenant_id, deconstruct_asset_id, brand_profile_id, product_id);
-`);
-await client.query(`
-  CREATE INDEX IF NOT EXISTS idx_blueprint_product_matches_lookup
-  ON blueprint_product_matches(tenant_id, brand_profile_id, promo_role, is_food_safe, match_score DESC);
-`);
-```
-
----
-
-### 2. Engine Klasifikasi & Pencocokan (`lib/blueprint-product-matcher.js` — *Baru*)
+### 1. [lib/visual-identity-contract.js](file:///Users/sabeqmmursyid/_cfstudio/lib/visual-identity-contract.js)
 
 **Code Sebelum (Current/Before):**
-Belum ada modul pencocokan blueprint × produk; hanya tersedia `lib/recipe-product-matcher-shared.js` khusus untuk topik resep (`scoreCatalogProductForRecipe`).
+```js
+export const SUBJECT_KINDS = ['human', 'blank_face_3d', 'animal', 'mascot_object', 'stylized_3d_character', 'stylized_cartoon_character'];
+...
+export const POPULATION_MODES = ['single', 'group', 'crowd', 'single_group_or_crowd'];
+...
+export const WARDROBE_MODES = ['fixed', 'sequential', 'stable_random', 'custom'];
+...
+export const CAMERA_FRAMINGS = [
+  'hands_closeup',
+  'forearms_and_hands',
+  'crop_below_neck',
+  'back_view',
+  'full_body_blank_face',
+  'object_or_animal',
+  'editorial_wide',
+  'environmental_wide',
+  'isometric',
+  'top_down_system',
+  'silhouette_profile',
+  'over_shoulder_faceless',
+  'extreme_scale_metaphor'
+];
+```
+*(Serta `validateAndNormalizeVisualIdentity` baris 331–390 yang memaksa `character_count >= 1`, `wardrobe.sleeve_policy = 'wrists_covered'`, dan `camera.framing = 'forearms_and_hands'`.)*
 
 **Code Sesudah (Proposed/After):**
-Membuat modul baru `lib/blueprint-product-matcher.js` (dengan helper pure JS yang juga aman di-import unit test & UI bila di-split ke `lib/blueprint-product-matcher-shared.js`):
-1. `classifyProductPromoRole(product)`: mengembalikan `'alat_dapur' | 'bahan_resep' | 'lainnya'` berdasarkan kata kunci nama/kategori/tags, dengan menghormati `product.promo_role` jika sudah di-set manual.
-2. `analyzeBlueprintProfile(asset)`: mengekstrak `methods` (mis. `blender`, `oven`, `steamer`, `kettle_rebus`, `skillet_pan`, `chopper`, `frother`, `saringan`, `pemeras`, `timbangan`, `parutan`, `wadah_kaca`), `ingredients` (`matcha`, `cocoa`, `oat`, `chia`, `kunyit`, `jahe`, `kayu_manis`, `madu`, `kopi`, `peanut_butter`, `yogurt`, `stevia`), serta `isFoodSafe` (`false` jika niche `Skincare` / `Home Care` / topik topikal luar).
-3. `scoreBlueprintAgainstProduct(bpProfile, product, { brandId, hasCleanPhoto, hasProductTruth, hasBrandAffiliateLink })`: menghitung skor kecocokan `0–100` beserta `matchReason` singkat (contoh: `"Cocok aksi blender/jus + foto studio siap"`).
-4. `indexBlueprintMatchesForAsset(assetId, tenantId)` & `backfillBlueprintProductMatches(tenantId)`: menghitung dan meng-upsert top-N kecocokan per `(brand_profile_id, promo_role)` ke `blueprint_product_matches`.
-5. `pickNextSmartMatchPair({ tenantId, brandId, targetPromoRole = 'alat_dapur', lookbackBlueprintDays = 14, lookbackProductDays = 4 })`: memilih pasangan `(deconstruct_asset_id, product_id)` untuk kuota harian 2+2 dengan menghindari blueprint yang sudah terpakai dalam 14 hari terakhir dan produk yang sudah terpakai dalam 4 hari terakhir untuk brand tersebut.
+```js
+export const SUBJECT_KINDS = ['human', 'blank_face_3d', 'animal', 'mascot_object', 'stylized_3d_character', 'stylized_cartoon_character', 'environment_object_only'];
+export const POPULATION_MODES = ['single', 'group', 'crowd', 'single_group_or_crowd', 'none'];
+export const WARDROBE_MODES = ['fixed', 'sequential', 'stable_random', 'custom', 'not_applicable'];
+export const CAMERA_FRAMINGS = [
+  'hands_closeup', 'forearms_and_hands', 'crop_below_neck', 'back_view',
+  'full_body_blank_face', 'object_or_animal', 'editorial_wide', 'environmental_wide',
+  'interior_showcase', 'product_still_life', 'top_down_flatlay', 'before_after_frame',
+  'isometric', 'top_down_system', 'silhouette_profile', 'over_shoulder_faceless', 'extreme_scale_metaphor'
+];
+
+// Dalam validateAndNormalizeVisualIdentity:
+if (result.subject.kind === 'environment_object_only') {
+  result.subject.faceless_mode = 'not_applicable';
+  result.subject.demographic_key = 'not_applicable';
+  result.subject.character_count = 0;
+  result.subject.population_mode = 'none';
+  result.wardrobe = {
+    mode: 'not_applicable',
+    preset_key: 'not_applicable',
+    sleeve_policy: 'not_applicable',
+    custom_description: '',
+    accessories: [],
+    palette: []
+  };
+  result.metaphor_engine.hands_policy = 'zero_hands';
+  result.guardrails = {
+    ...result.guardrails,
+    human_presence: 'prohibited',
+    hands_visibility: 'prohibited',
+    face_visibility: 'prohibited',
+    reflection_face: 'prohibited',
+    unintended_people: 'prohibited',
+    extra_people: 'prohibited',
+    intentional_crowd: 'prohibited',
+    wardrobe_drift: 'not_applicable'
+  };
+  const humanOnlyFramings = ['forearms_and_hands', 'hands_closeup', 'back_view', 'crop_below_neck'];
+  if (!result.camera.framing || humanOnlyFramings.includes(result.camera.framing)) {
+    result.camera.framing = result.camera.lens_look === 'macro_closeup' ? 'object_or_animal' : 'environmental_wide';
+  }
+}
+
+export function isEnvironmentObjectOnlyVisualConfig({ campaign = null, row = null, visualOverrides = null, structured = null } = {}) {
+  const resolvedStructured = structured || safeParseVoJson(visualOverrides)?.structured || safeParseVoJson(visualOverrides)
+    || safeParseVoJson(campaign?.visual_overrides_json)?.structured || safeParseVoJson(row?.visual_overrides_json)?.structured || null;
+  return String(resolvedStructured?.subject?.kind || '').trim().toLowerCase() === 'environment_object_only';
+}
+```
 
 ---
 
-### 3. Hook Otomatis Pasca-Dekonstruksi (`lib/scheduler-processors.js`)
+### 2. [lib/visual-override-resolver.js](file:///Users/sabeqmmursyid/_cfstudio/lib/visual-override-resolver.js)
 
-**Code Sebelum (Current/Before)** *(baris 9986–10002)*:
+**Code Sebelum (Current/Before):**
 ```js
-    await updateDeconstructAsset(asset.id, {
-      original_storyboard_json: JSON.stringify(parsed.storyboard || []),
-      product_ideas_json: JSON.stringify(parsed.product_ideas || {}),
-      ...
-      status: 'deconstructed',
-      deconstructed_at: new Date(),
-      error_message: null,
+  // 3. Resolve Wardrobe Prompt
+  let wardrobePrompt = 'wearing clean attire';
+  if (config.wardrobe?.preset_key === 'not_applicable') {
+    wardrobePrompt = (config.wardrobe.custom_description && config.wardrobe.custom_description.trim())
+      ? config.wardrobe.custom_description.trim()
+      : 'not applicable (natural character surface finish only, no human clothing)';
+  } ...
+  // 6. Resolve Camera Prompt
+  let defaultFraming = 'forearms_and_hands';
+  ...
+  // 8. Resolve Negative Prompt
+  const defaultNegatives = (isFaceAllowed || isCartoonOrStylized)
+    ? ['photorealistic human face', ...]
+    : isMascot
+      ? ['ugly', 'deformed', ...]
+      : ['visible human face', 'eyes', 'nose', 'mouth', 'human portrait', 'unintended people'];
+  ...
+  const legacy = {
+    character_concept: isMascot ? 'mascot' : (isCartoonOrStylized ? 'stylized_3d' : 'faceless'),
+```
+
+**Code Sesudah (Proposed/After):**
+```js
+  const isEnvironmentOnly = config.subject?.kind === 'environment_object_only';
+  if (isEnvironmentOnly) {
+    const customDesc = config.subject?.custom_description?.trim();
+    subjectPrompt = customDesc
+      ? `Strictly zero humans, zero people, zero hands, zero fingers, zero arms, zero human silhouettes. Pure architectural space and physical object cinematography: ${customDesc}`
+      : 'Strictly zero humans, zero people, zero hands, zero fingers, zero arms, zero human silhouettes. Focus 100% on calm interior rooms, furniture, surfaces, and physical home-living objects/products in place.';
+  }
+  ...
+  if (isEnvironmentOnly) {
+    wardrobePrompt = '';
+  }
+  ...
+  if (isEnvironmentOnly) {
+    defaultFraming = config.camera?.framing || 'environmental_wide';
+    defaultPerspective = config.camera?.perspective || 'third_person';
+  }
+  ...
+  const defaultNegatives = isEnvironmentOnly
+    ? ['human', 'person', 'people', 'hands', 'hand', 'fingers', 'arms', 'forearms', 'wrists', 'body parts', 'human silhouette', 'shadow of person', 'face', 'eyes', 'portrait', 'clothing', 'sleeves', 'mannequin', 'reflected person']
+    : ((isFaceAllowed || isCartoonOrStylized) ? [...] : isMascot ? [...] : [...]);
+  ...
+  character_concept: isEnvironmentOnly ? 'environment_object_only' : (isMascot ? 'mascot' : (isCartoonOrStylized ? 'stylized_3d' : 'faceless')),
+```
+
+---
+
+### 3. [lib/visual-identity-allocator.js](file:///Users/sabeqmmursyid/_cfstudio/lib/visual-identity-allocator.js)
+
+**Code Sebelum (Current/Before):**
+```js
+  const isStylizedChar = ...;
+  const isFacelessMandate = !isStylizedChar;
+  ...
+  const wardrobeDesc = (!isFacelessMandate || wardrobe.preset_key === 'not_applicable')
+    ? (wardrobe.custom_description || 'natural character surface finish only (no human clothing)')
+    : ...;
+  const charConceptDesc = isFacelessMandate
+    ? 'STRICTLY FACELESS (Semua figur manusia tampil tanpa mata/hidung/mulut, atau dari sudut belakang/siluet/potong siku ke bawah).'
+    : 'FULL 3D STYLIZED ANIMATED CHARACTER (...)';
+```
+
+**Code Sesudah (Proposed/After):**
+```js
+  const isEnvironmentOnly = subjectKindLower === 'environment_object_only';
+  const isStylizedChar = !isEnvironmentOnly && (...);
+  const isFacelessMandate = !isStylizedChar && !isEnvironmentOnly;
+  ...
+  const wardrobeDesc = isEnvironmentOnly
+    ? ''
+    : ((!isFacelessMandate || wardrobe.preset_key === 'not_applicable') ? ... : ...);
+  const charConceptDesc = isEnvironmentOnly
+    ? 'ZERO-HUMAN / SPACE & OBJECT ONLY MANDATE (Dilarang memunculkan manusia, bagian tubuh, tangan, jari, lengan, punggung, siluet, maupun bayangan orang di seluruh klip T2I/I2V/T2V).'
+    : (isFacelessMandate ? 'STRICTLY FACELESS (...)' : 'FULL 3D STYLIZED ANIMATED CHARACTER (...)');
+```
+
+---
+
+### 4. [lib/start-frame-visual-qc.js](file:///Users/sabeqmmursyid/_cfstudio/lib/start-frame-visual-qc.js)
+
+**Code Sebelum (Current/Before):**
+```js
+  const handRule = expectsObjectOnly
+    ? 'Opening hook frame MUST have 0 human hands, fingers, or arms (hand_count MUST be 0). Flag exposed_forearm=true or reasons if any hand/arm appears.'
+    : ...;
+  const wardrobeRule = (handsPolicy === 'modest_hands_active' && !expectsObjectOnly)
+    ? `Expected solid plain sleeves ...`
+    : 'Object-only or no locked wardrobe: set wardrobe_color_match=true.';
+```
+
+**Code Sesudah (Proposed/After):**
+```js
+  const isEnvOnly = Boolean(environmentOnly) || isEnvironmentObjectOnlyVisualConfig({ campaign, row });
+  const handRule = isEnvOnly
+    ? 'ZERO-HUMAN VISUAL IDENTITY: EVERY frame MUST have 0 humans, 0 hands, 0 fingers, 0 arms, and 0 human silhouettes (hand_count MUST be 0). Fail immediately if any human/body part is detected with hint: "Remove all humans, hands, arms, and body parts; show only the empty interior room and physical product/objects."'
+    : (expectsObjectOnly ? ... : ...);
+  const wardrobeRule = isEnvOnly
+    ? 'Environment/object only VI: no humans or wardrobe expected; set wardrobe_color_match=true and skip exposed_forearm/wardrobe checks.'
+    : ...;
+```
+
+---
+
+### 5. [lib/veo-native-audio.js](file:///Users/sabeqmmursyid/_cfstudio/lib/veo-native-audio.js)
+
+**Code Sebelum (Current/Before):**
+```js
+export function compileVeoNativeAudioPrompt({
+  basePrompt,
+  narrationText = '',
+  persona = 'Kore',
+  language = 'id-ID',
+  withSfx = true,
+  withAmbience = true,
+  antiMusic = true
+}) { ... }
+```
+
+**Code Sesudah (Proposed/After):**
+```js
+export function compileVeoAmbientOnlyPrompt({
+  basePrompt,
+  sfxCue = '',
+  withSfx = true,
+  withAmbience = true,
+  antiMusic = true
+}) {
+  if (!basePrompt) return '';
+  const cleanBase = basePrompt.replace(/\s*Audio direction:[\s\S]*$/i, '').trim();
+  const cueText = String(sfxCue || '').trim();
+  const directives = [
+    `AUDIO DIRECTION: Pure natural room ambience and tactile object foley only${cueText ? ` (${cueText})` : ''}. STRICTLY ZERO spoken words, ZERO voiceover, ZERO narration, ZERO human speech${antiMusic ? ', ZERO background music' : ''}.`
+  ];
+  if (withSfx && cueText) directives.push(`[SFX] Subtle physical room/object sound event: ${cueText}.`);
+  if (withAmbience) directives.push('[AMBIENCE] Quiet natural residential room tone without human voices.');
+  return `${cleanBase}\n\nAudio direction:\n${directives.join('\n')}`;
+}
+```
+
+---
+
+### 6. [lib/scheduler-processors.js](file:///Users/sabeqmmursyid/_cfstudio/lib/scheduler-processors.js)
+
+**Code Sebelum (Current/Before — baris ~4178 & ~8444):**
+```js
+  if (campaign.enable_glabs === 0 || campaign.enable_tts === 0) {
+    updateReCampaignItem(item.id, {
+      ffmpeg_status: 'skipped',
+      ffmpeg_output_path: 'skipped',
+      social_post_status: finalSocialPostStatus
     });
-
-    // Step 5: Update batch progress
-    const progress = await updateDeconstructBatchProgress(asset.batch_id);
+    return { processed: true, item_id: item.id, message: `Workflow dependencies (G-Labs/TTS) are inactive. Skipped FFmpeg stage. Social posting set to ${finalSocialPostStatus}.` };
+  }
 ```
+*(Sama pada baris 8444 untuk `updatePillarCampaignItem`.)*
 
-**Code Sesudah (Proposed/After)**:
+**Code Sesudah (Proposed/After — diekstrak ke helper atau kondisi seragam di kedua fungsi):**
 ```js
-    await updateDeconstructAsset(asset.id, {
-      original_storyboard_json: JSON.stringify(parsed.storyboard || []),
-      product_ideas_json: JSON.stringify(parsed.product_ideas || {}),
-      ...
-      status: 'deconstructed',
-      deconstructed_at: new Date(),
-      error_message: null,
+  const isTtsOptionalMode = ['native_veo', 'no_vo'].includes(campaign.audio_engine_mode);
+  if (campaign.enable_glabs === 0 || (campaign.enable_tts === 0 && !isTtsOptionalMode)) {
+    updateReCampaignItem(item.id, {
+      ffmpeg_status: 'skipped',
+      ffmpeg_output_path: 'skipped',
+      social_post_status: finalSocialPostStatus
     });
-
-    try {
-      const { indexBlueprintMatchesForAsset } = await import('./blueprint-product-matcher.js');
-      await indexBlueprintMatchesForAsset(asset.id, tenantId);
-    } catch (matchErr) {
-      console.warn(`[DECONSTRUCT] ${label} Smart matcher indexing warning:`, matchErr.message);
-    }
-
-    // Step 5: Update batch progress
-    const progress = await updateDeconstructBatchProgress(asset.batch_id);
+    return { processed: true, item_id: item.id, message: `Workflow dependencies (G-Labs/TTS) are inactive. Skipped FFmpeg stage. Social posting set to ${finalSocialPostStatus}.` };
+  }
 ```
+*(Demikian pula untuk cabang Pillar Campaign pada baris 8444; serta pastikan stage TTS di processor RE & Pillar men-skip TTS saat `audio_engine_mode === 'no_vo'` tanpa error.)*
 
 ---
 
-### 4. Product API, Repository & Katalog (`promo_role`)
+### 7. [lib/video-studio-processor.js](file:///Users/sabeqmmursyid/_cfstudio/lib/video-studio-processor.js)
 
-**File terdampak:** `lib/product-repository.js`, `lib/product-validation.js`, `lib/product-catalog-service.js`, `app/api/v2/products/route.js`, `app/api/v2/products/[id]/route.js`.
-
-**Code Sebelum (Current/Before)**:
-- `lib/product-repository.js` baris 18–22: `PRODUCT_IMPORT_COLUMNS` tidak menyertakan `'promo_role'`.
-- `app/api/v2/products/[id]/route.js` baris 136–148: `ALLOWED_UPDATE_FIELDS` tidak menyertakan `'promo_role'`.
-- `lib/product-catalog-service.js` baris 53–88: `listProductCatalog` tidak memiliki filter `promoRole`.
-
-**Code Sesudah (Proposed/After)**:
-1. Tambahkan `'promo_role'` ke `PRODUCT_IMPORT_COLUMNS` dan `ALLOWED_UPDATE_FIELDS`.
-2. Validasi `promo_role` di `validateSingleProductCreate` / `validateSingleProductUpdate` hanya menerima `['alat_dapur', 'bahan_resep', 'lainnya']` (atau `null` untuk auto-detect).
-3. Saat `POST /api/v2/products` menyimpan produk baru tanpa `promo_role` eksplisit, isi otomatis via `classifyProductPromoRole(productData)`.
-4. Tambah parameter query `promo_role` (`all | alat_dapur | bahan_resep | lainnya`) di `GET /api/v2/products` → `listProductCatalog({ ..., promoRole })`.
-
----
-
-### 5. Deconstruct API & Endpoint Rekomendasi (`app/api/v2/deconstruct/route.js`, `lib/db.js`, `app/api/v2/deconstruct/matches/route.js`)
-
-**Code Sebelum (Current/Before)** *(baris 18–75 `app/api/v2/deconstruct/route.js`)*:
+**Code Sebelum (Current/Before):**
 ```js
-    if (searchParams.get('assets') === 'true') {
-      const q = searchParams.get('q') || '';
-      const niche = searchParams.get('niche') || '';
-      const limit = Number(searchParams.get('limit') || 20);
-      ...
-      return NextResponse.json({ success: true, assets });
-    }
+  const isNativeVeoAudio = Boolean(jobConfig.audioEngineMode === 'native_veo' || jobConfig.isNativeVeo || (!hasAudioFile && anyVideoHasAudio));
 ```
-Belum ada filter `brand_id` / `promo_role`, belum mengembalikan hitungan/rekomendasi produk cocok, dan belum ada endpoint backfill matcher.
 
-**Code Sesudah (Proposed/After)**:
-1. Perluas `GET /api/v2/deconstruct` (`?assets=true` dan `listDeconstructAssets` di `lib/db.js`) menerima parameter opsional `brand_id` dan `promo_role` (`alat_dapur | bahan_resep`) serta `include_matches=true` untuk melampirkan `match_summary` (jumlah alat dapur & bahan resep cocok per brand + top 5 `recommended_products` dengan `match_score` & `match_reason`).
-2. Buat `app/api/v2/deconstruct/matches/route.js`:
-   - `GET`: ambil top-match terstruktur untuk pasangan `(blueprint_id, brand_id, promo_role)` bagi UI Multiplier Labs & Auto Pipeline.
-   - `POST`: jalankan `backfillBlueprintProductMatches(tenantId)` (atau untuk satu `blueprint_id` / satu `product_id` baru).
-
----
-
-### 6. Autopilot Kuota 2+2 Harian (`lib/auto-pipeline-scheduler-runner.js`, `lib/autonomous-engine.js`, `app/api/v2/recipes/auto-pipeline-schedules/route.js`)
-
-**Code Sebelum (Current/Before)** *(baris 135–163 `lib/auto-pipeline-scheduler-runner.js`)*:
+**Code Sesudah (Proposed/After):**
 ```js
-  if (pType === 'multiplier_campaign') {
-    const cfg = pipelineConfig || {};
-    const hasPairedProduct = Boolean(cfg.product_id) && cfg.bridging_mode !== 'none';
-
-    return await executeAutonomousMultiplierPipeline({
-      brandId: schedule.brand_id,
-      deconstructAssetId: schedule.target_item_id || cfg.deconstruct_asset_id || cfg.blueprint_id || null,
-      productId: hasPairedProduct ? cfg.product_id : null,
-      ...
+  const isNoVoMode = jobConfig.audioEngineMode === 'no_vo';
+  const noVoAudioBed = jobConfig.noVoAudioBed || 'native_sfx_ambience';
+  const useVeoVideoAudio = isNoVoMode
+    ? ['native_sfx_ambience', 'native_sfx_plus_bgm'].includes(noVoAudioBed) && anyVideoHasAudio
+    : Boolean(jobConfig.audioEngineMode === 'native_veo' || jobConfig.isNativeVeo || (!hasAudioFile && anyVideoHasAudio));
+  // Ketika isNoVoMode === true:
+  // - Nonaktifkan speed-stretch berbasis panjang TTS (smart_sync)
+  // - silent / bgm_only (tanpa BGM file): fallback anullsrc + mix BGM sesuai ffmpegBgmVolume jika ada
+  // - native_sfx_ambience / native_sfx_plus_bgm: pakai stream audio klip Veo + BGM bila tersedia
+  // - Overlay motion text: baca dari scene.on_screen_text ketika onScreenTextMode !== 'off'
 ```
 
-**Code Sesudah (Proposed/After)**:
+---
+
+### 8. [lib/multiplier-audio-config.js](file:///Users/sabeqmmursyid/_cfstudio/lib/multiplier-audio-config.js)
+
+**Code Sebelum (Current/Before):**
 ```js
-  if (pType === 'multiplier_campaign') {
-    const cfg = pipelineConfig || {};
-    const isSmartMatchMode = cfg.selection_mode === 'auto_smart_match';
-    let resolvedBlueprintId = schedule.target_item_id || cfg.deconstruct_asset_id || cfg.blueprint_id || null;
-    let resolvedProductId = cfg.product_id || null;
-    let resolvedBridgingMode = cfg.bridging_mode || 'select_existing';
-
-    if (isSmartMatchMode && (!resolvedBlueprintId || !resolvedProductId || cfg.product_id === 'auto')) {
-      const { pickNextSmartMatchPair } = await import('./blueprint-product-matcher.js');
-      const smartPair = await pickNextSmartMatchPair({
-        tenantId,
-        brandId: schedule.brand_id,
-        targetPromoRole: cfg.target_promo_role || 'alat_dapur',
-        lookbackBlueprintDays: Number(cfg.lookback_blueprint_days || 14),
-        lookbackProductDays: Number(cfg.lookback_product_days || 4)
-      });
-      if (!smartPair?.deconstruct_asset_id || !smartPair?.product_id) {
-        throw new Error(`Smart Matcher tidak menemukan pasangan blueprint + ${cfg.target_promo_role || 'produk'} yang memenuhi kuota anti-duplikat untuk brand ini.`);
-      }
-      resolvedBlueprintId = resolvedBlueprintId || smartPair.deconstruct_asset_id;
-      resolvedProductId = smartPair.product_id;
-      resolvedBridgingMode = 'select_existing';
-    }
-
-    const hasPairedProduct = Boolean(resolvedProductId) && resolvedBridgingMode !== 'none';
-    return await executeAutonomousMultiplierPipeline({
-      brandId: schedule.brand_id,
-      deconstructAssetId: resolvedBlueprintId,
-      productId: hasPairedProduct ? resolvedProductId : null,
-      ...
+  const enableTts = raw.enable_tts !== undefined ? Boolean(raw.enable_tts) : (raw.enableTts !== undefined ? Boolean(raw.enableTts) : true);
+  ...
+  const ffmpegSfxVolume = 0.00;
+  const ffmpegBgmVolume = 0.00;
 ```
-Dan di `app/api/v2/recipes/auto-pipeline-schedules/route.js` tambahkan aksi opsional `{ action: 'setup_multiplier_2plus2_quota', brand_ids: [...], preset_key, ... }` (hanya membuat 4 slot recurring per brand bila diminta eksplisit pengguna; 42 jadwal lama tidak disentuh otomatis tanpa konfirmasi).
+
+**Code Sesudah (Proposed/After):**
+```js
+  const audioEngineMode = raw.audio_engine_mode || raw.audioEngineMode || 'minimax_tts';
+  const noVoAudioBed = raw.no_vo_audio_bed || raw.noVoAudioBed || 'native_sfx_ambience';
+  const onScreenTextMode = raw.on_screen_text_mode || raw.onScreenTextMode || 'short_caption_overlay';
+  const enableTts = audioEngineMode === 'no_vo' || audioEngineMode === 'native_veo'
+    ? false
+    : (raw.enable_tts !== undefined ? Boolean(raw.enable_tts) : (raw.enableTts !== undefined ? Boolean(raw.enableTts) : true));
+  const ffmpegSfxVolume = raw.ffmpeg_sfx_volume !== undefined ? Number(raw.ffmpeg_sfx_volume) : (raw.ffmpegSfxVolume !== undefined ? Number(raw.ffmpegSfxVolume) : 0.00);
+  const ffmpegBgmVolume = raw.ffmpeg_bgm_volume !== undefined ? Number(raw.ffmpeg_bgm_volume) : (raw.ffmpegBgmVolume !== undefined ? Number(raw.ffmpegBgmVolume) : 0.00);
+```
 
 ---
 
-### 7. Dukungan MCP (`apps/mcp/tools.mjs`)
+### 9. [lib/re-multiplier-worker.js](file:///Users/sabeqmmursyid/_cfstudio/lib/re-multiplier-worker.js) & [lib/autonomous-engine.js](file:///Users/sabeqmmursyid/_cfstudio/lib/autonomous-engine.js)
 
-**Code Sebelum (Current/Before)** *(baris 1898–1931 & 1357–1373)*:
-- `cf_list_deconstructed_assets` hanya menerima `{ q, niche, limit }`.
-- `cf_search_blueprints` hanya menerima `{ query, niche, limit }`.
-- `scheduleExtendedFields` hanya menerima `{ blueprint_id, deconstruct_asset_id, bridging_mode, ... }` tanpa `selection_mode` dan `target_promo_role`.
+**Code Sebelum (Current/Before — `lib/re-multiplier-worker.js` baris ~1066 & ~1319):**
+```js
+  const isNativeVeo = audioConfig.audio_engine_mode === 'native_veo' || vsoConfig.audio_engine_mode === 'native_veo' || audioConfig.enableTts === 0 || audioConfig.enable_tts === false;
+  ...
+  const isNativeVeo = audioConfig.audio_engine_mode === 'native_veo' || aesthetics.audio_engine_mode === 'native_veo';
+  if (isNativeVeo) { ... compileVeoNativeAudioPrompt(...); }
+```
 
-**Code Sesudah (Proposed/After)**:
-1. Tambahkan parameter opsional `brand_id`, `promo_role: z.enum(['all', 'alat_dapur', 'bahan_resep']).optional()`, dan `include_matches: z.boolean().optional()` pada `cf_list_deconstructed_assets` & `cf_search_blueprints`.
-2. Tambahkan `selection_mode: z.enum(['manual', 'auto_smart_match']).optional()` dan `target_promo_role: z.enum(['alat_dapur', 'bahan_resep', 'any']).optional()` ke `scheduleExtendedFields` serta teruskan ke `pipeline_config_json` saat membuat/mengubah jadwal.
+**Code Sesudah (Proposed/After — `lib/re-multiplier-worker.js`):**
+```js
+  const audioMode = audioConfig.audio_engine_mode || vsoConfig.audio_engine_mode || 'minimax_tts';
+  const isNoVo = audioMode === 'no_vo';
+  const isNativeVeo = audioMode === 'native_veo';
+  if (isNoVo || isNativeVeo || audioConfig.enableTts === 0 || audioConfig.enable_tts === false) {
+    // Skip TTS eksternal; tandai skipped atau generating_visuals
+  }
+  ...
+  const noVoBed = audioConfig.no_vo_audio_bed || aesthetics.no_vo_audio_bed || 'native_sfx_ambience';
+  const wantVeoAudio = isNativeVeo || (isNoVo && ['native_sfx_ambience', 'native_sfx_plus_bgm'].includes(noVoBed));
+  if (isNoVo && wantVeoAudio) {
+    const { compileVeoAmbientOnlyPrompt } = await import('./veo-native-audio.js');
+    finalPrompt = compileVeoAmbientOnlyPrompt({
+      basePrompt: expectedPrompt,
+      sfxCue: storyboard[c - 1]?.ambient_sfx_cue || '',
+      withSfx: true,
+      withAmbience: true,
+      antiMusic: audioConfig.anti_music_guardrail !== undefined ? Boolean(audioConfig.anti_music_guardrail) : true
+    });
+  } else if (isNativeVeo && clipNarration) {
+    finalPrompt = compileVeoNativeAudioPrompt(...);
+  }
+  // Kirim noSoundOverride: wantVeoAudio
+```
+
+**Code Sebelum (Current/Before — `lib/autonomous-engine.js` baris ~1239–1240):**
+```js
+  const effectiveAudioEngineMode = overrides?.audio_engine_mode || overrides?.audio?.audio_engine_mode || presetConfig?.workflow?.audio_engine_mode || presetConfig?.basic_strategy?.audio_engine_mode || 'minimax_tts';
+  const isMultiplierNativeVeo = effectiveAudioEngineMode === 'native_veo';
+  ...
+    enableTts: isMultiplierNativeVeo ? 0 : 1,
+    enable_tts: !isMultiplierNativeVeo,
+```
+
+**Code Sesudah (Proposed/After — `lib/autonomous-engine.js` di seluruh jalur product, editorial, & multiplier):**
+```js
+  const effectiveAudioEngineMode = overrides?.audio_engine_mode || overrides?.audio?.audio_engine_mode || presetConfig?.workflow?.audio_engine_mode || presetConfig?.basic_strategy?.audio_engine_mode || 'minimax_tts';
+  const isNoVo = effectiveAudioEngineMode === 'no_vo';
+  const isMultiplierNativeVeo = effectiveAudioEngineMode === 'native_veo';
+  const noVoAudioBed = overrides?.no_vo_audio_bed || presetConfig?.workflow?.no_vo_audio_bed || 'native_sfx_ambience';
+  const onScreenTextMode = overrides?.on_screen_text_mode || presetConfig?.workflow?.on_screen_text_mode || 'short_caption_overlay';
+  const shouldDisableTts = isMultiplierNativeVeo || isNoVo || presetConfig?.workflow?.enable_tts === false;
+  ...
+    enableTts: shouldDisableTts ? 0 : 1,
+    enable_tts: !shouldDisableTts,
+    no_vo_audio_bed: noVoAudioBed,
+    on_screen_text_mode: onScreenTextMode,
+```
 
 ---
 
-### 8. Perubahan UI React/Next.js *(Hanya setelah review Mockup HTML di Staging `5010`)*
+### 10. [lib/custom-storyboard-pipeline.js](file:///Users/sabeqmmursyid/_cfstudio/lib/custom-storyboard-pipeline.js)
 
-1. **`app/deconstruct/page.js`**: Tambah dropdown `Brand Fit` & `Jenis Bridging (Alat Dapur / Bahan Resep)`, serta kolom/badge ringkasan produk cocok pada baris tabel `assets.map(...)`.
-2. **`app/products/ProductDatabaseModal.js` & `app/products/page.js`**: Tambah field pilihan `Peran Promosi (promo_role)` pada form edit/buat dan pill filter cepat `Alat Dapur` / `Bahan Resep` di daftar produk.
-3. **`app/components/campaign-forms/MultiplierConfigurationForm.js`**: Tambah filter `Brand Fit` / `Jenis Bridging` di kartu blueprint (baris 1161) serta seksi **"⭐ Direkomendasikan untuk Blueprint Ini"** (Alat Dapur Cocok vs Bahan Resep Cocok) di pemilih produk (baris 1754).
-4. **`app/auto-pipeline/page.js`**:
-   - Tambah filter & ranking **"⭐ Rekomendasi Blueprint"** pada Instant Run (`baris 4304 & 4530`) dan Schedule Modal (`baris 7838 & 8060`).
-   - Tambah opsi **"⚡ Auto Smart Match (Rotasi 2+2 Anti-Duplikat)"** pada modal jadwal Multiplier + tombol pembantu buat 4 slot harian (`06:15` Alat #1, `11:30` Bahan #1, `16:15` Alat #2, `19:30` Bahan #2).
-   - Semua komponen wajib 100% memakai Semantic CSS Tokens dari `app/theme.css` tanpa hardcoded hex/rgb.
+**Code Sebelum (Current/Before):**
+```js
+  for (let i = 0; i < rawScenes.length; i++) {
+    const s = rawScenes[i] || {};
+    if (!String(s.voiceover_text || '').trim()) {
+      throw new Error(`Scene #${i + 1} wajib mengisi voiceover_text.`);
+    }
+    ...
+  }
+  ...
+  const enableTts = isNativeVeo ? 0 : (pWorkflow.enable_tts !== undefined ? (pWorkflow.enable_tts ? 1 : 0) : 1);
+```
+
+**Code Sesudah (Proposed/After):**
+```js
+  const requestedAudioMode = storyboard.audio_engine_mode || rawDna.audio_engine_mode || pWorkflow.audio_engine_mode || pBasic.audio_engine_mode || 'minimax_tts';
+  const isNoVo = requestedAudioMode === 'no_vo';
+  for (let i = 0; i < rawScenes.length; i++) {
+    const s = rawScenes[i] || {};
+    if (!isNoVo && !String(s.voiceover_text || '').trim()) {
+      throw new Error(`Scene #${i + 1} wajib mengisi voiceover_text.`);
+    }
+    ...
+  }
+  ...
+  const enableTts = (isNativeVeo || isNoVo) ? 0 : (pWorkflow.enable_tts !== undefined ? (pWorkflow.enable_tts ? 1 : 0) : 1);
+  // Simpan on_screen_text & ambient_sfx_cue pada normalisasi scenes
+```
 
 ---
 
-## Rencana Verifikasi
+### 11. [lib/prompts.js](file:///Users/sabeqmmursyid/_cfstudio/lib/prompts.js)
 
-1. **Review Mockup HTML (Tahap 1):** Buka `http://100.95.245.55:5010/mockup_smart_matcher_2plus2.html` (Light & Dark Mode) bersama pengguna.
-2. **Unit Test Backend (Tahap 7):**
-   - `PG_SEARCH_PATH=dev node --test tests/blueprint-product-matcher.test.mjs` — menguji klasifikasi `promo_role`, deteksi `is_food_safe` (blokir Skincare/Home Care untuk NutriBake), skoring aksi/bahan, serta rotasi anti-duplikat 14 hari/4 hari.
-3. **Build & Deploy Dev:**
-   - `DISABLE_AUTO_MIGRATIONS=true PG_SEARCH_PATH=dev npm run build`
-   - `git push -u origin fitur/smart-matcher-2plus2`
-   - `npm run deploy:dev:atomic -- --ref <full-git-sha> --apply --confirm-dev`
-4. **Backfill & Smoke Test di Dev (`5020/7020`):**
-   - Jalankan backfill 213+ blueprint di Dev dan cek komposisi match untuk `nutribake`, `dapurbotani`, dan `siasatsehat`.
+**Code Sebelum (Current/Before):**
+```js
+// buildReverseEngineeringPrompt (baris 1175-1179) & buildMultiplierPhase2Prompt (baris 3997-4056):
+1. Konsep Karakter  : ${targetConcept} ...
+2. Demografi Subjek : ${targetCharacter}
+3. Pakaian / Wardrobe: ${targetWardrobe}
+4. Pencahayaan / Light: ${targetLighting}
+5. KONSISTENSI WARDROBE WAJIB ...
+```
+
+**Code Sesudah (Proposed/After):**
+```js
+// Bila isEnvironmentOnly === true (environment_object_only):
+// - Sembunyikan baris Wardrobe & WARDROBE CONSISTENCY.
+// - Suntikkan blok ZERO-HUMAN ACTION TRANSLATION RULE (Deconstruct -> Zero-Human):
+//   • Tangan menata/merapikan -> Before-After kontras ruang statis / slow pan
+//   • Tangan memegang produk -> Hero Product Staging + camera push-in
+//   • Tangan mengoperasikan alat -> gerak mekanis/lingkungan mandiri (tanpa "a hand picks up" / "holding")
+// Bila audio_engine_mode === 'no_vo':
+// - Ganti aturan WPC/Breathless Syntax dengan NO-VO VISUAL STORYTELLING CONTRACT:
+//   • Isi new_vo / narration_transcript = ""
+//   • Outputkan on_screen_text (maks 3-7 kata) & ambient_sfx_cue (foley ruangan bahasa Inggris)
+```
+
+---
+
+### 12. [lib/visual-identity-system-presets.js](file:///Users/sabeqmmursyid/_cfstudio/lib/visual-identity-system-presets.js) & [lib/operator-presets.js](file:///Users/sabeqmmursyid/_cfstudio/lib/operator-presets.js)
+
+**Code Sebelum (Current/Before):**
+- `lib/visual-identity-system-presets.js` belum memiliki preset `subject.kind: 'environment_object_only'`.
+- `lib/operator-presets.js` belum memiliki preset `multiplier_home_living_no_vo_asmr`.
+
+**Code Sesudah (Proposed/After):**
+- Tambah `home_living_serene_interior` dan `home_living_product_still_life` di `SYSTEM_VISUAL_IDENTITIES` dengan `subject.kind: 'environment_object_only'` dan `wardrobe.mode: 'not_applicable'`.
+- Tambah `multiplier_home_living_no_vo_asmr` (`campaign_kinds: ['multiplier_campaign', 'product_campaign']`, `audio_engine_mode: 'no_vo'`, `no_vo_audio_bed: 'native_sfx_ambience'`, `visual_identity_preset_id: 'home_living_serene_interior'`) di `OPERATOR_PRESETS`.
+
+---
+
+### 13. UI & MCP (`app/settings/*`, `app/auto-pipeline/page.js`, `app/components/campaign-forms/*`, `app/pillar-campaigns/*`, `apps/mcp/tools.mjs`)
+
+**Code Sebelum (Current/Before):**
+- [app/settings/visual-identities/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/settings/visual-identities/page.js) & `AiVisualIdentityBuilderModal.js`: selalu merender field demographic & wardrobe.
+- [app/settings/presets/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/settings/presets/page.js) baris 1249–1301: grid 2 kartu `minimax_tts` vs `native_veo`; filter chip hanya `native_veo`.
+- [PillarConfigurationForm.js](file:///Users/sabeqmmursyid/_cfstudio/app/components/campaign-forms/PillarConfigurationForm.js) baris 389 & 642: `enable_tts: true` / checkbox tunggal.
+- [apps/mcp/tools.mjs](file:///Users/sabeqmmursyid/_cfstudio/apps/mcp/tools.mjs) baris 1106: `voiceover_text: z.string().trim().min(1)`.
+
+**Code Sesudah (Proposed/After):**
+- Form VI menyembunyikan section *Demographic / Faceless Mode / Wardrobe / Sleeve Policy / Character Lock* ketika `subject.kind === 'environment_object_only'`.
+- Form Preset Manager menjadi grid 3 kartu termasuk **`🔇 Mode 3: Tanpa VO (Visual / ASMR)`** + sub-opsi `no_vo_audio_bed` & `on_screen_text_mode` + filter chip `🔇 Tanpa VO`.
+- Auto Pipeline (1-Click & Schedule Modal), `PillarConfigurationForm.js`, `MultiplierConfigurationForm.js`, dan `app/pillar-campaigns/[id]/page.js` memakai selector 3 mode `audio_engine_mode` + badge `🔇 Tanpa VO` / status `Dilewati (Mode Tanpa VO)`.
+- [lib/auto-pipeline-scheduler-runner.js](file:///Users/sabeqmmursyid/_cfstudio/lib/auto-pipeline-scheduler-runner.js) meneruskan `audio_engine_mode`, `no_vo_audio_bed`, dan `on_screen_text_mode` dari `pipeline_config_json` ke `autonomous-engine.js`.
+- [apps/mcp/tools.mjs](file:///Users/sabeqmmursyid/_cfstudio/apps/mcp/tools.mjs) menerima `voiceover_text` kosong bila `audio_engine_mode === 'no_vo'` serta menambahkan parameter `audio_engine_mode`, `no_vo_audio_bed`, dan `on_screen_text_mode` pada tool pipeline/schedule/campaign.
