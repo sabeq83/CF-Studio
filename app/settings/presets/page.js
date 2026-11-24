@@ -955,6 +955,7 @@ export default function PresetsPage() {
                           <option value="Problem-Solution">Problem-Solution</option>
                           <option value="Educational">Educational</option>
                           <option value="Promo-Hook">Promo-Hook</option>
+                          <option value="Direct_Showcase">Direct Showcase (Produk Langsung Klip 1 / Shopee 2 Klip)</option>
                         </select>
                       </label>
                       <label className="form-label">
