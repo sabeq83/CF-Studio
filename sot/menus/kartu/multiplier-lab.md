@@ -1,6 +1,6 @@
 # Kartu Menu: Multiplier Labs
 
-Terakhir dicek: 23 November 2026 · Versi aplikasi: v2.58.0 (fitur/smart-matcher-2plus2)
+Terakhir dicek: 24 November 2026 · Versi aplikasi: v2.59.0 (fitur/multiplier-bridging-foto)
 Alamat: `/multiplier-lab` (form) dan `/multiplier-lab/<id>` (detail hasil) · Kelompok: WORKFLOW · Kunci izin menu: `multiplier_lab`
 
 ## Fungsi
@@ -26,7 +26,8 @@ Pembuka viral tanpa sebut produk → jembatan ke produk → bukti/hasil → ajak
 - Form: `app/components/campaign-forms/MultiplierConfigurationForm.js` (halaman `app/multiplier-lab/page.js` hanya pembungkus)
 - Detail: `app/multiplier-lab/[id]/page.js`
 - API: `app/api/v2/multiplier/` — `route`, `generate-angles`, `[id]`, `[id]/approve`, `[id]/retry`, `[id]/update-creative`, `[id]/regenerate-t2i`, `[id]/regenerate-start-frames`, `[id]/replace-start-frame`, `[id]/sync-contentflow`, `[id]/sync-nextcloud`
-- Logika inti: `lib/re-multiplier-worker.js` (± 1.800 baris — cari dengan kata kunci), `lib/multiplier-angle-generator.js`, `lib/multiplier-pairing.js`, `lib/multiplier-audio-config.js`, `lib/blueprint-product-matcher.js` (`GET /api/v2/deconstruct/matches` untuk rekomendasi Alat Dapur vs Bahan Resep)
+- Logika inti: `lib/re-multiplier-worker.js` (± 1.800 baris — cari dengan kata kunci), `lib/multiplier-start-frame-request.js`, `lib/product-photo-policy.js`, `lib/product-reference-resolver.js`, `lib/multiplier-angle-generator.js`, `lib/multiplier-pairing.js`, `lib/multiplier-audio-config.js`, `lib/blueprint-product-matcher.js` (`GET /api/v2/deconstruct/matches` untuk rekomendasi Alat Dapur vs Bahan Resep)
+- Komponen pratinjau foto bridging: `app/components/BridgingProductReferenceCard.js`
 - Pedoman naskah: `kb/MULTIPLIER_BRIDGING_GUIDE.md`
 - Tabel data: `re_multiplier_tasks` (terhubung ke `re_deconstructed_assets`)
 
@@ -37,6 +38,7 @@ Pembuka viral tanpa sebut produk → jembatan ke produk → bukti/hasil → ajak
 4. Ada dua alamat API mirip: `/api/v2/multiplier/` (utama) dan `/api/v2/multiplier-lab/` (hanya sinkron). Jangan tertukar.
 5. Render akhir memakai slot produksi, jadi membuat Video Studio menunggu.
 6. Editor detail & worker TTS menormalisasi key VO adegan (`narration` ↔ `narration_transcript`, termasuk alias/typo AI seperti `narrating_transcript` dan pencocokan dinamis) saat generate dan saat `update-creative`; jika ada VO adegan kosong saat `remaking`, worker menjalankan 1× auto-repair dan menahan ke `waiting_approval` bila tetap kosong sebelum tahap T2I/TTS.
+7. Resolusi foto produk bridging menghormati `active_photo` (`resolveCampaignProductPhotoPath`) dan kontrak T2I `buildMultiplierStartFrameRequest` (`{ category: 'subject' }`, `[HIGHEST PRIORITY PRODUCT IDENTITY LOCK]`, `expected_reference_sha256s`, `webhookOverride`, sanitasi non-bridging, fail-fast bila file hilang); halaman detail memakai `zoneOf`, `safeJsonParse`, empty-state batch, dan kartu `BridgingProductReferenceCard`.
 
 ## Belum ada / batasan
 - Blueprint harus sudah dibedah di Deconstruct Lab; menu ini tidak membedah video sendiri.
