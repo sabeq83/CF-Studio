@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.63.0 — Distribusi MCP Multi-PC dengan Privilege Tenant Terbatas (25/11/2026)
+- Tambah kolom allowed_tenant_ids_json, allowed_tools_json, expires_at, last_used_at, dan notes pada operator_credentials
+- Terapkan validasi tenant allowlist (403 TENANT_FORBIDDEN), scope guard /api/v2/* (403 OPERATOR_SCOPE_FORBIDDEN), dan token expiration
+- Dukung Bearer token per-operator di Remote HTTP /mcp serta blokir file_path dan photo_file_path pada mode remote
+- Tambah API admin dan halaman UI Settings -> Akses MCP & Operator (/settings/mcp-access) khusus superadmin dengan fallback salin clipboard non-HTTPS
+- Perbarui kartu menu mcp-access dan users-tenants
+
 ## V2.62.2 — Hotfix Faceless Camera Optics & Crop Lock Multiplier (25/11/2026)
 - Perbaiki mapping opticsFromVI untuk forearms_and_hands dan first_person agar tidak jatuh ke eye-level medium shot
 - Tambah positive Framing Lock & Camera Lock tahan sanitizer pada T2I dan I2V Multiplier dengan guard aman NutriBake & DapurBotani
