@@ -1,6 +1,6 @@
 # Kartu Menu: User & Tenant Management
 
-Terakhir dicek: 25 November 2026 · Versi aplikasi: `fitur/mcp-multi-pc-tenant-terbatas`
+Terakhir dicek: 25 November 2026 · Versi aplikasi: v2.63.0
 Alamat: `/settings/users`, `/settings/tenants`, & `/settings/mcp-access` · Kelompok: SYSTEM · Kunci izin menu: `admin_only` & `superadmin_only`
 
 ## Fungsi

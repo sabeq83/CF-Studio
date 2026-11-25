@@ -1,6 +1,6 @@
 # Kartu Menu: Akses MCP & Operator Multi-PC
 
-Terakhir dicek: 25 November 2026 · Branch: `fitur/mcp-multi-pc-tenant-terbatas`
+Terakhir dicek: 25 November 2026 · Versi aplikasi: v2.63.0
 Alamat: `/settings/mcp-access` · Kelompok: SYSTEM · Kunci izin menu: `superadmin_only`
 
 ## Fungsi
