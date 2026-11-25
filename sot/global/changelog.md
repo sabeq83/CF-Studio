@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.64.2 — Fix Retry TTS Duplicate PK & FFmpeg 8.x Audio Concat (25/11/2026)
+- Upsert idempoten tts_studio_batches & tts_studio_clips pada lib/db.js agar retry TTS tidak crash PK
+- Reuse klip TTS valid di disk saat retry di handleAudioGeneration untuk hemat kuota
+- Normalisasi concat audio FFmpeg (aresample=44100 + stereo MP3) via concatAudioClipsToFile di Multiplier & Scheduler
+
 ## V2.64.1 — Pemulihan Task Macet, Approve Multiplier, & Fix Cluster Health MCP (25/11/2026)
 - Tambah cabang mul_* pada cf_approve_job ke POST /api/v2/multiplier/[id]/approve
 - Tambah parameter opsional force & stage pada cf_retry_multiplier_task via resolveMultiplierStageRetryTarget
