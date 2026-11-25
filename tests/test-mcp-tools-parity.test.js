@@ -90,6 +90,9 @@ test('2. MCP server exposes new cf_* parity tools without unnecessary makna_* du
       'cf_get_brand_profile',
       'cf_create_brand_profile',
       'cf_update_brand_profile',
+      'cf_get_brand_notification_settings',
+      'cf_update_brand_notification_settings',
+      'cf_test_brand_notification',
       'cf_list_content_flow',
       'cf_sync_content_flow',
       'cf_list_threads_series',
@@ -594,5 +597,39 @@ test('7. cf_start_deconstruct: pre-flight status check, batching, deduplication,
     } finally {
       await close();
     }
+  }
+});
+
+test('6. Brand Telegram notification MCP tools parity calls', async () => {
+  const { client, calls, close } = await setupTestMcpClient(async () => ({ success: true }));
+  try {
+    await client.callTool({
+      name: 'cf_get_brand_notification_settings',
+      arguments: { brand_id: 'bp_nutribake' }
+    });
+    assert.equal(calls.at(-1).path, '/api/v2/brand-profiles/bp_nutribake/notification-settings');
+
+    await client.callTool({
+      name: 'cf_update_brand_notification_settings',
+      arguments: {
+        brand_id: 'bp_nutribake',
+        enabled: true,
+        message_thread_id: 42,
+        events: ['production_and_schedule', 'publish_failed'],
+        timezone: 'Asia/Jakarta'
+      }
+    });
+    assert.equal(calls.at(-1).path, '/api/v2/brand-profiles/bp_nutribake/notification-settings');
+    assert.equal(calls.at(-1).opts.method, 'PUT');
+    assert.equal(calls.at(-1).opts.body.message_thread_id, 42);
+
+    await client.callTool({
+      name: 'cf_test_brand_notification',
+      arguments: { brand_id: 'bp_nutribake' }
+    });
+    assert.equal(calls.at(-1).path, '/api/v2/brand-profiles/bp_nutribake/notification-settings/test');
+    assert.equal(calls.at(-1).opts.method, 'POST');
+  } finally {
+    await close();
   }
 });

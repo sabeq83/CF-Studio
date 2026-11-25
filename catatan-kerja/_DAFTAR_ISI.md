@@ -183,7 +183,8 @@ Terakhir diperbarui: 25 November 2026
 
 | File | Ringkasan |
 |---|---|
-| [implementation_plan.md](../implementation_plan.md) | Rencana aktif `fitur/mcp-multi-pc-tenant-terbatas`: Distribusi CF Studio MCP ke PC lain dengan token per-PC, allowlist multi-tenant terbatas, scope guard, isolasi `file_path` remote, & UI Settings Akses MCP |
+| [implementation_plan.md](../implementation_plan.md) | Rencana aktif `fitur/brand-telegram-notifications`: Notifikasi Telegram Per Brand (1 Grup Forum ber-Topic, 1 Pesan Gabungan per video, 1 Bot per Tenant + pengaturan Bot Tenant di modal Brand Profiles) |
+| [mcp_multi_pc_tenant_terbatas_arsip_20261125.md](rencana/mcp_multi_pc_tenant_terbatas_arsip_20261125.md) | Arsip Implementation Plan: Distribusi CF Studio MCP ke PC Lain dengan Privilege Tenant Terbatas (dirilis v2.63.0, 25 Nov 2026) |
 | [multiplier_faceless_camera_framing_arsip_20261125.md](rencana/multiplier_faceless_camera_framing_arsip_20261125.md) | Arsip Implementation Plan (Hotfix): Perbaikan framing kamera VI & positive faceless chest-down lock Multiplier (dirilis v2.62.2, 25 Nov 2026) |
 | [multiplier_wardrobe_audio_hotfix_arsip_20261125.md](rencana/multiplier_wardrobe_audio_hotfix_arsip_20261125.md) | Arsip Implementation Plan: Hotfix Wardrobe Lock Multiplier & Proteksi Audio `combined_audio_path` (dirilis v2.62.1, 25 Nov 2026) |
 | [auto_pipeline_pisah_jadwal_arsip_20261125.md](rencana/auto_pipeline_pisah_jadwal_arsip_20261125.md) | Arsip Implementation Plan: Pemisahan Jadwal Produksi dan Publishing pada Auto Pipeline (dirilis v2.62.0, 25 Nov 2026) |

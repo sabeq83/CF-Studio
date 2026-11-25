@@ -2291,6 +2291,63 @@ export function createCfStudioServer(rawRequest, { isRemoteHttp = false, allowed
   );
 
   register(
+    'cf_get_brand_notification_settings',
+    'Get Telegram topic notification settings for a brand profile and tenant bot status.',
+    {
+      brand_id: z.string().trim().min(1).max(128)
+    },
+    true,
+    ({ brand_id }) => request(`/api/v2/brand-profiles/${encodeURIComponent(brand_id)}/notification-settings`)
+  );
+
+  register(
+    'cf_update_brand_notification_settings',
+    'Update Telegram topic notification settings for a brand profile.',
+    {
+      brand_id: z.string().trim().min(1).max(128),
+      enabled: z.boolean().optional(),
+      message_thread_id: z.number().int().positive().nullable().optional(),
+      chat_id: z.string().trim().max(64).nullable().optional(),
+      events: z
+        .array(
+          z.enum([
+            'production_and_schedule',
+            'production_failed',
+            'awaiting_approval',
+            'publish_succeeded',
+            'publish_failed'
+          ])
+        )
+        .min(1)
+        .optional(),
+      quiet_start: z.string().nullable().optional(),
+      quiet_end: z.string().nullable().optional(),
+      bypass_quiet_for_errors: z.boolean().optional(),
+      timezone: z.string().optional()
+    },
+    false,
+    ({ brand_id, ...body }) =>
+      request(`/api/v2/brand-profiles/${encodeURIComponent(brand_id)}/notification-settings`, {
+        method: 'PUT',
+        body
+      })
+  );
+
+  register(
+    'cf_test_brand_notification',
+    'Enqueue a test Telegram message to the configured Forum Topic of a brand profile.',
+    {
+      brand_id: z.string().trim().min(1).max(128)
+    },
+    false,
+    ({ brand_id }) =>
+      request(`/api/v2/brand-profiles/${encodeURIComponent(brand_id)}/notification-settings/test`, {
+        method: 'POST',
+        body: {}
+      })
+  );
+
+  register(
     'cf_list_content_flow',
     'List finished video/image assets in ContentFlow Hub ready for publishing (returns content_id, video_id, url_asset, affiliate links, and captions).',
     {

@@ -1,6 +1,6 @@
 # Kartu Menu: Brand Profile Manager
 
-Terakhir dicek: 17 November 2026 · Versi aplikasi: v2.50.0
+Terakhir dicek: 25 November 2026 · Versi aplikasi: v2.64.0
 Alamat: `/settings/brand-profiles` · Kelompok: PLANNING · Kunci izin menu: `brand_profiles`
 
 ## Fungsi
@@ -12,13 +12,15 @@ Profil lengkap identitas brand untuk mesin konten. Menyimpan suara brand (tone, 
 3. Aktifkan satu profil sebagai default; profil ini dipakai kampanye baru secara otomatis.
 
 ## Terhubung dengan
-- Dipakai oleh: hampir semua pipeline kampanye.
-- Perintah MCP: `cf_list_brand_profiles`, `cf_get_brand_profile`, `cf_create_brand_profile`, `cf_update_brand_profile`.
+- Dipakai oleh: hampir semua pipeline kampanye, Auto Pipeline, Publishing Worker, dan Content Automations (untuk notifikasi Telegram per brand).
+- Pengaturan Notifikasi Telegram: memakai Bot Token & `chat_id` grup Forum default tenant (dapat diisi langsung dari modal Telegram di menu ini) dan `message_thread_id` per brand.
+- Perintah MCP: `cf_list_brand_profiles`, `cf_get_brand_profile`, `cf_create_brand_profile`, `cf_update_brand_profile`, `cf_get_brand_notification_settings`, `cf_update_brand_notification_settings`, `cf_test_brand_notification`.
 
 ## Lokasi (untuk agent)
-- Halaman: `app/settings/brand-profiles/page.js`, `app/settings/brand-profiles/[id]/page.js`
-- API: `app/api/v2/brand-profiles/` (route, [id], extract)
-- Tabel data: `brand_profiles` (tenant-isolated)
+- Halaman: `app/settings/brand-profiles/page.js`, `app/settings/brand-profiles/BrandTelegramNotificationModal.js`, `app/settings/brand-profiles/[id]/page.js`
+- API: `app/api/v2/brand-profiles/` (route, `[id]`, `[id]/notification-settings`, `[id]/notification-settings/test`, extract)
+- Service & Worker: `lib/brand-notification-service.js`, `lib/content-automation-notification-worker.js`
+- Tabel data: `brand_profiles`, `brand_notification_preferences`, `studio_notification_outbox` (tenant-isolated)
 
 ## Aturan penting & jebakan
 1. Field `is_herbal_product = true` mengaktifkan validasi klaim ketat pada semua overlay finishing.

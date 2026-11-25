@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/Sidebar';
+import BrandTelegramNotificationModal from './BrandTelegramNotificationModal';
 
 const TONE_OPTIONS = [
   'Kasual/Gaul',
@@ -41,6 +42,8 @@ export default function BrandProfilesPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [toast, setToast] = useState(null);
   const [editorialPillarDraft, setEditorialPillarDraft] = useState('');
+  const [tenantTelegram, setTenantTelegram] = useState({ configured: false, chat_id_masked: '', enabled: false });
+  const [telegramModalState, setTelegramModalState] = useState({ brand: null, openTenantEditor: false });
 
   useEffect(() => { fetchProfiles(); }, []);
 
@@ -53,7 +56,12 @@ export default function BrandProfilesPage() {
     try {
       const res = await fetch('/api/v2/brand-profiles');
       const data = await res.json();
-      if (data.success) setProfiles(data.data || []);
+      if (data.success) {
+        setProfiles(data.data || []);
+        if (data.tenant_telegram) {
+          setTenantTelegram(data.tenant_telegram);
+        }
+      }
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   }
@@ -187,7 +195,7 @@ export default function BrandProfilesPage() {
         <div className="page-header">
           <div>
             <h1 className="page-title">🧬 Brand Profile Manager</h1>
-            <p className="page-subtitle">Kelola identitas merek Anda — setiap konten AI akan diselaraskan dengan Brand Profile yang dipilih.</p>
+            <p className="page-subtitle">Kelola identitas merek Anda. Setiap konten AI dan rute notifikasi Telegram per brand diselaraskan dengan Brand Profile yang dipilih.</p>
           </div>
           <button className="btn btn-primary" onClick={() => { setShowForm(v => !v); if (showForm) { setEditingId(null); setFormData({ ...emptyForm }); setInputMode('manual'); } }}>
             {showForm ? '✕ Tutup Form' : '+ New Brand Profile'}
@@ -197,6 +205,53 @@ export default function BrandProfilesPage() {
         {toast && (
           <div className={`toast ${toast.type === 'error' ? 'toast-error' : 'toast-success'}`}>
             {toast.msg}
+          </div>
+        )}
+
+        {profiles.length > 0 && (
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 12,
+              padding: '12px 16px',
+              marginBottom: 18,
+              background: 'var(--surface)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: 'var(--radius-md)'
+            }}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.88rem', fontWeight: 650, color: 'var(--text-primary)' }}>
+                <span
+                  style={{
+                    padding: '2px 8px',
+                    borderRadius: 'var(--radius-xs)',
+                    fontSize: '0.74rem',
+                    fontWeight: 650,
+                    background: tenantTelegram.configured ? 'var(--status-success-soft)' : 'var(--status-warning-soft)',
+                    color: tenantTelegram.configured ? 'var(--status-success)' : 'var(--status-warning)'
+                  }}
+                >
+                  {tenantTelegram.configured ? 'Bot Tenant Aktif' : 'Bot Belum Diisi'}
+                </span>
+                <span>Notifikasi Telegram Grup Forum Tenant</span>
+              </div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                {tenantTelegram.configured
+                  ? `Grup default terhubung (${tenantTelegram.chat_id_masked}). Atur Topic ID masing-masing brand melalui tombol Telegram.`
+                  : 'Bot Token atau Chat ID grup default tenant belum diatur. Klik tombol di kanan untuk mengisinya langsung.'}
+              </div>
+            </div>
+            <button
+              type="button"
+              className="btn btn-sm btn-secondary"
+              onClick={() => setTelegramModalState({ brand: profiles[0], openTenantEditor: true })}
+            >
+              Atur Bot &amp; Grup Tenant
+            </button>
           </div>
         )}
 
@@ -405,15 +460,16 @@ export default function BrandProfilesPage() {
             <p style={{ color: 'var(--text-muted)' }}>Belum ada Brand Profile. Klik "+ New Brand Profile" untuk memulai.</p>
           </div>
         ) : (
-          <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+          <div className="card" style={{ padding: 0, overflowX: 'auto' }}>
             <table className="ideas-table">
               <thead>
                 <tr>
                   <th>Brand Name</th>
+                  <th>Notifikasi Telegram</th>
                   <th>Tone of Voice</th>
                   <th>Finishing Skin</th>
                   <th>Visual Signature</th>
-                  <th>Storage Destination</th>
+                  <th>Storage</th>
                   <th>G-Labs Host</th>
                   <th>Source</th>
                   <th>Date</th>
@@ -421,9 +477,46 @@ export default function BrandProfilesPage() {
                 </tr>
               </thead>
               <tbody>
-                {profiles.map(p => (
+                {profiles.map(p => {
+                  const tg = p.telegram_notification || {};
+                  const needsTenant = tg.enabled && !tenantTelegram.configured && !tg.has_chat_override;
+                  const tgBadgeLabel = needsTenant
+                    ? 'Perlu Bot Tenant'
+                    : !tg.enabled
+                      ? 'Nonaktif'
+                      : tg.message_thread_id
+                        ? `Topic #${tg.message_thread_id}`
+                        : 'Grup Utama';
+                  const tgBadgeStyle = needsTenant
+                    ? { background: 'var(--status-warning-soft)', color: 'var(--status-warning)' }
+                    : tg.enabled
+                      ? { background: 'var(--status-success-soft)', color: 'var(--status-success)' }
+                      : { background: 'var(--surface-interactive)', color: 'var(--text-secondary)' };
+
+                  return (
                   <tr key={p.id}>
                     <td style={{ fontWeight: 600 }}>{p.brand_name}</td>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '4px', fontWeight: 600, display: 'inline-block', whiteSpace: 'nowrap', ...tgBadgeStyle }}>
+                          {tgBadgeLabel}
+                        </span>
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-secondary"
+                          onClick={() => setTelegramModalState({ brand: p, openTenantEditor: false })}
+                          style={{
+                            padding: '3px 9px',
+                            fontSize: '0.74rem',
+                            background: 'var(--status-info-soft)',
+                            borderColor: 'var(--status-info)',
+                            color: 'var(--status-info)'
+                          }}
+                        >
+                          Atur
+                        </button>
+                      </div>
+                    </td>
                     <td>
                       <span style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '4px', background: 'var(--status-neutral-soft)', color: 'var(--accent-light)' }}>
                         {p.tone_of_voice}
@@ -434,32 +527,55 @@ export default function BrandProfilesPage() {
                         {p.finishing_skin || 'pop_kuning'}
                       </span>
                     </td>
-                    <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', maxWidth: '170px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {p.visual_signature}
                     </td>
-                    <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                      {p.storage_provider === 'nextcloud' ? '☁️ Nextcloud' : p.storage_provider === 'gdrive' ? '📁 Google Drive' : '⚙️ Global Settings'}
+                    <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+                      {p.storage_provider === 'nextcloud' ? '☁️ Nextcloud' : p.storage_provider === 'gdrive' ? '📁 Google Drive' : '⚙️ Global'}
                     </td>
-                    <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                      {p.webhook_host ? `🖥️ ${p.webhook_host}` : '⚙️ Global Webhook'}
+                    <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+                      {p.webhook_host ? `🖥️ ${p.webhook_host}` : '⚙️ Global'}
                     </td>
                     <td style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                       {p.guideline_filename ? `📄 ${p.guideline_filename}` : '📝 Manual'}
                     </td>
-                    <td style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    <td style={{ fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
                       {new Date(p.created_at).toLocaleDateString('id-ID', { month: 'short', day: 'numeric' })}
                     </td>
                     <td style={{ textAlign: 'right' }}>
                       <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
-                        <button className="btn btn-sm btn-secondary" onClick={() => handleEdit(p.id)}>✏️ Edit</button>
-                        <button className="btn btn-sm btn-danger" onClick={() => handleDelete(p.id)}>✕</button>
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-secondary"
+                          onClick={() => setTelegramModalState({ brand: p, openTenantEditor: false })}
+                          style={{
+                            background: 'var(--status-info-soft)',
+                            borderColor: 'var(--status-info)',
+                            color: 'var(--status-info)'
+                          }}
+                        >
+                          Telegram
+                        </button>
+                        <button type="button" className="btn btn-sm btn-secondary" onClick={() => handleEdit(p.id)}>✏️ Edit</button>
+                        <button type="button" className="btn btn-sm btn-danger" onClick={() => handleDelete(p.id)}>✕</button>
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
+        )}
+        {telegramModalState.brand && (
+          <BrandTelegramNotificationModal
+            brand={telegramModalState.brand}
+            brands={profiles}
+            onSelectBrand={nextBrand => setTelegramModalState(prev => ({ ...prev, brand: nextBrand, openTenantEditor: false }))}
+            openTenantEditorInitially={telegramModalState.openTenantEditor}
+            onClose={() => setTelegramModalState({ brand: null, openTenantEditor: false })}
+            onSaved={fetchProfiles}
+          />
         )}
           <footer style={{ marginTop: '80px', padding: '24px 0', borderTop: '1px solid var(--border-subtle)', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
             © 2026 MaknaFlow
