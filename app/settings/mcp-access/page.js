@@ -57,6 +57,8 @@ export default function McpAccessManagementPage() {
   const [configModal, setConfigModal] = useState({ open: false, cred: null, plainToken: null });
   const [configClientMode, setConfigClientMode] = useState('http');
   const [configHostUrl, setConfigHostUrl] = useState('http://100.95.245.55:7030/mcp');
+  const [copiedKey, setCopiedKey] = useState('');
+  const [modalCopyFeedback, setModalCopyFeedback] = useState({ message: '', isError: false });
 
   const [confirmModal, setConfirmModal] = useState({ open: false, mode: null, cred: null, busy: false });
 
@@ -241,7 +243,7 @@ export default function McpAccessManagementPage() {
           isSuccess: true
         });
       } else {
-        setConfigModal({ open: true, cred: data.credential, plainToken: data.token });
+        openConfigModal(data.credential, data.token);
         setFeedback({
           message: `Kredensial "${cleanName}" berhasil dibuat.`,
           isSuccess: true
@@ -289,7 +291,7 @@ export default function McpAccessManagementPage() {
         if (!res.ok || !data.success) throw new Error(data.error || 'Gagal memutar token.');
         setConfirmModal({ open: false, mode: null, cred: null, busy: false });
         await loadData();
-        setConfigModal({ open: true, cred: data.credential, plainToken: data.token });
+        openConfigModal(data.credential, data.token);
         setFeedback({
           message: `Token baru untuk "${cred.name}" berhasil dibuat. Token lama sudah hangus.`,
           isSuccess: true
@@ -339,11 +341,77 @@ export default function McpAccessManagementPage() {
     }, null, 2);
   }, [configClientMode, configHostUrl, configModal.plainToken]);
 
-  function copyToClipboard(text, message) {
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(text).catch(() => {});
+  function openConfigModal(cred, plainToken = null) {
+    setCopiedKey('');
+    setModalCopyFeedback({ message: '', isError: false });
+    setConfigModal({ open: true, cred, plainToken });
+  }
+
+  function closeConfigModal() {
+    setCopiedKey('');
+    setModalCopyFeedback({ message: '', isError: false });
+    setConfigModal({ open: false, cred: null, plainToken: null });
+  }
+
+  function fallbackCopyText(text, containerEl = null) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'fixed';
+    textarea.style.top = '0';
+    textarea.style.left = '0';
+    textarea.style.width = '1px';
+    textarea.style.height = '1px';
+    textarea.style.opacity = '0';
+    const mountTarget = containerEl || document.body;
+    mountTarget.appendChild(textarea);
+    textarea.focus({ preventScroll: true });
+    textarea.select();
+    textarea.setSelectionRange(0, textarea.value.length);
+    let copied = false;
+    try {
+      copied = document.execCommand('copy');
+    } finally {
+      mountTarget.removeChild(textarea);
     }
-    setFeedback({ message, isSuccess: true });
+    return copied;
+  }
+
+  async function copyToClipboard(text, message, key = '', containerEl = null) {
+    if (!text) return;
+    let copied = false;
+    if (typeof window !== 'undefined' && window.isSecureContext && navigator?.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(text);
+        copied = true;
+      } catch {
+        copied = false;
+      }
+    }
+    if (!copied && typeof document !== 'undefined') {
+      try {
+        copied = fallbackCopyText(text, containerEl);
+      } catch {
+        copied = false;
+      }
+    }
+
+    if (copied) {
+      if (key) {
+        setCopiedKey(key);
+        setTimeout(() => setCopiedKey(prev => (prev === key ? '' : prev)), 2000);
+      }
+      if (configModal.open) {
+        setModalCopyFeedback({ message, isError: false });
+      }
+      setFeedback({ message, isSuccess: true });
+    } else {
+      const errMsg = 'Browser memblokir salin otomatis pada HTTP non-localhost. Silakan blok teks lalu salin manual (Cmd+C / Ctrl+C).';
+      if (configModal.open) {
+        setModalCopyFeedback({ message: errMsg, isError: true });
+      }
+      setFeedback({ message: errMsg, isSuccess: false });
+    }
   }
 
   const isFormMaster = formState.scopes.includes('tenant:superadmin');
@@ -591,9 +659,9 @@ export default function McpAccessManagementPage() {
                     color: 'var(--status-info)',
                     cursor: 'pointer'
                   }}
-                  onClick={() => copyToClipboard(remoteHosts[0].value, `URL endpoint MCP disalin: ${remoteHosts[0].value}`)}
+                  onClick={() => copyToClipboard(remoteHosts[0].value, `URL endpoint MCP disalin: ${remoteHosts[0].value}`, 'endpoint')}
                 >
-                  Salin URL MCP
+                  {copiedKey === 'endpoint' ? 'URL Tersalin!' : 'Salin URL MCP'}
                 </button>
               </div>
               <div style={{ marginTop: 10, fontSize: '0.78rem', color: 'var(--text-muted)' }}>
@@ -838,7 +906,7 @@ export default function McpAccessManagementPage() {
                                   type="button"
                                   className="btn btn-secondary"
                                   style={{ minHeight: 38, padding: '6px 10px', fontSize: '0.78rem', cursor: 'pointer' }}
-                                  onClick={() => setConfigModal({ open: true, cred, plainToken: null })}
+                                  onClick={() => openConfigModal(cred, null)}
                                 >
                                   Salin Config
                                 </button>
@@ -937,7 +1005,7 @@ export default function McpAccessManagementPage() {
                           <button type="button" className="btn btn-secondary" style={{ minHeight: 40, padding: '6px 12px', fontSize: '0.8rem', cursor: 'pointer' }} onClick={() => openEditModal(cred)}>
                             Edit Akses
                           </button>
-                          <button type="button" className="btn btn-secondary" style={{ minHeight: 40, padding: '6px 12px', fontSize: '0.8rem', cursor: 'pointer' }} onClick={() => setConfigModal({ open: true, cred, plainToken: null })}>
+                          <button type="button" className="btn btn-secondary" style={{ minHeight: 40, padding: '6px 12px', fontSize: '0.8rem', cursor: 'pointer' }} onClick={() => openConfigModal(cred, null)}>
                             Salin Config
                           </button>
                           <button type="button" className="btn btn-secondary" style={{ minHeight: 40, padding: '6px 12px', fontSize: '0.8rem', cursor: 'pointer' }} onClick={() => setConfirmModal({ open: true, mode: 'rotate', cred, busy: false })}>
@@ -1253,7 +1321,7 @@ export default function McpAccessManagementPage() {
               padding: 16,
               zIndex: 1000
             }}
-            onClick={e => { if (e.target === e.currentTarget) setConfigModal({ open: false, cred: null, plainToken: null }); }}
+            onClick={e => { if (e.target === e.currentTarget) closeConfigModal(); }}
           >
             <div
               className="card"
@@ -1277,13 +1345,29 @@ export default function McpAccessManagementPage() {
                   className="btn btn-secondary"
                   style={{ minHeight: 38, padding: '6px 12px', cursor: 'pointer' }}
                   aria-label="Tutup modal konfigurasi"
-                  onClick={() => setConfigModal({ open: false, cred: null, plainToken: null })}
+                  onClick={closeConfigModal}
                 >
                   <span aria-hidden="true">✕</span>
                 </button>
               </div>
 
               <div style={{ padding: '20px 22px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {modalCopyFeedback.message && (
+                  <div
+                    role="status"
+                    style={{
+                      padding: '10px 14px',
+                      borderRadius: 'var(--radius-sm)',
+                      border: `1px solid ${modalCopyFeedback.isError ? 'var(--status-danger)' : 'var(--status-success)'}`,
+                      background: modalCopyFeedback.isError ? 'var(--status-danger-soft)' : 'var(--status-success-soft)',
+                      color: modalCopyFeedback.isError ? 'var(--status-danger)' : 'var(--status-success)',
+                      fontSize: '0.84rem',
+                      fontWeight: 600
+                    }}
+                  >
+                    {modalCopyFeedback.message}
+                  </div>
+                )}
                 {configModal.plainToken && (
                   <div>
                     <div
@@ -1304,14 +1388,14 @@ export default function McpAccessManagementPage() {
                         Token Operator (Sekali Tampil)
                       </span>
                       <div className="mcp-endpoint-box">
-                        <code className="mcp-code-inline">{configModal.plainToken}</code>
+                        <code className="mcp-code-inline" style={{ userSelect: 'all' }}>{configModal.plainToken}</code>
                         <button
                           type="button"
                           className="btn btn-primary"
                           style={{ minHeight: 38, padding: '6px 12px', cursor: 'pointer' }}
-                          onClick={() => copyToClipboard(configModal.plainToken, 'Token operator disalin ke clipboard.')}
+                          onClick={e => copyToClipboard(configModal.plainToken, 'Token operator disalin ke clipboard.', 'token', e.currentTarget.closest('[role="dialog"]'))}
                         >
-                          Salin Token
+                          {copiedKey === 'token' ? 'Tersalin!' : 'Salin Token'}
                         </button>
                       </div>
                     </div>
@@ -1368,6 +1452,7 @@ export default function McpAccessManagementPage() {
                       color: 'var(--text-primary)',
                       whiteSpace: 'pre-wrap',
                       wordBreak: 'break-all',
+                      userSelect: 'all',
                       maxHeight: 280,
                       overflowY: 'auto'
                     }}
@@ -1382,15 +1467,15 @@ export default function McpAccessManagementPage() {
                   type="button"
                   className="btn btn-primary"
                   style={{ minHeight: 44, cursor: 'pointer' }}
-                  onClick={() => copyToClipboard(mcpConfigJsonText, 'Snippet JSON MCP berhasil disalin ke clipboard.')}
+                  onClick={e => copyToClipboard(mcpConfigJsonText, 'Snippet JSON MCP berhasil disalin ke clipboard.', 'config', e.currentTarget.closest('[role="dialog"]'))}
                 >
-                  Salin JSON Config
+                  {copiedKey === 'config' ? 'JSON Tersalin!' : 'Salin JSON Config'}
                 </button>
                 <button
                   type="button"
                   className="btn btn-secondary"
                   style={{ minHeight: 44, cursor: 'pointer' }}
-                  onClick={() => setConfigModal({ open: false, cred: null, plainToken: null })}
+                  onClick={closeConfigModal}
                 >
                   Selesai
                 </button>

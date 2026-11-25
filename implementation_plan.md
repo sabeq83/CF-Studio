@@ -89,6 +89,155 @@
 
 ---
 
+## Rencana Perbaikan Bug Uji Dev: Tombol Salin Token, URL MCP & JSON Config Tidak Berfungsi di HTTP Non-Localhost
+
+### Akar Masalah
+1. **Tidak Ada Fallback `document.execCommand('copy')` untuk Origin HTTP Non-Localhost (`http://100.95.245.55:5020`):**
+   - Browser modern hanya menyediakan `navigator.clipboard` pada *Secure Context* (`https://`, `http://localhost`, atau `http://127.0.0.1`). Saat halaman diakses via IP Tailscale (`http://100.95.245.55:5020/settings/mcp-access`), `navigator.clipboard` bernilai `undefined` sehingga `copyToClipboard()` tidak menyalin apa pun.
+2. **Tidak Ada Umpan Balik Langsung di Dalam Modal & Penanganan Kegagalan:**
+   - Banner `feedback` hanya tampil di belakang modal (`zIndex: 1000`), sehingga saat pengguna menekan **Salin Token** atau **Salin JSON Config** di dalam modal, tidak terlihat perubahan status berhasil/gagal pada tombol atau di dalam modal.
+   - Jika kedua jalur penyalinan (`navigator.clipboard` maupun `document.execCommand('copy')`) ditolak browser, sistem tetap menampilkan seolah berhasil alih-alih memberi pesan error dan memudahkan seleksi teks manual.
+
+### Execution Task List (Perbaikan Salin Clipboard)
+- [x] **Tahap P1 — Perbarui Mockup HTML** ([public/mockup_mcp_access_management.html](file:///Users/sabeqmmursyid/_cfstudio/public/mockup_mcp_access_management.html)): tambahkan fallback `document.execCommand('copy')` yang aman untuk non-HTTPS + indikator `"Tersalin!"` langsung pada tombol modal/endpoint.
+- [x] **Tahap P2 — Perbaiki `copyToClipboard` & Feedback Modal** ([app/settings/mcp-access/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/settings/mcp-access/page.js)):
+  - Gunakan `navigator.clipboard.writeText` (jika `window.isSecureContext && navigator?.clipboard?.writeText`), dengan fallback `textarea` (`position: fixed`, `opacity: 0`, `select()`, `setSelectionRange(0, text.length)`, `document.execCommand('copy')`) yang memeriksa nilai balik boolean `true`/`false`.
+  - Tampilkan status langsung di tombol yang diklik (`copiedKey`: `'endpoint' | 'token' | 'config'`) berupa teks `"Tersalin"` selama 2 detik, serta banner status di dalam modal (`modalFeedback`) bila sukses atau gagal agar terlihat tanpa menutup modal.
+  - Jadikan `<code className="mcp-code-inline">` / `<pre>` memakai `userSelect: 'all'` pada token agar mudah di-select manual bila browser memblokir clipboard.
+- [x] **Tahap P3 — Verifikasi Build, Commit, Push & Deploy Ulang Dev (`5020`/`7020`)**:
+  - Jalankan `DISABLE_AUTO_MIGRATIONS=true PG_SEARCH_PATH=dev npm run build`.
+  - Commit & push ke `fitur/mcp-multi-pc-tenant-terbatas`, lalu `npm run deploy:dev:atomic -- --ref <full-git-sha> --apply --confirm-dev` dan cek `HTTP 200` + PM2 online.
+
+### Detail Perubahan Kode (Before & After)
+
+#### [app/settings/mcp-access/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/settings/mcp-access/page.js)
+
+**Code Sebelum (Current/Before):**
+```js
+  const [configModal, setConfigModal] = useState({ open: false, cred: null, plainToken: null });
+  const [configClientMode, setConfigClientMode] = useState('http');
+  const [configHostUrl, setConfigHostUrl] = useState('http://100.95.245.55:7030/mcp');
+```
+```js
+  function copyToClipboard(text, message) {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text).catch(() => {});
+    }
+    setFeedback({ message, isSuccess: true });
+  }
+```
+```jsx
+                        <button
+                          type="button"
+                          className="btn btn-primary"
+                          style={{ minHeight: 38, padding: '6px 12px', cursor: 'pointer' }}
+                          onClick={() => copyToClipboard(configModal.plainToken, 'Token operator disalin ke clipboard.')}
+                        >
+                          Salin Token
+                        </button>
+```
+```jsx
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  style={{ minHeight: 44, cursor: 'pointer' }}
+                  onClick={() => copyToClipboard(mcpConfigJsonText, 'Snippet JSON MCP berhasil disalin ke clipboard.')}
+                >
+                  Salin JSON Config
+                </button>
+```
+
+**Code Sesudah (Proposed/After):**
+```js
+  const [configModal, setConfigModal] = useState({ open: false, cred: null, plainToken: null });
+  const [configClientMode, setConfigClientMode] = useState('http');
+  const [configHostUrl, setConfigHostUrl] = useState('http://100.95.245.55:7030/mcp');
+  const [copiedKey, setCopiedKey] = useState('');
+  const [modalCopyFeedback, setModalCopyFeedback] = useState({ message: '', isError: false });
+```
+```js
+  function fallbackCopyText(text, containerEl = null) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'fixed';
+    textarea.style.top = '0';
+    textarea.style.left = '0';
+    textarea.style.width = '1px';
+    textarea.style.height = '1px';
+    textarea.style.opacity = '0';
+    const mountTarget = containerEl || document.body;
+    mountTarget.appendChild(textarea);
+    textarea.focus({ preventScroll: true });
+    textarea.select();
+    textarea.setSelectionRange(0, textarea.value.length);
+    let copied = false;
+    try {
+      copied = document.execCommand('copy');
+    } finally {
+      mountTarget.removeChild(textarea);
+    }
+    return copied;
+  }
+
+  async function copyToClipboard(text, message, key = '', containerEl = null) {
+    let copied = false;
+    if (typeof window !== 'undefined' && window.isSecureContext && navigator?.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(text);
+        copied = true;
+      } catch {
+        copied = false;
+      }
+    }
+    if (!copied && typeof document !== 'undefined') {
+      try {
+        copied = fallbackCopyText(text, containerEl);
+      } catch {
+        copied = false;
+      }
+    }
+    if (copied) {
+      if (key) {
+        setCopiedKey(key);
+        setTimeout(() => setCopiedKey(prev => (prev === key ? '' : prev)), 2000);
+      }
+      if (configModal.open) {
+        setModalCopyFeedback({ message, isError: false });
+      }
+      setFeedback({ message, isSuccess: true });
+    } else {
+      const errMsg = 'Browser memblokir salin otomatis pada HTTP non-localhost. Silakan blok teks lalu salin manual (Cmd+C / Ctrl+C).';
+      if (configModal.open) {
+        setModalCopyFeedback({ message: errMsg, isError: true });
+      }
+      setFeedback({ message: errMsg, isSuccess: false });
+    }
+  }
+```
+```jsx
+                        <button
+                          type="button"
+                          className="btn btn-primary"
+                          style={{ minHeight: 38, padding: '6px 12px', cursor: 'pointer' }}
+                          onClick={e => copyToClipboard(configModal.plainToken, 'Token operator disalin ke clipboard.', 'token', e.currentTarget.closest('[role="dialog"]'))}
+                        >
+                          {copiedKey === 'token' ? 'Tersalin!' : 'Salin Token'}
+                        </button>
+```
+```jsx
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  style={{ minHeight: 44, cursor: 'pointer' }}
+                  onClick={e => copyToClipboard(mcpConfigJsonText, 'Snippet JSON MCP berhasil disalin ke clipboard.', 'config', e.currentTarget.closest('[role="dialog"]'))}
+                >
+                  {copiedKey === 'config' ? 'JSON Tersalin!' : 'Salin JSON Config'}
+                </button>
+```
+
+---
+
 ## Detail Perubahan Kode (Before & After)
 
 ### 1. [lib/db-pg.js](file:///Users/sabeqmmursyid/_cfstudio/lib/db-pg.js) (`migrateTenantControlPlane`)
