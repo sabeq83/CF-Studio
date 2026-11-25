@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.62.2 — Hotfix Faceless Camera Optics & Crop Lock Multiplier (25/11/2026)
+- Perbaiki mapping opticsFromVI untuk forearms_and_hands dan first_person agar tidak jatuh ke eye-level medium shot
+- Tambah positive Framing Lock & Camera Lock tahan sanitizer pada T2I dan I2V Multiplier dengan guard aman NutriBake & DapurBotani
+
 ## V2.62.1 — Hotfix Wardrobe Lock & Audio Muxing Multiplier (25/11/2026)
 - Kunci 1 warna solid deterministik dari wardrobe.palette per baris kampanye Multiplier tanpa membatasi warna antar-video
 - Pertahankan combined_audio_path pada update-creative & polling UI serta pulihkan file audio gabungan dari disk sebelum fallback concat bisu
