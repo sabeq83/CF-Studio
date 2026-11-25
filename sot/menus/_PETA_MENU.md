@@ -1,6 +1,6 @@
 # Peta Menu CF Studio
 
-Terakhir dicek: 17 November 2026 · Versi aplikasi: v2.51.0
+Terakhir dicek: 25 November 2026 · Versi aplikasi: v2.63.0
 Sumber daftar menu: `lib/sidebar-nav.js`
 
 **Cara pakai (untuk agent):** cari menu yang dibahas di tabel, buka kartunya saja. Dokumen lengkap hanya dibuka jika kartu tidak cukup.
@@ -53,6 +53,7 @@ Sumber daftar menu: `lib/sidebar-nav.js`
 | Settings | `/settings` | Pengaturan sistem, kunci layanan AI, Google Drive, dan webhook | ✅ [kartu](kartu/settings.md) | — |
 | User Management | `/settings/users` | Pengelolaan hak akses menu dan alokasi brand pengguna (admin) | ✅ [kartu](kartu/users-tenants.md) | — |
 | Tenant Management | `/settings/tenants` | Pengelolaan organisasi mandiri dan isolasi modul (superadmin) | ✅ [kartu](kartu/users-tenants.md) | — |
+| Akses MCP & Operator | `/settings/mcp-access` | Manajemen token MCP per-PC, allowlist tenant terbatas, & scope (superadmin) | ✅ [kartu](kartu/mcp-access.md) | — |
 
 ## Catatan
 

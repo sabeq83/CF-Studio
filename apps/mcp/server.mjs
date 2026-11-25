@@ -22,9 +22,9 @@ export function createHttpApp({ request, baseUrl, bearerToken, allowedHosts = ['
 
   app.use(express.json({ limit: '15mb' }));
 
-  // Helper untuk menjalankan sesi MCP Streamable HTTP
+  // Helper untuk menjalankan sesi MCP Streamable HTTP (mode remote memblokir pembacaan file host)
   const handleMcpSession = async (req, res, clientRequest) => {
-    const server = createCfStudioServer(clientRequest);
+    const server = createCfStudioServer(clientRequest, { isRemoteHttp: true });
     const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
     res.on('close', () => { void transport.close(); void server.close(); });
     try {
@@ -45,15 +45,23 @@ export function createHttpApp({ request, baseUrl, bearerToken, allowedHosts = ['
     await handleMcpSession(req, res, clientRequest);
   });
 
-  // 2. Endpoint Standard /mcp (dengan Bearer token atau ?token=...)
+  // 2. Endpoint Standard /mcp (mendukung Bearer statis server, Bearer token per-operator, atau ?token=...)
   app.use('/mcp', (req, res, next) => {
-    if (req.query.token && req.query.token.length >= 16) {
-      req.clientToken = req.query.token;
+    if (req.query.token && String(req.query.token).length >= 16) {
+      req.clientToken = String(req.query.token);
       return next();
     }
-    if (bearerToken && req.headers.authorization && crypto.timingSafeEqual(digest(req.headers.authorization), digest(`Bearer ${bearerToken}`))) {
-      req.clientToken = null;
-      return next();
+    const authHeader = String(req.headers.authorization || '').trim();
+    if (authHeader.startsWith('Bearer ')) {
+      const suppliedBearer = authHeader.slice(7).trim();
+      if (bearerToken && crypto.timingSafeEqual(digest(`Bearer ${suppliedBearer}`), digest(`Bearer ${bearerToken}`))) {
+        req.clientToken = null;
+        return next();
+      }
+      if (suppliedBearer.startsWith('cfop_') || suppliedBearer.length >= 24) {
+        req.clientToken = suppliedBearer;
+        return next();
+      }
     }
     res.set('WWW-Authenticate', 'Bearer realm="cf-studio-mcp"');
     return res.sendStatus(401);

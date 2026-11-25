@@ -6,7 +6,15 @@ export async function GET(req) {
   try {
     let user = getCurrentUser(req);
     if (!user) {
-      user = await getCurrentUserAsync(req);
+      try {
+        user = await getCurrentUserAsync(req);
+      } catch (authErr) {
+        if (authErr?.name === 'OperatorAuthError') {
+          user = null;
+        } else {
+          throw authErr;
+        }
+      }
     }
 
     if (!user) {

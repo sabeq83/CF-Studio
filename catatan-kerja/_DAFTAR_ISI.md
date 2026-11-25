@@ -183,7 +183,8 @@ Terakhir diperbarui: 25 November 2026
 
 | File | Ringkasan |
 |---|---|
-| [implementation_plan.md](../implementation_plan.md) | Rencana aktif `hotfix/multiplier-faceless-camera-framing`: Perbaikan framing kamera VI & positive faceless chest-down lock pada Multiplier (`mul_261125_78w443`) |
+| [implementation_plan.md](../implementation_plan.md) | Rencana aktif `fitur/mcp-multi-pc-tenant-terbatas`: Distribusi CF Studio MCP ke PC lain dengan token per-PC, allowlist multi-tenant terbatas, scope guard, isolasi `file_path` remote, & UI Settings Akses MCP |
+| [multiplier_faceless_camera_framing_arsip_20261125.md](rencana/multiplier_faceless_camera_framing_arsip_20261125.md) | Arsip Implementation Plan (Hotfix): Perbaikan framing kamera VI & positive faceless chest-down lock Multiplier (dirilis v2.62.2, 25 Nov 2026) |
 | [multiplier_wardrobe_audio_hotfix_arsip_20261125.md](rencana/multiplier_wardrobe_audio_hotfix_arsip_20261125.md) | Arsip Implementation Plan: Hotfix Wardrobe Lock Multiplier & Proteksi Audio `combined_audio_path` (dirilis v2.62.1, 25 Nov 2026) |
 | [auto_pipeline_pisah_jadwal_arsip_20261125.md](rencana/auto_pipeline_pisah_jadwal_arsip_20261125.md) | Arsip Implementation Plan: Pemisahan Jadwal Produksi dan Publishing pada Auto Pipeline (dirilis v2.62.0, 25 Nov 2026) |
 | [home_living_no_human_no_vo_arsip_20261124.md](rencana/home_living_no_human_no_vo_arsip_20261124.md) | Arsip Implementation Plan: Visual Identity Tanpa Manusia (`environment_object_only`) & Mode Video Tanpa VO (`no_vo`) (dirilis v2.60.0) |

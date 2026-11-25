@@ -1,7 +1,7 @@
 # Kartu Menu: User & Tenant Management
 
-Terakhir dicek: 17 November 2026 · Versi aplikasi: v2.50.5 (branch `fitur/hapus-instant-sheets`)
-Alamat: `/settings/users` & `/settings/tenants` · Kelompok: SYSTEM · Kunci izin menu: `admin_only` & `superadmin_only`
+Terakhir dicek: 25 November 2026 · Versi aplikasi: v2.63.0
+Alamat: `/settings/users`, `/settings/tenants`, & `/settings/mcp-access` · Kelompok: SYSTEM · Kunci izin menu: `admin_only` & `superadmin_only`
 
 ## Fungsi
 Pusat kontrol hak akses dan isolasi data organisasi. Halaman Users mengatur akun anggota, peran (admin/user), reset kata sandi, daftar menu yang diizinkan, dan penetapan brand. Halaman Tenants (khusus superadmin) membuat dan mengelola organisasi mandiri serta mengaktifkan/menonaktifkan modul menu per tenant.
@@ -17,10 +17,12 @@ Pusat kontrol hak akses dan isolasi data organisasi. Halaman Users mengatur akun
 ## Lokasi (untuk agent)
 - Halaman Users: `app/settings/users/page.js`
 - Halaman Tenants: `app/settings/tenants/page.js`
+- Halaman Akses MCP & Operator: `app/settings/mcp-access/page.js` (lihat [mcp-access.md](mcp-access.md))
 - API Users: `app/api/admin/users/` (route, [id])
 - API Tenants: `app/api/admin/tenants/` (route, [id])
+- API Kredensial MCP: `app/api/v2/operator-credentials/` (`route.js`, `[id]/route.js`, `[id]/rotate/route.js`)
 - Skema & Izin: `lib/schema/user-schema.js` (`ALL_MENU_KEYS`)
-- Tabel data: `users`, `tenants`
+- Tabel data: `users`, `tenants`, `operator_credentials`
 
 ## Aturan penting & jebakan
 1. Halaman Users hanya dapat dibuka oleh role `admin` atau `superadmin`. Halaman Tenants **khusus `superadmin`**.
