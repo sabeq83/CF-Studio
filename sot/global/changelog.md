@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.62.0 — Pemisahan Jadwal Produksi & Publishing Auto Pipeline (25/11/2026)
+- Tambah kolom publish_date, publish_day_offset, dan last_run_target_date pada auto_pipeline_schedules
+- Perbarui repository, validasi HTTP 400, scheduler runner timezone dinamis, dan run-now H-1
+- Dukung generation_date, publish_date, dan publish_day_offset pada API dan MCP cf_create/update/list_schedules
+- Perbarui UI form, tabel, dan kalender Auto Pipeline untuk jadwal produksi vs tayang terpisah
+
 ## V2.61.0 — VI & Preset Shopee 2 Klip Direct Showcase (Unboxing & Try-On) (24/11/2026)
 - Tambah 2 System VI shopee_unboxing_pov_hands dan shopee_tryon_faceless_fit
 - Tambah 2 Operator Preset shopee_2clip_showcase_vo dan shopee_2clip_showcase_no_vo serta opsi UI Direct_Showcase
