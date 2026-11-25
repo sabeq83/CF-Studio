@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.63.1 — Hotfix Listener Port 7030 Remote MCP di PM2 (25/11/2026)
+- Pastikan apps/mcp/server.mjs mendeteksi pm_exec_path dan symlink realpath saat dijalankan PM2
+- Setel exec_mode fork untuk maknaflow-staging-mcp di ecosystem.macmini.config.cjs agar port 7030 aktif mendengar request
+
 ## V2.63.0 — Distribusi MCP Multi-PC dengan Privilege Tenant Terbatas (25/11/2026)
 - Tambah kolom allowed_tenant_ids_json, allowed_tools_json, expires_at, last_used_at, dan notes pada operator_credentials
 - Terapkan validasi tenant allowlist (403 TENANT_FORBIDDEN), scope guard /api/v2/* (403 OPERATOR_SCOPE_FORBIDDEN), dan token expiration
