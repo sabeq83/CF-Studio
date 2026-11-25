@@ -1,6 +1,6 @@
 # Kartu Menu: Multiplier Labs
 
-Terakhir dicek: 25 November 2026 · Versi aplikasi: v2.62.1
+Terakhir dicek: 25 November 2026 · Versi aplikasi: v2.62.2
 Alamat: `/multiplier-lab` (form) dan `/multiplier-lab/<id>` (detail hasil) · Kelompok: WORKFLOW · Kunci izin menu: `multiplier_lab`
 
 ## Fungsi
@@ -43,6 +43,7 @@ Pembuka viral tanpa sebut produk → jembatan ke produk → bukti/hasil → ajak
 9. **Mode Tanpa VO (`no_vo`) & T2I Polling 120s:** Form Multiplier (`MultiplierConfigurationForm.js`) mendukung pemilihan `audio_engine_mode: 'no_vo'` beserta `no_vo_audio_bed` dan `on_screen_text_mode`, worker melewatkan TTS tanpa menulis kolom non-eksis, dan polling T2I diperpanjang hingga 120 detik dengan logging kegagalan.
 10. **Shopee 2 Klip `Direct_Showcase` (`bridge_at_clip: 1`):** Form Multiplier menyediakan opsi `Direct_Showcase` dan preset `shopee_2clip_showcase_vo` / `shopee_2clip_showcase_no_vo`; prompt builder (`lib/prompts.js`, `lib/kb/dynamic-story-curve.js`, `lib/bridging/bridge-prompt-zones.js`) menghilangkan blok non-produk/`strictly no product shown` serta `KLIP 2 SAMPAI 1` ketika seluruh klip (`1..2`) merupakan klip produk.
 11. **Wardrobe Color Lock Per Baris & Proteksi `combined_audio_path`:** `resolveVisualIdentitySnapshot`, `buildMultiplierPhase2Prompt`, dan `buildMultiplierStartFrameRequest` mengunci 1 warna solid deterministik dari `wardrobe.palette` per baris (`batch_id:task.id`) sambil tetap membolehkan warna berbeda antar-video/baris; `update-creative` & polling UI mempertahankan `combined_audio_path`/`tts_skipped_reason`, dan `handleVisualGeneration` memulihkan file `tts_multiplier_combined_<id>.mp3/.wav` dari disk sebelum fallback concat bisu agar VO & Motion Text tetap ter-render via `ffmpeg_muxing`.
+12. **Faceless Framing Guard (`forearms_and_hands` & `planner_driven`):** `buildMultiplierPhase2Prompt` memetakan `forearms_and_hands`, `crop_below_neck`, dan `first_person` ke sudut *angled-down chest-down tabletop close-up* (bukan `eye-level medium shot`), serta `buildMultiplierStartFrameRequest` dan I2V `handleVisualGeneration` menyematkan *positive framing/camera lock* yang kebal `sanitizeImagePrompt`/`sanitizeI2vPrompt` untuk klip live-action faceless ber-subjek tangan (dikecualikan untuk 3D CGI, still-life `zero hands`, `environment_object_only`, dan `stylized_3d`).
 
 ## Belum ada / batasan
 - Blueprint harus sudah dibedah di Deconstruct Lab; menu ini tidak membedah video sendiri.
