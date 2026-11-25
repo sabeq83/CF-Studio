@@ -1,5 +1,7 @@
 import crypto from 'node:crypto';
-import { pathToFileURL } from 'node:url';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import express from 'express';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
@@ -98,4 +100,20 @@ async function main() {
   const http = app.listen(port, host, () => console.error(`CF Studio MCP listening on ${host}:${port}`));
   for (const signal of ['SIGINT', 'SIGTERM']) process.once(signal, () => http.close());
 }
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main().catch(err => { console.error('CF Studio MCP startup failed:', err); process.exitCode = 1; });
+function resolveSafePath(targetPath) {
+  if (!targetPath) return null;
+  try {
+    return fs.realpathSync(targetPath);
+  } catch {
+    return path.resolve(targetPath);
+  }
+}
+
+const currentModulePath = resolveSafePath(fileURLToPath(import.meta.url));
+const invokedPaths = [process.argv[1], process.env.pm_exec_path].map(resolveSafePath).filter(Boolean);
+if (invokedPaths.includes(currentModulePath)) {
+  main().catch(err => {
+    console.error('CF Studio MCP startup failed:', err);
+    process.exitCode = 1;
+  });
+}

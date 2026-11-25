@@ -179,6 +179,7 @@ module.exports = {
       script: 'apps/mcp/server.mjs',
       cwd: APP_DIR,
       interpreter: 'node',
+      exec_mode: 'fork',
       node_args: '--env-file=' + path.resolve(APP_DIR, '.env.local'),
       instances: 1,
       autorestart: true,
