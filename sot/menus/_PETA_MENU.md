@@ -53,6 +53,7 @@ Sumber daftar menu: `lib/sidebar-nav.js`
 | Settings | `/settings` | Pengaturan sistem, kunci layanan AI, Google Drive, dan webhook | ✅ [kartu](kartu/settings.md) | — |
 | User Management | `/settings/users` | Pengelolaan hak akses menu dan alokasi brand pengguna (admin) | ✅ [kartu](kartu/users-tenants.md) | — |
 | Tenant Management | `/settings/tenants` | Pengelolaan organisasi mandiri dan isolasi modul (superadmin) | ✅ [kartu](kartu/users-tenants.md) | — |
+| Akses MCP & Operator | `/settings/mcp-access` | Manajemen token MCP per-PC, allowlist tenant terbatas, & scope (superadmin) | ✅ [kartu](kartu/mcp-access.md) | — |
 
 ## Catatan
 

@@ -96,7 +96,7 @@ function SidebarContent() {
       { name: 'WORKFLOW', items: navItems.filter(i => i.href && ['/auto-pipeline', '/threads-labs', '/re-campaigns', '/pillar-campaigns', '/recipe-labs', '/multiplier-lab', '/product-bridge-inject'].includes(i.href)) },
       { name: 'PUBLISHING', items: navItems.filter(i => i.href && ['/content-flow', '/recipe-exporter'].includes(i.href)) },
       { name: 'TOOLS', items: navItems.filter(i => i.href && ['/video-studio', '/tts-studio'].includes(i.href)) },
-      { name: 'SYSTEM', items: navItems.filter(i => i.href && ['/settings', '/settings/users', '/settings/tenants'].includes(i.href)) },
+      { name: 'SYSTEM', items: navItems.filter(i => i.href && ['/settings', '/settings/users', '/settings/tenants', '/settings/mcp-access'].includes(i.href)) },
     ]) || 'WORKFLOW';
   });
 

@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { FINISHING_TEMPLATE_IDS } from '../../lib/finishing-template-registry.js';
@@ -18,7 +19,16 @@ const AUDIO_ENGINE_MODE_VALUES = ['minimax_tts', 'native_veo', 'no_vo'];
 const NO_VO_AUDIO_BED_VALUES = ['native_sfx_ambience', 'bgm_only', 'native_sfx_plus_bgm', 'silent'];
 const ON_SCREEN_TEXT_MODE_VALUES = ['short_caption_overlay', 'off'];
 
-async function resolveReferenceAssetUploadInput({ image_base64, file_path, photo_url, filename }) {
+async function resolveReferenceAssetUploadInput({ image_base64, file_path, photo_url, filename, isRemoteHttp = false }) {
+  if (isRemoteHttp && file_path && String(file_path).trim()) {
+    return {
+      error: {
+        success: false,
+        error_code: 'VALIDATION_ERROR',
+        error: 'Parameter file_path dinonaktifkan pada mode Remote HTTP MCP demi keamanan host. Gunakan image_base64.'
+      }
+    };
+  }
   if (photo_url) {
     return {
       error: {
@@ -165,7 +175,12 @@ async function resolveReferenceAssetUploadInput({ image_base64, file_path, photo
   };
 }
 
-async function resolvePhotoInput({ photo_base64, photo_url, photo_file_path, filename }) {
+async function resolvePhotoInput({ photo_base64, photo_url, photo_file_path, filename, isRemoteHttp = false }) {
+  if (photo_file_path && isRemoteHttp) {
+    const err = new Error('Parameter photo_file_path dinonaktifkan pada mode Remote HTTP MCP demi keamanan host. Gunakan photo_base64 atau photo_url.');
+    err.error_code = 'VALIDATION_ERROR';
+    throw err;
+  }
   if (photo_base64) {
     return { photo_base64, filename };
   }
@@ -467,6 +482,8 @@ function isLocalOrPrivateHost(hostname) {
   return false;
 }
 
+const mcpToolContext = new AsyncLocalStorage();
+
 export function operatorClient({ baseUrl, token, fetchImpl = fetch }) {
   const base = new URL(baseUrl);
   if (!['http:', 'https:'].includes(base.protocol) || base.username || base.password || base.search || base.hash) {
@@ -480,9 +497,11 @@ export function operatorClient({ baseUrl, token, fetchImpl = fetch }) {
     try {
       const httpMethod = method || (body ? 'POST' : 'GET');
       const isFormData = typeof FormData !== 'undefined' && body instanceof FormData;
+      const currentMcpTool = mcpToolContext.getStore();
       const headers = {
         authorization: `Bearer ${token}`,
         ...(tenantOverride ? { 'x-tenant-override': tenantOverride } : {}),
+        ...(currentMcpTool ? { 'x-mcp-tool': currentMcpTool } : {}),
         ...(key ? { 'idempotency-key': key } : {}),
         ...(body && !isFormData ? { 'content-type': 'application/json' } : {})
       };
@@ -528,9 +547,10 @@ export function operatorClient({ baseUrl, token, fetchImpl = fetch }) {
   return client;
 }
 
-export function createCfStudioServer(rawRequest) {
+export function createCfStudioServer(rawRequest, { isRemoteHttp = false, allowedTools = null } = {}) {
   let activeTenantOverride = null;
   let cachedOperatorTenantId = null;
+  let cachedAllowedTools = Array.isArray(allowedTools) ? new Set(allowedTools) : null;
   const request = (path, opts = {}) => {
     return rawRequest(path, {
       ...opts,
@@ -618,7 +638,22 @@ export function createCfStudioServer(rawRequest) {
         annotations: { readOnlyHint: readOnly, destructiveHint: false, idempotentHint: true, openWorldHint: true }
       },
       async args => {
-        const result = await handler(args);
+        if (name !== 'cf_whoami' && name !== 'makna_whoami' && cachedAllowedTools && !cachedAllowedTools.has(name)) {
+          const denied = {
+            success: false,
+            error_code: 'TOOL_FORBIDDEN',
+            error: `Tool "${name}" tidak diizinkan oleh kebijakan kredensial operator Anda.`
+          };
+          return {
+            content: [{ type: 'text', text: JSON.stringify(denied) }],
+            structuredContent: denied,
+            isError: true
+          };
+        }
+        const result = await mcpToolContext.run(name, () => handler(args));
+        if ((name === 'cf_whoami' || name === 'makna_whoami') && Array.isArray(result?.operator?.allowed_tools)) {
+          cachedAllowedTools = new Set(result.operator.allowed_tools);
+        }
         return {
           content: [{ type: 'text', text: JSON.stringify(result) }],
           structuredContent: result,
@@ -665,7 +700,12 @@ export function createCfStudioServer(rawRequest) {
     async ({ tenant }) => {
       const check = await rawRequest('/api/v2/tenants', { tenantOverride: tenant });
       if (!check || !check.success) {
-        return { success: false, error: check?.error || `Unable to switch to tenant: ${tenant}` };
+        return {
+          success: false,
+          ...(check?.code ? { code: check.code } : {}),
+          ...(check?.error_code ? { error_code: check.error_code } : {}),
+          error: check?.error || `Unable to switch to tenant: ${tenant}`
+        };
       }
       activeTenantOverride = check.active_tenant || tenant;
       return {
@@ -1618,7 +1658,8 @@ export function createCfStudioServer(rawRequest) {
           photo_base64,
           photo_url,
           photo_file_path,
-          filename: photo_filename
+          filename: photo_filename,
+          isRemoteHttp
         });
         return request('/api/v2/products', {
           timeoutMs: 120000,
@@ -1630,7 +1671,7 @@ export function createCfStudioServer(rawRequest) {
           }
         });
       } catch (err) {
-        return { success: false, error: err.message };
+        return { success: false, ...(err.error_code ? { error_code: err.error_code } : {}), error: err.message };
       }
     }
   );
@@ -1698,7 +1739,7 @@ export function createCfStudioServer(rawRequest) {
     false,
     async ({ product_id, type, photo_base64, photo_url, photo_file_path, filename, active_photo }) => {
       try {
-        const photoData = await resolvePhotoInput({ photo_base64, photo_url, photo_file_path, filename });
+        const photoData = await resolvePhotoInput({ photo_base64, photo_url, photo_file_path, filename, isRemoteHttp });
         if (!photoData.photo_base64 && !photoData.photo_url) {
           return { success: false, error: 'Sertakan salah satu dari photo_base64, photo_url, atau photo_file_path.' };
         }
@@ -1712,7 +1753,7 @@ export function createCfStudioServer(rawRequest) {
           }
         });
       } catch (err) {
-        return { success: false, error: err.message };
+        return { success: false, ...(err.error_code ? { error_code: err.error_code } : {}), error: err.message };
       }
     }
   );
@@ -2706,7 +2747,7 @@ export function createCfStudioServer(rawRequest) {
       const mismatch = await checkExpectedTenant(expected_tenant_id);
       if (mismatch) return mismatch;
 
-      const resolved = await resolveReferenceAssetUploadInput({ image_base64, file_path, photo_url, filename });
+      const resolved = await resolveReferenceAssetUploadInput({ image_base64, file_path, photo_url, filename, isRemoteHttp });
       if (resolved.error) return resolved.error;
 
       const formData = new FormData();

@@ -1,0 +1,1771 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Akses MCP & Operator (Mockup) | CF Studio</title>
+  <style>
+    /* Semantic CSS Design Tokens dari app/theme.css (Light & Dark Mode) */
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --input-bg: #ffffff;
+      --overlay-backdrop: rgba(15, 23, 42, 0.54);
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --text-disabled: #8794a6;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --status-neutral: #6548bd;
+      --status-neutral-soft: #f0ecfb;
+      --focus-ring: #6d4ed6;
+      --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+      --shadow-modal: 0 26px 80px rgba(31, 45, 61, 0.22);
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    /* Affordance & Focus (R-32, R-39) */
+    a[href],
+    button:not(:disabled),
+    select:not(:disabled),
+    summary,
+    label[for],
+    input[type='checkbox']:not(:disabled),
+    input[type='radio']:not(:disabled) {
+      cursor: pointer;
+    }
+
+    button:disabled,
+    input:disabled,
+    select:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    .app-shell {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 20px 16px 56px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Top Simulation Bar */
+    .preview-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+    }
+
+    .preview-label {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .toolbar-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .state-tabs {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      background: var(--surface);
+      padding: 4px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .state-tab {
+      min-height: 36px;
+      padding: 6px 12px;
+      border-radius: var(--radius-xs);
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .state-tab:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+
+    .state-tab.active {
+      background: var(--status-info-soft);
+      border-color: var(--status-info);
+      color: var(--status-info);
+    }
+
+    /* Page Header */
+    .page-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 22px 24px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .page-header h1 {
+      margin: 0;
+      font-size: clamp(1.3rem, 2.5vw, 1.7rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+
+    .page-header p {
+      margin: 6px 0 0;
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      max-width: 70ch;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.86rem;
+      font-weight: 600;
+      font-family: var(--font-sans);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+
+    .btn-primary {
+      background: var(--action-primary);
+      border-color: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--action-primary-hover);
+      border-color: var(--action-primary-hover);
+    }
+
+    .btn-info {
+      background: var(--status-info-soft);
+      border-color: var(--status-info);
+      color: var(--status-info);
+    }
+
+    .btn-warning {
+      background: var(--status-warning-soft);
+      border-color: var(--status-warning);
+      color: var(--status-warning);
+    }
+
+    .btn-danger {
+      background: var(--status-danger-soft);
+      border-color: var(--status-danger);
+      color: var(--status-danger);
+    }
+
+    .btn-success {
+      background: var(--status-success-soft);
+      border-color: var(--status-success);
+      color: var(--status-success);
+    }
+
+    .btn-sm {
+      min-height: 38px;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+    }
+
+    /* Endpoint + Summary Strip (Asymmetric 2fr / 1fr for Rhythm 2) */
+    .overview-band {
+      display: grid;
+      grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+    }
+
+    .card-heading {
+      margin: 0 0 6px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .card-sub {
+      margin: 0 0 14px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .endpoint-box {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+    }
+
+    .endpoint-url {
+      font-family: var(--font-mono);
+      font-size: 0.84rem;
+      color: var(--text-primary);
+      word-break: break-all;
+    }
+
+    .endpoint-meta {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .counts-list {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .count-cell {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+    }
+
+    .count-cell-label {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .count-cell-value {
+      font-size: 1.4rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      margin-top: 2px;
+      color: var(--text-primary);
+    }
+
+    /* Filter Bar */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .filter-inputs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .field-group.grow {
+      flex: 1 1 260px;
+    }
+
+    .field-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 12px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 0.88rem;
+      font-family: var(--font-sans);
+    }
+
+    .form-textarea {
+      min-height: 74px;
+      resize: vertical;
+    }
+
+    /* Badges (functional status & tenant allowlist) */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 9px;
+      border-radius: var(--radius-xs);
+      font-size: 0.76rem;
+      font-weight: 600;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .badge-tenant {
+      background: var(--surface-interactive);
+      border-color: var(--border-strong);
+      color: var(--text-primary);
+    }
+
+    .badge-tenant-default {
+      background: var(--status-info-soft);
+      border-color: var(--status-info);
+      color: var(--status-info);
+    }
+
+    .badge-master {
+      background: var(--status-neutral-soft);
+      border-color: var(--status-neutral);
+      color: var(--status-neutral);
+    }
+
+    .badge-active {
+      background: var(--status-success-soft);
+      border-color: var(--status-success);
+      color: var(--status-success);
+    }
+
+    .badge-revoked {
+      background: var(--status-danger-soft);
+      border-color: var(--status-danger);
+      color: var(--status-danger);
+    }
+
+    .badge-expired {
+      background: var(--status-warning-soft);
+      border-color: var(--status-warning);
+      color: var(--status-warning);
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    /* Desktop Table */
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 780px;
+    }
+
+    thead {
+      background: var(--surface-raised);
+    }
+
+    th {
+      text-align: left;
+      padding: 12px 14px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    td {
+      padding: 14px;
+      vertical-align: top;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 0.86rem;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background: var(--surface-raised);
+    }
+
+    .op-name {
+      font-weight: 700;
+      color: var(--text-primary);
+      display: block;
+    }
+
+    .op-meta {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .op-id {
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    .actions-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    /* Mobile Card List (Reflow below 860px) */
+    .mobile-cards {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .mobile-op-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .mobile-op-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .mobile-op-meta-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      font-size: 0.82rem;
+    }
+
+    /* States (Empty, Loading, Error) */
+    .state-panel {
+      border: 1px dashed var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 36px 20px;
+      text-align: center;
+      background: var(--surface-raised);
+    }
+
+    .state-panel.error {
+      border-style: solid;
+      border-color: var(--status-danger);
+      background: var(--status-danger-soft);
+    }
+
+    .state-panel h3 {
+      margin: 0 0 8px;
+      font-size: 1.05rem;
+      color: var(--text-primary);
+    }
+
+    .state-panel p {
+      margin: 0 auto 16px;
+      max-width: 52ch;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+    }
+
+    /* Feedback Banner */
+    .feedback-banner {
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--status-info);
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      font-size: 0.86rem;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .feedback-banner.success {
+      border-color: var(--status-success);
+      background: var(--status-success-soft);
+      color: var(--status-success);
+    }
+
+    .feedback-banner.hidden {
+      display: none;
+    }
+
+    /* Modals */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay-backdrop);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 1000;
+    }
+
+    .modal-backdrop.hidden {
+      display: none;
+    }
+
+    .modal-dialog {
+      width: 100%;
+      max-width: 720px;
+      max-height: 92dvh;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-modal);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.15rem;
+      color: var(--text-primary);
+    }
+
+    .modal-body {
+      padding: 20px 22px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .modal-footer {
+      padding: 14px 22px;
+      border-top: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .checkbox-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 8px;
+    }
+
+    .check-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      font-size: 0.84rem;
+    }
+
+    .check-card:hover {
+      border-color: var(--border-strong);
+    }
+
+    .check-card input[type='checkbox'] {
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      flex-shrink: 0;
+      accent-color: var(--action-primary);
+    }
+
+    .preset-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .preset-btn {
+      min-height: 40px;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-strong);
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-align: left;
+    }
+
+    .preset-btn.selected {
+      background: var(--status-info-soft);
+      border-color: var(--status-info);
+      color: var(--status-info);
+    }
+
+    .code-box {
+      background: var(--input-bg);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-primary);
+      white-space: pre-wrap;
+      word-break: break-all;
+      margin: 0;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+
+    .notice-box {
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--status-warning);
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      font-size: 0.84rem;
+      font-weight: 600;
+    }
+
+    .section-divider {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .helper-text {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin: 4px 0 0;
+    }
+
+    .error-inline {
+      color: var(--status-danger);
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    @media (max-width: 860px) {
+      .overview-band {
+        grid-template-columns: 1fr;
+      }
+      .table-wrap {
+        display: none;
+      }
+      .mobile-cards {
+        display: flex;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .app-shell {
+        padding: 14px 12px 48px;
+      }
+      .form-grid-2 {
+        grid-template-columns: 1fr;
+      }
+      .counts-list {
+        grid-template-columns: 1fr;
+      }
+      .page-header {
+        padding: 18px 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Toolbar Simulasi Mockup (Theme + State R-27) -->
+    <div class="preview-toolbar" role="region" aria-label="Kontrol pratinjau mockup">
+      <div class="preview-label">
+        Mockup Pratinjau UI: Settings &gt; Akses MCP &amp; Operator (Tahap 1)
+      </div>
+      <div class="toolbar-controls">
+        <div class="state-tabs" role="tablist" aria-label="Simulasi kondisi data">
+          <button type="button" class="state-tab active" data-view-state="normal" role="tab" aria-selected="true">Normal</button>
+          <button type="button" class="state-tab" data-view-state="loading" role="tab" aria-selected="false">Loading</button>
+          <button type="button" class="state-tab" data-view-state="empty" role="tab" aria-selected="false">Kosong</button>
+          <button type="button" class="state-tab" data-view-state="error" role="tab" aria-selected="false">Error</button>
+        </div>
+        <button type="button" id="themeToggleBtn" class="btn btn-sm" aria-label="Ganti tema terang atau gelap">
+          Mode Terang
+        </button>
+      </div>
+    </div>
+
+    <!-- Banner Umpan Balik Aksi -->
+    <div id="feedbackBanner" class="feedback-banner hidden" role="status" aria-live="polite">
+      <span id="feedbackText"></span>
+      <button type="button" id="dismissFeedbackBtn" class="btn btn-sm" aria-label="Tutup notifikasi">Tutup</button>
+    </div>
+
+    <!-- Header Halaman -->
+    <header class="page-header">
+      <div>
+        <h1>Akses MCP &amp; Operator Multi-PC</h1>
+        <p>
+          Kelola token per PC atau per operator dengan batas tenant yang dapat diubah kapan saja tanpa mengedit konfigurasi di PC klien. Khusus Superadmin.
+        </p>
+      </div>
+      <button type="button" id="openCreateBtn" class="btn btn-primary">
+        + Buat Kredensial PC Baru
+      </button>
+    </header>
+
+    <main id="mainContent">
+      <!-- Band Ringkasan Endpoint & Status -->
+      <section class="overview-band" aria-label="Informasi endpoint Remote MCP dan ringkasan kredensial">
+        <div class="card">
+          <h2 class="card-heading">Endpoint Remote MCP (Streamable HTTP)</h2>
+          <p class="card-sub">
+            PC klien cukup menempel konfigurasi JSON dengan header Authorization Bearer. Mode remote otomatis memblokir pembacaan file_path lokal server.
+          </p>
+          <div class="endpoint-box">
+            <code id="remoteEndpointText" class="endpoint-url">http://100.95.245.55:7030/mcp</code>
+            <button type="button" id="copyEndpointBtn" class="btn btn-sm btn-info">Salin URL MCP</button>
+          </div>
+          <div class="endpoint-meta">
+            <span>Host aktif: Tailscale CGNAT (100.x) &amp; CF_STUDIO_MCP_ALLOWED_HOSTS</span>
+            <span>Perubahan allowlist tenant &amp; revoke berlaku di request berikutnya</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-heading">Ringkasan Kredensial</h2>
+          <p class="card-sub">Dihitung langsung dari daftar kredensial yang termuat.</p>
+          <div class="counts-list">
+            <div class="count-cell">
+              <div class="count-cell-label">Total</div>
+              <div id="statTotal" class="count-cell-value">0</div>
+            </div>
+            <div class="count-cell">
+              <div class="count-cell-label">Aktif</div>
+              <div id="statActive" class="count-cell-value">0</div>
+            </div>
+            <div class="count-cell">
+              <div class="count-cell-label">Nonaktif</div>
+              <div id="statInactive" class="count-cell-value">0</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Daftar Kredensial -->
+      <section class="card" style="margin-top: 20px;" aria-label="Daftar kredensial operator">
+        <div class="filter-bar">
+          <div class="filter-inputs">
+            <div class="field-group grow">
+              <label for="searchInput" class="field-label">Cari PC, Operator, atau Tenant</label>
+              <input id="searchInput" type="search" class="form-input" placeholder="Ketik nama PC, ID kredensial, atau slug tenant..." />
+            </div>
+            <div class="field-group" style="min-width: 190px;">
+              <label for="statusFilter" class="field-label">Filter Status</label>
+              <select id="statusFilter" class="form-select">
+                <option value="all">Semua Status</option>
+                <option value="active">Aktif</option>
+                <option value="revoked">Dicabut (Revoked)</option>
+                <option value="expired">Kedaluwarsa</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div id="listContainer"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal Tambah / Edit Kredensial -->
+  <div id="credModalBackdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="credModalTitle">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 id="credModalTitle">Buat Kredensial PC Baru</h2>
+        <button type="button" id="closeCredModalBtn" class="btn btn-sm" aria-label="Tutup modal kredensial">
+          <span aria-hidden="true">✕</span>
+        </button>
+      </div>
+      <form id="credForm" class="modal-body" novalidate>
+        <div id="credFormError" class="error-inline" role="alert" style="display: none;"></div>
+
+        <div class="form-grid-2">
+          <div class="field-group">
+            <label for="credNameInput" class="field-label">Nama PC / Operator</label>
+            <input id="credNameInput" type="text" class="form-input" placeholder="Mis. PC Editor Tim Konten B" required />
+          </div>
+          <div class="field-group">
+            <label for="credDefaultTenantSelect" class="field-label">Default Tenant</label>
+            <select id="credDefaultTenantSelect" class="form-select"></select>
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="field-group">
+            <label for="credExpiresInput" class="field-label">Masa Berlaku (Opsional)</label>
+            <input id="credExpiresInput" type="datetime-local" class="form-input" />
+          </div>
+          <div class="field-group">
+            <label for="credStatusSelect" class="field-label">Status Kredensial</label>
+            <select id="credStatusSelect" class="form-select">
+              <option value="active">Aktif</option>
+              <option value="revoked">Dicabut (Revoked)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="section-divider">
+            <span class="field-label">Profil Privilege Cepat (Preset Scope)</span>
+          </div>
+          <div id="presetButtonsRow" class="preset-row"></div>
+        </div>
+
+        <div class="field-group">
+          <div class="section-divider">
+            <span class="field-label">Tenant Tambahan yang Diizinkan (Allowlist)</span>
+            <div style="display: flex; gap: 6px;">
+              <button type="button" id="selectAllTenantsBtn" class="btn btn-sm">Pilih Semua</button>
+              <button type="button" id="clearTenantsBtn" class="btn btn-sm">Hanya Default</button>
+            </div>
+          </div>
+          <p id="tenantMasterNotice" class="helper-text" style="display: none;">
+            Mode Master Superadmin aktif: kredensial otomatis memiliki akses ke seluruh tenant aktif.
+          </p>
+          <div id="allowedTenantsGrid" class="checkbox-grid"></div>
+        </div>
+
+        <div class="field-group">
+          <span class="field-label">Scope Hak Akses</span>
+          <div id="scopesGrid" class="checkbox-grid"></div>
+        </div>
+
+        <div class="field-group">
+          <div class="section-divider">
+            <span class="field-label">Pembatasan Tool MCP (Opsional)</span>
+            <label for="limitToolsToggle" style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-secondary);">
+              <input id="limitToolsToggle" type="checkbox" /> Batasi ke daftar tool tertentu
+            </label>
+          </div>
+          <div id="allowedToolsWrapper" style="display: none;">
+            <div id="allowedToolsGrid" class="checkbox-grid"></div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="credNotesInput" class="field-label">Catatan Internal (Opsional)</label>
+          <textarea id="credNotesInput" class="form-textarea" placeholder="Contoh: Laptop editor untuk produksi konten harian NutriBake & DapurBotani."></textarea>
+        </div>
+      </form>
+      <div class="modal-footer">
+        <button type="button" id="cancelCredModalBtn" class="btn">Batal</button>
+        <button type="submit" form="credForm" id="saveCredBtn" class="btn btn-primary">Simpan Kredensial</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Token Sekali Tampil & Config MCP -->
+  <div id="configModalBackdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="configModalTitle">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 id="configModalTitle">Konfigurasi MCP PC Klien</h2>
+        <button type="button" id="closeConfigModalBtn" class="btn btn-sm" aria-label="Tutup modal konfigurasi">
+          <span aria-hidden="true">✕</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="oneTimeTokenSection" style="display: none;">
+          <div class="notice-box">
+            Token baru ini hanya ditampilkan 1 kali. Salin sekarang sebelum menutup jendela ini; server hanya menyimpan hash SHA-256.
+          </div>
+          <div class="field-group" style="margin-top: 10px;">
+            <label for="plainTokenDisplay" class="field-label">Token Operator (Sekali Tampil)</label>
+            <div class="endpoint-box">
+              <code id="plainTokenDisplay" class="endpoint-url"></code>
+              <button type="button" id="copyPlainTokenBtn" class="btn btn-sm btn-primary">Salin Token</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="field-group">
+            <label for="configClientModeSelect" class="field-label">Mode Koneksi Klien</label>
+            <select id="configClientModeSelect" class="form-select">
+              <option value="http">Remote Streamable HTTP (Direkomendasikan)</option>
+              <option value="stdio">Alternatif CLI (stdio)</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label for="configHostSelect" class="field-label">Alamat Server MCP</label>
+            <select id="configHostSelect" class="form-select">
+              <option value="http://100.95.245.55:7030/mcp">Tailscale: http://100.95.245.55:7030/mcp</option>
+              <option value="https://mcp.cfstudio.local/mcp">Domain HTTPS: https://mcp.cfstudio.local/mcp</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <span class="field-label">Snippet JSON Siap Tempel (Antigravity / Cursor / Claude Desktop)</span>
+          <pre id="mcpConfigJsonPre" class="code-box"></pre>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="copyConfigJsonBtn" class="btn btn-primary">Salin JSON Config</button>
+        <button type="button" id="doneConfigModalBtn" class="btn">Selesai</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Konfirmasi Aksi (Rotate / Delete) -->
+  <div id="confirmModalBackdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle">
+    <div class="modal-dialog" style="max-width: 480px;">
+      <div class="modal-header">
+        <h2 id="confirmModalTitle">Konfirmasi Aksi</h2>
+        <button type="button" id="closeConfirmModalBtn" class="btn btn-sm" aria-label="Tutup modal konfirmasi">
+          <span aria-hidden="true">✕</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmModalMessage" style="margin: 0; color: var(--text-secondary);"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="cancelConfirmBtn" class="btn">Batal</button>
+        <button type="button" id="acceptConfirmBtn" class="btn btn-danger">Lanjutkan</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const TENANTS = [
+      { id: 'default_tenant', name: 'MAKNA Default', slug: 'default-tenant' },
+      { id: 'tnt_pt-gim-sosmed_62d0d9', name: 'PT GIM Sosmed', slug: 'pt-gim-sosmed' },
+      { id: 'tnt_sy-benu_a18f22', name: 'SY Benu', slug: 'sy-benu' },
+      { id: 'tnt_klien-a_44c910', name: 'Klien NutriBake', slug: 'klien-nutribake' }
+    ];
+
+    const SCOPE_PRESETS = [
+      {
+        id: 'viewer',
+        label: 'Viewer / Auditor',
+        scopes: ['content:read', 'automation:read']
+      },
+      {
+        id: 'content_operator',
+        label: 'Content Operator',
+        scopes: ['content:read', 'content:create', 'automation:read']
+      },
+      {
+        id: 'full_tenant_operator',
+        label: 'Full Tenant Operator',
+        scopes: ['content:read', 'content:create', 'content:approve', 'automation:read', 'automation:write']
+      },
+      {
+        id: 'master_superadmin',
+        label: 'Master Superadmin',
+        scopes: ['content:read', 'content:create', 'content:approve', 'automation:read', 'automation:write', 'tenant:superadmin']
+      }
+    ];
+
+    const ALL_SCOPES = [
+      'content:read',
+      'content:create',
+      'content:approve',
+      'automation:read',
+      'automation:write',
+      'publishing:approve',
+      'product_research:read',
+      'product_research:mcp_promote',
+      'tenant:superadmin'
+    ];
+
+    const SAMPLE_TOOLS = [
+      'cf_whoami',
+      'cf_list_tenants',
+      'cf_switch_tenant',
+      'cf_search_catalog',
+      'cf_list_presets',
+      'cf_create_product_video',
+      'cf_create_schedule',
+      'cf_list_schedules',
+      'cf_get_job_status',
+      'cf_approve_job',
+      'cf_create_publishing_job',
+      'cf_upload_reference_asset'
+    ];
+
+    let credentials = [
+      {
+        id: 'opcred_antigravity_ide',
+        name: 'MacBook Utama (Master IDE)',
+        tenant_id: 'default_tenant',
+        allowed_tenant_ids: [],
+        scopes: ['content:read', 'content:create', 'content:approve', 'automation:read', 'automation:write', 'tenant:superadmin'],
+        allowed_tools: null,
+        status: 'active',
+        expires_at: '',
+        last_used_at: '2026-11-25 12:14 WIB',
+        notes: 'PC pemilik utama untuk orkestrasi seluruh tenant.'
+      },
+      {
+        id: 'opcred_pc_tim_b_01',
+        name: 'PC Tim Konten B (Editor)',
+        tenant_id: 'tnt_pt-gim-sosmed_62d0d9',
+        allowed_tenant_ids: ['tnt_sy-benu_a18f22'],
+        scopes: ['content:read', 'content:create', 'automation:read'],
+        allowed_tools: ['cf_whoami', 'cf_list_tenants', 'cf_switch_tenant', 'cf_search_catalog', 'cf_create_product_video', 'cf_get_job_status'],
+        status: 'active',
+        expires_at: '2026-12-31T23:59',
+        last_used_at: '2026-11-25 10:42 WIB',
+        notes: 'Hanya boleh produksi draft di PT GIM Sosmed & SY Benu.'
+      },
+      {
+        id: 'opcred_klien_viewer_02',
+        name: 'Laptop Supervisor Klien',
+        tenant_id: 'tnt_klien-a_44c910',
+        allowed_tenant_ids: [],
+        scopes: ['content:read', 'automation:read'],
+        allowed_tools: null,
+        status: 'active',
+        expires_at: '',
+        last_used_at: '2026-11-24 16:05 WIB',
+        notes: 'Hanya pantau progres produksi & status jadwal.'
+      },
+      {
+        id: 'opcred_editor_magang_old',
+        name: 'PC Magang Lama',
+        tenant_id: 'tnt_sy-benu_a18f22',
+        allowed_tenant_ids: [],
+        scopes: ['content:read'],
+        allowed_tools: null,
+        status: 'revoked',
+        expires_at: '',
+        last_used_at: '2026-11-10 09:15 WIB',
+        notes: 'Sudah dicabut setelah masa kontrak berakhir.'
+      }
+    ];
+
+    let viewState = 'normal';
+    let editingId = null;
+    let activeConfigCred = null;
+    let activePlainToken = null;
+    let pendingConfirmAction = null;
+
+    const listContainer = document.getElementById('listContainer');
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    const feedbackBanner = document.getElementById('feedbackBanner');
+    const feedbackText = document.getElementById('feedbackText');
+
+    function tenantLabel(id) {
+      const found = TENANTS.find(t => t.id === id);
+      return found ? found.name : id;
+    }
+
+    function isExpired(cred) {
+      return Boolean(cred.expires_at && new Date(cred.expires_at) < new Date());
+    }
+
+    function effectiveStatus(cred) {
+      if (cred.status === 'revoked') return 'revoked';
+      if (isExpired(cred)) return 'expired';
+      return 'active';
+    }
+
+    function detectPresetLabel(scopes) {
+      if (scopes.includes('tenant:superadmin') || scopes.includes('system:admin')) return 'Master Superadmin';
+      const sorted = [...scopes].sort().join(',');
+      const match = SCOPE_PRESETS.find(p => [...p.scopes].sort().join(',') === sorted);
+      return match ? match.label : `Custom (${scopes.length} scope)`;
+    }
+
+    function showFeedback(message, isSuccess = false) {
+      feedbackText.textContent = message;
+      feedbackBanner.classList.toggle('success', isSuccess);
+      feedbackBanner.classList.remove('hidden');
+    }
+
+    function updateStats() {
+      const list = viewState === 'empty' ? [] : credentials;
+      const total = list.length;
+      const active = list.filter(c => effectiveStatus(c) === 'active').length;
+      document.getElementById('statTotal').textContent = String(total);
+      document.getElementById('statActive').textContent = String(active);
+      document.getElementById('statInactive').textContent = String(total - active);
+    }
+
+    function renderList() {
+      updateStats();
+
+      if (viewState === 'loading') {
+        listContainer.innerHTML = `
+          <div class="state-panel" role="status" aria-live="polite">
+            <h3>Memuat daftar kredensial operator...</h3>
+            <p>Mengambil status tenant allowlist, scope, dan aktivitas terakhir dari server PostgreSQL.</p>
+          </div>`;
+        return;
+      }
+
+      if (viewState === 'error') {
+        listContainer.innerHTML = `
+          <div class="state-panel error" role="alert">
+            <h3>Gagal memuat kredensial operator (HTTP 500)</h3>
+            <p>Koneksi ke API /api/v2/operator-credentials terputus atau sesi Superadmin telah habis.</p>
+            <button type="button" class="btn btn-primary" onclick="setViewState('normal')">Coba Muat Ulang</button>
+          </div>`;
+        return;
+      }
+
+      if (viewState === 'empty') {
+        listContainer.innerHTML = `
+          <div class="state-panel">
+            <h3>Belum ada kredensial MCP operator terdaftar</h3>
+            <p>Buat token per PC untuk membagikan akses CF Studio MCP ke tim dengan batas tenant dan scope terkontrol.</p>
+            <button type="button" class="btn btn-primary" onclick="openCreateModal()">+ Buat Kredensial PC Pertama</button>
+          </div>`;
+        return;
+      }
+
+      const query = searchInput.value.trim().toLowerCase();
+      const stFilter = statusFilter.value;
+
+      const filtered = credentials.filter(cred => {
+        const eff = effectiveStatus(cred);
+        if (stFilter !== 'all' && eff !== stFilter) return false;
+        if (!query) return true;
+        const tenantNames = [cred.tenant_id, ...cred.allowed_tenant_ids].map(id => `${id} ${tenantLabel(id)}`).join(' ');
+        const haystack = `${cred.id} ${cred.name} ${cred.notes || ''} ${tenantNames}`.toLowerCase();
+        return haystack.includes(query);
+      });
+
+      if (filtered.length === 0) {
+        listContainer.innerHTML = `
+          <div class="state-panel">
+            <h3>Tidak ada kredensial yang cocok dengan filter</h3>
+            <p>Ubah kata kunci pencarian atau setel ulang filter status ke Semua Status.</p>
+            <button type="button" class="btn" onclick="resetFilters()">Setel Ulang Filter</button>
+          </div>`;
+        return;
+      }
+
+      const rowsHtml = filtered.map(cred => {
+        const eff = effectiveStatus(cred);
+        const isMaster = cred.scopes.includes('tenant:superadmin');
+        const statusBadge = eff === 'active'
+          ? '<span class="badge badge-active">Aktif</span>'
+          : (eff === 'expired'
+            ? '<span class="badge badge-expired">Kedaluwarsa</span>'
+            : '<span class="badge badge-revoked">Dicabut</span>');
+
+        const tenantBadges = isMaster
+          ? '<span class="badge badge-master">Semua Tenant (Master)</span>'
+          : [
+              `<span class="badge badge-tenant-default">Default: ${tenantLabel(cred.tenant_id)}</span>`,
+              ...cred.allowed_tenant_ids.filter(id => id !== cred.tenant_id).map(id => `<span class="badge badge-tenant">+ ${tenantLabel(id)}</span>`)
+            ].join('');
+
+        const toolNote = Array.isArray(cred.allowed_tools)
+          ? `<div class="op-meta">Batas tool: ${cred.allowed_tools.length} tool</div>`
+          : '<div class="op-meta">Tool: semua tool sesuai scope</div>';
+
+        const toggleLabel = cred.status === 'active' ? 'Revoke' : 'Aktifkan';
+        const toggleClass = cred.status === 'active' ? 'btn-warning' : 'btn-success';
+
+        return `
+          <tr>
+            <td>
+              <span class="op-name">${cred.name}</span>
+              <span class="op-id">${cred.id}</span>
+              ${cred.notes ? `<div class="op-meta">${cred.notes}</div>` : ''}
+            </td>
+            <td><div class="badge-row">${tenantBadges}</div></td>
+            <td>
+              <strong>${detectPresetLabel(cred.scopes)}</strong>
+              <div class="op-meta">${cred.scopes.join(', ')}</div>
+              ${toolNote}
+            </td>
+            <td>
+              ${statusBadge}
+              <div class="op-meta">${cred.expires_at ? `Berlaku s.d. ${cred.expires_at.replace('T', ' ')}` : 'Tanpa kedaluwarsa'}</div>
+            </td>
+            <td><div class="op-meta" style="margin-top:0;color:var(--text-secondary);">${cred.last_used_at || 'Belum pernah'}</div></td>
+            <td>
+              <div class="actions-group">
+                <button type="button" class="btn btn-sm btn-info" onclick="openEditModal('${cred.id}')">Edit Akses</button>
+                <button type="button" class="btn btn-sm" onclick="openConfigModal('${cred.id}', null)">Salin Config</button>
+                <button type="button" class="btn btn-sm" onclick="confirmRotate('${cred.id}')">Putar Token</button>
+                <button type="button" class="btn btn-sm ${toggleClass}" onclick="toggleStatus('${cred.id}')">${toggleLabel}</button>
+                <button type="button" class="btn btn-sm btn-danger" onclick="confirmDelete('${cred.id}')">Hapus</button>
+              </div>
+            </td>
+          </tr>`;
+      }).join('');
+
+      const cardsHtml = filtered.map(cred => {
+        const eff = effectiveStatus(cred);
+        const isMaster = cred.scopes.includes('tenant:superadmin');
+        const statusBadge = eff === 'active'
+          ? '<span class="badge badge-active">Aktif</span>'
+          : (eff === 'expired'
+            ? '<span class="badge badge-expired">Kedaluwarsa</span>'
+            : '<span class="badge badge-revoked">Dicabut</span>');
+
+        const tenantBadges = isMaster
+          ? '<span class="badge badge-master">Semua Tenant (Master)</span>'
+          : [
+              `<span class="badge badge-tenant-default">Default: ${tenantLabel(cred.tenant_id)}</span>`,
+              ...cred.allowed_tenant_ids.filter(id => id !== cred.tenant_id).map(id => `<span class="badge badge-tenant">+ ${tenantLabel(id)}</span>`)
+            ].join('');
+
+        const toggleLabel = cred.status === 'active' ? 'Revoke' : 'Aktifkan';
+        const toggleClass = cred.status === 'active' ? 'btn-warning' : 'btn-success';
+
+        return `
+          <article class="mobile-op-card">
+            <div class="mobile-op-head">
+              <div>
+                <span class="op-name">${cred.name}</span>
+                <span class="op-id">${cred.id}</span>
+              </div>
+              ${statusBadge}
+            </div>
+            <div class="mobile-op-meta-grid">
+              <div><strong>Tenant:</strong> <div class="badge-row" style="margin-top:4px;">${tenantBadges}</div></div>
+              <div><strong>Privilege:</strong> ${detectPresetLabel(cred.scopes)} (${cred.scopes.join(', ')})</div>
+              <div><strong>Terakhir dipakai:</strong> ${cred.last_used_at || 'Belum pernah'}</div>
+            </div>
+            <div class="actions-group">
+              <button type="button" class="btn btn-sm btn-info" onclick="openEditModal('${cred.id}')">Edit Akses</button>
+              <button type="button" class="btn btn-sm" onclick="openConfigModal('${cred.id}', null)">Salin Config</button>
+              <button type="button" class="btn btn-sm" onclick="confirmRotate('${cred.id}')">Putar Token</button>
+              <button type="button" class="btn btn-sm ${toggleClass}" onclick="toggleStatus('${cred.id}')">${toggleLabel}</button>
+              <button type="button" class="btn btn-sm btn-danger" onclick="confirmDelete('${cred.id}')">Hapus</button>
+            </div>
+          </article>`;
+      }).join('');
+
+      listContainer.innerHTML = `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>PC / Operator</th>
+                <th>Tenant Diizinkan</th>
+                <th>Profil &amp; Scope</th>
+                <th>Status</th>
+                <th>Terakhir Dipakai</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>
+        </div>
+        <div class="mobile-cards">${cardsHtml}</div>`;
+    }
+
+    function setViewState(next) {
+      viewState = next;
+      document.querySelectorAll('[data-view-state]').forEach(btn => {
+        const active = btn.dataset.viewState === next;
+        btn.classList.toggle('active', active);
+        btn.setAttribute('aria-selected', String(active));
+      });
+      renderList();
+    }
+
+    function resetFilters() {
+      searchInput.value = '';
+      statusFilter.value = 'all';
+      renderList();
+    }
+
+    // Populate Form Controls
+    function initFormOptions() {
+      const defSelect = document.getElementById('credDefaultTenantSelect');
+      defSelect.innerHTML = TENANTS.map(t => `<option value="${t.id}">${t.name} (${t.slug})</option>`).join('');
+
+      document.getElementById('presetButtonsRow').innerHTML = SCOPE_PRESETS.map(p =>
+        `<button type="button" class="preset-btn" data-preset-id="${p.id}" onclick="applyScopePreset('${p.id}')">${p.label}</button>`
+      ).join('');
+
+      document.getElementById('allowedTenantsGrid').innerHTML = TENANTS.map(t => `
+        <label class="check-card" for="tnt_chk_${t.id}">
+          <input id="tnt_chk_${t.id}" type="checkbox" name="allowed_tenants" value="${t.id}" />
+          <span><strong>${t.name}</strong><br><span style="font-size:0.74rem;color:var(--text-muted);">${t.slug}</span></span>
+        </label>`).join('');
+
+      document.getElementById('scopesGrid').innerHTML = ALL_SCOPES.map(s => `
+        <label class="check-card" for="scp_chk_${s}">
+          <input id="scp_chk_${s}" type="checkbox" name="scopes" value="${s}" onchange="syncScopeUIState()" />
+          <span style="font-family:var(--font-mono);font-size:0.78rem;">${s}</span>
+        </label>`).join('');
+
+      document.getElementById('allowedToolsGrid').innerHTML = SAMPLE_TOOLS.map(tool => `
+        <label class="check-card" for="tool_chk_${tool}">
+          <input id="tool_chk_${tool}" type="checkbox" name="allowed_tools" value="${tool}" />
+          <span style="font-family:var(--font-mono);font-size:0.78rem;">${tool}</span>
+        </label>`).join('');
+    }
+
+    function syncScopeUIState() {
+      const checkedScopes = Array.from(document.querySelectorAll('input[name="scopes"]:checked')).map(el => el.value);
+      const isMaster = checkedScopes.includes('tenant:superadmin');
+      document.getElementById('tenantMasterNotice').style.display = isMaster ? 'block' : 'none';
+      document.querySelectorAll('input[name="allowed_tenants"]').forEach(chk => {
+        chk.disabled = isMaster;
+      });
+      document.querySelectorAll('[data-preset-id]').forEach(btn => {
+        const preset = SCOPE_PRESETS.find(p => p.id === btn.dataset.presetId);
+        const match = preset && [...preset.scopes].sort().join(',') === [...checkedScopes].sort().join(',');
+        btn.classList.toggle('selected', Boolean(match));
+      });
+    }
+
+    function applyScopePreset(presetId) {
+      const preset = SCOPE_PRESETS.find(p => p.id === presetId);
+      if (!preset) return;
+      document.querySelectorAll('input[name="scopes"]').forEach(chk => {
+        chk.checked = preset.scopes.includes(chk.value);
+      });
+      syncScopeUIState();
+    }
+
+    function openCreateModal() {
+      editingId = null;
+      document.getElementById('credModalTitle').textContent = 'Buat Kredensial PC Baru';
+      document.getElementById('saveCredBtn').textContent = 'Buat Token & Simpan';
+      document.getElementById('credNameInput').value = '';
+      document.getElementById('credDefaultTenantSelect').value = TENANTS[1].id;
+      document.getElementById('credExpiresInput').value = '';
+      document.getElementById('credStatusSelect').value = 'active';
+      document.getElementById('credNotesInput').value = '';
+      document.getElementById('credFormError').style.display = 'none';
+      document.querySelectorAll('input[name="allowed_tenants"]').forEach(c => { c.checked = false; });
+      applyScopePreset('content_operator');
+      document.getElementById('limitToolsToggle').checked = false;
+      document.getElementById('allowedToolsWrapper').style.display = 'none';
+      document.querySelectorAll('input[name="allowed_tools"]').forEach(c => { c.checked = false; });
+      document.getElementById('credModalBackdrop').classList.remove('hidden');
+      document.getElementById('credNameInput').focus();
+    }
+
+    function openEditModal(id) {
+      const cred = credentials.find(c => c.id === id);
+      if (!cred) return;
+      editingId = id;
+      document.getElementById('credModalTitle').textContent = `Edit Akses: ${cred.name}`;
+      document.getElementById('saveCredBtn').textContent = 'Simpan Perubahan Real-Time';
+      document.getElementById('credNameInput').value = cred.name;
+      document.getElementById('credDefaultTenantSelect').value = cred.tenant_id;
+      document.getElementById('credExpiresInput').value = cred.expires_at || '';
+      document.getElementById('credStatusSelect').value = cred.status;
+      document.getElementById('credNotesInput').value = cred.notes || '';
+      document.getElementById('credFormError').style.display = 'none';
+
+      document.querySelectorAll('input[name="allowed_tenants"]').forEach(c => {
+        c.checked = cred.allowed_tenant_ids.includes(c.value);
+      });
+      document.querySelectorAll('input[name="scopes"]').forEach(c => {
+        c.checked = cred.scopes.includes(c.value);
+      });
+      syncScopeUIState();
+
+      const hasTools = Array.isArray(cred.allowed_tools);
+      document.getElementById('limitToolsToggle').checked = hasTools;
+      document.getElementById('allowedToolsWrapper').style.display = hasTools ? 'block' : 'none';
+      document.querySelectorAll('input[name="allowed_tools"]').forEach(c => {
+        c.checked = hasTools ? cred.allowed_tools.includes(c.value) : false;
+      });
+      document.getElementById('credModalBackdrop').classList.remove('hidden');
+      document.getElementById('credNameInput').focus();
+    }
+
+    function closeCredModal() {
+      document.getElementById('credModalBackdrop').classList.add('hidden');
+    }
+
+    function openConfigModal(id, plainToken) {
+      const cred = credentials.find(c => c.id === id);
+      if (!cred) return;
+      activeConfigCred = cred;
+      activePlainToken = plainToken;
+      const oneTimeSec = document.getElementById('oneTimeTokenSection');
+      if (plainToken) {
+        oneTimeSec.style.display = 'block';
+        document.getElementById('plainTokenDisplay').textContent = plainToken;
+      } else {
+        oneTimeSec.style.display = 'none';
+      }
+      renderMcpSnippet();
+      document.getElementById('configModalBackdrop').classList.remove('hidden');
+    }
+
+    function renderMcpSnippet() {
+      const mode = document.getElementById('configClientModeSelect').value;
+      const url = document.getElementById('configHostSelect').value;
+      const tokenVal = activePlainToken || 'cfop_SAMPLE_TOKEN_PLACEHOLDER_GANTI_DENGAN_TOKEN_ANDA';
+      let jsonObj;
+      if (mode === 'http') {
+        jsonObj = {
+          mcpServers: {
+            'cf-studio': {
+              url,
+              headers: {
+                Authorization: `Bearer ${tokenVal}`
+              }
+            }
+          }
+        };
+      } else {
+        jsonObj = {
+          mcpServers: {
+            'cf-studio': {
+              command: 'npx',
+              args: ['-y', '@cf-studio/mcp', '--stdio'],
+              env: {
+                CF_STUDIO_OPERATOR_BASE_URL: url.replace('/mcp', '').replace(':7030', ':5010'),
+                CF_STUDIO_OPERATOR_API_TOKEN: tokenVal
+              }
+            }
+          }
+        };
+      }
+      document.getElementById('mcpConfigJsonPre').textContent = JSON.stringify(jsonObj, null, 2);
+    }
+
+    function toggleStatus(id) {
+      const cred = credentials.find(c => c.id === id);
+      if (!cred) return;
+      cred.status = cred.status === 'active' ? 'revoked' : 'active';
+      renderList();
+      showFeedback(
+        cred.status === 'revoked'
+          ? `Akses "${cred.name}" dicabut. Request berikutnya dari PC tersebut langsung ditolak 401.`
+          : `Akses "${cred.name}" diaktifkan kembali.`,
+        cred.status === 'active'
+      );
+    }
+
+    function confirmRotate(id) {
+      const cred = credentials.find(c => c.id === id);
+      if (!cred) return;
+      document.getElementById('confirmModalTitle').textContent = 'Putar Token Operator';
+      document.getElementById('confirmModalMessage').textContent =
+        `Token lama milik "${cred.name}" akan langsung hangus begitu token baru dibuat. PC klien perlu memperbarui header Authorization.`;
+      const btn = document.getElementById('acceptConfirmBtn');
+      btn.className = 'btn btn-warning';
+      btn.textContent = 'Putar Token Sekarang';
+      pendingConfirmAction = () => {
+        const fakeToken = `cfop_SAMPLE_ROTATED_${Math.random().toString(16).slice(2, 14)}`;
+        closeConfirmModal();
+        openConfigModal(id, fakeToken);
+        showFeedback(`Token baru untuk "${cred.name}" berhasil dibuat. Token lama sudah hangus.`, true);
+      };
+      document.getElementById('confirmModalBackdrop').classList.remove('hidden');
+    }
+
+    function confirmDelete(id) {
+      const cred = credentials.find(c => c.id === id);
+      if (!cred) return;
+      document.getElementById('confirmModalTitle').textContent = 'Hapus Kredensial Permanen';
+      document.getElementById('confirmModalMessage').textContent =
+        `Hapus permanen "${cred.name}" (${cred.id})? Riwayat audit tetap tersimpan, namun token tidak dapat dipulihkan.`;
+      const btn = document.getElementById('acceptConfirmBtn');
+      btn.className = 'btn btn-danger';
+      btn.textContent = 'Hapus Permanen';
+      pendingConfirmAction = () => {
+        credentials = credentials.filter(c => c.id !== id);
+        closeConfirmModal();
+        renderList();
+        showFeedback(`Kredensial "${cred.name}" telah dihapus.`, false);
+      };
+      document.getElementById('confirmModalBackdrop').classList.remove('hidden');
+    }
+
+    function closeConfirmModal() {
+      document.getElementById('confirmModalBackdrop').classList.add('hidden');
+      pendingConfirmAction = null;
+    }
+
+    // Event Bindings
+    document.getElementById('openCreateBtn').addEventListener('click', openCreateModal);
+    document.getElementById('closeCredModalBtn').addEventListener('click', closeCredModal);
+    document.getElementById('cancelCredModalBtn').addEventListener('click', closeCredModal);
+    document.getElementById('closeConfigModalBtn').addEventListener('click', () => document.getElementById('configModalBackdrop').classList.add('hidden'));
+    document.getElementById('doneConfigModalBtn').addEventListener('click', () => document.getElementById('configModalBackdrop').classList.add('hidden'));
+    document.getElementById('closeConfirmModalBtn').addEventListener('click', closeConfirmModal);
+    document.getElementById('cancelConfirmBtn').addEventListener('click', closeConfirmModal);
+    document.getElementById('acceptConfirmBtn').addEventListener('click', () => { if (pendingConfirmAction) pendingConfirmAction(); });
+    document.getElementById('dismissFeedbackBtn').addEventListener('click', () => feedbackBanner.classList.add('hidden'));
+
+    document.getElementById('selectAllTenantsBtn').addEventListener('click', () => {
+      document.querySelectorAll('input[name="allowed_tenants"]:not(:disabled)').forEach(c => { c.checked = true; });
+    });
+    document.getElementById('clearTenantsBtn').addEventListener('click', () => {
+      document.querySelectorAll('input[name="allowed_tenants"]').forEach(c => { c.checked = false; });
+    });
+    document.getElementById('limitToolsToggle').addEventListener('change', e => {
+      document.getElementById('allowedToolsWrapper').style.display = e.target.checked ? 'block' : 'none';
+    });
+
+    document.getElementById('configClientModeSelect').addEventListener('change', renderMcpSnippet);
+    document.getElementById('configHostSelect').addEventListener('change', renderMcpSnippet);
+
+    document.getElementById('copyEndpointBtn').addEventListener('click', () => {
+      const url = document.getElementById('remoteEndpointText').textContent;
+      navigator.clipboard?.writeText(url).catch(() => {});
+      showFeedback(`URL endpoint MCP disalin: ${url}`, true);
+    });
+    document.getElementById('copyPlainTokenBtn').addEventListener('click', () => {
+      navigator.clipboard?.writeText(activePlainToken || '').catch(() => {});
+      showFeedback('Token operator disalin ke clipboard.', true);
+    });
+    document.getElementById('copyConfigJsonBtn').addEventListener('click', () => {
+      const jsonText = document.getElementById('mcpConfigJsonPre').textContent;
+      navigator.clipboard?.writeText(jsonText).catch(() => {});
+      showFeedback('Snippet JSON MCP berhasil disalin ke clipboard.', true);
+    });
+
+    document.getElementById('credForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const errBox = document.getElementById('credFormError');
+      const name = document.getElementById('credNameInput').value.trim();
+      const defaultTenant = document.getElementById('credDefaultTenantSelect').value;
+      const scopes = Array.from(document.querySelectorAll('input[name="scopes"]:checked')).map(el => el.value);
+      const allowedTenants = Array.from(document.querySelectorAll('input[name="allowed_tenants"]:checked')).map(el => el.value)
+        .filter(id => id !== defaultTenant);
+      const limitTools = document.getElementById('limitToolsToggle').checked;
+      const allowedTools = limitTools
+        ? Array.from(document.querySelectorAll('input[name="allowed_tools"]:checked')).map(el => el.value)
+        : null;
+
+      if (!name) {
+        errBox.textContent = 'Nama PC atau operator wajib diisi.';
+        errBox.style.display = 'block';
+        return;
+      }
+      if (scopes.length === 0) {
+        errBox.textContent = 'Pilih minimal satu scope hak akses.';
+        errBox.style.display = 'block';
+        return;
+      }
+
+      if (editingId) {
+        const target = credentials.find(c => c.id === editingId);
+        if (target) {
+          target.name = name;
+          target.tenant_id = defaultTenant;
+          target.allowed_tenant_ids = scopes.includes('tenant:superadmin') ? [] : allowedTenants;
+          target.scopes = scopes;
+          target.allowed_tools = allowedTools;
+          target.expires_at = document.getElementById('credExpiresInput').value;
+          target.status = document.getElementById('credStatusSelect').value;
+          target.notes = document.getElementById('credNotesInput').value.trim();
+        }
+        closeCredModal();
+        if (viewState !== 'normal') setViewState('normal');
+        else renderList();
+        showFeedback(`Perubahan akses "${name}" disimpan dan langsung aktif di request berikutnya.`, true);
+      } else {
+        const newId = `opcred_${Date.now().toString(36)}`;
+        credentials.unshift({
+          id: newId,
+          name,
+          tenant_id: defaultTenant,
+          allowed_tenant_ids: scopes.includes('tenant:superadmin') ? [] : allowedTenants,
+          scopes,
+          allowed_tools: allowedTools,
+          status: document.getElementById('credStatusSelect').value,
+          expires_at: document.getElementById('credExpiresInput').value,
+          last_used_at: '',
+          notes: document.getElementById('credNotesInput').value.trim()
+        });
+        closeCredModal();
+        if (viewState !== 'normal') setViewState('normal');
+        else renderList();
+        const sampleToken = `cfop_SAMPLE_NEW_${Math.random().toString(16).slice(2, 16)}`;
+        openConfigModal(newId, sampleToken);
+        showFeedback(`Kredensial baru "${name}" berhasil dibuat.`, true);
+      }
+    });
+
+    // State & Filter Listeners
+    document.querySelectorAll('[data-view-state]').forEach(btn => {
+      btn.addEventListener('click', () => setViewState(btn.dataset.viewState));
+    });
+    searchInput.addEventListener('input', renderList);
+    statusFilter.addEventListener('change', renderList);
+
+    // Light/Dark Theme Toggle
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    themeToggleBtn.addEventListener('click', () => {
+      const root = document.documentElement;
+      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      themeToggleBtn.textContent = next === 'dark' ? 'Mode Terang' : 'Mode Gelap';
+    });
+
+    // Close modals with Escape or backdrop click (R-26, R-32)
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        closeCredModal();
+        document.getElementById('configModalBackdrop').classList.add('hidden');
+        closeConfirmModal();
+      }
+    });
+    ['credModalBackdrop', 'configModalBackdrop', 'confirmModalBackdrop'].forEach(backdropId => {
+      const el = document.getElementById(backdropId);
+      el.addEventListener('click', e => {
+        if (e.target === el) el.classList.add('hidden');
+      });
+    });
+
+    initFormOptions();
+    renderList();
+  </script>
+</body>
+</html>

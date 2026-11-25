@@ -910,3 +910,149 @@ test('Universe & Character Lock MVP: all 10 tools registered with schema, tenant
   assert.equal(calls[0].opts.body.mode, 'required');
   assert.equal(calls[0].opts.body.sample_prompt, 'Maya in studio');
 });
+
+test('Remote HTTP MCP accepts per-operator Bearer token and blocks file_path / photo_file_path', async t => {
+  const backendSeenAuth = [];
+  const backendSeenTool = [];
+  const mockBackend = createHttpApp ? null : null;
+
+  // Spin up mock CF Studio backend HTTP server
+  const { createServer } = await import('node:http');
+  const backendServer = createServer((req, res) => {
+    backendSeenAuth.push(req.headers.authorization || '');
+    backendSeenTool.push(req.headers['x-mcp-tool'] || '');
+    res.setHeader('content-type', 'application/json');
+    if (req.url === '/api/operator/v1/whoami') {
+      res.end(JSON.stringify({
+        success: true,
+        operator: { id: 'op_pc_b', name: 'PC B', tenant_id: 'tnt_b', scopes: ['content:read'] }
+      }));
+      return;
+    }
+    if (req.url === '/api/v2/tenants') {
+      if (req.headers['x-tenant-override'] === 'default_tenant') {
+        res.statusCode = 403;
+        res.end(JSON.stringify({
+          success: false,
+          code: 'TENANT_FORBIDDEN',
+          error_code: 'TENANT_FORBIDDEN',
+          error: 'Akses ke tenant ini tidak diizinkan untuk kredensial Anda.'
+        }));
+        return;
+      }
+      res.end(JSON.stringify({ success: true, active_tenant: 'tnt_b', is_master: false, tenants: [{ id: 'tnt_b' }] }));
+      return;
+    }
+    res.end(JSON.stringify({ success: true }));
+  });
+
+  await new Promise(resolve => backendServer.listen(0, '127.0.0.1', resolve));
+  t.after(() => new Promise(resolve => {
+    backendServer.closeAllConnections();
+    backendServer.close(resolve);
+  }));
+  const backendUrl = `http://127.0.0.1:${backendServer.address().port}`;
+
+  const app = createHttpApp({
+    baseUrl: backendUrl,
+    bearerToken: 'STATIC_MASTER_BEARER_TOKEN_32_CHARS_LONG',
+    request: async () => ({ success: true })
+  });
+  const mcpHttp = await new Promise((resolve, reject) => {
+    const listener = app.listen(0, '127.0.0.1', () => resolve(listener));
+    listener.on('error', reject);
+  });
+  t.after(() => new Promise(resolve => {
+    mcpHttp.closeAllConnections();
+    mcpHttp.close(resolve);
+  }));
+
+  const mcpUrl = new URL(`http://127.0.0.1:${mcpHttp.address().port}/mcp`);
+  const perOperatorToken = 'cfop_SAMPLE_PER_PC_OPERATOR_TOKEN_0123456789abcdef';
+
+  const client = new Client({ name: 'remote-pc-test', version: '2' });
+  t.after(() => client.close());
+  await client.connect(
+    new StreamableHTTPClientTransport(mcpUrl, {
+      requestInit: { headers: { authorization: `Bearer ${perOperatorToken}` } }
+    })
+  );
+
+  // 1. Per-operator Bearer forwarded to backend along with x-mcp-tool
+  const whoami = await client.callTool({ name: 'cf_whoami' });
+  assert.equal(whoami.isError, undefined);
+  assert.equal(whoami.structuredContent.operator.id, 'op_pc_b');
+  assert.equal(backendSeenAuth[0], `Bearer ${perOperatorToken}`);
+  assert.equal(backendSeenTool[0], 'cf_whoami');
+
+  // 2. cf_switch_tenant propagates TENANT_FORBIDDEN when backend returns 403
+  const forbiddenSwitch = await client.callTool({
+    name: 'cf_switch_tenant',
+    arguments: { tenant: 'default_tenant' }
+  });
+  assert.equal(forbiddenSwitch.isError, true);
+  assert.equal(forbiddenSwitch.structuredContent.error_code, 'TENANT_FORBIDDEN');
+
+  // 3. Remote HTTP blocks file_path on cf_upload_reference_asset
+  const refReject = await client.callTool({
+    name: 'cf_upload_reference_asset',
+    arguments: {
+      owner_type: 'character',
+      owner_id: 'char_1',
+      role: 'identity',
+      file_path: '/etc/passwd'
+    }
+  });
+  assert.equal(refReject.isError, true);
+  assert.equal(refReject.structuredContent.error_code, 'VALIDATION_ERROR');
+
+  // 4. Remote HTTP blocks photo_file_path on cf_add_product & cf_upload_product_photo
+  const prodReject = await client.callTool({
+    name: 'cf_add_product',
+    arguments: {
+      product_name: 'Sample Product',
+      photo_file_path: '/etc/passwd'
+    }
+  });
+  assert.equal(prodReject.isError, true);
+  assert.equal(prodReject.structuredContent.error_code, 'VALIDATION_ERROR');
+
+  const photoReject = await client.callTool({
+    name: 'cf_upload_product_photo',
+    arguments: {
+      product_id: 'prod_1',
+      photo_file_path: '/etc/passwd'
+    }
+  });
+  assert.equal(photoReject.isError, true);
+  assert.equal(photoReject.structuredContent.error_code, 'VALIDATION_ERROR');
+
+  // 5. Static master bearer token still works when supplied
+  const masterClient = new Client({ name: 'master-test', version: '2' });
+  t.after(() => masterClient.close());
+  await masterClient.connect(
+    new StreamableHTTPClientTransport(mcpUrl, {
+      requestInit: { headers: { authorization: 'Bearer STATIC_MASTER_BEARER_TOKEN_32_CHARS_LONG' } }
+    })
+  );
+  const masterTools = await masterClient.listTools();
+  assert.ok(masterTools.tools.length >= 61);
+});
+
+test('createCfStudioServer enforces allowedTools allowlist locally when provided or returned by whoami', async t => {
+  const client = await connected(
+    t,
+    async path => {
+      if (path === '/api/operator/v1/whoami') {
+        return { success: true, operator: { id: 'op_1', tenant_id: 'tnt_a', allowed_tools: ['cf_whoami', 'cf_list_tenants'] } };
+      }
+      return { success: true };
+    }
+  );
+  const whoami = await client.callTool({ name: 'cf_whoami' });
+  assert.equal(whoami.isError, undefined);
+
+  const denied = await client.callTool({ name: 'cf_create_schedule', arguments: { name: 'Test' } });
+  assert.equal(denied.isError, true);
+  assert.equal(denied.structuredContent.error_code, 'TOOL_FORBIDDEN');
+});

@@ -31,7 +31,9 @@ Supply environment variables through your process manager, `.env.local`, or secr
 | `CF_STUDIO_MCP_ALLOWED_HOSTS` | `MAKNA_MCP_ALLOWED_HOSTS` | Comma-separated accepted hostnames. Default `127.0.0.1,localhost`. |
 | `CF_STUDIO_MCP_ALLOWED_ORIGINS` | `MAKNA_MCP_ALLOWED_ORIGINS` | Optional comma-separated browser origins for CORS protection. |
 
-HTTP endpoint: `/mcp`, authenticated using `Authorization: Bearer <CF_STUDIO_MCP_BEARER_TOKEN>`. `/health` checks adapter status (`{"status":"ok","service":"cf-studio-mcp"}`).
+HTTP endpoint: `/mcp`, authenticated using either `Authorization: Bearer <CF_STUDIO_MCP_BEARER_TOKEN>` (server-default token) or per-operator `Authorization: Bearer <cfop_...>` (scoped & tenant-allowlisted via `operator_credentials` and managed in `/settings/mcp-access`). `/health` checks adapter status (`{"status":"ok","service":"cf-studio-mcp"}`).
+
+> **Remote Security Isolation:** When served over HTTP (`isRemoteHttp: true`), host filesystem inputs (`file_path` on `cf_upload_reference_asset` and `photo_file_path` on `cf_add_product` / `cf_upload_product_photo`) are rejected with `VALIDATION_ERROR`; remote clients must pass `image_base64` / `photo_base64` or `photo_url`.
 
 ---
 
