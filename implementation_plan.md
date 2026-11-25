@@ -46,7 +46,7 @@
 - [x] Tambahkan test assertion parameter baru (`generation_date`, `publish_date`, `publish_day_offset`) di [apps/mcp/test/mcp.test.mjs](file:///Users/sabeqmmursyid/_cfstudio/apps/mcp/test/mcp.test.mjs)
 - [x] Perbarui [sot/menus/kartu/auto-pipeline.md](file:///Users/sabeqmmursyid/_cfstudio/sot/menus/kartu/auto-pipeline.md) dan [apps/mcp/README.md](file:///Users/sabeqmmursyid/_cfstudio/apps/mcp/README.md)
 - [x] Jalankan seluruh test lokal (`PG_SEARCH_PATH=dev`), `npm run test:mcp`, dan build lokal aman (`DISABLE_AUTO_MIGRATIONS=true PG_SEARCH_PATH=dev npm run build`)
-- [ ] Commit & push ke branch `fitur/pisah-jadwal-produksi-publish`, lalu deploy ke **Dev** (`npm run deploy:dev:atomic -- --ref <full-git-sha> --apply --confirm-dev`) untuk uji pengguna di `http://100.95.245.55:5020`
+- [x] Commit & push ke branch `fitur/pisah-jadwal-produksi-publish`, lalu deploy ke **Dev** (`npm run deploy:dev:atomic -- --ref <full-git-sha> --apply --confirm-dev`) untuk uji pengguna di `http://100.95.245.55:5020`
 
 ---
 
