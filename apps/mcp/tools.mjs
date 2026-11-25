@@ -221,6 +221,9 @@ function buildScheduleItemPayload(args = {}, { isUpdate = false } = {}) {
     pipeline_config,
     schedule_mode,
     target_date,
+    generation_date,
+    publish_date,
+    publish_day_offset,
     target_item_id,
     ...restArgs
   } = args;
@@ -262,14 +265,17 @@ function buildScheduleItemPayload(args = {}, { isUpdate = false } = {}) {
     ...(execution_mode ? { execution_mode } : {})
   };
 
-  const resolvedMode = schedule_mode || (target_date ? 'specific_date' : (isUpdate ? undefined : 'recurring'));
+  const resolvedTargetDate = target_date !== undefined ? target_date : generation_date;
+  const resolvedMode = schedule_mode || ((resolvedTargetDate || publish_date) ? 'specific_date' : (isUpdate ? undefined : 'recurring'));
   const resolvedTargetItemId = target_item_id || resolvedProductId || resolvedBlueprintId || undefined;
 
   return {
     ...restArgs,
     ...(resolvedTargetItemId !== undefined ? { target_item_id: resolvedTargetItemId } : {}),
     ...(resolvedMode ? { schedule_mode: resolvedMode } : {}),
-    ...(target_date !== undefined ? { target_date } : {}),
+    ...(resolvedTargetDate !== undefined ? { target_date: resolvedTargetDate } : {}),
+    ...(publish_date !== undefined ? { publish_date } : {}),
+    ...(publish_day_offset !== undefined ? { publish_day_offset } : {}),
     ...(Object.keys(extraConfig).length > 0 ? { pipeline_config_json: extraConfig } : {})
   };
 }
@@ -287,6 +293,9 @@ function buildScheduleBatchItems(args = {}) {
       auto_publish_enabled: args.auto_publish_enabled,
       schedule_mode: args.schedule_mode,
       target_date: args.target_date,
+      generation_date: args.generation_date,
+      publish_date: args.publish_date,
+      publish_day_offset: args.publish_day_offset,
       post_link_affiliate: args.post_link_affiliate,
       visual_identity_preset_id: args.visual_identity_preset_id,
       ...item
@@ -1389,6 +1398,9 @@ export function createCfStudioServer(rawRequest) {
     days_of_week: z.array(z.number().int().min(0).max(6)).optional(),
     schedule_mode: z.enum(['recurring', 'specific_date']).optional(),
     target_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format YYYY-MM-DD').optional(),
+    generation_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format YYYY-MM-DD').optional(),
+    publish_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format YYYY-MM-DD').optional(),
+    publish_day_offset: z.number().int().min(0).max(14).optional(),
     timezone: z.string().optional(),
     auto_publish_enabled: z.boolean().optional(),
     repliz_account_ids: z.array(z.string()).optional(),
@@ -1422,7 +1434,7 @@ export function createCfStudioServer(rawRequest) {
 
   register(
     'cf_list_schedules',
-    'List recurring or specific-date Auto Pipeline schedules in the tenant with their status, target date, and execution metrics.',
+    'List recurring or specific-date Auto Pipeline schedules in the tenant with their status, generation/target date, publish date, publish_day_offset, and execution metrics.',
     {
       status: z.enum(['active', 'paused', 'all']).default('all'),
       pipeline_type: z
@@ -1430,7 +1442,8 @@ export function createCfStudioServer(rawRequest) {
         .default('all'),
       brand_id: z.string().max(100).optional(),
       schedule_mode: z.enum(['recurring', 'specific_date', 'all']).default('all'),
-      target_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format YYYY-MM-DD').optional()
+      target_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format YYYY-MM-DD').optional(),
+      publish_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format YYYY-MM-DD').optional()
     },
     true,
     args =>

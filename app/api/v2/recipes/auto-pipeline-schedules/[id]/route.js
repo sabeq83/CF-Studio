@@ -57,6 +57,12 @@ export const PUT = withAutoPipelineAccess(async (request, context, user) => {
       message: 'Jadwal Auto Pipeline berhasil diperbarui.'
     });
   } catch (error) {
+    if (error?.statusCode === 400 || error?.name === 'ScheduleValidationError') {
+      return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+    }
+    if (/not found/i.test(error?.message || '')) {
+      return NextResponse.json({ success: false, error: error.message }, { status: 404 });
+    }
     console.error('[API Auto-Pipeline-Schedules/:id PUT Error]', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }

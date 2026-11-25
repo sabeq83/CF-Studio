@@ -1,6 +1,6 @@
 # Kartu Menu: Auto Pipeline
 
-Terakhir dicek: 24 November 2026 · Versi aplikasi: v2.60.0
+Terakhir dicek: 25 November 2026 · Versi aplikasi: v2.61.0 (branch `fitur/pisah-jadwal-produksi-publish`)
 Alamat: `/auto-pipeline` · Kelompok: WORKFLOW · Kunci izin menu: `auto_pipeline`
 
 ## Fungsi
@@ -49,6 +49,7 @@ Pabrik konten otomatis. Dari satu masukan (produk, topik, resep, atau blueprint)
 8. Eksekusi 1-klik (`POST /api/v2/recipes/autonomous-pipeline`) melakukan isolasi tenant yang konsisten pada aset blueprint Multiplier, menampilkan feedback validasi inline saat prasyarat belum lengkap, dan polling progress `recipe_labs` dilayani oleh `GET /api/v2/recipes/autonomous-pipeline/status`.
 9. Pemilihan produk Video Multiplier di tab Pipeline & Schedule menampilkan thumbnail foto aktif sesuai `active_photo` (`resolveCampaignProductPhotoPath`), status tinjauan (`photo_status`), serta kartu pratinjau `BridgingProductReferenceCard` beserta tautan cepat ke Product Database.
 10. Tab Pipeline & Schedule meneruskan konfigurasi `audio_engine_mode` (`minimax_tts` / `no_vo`), `no_vo_audio_bed`, dan `on_screen_text_mode` untuk mode produksi tanpa voice-over serta mendukung Visual Identity `zero_human`.
+11. Penjadwalan mendukung pemisahan tanggal produksi (`target_date` / alias `generation_date`) dan tanggal publish (`publish_date` pada mode `specific_date`, atau `publish_day_offset` H+0 s.d. H+14 pada mode `recurring`), dengan penguncian `last_run_target_date` agar render lintas tengah malam tidak menggeser jadwal tayang.
 
 ## Belum ada / batasan
 - Jumlah dan isi jadwal aktif berubah-ubah; jangan mengutip daftar jadwal dari dokumen, cek langsung lewat `cf_list_schedules`.

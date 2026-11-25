@@ -414,6 +414,12 @@ export default function AutoPipelinePage() {
     d.setDate(d.getDate() + 1);
     return d.toISOString().slice(0, 10);
   });
+  const [schedPublishDate, setSchedPublishDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().slice(0, 10);
+  });
+  const [schedPublishDayOffset, setSchedPublishDayOffset] = useState(0);
   const [schedStaggerCalendar, setSchedStaggerCalendar] = useState(true);
   const [scheduleModeFilter, setScheduleModeFilter] = useState('all'); // 'all' | 'recurring' | 'specific_date'
   const [scheduleViewMode, setScheduleViewMode] = useState(() => {
@@ -1528,13 +1534,35 @@ export default function AutoPipelinePage() {
     });
   }
 
+  function addDaysIso(dateStr, offsetDays = 0) {
+    if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(String(dateStr).slice(0, 10))) return dateStr;
+    const [y, m, d] = String(dateStr).slice(0, 10).split('-').map(Number);
+    const dt = new Date(Date.UTC(y, m - 1, d + Number(offsetDays || 0)));
+    return dt.toISOString().slice(0, 10);
+  }
+
+  function diffDaysIso(startStr, endStr) {
+    if (!startStr || !endStr) return 0;
+    const a = Date.parse(`${String(startStr).slice(0, 10)}T00:00:00Z`);
+    const b = Date.parse(`${String(endStr).slice(0, 10)}T00:00:00Z`);
+    return Number.isFinite(a) && Number.isFinite(b) ? Math.round((b - a) / 86400000) : 0;
+  }
+
   function setQuickDatePreset(offsetDays) {
     const d = new Date();
     d.setDate(d.getDate() + offsetDays);
     const yyyy = d.getFullYear();
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
-    setSchedTargetDate(`${yyyy}-${mm}-${dd}`);
+    const nextProd = `${yyyy}-${mm}-${dd}`;
+    const currentGap = Math.max(0, diffDaysIso(schedTargetDate, schedPublishDate));
+    setSchedTargetDate(nextProd);
+    setSchedPublishDate(addDaysIso(nextProd, currentGap));
+  }
+
+  function setPublishDateOffsetPreset(offsetDays) {
+    const base = schedTargetDate || new Date().toISOString().slice(0, 10);
+    setSchedPublishDate(addDaysIso(base, offsetDays));
   }
 
   function toggleReplizAccountSelection(accId) {
@@ -1587,12 +1615,16 @@ export default function AutoPipelinePage() {
     if (hasValidDate) {
       setSchedMode('specific_date');
       setSchedTargetDate(initialTargetDate);
+      setSchedPublishDate(initialTargetDate);
     } else {
       setSchedMode('recurring');
       const defaultDate = new Date();
       defaultDate.setDate(defaultDate.getDate() + 1);
-      setSchedTargetDate(defaultDate.toISOString().slice(0, 10));
+      const tomorrowStr = defaultDate.toISOString().slice(0, 10);
+      setSchedTargetDate(tomorrowStr);
+      setSchedPublishDate(tomorrowStr);
     }
+    setSchedPublishDayOffset(0);
     setSchedStaggerCalendar(true);
     setSchedAutoPublish(true);
     setSchedPostAffiliateLink(true);
@@ -1657,7 +1689,10 @@ export default function AutoPipelinePage() {
     setIsSchedCategoryManual(true);
     setSchedDays(Array.isArray(sched.days_of_week) ? sched.days_of_week : [0, 1, 2, 3, 4, 5, 6]);
     setSchedMode(sched.schedule_mode || 'recurring');
-    setSchedTargetDate(sched.target_date ? String(sched.target_date).slice(0, 10) : new Date().toISOString().slice(0, 10));
+    const resolvedTarget = sched.target_date ? String(sched.target_date).slice(0, 10) : new Date().toISOString().slice(0, 10);
+    setSchedTargetDate(resolvedTarget);
+    setSchedPublishDate(sched.publish_date ? String(sched.publish_date).slice(0, 10) : resolvedTarget);
+    setSchedPublishDayOffset(Number(sched.publish_day_offset || 0));
     setSchedStaggerCalendar(true);
     setSchedReplizAccountIds(Array.isArray(sched.repliz_account_ids) ? sched.repliz_account_ids : []);
     setSchedAutoPublish(sched.auto_publish_enabled !== false);
@@ -1815,6 +1850,48 @@ export default function AutoPipelinePage() {
       }
     }
 
+    if (schedAutoPublish) {
+      if (schedMode === 'specific_date') {
+        if (!schedTargetDate || !schedPublishDate) {
+          return showToast('Tanggal produksi dan tanggal tayang wajib diisi.', 'error');
+        }
+        if (schedPublishDate < schedTargetDate) {
+          return showToast('Tanggal tayang tidak boleh lebih awal dari tanggal produksi.', 'error');
+        }
+        if (schedPublishDate === schedTargetDate && schedPubTime <= schedGenTime) {
+          return showToast('Pada tanggal yang sama, jam tayang harus lebih lambat dari jam produksi, atau klik +1 Hari (H+1).', 'error');
+        }
+      } else if (Number(schedPublishDayOffset || 0) === 0 && schedPubTime <= schedGenTime) {
+        return showToast('Jam tayang lebih awal atau sama dengan jam produksi. Pilih Hari Tayang: Besok / H+1.', 'error');
+      }
+    }
+
+    const computeBatchCadenceFields = (idx) => {
+      if (schedMode === 'specific_date') {
+        const shift = schedStaggerCalendar ? idx : 0;
+        const targetDate = schedTargetDate ? addDaysIso(schedTargetDate, shift) : null;
+        const publishBase = schedPublishDate || schedTargetDate;
+        const publishDate = publishBase ? addDaysIso(publishBase, shift) : null;
+        return {
+          days_of_week: schedDays,
+          schedule_mode: 'specific_date',
+          target_date: targetDate,
+          publish_date: publishDate,
+          publish_day_offset: 0
+        };
+      }
+      const itemDays = (schedStaggerDays && schedDays.length > 0)
+        ? [schedDays[idx % schedDays.length]]
+        : schedDays;
+      return {
+        days_of_week: itemDays,
+        schedule_mode: 'recurring',
+        target_date: null,
+        publish_date: null,
+        publish_day_offset: Number(schedPublishDayOffset || 0)
+      };
+    };
+
     setSavingSchedule(true);
     try {
       if (editingSchedule) {
@@ -1931,6 +2008,8 @@ export default function AutoPipelinePage() {
           days_of_week: schedDays,
           schedule_mode: schedMode,
           target_date: schedMode === 'specific_date' ? schedTargetDate : null,
+          publish_date: schedMode === 'specific_date' ? (schedPublishDate || schedTargetDate) : null,
+          publish_day_offset: schedMode === 'recurring' ? Number(schedPublishDayOffset || 0) : 0,
           repliz_account_ids: schedReplizAccountIds,
           auto_publish_enabled: schedAutoPublish,
           timezone: 'Asia/Jakarta',
@@ -1960,17 +2039,6 @@ export default function AutoPipelinePage() {
             const itemScheduleName = customNameBase
               ? (customNameBase.toLowerCase().includes(prodName.toLowerCase()) ? customNameBase : `${customNameBase} - ${prodName}`)
               : `${prodName} — ${schedGenTime} WIB`;
-            let itemDays = schedDays;
-            let itemTargetDate = schedTargetDate;
-            if (schedMode === 'specific_date') {
-              if (schedStaggerCalendar && schedTargetDate) {
-                const d = new Date(schedTargetDate);
-                d.setDate(d.getDate() + idx);
-                itemTargetDate = d.toISOString().slice(0, 10);
-              }
-            } else if (schedStaggerDays && schedDays.length > 0) {
-              itemDays = [schedDays[idx % schedDays.length]];
-            }
             return {
               name: itemScheduleName,
               brand_id: schedBrandId,
@@ -1983,9 +2051,7 @@ export default function AutoPipelinePage() {
               recipe_count: 1,
               generation_time: schedGenTime,
               publish_time: schedPubTime,
-              days_of_week: itemDays,
-              schedule_mode: schedMode,
-              target_date: schedMode === 'specific_date' ? itemTargetDate : null,
+              ...computeBatchCadenceFields(idx),
               repliz_account_ids: schedReplizAccountIds,
               auto_publish_enabled: schedAutoPublish,
               timezone: 'Asia/Jakarta',
@@ -2008,17 +2074,6 @@ export default function AutoPipelinePage() {
 
           const customNameBase = schedName.trim();
           const items = keywords.map((kw, idx) => {
-            let itemDays = schedDays;
-            let itemTargetDate = schedTargetDate;
-            if (schedMode === 'specific_date') {
-              if (schedStaggerCalendar && schedTargetDate) {
-                const d = new Date(schedTargetDate);
-                d.setDate(d.getDate() + idx);
-                itemTargetDate = d.toISOString().slice(0, 10);
-              }
-            } else if (schedStaggerDays && schedDays.length > 0) {
-              itemDays = [schedDays[idx % schedDays.length]];
-            }
             const itemScheduleName = customNameBase
               ? (customNameBase.toLowerCase().includes(kw.toLowerCase()) ? customNameBase : `${customNameBase} - ${kw}`)
               : `Keyword: ${kw} — ${schedGenTime} WIB`;
@@ -2034,9 +2089,7 @@ export default function AutoPipelinePage() {
               recipe_count: 1,
               generation_time: schedGenTime,
               publish_time: schedPubTime,
-              days_of_week: itemDays,
-              schedule_mode: schedMode,
-              target_date: schedMode === 'specific_date' ? itemTargetDate : null,
+              ...computeBatchCadenceFields(idx),
               repliz_account_ids: schedReplizAccountIds,
               auto_publish_enabled: schedAutoPublish,
               timezone: 'Asia/Jakarta',
@@ -2065,17 +2118,6 @@ export default function AutoPipelinePage() {
             const itemScheduleName = customNameBase
               ? (customNameBase.toLowerCase().includes(pillar.toLowerCase()) ? customNameBase : `${customNameBase} - ${pillar}`)
               : `${pillar} — ${schedGenTime} WIB`;
-            let itemDays = schedDays;
-            let itemTargetDate = schedTargetDate;
-            if (schedMode === 'specific_date') {
-              if (schedStaggerCalendar && schedTargetDate) {
-                const d = new Date(schedTargetDate);
-                d.setDate(d.getDate() + idx);
-                itemTargetDate = d.toISOString().slice(0, 10);
-              }
-            } else if (schedStaggerDays && schedDays.length > 0) {
-              itemDays = [schedDays[idx % schedDays.length]];
-            }
             return {
               name: itemScheduleName,
               brand_id: schedBrandId,
@@ -2088,9 +2130,7 @@ export default function AutoPipelinePage() {
               recipe_count: 1,
               generation_time: schedGenTime,
               publish_time: schedPubTime,
-              days_of_week: itemDays,
-              schedule_mode: schedMode,
-              target_date: schedMode === 'specific_date' ? itemTargetDate : null,
+              ...computeBatchCadenceFields(idx),
               repliz_account_ids: schedReplizAccountIds,
               auto_publish_enabled: schedAutoPublish,
               timezone: 'Asia/Jakarta',
@@ -2113,17 +2153,6 @@ export default function AutoPipelinePage() {
 
           const customNameBase = schedName.trim();
           const items = menus.map((menuTitle, idx) => {
-            let itemDays = schedDays;
-            let itemTargetDate = schedTargetDate;
-            if (schedMode === 'specific_date') {
-              if (schedStaggerCalendar && schedTargetDate) {
-                const d = new Date(schedTargetDate);
-                d.setDate(d.getDate() + idx);
-                itemTargetDate = d.toISOString().slice(0, 10);
-              }
-            } else if (schedStaggerDays && schedDays.length > 0) {
-              itemDays = [schedDays[idx % schedDays.length]];
-            }
             const autoCat = detectCategoryFromTopic(menuTitle);
             const itemScheduleName = customNameBase
               ? (customNameBase.toLowerCase().includes(menuTitle.toLowerCase()) ? customNameBase : `${customNameBase} - ${menuTitle}`)
@@ -2140,9 +2169,7 @@ export default function AutoPipelinePage() {
               recipe_count: 1,
               generation_time: schedGenTime,
               publish_time: schedPubTime,
-              days_of_week: itemDays,
-              schedule_mode: schedMode,
-              target_date: schedMode === 'specific_date' ? itemTargetDate : null,
+              ...computeBatchCadenceFields(idx),
               repliz_account_ids: schedReplizAccountIds,
               auto_publish_enabled: schedAutoPublish,
               timezone: 'Asia/Jakarta',
@@ -2179,17 +2206,6 @@ export default function AutoPipelinePage() {
             const prodObj = pair.productId ? catalogProducts.find(p => p.id === pair.productId) : null;
             const bpTitle = bpObj?.core_problem || bpObj?.original_caption || bpObj?.source_url || 'Winning Blueprint';
             const pairTitle = prodObj ? `${bpTitle} × ${prodObj.product_name}` : bpTitle;
-            let itemDays = schedDays;
-            let itemTargetDate = schedTargetDate;
-            if (schedMode === 'specific_date') {
-              if (schedStaggerCalendar && schedTargetDate) {
-                const d = new Date(schedTargetDate);
-                d.setDate(d.getDate() + idx);
-                itemTargetDate = d.toISOString().slice(0, 10);
-              }
-            } else if (schedStaggerDays && schedDays.length > 0) {
-              itemDays = [schedDays[idx % schedDays.length]];
-            }
             const itemScheduleName = customNameBase
               ? (customNameBase.toLowerCase().includes(pairTitle.toLowerCase()) ? customNameBase : `${customNameBase} - ${pairTitle}`)
               : `Multiplier: ${pairTitle} — ${schedGenTime} WIB`;
@@ -2205,9 +2221,7 @@ export default function AutoPipelinePage() {
               recipe_count: 1,
               generation_time: schedGenTime,
               publish_time: schedPubTime,
-              days_of_week: itemDays,
-              schedule_mode: schedMode,
-              target_date: schedMode === 'specific_date' ? itemTargetDate : null,
+              ...computeBatchCadenceFields(idx),
               repliz_account_ids: schedReplizAccountIds,
               auto_publish_enabled: schedAutoPublish,
               timezone: 'Asia/Jakarta',
@@ -2242,17 +2256,6 @@ export default function AutoPipelinePage() {
           const customNameBase = schedName.trim();
 
           const items = angles.map((angleText, idx) => {
-            let itemDays = schedDays;
-            let itemTargetDate = schedTargetDate;
-            if (schedMode === 'specific_date') {
-              if (schedStaggerCalendar && schedTargetDate) {
-                const d = new Date(schedTargetDate);
-                d.setDate(d.getDate() + idx);
-                itemTargetDate = d.toISOString().slice(0, 10);
-              }
-            } else if (schedStaggerDays && schedDays.length > 0) {
-              itemDays = [schedDays[idx % schedDays.length]];
-            }
             const itemScheduleName = customNameBase
               ? `${customNameBase} - ${angleText}`
               : `[${prodTitle}] ${angleText} — ${schedGenTime} WIB`;
@@ -2268,9 +2271,7 @@ export default function AutoPipelinePage() {
               recipe_count: 1,
               generation_time: schedGenTime,
               publish_time: schedPubTime,
-              days_of_week: itemDays,
-              schedule_mode: schedMode,
-              target_date: schedMode === 'specific_date' ? itemTargetDate : null,
+              ...computeBatchCadenceFields(idx),
               repliz_account_ids: schedReplizAccountIds,
               auto_publish_enabled: schedAutoPublish,
               timezone: 'Asia/Jakarta',
@@ -2437,6 +2438,8 @@ export default function AutoPipelinePage() {
             days_of_week: schedDays,
             schedule_mode: schedMode,
             target_date: schedMode === 'specific_date' ? schedTargetDate : null,
+            publish_date: schedMode === 'specific_date' ? (schedPublishDate || schedTargetDate) : null,
+            publish_day_offset: schedMode === 'recurring' ? Number(schedPublishDayOffset || 0) : 0,
             repliz_account_ids: schedReplizAccountIds,
             auto_publish_enabled: schedAutoPublish,
             timezone: 'Asia/Jakarta',
@@ -8704,13 +8707,20 @@ export default function AutoPipelinePage() {
                               const prodObj = pair.productId ? catalogProducts.find(p => p.id === pair.productId) : null;
                               const bpTitle = (bpObj?.core_problem || bpObj?.original_caption || 'Blueprint').slice(0, 32);
                               const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
-                              let schedTag = `${schedGenTime} WIB`;
+                              let schedTag = `${schedGenTime} -> ${schedPubTime} WIB`;
                               if (schedMode === 'specific_date' && schedTargetDate) {
-                                const d = new Date(schedTargetDate);
-                                if (schedStaggerCalendar) d.setDate(d.getDate() + idx);
-                                schedTag = `📅 ${d.toISOString().slice(0, 10)} · ${schedGenTime} WIB`;
-                              } else if (schedStaggerDays && schedDays.length > 0) {
-                                schedTag = `🔄 Tiap ${dayNames[schedDays[idx % schedDays.length]]} · ${schedGenTime} WIB`;
+                                const shift = schedStaggerCalendar ? idx : 0;
+                                const pDate = addDaysIso(schedTargetDate, shift);
+                                const pubDate = addDaysIso(schedPublishDate || schedTargetDate, shift);
+                                schedTag = pDate !== pubDate
+                                  ? `📅 Prod: ${pDate} ${schedGenTime} ➔ Tayang: ${pubDate} ${schedPubTime}`
+                                  : `📅 ${pDate} · ${schedGenTime} ➔ ${schedPubTime} WIB`;
+                              } else {
+                                const dayLabel = schedStaggerDays && schedDays.length > 0
+                                  ? `Tiap ${dayNames[schedDays[idx % schedDays.length]]}`
+                                  : 'Rutin';
+                                const offTag = Number(schedPublishDayOffset || 0) > 0 ? `H+${Number(schedPublishDayOffset)} ` : '';
+                                schedTag = `🔄 ${dayLabel} · ${schedGenTime} ➔ ${offTag}${schedPubTime} WIB`;
                               }
                               return (
                                 <div key={`${pair.blueprintId}-${pair.productId || 'none'}-${idx}`} style={{
@@ -9028,70 +9038,7 @@ export default function AutoPipelinePage() {
                   />
                 )}
 
-                {/* STEP 4: Dua Waktu Terpisah (Jam Pembuatan & Jam Publish - Format 24 Jam WIB) */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-                  gap: '1rem',
-                  background: 'var(--surface-raised)',
-                  padding: '1rem',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--border-subtle)'
-                }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--status-info)' }}>
-                      ⚙️ Jam Pembuatan Video (Format 24 Jam WIB)
-                    </label>
-                    <input
-                      type="time"
-                      value={schedGenTime}
-                      onChange={(e) => setSchedGenTime(e.target.value)}
-                      required
-                      style={{
-                        height: '42px',
-                        background: 'var(--input-bg)',
-                        border: '1px solid var(--border-subtle)',
-                        borderRadius: 'var(--radius-sm)',
-                        padding: '0 0.85rem',
-                        fontSize: '1.05rem',
-                        fontWeight: 700,
-                        color: 'var(--text-primary)',
-                        outline: 'none'
-                      }}
-                    />
-                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                      Contoh: <strong>05:00</strong> (Pagi) atau <strong>17:00</strong> (Sore WIB). AI otomatis memproduksi video pada jam ini
-                    </span>
-                  </div>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--status-success)' }}>
-                      🚀 Jam Publish Repliz (Format 24 Jam WIB)
-                    </label>
-                    <input
-                      type="time"
-                      value={schedPubTime}
-                      onChange={(e) => setSchedPubTime(e.target.value)}
-                      required
-                      style={{
-                        height: '42px',
-                        background: 'var(--input-bg)',
-                        border: '1px solid var(--border-subtle)',
-                        borderRadius: 'var(--radius-sm)',
-                        padding: '0 0.85rem',
-                        fontSize: '1.05rem',
-                        fontWeight: 700,
-                        color: 'var(--text-primary)',
-                        outline: 'none'
-                      }}
-                    />
-                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                      Contoh: <strong>09:00</strong> (Pagi) atau <strong>21:30</strong> (Malam WIB). Video diteruskan ke antrean Repliz untuk jam ini
-                    </span>
-                  </div>
-                </div>
-
-                {/* 6. Mode Penjadwalan & Hari / Tanggal */}
+                {/* STEP 4 & 6: Jadwal Produksi & Jadwal Publish (Mode Rutin vs Tanggal Spesifik) */}
                 {(() => {
                   const batchItemCount = (
                     schedCampaignType === 'editorial_campaign' && schedEditorialMode === 'keyword'
@@ -9109,9 +9056,15 @@ export default function AutoPipelinePage() {
                                       : 1))))
                   );
                   const isBatchSchedule = !editingSchedule && batchItemCount > 1;
+                  const specificGapDays = diffDaysIso(schedTargetDate, schedPublishDate);
+                  const hasTimingError = schedAutoPublish && (
+                    schedMode === 'specific_date'
+                      ? (!schedTargetDate || !schedPublishDate || schedPublishDate < schedTargetDate || (schedPublishDate === schedTargetDate && schedPubTime <= schedGenTime))
+                      : (Number(schedPublishDayOffset || 0) === 0 && schedPubTime <= schedGenTime)
+                  );
 
                   return (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
                         <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
                           Pilih Mode Penjadwalan:
@@ -9162,102 +9115,238 @@ export default function AutoPipelinePage() {
                       </div>
 
                       {schedMode === 'recurring' ? (
-                        <div style={{
-                          background: 'var(--surface-raised)',
-                          padding: '0.85rem',
-                          borderRadius: 'var(--radius-sm)',
-                          border: '1px solid var(--border-subtle)',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '0.5rem'
-                        }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-                            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                              Hari Rutin Eksekusi:
-                            </span>
-                            <span style={{ fontSize: '0.72rem', color: 'var(--status-info)' }}>
-                              Aktif: {schedDays.map(d => ({ 1: 'Sen', 2: 'Sel', 3: 'Rab', 4: 'Kam', 5: 'Jum', 6: 'Sab', 0: 'Min' }[d])).join(', ')}
-                            </span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                          <div style={{
+                            background: 'var(--surface-raised)',
+                            padding: '0.9rem',
+                            borderRadius: 'var(--radius-sm)',
+                            border: '1px solid var(--border-subtle)',
+                            borderLeft: '3px solid var(--status-info)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.65rem'
+                          }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                              <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--status-info)' }}>
+                                1. Jadwal Produksi Rutin
+                              </span>
+                              <span style={{ fontSize: '0.72rem', color: 'var(--status-info)' }}>
+                                Aktif: {schedDays.map(d => ({ 1: 'Sen', 2: 'Sel', 3: 'Rab', 4: 'Kam', 5: 'Jum', 6: 'Sab', 0: 'Min' }[d])).join(', ')}
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
+                              {[
+                                { idx: 1, label: 'Sen' },
+                                { idx: 2, label: 'Sel' },
+                                { idx: 3, label: 'Rab' },
+                                { idx: 4, label: 'Kam' },
+                                { idx: 5, label: 'Jum' },
+                                { idx: 6, label: 'Sab' },
+                                { idx: 0, label: 'Min' }
+                              ].map(day => {
+                                const isSelected = schedDays.includes(day.idx);
+                                return (
+                                  <button
+                                    key={day.idx}
+                                    type="button"
+                                    onClick={() => toggleDaySelection(day.idx)}
+                                    style={{
+                                      padding: '0.45rem 0.85rem',
+                                      borderRadius: 'var(--radius-sm)',
+                                      border: isSelected ? '1px solid var(--action-primary)' : '1px solid var(--border-subtle)',
+                                      background: isSelected ? 'var(--action-primary)' : 'var(--surface)',
+                                      color: isSelected ? 'var(--on-action-primary)' : 'var(--text-secondary)',
+                                      fontWeight: 700,
+                                      fontSize: '0.8rem',
+                                      cursor: 'pointer',
+                                      transition: 'var(--transition)'
+                                    }}
+                                  >
+                                    {day.label}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                              <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                                ⚙️ Jam Pembuatan Video (Format 24 Jam WIB)
+                              </label>
+                              <input
+                                type="time"
+                                value={schedGenTime}
+                                onChange={(e) => setSchedGenTime(e.target.value)}
+                                required
+                                style={{
+                                  height: '42px',
+                                  background: 'var(--input-bg)',
+                                  border: '1px solid var(--border-subtle)',
+                                  borderRadius: 'var(--radius-sm)',
+                                  padding: '0 0.85rem',
+                                  fontSize: '1rem',
+                                  fontWeight: 700,
+                                  color: 'var(--text-primary)',
+                                  outline: 'none'
+                                }}
+                              />
+                            </div>
                           </div>
-                          <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
-                            {[
-                              { idx: 1, label: 'Sen' },
-                              { idx: 2, label: 'Sel' },
-                              { idx: 3, label: 'Rab' },
-                              { idx: 4, label: 'Kam' },
-                              { idx: 5, label: 'Jum' },
-                              { idx: 6, label: 'Sab' },
-                              { idx: 0, label: 'Min' }
-                            ].map(day => {
-                              const isSelected = schedDays.includes(day.idx);
-                              return (
-                                <button
-                                  key={day.idx}
-                                  type="button"
-                                  onClick={() => toggleDaySelection(day.idx)}
+
+                          <div style={{
+                            background: 'var(--surface-raised)',
+                            padding: '0.9rem',
+                            borderRadius: 'var(--radius-sm)',
+                            border: '1px solid var(--border-subtle)',
+                            borderLeft: '3px solid var(--status-success)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.65rem'
+                          }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                              <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--status-success)' }}>
+                                2. Jadwal Publish Rutin (Repliz)
+                              </span>
+                              <span style={{
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                padding: '0.15rem 0.5rem',
+                                borderRadius: 'var(--radius-xs)',
+                                background: 'var(--status-success-soft)',
+                                color: 'var(--status-success)'
+                              }}>
+                                Gen {schedGenTime} ➔ Tayang H+{Number(schedPublishDayOffset || 0)} {schedPubTime}
+                              </span>
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '0.75rem' }}>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                                  Hari Tayang
+                                </label>
+                                <select
+                                  value={Number(schedPublishDayOffset || 0)}
+                                  onChange={(e) => setSchedPublishDayOffset(Number(e.target.value))}
                                   style={{
-                                    padding: '0.45rem 0.85rem',
+                                    height: '42px',
+                                    background: 'var(--input-bg)',
+                                    border: '1px solid var(--border-subtle)',
                                     borderRadius: 'var(--radius-sm)',
-                                    border: isSelected ? '1px solid var(--action-primary)' : '1px solid var(--border-subtle)',
-                                    background: isSelected ? 'var(--action-primary)' : 'var(--surface)',
-                                    color: isSelected ? 'var(--on-action-primary)' : 'var(--text-secondary)',
+                                    padding: '0 0.75rem',
+                                    fontSize: '0.86rem',
                                     fontWeight: 700,
-                                    fontSize: '0.8rem',
-                                    cursor: 'pointer',
-                                    transition: 'var(--transition)'
+                                    color: 'var(--text-primary)',
+                                    outline: 'none'
                                   }}
                                 >
-                                  {day.label}
-                                </button>
-                              );
-                            })}
+                                  <option value={0}>Hari yang sama (H+0)</option>
+                                  <option value={1}>Besok / H+1</option>
+                                  <option value={2}>Lusa / H+2</option>
+                                  <option value={3}>+3 Hari (H+3)</option>
+                                </select>
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                                  🚀 Jam Publish Repliz (WIB)
+                                </label>
+                                <input
+                                  type="time"
+                                  value={schedPubTime}
+                                  onChange={(e) => setSchedPubTime(e.target.value)}
+                                  required
+                                  style={{
+                                    height: '42px',
+                                    background: 'var(--input-bg)',
+                                    border: '1px solid var(--border-subtle)',
+                                    borderRadius: 'var(--radius-sm)',
+                                    padding: '0 0.85rem',
+                                    fontSize: '1rem',
+                                    fontWeight: 700,
+                                    color: 'var(--text-primary)',
+                                    outline: 'none'
+                                  }}
+                                />
+                              </div>
+                            </div>
+                            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                              💡 Jika produksi malam selesai lewat pukul 00:00 WIB, sistem tetap mengacu pada tanggal mulai produksi agar tayang tidak bergeser +1 hari tambahan.
+                            </span>
                           </div>
-                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                            💡 <strong>Karakteristik Rutin:</strong> Pipeline akan terus dieksekusi berulang setiap minggu pada hari terpilih. Status tetap <code>active</code>.
-                          </span>
                         </div>
                       ) : (
-                        <div style={{
-                          background: 'var(--surface-raised)',
-                          padding: '0.85rem',
-                          borderRadius: 'var(--radius-sm)',
-                          border: '1px solid var(--border-strong)',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '0.65rem'
-                        }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-                            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                              Pilih Tanggal Kalender Eksekusi:
-                            </span>
-                            <span style={{
-                              fontSize: '0.7rem',
-                              fontWeight: 700,
-                              background: 'var(--status-warning-soft)',
-                              color: 'var(--status-warning)',
-                              padding: '0.15rem 0.5rem',
-                              borderRadius: 'var(--radius-full)'
-                            }}>
-                              One-Time Execution 🎯
-                            </span>
-                          </div>
-                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                            <input
-                              type="date"
-                              value={schedTargetDate}
-                              onChange={(e) => setSchedTargetDate(e.target.value)}
-                              style={{
-                                height: '38px',
-                                background: 'var(--input-bg)',
-                                border: '1px solid var(--border-subtle)',
-                                borderRadius: 'var(--radius-sm)',
-                                padding: '0 0.75rem',
-                                fontSize: '0.84rem',
-                                color: 'var(--text-primary)',
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                          <div style={{
+                            background: 'var(--surface-raised)',
+                            padding: '0.9rem',
+                            borderRadius: 'var(--radius-sm)',
+                            border: '1px solid var(--border-subtle)',
+                            borderLeft: '3px solid var(--status-info)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.65rem'
+                          }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                              <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--status-info)' }}>
+                                1. Jadwal Produksi (Generate &amp; Render)
+                              </span>
+                              <span style={{
+                                fontSize: '0.7rem',
                                 fontWeight: 700,
-                                outline: 'none'
-                              }}
-                            />
+                                background: 'var(--status-warning-soft)',
+                                color: 'var(--status-warning)',
+                                padding: '0.15rem 0.5rem',
+                                borderRadius: 'var(--radius-full)'
+                              }}>
+                                One-Time Execution 🎯
+                              </span>
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '0.75rem' }}>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                                  Tanggal Produksi
+                                </label>
+                                <input
+                                  type="date"
+                                  value={schedTargetDate}
+                                  onChange={(e) => {
+                                    const nextProd = e.target.value;
+                                    const gap = Math.max(0, diffDaysIso(schedTargetDate, schedPublishDate));
+                                    setSchedTargetDate(nextProd);
+                                    if (nextProd) setSchedPublishDate(addDaysIso(nextProd, gap));
+                                  }}
+                                  style={{
+                                    height: '42px',
+                                    background: 'var(--input-bg)',
+                                    border: '1px solid var(--border-subtle)',
+                                    borderRadius: 'var(--radius-sm)',
+                                    padding: '0 0.75rem',
+                                    fontSize: '0.86rem',
+                                    color: 'var(--text-primary)',
+                                    fontWeight: 700,
+                                    outline: 'none'
+                                  }}
+                                />
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                                  ⚙️ Jam Generate (WIB)
+                                </label>
+                                <input
+                                  type="time"
+                                  value={schedGenTime}
+                                  onChange={(e) => setSchedGenTime(e.target.value)}
+                                  required
+                                  style={{
+                                    height: '42px',
+                                    background: 'var(--input-bg)',
+                                    border: '1px solid var(--border-subtle)',
+                                    borderRadius: 'var(--radius-sm)',
+                                    padding: '0 0.85rem',
+                                    fontSize: '1rem',
+                                    fontWeight: 700,
+                                    color: 'var(--text-primary)',
+                                    outline: 'none'
+                                  }}
+                                />
+                              </div>
+                            </div>
                             <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
                               {[
                                 { label: 'Hari Ini', offset: 0 },
@@ -9288,11 +9377,114 @@ export default function AutoPipelinePage() {
                             </div>
                           </div>
 
+                          <div style={{
+                            background: 'var(--surface-raised)',
+                            padding: '0.9rem',
+                            borderRadius: 'var(--radius-sm)',
+                            border: '1px solid var(--border-subtle)',
+                            borderLeft: '3px solid var(--status-success)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.65rem'
+                          }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                              <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--status-success)' }}>
+                                2. Jadwal Publish (Tayang ke Repliz)
+                              </span>
+                              <span style={{
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                padding: '0.15rem 0.5rem',
+                                borderRadius: 'var(--radius-xs)',
+                                background: specificGapDays < 0 ? 'var(--status-danger-soft)' : 'var(--status-success-soft)',
+                                color: specificGapDays < 0 ? 'var(--status-danger)' : 'var(--status-success)'
+                              }}>
+                                {specificGapDays > 0
+                                  ? `Buffer +${specificGapDays} Hari`
+                                  : (specificGapDays === 0 ? 'Hari yang sama (H+0)' : 'Tanggal terbalik')}
+                              </span>
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '0.75rem' }}>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                                  Tanggal Tayang
+                                </label>
+                                <input
+                                  type="date"
+                                  value={schedPublishDate}
+                                  onChange={(e) => setSchedPublishDate(e.target.value)}
+                                  style={{
+                                    height: '42px',
+                                    background: 'var(--input-bg)',
+                                    border: '1px solid var(--border-subtle)',
+                                    borderRadius: 'var(--radius-sm)',
+                                    padding: '0 0.75rem',
+                                    fontSize: '0.86rem',
+                                    color: 'var(--text-primary)',
+                                    fontWeight: 700,
+                                    outline: 'none'
+                                  }}
+                                />
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                                  🚀 Jam Tayang (WIB)
+                                </label>
+                                <input
+                                  type="time"
+                                  value={schedPubTime}
+                                  onChange={(e) => setSchedPubTime(e.target.value)}
+                                  required
+                                  style={{
+                                    height: '42px',
+                                    background: 'var(--input-bg)',
+                                    border: '1px solid var(--border-subtle)',
+                                    borderRadius: 'var(--radius-sm)',
+                                    padding: '0 0.85rem',
+                                    fontSize: '1rem',
+                                    fontWeight: 700,
+                                    color: 'var(--text-primary)',
+                                    outline: 'none'
+                                  }}
+                                />
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                              {[
+                                { label: 'Sama dengan Produksi', offset: 0 },
+                                { label: '+1 Hari (H+1)', offset: 1 },
+                                { label: '+2 Hari (H+2)', offset: 2 }
+                              ].map(preset => {
+                                const isActive = specificGapDays === preset.offset;
+                                return (
+                                  <button
+                                    key={preset.label}
+                                    type="button"
+                                    onClick={() => setPublishDateOffsetPreset(preset.offset)}
+                                    style={{
+                                      padding: '0.35rem 0.65rem',
+                                      background: isActive ? 'var(--status-success-soft)' : 'var(--surface-interactive)',
+                                      border: isActive ? '1px solid var(--status-success)' : '1px solid var(--border-subtle)',
+                                      borderRadius: 'var(--radius-xs)',
+                                      fontSize: '0.74rem',
+                                      fontWeight: 700,
+                                      color: isActive ? 'var(--status-success)' : 'var(--text-secondary)',
+                                      cursor: 'pointer',
+                                      transition: 'var(--transition)'
+                                    }}
+                                  >
+                                    {preset.label}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+
                           {/* Stagger Option jika Batch Mode */}
                           {isBatchSchedule && (
                             <div style={{
-                              marginTop: '0.25rem',
-                              padding: '0.5rem 0.75rem',
+                              marginTop: '0.15rem',
+                              padding: '0.55rem 0.75rem',
                               background: 'var(--surface)',
                               borderRadius: 'var(--radius-xs)',
                               border: '1px dashed var(--action-primary)',
@@ -9319,15 +9511,33 @@ export default function AutoPipelinePage() {
                               </label>
                               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
                                 {schedStaggerCalendar
-                                  ? `Tiap item batch (${batchItemCount} jadwal) akan disebar ke hari-hari berurutan mulai dari tanggal ${schedTargetDate}.`
-                                  : `Semua item batch (${batchItemCount} jadwal) akan dieksekusi serentak pada tanggal ${schedTargetDate}.`}
+                                  ? `Tiap item batch (${batchItemCount} jadwal) disebar berurutan mulai produksi ${schedTargetDate} dan tayang ${schedPublishDate} dengan jarak tetap terjaga.`
+                                  : `Semua item batch (${batchItemCount} jadwal) diproduksi serentak pada ${schedTargetDate} dan tayang pada ${schedPublishDate}.`}
                               </span>
                             </div>
                           )}
 
                           <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                            💡 <strong>Karakteristik Tanggal Spesifik:</strong> Pipeline hanya dieksekusi <strong>1 kali</strong> pada tanggal tersebut. Setelah selesai dikirim ke Repliz, status otomatis menjadi <strong>Selesai (Completed)</strong>.
+                            💡 <strong>Karakteristik Tanggal Spesifik:</strong> Pipeline hanya dieksekusi <strong>1 kali</strong> pada tanggal produksi, lalu didaftarkan ke Repliz untuk tanggal tayang terpilih.
                           </span>
+                        </div>
+                      )}
+
+                      {hasTimingError && (
+                        <div style={{
+                          padding: '0.6rem 0.85rem',
+                          borderRadius: 'var(--radius-sm)',
+                          background: 'var(--status-danger-soft)',
+                          border: '1px solid var(--status-danger)',
+                          color: 'var(--status-danger)',
+                          fontSize: '0.78rem',
+                          fontWeight: 700
+                        }}>
+                          {schedMode === 'specific_date'
+                            ? (schedPublishDate < schedTargetDate
+                                ? '⚠️ Tanggal tayang tidak boleh lebih awal dari tanggal produksi.'
+                                : '⚠️ Pada tanggal yang sama, jam tayang harus lebih lambat dari jam produksi (atau klik +1 Hari).')
+                            : '⚠️ Jam tayang lebih awal/sama dengan jam produksi. Pilih Hari Tayang: Besok / H+1.'}
                         </div>
                       )}
                     </div>

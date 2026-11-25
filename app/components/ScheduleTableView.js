@@ -13,6 +13,17 @@ export default function ScheduleTableView({
   getCampaignTypeBadge,
   formatDaysOfWeek
 }) {
+  const formatShortDateId = (dateStr) => {
+    if (!dateStr) return '-';
+    const clean = String(dateStr).slice(0, 10);
+    const parts = clean.split('-');
+    if (parts.length !== 3) return clean;
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    const mIdx = parseInt(parts[1], 10) - 1;
+    const dayNum = parseInt(parts[2], 10);
+    return `${dayNum} ${months[mIdx] || parts[1]}`;
+  };
+
   const getSlotBorderLeft = (timeStr) => {
     const hour = parseInt((timeStr || '12:00').split(':')[0], 10);
     if (hour >= 6 && hour < 11) return '3px solid var(--status-warning)';
@@ -130,33 +141,75 @@ export default function ScheduleTableView({
                   {/* Col 2: Date / Frequency */}
                   <td style={{ padding: '0.65rem 1rem', borderBottom: '1px solid var(--border-subtle)', verticalAlign: 'middle' }}>
                     {isSpecific ? (
-                      <span style={{
-                        fontSize: '0.76rem',
-                        fontWeight: 700,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.3rem',
-                        padding: '0.18rem 0.5rem',
-                        borderRadius: 'var(--radius-xs)',
-                        background: 'var(--status-warning-soft)',
-                        color: 'var(--status-warning)'
-                      }}>
-                        <span>📅</span> {sched.target_date || '-'}
-                      </span>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.22rem' }}>
+                        <span style={{
+                          fontSize: '0.76rem',
+                          fontWeight: 700,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.3rem',
+                          padding: '0.18rem 0.5rem',
+                          borderRadius: 'var(--radius-xs)',
+                          background: 'var(--status-warning-soft)',
+                          color: 'var(--status-warning)',
+                          width: 'fit-content'
+                        }}>
+                          <span>📅</span> Produksi: {formatShortDateId(sched.target_date)} {sched.generation_time || '05:00'}
+                        </span>
+                        {sched.publish_date && sched.publish_date !== sched.target_date ? (
+                          <span style={{
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.3rem',
+                            padding: '0.14rem 0.5rem',
+                            borderRadius: 'var(--radius-xs)',
+                            background: 'var(--status-success-soft)',
+                            color: 'var(--status-success)',
+                            width: 'fit-content'
+                          }}>
+                            ➔ Tayang: {formatShortDateId(sched.publish_date)} {sched.publish_time || '09:00'}
+                          </span>
+                        ) : (
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                            Tayang hari yang sama ({sched.publish_time || '09:00'})
+                          </span>
+                        )}
+                      </div>
                     ) : (
-                      <span style={{
-                        fontSize: '0.76rem',
-                        fontWeight: 600,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.3rem',
-                        padding: '0.18rem 0.5rem',
-                        borderRadius: 'var(--radius-xs)',
-                        background: 'var(--surface-interactive)',
-                        color: 'var(--text-secondary)'
-                      }}>
-                        <span>🔄</span> {formatDaysOfWeek ? formatDaysOfWeek(sched.days_of_week || sched.days) : 'Rutin'}
-                      </span>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.22rem' }}>
+                        <span style={{
+                          fontSize: '0.76rem',
+                          fontWeight: 600,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.3rem',
+                          padding: '0.18rem 0.5rem',
+                          borderRadius: 'var(--radius-xs)',
+                          background: 'var(--surface-interactive)',
+                          color: 'var(--text-secondary)',
+                          width: 'fit-content'
+                        }}>
+                          <span>🔄</span> {formatDaysOfWeek ? formatDaysOfWeek(sched.days_of_week || sched.days) : 'Rutin'}
+                        </span>
+                        {Number(sched.publish_day_offset || 0) > 0 && (
+                          <span style={{
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.25rem',
+                            padding: '0.12rem 0.45rem',
+                            borderRadius: 'var(--radius-xs)',
+                            background: 'var(--status-success-soft)',
+                            color: 'var(--status-success)',
+                            width: 'fit-content'
+                          }}>
+                            Gen {sched.generation_time || '05:00'} ➔ Tayang H+{Number(sched.publish_day_offset)} {sched.publish_time || '09:00'}
+                          </span>
+                        )}
+                      </div>
                     )}
                   </td>
 

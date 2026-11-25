@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { withAutoPipelineAccess } from '@/lib/auth';
 import {
   listAutoPipelineSchedules,
-  createAutoPipelineSchedule
+  createAutoPipelineSchedule,
+  validateAndNormalizeScheduleTiming
 } from '@/lib/auto-pipeline-schedules-repository';
 import { isScheduleRunning } from '@/lib/auto-pipeline-scheduler-runner';
 
@@ -14,9 +15,17 @@ export const GET = withAutoPipelineAccess(async (request, _ctx, user) => {
     const pipelineType = searchParams.get('pipeline_type') || searchParams.get('type') || 'all';
     const scheduleMode = searchParams.get('schedule_mode') || 'all';
     const targetDate = searchParams.get('target_date');
+    const publishDate = searchParams.get('publish_date');
     const tenantId = (!user?.tenantId || user.tenantId === '__none__') ? 'default_tenant' : user.tenantId;
 
-    const schedules = await listAutoPipelineSchedules(tenantId, { status, brandId, pipelineType, scheduleMode, targetDate });
+    const schedules = await listAutoPipelineSchedules(tenantId, {
+      status,
+      brandId,
+      pipelineType,
+      scheduleMode,
+      targetDate,
+      publishDate
+    });
     const enriched = (schedules || []).map(s => ({
       ...s,
       is_running: isScheduleRunning(s.id)
@@ -100,9 +109,10 @@ export const POST = withAutoPipelineAccess(async (request, _ctx, user) => {
 
     // Mendukung Batch Creation (Array items dari modal pemilihan multiple produk/pilar)
     if (Array.isArray(body.items) && body.items.length > 0) {
-      const created = [];
+      const payloads = [];
       for (const item of body.items) {
         if (!item.brand_id && !item.brandId) continue;
+        const resolvedTargetDate = item.target_date !== undefined ? item.target_date : (item.generation_date ?? null);
         const payload = {
           name: item.name,
           pipeline_type: item.pipeline_type || 'recipe_campaign',
@@ -122,9 +132,17 @@ export const POST = withAutoPipelineAccess(async (request, _ctx, user) => {
           pipeline_config_json: item.pipeline_config_json || item.pipeline_config || {},
           auto_publish_enabled: item.auto_publish_enabled !== false,
           status: item.status || 'active',
-          schedule_mode: item.schedule_mode || 'recurring',
-          target_date: item.target_date || null
+          schedule_mode: item.schedule_mode || (resolvedTargetDate || item.publish_date ? 'specific_date' : 'recurring'),
+          target_date: resolvedTargetDate,
+          publish_date: item.publish_date || null,
+          publish_day_offset: item.publish_day_offset !== undefined ? Number(item.publish_day_offset) : 0
         };
+        validateAndNormalizeScheduleTiming(payload, null);
+        payloads.push(payload);
+      }
+
+      const created = [];
+      for (const payload of payloads) {
         const s = await createAutoPipelineSchedule(tenantId, payload);
         created.push(s);
       }
@@ -141,6 +159,7 @@ export const POST = withAutoPipelineAccess(async (request, _ctx, user) => {
       return NextResponse.json({ success: false, error: 'brand_id wajib dipilih.' }, { status: 400 });
     }
 
+    const resolvedTargetDate = body.target_date !== undefined ? body.target_date : (body.generation_date ?? null);
     const payload = {
       name: body.name,
       pipeline_type: body.pipeline_type || 'recipe_campaign',
@@ -160,8 +179,10 @@ export const POST = withAutoPipelineAccess(async (request, _ctx, user) => {
       pipeline_config_json: body.pipeline_config_json || body.pipeline_config || {},
       auto_publish_enabled: body.auto_publish_enabled !== false,
       status: body.status || 'active',
-      schedule_mode: body.schedule_mode || 'recurring',
-      target_date: body.target_date || null
+      schedule_mode: body.schedule_mode || (resolvedTargetDate || body.publish_date ? 'specific_date' : 'recurring'),
+      target_date: resolvedTargetDate,
+      publish_date: body.publish_date || null,
+      publish_day_offset: body.publish_day_offset !== undefined ? Number(body.publish_day_offset) : 0
     };
 
     const newSchedule = await createAutoPipelineSchedule(tenantId, payload);
@@ -171,6 +192,9 @@ export const POST = withAutoPipelineAccess(async (request, _ctx, user) => {
       message: 'Jadwal Auto Pipeline berhasil dibuat.'
     }, { status: 201 });
   } catch (error) {
+    if (error?.statusCode === 400 || error?.name === 'ScheduleValidationError') {
+      return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+    }
     console.error('[API Auto-Pipeline-Schedules POST Error]', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
