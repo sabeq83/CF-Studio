@@ -1,6 +1,6 @@
 # Kartu Menu: Brand Profile Manager
 
-Terakhir dicek: 17 November 2026 · Versi aplikasi: v2.50.0
+Terakhir dicek: 25 November 2026 · Versi aplikasi: v2.64.0
 Alamat: `/settings/brand-profiles` · Kelompok: PLANNING · Kunci izin menu: `brand_profiles`
 
 ## Fungsi
