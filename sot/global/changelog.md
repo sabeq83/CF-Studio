@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.64.0 — Notifikasi Telegram Per Brand (Forum Topic & Digest Multi-Platform) (25/11/2026)
+- Tambah tabel brand_notification_preferences dan studio_notification_outbox untuk rute Telegram per brand berbasis Forum Topic
+- Tambah brand-notification-service dengan fallback token/chat_id tenant, fail-open enqueue, dan agregasi 1 pesan gabungan multi-platform Repliz/tayang
+- Hook notifikasi ke Auto Pipeline, Publishing Worker, dan Content Automations (awaiting_approval) serta pemrosesan outbox di worker 10 detik
+- Tambah REST API, modal Notifikasi Telegram Per Brand dengan editor Bot & Chat ID Tenant di Brand Profiles, serta 3 MCP tools baru
+
 ## V2.63.1 — Hotfix Listener Port 7030 Remote MCP di PM2 (25/11/2026)
 - Pastikan apps/mcp/server.mjs mendeteksi pm_exec_path dan symlink realpath saat dijalankan PM2
 - Setel exec_mode fork untuk maknaflow-staging-mcp di ecosystem.macmini.config.cjs agar port 7030 aktif mendengar request
