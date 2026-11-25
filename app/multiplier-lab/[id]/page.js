@@ -333,7 +333,25 @@ function CampaignDetailPageContent() {
           });
 
           setEditedAudioConfigs(prev => {
-            if (prev[t.id]) return prev;
+            if (prev[t.id]) {
+              const serverAudio = normalizeAudioConfig(t.audio_config_json);
+              const nextCombined = serverAudio.combined_audio_path || prev[t.id].combined_audio_path;
+              const nextSkipped = serverAudio.tts_skipped_reason || prev[t.id].tts_skipped_reason;
+              if (
+                nextCombined !== prev[t.id].combined_audio_path ||
+                nextSkipped !== prev[t.id].tts_skipped_reason
+              ) {
+                return {
+                  ...prev,
+                  [t.id]: {
+                    ...prev[t.id],
+                    ...(nextCombined ? { combined_audio_path: nextCombined } : {}),
+                    ...(nextSkipped ? { tts_skipped_reason: nextSkipped } : {})
+                  }
+                };
+              }
+              return prev;
+            }
             return { ...prev, [t.id]: normalizeAudioConfig(t.audio_config_json) };
           });
         });

@@ -28,7 +28,22 @@ export const POST = withTenantContext(async (req, { params }) => {
       prompt: s.i2v_prompt || ''
     }));
 
+    const existingAudio = (() => {
+      try {
+        return typeof task.audio_config_json === 'string'
+          ? JSON.parse(task.audio_config_json || '{}')
+          : (task.audio_config_json || {});
+      } catch (_) {
+        return {};
+      }
+    })();
     const normalizedAudio = normalizeAudioConfig(audioConfig || {});
+    if (!normalizedAudio.combined_audio_path && existingAudio.combined_audio_path) {
+      normalizedAudio.combined_audio_path = existingAudio.combined_audio_path;
+    }
+    if (!normalizedAudio.tts_skipped_reason && existingAudio.tts_skipped_reason) {
+      normalizedAudio.tts_skipped_reason = existingAudio.tts_skipped_reason;
+    }
     const targetClipsCount = normalizedStoryboard.length > 0 ? normalizedStoryboard.length : null;
     const bridgeNorm = normalizeBridgePayload(bridgingConfig || {}, vsoConfig || {}, {
       targetClips: targetClipsCount,

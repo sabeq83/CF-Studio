@@ -80,19 +80,22 @@ test('Multiplier Detail Page and API routes enforce dual-casing normalization', 
   // Verify import in page.js
   assert.match(pageContent, /import \{ normalizeAudioConfig, syncAudioConfigKeyValue \} from '@\/lib\/multiplier-audio-config';/);
 
-  // Verify fetchTasks uses functional updater that protects local edits
+  // Verify fetchTasks uses functional updater that protects local edits and syncs runtime audio paths
   assert.match(pageContent, /setEditedAudioConfigs\(prev => \{/);
-  assert.match(pageContent, /if \(prev\[t\.id\]\) return prev;/);
+  assert.match(pageContent, /if \(prev\[t\.id\]\)/);
+  assert.match(pageContent, /combined_audio_path:\s*nextCombined/);
 
   // Verify Section 5 normalizes config and syncs keys
   assert.match(pageContent, /const cfg = normalizeAudioConfig\(editedAudioConfigs\[task\.id\] \|\| task\.audio_config_json\);/);
   assert.match(pageContent, /const updated = syncAudioConfigKeyValue\(prev\[task\.id\] \|\| task\.audio_config_json, key, value\);/);
   assert.match(pageContent, /value=\{cfg\.voice_persona \|\| cfg\.voicePersona \|\|/);
 
-  // Verify update-creative route normalizes audio
+  // Verify update-creative route normalizes audio and preserves server-generated combined_audio_path
   const updateRoutePath = path.join(process.cwd(), 'app/api/v2/multiplier/[id]/update-creative/route.js');
   const updateRouteContent = fs.readFileSync(updateRoutePath, 'utf8');
   assert.match(updateRouteContent, /const normalizedAudio = normalizeAudioConfig\(audioConfig \|\| \{\}\);/);
+  assert.match(updateRouteContent, /normalizedAudio\.combined_audio_path = existingAudio\.combined_audio_path/);
+  assert.match(updateRouteContent, /normalizedAudio\.tts_skipped_reason = existingAudio\.tts_skipped_reason/);
   assert.match(updateRouteContent, /JSON\.stringify\(normalizedAudio\)/);
 
   // Verify approve route normalizes audio

@@ -1,11 +1,13 @@
 # Daftar Isi Dokumen Kerja (catatan-kerja)
 
-Terakhir diperbarui: 24 November 2026
+Terakhir diperbarui: 25 November 2026
 
 ## USULAN
 
 | Nama File | Ringkasan / Judul |
 |---|---|
+| [REKOMENDASI_PRODUK_84_BLUEPRINT_NUTRIBAKE.csv](usulan/REKOMENDASI_PRODUK_84_BLUEPRINT_NUTRIBAKE.csv) | Daftar CSV 496 rekomendasi produk `high_ticket` (244) & `low_ticket` (252) beserta estimasi harga dan kata kunci marketplace dari 84 blueprint jadwal NutriBake 14 hari |
+| [USULAN_PERBAIKAN_WARDROBE_LOCK_MULTIPLIER.md](usulan/USULAN_PERBAIKAN_WARDROBE_LOCK_MULTIPLIER.md) | Analisa & Usulan Hotfix `mul_261125_scjc0u` (`syd_admin`): penguncian 1 warna baju per baris di Multiplier, proteksi `combined_audio_path` & self-healing disk check agar audio VO dan Motion Text ter-render (`ffmpeg_muxing`), plus rencana render ulang |
 | [USULAN_PERBAIKAN_ZOMBIE_GLABS_POLL_ITEM_293.md](usulan/USULAN_PERBAIKAN_ZOMBIE_GLABS_POLL_ITEM_293.md) | Analisa `[Pillar Glabs] Polling error: fetch failed` di Dev (zombie item `#293` / `opc_260922_hi2aiw` ke IP mati `100.82.154.57` vs status normal `opc_261124_tkv7cr`) dan rencana perbaikan anti-infinite-loop |
 | [USULAN_PERBAIKAN_NAMA_2_VI_HOME_LIVING.md](usulan/USULAN_PERBAIKAN_NAMA_2_VI_HOME_LIVING.md) | Analisa penyebab 2 VI sistem Home & Living baru muncul tanpa nama di Dev (`name` vs `label`) serta usulan penamaan & fallback |
 | [USULAN_AUDIT_RETRY_VIDEO_MULTIPLIER_RESUME_STAGE.md](usulan/USULAN_AUDIT_RETRY_VIDEO_MULTIPLIER_RESUME_STAGE.md) | Audit total jalur Retry video Multiplier (`re_multiplier_tasks` & UI/API/MCP) dan usulan Smart Resume agar kegagalan di FFmpeg/Cloud/Visuals tidak mengulang dari Gemini & start frame T2I |
@@ -180,7 +182,8 @@ Terakhir diperbarui: 24 November 2026
 
 | File | Ringkasan |
 |---|---|
-| [implementation_plan.md](../implementation_plan.md) | Rencana aktif `fitur/shopee-2klip-tryon-unboxing`: VI & Preset Shopee 2 Klip (`shopee_unboxing_pov_hands`, `shopee_tryon_faceless_fit`, `Direct_Showcase`, guard `bridgeAtClip === 1`, VO & No-VO) |
+| [implementation_plan.md](../implementation_plan.md) | Rencana aktif `hotfix/multiplier-wardrobe-audio-lock`: Hotfix Wardrobe Lock per baris Multiplier, proteksi `combined_audio_path` & self-healing `ffmpeg_muxing` (audio VO + Motion Text), dan render ulang `mul_261125_scjc0u` |
+| [auto_pipeline_pisah_jadwal_arsip_20261125.md](rencana/auto_pipeline_pisah_jadwal_arsip_20261125.md) | Arsip Implementation Plan: Pemisahan Jadwal Produksi dan Publishing pada Auto Pipeline (dirilis v2.62.0, 25 Nov 2026) |
 | [home_living_no_human_no_vo_arsip_20261124.md](rencana/home_living_no_human_no_vo_arsip_20261124.md) | Arsip Implementation Plan: Visual Identity Tanpa Manusia (`environment_object_only`) & Mode Video Tanpa VO (`no_vo`) (dirilis v2.60.0) |
 | [multiplier_vo_auto_repair_arsip_20261123.md](rencana/multiplier_vo_auto_repair_arsip_20261123.md) | Arsip Implementation Plan: Pengaman Auto-Repair VO Kosong & Fallback Key Dinamis Multiplier (dirilis v2.57.13) |
 | [enrich_vision_kemasan_implementation_plan.md](rencana/enrich_vision_kemasan_implementation_plan.md) | Arsip Implementation Plan: Enrich AI Multimodal Vision & Deteksi Kemasan Akurat (dirilis v2.55.0) |

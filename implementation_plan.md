@@ -1,774 +1,573 @@
-# Implementation Plan: Pemisahan Jadwal Produksi dan Publishing pada Auto Pipeline
+# Implementation Plan (Hotfix): Wardrobe Lock Multiplier, Proteksi Audio `combined_audio_path` & Render Ulang Text Overlay (`mul_261125_scjc0u`)
 
-**Sumber Usulan:** [usulan-cf-studio-pisah-jadwal-produksi-publish.md](file:///Users/sabeqmmursyid/cf-autopipeline/usulan-cf-studio-pisah-jadwal-produksi-publish.md)  
-**Target Branch Kerja:** `fitur/pisah-jadwal-produksi-publish` (dibuat dari `main` saat eksekusi dimulai)  
-**Catatan Arsitektur & Keamanan:**
-- 100% backward-compatible untuk jadwal lama (`publish_date = NULL`, `publish_day_offset = 0`).
-- Perubahan DB hanya berupa penambahan kolom baru nullable/ber-default (`publish_date`, `publish_day_offset`, `last_run_target_date`) secara idempoten (`ADD COLUMN IF NOT EXISTS`).
-- Perubahan UI wajib didahului pembuatan dan review mockup HTML standalone di `public/mockup_auto_pipeline_split_schedule.html` menggunakan 100% semantic CSS tokens (Light/Dark Mode) sesuai SOP Mockup HTML & Semantic CSS Tokens.
+**Sumber Usulan:** [USULAN_PERBAIKAN_WARDROBE_LOCK_MULTIPLIER.md](file:///Users/sabeqmmursyid/_cfstudio/catatan-kerja/usulan/USULAN_PERBAIKAN_WARDROBE_LOCK_MULTIPLIER.md)  
+**Target Branch Kerja:** `hotfix/multiplier-wardrobe-audio-lock` (dibuat dari `main` saat eksekusi dimulai, sesuai SOP Alur 2 Hotfix Staging)  
+**Lingkup & Catatan Arsitektur:**
+- **Hotfix-only (tanpa migrasi DB & tanpa perubahan layout UI):** Seluruh perubahan bersifat backward-compatible dan hanya menyentuh resolver Visual Identity, prompt builder Multiplier, worker Multiplier, proteksi `update-creative`, dan sinkronisasi field runtime audio di state polling UI.
+- **Tidak perlu Mockup HTML:** Tidak ada penambahan atau perubahan komponen visual UI (hanya sinkronisasi state non-visual `combined_audio_path` / `tts_skipped_reason` pada `fetchTasks()`).
+- **Perilaku Wardrobe Lock:** 1 video/baris Multiplier (`batch_id:task.id`) mengunci **1 warna solid tunggal** dan **1 potongan pakaian** dari Klip 1 sampai Klip terakhir, sementara video/baris lain dengan `task.id` berbeda tetap dapat memutar warna dari `wardrobe.palette` VI (`stable_random`).
 
 ---
 
 ## Execution Task List
 
-### Tahap 0 — Persiapan Branch
-- [x] Buat dan checkout branch baru `fitur/pisah-jadwal-produksi-publish` dari `main` terbaru (`git checkout main && git pull && git checkout -b fitur/pisah-jadwal-produksi-publish`)
+### Tahap 0 — Persiapan Branch Hotfix
+- [x] Buat dan checkout branch baru `hotfix/multiplier-wardrobe-audio-lock` dari `main` terbaru (`git checkout main && git pull && git checkout -b hotfix/multiplier-wardrobe-audio-lock`)
 
-### Tahap 1 — Pembuatan Mockup HTML & Review Pengguna (Wajib Sebelum Edit Backend & UI Utama)
-- [x] Buat mockup interaktif standalone [public/mockup_auto_pipeline_split_schedule.html](file:///Users/sabeqmmursyid/_cfstudio/public/mockup_auto_pipeline_split_schedule.html) dengan 100% semantic CSS tokens (Light/Dark Mode) untuk simulasi form `specific_date` (Produksi vs Publish + tombol `+1 Hari`), form `recurring` (dropdown `Hari Tayang` H+0/H+1/H+2), validasi live, tabel jadwal, dan tampilan kalender
-- [x] Sajikan melalui server mockup lokal (`npm run mockup:serve` → `http://127.0.0.1:4199/mockup_auto_pipeline_split_schedule.html`) dan tunggu review serta persetujuan pengguna sebelum mulai mengedit kode backend maupun React/Next.js
+### Tahap 1 — Perbaikan Wardrobe Lock Deterministik Per Baris Multiplier
+- [x] Tambahkan helper `resolvePaletteColorChoice` & perbarui `resolveVisualIdentitySnapshot`, `resolveVisualIdentity`, dan `resolveVisualIdentitySubmission` di [lib/visual-override-resolver.js](file:///Users/sabeqmmursyid/_cfstudio/lib/visual-override-resolver.js) untuk memilih 1 warna deterministik dari `wardrobe.palette` (termasuk `preset_key === 'custom'`), membersihkan opsi baju ganda (`or ... athletic top`), dan menyertakan `wardrobe_color_label` / `resolved_wardrobe_color` pada snapshot
+- [x] Teruskan `stable_seed` (`${task.batch_id}:${task.id}`) & `item_index` ke `resolveVisualIdentitySubmission`, serta simpan `resolved_wardrobe_color` & `resolved_wardrobe_prompt` ke `vso_config_json` pada `handleStoryboardRemake` di [lib/re-multiplier-worker.js](file:///Users/sabeqmmursyid/_cfstudio/lib/re-multiplier-worker.js)
+- [x] Perbarui `buildMultiplierPhase2Prompt` di [lib/prompts.js](file:///Users/sabeqmmursyid/_cfstudio/lib/prompts.js) agar menyuntikkan warna solid terkunci ke `targetCharacter`/`targetWardrobe` + `vsoSection` (`WARDROBE LOCK`) serta mendukung fallback `resolveVideoVariety` untuk `wardrobe.palette`
+- [x] Perbarui `buildMultiplierStartFrameRequest` di [lib/multiplier-start-frame-request.js](file:///Users/sabeqmmursyid/_cfstudio/lib/multiplier-start-frame-request.js) untuk membersihkan frasa baju ganda dan menyuntikkan `[WARDROBE LOCK: ...]` pada klip non-3D/non-`environment_object_only`
 
-### Tahap 2 — Skema Database & Repository (`lib/db-pg.js`, `lib/auto-pipeline-schedules-repository.js`)
-- [x] Tambahkan kolom `publish_date`, `publish_day_offset`, `last_run_target_date`, dan index `auto_pipeline_schedules_publish_date_idx` pada tabel `auto_pipeline_schedules` di [lib/db-pg.js](file:///Users/sabeqmmursyid/_cfstudio/lib/db-pg.js)
-- [x] Tambahkan helper `normalizeDateStr` dan `validateAndNormalizeScheduleTiming` (`ScheduleValidationError` status 400) di [lib/auto-pipeline-schedules-repository.js](file:///Users/sabeqmmursyid/_cfstudio/lib/auto-pipeline-schedules-repository.js)
-- [x] Perbarui `listAutoPipelineSchedules` (filter `publishDate`), `createAutoPipelineSchedule` (alias `generation_date`, `publish_date`, `publish_day_offset`), `updateAutoPipelineSchedule` (update parsial), `updateScheduleExecutionStatus` (`lastRunTargetDate`), dan `normalizeScheduleRow` (`generation_date`, `publish_date`, `publish_day_offset`, `last_run_target_date`) di [lib/auto-pipeline-schedules-repository.js](file:///Users/sabeqmmursyid/_cfstudio/lib/auto-pipeline-schedules-repository.js)
+### Tahap 2 — Perbaikan Proteksi Audio `combined_audio_path` & Jalur `ffmpeg_muxing` (Audio + Text)
+- [x] Pertahankan field runtime `combined_audio_path` dan `tts_skipped_reason` dari `task.audio_config_json` saat menyimpan via `POST /api/v2/multiplier/[id]/update-creative` di [app/api/v2/multiplier/[id]/update-creative/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/multiplier/%5Bid%5D/update-creative/route.js)
+- [x] Sinkronkan `combined_audio_path` & `tts_skipped_reason` terbaru dari server saat polling `fetchTasks()` di [app/multiplier-lab/[id]/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/multiplier-lab/%5Bid%5D/page.js) agar `editedAudioConfigs` tidak mengirim state usang tanpa path audio
+- [x] Tambahkan self-healing check file fisik `public/temp/tts_multiplier_combined_${task.id}.mp3` (atau `.wav`) pada `handleVisualGeneration` di [lib/re-multiplier-worker.js](file:///Users/sabeqmmursyid/_cfstudio/lib/re-multiplier-worker.js) sebelum masuk cabang silent concat fallback
 
-### Tahap 3 — Scheduler Runner & Timezone Dinamis (`lib/auto-pipeline-scheduler-runner.js`)
-- [x] Tambahkan helper `addDaysToDateStr` dan `zonedDateTimeToUtcIso`, serta perbaiki `getNowInTimezone` dan `computeTargetPublishIso` (hilangkan hardcoded `+07:00`, dukung object params maupun fallback 3 argumen posisional) di [lib/auto-pipeline-scheduler-runner.js](file:///Users/sabeqmmursyid/_cfstudio/lib/auto-pipeline-scheduler-runner.js)
-- [x] Tambahkan `resolveSchedulePublishIso(row)` dan simpan `lastRunTargetDate: dateStr` saat `runDueAutoPipelineGenerations` maupun `runScheduleImmediately` memulai eksekusi (termasuk meneruskan `targetPublishIso` ke `threads_series`)
-- [x] Perbarui `runDueAutoPipelinePublishingDispatch` untuk menggunakan `resolveSchedulePublishIso(row)` (prioritas: `publish_date` -> `generationDate + publish_day_offset` -> `today + publish_day_offset`, dengan `specific_date` mempertahankan `target_date` saat dipicu manual `run-now` pada H-1)
+### Tahap 3 — Unit Test, Build Aman, Merge/Rilis `main` & Deploy Hotfix ke Staging
+- [x] Perbarui [tests/multiplier-audio-config-sync.test.js](file:///Users/sabeqmmursyid/_cfstudio/tests/multiplier-audio-config-sync.test.js) dan tambahkan [tests/multiplier-wardrobe-lock-hotfix.test.js](file:///Users/sabeqmmursyid/_cfstudio/tests/multiplier-wardrobe-lock-hotfix.test.js) untuk menguji konsistensi warna per baris, rotasi antar baris, proteksi `combined_audio_path` di `update-creative`/UI, dan self-healing disk check di worker
+- [x] Jalankan unit test (`PG_SEARCH_PATH=dev node --test ...`) dan build lokal aman (`DISABLE_AUTO_MIGRATIONS=true PG_SEARCH_PATH=dev npm run build`)
+- [x] Perbarui [sot/menus/kartu/multiplier-lab.md](file:///Users/sabeqmmursyid/_cfstudio/sot/menus/kartu/multiplier-lab.md)
+- [ ] Atas persetujuan pengguna (SOP Alur 2 Hotfix): merge ke `main`, jalankan `npm run release-non-interactive -- --type patch ...`, lalu deploy SHA rilis `main` ke **Staging** (`npm run deploy:staging -- --ref <full-git-sha> --apply --confirm-staging`) dan hapus branch hotfix
 
-### Tahap 4 — API Routes & Validasi HTTP 400 (`app/api/v2/recipes/auto-pipeline-schedules/`)
-- [x] Perbarui `GET` (filter query `publish_date`) dan `POST` (single + batch `items` dengan pra-validasi seluruh item sebelum insert + dukung `generation_date`, `publish_date`, `publish_day_offset` dan kembalikan HTTP 400 untuk `ScheduleValidationError`) di [route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/recipes/auto-pipeline-schedules/route.js)
-- [x] Perbarui `PUT` (kembalikan HTTP 400 untuk `ScheduleValidationError` dan HTTP 404 jika schedule tidak ditemukan) di [[id]/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/recipes/auto-pipeline-schedules/%5Bid%5D/route.js)
-
-### Tahap 5 — MCP Server Tools (`apps/mcp/tools.mjs`)
-- [x] Perbarui `scheduleExtendedFields`, `buildScheduleItemPayload`, `buildScheduleBatchItems`, `cf_list_schedules`, `cf_create_schedule`, dan `cf_update_schedule` di [apps/mcp/tools.mjs](file:///Users/sabeqmmursyid/_cfstudio/apps/mcp/tools.mjs) agar mendukung `generation_date`, `publish_date`, dan `publish_day_offset` (termasuk filter `publish_date` di `cf_list_schedules`)
-
-### Tahap 6 — Implementasi UI React/Next.js (`app/auto-pipeline/page.js`, `ScheduleTableView.js`, `ScheduleCalendarView.js`)
-- [x] Tambahkan state `schedPublishDate` dan `schedPublishDayOffset`, sinkronisasi di `openCreateScheduleModal`/`openEditScheduleModal`, serta helper `addDaysIso` di [app/auto-pipeline/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/auto-pipeline/page.js)
-- [x] Perbarui UI modal Step 4 & Step 6 di [app/auto-pipeline/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/auto-pipeline/page.js) (2 blok Produksi vs Publish pada `specific_date` + preset `+1 Hari (H+1)`, dropdown `Hari Tayang` H+0/H+1/H+2 pada `recurring`, serta pratinjau batch)
-- [x] Perbarui seluruh payload submit (`PUT` edit, 5 cabang batch `items` termasuk stagger `publish_date`, dan `POST` single) di [app/auto-pipeline/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/auto-pipeline/page.js)
-- [x] Perbarui tampilan badge tanggal/waktu produksi vs tayang di [ScheduleTableView.js](file:///Users/sabeqmmursyid/_cfstudio/app/components/ScheduleTableView.js) dan [ScheduleCalendarView.js](file:///Users/sabeqmmursyid/_cfstudio/app/components/ScheduleCalendarView.js)
-
-### Tahap 7 — Unit Test, Verifikasi Lokal & Deploy Dev
-- [x] Buat test suite [tests/test-auto-pipeline-split-schedule.test.js](file:///Users/sabeqmmursyid/_cfstudio/tests/test-auto-pipeline-split-schedule.test.js) untuk 7 skenario penerimaan + timezone non-WIB + validasi HTTP 400 + batch `items` + `run-now` H-1
-- [x] Tambahkan test assertion parameter baru (`generation_date`, `publish_date`, `publish_day_offset`) di [apps/mcp/test/mcp.test.mjs](file:///Users/sabeqmmursyid/_cfstudio/apps/mcp/test/mcp.test.mjs)
-- [x] Perbarui [sot/menus/kartu/auto-pipeline.md](file:///Users/sabeqmmursyid/_cfstudio/sot/menus/kartu/auto-pipeline.md) dan [apps/mcp/README.md](file:///Users/sabeqmmursyid/_cfstudio/apps/mcp/README.md)
-- [x] Jalankan seluruh test lokal (`PG_SEARCH_PATH=dev`), `npm run test:mcp`, dan build lokal aman (`DISABLE_AUTO_MIGRATIONS=true PG_SEARCH_PATH=dev npm run build`)
-- [x] Commit & push ke branch `fitur/pisah-jadwal-produksi-publish`, lalu deploy ke **Dev** (`npm run deploy:dev:atomic -- --ref <full-git-sha> --apply --confirm-dev`) untuk uji pengguna di `http://100.95.245.55:5020`
+### Tahap 4 — Render Ulang `mul_261125_scjc0u` (Audio + Text Overlay) & Verifikasi Staging
+- [ ] Trigger ulang stage `ffmpeg_muxing` untuk `mul_261125_scjc0u` di Staging (`POST /api/v2/multiplier/mul_261125_scjc0u/retry` `{ "stage": "ffmpeg" }`, dengan verifikasi `audio_config_json.combined_audio_path` pulih oleh worker atau disetel ke `/temp/tts_multiplier_combined_mul_261125_scjc0u.mp3`)
+- [ ] Tunggu proses `ffmpeg_muxing` → `uploading_assets` → `completed` selesai, lalu verifikasi `ffprobe` pada `mul_261125_scjc0u_final.mp4` (wajib memiliki stream `video` + stream `audio`, durasi & overlay aktif, dan terunggah ke Nextcloud)
 
 ---
 
 ## Detail Perubahan Kode (Before & After)
 
-### 1. [lib/db-pg.js](file:///Users/sabeqmmursyid/_cfstudio/lib/db-pg.js)
+### 1. [lib/visual-override-resolver.js](file:///Users/sabeqmmursyid/_cfstudio/lib/visual-override-resolver.js)
 
 **Code Sebelum (Current/Before):**
-```sql
-            status TEXT NOT NULL DEFAULT 'active',
-            schedule_mode TEXT NOT NULL DEFAULT 'recurring',
-            target_date DATE,
-            last_run_at TIMESTAMP WITH TIME ZONE,
-            last_campaign_id TEXT,
-            last_publish_at TIMESTAMP WITH TIME ZONE,
-            last_error TEXT,
-            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-          );
+```js
+function stableIndex(seed, length) {
+  const digest = crypto.createHash('sha256').update(String(seed)).digest();
+  return digest.readUInt32BE(0) % length;
+}
 
-          ALTER TABLE auto_pipeline_schedules ADD COLUMN IF NOT EXISTS pipeline_type TEXT NOT NULL DEFAULT 'recipe_campaign';
-          ALTER TABLE auto_pipeline_schedules ADD COLUMN IF NOT EXISTS target_item_id TEXT;
-          ALTER TABLE auto_pipeline_schedules ADD COLUMN IF NOT EXISTS target_item_title TEXT;
-          ALTER TABLE auto_pipeline_schedules ADD COLUMN IF NOT EXISTS pipeline_config_json JSONB NOT NULL DEFAULT '{}';
-          ALTER TABLE auto_pipeline_schedules ADD COLUMN IF NOT EXISTS schedule_mode TEXT NOT NULL DEFAULT 'recurring';
-          ALTER TABLE auto_pipeline_schedules ADD COLUMN IF NOT EXISTS target_date DATE;
+export function resolveWardrobe({ mode, subjectDemographic, itemIndex = 0, stableSeed = '', rowOverride = '' }) {
+  ...
+```
+```js
+  // 2. Resolve Subject Prompt ...
+  if (basePreset) {
+    subjectPrompt = basePreset;
+    if (config.subject.custom_description) {
+      subjectPrompt = `${subjectPrompt}, ${config.subject.custom_description}`;
+    }
+  }
+```
+```js
+  // 3. Resolve Wardrobe Prompt
+  let wardrobePrompt = 'wearing clean attire';
+  if (isEnvironmentOnly) {
+    wardrobePrompt = '';
+  } else if (config.wardrobe?.preset_key === 'not_applicable') {
+    wardrobePrompt = (config.wardrobe.custom_description && config.wardrobe.custom_description.trim())
+      ? config.wardrobe.custom_description.trim()
+      : 'not applicable (natural character surface finish only, no human clothing)';
+  } else if (config.wardrobe?.mode === 'custom' || config.wardrobe?.preset_key === 'custom') {
+    wardrobePrompt = config.wardrobe.custom_description || 'wearing clean attire';
+  } else if (config.wardrobe) {
+    const resolvedW = resolveWardrobe({
+      mode: config.wardrobe.mode === 'fixed' ? config.wardrobe.preset_key : config.wardrobe.mode,
+      subjectDemographic: config.subject.demographic_key,
+      itemIndex,
+      stableSeed,
+      rowOverride
+    });
+    wardrobePrompt = resolvedW.description || (config.wardrobe.custom_description || 'wearing clean attire');
+  }
+  if (config.wardrobe?.primary_color && !isEnvironmentOnly && !wardrobePrompt.includes(config.wardrobe.primary_color)) {
+    wardrobePrompt = `${wardrobePrompt}, primary color ${config.wardrobe.primary_color}`;
+  }
+  if (config.wardrobe?.secondary_color && !isEnvironmentOnly && !wardrobePrompt.includes(config.wardrobe.secondary_color)) {
+    wardrobePrompt = `${wardrobePrompt}, secondary color ${config.wardrobe.secondary_color}`;
+  }
+```
+```js
+  const resolved = {
+    subject_prompt: subjectPrompt,
+    wardrobe_prompt: wardrobePrompt,
+    environment_prompt: environmentPrompt,
+    lighting_prompt: lightingPrompt,
+    camera_prompt: cameraPrompt,
+    style_prompt: stylePrompt,
+    active_visual_mode: activeStyleKey,
+    narrative_function: narrativeFunction || 'default',
+    visual_language_prompt: stylePrompt,
+    mode_prompt: styleDefinition.prompt,
+    rendering_prompt: renderingPrompt,
+    composition_prompt: compositionPrompt,
+    metaphor_prompt: metaphorPrompt,
+    negative_prompt: negativePrompt
+  };
+...
+export async function resolveVisualIdentitySubmission({ preset_id, inline_config, legacy_overrides_json, narrative_function }) {
+  ...
+  const snapshot = await resolveVisualIdentity({
+    presetRef: preset_id && preset_id !== 'inline' && preset_id !== 'custom' ? preset_id : null,
+    inlineConfig: preset_id === 'inline' ? inline_config : null,
+    legacyOverrides: (preset_id === 'custom' || !preset_id) ? parsedLegacy : null,
+    itemContext: { narrativeFunction: narrative_function }
+  });
 ```
 
 **Code Sesudah (Proposed/After):**
-```sql
-            status TEXT NOT NULL DEFAULT 'active',
-            schedule_mode TEXT NOT NULL DEFAULT 'recurring',
-            target_date DATE,
-            publish_date DATE,
-            publish_day_offset INTEGER NOT NULL DEFAULT 0,
-            last_run_target_date DATE,
-            last_run_at TIMESTAMP WITH TIME ZONE,
-            last_campaign_id TEXT,
-            last_publish_at TIMESTAMP WITH TIME ZONE,
-            last_error TEXT,
-            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-          );
+```js
+function stableIndex(seed, length) {
+  const digest = crypto.createHash('sha256').update(String(seed)).digest();
+  return digest.readUInt32BE(0) % length;
+}
 
-          ALTER TABLE auto_pipeline_schedules ADD COLUMN IF NOT EXISTS pipeline_type TEXT NOT NULL DEFAULT 'recipe_campaign';
-          ALTER TABLE auto_pipeline_schedules ADD COLUMN IF NOT EXISTS target_item_id TEXT;
-          ALTER TABLE auto_pipeline_schedules ADD COLUMN IF NOT EXISTS target_item_title TEXT;
-          ALTER TABLE auto_pipeline_schedules ADD COLUMN IF NOT EXISTS pipeline_config_json JSONB NOT NULL DEFAULT '{}';
-          ALTER TABLE auto_pipeline_schedules ADD COLUMN IF NOT EXISTS schedule_mode TEXT NOT NULL DEFAULT 'recurring';
-          ALTER TABLE auto_pipeline_schedules ADD COLUMN IF NOT EXISTS target_date DATE;
-          ALTER TABLE auto_pipeline_schedules ADD COLUMN IF NOT EXISTS publish_date DATE;
-          ALTER TABLE auto_pipeline_schedules ADD COLUMN IF NOT EXISTS publish_day_offset INTEGER NOT NULL DEFAULT 0;
-          ALTER TABLE auto_pipeline_schedules ADD COLUMN IF NOT EXISTS last_run_target_date DATE;
+function sanitizeAmbiguousWardrobeChoice(text = '') {
+  return String(text || '')
+    .replace(/\s+or\s+(?:a\s+)?(?:clean\s+minimalist\s+|plain\s+)?athletic\s+top\b/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
 
-          CREATE INDEX IF NOT EXISTS auto_pipeline_schedules_publish_date_idx
-            ON auto_pipeline_schedules(tenant_id, publish_date);
+export function resolvePaletteColorChoice({ wardrobe = {}, itemIndex = 0, stableSeed = '', fallbackLabel = '' } = {}) {
+  const primary = String(wardrobe?.primary_color || '').trim();
+  if (primary) return primary;
+  const palette = Array.isArray(wardrobe?.palette)
+    ? wardrobe.palette.map(c => String(c || '').trim()).filter(Boolean)
+    : [];
+  if (palette.length === 0) return '';
+  const mode = String(wardrobe?.mode || 'stable_random').trim().toLowerCase();
+  if (mode === 'fixed') return palette[0];
+  if (mode === 'sequential') return palette[Math.max(0, Number(itemIndex) || 0) % palette.length];
+  const seed = String(stableSeed || fallbackLabel || 'default');
+  return palette[stableIndex(seed, palette.length)];
+}
+```
+```js
+  // 3. Resolve Wardrobe Prompt
+  let wardrobePrompt = 'wearing clean attire';
+  let resolvedWardrobeColor = '';
+  if (isEnvironmentOnly) {
+    wardrobePrompt = '';
+  } else if (config.wardrobe?.preset_key === 'not_applicable') {
+    wardrobePrompt = (config.wardrobe.custom_description && config.wardrobe.custom_description.trim())
+      ? config.wardrobe.custom_description.trim()
+      : 'not applicable (natural character surface finish only, no human clothing)';
+  } else if (config.wardrobe?.mode === 'custom' || config.wardrobe?.preset_key === 'custom') {
+    const baseCustom = sanitizeAmbiguousWardrobeChoice(config.wardrobe.custom_description || 'wearing clean attire');
+    resolvedWardrobeColor = resolvePaletteColorChoice({
+      wardrobe: config.wardrobe,
+      itemIndex,
+      stableSeed,
+      fallbackLabel: config.label || activeSnapshot?.identity_ref?.key || ''
+    });
+    if (resolvedWardrobeColor) {
+      const hasColor = baseCustom.toLowerCase().includes(resolvedWardrobeColor.toLowerCase());
+      wardrobePrompt = hasColor
+        ? `${baseCustom}, single uniform solid ${resolvedWardrobeColor} color across all scenes`
+        : `solid plain ${resolvedWardrobeColor} color — ${baseCustom}, strictly identical ${resolvedWardrobeColor} garment color across all scenes, no color change`;
+    } else {
+      wardrobePrompt = baseCustom;
+    }
+  } else if (config.wardrobe) {
+    const resolvedW = resolveWardrobe({
+      mode: config.wardrobe.mode === 'fixed' ? config.wardrobe.preset_key : config.wardrobe.mode,
+      subjectDemographic: config.subject.demographic_key,
+      itemIndex,
+      stableSeed,
+      rowOverride
+    });
+    wardrobePrompt = resolvedW.description || (config.wardrobe.custom_description || 'wearing clean attire');
+    resolvedWardrobeColor = resolvePaletteColorChoice({
+      wardrobe: config.wardrobe,
+      itemIndex,
+      stableSeed,
+      fallbackLabel: resolvedW.key || ''
+    });
+  }
+  if (resolvedWardrobeColor && !isEnvironmentOnly && config.wardrobe?.preset_key !== 'not_applicable') {
+    subjectPrompt = sanitizeAmbiguousWardrobeChoice(subjectPrompt);
+  }
+  if (config.wardrobe?.primary_color && !isEnvironmentOnly && !wardrobePrompt.includes(config.wardrobe.primary_color)) {
+    wardrobePrompt = `${wardrobePrompt}, primary color ${config.wardrobe.primary_color}`;
+  }
+  if (config.wardrobe?.secondary_color && !isEnvironmentOnly && !wardrobePrompt.includes(config.wardrobe.secondary_color)) {
+    wardrobePrompt = `${wardrobePrompt}, secondary color ${config.wardrobe.secondary_color}`;
+  }
+```
+```js
+  const resolved = {
+    subject_prompt: subjectPrompt,
+    wardrobe_prompt: wardrobePrompt,
+    wardrobe_color_label: resolvedWardrobeColor,
+    ...
+  };
+  return {
+    ...snapshot,
+    resolved,
+    legacy,
+    ...legacy,
+    wardrobe_mode: config.wardrobe?.mode,
+    wardrobe_resolved_key: config.wardrobe?.preset_key,
+    resolved_wardrobe_color: resolvedWardrobeColor
+  };
+...
+export async function resolveVisualIdentitySubmission({ preset_id, inline_config, legacy_overrides_json, narrative_function, item_index = 0, stable_seed = '' }) {
+  ...
+  const snapshot = await resolveVisualIdentity({
+    presetRef: preset_id && preset_id !== 'inline' && preset_id !== 'custom' ? preset_id : null,
+    inlineConfig: preset_id === 'inline' ? inline_config : null,
+    legacyOverrides: (preset_id === 'custom' || !preset_id) ? parsedLegacy : null,
+    itemContext: {
+      narrativeFunction: narrative_function,
+      itemIndex: item_index,
+      stableSeed: stable_seed
+    }
+  });
 ```
 
 ---
 
-### 2. [lib/auto-pipeline-schedules-repository.js](file:///Users/sabeqmmursyid/_cfstudio/lib/auto-pipeline-schedules-repository.js)
+### 2. [lib/re-multiplier-worker.js](file:///Users/sabeqmmursyid/_cfstudio/lib/re-multiplier-worker.js)
+
+#### A. Wardrobe Seed Propagation (`handleStoryboardRemake`)
 
 **Code Sebelum (Current/Before):**
 ```js
-export async function listAutoPipelineSchedules(tenantId = 'default_tenant', options = {}) {
-  if (typeof tenantId === 'object' && tenantId !== null) {
-    options = tenantId;
-    tenantId = options.tenantId || 'default_tenant';
-  }
-  const { status, brandId, pipelineType, scheduleMode, targetDate } = options;
-  ...
-  if (targetDate) {
-    conditions.push(`s.target_date = $${paramIdx++}`);
-    params.push(targetDate);
-  }
+    if (targetPresetId && targetPresetId !== 'custom') {
+      const submission = await resolveVisualIdentitySubmission({
+        preset_id: targetPresetId,
+        inline_config: aesthetics.visual_identity_inline_config || aesthetics.visualIdentity?.inline_config,
+        narrative_function: 'hook'
+      });
+      const resolvedSnapshot = submission.snapshot;
+...
+      resolvedVso = {
+        ...aesthetics,
+        ...resolvedSnapshot.legacy,
+        ...resolvedSnapshot.resolved,
+        structured: resolvedSnapshot.structured,
+        resolved: resolvedSnapshot.resolved,
+        mechanismSnapshot: mechanismSnapshot?.resolved || null,
+        visualSignature: brandVisualSignature || resolvedSnapshot.structured?.description || '',
+        isVsoActive: aesthetics.isVsoActive !== undefined ? aesthetics.isVsoActive : true,
+        characterConcept: resolvedSnapshot.legacy?.character_concept || 'faceless',
+        subjectDemographic: resolvedSnapshot.legacy?.subject_demographic || 'custom',
+        subjectDemographicCustom: resolvedSnapshot.legacy?.subject_demographic_custom || resolvedSnapshot.resolved?.subject_prompt || '',
+        wardrobeStyle: 'custom',
+        wardrobeStyleCustom: resolvedSnapshot.legacy?.wardrobe_style_custom || resolvedSnapshot.resolved?.wardrobe_prompt || '',
+        lightingStyle: 'custom',
+        lightingStyleCustom: resolvedSnapshot.legacy?.lighting_style_custom || resolvedSnapshot.resolved?.lighting_prompt || '',
+        environmentPrompt: resolvedSnapshot.resolved?.environment_prompt || '',
+        negativePrompt: resolvedSnapshot.resolved?.negative_prompt || ''
+      };
+    }
+```
+```js
+  await updateMultiplierTask(task.id, {
+    remake_storyboard_json: JSON.stringify(safeVoiceover),
+    ...
+    t2i_i2v_prompts_json: JSON.stringify(parsed.prompts || []),
+    bridging_config_json: JSON.stringify(bridging),
 ```
 
 **Code Sesudah (Proposed/After):**
 ```js
-export class ScheduleValidationError extends Error {
-  constructor(message) {
-    super(message);
-    this.name = 'ScheduleValidationError';
-    this.statusCode = 400;
-  }
-}
-
-export function normalizeDateStr(val) {
-  if (!val) return null;
-  if (typeof val === 'string') {
-    const trimmed = val.trim().slice(0, 10);
-    return /^\d{4}-\d{2}-\d{2}$/.test(trimmed) ? trimmed : null;
-  }
-  if (val instanceof Date && !Number.isNaN(val.getTime())) {
-    const y = val.getFullYear();
-    const m = String(val.getMonth() + 1).padStart(2, '0');
-    const d = String(val.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
-  }
-  return null;
-}
-
-export function validateAndNormalizeScheduleTiming(input = {}, existing = null) {
-  const hasTimingChange = !existing || [
-    'schedule_mode', 'target_date', 'generation_date', 'publish_date',
-    'publish_day_offset', 'generation_time', 'publish_time', 'auto_publish_enabled'
-  ].some(k => input[k] !== undefined);
-
-  const scheduleMode = input.schedule_mode !== undefined
-    ? input.schedule_mode
-    : (existing?.schedule_mode || 'recurring');
-
-  const rawTargetDate = input.target_date !== undefined
-    ? input.target_date
-    : (input.generation_date !== undefined ? input.generation_date : (existing?.target_date ?? null));
-  const rawPublishDate = input.publish_date !== undefined
-    ? input.publish_date
-    : (existing?.publish_date ?? null);
-
-  if (rawTargetDate !== null && rawTargetDate !== '' && !/^\d{4}-\d{2}-\d{2}$/.test(String(rawTargetDate).slice(0, 10))) {
-    throw new ScheduleValidationError('Format target_date / generation_date harus YYYY-MM-DD.');
-  }
-  if (rawPublishDate !== null && rawPublishDate !== '' && !/^\d{4}-\d{2}-\d{2}$/.test(String(rawPublishDate).slice(0, 10))) {
-    throw new ScheduleValidationError('Format publish_date harus YYYY-MM-DD.');
-  }
-
-  const targetDate = rawTargetDate ? String(rawTargetDate).slice(0, 10) : null;
-  const publishDate = rawPublishDate ? String(rawPublishDate).slice(0, 10) : null;
-
-  const rawOffset = input.publish_day_offset !== undefined
-    ? input.publish_day_offset
-    : (existing?.publish_day_offset ?? 0);
-  const publishDayOffset = Number(rawOffset);
-  if (!Number.isInteger(publishDayOffset) || publishDayOffset < 0 || publishDayOffset > 14) {
-    throw new ScheduleValidationError('publish_day_offset harus berupa bilangan bulat antara 0 sampai 14.');
-  }
-
-  const generationTime = input.generation_time !== undefined
-    ? input.generation_time
-    : (existing?.generation_time || '05:00');
-  const publishTime = input.publish_time !== undefined
-    ? input.publish_time
-    : (existing?.publish_time || '09:00');
-  const autoPublishEnabled = input.auto_publish_enabled !== undefined
-    ? Boolean(input.auto_publish_enabled)
-    : (existing ? existing.auto_publish_enabled !== false : true);
-
-  if (!/^\d{2}:\d{2}$/.test(generationTime)) {
-    throw new ScheduleValidationError('Format generation_time harus HH:mm.');
-  }
-  if (!/^\d{2}:\d{2}$/.test(publishTime)) {
-    throw new ScheduleValidationError('Format publish_time harus HH:mm.');
-  }
-
-  if (hasTimingChange && autoPublishEnabled) {
-    if (scheduleMode === 'specific_date') {
-      if (targetDate && publishDate) {
-        if (publishDate < targetDate) {
-          throw new ScheduleValidationError('Tanggal publish (publish_date) tidak boleh lebih awal dari tanggal produksi (target_date).');
-        }
-        if (publishDate === targetDate && publishTime <= generationTime) {
-          throw new ScheduleValidationError('Pada tanggal yang sama, jam publish harus lebih lambat dari jam produksi, atau majukan publish_date ke hari berikutnya.');
-        }
-      } else if (publishDayOffset === 0 && publishTime <= generationTime) {
-        throw new ScheduleValidationError('Jam publish harus lebih lambat dari jam produksi untuk tayang di hari yang sama, atau set publish_date / publish_day_offset >= 1.');
+    const multiplierWardrobeSeed = `${task.batch_id || 'multiplier'}:${task.id || rowIndex}`;
+    if (targetPresetId && targetPresetId !== 'custom') {
+      const submission = await resolveVisualIdentitySubmission({
+        preset_id: targetPresetId,
+        inline_config: aesthetics.visual_identity_inline_config || aesthetics.visualIdentity?.inline_config,
+        narrative_function: 'hook',
+        item_index: rowIndex,
+        stable_seed: multiplierWardrobeSeed
+      });
+      const resolvedSnapshot = submission.snapshot;
+...
+      const lockedColorLabel = resolvedSnapshot.resolved?.wardrobe_color_label || resolvedSnapshot.resolved_wardrobe_color || '';
+      const lockedWardrobeDesc = resolvedSnapshot.legacy?.wardrobe_style_custom || resolvedSnapshot.resolved?.wardrobe_prompt || '';
+      resolvedVso = {
+        ...aesthetics,
+        ...resolvedSnapshot.legacy,
+        ...resolvedSnapshot.resolved,
+        structured: resolvedSnapshot.structured,
+        resolved: resolvedSnapshot.resolved,
+        mechanismSnapshot: mechanismSnapshot?.resolved || null,
+        visualSignature: brandVisualSignature || resolvedSnapshot.structured?.description || '',
+        isVsoActive: aesthetics.isVsoActive !== undefined ? aesthetics.isVsoActive : true,
+        characterConcept: resolvedSnapshot.legacy?.character_concept || 'faceless',
+        subjectDemographic: resolvedSnapshot.legacy?.subject_demographic || 'custom',
+        subjectDemographicCustom: resolvedSnapshot.legacy?.subject_demographic_custom || resolvedSnapshot.resolved?.subject_prompt || '',
+        wardrobeStyle: 'custom',
+        wardrobeStyleCustom: lockedWardrobeDesc,
+        resolved_wardrobe_color: lockedColorLabel,
+        resolvedWardrobeColor: lockedColorLabel,
+        resolved_wardrobe_prompt: lockedWardrobeDesc,
+        lightingStyle: 'custom',
+        lightingStyleCustom: resolvedSnapshot.legacy?.lighting_style_custom || resolvedSnapshot.resolved?.lighting_prompt || '',
+        environmentPrompt: resolvedSnapshot.resolved?.environment_prompt || '',
+        negativePrompt: resolvedSnapshot.resolved?.negative_prompt || ''
+      };
+    }
+```
+```js
+  const persistedVsoConfig = (() => {
+    try {
+      const base = JSON.parse(task.vso_config_json || '{}') || {};
+      if (resolvedVso?.resolved_wardrobe_color || resolvedVso?.resolved_wardrobe_prompt) {
+        return {
+          ...base,
+          ...(resolvedVso.resolved_wardrobe_color ? { resolved_wardrobe_color: resolvedVso.resolved_wardrobe_color } : {}),
+          ...(resolvedVso.resolved_wardrobe_prompt ? { resolved_wardrobe_prompt: resolvedVso.resolved_wardrobe_prompt } : {})
+        };
       }
-    } else if (publishDayOffset === 0 && publishTime <= generationTime) {
-      throw new ScheduleValidationError('Gunakan `publish_day_offset: 1` jika jam tayang berada di hari berikutnya.');
+    } catch (_) {}
+    return null;
+  })();
+
+  await updateMultiplierTask(task.id, {
+    remake_storyboard_json: JSON.stringify(safeVoiceover),
+    ...
+    t2i_i2v_prompts_json: JSON.stringify(parsed.prompts || []),
+    bridging_config_json: JSON.stringify(bridging),
+    ...(persistedVsoConfig ? { vso_config_json: JSON.stringify(persistedVsoConfig) } : {}),
+```
+
+#### B. Self-Healing Audio Disk Recovery (`handleVisualGeneration`)
+
+**Code Sebelum (Current/Before):**
+```js
+      const hasFfmpeg = audioConfig.enableFfmpeg === 1 || audioConfig.enableFfmpeg === true || audioConfig.enable_ffmpeg === true;
+      const muxAudioMode = audioConfig.audio_engine_mode || aesthetics.audio_engine_mode || 'minimax_tts';
+      const isTtsOptionalMux = muxAudioMode === 'no_vo' || muxAudioMode === 'native_veo';
+      if (hasFfmpeg && (audioConfig.combined_audio_path || isTtsOptionalMux)) {
+        // Alihkan task ke stage ffmpeg_muxing agar dieksekusi oleh handleFFmpegMuxing & processTtsStudioMuxing
+        await updateMultiplierTask(task.id, { 
+          status: 'ffmpeg_muxing'
+        });
+      } else {
+```
+
+**Code Sesudah (Proposed/After):**
+```js
+      const hasFfmpeg = audioConfig.enableFfmpeg === 1 || audioConfig.enableFfmpeg === true || audioConfig.enable_ffmpeg === true;
+      const muxAudioMode = audioConfig.audio_engine_mode || aesthetics.audio_engine_mode || 'minimax_tts';
+      const isTtsOptionalMux = muxAudioMode === 'no_vo' || muxAudioMode === 'native_veo';
+
+      if (hasFfmpeg && !isTtsOptionalMux && !audioConfig.combined_audio_path) {
+        const recoveredCandidate = [`tts_multiplier_combined_${task.id}.mp3`, `tts_multiplier_combined_${task.id}.wav`]
+          .find((fname) => {
+            const fp = path.join(tempDir, fname);
+            return fs.existsSync(fp) && fs.statSync(fp).size > 0;
+          });
+        if (recoveredCandidate) {
+          audioConfig.combined_audio_path = `/temp/${recoveredCandidate}`;
+          await updateMultiplierTask(task.id, {
+            audio_config_json: JSON.stringify(audioConfig)
+          });
+          logToMultiplier(`[Multiplier Worker] Recovered missing combined_audio_path from disk for task ${task.id}: ${audioConfig.combined_audio_path}`);
+        }
+      }
+
+      if (hasFfmpeg && (audioConfig.combined_audio_path || isTtsOptionalMux)) {
+        // Alihkan task ke stage ffmpeg_muxing agar dieksekusi oleh handleFFmpegMuxing & processTtsStudioMuxing
+        await updateMultiplierTask(task.id, { 
+          status: 'ffmpeg_muxing'
+        });
+      } else {
+```
+
+---
+
+### 3. [lib/prompts.js](file:///Users/sabeqmmursyid/_cfstudio/lib/prompts.js) (`buildMultiplierPhase2Prompt`)
+
+**Code Sebelum (Current/Before):**
+```js
+  if (vso?.isVsoActive) {
+    const targetConcept = isEnvironmentOnly ? 'environment_object_only' : (vso.characterConcept || vso.character_concept || "faceless");
+    const subjectDemo = vso.subjectDemographic || vso.subject_demographic || "syari_classic";
+
+    const customWardrobe = vso.wardrobeStyleCustom || vso.wardrobe_style_custom || vso.resolved?.wardrobe_prompt;
+    if ((vso.wardrobe_style === "custom" || vso.wardrobeStyle === "custom" || customWardrobe) && customWardrobe) {
+      targetWardrobe = customWardrobe;
+    } else {
+      ...
+    }
+```
+```js
+    targetCharacter = (vso.subjectDemographicCustom || vso.subject_demographic_custom || vso.resolved?.subject_prompt)
+      ? (vso.subjectDemographicCustom || vso.subject_demographic_custom || vso.resolved?.subject_prompt)
+      : (DEMOGRAPHIC_PRESETS[subjectDemo] || subjectDemo || "a graceful Muslimah");
+```
+```js
+- WARDROBE CONSISTENCY: The color, texture, and style of the wardrobe must be IDENTICAL across all visual prompts.
+```
+
+**Code Sesudah (Proposed/After):**
+```js
+  if (vso?.isVsoActive) {
+    const targetConcept = isEnvironmentOnly ? 'environment_object_only' : (vso.characterConcept || vso.character_concept || "faceless");
+    const subjectDemo = vso.subjectDemographic || vso.subject_demographic || "syari_classic";
+
+    const structuredWardrobe = vso.structured?.wardrobe || null;
+    const preResolvedColor = vso.resolvedWardrobeColor || vso.resolved_wardrobe_color || vso.resolved?.wardrobe_color_label || '';
+    const customWardrobe = vso.wardrobeStyleCustom || vso.wardrobe_style_custom || vso.resolved?.wardrobe_prompt;
+    let lockedWardrobeColor = preResolvedColor;
+
+    if ((vso.wardrobe_style === "custom" || vso.wardrobeStyle === "custom" || customWardrobe) && customWardrobe) {
+      targetWardrobe = customWardrobe;
+      if (!lockedWardrobeColor && !isEnvironmentOnly && Array.isArray(structuredWardrobe?.palette) && structuredWardrobe.palette.length > 0) {
+        const seed = vso.stable_seed || `${aesthetics?.campaign_id || bridging?.targetProductId || 'mult'}:${rowIndex}`;
+        const picked = resolveVideoVariety(seed, {
+          paletteEntries: structuredWardrobe.palette,
+          sleevePolicy: structuredWardrobe.sleeve_policy || 'wrists_covered'
+        });
+        lockedWardrobeColor = picked.wardrobeColorLabel || '';
+        if (lockedWardrobeColor && !targetWardrobe.toLowerCase().includes(lockedWardrobeColor.toLowerCase())) {
+          const cleaned = targetWardrobe.replace(/\s+or\s+(?:a\s+)?(?:clean\s+minimalist\s+|plain\s+)?athletic\s+top\b/gi, '').trim();
+          targetWardrobe = `solid plain ${lockedWardrobeColor} color — ${cleaned}, strictly identical ${lockedWardrobeColor} garment color across all scenes`;
+        }
+      }
+    } else {
+      ...
+    }
+```
+```js
+    const rawTargetCharacter = (vso.subjectDemographicCustom || vso.subject_demographic_custom || vso.resolved?.subject_prompt)
+      ? (vso.subjectDemographicCustom || vso.subject_demographic_custom || vso.resolved?.subject_prompt)
+      : (DEMOGRAPHIC_PRESETS[subjectDemo] || subjectDemo || "a graceful Muslimah");
+    targetCharacter = lockedWardrobeColor && !isEnvironmentOnly
+      ? rawTargetCharacter.replace(/\s+or\s+(?:a\s+)?(?:clean\s+minimalist\s+|plain\s+)?athletic\s+top\b/gi, '').trim()
+      : rawTargetCharacter;
+```
+```js
+- WARDROBE CONSISTENCY: The color, texture, and style of the wardrobe must be IDENTICAL across all visual prompts${lockedWardrobeColor ? ` (MANDATORY LOCKED COLOR FOR THIS ENTIRE VIDEO: strictly "${lockedWardrobeColor}" only — never switch shirt colors or garment cuts between clips)` : ''}.
+```
+
+---
+
+### 4. [lib/multiplier-start-frame-request.js](file:///Users/sabeqmmursyid/_cfstudio/lib/multiplier-start-frame-request.js)
+
+**Code Sebelum (Current/Before):**
+```js
+  return {
+    isBridgeClip,
+    providerRequest: {
+      prompt: effectivePrompt,
+      model: imageModel || 'nano_banana_pro',
+      aspect_ratio,
+      reference_images: references,
+      expected_reference_sha256s: expectedReferenceSha256s,
+      webhookOverride: webhookOverride || undefined
+    },
+```
+
+**Code Sesudah (Proposed/After):**
+```js
+  const isEnvOnly = aesthetics?.characterConcept === 'environment_object_only'
+    || aesthetics?.character_concept === 'environment_object_only'
+    || aesthetics?.structured?.subject?.kind === 'environment_object_only';
+  const is3dOrCellularPrompt = /\b3d\s*(?:bio-cellular|biomedical|cellular|cgi|simulation)\b/i.test(effectivePrompt)
+    || /\(Presence Truth:\s*Zero Humans/i.test(effectivePrompt);
+  const lockedWardrobeColor = String(
+    aesthetics?.resolved_wardrobe_color ||
+    aesthetics?.resolvedWardrobeColor ||
+    aesthetics?.resolved?.wardrobe_color_label ||
+    ''
+  ).trim();
+  const lockedWardrobePrompt = String(
+    aesthetics?.resolved_wardrobe_prompt ||
+    aesthetics?.wardrobeStyleCustom ||
+    aesthetics?.wardrobe_style_custom ||
+    aesthetics?.resolved?.wardrobe_prompt ||
+    ''
+  ).trim();
+
+  if (lockedWardrobeColor && !isEnvOnly && !is3dOrCellularPrompt) {
+    effectivePrompt = effectivePrompt
+      .replace(/\s+or\s+(?:a\s+)?(?:clean\s+minimalist\s+|plain\s+)?athletic\s+top\b/gi, '')
+      .trim();
+    if (!/\[WARDROBE LOCK:/i.test(effectivePrompt)) {
+      effectivePrompt = `${effectivePrompt} [WARDROBE LOCK: strictly uniform solid ${lockedWardrobeColor} garment color across all live-action scenes${lockedWardrobePrompt ? ` (${lockedWardrobePrompt})` : ''}, identical shirt color and fabric, no color change]`;
     }
   }
 
   return {
-    scheduleMode,
-    targetDate,
-    publishDate,
-    publishDayOffset,
-    generationTime,
-    publishTime,
-    autoPublishEnabled
-  };
-}
-
-export async function listAutoPipelineSchedules(tenantId = 'default_tenant', options = {}) {
-  if (typeof tenantId === 'object' && tenantId !== null) {
-    options = tenantId;
-    tenantId = options.tenantId || 'default_tenant';
-  }
-  const { status, brandId, pipelineType, scheduleMode, targetDate, publishDate } = options;
-  ...
-  if (targetDate) {
-    conditions.push(`s.target_date = $${paramIdx++}`);
-    params.push(targetDate);
-  }
-
-  if (publishDate) {
-    conditions.push(`(
-      s.publish_date = $${paramIdx}
-      OR (
-        s.publish_date IS NULL
-        AND s.schedule_mode = 'specific_date'
-        AND s.target_date IS NOT NULL
-        AND (s.target_date + (COALESCE(s.publish_day_offset, 0) * INTERVAL '1 day'))::date = $${paramIdx}::date
-      )
-    )`);
-    params.push(publishDate);
-    paramIdx++;
-  }
-```
-
-**Code Sebelum (`createAutoPipelineSchedule`, `updateAutoPipelineSchedule`, `updateScheduleExecutionStatus`, `normalizeScheduleRow`):**
-```js
-  const generationTime = data.generation_time || '05:00';
-  const publishTime = data.publish_time || '09:00';
-  ...
-  const scheduleMode = data.schedule_mode || 'recurring';
-  const targetDate = data.target_date || null;
-
-  const sql = `
-    INSERT INTO auto_pipeline_schedules (
-      id, tenant_id, pipeline_type, name, brand_id, preset_key,
-      target_item_id, target_item_title, topic_strategy, topic,
-      category, recipe_count, generation_time, publish_time, days_of_week_json,
-      timezone, repliz_account_ids_json, pipeline_config_json, auto_publish_enabled, status,
-      schedule_mode, target_date,
-      created_at, updated_at
-    ) VALUES (
-      $1, $2, $3, $4, $5, $6,
-      $7, $8, $9, $10,
-      $11, $12, $13, $14, $15,
-      $16, $17, $18, $19, $20,
-      $21, $22,
-      CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
-    )
-    RETURNING *
-  `;
-```
-
-**Code Sesudah:**
-```js
-  const timing = validateAndNormalizeScheduleTiming(data, null);
-  const generationTime = timing.generationTime;
-  const publishTime = timing.publishTime;
-  ...
-  const autoPublishEnabled = timing.autoPublishEnabled;
-  const status = data.status || 'active';
-  const scheduleMode = timing.scheduleMode;
-  const targetDate = timing.targetDate;
-  const publishDate = timing.publishDate;
-  const publishDayOffset = timing.publishDayOffset;
-
-  const sql = `
-    INSERT INTO auto_pipeline_schedules (
-      id, tenant_id, pipeline_type, name, brand_id, preset_key,
-      target_item_id, target_item_title, topic_strategy, topic,
-      category, recipe_count, generation_time, publish_time, days_of_week_json,
-      timezone, repliz_account_ids_json, pipeline_config_json, auto_publish_enabled, status,
-      schedule_mode, target_date, publish_date, publish_day_offset,
-      created_at, updated_at
-    ) VALUES (
-      $1, $2, $3, $4, $5, $6,
-      $7, $8, $9, $10,
-      $11, $12, $13, $14, $15,
-      $16, $17, $18, $19, $20,
-      $21, $22, $23, $24,
-      CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
-    )
-    RETURNING *
-  `;
-```
-*(Demikian pula pada `updateAutoPipelineSchedule`: memanggil `validateAndNormalizeScheduleTiming(data, existing)`, mengupdate kolom `publish_date = $23, publish_day_offset = $24`; pada `updateScheduleExecutionStatus`: menambahkan parameter opsional `lastRunTargetDate` yang menulis `last_run_target_date`; serta pada `normalizeScheduleRow`: mengembalikan `target_date: targetDateNormalized`, `generation_date: targetDateNormalized`, `publish_date: publishDateNormalized`, `publish_day_offset: Number(row.publish_day_offset || 0)`, `last_run_target_date: lastRunTargetDateNormalized`.)*
-
----
-
-### 3. [lib/auto-pipeline-scheduler-runner.js](file:///Users/sabeqmmursyid/_cfstudio/lib/auto-pipeline-scheduler-runner.js)
-
-**Code Sebelum (Current/Before):**
-```js
-function getNowInTimezone(timeZone = 'Asia/Jakarta') {
-  ...
-  const dateStr = `${map.year}-${map.month}-${map.day}`;
-  const timeStr = `${map.hour}:${map.minute}`;
-
-  // Hitung day of week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
-  const dt = new Date(`${dateStr}T${timeStr}:00+07:00`);
-  const dayOfWeek = dt.getDay();
-
-  return { dateStr, timeStr, dayOfWeek, fullDate: now };
-}
-
-export function computeTargetPublishIso(publishTimeStr = '09:00', timeZone = 'Asia/Jakarta', targetDateStr = null) {
-  const now = new Date();
-  const [targetH, targetM] = publishTimeStr.split(':').map(Number);
-
-  let dateBase = targetDateStr;
-  if (!dateBase) {
-    const formatter = new Intl.DateTimeFormat('en-CA', {
-      timeZone,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour12: false
-    });
-    dateBase = formatter.format(now); // YYYY-MM-DD
-  }
-
-  // Format ISO local string
-  const hPad = String(targetH).padStart(2, '0');
-  const mPad = String(targetM).padStart(2, '0');
-  const targetDateLocal = new Date(`${dateBase}T${hPad}:${mPad}:00+07:00`);
-
-  // Jika waktu target hari ini sudah terlewat lebih dari 15 menit yang lalu, jadwalkan 15 menit dari sekarang
-  if (targetDateLocal.getTime() <= now.getTime()) {
-    return new Date(now.getTime() + 15 * 60 * 1000).toISOString();
-  }
-
-  return targetDateLocal.toISOString();
-}
-```
-
-**Code Sesudah (Proposed/After):**
-```js
-export function addDaysToDateStr(dateStr, offsetDays = 0) {
-  if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(String(dateStr).slice(0, 10))) return null;
-  const [y, m, d] = String(dateStr).slice(0, 10).split('-').map(Number);
-  const dt = new Date(Date.UTC(y, m - 1, d + Number(offsetDays || 0)));
-  return dt.toISOString().slice(0, 10);
-}
-
-function getTimezonePartsMap(dateObj, timeZone = 'Asia/Jakarta') {
-  const formatter = new Intl.DateTimeFormat('en-CA', {
-    timeZone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-  });
-  const parts = formatter.formatToParts(dateObj);
-  const map = {};
-  parts.forEach(p => { map[p.type] = p.value; });
-  if (map.hour === '24') map.hour = '00';
-  return map;
-}
-
-export function zonedDateTimeToUtcDate(dateStr, timeStr = '09:00', timeZone = 'Asia/Jakarta') {
-  const [y, m, d] = dateStr.split('-').map(Number);
-  const [hh, mm] = timeStr.split(':').map(Number);
-  const desiredUtcMs = Date.UTC(y, m - 1, d, hh, mm, 0);
-
-  let guessMs = desiredUtcMs;
-  for (let i = 0; i < 2; i++) {
-    const p = getTimezonePartsMap(new Date(guessMs), timeZone);
-    const renderedUtcMs = Date.UTC(
-      Number(p.year),
-      Number(p.month) - 1,
-      Number(p.day),
-      Number(p.hour),
-      Number(p.minute),
-      Number(p.second || 0)
-    );
-    const diff = desiredUtcMs - renderedUtcMs;
-    if (diff === 0) break;
-    guessMs += diff;
-  }
-  return new Date(guessMs);
-}
-
-function getNowInTimezone(timeZone = 'Asia/Jakarta') {
-  const now = new Date();
-  const map = getTimezonePartsMap(now, timeZone);
-  const dateStr = `${map.year}-${map.month}-${map.day}`;
-  const timeStr = `${map.hour}:${map.minute}`;
-  const [y, m, d] = dateStr.split('-').map(Number);
-  const dayOfWeek = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
-  return { dateStr, timeStr, dayOfWeek, fullDate: now };
-}
-
-export function computeTargetPublishIso(arg1 = {}, legacyTimeZone = 'Asia/Jakarta', legacyTargetDateStr = null) {
-  const opts = (typeof arg1 === 'object' && arg1 !== null)
-    ? arg1
-    : {
-        publishTimeStr: arg1 || '09:00',
-        timeZone: legacyTimeZone || 'Asia/Jakarta',
-        publishDateStr: legacyTargetDateStr || null,
-        generationDateStr: null,
-        publishDayOffset: 0
-      };
-
-  const publishTimeStr = opts.publishTimeStr || '09:00';
-  const timeZone = opts.timeZone || 'Asia/Jakarta';
-  const publishDateStr = opts.publishDateStr ? String(opts.publishDateStr).slice(0, 10) : null;
-  const generationDateStr = opts.generationDateStr ? String(opts.generationDateStr).slice(0, 10) : null;
-  const publishDayOffset = Number(opts.publishDayOffset || 0);
-  const now = opts.now instanceof Date ? opts.now : new Date();
-
-  let dateBase = publishDateStr;
-  if (!dateBase && generationDateStr) {
-    dateBase = addDaysToDateStr(generationDateStr, publishDayOffset);
-  }
-  if (!dateBase) {
-    const { dateStr: todayInTz } = getNowInTimezone(timeZone);
-    dateBase = addDaysToDateStr(todayInTz, publishDayOffset);
-  }
-
-  const targetDateLocal = zonedDateTimeToUtcDate(dateBase, publishTimeStr, timeZone);
-  if (targetDateLocal.getTime() <= now.getTime()) {
-    return new Date(now.getTime() + 15 * 60 * 1000).toISOString();
-  }
-  return targetDateLocal.toISOString();
-}
-
-export function resolveSchedulePublishIso(row = {}) {
-  const publishDateStr = row.publish_date ? String(row.publish_date).slice(0, 10) : null;
-  const schedMode = row.schedule_mode || 'recurring';
-  const targetDateStr = row.target_date ? String(row.target_date).slice(0, 10) : null;
-  const lastRunTargetDateStr = row.last_run_target_date ? String(row.last_run_target_date).slice(0, 10) : null;
-  const generationDateStr = schedMode === 'specific_date'
-    ? (targetDateStr || lastRunTargetDateStr)
-    : (lastRunTargetDateStr || targetDateStr);
-  const publishDayOffset = Number(row.publish_day_offset || 0);
-
-  return computeTargetPublishIso({
-    publishTimeStr: row.publish_time || '09:00',
-    timeZone: row.timezone || 'Asia/Jakarta',
-    publishDateStr,
-    generationDateStr,
-    publishDayOffset
-  });
-}
-```
-
-**Code Sebelum (pencatatan `last_run_at`, `threads_series`, dan dispatch publish di `lib/auto-pipeline-scheduler-runner.js`):**
-```js
-// Baris 251 (threads_series):
-      targetPublishIso: schedule.target_publish_iso || null
-
-// Baris 390 (runDueAutoPipelineGenerations):
-        await updateScheduleExecutionStatus(effectiveTenantId, row.id, {
-          lastRunAt: new Date()
-        });
-
-// Baris 576-577 (runDueAutoPipelinePublishingDispatch):
-      const targetDateStr = row.target_date ? String(row.target_date).slice(0, 10) : null;
-      const scheduledAtIso = computeTargetPublishIso(row.publish_time || '09:00', row.timezone || 'Asia/Jakarta', targetDateStr);
-
-// Baris 681 (runScheduleImmediately):
-  await updateScheduleExecutionStatus(effectiveTenantId, schedule.id, {
-    lastRunAt: new Date(),
-    lastError: null
-  });
-```
-
-**Code Sesudah (Proposed/After):**
-```js
-// Baris 251 (threads_series):
-      targetPublishIso: schedule.target_publish_iso || resolveSchedulePublishIso(schedule)
-
-// Baris 390 (runDueAutoPipelineGenerations, dengan dateStr dari dueBatch item):
-        row.last_run_target_date = runDateStr;
-        await updateScheduleExecutionStatus(effectiveTenantId, row.id, {
-          lastRunAt: new Date(),
-          lastRunTargetDate: runDateStr
-        });
-
-// Baris 576-577 (runDueAutoPipelinePublishingDispatch):
-      const scheduledAtIso = resolveSchedulePublishIso(row);
-
-// Baris 681 (runScheduleImmediately):
-  const { dateStr: runDateStr } = getNowInTimezone(schedule.timezone || 'Asia/Jakarta');
-  schedule.last_run_target_date = runDateStr;
-  await updateScheduleExecutionStatus(effectiveTenantId, schedule.id, {
-    lastRunAt: new Date(),
-    lastRunTargetDate: runDateStr,
-    lastError: null
-  });
-```
-
----
-
-### 4. [app/api/v2/recipes/auto-pipeline-schedules/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/recipes/auto-pipeline-schedules/route.js) & [[id]/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/recipes/auto-pipeline-schedules/%5Bid%5D/route.js)
-
-**Code Sebelum (`route.js`):**
-```js
-    const scheduleMode = searchParams.get('schedule_mode') || 'all';
-    const targetDate = searchParams.get('target_date');
-    const tenantId = (!user?.tenantId || user.tenantId === '__none__') ? 'default_tenant' : user.tenantId;
-
-    const schedules = await listAutoPipelineSchedules(tenantId, { status, brandId, pipelineType, scheduleMode, targetDate });
-...
-    // Batch items:
-          schedule_mode: item.schedule_mode || 'recurring',
-          target_date: item.target_date || null
-        };
-        const s = await createAutoPipelineSchedule(tenantId, payload);
-...
-    // Single create:
-      schedule_mode: body.schedule_mode || 'recurring',
-      target_date: body.target_date || null
-    };
-    const newSchedule = await createAutoPipelineSchedule(tenantId, payload);
-```
-
-**Code Sesudah (`route.js`):**
-```js
-import {
-  listAutoPipelineSchedules,
-  createAutoPipelineSchedule,
-  validateAndNormalizeScheduleTiming
-} from '@/lib/auto-pipeline-schedules-repository';
-...
-    const scheduleMode = searchParams.get('schedule_mode') || 'all';
-    const targetDate = searchParams.get('target_date');
-    const publishDate = searchParams.get('publish_date');
-    const tenantId = (!user?.tenantId || user.tenantId === '__none__') ? 'default_tenant' : user.tenantId;
-
-    const schedules = await listAutoPipelineSchedules(tenantId, {
-      status, brandId, pipelineType, scheduleMode, targetDate, publishDate
-    });
-...
-    // Batch items: pra-validasi seluruh item sebelum menulis ke DB
-    if (Array.isArray(body.items) && body.items.length > 0) {
-      const payloads = [];
-      for (const item of body.items) {
-        if (!item.brand_id && !item.brandId) continue;
-        const resolvedTargetDate = item.target_date !== undefined ? item.target_date : (item.generation_date ?? null);
-        const payload = {
-          ...existingItemFields,
-          schedule_mode: item.schedule_mode || (resolvedTargetDate || item.publish_date ? 'specific_date' : 'recurring'),
-          target_date: resolvedTargetDate,
-          publish_date: item.publish_date || null,
-          publish_day_offset: item.publish_day_offset !== undefined ? Number(item.publish_day_offset) : 0
-        };
-        validateAndNormalizeScheduleTiming(payload, null);
-        payloads.push(payload);
-      }
-      const created = [];
-      for (const payload of payloads) {
-        created.push(await createAutoPipelineSchedule(tenantId, payload));
-      }
-      return NextResponse.json({ ... }, { status: 201 });
-    }
-...
-    // Single create:
-      const resolvedTargetDate = body.target_date !== undefined ? body.target_date : (body.generation_date ?? null);
-      const payload = {
-        ...existingSingleFields,
-        schedule_mode: body.schedule_mode || (resolvedTargetDate || body.publish_date ? 'specific_date' : 'recurring'),
-        target_date: resolvedTargetDate,
-        publish_date: body.publish_date || null,
-        publish_day_offset: body.publish_day_offset !== undefined ? Number(body.publish_day_offset) : 0
-      };
-...
-  } catch (error) {
-    if (error?.statusCode === 400 || error?.name === 'ScheduleValidationError') {
-      return NextResponse.json({ success: false, error: error.message }, { status: 400 });
-    }
-    console.error('[API Auto-Pipeline-Schedules POST Error]', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
-  }
-```
-
-**Code Sebelum (`[id]/route.js`):**
-```js
-  } catch (error) {
-    console.error('[API Auto-Pipeline-Schedules/:id PUT Error]', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
-  }
-```
-
-**Code Sesudah (`[id]/route.js`):**
-```js
-  } catch (error) {
-    if (error?.statusCode === 400 || error?.name === 'ScheduleValidationError') {
-      return NextResponse.json({ success: false, error: error.message }, { status: 400 });
-    }
-    if (/not found/i.test(error?.message || '')) {
-      return NextResponse.json({ success: false, error: error.message }, { status: 404 });
-    }
-    console.error('[API Auto-Pipeline-Schedules/:id PUT Error]', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
-  }
-```
-
----
-
-### 5. [apps/mcp/tools.mjs](file:///Users/sabeqmmursyid/_cfstudio/apps/mcp/tools.mjs)
-
-**Code Sebelum (Current/Before):**
-```js
-    schedule_mode: z.enum(['recurring', 'specific_date']).optional(),
-    target_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format YYYY-MM-DD').optional(),
-...
-  register(
-    'cf_list_schedules',
-    'List recurring or specific-date Auto Pipeline schedules in the tenant with their status, target date, and execution metrics.',
-    {
-      status: z.enum(['active', 'paused', 'all']).default('all'),
-      pipeline_type: z
-        .enum(['product_campaign', 'editorial_campaign', 'recipe_campaign', 'multiplier_campaign', 'threads_series', 'recipe_labs', 'all'])
-        .default('all'),
-      brand_id: z.string().max(100).optional(),
-      schedule_mode: z.enum(['recurring', 'specific_date', 'all']).default('all'),
-      target_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format YYYY-MM-DD').optional()
+    isBridgeClip,
+    providerRequest: {
+      prompt: effectivePrompt,
+      model: imageModel || 'nano_banana_pro',
+      aspect_ratio,
+      reference_images: references,
+      expected_reference_sha256s: expectedReferenceSha256s,
+      webhookOverride: webhookOverride || undefined
     },
 ```
-*(serta pada `buildScheduleItemPayload` baris 222-274 dan `buildScheduleBatchItems` baris 277-318 hanya meneruskan `schedule_mode` dan `target_date`)*
+
+---
+
+### 5. [app/api/v2/multiplier/[id]/update-creative/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/multiplier/%5Bid%5D/update-creative/route.js)
+
+**Code Sebelum (Current/Before):**
+```js
+    const normalizedAudio = normalizeAudioConfig(audioConfig || {});
+```
 
 **Code Sesudah (Proposed/After):**
 ```js
-    schedule_mode: z.enum(['recurring', 'specific_date']).optional(),
-    target_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format YYYY-MM-DD').optional(),
-    generation_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format YYYY-MM-DD').optional(),
-    publish_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format YYYY-MM-DD').optional(),
-    publish_day_offset: z.number().int().min(0).max(14).optional(),
-...
-  register(
-    'cf_list_schedules',
-    'List recurring or specific-date Auto Pipeline schedules in the tenant with their status, generation/target date, publish date, publish_day_offset, and execution metrics.',
-    {
-      status: z.enum(['active', 'paused', 'all']).default('all'),
-      pipeline_type: z
-        .enum(['product_campaign', 'editorial_campaign', 'recipe_campaign', 'multiplier_campaign', 'threads_series', 'recipe_labs', 'all'])
-        .default('all'),
-      brand_id: z.string().max(100).optional(),
-      schedule_mode: z.enum(['recurring', 'specific_date', 'all']).default('all'),
-      target_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format YYYY-MM-DD').optional(),
-      publish_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format YYYY-MM-DD').optional()
-    },
+    const existingAudio = (() => {
+      try {
+        return typeof task.audio_config_json === 'string'
+          ? JSON.parse(task.audio_config_json || '{}')
+          : (task.audio_config_json || {});
+      } catch (_) {
+        return {};
+      }
+    })();
+    const normalizedAudio = normalizeAudioConfig(audioConfig || {});
+    if (!normalizedAudio.combined_audio_path && existingAudio.combined_audio_path) {
+      normalizedAudio.combined_audio_path = existingAudio.combined_audio_path;
+    }
+    if (!normalizedAudio.tts_skipped_reason && existingAudio.tts_skipped_reason) {
+      normalizedAudio.tts_skipped_reason = existingAudio.tts_skipped_reason;
+    }
 ```
-*(Pada `buildScheduleItemPayload`: ekstrak `generation_date`, `publish_date`, `publish_day_offset`; `resolvedTargetDate = target_date !== undefined ? target_date : generation_date`; `resolvedMode = schedule_mode || ((resolvedTargetDate || publish_date) ? 'specific_date' : (isUpdate ? undefined : 'recurring'))`; teruskan `target_date`, `publish_date`, `publish_day_offset`. Pada `buildScheduleBatchItems`: ikut wariskan `generation_date`, `publish_date`, `publish_day_offset` dari `args` ke setiap item.)*
 
 ---
 
-### 6. Mockup HTML & Antarmuka UI
-
-#### 6A. [public/mockup_auto_pipeline_split_schedule.html](file:///Users/sabeqmmursyid/_cfstudio/public/mockup_auto_pipeline_split_schedule.html) (File Baru — Tahap 1 sebelum edit backend & UI utama)
-- Standalone HTML interaktif dengan 100% semantic CSS tokens (`--surface`, `--surface-raised`, `--surface-interactive`, `--border-subtle`, `--text-primary`, `--text-secondary`, `--action-primary`, `--status-info`, `--status-success`, `--status-warning`, `--status-danger`) + switcher Light/Dark Mode.
-- Mensimulasikan form `specific_date` (Blok Produksi vs Blok Publish + tombol cepat `Sama dengan Produksi` & `+1 Hari (H+1)`), form `recurring` (dropdown `Hari Tayang`: `Hari yang sama (H+0)`, `Besok / H+1`, `Lusa / H+2`), validasi live tanggal/jam, tabel jadwal, dan kartu kalender.
-
-#### 6B. [app/auto-pipeline/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/auto-pipeline/page.js)
+### 6. [app/multiplier-lab/[id]/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/multiplier-lab/%5Bid%5D/page.js)
 
 **Code Sebelum (Current/Before):**
-```jsx
-  const [schedMode, setSchedMode] = useState('recurring'); // 'recurring' | 'specific_date'
-  const [schedTargetDate, setSchedTargetDate] = useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 1);
-    return d.toISOString().slice(0, 10);
-  });
+```js
+          setEditedAudioConfigs(prev => {
+            if (prev[t.id]) return prev;
+            return { ...prev, [t.id]: normalizeAudioConfig(t.audio_config_json) };
+          });
 ```
 
 **Code Sesudah (Proposed/After):**
-```jsx
-  const [schedMode, setSchedMode] = useState('recurring'); // 'recurring' | 'specific_date'
-  const [schedTargetDate, setSchedTargetDate] = useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 1);
-    return d.toISOString().slice(0, 10);
-  });
-  const [schedPublishDate, setSchedPublishDate] = useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 1);
-    return d.toISOString().slice(0, 10);
-  });
-  const [schedPublishDayOffset, setSchedPublishDayOffset] = useState(0);
+```js
+          setEditedAudioConfigs(prev => {
+            if (prev[t.id]) {
+              const serverAudio = normalizeAudioConfig(t.audio_config_json);
+              const nextCombined = serverAudio.combined_audio_path || prev[t.id].combined_audio_path;
+              const nextSkipped = serverAudio.tts_skipped_reason || prev[t.id].tts_skipped_reason;
+              if (
+                nextCombined !== prev[t.id].combined_audio_path ||
+                nextSkipped !== prev[t.id].tts_skipped_reason
+              ) {
+                return {
+                  ...prev,
+                  [t.id]: {
+                    ...prev[t.id],
+                    ...(nextCombined ? { combined_audio_path: nextCombined } : {}),
+                    ...(nextSkipped ? { tts_skipped_reason: nextSkipped } : {})
+                  }
+                };
+              }
+              return prev;
+            }
+            return { ...prev, [t.id]: normalizeAudioConfig(t.audio_config_json) };
+          });
 ```
-*(Seluruh payload submit di `handleSaveSchedule` menyertakan `publish_date: schedMode === 'specific_date' ? itemPublishDate : null` dan `publish_day_offset: schedMode === 'recurring' ? Number(schedPublishDayOffset || 0) : 0`. Saat `schedStaggerCalendar` aktif pada batch `specific_date`, `itemPublishDate` ikut digeser `+ idx` hari dari `schedPublishDate` agar jarak H-1 -> H-0 tetap terjaga di seluruh baris batch. UI Modal Step 4/6 memisahkan blok **Jadwal Produksi** & **Jadwal Publish** untuk `specific_date` (dengan tombol `+1 Hari (H+1)`), dan menampilkan dropdown **Hari Tayang** (`H+0`, `H+1`, `H+2`) di samping `publish_time` pada mode `recurring`.)*
-
-#### 6C. [app/components/ScheduleTableView.js](file:///Users/sabeqmmursyid/_cfstudio/app/components/ScheduleTableView.js) & [app/components/ScheduleCalendarView.js](file:///Users/sabeqmmursyid/_cfstudio/app/components/ScheduleCalendarView.js)
-
-**Code Sebelum (`ScheduleTableView.js`):**
-```jsx
-                    {isSpecific ? (
-                      <span style={{ ... }}>
-                        <span>📅</span> {sched.target_date || '-'}
-                      </span>
-                    ) : (
-                      <span style={{ ... }}>
-                        <span>🔄</span> {formatDaysOfWeek ? formatDaysOfWeek(sched.days_of_week || sched.days) : 'Rutin'}
-                      </span>
-                    )}
-```
-
-**Code Sesudah (`ScheduleTableView.js`):**
-```jsx
-                    {isSpecific ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                        <span style={{ ... }}>
-                          <span>📅</span> {formatShortDateId(sched.target_date)} {sched.generation_time || '05:00'}
-                        </span>
-                        {sched.publish_date && sched.publish_date !== sched.target_date && (
-                          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--status-success)' }}>
-                            ➔ Tayang: {formatShortDateId(sched.publish_date)} {sched.publish_time || '09:00'}
-                          </span>
-                        )}
-                      </div>
-                    ) : (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                        <span style={{ ... }}>
-                          <span>🔄</span> {formatDaysOfWeek ? formatDaysOfWeek(sched.days_of_week || sched.days) : 'Rutin'}
-                        </span>
-                        {Number(sched.publish_day_offset || 0) > 0 && (
-                          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--status-success)' }}>
-                            Tayang: H+{Number(sched.publish_day_offset)} {sched.publish_time || '09:00'}
-                          </span>
-                        )}
-                      </div>
-                    )}
-```
-*(Di `ScheduleCalendarView.js`, tooltip dan label slot item diperbarui agar menampilkan informasi tanggal/offset tayang bila `publish_date !== target_date` atau `publish_day_offset > 0`.)*
-
----
-
-### 7. [tests/test-auto-pipeline-split-schedule.test.js](file:///Users/sabeqmmursyid/_cfstudio/tests/test-auto-pipeline-split-schedule.test.js) (File Baru) & [apps/mcp/test/mcp.test.mjs](file:///Users/sabeqmmursyid/_cfstudio/apps/mcp/test/mcp.test.mjs)
-- Unit & integration tests yang memverifikasi seluruh 7 skenario kriteria penerimaan:
-  1. Backward compatibility `specific_date` lama (`publish_date: null`, `publish_day_offset: 0`)
-  2. `specific_date` produksi H-1 (`target_date: 2026-11-25`, `15:00`), publish H-0 (`publish_date: 2026-11-26`, `07:15`)
-  3. `recurring` lintas hari (`publish_day_offset = 1`, `gen: 20:00`, `pub: 06:15`)
-  4. Render melewati tengah malam (`last_run_target_date = Senin`, selesai Selasa `00:15` -> publish tetap Selasa `06:15`)
-  5. Validasi tanggal terbalik & jam lintas hari tanpa offset (menolak dengan `ScheduleValidationError` / HTTP 400)
-  6. `resolveSchedulePublishIso` untuk trigger manual `run-now` pada H-1 tetap menghormati `publish_date`
-  7. Batch creation via MCP `cf_create_schedule` dengan `generation_date`, `publish_date`, `publish_day_offset`, dan filter `publish_date` pada `cf_list_schedules`
-  8. Akurasi konversi timezone non-WIB (`Asia/Makassar`, `Asia/Jayapura`, `UTC`).
