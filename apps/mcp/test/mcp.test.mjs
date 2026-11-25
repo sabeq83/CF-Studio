@@ -205,16 +205,17 @@ test('schedule tools dispatch to /api/v2/recipes/auto-pipeline-schedules', async
     return { success: true, schedule_id: 'sched-456' };
   });
 
-  // List schedules
+  // List schedules (including publish_date filter)
   await client.callTool({
     name: 'cf_list_schedules',
-    arguments: { status: 'active', pipeline_type: 'recipe_campaign' }
+    arguments: { status: 'active', pipeline_type: 'recipe_campaign', publish_date: '2026-11-26' }
   });
   assert.ok(calls[0].path.startsWith('/api/v2/recipes/auto-pipeline-schedules?'));
   assert.ok(calls[0].path.includes('status=active'));
   assert.ok(calls[0].path.includes('pipeline_type=recipe_campaign'));
+  assert.ok(calls[0].path.includes('publish_date=2026-11-26'));
 
-  // Create schedule with full publish accounts, recipe toggle, Shopee affiliate link, and blueprint
+  // Create schedule with full publish accounts, recipe toggle, Shopee affiliate link, blueprint, and split production/publish dates
   await client.callTool({
     name: 'cf_create_schedule',
     arguments: {
@@ -222,8 +223,11 @@ test('schedule tools dispatch to /api/v2/recipes/auto-pipeline-schedules', async
       pipeline_type: 'recipe_campaign',
       brand_id: 'brand-1',
       topic: 'Masakan Sehari-hari',
-      generation_time: '06:00',
-      publish_time: '10:00',
+      generation_date: '2026-11-25',
+      generation_time: '15:00',
+      publish_date: '2026-11-26',
+      publish_time: '07:15',
+      publish_day_offset: 0,
       repliz_account_ids: ['acc_fb_1', 'acc_ig_1'],
       generate_recipe: true,
       post_link_affiliate: true,
@@ -233,20 +237,27 @@ test('schedule tools dispatch to /api/v2/recipes/auto-pipeline-schedules', async
   });
   assert.equal(calls[1].path, '/api/v2/recipes/auto-pipeline-schedules');
   assert.equal(calls[1].opts.body.name, 'Resep Harian Pagi');
-  assert.equal(calls[1].opts.body.generation_time, '06:00');
+  assert.equal(calls[1].opts.body.schedule_mode, 'specific_date');
+  assert.equal(calls[1].opts.body.target_date, '2026-11-25');
+  assert.equal(calls[1].opts.body.publish_date, '2026-11-26');
+  assert.equal(calls[1].opts.body.publish_day_offset, 0);
+  assert.equal(calls[1].opts.body.generation_time, '15:00');
+  assert.equal(calls[1].opts.body.publish_time, '07:15');
   assert.deepEqual(calls[1].opts.body.repliz_account_ids, ['acc_fb_1', 'acc_ig_1']);
   assert.equal(calls[1].opts.body.pipeline_config_json.generate_recipe, true);
   assert.equal(calls[1].opts.body.pipeline_config_json.post_link_affiliate, true);
   assert.equal(calls[1].opts.body.pipeline_config_json.blueprint_id, 'bp-uuid-12345');
   assert.equal(calls[1].opts.body.pipeline_config_json.execution_mode, 'full_autopilot');
 
-  // Update schedule
+  // Update schedule (including publish_day_offset)
   await client.callTool({
     name: 'cf_update_schedule',
     arguments: {
       schedule_id: 'sched-456',
       name: 'Resep Harian Update',
-      generation_time: '07:00',
+      generation_time: '20:00',
+      publish_time: '06:15',
+      publish_day_offset: 1,
       repliz_account_ids: ['acc_fb_updated'],
       generate_recipe: false
     }
@@ -254,6 +265,7 @@ test('schedule tools dispatch to /api/v2/recipes/auto-pipeline-schedules', async
   assert.equal(calls[2].path, '/api/v2/recipes/auto-pipeline-schedules/sched-456');
   assert.equal(calls[2].opts.method, 'PUT');
   assert.equal(calls[2].opts.body.name, 'Resep Harian Update');
+  assert.equal(calls[2].opts.body.publish_day_offset, 1);
   assert.deepEqual(calls[2].opts.body.repliz_account_ids, ['acc_fb_updated']);
   assert.equal(calls[2].opts.body.pipeline_config_json.generate_recipe, false);
 

@@ -1,0 +1,1747 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup UI: Pemisahan Jadwal Produksi &amp; Publish Auto Pipeline - CF Studio</title>
+  <style>
+    /* Semantic Design Tokens: disalin langsung dari app/theme.css */
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --link-hover: #a5f3fc;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --input-bg: #ffffff;
+      --overlay-subtle: rgba(30, 41, 59, 0.08);
+      --overlay-backdrop: rgba(15, 23, 42, 0.54);
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #5a697d;
+      --text-disabled: #8794a6;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --link: #075ea8;
+      --link-hover: #064b86;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --status-neutral: #6548bd;
+      --status-neutral-soft: #f0ecfb;
+      --focus-ring: #6d4ed6;
+      --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+      --shadow-modal: 0 26px 80px rgba(31, 45, 61, 0.22);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    button:not(:disabled),
+    select:not(:disabled),
+    input[type='checkbox']:not(:disabled),
+    input[type='date']:not(:disabled),
+    input[type='time']:not(:disabled),
+    label[for] {
+      cursor: pointer;
+    }
+
+    button:disabled,
+    input:disabled,
+    select:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    :focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--focus-ring) 78%, transparent);
+      outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+      }
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .app-shell {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px 20px 56px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .topbar {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 18px 22px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .topbar-title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .topbar-title-group h1 {
+      margin: 0;
+      font-size: clamp(1.15rem, 2.2vw, 1.45rem);
+      font-weight: 800;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+
+    .topbar-subtitle {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .topbar-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      min-height: 40px;
+      padding: 0 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.84rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background-color var(--transition), border-color var(--transition);
+    }
+
+    .btn:hover:not(:disabled) {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+
+    .btn:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    .btn-primary {
+      background: var(--action-primary);
+      border-color: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--action-primary-hover);
+      border-color: var(--action-primary-hover);
+    }
+
+    .btn-sm {
+      min-height: 36px;
+      padding: 0 11px;
+      font-size: 0.78rem;
+    }
+
+    .scenario-strip {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+    }
+
+    .scenario-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-right: 4px;
+    }
+
+    .chip-btn {
+      min-height: 36px;
+      padding: 0 12px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 600;
+      transition: all var(--transition);
+    }
+
+    .chip-btn:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+      border-color: var(--border-strong);
+    }
+
+    .chip-btn[aria-pressed='true'] {
+      background: var(--status-info-soft);
+      border-color: var(--status-info);
+      color: var(--status-info);
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.15fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 16px 20px;
+      background: var(--surface-raised);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .panel-header h2 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .field-hint {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    .input,
+    .select {
+      width: 100%;
+      min-height: 42px;
+      padding: 0 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--input-bg);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .input-time {
+      font-variant-numeric: tabular-nums;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .mode-switch {
+      display: inline-flex;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 3px;
+      gap: 4px;
+    }
+
+    .mode-switch button {
+      min-height: 36px;
+      padding: 0 14px;
+      border: none;
+      border-radius: var(--radius-xs);
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .mode-switch button[aria-pressed='true'] {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    .schedule-block {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .schedule-block-prod {
+      border-left: 3px solid var(--status-info);
+    }
+
+    .schedule-block-pub {
+      border-left: 3px solid var(--status-success);
+    }
+
+    .block-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .block-title {
+      font-size: 0.84rem;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .block-title-prod {
+      color: var(--status-info);
+    }
+
+    .block-title-pub {
+      color: var(--status-success);
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .quick-presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .preset-btn {
+      min-height: 34px;
+      padding: 0 10px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface);
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .preset-btn:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+      border-color: var(--border-strong);
+    }
+
+    .preset-btn[aria-pressed='true'] {
+      background: var(--status-success-soft);
+      border-color: var(--status-success);
+      color: var(--status-success);
+    }
+
+    .days-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .day-btn {
+      min-width: 46px;
+      min-height: 38px;
+      padding: 0 10px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface);
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .day-btn[aria-pressed='true'] {
+      background: var(--action-primary);
+      border-color: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .toggle-row label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .toggle-row input[type='checkbox'] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--action-primary);
+    }
+
+    .alert-box {
+      padding: 11px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .alert-error {
+      background: var(--status-danger-soft);
+      border-color: var(--status-danger);
+      color: var(--status-danger);
+    }
+
+    .alert-info {
+      background: var(--status-info-soft);
+      border-color: var(--status-info);
+      color: var(--status-info);
+    }
+
+    .alert-success {
+      background: var(--status-success-soft);
+      border-color: var(--status-success);
+      color: var(--status-success);
+    }
+
+    .batch-preview {
+      border: 1px dashed var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .batch-item {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      font-size: 0.76rem;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 2px 8px;
+      border-radius: var(--radius-xs);
+      font-size: 0.73rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .tag-info {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+    }
+
+    .tag-success {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+    }
+
+    .tag-warning {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+    }
+
+    .tag-neutral {
+      background: var(--surface-interactive);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--surface);
+    }
+
+    .filter-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.82rem;
+    }
+
+    th {
+      background: var(--surface-raised);
+      padding: 10px 14px;
+      font-size: 0.71rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      border-bottom: 1px solid var(--border-subtle);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      vertical-align: middle;
+    }
+
+    tbody tr {
+      transition: background-color var(--transition);
+    }
+
+    tbody tr:hover {
+      background: var(--surface-hover);
+    }
+
+    .row-select-btn {
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      border: none;
+      color: inherit;
+      font: inherit;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .schedule-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 1px;
+      background: var(--border-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    .cal-head {
+      background: var(--surface-raised);
+      padding: 8px 6px;
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .cal-cell {
+      background: var(--surface);
+      min-height: 112px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .cal-cell-today {
+      background: var(--surface-raised);
+    }
+
+    .cal-day-num {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .cal-card {
+      width: 100%;
+      text-align: left;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-left: 3px solid var(--status-info);
+      border-radius: var(--radius-xs);
+      padding: 5px 7px;
+      font-family: inherit;
+      font-size: 0.71rem;
+      color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .cal-card-pub {
+      border-left-color: var(--status-success);
+      background: var(--status-success-soft);
+    }
+
+    .cal-card:hover {
+      border-color: var(--border-strong);
+      background: var(--surface-hover);
+    }
+
+    .empty-state {
+      padding: 40px 20px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-secondary);
+    }
+
+    .empty-state h3 {
+      margin: 0;
+      font-size: 0.96rem;
+      color: var(--text-primary);
+    }
+
+    .empty-state p {
+      margin: 0;
+      max-width: 420px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay-backdrop);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 100;
+    }
+
+    .modal-backdrop[data-open='true'] {
+      display: flex;
+    }
+
+    .modal-dialog {
+      width: 100%;
+      max-width: 560px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-modal);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .code-preview {
+      margin: 0;
+      padding: 12px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      overflow-x: auto;
+      line-height: 1.45;
+    }
+
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      background: var(--surface-raised);
+      border: 1px solid var(--status-success);
+      color: var(--text-primary);
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-card);
+      font-size: 0.82rem;
+      font-weight: 700;
+      display: none;
+      z-index: 120;
+    }
+
+    .toast[data-visible='true'] {
+      display: block;
+    }
+
+    @media (max-width: 980px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+      .calendar-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .cal-head {
+        display: none;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .app-shell {
+        padding: 14px 12px 44px;
+      }
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+      .btn,
+      .chip-btn,
+      .preset-btn,
+      .mode-switch button,
+      .day-btn {
+        min-height: 44px;
+      }
+      .calendar-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="topbar-title-group">
+        <h1>Pemisahan Jadwal Produksi &amp; Publish Auto Pipeline</h1>
+        <p class="topbar-subtitle">Mockup interaktif untuk simulasi mode Tanggal Spesifik (H-1 produksi, H-0 tayang) dan Rutin Mingguan (Hari Tayang H+0/H+1/H+2).</p>
+      </div>
+      <div class="topbar-actions">
+        <button type="button" class="btn" id="btnInspectPayload">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+          Lihat Payload API / MCP
+        </button>
+        <button type="button" class="btn" id="btnToggleTheme" aria-label="Ganti tema Light atau Dark Mode">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+          </svg>
+          <span id="themeLabel">Mode Terang</span>
+        </button>
+      </div>
+    </header>
+
+    <section class="scenario-strip" aria-label="Skenario uji cepat">
+      <span class="scenario-label">Skenario cepat:</span>
+      <button type="button" class="chip-btn" data-scenario="h1_specific" aria-pressed="true">Kasus A: Tanggal Spesifik (Produksi H-1 15:00, Tayang H-0 07:15)</button>
+      <button type="button" class="chip-btn" data-scenario="h1_recurring" aria-pressed="false">Kasus B: Rutin Malam (Gen 20:00, Tayang H+1 06:15)</button>
+      <button type="button" class="chip-btn" data-scenario="invalid_date" aria-pressed="false">Kasus Error: Tanggal Tayang Terbalik</button>
+      <button type="button" class="chip-btn" data-scenario="empty_list" aria-pressed="false">State Kosong (Empty)</button>
+    </section>
+
+    <main class="main-grid">
+      <!-- PANEL KIRI: FORM BUAT / EDIT JADWAL -->
+      <section class="panel" aria-labelledby="formHeading">
+        <div class="panel-header">
+          <h2 id="formHeading">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span id="formTitleText">Form Jadwal Auto Pipeline</span>
+          </h2>
+          <div class="mode-switch" role="group" aria-label="Mode penjadwalan">
+            <button type="button" id="btnModeRecurring" aria-pressed="false">Rutin Mingguan</button>
+            <button type="button" id="btnModeSpecific" aria-pressed="true">Tanggal Spesifik</button>
+          </div>
+        </div>
+
+        <form class="panel-body" id="scheduleForm">
+          <div class="field-group">
+            <label class="field-label" for="schedName">
+              <span>Nama Pengenal Jadwal</span>
+              <span class="field-hint">Wajib diisi</span>
+            </label>
+            <input class="input" id="schedName" type="text" value="Multiplier Dapur Botani - Pagi" required />
+          </div>
+
+          <!-- MODE TANGGAL SPESIFIK: 2 BLOK TERPISAH -->
+          <div id="specificDateBlocks" class="schedule-stack" style="gap: 12px;">
+            <div class="schedule-block schedule-block-prod">
+              <div class="block-head">
+                <span class="block-title block-title-prod">1. Jadwal Produksi (Generate &amp; Render)</span>
+                <span class="tag tag-info">One-Time Execution</span>
+              </div>
+              <div class="two-col">
+                <div class="field-group">
+                  <label class="field-label" for="schedTargetDate">Tanggal Produksi</label>
+                  <input class="input" id="schedTargetDate" type="date" value="2026-11-25" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label" for="schedGenTimeSpecific">Jam Generate (WIB)</label>
+                  <input class="input input-time" id="schedGenTimeSpecific" type="time" value="15:00" />
+                </div>
+              </div>
+              <div class="quick-presets" role="group" aria-label="Preset cepat tanggal produksi">
+                <button type="button" class="preset-btn" data-prod-offset="0">Hari Ini (25 Nov)</button>
+                <button type="button" class="preset-btn" data-prod-offset="1">Besok (26 Nov)</button>
+                <button type="button" class="preset-btn" data-prod-offset="3">+3 Hari</button>
+              </div>
+            </div>
+
+            <div class="schedule-block schedule-block-pub">
+              <div class="block-head">
+                <span class="block-title block-title-pub">2. Jadwal Publish (Tayang ke Repliz)</span>
+                <span class="tag tag-success" id="specificGapTag">Buffer +1 Hari (H-1 ke H-0)</span>
+              </div>
+              <div class="two-col">
+                <div class="field-group">
+                  <label class="field-label" for="schedPublishDate">Tanggal Tayang</label>
+                  <input class="input" id="schedPublishDate" type="date" value="2026-11-26" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label" for="schedPubTimeSpecific">Jam Tayang (WIB)</label>
+                  <input class="input input-time" id="schedPubTimeSpecific" type="time" value="07:15" />
+                </div>
+              </div>
+              <div class="quick-presets" role="group" aria-label="Preset cepat tanggal tayang">
+                <button type="button" class="preset-btn" id="btnPubSameDay" data-pub-offset="0" aria-pressed="false">Sama dengan Produksi</button>
+                <button type="button" class="preset-btn" id="btnPubPlusOne" data-pub-offset="1" aria-pressed="true">+1 Hari (H+1)</button>
+                <button type="button" class="preset-btn" id="btnPubPlusTwo" data-pub-offset="2" aria-pressed="false">+2 Hari (H+2)</button>
+              </div>
+            </div>
+
+            <div class="toggle-row">
+              <label for="chkStaggerBatch">
+                <input type="checkbox" id="chkStaggerBatch" checked />
+                <span>Simulasikan Batch Auto-Stagger Kalender (+1 hari per item)</span>
+              </label>
+            </div>
+
+            <div class="batch-preview" id="batchPreviewBox">
+              <div class="field-label">
+                <span>Pratinjau Batch (3 Item)</span>
+                <span class="field-hint">Jarak produksi ke tayang ikut bergeser konsisten</span>
+              </div>
+              <div id="batchPreviewRows"></div>
+            </div>
+          </div>
+
+          <!-- MODE RUTIN MINGGUAN -->
+          <div id="recurringBlocks" class="schedule-stack" style="gap: 12px; display: none;">
+            <div class="schedule-block schedule-block-prod">
+              <div class="block-head">
+                <span class="block-title block-title-prod">1. Jadwal Produksi Rutin</span>
+                <span class="tag tag-neutral">Berulang Mingguan</span>
+              </div>
+              <div class="field-group">
+                <span class="field-label">Hari Eksekusi</span>
+                <div class="days-row" role="group" aria-label="Pilih hari rutin">
+                  <button type="button" class="day-btn" data-day="1" aria-pressed="true">Sen</button>
+                  <button type="button" class="day-btn" data-day="2" aria-pressed="true">Sel</button>
+                  <button type="button" class="day-btn" data-day="3" aria-pressed="true">Rab</button>
+                  <button type="button" class="day-btn" data-day="4" aria-pressed="true">Kam</button>
+                  <button type="button" class="day-btn" data-day="5" aria-pressed="true">Jum</button>
+                  <button type="button" class="day-btn" data-day="6" aria-pressed="true">Sab</button>
+                  <button type="button" class="day-btn" data-day="0" aria-pressed="true">Min</button>
+                </div>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="schedGenTimeRecurring">Jam Generate (WIB)</label>
+                <input class="input input-time" id="schedGenTimeRecurring" type="time" value="20:00" />
+              </div>
+            </div>
+
+            <div class="schedule-block schedule-block-pub">
+              <div class="block-head">
+                <span class="block-title block-title-pub">2. Jadwal Publish Rutin</span>
+                <span class="tag tag-success" id="recurringSummaryTag">Gen 20:00 -> Tayang H+1 06:15</span>
+              </div>
+              <div class="two-col">
+                <div class="field-group">
+                  <label class="field-label" for="schedPublishDayOffset">Hari Tayang</label>
+                  <select class="select" id="schedPublishDayOffset">
+                    <option value="0">Hari yang sama (H+0)</option>
+                    <option value="1" selected>Besok / H+1</option>
+                    <option value="2">Lusa / H+2</option>
+                    <option value="3">+3 Hari (H+3)</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label class="field-label" for="schedPubTimeRecurring">Jam Tayang (WIB)</label>
+                  <input class="input input-time" id="schedPubTimeRecurring" type="time" value="06:15" />
+                </div>
+              </div>
+              <span class="field-hint">Jika render melewati pukul 00:00, sistem mengunci tanggal mulai produksi (`last_run_target_date`) agar jadwal tayang tidak melompat +1 hari ekstra.</span>
+            </div>
+          </div>
+
+          <div class="toggle-row">
+            <label for="chkAutoPublish">
+              <input type="checkbox" id="chkAutoPublish" checked />
+              <span>Aktifkan Auto-Publish ke Repliz setelah render selesai</span>
+            </label>
+          </div>
+
+          <div id="validationAlert" class="alert-box alert-info" role="status" aria-live="polite">
+            <span id="validationText"></span>
+          </div>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end;">
+            <button type="button" class="btn" id="btnResetForm">Reset Form</button>
+            <button type="submit" class="btn btn-primary" id="btnSubmitForm">Simpan ke Daftar Jadwal</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- PANEL KANAN: DAFTAR JADWAL & KALENDER -->
+      <section class="panel" aria-labelledby="listHeading">
+        <div class="panel-header">
+          <h2 id="listHeading">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <line x1="8" y1="6" x2="21" y2="6"></line>
+              <line x1="8" y1="12" x2="21" y2="12"></line>
+              <line x1="8" y1="18" x2="21" y2="18"></line>
+              <line x1="3" y1="6" x2="3.01" y2="6"></line>
+              <line x1="3" y1="12" x2="3.01" y2="12"></line>
+              <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </svg>
+            <span>Daftar &amp; Kalender Jadwal</span>
+          </h2>
+          <div class="mode-switch" role="group" aria-label="Pilih tampilan jadwal">
+            <button type="button" id="btnViewTable" aria-pressed="true">Tampilan Tabel</button>
+            <button type="button" id="btnViewCalendar" aria-pressed="false">Tampilan Kalender</button>
+          </div>
+        </div>
+
+        <div class="filter-bar">
+          <div class="filter-group" role="group" aria-label="Filter mode jadwal">
+            <button type="button" class="chip-btn" data-filter-mode="all" aria-pressed="true">Semua</button>
+            <button type="button" class="chip-btn" data-filter-mode="specific_date" aria-pressed="false">Tanggal Spesifik</button>
+            <button type="button" class="chip-btn" data-filter-mode="recurring" aria-pressed="false">Rutin</button>
+          </div>
+          <div class="filter-group">
+            <label class="field-hint" for="filterPublishDate">Filter Tanggal Tayang:</label>
+            <input class="input" id="filterPublishDate" type="date" style="width: auto; min-height: 36px; font-size: 0.78rem;" />
+            <button type="button" class="btn btn-sm" id="btnClearPubFilter">Semua Tgl</button>
+          </div>
+        </div>
+
+        <div id="tableViewContainer">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Jadwal Produksi</th>
+                  <th>Jadwal Publish (Repliz)</th>
+                  <th>Topik &amp; Brand</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="scheduleTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="calendarViewContainer" style="display: none; padding: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;">
+            <strong style="font-size: 0.92rem;">Pekan Uji: 24 Nov - 30 Nov 2026</strong>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <span class="tag tag-info">Kartu Biru: Produksi</span>
+              <span class="tag tag-success">Kartu Hijau: Tayang H-0</span>
+            </div>
+          </div>
+          <div class="calendar-grid" id="calendarGrid"></div>
+        </div>
+
+        <div id="emptyStateContainer" class="empty-state" style="display: none;">
+          <h3>Tidak ada jadwal yang cocok dengan filter</h3>
+          <p>Belum ada jadwal yang diproduksi atau dijadwalkan tayang untuk kriteria ini. Reset filter atau buat jadwal baru di panel kiri.</p>
+          <button type="button" class="btn btn-primary btn-sm" id="btnEmptyReset">Tampilkan Semua Jadwal</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL PAYLOAD API & MCP -->
+  <div class="modal-backdrop" id="payloadModal" role="dialog" aria-modal="true" aria-labelledby="payloadModalTitle">
+    <div class="modal-dialog">
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+        <h3 id="payloadModalTitle" style="margin: 0; font-size: 1rem;">Preview Payload API &amp; MCP</h3>
+        <button type="button" class="btn btn-sm" id="btnCloseModal" aria-label="Tutup dialog payload">Tutup</button>
+      </div>
+      <p style="margin: 0; font-size: 0.8rem; color: var(--text-secondary);">
+        Struktur JSON yang dikirim ke <code>POST /api/v2/recipes/auto-pipeline-schedules</code> dan tool MCP <code>cf_create_schedule</code>:
+      </p>
+      <pre class="code-preview" id="payloadPre"></pre>
+    </div>
+  </div>
+
+  <div class="toast" id="toastBox" role="status" aria-live="polite"></div>
+
+  <script>
+    (function () {
+      const BASE_TODAY = '2026-11-25';
+      const state = {
+        theme: 'dark',
+        mode: 'specific_date',
+        view: 'table',
+        filterMode: 'all',
+        filterPublishDate: '',
+        editingId: null,
+        days: [0, 1, 2, 3, 4, 5, 6],
+        schedules: [
+          {
+            id: 'sched_h1_01',
+            name: 'Multiplier Dapur Botani - Pagi',
+            brand: 'Dapur Botani',
+            schedule_mode: 'specific_date',
+            target_date: '2026-11-25',
+            generation_time: '15:00',
+            publish_date: '2026-11-26',
+            publish_time: '07:15',
+            publish_day_offset: 0,
+            auto_publish_enabled: true,
+            status: 'active'
+          },
+          {
+            id: 'sched_rec_02',
+            name: 'Nutribake Malam ke Pagi',
+            brand: 'Nutribake',
+            schedule_mode: 'recurring',
+            target_date: null,
+            generation_time: '20:00',
+            publish_date: null,
+            publish_time: '06:15',
+            publish_day_offset: 1,
+            days_of_week: [1, 2, 3, 4, 5, 6, 0],
+            auto_publish_enabled: true,
+            status: 'active'
+          },
+          {
+            id: 'sched_legacy_03',
+            name: 'Jadwal Lama Same-Day',
+            brand: 'HabitFolk',
+            schedule_mode: 'specific_date',
+            target_date: '2026-11-26',
+            generation_time: '02:05',
+            publish_date: '2026-11-26',
+            publish_time: '07:15',
+            publish_day_offset: 0,
+            auto_publish_enabled: true,
+            status: 'active'
+          }
+        ]
+      };
+
+      const el = {
+        html: document.documentElement,
+        themeLabel: document.getElementById('themeLabel'),
+        btnToggleTheme: document.getElementById('btnToggleTheme'),
+        btnModeRecurring: document.getElementById('btnModeRecurring'),
+        btnModeSpecific: document.getElementById('btnModeSpecific'),
+        specificDateBlocks: document.getElementById('specificDateBlocks'),
+        recurringBlocks: document.getElementById('recurringBlocks'),
+        schedName: document.getElementById('schedName'),
+        schedTargetDate: document.getElementById('schedTargetDate'),
+        schedGenTimeSpecific: document.getElementById('schedGenTimeSpecific'),
+        schedPublishDate: document.getElementById('schedPublishDate'),
+        schedPubTimeSpecific: document.getElementById('schedPubTimeSpecific'),
+        specificGapTag: document.getElementById('specificGapTag'),
+        chkStaggerBatch: document.getElementById('chkStaggerBatch'),
+        batchPreviewBox: document.getElementById('batchPreviewBox'),
+        batchPreviewRows: document.getElementById('batchPreviewRows'),
+        schedGenTimeRecurring: document.getElementById('schedGenTimeRecurring'),
+        schedPublishDayOffset: document.getElementById('schedPublishDayOffset'),
+        schedPubTimeRecurring: document.getElementById('schedPubTimeRecurring'),
+        recurringSummaryTag: document.getElementById('recurringSummaryTag'),
+        chkAutoPublish: document.getElementById('chkAutoPublish'),
+        validationAlert: document.getElementById('validationAlert'),
+        validationText: document.getElementById('validationText'),
+        btnSubmitForm: document.getElementById('btnSubmitForm'),
+        btnResetForm: document.getElementById('btnResetForm'),
+        formTitleText: document.getElementById('formTitleText'),
+        scheduleForm: document.getElementById('scheduleForm'),
+        btnViewTable: document.getElementById('btnViewTable'),
+        btnViewCalendar: document.getElementById('btnViewCalendar'),
+        tableViewContainer: document.getElementById('tableViewContainer'),
+        calendarViewContainer: document.getElementById('calendarViewContainer'),
+        emptyStateContainer: document.getElementById('emptyStateContainer'),
+        scheduleTableBody: document.getElementById('scheduleTableBody'),
+        calendarGrid: document.getElementById('calendarGrid'),
+        filterPublishDate: document.getElementById('filterPublishDate'),
+        btnClearPubFilter: document.getElementById('btnClearPubFilter'),
+        btnEmptyReset: document.getElementById('btnEmptyReset'),
+        btnInspectPayload: document.getElementById('btnInspectPayload'),
+        payloadModal: document.getElementById('payloadModal'),
+        payloadPre: document.getElementById('payloadPre'),
+        btnCloseModal: document.getElementById('btnCloseModal'),
+        toastBox: document.getElementById('toastBox')
+      };
+
+      function addDays(dateStr, days) {
+        if (!dateStr) return '';
+        const [y, m, d] = dateStr.split('-').map(Number);
+        const dt = new Date(Date.UTC(y, m - 1, d + days));
+        return dt.toISOString().slice(0, 10);
+      }
+
+      function diffDays(startStr, endStr) {
+        if (!startStr || !endStr) return 0;
+        const a = Date.parse(startStr + 'T00:00:00Z');
+        const b = Date.parse(endStr + 'T00:00:00Z');
+        return Math.round((b - a) / 86400000);
+      }
+
+      function formatShortId(dateStr) {
+        if (!dateStr) return '-';
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        const [y, m, d] = dateStr.split('-').map(Number);
+        return d + ' ' + (months[m - 1] || m);
+      }
+
+      function showToast(msg) {
+        el.toastBox.textContent = msg;
+        el.toastBox.setAttribute('data-visible', 'true');
+        clearTimeout(showToast._t);
+        showToast._t = setTimeout(() => {
+          el.toastBox.setAttribute('data-visible', 'false');
+        }, 3200);
+      }
+
+      function validateCurrentForm() {
+        const autoPub = el.chkAutoPublish.checked;
+        if (state.mode === 'specific_date') {
+          const td = el.schedTargetDate.value;
+          const pd = el.schedPublishDate.value;
+          const gt = el.schedGenTimeSpecific.value;
+          const pt = el.schedPubTimeSpecific.value;
+          if (!td || !pd) {
+            return { valid: false, level: 'error', message: 'HTTP 400: Tanggal produksi dan tanggal tayang wajib diisi.' };
+          }
+          if (autoPub && pd < td) {
+            return {
+              valid: false,
+              level: 'error',
+              message: 'HTTP 400: Tanggal publish (' + formatShortId(pd) + ') tidak boleh lebih awal dari tanggal produksi (' + formatShortId(td) + ').'
+            };
+          }
+          if (autoPub && pd === td && pt <= gt) {
+            return {
+              valid: false,
+              level: 'error',
+              message: 'HTTP 400: Pada tanggal yang sama, jam tayang (' + pt + ') harus lebih lambat dari jam produksi (' + gt + '), atau klik +1 Hari (H+1).'
+            };
+          }
+          const gap = diffDays(td, pd);
+          return {
+            valid: true,
+            level: 'success',
+            message: gap > 0
+              ? 'Valid: Produksi ' + formatShortId(td) + ' pukul ' + gt + ' WIB, lalu tayang ' + formatShortId(pd) + ' pukul ' + pt + ' WIB (buffer +' + gap + ' hari).'
+              : 'Valid (same-day): Produksi ' + formatShortId(td) + ' pukul ' + gt + ' WIB, tayang hari yang sama pukul ' + pt + ' WIB.'
+          };
+        }
+
+        const gt = el.schedGenTimeRecurring.value;
+        const pt = el.schedPubTimeRecurring.value;
+        const offset = Number(el.schedPublishDayOffset.value || 0);
+        if (autoPub && offset === 0 && pt <= gt) {
+          return {
+            valid: false,
+            level: 'error',
+            message: 'HTTP 400: Jam tayang (' + pt + ') lebih awal atau sama dengan jam produksi (' + gt + '). Gunakan Hari Tayang: Besok / H+1.'
+          };
+        }
+        return {
+          valid: true,
+          level: 'success',
+          message: offset > 0
+            ? 'Valid: Produksi rutin pukul ' + gt + ' WIB, jadwal Repliz dipasang ke H+' + offset + ' pukul ' + pt + ' WIB.'
+            : 'Valid: Produksi rutin pukul ' + gt + ' WIB dan tayang hari yang sama pukul ' + pt + ' WIB.'
+        };
+      }
+
+      function renderFormState() {
+        const isSpec = state.mode === 'specific_date';
+        el.btnModeSpecific.setAttribute('aria-pressed', String(isSpec));
+        el.btnModeRecurring.setAttribute('aria-pressed', String(!isSpec));
+        el.specificDateBlocks.style.display = isSpec ? 'flex' : 'none';
+        el.recurringBlocks.style.display = isSpec ? 'none' : 'flex';
+
+        if (isSpec) {
+          const td = el.schedTargetDate.value;
+          const pd = el.schedPublishDate.value;
+          const gap = diffDays(td, pd);
+          el.specificGapTag.textContent = gap > 0
+            ? 'Buffer +' + gap + ' Hari'
+            : (gap === 0 ? 'Hari yang sama (H+0)' : 'Tanggal terbalik (' + gap + ' hari)');
+
+          document.querySelectorAll('[data-pub-offset]').forEach(btn => {
+            const off = Number(btn.getAttribute('data-pub-offset'));
+            btn.setAttribute('aria-pressed', String(gap === off));
+          });
+
+          const stagger = el.chkStaggerBatch.checked;
+          const gt = el.schedGenTimeSpecific.value;
+          const pt = el.schedPubTimeSpecific.value;
+          const previewHtml = [0, 1, 2].map(idx => {
+            const rowTd = stagger ? addDays(td, idx) : td;
+            const rowPd = stagger ? addDays(pd, idx) : pd;
+            return '<div class="batch-item">' +
+              '<span><strong>#' + (idx + 1) + '</strong> Produk Batch ' + (idx + 1) + '</span>' +
+              '<span style="display:flex; gap:6px; flex-wrap:wrap;">' +
+                '<span class="tag tag-info">Prod: ' + formatShortId(rowTd) + ' ' + gt + '</span>' +
+                '<span class="tag tag-success">Tayang: ' + formatShortId(rowPd) + ' ' + pt + '</span>' +
+              '</span>' +
+            '</div>';
+          }).join('');
+          el.batchPreviewRows.innerHTML = previewHtml;
+        } else {
+          const gt = el.schedGenTimeRecurring.value;
+          const pt = el.schedPubTimeRecurring.value;
+          const off = Number(el.schedPublishDayOffset.value || 0);
+          el.recurringSummaryTag.textContent = 'Gen ' + gt + ' -> Tayang H+' + off + ' ' + pt;
+          document.querySelectorAll('.day-btn').forEach(btn => {
+            const d = Number(btn.getAttribute('data-day'));
+            btn.setAttribute('aria-pressed', String(state.days.includes(d)));
+          });
+        }
+
+        const v = validateCurrentForm();
+        el.validationAlert.className = 'alert-box ' + (v.level === 'error' ? 'alert-error' : 'alert-success');
+        el.validationText.textContent = v.message;
+        el.btnSubmitForm.disabled = !v.valid;
+        el.formTitleText.textContent = state.editingId ? 'Edit Jadwal Auto Pipeline' : 'Form Jadwal Auto Pipeline';
+        el.btnSubmitForm.textContent = state.editingId ? 'Perbarui Jadwal' : 'Simpan ke Daftar Jadwal';
+      }
+
+      function getFilteredSchedules() {
+        return state.schedules.filter(s => {
+          if (state.filterMode !== 'all' && s.schedule_mode !== state.filterMode) return false;
+          if (state.filterPublishDate) {
+            if (s.schedule_mode === 'specific_date') {
+              const effPub = s.publish_date || addDays(s.target_date, s.publish_day_offset || 0);
+              return effPub === state.filterPublishDate;
+            }
+            return false;
+          }
+          return true;
+        });
+      }
+
+      function renderScheduleViews() {
+        const rows = getFilteredSchedules();
+        document.querySelectorAll('[data-filter-mode]').forEach(b => {
+          b.setAttribute('aria-pressed', String(b.getAttribute('data-filter-mode') === state.filterMode));
+        });
+        el.btnViewTable.setAttribute('aria-pressed', String(state.view === 'table'));
+        el.btnViewCalendar.setAttribute('aria-pressed', String(state.view === 'calendar'));
+
+        if (rows.length === 0) {
+          el.tableViewContainer.style.display = 'none';
+          el.calendarViewContainer.style.display = 'none';
+          el.emptyStateContainer.style.display = 'flex';
+          return;
+        }
+
+        el.emptyStateContainer.style.display = 'none';
+        el.tableViewContainer.style.display = state.view === 'table' ? 'block' : 'none';
+        el.calendarViewContainer.style.display = state.view === 'calendar' ? 'block' : 'none';
+
+        el.scheduleTableBody.innerHTML = rows.map(s => {
+          const isSpec = s.schedule_mode === 'specific_date';
+          const prodCol = isSpec
+            ? '<span class="tag tag-info">' + formatShortId(s.target_date) + ' · ' + s.generation_time + '</span>'
+            : '<span class="tag tag-neutral">Rutin · ' + s.generation_time + '</span>';
+
+          let pubCol = '';
+          if (isSpec) {
+            const effPubDate = s.publish_date || s.target_date;
+            const isDiff = effPubDate !== s.target_date;
+            pubCol = '<div class="schedule-stack">' +
+              '<span class="tag tag-success">' + formatShortId(effPubDate) + ' · ' + s.publish_time + '</span>' +
+              (isDiff ? '<span class="field-hint">Terpisah dari produksi</span>' : '<span class="field-hint">Hari yang sama</span>') +
+            '</div>';
+          } else {
+            const off = Number(s.publish_day_offset || 0);
+            pubCol = '<div class="schedule-stack">' +
+              '<span class="tag tag-success">H+' + off + ' · ' + s.publish_time + '</span>' +
+              '<span class="field-hint">' + (off === 0 ? 'Hari yang sama' : (off === 1 ? 'Besok pagi/siang' : '+' + off + ' hari')) + '</span>' +
+            '</div>';
+          }
+
+          return '<tr>' +
+            '<td>' + prodCol + '</td>' +
+            '<td>' + pubCol + '</td>' +
+            '<td>' +
+              '<button type="button" class="row-select-btn" data-edit-id="' + s.id + '">' +
+                '<strong style="color:var(--text-primary);">' + s.name + '</strong>' +
+                '<span class="field-hint">' + s.brand + '</span>' +
+              '</button>' +
+            '</td>' +
+            '<td><span class="tag tag-success">Aktif</span></td>' +
+          '</tr>';
+        }).join('');
+
+        // Render 7-day sample calendar (24-30 Nov 2026)
+        const weekDays = [
+          { name: 'Sel', date: '2026-11-24' },
+          { name: 'Rab', date: '2026-11-25', today: true },
+          { name: 'Kam', date: '2026-11-26' },
+          { name: 'Jum', date: '2026-11-27' },
+          { name: 'Sab', date: '2026-11-28' },
+          { name: 'Min', date: '2026-11-29' },
+          { name: 'Sen', date: '2026-11-30' }
+        ];
+
+        const headHtml = weekDays.map(d => '<div class="cal-head">' + d.name + '</div>').join('');
+        const cellsHtml = weekDays.map(day => {
+          const cards = [];
+          rows.forEach(s => {
+            if (s.schedule_mode === 'specific_date') {
+              const effPub = s.publish_date || s.target_date;
+              if (s.target_date === day.date) {
+                cards.push(
+                  '<button type="button" class="cal-card" data-edit-id="' + s.id + '">' +
+                    '<strong style="color:var(--status-info);">Produksi ' + s.generation_time + '</strong>' +
+                    '<span>' + s.name + '</span>' +
+                    (effPub !== s.target_date ? '<span class="field-hint">Tayang: ' + formatShortId(effPub) + ' ' + s.publish_time + '</span>' : '') +
+                  '</button>'
+                );
+              }
+              if (effPub === day.date && effPub !== s.target_date) {
+                cards.push(
+                  '<button type="button" class="cal-card cal-card-pub" data-edit-id="' + s.id + '">' +
+                    '<strong style="color:var(--status-success);">Tayang ' + s.publish_time + '</strong>' +
+                    '<span>' + s.name + '</span>' +
+                    '<span class="field-hint">Hasil produksi ' + formatShortId(s.target_date) + '</span>' +
+                  '</button>'
+                );
+              }
+            } else {
+              cards.push(
+                '<button type="button" class="cal-card" data-edit-id="' + s.id + '">' +
+                  '<strong style="color:var(--status-info);">Gen ' + s.generation_time + ' -> H+' + (s.publish_day_offset || 0) + ' ' + s.publish_time + '</strong>' +
+                  '<span>' + s.name + '</span>' +
+                '</button>'
+              );
+            }
+          });
+          return '<div class="cal-cell ' + (day.today ? 'cal-cell-today' : '') + '">' +
+            '<div class="cal-day-num"><span>' + formatShortId(day.date) + '</span>' + (day.today ? '<span class="tag tag-info">Hari ini</span>' : '') + '</div>' +
+            cards.join('') +
+          '</div>';
+        }).join('');
+
+        el.calendarGrid.innerHTML = headHtml + cellsHtml;
+      }
+
+      function buildApiPayload() {
+        if (state.mode === 'specific_date') {
+          return {
+            name: el.schedName.value.trim(),
+            schedule_mode: 'specific_date',
+            target_date: el.schedTargetDate.value,
+            generation_date: el.schedTargetDate.value,
+            generation_time: el.schedGenTimeSpecific.value,
+            publish_date: el.schedPublishDate.value,
+            publish_time: el.schedPubTimeSpecific.value,
+            publish_day_offset: 0,
+            auto_publish_enabled: el.chkAutoPublish.checked,
+            timezone: 'Asia/Jakarta'
+          };
+        }
+        return {
+          name: el.schedName.value.trim(),
+          schedule_mode: 'recurring',
+          days_of_week: state.days,
+          generation_time: el.schedGenTimeRecurring.value,
+          publish_time: el.schedPubTimeRecurring.value,
+          publish_day_offset: Number(el.schedPublishDayOffset.value || 0),
+          auto_publish_enabled: el.chkAutoPublish.checked,
+          timezone: 'Asia/Jakarta'
+        };
+      }
+
+      function loadScenario(key) {
+        document.querySelectorAll('[data-scenario]').forEach(b => {
+          b.setAttribute('aria-pressed', String(b.getAttribute('data-scenario') === key));
+        });
+        state.editingId = null;
+        if (key === 'h1_specific') {
+          state.mode = 'specific_date';
+          state.filterMode = 'all';
+          state.filterPublishDate = '';
+          el.filterPublishDate.value = '';
+          el.schedName.value = 'Multiplier Dapur Botani - Pagi';
+          el.schedTargetDate.value = '2026-11-25';
+          el.schedGenTimeSpecific.value = '15:00';
+          el.schedPublishDate.value = '2026-11-26';
+          el.schedPubTimeSpecific.value = '07:15';
+          el.chkAutoPublish.checked = true;
+        } else if (key === 'h1_recurring') {
+          state.mode = 'recurring';
+          state.filterMode = 'all';
+          state.filterPublishDate = '';
+          el.filterPublishDate.value = '';
+          el.schedName.value = 'Nutribake Malam ke Pagi';
+          el.schedGenTimeRecurring.value = '20:00';
+          el.schedPubTimeRecurring.value = '06:15';
+          el.schedPublishDayOffset.value = '1';
+          el.chkAutoPublish.checked = true;
+        } else if (key === 'invalid_date') {
+          state.mode = 'specific_date';
+          el.schedName.value = 'Uji Validasi Tanggal Terbalik';
+          el.schedTargetDate.value = '2026-11-27';
+          el.schedGenTimeSpecific.value = '15:00';
+          el.schedPublishDate.value = '2026-11-26';
+          el.schedPubTimeSpecific.value = '07:15';
+          el.chkAutoPublish.checked = true;
+        } else if (key === 'empty_list') {
+          state.filterPublishDate = '2026-12-31';
+          el.filterPublishDate.value = '2026-12-31';
+        }
+        renderFormState();
+        renderScheduleViews();
+      }
+
+      // Event bindings
+      el.btnToggleTheme.addEventListener('click', () => {
+        state.theme = state.theme === 'dark' ? 'light' : 'dark';
+        el.html.setAttribute('data-theme', state.theme);
+        el.themeLabel.textContent = state.theme === 'dark' ? 'Mode Terang' : 'Mode Gelap';
+      });
+
+      el.btnModeSpecific.addEventListener('click', () => {
+        state.mode = 'specific_date';
+        renderFormState();
+      });
+
+      el.btnModeRecurring.addEventListener('click', () => {
+        state.mode = 'recurring';
+        renderFormState();
+      });
+
+      [
+        el.schedTargetDate,
+        el.schedGenTimeSpecific,
+        el.schedPublishDate,
+        el.schedPubTimeSpecific,
+        el.chkStaggerBatch,
+        el.schedGenTimeRecurring,
+        el.schedPublishDayOffset,
+        el.schedPubTimeRecurring,
+        el.chkAutoPublish
+      ].forEach(node => {
+        node.addEventListener('input', renderFormState);
+        node.addEventListener('change', renderFormState);
+      });
+
+      document.querySelectorAll('[data-prod-offset]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const offset = Number(btn.getAttribute('data-prod-offset'));
+          const prevGap = Math.max(0, diffDays(el.schedTargetDate.value, el.schedPublishDate.value));
+          const nextProd = addDays(BASE_TODAY, offset);
+          el.schedTargetDate.value = nextProd;
+          el.schedPublishDate.value = addDays(nextProd, prevGap);
+          renderFormState();
+        });
+      });
+
+      document.querySelectorAll('[data-pub-offset]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const offset = Number(btn.getAttribute('data-pub-offset'));
+          const base = el.schedTargetDate.value || BASE_TODAY;
+          el.schedPublishDate.value = addDays(base, offset);
+          renderFormState();
+        });
+      });
+
+      document.querySelectorAll('.day-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const d = Number(btn.getAttribute('data-day'));
+          if (state.days.includes(d)) {
+            if (state.days.length > 1) state.days = state.days.filter(x => x !== d);
+          } else {
+            state.days = [...state.days, d];
+          }
+          renderFormState();
+        });
+      });
+
+      document.querySelectorAll('[data-scenario]').forEach(btn => {
+        btn.addEventListener('click', () => loadScenario(btn.getAttribute('data-scenario')));
+      });
+
+      document.querySelectorAll('[data-filter-mode]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.filterMode = btn.getAttribute('data-filter-mode');
+          renderScheduleViews();
+        });
+      });
+
+      el.filterPublishDate.addEventListener('change', () => {
+        state.filterPublishDate = el.filterPublishDate.value;
+        renderScheduleViews();
+      });
+
+      el.btnClearPubFilter.addEventListener('click', () => {
+        state.filterPublishDate = '';
+        el.filterPublishDate.value = '';
+        renderScheduleViews();
+      });
+
+      el.btnEmptyReset.addEventListener('click', () => {
+        state.filterMode = 'all';
+        state.filterPublishDate = '';
+        el.filterPublishDate.value = '';
+        renderScheduleViews();
+      });
+
+      el.btnViewTable.addEventListener('click', () => {
+        state.view = 'table';
+        renderScheduleViews();
+      });
+
+      el.btnViewCalendar.addEventListener('click', () => {
+        state.view = 'calendar';
+        renderScheduleViews();
+      });
+
+      el.btnResetForm.addEventListener('click', () => {
+        loadScenario('h1_specific');
+        showToast('Form dikembalikan ke default.');
+      });
+
+      el.scheduleForm.addEventListener('submit', e => {
+        e.preventDefault();
+        const v = validateCurrentForm();
+        if (!v.valid) return;
+        const payload = buildApiPayload();
+        if (state.editingId) {
+          state.schedules = state.schedules.map(s => (s.id === state.editingId ? { ...s, ...payload } : s));
+          showToast('Jadwal berhasil diperbarui di pratinjau daftar.');
+        } else {
+          state.schedules.unshift({
+            id: 'sched_' + Date.now(),
+            brand: 'Brand Aktif',
+            status: 'active',
+            ...payload
+          });
+          showToast('Jadwal baru ditambahkan ke pratinjau daftar.');
+        }
+        state.editingId = null;
+        renderFormState();
+        renderScheduleViews();
+      });
+
+      document.addEventListener('click', e => {
+        const editTarget = e.target.closest('[data-edit-id]');
+        if (!editTarget) return;
+        const id = editTarget.getAttribute('data-edit-id');
+        const found = state.schedules.find(s => s.id === id);
+        if (!found) return;
+        state.editingId = found.id;
+        state.mode = found.schedule_mode;
+        el.schedName.value = found.name;
+        el.chkAutoPublish.checked = found.auto_publish_enabled !== false;
+        if (found.schedule_mode === 'specific_date') {
+          el.schedTargetDate.value = found.target_date || BASE_TODAY;
+          el.schedGenTimeSpecific.value = found.generation_time || '15:00';
+          el.schedPublishDate.value = found.publish_date || found.target_date || BASE_TODAY;
+          el.schedPubTimeSpecific.value = found.publish_time || '07:15';
+        } else {
+          el.schedGenTimeRecurring.value = found.generation_time || '20:00';
+          el.schedPubTimeRecurring.value = found.publish_time || '06:15';
+          el.schedPublishDayOffset.value = String(found.publish_day_offset || 0);
+        }
+        renderFormState();
+        showToast('Memuat "' + found.name + '" ke form editor.');
+      });
+
+      el.btnInspectPayload.addEventListener('click', () => {
+        el.payloadPre.textContent = JSON.stringify(buildApiPayload(), null, 2);
+        el.payloadModal.setAttribute('data-open', 'true');
+        el.btnCloseModal.focus();
+      });
+
+      function closeModal() {
+        el.payloadModal.setAttribute('data-open', 'false');
+        el.btnInspectPayload.focus();
+      }
+
+      el.btnCloseModal.addEventListener('click', closeModal);
+      el.payloadModal.addEventListener('click', e => {
+        if (e.target === el.payloadModal) closeModal();
+      });
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && el.payloadModal.getAttribute('data-open') === 'true') {
+          closeModal();
+        }
+      });
+
+      renderFormState();
+      renderScheduleViews();
+    })();
+  </script>
+</body>
+</html>

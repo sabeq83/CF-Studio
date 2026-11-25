@@ -58,9 +58,9 @@ HTTP endpoint: `/mcp`, authenticated using `Authorization: Bearer <CF_STUDIO_MCP
 - `cf_list_curated_recipes`: 📚 List curated authoritative recipes stored in the database with ingredients and polish status.
 
 ### D. Schedule Management
-- `cf_list_schedules`: List recurring Auto Pipeline schedules and execution metrics.
-- `cf_create_schedule`: Create a new automated recurring schedule with target Repliz publishing accounts, recipe toggle, Shopee affiliate link, and blueprint UUID.
-- `cf_update_schedule`: Update an existing recurring Auto Pipeline schedule (modify times, preset, accounts, toggles, or status).
+- `cf_list_schedules`: List recurring or `specific_date` Auto Pipeline schedules (with optional `target_date` and `publish_date` filters) and execution metrics.
+- `cf_create_schedule`: Create single or batch Auto Pipeline schedules with separate production (`target_date`/`generation_date` + `generation_time`) and publishing (`publish_date` / `publish_day_offset` + `publish_time`) cadence, target Repliz publishing accounts, recipe toggle, Shopee affiliate link, and blueprint UUID.
+- `cf_update_schedule`: Update an existing Auto Pipeline schedule (modify production/publish dates, `publish_day_offset`, times, preset, accounts, toggles, or status).
 - `cf_toggle_schedule_pause`: Pause or resume an active Auto Pipeline schedule.
 - `cf_delete_schedule`: Permanently delete an Auto Pipeline schedule.
 - `cf_trigger_schedule_now`: Immediately trigger an execution run for an existing schedule.

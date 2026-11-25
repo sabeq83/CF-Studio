@@ -413,12 +413,22 @@ export default function ScheduleCalendarView({
                   const platformList = [...new Set(accounts.map(a => a.platform || 'social'))];
 
                   const topicSnippet = sched.topic || sched.pipeline_name || sched.name || 'Jadwal Konten';
+                  const isSpecificSplit = (sched.schedule_mode || 'recurring') === 'specific_date' &&
+                    sched.publish_date &&
+                    sched.target_date &&
+                    String(sched.publish_date).slice(0, 10) !== String(sched.target_date).slice(0, 10);
+                  const pubOffset = Number(sched.publish_day_offset || 0);
+                  const splitLabel = isSpecificSplit
+                    ? `Prod ${sched.generation_time || '05:00'} ➔ Tayang ${String(sched.publish_date).slice(5, 10)} ${sched.publish_time || '09:00'}`
+                    : (pubOffset > 0
+                        ? `Gen ${sched.generation_time || '05:00'} ➔ H+${pubOffset} ${sched.publish_time || '09:00'}`
+                        : null);
 
                   return (
                     <div
                       key={sched.id}
                       onClick={() => onEditSchedule(sched)}
-                      title={`${sched.name || topicSnippet} (${sched.generation_time || '00:00'} -> ${sched.publish_time || '12:00'})`}
+                      title={`${sched.name || topicSnippet} (${splitLabel || `${sched.generation_time || '00:00'} -> ${sched.publish_time || '12:00'}`})`}
                       style={{
                         background: slot.background,
                         border: '1px solid var(--border-subtle)',
@@ -444,7 +454,7 @@ export default function ScheduleCalendarView({
                         color: slot.color
                       }}>
                         <span>
-                          {slot.icon} {sched.publish_time || sched.generation_time || '12:00'}
+                          {slot.icon} {splitLabel || sched.publish_time || sched.generation_time || '12:00'}
                         </span>
                         {isPaused ? (
                           <span style={{ fontSize: '0.62rem', color: 'var(--status-warning)' }}>⏸️ PAUSED</span>
