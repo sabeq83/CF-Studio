@@ -1,0 +1,1740 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notifikasi Telegram Per Brand (Mockup) | CF Studio</title>
+  <style>
+    /* Semantic CSS Design Tokens dari app/theme.css (Light & Dark Mode) */
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-backdrop: rgba(2, 6, 14, 0.78);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --link-hover: #a5f3fc;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.56);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --input-bg: #ffffff;
+      --overlay-backdrop: rgba(15, 23, 42, 0.54);
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --text-disabled: #8794a6;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --link: #075ea8;
+      --link-hover: #064b86;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --status-neutral: #6548bd;
+      --status-neutral-soft: #f0ecfb;
+      --focus-ring: #6d4ed6;
+      --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+      --shadow-modal: 0 26px 80px rgba(31, 45, 61, 0.22);
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    a[href],
+    button:not(:disabled),
+    select:not(:disabled),
+    label[for],
+    input[type='checkbox']:not(:disabled) {
+      cursor: pointer;
+    }
+
+    button:disabled,
+    input:disabled,
+    select:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+      }
+    }
+
+    /* Mockup Top Bar */
+    .preview-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 20px;
+      background: var(--sidebar);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .preview-toolbar-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .preview-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-right: 4px;
+    }
+
+    .pill-btn {
+      min-height: 36px;
+      padding: 6px 12px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: background-color 0.16s ease, border-color 0.16s ease;
+    }
+
+    .pill-btn:hover:not(:disabled) {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+
+    .pill-btn[aria-pressed='true'] {
+      background: var(--status-info-soft);
+      border-color: var(--status-info);
+      color: var(--status-info);
+    }
+
+    /* App Layout */
+    .app-shell {
+      display: flex;
+      min-height: calc(100vh - 57px);
+    }
+
+    .sidebar-nav {
+      width: 248px;
+      flex-shrink: 0;
+      background: var(--sidebar);
+      border-right: 1px solid var(--border-subtle);
+      padding: 20px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .brand-wordmark {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+      padding: 0 10px;
+    }
+
+    .nav-group-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      padding: 0 10px;
+      margin-bottom: 6px;
+    }
+
+    .nav-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      min-height: 40px;
+      padding: 8px 10px;
+      border-radius: var(--radius-xs);
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-decoration: none;
+    }
+
+    .nav-item:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+
+    .nav-item[aria-current='page'] {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      font-weight: 650;
+    }
+
+    .main-area {
+      flex: 1;
+      min-width: 0;
+      padding: 28px 32px 48px;
+    }
+
+    .page-container {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .page-title {
+      margin: 0;
+      font-size: 1.65rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+
+    .page-subtitle {
+      margin: 6px 0 0;
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      max-width: 68ch;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 40px;
+      padding: 8px 15px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      font-family: inherit;
+      font-size: 0.86rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background-color 0.16s ease, border-color 0.16s ease;
+    }
+
+    .btn-sm {
+      min-height: 36px;
+      padding: 6px 11px;
+      font-size: 0.8rem;
+    }
+
+    .btn-primary {
+      background: var(--action-primary);
+      border-color: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--action-primary-hover);
+      border-color: var(--action-primary-hover);
+    }
+
+    .btn-secondary {
+      background: var(--surface-interactive);
+      border-color: var(--border-subtle);
+      color: var(--text-primary);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+
+    .btn-info {
+      background: var(--status-info-soft);
+      border-color: var(--status-info);
+      color: var(--status-info);
+    }
+
+    .btn-info:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--status-info-soft) 72%, var(--status-info) 28%);
+    }
+
+    .btn-danger {
+      background: var(--status-danger-soft);
+      border-color: var(--status-danger);
+      color: var(--status-danger);
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--status-danger-soft) 72%, var(--status-danger) 28%);
+    }
+
+    /* Tenant Status Summary Strip */
+    .summary-strip {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 14px 18px;
+      margin-bottom: 18px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+    }
+
+    .summary-strip-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font-size: 0.86rem;
+      color: var(--text-secondary);
+    }
+
+    .summary-strip-title {
+      font-weight: 650;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Status Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 9px;
+      border-radius: var(--radius-xs);
+      font-size: 0.76rem;
+      font-weight: 650;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .badge-success {
+      background: var(--status-success-soft);
+      border-color: color-mix(in srgb, var(--status-success) 45%, transparent);
+      color: var(--status-success);
+    }
+
+    .badge-warning {
+      background: var(--status-warning-soft);
+      border-color: color-mix(in srgb, var(--status-warning) 45%, transparent);
+      color: var(--status-warning);
+    }
+
+    .badge-neutral {
+      background: var(--surface-interactive);
+      border-color: var(--border-subtle);
+      color: var(--text-secondary);
+    }
+
+    .badge-info {
+      background: var(--status-info-soft);
+      border-color: color-mix(in srgb, var(--status-info) 45%, transparent);
+      color: var(--status-info);
+    }
+
+    .badge-danger {
+      background: var(--status-danger-soft);
+      border-color: color-mix(in srgb, var(--status-danger) 45%, transparent);
+      color: var(--status-danger);
+    }
+
+    /* Table Surface */
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+    }
+
+    .brand-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .brand-table th {
+      padding: 13px 16px;
+      font-size: 0.78rem;
+      font-weight: 650;
+      color: var(--text-secondary);
+      background: var(--surface-raised);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .brand-table td {
+      padding: 14px 16px;
+      font-size: 0.86rem;
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border-subtle);
+      vertical-align: middle;
+    }
+
+    .brand-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .brand-table tbody tr:hover {
+      background: var(--surface-hover);
+    }
+
+    .cell-truncate {
+      max-width: 220px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text-secondary);
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 6px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    /* Mobile Card List (hidden on desktop) */
+    .mobile-brand-list {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .mobile-brand-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .mobile-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .mobile-card-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+    }
+
+    .mobile-card-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* State Panels (Empty / Loading / Error) */
+    .state-panel {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 40px 24px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .state-panel h2 {
+      margin: 0;
+      font-size: 1.05rem;
+      color: var(--text-primary);
+    }
+
+    .state-panel p {
+      margin: 0;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      max-width: 48ch;
+    }
+
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 3px solid var(--border-subtle);
+      border-top-color: var(--action-primary);
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Modal Dialog */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: var(--overlay-backdrop);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+    }
+
+    .modal-overlay[hidden] {
+      display: none;
+    }
+
+    .modal-dialog {
+      width: 100%;
+      max-width: 720px;
+      max-height: 92vh;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-modal);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      background: var(--surface-raised);
+    }
+
+    .modal-title {
+      margin: 0;
+      font-size: 1.12rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .modal-subtitle {
+      margin: 4px 0 0;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+    }
+
+    .modal-close {
+      min-width: 40px;
+      min-height: 40px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-close:hover {
+      background: var(--surface-hover);
+    }
+
+    .modal-body {
+      padding: 20px 22px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .modal-footer {
+      padding: 14px 22px;
+      border-top: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .modal-footer-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    /* Form Controls inside Modal */
+    .section-box {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .section-box-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .field-grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.3fr;
+      gap: 12px;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 0.8rem;
+      font-weight: 650;
+      color: var(--text-primary);
+    }
+
+    .form-input,
+    .form-select {
+      width: 100%;
+      min-height: 40px;
+      padding: 8px 11px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border-strong);
+      background: var(--input-bg);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.86rem;
+    }
+
+    .form-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .form-hint {
+      font-size: 0.77rem;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+
+    .input-with-action {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .input-with-action .form-input {
+      flex: 1;
+    }
+
+    /* Checkboxes and Switch Rows */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .toggle-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .toggle-title {
+      font-size: 0.88rem;
+      font-weight: 650;
+      color: var(--text-primary);
+    }
+
+    .toggle-desc {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+
+    .checkbox-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .checkbox-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .checkbox-card input[type='checkbox'] {
+      margin-top: 3px;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--action-primary);
+      flex-shrink: 0;
+    }
+
+    .checkbox-card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .checkbox-card-title {
+      font-size: 0.85rem;
+      font-weight: 650;
+      color: var(--text-primary);
+    }
+
+    .checkbox-card-desc {
+      font-size: 0.77rem;
+      color: var(--text-secondary);
+    }
+
+    /* Inline Feedback Banner inside Modal */
+    .feedback-banner {
+      padding: 11px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      font-size: 0.84rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .feedback-banner[hidden] {
+      display: none;
+    }
+
+    .feedback-success {
+      background: var(--status-success-soft);
+      border-color: var(--status-success);
+      color: var(--status-success);
+    }
+
+    .feedback-error {
+      background: var(--status-danger-soft);
+      border-color: var(--status-danger);
+      color: var(--status-danger);
+    }
+
+    .feedback-warning {
+      background: var(--status-warning-soft);
+      border-color: var(--status-warning);
+      color: var(--status-warning);
+    }
+
+    /* Telegram Message Preview Box */
+    .preview-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .telegram-preview-card {
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 13px 15px;
+      font-size: 0.82rem;
+      color: var(--text-primary);
+      white-space: pre-line;
+      line-height: 1.55;
+    }
+
+    .telegram-preview-topic {
+      font-size: 0.74rem;
+      font-weight: 650;
+      color: var(--status-info);
+      margin-bottom: 6px;
+    }
+
+    .telegram-preview-link {
+      color: var(--link);
+      font-weight: 600;
+      text-decoration: underline;
+    }
+
+    /* Responsive Breakpoints */
+    @media (max-width: 960px) {
+      .sidebar-nav {
+        display: none;
+      }
+      .main-area {
+        padding: 20px 16px 40px;
+      }
+      .field-grid,
+      .field-grid-3 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .table-card {
+        display: none;
+      }
+      .mobile-brand-list {
+        display: flex;
+      }
+      .btn,
+      .pill-btn,
+      .modal-close {
+        min-height: 44px;
+      }
+      .modal-overlay {
+        padding: 8px;
+      }
+      .modal-header,
+      .modal-body,
+      .modal-footer {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+      .modal-footer-actions {
+        width: 100%;
+      }
+      .modal-footer-actions .btn {
+        flex: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="preview-toolbar" role="region" aria-label="Kontrol Pratinjau Mockup">
+    <div class="preview-toolbar-group">
+      <span class="preview-label">Simulasi State:</span>
+      <button type="button" class="pill-btn" data-sim-state="normal" aria-pressed="true">Normal (Bot Terhubung)</button>
+      <button type="button" class="pill-btn" data-sim-state="unconfigured" aria-pressed="false">Bot Tenant Belum Diisi</button>
+      <button type="button" class="pill-btn" data-sim-state="loading" aria-pressed="false">Loading</button>
+      <button type="button" class="pill-btn" data-sim-state="empty" aria-pressed="false">Empty</button>
+      <button type="button" class="pill-btn" data-sim-state="error" aria-pressed="false">Error</button>
+    </div>
+    <div class="preview-toolbar-group">
+      <button type="button" class="pill-btn" id="openFirstModalBtn">Buka Modal NutriBake</button>
+      <button type="button" class="pill-btn" id="themeToggleBtn" aria-pressed="false">Mode Terang</button>
+    </div>
+  </div>
+
+  <div class="app-shell">
+    <aside class="sidebar-nav" aria-label="Navigasi CF Studio">
+      <div class="brand-wordmark">CF Studio</div>
+      <div>
+        <div class="nav-group-label">Planning</div>
+        <ul class="nav-list">
+          <li><a class="nav-item" href="#content-planner">Content Planner</a></li>
+          <li><a class="nav-item" href="#products">Product Database</a></li>
+          <li><a class="nav-item" href="#brand-profiles" aria-current="page">Brand Profile Manager</a></li>
+          <li><a class="nav-item" href="#visual-identities">Visual Identity</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="nav-group-label">Workflow</div>
+        <ul class="nav-list">
+          <li><a class="nav-item" href="#auto-pipeline">Auto Pipeline</a></li>
+          <li><a class="nav-item" href="#content-flow">ContentFlow Hub</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <main class="main-area" id="brand-profiles">
+      <div class="page-container">
+        <header class="page-header">
+          <div>
+            <h1 class="page-title">Brand Profile Manager</h1>
+            <p class="page-subtitle">Kelola identitas merek dan rute notifikasi Telegram per brand menggunakan 1 grup Forum ber-Topic.</p>
+          </div>
+          <button type="button" class="btn btn-primary" id="newBrandBtn">+ New Brand Profile</button>
+        </header>
+
+        <section class="summary-strip" id="tenantSummaryStrip" aria-live="polite">
+          <div class="summary-strip-text">
+            <div class="summary-strip-title">
+              <span id="tenantSummaryBadge" class="badge badge-success">Bot Tenant Aktif</span>
+              <span id="tenantSummaryHeading">1 Bot dan 1 Grup Forum Default Tenant Terhubung</span>
+            </div>
+            <span id="tenantSummaryDetail">Target grup default: -1002948810312. Setiap brand cukup mengisi Topic ID masing-masing.</span>
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm" id="quickConfigTenantBtn">Atur Bot &amp; Grup Tenant</button>
+        </section>
+
+        <div id="pageFeedbackBanner" class="feedback-banner feedback-success" style="margin-bottom: 16px;" hidden role="status"></div>
+
+        <div id="stateContainer"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal Pengaturan Telegram Per Brand + Konfigurasi Bot Tenant -->
+  <div class="modal-overlay" id="telegramModalOverlay" hidden>
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalSubtitle">
+      <header class="modal-header">
+        <div>
+          <h2 class="modal-title" id="modalTitle">Notifikasi Telegram: NutriBake</h2>
+          <p class="modal-subtitle" id="modalSubtitle">Arahkan laporan produksi dan jadwal tayang brand ini ke Topic khusus di grup Forum Telegram tenant.</p>
+        </div>
+        <button type="button" class="modal-close" id="closeModalBtn" aria-label="Tutup dialog notifikasi Telegram">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </header>
+
+      <div class="modal-body">
+        <div id="modalFeedback" class="feedback-banner" hidden role="status" aria-live="polite"></div>
+
+        <!-- Panel Konfigurasi Bot & Chat ID Default Tenant -->
+        <section class="section-box" aria-labelledby="tenantBotHeading">
+          <div class="section-box-header">
+            <div>
+              <h3 class="section-title" id="tenantBotHeading">Bot &amp; Grup Default Tenant</h3>
+              <p class="form-hint" id="tenantBotStatusText">Status: Bot tersimpan dan grup default terhubung (-1002948810312).</p>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" id="toggleTenantEditorBtn" aria-expanded="false" aria-controls="tenantBotEditor">
+              Ubah Bot / Chat ID Tenant
+            </button>
+          </div>
+
+          <div id="tenantBotEditor" hidden>
+            <div class="field-grid">
+              <div class="form-field">
+                <label class="form-label" for="tenantBotTokenInput">Bot Token Telegram Tenant</label>
+                <div class="input-with-action">
+                  <input
+                    id="tenantBotTokenInput"
+                    class="form-input"
+                    type="password"
+                    autocomplete="off"
+                    placeholder="123456789:BOT_TOKEN_PLACEHOLDER"
+                  />
+                  <button type="button" class="btn btn-secondary btn-sm" id="toggleTokenVisibilityBtn" aria-pressed="false">Lihat</button>
+                </div>
+                <p class="form-hint">Satu bot dipakai untuk semua brand di tenant ini. Kosongkan bila tidak mengganti token lama.</p>
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="tenantChatIdInput">Chat ID Grup Forum Default</label>
+                <input
+                  id="tenantChatIdInput"
+                  class="form-input"
+                  type="text"
+                  placeholder="-1001234567890"
+                />
+                <p class="form-hint">Masukkan ID grup Telegram (format -100...) yang sudah mengaktifkan Topics.</p>
+              </div>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; margin-top:12px;">
+              <label for="tenantEnabledCheck" style="display:flex; align-items:center; gap:8px; font-size:0.84rem; font-weight:600;">
+                <input type="checkbox" id="tenantEnabledCheck" style="width:18px; height:18px; accent-color:var(--action-primary);" />
+                <span>Aktifkan pengiriman notifikasi level tenant</span>
+              </label>
+              <button type="button" class="btn btn-info btn-sm" id="saveTenantBotBtn">Simpan Bot &amp; Chat ID Tenant</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Pengaturan Khusus Brand -->
+        <section class="section-box" aria-labelledby="brandRoutingHeading">
+          <h3 class="section-title" id="brandRoutingHeading">Pengaturan Topic &amp; Event Brand Ini</h3>
+
+          <div class="toggle-row">
+            <div class="toggle-text">
+              <label class="toggle-title" for="brandEnabledCheck">Aktifkan notifikasi untuk brand ini</label>
+              <span class="toggle-desc">Kirim ringkasan produksi, jadwal Repliz, dan alert gagal ke Topic brand.</span>
+            </div>
+            <input type="checkbox" id="brandEnabledCheck" style="width:20px; height:20px; accent-color:var(--action-primary);" />
+          </div>
+
+          <div class="field-grid">
+            <div class="form-field">
+              <label class="form-label" for="brandThreadIdInput">Topic / Thread ID Telegram</label>
+              <input
+                id="brandThreadIdInput"
+                class="form-input"
+                type="number"
+                min="1"
+                step="1"
+                placeholder="Contoh: 42"
+              />
+              <p class="form-hint">Salin link topik grup (t.me/c/123456789/<strong>42</strong>), lalu isi angka terakhirnya.</p>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="brandChatOverrideInput">Override Chat ID (Opsional)</label>
+              <input
+                id="brandChatOverrideInput"
+                class="form-input"
+                type="text"
+                placeholder="Kosongkan untuk pakai grup tenant"
+              />
+              <p class="form-hint">Isi hanya jika brand ini ingin dikirim ke grup Telegram terpisah.</p>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <span class="form-label">Event Notifikasi yang Dikirim</span>
+            <div class="checkbox-list">
+              <label class="checkbox-card" for="ev_production_and_schedule">
+                <input type="checkbox" id="ev_production_and_schedule" value="production_and_schedule" />
+                <span class="checkbox-card-body">
+                  <span class="checkbox-card-title">Produksi Selesai &amp; Terjadwal ke Repliz (1 pesan gabungan)</span>
+                  <span class="checkbox-card-desc">Menggabungkan status semua akun (FB, IG, TT, YT) dalam 1 pesan per video setelah masuk antrean Repliz.</span>
+                </span>
+              </label>
+
+              <label class="checkbox-card" for="ev_production_failed">
+                <input type="checkbox" id="ev_production_failed" value="production_failed" />
+                <span class="checkbox-card-body">
+                  <span class="checkbox-card-title">Gagal Produksi Video</span>
+                  <span class="checkbox-card-desc">Peringatan langsung ketika Auto Pipeline gagal render atau kehabisan retry.</span>
+                </span>
+              </label>
+
+              <label class="checkbox-card" for="ev_awaiting_approval">
+                <input type="checkbox" id="ev_awaiting_approval" value="awaiting_approval" />
+                <span class="checkbox-card-body">
+                  <span class="checkbox-card-title">Menunggu Persetujuan (Semi-Autopilot)</span>
+                  <span class="checkbox-card-desc">Pemberitahuan saat storyboard Content Automations siap direview sebelum produksi lanjut.</span>
+                </span>
+              </label>
+
+              <label class="checkbox-card" for="ev_publish_succeeded">
+                <input type="checkbox" id="ev_publish_succeeded" value="publish_succeeded" />
+                <span class="checkbox-card-body">
+                  <span class="checkbox-card-title">Konten Berhasil Tayang (H-0)</span>
+                  <span class="checkbox-card-desc">Terkirim setelah semua platform target untuk video tersebut berstatus tayang beserta tautan postingan.</span>
+                </span>
+              </label>
+
+              <label class="checkbox-card" for="ev_publish_failed">
+                <input type="checkbox" id="ev_publish_failed" value="publish_failed" />
+                <span class="checkbox-card-body">
+                  <span class="checkbox-card-title">Gagal Jadwal Repliz atau Gagal Publish</span>
+                  <span class="checkbox-card-desc">Peringatan langsung disertai rincian akun dan pesan error bila penjadwalan atau publish gagal.</span>
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <div class="field-grid-3">
+            <div class="form-field">
+              <label class="form-label" for="quietStartInput">Jam Tenang Mulai</label>
+              <input id="quietStartInput" class="form-input" type="text" placeholder="22:00" />
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="quietEndInput">Jam Tenang Selesai</label>
+              <input id="quietEndInput" class="form-input" type="text" placeholder="05:00" />
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="timezoneSelect">Zona Waktu Pesan</label>
+              <select id="timezoneSelect" class="form-select">
+                <option value="Asia/Jakarta">Asia/Jakarta (WIB)</option>
+                <option value="Asia/Makassar">Asia/Makassar (WITA)</option>
+                <option value="Asia/Jayapura">Asia/Jayapura (WIT)</option>
+              </select>
+            </div>
+          </div>
+
+          <label for="bypassQuietCheck" style="display:flex; align-items:center; gap:8px; font-size:0.84rem; font-weight:600;">
+            <input type="checkbox" id="bypassQuietCheck" style="width:18px; height:18px; accent-color:var(--action-primary);" />
+            <span>Tetap kirim alert error (Gagal Produksi &amp; Gagal Publish) saat jam tenang</span>
+          </label>
+        </section>
+
+        <!-- Pratinjau Format Pesan Telegram -->
+        <section class="section-box" aria-labelledby="previewHeading">
+          <div class="section-box-header">
+            <h3 class="section-title" id="previewHeading">Pratinjau Pesan Gabungan ke Topic</h3>
+            <div class="preview-tabs" role="tablist" aria-label="Contoh jenis pesan Telegram">
+              <button type="button" class="pill-btn" role="tab" data-preview-type="ready" aria-selected="true" aria-pressed="true">Terjadwal Repliz</button>
+              <button type="button" class="pill-btn" role="tab" data-preview-type="published" aria-selected="false" aria-pressed="false">Sudah Tayang</button>
+              <button type="button" class="pill-btn" role="tab" data-preview-type="failed" aria-selected="false" aria-pressed="false">Alert Gagal</button>
+            </div>
+          </div>
+          <div class="telegram-preview-card">
+            <div class="telegram-preview-topic" id="previewTopicLabel">Tujuan: Grup Tenant (-1002948810312) | Topic #42</div>
+            <div id="previewMessageBody"></div>
+          </div>
+        </section>
+      </div>
+
+      <footer class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="cancelModalBtn">Tutup</button>
+        <div class="modal-footer-actions">
+          <button type="button" class="btn btn-info" id="sendTestBtn">Kirim Tes ke Topic Brand</button>
+          <button type="button" class="btn btn-primary" id="saveBrandBtn">Simpan Pengaturan Brand</button>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const INITIAL_TENANT = {
+        configured: true,
+        enabled: true,
+        chatId: '-1002948810312',
+        hasToken: true
+      };
+
+      const INITIAL_BRANDS = [
+        {
+          id: 'bp_nutribake',
+          name: 'NutriBake',
+          tone: 'Profesional/Edukatif',
+          skin: 'pop_kuning',
+          signature: 'Dapur cerah natural, fokus tekstur adonan dan bahan kue sehat',
+          storage: 'Google Drive',
+          host: 'Global Webhook',
+          notif: {
+            enabled: true,
+            threadId: 42,
+            chatIdOverride: '',
+            events: ['production_and_schedule', 'production_failed', 'awaiting_approval', 'publish_succeeded', 'publish_failed'],
+            quietStart: '22:00',
+            quietEnd: '05:00',
+            bypassQuietForErrors: true,
+            timezone: 'Asia/Jakarta'
+          }
+        },
+        {
+          id: 'bp_dapurbotani',
+          name: 'Dapur Botani',
+          tone: 'ASMR/Menenangkan',
+          skin: 'hangat_earthy',
+          signature: 'Meja kayu hangat, pencahayaan pagi, peralatan masak estetik',
+          storage: 'Nextcloud',
+          host: '100.117.59.92',
+          notif: {
+            enabled: true,
+            threadId: 58,
+            chatIdOverride: '',
+            events: ['production_and_schedule', 'production_failed', 'publish_succeeded', 'publish_failed'],
+            quietStart: '',
+            quietEnd: '',
+            bypassQuietForErrors: true,
+            timezone: 'Asia/Jakarta'
+          }
+        },
+        {
+          id: 'bp_nutriblend',
+          name: 'NutriBlend',
+          tone: 'Kasual/Gaul',
+          skin: 'bersih_putih',
+          signature: 'Countertop modern minimalis, minuman herbal dan infuser kaca',
+          storage: 'Global Settings',
+          host: 'Global Webhook',
+          notif: {
+            enabled: false,
+            threadId: null,
+            chatIdOverride: '',
+            events: ['production_and_schedule', 'production_failed', 'publish_succeeded', 'publish_failed'],
+            quietStart: '',
+            quietEnd: '',
+            bypassQuietForErrors: true,
+            timezone: 'Asia/Jakarta'
+          }
+        },
+        {
+          id: 'bp_siasatsehat',
+          name: 'Siasat Sehat',
+          tone: 'Motivasi/Tegas',
+          skin: 'gelap_tegas',
+          signature: 'Komparasi nutrisi kontras tinggi dengan data jelas',
+          storage: 'Google Drive',
+          host: 'Global Webhook',
+          notif: {
+            enabled: true,
+            threadId: 71,
+            chatIdOverride: '-1008812200419',
+            events: ['production_failed', 'publish_failed'],
+            quietStart: '23:00',
+            quietEnd: '05:00',
+            bypassQuietForErrors: true,
+            timezone: 'Asia/Jakarta'
+          }
+        }
+      ];
+
+      let simState = 'normal';
+      let tenantState = { ...INITIAL_TENANT };
+      let brands = JSON.parse(JSON.stringify(INITIAL_BRANDS));
+      let activeBrandId = null;
+      let activePreviewType = 'ready';
+      let lastTriggerEl = null;
+
+      const stateContainer = document.getElementById('stateContainer');
+      const modalOverlay = document.getElementById('telegramModalOverlay');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalFeedback = document.getElementById('modalFeedback');
+      const pageFeedbackBanner = document.getElementById('pageFeedbackBanner');
+      const tenantBotEditor = document.getElementById('tenantBotEditor');
+      const toggleTenantEditorBtn = document.getElementById('toggleTenantEditorBtn');
+      const tenantBotStatusText = document.getElementById('tenantBotStatusText');
+      const tenantBotTokenInput = document.getElementById('tenantBotTokenInput');
+      const tenantChatIdInput = document.getElementById('tenantChatIdInput');
+      const tenantEnabledCheck = document.getElementById('tenantEnabledCheck');
+      const brandEnabledCheck = document.getElementById('brandEnabledCheck');
+      const brandThreadIdInput = document.getElementById('brandThreadIdInput');
+      const brandChatOverrideInput = document.getElementById('brandChatOverrideInput');
+      const quietStartInput = document.getElementById('quietStartInput');
+      const quietEndInput = document.getElementById('quietEndInput');
+      const timezoneSelect = document.getElementById('timezoneSelect');
+      const bypassQuietCheck = document.getElementById('bypassQuietCheck');
+      const previewTopicLabel = document.getElementById('previewTopicLabel');
+      const previewMessageBody = document.getElementById('previewMessageBody');
+
+      function getBrandBadge(brand) {
+        if (!tenantState.configured || !tenantState.hasToken || !tenantState.chatId) {
+          if (brand.notif.enabled) {
+            return '<span class="badge badge-warning">Perlu Bot Tenant</span>';
+          }
+          return '<span class="badge badge-neutral">Nonaktif</span>';
+        }
+        if (!brand.notif.enabled) {
+          return '<span class="badge badge-neutral">Nonaktif</span>';
+        }
+        if (brand.notif.threadId) {
+          const suffix = brand.notif.chatIdOverride ? ' (Grup Khusus)' : '';
+          return '<span class="badge badge-success">Topic #' + brand.notif.threadId + suffix + '</span>';
+        }
+        return '<span class="badge badge-info">Grup Utama</span>';
+      }
+
+      function renderTenantStrip() {
+        const stripBadge = document.getElementById('tenantSummaryBadge');
+        const stripHeading = document.getElementById('tenantSummaryHeading');
+        const stripDetail = document.getElementById('tenantSummaryDetail');
+
+        if (tenantState.configured && tenantState.hasToken && tenantState.chatId) {
+          stripBadge.className = 'badge badge-success';
+          stripBadge.textContent = 'Bot Tenant Aktif';
+          stripHeading.textContent = '1 Bot dan 1 Grup Forum Default Tenant Terhubung';
+          stripDetail.textContent = 'Target grup default: ' + tenantState.chatId + '. Setiap brand cukup mengisi Topic ID masing-masing.';
+        } else {
+          stripBadge.className = 'badge badge-warning';
+          stripBadge.textContent = 'Bot Belum Diisi';
+          stripHeading.textContent = 'Bot Token atau Chat ID Default Tenant Belum Dikonfigurasi';
+          stripDetail.textContent = 'Klik tombol Atur Bot & Grup Tenant atau buka modal Telegram pada brand mana saja untuk mengisinya langsung.';
+        }
+      }
+
+      function renderMainContent() {
+        renderTenantStrip();
+
+        if (simState === 'loading') {
+          stateContainer.innerHTML =
+            '<div class="state-panel" role="status">' +
+              '<div class="spinner" aria-hidden="true"></div>' +
+              '<h2>Memuat daftar Brand Profile...</h2>' +
+              '<p>Mengambil profil brand dan status rute Topic Telegram untuk tenant aktif.</p>' +
+            '</div>';
+          return;
+        }
+
+        if (simState === 'error') {
+          stateContainer.innerHTML =
+            '<div class="state-panel" role="alert">' +
+              '<span class="badge badge-danger">Koneksi Gagal</span>' +
+              '<h2>Gagal memuat Brand Profiles</h2>' +
+              '<p>Server API tidak merespons (HTTP 503). Periksa koneksi database atau muat ulang daftar.</p>' +
+              '<button type="button" class="btn btn-primary" id="retryLoadBtn">Muat Ulang Daftar</button>' +
+            '</div>';
+          document.getElementById('retryLoadBtn').addEventListener('click', function () {
+            setSimState('normal');
+          });
+          return;
+        }
+
+        if (simState === 'empty') {
+          stateContainer.innerHTML =
+            '<div class="state-panel">' +
+              '<h2>Belum ada Brand Profile</h2>' +
+              '<p>Buat Brand Profile pertama Anda agar pipeline konten memiliki identitas visual, suara, dan Topic Telegram terpisah.</p>' +
+              '<button type="button" class="btn btn-primary" id="emptyCreateBtn">+ New Brand Profile</button>' +
+            '</div>';
+          document.getElementById('emptyCreateBtn').addEventListener('click', function () {
+            showPageFeedback('Mockup: formulir pembuatan Brand Profile baru dibuka di halaman asli.');
+          });
+          return;
+        }
+
+        const tableRows = brands.map(function (b) {
+          return (
+            '<tr>' +
+              '<td style="font-weight:650;">' + b.name + '</td>' +
+              '<td><span class="badge badge-info">' + b.tone + '</span></td>' +
+              '<td><span class="badge badge-neutral">' + b.skin + '</span></td>' +
+              '<td class="cell-truncate">' + b.signature + '</td>' +
+              '<td>' + b.storage + '</td>' +
+              '<td>' + getBrandBadge(b) + '</td>' +
+              '<td>' +
+                '<div class="row-actions">' +
+                  '<button type="button" class="btn btn-sm btn-info" data-open-telegram="' + b.id + '">Telegram</button>' +
+                  '<button type="button" class="btn btn-sm btn-secondary" data-edit-brand="' + b.id + '">Edit</button>' +
+                  '<button type="button" class="btn btn-sm btn-danger" data-delete-brand="' + b.id + '" aria-label="Hapus ' + b.name + '">Hapus</button>' +
+                '</div>' +
+              '</td>' +
+            '</tr>'
+          );
+        }).join('');
+
+        const mobileCards = brands.map(function (b) {
+          return (
+            '<article class="mobile-brand-card">' +
+              '<div class="mobile-card-top">' +
+                '<div>' +
+                  '<div style="font-weight:700; font-size:0.98rem;">' + b.name + '</div>' +
+                  '<div style="font-size:0.8rem; color:var(--text-secondary);">' + b.tone + '</div>' +
+                '</div>' +
+                getBrandBadge(b) +
+              '</div>' +
+              '<div class="mobile-card-meta">' +
+                '<div><strong>Skin:</strong> ' + b.skin + '</div>' +
+                '<div><strong>Storage:</strong> ' + b.storage + '</div>' +
+              '</div>' +
+              '<div class="mobile-card-actions">' +
+                '<button type="button" class="btn btn-sm btn-info" style="flex:1;" data-open-telegram="' + b.id + '">Atur Telegram</button>' +
+                '<button type="button" class="btn btn-sm btn-secondary" data-edit-brand="' + b.id + '">Edit</button>' +
+                '<button type="button" class="btn btn-sm btn-danger" data-delete-brand="' + b.id + '">Hapus</button>' +
+              '</div>' +
+            '</article>'
+          );
+        }).join('');
+
+        stateContainer.innerHTML =
+          '<div class="table-card">' +
+            '<table class="brand-table">' +
+              '<thead>' +
+                '<tr>' +
+                  '<th>Brand Name</th>' +
+                  '<th>Tone of Voice</th>' +
+                  '<th>Finishing Skin</th>' +
+                  '<th>Visual Signature</th>' +
+                  '<th>Storage</th>' +
+                  '<th>Notifikasi Telegram</th>' +
+                  '<th style="text-align:right;">Actions</th>' +
+                '</tr>' +
+              '</thead>' +
+              '<tbody>' + tableRows + '</tbody>' +
+            '</table>' +
+          '</div>' +
+          '<div class="mobile-brand-list">' + mobileCards + '</div>';
+
+        stateContainer.querySelectorAll('[data-open-telegram]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            openTelegramModal(btn.getAttribute('data-open-telegram'), btn);
+          });
+        });
+
+        stateContainer.querySelectorAll('[data-edit-brand]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            showPageFeedback('Mockup: klik Telegram untuk menguji modal Notifikasi Telegram Per Brand.');
+          });
+        });
+
+        stateContainer.querySelectorAll('[data-delete-brand]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            showPageFeedback('Mockup: aksi hapus dinonaktifkan pada pratinjau agar data contoh tetap utuh.');
+          });
+        });
+      }
+
+      function showPageFeedback(text) {
+        pageFeedbackBanner.textContent = text;
+        pageFeedbackBanner.hidden = false;
+        clearTimeout(pageFeedbackBanner._timer);
+        pageFeedbackBanner._timer = setTimeout(function () {
+          pageFeedbackBanner.hidden = true;
+        }, 3500);
+      }
+
+      function showModalFeedback(text, kind) {
+        modalFeedback.textContent = text;
+        modalFeedback.className = 'feedback-banner ' + (kind === 'error' ? 'feedback-error' : kind === 'warning' ? 'feedback-warning' : 'feedback-success');
+        modalFeedback.hidden = false;
+      }
+
+      function clearModalFeedback() {
+        modalFeedback.hidden = true;
+        modalFeedback.textContent = '';
+      }
+
+      function syncTenantEditorUi(forceExpand) {
+        if (tenantState.configured && tenantState.hasToken && tenantState.chatId) {
+          tenantBotStatusText.textContent = 'Status: Bot tersimpan dan grup default terhubung (' + tenantState.chatId + ').';
+        } else {
+          tenantBotStatusText.textContent = 'Status: Bot Token atau Chat ID default tenant belum diisi. Isi di bawah agar notifikasi brand bisa dikirim.';
+        }
+
+        tenantChatIdInput.value = tenantState.chatId || '';
+        tenantEnabledCheck.checked = Boolean(tenantState.enabled);
+
+        if (typeof forceExpand === 'boolean') {
+          tenantBotEditor.hidden = !forceExpand;
+          toggleTenantEditorBtn.setAttribute('aria-expanded', forceExpand ? 'true' : 'false');
+        }
+      }
+
+      function renderMessagePreview() {
+        const brand = brands.find(function (b) { return b.id === activeBrandId; }) || brands[0];
+        const targetChat = (brandChatOverrideInput.value || '').trim() || tenantState.chatId || 'Belum ada Chat ID';
+        const threadVal = (brandThreadIdInput.value || '').trim();
+        const topicPart = threadVal ? 'Topic #' + threadVal : 'Pesan Umum Grup (tanpa Topic ID)';
+        previewTopicLabel.textContent = 'Tujuan: ' + targetChat + ' | ' + topicPart;
+
+        if (activePreviewType === 'ready') {
+          previewMessageBody.innerHTML =
+            '✅ <strong>[' + brand.name + '] Video Siap &amp; Terjadwal ke Repliz</strong>\n' +
+            '• Jadwal: Multiplier Produk (Bahan 1) - Tepung Almond\n' +
+            '• Campaign: mul_261126_abc123\n' +
+            '• Tayang: Kamis, 26 Nov 2026 • 07:15 WIB\n' +
+            '• Channel: Facebook (' + brand.name + ' ID) ✅ | Instagram ✅\n' +
+            '• Link Afiliasi: Aktif\n' +
+            '<span class="telegram-preview-link">Buka Publishing Queue</span>';
+        } else if (activePreviewType === 'published') {
+          previewMessageBody.innerHTML =
+            '🚀 <strong>[' + brand.name + '] Konten Sudah Tayang</strong>\n' +
+            '• Konten: Multiplier Produk (Alat 1) - Blender Portable\n' +
+            '• Jadwal Asli: 10:30 WIB\n' +
+            '• Facebook: Terbit (lihat postingan)\n' +
+            '• Instagram: Terbit (lihat postingan)\n' +
+            '<span class="telegram-preview-link">Lihat Riwayat Publish</span>';
+        } else {
+          previewMessageBody.innerHTML =
+            '🚨 <strong>[' + brand.name + '] Gagal Produksi Video</strong>\n' +
+            '• Jadwal: Multiplier Produk - Teko Kaca Infuser (2026-11-26)\n' +
+            '• Error: G-Labs timeout setelah retry\n' +
+            '• Target Tayang: 2026-11-26 06:01 WIB\n' +
+            '<span class="telegram-preview-link">Cek Jadwal Auto Pipeline</span>';
+        }
+      }
+
+      function openTelegramModal(brandId, triggerEl, expandTenantEditor) {
+        const brand = brands.find(function (b) { return b.id === brandId; });
+        if (!brand) return;
+
+        lastTriggerEl = triggerEl || document.activeElement;
+        activeBrandId = brand.id;
+        modalTitle.textContent = 'Notifikasi Telegram: ' + brand.name;
+        clearModalFeedback();
+
+        const shouldExpandTenant = typeof expandTenantEditor === 'boolean'
+          ? expandTenantEditor
+          : (!tenantState.hasToken || !tenantState.chatId);
+
+        syncTenantEditorUi(shouldExpandTenant);
+
+        brandEnabledCheck.checked = Boolean(brand.notif.enabled);
+        brandThreadIdInput.value = brand.notif.threadId || '';
+        brandChatOverrideInput.value = brand.notif.chatIdOverride || '';
+        quietStartInput.value = brand.notif.quietStart || '';
+        quietEndInput.value = brand.notif.quietEnd || '';
+        timezoneSelect.value = brand.notif.timezone || 'Asia/Jakarta';
+        bypassQuietCheck.checked = Boolean(brand.notif.bypassQuietForErrors);
+
+        ['production_and_schedule', 'production_failed', 'awaiting_approval', 'publish_succeeded', 'publish_failed'].forEach(function (ev) {
+          const el = document.getElementById('ev_' + ev);
+          if (el) el.checked = brand.notif.events.includes(ev);
+        });
+
+        renderMessagePreview();
+        modalOverlay.hidden = false;
+        document.getElementById('closeModalBtn').focus();
+      }
+
+      function closeTelegramModal() {
+        modalOverlay.hidden = true;
+        if (lastTriggerEl && typeof lastTriggerEl.focus === 'function') {
+          lastTriggerEl.focus();
+        }
+      }
+
+      function setSimState(nextState) {
+        simState = nextState;
+        if (nextState === 'unconfigured') {
+          tenantState = { configured: false, enabled: false, chatId: '', hasToken: false };
+        } else if (nextState === 'normal') {
+          tenantState = { ...INITIAL_TENANT };
+        }
+        document.querySelectorAll('[data-sim-state]').forEach(function (btn) {
+          btn.setAttribute('aria-pressed', btn.getAttribute('data-sim-state') === nextState ? 'true' : 'false');
+        });
+        renderMainContent();
+      }
+
+      document.querySelectorAll('[data-sim-state]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          setSimState(btn.getAttribute('data-sim-state'));
+        });
+      });
+
+      document.getElementById('themeToggleBtn').addEventListener('click', function (e) {
+        const html = document.documentElement;
+        const current = html.getAttribute('data-theme') || 'dark';
+        const next = current === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', next);
+        e.currentTarget.textContent = next === 'dark' ? 'Mode Terang' : 'Mode Gelap';
+        e.currentTarget.setAttribute('aria-pressed', next === 'light' ? 'true' : 'false');
+      });
+
+      document.getElementById('openFirstModalBtn').addEventListener('click', function (e) {
+        if (simState === 'loading' || simState === 'empty' || simState === 'error') {
+          setSimState('normal');
+        }
+        openTelegramModal('bp_nutribake', e.currentTarget);
+      });
+
+      document.getElementById('quickConfigTenantBtn').addEventListener('click', function (e) {
+        if (simState === 'loading' || simState === 'empty' || simState === 'error') {
+          setSimState('normal');
+        }
+        openTelegramModal('bp_nutribake', e.currentTarget, true);
+      });
+
+      document.getElementById('newBrandBtn').addEventListener('click', function () {
+        showPageFeedback('Mockup: klik Telegram pada baris brand untuk menguji pengaturan notifikasi per brand.');
+      });
+
+      toggleTenantEditorBtn.addEventListener('click', function () {
+        const nextExpanded = tenantBotEditor.hidden;
+        tenantBotEditor.hidden = !nextExpanded;
+        toggleTenantEditorBtn.setAttribute('aria-expanded', nextExpanded ? 'true' : 'false');
+      });
+
+      document.getElementById('toggleTokenVisibilityBtn').addEventListener('click', function (e) {
+        const isPw = tenantBotTokenInput.type === 'password';
+        tenantBotTokenInput.type = isPw ? 'text' : 'password';
+        e.currentTarget.textContent = isPw ? 'Sembunyikan' : 'Lihat';
+        e.currentTarget.setAttribute('aria-pressed', isPw ? 'true' : 'false');
+      });
+
+      document.getElementById('saveTenantBotBtn').addEventListener('click', function () {
+        const chatVal = tenantChatIdInput.value.trim();
+        const tokenVal = tenantBotTokenInput.value.trim();
+
+        if (!chatVal) {
+          showModalFeedback('Chat ID Grup Forum Default wajib diisi.', 'error');
+          tenantChatIdInput.focus();
+          return;
+        }
+        if (!tenantState.hasToken && !tokenVal) {
+          showModalFeedback('Bot Token Telegram Tenant wajib diisi untuk konfigurasi pertama kali.', 'error');
+          tenantBotTokenInput.focus();
+          return;
+        }
+        if (tokenVal && !/^\d+:[A-Za-z0-9_-]+$/.test(tokenVal)) {
+          showModalFeedback('Format Bot Token tidak valid (contoh format: 123456789:ABCdef...).', 'error');
+          tenantBotTokenInput.focus();
+          return;
+        }
+
+        tenantState.chatId = chatVal;
+        if (tokenVal) tenantState.hasToken = true;
+        tenantState.enabled = tenantEnabledCheck.checked;
+        tenantState.configured = Boolean(tenantState.chatId && tenantState.hasToken);
+        tenantBotTokenInput.value = '';
+
+        syncTenantEditorUi(false);
+        renderMainContent();
+        renderMessagePreview();
+        showModalFeedback('Bot Token dan Chat ID default tenant tersimpan.', 'success');
+      });
+
+      document.getElementById('saveBrandBtn').addEventListener('click', function () {
+        const brand = brands.find(function (b) { return b.id === activeBrandId; });
+        if (!brand) return;
+
+        const enabled = brandEnabledCheck.checked;
+        const threadRaw = brandThreadIdInput.value.trim();
+        const threadId = threadRaw ? Number(threadRaw) : null;
+        const chatOverride = brandChatOverrideInput.value.trim();
+        const quietStart = quietStartInput.value.trim();
+        const quietEnd = quietEndInput.value.trim();
+        const events = ['production_and_schedule', 'production_failed', 'awaiting_approval', 'publish_succeeded', 'publish_failed']
+          .filter(function (ev) {
+            const el = document.getElementById('ev_' + ev);
+            return el && el.checked;
+          });
+
+        if (threadRaw && (!Number.isInteger(threadId) || threadId <= 0)) {
+          showModalFeedback('Topic / Thread ID harus berupa bilangan bulat positif.', 'error');
+          brandThreadIdInput.focus();
+          return;
+        }
+        if (!events.length) {
+          showModalFeedback('Pilih minimal satu event notifikasi.', 'error');
+          return;
+        }
+        if (enabled && (!tenantState.hasToken || (!chatOverride && !tenantState.chatId))) {
+          showModalFeedback('Bot Token atau Chat ID tenant belum tersedia. Buka dan simpan panel Bot & Grup Default Tenant di atas terlebih dahulu.', 'error');
+          syncTenantEditorUi(true);
+          return;
+        }
+        const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
+        if ((quietStart && !timeRegex.test(quietStart)) || (quietEnd && !timeRegex.test(quietEnd))) {
+          showModalFeedback('Format jam tenang harus HH:mm (contoh 22:00).', 'error');
+          return;
+        }
+
+        brand.notif = {
+          enabled: enabled,
+          threadId: threadId,
+          chatIdOverride: chatOverride,
+          events: events,
+          quietStart: quietStart,
+          quietEnd: quietEnd,
+          bypassQuietForErrors: bypassQuietCheck.checked,
+          timezone: timezoneSelect.value
+        };
+
+        renderMainContent();
+        renderMessagePreview();
+        showModalFeedback('Pengaturan Telegram untuk ' + brand.name + ' berhasil disimpan.', 'success');
+      });
+
+      document.getElementById('sendTestBtn').addEventListener('click', function () {
+        const brand = brands.find(function (b) { return b.id === activeBrandId; });
+        if (!brand) return;
+        const chatOverride = brandChatOverrideInput.value.trim();
+        if (!tenantState.hasToken || (!chatOverride && !tenantState.chatId)) {
+          showModalFeedback('Bot Token atau Chat ID belum lengkap. Isi pada panel Bot & Grup Default Tenant di atas.', 'error');
+          syncTenantEditorUi(true);
+          return;
+        }
+        const threadVal = brandThreadIdInput.value.trim();
+        const targetNote = threadVal ? 'Topic #' + threadVal : 'grup utama';
+        showModalFeedback('Pesan tes untuk ' + brand.name + ' masuk antrean outbox menuju ' + targetNote + '.', 'success');
+      });
+
+      document.querySelectorAll('[data-preview-type]').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          activePreviewType = tab.getAttribute('data-preview-type');
+          document.querySelectorAll('[data-preview-type]').forEach(function (btn) {
+            const selected = btn === tab;
+            btn.setAttribute('aria-selected', selected ? 'true' : 'false');
+            btn.setAttribute('aria-pressed', selected ? 'true' : 'false');
+          });
+          renderMessagePreview();
+        });
+      });
+
+      [brandThreadIdInput, brandChatOverrideInput].forEach(function (el) {
+        el.addEventListener('input', renderMessagePreview);
+      });
+
+      document.getElementById('closeModalBtn').addEventListener('click', closeTelegramModal);
+      document.getElementById('cancelModalBtn').addEventListener('click', closeTelegramModal);
+      modalOverlay.addEventListener('click', function (e) {
+        if (e.target === modalOverlay) closeTelegramModal();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !modalOverlay.hidden) {
+          closeTelegramModal();
+        }
+      });
+
+      renderMainContent();
+    })();
+  </script>
+</body>
+</html>

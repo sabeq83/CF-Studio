@@ -109,6 +109,12 @@ HTTP endpoint: `/mcp`, authenticated using either `Authorization: Bearer <CF_STU
 - `cf_get_cluster_health`: Check real-time health of the 3-node cluster, services, API keys, and queue tasks.
 - `cf_get_studio_stats`: Get overview metrics on content production, stock availability, and publishing counts.
 
+### J2. Brand Profiles & Per-Brand Telegram Topic Notifications
+- `cf_list_brand_profiles` / `cf_get_brand_profile` / `cf_create_brand_profile` / `cf_update_brand_profile`: Manage Brand Profile identity, tone, storage, and finishing defaults.
+- `cf_get_brand_notification_settings` *(readOnly)*: Get Telegram Forum Topic notification settings for a brand profile and tenant bot readiness.
+- `cf_update_brand_notification_settings`: Update brand Telegram `enabled`, `message_thread_id`, optional `chat_id` override, `events`, quiet hours, and `timezone`.
+- `cf_test_brand_notification`: Enqueue a test Telegram message to the configured Forum Topic of a brand profile.
+
 ### K. Universe Manager & Character Lock Reference Assets
 - `cf_list_universes` *(readOnly, scope `content:read`)*: List active Universe profiles in the current tenant (compact summary).
 - `cf_get_universe` *(readOnly, scope `content:read`)*: Get Universe details, characters, locations, and approved reference asset summary per character.

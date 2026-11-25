@@ -3,17 +3,35 @@ import { getAllBrandProfiles, createBrandProfile } from '@/lib/db';
 import { v4 as uuidv4 } from 'uuid';
 import { withTenantContext } from '@/lib/auth';
 import { validateBrandEditorialDefaults } from '@/lib/brand-editorial-defaults';
+import { listBrandNotificationPreferencesByTenant } from '@/lib/brand-notification-service';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = withTenantContext(async (_req, _ctx, user) => {
   try {
     let profiles = await getAllBrandProfiles();
-    if (user.role !== 'admin') {
+    if (user.role !== 'admin' && !user.isOperator) {
       const allowed = new Set(user.assignedBrandIds || []);
       profiles = profiles.filter(profile => allowed.has(profile.id));
     }
-    return NextResponse.json({ success: true, data: profiles });
+    const notifSummary = await listBrandNotificationPreferencesByTenant(user.tenantId).catch(() => ({
+      tenant_telegram: { enabled: false, chat_id: '', chat_id_masked: '', configured: false, has_bot_token: false },
+      by_brand_id: {}
+    }));
+    const enriched = profiles.map(profile => ({
+      ...profile,
+      telegram_notification: notifSummary.by_brand_id[profile.id] || {
+        enabled: false,
+        message_thread_id: null,
+        has_chat_override: false,
+        tenant_configured: notifSummary.tenant_telegram.configured
+      }
+    }));
+    return NextResponse.json({
+      success: true,
+      data: enriched,
+      tenant_telegram: notifSummary.tenant_telegram
+    });
   } catch (error) {
     console.error('Brand Profiles GET Error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
