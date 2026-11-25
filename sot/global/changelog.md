@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.62.1 — Hotfix Wardrobe Lock & Audio Muxing Multiplier (25/11/2026)
+- Kunci 1 warna solid deterministik dari wardrobe.palette per baris kampanye Multiplier tanpa membatasi warna antar-video
+- Pertahankan combined_audio_path pada update-creative & polling UI serta pulihkan file audio gabungan dari disk sebelum fallback concat bisu
+
 ## V2.62.0 — Pemisahan Jadwal Produksi & Publishing Auto Pipeline (25/11/2026)
 - Tambah kolom publish_date, publish_day_offset, dan last_run_target_date pada auto_pipeline_schedules
 - Perbarui repository, validasi HTTP 400, scheduler runner timezone dinamis, dan run-now H-1
