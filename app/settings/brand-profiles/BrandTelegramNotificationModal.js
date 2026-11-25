@@ -87,6 +87,8 @@ function PreviewMessage({ type, brandName, chatTarget, threadId }) {
 
 export default function BrandTelegramNotificationModal({
   brand,
+  brands = [],
+  onSelectBrand = null,
   openTenantEditorInitially = false,
   onClose,
   onSaved
@@ -385,6 +387,38 @@ export default function BrandTelegramNotificationModal({
             <p style={{ margin: '4px 0 0', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
               Arahkan laporan produksi dan jadwal tayang brand ini ke Topic khusus di grup Forum Telegram tenant.
             </p>
+            {Array.isArray(brands) && brands.length > 1 && typeof onSelectBrand === 'function' && (
+              <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
+                <label htmlFor="modal-brand-selector" style={{ fontSize: '0.78rem', fontWeight: 650, color: 'var(--text-secondary)' }}>
+                  Brand yang diatur:
+                </label>
+                <select
+                  id="modal-brand-selector"
+                  className="form-select"
+                  value={brand.id}
+                  onChange={e => {
+                    const next = brands.find(item => item.id === e.target.value);
+                    if (next) {
+                      setFeedback(null);
+                      onSelectBrand(next);
+                    }
+                  }}
+                  style={{ minHeight: 34, padding: '4px 10px', fontSize: '0.84rem', width: 'auto', minWidth: 190 }}
+                >
+                  {brands.map(item => {
+                    const tg = item.telegram_notification || {};
+                    const suffix = tg.enabled
+                      ? (tg.message_thread_id ? ` (Topic #${tg.message_thread_id})` : ' (Aktif)')
+                      : ' (Nonaktif)';
+                    return (
+                      <option key={item.id} value={item.id}>
+                        {item.brand_name}{suffix}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+            )}
           </div>
           <button
             type="button"

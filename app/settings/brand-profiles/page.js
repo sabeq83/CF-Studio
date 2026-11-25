@@ -460,17 +460,17 @@ export default function BrandProfilesPage() {
             <p style={{ color: 'var(--text-muted)' }}>Belum ada Brand Profile. Klik "+ New Brand Profile" untuk memulai.</p>
           </div>
         ) : (
-          <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+          <div className="card" style={{ padding: 0, overflowX: 'auto' }}>
             <table className="ideas-table">
               <thead>
                 <tr>
                   <th>Brand Name</th>
+                  <th>Notifikasi Telegram</th>
                   <th>Tone of Voice</th>
                   <th>Finishing Skin</th>
                   <th>Visual Signature</th>
-                  <th>Storage Destination</th>
+                  <th>Storage</th>
                   <th>G-Labs Host</th>
-                  <th>Notifikasi Telegram</th>
                   <th>Source</th>
                   <th>Date</th>
                   <th style={{ textAlign: 'right' }}>Actions</th>
@@ -497,6 +497,27 @@ export default function BrandProfilesPage() {
                   <tr key={p.id}>
                     <td style={{ fontWeight: 600 }}>{p.brand_name}</td>
                     <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '4px', fontWeight: 600, display: 'inline-block', whiteSpace: 'nowrap', ...tgBadgeStyle }}>
+                          {tgBadgeLabel}
+                        </span>
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-secondary"
+                          onClick={() => setTelegramModalState({ brand: p, openTenantEditor: false })}
+                          style={{
+                            padding: '3px 9px',
+                            fontSize: '0.74rem',
+                            background: 'var(--status-info-soft)',
+                            borderColor: 'var(--status-info)',
+                            color: 'var(--status-info)'
+                          }}
+                        >
+                          Atur
+                        </button>
+                      </div>
+                    </td>
+                    <td>
                       <span style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '4px', background: 'var(--status-neutral-soft)', color: 'var(--accent-light)' }}>
                         {p.tone_of_voice}
                       </span>
@@ -506,24 +527,19 @@ export default function BrandProfilesPage() {
                         {p.finishing_skin || 'pop_kuning'}
                       </span>
                     </td>
-                    <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', maxWidth: '170px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {p.visual_signature}
                     </td>
-                    <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                      {p.storage_provider === 'nextcloud' ? '☁️ Nextcloud' : p.storage_provider === 'gdrive' ? '📁 Google Drive' : '⚙️ Global Settings'}
+                    <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+                      {p.storage_provider === 'nextcloud' ? '☁️ Nextcloud' : p.storage_provider === 'gdrive' ? '📁 Google Drive' : '⚙️ Global'}
                     </td>
-                    <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                      {p.webhook_host ? `🖥️ ${p.webhook_host}` : '⚙️ Global Webhook'}
-                    </td>
-                    <td>
-                      <span style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '4px', fontWeight: 600, display: 'inline-block', ...tgBadgeStyle }}>
-                        {tgBadgeLabel}
-                      </span>
+                    <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+                      {p.webhook_host ? `🖥️ ${p.webhook_host}` : '⚙️ Global'}
                     </td>
                     <td style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                       {p.guideline_filename ? `📄 ${p.guideline_filename}` : '📝 Manual'}
                     </td>
-                    <td style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    <td style={{ fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
                       {new Date(p.created_at).toLocaleDateString('id-ID', { month: 'short', day: 'numeric' })}
                     </td>
                     <td style={{ textAlign: 'right' }}>
@@ -554,6 +570,8 @@ export default function BrandProfilesPage() {
         {telegramModalState.brand && (
           <BrandTelegramNotificationModal
             brand={telegramModalState.brand}
+            brands={profiles}
+            onSelectBrand={nextBrand => setTelegramModalState(prev => ({ ...prev, brand: nextBrand, openTenantEditor: false }))}
             openTenantEditorInitially={telegramModalState.openTenantEditor}
             onClose={() => setTelegramModalState({ brand: null, openTenantEditor: false })}
             onSaved={fetchProfiles}
