@@ -7,6 +7,7 @@ Terakhir diperbarui: 25 November 2026
 | Nama File | Ringkasan / Judul |
 |---|---|
 | [REKOMENDASI_PRODUK_84_BLUEPRINT_NUTRIBAKE.csv](usulan/REKOMENDASI_PRODUK_84_BLUEPRINT_NUTRIBAKE.csv) | Daftar CSV 496 rekomendasi produk `high_ticket` (244) & `low_ticket` (252) beserta estimasi harga dan kata kunci marketplace dari 84 blueprint jadwal NutriBake 14 hari |
+| [USULAN_PENANGANAN_GAGAL_DAN_STUCK_VIA_MCP.md](usulan/USULAN_PENANGANAN_GAGAL_DAN_STUCK_VIA_MCP.md) | Analisa kemampuan MCP saat ini & usulan 4 perbaikan (approve `mul_*`, retry task macet/`force`, parameter `stage`, filter `needs_review` di `cf_list_publishing_jobs`, & fix `cf_get_cluster_health`) |
 | [USULAN_PERBAIKAN_FACELESS_CAMERA_MULTIPLIER.md](usulan/USULAN_PERBAIKAN_FACELESS_CAMERA_MULTIPLIER.md) | Analisa & Usulan Perbaikan `mul_261125_78w443` (`syd_admin`): penampakan wajah akibat `camera.framing: forearms_and_hands` + `third_person` diterjemahkan `eye-level medium shot`, penghapusan negasi di `sanitizeImagePrompt`, & positive crop lock |
 | [USULAN_PERBAIKAN_WARDROBE_LOCK_MULTIPLIER.md](usulan/USULAN_PERBAIKAN_WARDROBE_LOCK_MULTIPLIER.md) | Analisa & Usulan Hotfix `mul_261125_scjc0u` (`syd_admin`): penguncian 1 warna baju per baris di Multiplier, proteksi `combined_audio_path` & self-healing disk check agar audio VO dan Motion Text ter-render (`ffmpeg_muxing`), plus rencana render ulang |
 | [USULAN_PERBAIKAN_ZOMBIE_GLABS_POLL_ITEM_293.md](usulan/USULAN_PERBAIKAN_ZOMBIE_GLABS_POLL_ITEM_293.md) | Analisa `[Pillar Glabs] Polling error: fetch failed` di Dev (zombie item `#293` / `opc_260922_hi2aiw` ke IP mati `100.82.154.57` vs status normal `opc_261124_tkv7cr`) dan rencana perbaikan anti-infinite-loop |
@@ -156,6 +157,7 @@ Terakhir diperbarui: 25 November 2026
 | `LAPORAN_TRUTH_INGGRIS_DAN_MOCKUP_KARTU_PRODUK.md` | Laporan Pelaksanaan: Truth Berbahasa Inggris (Bagian A di Dev 5020) & Mockup Kartu Produk (Bagian B0) |
 | `LAPORAN_BAGIAN_B_KARTU_PRODUK_FOTO_ENRICH.md` | Laporan Pelaksanaan Bagian B: Perbaikan Kartu Produk, Jendela Banding & Penyimpanan Foto Sebelumnya (B1–B6 di Dev 5020) |
 | `LAPORAN_GPT_REGENERATE_DAN_SCRAPER_SQUARE_DEV.md` | Laporan Pelaksanaan: Foto Scraper Square (Bagian A) & Tombol GPT Image 2 Manual di Jendela Banding (Bagian B, Dev 5020) |
+| [LAPORAN_AUDIT_STAGING_KONTEN_20261125.md](laporan/LAPORAN_AUDIT_STAGING_KONTEN_20261125.md) | Audit Server Staging atas laporan pembuatan konten 2026-11-25 (perbandingan 18:08 vs 19:21 WIB, status 3 task gagal, 2 proses/macet, & 3 publishing_jobs `needs_review`) |
 | `RISET_KATA_KUNCI_PTGIM_W2.md` | Riset Kata Kunci Week 2 Solusi Thermal ID & Ruang Akustik ID (43 + 43, per kelompok latar) |
 | `maknagrid_published_facebook_videos.md` | Maknagrid Published Facebook Video IDs |
 
@@ -183,7 +185,8 @@ Terakhir diperbarui: 25 November 2026
 
 | File | Ringkasan |
 |---|---|
-| [implementation_plan.md](../implementation_plan.md) | Rencana aktif `fitur/brand-telegram-notifications`: Notifikasi Telegram Per Brand (1 Grup Forum ber-Topic, 1 Pesan Gabungan per video, 1 Bot per Tenant + pengaturan Bot Tenant di modal Brand Profiles) |
+| [implementation_plan.md](../implementation_plan.md) | Rencana aktif: Pemulihan Task Gagal/Macet (`force` & `stage` di `cf_retry_multiplier_task`), Approve `mul_*` di `cf_approve_job`, Filter `needs_review` & `scheduled` di `cf_list_publishing_jobs`, & Fix Serialisasi `cf_get_cluster_health` |
+| [brand_telegram_notifications_arsip_20261125.md](rencana/brand_telegram_notifications_arsip_20261125.md) | Arsip Implementation Plan: Notifikasi Telegram Per Brand `fitur/brand-telegram-notifications` (dirilis v2.64.0, 25 Nov 2026) |
 | [mcp_multi_pc_tenant_terbatas_arsip_20261125.md](rencana/mcp_multi_pc_tenant_terbatas_arsip_20261125.md) | Arsip Implementation Plan: Distribusi CF Studio MCP ke PC Lain dengan Privilege Tenant Terbatas (dirilis v2.63.0, 25 Nov 2026) |
 | [multiplier_faceless_camera_framing_arsip_20261125.md](rencana/multiplier_faceless_camera_framing_arsip_20261125.md) | Arsip Implementation Plan (Hotfix): Perbaikan framing kamera VI & positive faceless chest-down lock Multiplier (dirilis v2.62.2, 25 Nov 2026) |
 | [multiplier_wardrobe_audio_hotfix_arsip_20261125.md](rencana/multiplier_wardrobe_audio_hotfix_arsip_20261125.md) | Arsip Implementation Plan: Hotfix Wardrobe Lock Multiplier & Proteksi Audio `combined_audio_path` (dirilis v2.62.1, 25 Nov 2026) |

@@ -2066,7 +2066,7 @@ export function createCfStudioServer(rawRequest, { isRemoteHttp = false, allowed
 
   register(
     'cf_approve_job',
-    'Approve pending campaign review items (operator jobs ocj_* or custom storyboards cst_*) to proceed to production rendering.',
+    'Approve pending campaign review items (operator jobs ocj_*, custom storyboards cst_*, OPC opc_*, or Multiplier tasks mul_*) to proceed to production rendering.',
     {
       job_id: z.string().trim().min(1).max(128),
       review_revision: z.union([z.number().int().min(1), z.string()]).optional(),
@@ -2074,6 +2074,11 @@ export function createCfStudioServer(rawRequest, { isRemoteHttp = false, allowed
     },
     false,
     ({ job_id, review_revision, ...body }) => {
+      if (job_id.startsWith('mul_')) {
+        return request(`/api/v2/multiplier/${encodeURIComponent(job_id)}/approve`, {
+          body: {}
+        });
+      }
       if (job_id.startsWith('cst_') || job_id.startsWith('opc_') || /^\d+$/.test(job_id)) {
         return fetchPillarStoryboardSummary(request, job_id, { includeItems: true }).then(summary => {
           if (!summary?.success) return summary;
@@ -2187,9 +2192,9 @@ export function createCfStudioServer(rawRequest, { isRemoteHttp = false, allowed
 
   register(
     'cf_list_publishing_jobs',
-    'Monitor social media publishing job statuses and view live links.',
+    'Monitor social media publishing job statuses (including scheduled and needs_review failures) and view live links.',
     {
-      status: z.enum(['pending', 'processing', 'completed', 'failed', 'all']).default('all'),
+      status: z.enum(['pending', 'processing', 'scheduled', 'completed', 'failed', 'needs_review', 'all']).default('all'),
       platform: z.string().optional(),
       limit: z.number().int().min(1).max(50).default(20)
     },
@@ -2462,15 +2467,23 @@ export function createCfStudioServer(rawRequest, { isRemoteHttp = false, allowed
 
   register(
     'cf_retry_multiplier_task',
-    'Retry a failed Multiplier Lab task. By default smart-resumes from the latest completed stage (e.g. ffmpeg_muxing when clips already exist); pass mode="restart_all" to restart from pending_resolution.',
+    'Retry a failed (or stuck in-progress when force=true) Multiplier Lab task. Supports mode ("smart_resume" | "restart_all") or explicit stage ("remaking" | "t2i" | "tts" | "visuals" | "ffmpeg" | "cloud").',
     {
       task_id: z.string().trim().min(1).max(128),
-      mode: z.enum(['smart_resume', 'restart_all']).optional()
+      mode: z.enum(['smart_resume', 'restart_all']).optional(),
+      force: z.boolean().optional(),
+      stage: z.enum(['remaking', 't2i', 'tts', 'visuals', 'ffmpeg', 'cloud']).optional()
     },
     false,
-    ({ task_id, mode }) => request('/api/v2/multiplier', {
+    ({ task_id, mode, force, stage }) => request('/api/v2/multiplier', {
       method: 'PATCH',
-      body: { action: 'retry_task', taskId: task_id, ...(mode ? { mode } : {}) }
+      body: {
+        action: 'retry_task',
+        taskId: task_id,
+        ...(mode ? { mode } : {}),
+        ...(force !== undefined ? { force } : {}),
+        ...(stage ? { stage } : {})
+      }
     })
   );
 

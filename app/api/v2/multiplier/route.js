@@ -13,7 +13,11 @@ import {
 } from '@/lib/db';
 import { generateCampaignId } from '@/lib/id-generator';
 import { normalizeBridgePayload } from '@/lib/bridging/bridge-plan';
-import { inspectMultiplierTaskArtifacts } from '@/lib/multiplier-artifacts';
+import {
+  IN_PROGRESS_STUCK_STATUSES,
+  inspectMultiplierTaskArtifacts,
+  resolveMultiplierStageRetryTarget,
+} from '@/lib/multiplier-artifacts';
 
 function applyNormalizedBridgingConfig(bridgingConfig, vsoConfig) {
   const defaultActive = bridgingConfig?.campaign_type !== 'pure_storytelling' && bridgingConfig?.is_bridging_active !== false;
@@ -138,40 +142,59 @@ export const PATCH = withTenantContext(async (request) => {
       if (!task) {
         return NextResponse.json({ success: false, error: 'Task tidak ditemukan' }, { status: 404 });
       }
-      if (task.status !== 'failed') {
+
+      const force = Boolean(body.force);
+      const canRecoverStuck = force && IN_PROGRESS_STUCK_STATUSES.has(task.status);
+      if (task.status !== 'failed' && !canRecoverStuck) {
         return NextResponse.json({
           success: false,
-          error: `Task ${targetTaskId} berstatus '${task.status}', hanya task 'failed' yang bisa di-retry.`
+          error: `Task ${targetTaskId} berstatus '${task.status}', hanya task 'failed' (atau task in-progress macet dengan force=true) yang bisa di-retry.`
         }, { status: 409 });
       }
 
+      const requestedStage = typeof body.stage === 'string' && body.stage.trim() ? body.stage.trim() : null;
       const mode = body.mode === 'restart_all' ? 'restart_all' : 'smart_resume';
       let nextStatus = 'pending_resolution';
       let resumedLabel = 'Dari Awal';
       let artifacts = null;
 
-      if (mode === 'smart_resume') {
+      if (requestedStage) {
+        const glabsTasks = await dbAll('SELECT task_id, status, video_url FROM glabs_tasks WHERE campaign_id = ? ORDER BY item_id ASC', [targetTaskId]);
+        const target = resolveMultiplierStageRetryTarget(task, requestedStage, glabsTasks);
+        if (!target.ok) {
+          return NextResponse.json({ success: false, error: target.error, artifacts: target.artifacts || null }, { status: target.statusCode || 400 });
+        }
+        nextStatus = target.nextStatus;
+        resumedLabel = target.label;
+        artifacts = target.artifacts;
+      } else if (mode === 'smart_resume') {
         const glabsTasks = await dbAll('SELECT task_id, status, video_url FROM glabs_tasks WHERE campaign_id = ? ORDER BY item_id ASC', [targetTaskId]);
         artifacts = inspectMultiplierTaskArtifacts(task, glabsTasks);
         nextStatus = artifacts.recommended_resume_stage || 'pending_resolution';
         resumedLabel = artifacts.recommended_resume_label || nextStatus;
       }
 
-      const result = await dbRun(`
-        UPDATE re_multiplier_tasks
-        SET status = ?, error_message = NULL, failed_stage = NULL
-        WHERE id = ? AND status = 'failed'
-      `, [nextStatus, targetTaskId]);
+      const sql = nextStatus === 'ffmpeg_muxing'
+        ? `UPDATE re_multiplier_tasks
+           SET status = ?, error_message = NULL, failed_stage = NULL, ffmpeg_output_path = NULL
+           WHERE id = ? AND status = ?`
+        : `UPDATE re_multiplier_tasks
+           SET status = ?, error_message = NULL, failed_stage = NULL
+           WHERE id = ? AND status = ?`;
+      const result = await dbRun(sql, [nextStatus, targetTaskId, task.status]);
 
       return NextResponse.json({
         success: true,
         resumed_stage: nextStatus,
         resumed_label: resumedLabel,
-        mode,
+        mode: requestedStage ? `stage:${requestedStage}` : mode,
+        forced: canRecoverStuck,
         artifacts,
-        message: mode === 'restart_all'
-          ? `Task ${targetTaskId} diulang dari awal (pending_resolution).`
-          : `Task ${targetTaskId} dilanjutkan langsung dari tahap ${resumedLabel} (${nextStatus}).`,
+        message: requestedStage
+          ? `Task ${targetTaskId} ditrigger ulang pada tahap ${resumedLabel} (${nextStatus}).`
+          : (mode === 'restart_all'
+              ? `Task ${targetTaskId} diulang dari awal (pending_resolution).`
+              : `Task ${targetTaskId} dilanjutkan langsung dari tahap ${resumedLabel} (${nextStatus}).`),
         affected: result.changes || result.rowCount || 0
       });
     }
