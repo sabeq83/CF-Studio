@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.64.1 — Pemulihan Task Macet, Approve Multiplier, & Fix Cluster Health MCP (25/11/2026)
+- Tambah cabang mul_* pada cf_approve_job ke POST /api/v2/multiplier/[id]/approve
+- Tambah parameter opsional force & stage pada cf_retry_multiplier_task via resolveMultiplierStageRetryTarget
+- Tambah status scheduled & needs_review pada cf_list_publishing_jobs
+- Perbaiki serialisasi JSON cf_get_cluster_health agar tidak mengembalikan objek Timeout
+
 ## V2.64.0 — Notifikasi Telegram Per Brand (Forum Topic & Digest Multi-Platform) (25/11/2026)
 - Tambah tabel brand_notification_preferences dan studio_notification_outbox untuk rute Telegram per brand berbasis Forum Topic
 - Tambah brand-notification-service dengan fallback token/chat_id tenant, fail-open enqueue, dan agregasi 1 pesan gabungan multi-platform Repliz/tayang
