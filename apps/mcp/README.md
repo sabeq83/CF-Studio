@@ -98,12 +98,13 @@ HTTP endpoint: `/mcp`, authenticated using either `Authorization: Bearer <CF_STU
 
 ### H. Pillar 5: Creative Review & Human-in-the-Loop Co-Pilot
 - `cf_get_job_review`: Get human-in-the-loop review artifact (script and storyboard) for a pending job.
-- `cf_approve_job`: Approve pending campaign review items to proceed to production rendering.
+- `cf_approve_job`: Approve pending campaign review items (`ocj_*`, `cst_*`, `opc_*`, and Multiplier `mul_*`) to proceed to production rendering.
 
 ### I. Pillar 6: Omnichannel Social Publishing
 - `cf_list_publishing_accounts`: List connected social media publishing accounts (Meta, Repliz, etc.).
 - `cf_create_publishing_job`: Schedule or publish completed content to a social account.
-- `cf_list_publishing_jobs`: Monitor social media publishing job statuses and view live links.
+- `cf_list_publishing_jobs`: Monitor social media publishing job statuses (including `scheduled` and `needs_review`) and view live links.
+- `cf_retry_multiplier_task`: Retry a failed (or stuck in-progress with `force: true`) Multiplier task using `smart_resume`, `restart_all`, or explicit `stage`.
 
 ### J. Pillar 7: Studio Observability & Cluster Health
 - `cf_get_cluster_health`: Check real-time health of the 3-node cluster, services, API keys, and queue tasks.

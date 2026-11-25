@@ -1056,3 +1056,44 @@ test('createCfStudioServer enforces allowedTools allowlist locally when provided
   assert.equal(denied.isError, true);
   assert.equal(denied.structuredContent.error_code, 'TOOL_FORBIDDEN');
 });
+
+test('cf_approve_job supports mul_* Multiplier tasks, cf_retry_multiplier_task passes force & stage, and cf_list_publishing_jobs supports needs_review & scheduled', async t => {
+  const calls = [];
+  const client = await connected(t, async (path, opts) => {
+    calls.push({ path, opts });
+    return { success: true };
+  });
+
+  await client.callTool({
+    name: 'cf_approve_job',
+    arguments: { job_id: 'mul_261125_h6c6p0' }
+  });
+  assert.equal(calls[0].path, '/api/v2/multiplier/mul_261125_h6c6p0/approve');
+  assert.deepEqual(calls[0].opts.body, {});
+
+  await client.callTool({
+    name: 'cf_retry_multiplier_task',
+    arguments: { task_id: 'mul_261125_pa2dv7', force: true, stage: 't2i' }
+  });
+  assert.equal(calls[1].path, '/api/v2/multiplier');
+  assert.equal(calls[1].opts.method, 'PATCH');
+  assert.deepEqual(calls[1].opts.body, {
+    action: 'retry_task',
+    taskId: 'mul_261125_pa2dv7',
+    force: true,
+    stage: 't2i'
+  });
+
+  await client.callTool({
+    name: 'cf_list_publishing_jobs',
+    arguments: { status: 'needs_review', limit: 10 }
+  });
+  assert.ok(calls[2].path.startsWith('/api/v2/publishing/jobs?'));
+  assert.ok(calls[2].path.includes('status=needs_review'));
+
+  await client.callTool({
+    name: 'cf_list_publishing_jobs',
+    arguments: { status: 'scheduled', limit: 10 }
+  });
+  assert.ok(calls[3].path.includes('status=scheduled'));
+});
