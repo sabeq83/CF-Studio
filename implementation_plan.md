@@ -84,7 +84,7 @@
   - `PG_SEARCH_PATH=dev node --test tests/mcp-multi-pc-tenant-scope.test.js tests/cf-studio-mcp-auth-bridge.test.js tests/universe-character-route-whitelist.test.js tests/hermes-token-rotation.test.js`
   - `DISABLE_AUTO_MIGRATIONS=true PG_SEARCH_PATH=dev npm run build`
 - [x] Perbarui dokumentasi ([apps/mcp/README.md](file:///Users/sabeqmmursyid/_cfstudio/apps/mcp/README.md), [sot/menus/kartu/users-tenants.md](file:///Users/sabeqmmursyid/_cfstudio/sot/menus/kartu/users-tenants.md), [sot/menus/_PETA_MENU.md](file:///Users/sabeqmmursyid/_cfstudio/sot/menus/_PETA_MENU.md), dan tambah kartu [mcp-access.md](file:///Users/sabeqmmursyid/_cfstudio/sot/menus/kartu/mcp-access.md))
-- [ ] Commit & push branch `fitur/mcp-multi-pc-tenant-terbatas` (tanpa `npm run release`), lalu deploy atomic ke **Dev** (`npm run deploy:dev:atomic -- --ref <full-git-sha> --apply --confirm-dev`) dan serahkan daftar uji manual kepada pengguna
+- [x] Commit & push branch `fitur/mcp-multi-pc-tenant-terbatas` (tanpa `npm run release`), lalu deploy atomic ke **Dev** (`npm run deploy:dev:atomic -- --ref <full-git-sha> --apply --confirm-dev`) dan serahkan daftar uji manual kepada pengguna
 - [ ] *(Menunggu persetujuan eksplisit pengguna setelah uji Dev)*: Merge ke `main`, jalankan `npm run release-non-interactive -- --type minor ...`, dan deploy ke Staging
 
 ---
