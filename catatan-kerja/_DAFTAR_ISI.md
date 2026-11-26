@@ -6,6 +6,7 @@ Terakhir diperbarui: 26 November 2026
 
 | Nama File | Ringkasan / Judul |
 |---|---|
+| [USULAN_HALAMAN_KATALOG_LINK_AFF_PUBLIK.md](usulan/USULAN_HALAMAN_KATALOG_LINK_AFF_PUBLIK.md) | Usulan halaman front-end publik tanpa login (mobile-first) untuk melihat daftar produk, thumbnail foto, filter Brand Profile, dan tombol Salin Link Aff |
 | [USULAN_PENGHAPUSAN_OTOMATIS_FILE_GDRIVE_REPLIZ.md](usulan/USULAN_PENGHAPUSAN_OTOMATIS_FILE_GDRIVE_REPLIZ.md) | Analisa apakah file di folder Google Drive `REPLIZ Publishing` aman dihapus setelah penjadwalan & usulan mekanisme penghapusan otomatis berbasis status (grace period pasca-`published`/`cancelled`, `needs_review`, anti-orphan, multi-tenant fix) |
 | [REKOMENDASI_PRODUK_84_BLUEPRINT_NUTRIBAKE.csv](usulan/REKOMENDASI_PRODUK_84_BLUEPRINT_NUTRIBAKE.csv) | Daftar CSV 496 rekomendasi produk `high_ticket` (244) & `low_ticket` (252) beserta estimasi harga dan kata kunci marketplace dari 84 blueprint jadwal NutriBake 14 hari |
 | [USULAN_PENANGANAN_GAGAL_DAN_STUCK_VIA_MCP.md](usulan/USULAN_PENANGANAN_GAGAL_DAN_STUCK_VIA_MCP.md) | Analisa kemampuan MCP saat ini & usulan 4 perbaikan (approve `mul_*`, retry task macet/`force`, parameter `stage`, filter `needs_review` di `cf_list_publishing_jobs`, & fix `cf_get_cluster_health`) |
