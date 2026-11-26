@@ -1,475 +1,600 @@
-# Implementation Plan: Pemulihan Task Gagal/Macet, Approval Multiplier, Filter `needs_review`, & Perbaikan `cf_get_cluster_health` MCP
+# Implementation Plan: Penghapusan Otomatis Berbasis Status & Deduplikasi File Staging Google Drive (`REPLIZ Publishing` — Komponen A + B)
 
-**Sumber Usulan:** [USULAN_PENANGANAN_GAGAL_DAN_STUCK_VIA_MCP.md](file:///Users/sabeqmmursyid/_cfstudio/catatan-kerja/usulan/USULAN_PENANGANAN_GAGAL_DAN_STUCK_VIA_MCP.md)  
-**Target Branch Kerja:** `hotfix/mcp-recovery-tools` (dibuat dari `main` sesuai SOP Alur 2: Hotfix Staging)  
-**Lingkungan Uji Target:** Unit test lokal (`PG_SEARCH_PATH=dev`), `npm run test:mcp`, `DISABLE_AUTO_MIGRATIONS=true PG_SEARCH_PATH=dev npm run build`, lalu merge ke `main`, `npm run release-non-interactive -- --type patch`, dan deploy atomic ke **Staging (`5010`/`7010`)** untuk pengujian langsung di Staging (tanpa migrasi database).
+**Sumber Usulan:** [USULAN_PENGHAPUSAN_OTOMATIS_FILE_GDRIVE_REPLIZ.md](file:///Users/sabeqmmursyid/_cfstudio/catatan-kerja/usulan/USULAN_PENGHAPUSAN_OTOMATIS_FILE_GDRIVE_REPLIZ.md)  
+**Target Branch Kerja:** `fitur/repliz-drive-cleanup` (dibuat dari `main` terbaru sesuai SOP Alur 1 — Fitur Baru)  
+**Lingkungan Uji Target:** Unit test lokal (`PG_SEARCH_PATH=dev`), `DISABLE_AUTO_MIGRATIONS=true PG_SEARCH_PATH=dev npm run build`, lalu deploy atomic ke **Dev (`5020`/`7020`)** untuk verifikasi sebelum persetujuan naik ke Staging (`5010`/`7010`).
 
 > [!NOTE]
-> **Tanpa Migrasi Database & Tanpa Perubahan UI:** Seluruh perubahan hanya menyentuh lapisan MCP (`apps/mcp/tools.mjs`, `apps/mcp/README.md`), API/helper Multiplier (`lib/multiplier-artifacts.js`, `app/api/v2/multiplier/route.js`, `app/api/v2/multiplier/[id]/retry/route.js`), dan serialisasi runtime worker (`lib/content-automation-worker.js`, `lib/content-automation-notification-worker.js`).
+> **Tanpa Migrasi Database & Tanpa Perubahan UI:** Seluruh perubahan hanya menyentuh lapisan repository, worker cleanup, Drive staging helper, dan unit test (`lib/publishing-repository.js`, `lib/publishing-media-cleanup-worker.js`, `lib/drive-uploader.js`, `lib/publishing-drive-staging.js`, `lib/publishing-worker.js`, `tests/publishing-drive-staging.test.js`). Tidak ada perubahan skema PostgreSQL maupun komponen UI, sehingga tidak memerlukan mockup HTML Tahap 1.
 
 ---
 
 ## Execution Task List
 
 ### Tahap 0: Persiapan Branch
-- [x] Pastikan `main` bersih/terbaru lalu buat branch baru dari `main` (`git checkout -b hotfix/mcp-recovery-tools`)
+- [x] Pastikan berada di `main` terbaru (`git checkout main && git pull`) lalu buat branch fitur baru `fitur/repliz-drive-cleanup`
 
-### Tahap 1: Helper Bersama & API Recovery Multiplier (`force` & `stage`)
-- [x] Tambahkan helper `resolveMultiplierStageRetryTarget()` di [lib/multiplier-artifacts.js](file:///Users/sabeqmmursyid/_cfstudio/lib/multiplier-artifacts.js) memakai `FAILED_CODE_TO_WORKER_STATUS` dan validasi artefak (`ffmpeg`, `cloud`) agar tidak ada duplikasi antara route `PATCH` dan `POST`
-- [x] Perbarui [app/api/v2/multiplier/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/multiplier/route.js) (`action === 'retry_task'`) agar mendukung parameter opsional `force` (mengizinkan pemulihan status in-progress macet) dan `stage` (`remaking`, `t2i`, `tts`, `visuals`, `ffmpeg`, `cloud`)
-- [x] Refaktor [app/api/v2/multiplier/[id]/retry/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/multiplier/%5Bid%5D/retry/route.js) agar menggunakan `resolveMultiplierStageRetryTarget()`
+### Tahap 1: Komponen A — Pembersihan Otomatis Berbasis Status & Ref-Counting Aman
+- [x] Perbarui `listExpiredMediaStaging()` dan tambahkan `markMediaStagingDeletedByExternalFile()` di [lib/publishing-repository.js](file:///Users/sabeqmmursyid/_cfstudio/lib/publishing-repository.js) dengan aturan grace period per status (`published`/`draft_created`: 2 jam, `cancelled`: 1 jam, `failed`/`needs_review`: 3 hari, `scheduled`/`processing`/`retry_wait`/`verifying`: tidak pernah dihapus) serta guard *ref-counting* `NOT EXISTS` agar file yang masih dipakai job lain tidak terhapus prematur
+- [x] Perbarui `runPublishingMediaCleanupTick()` di [lib/publishing-media-cleanup-worker.js](file:///Users/sabeqmmursyid/_cfstudio/lib/publishing-media-cleanup-worker.js) agar membungkus tiap item di dalam `tenantContext.run(item.tenant_id, ...)`, menambahkan `supportsAllDrives: true` saat `files.delete`, memproses batch lebih besar secara aman untuk menguras backlog, dan menandai seluruh baris staging yang berbagi `(provider, external_file_id)` sebagai `deleted`
+- [x] Perbarui default interval cleanup worker di [lib/publishing-worker.js](file:///Users/sabeqmmursyid/_cfstudio/lib/publishing-worker.js) dari 60 menit menjadi 30 menit (`1800000` ms, tetap dapat di-override via `PUBLISHING_MEDIA_CLEANUP_INTERVAL_MS`)
 
-### Tahap 2: Perbaikan Serialisasi JSON `cf_get_cluster_health`
-- [x] Perbarui `getContentAutomationRuntime()` di [lib/content-automation-worker.js](file:///Users/sabeqmmursyid/_cfstudio/lib/content-automation-worker.js) agar tidak men-spread `state.interval` (objek `Timeout` Node.js yang circular)
-- [x] Perbarui `getContentAutomationNotificationRuntime()` di [lib/content-automation-notification-worker.js](file:///Users/sabeqmmursyid/_cfstudio/lib/content-automation-notification-worker.js) agar tidak men-spread `state.interval`
+### Tahap 2: Komponen B — Deduplikasi Upload 1 File per Video Lintas Platform
+- [x] Perbarui `uploadToDriveStaging()` di [lib/drive-uploader.js](file:///Users/sabeqmmursyid/_cfstudio/lib/drive-uploader.js) agar mendukung pencarian idempoten berdasarkan `appProperties.mediaKey` (prioritas sebelum `appProperties.jobId`) sehingga beberapa job lintas platform untuk video yang sama cukup mengunggah 1 file ke folder `REPLIZ Publishing`
+- [x] Tambahkan helper `buildReplizMediaDedupKey()` dan perbarui `stageMediaToDrive()` di [lib/publishing-drive-staging.js](file:///Users/sabeqmmursyid/_cfstudio/lib/publishing-drive-staging.js) untuk menyertakan `mediaKey` (`sha256(tenantId | contentId | sourceUrl)`) pada `appProperties` dan menyimpan baris `publishing_media_staging` untuk masing-masing `job_id`
 
-### Tahap 3: Pembaruan MCP Tools (`apps/mcp/tools.mjs` & `apps/mcp/README.md`)
-- [x] Tambahkan cabang `job_id.startsWith('mul_')` pada `cf_approve_job` menuju `POST /api/v2/multiplier/[id]/approve`
-- [x] Tambahkan parameter opsional `force` dan `stage` pada `cf_retry_multiplier_task`
-- [x] Tambahkan `'scheduled'` dan `'needs_review'` pada enum `status` di `cf_list_publishing_jobs`
-- [x] Perbarui dokumentasi ringkas pada [apps/mcp/README.md](file:///Users/sabeqmmursyid/_cfstudio/apps/mcp/README.md)
-
-### Tahap 4: Pengujian & Build Verifikasi
-- [x] Tambahkan test MCP baru di [apps/mcp/test/mcp.test.mjs](file:///Users/sabeqmmursyid/_cfstudio/apps/mcp/test/mcp.test.mjs) (`cf_approve_job` untuk `mul_*`, `cf_retry_multiplier_task` dengan `force` + `stage`, `cf_list_publishing_jobs` dengan `needs_review` + `scheduled`)
-- [x] Tambahkan unit test backend [tests/mcp-recovery-tools.test.mjs](file:///Users/sabeqmmursyid/_cfstudio/tests/mcp-recovery-tools.test.mjs) untuk memverifikasi `resolveMultiplierStageRetryTarget()`, `getContentAutomationRuntime()`, dan `getContentAutomationNotificationRuntime()` bebas error circular JSON
-- [x] Jalankan `npm run test:mcp`, `PG_SEARCH_PATH=dev node --test tests/mcp-recovery-tools.test.mjs tests/test-mcp-tools-parity.test.js`, dan `DISABLE_AUTO_MIGRATIONS=true PG_SEARCH_PATH=dev npm run build`
+### Tahap 3: Pengujian, Verifikasi Build, & Deploy Dev
+- [x] Tambahkan regression test di [tests/publishing-drive-staging.test.js](file:///Users/sabeqmmursyid/_cfstudio/tests/publishing-drive-staging.test.js) untuk memverifikasi: (a) grace period 2 jam `published` & 1 jam `cancelled`, (b) `needs_review` tertahan hingga 3 hari lalu terhapus, (c) `scheduled` tidak terhapus, (d) ref-counting menahan hapus jika ada sibling job masih `scheduled`, (e) multi-tenant context cleanup, dan (f) deduplikasi `mediaKey` lintas platform
+- [x] Jalankan unit test (`PG_SEARCH_PATH=dev node --test tests/publishing-drive-staging.test.js tests/publishing-scheduler.test.js tests/publishing-repository-query.test.js`) dan build lokal (`DISABLE_AUTO_MIGRATIONS=true PG_SEARCH_PATH=dev npm run build`)
+- [x] Commit dan push branch `fitur/repliz-drive-cleanup`, lalu deploy ke **Dev (`5020`/`7020`)** memakai `npm run deploy:dev:atomic -- --ref <full-git-sha> --apply --confirm-dev` dan verifikasi worker aktif
 
 ---
 
 ## Rincian Perubahan Kode (Before & After Code Snippets)
 
-### 1. `lib/multiplier-artifacts.js`
+### 1. `lib/publishing-repository.js`
 
 **Code Sebelum (Current/Before):**
 ```js
-  const recommendedStage = resolveMultiplierResumeStage(task, artifacts);
-  artifacts.recommended_resume_stage = recommendedStage;
-  artifacts.recommended_resume_label = MULTIPLIER_STAGE_LABELS[recommendedStage] || recommendedStage;
-
-  return artifacts;
+/**
+ * Ambil daftar file media staging yang telah melewati masa retensi (expires_at <= NOW)
+ * dan parent job-nya berstatus terminal (published, failed, cancelled, draft_created).
+ */
+export async function listExpiredMediaStaging(limit = 20) {
+  const res = await pgQuery(`
+    SELECT s.*, j.status as job_status
+    FROM publishing_media_staging s
+    JOIN publishing_jobs j ON j.id = s.job_id
+    WHERE s.deleted_at IS NULL
+      AND s.expires_at <= CURRENT_TIMESTAMP
+      AND j.status IN ('published', 'failed', 'cancelled', 'draft_created')
+    ORDER BY s.expires_at ASC
+    LIMIT $1
+  `, [limit]);
+  return res.rows;
 }
-```
-
-**Code Sesudah (Proposed/After):**
-```js
-import {
-  FAILED_CODE_TO_WORKER_STATUS,
-  MULTIPLIER_STAGE_LABELS,
-  parseJsonSafe,
-  resolveMultiplierResumeStage,
-} from './multiplier-resume.js';
-
-// ... di bagian bawah file:
-
-  const recommendedStage = resolveMultiplierResumeStage(task, artifacts);
-  artifacts.recommended_resume_stage = recommendedStage;
-  artifacts.recommended_resume_label = MULTIPLIER_STAGE_LABELS[recommendedStage] || recommendedStage;
-
-  return artifacts;
-}
-
-const VALID_RETRY_STAGES = new Set(['remaking', 't2i', 'tts', 'visuals', 'ffmpeg', 'cloud']);
 
 /**
- * Memetakan `stage` retry eksplisit menjadi status worker berikutnya beserta validasi artefak.
+ * Tandai record media staging sebagai telah dihapus.
  */
-export function resolveMultiplierStageRetryTarget(task = {}, stage, dbGlabsTasks = null) {
-  const normalizedStage = String(stage || '').trim().toLowerCase();
-  if (!VALID_RETRY_STAGES.has(normalizedStage)) {
-    return {
-      ok: false,
-      statusCode: 400,
-      error: `Stage retry '${stage}' tidak valid. Pilihan: remaking, t2i, tts, visuals, ffmpeg, cloud.`,
-    };
-  }
+export async function markMediaStagingDeleted(id) {
+  const res = await pgQuery(`
+    UPDATE publishing_media_staging
+    SET deleted_at = CURRENT_TIMESTAMP, status = 'deleted', updated_at = CURRENT_TIMESTAMP
+    WHERE id = $1
+    RETURNING *
+  `, [id]);
+  return res.rows[0] || null;
+}
+```
 
-  const artifacts = inspectMultiplierTaskArtifacts(task, dbGlabsTasks);
-  if (normalizedStage === 'ffmpeg' && !artifacts.has_visual_clips) {
-    return {
-      ok: false,
-      statusCode: 409,
-      error: 'Klip video G-Labs belum lengkap untuk langsung menjalankan FFmpeg Muxing. Gunakan Lanjutkan / Visuals terlebih dahulu.',
-      artifacts,
-    };
-  }
-  if (normalizedStage === 'cloud' && !artifacts.has_final_video) {
-    return {
-      ok: false,
-      statusCode: 409,
-      error: 'File video master hasil FFmpeg belum ditemukan di disk; jalankan FFmpeg Muxing terlebih dahulu.',
-      artifacts,
-    };
-  }
+**Code Sesudah (Proposed/After):**
+```js
+function resolveMediaRetentionPolicy({
+  publishedGraceHours = process.env.PUBLISHING_STAGING_PUBLISHED_GRACE_HOURS,
+  cancelledGraceHours = process.env.PUBLISHING_STAGING_CANCELLED_GRACE_HOURS,
+  failedRetentionDays = process.env.PUBLISHING_STAGING_FAILED_RETENTION_DAYS
+} = {}) {
+  const parsedPublished = Number.parseInt(publishedGraceHours ?? '2', 10);
+  const parsedCancelled = Number.parseInt(cancelledGraceHours ?? '1', 10);
+  const parsedFailed = Number.parseInt(failedRetentionDays ?? '3', 10);
 
-  const nextStatus = FAILED_CODE_TO_WORKER_STATUS[normalizedStage] || 'pending_resolution';
   return {
-    ok: true,
-    stage: normalizedStage,
-    nextStatus,
-    label: MULTIPLIER_STAGE_LABELS[nextStatus] || nextStatus,
-    artifacts,
+    publishedHours: Number.isFinite(parsedPublished) && parsedPublished >= 0 ? parsedPublished : 2,
+    cancelledHours: Number.isFinite(parsedCancelled) && parsedCancelled >= 0 ? parsedCancelled : 1,
+    failedDays: Number.isFinite(parsedFailed) && parsedFailed >= 0 ? parsedFailed : 3
   };
+}
+
+/**
+ * Ambil daftar file media staging yang sudah aman dihapus berdasarkan status job,
+ * masa retensi/grace period, serta ref-counting agar file yang masih dipakai job lain
+ * yang belum selesai tidak terhapus prematur.
+ */
+export async function listExpiredMediaStaging(limit = 50, policyOverrides = {}) {
+  const { publishedHours, cancelledHours, failedDays } = resolveMediaRetentionPolicy(policyOverrides);
+
+  const res = await pgQuery(`
+    SELECT s.*, j.status as job_status
+    FROM publishing_media_staging s
+    JOIN publishing_jobs j ON j.id = s.job_id
+    WHERE s.deleted_at IS NULL
+      AND j.status IN ('published', 'draft_created', 'cancelled', 'failed', 'needs_review')
+      AND (
+        s.expires_at <= CURRENT_TIMESTAMP
+        OR (
+          j.status IN ('published', 'draft_created')
+          AND COALESCE(j.published_at, j.updated_at, s.verified_at, s.created_at)
+              <= CURRENT_TIMESTAMP - ($2::text || ' hours')::INTERVAL
+        )
+        OR (
+          j.status = 'cancelled'
+          AND COALESCE(j.cancelled_at, j.updated_at, s.verified_at, s.created_at)
+              <= CURRENT_TIMESTAMP - ($3::text || ' hours')::INTERVAL
+        )
+        OR (
+          j.status IN ('failed', 'needs_review')
+          AND COALESCE(j.updated_at, s.verified_at, s.created_at)
+              <= CURRENT_TIMESTAMP - ($4::text || ' days')::INTERVAL
+        )
+      )
+      AND NOT EXISTS (
+        SELECT 1
+        FROM publishing_media_staging s2
+        JOIN publishing_jobs j2 ON j2.id = s2.job_id
+        WHERE s2.provider = s.provider
+          AND s2.external_file_id = s.external_file_id
+          AND s2.deleted_at IS NULL
+          AND (
+            j2.status NOT IN ('published', 'draft_created', 'cancelled', 'failed', 'needs_review')
+            OR (
+              s2.expires_at > CURRENT_TIMESTAMP
+              AND NOT (
+                (j2.status IN ('published', 'draft_created')
+                  AND COALESCE(j2.published_at, j2.updated_at, s2.verified_at, s2.created_at)
+                      <= CURRENT_TIMESTAMP - ($2::text || ' hours')::INTERVAL)
+                OR (j2.status = 'cancelled'
+                  AND COALESCE(j2.cancelled_at, j2.updated_at, s2.verified_at, s2.created_at)
+                      <= CURRENT_TIMESTAMP - ($3::text || ' hours')::INTERVAL)
+                OR (j2.status IN ('failed', 'needs_review')
+                  AND COALESCE(j2.updated_at, s2.verified_at, s2.created_at)
+                      <= CURRENT_TIMESTAMP - ($4::text || ' days')::INTERVAL)
+              )
+            )
+          )
+      )
+    ORDER BY COALESCE(j.published_at, j.cancelled_at, j.updated_at, s.expires_at) ASC
+    LIMIT $1
+  `, [limit, String(publishedHours), String(cancelledHours), String(failedDays)]);
+  return res.rows;
+}
+
+/**
+ * Tandai record media staging sebagai telah dihapus.
+ */
+export async function markMediaStagingDeleted(id) {
+  const res = await pgQuery(`
+    UPDATE publishing_media_staging
+    SET deleted_at = CURRENT_TIMESTAMP, status = 'deleted', updated_at = CURRENT_TIMESTAMP
+    WHERE id = $1
+    RETURNING *
+  `, [id]);
+  return res.rows[0] || null;
+}
+
+/**
+ * Tandai seluruh record media staging yang berbagi external_file_id yang sama sebagai telah dihapus.
+ */
+export async function markMediaStagingDeletedByExternalFile(provider, externalFileId) {
+  const res = await pgQuery(`
+    UPDATE publishing_media_staging
+    SET deleted_at = CURRENT_TIMESTAMP, status = 'deleted', updated_at = CURRENT_TIMESTAMP
+    WHERE provider = $1 AND external_file_id = $2 AND deleted_at IS NULL
+    RETURNING *
+  `, [provider, externalFileId]);
+  return res.rows;
 }
 ```
 
 ---
 
-### 2. `app/api/v2/multiplier/route.js`
+### 2. `lib/publishing-media-cleanup-worker.js`
 
 **Code Sebelum (Current/Before):**
 ```js
-    if (action === 'retry_task') {
-      const { dbRun } = await import('@/lib/db');
-      const targetTaskId = taskId || id;
-      if (!targetTaskId) {
-        return NextResponse.json({ success: false, error: 'taskId wajib disertakan untuk aksi retry_task' }, { status: 400 });
-      }
+import { google } from 'googleapis';
+import { getAuthorizedClient } from './google-auth.js';
+import { listExpiredMediaStaging, markMediaStagingDeleted } from './publishing-repository.js';
+import { isPublishingWorkerEnabled } from './node-config.js';
+import { deleteObjectFromR2 } from './cloudflare-r2-client.js';
 
-      const task = await getMultiplierTaskById(targetTaskId);
-      if (!task) {
-        return NextResponse.json({ success: false, error: 'Task tidak ditemukan' }, { status: 404 });
-      }
-      if (task.status !== 'failed') {
-        return NextResponse.json({
-          success: false,
-          error: `Task ${targetTaskId} berstatus '${task.status}', hanya task 'failed' yang bisa di-retry.`
-        }, { status: 409 });
-      }
+let cleanupIntervalHandle = null;
+let isCleaningTick = false;
 
-      const mode = body.mode === 'restart_all' ? 'restart_all' : 'smart_resume';
-      let nextStatus = 'pending_resolution';
-      let resumedLabel = 'Dari Awal';
-      let artifacts = null;
+/**
+ * Single tick execution for expired Google Drive media staging cleanup.
+ * @returns {Promise<{ processed: number, deleted: number, errors: number }>}
+ */
+export async function runPublishingMediaCleanupTick() {
+  if (isCleaningTick) return { processed: 0, deleted: 0, errors: 0 };
+  isCleaningTick = true;
 
-      if (mode === 'smart_resume') {
-        const glabsTasks = await dbAll('SELECT task_id, status, video_url FROM glabs_tasks WHERE campaign_id = ? ORDER BY item_id ASC', [targetTaskId]);
-        artifacts = inspectMultiplierTaskArtifacts(task, glabsTasks);
-        nextStatus = artifacts.recommended_resume_stage || 'pending_resolution';
-        resumedLabel = artifacts.recommended_resume_label || nextStatus;
-      }
+  let processed = 0;
+  let deleted = 0;
+  let errors = 0;
 
-      const result = await dbRun(`
-        UPDATE re_multiplier_tasks
-        SET status = ?, error_message = NULL, failed_stage = NULL
-        WHERE id = ? AND status = 'failed'
-      `, [nextStatus, targetTaskId]);
-
-      return NextResponse.json({
-        success: true,
-        resumed_stage: nextStatus,
-        resumed_label: resumedLabel,
-        mode,
-        artifacts,
-        message: mode === 'restart_all'
-          ? `Task ${targetTaskId} diulang dari awal (pending_resolution).`
-          : `Task ${targetTaskId} dilanjutkan langsung dari tahap ${resumedLabel} (${nextStatus}).`,
-        affected: result.changes || result.rowCount || 0
-      });
+  try {
+    const expiredItems = await listExpiredMediaStaging(20);
+    if (!expiredItems || expiredItems.length === 0) {
+      return { processed: 0, deleted: 0, errors: 0 };
     }
-```
 
-**Code Sesudah (Proposed/After):**
-```js
-    if (action === 'retry_task') {
-      const { dbRun } = await import('@/lib/db');
-      const { resolveMultiplierStageRetryTarget } = await import('@/lib/multiplier-artifacts');
-      const IN_PROGRESS_STUCK_STATUSES = new Set([
-        'pending_resolution',
-        'resolving_product',
-        'remaking',
-        'generating_t2i',
-        'generating_audio',
-        'generating_visuals',
-        'ffmpeg_muxing',
-        'uploading_assets',
-      ]);
-
-      const targetTaskId = taskId || id;
-      if (!targetTaskId) {
-        return NextResponse.json({ success: false, error: 'taskId wajib disertakan untuk aksi retry_task' }, { status: 400 });
+    let driveClient = null;
+    const hasDriveItems = expiredItems.some(i => i.provider === 'google_drive');
+    if (hasDriveItems) {
+      try {
+        const auth = getAuthorizedClient();
+        driveClient = google.drive({ version: 'v3', auth });
+      } catch (authErr) {
+        console.warn('[Publishing Media Cleanup] Google client not available for cleanup:', authErr.message);
       }
+    }
 
-      const task = await getMultiplierTaskById(targetTaskId);
-      if (!task) {
-        return NextResponse.json({ success: false, error: 'Task tidak ditemukan' }, { status: 404 });
-      }
-
-      const force = Boolean(body.force);
-      const canRecoverStuck = force && IN_PROGRESS_STUCK_STATUSES.has(task.status);
-      if (task.status !== 'failed' && !canRecoverStuck) {
-        return NextResponse.json({
-          success: false,
-          error: `Task ${targetTaskId} berstatus '${task.status}', hanya task 'failed' (atau task in-progress macet dengan force=true) yang bisa di-retry.`
-        }, { status: 409 });
-      }
-
-      const requestedStage = typeof body.stage === 'string' && body.stage.trim() ? body.stage.trim() : null;
-      const mode = body.mode === 'restart_all' ? 'restart_all' : 'smart_resume';
-      let nextStatus = 'pending_resolution';
-      let resumedLabel = 'Dari Awal';
-      let artifacts = null;
-
-      if (requestedStage) {
-        const glabsTasks = await dbAll('SELECT task_id, status, video_url FROM glabs_tasks WHERE campaign_id = ? ORDER BY item_id ASC', [targetTaskId]);
-        const target = resolveMultiplierStageRetryTarget(task, requestedStage, glabsTasks);
-        if (!target.ok) {
-          return NextResponse.json({ success: false, error: target.error, artifacts: target.artifacts || null }, { status: target.statusCode || 400 });
+    for (const item of expiredItems) {
+      processed++;
+      try {
+        if (item.provider === 'cloudflare_r2' && item.external_file_id) {
+          try {
+            console.log(`[Publishing Media Cleanup] Purging expired R2 staging file ${item.external_file_id} for job ${item.job_id}...`);
+            await deleteObjectFromR2({ key: item.external_file_id, tenantId: item.tenant_id });
+          } catch (delErr) {
+            console.warn(`[Publishing Media Cleanup] Warning deleting R2 file ${item.external_file_id}:`, delErr.message);
+          }
+        } else if (item.provider === 'google_drive' && item.external_file_id) {
+          if (!driveClient) {
+            console.warn(`[Publishing Media Cleanup] Skipping Google Drive item ${item.id}: drive client unavailable.`);
+            errors++;
+            continue;
+          }
+          try {
+            console.log(`[Publishing Media Cleanup] Purging expired Drive staging file ${item.external_file_id} for job ${item.job_id}...`);
+            await driveClient.files.delete({ fileId: item.external_file_id });
+          } catch (delErr) {
+            const status = delErr?.status || delErr?.code || delErr?.response?.status;
+            // 404 means already deleted on Drive, treat as successful deletion
+            if (status !== 404 && !delErr?.message?.includes('File not found')) {
+              throw delErr;
+            }
+          }
         }
-        nextStatus = target.nextStatus;
-        resumedLabel = target.label;
-        artifacts = target.artifacts;
-      } else if (mode === 'smart_resume') {
-        const glabsTasks = await dbAll('SELECT task_id, status, video_url FROM glabs_tasks WHERE campaign_id = ? ORDER BY item_id ASC', [targetTaskId]);
-        artifacts = inspectMultiplierTaskArtifacts(task, glabsTasks);
-        nextStatus = artifacts.recommended_resume_stage || 'pending_resolution';
-        resumedLabel = artifacts.recommended_resume_label || nextStatus;
+
+        await markMediaStagingDeleted(item.id);
+        deleted++;
+        console.log(`[Publishing Media Cleanup] Marked media staging ${item.id} as deleted.`);
+      } catch (itemErr) {
+        errors++;
+        console.error(`[Publishing Media Cleanup] Error purging staging item ${item.id} (job ${item.job_id}):`, itemErr.message);
       }
-
-      const result = nextStatus === 'ffmpeg_muxing'
-        ? await dbRun(`
-            UPDATE re_multiplier_tasks
-            SET status = ?, error_message = NULL, failed_stage = NULL, ffmpeg_output_path = NULL
-            WHERE id = ? AND status = ?
-          `, [nextStatus, targetTaskId, task.status])
-        : await dbRun(`
-            UPDATE re_multiplier_tasks
-            SET status = ?, error_message = NULL, failed_stage = NULL
-            WHERE id = ? AND status = ?
-          `, [nextStatus, targetTaskId, task.status]);
-
-      return NextResponse.json({
-        success: true,
-        resumed_stage: nextStatus,
-        resumed_label: resumedLabel,
-        mode: requestedStage ? `stage:${requestedStage}` : mode,
-        forced: canRecoverStuck,
-        artifacts,
-        message: requestedStage
-          ? `Task ${targetTaskId} ditrigger ulang pada tahap ${resumedLabel} (${nextStatus}).`
-          : (mode === 'restart_all'
-              ? `Task ${targetTaskId} diulang dari awal (pending_resolution).`
-              : `Task ${targetTaskId} dilanjutkan langsung dari tahap ${resumedLabel} (${nextStatus}).`),
-        affected: result.changes || result.rowCount || 0
-      });
     }
-```
+  } catch (tickErr) {
+    console.error('[Publishing Media Cleanup Tick Error]:', tickErr.message);
+  } finally {
+    isCleaningTick = false;
+  }
 
----
-
-### 3. `app/api/v2/multiplier/[id]/retry/route.js`
-
-**Code Sebelum (Current/Before):**
-```js
-import { inspectMultiplierTaskArtifacts } from '@/lib/multiplier-artifacts';
-...
-    const glabsTasks = await dbAll('SELECT task_id, status, video_url FROM glabs_tasks WHERE campaign_id = ? ORDER BY item_id ASC', [id]);
-    const artifacts = inspectMultiplierTaskArtifacts(task, glabsTasks);
-
-    let nextStatus = 'pending_resolution';
-    if (stage === 'remaking') nextStatus = 'remaking';
-    else if (stage === 't2i') nextStatus = 'generating_t2i';
-    else if (stage === 'tts') nextStatus = 'generating_audio';
-    else if (stage === 'visuals') nextStatus = 'generating_visuals';
-    else if (stage === 'ffmpeg') {
-      if (!artifacts.has_visual_clips) {
-        return NextResponse.json({
-          success: false,
-          error: 'Klip video G-Labs belum lengkap untuk langsung menjalankan FFmpeg Muxing. Gunakan Lanjutkan / Visuals terlebih dahulu.'
-        }, { status: 409 });
-      }
-      nextStatus = 'ffmpeg_muxing';
-    } else if (stage === 'cloud') {
-      if (!artifacts.has_final_video) {
-        return NextResponse.json({
-          success: false,
-          error: 'File video master hasil FFmpeg belum ditemukan di disk; jalankan FFmpeg Muxing terlebih dahulu.'
-        }, { status: 409 });
-      }
-      nextStatus = 'uploading_assets';
-    }
+  return { processed, deleted, errors };
+}
 ```
 
 **Code Sesudah (Proposed/After):**
 ```js
-import { resolveMultiplierStageRetryTarget } from '@/lib/multiplier-artifacts';
-...
-    const glabsTasks = await dbAll('SELECT task_id, status, video_url FROM glabs_tasks WHERE campaign_id = ? ORDER BY item_id ASC', [id]);
-    const target = resolveMultiplierStageRetryTarget(task, stage, glabsTasks);
-    if (!target.ok) {
-      return NextResponse.json({ success: false, error: target.error }, { status: target.statusCode || 400 });
+import { google } from 'googleapis';
+import { getAuthorizedClient } from './google-auth.js';
+import {
+  listExpiredMediaStaging,
+  markMediaStagingDeleted,
+  markMediaStagingDeletedByExternalFile
+} from './publishing-repository.js';
+import { isPublishingWorkerEnabled } from './node-config.js';
+import { deleteObjectFromR2 } from './cloudflare-r2-client.js';
+import { tenantContext } from './tenant-context.js';
+
+let cleanupIntervalHandle = null;
+let isCleaningTick = false;
+
+const CLEANUP_BATCH_LIMIT = parseInt(process.env.PUBLISHING_MEDIA_CLEANUP_BATCH_SIZE || '50', 10);
+const CLEANUP_MAX_PER_TICK = parseInt(process.env.PUBLISHING_MEDIA_CLEANUP_MAX_PER_TICK || '200', 10);
+
+async function getDriveClientForTenant(tenantId, cache) {
+  const key = tenantId || 'default_tenant';
+  if (cache.has(key)) return cache.get(key);
+
+  const client = await tenantContext.run(key, async () => {
+    try {
+      const auth = getAuthorizedClient();
+      return google.drive({ version: 'v3', auth });
+    } catch (authErr) {
+      console.warn(`[Publishing Media Cleanup] Google client unavailable for tenant ${key}:`, authErr.message);
+      return null;
     }
-    const nextStatus = target.nextStatus;
-```
+  });
+  cache.set(key, client);
+  return client;
+}
 
----
+/**
+ * Single tick execution for status-aware Google Drive & R2 media staging cleanup.
+ * @returns {Promise<{ processed: number, deleted: number, errors: number }>}
+ */
+export async function runPublishingMediaCleanupTick({
+  batchLimit = CLEANUP_BATCH_LIMIT,
+  maxPerTick = CLEANUP_MAX_PER_TICK,
+  policyOverrides = {}
+} = {}) {
+  if (isCleaningTick) return { processed: 0, deleted: 0, errors: 0 };
+  isCleaningTick = true;
 
-### 4. `lib/content-automation-worker.js` & `lib/content-automation-notification-worker.js`
+  let processed = 0;
+  let deleted = 0;
+  let errors = 0;
 
-**Code Sebelum (Current/Before) — `lib/content-automation-worker.js:85`:**
-```js
-export function getContentAutomationRuntime(){return {...state,running:Boolean(state.interval)};}
-```
+  try {
+    const driveClientCache = new Map();
+    const deletedPhysicalFiles = new Set();
 
-**Code Sesudah (Proposed/After) — `lib/content-automation-worker.js:85`:**
-```js
-export function getContentAutomationRuntime(){return {running:Boolean(state.interval),processing:Boolean(state.running),lastTick:state.lastTick||null,lastError:state.lastError||null};}
-```
+    while (processed < maxPerTick) {
+      const remaining = Math.min(batchLimit, maxPerTick - processed);
+      const expiredItems = await listExpiredMediaStaging(remaining, policyOverrides);
+      if (!expiredItems || expiredItems.length === 0) break;
 
-**Code Sebelum (Current/Before) — `lib/content-automation-notification-worker.js:12`:**
-```js
-export function getContentAutomationNotificationRuntime(){return {...state,running:Boolean(state.interval)};}
-```
+      let progressInBatch = 0;
 
-**Code Sesudah (Proposed/After) — `lib/content-automation-notification-worker.js:12`:**
-```js
-export function getContentAutomationNotificationRuntime(){return {running:Boolean(state.interval),processing:Boolean(state.running),lastTick:state.lastTick||null,lastError:state.lastError||null,lastSentAt:state.lastSentAt||null};}
-```
+      for (const item of expiredItems) {
+        processed++;
+        const fileKey = `${item.provider}:${item.external_file_id}`;
 
-*(Catatan: Mengeluarkan `state.interval` dari object return menghilangkan `Timeout` / `TimersList` circular reference saat `/api/v2/system-health` diserialisasi ke JSON oleh `NextResponse.json(...)`.)*
-
----
-
-### 5. `apps/mcp/tools.mjs`
-
-#### 5A. `cf_approve_job` (tambah cabang `mul_*`)
-
-**Code Sebelum (Current/Before):**
-```js
-  register(
-    'cf_approve_job',
-    'Approve pending campaign review items (operator jobs ocj_* or custom storyboards cst_*) to proceed to production rendering.',
-    {
-      job_id: z.string().trim().min(1).max(128),
-      review_revision: z.union([z.number().int().min(1), z.string()]).optional(),
-      review_sha256: z.string().optional()
-    },
-    false,
-    ({ job_id, review_revision, ...body }) => {
-      if (job_id.startsWith('cst_') || job_id.startsWith('opc_') || /^\d+$/.test(job_id)) {
-        return fetchPillarStoryboardSummary(request, job_id, { includeItems: true }).then(summary => {
-          if (!summary?.success) return summary;
-          const targetItemId = summary.item_id;
-          if (!targetItemId) return { success: false, error: `Tidak ditemukan item pada ${job_id}.` };
-          return request(`/api/v2/pillar-campaigns/items/${encodeURIComponent(String(targetItemId))}/approve`, {
-            body: {
-              review_revision: review_revision !== undefined ? String(review_revision) : (summary.review_revision || ''),
-              new_video_plan: summary.items?.[0]?.new_video_plan_json ? JSON.parse(summary.items[0].new_video_plan_json) : [],
-              video_dna: summary.items?.[0]?.video_dna_json ? JSON.parse(summary.items[0].video_dna_json) : {}
+        try {
+          if (!deletedPhysicalFiles.has(fileKey)) {
+            if (item.provider === 'cloudflare_r2' && item.external_file_id) {
+              try {
+                console.log(`[Publishing Media Cleanup] Purging R2 staging file ${item.external_file_id} (${item.job_status}) for job ${item.job_id}...`);
+                await deleteObjectFromR2({ key: item.external_file_id, tenantId: item.tenant_id });
+              } catch (delErr) {
+                console.warn(`[Publishing Media Cleanup] Warning deleting R2 file ${item.external_file_id}:`, delErr.message);
+              }
+            } else if (item.provider === 'google_drive' && item.external_file_id) {
+              const driveClient = await getDriveClientForTenant(item.tenant_id, driveClientCache);
+              if (!driveClient) {
+                console.warn(`[Publishing Media Cleanup] Skipping Google Drive item ${item.id} (tenant ${item.tenant_id}): drive client unavailable.`);
+                errors++;
+                continue;
+              }
+              try {
+                console.log(`[Publishing Media Cleanup] Purging Drive staging file ${item.external_file_id} (${item.job_status}) for job ${item.job_id}...`);
+                await driveClient.files.delete({
+                  fileId: item.external_file_id,
+                  supportsAllDrives: true
+                });
+              } catch (delErr) {
+                const status = delErr?.status || delErr?.code || delErr?.response?.status;
+                // 404 means already deleted on Drive, treat as successful deletion
+                if (status !== 404 && !delErr?.message?.includes('File not found')) {
+                  throw delErr;
+                }
+              }
             }
-          });
-        });
+            deletedPhysicalFiles.add(fileKey);
+          }
+
+          if (item.external_file_id) {
+            const markedRows = await markMediaStagingDeletedByExternalFile(item.provider, item.external_file_id);
+            deleted += markedRows.length || 1;
+            progressInBatch += markedRows.length || 1;
+          } else {
+            await markMediaStagingDeleted(item.id);
+            deleted++;
+            progressInBatch++;
+          }
+          console.log(`[Publishing Media Cleanup] Marked media staging ${item.id} (file ${item.external_file_id}) as deleted.`);
+        } catch (itemErr) {
+          errors++;
+          console.error(`[Publishing Media Cleanup] Error purging staging item ${item.id} (job ${item.job_id}):`, itemErr.message);
+        }
       }
-      return request(`/api/operator/v1/content-jobs/${encodeURIComponent(job_id)}/approve`, {
-        body: { review_revision, ...body }
-      });
+
+      if (expiredItems.length < remaining || progressInBatch === 0) {
+        break;
+      }
     }
-  );
+  } catch (tickErr) {
+    console.error('[Publishing Media Cleanup Tick Error]:', tickErr.message);
+  } finally {
+    isCleaningTick = false;
+  }
+
+  return { processed, deleted, errors };
+}
 ```
 
-**Code Sesudah (Proposed/After):**
-```js
-  register(
-    'cf_approve_job',
-    'Approve pending campaign review items (operator jobs ocj_*, custom storyboards cst_*, OPC opc_*, or Multiplier tasks mul_*) to proceed to production rendering.',
-    {
-      job_id: z.string().trim().min(1).max(128),
-      review_revision: z.union([z.number().int().min(1), z.string()]).optional(),
-      review_sha256: z.string().optional()
-    },
-    false,
-    ({ job_id, review_revision, ...body }) => {
-      if (job_id.startsWith('mul_')) {
-        return request(`/api/v2/multiplier/${encodeURIComponent(job_id)}/approve`, {
-          body: {}
-        });
-      }
-      if (job_id.startsWith('cst_') || job_id.startsWith('opc_') || /^\d+$/.test(job_id)) {
-        return fetchPillarStoryboardSummary(request, job_id, { includeItems: true }).then(summary => {
-          if (!summary?.success) return summary;
-          const targetItemId = summary.item_id;
-          if (!targetItemId) return { success: false, error: `Tidak ditemukan item pada ${job_id}.` };
-          return request(`/api/v2/pillar-campaigns/items/${encodeURIComponent(String(targetItemId))}/approve`, {
-            body: {
-              review_revision: review_revision !== undefined ? String(review_revision) : (summary.review_revision || ''),
-              new_video_plan: summary.items?.[0]?.new_video_plan_json ? JSON.parse(summary.items[0].new_video_plan_json) : [],
-              video_dna: summary.items?.[0]?.video_dna_json ? JSON.parse(summary.items[0].video_dna_json) : {}
-            }
-          });
-        });
-      }
-      return request(`/api/operator/v1/content-jobs/${encodeURIComponent(job_id)}/approve`, {
-        body: { review_revision, ...body }
-      });
-    }
-  );
-```
+---
 
-#### 5B. `cf_list_publishing_jobs` (tambah `needs_review` dan `scheduled`)
+### 3. `lib/publishing-worker.js`
 
 **Code Sebelum (Current/Before):**
 ```js
-  register(
-    'cf_list_publishing_jobs',
-    'Monitor social media publishing job statuses and view live links.',
-    {
-      status: z.enum(['pending', 'processing', 'completed', 'failed', 'all']).default('all'),
-      platform: z.string().optional(),
-      limit: z.number().int().min(1).max(50).default(20)
-    },
+  // Start periodic staging media cleanup worker
+  try {
+    const cleanupIntervalMs = parseInt(process.env.PUBLISHING_MEDIA_CLEANUP_INTERVAL_MS || '3600000', 10);
+    startPublishingMediaCleanupWorker(cleanupIntervalMs);
+  } catch (cleanErr) {
+    console.warn('[Publishing Worker] Failed to start media cleanup worker:', cleanErr.message);
+  }
 ```
 
 **Code Sesudah (Proposed/After):**
 ```js
-  register(
-    'cf_list_publishing_jobs',
-    'Monitor social media publishing job statuses (including scheduled and needs_review failures) and view live links.',
-    {
-      status: z.enum(['pending', 'processing', 'scheduled', 'completed', 'failed', 'needs_review', 'all']).default('all'),
-      platform: z.string().optional(),
-      limit: z.number().int().min(1).max(50).default(20)
-    },
+  // Start periodic staging media cleanup worker (default 30 menit)
+  try {
+    const cleanupIntervalMs = parseInt(process.env.PUBLISHING_MEDIA_CLEANUP_INTERVAL_MS || '1800000', 10);
+    startPublishingMediaCleanupWorker(cleanupIntervalMs);
+  } catch (cleanErr) {
+    console.warn('[Publishing Worker] Failed to start media cleanup worker:', cleanErr.message);
+  }
 ```
 
-#### 5C. `cf_retry_multiplier_task` (tambah `force` dan `stage`)
+---
+
+### 4. `lib/drive-uploader.js`
 
 **Code Sebelum (Current/Before):**
 ```js
-  register(
-    'cf_retry_multiplier_task',
-    'Retry a failed Multiplier Lab task. By default smart-resumes from the latest completed stage (e.g. ffmpeg_muxing when clips already exist); pass mode="restart_all" to restart from pending_resolution.',
-    {
-      task_id: z.string().trim().min(1).max(128),
-      mode: z.enum(['smart_resume', 'restart_all']).optional()
-    },
-    false,
-    ({ task_id, mode }) => request('/api/v2/multiplier', {
-      method: 'PATCH',
-      body: { action: 'retry_task', taskId: task_id, ...(mode ? { mode } : {}) }
-    })
-  );
+  // Cek apakah file sudah pernah diupload untuk jobId ini (idempoten)
+  if (appProperties.jobId) {
+    try {
+      const q = `'${folderId}' in parents and appProperties has { key='jobId' and value='${appProperties.jobId}' } and trashed=false`;
+      const searchRes = await drive.files.list({
+        q,
+        supportsAllDrives: true,
+        includeItemsFromAllDrives: true,
+        fields: 'files(id, name, appProperties)'
+      });
+      if (searchRes.data.files && searchRes.data.files.length > 0) {
+        const existing = searchRes.data.files[0];
+        const directDownloadUrl = formatGoogleDriveDirectUrl(existing.id);
+        console.log(`[Drive Upload] Reused existing upload for job ${appProperties.jobId} → fileId=${existing.id}`);
+        return { fileId: existing.id, directDownloadUrl };
+      }
+    } catch (e) {
+      console.warn('[Drive Uploader] Idempotency lookup failed, proceeding to upload:', e.message);
+    }
+  }
 ```
 
 **Code Sesudah (Proposed/After):**
 ```js
-  register(
-    'cf_retry_multiplier_task',
-    'Retry a failed (or stuck in-progress when force=true) Multiplier Lab task. Supports mode ("smart_resume" | "restart_all") or explicit stage ("remaking" | "t2i" | "tts" | "visuals" | "ffmpeg" | "cloud").',
-    {
-      task_id: z.string().trim().min(1).max(128),
-      mode: z.enum(['smart_resume', 'restart_all']).optional(),
-      force: z.boolean().optional(),
-      stage: z.enum(['remaking', 't2i', 'tts', 'visuals', 'ffmpeg', 'cloud']).optional()
-    },
-    false,
-    ({ task_id, mode, force, stage }) => request('/api/v2/multiplier', {
-      method: 'PATCH',
-      body: {
-        action: 'retry_task',
-        taskId: task_id,
-        ...(mode ? { mode } : {}),
-        ...(force !== undefined ? { force } : {}),
-        ...(stage ? { stage } : {})
+  // Cek idempoten: prioritaskan mediaKey (dedup lintas platform untuk video sama), fallback ke jobId
+  const lookupProp = appProperties.mediaKey
+    ? { key: 'mediaKey', value: appProperties.mediaKey, label: `mediaKey ${appProperties.mediaKey}` }
+    : (appProperties.jobId
+      ? { key: 'jobId', value: appProperties.jobId, label: `job ${appProperties.jobId}` }
+      : null);
+
+  if (lookupProp) {
+    try {
+      const q = `'${folderId}' in parents and appProperties has { key='${lookupProp.key}' and value='${lookupProp.value}' } and trashed=false`;
+      const searchRes = await drive.files.list({
+        q,
+        supportsAllDrives: true,
+        includeItemsFromAllDrives: true,
+        fields: 'files(id, name, appProperties)'
+      });
+      if (searchRes.data.files && searchRes.data.files.length > 0) {
+        const existing = searchRes.data.files[0];
+        // Pastikan permission publik masih aktif agar aman untuk reuse
+        await drive.permissions.create({
+          fileId: existing.id,
+          supportsAllDrives: true,
+          requestBody: { role: 'reader', type: 'anyone' },
+        }).catch(() => {});
+        const directDownloadUrl = formatGoogleDriveDirectUrl(existing.id);
+        console.log(`[Drive Upload] Reused existing upload for ${lookupProp.label} → fileId=${existing.id}`);
+        return { fileId: existing.id, directDownloadUrl, reused: true };
       }
-    })
-  );
+    } catch (e) {
+      console.warn('[Drive Uploader] Idempotency lookup failed, proceeding to upload:', e.message);
+    }
+  }
+```
+
+---
+
+### 5. `lib/publishing-drive-staging.js`
+
+**Code Sebelum (Current/Before):**
+```js
+import { google } from 'googleapis';
+import { getAuthorizedClient, verifyGoogleConnection } from './google-auth.js';
+...
+/**
+ * Stage media to Google Drive (legacy fallback).
+ */
+export async function stageMediaToDrive(job) {
+  const ready = await verifyPublishingDriveReady({ bypassCache: true });
+  const folderId = ready.folderId;
+  const sourceUrl = normalizeNextcloudDownloadUrl(job.media_url_snapshot);
+
+  const filename = `publishing_${job.id}_${job.platform || 'video'}.mp4`;
+  const appProperties = {
+    jobId: String(job.id),
+    tenantId: String(job.tenant_id || 'default_tenant'),
+    contentId: String(job.content_id || '')
+  };
+
+  console.log(`[Drive Staging] Uploading media for job ${job.id} to folder ${folderId}...`);
+  const uploaded = await uploadUrlToPublicDrive(sourceUrl, filename, folderId, { appProperties });
+
+  console.log(`[Drive Staging] Running anonymous probe on ${uploaded.directDownloadUrl}...`);
+  await verifyAnonymousDriveDownload(uploaded.directDownloadUrl);
+  console.log(`[Drive Staging] Anonymous probe passed for job ${job.id}!`);
+
+  const retentionDays = parseInt(process.env.PUBLISHING_DRIVE_RETENTION_DAYS || '14', 10);
+  const expiresAt = new Date(Date.now() + retentionDays * 24 * 3600 * 1000).toISOString();
+```
+
+**Code Sesudah (Proposed/After):**
+```js
+import crypto from 'crypto';
+import { google } from 'googleapis';
+import { getAuthorizedClient, verifyGoogleConnection } from './google-auth.js';
+...
+/**
+ * Bangun kunci deduplikasi stabil lintas platform untuk 1 sumber video yang sama
+ * dalam tenant & folder tujuan yang sama.
+ */
+export function buildReplizMediaDedupKey({ tenantId = 'default_tenant', contentId = '', sourceUrl = '' } = {}) {
+  const normalizedSource = String(sourceUrl || '').trim();
+  const normalizedContent = String(contentId || '').trim();
+  if (!normalizedSource) return '';
+  return crypto
+    .createHash('sha256')
+    .update(`${tenantId}|${normalizedContent}|${normalizedSource}`)
+    .digest('hex')
+    .slice(0, 24);
+}
+
+/**
+ * Stage media to Google Drive (with cross-platform deduplication by mediaKey).
+ */
+export async function stageMediaToDrive(job) {
+  const ready = await verifyPublishingDriveReady({ bypassCache: true });
+  const folderId = ready.folderId;
+  const tenantId = String(job.tenant_id || 'default_tenant');
+  const sourceUrl = normalizeNextcloudDownloadUrl(job.media_url_snapshot);
+  const mediaKey = buildReplizMediaDedupKey({
+    tenantId,
+    contentId: job.content_id || '',
+    sourceUrl
+  });
+
+  const safeContentSlug = String(job.content_id || job.id).replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 48);
+  const filename = mediaKey
+    ? `publishing_${safeContentSlug}_${mediaKey.slice(0, 8)}.mp4`
+    : `publishing_${job.id}_${job.platform || 'video'}.mp4`;
+
+  const appProperties = {
+    jobId: String(job.id),
+    tenantId,
+    contentId: String(job.content_id || ''),
+    ...(mediaKey ? { mediaKey } : {})
+  };
+
+  console.log(`[Drive Staging] Staging media for job ${job.id} (mediaKey=${mediaKey || 'none'}) to folder ${folderId}...`);
+  const uploaded = await uploadUrlToPublicDrive(sourceUrl, filename, folderId, { appProperties });
+
+  console.log(`[Drive Staging] Running anonymous probe on ${uploaded.directDownloadUrl}...`);
+  await verifyAnonymousDriveDownload(uploaded.directDownloadUrl);
+  console.log(`[Drive Staging] Anonymous probe passed for job ${job.id}!`);
+
+  const retentionDays = parseInt(process.env.PUBLISHING_DRIVE_RETENTION_DAYS || '14', 10);
+  const expiresAt = new Date(Date.now() + retentionDays * 24 * 3600 * 1000).toISOString();
+```
+
+---
+
+### 6. `tests/publishing-drive-staging.test.js`
+
+**Code Sebelum (Current/Before):**
+```js
+test('Drive Staging: runPublishingMediaCleanupTick purges expired items and marks deleted in DB without touching Nextcloud', async () => {
+  ...
+});
+```
+
+**Code Sesudah (Proposed/After):**
+```js
+// Pertahankan test existing, lalu tambahkan test baru di bawahnya:
+test('Drive Staging: listExpiredMediaStaging enforces status-aware grace period (published 2h, cancelled 1h, needs_review 3d, scheduled never)', async () => {});
+test('Drive Staging: listExpiredMediaStaging & cleanup hold shared external_file_id until all sibling jobs are eligible', async () => {});
+test('Drive Staging: buildReplizMediaDedupKey produces identical key across platforms and changes when sourceUrl changes', () => {});
+test('Drive Staging: runPublishingMediaCleanupTick uses per-item tenant context and supportsAllDrives=true', async () => {});
 ```

@@ -1,11 +1,12 @@
 # Daftar Isi Dokumen Kerja (catatan-kerja)
 
-Terakhir diperbarui: 25 November 2026
+Terakhir diperbarui: 26 November 2026
 
 ## USULAN
 
 | Nama File | Ringkasan / Judul |
 |---|---|
+| [USULAN_PENGHAPUSAN_OTOMATIS_FILE_GDRIVE_REPLIZ.md](usulan/USULAN_PENGHAPUSAN_OTOMATIS_FILE_GDRIVE_REPLIZ.md) | Analisa apakah file di folder Google Drive `REPLIZ Publishing` aman dihapus setelah penjadwalan & usulan mekanisme penghapusan otomatis berbasis status (grace period pasca-`published`/`cancelled`, `needs_review`, anti-orphan, multi-tenant fix) |
 | [REKOMENDASI_PRODUK_84_BLUEPRINT_NUTRIBAKE.csv](usulan/REKOMENDASI_PRODUK_84_BLUEPRINT_NUTRIBAKE.csv) | Daftar CSV 496 rekomendasi produk `high_ticket` (244) & `low_ticket` (252) beserta estimasi harga dan kata kunci marketplace dari 84 blueprint jadwal NutriBake 14 hari |
 | [USULAN_PENANGANAN_GAGAL_DAN_STUCK_VIA_MCP.md](usulan/USULAN_PENANGANAN_GAGAL_DAN_STUCK_VIA_MCP.md) | Analisa kemampuan MCP saat ini & usulan 4 perbaikan (approve `mul_*`, retry task macet/`force`, parameter `stage`, filter `needs_review` di `cf_list_publishing_jobs`, & fix `cf_get_cluster_health`) |
 | [USULAN_PERBAIKAN_FACELESS_CAMERA_MULTIPLIER.md](usulan/USULAN_PERBAIKAN_FACELESS_CAMERA_MULTIPLIER.md) | Analisa & Usulan Perbaikan `mul_261125_78w443` (`syd_admin`): penampakan wajah akibat `camera.framing: forearms_and_hands` + `third_person` diterjemahkan `eye-level medium shot`, penghapusan negasi di `sanitizeImagePrompt`, & positive crop lock |
@@ -185,7 +186,8 @@ Terakhir diperbarui: 25 November 2026
 
 | File | Ringkasan |
 |---|---|
-| [implementation_plan.md](../implementation_plan.md) | Rencana aktif: Pemulihan Task Gagal/Macet (`force` & `stage` di `cf_retry_multiplier_task`), Approve `mul_*` di `cf_approve_job`, Filter `needs_review` & `scheduled` di `cf_list_publishing_jobs`, & Fix Serialisasi `cf_get_cluster_health` |
+| [implementation_plan.md](../implementation_plan.md) | Rencana aktif |
+| [repliz_drive_cleanup_arsip_20261126.md](rencana/repliz_drive_cleanup_arsip_20261126.md) | Arsip Implementation Plan: Pembersihan Otomatis Berbasis Status & Deduplikasi File Staging Google Drive `REPLIZ Publishing` `fitur/repliz-drive-cleanup` (dirilis v2.65.0, 26 Nov 2026) |
 | [brand_telegram_notifications_arsip_20261125.md](rencana/brand_telegram_notifications_arsip_20261125.md) | Arsip Implementation Plan: Notifikasi Telegram Per Brand `fitur/brand-telegram-notifications` (dirilis v2.64.0, 25 Nov 2026) |
 | [mcp_multi_pc_tenant_terbatas_arsip_20261125.md](rencana/mcp_multi_pc_tenant_terbatas_arsip_20261125.md) | Arsip Implementation Plan: Distribusi CF Studio MCP ke PC Lain dengan Privilege Tenant Terbatas (dirilis v2.63.0, 25 Nov 2026) |
 | [multiplier_faceless_camera_framing_arsip_20261125.md](rencana/multiplier_faceless_camera_framing_arsip_20261125.md) | Arsip Implementation Plan (Hotfix): Perbaikan framing kamera VI & positive faceless chest-down lock Multiplier (dirilis v2.62.2, 25 Nov 2026) |

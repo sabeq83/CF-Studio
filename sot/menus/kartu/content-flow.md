@@ -1,6 +1,6 @@
 # Kartu Menu: ContentFlow Hub
 
-Terakhir dicek: 17 November 2026 · Versi aplikasi: v2.50.5 (branch `fitur/hapus-instant-sheets`)
+Terakhir dicek: 26 November 2026 · Versi aplikasi: v2.65.0
 Alamat: `/content-flow` · Kelompok: PUBLISHING · Kunci izin menu: `content_flow`
 
 ## Fungsi
@@ -28,6 +28,7 @@ Pusat staging dan penjadwalan konten jadi. Semua video dan artikel yang selesai 
 3. Akun publishing harus sudah terhubung di Settings sebelum bisa menjadwalkan.
 4. Link post (permalink) disusun dari postId Repliz, kecuali **Instagram** (sejak v2.50.3): link resmi shortcode diambil dari Repliz Get One Content (`getReplizContent`), karena postId Instagram berupa ID angka yang tidak bisa dibuka. Link lama diperbaiki dengan `scripts/backfill-instagram-permalink.mjs`.
 5. Filter & badge `Instant Factory` telah dihapus; tabel `pipeline_assets` dilabeli netral sebagai `Pipeline v5.4` (`source_type = 'pipeline'`).
+6. Media staging Google Drive/R2 untuk Repliz memakai deduplikasi 1 file per video lintas platform (`mediaKey` di `appProperties`) dan dibersihkan otomatis berbasis status (`published`/`draft_created`: 2 jam, `cancelled`: 1 jam, `failed`/`needs_review`: 3 hari, `scheduled` tidak dihapus; dijaga *ref-counting* lintas platform).
 
 ## Belum ada / batasan
 - Kalender belum menampilkan konten dari platform lain yang posting manual (hanya yang lewat sistem ini).
