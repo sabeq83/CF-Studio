@@ -1,0 +1,598 @@
+.pageShell {
+  min-height: 100dvh;
+  background: var(--canvas);
+  color: var(--text-primary);
+  overflow-x: hidden;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.catalogHeader {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 12px 16px;
+}
+
+.headerInner {
+  max-width: 1120px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.headerTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.titleGroup {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pageTitle {
+  margin: 0;
+  font-size: clamp(1.05rem, 3.8vw, 1.35rem);
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+}
+
+.resultCount {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.themeBtn {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface-interactive);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-shrink: 0;
+  transition: background var(--transition);
+}
+
+.themeBtn:hover {
+  background: var(--surface-hover);
+}
+
+.controlsStack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.brandSelectBox {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  width: 100%;
+  min-width: 0;
+}
+
+.brandSelectLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  line-height: 1.3;
+}
+
+.brandSelectWrap {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.brandSelect {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 38px 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color var(--transition), background var(--transition);
+}
+
+.brandSelect:hover {
+  background: var(--surface-raised);
+}
+
+.brandSelect:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.brandSelectChevron {
+  position: absolute;
+  right: 12px;
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+.searchBox {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 13px;
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 44px 8px 40px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color var(--transition);
+}
+
+.searchInput::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+.searchClearBtn {
+  position: absolute;
+  right: 2px;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.searchClearBtn:hover {
+  background: var(--surface-interactive);
+  color: var(--text-primary);
+}
+
+.catalogMain {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 14px 16px 88px;
+}
+
+.activeBrandBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+}
+
+.activeBrandMeta {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.activeBrandMeta strong {
+  color: var(--text-primary);
+}
+
+.productGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .productGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .productGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+
+.productCard {
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.cardTop {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.thumbTrigger {
+  width: 64px;
+  height: 64px;
+  padding: 4px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface-raised);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: border-color var(--transition), background var(--transition);
+}
+
+.thumbTrigger:hover {
+  border-color: var(--action-primary);
+  background: var(--surface-interactive);
+}
+
+.thumbImg {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  display: block;
+  border-radius: var(--radius-xs);
+}
+
+.thumbPlaceholder {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-xs);
+  background: var(--surface-interactive);
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cardInfo {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.productName {
+  margin: 0;
+  font-size: 15.5px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--text-primary);
+  word-break: break-word;
+}
+
+.brandBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--radius-xs);
+  background: var(--status-neutral-soft);
+  border: 1px solid color-mix(in srgb, var(--status-neutral) 35%, transparent);
+  color: var(--status-neutral);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.copyAffBtn {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--action-primary);
+  background: var(--action-primary);
+  color: var(--on-action-primary);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background var(--transition), border-color var(--transition), transform 0.1s ease;
+}
+
+.copyAffBtn:hover {
+  background: var(--action-primary-hover);
+  border-color: var(--action-primary-hover);
+}
+
+.copyAffBtn:active {
+  transform: scale(0.99);
+}
+
+.copyAffBtnCopied {
+  background: var(--status-success-soft);
+  border-color: var(--status-success);
+  color: var(--status-success);
+}
+
+.copyAffBtnCopied:hover {
+  background: var(--status-success-soft);
+  border-color: var(--status-success);
+}
+
+.statePanel {
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 28px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.stateTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.stateDesc {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+  max-width: 420px;
+}
+
+.stateActionBtn {
+  margin-top: 6px;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface-interactive);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.stateActionBtn:hover {
+  background: var(--surface-hover);
+}
+
+.skeletonCard {
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skeletonRow {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.skeletonBox {
+  background: var(--surface-interactive);
+  border-radius: var(--radius-sm);
+}
+
+.skeletonThumb {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+}
+
+.skeletonLines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeletonLineLg {
+  height: 18px;
+  width: 82%;
+}
+
+.skeletonLineSm {
+  height: 24px;
+  width: 112px;
+}
+
+.skeletonBtn {
+  height: 44px;
+  width: 100%;
+}
+
+.catalogFooter {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 16px 28px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: var(--overlay-backdrop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modalDialog {
+  width: 100%;
+  max-width: 360px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-modal);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modalHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.35;
+}
+
+.modalBadgeWrap {
+  margin-top: 6px;
+}
+
+.modalCloseBtn {
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface-interactive);
+  color: var(--text-primary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.modalCloseBtn:hover {
+  background: var(--surface-hover);
+}
+
+.modalImageFrame {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modalImg {
+  width: 220px;
+  height: 220px;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.toastBanner {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  z-index: 70;
+  background: var(--surface-raised);
+  border: 1px solid var(--status-success);
+  color: var(--text-primary);
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-modal);
+  font-size: 13.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100vw - 32px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .copyAffBtn,
+  .themeBtn,
+  .brandSelect,
+  .searchInput,
+  .thumbTrigger {
+    transition-duration: 0.01ms !important;
+  }
+}

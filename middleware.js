@@ -1,30 +1,11 @@
 import { NextResponse } from 'next/server';
+import { isPublicRoutePathname } from './lib/public-routes.js';
 
 export function middleware(req) {
   const { pathname } = req.nextUrl;
 
   // Allow public static assets, public landing pages, legal pages, and auth API endpoints
-  if (
-    pathname === '/' ||
-    pathname === '/home' ||
-    pathname.startsWith('/privacy') ||
-    pathname.startsWith('/terms') ||
-    pathname.startsWith('/login') ||
-    pathname.startsWith('/api/auth/login') ||
-    pathname.startsWith('/api/auth/logout') ||
-    pathname.startsWith('/api/auth/me') ||
-    pathname.startsWith('/api/operator/v1/') ||
-    pathname.startsWith('/api/operator/v2/') ||
-    pathname.startsWith('/api/media-proxy') ||   // Public media proxy for Repliz downloads
-    pathname.startsWith('/temp/') ||              // Temp file serving (public)
-    pathname.startsWith('/mockup') ||            // HTML Mockup previews
-    pathname.startsWith('/fonts/') ||            // Bundled OFL fonts for finishing preview iframes
-    pathname.startsWith('/images/') ||
-    pathname.startsWith('/_next') ||
-    pathname.startsWith('/favicon') ||
-    pathname.startsWith('/public') ||
-    pathname.startsWith('/uploads/')
-  ) {
+  if (isPublicRoutePathname(pathname)) {
     return NextResponse.next();
   }
 

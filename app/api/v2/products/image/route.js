@@ -1,47 +1,32 @@
 import { NextResponse } from 'next/server';
-import path from 'path';
 import fs from 'fs';
 import { withTenantContext } from '@/lib/auth';
 import { getActiveTenantId } from '@/lib/tenant-context';
 import { getProductById, updateProduct } from '@/lib/product-repository';
-import { saveRawProductImage, saveCleanProductImage, resolveImageBufferFromInput } from '@/lib/product-image-storage';
+import {
+  BASE_PRODUCTS_UPLOAD_DIR,
+  TRANSPARENT_1X1_GIF_BUFFER,
+  resolveSafeProductUploadFile,
+  saveRawProductImage,
+  saveCleanProductImage,
+  resolveImageBufferFromInput
+} from '@/lib/product-image-storage';
 import { validateRawProductImage } from '@/lib/product-validation';
 
 export const dynamic = 'force-dynamic';
-
-// Base dir untuk keamanan path traversal check
-const BASE_PRODUCTS_DIR = path.join(process.cwd(), 'public', 'uploads', 'products');
 
 export const GET = withTenantContext(async (request) => {
   try {
     const { searchParams } = new URL(request.url);
     const relativePath = searchParams.get('path');
 
-    if (!relativePath) {
-      return NextResponse.json({ success: false, error: 'path parameter is required' }, { status: 400 });
+    const resolved = resolveSafeProductUploadFile(relativePath, { baseDir: BASE_PRODUCTS_UPLOAD_DIR });
+    if (resolved.error) {
+      return NextResponse.json({ success: false, error: resolved.error }, { status: resolved.status });
     }
 
-    // Tolak URL eksternal — jangan proxy URL HTTP/HTTPS
-    if (relativePath.startsWith('http://') || relativePath.startsWith('https://')) {
-      return NextResponse.json({ success: false, error: 'External URLs are not proxied by this endpoint' }, { status: 400 });
-    }
-
-    // Sanitize path
-    let cleanPath = relativePath.replace(/\\/g, '/').replace(/\/+/g, '/');
-    if (cleanPath.startsWith('/')) cleanPath = cleanPath.slice(1);
-    if (cleanPath.startsWith('public/')) cleanPath = cleanPath.slice(7);
-    if (cleanPath.startsWith('uploads/products/')) cleanPath = cleanPath.slice(17);
-
-    // Security: cek path traversal
-    const resolvedPath = path.resolve(path.join(BASE_PRODUCTS_DIR, cleanPath));
-    if (!resolvedPath.startsWith(BASE_PRODUCTS_DIR)) {
-      return NextResponse.json({ success: false, error: 'Unauthorized path' }, { status: 403 });
-    }
-
-    if (!fs.existsSync(resolvedPath)) {
-      // Fallback: transparent pixel dengan header diagnostik
-      const pixel = Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64');
-      return new NextResponse(pixel, {
+    if (resolved.missing) {
+      return new NextResponse(TRANSPARENT_1X1_GIF_BUFFER, {
         headers: {
           'Content-Type': 'image/gif',
           'Cache-Control': 'no-cache',
@@ -50,14 +35,10 @@ export const GET = withTenantContext(async (request) => {
       });
     }
 
-    const ext = path.extname(resolvedPath).toLowerCase();
-    const contentTypeMap = { '.png': 'image/png', '.gif': 'image/gif', '.webp': 'image/webp', '.svg': 'image/svg+xml' };
-    const contentType = contentTypeMap[ext] || 'image/jpeg';
-
-    const fileBuffer = fs.readFileSync(resolvedPath);
+    const fileBuffer = fs.readFileSync(resolved.resolvedPath);
     return new NextResponse(fileBuffer, {
       headers: {
-        'Content-Type': contentType,
+        'Content-Type': resolved.contentType,
         'Cache-Control': 'public, max-age=86400',
       },
     });
