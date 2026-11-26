@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.65.1 — Fix Startup Cache Race pada Cleanup Worker Drive Staging (26/11/2026)
+- Tunggu ensureDbCachesLoaded sebelum tick cleanup awal agar kredensial Google Drive terbaca saat startup
+
 ## V2.65.0 — Cleanup Otomatis Berbasis Status & Deduplikasi Drive Staging Repliz (26/11/2026)
 - Pembersihan file staging Drive/R2 berbasis status (published 2j, cancelled 1j, failed/needs_review 3h)
 - Ref-counting lintas sibling job dan perbaikan multi-tenant cleanup worker
