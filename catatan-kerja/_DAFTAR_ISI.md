@@ -1,11 +1,12 @@
 # Daftar Isi Dokumen Kerja (catatan-kerja)
 
-Terakhir diperbarui: 25 November 2026
+Terakhir diperbarui: 26 November 2026
 
 ## USULAN
 
 | Nama File | Ringkasan / Judul |
 |---|---|
+| [USULAN_PENGHAPUSAN_OTOMATIS_FILE_GDRIVE_REPLIZ.md](usulan/USULAN_PENGHAPUSAN_OTOMATIS_FILE_GDRIVE_REPLIZ.md) | Analisa apakah file di folder Google Drive `REPLIZ Publishing` aman dihapus setelah penjadwalan & usulan mekanisme penghapusan otomatis berbasis status (grace period pasca-`published`/`cancelled`, `needs_review`, anti-orphan, multi-tenant fix) |
 | [REKOMENDASI_PRODUK_84_BLUEPRINT_NUTRIBAKE.csv](usulan/REKOMENDASI_PRODUK_84_BLUEPRINT_NUTRIBAKE.csv) | Daftar CSV 496 rekomendasi produk `high_ticket` (244) & `low_ticket` (252) beserta estimasi harga dan kata kunci marketplace dari 84 blueprint jadwal NutriBake 14 hari |
 | [USULAN_PENANGANAN_GAGAL_DAN_STUCK_VIA_MCP.md](usulan/USULAN_PENANGANAN_GAGAL_DAN_STUCK_VIA_MCP.md) | Analisa kemampuan MCP saat ini & usulan 4 perbaikan (approve `mul_*`, retry task macet/`force`, parameter `stage`, filter `needs_review` di `cf_list_publishing_jobs`, & fix `cf_get_cluster_health`) |
 | [USULAN_PERBAIKAN_FACELESS_CAMERA_MULTIPLIER.md](usulan/USULAN_PERBAIKAN_FACELESS_CAMERA_MULTIPLIER.md) | Analisa & Usulan Perbaikan `mul_261125_78w443` (`syd_admin`): penampakan wajah akibat `camera.framing: forearms_and_hands` + `third_person` diterjemahkan `eye-level medium shot`, penghapusan negasi di `sanitizeImagePrompt`, & positive crop lock |
