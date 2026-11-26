@@ -26,7 +26,7 @@
 ### Tahap 3: Pengujian, Verifikasi Build, & Deploy Dev
 - [x] Tambahkan regression test di [tests/publishing-drive-staging.test.js](file:///Users/sabeqmmursyid/_cfstudio/tests/publishing-drive-staging.test.js) untuk memverifikasi: (a) grace period 2 jam `published` & 1 jam `cancelled`, (b) `needs_review` tertahan hingga 3 hari lalu terhapus, (c) `scheduled` tidak terhapus, (d) ref-counting menahan hapus jika ada sibling job masih `scheduled`, (e) multi-tenant context cleanup, dan (f) deduplikasi `mediaKey` lintas platform
 - [x] Jalankan unit test (`PG_SEARCH_PATH=dev node --test tests/publishing-drive-staging.test.js tests/publishing-scheduler.test.js tests/publishing-repository-query.test.js`) dan build lokal (`DISABLE_AUTO_MIGRATIONS=true PG_SEARCH_PATH=dev npm run build`)
-- [ ] Commit dan push branch `fitur/repliz-drive-cleanup`, lalu deploy ke **Dev (`5020`/`7020`)** memakai `npm run deploy:dev:atomic -- --ref <full-git-sha> --apply --confirm-dev` dan verifikasi worker aktif
+- [x] Commit dan push branch `fitur/repliz-drive-cleanup`, lalu deploy ke **Dev (`5020`/`7020`)** memakai `npm run deploy:dev:atomic -- --ref <full-git-sha> --apply --confirm-dev` dan verifikasi worker aktif
 
 ---
 
