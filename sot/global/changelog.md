@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.66.0 — Halaman Publik Katalog Link Affiliate (/aff) (26/11/2026)
+- Tambah halaman front-end publik /aff tanpa login (mobile-first, 1 kartu 1 brand, thumbnail 64x64, tombol Salin Link Aff)
+- Tambah filter Brand Profile dropdown dan kotak pencarian full-width dengan tema Light/Dark semantic tokens
+- Tambah API publik /api/public/affiliate-catalog dan /api/public/affiliate-catalog/image dengan isolasi tenant dan path traversal guard
+- Arsipkan implementation plan ke catatan-kerja/rencana/
+
 ## V2.65.1 — Fix Startup Cache Race pada Cleanup Worker Drive Staging (26/11/2026)
 - Tunggu ensureDbCachesLoaded sebelum tick cleanup awal agar kredensial Google Drive terbaca saat startup
 
