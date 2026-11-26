@@ -15,6 +15,7 @@ import {
   isMultiplierTtsOptional,
   resolveMultiplierFailedStage
 } from '@/lib/multiplier-resume';
+import { formatWibDateTime } from '@/lib/date-format';
 
 function safeJsonParse(raw, fallback) {
   if (raw === null || raw === undefined || raw === '') return fallback;
@@ -790,7 +791,7 @@ function CampaignDetailPageContent() {
               <span style={{ opacity: 0.3 }}>|</span>
               <span>🏷️ Brand: <strong>{firstTask?.account_name || firstTask?.brand_name || bridging.account_name || bridging.brandName || audio.accountName || 'Tanpa Akun'}</strong></span>
               <span style={{ opacity: 0.3 }}>|</span>
-              <span>📅 Dibuat: <strong>{firstTask?.created_at ? new Date(firstTask.created_at).toLocaleString('id-ID') : '-'}</strong></span>
+              <span>📅 Dibuat: <strong>{firstTask?.created_at ? formatWibDateTime(firstTask.created_at) : '-'}</strong></span>
               <span style={{ opacity: 0.3 }}>|</span>
               <span style={{ fontSize: '0.72rem', background: 'var(--action-primary)', color: 'var(--on-action-primary)', padding: '3px 8px', borderRadius: 4, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                 🧬 1 BLUEPRINT TO {tasks.length} MULTI-ANGLES

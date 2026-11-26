@@ -14,6 +14,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { getWordsPerClipOptions, getDefaultWordsPerClip, VIDEO_MODELS } from '@/lib/words-per-clip-presets';
 import { GEMINI_VOICES, MINIMAX_VOICES, MINIMAX_ENGLISH_VOICES, getDefaultVoicePersona } from '@/lib/voice-constants';
 import { getDemographicOptions } from '@/lib/demographic-constants';
+import { formatWibDateTime } from '@/lib/date-format';
 
 function MultiplierLabPageContent({ mode = 'direct', onCapture, onSuccess, onCancel } = {}) {
   const captureMode = mode === 'capture';
@@ -3209,7 +3210,7 @@ return (
                       </div>
                     </div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                      {new Date(c.created_at).toLocaleString('id-ID')}
+                      {formatWibDateTime(c.created_at)}
                     </div>
                   </div>
 

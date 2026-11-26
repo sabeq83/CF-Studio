@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
 import { getWordsPerClipOptions, getDefaultWordsPerClip, VIDEO_MODELS } from '@/lib/words-per-clip-presets';
 import { MINIMAX_ENGLISH_VOICES } from '@/lib/voice-constants';
+import { formatWibDateTime, formatWibTime } from '@/lib/date-format';
 
 const GEMINI_VOICES = [
   { id: 'Kore', name: 'Kore (Female)', avatar: '👩', desc: 'Standard Female (Skincare/Cosmetic)' },
@@ -2417,7 +2418,7 @@ export default function OrganicPillarPage() {
                 ⚙️ Status Skeduler Organic Pillar Campaign
               </h3>
               <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '4px 0 0' }}>
-                Mengontrol antrean video OPC otomatis. {schedulerDetail ? `Node: ${schedulerDetail.node_role} · Worker: ${schedulerDetail.worker_enabled ? 'siap' : 'mati'} · Tick: ${schedulerDetail.last_tick_at ? new Date(schedulerDetail.last_tick_at).toLocaleTimeString('id-ID') : 'belum ada'}` : ''}
+                Mengontrol antrean video OPC otomatis. {schedulerDetail ? `Node: ${schedulerDetail.node_role} · Worker: ${schedulerDetail.worker_enabled ? 'siap' : 'mati'} · Tick: ${schedulerDetail.last_tick_at ? formatWibTime(schedulerDetail.last_tick_at) : 'belum ada'}` : ''}
               </p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -2579,7 +2580,7 @@ export default function OrganicPillarPage() {
                           </div>
                         </div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                          {new Date(c.created_at).toLocaleString('id-ID')}
+                          {formatWibDateTime(c.created_at)}
                         </div>
                       </div>
 

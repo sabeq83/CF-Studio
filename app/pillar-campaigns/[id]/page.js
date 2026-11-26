@@ -11,6 +11,7 @@ import { FINISHING_TEMPLATE_REGISTRY, getFinishingTemplateMeta, getEffectiveFini
 import FinishingTemplatePreview from '../../components/FinishingTemplatePreview';
 import { isPillarItemBlocked, getPillarItemBlockInfo, getPillarItemStatusInfo } from '@/lib/vo-status-ui';
 import { stripInternalVisualPromptTags } from '@/lib/scene-brief';
+import { formatWibDateTime } from '@/lib/date-format';
 
 const writeToClipboard = (text) => {
   if (typeof window !== 'undefined') {
@@ -3763,7 +3764,7 @@ export default function PillarCampaignDetailPage() {
                 <span style={{ opacity: 0.3 }}>|</span>
                 <span>🏷️ Brand: <strong>{campaign.account_name || campaign.brand_name || 'Tidak Ditentukan'}</strong></span>
                 <span style={{ opacity: 0.3 }}>|</span>
-                <span>📅 Dibuat: <strong>{new Date(campaign.created_at).toLocaleString('id-ID')}</strong></span>
+                <span>📅 Dibuat: <strong>{formatWibDateTime(campaign.created_at)}</strong></span>
                 <span style={{ opacity: 0.3 }}>|</span>
                 {campaign?.execution_mode === 'full_autopilot' ? (
                   <span style={{ fontSize: '0.72rem', background: 'var(--status-success)', color: 'var(--text-primary)', padding: '3px 8px', borderRadius: 4, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
@@ -4257,7 +4258,7 @@ export default function PillarCampaignDetailPage() {
                                   <div>
                                     <strong style={{ fontSize: '1.1rem' }}>Video Item #{index + 1} Workspace</strong>
                                     <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginLeft: 8 }}>
-                                      (ID: #{item.id}) | Dibuat: {new Date(item.created_at).toLocaleString('id-ID')}
+                                      (ID: #{item.id}) | Dibuat: {formatWibDateTime(item.created_at)}
                                     </span>
                                   </div>
                                   <span className={`badge ${getStageBadgeClass(item.workflow_status === 'completed' ? 'completed' : item.workflow_status === 'production_processing' ? 'processing' : 'pending')}`}>

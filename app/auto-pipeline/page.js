@@ -14,6 +14,7 @@ import { buildRecipeProductSubmitFields } from '@/lib/recipe-product-matcher-sha
 import BridgingProductReferenceCard from '../components/BridgingProductReferenceCard';
 import { resolveCampaignProductPhotoPath } from '@/lib/product-photo-policy';
 import { resolvePhotoStatusBadge } from '@/lib/product-card-photo-view';
+import { formatWibShortDateTime } from '@/lib/date-format';
 
 const LAYOUT_PRESET_METADATA = {
   3: [
@@ -6332,7 +6333,7 @@ export default function AutoPipelinePage() {
                             <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{camp.campaign_name || camp.name || 'Batch Campaign'}</div>
                             <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
                               {camp.brand_name || camp.account_name || 'Brand Profile'} • {camp.total_items || 1} Video Items
-                              {camp.created_at ? ` • ${new Date(camp.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}` : ''}
+                              {camp.created_at ? ` • ${formatWibShortDateTime(camp.created_at)}` : ''}
                             </div>
                           </td>
                           <td style={{ padding: '0.85rem 1rem' }}>

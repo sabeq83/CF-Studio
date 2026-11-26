@@ -1,182 +1,250 @@
-# Implementation Plan: Halaman Publik Katalog Link Affiliate (`/aff`)
+# Implementation Plan: Perbaikan Zona Waktu GMT ke GMT+7 (WIB) pada Halaman Pembuatan Kampanye
 
-**Sumber Usulan:** [USULAN_HALAMAN_KATALOG_LINK_AFF_PUBLIK.md](file:///Users/sabeqmmursyid/_cfstudio/catatan-kerja/usulan/USULAN_HALAMAN_KATALOG_LINK_AFF_PUBLIK.md)  
-**Mockup Disetujui:** [mockup_public_affiliate_catalog.html](file:///Users/sabeqmmursyid/_cfstudio/public/mockup_public_affiliate_catalog.html)  
-**Target Branch Kerja:** `fitur/public-affiliate-catalog`  
-**Lingkungan Uji Target:** Unit test lokal (`PG_SEARCH_PATH=dev`), `DISABLE_AUTO_MIGRATIONS=true PG_SEARCH_PATH=dev npm run build`, lalu deploy ke **Dev (`5020`/`7020`)**.
+**Sumber Analisa:** [ANALISA_WAKTU_GMT_KAMPANYE_PILLAR_MULTIPLIER.md](file:///Users/sabeqmmursyid/_cfstudio/catatan-kerja/usulan/ANALISA_WAKTU_GMT_KAMPANYE_PILLAR_MULTIPLIER.md)  
+**Target Branch Kerja:** `hotfix/campaign-wib-timezone` (dibuat dari `main` terbaru sesuai SOP Alur 2 — Hotfix)  
+**Cakupan:** Lapisan parser PostgreSQL (`lib/db-pg.js`), helper bersama (`lib/date-format.js`), serta UI **Pillar Campaign**, **Multiplier Campaign**, **RE Campaign**, **Recipe Labs**, dan **Auto Pipeline**.  
+**Lingkungan Uji Target:** Unit test lokal (`PG_SEARCH_PATH=dev`), `DISABLE_AUTO_MIGRATIONS=true PG_SEARCH_PATH=dev npm run build`, uji di **Dev (`5020`/`7020`)** / **Staging (`5010`/`7010`)** atas persetujuan pengguna.
 
 > [!NOTE]
-> **Tanpa Migrasi Database:** Seluruh data berasal dari tabel PostgreSQL yang sudah ada (`product_extractions`, `brand_profiles`, `brand_products`, `tenants`). Tidak ada perubahan skema database.
+> **Tanpa Migrasi Database & Tanpa Perubahan Layout UI:** Perbaikan akar masalah memakai **Opsi 1A** (override parser OID `1114` `TIMESTAMP WITHOUT TIME ZONE` di `lib/db-pg.js` agar string dari PostgreSQL `Etc/UTC` tidak salah di-parse sebagai waktu lokal Mac Mini `WIB`), ditambah helper `formatWibDateTime` / `formatWibShortDateTime` / `formatWibTime` (`timeZone: 'Asia/Jakarta'`) pada slot teks waktu yang sudah ada di UI. Tidak ada perubahan skema PostgreSQL maupun tata letak/komponen antarmuka.
 
 ---
 
 ## Execution Task List
 
 ### Tahap 0: Persiapan Branch
-- [x] Buat branch fitur baru `fitur/public-affiliate-catalog` dari `main`
+- [x] Pastikan berada di `main` terbaru (`git checkout main && git pull`) lalu buat branch hotfix baru `hotfix/campaign-wib-timezone`
 
-### Tahap 1: Mockup HTML (Disetujui Pengguna)
-- [x] Buat dan revisi mockup mobile-first [public/mockup_public_affiliate_catalog.html](file:///Users/sabeqmmursyid/_cfstudio/public/mockup_public_affiliate_catalog.html) (dropdown Brand Profile full-width, kotak pencarian full-width di bawah dropdown, thumbnail `64×64px`, 1 kartu = 1 brand, hanya tombol `Salin Link Aff`, semantic tokens Light/Dark mode)
+### Tahap 1: Helper Bersama & Perbaikan Parser PostgreSQL OID 1114
+- [x] Buat modul pure JS [lib/date-format.js](file:///Users/sabeqmmursyid/_cfstudio/lib/date-format.js) berisi `parseUtcDate()`, `formatWibDateTime()`, `formatWibTime()`, dan `formatWibShortDateTime()` (aman dipakai di server maupun komponen `'use client'`)
+- [x] Daftarkan `types.setTypeParser(1114, (val) => parseUtcDate(val))` di [lib/db-pg.js](file:///Users/sabeqmmursyid/_cfstudio/lib/db-pg.js) agar seluruh kolom `TIMESTAMP WITHOUT TIME ZONE` dari PostgreSQL (`Etc/UTC`) terbaca sebagai epoch UTC yang benar, bukan mundur 7 jam
 
-### Tahap 2: Service, API Publik, & Middleware
-- [x] Tambahkan helper resolusi file gambar aman di [lib/product-image-storage.js](file:///Users/sabeqmmursyid/_cfstudio/lib/product-image-storage.js) agar dapat dipakai bersama oleh endpoint produk internal dan endpoint gambar publik
-- [x] Buat service katalog publik [lib/public-affiliate-catalog-service.js](file:///Users/sabeqmmursyid/_cfstudio/lib/public-affiliate-catalog-service.js) (DTO publik aman tanpa field internal, relasi 1 kartu = 1 brand dari `brand_products` aktif, isolasi `tenant_id`)
-- [x] Buat API publik [app/api/public/affiliate-catalog/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/public/affiliate-catalog/route.js) dan [app/api/public/affiliate-catalog/image/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/public/affiliate-catalog/image/route.js) (serta manfaatkan helper bersama di [app/api/v2/products/image/route.js](file:///Users/sabeqmmursyid/_cfstudio/app/api/v2/products/image/route.js))
-- [x] Daftarkan `/aff` dan `/api/public/affiliate-catalog` pada whitelist publik di [middleware.js](file:///Users/sabeqmmursyid/_cfstudio/middleware.js)
+### Tahap 2: Pembaruan Formatter UI — Pillar Campaign & Multiplier Campaign
+- [x] Perbarui tampilan `created_at` dan `last_tick_at` pada [app/pillar-campaigns/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/pillar-campaigns/page.js) agar memakai `formatWibDateTime` dan `formatWibTime`
+- [x] Perbarui tampilan `campaign.created_at` dan `item.created_at` pada [app/pillar-campaigns/[id]/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/pillar-campaigns/[id]/page.js) agar memakai `formatWibDateTime`
+- [x] Perbarui tampilan `c.created_at` pada [app/components/campaign-forms/MultiplierConfigurationForm.js](file:///Users/sabeqmmursyid/_cfstudio/app/components/campaign-forms/MultiplierConfigurationForm.js) dan `firstTask.created_at` pada [app/multiplier-lab/[id]/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/multiplier-lab/[id]/page.js) agar memakai `formatWibDateTime`
 
-### Tahap 3: Halaman Front-End Publik `/aff`
-- [x] Buat stylesheet scoped [app/aff/aff.module.css](file:///Users/sabeqmmursyid/_cfstudio/app/aff/aff.module.css) menggunakan 100% semantic CSS tokens dari `app/theme.css`
-- [x] Buat komponen client [app/aff/PublicAffiliateCatalogClient.js](file:///Users/sabeqmmursyid/_cfstudio/app/aff/PublicAffiliateCatalogClient.js) dan halaman [app/aff/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/aff/page.js) tanpa `<Sidebar />`
+### Tahap 3: Pembaruan Formatter UI — RE Campaign, Recipe Labs, & Auto Pipeline
+- [x] Perbarui tampilan `c.created_at` pada [app/components/campaign-forms/ReCampaignConfigurationForm.js](file:///Users/sabeqmmursyid/_cfstudio/app/components/campaign-forms/ReCampaignConfigurationForm.js) dan `campaign.created_at` pada [app/re-campaigns/[id]/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/re-campaigns/[id]/page.js) agar memakai `formatWibDateTime`
+- [x] Perbarui tampilan `c.created_at` pada [app/components/campaign-forms/RecipeLabsConfigurationForm.js](file:///Users/sabeqmmursyid/_cfstudio/app/components/campaign-forms/RecipeLabsConfigurationForm.js) agar memakai `formatWibDateTime`
+- [x] Perbarui tampilan `camp.created_at` pada [app/auto-pipeline/page.js](file:///Users/sabeqmmursyid/_cfstudio/app/auto-pipeline/page.js) agar memakai `formatWibShortDateTime`
 
-### Tahap 4: Pengujian, Verifikasi Build, & Deploy Dev
-- [x] Buat unit test [tests/public-affiliate-catalog.test.js](file:///Users/sabeqmmursyid/_cfstudio/tests/public-affiliate-catalog.test.js) dan jalankan dengan `PG_SEARCH_PATH=dev node --test tests/public-affiliate-catalog.test.js`
-- [x] Jalankan build lokal `DISABLE_AUTO_MIGRATIONS=true PG_SEARCH_PATH=dev npm run build` dan pastikan sukses tanpa error
-- [x] Commit dan push branch `fitur/public-affiliate-catalog`, lalu deploy ke **Dev (`5020`/`7020`)** dan verifikasi akses publik tanpa login
+### Tahap 4: Pengujian, Verifikasi Build, & Deploy
+- [x] Tambahkan unit test [tests/date-format-wib.test.js](file:///Users/sabeqmmursyid/_cfstudio/tests/date-format-wib.test.js) untuk memverifikasi parsing OID `1114` (`'2026-11-26 10:16:49.616942'` → `'2026-11-26T10:16:49.616Z'`) dan output `Asia/Jakarta` (`17.16.49 WIB`), termasuk simulasi `TZ=Asia/Jakarta`
+- [x] Jalankan unit test (`PG_SEARCH_PATH=dev TZ=Asia/Jakarta node --test tests/date-format-wib.test.js`) dan build lokal (`DISABLE_AUTO_MIGRATIONS=true DISABLE_STARTUP_DB_CACHES=true ENABLE_BACKGROUND_SERVICES=false PG_SEARCH_PATH=dev npm run build`)
+- [x] Uji di **Dev (`5020`)** / rilis & deploy ke **Staging (`5010`)** sesuai persetujuan pengguna, lalu verifikasi jam pembuatan kampanye terbaru tampil sesuai WIB (GMT+7)
 
 ---
 
 ## Rincian Perubahan Kode (Before & After Code Snippets)
 
-### 1. `middleware.js`
-
-**Code Sebelum (Current/Before):**
-```js
-  // Allow public static assets, public landing pages, legal pages, and auth API endpoints
-  if (
-    pathname === '/' ||
-    pathname === '/home' ||
-    pathname.startsWith('/privacy') ||
-    pathname.startsWith('/terms') ||
-    pathname.startsWith('/login') ||
-    pathname.startsWith('/api/auth/login') ||
-```
+### 1. File Baru: `lib/date-format.js`
 
 **Code Sesudah (Proposed/After):**
 ```js
-  // Allow public static assets, public landing pages, legal pages, and auth API endpoints
-  if (
-    pathname === '/' ||
-    pathname === '/home' ||
-    pathname === '/aff' ||
-    pathname.startsWith('/aff/') ||
-    pathname.startsWith('/api/public/affiliate-catalog') ||
-    pathname.startsWith('/privacy') ||
-    pathname.startsWith('/terms') ||
-    pathname.startsWith('/login') ||
-    pathname.startsWith('/api/auth/login') ||
-```
-
-### 2. `lib/product-image-storage.js`
-
-**Code Sebelum (Current/Before):**
-```js
-export function readLocalImageToBuffer(relativePath) {
-  if (!relativePath) return null;
-  // Ensure it doesn't try to read outside public directory
-  const cleanPath = relativePath.startsWith('/') ? relativePath.slice(1) : relativePath;
-  const absolutePath = path.join(process.cwd(), 'public', cleanPath);
-  
-  // Basic security check
-  if (!absolutePath.startsWith(path.join(process.cwd(), 'public'))) return null;
-  
-  try {
-    if (fs.existsSync(absolutePath)) {
-      return fs.readFileSync(absolutePath);
-    }
-  } catch (e) {
-    // Ignore
-  }
-  return null;
-}
-```
-
-**Code Sesudah (Proposed/After):**
-```js
-export const BASE_PRODUCTS_UPLOAD_DIR = path.join(process.cwd(), 'public', 'uploads', 'products');
+const BARE_DATETIME_RE = /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?$/;
+export const JAKARTA_TIMEZONE = 'Asia/Jakarta';
 
 /**
- * Validasi dan sanitasi path gambar di bawah public/uploads/products tanpa traversal.
+ * Mengubah string/Date timestamp menjadi objek Date UTC yang akurat.
+ * String timestamp tanpa offset zona waktu (mis. PostgreSQL TIMESTAMP WITHOUT TIME ZONE)
+ * ditafsirkan sebagai UTC agar tidak tergeser oleh zona waktu lokal server/browser.
  */
-export function resolveSafeProductUploadFile(relativePath, { baseDir = BASE_PRODUCTS_UPLOAD_DIR } = {}) {
-  if (!relativePath || typeof relativePath !== 'string') {
-    return { error: 'path parameter is required', status: 400 };
+export function parseUtcDate(value) {
+  if (!value) return null;
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value;
   }
-  const trimmed = relativePath.trim();
-  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
-    return { error: 'External URLs are not proxied by this endpoint', status: 400 };
-  }
+  const raw = String(value).trim();
+  if (!raw) return null;
+  const parsed = BARE_DATETIME_RE.test(raw)
+    ? new Date(`${raw.replace(' ', 'T')}Z`)
+    : new Date(raw);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
 
-  let cleanPath = trimmed.replace(/\\/g, '/').replace(/\/+/g, '/');
-  if (cleanPath.startsWith('/')) cleanPath = cleanPath.slice(1);
-  if (cleanPath.startsWith('public/')) cleanPath = cleanPath.slice(7);
-  if (cleanPath.startsWith('uploads/products/')) cleanPath = cleanPath.slice(17);
+export function formatWibDateTime(value, options = {}) {
+  const date = parseUtcDate(value);
+  if (!date) return '-';
+  return `${date.toLocaleString('id-ID', {
+    timeZone: JAKARTA_TIMEZONE,
+    ...options
+  })} WIB`;
+}
 
-  const resolvedBase = path.resolve(baseDir);
-  const resolvedPath = path.resolve(path.join(resolvedBase, cleanPath));
-  if (!resolvedPath.startsWith(`${resolvedBase}${path.sep}`)) {
-    return { error: 'Unauthorized path', status: 403 };
-  }
+export function formatWibTime(value, options = {}) {
+  const date = parseUtcDate(value);
+  if (!date) return '-';
+  return `${date.toLocaleTimeString('id-ID', {
+    timeZone: JAKARTA_TIMEZONE,
+    ...options
+  })} WIB`;
+}
 
-  if (!fs.existsSync(resolvedPath) || !fs.statSync(resolvedPath).isFile()) {
-    return { missing: true, cleanPath, resolvedPath, contentType: 'image/gif' };
-  }
-
-  const ext = path.extname(resolvedPath).toLowerCase();
-  const contentTypeMap = { '.png': 'image/png', '.gif': 'image/gif', '.webp': 'image/webp', '.svg': 'image/svg+xml' };
-  return {
-    missing: false,
-    cleanPath,
-    resolvedPath,
-    contentType: contentTypeMap[ext] || 'image/jpeg'
-  };
+export function formatWibShortDateTime(value) {
+  const date = parseUtcDate(value);
+  if (!date) return '-';
+  return `${date.toLocaleDateString('id-ID', {
+    timeZone: JAKARTA_TIMEZONE,
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit'
+  })} WIB`;
 }
 ```
 
-### 3. `app/api/v2/products/image/route.js`
+### 2. `lib/db-pg.js`
 
 **Code Sebelum (Current/Before):**
 ```js
-    // Sanitize path
-    let cleanPath = relativePath.replace(/\\/g, '/').replace(/\/+/g, '/');
-    if (cleanPath.startsWith('/')) cleanPath = cleanPath.slice(1);
-    if (cleanPath.startsWith('public/')) cleanPath = cleanPath.slice(7);
-    if (cleanPath.startsWith('uploads/products/')) cleanPath = cleanPath.slice(17);
+import pkg from 'pg';
+import { AsyncLocalStorage } from 'async_hooks';
+import { assertSafeTestDbEnv } from './db-env-validator.js';
+const { Pool, types } = pkg;
 
-    // Security: cek path traversal
-    const resolvedPath = path.resolve(path.join(BASE_PRODUCTS_DIR, cleanPath));
-    if (!resolvedPath.startsWith(BASE_PRODUCTS_DIR)) {
-      return NextResponse.json({ success: false, error: 'Unauthorized path' }, { status: 403 });
-    }
+// Parse tipe PostgreSQL DATE (OID: 1082) sebagai raw string 'YYYY-MM-DD'
+// Mencegah pergeseran hari akibat konversi UTC vs Local Timezone
+types.setTypeParser(1082, (val) => val);
 ```
 
 **Code Sesudah (Proposed/After):**
 ```js
-    const resolved = resolveSafeProductUploadFile(relativePath, { baseDir: BASE_PRODUCTS_DIR });
-    if (resolved.error) {
-      return NextResponse.json({ success: false, error: resolved.error }, { status: resolved.status });
-    }
-    if (resolved.missing) {
-      const pixel = Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64');
-      return new NextResponse(pixel, {
-        headers: {
-          'Content-Type': 'image/gif',
-          'Cache-Control': 'no-cache',
-          'X-Image-Missing': 'true'
-        },
-      });
-    }
-    const fileBuffer = fs.readFileSync(resolved.resolvedPath);
-    return new NextResponse(fileBuffer, {
-      headers: {
-        'Content-Type': resolved.contentType,
-        'Cache-Control': 'public, max-age=86400',
-      },
-    });
+import pkg from 'pg';
+import { AsyncLocalStorage } from 'async_hooks';
+import { assertSafeTestDbEnv } from './db-env-validator.js';
+import { parseUtcDate } from './date-format.js';
+const { Pool, types } = pkg;
+
+// Parse tipe PostgreSQL DATE (OID: 1082) sebagai raw string 'YYYY-MM-DD'
+// Mencegah pergeseran hari akibat konversi UTC vs Local Timezone
+types.setTypeParser(1082, (val) => val);
+
+// Parse PostgreSQL TIMESTAMP WITHOUT TIME ZONE (OID: 1114) sebagai UTC
+// karena server PostgreSQL menyimpan CURRENT_TIMESTAMP dalam Etc/UTC
+types.setTypeParser(1114, (val) => parseUtcDate(val));
 ```
 
-### 4. File Baru yang Ditambahkan
-- `lib/public-affiliate-catalog-service.js`: Query publik `listPublicAffiliateCatalog()` dan sanitasi URL/path gambar per tenant (`resolvePublicThumbnailUrl()`, `isProductPhotoAllowedForTenant()`).
-- `app/api/public/affiliate-catalog/route.js`: Handler `GET` publik untuk daftar brand dan item produk (1 item = 1 relasi produk-brand).
-- `app/api/public/affiliate-catalog/image/route.js`: Handler `GET` publik read-only untuk menyajikan thumbnail produk milik tenant publik secara aman.
-- `app/aff/page.js`, `app/aff/PublicAffiliateCatalogClient.js`, `app/aff/aff.module.css`: Halaman mobile-first tanpa login sesuai mockup yang disetujui.
-- `tests/public-affiliate-catalog.test.js`: Unit test kontrak DTO publik, pemetaan 1 kartu = 1 brand, dan keamanan path gambar.
+### 3. `app/pillar-campaigns/page.js`
+
+**Code Sebelum (Current/Before) — Baris 2420 & 2582:**
+```jsx
+Mengontrol antrean video OPC otomatis. {schedulerDetail ? `Node: ${schedulerDetail.node_role} · Worker: ${schedulerDetail.worker_enabled ? 'siap' : 'mati'} · Tick: ${schedulerDetail.last_tick_at ? new Date(schedulerDetail.last_tick_at).toLocaleTimeString('id-ID') : 'belum ada'}` : ''}
+```
+```jsx
+<div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+  {new Date(c.created_at).toLocaleString('id-ID')}
+</div>
+```
+
+**Code Sesudah (Proposed/After):**
+```jsx
+Mengontrol antrean video OPC otomatis. {schedulerDetail ? `Node: ${schedulerDetail.node_role} · Worker: ${schedulerDetail.worker_enabled ? 'siap' : 'mati'} · Tick: ${schedulerDetail.last_tick_at ? formatWibTime(schedulerDetail.last_tick_at) : 'belum ada'}` : ''}
+```
+```jsx
+<div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+  {formatWibDateTime(c.created_at)}
+</div>
+```
+
+### 4. `app/pillar-campaigns/[id]/page.js`
+
+**Code Sebelum (Current/Before) — Baris 3766 & 4260:**
+```jsx
+<span>📅 Dibuat: <strong>{new Date(campaign.created_at).toLocaleString('id-ID')}</strong></span>
+```
+```jsx
+<span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginLeft: 8 }}>
+  (ID: #{item.id}) | Dibuat: {new Date(item.created_at).toLocaleString('id-ID')}
+</span>
+```
+
+**Code Sesudah (Proposed/After):**
+```jsx
+<span>📅 Dibuat: <strong>{formatWibDateTime(campaign.created_at)}</strong></span>
+```
+```jsx
+<span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginLeft: 8 }}>
+  (ID: #{item.id}) | Dibuat: {formatWibDateTime(item.created_at)}
+</span>
+```
+
+### 5. `app/components/campaign-forms/MultiplierConfigurationForm.js`
+
+**Code Sebelum (Current/Before) — Baris 3212:**
+```jsx
+<div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+  {new Date(c.created_at).toLocaleString('id-ID')}
+</div>
+```
+
+**Code Sesudah (Proposed/After):**
+```jsx
+<div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+  {formatWibDateTime(c.created_at)}
+</div>
+```
+
+### 6. `app/multiplier-lab/[id]/page.js`
+
+**Code Sebelum (Current/Before) — Baris 793:**
+```jsx
+<span>📅 Dibuat: <strong>{firstTask?.created_at ? new Date(firstTask.created_at).toLocaleString('id-ID') : '-'}</strong></span>
+```
+
+**Code Sesudah (Proposed/After):**
+```jsx
+<span>📅 Dibuat: <strong>{firstTask?.created_at ? formatWibDateTime(firstTask.created_at) : '-'}</strong></span>
+```
+
+### 7. `app/components/campaign-forms/ReCampaignConfigurationForm.js`
+
+**Code Sebelum (Current/Before) — Baris 2378:**
+```jsx
+<div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+  {new Date(c.created_at).toLocaleString('id-ID')}
+</div>
+```
+
+**Code Sesudah (Proposed/After):**
+```jsx
+<div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+  {formatWibDateTime(c.created_at)}
+</div>
+```
+
+### 8. `app/re-campaigns/[id]/page.js`
+
+**Code Sebelum (Current/Before) — Baris 4527:**
+```jsx
+<span>📅 Dibuat: <strong>{new Date(campaign.created_at).toLocaleString('id-ID')}</strong></span>
+```
+
+**Code Sesudah (Proposed/After):**
+```jsx
+<span>📅 Dibuat: <strong>{formatWibDateTime(campaign.created_at)}</strong></span>
+```
+
+### 9. `app/components/campaign-forms/RecipeLabsConfigurationForm.js`
+
+**Code Sebelum (Current/Before) — Baris 2612:**
+```jsx
+<div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{new Date(c.created_at).toLocaleString('id-ID')}</div>
+```
+
+**Code Sesudah (Proposed/After):**
+```jsx
+<div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{formatWibDateTime(c.created_at)}</div>
+```
+
+### 10. `app/auto-pipeline/page.js`
+
+**Code Sebelum (Current/Before) — Baris 6335:**
+```jsx
+{camp.created_at ? ` • ${new Date(camp.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}` : ''}
+```
+
+**Code Sesudah (Proposed/After):**
+```jsx
+{camp.created_at ? ` • ${formatWibShortDateTime(camp.created_at)}` : ''}
+```

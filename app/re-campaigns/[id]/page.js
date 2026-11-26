@@ -6,6 +6,7 @@ import { getVisualOverrideLabel, parseVisualOverrides } from '../../../lib/campa
 import { useEffect, useState, Fragment } from 'react';
 import { useParams } from 'next/navigation';
 import { GEMINI_VOICES, MINIMAX_VOICES, MINIMAX_ENGLISH_VOICES, ELEVENLABS_ID_VOICES, ELEVENLABS_EN_VOICES, ELEVENLABS_MODELS } from '@/lib/voice-constants';
+import { formatWibDateTime } from '@/lib/date-format';
 
 const writeToClipboard = (text) => {
   if (typeof window !== 'undefined') {
@@ -4524,7 +4525,7 @@ export default function RECampaignDetailPage() {
                 <span style={{ opacity: 0.3 }}>|</span>
                 <span>🏷️ Brand: <strong>{campaign.brand_name || 'Tidak Ditentukan'}</strong></span>
                 <span style={{ opacity: 0.3 }}>|</span>
-                <span>📅 Dibuat: <strong>{new Date(campaign.created_at).toLocaleString('id-ID')}</strong></span>
+                <span>📅 Dibuat: <strong>{formatWibDateTime(campaign.created_at)}</strong></span>
               </div>
             </div>
 

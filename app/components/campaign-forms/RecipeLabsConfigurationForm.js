@@ -10,6 +10,7 @@ import { GRID_LAYOUT_COORDINATES } from '@/lib/core/GridCoordinates';
 import { getDemographicOptions } from '@/lib/demographic-constants';
 import RecipeExportModal from '../recipe-export/RecipeExportModal';
 import DedicatedVideoLightbox from '../recipe-export/DedicatedVideoLightbox';
+import { formatWibDateTime } from '@/lib/date-format';
 
 const LAYOUT_PRESET_METADATA = {
   3: [
@@ -2609,7 +2610,7 @@ return (
                       >
                         <td style={{ padding: '12px' }}>
                           <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{c.id}</div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{new Date(c.created_at).toLocaleString('id-ID')}</div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{formatWibDateTime(c.created_at)}</div>
                         </td>
                         <td style={{ padding: '12px' }}>
                           <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{catDisplay}</div>
