@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.65.0 — Cleanup Otomatis Berbasis Status & Deduplikasi Drive Staging Repliz (26/11/2026)
+- Pembersihan file staging Drive/R2 berbasis status (published 2j, cancelled 1j, failed/needs_review 3h)
+- Ref-counting lintas sibling job dan perbaikan multi-tenant cleanup worker
+- Deduplikasi upload 1 file per video lintas platform via appProperties.mediaKey
+- Perbarui kartu menu content-flow dan arsipkan rencana
+
 ## V2.64.2 — Fix Retry TTS Duplicate PK & FFmpeg 8.x Audio Concat (25/11/2026)
 - Upsert idempoten tts_studio_batches & tts_studio_clips pada lib/db.js agar retry TTS tidak crash PK
 - Reuse klip TTS valid di disk saat retry di handleAudioGeneration untuk hemat kuota
