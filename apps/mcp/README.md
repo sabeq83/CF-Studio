@@ -112,6 +112,7 @@ HTTP endpoint: `/mcp`, authenticated using either `Authorization: Bearer <CF_STU
 
 ### J2. Brand Profiles & Per-Brand Telegram Topic Notifications
 - `cf_list_brand_profiles` / `cf_get_brand_profile` / `cf_create_brand_profile` / `cf_update_brand_profile`: Manage Brand Profile identity, tone, storage, and finishing defaults.
+- `cf_link_product_brand`: Link a catalog product to a brand profile with a brand-specific affiliate link (optional `tracking_code`), then verify by reading it back. Does not change the product's global `affiliate_link`. A different existing link returns `BRAND_LINK_EXISTS` unless `replace_existing=true`. Needs scope `content:create` or `automation:write`.
 - `cf_get_brand_notification_settings` *(readOnly)*: Get Telegram Forum Topic notification settings for a brand profile and tenant bot readiness.
 - `cf_update_brand_notification_settings`: Update brand Telegram `enabled`, `message_thread_id`, optional `chat_id` override, `events`, quiet hours, and `timezone`.
 - `cf_test_brand_notification`: Enqueue a test Telegram message to the configured Forum Topic of a brand profile.

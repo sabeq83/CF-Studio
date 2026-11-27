@@ -1097,3 +1097,70 @@ test('cf_approve_job supports mul_* Multiplier tasks, cf_retry_multiplier_task p
   });
   assert.ok(calls[3].path.includes('status=scheduled'));
 });
+
+test('cf_link_product_brand saves a per-brand affiliate link, verifies it, and never silently overwrites', async t => {
+  const calls = [];
+  let rows = [];
+  let ignoreWrite = false;
+  const client = await connected(t, async (path, opts) => {
+    calls.push({ path, opts });
+    if (opts.method === 'PUT') {
+      if (!ignoreWrite) {
+        rows = [{ brand_profile_id: 'brand-1', brand_name: 'snacklab', affiliate_link: opts.body.affiliateLink, is_active: true }];
+      }
+      return { success: true, data: rows[0] || null };
+    }
+    return { success: true, data: rows };
+  });
+  const link = args => client.callTool({
+    name: 'cf_link_product_brand',
+    arguments: { brand_id: 'brand-1', product_id: 'pe-123', affiliate_link: 'https://s.shopee.co.id/aaa', ...args }
+  });
+  const writes = () => calls.filter(c => c.opts.method === 'PUT');
+
+  // 1. Link baru: tulis ke endpoint brand, lalu baca ulang
+  const created = (await link({ tracking_code: 'SnackLab' })).structuredContent;
+  assert.equal(created.success, true);
+  assert.equal(created.verified, true);
+  assert.equal(writes()[0].path, '/api/v2/brand-profiles/brand-1/products');
+  assert.deepEqual(writes()[0].opts.body, { productId: 'pe-123', affiliateLink: 'https://s.shopee.co.id/aaa', trackingCode: 'SnackLab' });
+  assert.equal(calls.at(-1).path, '/api/v2/products/pe-123/brands');
+
+  // 2. Link sama tanpa tracking_code: tidak menulis ulang
+  const same = (await link({})).structuredContent;
+  assert.equal(same.changed, false);
+  assert.equal(writes().length, 1);
+
+  // 3. Link berbeda ditahan kecuali replace_existing
+  const blocked = await link({ affiliate_link: 'https://s.shopee.co.id/bbb' });
+  assert.equal(blocked.isError, true);
+  assert.equal(blocked.structuredContent.error_code, 'BRAND_LINK_EXISTS');
+  assert.equal(writes().length, 1);
+  const replaced = (await link({ affiliate_link: 'https://s.shopee.co.id/bbb', replace_existing: true })).structuredContent;
+  assert.equal(replaced.brand_link.affiliate_link, 'https://s.shopee.co.id/bbb');
+  assert.equal(writes().length, 2);
+
+  // 4. Tulisan yang tidak terbaca ulang dilaporkan gagal
+  rows = [];
+  ignoreWrite = true;
+  assert.equal((await link({})).structuredContent.error_code, 'BRAND_LINK_NOT_VERIFIED');
+
+  // 5. URL bukan http(s) ditolak sebelum ada permintaan
+  const count = calls.length;
+  assert.equal((await link({ affiliate_link: 'javascript:alert(1)' })).isError, true);
+  assert.equal(calls.length, count);
+});
+
+test('cf_link_product_brand stops when the product cannot be read', async t => {
+  const calls = [];
+  const client = await connected(t, async (path, opts) => {
+    calls.push({ path, opts });
+    return { success: false, status: 403, error: 'Akses ke tenant ini tidak diizinkan.' };
+  });
+  const result = await client.callTool({
+    name: 'cf_link_product_brand',
+    arguments: { brand_id: 'brand-1', product_id: 'pe-123', affiliate_link: 'https://s.shopee.co.id/aaa' }
+  });
+  assert.equal(result.isError, true);
+  assert.equal(calls.length, 1);
+});

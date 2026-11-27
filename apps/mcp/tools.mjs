@@ -2296,6 +2296,63 @@ export function createCfStudioServer(rawRequest, { isRemoteHttp = false, allowed
   );
 
   register(
+    'cf_link_product_brand',
+    'Link a catalog product to a brand profile with that brand\'s own affiliate link, then read it back to verify. The product global affiliate_link is not changed. An existing active link with a different URL is kept unless replace_existing=true.',
+    {
+      brand_id: z.string().trim().min(1).max(128),
+      product_id: z.string().trim().min(1).max(128),
+      affiliate_link: z.string().trim().max(1000).regex(/^https?:\/\/\S+$/i, 'affiliate_link must be an http(s) URL'),
+      tracking_code: z.string().trim().min(1).max(100).optional(),
+      replace_existing: z.boolean().default(false)
+    },
+    false,
+    async ({ brand_id, product_id, affiliate_link, tracking_code, replace_existing }) => {
+      const brandsPath = `/api/v2/products/${encodeURIComponent(product_id)}/brands`;
+      const findLink = res => (Array.isArray(res?.data) ? res.data : []).find(row => row.brand_profile_id === brand_id);
+      const isActive = row => Boolean(row) && ![false, 0, '0'].includes(row.is_active);
+
+      const before = await request(brandsPath);
+      if (!before?.success) return before;
+      const existing = findLink(before);
+      const currentLink = String(existing?.affiliate_link || '').trim();
+      if (isActive(existing) && currentLink && currentLink !== affiliate_link && !replace_existing) {
+        return {
+          success: false,
+          error_code: 'BRAND_LINK_EXISTS',
+          error: 'Produk ini sudah punya link berbeda untuk brand tersebut. Kirim ulang dengan replace_existing=true hanya bila pengguna ingin menggantinya.',
+          brand_link: existing
+        };
+      }
+      // Tanpa tracking_code, link yang sudah sama tidak perlu ditulis ulang.
+      if (isActive(existing) && currentLink === affiliate_link && !tracking_code) {
+        return { success: true, verified: true, changed: false, brand_link: existing };
+      }
+
+      const saved = await request(`/api/v2/brand-profiles/${encodeURIComponent(brand_id)}/products`, {
+        method: 'PUT',
+        body: {
+          productId: product_id,
+          affiliateLink: affiliate_link,
+          ...(tracking_code ? { trackingCode: tracking_code } : {})
+        }
+      });
+      if (!saved?.success) return saved;
+
+      const after = await request(brandsPath);
+      const link = findLink(after);
+      if (!isActive(link) || String(link.affiliate_link || '').trim() !== affiliate_link) {
+        return {
+          success: false,
+          error_code: 'BRAND_LINK_NOT_VERIFIED',
+          error: after?.error || 'Link sudah dikirim, tetapi tidak terbaca sesuai pada pemeriksaan ulang. Periksa produk di CF Studio sebelum mengulang.',
+          brand_link: link || null
+        };
+      }
+      return { success: true, verified: true, changed: true, brand_link: link };
+    }
+  );
+
+  register(
     'cf_get_brand_notification_settings',
     'Get Telegram topic notification settings for a brand profile and tenant bot status.',
     {
