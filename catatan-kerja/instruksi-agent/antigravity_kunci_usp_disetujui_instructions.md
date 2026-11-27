@@ -258,8 +258,8 @@ Satu produk uji di tenant `tnt_pt-gim-sosmed_62d0d9` (`pe_1795740007497_3946`) j
 - [x] Tahap 1: `usp_approved`, README, tes
 - [x] Tahap 2: skill, manajer, uji salinan batch, petunjuk dan zip
 - [ ] Uji satu produk nyata oleh pengguna lewat Codex
-- [ ] Tahap 2B: push, Dev, merge ke `main`, rilis, Staging, periksa MCP jarak jauh
-- [ ] Tahap 3: worktree hotfix, kode, tes, build
+- [x] Tahap 2B: push, Dev, merge ke `main`, rilis, Staging, periksa MCP jarak jauh (naik ke Staging v2.67.0; uji Dev dilewati atas perintah pengguna)
+- [x] Tahap 3: worktree hotfix, kode, tes, build
 - [ ] Dev, merge, rilis, Staging (persetujuan tiap langkah)
 - [ ] Kunci sembilan produk lama
 
