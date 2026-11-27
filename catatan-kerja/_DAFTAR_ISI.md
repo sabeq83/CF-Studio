@@ -1,6 +1,6 @@
 # Daftar Isi Dokumen Kerja (catatan-kerja)
 
-Terakhir diperbarui: 26 November 2026
+Terakhir diperbarui: 27 November 2026
 
 ## USULAN
 
@@ -70,6 +70,7 @@ Terakhir diperbarui: 26 November 2026
 | [antigravity_layout_mobile_tahap2_instructions.md](instruksi-agent/antigravity_layout_mobile_tahap2_instructions.md) | Instruksi Antigravity — Layout Mobile Tahap 2 (Prioritas 1 & 2): pemolesan 5 halaman utama (Dashboard, Auto Pipeline, ContentFlow Hub, Radar Produk, Product Database), mockup dulu, uji di Dev |
 | [antigravity_layout_mobile_tahap3_instructions.md](instruksi-agent/antigravity_layout_mobile_tahap3_instructions.md) | Instruksi Antigravity — Layout Mobile Tahap 3 (Finalisasi): pemolesan seluruh 16 menu tersisa (Planning, Workflow, Tools, System), mockup dulu, uji di Dev |
 | [antigravity_mcp_universe_reference_manager_instructions.md](instruksi-agent/antigravity_mcp_universe_reference_manager_instructions.md) | Instruksi Antigravity — MCP Universe & Character Lock (kasus Arka): Bagian H hotfix isolasi tenant (B2+B3, naik Staging duluan) lalu Bagian F fitur: B1/B4/B5, 3 route baru, 10 tool MCP, mode strict, uji di Dev |
+| [antigravity_kunci_usp_disetujui_instructions.md](instruksi-agent/antigravity_kunci_usp_disetujui_instructions.md) | Instruksi Antigravity — USP yang sudah disetujui tidak diperkaya ulang: parameter MCP `usp_approved`, verifikasi di skill setor CF Tools, dan hotfix kunci USP/kategori di server |
 | `antigravity_radar_produk_teleradar_instructions.md` | Instruksi Antigravity — Menu Radar Produk: hasil TeleRadar masuk tabel riset terpisah, kurasi, lalu promosi ke Database Produk (mockup dulu, 6 tahap dengan pintu berhenti) |
 | `antigravity_aktifkan_batch_scraper_instructions.md` | Instruksi Antigravity — Aktifkan kembali tombol Batch Scraper (mockup dulu) + pengaman kuota/afiliasi + S3/S5/S6 (disetujui); S1/S2/S4/S7 menunggu keputusan |
 | `antigravity_gpt_regenerate_scraper_square_instructions.md` | Instruksi Antigravity — Tombol GPT Image 2 manual di jendela banding (mockup dulu) & foto scraper square Nano Banana 2 |
