@@ -1611,7 +1611,7 @@ export function createCfStudioServer(rawRequest, { isRemoteHttp = false, allowed
   // 5. Product Database Tools (Pilar 1: Data Engine)
   register(
     'cf_add_product',
-    'Register a new product into the tenant catalog, optionally uploading a raw product photo (via photo_base64, photo_url, or local photo_file_path) and queuing AI clean photo generation.',
+    'Register a new product into the tenant catalog, optionally uploading a raw product photo (via photo_base64, photo_url, or local photo_file_path) and queuing AI clean photo generation. Pass usp_approved=true when unique_selling_point is user-approved so AI enrichment locks and preserves it (marks raw_response.usp_source="manual").',
     {
       product_name: z.string().trim().min(1).max(300),
       product_description: z.string().max(12000).optional(),
@@ -1631,11 +1631,15 @@ export function createCfStudioServer(rawRequest, { isRemoteHttp = false, allowed
       photo_file_path: z.string().max(1000).optional(),
       active_photo: z.enum(['raw_photo_url', 'clean_photo_url']).optional(),
       auto_enrich_clean_photo: z.boolean().default(true),
-      bypass_radar_check: z.boolean().optional()
+      bypass_radar_check: z.boolean().optional(),
+      usp_approved: z.boolean().optional()
     },
     false,
-    async ({ photo_base64, photo_filename, photo_url, photo_file_path, bypass_radar_check, ...args }) => {
+    async ({ photo_base64, photo_filename, photo_url, photo_file_path, bypass_radar_check, usp_approved, ...args }) => {
       try {
+        if (usp_approved && !args.unique_selling_point?.trim()) {
+          return { success: false, error_code: 'USP_REQUIRED', error: 'usp_approved membutuhkan unique_selling_point.' };
+        }
         // Guard Radar Produk: produk hasil riset harus lewat kurasi Radar, bukan jalan pintas manual.
         // Input manual tanpa source_url, atau URL yang tidak ada di Radar, tetap berjalan seperti biasa.
         if (args.source_url && !bypass_radar_check) {
@@ -1665,6 +1669,7 @@ export function createCfStudioServer(rawRequest, { isRemoteHttp = false, allowed
           timeoutMs: 120000,
           body: {
             ...args,
+            ...(usp_approved ? { raw_response: JSON.stringify({ source: 'manual', usp_source: 'manual' }) } : {}),
             ...(photoData.photo_base64 ? { photo_base64: photoData.photo_base64 } : {}),
             ...(photoData.photo_url ? { photo_url: photoData.photo_url } : {}),
             ...(photoData.filename ? { photo_filename: photoData.filename } : {})

@@ -68,7 +68,7 @@ HTTP endpoint: `/mcp`, authenticated using either `Authorization: Bearer <CF_STU
 - `cf_trigger_schedule_now`: Immediately trigger an execution run for an existing schedule.
 
 ### D. Pillar 1: Product Database & Knowledge Catalog (Data Engine)
-- `cf_add_product`: Register a new product into the tenant catalog (manual/spec). If `source_url` matches a not-yet-promoted Radar Produk candidate it is blocked with `RADAR_CANDIDATE_EXISTS` (use `cf_submit_radar_candidates`); pass `bypass_radar_check=true` to add manually anyway. Manual input without `source_url` is unchanged.
+- `cf_add_product`: Register a new product into the tenant catalog (manual/spec). Pass `usp_approved=true` (requires `unique_selling_point`) when the USP is already user-approved so `raw_response.usp_source="manual"` is recorded and enrichment does not overwrite it. If `source_url` matches a not-yet-promoted Radar Produk candidate it is blocked with `RADAR_CANDIDATE_EXISTS` (use `cf_submit_radar_candidates`); pass `bypass_radar_check=true` to add manually anyway. Manual input without `source_url` is unchanged.
 - `cf_list_radar_candidates` / `cf_get_radar_candidate` / `cf_get_radar_status`: read Radar Produk research candidates (scope `product_research:read`).
 - `cf_submit_radar_candidates`: promote candidates through the same atomic service as the web UI (default `preview`; `execute` needs scope `product_research:mcp_promote`).
 - `cf_enrich_product`: Trigger AI enrichment for product USP, truths, and clean photo prompt.

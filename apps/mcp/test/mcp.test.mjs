@@ -1164,3 +1164,53 @@ test('cf_link_product_brand stops when the product cannot be read', async t => {
   assert.equal(result.isError, true);
   assert.equal(calls.length, 1);
 });
+
+test('cf_add_product: usp_approved mengunci USP via raw_response.usp_source=manual dan memvalidasi USP wajib', async t => {
+  const calls = [];
+  const client = await connected(t, async (path, opts) => {
+    calls.push({ path, opts });
+    return { success: true, id: 'pe-usp-1' };
+  });
+
+  // 1. Dengan usp_approved=true dan USP -> raw_response JSON berisi usp_source='manual', usp_approved tidak dikirim
+  await client.callTool({
+    name: 'cf_add_product',
+    arguments: {
+      product_name: 'Sikat Elektrik',
+      unique_selling_point: 'Tahan air IPX7\nPutaran 350 RPM',
+      usp_approved: true
+    }
+  });
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].path, '/api/v2/products');
+  assert.equal('usp_approved' in calls[0].opts.body, false);
+  const parsedRaw = JSON.parse(calls[0].opts.body.raw_response);
+  assert.equal(parsedRaw.usp_source, 'manual');
+  assert.equal(parsedRaw.source, 'manual');
+
+  // 2. Tanpa usp_approved -> tidak ada raw_response
+  calls.length = 0;
+  await client.callTool({
+    name: 'cf_add_product',
+    arguments: {
+      product_name: 'Sikat Biasa',
+      unique_selling_point: 'Ringan'
+    }
+  });
+  assert.equal(calls.length, 1);
+  assert.equal('raw_response' in calls[0].opts.body, false);
+
+  // 3. usp_approved=true tanpa USP (kosong / spasi) -> USP_REQUIRED dan tidak ada permintaan tulis
+  calls.length = 0;
+  const missingUsp = await client.callTool({
+    name: 'cf_add_product',
+    arguments: {
+      product_name: 'Produk Tanpa USP',
+      unique_selling_point: '   ',
+      usp_approved: true
+    }
+  });
+  assert.equal(missingUsp.isError, true);
+  assert.equal(missingUsp.structuredContent.error_code, 'USP_REQUIRED');
+  assert.equal(calls.length, 0);
+});
