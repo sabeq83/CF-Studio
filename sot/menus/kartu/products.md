@@ -1,6 +1,6 @@
 # Kartu Menu: Product Database
 
-Terakhir dicek: 23 November 2026 · Versi aplikasi: v2.58.0 (fitur/smart-matcher-2plus2)
+Terakhir dicek: 27 November 2026 · Versi aplikasi: v2.67.0 (main)
 Alamat: `/products` · Kelompok: PLANNING · Kunci izin menu: `product_database`
 
 ## Fungsi
@@ -15,7 +15,7 @@ Gudang data "DNA" produk jualan. Menyimpan info terstruktur (USP, target audiens
 ## Terhubung dengan
 - Pintu masuk baru: **Radar Produk** (`/product-radar`) — kandidat hasil riset TeleRadar dikurasi terlebih dahulu lalu dipromosikan ke katalog menggunakan `enqueueProductScrape`.
 - Dipakai oleh: hampir semua menu kampanye.
-- Perintah MCP: `cf_add_product` (diberi guard Radar: `source_url` yang sudah jadi kandidat Radar Produk diblokir kecuali `bypass_radar_check=true`; input manual tanpa URL tetap normal; lihat kartu `product-radar.md`), `cf_upload_product_photo`, `cf_regenerate_product_photo`, `cf_enrich_product`, `cf_get_product_detail`, `cf_update_product`, `cf_scrape_product_url`, `cf_get_scrape_status`.
+- Perintah MCP: `cf_add_product` (diberi guard Radar: `source_url` yang sudah jadi kandidat Radar Produk diblokir kecuali `bypass_radar_check=true`; mendukung `usp_approved=true` untuk mengunci USP yang sudah disetujui pengguna via `raw_response.usp_source="manual"`; input manual tanpa URL tetap normal; lihat kartu `product-radar.md`), `cf_link_product_brand` (mengaitkan link afiliasi per brand profile tanpa mengubah link global dan memverifikasi ulang setelah simpan), `cf_upload_product_photo`, `cf_regenerate_product_photo`, `cf_enrich_product`, `cf_get_product_detail`, `cf_update_product`, `cf_scrape_product_url`, `cf_get_scrape_status`.
 
 ## Lokasi (untuk agent)
 - Halaman: `app/products/page.js`, `app/products/ProductDatabaseModal.js`, `app/products/[id]/page.js`

@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.67.0 — Kunci USP Disetujui & Tautan Brand MCP (27/11/2026)
+- Tambah alat MCP cf_link_product_brand untuk tautan afiliasi per brand tanpa menimpa link global
+- Tambah parameter usp_approved pada cf_add_product untuk mengunci USP yang sudah disetujui pengguna via raw_response.usp_source=manual
+- Perbarui kartu menu Product Database
+
 ## V2.66.0 — Halaman Publik Katalog Link Affiliate (/aff) (26/11/2026)
 - Tambah halaman front-end publik /aff tanpa login (mobile-first, 1 kartu 1 brand, thumbnail 64x64, tombol Salin Link Aff)
 - Tambah filter Brand Profile dropdown dan kotak pencarian full-width dengan tema Light/Dark semantic tokens
