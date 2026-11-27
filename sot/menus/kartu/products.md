@@ -1,6 +1,6 @@
 # Kartu Menu: Product Database
 
-Terakhir dicek: 27 November 2026 · Versi aplikasi: v2.67.0 (main)
+Terakhir dicek: 27 November 2026 · Versi aplikasi: v2.67.1 (main)
 Alamat: `/products` · Kelompok: PLANNING · Kunci izin menu: `product_database`
 
 ## Fungsi
@@ -40,6 +40,7 @@ Gudang data "DNA" produk jualan. Menyimpan info terstruktur (USP, target audiens
 14. **Proteksi Normalisasi URL Afiliasi Produk Baru (v2.57.1):** Penentuan link afiliasi pada saat menyimpan produk baru ke `product_extractions` memakai `normalizeProductUrl` dari `lib/product-url-normalizer.js` dan dilindungi unit test regresi agar kebal dari ReferenceError.
 15. **Opsi Foto Siap Pakai / Profesional pada Modal Ganti Foto Produk (Tab Unggah Sendiri):** Pengguna dapat mencentang opsi "Foto ini sudah siap pakai / profesional" (`direct_use: true`). Foto yang diunggah langsung disimpan ke folder clean/raw dan status database langsung disetujui (`photo_status = 'approved'`, `photo_provider = 'manual_upload'`, `photo_reviewed_at = NOW()`) secara synchronous instan tanpa antrean scheduler worker, tanpa pembersihan background paksa (`@imgly`), dan tanpa AI regenerasi. Versi foto bersih sebelumnya tetap dicadangkan ke `previous_clean_photo_url` untuk keperluan pembatalan (revert).
 16. **Klasifikasi Peran Promosi (`promo_role`) untuk Smart Matcher:** Setiap produk dapat diklasifikasikan sebagai `alat_dapur`, `bahan_resep`, atau `lainnya` (auto-deteksi via `classifyProductPromoRole`, dapat di-override manual di modal Edit Produk serta disaring di API/UI via `promo_role`). Perubahan ke `lainnya` langsung menghapus entri produk tersebut dari `blueprint_product_matches` via `syncProductPromoRoleInMatches`, dan perubahan ke `alat_dapur`/`bahan_resep` langsung memperbarui atau mengindeks ulang kecocokannya.
+17. **Penguncian USP & Kategori Manual (`v2.67.1`):** Suntingan `unique_selling_point` lewat `PUT /api/v2/products/[id]` (baik multipart UI maupun JSON `cf_update_product`) atau kiriman `usp_approved: true` (JSON) menandai `raw_response.usp_source = "manual"` lewat `lib/product-manual-lock.js` tanpa membuang penanda lain (`packaging_source`, `curated_from_radar`) dan tanpa mengunci jika nilai USP tidak berubah. Selama `isUspManualLocked` aktif, `enrichProduct` tetap menghasilkan `product_truth`, `geometric_truth`, dan prompt foto, namun menjaga USP serta kategori lama yang sudah terisi (`resolveEnrichmentCategoryUpdate`).
 
 ## Belum ada / batasan
 - Scraper Playwright membutuhkan Chromium terinstall di server.

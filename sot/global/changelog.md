@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.67.1 — Hotfix Kunci Edit USP Manual & Kategori (27/11/2026)
+- Kunci raw_response.usp_source=manual saat USP diedit via PUT UI/JSON atau usp_approved=true tanpa menimpa penanda lain
+- Jaga kategori lama yang sudah terisi saat USP terkunci selama AI enrichment
+- Perbarui kartu menu Product Database dan tambah unit test regresi
+
 ## V2.67.0 — Kunci USP Disetujui & Tautan Brand MCP (27/11/2026)
 - Tambah alat MCP cf_link_product_brand untuk tautan afiliasi per brand tanpa menimpa link global
 - Tambah parameter usp_approved pada cf_add_product untuk mengunci USP yang sudah disetujui pengguna via raw_response.usp_source=manual
