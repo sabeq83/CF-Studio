@@ -254,9 +254,9 @@ Satu produk uji di tenant `tnt_pt-gim-sosmed_62d0d9` (`pe_1795740007497_3946`) j
 
 ## 8. Daftar tugas
 
-- [ ] Tahap 0: periksa keadaan, tes awal, commit alat brand, buat branch
-- [ ] Tahap 1: `usp_approved`, README, tes
-- [ ] Tahap 2: skill, manajer, uji salinan batch, petunjuk dan zip
+- [x] Tahap 0: periksa keadaan, tes awal, commit alat brand, buat branch
+- [x] Tahap 1: `usp_approved`, README, tes
+- [x] Tahap 2: skill, manajer, uji salinan batch, petunjuk dan zip
 - [ ] Uji satu produk nyata oleh pengguna lewat Codex
 - [ ] Tahap 2B: push, Dev, merge ke `main`, rilis, Staging, periksa MCP jarak jauh
 - [ ] Tahap 3: worktree hotfix, kode, tes, build
