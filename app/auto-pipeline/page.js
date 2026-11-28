@@ -276,8 +276,9 @@ export default function AutoPipelinePage() {
   const [loadingCuratedRecipes, setLoadingCuratedRecipes] = useState(false);
   const [instantInfographicCfg, setInstantInfographicCfg] = useState({
     outputStyle: 'recipe_infographic',
-    infographicTemplate: 'infographic_step_grid',
+    infographicTemplate: 'step_grid_classic',
     infographicTheme: 'warm_cream',
+    infographicAspectRatio: '3:4',
     recipeSource: 'ai_generated',
     curatedRecipeId: '',
     librarySelectionMode: 'manual',
@@ -287,8 +288,9 @@ export default function AutoPipelinePage() {
   });
   const [schedInfographicCfg, setSchedInfographicCfg] = useState({
     outputStyle: 'recipe_infographic',
-    infographicTemplate: 'infographic_step_grid',
+    infographicTemplate: 'auto_rotate',
     infographicTheme: 'warm_cream',
+    infographicAspectRatio: '3:4',
     recipeSource: 'ai_generated',
     curatedRecipeId: '',
     librarySelectionMode: 'auto_library_rotation',
@@ -1315,6 +1317,7 @@ export default function AutoPipelinePage() {
           output_style: instantCampaignType === 'recipe_labs' ? instantInfographicCfg.outputStyle : undefined,
           infographic_template: instantCampaignType === 'recipe_labs' ? instantInfographicCfg.infographicTemplate : undefined,
           infographic_theme: instantCampaignType === 'recipe_labs' ? instantInfographicCfg.infographicTheme : undefined,
+          infographic_aspect_ratio: instantCampaignType === 'recipe_labs' ? (instantInfographicCfg.infographicAspectRatio || '3:4') : undefined,
           recipe_source: instantCampaignType === 'recipe_labs' ? instantInfographicCfg.recipeSource : undefined,
           curated_recipe_id: instantCampaignType === 'recipe_labs' ? (instantInfographicCfg.curatedRecipeId || null) : undefined,
           library_selection_mode: instantCampaignType === 'recipe_labs' ? instantInfographicCfg.librarySelectionMode : undefined,
@@ -1327,7 +1330,9 @@ export default function AutoPipelinePage() {
           grid_border_radius: gridBorderRadius,
           grid_outer_padding: gridOuterPadding,
           grid_bg_color: gridBgColor,
-          aspect_ratio: instantRecipeAspectRatio,
+          aspect_ratio: instantCampaignType === 'recipe_labs' && instantInfographicCfg.outputStyle === 'recipe_infographic'
+            ? (instantInfographicCfg.infographicAspectRatio || '3:4')
+            : instantRecipeAspectRatio,
           visual_style: recipeLabsVisualStyle,
           post_to_facebook: postToFacebook,
           post_link_affiliate: instantPostAffiliateLink,
@@ -1840,8 +1845,9 @@ export default function AutoPipelinePage() {
       setSchedRecipeClassification(schedCfg.recipe_classification || schedCfg.category || sched.category || 'Menu Hidangan Utama & Lauk Pauk (Main Course)');
       setSchedInfographicCfg({
         outputStyle: schedCfg.output_style || 'recipe_infographic',
-        infographicTemplate: schedCfg.infographic_template || 'infographic_step_grid',
+        infographicTemplate: schedCfg.infographic_template || 'auto_rotate',
         infographicTheme: schedCfg.infographic_theme || 'warm_cream',
+        infographicAspectRatio: schedCfg.infographic_aspect_ratio || '3:4',
         recipeSource: schedCfg.recipe_source || 'ai_generated',
         curatedRecipeId: schedCfg.curated_recipe_id || '',
         librarySelectionMode: schedCfg.library_selection_mode || 'auto_library_rotation',
@@ -2038,9 +2044,11 @@ export default function AutoPipelinePage() {
                           category: schedCategory,
                           recipe_classification: schedRecipeClassification,
                           target_language: schedTargetLanguage || 'id_ID',
+                          aspect_ratio: schedInfographicCfg.outputStyle === 'recipe_infographic' ? (schedInfographicCfg.infographicAspectRatio || '3:4') : undefined,
                           output_style: schedInfographicCfg.outputStyle,
                           infographic_template: schedInfographicCfg.infographicTemplate,
                           infographic_theme: schedInfographicCfg.infographicTheme,
+                          infographic_aspect_ratio: schedInfographicCfg.infographicAspectRatio || '3:4',
                           recipe_source: schedInfographicCfg.recipeSource,
                           curated_recipe_id: schedInfographicCfg.curatedRecipeId || null,
                           library_selection_mode: schedInfographicCfg.librarySelectionMode,
@@ -2489,9 +2497,11 @@ export default function AutoPipelinePage() {
                             category: finalCategory,
                             recipe_classification: finalCategory,
                             target_language: schedTargetLanguage || 'id_ID',
+                            aspect_ratio: schedInfographicCfg.outputStyle === 'recipe_infographic' ? (schedInfographicCfg.infographicAspectRatio || '3:4') : undefined,
                             output_style: schedInfographicCfg.outputStyle,
                             infographic_template: schedInfographicCfg.infographicTemplate,
                             infographic_theme: schedInfographicCfg.infographicTheme,
+                            infographic_aspect_ratio: schedInfographicCfg.infographicAspectRatio || '3:4',
                             recipe_source: schedInfographicCfg.recipeSource,
                             curated_recipe_id: schedInfographicCfg.curatedRecipeId || null,
                             library_selection_mode: schedInfographicCfg.librarySelectionMode,
@@ -3343,6 +3353,7 @@ export default function AutoPipelinePage() {
                   </select>
                 </div>
 
+                {instantCampaignType !== 'recipe_labs' && (<>
                 {/* 2. Preset Konfigurasi Video (Preset Manager) */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', minWidth: 0, maxWidth: '100%', width: '100%' }}>
                   <label style={{
@@ -3476,9 +3487,11 @@ export default function AutoPipelinePage() {
                     <option value="manual_review">⏸️ Manual Review (Jeda di Storyboard Approval)</option>
                   </select>
                 </div>
+                </>)}
               </div>
 
               {/* READ-ONLY PRESET INSPECTOR CARD */}
+              {instantCampaignType !== 'recipe_labs' && (
               <div style={{
                 background: 'var(--surface-raised)',
                 border: '1px solid var(--border-subtle)',
@@ -3806,6 +3819,7 @@ export default function AutoPipelinePage() {
                   );
                 })()}
               </div>
+              )}
 
               {/* STEP 3: ADAPTIVE CAMPAIGN CONTENT FORM */}
               {/* 3A: VIDEO PRODUK (Katalog Produk Selector) */}
@@ -5459,7 +5473,24 @@ export default function AutoPipelinePage() {
                     defaultBrandName={brands.find(b => b.id === selectedBrandId)?.brand_name || ''}
                   />
 
+                  {/* Facebook Auto-Publish Checkbox */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.65rem 0.9rem', borderRadius: 'var(--radius-sm)', background: 'var(--surface)', border: '1px solid var(--border-subtle)' }}>
+                    <input
+                      type="checkbox"
+                      id="fb-autopublish-check"
+                      checked={postToFacebook}
+                      onChange={(e) => setPostToFacebook(e.target.checked)}
+                      style={{ width: '16px', height: '16px', accentColor: 'var(--action-primary)', cursor: 'pointer' }}
+                    />
+                    <label htmlFor="fb-autopublish-check" style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 600, cursor: 'pointer' }}>
+                      {instantInfographicCfg.outputStyle === 'recipe_infographic'
+                        ? 'Posting otomatis naskah resep dan gambar poster infografis ke Halaman Facebook'
+                        : 'Posting otomatis naskah resep dan gambar kolase ke Halaman Facebook'}
+                    </label>
+                  </div>
+
                   {/* Susunan Grid Komposit (Adopted 100% from Recipe Labs) */}
+                  {instantInfographicCfg.outputStyle === 'photo_grid' && (
                   <div style={{
                     background: 'var(--surface)',
                     border: '1px solid var(--border-subtle)',
@@ -5698,19 +5729,6 @@ export default function AutoPipelinePage() {
                           </div>
                         </div>
 
-                        {/* Facebook Auto-Publish Checkbox */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginTop: '0.2rem' }}>
-                          <input
-                            type="checkbox"
-                            id="fb-autopublish-check"
-                            checked={postToFacebook}
-                            onChange={(e) => setPostToFacebook(e.target.checked)}
-                            style={{ width: '16px', height: '16px', accentColor: 'var(--action-primary)', cursor: 'pointer' }}
-                          />
-                          <label htmlFor="fb-autopublish-check" style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 600, cursor: 'pointer' }}>
-                            Posting otomatis naskah resep dan gambar kolase ke Halaman Facebook
-                          </label>
-                        </div>
                       </div>
 
                       {/* Kolom Kanan: Live Mockup Preview Box (1:1 Canvas 230px x 230px) */}
@@ -5812,6 +5830,7 @@ export default function AutoPipelinePage() {
                       </div>
                     </div>
                   </div>
+                  )}
                 </div>
               )}
 
@@ -5895,7 +5914,9 @@ export default function AutoPipelinePage() {
                       🛒 Sertakan Rekomendasi Produk & Affiliate (Shopee FB & Link di Bio)
                     </label>
                     <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1.4, display: 'block', marginTop: '2px' }}>
-                      Otomatis mencocokkan produk brand dan menghasilkan CTA adaptif (FB: link Shopee aktif, Non-FB: Link di Bio). Uncheck jika ingin video viral 1-klik murni edukasi tanpa jualan.
+                      {instantCampaignType === 'recipe_labs'
+                        ? 'Otomatis mencocokkan produk brand ke dalam caption (FB: link Shopee aktif, Non-FB: Link di Bio). Uncheck jika ingin poster resep murni edukasi tanpa jualan.'
+                        : 'Otomatis mencocokkan produk brand dan menghasilkan CTA adaptif (FB: link Shopee aktif, Non-FB: Link di Bio). Uncheck jika ingin video viral 1-klik murni edukasi tanpa jualan.'}
                     </span>
                   </div>
                 </div>
@@ -5963,7 +5984,9 @@ export default function AutoPipelinePage() {
                             : (instantCampaignType === 'multiplier_campaign'
                                 ? `🔀 Luncurkan Multiplier Angle Remix (Winning Blueprint)`
                                 : (instantCampaignType === 'recipe_labs'
-                                    ? `🖼️ Luncurkan Resep Teks & Foto AI (Grid Komposit)`
+                                    ? (instantInfographicCfg.outputStyle === 'recipe_infographic'
+                                        ? `🖼️ Luncurkan Poster Infografis & Caption Sekarang`
+                                        : `🖼️ Luncurkan Resep Teks & Foto AI (Grid Komposit)`)
                                     : (instantCampaignType === 'threads_series'
                                         ? `🧵 Buat Utas Berseri & Jadwalkan ke Repliz`
                                         : `🚀 Luncurkan Auto Pipeline Resep (${targetClipsCount} Klip Video)`))))
@@ -7184,6 +7207,7 @@ export default function AutoPipelinePage() {
                     </select>
                   </div>
 
+                  {schedCampaignType !== 'recipe_labs' && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                     <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
                       <span>2. Preset Konfigurasi Video</span>
@@ -7242,10 +7266,11 @@ export default function AutoPipelinePage() {
                       })()}
                     </select>
                   </div>
+                  )}
                 </div>
 
                 {/* Preset Target Language & Voice Info Banner */}
-                {(() => {
+                {schedCampaignType !== 'recipe_labs' && (() => {
                   const modalPresetsList = modalBrandPresets.length > 0 ? modalBrandPresets : operatorPresets;
                   const activePresetItem = modalPresetsList.find(p => p.key === schedPresetKey) || modalPresetsList[0];
                   const pConfig = activePresetItem?.config || activePresetItem || {};
@@ -9060,61 +9085,67 @@ export default function AutoPipelinePage() {
                         </select>
                       </div>
 
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                        <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                          Jumlah Foto dalam Kolase
-                        </label>
-                        <select
-                          value={schedImagesPerRecipe}
-                          onChange={(e) => {
-                            const val = Number(e.target.value);
-                            setSchedImagesPerRecipe(val);
-                            setSchedLayoutId(LAYOUT_PRESET_METADATA[val]?.[0]?.id || '4_editorial_split');
-                          }}
-                          style={{
-                            height: '38px',
-                            background: 'var(--input-bg)',
-                            border: '1px solid var(--border-subtle)',
-                            borderRadius: 'var(--radius-sm)',
-                            padding: '0 0.75rem',
-                            fontSize: '0.84rem',
-                            color: 'var(--text-primary)',
-                            outline: 'none'
-                          }}
-                        >
-                          <option value={3}>3 Gambar Kolase</option>
-                          <option value={4}>4 Gambar Kolase (Default)</option>
-                          <option value={5}>5 Gambar Kolase</option>
-                          <option value={6}>6 Gambar Kolase</option>
-                        </select>
-                      </div>
+                      {schedInfographicCfg.outputStyle === 'photo_grid' && (
+                        <>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                            <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                              Jumlah Foto dalam Kolase
+                            </label>
+                            <select
+                              value={schedImagesPerRecipe}
+                              onChange={(e) => {
+                                const val = Number(e.target.value);
+                                setSchedImagesPerRecipe(val);
+                                setSchedLayoutId(LAYOUT_PRESET_METADATA[val]?.[0]?.id || '4_editorial_split');
+                              }}
+                              style={{
+                                height: '38px',
+                                background: 'var(--input-bg)',
+                                border: '1px solid var(--border-subtle)',
+                                borderRadius: 'var(--radius-sm)',
+                                padding: '0 0.75rem',
+                                fontSize: '0.84rem',
+                                color: 'var(--text-primary)',
+                                outline: 'none'
+                              }}
+                            >
+                              <option value={3}>3 Gambar Kolase</option>
+                              <option value={4}>4 Gambar Kolase (Default)</option>
+                              <option value={5}>5 Gambar Kolase</option>
+                              <option value={6}>6 Gambar Kolase</option>
+                            </select>
+                          </div>
+                        </>
+                      )}
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                        <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                          Template Susunan Grid
-                        </label>
-                        <select
-                          value={schedLayoutId}
-                          onChange={(e) => setSchedLayoutId(e.target.value)}
-                          style={{
-                            height: '38px',
-                            background: 'var(--input-bg)',
-                            border: '1px solid var(--border-subtle)',
-                            borderRadius: 'var(--radius-sm)',
-                            padding: '0 0.75rem',
-                            fontSize: '0.84rem',
-                            color: 'var(--text-primary)',
-                            outline: 'none'
-                          }}
-                        >
-                          {(LAYOUT_PRESET_METADATA[schedImagesPerRecipe] || []).map(preset => (
-                            <option key={preset.id} value={preset.id}>{preset.name}</option>
-                          ))}
-                        </select>
+                    {schedInfographicCfg.outputStyle === 'photo_grid' && (
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                          <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                            Template Susunan Grid
+                          </label>
+                          <select
+                            value={schedLayoutId}
+                            onChange={(e) => setSchedLayoutId(e.target.value)}
+                            style={{
+                              height: '38px',
+                              background: 'var(--input-bg)',
+                              border: '1px solid var(--border-subtle)',
+                              borderRadius: 'var(--radius-sm)',
+                              padding: '0 0.75rem',
+                              fontSize: '0.84rem',
+                              color: 'var(--text-primary)',
+                              outline: 'none'
+                            }}
+                          >
+                            {(LAYOUT_PRESET_METADATA[schedImagesPerRecipe] || []).map(preset => (
+                              <option key={preset.id} value={preset.id}>{preset.name}</option>
+                            ))}
+                          </select>
+                        </div>
                       </div>
-                    </div>
+                    )}
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                       <input
@@ -9946,6 +9977,7 @@ export default function AutoPipelinePage() {
                 )}
 
                 {/* 🔊 Override Mode Audio / VO untuk Jadwal Ini */}
+                {schedCampaignType !== 'recipe_labs' && (
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: schedAudioModeOverride === 'no_vo' ? '1.3fr 1fr 1fr' : '1fr',
@@ -9998,6 +10030,7 @@ export default function AutoPipelinePage() {
                     </>
                   )}
                 </div>
+                )}
 
                 {/* 🛒 Toggle Kontrol Post Link Affiliate Shopee & Link di Bio */}
                 <div style={{

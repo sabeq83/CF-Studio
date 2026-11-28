@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup 9 Template Layout Poster Infografis Resep - CF Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root,
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-display: 'Fredoka', 'Plus Jakarta Sans', sans-serif;
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-rose: #f43f5e;
+      --status-rose-soft: rgba(244, 63, 94, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+    }
+
+    [data-theme="light"] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --input-bg: #ffffff;
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-rose: #e11d48;
+      --status-rose-soft: #fff1f2;
+      --focus-ring: #6d4ed6;
+      --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.45;
+    }
+
+    button, select, input { font-family: inherit; color: var(--text-primary); }
+    button:not(:disabled), select, label[for], input[type="checkbox"] { cursor: pointer; }
+    :focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--focus-ring) 78%, transparent);
+      outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition-duration: 0.01ms !important; }
+    }
+
+    .shell {
+      max-width: 1460px;
+      margin: 0 auto;
+      padding: 20px 24px 56px;
+    }
+
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding-bottom: 16px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .kicker {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--action-primary);
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.25rem, 2.2vw, 1.65rem);
+      font-weight: 800;
+    }
+
+    .sub {
+      margin: 4px 0 0;
+      font-size: 0.86rem;
+      color: var(--text-secondary);
+    }
+
+    .controls-bar {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 14px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .ctrl-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 170px;
+    }
+
+    .ctrl-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    .ctrl-select {
+      min-height: 44px;
+      padding: 0 10px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      font-size: 0.84rem;
+      font-weight: 600;
+    }
+
+    .view-switch {
+      display: inline-flex;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 4px;
+      gap: 4px;
+      margin-left: auto;
+    }
+
+    .btn-seg {
+      min-height: 44px;
+      padding: 0 14px;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .btn-seg:hover { background: var(--surface-hover); color: var(--text-primary); }
+    .btn-seg[aria-pressed="true"] {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    .theme-btn {
+      min-height: 44px;
+      padding: 0 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-strong);
+      background: var(--surface);
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+
+    .theme-btn:hover { background: var(--surface-hover); }
+
+    /* Gallery 3 columns */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .tpl-wrapper {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .tpl-wrapper.is-focused {
+      border-color: var(--action-primary);
+    }
+
+    .tpl-meta {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .tpl-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      font-size: 0.78rem;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .tpl-title {
+      margin: 0;
+      font-size: 0.94rem;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .tpl-desc {
+      margin: 2px 0 0;
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+    }
+
+    .tpl-badge {
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      font-size: 0.72rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .zoom-btn {
+      min-height: 40px;
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid var(--border-strong);
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .zoom-btn:hover { background: var(--surface-hover); }
+
+    /* Single Inspector View */
+    .single-view {
+      display: none;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .single-sidebar {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .tpl-list-btn {
+      width: 100%;
+      min-height: 46px;
+      padding: 8px 10px;
+      text-align: left;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tpl-list-btn:hover { background: var(--surface-hover); }
+    .tpl-list-btn[aria-pressed="true"] {
+      border-color: var(--action-primary);
+      background: var(--surface-interactive);
+    }
+
+    .single-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 20px;
+    }
+
+    /* Poster Base Tokens */
+    .poster {
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      color: var(--p-ink);
+      background: var(--p-bg);
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      position: relative;
+    }
+
+    .poster[data-ratio="4:5"] { aspect-ratio: 4 / 5; }
+    .poster[data-ratio="3:4"] { aspect-ratio: 3 / 4; }
+    .poster[data-ratio="1:1"] { aspect-ratio: 1 / 1; }
+
+    .single-stage .poster {
+      max-width: 560px;
+      padding: 18px;
+      gap: 11px;
+    }
+
+    /* Color Themes */
+    .poster[data-ptheme="warm_cream"] {
+      --p-bg: linear-gradient(180deg, #fff8ee 0%, #f8e9d2 100%);
+      --p-primary: #2d6a2e;
+      --p-accent: #e03e6b;
+      --p-gold: #e59417;
+      --p-card: #fffdf9;
+      --p-border: #e5d1b5;
+      --p-ink: #2c1e16;
+      --p-muted: #5d4534;
+    }
+    .poster[data-ptheme="fresh_pandan"] {
+      --p-bg: linear-gradient(180deg, #f3fbef 0%, #dff1d5 100%);
+      --p-primary: #1f6f3d;
+      --p-accent: #d94862;
+      --p-gold: #df9a18;
+      --p-card: #ffffff;
+      --p-border: #bfdcb2;
+      --p-ink: #1e2c1f;
+      --p-muted: #465e48;
+    }
+    .poster[data-ptheme="bakery_choco"] {
+      --p-bg: linear-gradient(180deg, #fdf6ef 0%, #f1dfc9 100%);
+      --p-primary: #5b3019;
+      --p-accent: #c93b5b;
+      --p-gold: #d98218;
+      --p-card: #fffbf6;
+      --p-border: #dfc5ab;
+      --p-ink: #2d1a0f;
+      --p-muted: #5e4130;
+    }
+    .poster[data-ptheme="pastel_playful"] {
+      --p-bg: linear-gradient(180deg, #fff9fb 0%, #f8eaf0 100%);
+      --p-primary: #3b5e36;
+      --p-accent: #db2777;
+      --p-gold: #ea9010;
+      --p-card: #ffffff;
+      --p-border: #ebc8d7;
+      --p-ink: #2c1e26;
+      --p-muted: #5e4552;
+    }
+
+    /* Shared poster pieces */
+    .p-title {
+      margin: 0;
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--p-primary);
+      line-height: 1.06;
+      text-shadow: 0 2px 0 #fff, 1.5px 0 0 #fff, -1.5px 0 0 #fff, 0 -1.5px 0 #fff;
+    }
+    .p-ribbon {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 6px;
+      background: var(--p-accent);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 0.64rem;
+    }
+    .p-pill {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 7px;
+      background: var(--p-primary);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 0.65rem;
+    }
+    .p-card {
+      background: var(--p-card);
+      border: 1.5px solid var(--p-border);
+      border-radius: 10px;
+      padding: 7px 9px;
+    }
+    .p-photo {
+      border-radius: 10px;
+      border: 2.5px solid #ffffff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      background: linear-gradient(135deg, #edd8bd 0%, #dfb88c 100%);
+      color: #4b311c;
+      font-weight: 700;
+      font-size: 0.62rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+    .p-photo-hero {
+      background: radial-gradient(circle at 35% 30%, #f8e8cf 0%, #e4be8f 55%, #c99660 100%);
+    }
+    .p-num {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--p-gold);
+      color: #1f1408;
+      border: 1.5px solid #ffffff;
+      font-size: 0.6rem;
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .p-num-dark {
+      background: var(--p-primary);
+      color: #ffffff;
+      border: none;
+    }
+    .p-list {
+      margin: 4px 0 0;
+      padding-left: 13px;
+      font-size: 0.58rem;
+      line-height: 1.32;
+      font-weight: 600;
+    }
+    .p-list li { margin-bottom: 1.5px; }
+    .p-footer {
+      margin-top: auto;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .p-tips-box {
+      flex: 1;
+      background: var(--p-card);
+      border: 1.5px dashed var(--p-accent);
+      border-radius: 8px;
+      padding: 5px 8px;
+    }
+    .p-tips-tag {
+      display: inline-block;
+      padding: 1px 7px;
+      border-radius: 5px;
+      background: var(--p-accent);
+      color: #ffffff;
+      font-size: 0.58rem;
+      font-weight: 800;
+    }
+    .p-badge-col {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .p-selamat {
+      padding: 4px 9px;
+      border-radius: 8px;
+      background: var(--p-accent);
+      color: #ffffff;
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      font-weight: 700;
+      transform: rotate(-2deg);
+    }
+    .p-wm {
+      padding: 2px 7px;
+      border-radius: 5px;
+      background: rgba(21, 32, 51, 0.9);
+      color: #ffffff;
+      font-size: 0.58rem;
+      font-weight: 700;
+    }
+    .p-prod-chip {
+      margin-top: 4px;
+      padding: 3px 6px;
+      border-radius: 5px;
+      background: #fff3d7;
+      border: 1px solid var(--p-gold);
+      font-size: 0.54rem;
+      font-weight: 700;
+      color: #5c3a04;
+    }
+
+    /* Larger text when inspected in Single View */
+    .single-stage .p-title { font-size: 1.65rem; }
+    .single-stage .p-ribbon { font-size: 0.78rem; padding: 4px 12px; }
+    .single-stage .p-pill { font-size: 0.78rem; padding: 4px 12px; }
+    .single-stage .p-list { font-size: 0.73rem; }
+    .single-stage .p-photo { font-size: 0.75rem; }
+    .single-stage .p-num { width: 22px; height: 22px; font-size: 0.72rem; }
+    .single-stage .p-selamat { font-size: 0.88rem; padding: 6px 12px; }
+    .single-stage .p-wm { font-size: 0.7rem; padding: 3px 9px; }
+    .single-stage .p-prod-chip { font-size: 0.68rem; }
+
+    /* Responsive breakpoints */
+    @media (max-width: 1180px) {
+      .gallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 820px) {
+      .gallery-grid { grid-template-columns: 1fr; }
+      .single-view { grid-template-columns: 1fr; }
+      .view-switch { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div>
+        <span class="kicker">[SIMULASI PRATINJAU MOCKUP] CF Studio - 9 Variasi Layout Infografis</span>
+        <h1>9 Template Layout Poster Infografis Resep</h1>
+        <p class="sub">Bandingkan 9 komposisi spasial berbeda secara langsung, ubah tema warna, rasio, watermark brand, dan produk opsional sebelum implementasi renderer.</p>
+      </div>
+      <button type="button" class="theme-btn" id="themeToggle">Mode Terang</button>
+    </header>
+
+    <section class="controls-bar" aria-label="Pengaturan global pratinjau">
+      <div class="ctrl-group">
+        <label class="ctrl-label" for="pthemeSelect">Tema Warna Poster</label>
+        <select class="ctrl-select" id="pthemeSelect">
+          <option value="warm_cream">Krem Hangat</option>
+          <option value="fresh_pandan">Pandan Segar</option>
+          <option value="bakery_choco">Cokelat Bakery</option>
+          <option value="pastel_playful">Pastel Ceria</option>
+        </select>
+      </div>
+
+      <div class="ctrl-group">
+        <label class="ctrl-label" for="ratioSelect">Rasio Kanvas</label>
+        <select class="ctrl-select" id="ratioSelect">
+          <option value="4:5">4:5 (1080x1350 Feed Optimal)</option>
+          <option value="3:4">3:4 (1080x1440 Portrait)</option>
+          <option value="1:1">1:1 (1080x1080 Square)</option>
+        </select>
+      </div>
+
+      <div class="ctrl-group">
+        <label class="ctrl-label" for="wmInput">Watermark Nama Brand</label>
+        <input class="ctrl-select" id="wmInput" type="text" value="@NutriBake.id" placeholder="Kosongkan untuk nonaktif" />
+      </div>
+
+      <div class="ctrl-group" style="min-width: 150px;">
+        <label class="ctrl-label" for="prodToggle">Produk Opsional</label>
+        <label style="display:flex;align-items:center;gap:8px;min-height:44px;font-size:0.82rem;font-weight:600;" for="prodToggle">
+          <input id="prodToggle" type="checkbox" checked style="width:18px;height:18px;accent-color:var(--action-primary);" />
+          <span>Sisipkan Produk</span>
+        </label>
+      </div>
+
+      <div class="view-switch" role="group" aria-label="Mode tampilan mockup">
+        <button type="button" class="btn-seg" id="btnViewAll" aria-pressed="true">Galeri 9 Template</button>
+        <button type="button" class="btn-seg" id="btnViewSingle" aria-pressed="false">Inspeksi 1-per-1</button>
+      </div>
+    </section>
+
+    <section id="galleryView" class="gallery-grid" aria-label="Galeri 9 template infografis"></section>
+
+    <section id="singleView" class="single-view" aria-label="Inspeksi detail per template">
+      <div class="single-sidebar" id="singleSidebar"></div>
+      <div class="single-stage" id="singleStage"></div>
+    </section>
+  </div>
+
+  <script>
+    const TEMPLATES = [
+      {
+        id: 'step_grid_classic',
+        num: 1,
+        name: 'Classic Step-Photo Grid',
+        quota: '5-7 Foto AI',
+        desc: 'Hero kiri atas, bahan kanan atas, grid 6 foto langkah di bawah.',
+        sample: {
+          title: 'Es Teler Creamy',
+          ribbon: 'Segar, Creamy, Enak Banget!',
+          hook: 'Perpaduan Alpukat, Nangka & Kelapa Muda',
+          meta: '4 Porsi · 15 Menit',
+          product: 'Cup Es 16oz + Tutup Cembung',
+          ingredients: ['1 buah alpukat matang', '100 gr nangka matang', '100 gr kelapa muda', '100 gr jelly hitam & hijau', '500 ml susu cair full cream', '100 ml santan matang', '4 sdm susu kental manis'],
+          steps: ['Potong buah & jelly', 'Aduk susu, santan, SKM', 'Campur jelly ke kuah', 'Susun buah dalam cup', 'Tuang kuah creamy', 'Beri keju parut & sajikan'],
+          tips: ['Pakai alpukat matang pohon.', 'Simpan dingin agar lebih segar.']
+        }
+      },
+      {
+        id: 'hero_right_editorial',
+        num: 2,
+        name: 'Editorial Kanan (Hero Vertikal)',
+        quota: '2 Foto AI',
+        desc: 'Bahan memanjang di kiri, foto hero tinggi di kanan, strip 4 langkah di bawah.',
+        sample: {
+          title: 'Matcha Almond Crispy',
+          ribbon: 'Renyah, Lembut, Wangi Matcha',
+          hook: 'Resep Kue Kering Favorit Toples',
+          meta: '1 Toples · 35 Menit',
+          product: 'Toples Kaca Kedap Udara 1000ml',
+          ingredients: ['50 gr putih telur', '25 gr mentega Wisjman', '25 gr margarin', '45 gr gula halus', '5 gr matcha bubuk', '20 gr maizena & 50 gr terigu', 'Topping: almond slice & keju'],
+          steps: ['Kocok mentega & gula rata', 'Campur putih telur & matcha', 'Cetak tipis & beri topping', 'Panggang 150C selama 20 mnt'],
+          tips: ['Oles adonan setipis mungkin agar garing.', 'Simpan rapat setelah dingin.']
+        }
+      },
+      {
+        id: 'layered_band_cards',
+        num: 3,
+        name: 'Multi-Layer / Kartu Kolom',
+        quota: '2 Foto AI',
+        desc: 'Header + Hero atas, 3 kolom bahan per lapisan di tengah, langkah & foto potongan di bawah.',
+        sample: {
+          title: 'Puding Coklat Susu Oreo & Alpukat',
+          ribbon: 'Lembut, Segar, 3 Lapis Istimewa',
+          hook: 'Cocok untuk Ide Jualan & Keluarga',
+          meta: '1 Loyang · 30 Menit',
+          product: 'Cetakan Puding Tulban 22cm',
+          groups: [
+            { title: 'Lapisan Alpukat', items: ['200 gr alpukat', '1/2 bks agar plain', '350 ml susu cair'] },
+            { title: 'Lapisan Oreo', items: ['1/2 bks agar plain', '400 ml susu cair', '5 keping Oreo'] },
+            { title: 'Lapisan Coklat', items: ['1 bks agar coklat', '600 ml susu coklat', '40 gr DCC cincang'] }
+          ],
+          steps: ['Blender alpukat + susu, masak & tuang 1/3 loyang.', 'Masak lapisan susu Oreo, tuang di atas alpukat.', 'Masak lapisan coklat + DCC, tuang perlahan.', 'Dinginkan hingga set di kulkas.'],
+          tips: ['Tusuk tipis permukaan lapisan agar menempel.', 'Sajikan dingin lebih nikmat.']
+        }
+      },
+      {
+        id: 'centerpiece_spotlight',
+        num: 4,
+        name: 'Centerpiece Spotlight (Hero Tengah)',
+        quota: '1 Foto AI',
+        desc: 'Judul terpusat, foto hero bulat di tengah diapit info & bahan kiri-kanan, langkah 2 kolom bawah.',
+        sample: {
+          title: 'Ayam Bakar Madu Rempah',
+          ribbon: 'Empuk, Manis Gurih, Meresap',
+          hook: 'Menu Utama Favorit Makan Malam',
+          meta: '4 Porsi · 40 Menit',
+          product: 'Kuas Silikon Tahan Panas',
+          ingredients: ['500 gr paha ayam', '3 sdm madu murni', '2 sdm kecap manis', '4 siung bawang putih', '1 sdt ketumbar bubuk', '1 ruas jahe & kunyit'],
+          steps: ['Haluskan bumbu lalu tumis harum', 'Ungkep ayam hingga air menyusut', 'Oles sisa bumbu dan madu', 'Bakar hingga kecoklatan merata'],
+          tips: ['Gunakan api kecil saat membakar agar madu tidak gosong.']
+        }
+      },
+      {
+        id: 'magazine_vertical_split',
+        num: 5,
+        name: 'Majalah 2-Kolom Penuh',
+        quota: '4 Foto AI',
+        desc: 'Kolom kiri penuh berisi Hero + 3 foto proses bertumpuk, kolom kanan teks resep lengkap.',
+        sample: {
+          title: 'Sourdough Coffee Brownie',
+          ribbon: 'Fudgy, Aroma Kopi Menggoda',
+          hook: 'Perpaduan Cokelat Pekat & Kopi',
+          meta: '1 Loyang · 45 Menit',
+          product: 'Premix Cocoa Powder Premium',
+          ingredients: ['150 gr dark chocolate', '100 gr mentega tawar', '120 gr gula palem', '2 butir telur', '100 gr starter sourdough', '60 gr tepung terigu', '1 sdm kopi instan seduh'],
+          steps: ['Lelehkan coklat & mentega', 'Kocok telur, gula, dan kopi', 'Aduk lipat terigu & starter', 'Panggang 175C selama 28 mnt'],
+          tips: ['Jangan overbake agar tekstur tengah tetap fudgy.', 'Potong setelah benar-benar dingin.']
+        }
+      },
+      {
+        id: 'visual_ingredient_shelf',
+        num: 6,
+        name: 'Rak Bahan Visual + Step Grid',
+        quota: '5-7 Foto AI',
+        desc: 'Judul lebar atas, kartu rak bahan menonjol di kiri + Hero kanan, grid foto proses di bawah.',
+        sample: {
+          title: 'Puding Krispi 2 Bahan',
+          ribbon: 'Enak, Praktis, Super Krispi',
+          hook: 'Modal Minim Hasil Mengagumkan',
+          meta: '1 Loyang · 20 Menit',
+          product: 'Loyang Aluminium Foil Bulat',
+          ingredients: ['1 bks Biskuit Krispi', '1 bks Agar Coklat Instan', '2 1/2 gelas Air matang'],
+          steps: ['Masak agar coklat hingga mendidih', 'Patahkan biskuit kecil-kecil', 'Campur biskuit ke dalam agar', 'Tuang ke loyang bulat', 'Beri taburan biskuit halus', 'Tutup rapat & dinginkan'],
+          tips: ['Sisakan sedikit remahan biskuit untuk topping kering di atas.']
+        }
+      },
+      {
+        id: 'step_timeline_zigzag',
+        num: 7,
+        name: 'Timeline Alur Memasak',
+        quota: '5 Foto AI',
+        desc: 'Header kompak, 4 baris alur waktu (foto step + konektor + instruksi), bahan & tips di bawah.',
+        sample: {
+          title: 'Kacang Caramel Gula Putih',
+          ribbon: 'Renyah, Manis, Gurih',
+          hook: 'Anti Gosong & Tidak Menggumpal',
+          meta: '1 Toples · 25 Menit',
+          product: 'Wajan Anti Lengket Granite 24cm',
+          ingredients: ['250 gr kacang tanah kupas', '150 gr gula pasir putih', '75 ml air', '1 sdm margarin', '1/4 sdt garam'],
+          steps: ['Sangrai kacang tanah hingga matang renyah lalu sisihkan.', 'Masak gula dan air di wajan hingga larut berbuih.', 'Masukkan kacang, garam, dan vanili lalu aduk cepat.', 'Ratakan di loyang sampai dingin dan simpan di toples.'],
+          tips: ['Wajib pakai api kecil saat memasak karamel gula.']
+        }
+      },
+      {
+        id: 'polaroid_scrapbook',
+        num: 8,
+        name: 'Scrapbook Kartu Foto Dapur',
+        quota: '4 Foto AI',
+        desc: 'Foto polaroid berbingkai putih miring ringan di kiri/atas, kartu catatan bahan & langkah di kanan.',
+        sample: {
+          title: 'Pilus Cikur Gurih',
+          ribbon: 'Camilan Renyah, Bikin Nagih',
+          hook: 'Wangi Kencur Khas Jajanan Rumahan',
+          meta: '1 Toples · 25 Menit',
+          product: 'Toples Kedap Udara',
+          ingredients: ['250 gr tepung tapioka', '2 sdm tepung terigu', '3 siung bawang putih halus', '2 ruas kencur halus', '1 btg daun bawang iris', '150 ml air panas mendidih'],
+          steps: ['Campur tapioka, terigu & bumbu', 'Tuang air panas, uleni kalis', 'Pulung bulat kecil seragam', 'Goreng api sedang sampai kuning'],
+          tips: ['Masukkan pilus saat minyak masih hangat agar tidak meletus.']
+        }
+      },
+      {
+        id: 'compact_2col_cheat_sheet',
+        num: 9,
+        name: 'Cheat Sheet 1-Menit Baca',
+        quota: '1 Foto AI',
+        desc: 'Banner Hero lebar dengan judul kontras di scrim atas, diikuti 2 panel sejajar Bahan vs Langkah.',
+        sample: {
+          title: 'Stik Royco Renyah',
+          ribbon: 'Renyah, Gurih, Simpel!',
+          hook: 'Camilan Harian Favorit Anak & Keluarga',
+          meta: '1 Toples · 30 Menit',
+          product: 'Botol Minyak & Saringan Tirisan',
+          ingredients: ['250 gr tepung terigu', '100 gr tepung tapioka', '1 butir telur', '1 sachet kaldu ayam', '2 btg daun bawang iris', '2 sdm margarin', '110 ml air'],
+          steps: ['Campur tepung, kaldu, dan daun bawang.', 'Masukkan telur, margarin, dan air sedikit demi sedikit.', 'Uleni adonan hingga kalis dan bisa digilas.', 'Gilas tipis lalu potong memanjang seperti stik.', 'Goreng dalam minyak panas api sedang hingga keemasan.', 'Tiriskan minyak dan simpan di toples kedap udara.'],
+          tips: ['Pastikan adonan digilas tipis agar stik matang renyah merata.']
+        }
+      }
+    ];
+
+    const state = {
+      ptheme: 'warm_cream',
+      ratio: '4:5',
+      watermark: '@NutriBake.id',
+      showProduct: true,
+      viewMode: 'gallery',
+      selectedId: 'step_grid_classic'
+    };
+
+    function renderWatermark(isSingle) {
+      const wm = state.watermark.trim();
+      if (!wm) return '';
+      return `<div class="p-wm">${wm}</div>`;
+    }
+
+    function renderProductChip(sample) {
+      if (!state.showProduct || !sample.product) return '';
+      return `<div class="p-prod-chip">Pakai: ${sample.product}</div>`;
+    }
+
+    function renderFooter(sample, compact = false) {
+      return `
+        <div class="p-footer">
+          <div class="p-tips-box">
+            <span class="p-tips-tag">Tips :</span>
+            <ul class="p-list">
+              ${(sample.tips || []).slice(0, compact ? 1 : 2).map(t => `<li>${t}</li>`).join('')}
+            </ul>
+          </div>
+          <div class="p-badge-col">
+            <div class="p-selamat">Selamat Mencoba!</div>
+            ${renderWatermark()}
+          </div>
+        </div>
+      `;
+    }
+
+    function buildPosterInner(tpl) {
+      const s = tpl.sample;
+      const ingListHtml = (items) => `<ul class="p-list">${items.map(i => `<li>${i}</li>`).join('')}</ul>`;
+
+      switch (tpl.id) {
+        case 'step_grid_classic':
+          return `
+            <div style="display:grid;grid-template-columns:1.1fr 0.9fr;gap:8px;align-items:stretch;">
+              <div style="display:flex;flex-direction:column;gap:5px;">
+                <div>
+                  <h3 class="p-title">${s.title}</h3>
+                  <div class="p-ribbon">${s.ribbon}</div>
+                </div>
+                <div class="p-photo p-photo-hero" style="flex:1;min-height:95px;">Hero Dish Photo (${s.meta})</div>
+              </div>
+              <div class="p-card" style="display:flex;flex-direction:column;">
+                <span class="p-pill">Bahan-bahan :</span>
+                ${ingListHtml(s.ingredients)}
+                ${renderProductChip(s)}
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:5px;">
+              <div><span class="p-pill">Cara Membuat :</span></div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">
+                ${s.steps.map((st, idx) => `
+                  <div class="p-card" style="padding:4px;text-align:center;">
+                    <div class="p-photo" style="height:36px;margin-bottom:3px;">
+                      <span class="p-num" style="position:absolute;top:3px;left:3px;">${idx + 1}</span>
+                      Step ${idx + 1}
+                    </div>
+                    <div style="font-size:0.53rem;font-weight:700;line-height:1.2;">${st}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            ${renderFooter(s)}
+          `;
+
+        case 'hero_right_editorial':
+          return `
+            <div style="display:grid;grid-template-columns:0.95fr 1.05fr;gap:9px;flex:1;align-items:stretch;">
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <div>
+                  <h3 class="p-title">${s.title}</h3>
+                  <div class="p-ribbon">${s.ribbon}</div>
+                </div>
+                <div class="p-card" style="flex:1;display:flex;flex-direction:column;">
+                  <span class="p-pill">Bahan &amp; Takaran :</span>
+                  ${ingListHtml(s.ingredients)}
+                  ${renderProductChip(s)}
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:7px;">
+                <div class="p-photo p-photo-hero" style="flex:1.4;min-height:120px;">Hero Vertikal Tinggi (${s.meta})</div>
+                <div class="p-photo" style="flex:0.65;min-height:58px;">Foto Detail Tekstur / Topping</div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <div><span class="p-pill">Cara Membuat :</span></div>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;">
+                ${s.steps.map((st, idx) => `
+                  <div class="p-card" style="padding:5px;display:flex;flex-direction:column;gap:3px;">
+                    <span class="p-num p-num-dark">${idx + 1}</span>
+                    <span style="font-size:0.53rem;font-weight:700;line-height:1.2;">${st}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            ${renderFooter(s, true)}
+          `;
+
+        case 'layered_band_cards':
+          return `
+            <div style="display:grid;grid-template-columns:1.1fr 0.9fr;gap:8px;align-items:center;">
+              <div>
+                <h3 class="p-title">${s.title}</h3>
+                <div class="p-ribbon">${s.ribbon}</div>
+              </div>
+              <div class="p-photo p-photo-hero" style="height:88px;">Hero Utuh (${s.meta})</div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">
+              ${s.groups.map(g => `
+                <div class="p-card" style="padding:5px 6px;">
+                  <span class="p-pill" style="font-size:0.56rem;">${g.title}</span>
+                  ${ingListHtml(g.items)}
+                </div>
+              `).join('')}
+            </div>
+            ${renderProductChip(s)}
+            <div style="display:grid;grid-template-columns:1.25fr 0.75fr;gap:8px;flex:1;align-items:stretch;">
+              <div style="display:flex;flex-direction:column;gap:4px;">
+                <span class="p-pill">Cara Membuat :</span>
+                ${s.steps.map((st, idx) => `
+                  <div class="p-card" style="padding:4px 6px;display:flex;gap:6px;align-items:center;">
+                    <span class="p-num p-num-dark">${idx + 1}</span>
+                    <span style="font-size:0.55rem;font-weight:600;line-height:1.2;">${st}</span>
+                  </div>
+                `).join('')}
+              </div>
+              <div class="p-photo" style="min-height:90px;">Foto Potongan Lapisan Dalam</div>
+            </div>
+            ${renderFooter(s, true)}
+          `;
+
+        case 'centerpiece_spotlight':
+          return `
+            <div style="text-align:center;">
+              <h3 class="p-title">${s.title}</h3>
+              <div class="p-ribbon">${s.ribbon}</div>
+            </div>
+            <div style="display:grid;grid-template-columns:0.78fr 1fr 0.92fr;gap:7px;align-items:center;">
+              <div class="p-card" style="display:flex;flex-direction:column;gap:4px;">
+                <span class="p-pill">Info Menu</span>
+                <div style="font-size:0.57rem;font-weight:700;">${s.meta}</div>
+                <div style="font-size:0.54rem;color:var(--p-muted);">${s.hook}</div>
+                ${renderProductChip(s)}
+              </div>
+              <div class="p-photo p-photo-hero" style="aspect-ratio:1/1;border-radius:50%;padding:10px;">
+                Spotlight Hero Bulat
+              </div>
+              <div class="p-card">
+                <span class="p-pill">Bahan :</span>
+                ${ingListHtml(s.ingredients)}
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <div><span class="p-pill">Cara Membuat :</span></div>
+              <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:5px;">
+                ${s.steps.map((st, idx) => `
+                  <div class="p-card" style="padding:5px 7px;display:flex;gap:6px;align-items:center;">
+                    <span class="p-num p-num-dark">${idx + 1}</span>
+                    <span style="font-size:0.57rem;font-weight:600;">${st}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            ${renderFooter(s)}
+          `;
+
+        case 'magazine_vertical_split':
+          return `
+            <div style="display:grid;grid-template-columns:0.86fr 1.14fr;gap:10px;flex:1;align-items:stretch;">
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <div class="p-photo p-photo-hero" style="flex:1.4;min-height:110px;">Hero Utama (${s.meta})</div>
+                <div class="p-photo" style="flex:0.7;"><span class="p-num" style="position:absolute;top:4px;left:4px;">1</span>Proses 1</div>
+                <div class="p-photo" style="flex:0.7;"><span class="p-num" style="position:absolute;top:4px;left:4px;">2</span>Proses 2</div>
+                <div class="p-photo" style="flex:0.7;"><span class="p-num" style="position:absolute;top:4px;left:4px;">3</span>Proses 3</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <div>
+                  <h3 class="p-title">${s.title}</h3>
+                  <div class="p-ribbon">${s.ribbon}</div>
+                </div>
+                <div class="p-card">
+                  <span class="p-pill">Bahan-bahan :</span>
+                  ${ingListHtml(s.ingredients)}
+                  ${renderProductChip(s)}
+                </div>
+                <div class="p-card" style="flex:1;display:flex;flex-direction:column;gap:4px;">
+                  <span class="p-pill">Cara Membuat :</span>
+                  ${s.steps.map((st, idx) => `
+                    <div style="display:flex;gap:5px;align-items:flex-start;font-size:0.57rem;font-weight:600;">
+                      <span class="p-num p-num-dark">${idx + 1}</span>
+                      <span>${st}</span>
+                    </div>
+                  `).join('')}
+                </div>
+                ${renderFooter(s, true)}
+              </div>
+            </div>
+          `;
+
+        case 'visual_ingredient_shelf':
+          return `
+            <div style="text-align:center;">
+              <h3 class="p-title">${s.title}</h3>
+              <div class="p-ribbon">${s.ribbon} · ${s.hook}</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:stretch;">
+              <div class="p-card" style="display:flex;flex-direction:column;gap:4px;">
+                <span class="p-pill">Rak Bahan Utama :</span>
+                <div style="display:grid;grid-template-columns:1fr;gap:4px;">
+                  ${s.ingredients.map(i => `
+                    <div style="padding:4px 6px;border-radius:6px;background:rgba(0,0,0,0.04);border:1px solid var(--p-border);font-size:0.57rem;font-weight:700;">
+                      [Ikon Bahan] ${i}
+                    </div>
+                  `).join('')}
+                </div>
+                ${renderProductChip(s)}
+              </div>
+              <div class="p-photo p-photo-hero" style="min-height:95px;">Hero Sajian (${s.meta})</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <div><span class="p-pill">Cara Membuat :</span></div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">
+                ${s.steps.map((st, idx) => `
+                  <div class="p-card" style="padding:4px;text-align:center;">
+                    <div class="p-photo" style="height:34px;margin-bottom:3px;">
+                      <span class="p-num" style="position:absolute;top:3px;left:3px;">${idx + 1}</span>
+                      Step ${idx + 1}
+                    </div>
+                    <div style="font-size:0.52rem;font-weight:700;line-height:1.2;">${st}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            ${renderFooter(s, true)}
+          `;
+
+        case 'step_timeline_zigzag':
+          return `
+            <div style="display:grid;grid-template-columns:1.25fr 0.75fr;gap:8px;align-items:center;">
+              <div>
+                <h3 class="p-title">${s.title}</h3>
+                <div class="p-ribbon">${s.ribbon}</div>
+              </div>
+              <div class="p-photo p-photo-hero" style="height:74px;">Hero (${s.meta})</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:5px;flex:1;">
+              <span class="p-pill">Timeline Alur Memasak :</span>
+              ${s.steps.map((st, idx) => {
+                const isEven = idx % 2 === 1;
+                const photoBox = `<div class="p-photo" style="width:76px;height:44px;flex-shrink:0;">Foto ${idx + 1}</div>`;
+                const textBox = `<div style="flex:1;font-size:0.57rem;font-weight:700;line-height:1.25;">${st}</div>`;
+                return `
+                  <div class="p-card" style="padding:5px 7px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--p-primary);">
+                    <span class="p-num">${idx + 1}</span>
+                    ${isEven ? textBox + photoBox : photoBox + textBox}
+                  </div>
+                `;
+              }).join('')}
+            </div>
+            <div class="p-card" style="padding:5px 8px;">
+              <span class="p-pill">Bahan :</span>
+              <span style="font-size:0.56rem;font-weight:600;margin-left:6px;">${s.ingredients.join(' · ')}</span>
+              ${renderProductChip(s)}
+            </div>
+            ${renderFooter(s, true)}
+          `;
+
+        case 'polaroid_scrapbook':
+          return `
+            <div style="text-align:center;">
+              <h3 class="p-title">${s.title}</h3>
+              <div class="p-ribbon">${s.ribbon}</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;flex:1;align-items:stretch;">
+              <div style="display:flex;flex-direction:column;gap:8px;justify-content:center;">
+                <div style="background:#fff;padding:6px 6px 14px;border-radius:4px;box-shadow:0 6px 14px rgba(0,0,0,0.16);transform:rotate(-2deg);">
+                  <div class="p-photo p-photo-hero" style="height:90px;border:none;border-radius:2px;">Hero Polaroid</div>
+                  <div style="font-size:0.54rem;font-weight:800;text-align:center;margin-top:4px;color:#2c1e16;">${s.meta}</div>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">
+                  ${[1, 2, 3].map(n => `
+                    <div style="background:#fff;padding:4px 4px 8px;border-radius:4px;box-shadow:0 4px 10px rgba(0,0,0,0.12);transform:rotate(${n === 2 ? '2deg' : '-1.5deg'});">
+                      <div class="p-photo" style="height:40px;border:none;border-radius:2px;">
+                        <span class="p-num" style="position:absolute;top:2px;left:2px;">${n}</span>
+                        Proses ${n}
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <div class="p-card" style="border-style:dashed;">
+                  <span class="p-pill">Catatan Bahan :</span>
+                  ${ingListHtml(s.ingredients)}
+                  ${renderProductChip(s)}
+                </div>
+                <div class="p-card" style="border-style:dashed;flex:1;">
+                  <span class="p-pill">Langkah :</span>
+                  <div style="margin-top:4px;display:flex;flex-direction:column;gap:3px;">
+                    ${s.steps.map((st, idx) => `
+                      <div style="font-size:0.55rem;font-weight:600;display:flex;gap:5px;">
+                        <span class="p-num p-num-dark">${idx + 1}</span>
+                        <span>${st}</span>
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              </div>
+            </div>
+            ${renderFooter(s, true)}
+          `;
+
+        case 'compact_2col_cheat_sheet':
+          return `
+            <div class="p-photo p-photo-hero" style="height:112px;justify-content:flex-end;align-items:flex-start;padding:0;">
+              <div style="width:100%;padding:10px 12px;background:linear-gradient(180deg, rgba(16,10,6,0.15) 0%, rgba(16,10,6,0.88) 100%);text-align:left;">
+                <div style="font-family:var(--font-display);font-size:1.18rem;font-weight:700;color:#ffffff;line-height:1.1;">${s.title}</div>
+                <div style="font-size:0.65rem;font-weight:700;color:#fde68a;margin-top:2px;">${s.ribbon} · ${s.meta}</div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:0.92fr 1.08fr;gap:8px;flex:1;align-items:stretch;">
+              <div class="p-card" style="display:flex;flex-direction:column;">
+                <span class="p-pill">Bahan &amp; Takaran :</span>
+                ${ingListHtml(s.ingredients)}
+                ${renderProductChip(s)}
+              </div>
+              <div class="p-card" style="display:flex;flex-direction:column;gap:4px;">
+                <span class="p-pill">Langkah Cepat :</span>
+                ${s.steps.map((st, idx) => `
+                  <div style="display:flex;gap:5px;align-items:flex-start;font-size:0.56rem;font-weight:600;line-height:1.25;">
+                    <span class="p-num p-num-dark">${idx + 1}</span>
+                    <span>${st}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            ${renderFooter(s)}
+          `;
+      }
+      return '';
+    }
+
+    function renderAll() {
+      const gallery = document.getElementById('galleryView');
+      const single = document.getElementById('singleView');
+      const isGallery = state.viewMode === 'gallery';
+
+      document.getElementById('btnViewAll').setAttribute('aria-pressed', isGallery ? 'true' : 'false');
+      document.getElementById('btnViewSingle').setAttribute('aria-pressed', isGallery ? 'false' : 'true');
+
+      gallery.style.display = isGallery ? 'grid' : 'none';
+      single.style.display = isGallery ? 'none' : 'grid';
+
+      if (isGallery) {
+        gallery.innerHTML = TEMPLATES.map(tpl => `
+          <article class="tpl-wrapper ${tpl.id === state.selectedId ? 'is-focused' : ''}">
+            <div class="tpl-meta">
+              <div style="display:flex;gap:8px;align-items:flex-start;">
+                <span class="tpl-num">${tpl.num}</span>
+                <div>
+                  <h2 class="tpl-title">${tpl.name}</h2>
+                  <p class="tpl-desc">${tpl.desc}</p>
+                </div>
+              </div>
+              <span class="tpl-badge">${tpl.quota}</span>
+            </div>
+            <div class="poster" data-ptheme="${state.ptheme}" data-ratio="${state.ratio}">
+              ${buildPosterInner(tpl)}
+            </div>
+            <button type="button" class="zoom-btn" data-inspect="${tpl.id}">Perbesar &amp; Inspeksi Template #${tpl.num}</button>
+          </article>
+        `).join('');
+
+        gallery.querySelectorAll('[data-inspect]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            state.selectedId = btn.getAttribute('data-inspect');
+            state.viewMode = 'single';
+            renderAll();
+          });
+        });
+      } else {
+        const sidebar = document.getElementById('singleSidebar');
+        const stage = document.getElementById('singleStage');
+        const activeTpl = TEMPLATES.find(t => t.id === state.selectedId) || TEMPLATES[0];
+
+        sidebar.innerHTML = TEMPLATES.map(t => `
+          <button type="button" class="tpl-list-btn" data-pick="${t.id}" aria-pressed="${t.id === activeTpl.id ? 'true' : 'false'}">
+            <span class="tpl-num">${t.num}</span>
+            <div>
+              <div style="font-size:0.82rem;font-weight:700;color:var(--text-primary);">${t.name}</div>
+              <div style="font-size:0.72rem;color:var(--text-secondary);">${t.quota}</div>
+            </div>
+          </button>
+        `).join('');
+
+        sidebar.querySelectorAll('[data-pick]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            state.selectedId = btn.getAttribute('data-pick');
+            renderAll();
+          });
+        });
+
+        stage.innerHTML = `
+          <div style="width:100%;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+            <div>
+              <strong style="font-size:1rem;">#${activeTpl.num} ${activeTpl.name}</strong>
+              <span style="display:block;font-size:0.82rem;color:var(--text-secondary);">${activeTpl.desc}</span>
+            </div>
+            <span class="tpl-badge">${activeTpl.quota} · Rasio ${state.ratio}</span>
+          </div>
+          <div class="poster" data-ptheme="${state.ptheme}" data-ratio="${state.ratio}">
+            ${buildPosterInner(activeTpl)}
+          </div>
+        `;
+      }
+    }
+
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      const html = document.documentElement;
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      document.getElementById('themeToggle').textContent = next === 'dark' ? 'Mode Terang' : 'Mode Gelap';
+    });
+
+    document.getElementById('pthemeSelect').addEventListener('change', (e) => { state.ptheme = e.target.value; renderAll(); });
+    document.getElementById('ratioSelect').addEventListener('change', (e) => { state.ratio = e.target.value; renderAll(); });
+    document.getElementById('wmInput').addEventListener('input', (e) => { state.watermark = e.target.value; renderAll(); });
+    document.getElementById('prodToggle').addEventListener('change', (e) => { state.showProduct = e.target.checked; renderAll(); });
+    document.getElementById('btnViewAll').addEventListener('click', () => { state.viewMode = 'gallery'; renderAll(); });
+    document.getElementById('btnViewSingle').addEventListener('click', () => { state.viewMode = 'single'; renderAll(); });
+
+    renderAll();
+  </script>
+</body>
+</html>

@@ -18,6 +18,10 @@ Keputusan Desain Pengguna:
 - [x] **Tahap 4: Perbaikan Jalur Caption, ContentFlow, & Auto-Publish Gambar (`image`)** — Memperbarui `lib/contentflow-ingest.js`, `lib/auto-pipeline-scheduler-runner.js` (`media_type: 'image'`), dan `lib/publishing-drive-staging.js` (deteksi MIME gambar lokal di R2 & Drive).
 - [x] **Tahap 5: API & UI Integration** — Memperbarui `lib/autonomous-engine.js`, `app/api/recipe-labs/route.js`, `app/api/v2/recipes/autonomous-pipeline/route.js`, `app/auto-pipeline/page.js`, dan `app/components/campaign-forms/RecipeLabsConfigurationForm.js`.
 - [x] **Tahap 6: Verifikasi Unit Test, Build Lokal, & Pembaruan Kartu Menu** — Membuat dan menjalankan `PG_SEARCH_PATH=dev node --test tests/recipe-infographic.test.js`, `DISABLE_AUTO_MIGRATIONS=true PG_SEARCH_PATH=dev npm run build`, memperbarui `sot/menus/kartu/recipe-labs.md` & `sot/menus/kartu/auto-pipeline.md`, serta uji di Dev (`5020`).
+- [x] **Tahap 7: Mockup 9 Layout Infografis & Perapian UI Auto Pipeline** — Membuat `public/mockup_9_template_infografis.html` dan mockup utuh `public/mockup_autopipeline_recipe_labs_clean.html` (disetujui pengguna).
+- [x] **Tahap 8: Implementasi 9 Template Infografis & Auto-Rotasi** — Memperbarui `lib/recipe-infographic-renderer.js`, `lib/recipe-infographic-prompt.js`, dan `lib/scheduler-processors.js` untuk 9 layout berbeda + mode `auto_rotate` + kuota foto adaptif (`1` s.d. `7` foto).
+- [x] **Tahap 9: Perapian UI Auto Pipeline (Hide Video Saat `recipe_labs`) & Wireframe 9 Template** — Memperbarui `app/components/campaign-forms/RecipeInfographicControls.js` (9 kartu wireframe mini + toggle `auto_rotate`) dan menyembunyikan seluruh UI pengaturan video pada Tab 1 & Modal Jadwal `app/auto-pipeline/page.js` saat tipe `recipe_labs` dipilih.
+- [x] **Tahap 10: Verifikasi Unit Test 9 Template, Local Build, & Deploy Dev (`5020`)** — Memperluas `tests/recipe-infographic.test.js` untuk seluruh 9 template, menjalankan `npm run build`, commit & push `fitur/recipe-labs-infografis`, lalu `deploy:dev:atomic`.
 
 ---
 

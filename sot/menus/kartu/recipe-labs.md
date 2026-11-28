@@ -4,7 +4,7 @@ Terakhir dicek: 28 November 2026 · Versi aplikasi: v2.68.0 (branch `fitur/recip
 Alamat: `/recipe-labs` · Kelompok: WORKFLOW · Kunci izin menu: `recipe_labs`
 
 ## Fungsi
-Pabrik konten kuliner statis (Poster Infografis Resep satu halaman & foto grid kolase) serta storyboard video resep. Mendukung **2 sumber resep** (`ai_generated` oleh Gemini atau `recipe_library` dari `curated_recipes` dengan takaran asli dikunci), **3 layout poster infografis** (`infographic_step_grid`, `infographic_text_steps`, `infographic_visual_ingredients` via Playwright + Sharp), watermark nama brand, produk opsional dari Product Database, dan paket caption siap tayang lintas platform.
+Pabrik konten kuliner statis (Poster Infografis Resep satu halaman & foto grid kolase) serta storyboard video resep. Mendukung **2 sumber resep** (`ai_generated` oleh Gemini atau `recipe_library` dari `curated_recipes` dengan takaran asli dikunci), **9 layout poster infografis + mode `auto_rotate`** (`step_grid_classic`, `hero_right_editorial`, `layered_band_cards`, `centerpiece_spotlight`, `magazine_vertical_split`, `visual_ingredient_shelf`, `step_timeline_zigzag`, `polaroid_scrapbook`, `compact_2col_cheat_sheet` via Playwright + Sharp dengan kuota foto adaptif 1 sampai 7 foto), watermark nama brand, produk opsional dari Product Database, dan paket caption siap tayang lintas platform.
 
 ## Alur pakai
 1. Pilih sumber resep (AI Bikin Sendiri atau Ambil dari Recipe Library) dan format output (`Poster Infografis` atau `Grid Kolase Foto`).

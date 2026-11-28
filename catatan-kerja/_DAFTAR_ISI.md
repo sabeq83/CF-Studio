@@ -6,6 +6,8 @@ Terakhir diperbarui: 27 November 2026
 
 | Nama File | Ringkasan / Judul |
 |---|---|
+| [USULAN_9_TEMPLATE_LAYOUT_INFOGRAFIS_RESEP.md](usulan/USULAN_9_TEMPLATE_LAYOUT_INFOGRAFIS_RESEP.md) | Usulan 9 template layout berbeda untuk Poster Infografis Resep (termasuk hemat-kuota 1-2 foto vs multi-foto, wireframe mini di UI, & mode `auto_rotate`) |
+| [RENCANA_COPY_CURATED_RECIPES_STAGING_DEV.md](usulan/RENCANA_COPY_CURATED_RECIPES_STAGING_DEV.md) | Rencana penyalinan 30 resep `curated_recipes` dari `tnt_sy-dodot_4ba27b` (`syd_admin`) ke `default_tenant` pada schema `staging` & `dev` secara transaksional & idempoten |
 | [USULAN_RECIPE_LABS_INFOGRAFIS_DAN_SUMBER_RESEP.md](usulan/USULAN_RECIPE_LABS_INFOGRAFIS_DAN_SUMBER_RESEP.md) | Analisa 7 contoh infografis resep & usulan pengembangan Recipe Labs / Auto Pipeline (mode poster infografis + caption, pilihan Recipe Library vs AI, & perbaikan publish `media_type: image`) |
 | [USULAN_HALAMAN_KATALOG_LINK_AFF_PUBLIK.md](usulan/USULAN_HALAMAN_KATALOG_LINK_AFF_PUBLIK.md) | Usulan halaman front-end publik tanpa login (mobile-first) untuk melihat daftar produk, thumbnail foto, filter Brand Profile, dan tombol Salin Link Aff |
 | [USULAN_PENGHAPUSAN_OTOMATIS_FILE_GDRIVE_REPLIZ.md](usulan/USULAN_PENGHAPUSAN_OTOMATIS_FILE_GDRIVE_REPLIZ.md) | Analisa apakah file di folder Google Drive `REPLIZ Publishing` aman dihapus setelah penjadwalan & usulan mekanisme penghapusan otomatis berbasis status (grace period pasca-`published`/`cancelled`, `needs_review`, anti-orphan, multi-tenant fix) |

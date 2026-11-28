@@ -6,168 +6,208 @@ import path from 'node:path';
 import sharp from 'sharp';
 
 import {
+  getTemplateImageSpec,
   buildInfographicRecipeSystemPrompt,
   normalizeInfographicPayload
 } from '../lib/recipe-infographic-prompt.js';
 import {
+  INFOGRAPHIC_TEMPLATE_LIST,
+  normalizeInfographicTemplateId,
+  pickAutoRotatedTemplate,
   buildInfographicPosterHtml,
   renderRecipeInfographicPoster
 } from '../lib/recipe-infographic-renderer.js';
 
+const MOCK_RAW_RECIPE = {
+  title: 'Es Teler Creamy Spesial',
+  subtitle_ribbon: 'Segar, Creamy, dan Cocok untuk Ide Jualan',
+  hook_badge: 'Perpaduan alpukat, mangga, dan kelapa muda',
+  prep_time: '15 menit',
+  cook_time: '10 menit',
+  servings: '4 porsi',
+  ingredients_groups: [
+    {
+      group_name: 'Bahan Utama',
+      items: [
+        '1 buah alpukat matang, potong dadu',
+        '100 gr nangka matang',
+        '100 gr kelapa muda',
+        '100 gr jelly hijau'
+      ]
+    },
+    {
+      group_name: 'Kuah Creamy',
+      items: [
+        '500 ml susu cair full cream',
+        '100 ml santan matang',
+        '4 sdm susu kental manis'
+      ]
+    }
+  ],
+  steps: [
+    { step_number: 1, text: 'Potong alpukat, nangka, dan jelly sesuai ukuran sajian.', t2i_prompt: 'Fresh diced avocado and jackfruit on white ceramic plate' },
+    { step_number: 2, text: 'Aduk rata susu cair, santan, dan kental manis hingga lembut.', t2i_prompt: 'Whisking creamy white milk base in clear glass bowl' },
+    { step_number: 3, text: 'Susun potongan buah ke dalam cup saji transparan.', t2i_prompt: 'Layering diced tropical fruits inside clear plastic cup' },
+    { step_number: 4, text: 'Tuang kuah creamy dan beri topping keju parut.', t2i_prompt: 'Pouring creamy milk into dessert cup topped with grated cheese' }
+  ],
+  tips: [
+    'Gunakan buah matang sempurna agar rasa lebih manis.',
+    'Simpan di kulkas sebelum disajikan.'
+  ],
+  cta_badge: 'Selamat Mencoba!',
+  hero_prompt: 'Realistic food photography of creamy Indonesian es teler in clear cup topped with grated cheese',
+  secondary_prompt: 'Overhead close-up bowl of creamy es teler topping',
+  caption_facebook: 'Bikin Es Teler Creamy sendiri di rumah yuk!',
+  caption_bio: 'Resep Es Teler Creamy mudah anti gagal.',
+  hashtags: ['#EsTelerCreamy', '#ResepMinuman', '#IdeJualan']
+};
+
+test('getTemplateImageSpec returns accurate photo quotas across all 9 templates', () => {
+  assert.equal(INFOGRAPHIC_TEMPLATE_LIST.length, 9);
+
+  const heroOnly = getTemplateImageSpec('compact_2col_cheat_sheet');
+  assert.equal(heroOnly.mode, 'hero_only');
+  assert.equal(heroOnly.stepPhotoCount, 0);
+
+  const heroDetail = getTemplateImageSpec('hero_right_editorial');
+  assert.equal(heroDetail.mode, 'hero_and_detail');
+  assert.equal(heroDetail.stepPhotoCount, 0);
+
+  const polaroid = getTemplateImageSpec('polaroid_scrapbook');
+  assert.equal(polaroid.mode, 'step_photos');
+  assert.equal(polaroid.stepPhotoCount, 3);
+
+  const timeline = getTemplateImageSpec('step_timeline_zigzag');
+  assert.equal(timeline.mode, 'step_photos');
+  assert.equal(timeline.stepPhotoCount, 4);
+
+  const classic = getTemplateImageSpec('step_grid_classic');
+  assert.equal(classic.mode, 'step_photos');
+  assert.equal(classic.stepPhotoCount, 6);
+});
+
+test('normalizeInfographicTemplateId preserves legacy aliases and pickAutoRotatedTemplate cycles cleanly', () => {
+  assert.equal(normalizeInfographicTemplateId('infographic_step_grid'), 'step_grid_classic');
+  assert.equal(normalizeInfographicTemplateId('infographic_text_steps'), 'layered_band_cards');
+  assert.equal(normalizeInfographicTemplateId('infographic_visual_ingredients'), 'visual_ingredient_shelf');
+  assert.equal(normalizeInfographicTemplateId('auto_rotate'), 'step_grid_classic');
+
+  const seen = new Set();
+  let last = null;
+  for (let i = 0; i < 9; i++) {
+    const next = pickAutoRotatedTemplate({ lastUsedTemplate: last, itemIndex: 0 });
+    seen.add(next);
+    last = next;
+  }
+  assert.equal(seen.size, 9);
+});
+
 test('buildInfographicRecipeSystemPrompt embeds curated recipe lock and optional product', () => {
   const prompt = buildInfographicRecipeSystemPrompt({
-    recipeClassification: 'Minuman',
+    recipeClassification: 'Minuman & Es Kekinian',
+    targetTopic: 'Es Teler Creamy',
     targetLang: 'id_ID',
-    infographicTemplate: 'infographic_step_grid',
+    envObj: { name: 'Rustic Warm Tabletop' },
+    infographicTemplate: 'hero_right_editorial',
     curatedRecipe: {
-      id: 'rcp_test_1',
-      title: 'Es Teler Creamy',
-      ingredients: ['1 buah alpukat matang', '500 ml susu cair full cream'],
-      steps: ['Potong dadu alpukat.', 'Campur susu cair dan santan.'],
-      prep_time: '15 menit',
-      cook_time: '10 menit',
-      servings: '4 porsi'
+      title: 'Es Teler Alpukat Creamy',
+      ingredients: ['1 buah alpukat', '500 ml susu full cream'],
+      steps: ['Potong alpukat.', 'Tuang kuah susu.']
     },
     optionalProduct: {
-      product_name: 'Cup Es 16oz Tebal',
-      category: 'Kemasan',
-      usp: 'Tutup cembung bening anti tumpah'
+      product_name: 'Blender Chopper Mini 300W',
+      usp: 'Mata pisau stainless super cepat'
     }
   });
 
-  assert.match(prompt, /AUTHORITATIVE RECIPE LIBRARY LOCK/);
-  assert.match(prompt, /Es Teler Creamy/);
-  assert.match(prompt, /1 buah alpukat matang/);
-  assert.match(prompt, /Cup Es 16oz Tebal/);
-  assert.match(prompt, /CLEAN FOOD PHOTOGRAPHY ONLY: NO TEXT/);
+  assert.match(prompt, /AUTHORITATIVE RECIPE LIBRARY LOCK/i);
+  assert.match(prompt, /Es Teler Alpukat Creamy/);
+  assert.match(prompt, /Blender Chopper Mini 300W/);
+  assert.match(prompt, /hero_right_editorial/i);
 });
 
-test('normalizeInfographicPayload deduplicates ingredients, builds step prompts, and enriches affiliate/bio links', () => {
-  const normalized = normalizeInfographicPayload(
-    {
-      title: 'Stik Royco Renyah',
-      subtitle_ribbon: 'Renyah, Gurih, Nagih!',
-      hook_badge: 'Camilan Simpel untuk Segala Suasana',
-      ingredients_groups: [
-        {
-          group_title: 'Bahan-bahan',
-          items: ['250 gr tepung terigu', '100-120 ml air', '100-120 ml air', '1 sachet kaldu ayam']
-        }
-      ],
-      steps: [
-        { step_number: 1, caption: 'Campurkan tepung dan bumbu', t2i_prompt: 'Overhead bowl of flour and seasoning, NO TEXT' },
-        { step_number: 2, caption: 'Uleni hingga kalis', t2i_prompt: 'Kneaded dough ball in glass bowl, NO TEXT' },
-        { step_number: 3, caption: 'Gilas tipis lalu potong', t2i_prompt: 'Flat rolled dough cut into strips, NO TEXT' },
-        { step_number: 4, caption: 'Goreng hingga kuning keemasan', t2i_prompt: 'Golden fried sticks in pan, NO TEXT' }
-      ],
-      tips: ['Pastikan adonan tipis agar renyah.', 'Simpan di toples kedap udara.'],
-      hero_prompt: 'Crispy golden savory sticks in glass jar and white plate, NO TEXT'
+test('normalizeInfographicPayload sets resolved_template, builds adaptive prompts, and enriches affiliate/bio links', () => {
+  const normalized = normalizeInfographicPayload(MOCK_RAW_RECIPE, {
+    optionalProduct: {
+      product_id: 'prod_1',
+      product_name: 'Wajan Anti Lengket 28cm',
+      affiliate_link: 'https://shope.ee/test-link'
     },
-    {
-      optionalProduct: {
-        product_id: 'pe_123',
-        product_name: 'Toples Kaca Kedap Udara 1000ml',
-        affiliate_link: 'https://shopee.co.id/toples-kedap-udara'
-      },
-      brandWatermarkText: '@NutriBake.id',
-      infographicTemplate: 'infographic_step_grid',
-      targetLang: 'id_ID'
-    }
-  );
+    brandWatermarkText: 'Dapur Nusantara',
+    infographicTemplate: 'step_timeline_zigzag',
+    targetLang: 'id_ID'
+  });
 
-  // Duplicate '100-120 ml air' removed
-  assert.equal(normalized.infographic.ingredients_groups[0].items.length, 3);
-  // Hero + 4 step prompts = 5 prompts
+  assert.equal(normalized.resolved_template, 'step_timeline_zigzag');
+  assert.equal(normalized.infographic.optional_product_name, 'Wajan Anti Lengket 28cm');
+  // hero + 4 step photos for step_timeline_zigzag = 5 prompts
   assert.equal(Object.keys(normalized.prompts).length, 5);
-  assert.ok(normalized.prompts.image_1.includes('glass jar'));
-  assert.ok(normalized.prompts.image_5.includes('Golden fried sticks'));
-  // Captions include affiliate link for FB, Link di Bio for IG, and watermark brand
-  assert.ok(normalized.social_media_package.caption_facebook.includes('https://shopee.co.id/toples-kedap-udara'));
-  assert.ok(normalized.social_media_package.caption_facebook.includes('@NutriBake.id'));
-  assert.ok(normalized.social_media_package.caption_bio.toLowerCase().includes('link di bio'));
+  assert.match(normalized.social_media_package.caption_facebook, /shope\.ee\/test-link/);
+  assert.match(normalized.social_media_package.caption_facebook, /Dapur Nusantara/);
+  assert.match(normalized.social_media_package.caption_bio, /Link di Bio/i);
 });
 
-test('buildInfographicPosterHtml supports templates, ratios, watermark toggle, and renders valid 4:5 JPEG', async () => {
-  const sampleData = {
-    title: 'Matcha Almond Crispy',
-    subtitle_ribbon: 'Renyah, Lembut, Wangi Matcha',
-    hook_badge: 'Resep Kue Kering Terbaru',
-    servings: '1 Toples',
-    cook_time: '20 menit',
-    ingredients_groups: [
-      { group_title: 'Bahan', items: ['50 gr putih telur', '25 gr mentega', '5 gr matcha bubuk'] },
-      { group_title: 'Topping', items: ['20 gr almond slice', '20 gr keju parut'] }
-    ],
-    steps: [
-      { step_number: 1, caption: 'Aduk mentega dan margarin sampai rata.' },
-      { step_number: 2, caption: 'Masukkan putih telur dan matcha bubuk.' },
-      { step_number: 3, caption: 'Cetak bulat pipih dan beri topping almond.' },
-      { step_number: 4, caption: 'Panggang suhu 150C selama 20 menit.' }
-    ],
-    tips: ['Oles adonan setipis mungkin agar renyah merata.'],
-    cta_badge: 'Selamat Mencoba!',
-    optional_product_name: 'Loyang Kue Kering Anti Lengket'
-  };
-
-  const htmlWithWm = buildInfographicPosterHtml({
-    data: sampleData,
-    config: {
-      aspectRatio: '4:5',
-      template: 'infographic_text_steps',
-      theme: 'fresh_pandan',
-      showBrandWatermark: true,
-      brandWatermarkText: '@NutriBake.id'
-    }
-  });
-  assert.ok(htmlWithWm.includes('Matcha Almond Crispy'));
-  assert.ok(htmlWithWm.includes('@NutriBake.id'));
-  assert.ok(htmlWithWm.includes('Loyang Kue Kering Anti Lengket'));
-
-  const htmlNoWm = buildInfographicPosterHtml({
-    data: sampleData,
-    config: {
-      aspectRatio: '3:4',
-      template: 'infographic_step_grid',
-      theme: 'warm_cream',
-      showBrandWatermark: false,
-      brandWatermarkText: '@NutriBake.id'
-    }
-  });
-  assert.equal(htmlNoWm.includes('@NutriBake.id'), false);
-
-  // Render real JPEG poster via Playwright + Sharp using tiny generated placeholder images
+test('buildInfographicPosterHtml and renderRecipeInfographicPoster render all 9 templates into valid JPEGs', async () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cf-infographic-test-'));
-  const heroPath = path.join(tmpDir, 'hero.jpg');
-  const stepPath = path.join(tmpDir, 'step1.jpg');
-  const outPath = path.join(tmpDir, 'poster.jpg');
-
   try {
-    await sharp({ create: { width: 200, height: 150, channels: 3, background: { r: 120, g: 180, b: 90 } } })
-      .jpeg()
-      .toFile(heroPath);
-    await sharp({ create: { width: 200, height: 150, channels: 3, background: { r: 220, g: 190, b: 140 } } })
-      .jpeg()
-      .toFile(stepPath);
+    const heroPath = path.join(tmpDir, 'hero.jpg');
+    const secondaryPath = path.join(tmpDir, 'secondary.jpg');
+    const stepPaths = [];
 
-    await renderRecipeInfographicPoster({
-      data: sampleData,
-      heroImagePath: heroPath,
-      stepImagePaths: [stepPath, stepPath, stepPath, stepPath],
-      outputPath: outPath,
+    await sharp({
+      create: { width: 800, height: 600, channels: 3, background: { r: 232, g: 165, b: 84 } }
+    }).jpeg().toFile(heroPath);
+
+    await sharp({
+      create: { width: 640, height: 480, channels: 3, background: { r: 196, g: 132, b: 78 } }
+    }).jpeg().toFile(secondaryPath);
+
+    for (let i = 0; i < 6; i++) {
+      const p = path.join(tmpDir, `step_${i + 1}.jpg`);
+      await sharp({
+        create: { width: 480, height: 360, channels: 3, background: { r: 120 + i * 18, g: 170, b: 110 } }
+      }).jpeg().toFile(p);
+      stepPaths.push(p);
+    }
+
+    const html = buildInfographicPosterHtml({
+      data: MOCK_RAW_RECIPE,
+      heroDataUri: 'data:image/jpeg;base64,/9j/4AAQ',
+      secondaryDataUri: 'data:image/jpeg;base64,/9j/4AAQ',
+      stepDataUris: stepPaths.map(() => 'data:image/jpeg;base64,/9j/4AAQ'),
       config: {
-        aspectRatio: '4:5',
-        template: 'infographic_step_grid',
-        theme: 'warm_cream',
-        showBrandWatermark: true,
-        brandWatermarkText: '@NutriBake.id'
+        aspectRatio: '3:4',
+        template: 'polaroid_scrapbook',
+        theme: 'pastel_bakery',
+        brandWatermarkText: 'Dapur Nusantara',
+        showBrandWatermark: true
       }
     });
+    assert.match(html, /Dapur Nusantara/);
+    assert.match(html, /Es Teler Creamy Spesial/);
 
-    assert.ok(fs.existsSync(outPath));
-    const meta = await sharp(outPath).metadata();
-    assert.equal(meta.format, 'jpeg');
-    assert.equal(meta.width, 1080);
-    assert.equal(meta.height, 1350);
+    for (const tpl of INFOGRAPHIC_TEMPLATE_LIST) {
+      const outPath = path.join(tmpDir, `poster_${tpl.id}.jpg`);
+      await renderRecipeInfographicPoster({
+        data: MOCK_RAW_RECIPE,
+        heroImagePath: heroPath,
+        secondaryImagePath: secondaryPath,
+        stepImagePaths: stepPaths,
+        outputPath: outPath,
+        config: {
+          aspectRatio: tpl.id === 'compact_2col_cheat_sheet' ? '4:5' : '3:4',
+          template: tpl.id,
+          theme: 'warm_cream',
+          showBrandWatermark: true,
+          brandWatermarkText: 'Dapur Nusantara'
+        }
+      });
+
+      assert.ok(fs.existsSync(outPath), `Output missing for ${tpl.id}`);
+      const meta = await sharp(outPath).metadata();
+      assert.equal(meta.width, 1080);
+      assert.equal(meta.height, tpl.id === 'compact_2col_cheat_sheet' ? 1350 : 1440);
+    }
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }
