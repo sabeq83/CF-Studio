@@ -45,6 +45,8 @@ export default function SettingsPage() {
   const [webhookDelayMin, setWebhookDelayMin] = useState(10);
   const [webhookDelayMax, setWebhookDelayMax] = useState(20);
   const [webhookT2iPattern, setWebhookT2iPattern] = useState('threading');
+  const [webhookProductRefLaneMode, setWebhookProductRefLaneMode] = useState('exclusive');
+  const [webhookProductRefStaggerSec, setWebhookProductRefStaggerSec] = useState(12);
   const [savingWebhook, setSavingWebhook] = useState(false);
   const [webhookStatus, setWebhookStatus] = useState(null);
   const [testingWebhook, setTestingWebhook] = useState(false);
@@ -309,6 +311,8 @@ export default function SettingsPage() {
       setWebhookDelayMin(data.data.webhook_delay_min !== undefined ? data.data.webhook_delay_min : 10);
       setWebhookDelayMax(data.data.webhook_delay_max !== undefined ? data.data.webhook_delay_max : 20);
       setWebhookT2iPattern(data.data.webhook_t2i_pattern || 'threading');
+      setWebhookProductRefLaneMode(data.data.webhook_product_ref_lane_mode || 'exclusive');
+      setWebhookProductRefStaggerSec(data.data.webhook_product_ref_stagger_sec ?? 12);
       setStorageProvider(data.data.storage_provider || 'gdrive');
       setNextcloudUrl(data.data.nextcloud_url || '');
       setNextcloudUsername(data.data.nextcloud_username || '');
@@ -2614,9 +2618,11 @@ export default function SettingsPage() {
               )}
 
               <div className="form-group" style={{ marginBottom: '16px' }}>
-                <label className="form-label">Pola T2I (Start Frame)</label>
+                <label className="form-label" htmlFor="webhook-t2i-pattern">Pola T2I (Start Frame)</label>
                 <select
+                  id="webhook-t2i-pattern"
                   className="form-input"
+                  style={{ cursor: 'pointer', minHeight: '44px' }}
                   value={webhookT2iPattern}
                   onChange={e => setWebhookT2iPattern(e.target.value)}
                 >
@@ -2625,11 +2631,52 @@ export default function SettingsPage() {
                 </select>
               </div>
 
+              <div className="form-group" style={{ marginBottom: '16px' }}>
+                <label className="form-label" htmlFor="webhook-product-ref-lane-mode">Jalur Foto Produk (Start Frame)</label>
+                <select
+                  id="webhook-product-ref-lane-mode"
+                  className="form-input"
+                  style={{ cursor: 'pointer', minHeight: '44px' }}
+                  value={webhookProductRefLaneMode}
+                  onChange={e => setWebhookProductRefLaneMode(e.target.value)}
+                >
+                  <option value="exclusive">Eksklusif: 1 per 1 tunggu selesai (paling aman anti reference bleed)</option>
+                  <option value="shared_staggered">Paralel Terjeda (Shared Staggered): kirim berjarak detik ke G-Labs Shared Worker</option>
+                </select>
+                <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '6px', lineHeight: 1.5 }}>
+                  Mengatur apakah klip Start Frame dengan foto referensi produk menunggu giliran eksklusif hingga selesai atau dikirim terjeda ke G-Labs Shared Worker.
+                </div>
+              </div>
+
+              {webhookProductRefLaneMode === 'shared_staggered' && (
+                <div className="form-group" style={{ marginBottom: '16px' }}>
+                  <label className="form-label" htmlFor="webhook-product-ref-stagger-sec">Jeda Antar-Submit Foto Produk (Detik)</label>
+                  <input
+                    id="webhook-product-ref-stagger-sec"
+                    type="number"
+                    className="form-input"
+                    style={{ minHeight: '44px', maxWidth: '220px' }}
+                    min={5}
+                    max={60}
+                    step={1}
+                    placeholder="12"
+                    value={webhookProductRefStaggerSec}
+                    onChange={e => setWebhookProductRefStaggerSec(e.target.value)}
+                    onBlur={() => setWebhookProductRefStaggerSec(prev => Math.min(60, Math.max(5, parseInt(prev, 10) || 12)))}
+                  />
+                  <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '6px', lineHeight: 1.5 }}>
+                    Rentang 5 sampai 60 detik (default 12 detik). Mencegah proses upload foto produk bertumpuk di detik yang sama.
+                  </div>
+                </div>
+              )}
+
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button
                   className="btn btn-primary"
                   onClick={async () => {
                     setSavingWebhook(true);
+                    const clampedStagger = Math.min(60, Math.max(5, parseInt(webhookProductRefStaggerSec, 10) || 12));
+                    setWebhookProductRefStaggerSec(clampedStagger);
                     try {
                       const res = await fetch('/api/settings', {
                         method: 'POST',
@@ -2643,7 +2690,9 @@ export default function SettingsPage() {
                           webhook_delay_enabled: webhookDelayEnabled ? 1 : 0,
                           webhook_delay_min: webhookDelayMin,
                           webhook_delay_max: webhookDelayMax,
-                          webhook_t2i_pattern: webhookT2iPattern
+                          webhook_t2i_pattern: webhookT2iPattern,
+                          webhook_product_ref_lane_mode: webhookProductRefLaneMode,
+                          webhook_product_ref_stagger_sec: clampedStagger
                         }),
                       });
                       const data = await res.json();

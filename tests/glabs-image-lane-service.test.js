@@ -6,8 +6,11 @@ import {
   tryAcquireImageLane,
   heartbeatImageLane,
   releaseImageLane,
-  recoverExpiredImageLanes
+  recoverExpiredImageLanes,
+  reserveGlabsSubmitSlot,
+  waitAndReserveGlabsSubmitSlot
 } from '../lib/glabs-image-lane-service.js';
+import { getPgPool, closePgPool } from '../lib/db-pg.js';
 
 test('buildGlabsImageLaneKey generates deterministic, safe sha256 hash without secrets', () => {
   const key1 = buildGlabsImageLaneKey({ host: '100.64.70.61', port: '8765' });
@@ -116,5 +119,87 @@ test('glabs image lane: auto-recovers and expires stale orphaned waiting leases 
 
   // Clean up
   await releaseImageLane(newReq.lease.id, 'completed');
+});
+
+test('reserveGlabsSubmitSlot enforces stagger window and resets after elapsed', async () => {
+  const pool = getPgPool();
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS glabs_image_lane_submit_gates (
+      lane_key TEXT PRIMARY KEY,
+      last_submit_at TIMESTAMPTZ,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  const laneKey = `test_stagger_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  try {
+    const first = await reserveGlabsSubmitSlot(laneKey, 10);
+    assert.equal(first.allowed, true, 'First submit on fresh lane must be allowed');
+    assert.equal(first.waitMs, 0);
+
+    const second = await reserveGlabsSubmitSlot(laneKey, 10);
+    assert.equal(second.allowed, false, 'Immediate second submit within stagger window must be blocked');
+    assert.ok(second.waitMs > 0, 'Blocked submit must report positive waitMs');
+    assert.ok(second.nextAllowedAt, 'Blocked submit must include nextAllowedAt timestamp');
+
+    // Simulate elapsed window (> 10s ago)
+    await pool.query(
+      `UPDATE glabs_image_lane_submit_gates
+       SET last_submit_at = CURRENT_TIMESTAMP - INTERVAL '15 seconds'
+       WHERE lane_key = $1`,
+      [laneKey]
+    );
+
+    const third = await reserveGlabsSubmitSlot(laneKey, 10);
+    assert.equal(third.allowed, true, 'Submit after stagger window elapsed must be allowed');
+  } finally {
+    await pool.query('DELETE FROM glabs_image_lane_submit_gates WHERE lane_key = $1', [laneKey]).catch(() => {});
+  }
+});
+
+test('reserveGlabsSubmitSlot is atomic under concurrent Promise.all calls', async () => {
+  const pool = getPgPool();
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS glabs_image_lane_submit_gates (
+      lane_key TEXT PRIMARY KEY,
+      last_submit_at TIMESTAMPTZ,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  const laneKey = `test_stagger_race_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  try {
+    const results = await Promise.all(
+      Array.from({ length: 6 }, () => reserveGlabsSubmitSlot(laneKey, 15))
+    );
+    const allowedCount = results.filter(r => r.allowed).length;
+    const blockedCount = results.filter(r => !r.allowed).length;
+    assert.equal(allowedCount, 1, 'Exactly one concurrent caller may reserve the submit slot');
+    assert.equal(blockedCount, 5, 'All other concurrent callers must be rejected with waitMs');
+  } finally {
+    await pool.query('DELETE FROM glabs_image_lane_submit_gates WHERE lane_key = $1', [laneKey]).catch(() => {});
+  }
+});
+
+test('waitAndReserveGlabsSubmitSlot retries until slot opens', async () => {
+  let calls = 0;
+  const mockReserve = async () => {
+    calls += 1;
+    if (calls < 3) {
+      return { allowed: false, waitMs: 120, nextAllowedAt: new Date(Date.now() + 120).toISOString() };
+    }
+    return { allowed: true, waitMs: 0, nextAllowedAt: null };
+  };
+
+  const slot = await waitAndReserveGlabsSubmitSlot('mock_lane', 12, {
+    maxWaitMs: 5000,
+    reserveFn: mockReserve
+  });
+  assert.equal(slot.allowed, true);
+  assert.equal(calls, 3);
+});
+
+test.after(async () => {
+  await closePgPool().catch(() => {});
 });
 
