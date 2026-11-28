@@ -271,7 +271,7 @@ export default function AutoPipelinePage() {
   const [gridBorderRadius, setGridBorderRadius] = useState(16);
   const [gridOuterPadding, setGridOuterPadding] = useState(16);
   const [gridBgColor, setGridBgColor] = useState('#0d0d12');
-  const [postToFacebook, setPostToFacebook] = useState(true);
+  const [postToFacebook, setPostToFacebook] = useState(false);
   const [curatedRecipes, setCuratedRecipes] = useState([]);
   const [loadingCuratedRecipes, setLoadingCuratedRecipes] = useState(false);
   const [instantInfographicCfg, setInstantInfographicCfg] = useState({
@@ -362,7 +362,7 @@ export default function AutoPipelinePage() {
   const [schedLayoutId, setSchedLayoutId] = useState('4_editorial_split');
   const [schedRecipeAspectRatio, setSchedRecipeAspectRatio] = useState('3:4');
   const [schedVisualStyle, setSchedVisualStyle] = useState('Modern Minimalist Nordic Studio');
-  const [schedPostToFacebook, setSchedPostToFacebook] = useState(true);
+  const [schedPostToFacebook, setSchedPostToFacebook] = useState(false);
   const [schedTargetLanguage, setSchedTargetLanguage] = useState('en_US');
   const [schedRecipeClassification, setSchedRecipeClassification] = useState('Quick & Easy Weeknight Dinners (Under 20 Mins)');
   const [currentUser, setCurrentUser] = useState(null);
@@ -1840,7 +1840,7 @@ export default function AutoPipelinePage() {
       setSchedLayoutId(schedCfg.selected_layout_id || '4_editorial_split');
       setSchedRecipeAspectRatio(schedCfg.aspect_ratio || '4:5');
       setSchedVisualStyle(schedCfg.visual_style || 'Rustic Warm Tabletop & Artisanal Kitchen');
-      setSchedPostToFacebook(schedCfg.post_to_facebook !== false);
+      setSchedPostToFacebook(schedCfg.post_to_facebook === true);
       setSchedTargetLanguage(schedCfg.target_language || 'id_ID');
       setSchedRecipeClassification(schedCfg.recipe_classification || schedCfg.category || sched.category || 'Menu Hidangan Utama & Lauk Pauk (Main Course)');
       setSchedInfographicCfg({
@@ -5473,21 +5473,6 @@ export default function AutoPipelinePage() {
                     defaultBrandName={brands.find(b => b.id === selectedBrandId)?.brand_name || ''}
                   />
 
-                  {/* Facebook Auto-Publish Checkbox */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.65rem 0.9rem', borderRadius: 'var(--radius-sm)', background: 'var(--surface)', border: '1px solid var(--border-subtle)' }}>
-                    <input
-                      type="checkbox"
-                      id="fb-autopublish-check"
-                      checked={postToFacebook}
-                      onChange={(e) => setPostToFacebook(e.target.checked)}
-                      style={{ width: '16px', height: '16px', accentColor: 'var(--action-primary)', cursor: 'pointer' }}
-                    />
-                    <label htmlFor="fb-autopublish-check" style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 600, cursor: 'pointer' }}>
-                      {instantInfographicCfg.outputStyle === 'recipe_infographic'
-                        ? 'Posting otomatis naskah resep dan gambar poster infografis ke Halaman Facebook'
-                        : 'Posting otomatis naskah resep dan gambar kolase ke Halaman Facebook'}
-                    </label>
-                  </div>
 
                   {/* Susunan Grid Komposit (Adopted 100% from Recipe Labs) */}
                   {instantInfographicCfg.outputStyle === 'photo_grid' && (
@@ -9147,18 +9132,6 @@ export default function AutoPipelinePage() {
                       </div>
                     )}
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                      <input
-                        type="checkbox"
-                        id="sched-fb-check"
-                        checked={schedPostToFacebook}
-                        onChange={(e) => setSchedPostToFacebook(e.target.checked)}
-                        style={{ width: '16px', height: '16px', accentColor: 'var(--action-primary)', cursor: 'pointer' }}
-                      />
-                      <label htmlFor="sched-fb-check" style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 600, cursor: 'pointer' }}>
-                        Auto-Publish Naskah FB & Kolase Poster ke Facebook Pages
-                      </label>
-                    </div>
                   </div>
                 )}
 
