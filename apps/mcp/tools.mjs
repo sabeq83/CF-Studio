@@ -992,7 +992,8 @@ export function createCfStudioServer(rawRequest, { isRemoteHttp = false, allowed
       brand_id: z.string().max(100).optional(),
       deconstruct_asset_id: z.string().trim().min(1).max(128),
       product_id: z.string().max(100).optional(),
-      bridging_mode: z.enum(['select_existing', 'product_aware_angle', 'bridge_injection', 'none']).optional(),
+      bridging_mode: z.enum(['select_existing', 'visual_only_placement', 'product_aware_angle', 'bridge_injection', 'none']).optional(),
+      vo_product_mention: z.enum(['full', 'cta_only', 'none']).optional(),
       product_aware_angle: z.boolean().optional(),
       selected_angle: z
         .union([
@@ -1385,7 +1386,8 @@ export function createCfStudioServer(rawRequest, { isRemoteHttp = false, allowed
       product_title: z.string().max(300).optional(),
       content_pillar: z.string().max(300).optional(),
       deconstruct_asset_id: z.string().max(128).optional(),
-      bridging_mode: z.enum(['select_existing', 'product_aware_angle', 'bridge_injection', 'none']).optional(),
+      bridging_mode: z.enum(['select_existing', 'visual_only_placement', 'product_aware_angle', 'bridge_injection', 'none']).optional(),
+      vo_product_mention: z.enum(['full', 'cta_only', 'none']).optional(),
       product_aware_angle: z.boolean().optional(),
       post_link_affiliate: z.boolean().optional(),
       visual_identity_preset_id: z.string().max(100).optional(),

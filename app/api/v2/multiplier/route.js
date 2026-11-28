@@ -31,6 +31,10 @@ function applyNormalizedBridgingConfig(bridgingConfig, vsoConfig) {
   const updated = {
     ...(bridgingConfig || {}),
     is_bridging_active: normalized.active,
+    bridging_mode: normalized.bridgingMode,
+    bridgingMode: normalized.bridgingMode,
+    vo_product_mention: normalized.voProductMention,
+    voProductMention: normalized.voProductMention,
     bridge_at_clip: normalized.legacy.bridge_at_clip,
     bridge_duration_clips: normalized.legacy.bridge_duration_clips
   };

@@ -49,6 +49,7 @@ const initialForm = {
   // Section 3: product_bridging
   is_bridging_active: false,
   bridging_mode: 'select_existing',
+  vo_product_mention: 'full',
   bridge_at_clip: 3,
   bridge_duration_clips: 1,
   bridge_segments: [{ at_clip: 3, duration_clips: 1, role: 'intro' }],
@@ -147,6 +148,7 @@ function mapPresetToForm(p) {
     // product_bridging
     is_bridging_active: Boolean(pb.is_bridging_active),
     bridging_mode: pb.bridging_mode || 'select_existing',
+    vo_product_mention: pb.vo_product_mention || (pb.bridging_mode === 'visual_only_placement' ? 'none' : 'full'),
     bridge_at_clip: Number(pb.bridge_at_clip ?? 3),
     bridge_duration_clips: Number(pb.bridge_duration_clips ?? 1),
     bridge_segments: (() => {
@@ -268,6 +270,7 @@ function mapFormToPayload(f) {
       product_bridging: {
         is_bridging_active: Boolean(f.is_bridging_active),
         bridging_mode: f.bridging_mode || 'select_existing',
+        vo_product_mention: f.vo_product_mention || (f.bridging_mode === 'visual_only_placement' ? 'none' : 'full'),
         bridge_at_clip: Number(f.bridge_segments?.[0]?.at_clip ?? f.bridge_at_clip ?? 3),
         bridge_duration_clips: Number(f.bridge_segments?.[0]?.duration_clips ?? f.bridge_duration_clips ?? 1),
         bridge_segments: Array.isArray(f.bridge_segments) && f.bridge_segments.length > 0
@@ -1159,11 +1162,50 @@ export default function PresetsPage() {
 
                     {form.is_bridging_active && (
                       <div style={{ display: 'grid', gap: 14 }}>
-                        <label className="form-label">
+                        <label className="form-label" htmlFor="preset-bridging-mode">
                           Bridging Mode
-                          <select className="form-select" value={form.bridging_mode} onChange={e => setForm({ ...form, bridging_mode: e.target.value })}>
+                          <select
+                            id="preset-bridging-mode"
+                            className="form-select"
+                            style={{ cursor: 'pointer', minHeight: 44 }}
+                            value={form.bridging_mode}
+                            onChange={e => {
+                              const nextMode = e.target.value;
+                              if (nextMode === 'visual_only_placement') {
+                                setForm({
+                                  ...form,
+                                  bridging_mode: nextMode,
+                                  vo_product_mention: form.vo_product_mention === 'cta_only' ? 'cta_only' : 'none',
+                                  bridge_at_clip: 1,
+                                  bridge_duration_clips: 0,
+                                  bridge_segments: [{ at_clip: 1, duration_clips: 0, role: 'intro' }]
+                                });
+                              } else {
+                                setForm({
+                                  ...form,
+                                  bridging_mode: nextMode,
+                                  vo_product_mention: form.vo_product_mention || 'full'
+                                });
+                              }
+                            }}
+                          >
                             <option value="select_existing">Select Existing Product Photo</option>
+                            <option value="visual_only_placement">Visual Only Placement (Produk tampil terus, VO tidak menjual)</option>
                             <option value="manual_input">Manual Prompt Only</option>
+                          </select>
+                        </label>
+                        <label className="form-label" htmlFor="preset-vo-product-mention">
+                          VO Product Mention
+                          <select
+                            id="preset-vo-product-mention"
+                            className="form-select"
+                            style={{ cursor: 'pointer', minHeight: 44 }}
+                            value={form.vo_product_mention || 'full'}
+                            onChange={e => setForm({ ...form, vo_product_mention: e.target.value })}
+                          >
+                            <option value="full">Full (Produk & USP disebut aktif di VO)</option>
+                            <option value="cta_only">CTA Only (Hanya pointer netral di klip akhir)</option>
+                            <option value="none">None (Pure Story/Resep, VO tidak menyebut produk)</option>
                           </select>
                         </label>
                         <BridgeSegmentsEditor

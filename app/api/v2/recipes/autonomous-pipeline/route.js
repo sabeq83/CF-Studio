@@ -253,6 +253,12 @@ export const POST = withTenantContext(async (request, _context, user) => {
       const resolvedMultiplierProductId = body.bridging_mode === 'none'
         ? null
         : (body.product_id || body.productId || null);
+      const resolvedBridgingMode = resolvedMultiplierProductId ? (body.bridging_mode || 'select_existing') : 'none';
+      const resolvedVoProductMention = body.vo_product_mention ?? body.voProductMention ?? (resolvedBridgingMode === 'visual_only_placement' ? 'none' : 'full');
+      const suppressProductAwareAngleByDefault = resolvedBridgingMode === 'visual_only_placement' || resolvedVoProductMention === 'none' || resolvedVoProductMention === 'cta_only';
+      const resolvedProductAwareAngle = body.product_aware_angle !== undefined
+        ? Boolean(body.product_aware_angle)
+        : !suppressProductAwareAngleByDefault;
       result = await executeAutonomousMultiplierPipeline({
         brandId: body.brand_id || body.brandId,
         deconstructAssetId: body.deconstruct_asset_id || body.blueprint_id || body.deconstructAssetId,
@@ -263,8 +269,9 @@ export const POST = withTenantContext(async (request, _context, user) => {
         tenantId,
         overrides: {
           ...(body.visual_identity_preset_id ? { visual_identity_preset_id: body.visual_identity_preset_id } : {}),
-          bridging_mode: resolvedMultiplierProductId ? (body.bridging_mode || 'select_existing') : 'none',
-          product_aware_angle: body.product_aware_angle !== false,
+          bridging_mode: resolvedBridgingMode,
+          vo_product_mention: resolvedVoProductMention,
+          product_aware_angle: resolvedProductAwareAngle,
           enable_motion_text: body.enable_motion_text,
           motion_text_style: body.motion_text_style,
           video_transition: body.video_transition,
