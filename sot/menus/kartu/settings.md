@@ -1,6 +1,6 @@
 # Kartu Menu: Settings
 
-Terakhir dicek: 17 November 2026 · Versi aplikasi: v2.51.0
+Terakhir dicek: 28 November 2026 · Versi aplikasi: v2.69.0
 Alamat: `/settings` · Kelompok: SYSTEM · Kunci izin menu: `system_settings`
 
 ## Fungsi
