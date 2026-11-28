@@ -264,7 +264,7 @@ export default function AutoPipelinePage() {
   const [recipeLabsTopic, setRecipeLabsTopic] = useState('Es Teler Creamy');
   const [recipeLabsCategory, setRecipeLabsCategory] = useState('Menu Hidangan Utama & Lauk Pauk (Main Course)');
   const [instantRecipeAspectRatio, setInstantRecipeAspectRatio] = useState('4:5');
-  const [recipeLabsVisualStyle, setRecipeLabsVisualStyle] = useState('Rustic Warm Tabletop & Artisanal Kitchen');
+  const [recipeLabsVisualStyle, setRecipeLabsVisualStyle] = useState('Modern Minimalist Nordic Studio');
   const [imagesPerRecipe, setImagesPerRecipe] = useState(4);
   const [selectedLayoutId, setSelectedLayoutId] = useState('4_editorial_split');
   const [gridGapSize, setGridGapSize] = useState(12);
@@ -279,6 +279,7 @@ export default function AutoPipelinePage() {
     infographicTemplate: 'step_grid_classic',
     infographicTheme: 'warm_cream',
     infographicAspectRatio: '3:4',
+    handMode: 'objects_only',
     recipeSource: 'ai_generated',
     curatedRecipeId: '',
     librarySelectionMode: 'manual',
@@ -291,6 +292,7 @@ export default function AutoPipelinePage() {
     infographicTemplate: 'auto_rotate',
     infographicTheme: 'warm_cream',
     infographicAspectRatio: '3:4',
+    handMode: 'objects_only',
     recipeSource: 'ai_generated',
     curatedRecipeId: '',
     librarySelectionMode: 'auto_library_rotation',
@@ -1318,6 +1320,7 @@ export default function AutoPipelinePage() {
           infographic_template: instantCampaignType === 'recipe_labs' ? instantInfographicCfg.infographicTemplate : undefined,
           infographic_theme: instantCampaignType === 'recipe_labs' ? instantInfographicCfg.infographicTheme : undefined,
           infographic_aspect_ratio: instantCampaignType === 'recipe_labs' ? (instantInfographicCfg.infographicAspectRatio || '3:4') : undefined,
+          hand_mode: instantCampaignType === 'recipe_labs' ? (instantInfographicCfg.handMode || 'objects_only') : undefined,
           recipe_source: instantCampaignType === 'recipe_labs' ? instantInfographicCfg.recipeSource : undefined,
           curated_recipe_id: instantCampaignType === 'recipe_labs' ? (instantInfographicCfg.curatedRecipeId || null) : undefined,
           library_selection_mode: instantCampaignType === 'recipe_labs' ? instantInfographicCfg.librarySelectionMode : undefined,
@@ -1698,8 +1701,8 @@ export default function AutoPipelinePage() {
     setSchedRecipeClassification('Main Courses & Entrees');
     setSchedImagesPerRecipe(4);
     setSchedLayoutId('4_editorial_split');
-    setSchedVisualStyle('Food Porn');
-    setSchedPostToFacebook(true);
+    setSchedVisualStyle('Modern Minimalist Nordic Studio');
+    setSchedPostToFacebook(false);
 
     // Reset item selections
     setSelectedProductIds([]);
@@ -1839,7 +1842,7 @@ export default function AutoPipelinePage() {
       setSchedImagesPerRecipe(schedCfg.images_per_recipe || 4);
       setSchedLayoutId(schedCfg.selected_layout_id || '4_editorial_split');
       setSchedRecipeAspectRatio(schedCfg.aspect_ratio || '4:5');
-      setSchedVisualStyle(schedCfg.visual_style || 'Rustic Warm Tabletop & Artisanal Kitchen');
+      setSchedVisualStyle(schedCfg.visual_style || 'Modern Minimalist Nordic Studio');
       setSchedPostToFacebook(schedCfg.post_to_facebook === true);
       setSchedTargetLanguage(schedCfg.target_language || 'id_ID');
       setSchedRecipeClassification(schedCfg.recipe_classification || schedCfg.category || sched.category || 'Menu Hidangan Utama & Lauk Pauk (Main Course)');
@@ -1848,6 +1851,7 @@ export default function AutoPipelinePage() {
         infographicTemplate: schedCfg.infographic_template || 'auto_rotate',
         infographicTheme: schedCfg.infographic_theme || 'warm_cream',
         infographicAspectRatio: schedCfg.infographic_aspect_ratio || '3:4',
+        handMode: schedCfg.hand_mode || 'objects_only',
         recipeSource: schedCfg.recipe_source || 'ai_generated',
         curatedRecipeId: schedCfg.curated_recipe_id || '',
         librarySelectionMode: schedCfg.library_selection_mode || 'auto_library_rotation',
@@ -2049,6 +2053,7 @@ export default function AutoPipelinePage() {
                           infographic_template: schedInfographicCfg.infographicTemplate,
                           infographic_theme: schedInfographicCfg.infographicTheme,
                           infographic_aspect_ratio: schedInfographicCfg.infographicAspectRatio || '3:4',
+                          hand_mode: schedInfographicCfg.handMode || 'objects_only',
                           recipe_source: schedInfographicCfg.recipeSource,
                           curated_recipe_id: schedInfographicCfg.curatedRecipeId || null,
                           library_selection_mode: schedInfographicCfg.librarySelectionMode,
@@ -2502,6 +2507,7 @@ export default function AutoPipelinePage() {
                             infographic_template: schedInfographicCfg.infographicTemplate,
                             infographic_theme: schedInfographicCfg.infographicTheme,
                             infographic_aspect_ratio: schedInfographicCfg.infographicAspectRatio || '3:4',
+                            hand_mode: schedInfographicCfg.handMode || 'objects_only',
                             recipe_source: schedInfographicCfg.recipeSource,
                             curated_recipe_id: schedInfographicCfg.curatedRecipeId || null,
                             library_selection_mode: schedInfographicCfg.librarySelectionMode,
@@ -5455,8 +5461,8 @@ export default function AutoPipelinePage() {
                           outline: 'none'
                         }}
                       >
+                        <option value="Modern Minimalist Nordic Studio">⚪ Modern Minimalist Nordic Studio (Bright, Clean & Macro Default)</option>
                         <option value="Rustic Warm Tabletop & Artisanal Kitchen">🌿 Rustic Warm Tabletop & Artisanal Kitchen (Earthy & Cozy)</option>
-                        <option value="Modern Minimalist Nordic Studio">⚪ Modern Minimalist Nordic Studio (Bright, Clean & Scandinavian)</option>
                         <option value="Dark Moody Chiaroscuro & Atmospheric Smoke">🍷 Dark Moody Chiaroscuro & Atmospheric Smoke (Dramatic Fine Dining)</option>
                         <option value="Vibrant Alfresco Sunlit Patio">🍋 Vibrant Alfresco Sunlit Patio (Fresh Mediterranean Outdoors)</option>
                       </select>
@@ -9063,8 +9069,8 @@ export default function AutoPipelinePage() {
                             outline: 'none'
                           }}
                         >
+                          <option value="Modern Minimalist Nordic Studio">⚪ Modern Minimalist Nordic Studio (Default)</option>
                           <option value="Rustic Warm Tabletop & Artisanal Kitchen">🌿 Rustic Warm Tabletop & Artisanal Kitchen</option>
-                          <option value="Modern Minimalist Nordic Studio">⚪ Modern Minimalist Nordic Studio</option>
                           <option value="Dark Moody Chiaroscuro & Atmospheric Smoke">🍷 Dark Moody Chiaroscuro & Atmospheric Smoke</option>
                           <option value="Vibrant Alfresco Sunlit Patio">🍋 Vibrant Alfresco Sunlit Patio</option>
                         </select>

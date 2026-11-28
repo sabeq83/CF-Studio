@@ -50,7 +50,8 @@ export const POST = withTenantContext(async (request) => {
       library_selection_mode,
       show_brand_watermark,
       brand_watermark_text,
-      target_language
+      target_language,
+      hand_mode
     } = body;
 
     if (!category) {
@@ -72,6 +73,7 @@ export const POST = withTenantContext(async (request) => {
       ...(show_brand_watermark !== undefined ? { show_brand_watermark: Boolean(show_brand_watermark) } : {}),
       ...(brand_watermark_text !== undefined ? { brand_watermark_text } : {}),
       ...(target_language ? { target_language } : {}),
+      ...(hand_mode ? { hand_mode } : { hand_mode: parsedConfig?.hand_mode || 'objects_only' }),
       ...(rawProductId ? { product_id: rawProductId } : {})
     };
 

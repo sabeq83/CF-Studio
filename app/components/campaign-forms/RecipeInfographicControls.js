@@ -267,6 +267,7 @@ export default function RecipeInfographicControls({
     infographicTemplate = isScheduleMode ? 'auto_rotate' : 'step_grid_classic',
     infographicTheme = 'warm_cream',
     infographicAspectRatio = '3:4',
+    handMode = 'objects_only',
     recipeSource = 'ai_generated',
     curatedRecipeId = '',
     librarySelectionMode = 'sequential',
@@ -678,6 +679,29 @@ export default function RecipeInfographicControls({
                     {p.name || p.title}
                   </option>
                 ))}
+              </select>
+            </div>
+
+            {/* Gaya Interaksi Tangan di Foto AI */}
+            <div>
+              <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                Subjek Tangan pada Foto AI
+              </label>
+              <select
+                value={handMode || 'objects_only'}
+                onChange={(e) => update({ handMode: e.target.value })}
+                style={{
+                  width: '100%',
+                  padding: '7px 10px',
+                  borderRadius: '7px',
+                  background: 'var(--input-bg)',
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--border-subtle)',
+                  fontSize: '0.8rem'
+                }}
+              >
+                <option value="objects_only">Obyek Saja Tanpa Tangan (Rekomendasi)</option>
+                <option value="wrist_only">Tangan Minimal (Pergelangan ke Jari Saja)</option>
               </select>
             </div>
           </div>

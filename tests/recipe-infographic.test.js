@@ -126,8 +126,12 @@ test('buildInfographicRecipeSystemPrompt embeds curated recipe lock and optional
   assert.match(prompt, /hero_right_editorial/i);
 });
 
-test('normalizeInfographicPayload sets resolved_template, builds adaptive prompts, and enriches affiliate/bio links', () => {
-  const normalized = normalizeInfographicPayload(MOCK_RAW_RECIPE, {
+test('normalizeInfographicPayload enforces zero-hand/wrist macro policies & enriches affiliate/bio links', () => {
+  const withOldForearmPrompt = {
+    ...MOCK_RAW_RECIPE,
+    hero_prompt: 'Overhead dish photo, at most hands/forearms from elbow down. [CLEAN FOOD PHOTOGRAPHY ONLY: old]'
+  };
+  const objectsOnly = normalizeInfographicPayload(withOldForearmPrompt, {
     optionalProduct: {
       product_id: 'prod_1',
       product_name: 'Wajan Anti Lengket 28cm',
@@ -135,16 +139,42 @@ test('normalizeInfographicPayload sets resolved_template, builds adaptive prompt
     },
     brandWatermarkText: 'Dapur Nusantara',
     infographicTemplate: 'step_timeline_zigzag',
+    handMode: 'objects_only',
     targetLang: 'id_ID'
   });
 
-  assert.equal(normalized.resolved_template, 'step_timeline_zigzag');
-  assert.equal(normalized.infographic.optional_product_name, 'Wajan Anti Lengket 28cm');
-  // hero + 4 step photos for step_timeline_zigzag = 5 prompts
-  assert.equal(Object.keys(normalized.prompts).length, 5);
-  assert.match(normalized.social_media_package.caption_facebook, /shope\.ee\/test-link/);
-  assert.match(normalized.social_media_package.caption_facebook, /Dapur Nusantara/);
-  assert.match(normalized.social_media_package.caption_bio, /Link di Bio/i);
+  assert.equal(objectsOnly.resolved_template, 'step_timeline_zigzag');
+  assert.equal(objectsOnly.infographic.optional_product_name, 'Wajan Anti Lengket 28cm');
+  assert.equal(Object.keys(objectsOnly.prompts).length, 5);
+  assert.match(objectsOnly.prompts.image_1, /STRICTLY OBJECT-ONLY STILL LIFE/);
+  assert.match(objectsOnly.prompts.image_1, /macro/i);
+  assert.doesNotMatch(objectsOnly.prompts.image_1, /forearms from elbow down/i);
+  assert.match(objectsOnly.social_media_package.caption_facebook, /shope\.ee\/test-link/);
+  assert.match(objectsOnly.social_media_package.caption_facebook, /Dapur Nusantara/);
+  assert.match(objectsOnly.social_media_package.caption_bio, /Link di Bio/i);
+
+  const wristOnly = normalizeInfographicPayload(MOCK_RAW_RECIPE, {
+    infographicTemplate: 'hero_right_editorial',
+    handMode: 'wrist_only',
+    targetLang: 'id_ID'
+  });
+  assert.match(wristOnly.prompts.image_1, /bare wrist-to-hand only/i);
+  assert.match(wristOnly.prompts.image_1, /NO sleeves/i);
+});
+
+test('buildInfographicPosterHtml formats lowercase title to Title Case cleanly', () => {
+  const html = buildInfographicPosterHtml({
+    data: { ...MOCK_RAW_RECIPE, title: 'brownies fudgy dari ubi' },
+    config: {
+      aspectRatio: '4:5',
+      template: 'step_grid_classic',
+      theme: 'warm_cream',
+      brandWatermarkText: 'nutribake',
+      showBrandWatermark: true
+    }
+  });
+  assert.match(html, /Brownies Fudgy dari Ubi/);
+  assert.match(html, /nutribake/);
 });
 
 test('buildInfographicPosterHtml and renderRecipeInfographicPoster render all 9 templates into valid JPEGs', async () => {
