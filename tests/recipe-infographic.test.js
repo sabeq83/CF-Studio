@@ -19,6 +19,10 @@ import {
   buildInfographicPosterHtml,
   renderRecipeInfographicPoster
 } from '../lib/recipe-infographic-renderer.js';
+import {
+  buildRecipePosterSlug,
+  buildRecipePosterFilename
+} from '../lib/naming-helper.js';
 
 const MOCK_RAW_RECIPE = {
   title: 'Es Teler Creamy Spesial',
@@ -358,4 +362,46 @@ test('buildInfographicPosterHtml and renderRecipeInfographicPoster render all 9 
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }
+});
+
+test('buildRecipePosterSlug and buildRecipePosterFilename produce recipe + campaign code filenames', () => {
+  assert.equal(
+    buildRecipePosterSlug('Sourdough Coffee Brownie Bliss: Perpaduan Aroma Kopi!'),
+    'sourdough_coffee_brownie_bliss_perpaduan_aroma'
+  );
+  assert.equal(buildRecipePosterSlug('Crème Brûlée Vanilla'), 'creme_brulee_vanilla');
+  assert.equal(buildRecipePosterSlug('!!!'), 'resep');
+
+  assert.equal(
+    buildRecipePosterFilename({
+      recipeTitle: 'Sourdough Coffee Brownie',
+      campaignId: 'recipe_261128_7k9m2p',
+      isInfographicMode: true,
+      itemIndex: 1,
+      totalItems: 1
+    }),
+    'sourdough_coffee_brownie_recipe_261128_7k9m2p.jpg'
+  );
+
+  assert.equal(
+    buildRecipePosterFilename({
+      recipeTitle: 'Es Teler Creamy',
+      campaignId: 'recipe_261128_ab12cd',
+      isInfographicMode: true,
+      itemIndex: 2,
+      totalItems: 3
+    }),
+    'es_teler_creamy_recipe_261128_ab12cd_02.jpg'
+  );
+
+  assert.equal(
+    buildRecipePosterFilename({
+      recipeTitle: 'Brownies Panggang',
+      campaignId: 'recipe_261128_xy89zt',
+      isInfographicMode: false,
+      itemIndex: 1,
+      totalItems: 1
+    }),
+    'brownies_panggang_recipe_261128_xy89zt_grid.jpg'
+  );
 });
