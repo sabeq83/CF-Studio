@@ -10,7 +10,8 @@ import {
   getTemplateImageSpec,
   shortenPosterTitle,
   buildInfographicRecipeSystemPrompt,
-  normalizeInfographicPayload
+  normalizeInfographicPayload,
+  resolveInfographicGlabsAspectRatio
 } from '../lib/recipe-infographic-prompt.js';
 import {
   INFOGRAPHIC_TEMPLATE_LIST,
@@ -263,12 +264,13 @@ test('shortenPosterTitle and buildInfographicPosterHtml fit long 3:4 Recipe Libr
     assert.ok(boxes.footer.bottom <= 1440, `Footer clipped below 1440px: ${boxes.footer.bottom}`);
     assert.ok(boxes.h1.height <= 90, `Title wrapped past 2 lines: ${boxes.h1.height}`);
 
-    // Verify all 9 templates fit cleanly inside 1080x1440 (3:4) & 1080x1350 (4:5) with zero vertical overflow
+    // Verify all 9 templates fit cleanly across all 4 canvas ratios (1:1, 4:5, 3:4, 9:16) with dominant Hero (>= 33% canvas area)
+    const ratioHeights = { '1:1': 1080, '4:5': 1350, '3:4': 1440, '9:16': 1920 };
+    const productTestData = { ...sixStepData, optional_product_name: 'Loyang Brownies Anti Lengket' };
     for (const tpl of INFOGRAPHIC_TEMPLATE_LIST) {
-      for (const ar of ['3:4', '4:5']) {
-        const expectedH = ar === '3:4' ? 1440 : 1350;
+      for (const [ar, expectedH] of Object.entries(ratioHeights)) {
         const tplHtml = buildInfographicPosterHtml({
-          data: sixStepData,
+          data: productTestData,
           config: {
             aspectRatio: ar,
             template: tpl.id,
@@ -282,20 +284,41 @@ test('shortenPosterTitle and buildInfographicPosterHtml fit long 3:4 Recipe Libr
         const check = await page.evaluate(() => {
           const wm = document.querySelector('[data-watermark="brand"]')?.getBoundingClientRect();
           const ft = document.querySelector('[data-footer="infographic"]')?.getBoundingClientRect();
+          const hero = document.querySelector('[data-hero="primary"]')?.getBoundingClientRect();
           return {
             scrollH: document.body.scrollHeight,
             wmBottom: wm ? wm.bottom : 9999,
-            ftBottom: ft ? ft.bottom : 9999
+            ftBottom: ft ? ft.bottom : 9999,
+            heroArea: hero ? (hero.width * hero.height) : 0
           };
         });
+        const heroRatio = check.heroArea / (1080 * expectedH);
         assert.ok(check.scrollH <= expectedH, `${tpl.id} ${ar} scrollHeight overflow: ${check.scrollH} > ${expectedH}`);
         assert.ok(check.wmBottom <= expectedH, `${tpl.id} ${ar} watermark clipped: ${check.wmBottom} > ${expectedH}`);
         assert.ok(check.ftBottom <= expectedH, `${tpl.id} ${ar} footer clipped: ${check.ftBottom} > ${expectedH}`);
+        assert.ok(heroRatio >= 0.33, `${tpl.id} ${ar} hero too small: ${(heroRatio * 100).toFixed(1)}%`);
       }
     }
   } finally {
     await browser.close();
   }
+});
+
+test('resolveInfographicGlabsAspectRatio emits only G-Labs supported ratios matching Hero orientation', () => {
+  const validGlabsRatios = new Set(['1:1', '3:4', '4:3', '9:16', '16:9']);
+  for (const tpl of INFOGRAPHIC_TEMPLATE_LIST) {
+    for (const canvasAr of ['1:1', '4:5', '3:4', '9:16']) {
+      const heroAr = resolveInfographicGlabsAspectRatio({ key: 'image_1', templateId: tpl.id, canvasAspectRatio: canvasAr });
+      const stepAr = resolveInfographicGlabsAspectRatio({ key: 'image_2', templateId: tpl.id, canvasAspectRatio: canvasAr });
+      assert.ok(validGlabsRatios.has(heroAr), `Invalid G-Labs hero ratio ${heroAr} for ${tpl.id} ${canvasAr}`);
+      assert.ok(validGlabsRatios.has(stepAr), `Invalid G-Labs step ratio ${stepAr} for ${tpl.id} ${canvasAr}`);
+      assert.equal(stepAr, '4:3');
+    }
+  }
+  assert.equal(resolveInfographicGlabsAspectRatio({ key: 'image_1', templateId: 'hero_right_editorial', canvasAspectRatio: '4:5' }), '3:4');
+  assert.equal(resolveInfographicGlabsAspectRatio({ key: 'image_1', templateId: 'magazine_vertical_split', canvasAspectRatio: '9:16' }), '9:16');
+  assert.equal(resolveInfographicGlabsAspectRatio({ key: 'image_1', templateId: 'step_grid_classic', canvasAspectRatio: '4:5' }), '16:9');
+  assert.equal(resolveInfographicGlabsAspectRatio({ key: 'image_1', templateId: 'step_grid_classic', canvasAspectRatio: '9:16' }), '4:3');
 });
 
 test('buildInfographicPosterHtml and renderRecipeInfographicPoster render all 9 templates into valid JPEGs', async () => {

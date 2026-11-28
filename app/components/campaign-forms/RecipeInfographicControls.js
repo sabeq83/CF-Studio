@@ -8,7 +8,7 @@ const TEMPLATE_OPTIONS = [
     code: 'T1',
     name: 'Classic Hero + Step Grid',
     badge: '5-7 Foto AI',
-    desc: 'Hero besar + bahan samping + 4-6 kotak foto langkah bawah',
+    desc: 'Hero banner lebar 40% di atas + bahan samping & 4-6 kotak step bawah',
     wireframe: 'step_grid_classic'
   },
   {
@@ -16,7 +16,7 @@ const TEMPLATE_OPTIONS = [
     code: 'T2',
     name: 'Editorial Bento Showcase',
     badge: '2 Foto AI',
-    desc: 'Hero kanan jumbo + foto detail + kartu bahan kiri rapi',
+    desc: 'Hero vertikal kanan dominan 40% + inset detail + 4 langkah bawah',
     wireframe: 'hero_right_editorial'
   },
   {
@@ -24,7 +24,7 @@ const TEMPLATE_OPTIONS = [
     code: 'T3',
     name: 'Multi-Layer Component',
     badge: '2 Foto AI',
-    desc: '3 pita komponen bahan sejajar + 2 foto hidangan kontras',
+    desc: 'Hero banner 40% + inset potongan + pita komponen & 4 langkah',
     wireframe: 'layered_band_cards'
   },
   {
@@ -32,23 +32,23 @@ const TEMPLATE_OPTIONS = [
     code: 'T4',
     name: 'Centerpiece Spotlight',
     badge: '1 Foto AI',
-    desc: 'Header tengah + foto fokus utama + 2 kolom bahan dan cara',
+    desc: 'Judul atas + spotlight foto utama lebar 40% + 2 kolom bahan & cara',
     wireframe: 'centerpiece_spotlight'
   },
   {
     id: 'magazine_vertical_split',
     code: 'T5',
-    name: 'Magazine Vertical Split',
+    name: 'Majalah 2 Kolom (Foto Dominan)',
     badge: '4 Foto AI',
-    desc: 'Sidebar bahan tinggi 45% + kolom editorial & 3 step kanan',
+    desc: 'Kolom foto kiri 59% dengan Hero dominan + strip 3 step proses',
     wireframe: 'magazine_vertical_split'
   },
   {
     id: 'visual_ingredient_shelf',
     code: 'T6',
     name: 'Visual Pantry Shelf',
-    badge: '7 Foto AI',
-    desc: 'Rak kotak visual komponen + hingga 6 foto proses bertahap',
+    badge: '5-7 Foto AI',
+    desc: 'Hero sajian lebar 40% di atas + rak bahan samping & grid foto step',
     wireframe: 'visual_ingredient_shelf'
   },
   {
@@ -56,7 +56,7 @@ const TEMPLATE_OPTIONS = [
     code: 'T7',
     name: 'Vertical Timeline Steps',
     badge: '5 Foto AI',
-    desc: 'Banner hero atas + alur timeline bernomor 4 foto proses',
+    desc: 'Hero banner dominan 40% atas + kartu timeline 2x2 & pita bahan',
     wireframe: 'step_timeline_zigzag'
   },
   {
@@ -64,7 +64,7 @@ const TEMPLATE_OPTIONS = [
     code: 'T8',
     name: 'Polaroid Scrapbook',
     badge: '4 Foto AI',
-    desc: 'Bingkai polaroid miring estetik + 3 foto step & catatan bahan',
+    desc: 'Polaroid Hero dominan di kiri + 3 mini polaroid & catatan kanan',
     wireframe: 'polaroid_scrapbook'
   },
   {
@@ -72,7 +72,7 @@ const TEMPLATE_OPTIONS = [
     code: 'T9',
     name: '2-Column Cheat Sheet',
     badge: '1 Foto AI',
-    desc: 'Header strip ringkas + tabel takaran & langkah padat',
+    desc: 'Hero banner penuh 40% ber-scrim judul + 2 kolom bahan & langkah cepat',
     wireframe: 'compact_2col_cheat_sheet'
   }
 ];
@@ -113,14 +113,15 @@ function TemplateWireframe({ type, active }) {
   if (type === 'step_grid_classic') {
     return (
       <div style={boxStyle} aria-hidden="true">
-        <div style={{ display: 'flex', gap: '3px', flex: '1.1' }}>
-          <div style={{ flex: 1.2, borderRadius: '3px', background: blockBg, border: `1px solid ${accent}` }} />
-          <div style={{ flex: 1, borderRadius: '3px', background: 'var(--surface-subtle)', border: `1px solid ${softLine}` }} />
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px', flex: '0.9' }}>
-          {[0, 1, 2, 3, 4, 5].map((i) => (
-            <div key={i} style={{ borderRadius: '2px', background: blockBg }} />
-          ))}
+        <div style={{ height: '6px', borderRadius: '2px', background: accent, opacity: 0.7 }} />
+        <div style={{ height: '24px', borderRadius: '3px', background: blockBg, border: `1px solid ${accent}` }} />
+        <div style={{ display: 'flex', gap: '3px', flex: 1 }}>
+          <div style={{ flex: 0.74, borderRadius: '3px', background: 'var(--surface-subtle)', border: `1px solid ${softLine}` }} />
+          <div style={{ flex: 1.26, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px' }}>
+            {[0, 1, 2, 3, 4, 5].map((i) => (
+              <div key={i} style={{ borderRadius: '2px', background: blockBg }} />
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -130,13 +131,19 @@ function TemplateWireframe({ type, active }) {
     return (
       <div style={boxStyle} aria-hidden="true">
         <div style={{ display: 'flex', gap: '3px', flex: 1 }}>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '3px' }}>
-            <div style={{ height: '12px', borderRadius: '3px', background: accent, opacity: 0.7 }} />
+          <div style={{ flex: 0.74, display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            <div style={{ height: '10px', borderRadius: '3px', background: accent, opacity: 0.7 }} />
             <div style={{ flex: 1, borderRadius: '3px', background: 'var(--surface-subtle)', border: `1px solid ${softLine}` }} />
           </div>
-          <div style={{ flex: 1.2, borderRadius: '3px', background: blockBg, border: `1px solid ${accent}` }} />
+          <div style={{ flex: 1.26, position: 'relative', borderRadius: '3px', background: blockBg, border: `1px solid ${accent}` }}>
+            <div style={{ position: 'absolute', right: '2px', bottom: '2px', width: '10px', height: '8px', borderRadius: '2px', background: 'var(--surface-raised)', border: `1px solid ${accent}` }} />
+          </div>
         </div>
-        <div style={{ height: '14px', borderRadius: '3px', background: 'var(--surface-subtle)' }} />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '2px', height: '11px' }}>
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} style={{ borderRadius: '2px', background: 'var(--surface-subtle)' }} />
+          ))}
+        </div>
       </div>
     );
   }
@@ -144,15 +151,18 @@ function TemplateWireframe({ type, active }) {
   if (type === 'layered_band_cards') {
     return (
       <div style={boxStyle} aria-hidden="true">
-        <div style={{ height: '18px', borderRadius: '3px', background: blockBg, border: `1px solid ${accent}` }} />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px', height: '16px' }}>
+        <div style={{ position: 'relative', height: '25px', borderRadius: '3px', background: blockBg, border: `1px solid ${accent}` }}>
+          <div style={{ position: 'absolute', right: '2px', top: '2px', width: '10px', height: '8px', borderRadius: '2px', background: 'var(--surface-raised)', border: `1px solid ${accent}` }} />
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px', height: '12px' }}>
           <div style={{ borderRadius: '2px', background: 'var(--surface-subtle)', border: `1px solid ${softLine}` }} />
           <div style={{ borderRadius: '2px', background: 'var(--surface-subtle)', border: `1px solid ${softLine}` }} />
           <div style={{ borderRadius: '2px', background: 'var(--surface-subtle)', border: `1px solid ${softLine}` }} />
         </div>
-        <div style={{ display: 'flex', gap: '3px', flex: 1 }}>
-          <div style={{ flex: 1, borderRadius: '3px', background: 'var(--surface-subtle)' }} />
-          <div style={{ flex: 1, borderRadius: '3px', background: blockBg, border: `1px solid ${accent}` }} />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px', flex: 1 }}>
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} style={{ borderRadius: '2px', background: 'var(--surface-subtle)' }} />
+          ))}
         </div>
       </div>
     );
@@ -161,11 +171,11 @@ function TemplateWireframe({ type, active }) {
   if (type === 'centerpiece_spotlight') {
     return (
       <div style={boxStyle} aria-hidden="true">
-        <div style={{ height: '9px', borderRadius: '2px', background: accent, opacity: 0.7, marginInline: '6px' }} />
-        <div style={{ height: '24px', borderRadius: '4px', background: blockBg, border: `1px solid ${accent}` }} />
+        <div style={{ height: '7px', borderRadius: '2px', background: accent, opacity: 0.7, marginInline: '6px' }} />
+        <div style={{ height: '25px', borderRadius: '6px', background: blockBg, border: `1px solid ${accent}` }} />
         <div style={{ display: 'flex', gap: '3px', flex: 1 }}>
-          <div style={{ flex: 1, borderRadius: '3px', background: 'var(--surface-subtle)', border: `1px solid ${softLine}` }} />
-          <div style={{ flex: 1, borderRadius: '3px', background: 'var(--surface-subtle)', border: `1px solid ${softLine}` }} />
+          <div style={{ flex: 0.86, borderRadius: '3px', background: 'var(--surface-subtle)', border: `1px solid ${softLine}` }} />
+          <div style={{ flex: 1.14, borderRadius: '3px', background: 'var(--surface-subtle)', border: `1px solid ${softLine}` }} />
         </div>
       </div>
     );
@@ -175,11 +185,18 @@ function TemplateWireframe({ type, active }) {
     return (
       <div style={boxStyle} aria-hidden="true">
         <div style={{ display: 'flex', gap: '3px', flex: 1 }}>
-          <div style={{ flex: 0.85, borderRadius: '3px', background: 'var(--surface-subtle)', border: `1px solid ${softLine}` }} />
-          <div style={{ flex: 1.15, display: 'flex', flexDirection: 'column', gap: '3px' }}>
-            <div style={{ flex: 1, borderRadius: '3px', background: blockBg, border: `1px solid ${accent}` }} />
-            <div style={{ flex: 0.8, borderRadius: '3px', background: blockBg }} />
-            <div style={{ flex: 0.7, borderRadius: '3px', background: 'var(--surface-subtle)' }} />
+          <div style={{ flex: 1.18, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <div style={{ flex: 2.6, borderRadius: '3px', background: blockBg, border: `1px solid ${accent}` }} />
+            <div style={{ flex: 0.68, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px' }}>
+              <div style={{ borderRadius: '2px', background: blockBg }} />
+              <div style={{ borderRadius: '2px', background: blockBg }} />
+              <div style={{ borderRadius: '2px', background: blockBg }} />
+            </div>
+          </div>
+          <div style={{ flex: 0.82, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <div style={{ height: '10px', borderRadius: '2px', background: accent, opacity: 0.7 }} />
+            <div style={{ flex: 1, borderRadius: '3px', background: 'var(--surface-subtle)', border: `1px solid ${softLine}` }} />
+            <div style={{ flex: 1, borderRadius: '3px', background: 'var(--surface-subtle)' }} />
           </div>
         </div>
       </div>
@@ -189,16 +206,15 @@ function TemplateWireframe({ type, active }) {
   if (type === 'visual_ingredient_shelf') {
     return (
       <div style={boxStyle} aria-hidden="true">
-        <div style={{ height: '18px', borderRadius: '3px', background: blockBg, border: `1px solid ${accent}` }} />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px', height: '14px' }}>
-          <div style={{ borderRadius: '2px', background: 'var(--surface-subtle)', border: `1px solid ${softLine}` }} />
-          <div style={{ borderRadius: '2px', background: 'var(--surface-subtle)', border: `1px solid ${softLine}` }} />
-          <div style={{ borderRadius: '2px', background: 'var(--surface-subtle)', border: `1px solid ${softLine}` }} />
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '2px', flex: 1 }}>
-          {[0, 1, 2, 3].map((i) => (
-            <div key={i} style={{ borderRadius: '2px', background: blockBg }} />
-          ))}
+        <div style={{ height: '6px', borderRadius: '2px', background: accent, opacity: 0.7 }} />
+        <div style={{ height: '24px', borderRadius: '3px', background: blockBg, border: `1px solid ${accent}` }} />
+        <div style={{ display: 'flex', gap: '3px', flex: 1 }}>
+          <div style={{ flex: 0.74, borderRadius: '3px', background: 'var(--surface-subtle)', border: `1px solid ${softLine}` }} />
+          <div style={{ flex: 1.26, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px' }}>
+            {[0, 1, 2, 3, 4, 5].map((i) => (
+              <div key={i} style={{ borderRadius: '2px', background: blockBg }} />
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -207,18 +223,14 @@ function TemplateWireframe({ type, active }) {
   if (type === 'step_timeline_zigzag') {
     return (
       <div style={boxStyle} aria-hidden="true">
-        <div style={{ height: '17px', borderRadius: '3px', background: blockBg, border: `1px solid ${accent}` }} />
-        <div style={{ display: 'flex', gap: '3px', flex: 1 }}>
-          <div style={{ flex: 0.85, borderRadius: '3px', background: 'var(--surface-subtle)' }} />
-          <div style={{ flex: 1.15, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '2px' }}>
-            {[0, 1, 2].map((i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '2px', flex: 1 }}>
-                <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: accent }} />
-                <div style={{ flex: 1, height: '100%', borderRadius: '2px', background: blockBg }} />
-              </div>
-            ))}
-          </div>
+        <div style={{ height: '6px', borderRadius: '2px', background: accent, opacity: 0.7 }} />
+        <div style={{ height: '24px', borderRadius: '3px', background: blockBg, border: `1px solid ${accent}` }} />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px', flex: 1 }}>
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} style={{ borderRadius: '2px', background: 'var(--surface-subtle)', borderLeft: `2px solid ${accent}` }} />
+          ))}
         </div>
+        <div style={{ height: '8px', borderRadius: '2px', background: 'var(--surface-subtle)' }} />
       </div>
     );
   }
@@ -226,14 +238,17 @@ function TemplateWireframe({ type, active }) {
   if (type === 'polaroid_scrapbook') {
     return (
       <div style={boxStyle} aria-hidden="true">
-        <div style={{ display: 'flex', gap: '3px', height: '24px' }}>
-          <div style={{ flex: 1, borderRadius: '3px', background: blockBg, border: `1px solid ${accent}`, transform: 'rotate(-2deg)' }} />
-          <div style={{ flex: 1, borderRadius: '3px', background: 'var(--surface-subtle)', border: `1px solid ${softLine}` }} />
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '3px', flex: 1, paddingTop: '2px' }}>
-          {[0, 1, 2].map((i) => (
-            <div key={i} style={{ borderRadius: '2px', background: blockBg, border: `1px solid ${softLine}` }} />
-          ))}
+        <div style={{ height: '7px', borderRadius: '2px', background: accent, opacity: 0.7, marginInline: '6px' }} />
+        <div style={{ display: 'flex', gap: '3px', flex: 1 }}>
+          <div style={{ flex: 1.22, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <div style={{ flex: 3.1, borderRadius: '3px', background: blockBg, border: `1px solid ${accent}`, transform: 'rotate(-1.5deg)' }} />
+            <div style={{ flex: 0.65, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px' }}>
+              {[0, 1, 2].map((i) => (
+                <div key={i} style={{ borderRadius: '2px', background: blockBg, border: `1px solid ${softLine}` }} />
+              ))}
+            </div>
+          </div>
+          <div style={{ flex: 0.78, borderRadius: '3px', background: 'var(--surface-subtle)', border: `1px dashed ${softLine}` }} />
         </div>
       </div>
     );
@@ -241,13 +256,10 @@ function TemplateWireframe({ type, active }) {
 
   return (
     <div style={boxStyle} aria-hidden="true">
-      <div style={{ display: 'flex', gap: '3px', height: '14px' }}>
-        <div style={{ flex: 1.3, borderRadius: '2px', background: accent, opacity: 0.7 }} />
-        <div style={{ flex: 0.7, borderRadius: '2px', background: blockBg, border: `1px solid ${accent}` }} />
-      </div>
+      <div style={{ height: '26px', borderRadius: '3px', background: blockBg, border: `1px solid ${accent}` }} />
       <div style={{ display: 'flex', gap: '3px', flex: 1 }}>
-        <div style={{ flex: 1, borderRadius: '3px', background: 'var(--surface-subtle)', border: `1px solid ${softLine}` }} />
-        <div style={{ flex: 1, borderRadius: '3px', background: 'var(--surface-subtle)', border: `1px solid ${softLine}` }} />
+        <div style={{ flex: 0.88, borderRadius: '3px', background: 'var(--surface-subtle)', border: `1px solid ${softLine}` }} />
+        <div style={{ flex: 1.12, borderRadius: '3px', background: 'var(--surface-subtle)', border: `1px solid ${softLine}` }} />
       </div>
     </div>
   );
