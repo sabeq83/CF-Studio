@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.68.0 — Poster Infografis Resep 9 Template Hero Dominan & Recipe Library (28/11/2026)
+- Mode Poster Infografis Resep satu halaman pada Recipe Labs & Auto Pipeline dengan 9 layout Hero dominan ~40% dan mode auto_rotate
+- Dukungan sumber Recipe Library (curated_recipes lock, original_title & state adonan kumulatif, Stage 2 Hero reference lock, plus rasio G-Labs selaras orientasi Hero)
+- Penamaan file poster dinamis (<nama_resep>_<kode_kampanye>.jpg), pemendekan judul otomatis, brand watermark anti-clip, kebijakan foto makro tanpa tangan, & kirim media_type image ke Repliz
+- Hapus checkbox legacy Facebook Page di Auto Pipeline, default kolom topik kosong, & perbarui kartu menu Recipe Labs dan Auto Pipeline
+
 ## V2.67.1 — Hotfix Kunci Edit USP Manual & Kategori (27/11/2026)
 - Kunci raw_response.usp_source=manual saat USP diedit via PUT UI/JSON atau usp_approved=true tanpa menimpa penanda lain
 - Jaga kategori lama yang sudah terisi saat USP terkunci selama AI enrichment
