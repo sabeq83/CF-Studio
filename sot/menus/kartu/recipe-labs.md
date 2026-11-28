@@ -8,8 +8,8 @@ Pabrik konten kuliner statis (Poster Infografis Resep satu halaman & foto grid k
 
 ## Alur pakai
 1. Pilih sumber resep (AI Bikin Sendiri atau Ambil dari Recipe Library) dan format output (`Poster Infografis` atau `Grid Kolase Foto`).
-2. Atur template layout, tema warna, rasio (`4:5` / `3:4` / `1:1`), nama brand watermark, dan produk opsional bila perlu.
-3. Sistem membuat teks terstruktur + foto bersih G-Labs, lalu merender poster infografis JPEG + caption siap tayang ke ContentFlow Hub atau Recipe Exporter.
+2. Atur template layout (proporsi Hero dominan ~40%), tema warna, rasio (`4:5` / `3:4` / `1:1` / `9:16`), nama brand watermark, dan produk opsional bila perlu.
+3. Sistem membuat teks terstruktur + foto bersih G-Labs (rasio Hero mengikuti orientasi template, Stage 2 Hero Reference Lock pada foto akhir), lalu merender poster infografis JPEG bernama `<nama_resep>_<kode_kampanye>.jpg` + caption siap tayang ke ContentFlow Hub atau Recipe Exporter.
 
 ## Terhubung dengan
 - Butuh data dari: Recipe Library (`curated_recipes`), Product Database (`product_extractions` opsional), Brand Profile (`brand_profiles`).
