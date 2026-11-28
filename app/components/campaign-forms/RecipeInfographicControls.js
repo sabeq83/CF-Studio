@@ -413,7 +413,7 @@ export default function RecipeInfographicControls({
                   Mode Pemilihan Resep per Eksekusi Jadwal
                 </label>
                 <select
-                  value={librarySelectionMode}
+                  value={librarySelectionMode === 'sequential' ? 'auto_library_rotation' : librarySelectionMode}
                   onChange={(e) => update({ librarySelectionMode: e.target.value })}
                   style={{
                     width: '100%',
@@ -425,7 +425,7 @@ export default function RecipeInfographicControls({
                     fontSize: '0.8rem'
                   }}
                 >
-                  <option value="sequential">Berurutan Otomatis (Prioritaskan Belum Dipakai)</option>
+                  <option value="auto_library_rotation">Berurutan Otomatis (Prioritaskan Belum Dipakai)</option>
                   <option value="random">Acak dari Recipe Library (Prioritaskan Belum Dipakai)</option>
                   <option value="manual">Selalu Gunakan Resep Tertentu</option>
                 </select>
@@ -451,11 +451,15 @@ export default function RecipeInfographicControls({
                   }}
                 >
                   <option value="">-- Pilih Resep Otomatis (Belum Dipakai) --</option>
-                  {curatedRecipes.map((rec) => (
-                    <option key={rec.id} value={String(rec.id)}>
-                      {rec.title} [{rec.category || 'Resep'}]{rec.used_count > 0 ? ` (dipakai ${rec.used_count}x)` : ' (baru)'}
-                    </option>
-                  ))}
+                  {curatedRecipes.map((rec) => {
+                    const recipeTitle = rec.polished_title || rec.original_title || rec.title || `Resep #${rec.id}`;
+                    const usedCount = Number(rec.used_in_campaign_count ?? rec.used_count ?? 0);
+                    return (
+                      <option key={rec.id} value={String(rec.id)}>
+                        {recipeTitle} [{rec.category || 'Resep'}]{usedCount > 0 ? ` (dipakai ${usedCount}x)` : ' (baru)'}
+                      </option>
+                    );
+                  })}
                 </select>
                 {curatedRecipes.length === 0 && !loadingRecipes && (
                   <div style={{ fontSize: '0.72rem', color: 'var(--status-warning)', marginTop: '4px' }}>
