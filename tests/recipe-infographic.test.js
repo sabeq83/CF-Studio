@@ -169,6 +169,30 @@ test('normalizeInfographicPayload enforces zero-hand/wrist macro policies, refer
   assert.deepEqual(wristOnly.reference_hero_keys, ['image_2']);
   assert.match(wristOnly.prompts.image_1, /bare wrist-to-hand only/i);
   assert.match(wristOnly.prompts.image_1, /NO sleeves/i);
+
+  // Hotfix check: leaked placeholder "matching dish_visual_identity" & Indonesian identity + no duplicate CLEAN MACRO tags
+  const leakedPromptPayload = {
+    ...MOCK_RAW_RECIPE,
+    title: 'Sourdough Coffee Brownie',
+    dish_visual_identity: 'Sebuah loaf roti artisanal sourdough cokelat gelap',
+    hero_prompt: 'Commercial bright macro hero food photography matching dish_visual_identity, served on marble, bowl, utensils. [CLEAN MACRO FOOD PHOTOGRAPHY ONLY: old tag]'
+  };
+  const sanitized = normalizeInfographicPayload(leakedPromptPayload, {
+    curatedRecipe: {
+      id: 'rcp_test',
+      title: 'Sourdough Coffee Brownie',
+      original_title: 'Coffee Brownie Sourdough Bread',
+      ingredients: ['150 gr tepung'],
+      steps: ['Panggang matang.']
+    },
+    infographicTemplate: 'step_grid_classic',
+    handMode: 'objects_only',
+    targetLang: 'id_ID'
+  });
+  assert.doesNotMatch(sanitized.prompts.image_1, /dish_visual_identity/i);
+  assert.match(sanitized.prompts.image_1, /Coffee Brownie Sourdough Bread/i);
+  const tagMatches = sanitized.prompts.image_1.match(/\[CLEAN MACRO FOOD PHOTOGRAPHY ONLY:/g) || [];
+  assert.equal(tagMatches.length, 1, 'Guardrail tag must appear strictly once');
 });
 
 test('shortenPosterTitle and buildInfographicPosterHtml fit long 3:4 Recipe Library data without clipping brand watermark or footer', async () => {
