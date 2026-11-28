@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.70.0 — Mode Visual Only Placement & Kontrol VO Product Mention di Multiplier (28/11/2026)
+- Tambah bridging_mode visual_only_placement dengan kunci visual & reference_images di seluruh klip dan VO non-komersial
+- Tambah kontrol vo_product_mention (full, cta_only, none) lintas prompt builder, story curve, affiliate CTA, worker, & auto-repair TTS
+- Tambah dukungan pilihan mode & dropdown di Preset Manager, Multiplier Form, API v2, Auto Pipeline, serta MCP cf_create_multiplier_video
+- Perbarui kartu menu presets & multiplier-lab serta tambah unit test regresi
+
 ## V2.69.0 — Mode Shared Staggered Start Frame & Fix Approval TTS Gate (28/11/2026)
 - Tambah mode shared_staggered dengan Submit Stagger Gate atomik di PostgreSQL untuk Start Frame berfoto produk (OPC, Review Worker, & Multiplier)
 - Tambah pengaturan Jalur Foto Produk & Jeda Antar-Submit (5-60 detik, default exclusive) di Settings API & UI
