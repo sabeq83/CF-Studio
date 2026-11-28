@@ -12,6 +12,8 @@ import {
   normalizeProductRefLaneMode
 } from '../lib/product-ref-lane-settings.js';
 import { runStaggeredT2iBatch } from '../lib/t2i-staggered-runner.js';
+import { approvePillarCampaignItem } from '../lib/pillar-campaign-approval.js';
+import { shouldPauseBeforeTts } from '../lib/pillar-tts-gate.js';
 import { pgQuery, closePgPool } from '../lib/db-pg.js';
 import { tenantContext } from '../lib/tenant-context.js';
 import { ensureSafeLocalTestDbEnv } from './helpers/db-test-guard.js';
@@ -260,4 +262,48 @@ test('runStaggeredT2iBatch submits sequentially via stagger gate with skipDelay=
   ]);
   assert.equal(events[4], 'done:2:clip2.png');
   assert.equal(events[5], 'done:1:clip1.png');
+});
+
+test('approvePillarCampaignItem clears scheduler_pause_at=tts and allows TTS scheduler progression', async () => {
+  const campId = `camp_tts_gate_${Date.now()}_${crypto.randomUUID().slice(0, 6)}`;
+  let itemId = null;
+
+  await tenantContext.run(TENANT, async () => {
+    try {
+      await pgQuery(
+        `INSERT INTO pillar_campaigns
+          (id, tenant_id, campaign_name, content_pillar, custom_hook, visual_action_guideline, status, execution_mode, approval_mode, scheduler_pause_at, enable_tts)
+         VALUES ($1, $2, 'Test TTS Pause Release', 'edukasi', 'hook', 'visual', 'waiting_approval', 'manual_review', 'creative', 'tts', 1)`,
+        [campId, TENANT]
+      );
+      const insertedItem = await pgQuery(
+        `INSERT INTO pillar_campaign_items
+          (campaign_id, generation_status, start_frame_status, tts_status, workflow_status, review_state, review_revision, result_json, new_video_plan_json)
+         VALUES ($1, 'completed', 'completed', 'pending', 'ready_for_review', 'ready', 'rev_tts_1', '{}', '[]')
+         RETURNING id`,
+        [campId]
+      );
+      itemId = insertedItem.rows[0].id;
+
+      await approvePillarCampaignItem(itemId, {
+        new_video_plan: [{ clip_index: 1, new_vo: 'Narasi uji coba', t2i_prompt: 'Prompt uji coba' }],
+        review_revision: 'rev_tts_1'
+      });
+
+      const campAfter = (await pgQuery(`SELECT status, scheduler_pause_at FROM pillar_campaigns WHERE id = $1`, [campId])).rows[0];
+      const itemAfter = (await pgQuery(`SELECT review_state, workflow_status, tts_status FROM pillar_campaign_items WHERE id = $1`, [itemId])).rows[0];
+
+      assert.equal(campAfter.scheduler_pause_at, null, 'approvePillarCampaignItem must clear scheduler_pause_at=tts');
+      assert.equal(campAfter.status, 'running');
+      assert.equal(itemAfter.review_state, 'approved');
+      assert.equal(itemAfter.tts_status, 'pending');
+      assert.equal(shouldPauseBeforeTts(campAfter.scheduler_pause_at, itemAfter.review_state), false);
+      assert.equal(shouldPauseBeforeTts('tts', itemAfter.review_state), false, 'Scheduler must not hold approved item even if pauseAt is tts');
+    } finally {
+      if (itemId) {
+        await pgQuery(`DELETE FROM pillar_campaign_items WHERE id = $1`, [itemId]).catch(() => {});
+      }
+      await pgQuery(`DELETE FROM pillar_campaigns WHERE id = $1`, [campId]).catch(() => {});
+    }
+  });
 });

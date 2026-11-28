@@ -1,4 +1,5 @@
 import assert from 'assert';
+import { shouldPauseBeforeTts } from '../lib/pillar-tts-gate.js';
 
 console.log('--- Testing Pillar Campaign Manual Review Gate ---');
 
@@ -43,6 +44,13 @@ const case3 = evaluateT2iExecutionGate({
 assert.equal(case3.isManualReview, true);
 assert.equal(case3.shouldRunT2i, false);
 console.log('✅ Case 3 Passed: Creative approval gate correctly halts before T2I');
+
+// Case 4: TTS pause gate must block unapproved items and let approved items proceed
+assert.equal(shouldPauseBeforeTts('tts', 'ready'), true, 'Unapproved item with pauseAt=tts must pause before TTS');
+assert.equal(shouldPauseBeforeTts('tts', null), true, 'Item without approved review_state must pause when pauseAt=tts');
+assert.equal(shouldPauseBeforeTts('tts', 'approved'), false, 'Approved item must NOT be held before TTS even if pauseAt=tts');
+assert.equal(shouldPauseBeforeTts(null, 'ready'), false, 'No pauseAt marker must allow TTS to proceed');
+console.log('✅ Case 4 Passed: TTS approval gate holds unapproved items and releases approved items');
 
 console.log('🎉 ALL Manual Review Gate Tests Passed!');
 process.exit(0);
