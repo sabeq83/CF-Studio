@@ -11,7 +11,7 @@ Pusat konfigurasi sistem dan koneksi layanan pihak ketiga. Tempat mengatur model
 2. Atur saklar Smart Routing: aktif = tugas kecil memakai Model ringan, mati = semua memakai Model utama.
 3. Masukkan dan kelola kunci Gemini AI untuk pemrosesan naskah dan gambar.
 4. Hubungkan atau perbaiki izin Google Drive untuk penyimpanan aset cloud.
-5. Konfigurasikan host dan kunci webhook G-Labs worker jika menggunakan GPU eksternal.
+5. Konfigurasikan host, kunci webhook, serta jalur foto produk Start Frame (`Eksklusif` atau `Paralel Terjeda / Shared Staggered` beserta jeda antar-submit 5–60 detik) pada kartu **G-Labs Webhook Settings**.
 6. Simpan pengaturan; perubahan langsung berlaku pada tenant aktif.
 
 ## Terhubung dengan

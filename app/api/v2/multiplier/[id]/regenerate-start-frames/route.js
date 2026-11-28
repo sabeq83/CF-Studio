@@ -5,6 +5,9 @@ import fs from 'fs';
 import path from 'path';
 import { withTenantContext } from '@/lib/auth';
 import { buildMultiplierStartFrameRequest } from '@/lib/multiplier-start-frame-request';
+import { buildGlabsImageLaneKey } from '@/lib/glabs-image-lane-service';
+import { resolveProductRefLaneSettings } from '@/lib/product-ref-lane-settings';
+import { runStaggeredT2iBatch } from '@/lib/t2i-staggered-runner';
 
 export const POST = withTenantContext(async (req, { params }) => {
   try {
@@ -70,6 +73,123 @@ async function runTaskRegenerateStartFramesBackground(taskId, task, prompts) {
 
     const aesthetics = (() => { try { return JSON.parse(task.vso_config_json || '{}'); } catch { return {}; } })();
     const totalCount = prompts.length;
+    const t2iPattern = (await getSetting('webhook_t2i_pattern')) || 'threading';
+    const { laneMode: productRefLaneMode, staggerSec: productRefStaggerSec } = resolveProductRefLaneSettings(getSetting);
+
+    if (t2iPattern === 'threading' && productRefLaneMode === 'shared_staggered') {
+      const staggeredTasks = [];
+      const laneKey = buildGlabsImageLaneKey(brandProfile);
+
+      for (let i = 0; i < totalCount; i++) {
+        const clip = prompts[i];
+        const clipIndex = clip.clip || (i + 1);
+        const promptText = clip.t2i_prompt || '';
+        if (!promptText) continue;
+
+        const built = buildMultiplierStartFrameRequest({
+          task,
+          clipIndex,
+          prompt: promptText,
+          product: liveProduct,
+          bridging,
+          aesthetics: { ...aesthetics, target_clips_count: prompts.length },
+          imageModel,
+          webhookOverride: brandProfile
+        });
+
+        staggeredTasks.push({
+          clipIndex,
+          built,
+          laneKey,
+          providerRequest: built.providerRequest
+        });
+      }
+
+      let finishedCount = 0;
+      let dbWriteQueue = Promise.resolve();
+      const enqueueDbUpdate = (fn) => {
+        dbWriteQueue = dbWriteQueue.then(fn).catch(() => {});
+        return dbWriteQueue;
+      };
+
+      await runStaggeredT2iBatch({
+        tasks: staggeredTasks,
+        staggerSec: productRefStaggerSec,
+        pollIntervalMs: 2000,
+        maxAttempts: 60,
+        onSubmitted: async ({ task: stTask }) => {
+          console.log(`[Multiplier SF Batch] [SharedStaggered] Submitted clip ${stTask.clipIndex} for task ${taskId} (bridge=${stTask.built.isBridgeClip}, ref=${stTask.built.audit.referenceSourceField || 'none'})`);
+        },
+        onCompleted: async ({ task: stTask, files }) => {
+          let imageFile = files.find(f => f.endsWith('.png') || f.endsWith('.jpg') || f.endsWith('.jpeg')) || files[0];
+          if (imageFile && (imageFile.startsWith('http://') || imageFile.startsWith('https://'))) {
+            imageFile = imageFile.split('/').pop();
+          }
+          let publicUrl = null;
+          if (imageFile) {
+            const t2iImageUrl = getFileUrl(imageFile);
+            const imgResponse = await fetch(t2iImageUrl);
+            if (imgResponse.ok) {
+              const imgBuffer = Buffer.from(await imgResponse.arrayBuffer());
+              const startFrameFilename = `start_frame_mult_${taskId}_clip${stTask.clipIndex}_${Date.now()}.png`;
+              const destDir = path.join(process.cwd(), 'public', 'uploads', 'start_frames');
+              if (!fs.existsSync(destDir)) {
+                fs.mkdirSync(destDir, { recursive: true });
+              }
+              fs.writeFileSync(path.join(destDir, startFrameFilename), imgBuffer);
+              publicUrl = `/uploads/start_frames/${startFrameFilename}`;
+            }
+          }
+
+          await enqueueDbUpdate(async () => {
+            finishedCount += 1;
+            if (publicUrl) {
+              const currentTask = await getMultiplierTaskById(taskId);
+              let currentImages = [];
+              try {
+                currentImages = JSON.parse(currentTask.t2i_images_json || '[]');
+              } catch (_) {}
+              currentImages[Number(stTask.clipIndex) - 1] = publicUrl;
+              await dbRun(`
+                UPDATE re_multiplier_tasks
+                SET t2i_images_json = ?,
+                    regenerate_start_frames_progress = ?
+                WHERE id = ?
+              `, [JSON.stringify(currentImages), `${finishedCount}/${totalCount}`, taskId]);
+              console.log(`[Multiplier SF Batch] [SharedStaggered] Clip ${stTask.clipIndex} completed and updated.`);
+            } else {
+              await dbRun(`
+                UPDATE re_multiplier_tasks
+                SET regenerate_start_frames_progress = ?
+                WHERE id = ?
+              `, [`${finishedCount}/${totalCount}`, taskId]);
+            }
+          });
+        },
+        onFailed: async ({ task: stTask, error }) => {
+          console.error(`[Multiplier SF Batch] [SharedStaggered] Clip ${stTask.clipIndex} failed:`, error);
+          await enqueueDbUpdate(async () => {
+            finishedCount += 1;
+            await dbRun(`
+              UPDATE re_multiplier_tasks
+              SET regenerate_start_frames_progress = ?
+              WHERE id = ?
+            `, [`${finishedCount}/${totalCount}`, taskId]);
+          });
+        }
+      });
+
+      await dbWriteQueue;
+
+      await dbRun(`
+        UPDATE re_multiplier_tasks
+        SET regenerate_start_frames_status = NULL,
+            status = 'waiting_approval',
+            regenerate_start_frames_progress = NULL
+        WHERE id = ?
+      `, [taskId]).catch(() => {});
+      return;
+    }
     
     for (let i = 0; i < totalCount; i++) {
       const clip = prompts[i];

@@ -10,6 +10,11 @@ import {
   validateExperimentSettingsPayload,
   saveTenantExperimentSettings
 } from '@/lib/experiment-settings';
+import {
+  normalizeProductRefLaneMode,
+  clampProductRefStaggerSec,
+  validateProductRefLaneSettings
+} from '@/lib/product-ref-lane-settings';
 
 function requireSettingsAdmin(request) {
   const user = getCurrentUser(request);
@@ -75,6 +80,8 @@ export const GET = withTenantContext(async (request, _context, user) => {
         webhook_delay_min: await getSetting('webhook_delay_min') !== null ? Number(await getSetting('webhook_delay_min')) : 10,
         webhook_delay_max: await getSetting('webhook_delay_max') !== null ? Number(await getSetting('webhook_delay_max')) : 20,
         webhook_t2i_pattern: await getSetting('webhook_t2i_pattern') || 'threading',
+        webhook_product_ref_lane_mode: normalizeProductRefLaneMode(await getSetting('webhook_product_ref_lane_mode')),
+        webhook_product_ref_stagger_sec: clampProductRefStaggerSec(await getSetting('webhook_product_ref_stagger_sec')),
         // V3 Workspace & Drive Target Folder
         drive_target_folder: await getSetting('drive_target_folder') || '/MAKNA_Video_Generations',
         drive_glabs_folder_id: await getSetting('drive_glabs_folder_id') || '',
@@ -133,6 +140,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
       google_client_id, google_client_secret,
       webhook_api_key, webhook_host, webhook_port, webhook_image_model, webhook_video_model,
       webhook_delay_enabled, webhook_delay_min, webhook_delay_max, webhook_t2i_pattern,
+      webhook_product_ref_lane_mode, webhook_product_ref_stagger_sec,
       drive_target_folder, drive_glabs_folder_id, drive_re_markdown_folder_id, master_re_sheet_id, drive_product_photo_folder,
       storage_provider, nextcloud_url, nextcloud_username, nextcloud_app_password, nextcloud_target_folder,
       minimax_api_key, minimax_group_id, elevenlabs_api_key, save_to_local_storage, local_storage_path,
@@ -140,6 +148,15 @@ export const POST = withTenantContext(async (request, _context, user) => {
       contentflow_api_key, contentflow_api_url,
       product_photo_provider, product_photo_gemini_model, product_photo_glabs_model, product_photo_auto_approve,
       repliz_api_url, repliz_access_key, repliz_secret_key, repliz_media_staging_provider, repliz_drive_folder_id } = body;
+
+    const productRefLaneValidation = validateProductRefLaneSettings(body);
+    if (!productRefLaneValidation.valid) {
+      return NextResponse.json({
+        success: false,
+        error: productRefLaneValidation.errors[0] || 'Nilai pengaturan jalur foto produk tidak valid.',
+        details: productRefLaneValidation.errors
+      }, { status: 400 });
+    }
 
     const hasExperimentKeys = EXPERIMENT_SETTING_KEYS.some((k) => body[k] !== undefined);
     if (hasExperimentKeys) {
@@ -200,6 +217,12 @@ export const POST = withTenantContext(async (request, _context, user) => {
     if (webhook_delay_min !== undefined) await setSetting('webhook_delay_min', String(webhook_delay_min));
     if (webhook_delay_max !== undefined) await setSetting('webhook_delay_max', String(webhook_delay_max));
     if (webhook_t2i_pattern !== undefined) await setSetting('webhook_t2i_pattern', webhook_t2i_pattern);
+    if (productRefLaneValidation.hasLaneMode) {
+      await setSetting('webhook_product_ref_lane_mode', productRefLaneValidation.laneMode);
+    }
+    if (productRefLaneValidation.hasStaggerSec) {
+      await setSetting('webhook_product_ref_stagger_sec', String(productRefLaneValidation.staggerSec));
+    }
     // V3 Workspace
     if (drive_target_folder !== undefined) await setSetting('drive_target_folder', drive_target_folder);
     if (drive_glabs_folder_id !== undefined) await setSetting('drive_glabs_folder_id', drive_glabs_folder_id);
