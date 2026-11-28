@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.69.0 — Mode Shared Staggered Start Frame & Fix Approval TTS Gate (28/11/2026)
+- Tambah mode shared_staggered dengan Submit Stagger Gate atomik di PostgreSQL untuk Start Frame berfoto produk (OPC, Review Worker, & Multiplier)
+- Tambah pengaturan Jalur Foto Produk & Jeda Antar-Submit (5-60 detik, default exclusive) di Settings API & UI
+- Perbaiki approval Pillar Campaign agar membersihkan scheduler_pause_at='tts' dan meloloskan item approved ke tahap TTS
+
 ## V2.68.0 — Poster Infografis Resep 9 Template Hero Dominan & Recipe Library (28/11/2026)
 - Mode Poster Infografis Resep satu halaman pada Recipe Labs & Auto Pipeline dengan 9 layout Hero dominan ~40% dan mode auto_rotate
 - Dukungan sumber Recipe Library (curated_recipes lock, original_title & state adonan kumulatif, Stage 2 Hero reference lock, plus rasio G-Labs selaras orientasi Hero)
