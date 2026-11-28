@@ -1,6 +1,6 @@
 # Kartu Menu: Auto Pipeline
 
-Terakhir dicek: 25 November 2026 · Versi aplikasi: v2.62.0
+Terakhir dicek: 28 November 2026 · Versi aplikasi: v2.68.0 (branch `fitur/recipe-labs-infografis`)
 Alamat: `/auto-pipeline` · Kelompok: WORKFLOW · Kunci izin menu: `auto_pipeline`
 
 ## Fungsi
@@ -50,6 +50,7 @@ Pabrik konten otomatis. Dari satu masukan (produk, topik, resep, atau blueprint)
 9. Pemilihan produk Video Multiplier di tab Pipeline & Schedule menampilkan thumbnail foto aktif sesuai `active_photo` (`resolveCampaignProductPhotoPath`), status tinjauan (`photo_status`), serta kartu pratinjau `BridgingProductReferenceCard` beserta tautan cepat ke Product Database.
 10. Tab Pipeline & Schedule meneruskan konfigurasi `audio_engine_mode` (`minimax_tts` / `no_vo`), `no_vo_audio_bed`, dan `on_screen_text_mode` untuk mode produksi tanpa voice-over serta mendukung Visual Identity `zero_human`.
 11. Penjadwalan mendukung pemisahan tanggal produksi (`target_date` / alias `generation_date`) dan tanggal publish (`publish_date` pada mode `specific_date`, atau `publish_day_offset` H+0 s.d. H+14 pada mode `recurring`), dengan penguncian `last_run_target_date` agar render lintas tengah malam tidak menggeser jadwal tayang.
+12. Pipeline `recipe_labs` mendukung mode **Poster Infografis Resep (`output_style: 'recipe_infographic'`)** dengan pilihan sumber resep (`ai_generated` vs `recipe_library` dari `curated_recipes` / auto-rotasi jadwal), **9 variasi template layout HTML-to-Image + mode `auto_rotate`** dengan kuota foto adaptif, watermark nama brand, produk opsional dari katalog, paket caption adaptif FB/IG, serta pengiriman `media_type: 'image'` ke Repliz. Saat `recipe_labs` dipilih di tab Pipeline maupun Modal Jadwal, seluruh pengaturan khusus video otomatis disembunyikan agar UI ringkas.
 
 ## Belum ada / batasan
 - Jumlah dan isi jadwal aktif berubah-ubah; jangan mengutip daftar jadwal dari dokumen, cek langsung lewat `cf_list_schedules`.

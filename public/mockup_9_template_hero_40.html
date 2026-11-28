@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup 9 Template Hero 40% (Seimbang-Dominan) : CF Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root,
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-display: 'Fredoka', 'Plus Jakarta Sans', sans-serif;
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8fa0b5;
+      --border-subtle: #26354a;
+      --border-strong: #415775;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --status-info: #7ab8ff;
+      --status-info-soft: rgba(96, 165, 250, 0.16);
+      --status-accent: #fbbf24;
+      --status-accent-soft: rgba(251, 191, 36, 0.16);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 30px rgba(0, 0, 0, 0.28);
+    }
+
+    [data-theme="light"] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e4ecf4;
+      --input-bg: #ffffff;
+      --text-primary: #152033;
+      --text-secondary: #3b4b63;
+      --text-muted: #52627a;
+      --border-subtle: #d5dee8;
+      --border-strong: #8ea0b5;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --status-info: #1a58a3;
+      --status-info-soft: #e6f0fc;
+      --status-accent: #8a4b00;
+      --status-accent-soft: #fff3d6;
+      --focus-ring: #6d4ed6;
+      --shadow-card: 0 10px 28px rgba(21, 32, 51, 0.08);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.45;
+    }
+
+    button, select, input { font-family: inherit; color: var(--text-primary); }
+    a[href], button:not(:disabled), select, label[for], input[type="checkbox"] { cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: 0.6; }
+    :focus-visible {
+      outline: 3px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition-duration: 0.01ms !important; }
+    }
+
+    .shell {
+      max-width: 1460px;
+      margin: 0 auto;
+      padding: 20px 24px 56px;
+    }
+
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding-bottom: 16px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .kicker {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--action-primary);
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.25rem, 2.2vw, 1.65rem);
+      font-weight: 800;
+    }
+
+    .sub {
+      margin: 4px 0 0;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      max-width: 78ch;
+    }
+
+    .top-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .version-nav {
+      display: inline-flex;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .nav-pill {
+      min-height: 44px;
+      padding: 0 12px;
+      border-radius: 7px;
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-size: 0.82rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .nav-pill:hover { background: var(--surface-hover); color: var(--text-primary); }
+    .nav-pill.is-active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    .theme-btn {
+      min-height: 44px;
+      padding: 0 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border-strong);
+      background: var(--surface);
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+    .theme-btn:hover { background: var(--surface-hover); }
+
+    .controls-bar {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 14px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .ctrl-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 170px;
+    }
+
+    .ctrl-label {
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    .ctrl-select {
+      min-height: 44px;
+      padding: 0 10px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      font-size: 0.84rem;
+      font-weight: 600;
+    }
+
+    .view-switch {
+      display: inline-flex;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 4px;
+      gap: 4px;
+      margin-left: auto;
+    }
+
+    .btn-seg {
+      min-height: 44px;
+      padding: 0 14px;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+    .btn-seg:hover { background: var(--surface-hover); color: var(--text-primary); }
+    .btn-seg[aria-pressed="true"] {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .tpl-wrapper {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: var(--shadow-card);
+      min-width: 0;
+    }
+    .tpl-wrapper.is-focused { border-color: var(--action-primary); }
+
+    .tpl-meta {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .tpl-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      font-size: 0.78rem;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .tpl-title {
+      margin: 0;
+      font-size: 0.94rem;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .tpl-desc {
+      margin: 2px 0 0;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+
+    .tpl-badges {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .tpl-badge {
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      font-size: 0.72rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .tpl-hero-tag {
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--status-accent-soft);
+      color: var(--status-accent);
+      font-size: 0.72rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .zoom-btn {
+      min-height: 44px;
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid var(--border-strong);
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+    .zoom-btn:hover { background: var(--surface-hover); }
+
+    .single-view {
+      display: none;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .single-sidebar {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .tpl-list-btn {
+      width: 100%;
+      min-height: 46px;
+      padding: 8px 10px;
+      text-align: left;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .tpl-list-btn:hover { background: var(--surface-hover); }
+    .tpl-list-btn[aria-pressed="true"] {
+      border-color: var(--action-primary);
+      background: var(--surface-interactive);
+    }
+
+    .single-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 20px;
+    }
+
+    /* Poster Base Tokens */
+    .poster {
+      width: 100%;
+      min-width: 0;
+      border-radius: 12px;
+      overflow: hidden;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      color: var(--p-ink);
+      background: var(--p-bg);
+      border: 1px solid rgba(0, 0, 0, 0.14);
+      position: relative;
+    }
+    .poster[data-ratio="4:5"] { aspect-ratio: 4 / 5; }
+    .poster[data-ratio="3:4"] { aspect-ratio: 3 / 4; }
+    .poster[data-ratio="1:1"] { aspect-ratio: 1 / 1; }
+
+    .single-stage .poster {
+      max-width: 560px;
+      padding: 16px;
+      gap: 10px;
+    }
+
+    /* Poster Color Themes */
+    .poster[data-ptheme="warm_cream"] {
+      --p-bg: linear-gradient(180deg, #fff8ee 0%, #f8e9d2 100%);
+      --p-primary: #265c29;
+      --p-accent: #b8234e;
+      --p-gold: #e59417;
+      --p-card: #fffdf9;
+      --p-border: #e5d1b5;
+      --p-ink: #2b1d14;
+      --p-muted: #5d4534;
+    }
+    .poster[data-ptheme="fresh_pandan"] {
+      --p-bg: linear-gradient(180deg, #f3fbef 0%, #dff1d5 100%);
+      --p-primary: #1b6537;
+      --p-accent: #b52b47;
+      --p-gold: #df9a18;
+      --p-card: #ffffff;
+      --p-border: #bfdcb2;
+      --p-ink: #1b291c;
+      --p-muted: #465e48;
+    }
+    .poster[data-ptheme="bakery_choco"] {
+      --p-bg: linear-gradient(180deg, #fdf6ef 0%, #f1dfc9 100%);
+      --p-primary: #572d16;
+      --p-accent: #a62845;
+      --p-gold: #d98218;
+      --p-card: #fffbf6;
+      --p-border: #dfc5ab;
+      --p-ink: #2b180e;
+      --p-muted: #5e4130;
+    }
+    .poster[data-ptheme="pastel_playful"] {
+      --p-bg: linear-gradient(180deg, #fff9fb 0%, #f8eaf0 100%);
+      --p-primary: #345630;
+      --p-accent: #b81d62;
+      --p-gold: #ea9010;
+      --p-card: #ffffff;
+      --p-border: #ebc8d7;
+      --p-ink: #2b1c24;
+      --p-muted: #5e4552;
+    }
+
+    .p-title {
+      margin: 0;
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--p-primary);
+      line-height: 1.05;
+      font-size: 0.96rem;
+      text-shadow: 0 2px 0 #fff, 1.5px 0 0 #fff, -1.5px 0 0 #fff, 0 -1.5px 0 #fff;
+    }
+    .p-ribbon {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 6px;
+      background: var(--p-accent);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 0.6rem;
+    }
+    .p-pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: var(--p-primary);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 0.6rem;
+    }
+    .p-card {
+      background: var(--p-card);
+      border: 1.5px solid var(--p-border);
+      border-radius: 9px;
+      padding: 6px 8px;
+      min-height: 0;
+    }
+    .p-photo {
+      border-radius: 10px;
+      border: 2.5px solid #ffffff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      background: linear-gradient(135deg, #edd8bd 0%, #dfb88c 100%);
+      color: #2e1b0d;
+      font-weight: 800;
+      font-size: 0.58rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6px;
+      position: relative;
+      overflow: hidden;
+      min-height: 0;
+    }
+    .p-photo-hero {
+      background: radial-gradient(circle at 35% 30%, #faebd3 0%, #e4bd8d 56%, #c68e55 100%);
+      border-width: 3px;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
+    }
+    .p-hero-badge {
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: #1b120b;
+      color: #fde68a;
+      font-size: 0.56rem;
+      font-weight: 800;
+      margin-bottom: 3px;
+    }
+    .p-meta-float {
+      position: absolute;
+      bottom: 6px;
+      left: 6px;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.94);
+      color: #2b1d14;
+      font-size: 0.52rem;
+      font-weight: 800;
+    }
+    .p-num {
+      width: 17px;
+      height: 17px;
+      border-radius: 50%;
+      background: var(--p-gold);
+      color: #1f1408;
+      border: 1.5px solid #ffffff;
+      font-size: 0.56rem;
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .p-num-dark {
+      background: var(--p-primary);
+      color: #ffffff;
+      border: none;
+    }
+    .p-list {
+      margin: 3px 0 0;
+      padding-left: 12px;
+      font-size: 0.54rem;
+      line-height: 1.26;
+      font-weight: 600;
+    }
+    .p-list li { margin-bottom: 1px; }
+    .p-footer {
+      margin-top: auto;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .p-tips-box {
+      flex: 1;
+      background: var(--p-card);
+      border: 1.5px dashed var(--p-accent);
+      border-radius: 8px;
+      padding: 4px 7px;
+    }
+    .p-tips-tag {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 5px;
+      background: var(--p-accent);
+      color: #ffffff;
+      font-size: 0.54rem;
+      font-weight: 800;
+    }
+    .p-badge-col {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 3px;
+      flex-shrink: 0;
+    }
+    .p-selamat {
+      padding: 4px 8px;
+      border-radius: 7px;
+      background: var(--p-accent);
+      color: #ffffff;
+      font-family: var(--font-display);
+      font-size: 0.64rem;
+      font-weight: 700;
+      transform: rotate(-2deg);
+    }
+    .p-wm {
+      padding: 2px 7px;
+      border-radius: 5px;
+      background: #152033;
+      color: #ffffff;
+      font-size: 0.54rem;
+      font-weight: 700;
+    }
+    .p-prod-chip {
+      margin-top: 4px;
+      padding: 2px 6px;
+      border-radius: 5px;
+      background: #fff3d7;
+      border: 1px solid var(--p-gold);
+      font-size: 0.5rem;
+      font-weight: 700;
+      color: #4f3103;
+    }
+
+    /* Larger proportions in Single View */
+    .single-stage .p-title { font-size: 1.45rem; }
+    .single-stage .p-ribbon { font-size: 0.76rem; padding: 3px 11px; }
+    .single-stage .p-pill { font-size: 0.74rem; padding: 3px 10px; }
+    .single-stage .p-list { font-size: 0.7rem; line-height: 1.3; }
+    .single-stage .p-photo { font-size: 0.72rem; }
+    .single-stage .p-hero-badge { font-size: 0.7rem; padding: 3px 10px; }
+    .single-stage .p-meta-float { font-size: 0.66rem; }
+    .single-stage .p-num { width: 21px; height: 21px; font-size: 0.68rem; }
+    .single-stage .p-selamat { font-size: 0.84rem; padding: 5px 11px; }
+    .single-stage .p-wm { font-size: 0.68rem; padding: 3px 8px; }
+    .single-stage .p-prod-chip { font-size: 0.65rem; }
+
+    @media (max-width: 1180px) {
+      .gallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 820px) {
+      .gallery-grid { grid-template-columns: 1fr; }
+      .single-view { grid-template-columns: 1fr; }
+      .view-switch { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div>
+        <span class="kicker">[MOCKUP USULAN A] Target Luas Foto Hero ~40% (Seimbang-Dominan)</span>
+        <h1>9 Template Infografis : Proporsi Hero 40%</h1>
+        <p class="sub">Foto Hero diperbesar menjadi titik fokus utama (~38% sampai 43% luas poster), kolom Hero lebih lebar dari kolom teks, dan kartu bahan serta langkah tetap terbaca lega.</p>
+      </div>
+      <div class="top-actions">
+        <nav class="version-nav" aria-label="Bandingkan versi mockup">
+          <a class="nav-pill" href="mockup_9_template_infografis.html">Versi Lama</a>
+          <a class="nav-pill is-active" href="mockup_9_template_hero_40.html" aria-current="page">Usulan 40%</a>
+          <a class="nav-pill" href="mockup_9_template_hero_55.html">Usulan 55%</a>
+        </nav>
+        <button type="button" class="theme-btn" id="themeToggle">Mode Terang</button>
+      </div>
+    </header>
+
+    <section class="controls-bar" aria-label="Pengaturan pratinjau mockup 40 persen">
+      <div class="ctrl-group">
+        <label class="ctrl-label" for="pthemeSelect">Tema Warna Poster</label>
+        <select class="ctrl-select" id="pthemeSelect">
+          <option value="warm_cream">Krem Hangat</option>
+          <option value="fresh_pandan">Pandan Segar</option>
+          <option value="bakery_choco">Cokelat Bakery</option>
+          <option value="pastel_playful">Pastel Ceria</option>
+        </select>
+      </div>
+
+      <div class="ctrl-group">
+        <label class="ctrl-label" for="ratioSelect">Rasio Kanvas</label>
+        <select class="ctrl-select" id="ratioSelect">
+          <option value="4:5">4:5 (1080x1350 Feed Optimal)</option>
+          <option value="3:4">3:4 (1080x1440 Portrait)</option>
+          <option value="1:1">1:1 (1080x1080 Square)</option>
+        </select>
+      </div>
+
+      <div class="ctrl-group">
+        <label class="ctrl-label" for="wmInput">Watermark Nama Brand</label>
+        <input class="ctrl-select" id="wmInput" type="text" value="@NutriBake.id" placeholder="Kosongkan untuk nonaktif" />
+      </div>
+
+      <div class="ctrl-group" style="min-width: 150px;">
+        <label class="ctrl-label" for="prodToggle">Produk Opsional</label>
+        <label style="display:flex;align-items:center;gap:8px;min-height:44px;font-size:0.82rem;font-weight:600;" for="prodToggle">
+          <input id="prodToggle" type="checkbox" checked style="width:18px;height:18px;accent-color:var(--action-primary);" />
+          <span>Sisipkan Produk</span>
+        </label>
+      </div>
+
+      <div class="view-switch" role="group" aria-label="Mode tampilan mockup">
+        <button type="button" class="btn-seg" id="btnViewAll" aria-pressed="true">Galeri 9 Template</button>
+        <button type="button" class="btn-seg" id="btnViewSingle" aria-pressed="false">Inspeksi 1-per-1</button>
+      </div>
+    </section>
+
+    <main>
+      <section id="galleryView" class="gallery-grid" aria-label="Galeri 9 template proporsi hero 40 persen"></section>
+
+      <section id="singleView" class="single-view" aria-label="Inspeksi detail per template">
+        <div class="single-sidebar" id="singleSidebar"></div>
+        <div class="single-stage" id="singleStage"></div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const TEMPLATES = [
+      {
+        id: 'step_grid_classic',
+        num: 1,
+        name: 'Classic Step-Photo Grid',
+        quota: '5-7 Foto AI',
+        heroShare: 'Hero ~40%',
+        desc: 'Baris Hero diperbesar ke 43% tinggi dengan rasio kolom 1.38fr : 0.62fr; grid 6 step dirapatkan di bawah.',
+        sample: {
+          title: 'Es Teler Creamy',
+          ribbon: 'Segar, Creamy, Enak Banget!',
+          meta: '4 Porsi · 15 Mnt',
+          product: 'Cup Es 16oz + Tutup Cembung',
+          ingredients: ['1 buah alpukat matang', '100 gr nangka matang', '100 gr kelapa muda', '100 gr jelly hijau', '500 ml susu cair', '100 ml santan', '4 sdm SKM'],
+          steps: ['Potong buah & jelly', 'Aduk susu, santan, SKM', 'Campur jelly ke kuah', 'Susun buah di cup', 'Tuang kuah creamy', 'Beri keju & sajikan'],
+          tips: ['Pakai alpukat matang pohon agar gurih.', 'Sajikan dingin lebih segar.']
+        }
+      },
+      {
+        id: 'hero_right_editorial',
+        num: 2,
+        name: 'Editorial Kanan (Hero Dominan)',
+        quota: '2 Foto AI',
+        heroShare: 'Hero ~42%',
+        desc: 'Kolom kanan melebar ke 1.24fr; Hero mengisi tinggi penuh dan foto detail jadi inset di pojok kanan bawah.',
+        sample: {
+          title: 'Matcha Almond Crispy',
+          ribbon: 'Renyah, Lembut, Wangi Matcha',
+          meta: '1 Toples · 35 Mnt',
+          product: 'Toples Kaca Kedap 1000ml',
+          ingredients: ['50 gr putih telur', '25 gr mentega', '25 gr margarin', '45 gr gula halus', '5 gr matcha bubuk', '50 gr terigu & 20 gr maizena', 'Topping almond & keju'],
+          steps: ['Kocok mentega & gula', 'Campur telur & matcha', 'Cetak tipis & topping', 'Panggang 150C 20 mnt'],
+          tips: ['Oles setipis mungkin agar garing merata.']
+        }
+      },
+      {
+        id: 'layered_band_cards',
+        num: 3,
+        name: 'Multi-Layer / Kartu Kolom',
+        quota: '2 Foto AI',
+        heroShare: 'Hero ~39%',
+        desc: 'Hero kanan atas dipertinggi ke 41% kanvas (1.28fr); 3 kolom bahan dirapatkan dan potongan dalam di kanan bawah.',
+        sample: {
+          title: 'Puding Coklat Oreo Alpukat',
+          ribbon: 'Lembut, 3 Lapis Istimewa',
+          meta: '1 Loyang · 30 Mnt',
+          product: 'Cetakan Puding Tulban 22cm',
+          groups: [
+            { title: 'Lapis Alpukat', items: ['200 gr alpukat', '1/2 bks agar', '350 ml susu'] },
+            { title: 'Lapis Oreo', items: ['1/2 bks agar', '400 ml susu', '5 keping Oreo'] },
+            { title: 'Lapis Coklat', items: ['1 bks agar coklat', '600 ml susu coklat', '40 gr DCC'] }
+          ],
+          steps: ['Blender alpukat + susu, masak & tuang.', 'Masak lapisan Oreo, tuang di atas alpukat.', 'Masak lapisan coklat + DCC, tuang perlahan.', 'Dinginkan hingga set di kulkas.'],
+          tips: ['Tusuk tipis permukaan tiap lapisan agar menempel.']
+        }
+      },
+      {
+        id: 'centerpiece_spotlight',
+        num: 4,
+        name: 'Spotlight 2 Kolom Asimetris',
+        quota: '1 Foto AI',
+        heroShare: 'Hero ~41%',
+        desc: 'Dari 3 kolom sempit menjadi 2 kolom asimetris (1.26fr Hero bulat besar vs 0.74fr info & bahan), step 2x2 di bawah.',
+        sample: {
+          title: 'Ayam Bakar Madu Rempah',
+          ribbon: 'Empuk, Manis Gurih, Meresap',
+          meta: '4 Porsi · 40 Mnt',
+          product: 'Kuas Silikon Tahan Panas',
+          ingredients: ['500 gr paha ayam', '3 sdm madu murni', '2 sdm kecap manis', '4 siung bawang putih', '1 sdt ketumbar', '1 ruas jahe & kunyit'],
+          steps: ['Haluskan bumbu lalu tumis harum', 'Ungkep ayam hingga air menyusut', 'Oles sisa bumbu dan madu', 'Bakar hingga kecoklatan merata'],
+          tips: ['Pakai api kecil saat membakar agar madu tidak gosong.']
+        }
+      },
+      {
+        id: 'magazine_vertical_split',
+        num: 5,
+        name: 'Majalah 2-Kolom (Foto Dominan)',
+        quota: '4 Foto AI',
+        heroShare: 'Hero ~41%',
+        desc: 'Kolom kiri melebar jadi 1.14fr; Hero mengambil 72% tinggi kolom dan 3 foto proses berjajar 1 strip tipis di bawahnya.',
+        sample: {
+          title: 'Sourdough Coffee Brownie',
+          ribbon: 'Fudgy, Aroma Kopi Menggoda',
+          meta: '1 Loyang · 45 Mnt',
+          product: 'Cocoa Powder Premium',
+          ingredients: ['150 gr dark chocolate', '100 gr mentega tawar', '120 gr gula palem', '2 butir telur', '100 gr starter', '60 gr terigu', '1 sdm kopi seduh'],
+          steps: ['Lelehkan coklat & mentega', 'Kocok telur, gula, dan kopi', 'Aduk lipat terigu & starter', 'Panggang 175C selama 28 mnt'],
+          tips: ['Jangan overbake agar tekstur tengah tetap fudgy.']
+        }
+      },
+      {
+        id: 'visual_ingredient_shelf',
+        num: 6,
+        name: 'Rak Bahan + Hero Dominan',
+        quota: '5-7 Foto AI',
+        heroShare: 'Hero ~40%',
+        desc: 'Rasio dibalik ke 0.72fr Rak Bahan vs 1.28fr Hero setinggi 43% kanvas; grid step 2x3 kompak di bawah.',
+        sample: {
+          title: 'Puding Krispi 2 Bahan',
+          ribbon: 'Praktis, Super Krispi',
+          meta: '1 Loyang · 20 Mnt',
+          product: 'Loyang Aluminium Bulat',
+          ingredients: ['1 bks Biskuit Krispi', '1 bks Agar Coklat', '2 1/2 gelas Air matang'],
+          steps: ['Masak agar hingga mendidih', 'Patahkan biskuit kecil', 'Campur ke dalam agar', 'Tuang ke loyang bulat', 'Beri taburan biskuit', 'Tutup & dinginkan'],
+          tips: ['Sisakan remahan biskuit untuk topping kering di atas.']
+        }
+      },
+      {
+        id: 'step_timeline_zigzag',
+        num: 7,
+        name: 'Timeline Alur + Hero Atas',
+        quota: '5 Foto AI',
+        heroShare: 'Hero ~39%',
+        desc: 'Blok Hero atas dinaikkan ke 40% tinggi kanvas (0.76fr : 1.24fr); thumbnail timeline dirampingkan agar hemat ruang.',
+        sample: {
+          title: 'Kacang Caramel Gula Putih',
+          ribbon: 'Renyah, Manis, Gurih',
+          meta: '1 Toples · 25 Mnt',
+          product: 'Wajan Granite 24cm',
+          ingredients: ['250 gr kacang tanah', '150 gr gula pasir', '75 ml air', '1 sdm margarin', '1/4 sdt garam'],
+          steps: ['Sangrai kacang tanah hingga matang renyah.', 'Masak gula dan air hingga larut berbuih.', 'Masukkan kacang dan garam, aduk cepat.', 'Dinginkan di loyang lalu simpan di toples.'],
+          tips: ['Wajib pakai api kecil saat memasak karamel.']
+        }
+      },
+      {
+        id: 'polaroid_scrapbook',
+        num: 8,
+        name: 'Scrapbook Polaroid Dominan',
+        quota: '4 Foto AI',
+        heroShare: 'Hero ~40%',
+        desc: 'Kolom kiri melebar ke 1.12fr dengan Hero Polaroid mengambil porsi utama (flex 2.5) di atas 3 polaroid kecil.',
+        sample: {
+          title: 'Pilus Cikur Gurih',
+          ribbon: 'Renyah, Wangi Kencur',
+          meta: '1 Toples · 25 Mnt',
+          product: 'Toples Kedap Udara',
+          ingredients: ['250 gr tapioka', '2 sdm terigu', '3 bawang putih', '2 ruas kencur', '1 daun bawang', '150 ml air mendidih'],
+          steps: ['Campur tepung & bumbu', 'Tuang air panas, uleni kalis', 'Pulung bulat kecil', 'Goreng api sedang'],
+          tips: ['Masukkan pilus saat minyak masih hangat.']
+        }
+      },
+      {
+        id: 'compact_2col_cheat_sheet',
+        num: 9,
+        name: 'Cheat Sheet Hero Banner 42%',
+        quota: '1 Foto AI',
+        heroShare: 'Hero ~42%',
+        desc: 'Hero full-width setinggi 42% kanvas di atas dengan scrim judul kontras, diikuti panel Bahan & Langkah sejajar.',
+        sample: {
+          title: 'Stik Royco Renyah',
+          ribbon: 'Renyah, Gurih, Simpel!',
+          meta: '1 Toples · 30 Mnt',
+          product: 'Saringan Tirisan Minyak',
+          ingredients: ['250 gr tepung terigu', '100 gr tepung tapioka', '1 butir telur', '1 sachet kaldu ayam', '2 btg daun bawang', '2 sdm margarin', '110 ml air'],
+          steps: ['Campur tepung, kaldu, dan daun bawang.', 'Masukkan telur, margarin, dan air bertahap.', 'Uleni adonan hingga kalis.', 'Gilas tipis lalu potong memanjang.', 'Goreng api sedang sampai keemasan.', 'Tiriskan dan simpan di toples rapat.'],
+          tips: ['Gilas tipis agar stik matang renyah merata.']
+        }
+      }
+    ];
+
+    const state = {
+      ptheme: 'warm_cream',
+      ratio: '4:5',
+      watermark: '@NutriBake.id',
+      showProduct: true,
+      viewMode: 'gallery',
+      selectedId: 'step_grid_classic'
+    };
+
+    function renderWatermark() {
+      const wm = state.watermark.trim();
+      return wm ? `<div class="p-wm">${wm}</div>` : '';
+    }
+
+    function renderProductChip(sample) {
+      if (!state.showProduct || !sample.product) return '';
+      return `<div class="p-prod-chip">Pakai: ${sample.product}</div>`;
+    }
+
+    function renderFooter(sample, compact = false) {
+      return `
+        <div class="p-footer">
+          <div class="p-tips-box">
+            <span class="p-tips-tag">Tips :</span>
+            <ul class="p-list">
+              ${(sample.tips || []).slice(0, compact ? 1 : 2).map(t => `<li>${t}</li>`).join('')}
+            </ul>
+          </div>
+          <div class="p-badge-col">
+            <div class="p-selamat">Selamat Mencoba!</div>
+            ${renderWatermark()}
+          </div>
+        </div>
+      `;
+    }
+
+    function buildPosterInner(tpl) {
+      const s = tpl.sample;
+      const ingList = (items, limit = 9) => `<ul class="p-list">${items.slice(0, limit).map(i => `<li>${i}</li>`).join('')}</ul>`;
+
+      switch (tpl.id) {
+        case 'step_grid_classic':
+          return `
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0;">
+              <h3 class="p-title">${s.title}</h3>
+              <span class="p-ribbon">${s.ribbon}</span>
+            </div>
+            <div class="p-photo p-photo-hero" style="flex:0 0 43%;min-height:0;">
+              <span class="p-hero-badge">HERO 40%</span>
+              <span>Foto Hasil Utama</span>
+              <div class="p-meta-float">${s.meta}</div>
+            </div>
+            <div style="display:grid;grid-template-columns:0.74fr 1.26fr;gap:6px;flex:1;min-height:0;align-items:stretch;">
+              <div class="p-card" style="display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;">
+                <div>
+                  <span class="p-pill">Bahan :</span>
+                  ${ingList(s.ingredients, 6)}
+                </div>
+                ${renderProductChip(s)}
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:4px;min-height:0;">
+                ${s.steps.map((st, idx) => `
+                  <div class="p-card" style="padding:3px;text-align:center;display:flex;flex-direction:column;">
+                    <div class="p-photo" style="flex:1;margin-bottom:2px;border-width:1.5px;font-size:0.46rem;">
+                      <span class="p-num" style="position:absolute;top:2px;left:2px;">${idx + 1}</span>
+                      Step ${idx + 1}
+                    </div>
+                    <div style="font-size:0.46rem;font-weight:700;line-height:1.12;">${st}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            ${renderFooter(s, true)}
+          `;
+
+        case 'hero_right_editorial':
+          return `
+            <div style="display:grid;grid-template-columns:0.74fr 1.26fr;gap:8px;flex:1;min-height:0;align-items:stretch;">
+              <div style="display:flex;flex-direction:column;gap:5px;min-height:0;">
+                <div>
+                  <h3 class="p-title">${s.title}</h3>
+                  <div class="p-ribbon">${s.ribbon}</div>
+                </div>
+                <div class="p-card" style="flex:1;display:flex;flex-direction:column;">
+                  <span class="p-pill">Bahan :</span>
+                  ${ingList(s.ingredients, 7)}
+                  ${renderProductChip(s)}
+                </div>
+              </div>
+              <div class="p-photo p-photo-hero" style="height:100%;">
+                <span class="p-hero-badge">HERO 41%</span>
+                <span>Hero Vertikal Dominan</span>
+                <div class="p-meta-float">${s.meta}</div>
+                <div class="p-photo" style="position:absolute;right:6px;bottom:6px;width:34%;aspect-ratio:4/3;font-size:0.46rem;padding:3px;border-width:2px;box-shadow:0 4px 10px rgba(0,0,0,0.22);">
+                  Inset Detail
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">
+              <div><span class="p-pill">Cara Membuat :</span></div>
+              <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;">
+                ${s.steps.map((st, idx) => `
+                  <div class="p-card" style="padding:4px;display:flex;flex-direction:column;gap:2px;">
+                    <span class="p-num p-num-dark">${idx + 1}</span>
+                    <span style="font-size:0.49rem;font-weight:700;line-height:1.15;">${st}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            ${renderFooter(s, true)}
+          `;
+
+        case 'layered_band_cards':
+          return `
+            <div class="p-photo p-photo-hero" style="flex:0 0 43%;justify-content:space-between;align-items:flex-start;padding:0;min-height:0;">
+              <div style="width:100%;display:flex;justify-content:space-between;align-items:flex-start;padding:6px 8px 0;">
+                <span class="p-hero-badge">HERO 40%</span>
+                <div class="p-photo" style="width:24%;aspect-ratio:4/3;font-size:0.44rem;padding:2px;border-width:2px;">Potongan Dalam</div>
+              </div>
+              <div style="width:100%;padding:10px 10px 7px;background:linear-gradient(180deg, rgba(16,10,6,0.08) 0%, rgba(16,10,6,0.9) 100%);text-align:left;">
+                <div style="font-family:var(--font-display);font-size:1rem;font-weight:700;color:#ffffff;line-height:1.1;">${s.title}</div>
+                <div style="font-size:0.56rem;font-weight:700;color:#fde68a;margin-top:2px;">${s.ribbon} · ${s.meta}</div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;flex-shrink:0;">
+              ${s.groups.map(g => `
+                <div class="p-card" style="padding:4px 5px;">
+                  <span class="p-pill" style="font-size:0.5rem;">${g.title}</span>
+                  ${ingList(g.items, 3)}
+                </div>
+              `).join('')}
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;flex:1;min-height:0;">
+              ${s.steps.map((st, idx) => `
+                <div class="p-card" style="padding:3px 6px;display:flex;gap:5px;align-items:center;">
+                  <span class="p-num p-num-dark">${idx + 1}</span>
+                  <span style="font-size:0.49rem;font-weight:600;line-height:1.15;">${st}</span>
+                </div>
+              `).join('')}
+            </div>
+            ${renderProductChip(s)}
+            ${renderFooter(s, true)}
+          `;
+
+        case 'centerpiece_spotlight':
+          return `
+            <div style="text-align:center;flex-shrink:0;">
+              <h3 class="p-title">${s.title}</h3>
+              <div class="p-ribbon">${s.ribbon}</div>
+            </div>
+            <div class="p-photo p-photo-hero" style="flex:0 0 43%;border-radius:28px;min-height:0;">
+              <span class="p-hero-badge">HERO SPOTLIGHT 40%</span>
+              <span>Spotlight Lebar Tengah</span>
+              <div class="p-meta-float" style="left:50%;transform:translateX(-50%);white-space:nowrap;">${s.meta}</div>
+            </div>
+            <div style="display:grid;grid-template-columns:0.86fr 1.14fr;gap:6px;flex:1;min-height:0;align-items:stretch;">
+              <div class="p-card" style="display:flex;flex-direction:column;justify-content:space-between;">
+                <div>
+                  <span class="p-pill">Bahan :</span>
+                  ${ingList(s.ingredients, 6)}
+                </div>
+                ${renderProductChip(s)}
+              </div>
+              <div class="p-card" style="display:grid;grid-template-rows:auto repeat(4,minmax(0,1fr));gap:3px;">
+                <span class="p-pill" style="justify-self:start;">Cara Membuat :</span>
+                ${s.steps.map((st, idx) => `
+                  <div style="display:flex;gap:4px;align-items:center;font-size:0.5rem;font-weight:700;line-height:1.15;">
+                    <span class="p-num p-num-dark">${idx + 1}</span>
+                    <span>${st}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            ${renderFooter(s, true)}
+          `;
+
+        case 'magazine_vertical_split':
+          return `
+            <div style="display:grid;grid-template-columns:1.18fr 0.82fr;gap:8px;flex:1;min-height:0;align-items:stretch;">
+              <div style="display:flex;flex-direction:column;gap:6px;min-height:0;">
+                <div class="p-photo p-photo-hero" style="flex:2.6;">
+                  <span class="p-hero-badge">HERO 40%</span>
+                  <span>Hero Utama Majalah</span>
+                  <div class="p-meta-float">${s.meta}</div>
+                </div>
+                <div style="flex:0.68;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;min-height:0;">
+                  ${[1, 2, 3].map(n => `
+                    <div class="p-photo" style="border-width:1.5px;font-size:0.48rem;padding:2px;">
+                      <span class="p-num" style="position:absolute;top:2px;left:2px;">${n}</span>
+                      Proses ${n}
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:5px;min-height:0;">
+                <div>
+                  <h3 class="p-title">${s.title}</h3>
+                  <div class="p-ribbon">${s.ribbon}</div>
+                </div>
+                <div class="p-card">
+                  <span class="p-pill">Bahan :</span>
+                  ${ingList(s.ingredients, 7)}
+                  ${renderProductChip(s)}
+                </div>
+                <div class="p-card" style="flex:1;display:flex;flex-direction:column;gap:3px;">
+                  <span class="p-pill" style="align-self:flex-start;">Langkah :</span>
+                  ${s.steps.map((st, idx) => `
+                    <div style="display:flex;gap:4px;align-items:flex-start;font-size:0.49rem;font-weight:600;line-height:1.18;">
+                      <span class="p-num p-num-dark">${idx + 1}</span>
+                      <span>${st}</span>
+                    </div>
+                  `).join('')}
+                </div>
+                ${renderFooter(s, true)}
+              </div>
+            </div>
+          `;
+
+        case 'visual_ingredient_shelf':
+          return `
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0;">
+              <h3 class="p-title">${s.title}</h3>
+              <span class="p-ribbon">${s.ribbon}</span>
+            </div>
+            <div class="p-photo p-photo-hero" style="flex:0 0 43%;min-height:0;">
+              <span class="p-hero-badge">HERO 40%</span>
+              <span>Hero Sajian Lebar</span>
+              <div class="p-meta-float">${s.meta}</div>
+            </div>
+            <div style="display:grid;grid-template-columns:0.74fr 1.26fr;gap:6px;flex:1;min-height:0;align-items:stretch;">
+              <div class="p-card" style="display:flex;flex-direction:column;gap:4px;justify-content:space-between;">
+                <div>
+                  <span class="p-pill">Rak Bahan :</span>
+                  <div style="display:flex;flex-direction:column;gap:3px;margin-top:4px;">
+                    ${s.ingredients.map(i => `
+                      <div style="padding:3px 5px;border-radius:5px;background:rgba(0,0,0,0.04);border:1px solid var(--p-border);font-size:0.49rem;font-weight:700;">
+                        • ${i}
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+                ${renderProductChip(s)}
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:4px;min-height:0;">
+                ${s.steps.map((st, idx) => `
+                  <div class="p-card" style="padding:3px;text-align:center;display:flex;flex-direction:column;">
+                    <div class="p-photo" style="flex:1;margin-bottom:2px;border-width:1.5px;font-size:0.46rem;">
+                      <span class="p-num" style="position:absolute;top:2px;left:2px;">${idx + 1}</span>
+                      Step ${idx + 1}
+                    </div>
+                    <div style="font-size:0.46rem;font-weight:700;line-height:1.12;">${st}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            ${renderFooter(s, true)}
+          `;
+
+        case 'step_timeline_zigzag':
+          return `
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0;">
+              <h3 class="p-title">${s.title}</h3>
+              <span class="p-ribbon">${s.ribbon}</span>
+            </div>
+            <div class="p-photo p-photo-hero" style="flex:0 0 42%;min-height:0;">
+              <span class="p-hero-badge">HERO 40%</span>
+              <span>Hero Banner Atas</span>
+              <div class="p-meta-float">${s.meta}</div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:4px;flex:1;min-height:0;">
+              ${s.steps.map((st, idx) => `
+                <div class="p-card" style="padding:3px 5px;display:flex;align-items:center;gap:5px;border-left:4px solid var(--p-primary);">
+                  <div class="p-photo" style="width:42px;height:100%;flex-shrink:0;border-width:1.5px;font-size:0.44rem;">
+                    <span class="p-num" style="position:absolute;top:2px;left:2px;">${idx + 1}</span>
+                    S${idx + 1}
+                  </div>
+                  <div style="flex:1;font-size:0.49rem;font-weight:700;line-height:1.16;">${st}</div>
+                </div>
+              `).join('')}
+            </div>
+            <div class="p-card" style="padding:4px 7px;flex-shrink:0;">
+              <span class="p-pill" style="font-size:0.5rem;">Bahan :</span>
+              <span style="font-size:0.49rem;font-weight:600;margin-left:4px;">${s.ingredients.join(' · ')}</span>
+              ${renderProductChip(s)}
+            </div>
+            ${renderFooter(s, true)}
+          `;
+
+        case 'polaroid_scrapbook':
+          return `
+            <div style="text-align:center;flex-shrink:0;">
+              <h3 class="p-title">${s.title}</h3>
+              <div class="p-ribbon">${s.ribbon}</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1.22fr 0.78fr;gap:8px;flex:1;min-height:0;align-items:stretch;">
+              <div style="display:flex;flex-direction:column;gap:5px;min-height:0;">
+                <div style="flex:3.2;background:#ffffff;padding:5px 5px 8px;border-radius:5px;box-shadow:0 7px 16px rgba(0,0,0,0.16);transform:rotate(-1.2deg);display:flex;flex-direction:column;min-height:0;">
+                  <div class="p-photo p-photo-hero" style="flex:1;border:none;border-radius:3px;">
+                    <span class="p-hero-badge">HERO 40%</span>
+                    <span>Hero Polaroid Besar</span>
+                  </div>
+                  <div style="font-size:0.5rem;font-weight:800;text-align:center;margin-top:3px;color:#2c1e16;">${s.meta}</div>
+                </div>
+                <div style="flex:0.58;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;min-height:0;">
+                  ${[1, 2, 3].map(n => `
+                    <div style="background:#ffffff;padding:2px 2px 5px;border-radius:4px;box-shadow:0 3px 8px rgba(0,0,0,0.12);transform:rotate(${n === 2 ? '1.8deg' : '-1.4deg'});display:flex;min-height:0;">
+                      <div class="p-photo" style="flex:1;border:none;border-radius:2px;font-size:0.43rem;padding:2px;">
+                        <span class="p-num" style="position:absolute;top:2px;left:2px;">${n}</span>
+                        P${n}
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:5px;min-height:0;">
+                <div class="p-card" style="border-style:dashed;">
+                  <span class="p-pill">Bahan :</span>
+                  ${ingList(s.ingredients, 6)}
+                  ${renderProductChip(s)}
+                </div>
+                <div class="p-card" style="border-style:dashed;flex:1;display:flex;flex-direction:column;gap:3px;">
+                  <span class="p-pill" style="align-self:flex-start;">Langkah :</span>
+                  ${s.steps.map((st, idx) => `
+                    <div style="font-size:0.48rem;font-weight:600;display:flex;gap:4px;align-items:flex-start;line-height:1.16;">
+                      <span class="p-num p-num-dark">${idx + 1}</span>
+                      <span>${st}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+            ${renderFooter(s, true)}
+          `;
+
+        case 'compact_2col_cheat_sheet':
+          return `
+            <div class="p-photo p-photo-hero" style="flex:0 0 44%;justify-content:space-between;align-items:flex-start;padding:0;min-height:0;">
+              <div style="padding:7px 10px 0;"><span class="p-hero-badge">HERO BANNER 41%</span></div>
+              <div style="width:100%;padding:10px 12px;background:linear-gradient(180deg, rgba(16,10,6,0.12) 0%, rgba(16,10,6,0.9) 100%);text-align:left;">
+                <div style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;color:#ffffff;line-height:1.1;">${s.title}</div>
+                <div style="font-size:0.6rem;font-weight:700;color:#fde68a;margin-top:2px;">${s.ribbon} · ${s.meta}</div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:0.88fr 1.12fr;gap:7px;flex:1;min-height:0;align-items:stretch;">
+              <div class="p-card" style="display:flex;flex-direction:column;justify-content:space-between;">
+                <div>
+                  <span class="p-pill">Bahan &amp; Takaran :</span>
+                  ${ingList(s.ingredients, 7)}
+                </div>
+                ${renderProductChip(s)}
+              </div>
+              <div class="p-card" style="display:flex;flex-direction:column;gap:3px;justify-content:space-between;">
+                <span class="p-pill" style="align-self:flex-start;">Langkah Cepat :</span>
+                ${s.steps.map((st, idx) => `
+                  <div style="display:flex;gap:4px;align-items:flex-start;font-size:0.5rem;font-weight:600;line-height:1.18;">
+                    <span class="p-num p-num-dark">${idx + 1}</span>
+                    <span>${st}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            ${renderFooter(s, true)}
+          `;
+      }
+      return '';
+    }
+
+    function renderAll() {
+      const gallery = document.getElementById('galleryView');
+      const single = document.getElementById('singleView');
+      const isGallery = state.viewMode === 'gallery';
+
+      document.getElementById('btnViewAll').setAttribute('aria-pressed', isGallery ? 'true' : 'false');
+      document.getElementById('btnViewSingle').setAttribute('aria-pressed', isGallery ? 'false' : 'true');
+
+      gallery.style.display = isGallery ? 'grid' : 'none';
+      single.style.display = isGallery ? 'none' : 'grid';
+
+      if (isGallery) {
+        gallery.innerHTML = TEMPLATES.map(tpl => `
+          <article class="tpl-wrapper ${tpl.id === state.selectedId ? 'is-focused' : ''}">
+            <div class="tpl-meta">
+              <div style="display:flex;gap:8px;align-items:flex-start;">
+                <span class="tpl-num">${tpl.num}</span>
+                <div>
+                  <h2 class="tpl-title">${tpl.name}</h2>
+                  <p class="tpl-desc">${tpl.desc}</p>
+                </div>
+              </div>
+              <div class="tpl-badges">
+                <span class="tpl-hero-tag">${tpl.heroShare}</span>
+                <span class="tpl-badge">${tpl.quota}</span>
+              </div>
+            </div>
+            <div class="poster" data-ptheme="${state.ptheme}" data-ratio="${state.ratio}">
+              ${buildPosterInner(tpl)}
+            </div>
+            <button type="button" class="zoom-btn" data-inspect="${tpl.id}">Inspeksi Template #${tpl.num}</button>
+          </article>
+        `).join('');
+
+        gallery.querySelectorAll('[data-inspect]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            state.selectedId = btn.getAttribute('data-inspect');
+            state.viewMode = 'single';
+            renderAll();
+          });
+        });
+      } else {
+        const sidebar = document.getElementById('singleSidebar');
+        const stage = document.getElementById('singleStage');
+        const activeTpl = TEMPLATES.find(t => t.id === state.selectedId) || TEMPLATES[0];
+
+        sidebar.innerHTML = TEMPLATES.map(t => `
+          <button type="button" class="tpl-list-btn" data-pick="${t.id}" aria-pressed="${t.id === activeTpl.id ? 'true' : 'false'}">
+            <span class="tpl-num">${t.num}</span>
+            <div>
+              <div style="font-size:0.82rem;font-weight:700;color:var(--text-primary);">${t.name}</div>
+              <div style="font-size:0.72rem;color:var(--text-secondary);">${t.heroShare} · ${t.quota}</div>
+            </div>
+          </button>
+        `).join('');
+
+        sidebar.querySelectorAll('[data-pick]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            state.selectedId = btn.getAttribute('data-pick');
+            renderAll();
+          });
+        });
+
+        stage.innerHTML = `
+          <div style="width:100%;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+            <div>
+              <strong style="font-size:1rem;">#${activeTpl.num} ${activeTpl.name}</strong>
+              <span style="display:block;font-size:0.82rem;color:var(--text-secondary);">${activeTpl.desc}</span>
+            </div>
+            <span class="tpl-hero-tag">${activeTpl.heroShare} · Rasio ${state.ratio}</span>
+          </div>
+          <div class="poster" data-ptheme="${state.ptheme}" data-ratio="${state.ratio}">
+            ${buildPosterInner(activeTpl)}
+          </div>
+        `;
+      }
+    }
+
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      const html = document.documentElement;
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      document.getElementById('themeToggle').textContent = next === 'dark' ? 'Mode Terang' : 'Mode Gelap';
+    });
+
+    document.getElementById('pthemeSelect').addEventListener('change', (e) => { state.ptheme = e.target.value; renderAll(); });
+    document.getElementById('ratioSelect').addEventListener('change', (e) => { state.ratio = e.target.value; renderAll(); });
+    document.getElementById('wmInput').addEventListener('input', (e) => { state.watermark = e.target.value; renderAll(); });
+    document.getElementById('prodToggle').addEventListener('change', (e) => { state.showProduct = e.target.checked; renderAll(); });
+    document.getElementById('btnViewAll').addEventListener('click', () => { state.viewMode = 'gallery'; renderAll(); });
+    document.getElementById('btnViewSingle').addEventListener('click', () => { state.viewMode = 'single'; renderAll(); });
+
+    renderAll();
+  </script>
+</body>
+</html>

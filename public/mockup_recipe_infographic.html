@@ -1,0 +1,1827 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup Recipe Labs &amp; Auto Pipeline: Poster Infografis Resep + Caption</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* Semantic tokens from app/theme.css */
+    :root,
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-display: 'Fredoka', 'Plus Jakarta Sans', sans-serif;
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-rose: #f43f5e;
+      --status-rose-soft: rgba(244, 63, 94, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+    }
+
+    [data-theme="light"] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --input-bg: #ffffff;
+      --overlay-subtle: rgba(30, 41, 59, 0.08);
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --status-rose: #e11d48;
+      --status-rose-soft: #fff1f2;
+      --focus-ring: #6d4ed6;
+      --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      color: var(--text-primary);
+    }
+
+    a[href], button:not(:disabled), summary, select, label[for], input[type="checkbox"], input[type="radio"] {
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    :focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--focus-ring) 78%, transparent);
+      outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+      }
+    }
+
+    .app-shell {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px 24px 48px;
+    }
+
+    /* Top header */
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding-bottom: 18px;
+      margin-bottom: 22px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .topbar-title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .topbar-kicker {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--action-primary);
+      letter-spacing: 0.02em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.25rem, 2.2vw, 1.65rem);
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .topbar-sub {
+      margin: 0;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+    }
+
+    .topbar-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .segmented {
+      display: inline-flex;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .seg-btn {
+      min-height: 44px;
+      padding: 0 14px;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 0.84rem;
+      font-weight: 700;
+      transition: background-color 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+    }
+
+    .seg-btn:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+
+    .seg-btn[aria-pressed="true"] {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    .theme-btn {
+      min-height: 44px;
+      padding: 0 14px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      color: var(--text-primary);
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+
+    .theme-btn:hover {
+      background: var(--surface-hover);
+    }
+
+    /* Main two-column workbench */
+    .workbench {
+      display: grid;
+      grid-template-columns: minmax(340px, 520px) minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .panel-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 1.02rem;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: var(--radius-xs);
+      font-size: 0.76rem;
+      font-weight: 700;
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid color-mix(in srgb, var(--status-info) 40%, transparent);
+    }
+
+    .form-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .field-block {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .field-label {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .field-hint {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+
+    .input-control, .select-control {
+      width: 100%;
+      min-height: 44px;
+      padding: 8px 12px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      color: var(--text-primary);
+    }
+
+    .choice-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .choice-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .choice-card {
+      min-height: 52px;
+      padding: 10px 12px;
+      text-align: left;
+      background: var(--surface);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      transition: border-color 0.15s ease, background-color 0.15s ease;
+    }
+
+    .choice-card:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+
+    .choice-card[aria-pressed="true"] {
+      background: var(--surface-interactive);
+      border-color: var(--action-primary);
+    }
+
+    .choice-title {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .choice-sub {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    /* Library picker list */
+    .library-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 220px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .library-item {
+      width: 100%;
+      min-height: 48px;
+      padding: 10px 12px;
+      text-align: left;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .library-item:hover {
+      background: var(--surface-hover);
+    }
+
+    .library-item[aria-pressed="true"] {
+      border-color: var(--action-primary);
+      background: var(--surface-interactive);
+    }
+
+    .library-meta {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .library-lock-note {
+      padding: 8px 10px;
+      border-radius: var(--radius-xs);
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid color-mix(in srgb, var(--status-success) 35%, transparent);
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    /* Toggle row */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 44px;
+    }
+
+    .toggle-check {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--action-primary);
+      flex-shrink: 0;
+    }
+
+    /* Theme swatch chips */
+    .swatch-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .swatch-btn {
+      min-height: 44px;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border-subtle);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-align: left;
+    }
+
+    .swatch-btn[aria-pressed="true"] {
+      border-color: var(--action-primary);
+      background: var(--surface-interactive);
+    }
+
+    .swatch-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      flex-shrink: 0;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+    }
+
+    /* Primary CTA bar */
+    .action-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding-top: 4px;
+    }
+
+    .btn-primary {
+      flex: 1 1 220px;
+      min-height: 46px;
+      padding: 0 18px;
+      border: 1px solid var(--action-primary);
+      border-radius: var(--radius-sm);
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      font-size: 0.9rem;
+      font-weight: 800;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--action-primary-hover);
+      border-color: var(--action-primary-hover);
+    }
+
+    .btn-secondary {
+      min-height: 46px;
+      padding: 0 14px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: var(--surface-hover);
+    }
+
+    /* Preview tabs & states */
+    .preview-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tab-btn {
+      min-height: 44px;
+      padding: 0 14px;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+
+    .tab-btn[aria-selected="true"] {
+      background: var(--status-info-soft);
+      border-color: var(--status-info);
+      color: var(--status-info);
+    }
+
+    .state-banner {
+      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 14px;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .state-banner.error {
+      background: var(--status-danger-soft);
+      border: 1px solid var(--status-danger);
+      color: var(--status-danger);
+    }
+
+    .state-banner.loading {
+      background: var(--status-info-soft);
+      border: 1px solid var(--status-info);
+      color: var(--status-info);
+    }
+
+    .state-banner.empty {
+      background: var(--status-warning-soft);
+      border: 1px solid var(--status-warning);
+      color: var(--status-warning);
+    }
+
+    /* Poster Canvas Simulation (Fixed poster light aesthetic matching 7 references) */
+    .poster-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .poster-meta-bar {
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .poster-canvas {
+      width: 100%;
+      max-width: 540px;
+      border-radius: 14px;
+      overflow: hidden;
+      padding: 16px;
+      position: relative;
+      color: #2c1e16;
+      border: 1px solid var(--border-strong);
+      box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .poster-canvas[data-ratio="4:5"] {
+      aspect-ratio: 4 / 5;
+    }
+
+    .poster-canvas[data-ratio="3:4"] {
+      aspect-ratio: 3 / 4;
+    }
+
+    .poster-canvas[data-ratio="1:1"] {
+      aspect-ratio: 1 / 1;
+      max-width: 520px;
+    }
+
+    /* Poster Color Themes */
+    .poster-canvas[data-poster-theme="warm_cream"] {
+      background: linear-gradient(180deg, #fff8ee 0%, #f9ebd6 100%);
+      --p-primary: #2d6a2e;
+      --p-accent: #e03e6b;
+      --p-gold: #e59417;
+      --p-card: #fffdf9;
+      --p-card-border: #e6d3b8;
+    }
+
+    .poster-canvas[data-poster-theme="fresh_pandan"] {
+      background: linear-gradient(180deg, #f3fbef 0%, #e1f2d8 100%);
+      --p-primary: #1f6f3d;
+      --p-accent: #d94862;
+      --p-gold: #df9a18;
+      --p-card: #ffffff;
+      --p-card-border: #c3dfb7;
+    }
+
+    .poster-canvas[data-poster-theme="bakery_choco"] {
+      background: linear-gradient(180deg, #fdf6ef 0%, #f2e1cf 100%);
+      --p-primary: #5b3019;
+      --p-accent: #c93b5b;
+      --p-gold: #d98218;
+      --p-card: #fffbf6;
+      --p-card-border: #dfc6ae;
+    }
+
+    .poster-canvas[data-poster-theme="pastel_playful"] {
+      background: linear-gradient(180deg, #fff9fb 0%, #f9edf2 100%);
+      --p-primary: #3b5e36;
+      --p-accent: #db2777;
+      --p-gold: #ea9010;
+      --p-card: #ffffff;
+      --p-card-border: #ecccd9;
+    }
+
+    .poster-top {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    .poster-hero-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .poster-title-block {
+      text-align: left;
+      padding: 2px 4px;
+    }
+
+    .poster-dish-title {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: clamp(1.35rem, 2.5vw, 1.85rem);
+      line-height: 1.05;
+      color: var(--p-primary);
+      text-shadow: 0 2px 0 #ffffff, 1px 1px 0 #ffffff, -1px -1px 0 #ffffff;
+    }
+
+    .poster-ribbon {
+      display: inline-block;
+      margin-top: 4px;
+      padding: 3px 12px;
+      border-radius: 6px;
+      background: var(--p-accent);
+      color: #ffffff;
+      font-size: 0.74rem;
+      font-weight: 800;
+    }
+
+    .poster-hook-note {
+      display: inline-block;
+      margin-top: 4px;
+      padding: 3px 8px;
+      border-radius: 8px;
+      background: #fff6cf;
+      border: 1px dashed var(--p-gold);
+      color: #4a3518;
+      font-size: 0.68rem;
+      font-weight: 700;
+    }
+
+    .poster-hero-photo {
+      flex: 1;
+      min-height: 130px;
+      border-radius: 12px;
+      border: 2px solid #ffffff;
+      box-shadow: 0 6px 16px rgba(44, 30, 22, 0.14);
+      overflow: hidden;
+      background: #e9d9c3;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .poster-hero-badge {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      background: rgba(255, 255, 255, 0.92);
+      color: #2c1e16;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.66rem;
+      font-weight: 800;
+    }
+
+    .poster-ingredients-card {
+      background: var(--p-card);
+      border: 1.5px solid var(--p-card-border);
+      border-radius: 12px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .poster-pill-heading {
+      display: inline-block;
+      align-self: flex-start;
+      padding: 3px 12px;
+      border-radius: 8px;
+      background: var(--p-primary);
+      color: #ffffff;
+      font-size: 0.76rem;
+      font-weight: 800;
+    }
+
+    .poster-ing-list {
+      margin: 0;
+      padding-left: 14px;
+      font-size: 0.7rem;
+      line-height: 1.38;
+      color: #2c1e16;
+    }
+
+    .poster-ing-list li {
+      margin-bottom: 2px;
+    }
+
+    .poster-product-chip {
+      margin-top: auto;
+      padding: 4px 7px;
+      border-radius: 6px;
+      background: #fff3d7;
+      border: 1px solid #eab308;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #5c3a04;
+    }
+
+    .poster-steps-section {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+
+    .poster-steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 7px;
+    }
+
+    .poster-step-card {
+      background: var(--p-card);
+      border: 1px solid var(--p-card-border);
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .poster-step-thumb {
+      height: 56px;
+      background: linear-gradient(135deg, #f3e3ce 0%, #e7cfa8 100%);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.66rem;
+      font-weight: 700;
+      color: #5c3a1f;
+      padding: 4px;
+      text-align: center;
+    }
+
+    .poster-step-num {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--p-gold);
+      color: #1f1408;
+      font-size: 0.66rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .poster-step-caption {
+      padding: 4px 6px;
+      font-size: 0.64rem;
+      line-height: 1.25;
+      color: #2c1e16;
+      font-weight: 600;
+    }
+
+    .poster-text-steps-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .poster-text-step-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      background: var(--p-card);
+      border: 1px solid var(--p-card-border);
+      border-radius: 8px;
+      padding: 6px 8px;
+      font-size: 0.7rem;
+      line-height: 1.3;
+    }
+
+    .poster-text-step-badge {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--p-primary);
+      color: #ffffff;
+      font-size: 0.7rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .poster-bottom {
+      display: grid;
+      grid-template-columns: 1.3fr 0.7fr;
+      gap: 8px;
+      align-items: end;
+      margin-top: auto;
+    }
+
+    .poster-tips-card {
+      background: var(--p-card);
+      border: 1.5px dashed var(--p-accent);
+      border-radius: 10px;
+      padding: 6px 9px;
+    }
+
+    .poster-tips-title {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 6px;
+      background: var(--p-accent);
+      color: #ffffff;
+      font-size: 0.7rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .poster-tips-list {
+      margin: 0;
+      padding-left: 14px;
+      font-size: 0.66rem;
+      line-height: 1.32;
+      color: #2c1e16;
+    }
+
+    .poster-cta-col {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .poster-selamat-badge {
+      padding: 6px 10px;
+      border-radius: 10px;
+      background: var(--p-accent);
+      color: #ffffff;
+      font-family: var(--font-display);
+      font-size: 0.84rem;
+      font-weight: 700;
+      text-align: center;
+      transform: rotate(-2deg);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.14);
+    }
+
+    .poster-brand-watermark {
+      padding: 3px 9px;
+      border-radius: 6px;
+      background: rgba(21, 32, 51, 0.88);
+      color: #ffffff;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+
+    /* Plain photo grid fallback mode preview */
+    .plain-grid-preview {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      padding: 14px;
+      background: #0d0d12;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 480px;
+      aspect-ratio: 3 / 4;
+    }
+
+    .plain-grid-cell {
+      background: #1c2433;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #d8e0ea;
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 12px;
+      text-align: center;
+    }
+
+    /* Caption cards */
+    .caption-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .caption-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .caption-card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .caption-platform {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .copy-btn {
+      min-height: 38px;
+      padding: 0 12px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border-strong);
+      background: var(--surface);
+      color: var(--text-primary);
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .copy-btn:hover {
+      background: var(--surface-hover);
+    }
+
+    .caption-pre {
+      margin: 0;
+      white-space: pre-wrap;
+      font-family: inherit;
+      font-size: 0.84rem;
+      line-height: 1.55;
+      color: var(--text-secondary);
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+    }
+
+    .pipeline-summary {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    /* Tablet & Mobile breakpoints */
+    @media (max-width: 960px) {
+      .workbench {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .app-shell {
+        padding: 14px 12px 36px;
+      }
+      .choice-grid-2,
+      .choice-grid-3,
+      .swatch-row {
+        grid-template-columns: 1fr;
+      }
+      .poster-top,
+      .poster-bottom {
+        grid-template-columns: 1fr;
+      }
+      .poster-steps-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="topbar-title-group">
+        <span class="topbar-kicker">[SIMULASI PRATINJAU MOCKUP] CF Studio</span>
+        <h1>Recipe Labs &amp; Auto Pipeline: Poster Infografis Resep + Caption</h1>
+        <p class="topbar-sub">Pratinjau konfigurasi sumber resep (Recipe Library vs AI Bikin Sendiri), layout poster infografis, watermark brand, dan paket caption siap tayang.</p>
+      </div>
+      <div class="topbar-actions">
+        <div class="segmented" role="group" aria-label="Pilih konteks menu">
+          <button type="button" class="seg-btn" id="ctxAutoPipeline" aria-pressed="true">Auto Pipeline (1-Klik &amp; Jadwal)</button>
+          <button type="button" class="seg-btn" id="ctxRecipeLabs" aria-pressed="false">Recipe Labs (/recipe-labs)</button>
+        </div>
+        <button type="button" class="theme-btn" id="themeToggle" aria-label="Ganti tema terang atau gelap">Mode Terang</button>
+      </div>
+    </header>
+
+    <main class="workbench">
+      <!-- Left Column: Configuration -->
+      <section class="panel" aria-labelledby="configHeading">
+        <div class="panel-header">
+          <h2 class="panel-title" id="configHeading">Konfigurasi Produksi Resep Foto &amp; Teks</h2>
+          <span class="status-chip" id="contextBadge">Auto Pipeline: recipe_labs</span>
+        </div>
+
+        <form class="form-stack" id="configForm" onsubmit="return false;">
+          <!-- 1. Output Style -->
+          <div class="field-block">
+            <div class="field-label">
+              <span>1. Format Output Visual</span>
+            </div>
+            <div class="choice-grid-2" role="group" aria-label="Pilih format output visual">
+              <button type="button" class="choice-card" id="styleInfographic" aria-pressed="true">
+                <span class="choice-title">Poster Infografis Resep (Baru)</span>
+                <span class="choice-sub">Hybrid: Foto AI bersih + HTML-to-Image (0% typo)</span>
+              </button>
+              <button type="button" class="choice-card" id="styleGrid" aria-pressed="false">
+                <span class="choice-title">Grid Kolase Foto (Lama)</span>
+                <span class="choice-sub">3 sampai 6 foto tanpa teks di kanvas Sharp</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. Recipe Source -->
+          <div class="field-block">
+            <div class="field-label">
+              <span>2. Sumber Resep</span>
+            </div>
+            <div class="choice-grid-2" role="group" aria-label="Pilih sumber resep">
+              <button type="button" class="choice-card" id="srcAi" aria-pressed="true">
+                <span class="choice-title">AI Bikin Sendiri</span>
+                <span class="choice-sub">Gemini buat resep &amp; langkah sesuai topik/kategori</span>
+              </button>
+              <button type="button" class="choice-card" id="srcLibrary" aria-pressed="false">
+                <span class="choice-title">Ambil dari Recipe Library</span>
+                <span class="choice-sub">Resep terkurasi (takaran asli dikunci)</span>
+              </button>
+            </div>
+
+            <!-- AI Generated controls -->
+            <div id="aiSourceControls" class="form-stack" style="gap: 10px; margin-top: 4px;">
+              <div>
+                <label class="field-label" for="langSelect">Bahasa Target</label>
+                <select class="select-control" id="langSelect">
+                  <option value="id_ID">Bahasa Indonesia (Default Infografis)</option>
+                  <option value="en_US">Global English</option>
+                  <option value="bilingual">Bilingual (English Hook + Indonesian Body)</option>
+                </select>
+              </div>
+              <div>
+                <label class="field-label" for="topicInput">Topik / Nama Menu Resep</label>
+                <input class="input-control" id="topicInput" type="text" value="Es Teler Creamy" placeholder="Contoh: Es Teler Creamy, Kacang Caramel..." />
+              </div>
+              <div id="scheduleAutoTopicWrap" style="display: none;">
+                <label class="toggle-row" for="autoRotateAiTopic">
+                  <span style="font-size: 0.82rem; font-weight: 600;">Mode Jadwal: Variasi menu otomatis tiap hari dalam kategori ini</span>
+                  <input class="toggle-check" id="autoRotateAiTopic" type="checkbox" checked />
+                </label>
+              </div>
+            </div>
+
+            <!-- Recipe Library controls -->
+            <div id="librarySourceControls" class="form-stack" style="gap: 10px; margin-top: 4px; display: none;">
+              <div id="libraryScheduleModeWrap">
+                <label class="field-label" for="libSelectionMode">Mode Pemilihan di Jadwal / Eksekusi</label>
+                <select class="select-control" id="libSelectionMode">
+                  <option value="manual">Pilih 1 Resep Spesifik</option>
+                  <option value="auto_library_rotation">Auto-Rotasi dari Recipe Library (Anti-Ulang)</option>
+                </select>
+              </div>
+              <div id="libraryPickerWrap">
+                <label class="field-label" for="librarySearch">Cari Resep Terkurasi (Contoh Data Mockup)</label>
+                <input class="input-control" id="librarySearch" type="search" placeholder="Ketik nama resep atau kategori..." />
+                <div class="library-list" id="libraryList" role="listbox" aria-label="Daftar resep di Recipe Library" style="margin-top: 8px;"></div>
+              </div>
+              <div class="library-lock-note">
+                Aturan Fidelity Recipe Library: Nama bahan dan takaran asli dipertahankan persis. AI hanya merapikan ringkasan langkah dan caption.
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Infographic Design Options -->
+          <div class="field-block" id="infographicOptionsBlock">
+            <div class="field-label">
+              <span>3. Template Layout, Rasio, &amp; Tema Warna</span>
+            </div>
+
+            <div>
+              <span class="field-hint" style="display:block; margin-bottom:6px;">Pilih gaya tata letak poster (mengacu pada 7 contoh referensi):</span>
+              <div class="choice-grid-3" role="group" aria-label="Pilih template infografis">
+                <button type="button" class="choice-card tpl-btn" data-tpl="infographic_step_grid" aria-pressed="true">
+                  <span class="choice-title">Step-Photo Grid</span>
+                  <span class="choice-sub">Hero + Bahan + 6 Foto Step</span>
+                </button>
+                <button type="button" class="choice-card tpl-btn" data-tpl="infographic_text_steps" aria-pressed="false">
+                  <span class="choice-title">Text Steps</span>
+                  <span class="choice-sub">Hero + Bahan/Layer + 4 Langkah</span>
+                </button>
+                <button type="button" class="choice-card tpl-btn" data-tpl="infographic_visual_ingredients" aria-pressed="false">
+                  <span class="choice-title">Visual Bahan</span>
+                  <span class="choice-sub">Kartu Bahan + Step Grid</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="choice-grid-2">
+              <div>
+                <label class="field-label" for="ratioSelect">Rasio Poster</label>
+                <select class="select-control" id="ratioSelect">
+                  <option value="4:5">4:5 (1080x1350 Feed Optimal)</option>
+                  <option value="3:4">3:4 (1080x1440 Portrait)</option>
+                  <option value="1:1">1:1 (1080x1080 Square)</option>
+                </select>
+              </div>
+              <div>
+                <span class="field-label" style="margin-bottom:6px;">Tema Warna</span>
+                <div class="swatch-row">
+                  <button type="button" class="swatch-btn theme-swatch" data-poster-theme="warm_cream" aria-pressed="true">
+                    <span class="swatch-dot" style="background:#f9ebd6;"></span>
+                    <span>Krem Hangat</span>
+                  </button>
+                  <button type="button" class="swatch-btn theme-swatch" data-poster-theme="fresh_pandan" aria-pressed="false">
+                    <span class="swatch-dot" style="background:#d9f0cf;"></span>
+                    <span>Pandan Segar</span>
+                  </button>
+                  <button type="button" class="swatch-btn theme-swatch" data-poster-theme="bakery_choco" aria-pressed="false">
+                    <span class="swatch-dot" style="background:#edd2b8;"></span>
+                    <span>Cokelat Bakery</span>
+                  </button>
+                  <button type="button" class="swatch-btn theme-swatch" data-poster-theme="pastel_playful" aria-pressed="false">
+                    <span class="swatch-dot" style="background:#f8dce8;"></span>
+                    <span>Pastel Ceria</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Brand Watermark & Optional Product -->
+          <div class="field-block">
+            <div class="field-label">
+              <span>4. Identitas Brand &amp; Produk Opsional</span>
+            </div>
+            <label class="toggle-row" for="toggleBrandWatermark">
+              <span style="font-size: 0.84rem; font-weight: 600;">Tampilkan Nama Brand / Watermark di pojok poster</span>
+              <input class="toggle-check" id="toggleBrandWatermark" type="checkbox" checked />
+            </label>
+            <div id="brandNameWrap">
+              <label class="field-label" for="brandWatermarkInput" style="font-size:0.78rem;">Teks Nama Brand di Poster</label>
+              <input class="input-control" id="brandWatermarkInput" type="text" value="@NutriBake.id" placeholder="Contoh: @NutriBake.id atau Dapur Botani" />
+            </div>
+
+            <div style="border-top: 1px solid var(--border-subtle); padding-top: 10px; margin-top: 4px;">
+              <label class="field-label" for="productOptionalSelect">Sisipkan Produk dari Product Database (Opsional)</label>
+              <select class="select-control" id="productOptionalSelect">
+                <option value="none">Tanpa Produk (Konten Resep Organik Murni)</option>
+                <option value="prod_toples">Toples Kaca Kedap Udara 1000ml (Alat/Wadah)</option>
+                <option value="prod_cocoa">Premix Cocoa Powder Premium 250gr (Bahan)</option>
+                <option value="prod_wajan">Wajan Anti Lengket Granite 24cm (Alat Masak)</option>
+              </select>
+              <p class="field-hint" style="margin-top:6px;">Jika produk dipilih, sistem menyisipkan referensi produk ke kartu bahan/tips serta menautkan link affiliate di caption Facebook (atau arahan Link di Bio di IG/Threads).</p>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="action-bar">
+            <button type="button" class="btn-primary" id="simulateProduceBtn">Simulasikan Produksi Poster &amp; Caption</button>
+            <button type="button" class="btn-secondary" id="simulateErrorBtn">Uji State Error</button>
+            <button type="button" class="btn-secondary" id="resetDemoBtn">Reset</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Right Column: Live Poster & Caption Preview -->
+      <section class="panel" aria-labelledby="previewHeading">
+        <div class="panel-header">
+          <h2 class="panel-title" id="previewHeading">Pratinjau Hasil Produksi</h2>
+          <div class="preview-tabs" role="tablist" aria-label="Pilih pratinjau hasil">
+            <button type="button" class="tab-btn" role="tab" id="tabPoster" aria-selected="true" aria-controls="panelPoster">Poster Infografis</button>
+            <button type="button" class="tab-btn" role="tab" id="tabCaption" aria-selected="false" aria-controls="panelCaption">Caption Siap Tayang</button>
+          </div>
+        </div>
+
+        <div id="stateBannerContainer" aria-live="polite"></div>
+
+        <!-- Tab 1: Poster -->
+        <div id="panelPoster" role="tabpanel" aria-labelledby="tabPoster">
+          <div class="poster-stage">
+            <div class="poster-meta-bar">
+              <span id="posterSpecLabel">Output: 1080x1350 (4:5) · Opsi A Hybrid Renderer · media_type: image</span>
+              <span id="posterSourceLabel">Sumber: AI Bikin Sendiri</span>
+            </div>
+
+            <!-- Infographic Canvas -->
+            <div class="poster-canvas" id="posterCanvas" data-ratio="4:5" data-poster-theme="warm_cream">
+              <div class="poster-top">
+                <div class="poster-hero-wrap">
+                  <div class="poster-title-block">
+                    <h3 class="poster-dish-title" id="pTitle">Es Teler Creamy</h3>
+                    <div class="poster-ribbon" id="pRibbon">Segar, Creamy, Enak Banget!</div>
+                    <div class="poster-hook-note" id="pHook">Perpaduan Alpukat, Nangka &amp; Kelapa Muda</div>
+                  </div>
+                  <div class="poster-hero-photo" id="pHeroBox">
+                    <div>
+                      <strong id="pHeroDesc" style="font-size:0.8rem; display:block;">Foto Hero Hidangan (G-Labs Clean Food Photo)</strong>
+                      <span style="font-size:0.7rem; color:#5c4433;">[SIMULASI FOTO AI TANPA TEKS]</span>
+                    </div>
+                    <span class="poster-hero-badge" id="pHeroBadge">4 Porsi · 15 Menit</span>
+                  </div>
+                </div>
+
+                <div class="poster-ingredients-card">
+                  <span class="poster-pill-heading" id="pIngHeading">Bahan-bahan :</span>
+                  <ul class="poster-ing-list" id="pIngList"></ul>
+                  <div class="poster-product-chip" id="pProductChip" style="display:none;"></div>
+                </div>
+              </div>
+
+              <div class="poster-steps-section">
+                <span class="poster-pill-heading">Cara Membuat :</span>
+                <div class="poster-steps-grid" id="pStepsGrid"></div>
+                <div class="poster-text-steps-list" id="pTextSteps" style="display:none;"></div>
+              </div>
+
+              <div class="poster-bottom">
+                <div class="poster-tips-card">
+                  <span class="poster-tips-title">Tips :</span>
+                  <ul class="poster-tips-list" id="pTipsList"></ul>
+                </div>
+                <div class="poster-cta-col">
+                  <div class="poster-selamat-badge">Selamat Mencoba!</div>
+                  <div class="poster-brand-watermark" id="pWatermark">@NutriBake.id</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Legacy Plain Grid Preview (shown when Grid Kolase Foto is selected) -->
+            <div class="plain-grid-preview" id="plainGridPreview" style="display:none;">
+              <div class="plain-grid-cell">Slot 1: Hero Hidangan (Tanpa Teks)</div>
+              <div class="plain-grid-cell">Slot 2: Bahan Baku</div>
+              <div class="plain-grid-cell">Slot 3: Proses Memasak</div>
+              <div class="plain-grid-cell">Slot 4: Sajian Plating</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Captions -->
+        <div id="panelCaption" role="tabpanel" aria-labelledby="tabCaption" style="display:none;">
+          <div class="caption-grid">
+            <article class="caption-card">
+              <div class="caption-card-head">
+                <span class="caption-platform">Caption Facebook Page (Detail + Smart Affiliate Opsional)</span>
+                <button type="button" class="copy-btn" id="copyFbBtn">Salin Caption FB</button>
+              </div>
+              <pre class="caption-pre" id="fbCaptionPreview"></pre>
+            </article>
+
+            <article class="caption-card">
+              <div class="caption-card-head">
+                <span class="caption-platform">Caption Instagram &amp; Threads (Ringkas + Save/Share CTA)</span>
+                <button type="button" class="copy-btn" id="copyIgBtn">Salin Caption IG</button>
+              </div>
+              <pre class="caption-pre" id="igCaptionPreview"></pre>
+            </article>
+          </div>
+        </div>
+
+        <div class="pipeline-summary" id="pipelineSummary">
+          <strong>Ringkasan Alur Publikasi (Perbaikan yang Direncanakan):</strong>
+          <span>1. Renderer menghasilkan poster JPEG resolusi tinggi &rarr; disimpan di <code>recipe_items.img_grid_path</code>.</span>
+          <span>2. ContentFlow Hub &amp; Auto Pipeline mengirim <code>media_type: "image"</code> ke Repliz (bukan hardcoded <code>"video"</code>).</span>
+          <span>3. Staging R2 &amp; Google Drive mendeteksi MIME <code>image/jpeg</code> secara otomatis.</span>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const MOCK_RECIPES = {
+      ai: {
+        'Es Teler Creamy': {
+          title: 'Es Teler Creamy',
+          ribbon: 'Segar, Creamy, Enak Banget!',
+          hook: 'Perpaduan Alpukat, Nangka & Kelapa Muda',
+          meta: '4 Porsi · 15 Menit',
+          heroDesc: 'Cup Es Teler Creamy dengan topping parutan keju melimpah',
+          ingredients: [
+            '1 buah alpukat matang',
+            '100 gr nangka matang, potong dadu',
+            '100 gr kelapa muda serut',
+            '100 gr jelly hitam & hijau',
+            '500 ml susu cair full cream',
+            '100 ml santan matang',
+            '4 sdm susu kental manis',
+            'Es batu & keju parut secukupnya'
+          ],
+          steps: [
+            { img: 'Foto Step 1: Potongan alpukat, nangka & jelly', text: 'Potong dadu alpukat, nangka, kelapa muda, dan jelly.' },
+            { img: 'Foto Step 2: Mengaduk kuah susu & santan', text: 'Campur susu cair, santan, SKM, dan gula. Aduk rata.' },
+            { img: 'Foto Step 3: Jelly masuk ke kuah creamy', text: 'Masukkan jelly ke dalam kuah susu, aduk perlahan.' },
+            { img: 'Foto Step 4: Susun buah & jelly di cup', text: 'Tata potongan buah, kelapa muda, dan jelly ke cup.' },
+            { img: 'Foto Step 5: Tuang kuah creamy ke cup', text: 'Tuang adonan kuah susu creamy perlahan hingga penuh.' },
+            { img: 'Foto Step 6: Tabur keju parut & sajikan dingin', text: 'Beri topping keju parut melimpah dan sajikan dingin.' }
+          ],
+          tips: [
+            'Gunakan alpukat matang pohon agar tekstur lebih lembut.',
+            'Dinginkan kuah di kulkas minimal 1 jam sebelum disajikan.',
+            'Cocok untuk ide takjil atau jualan cup kekinian.'
+          ],
+          hashtags: '#EsTelerCreamy #ResepMinumanSegar #IdeJualanMinuman #TakjilKekinian #ResepRumahan'
+        }
+      },
+      library: [
+        {
+          id: 'rcp_lib_01',
+          title: 'Matcha Almond Crispy',
+          category: 'Kue Kering',
+          usedCount: 0,
+          ribbon: 'Renyah, Lembut, Wangi Matcha!',
+          hook: 'Resep Terkurasi Recipe Library (Takaran Terkunci)',
+          meta: '1 Toples · 35 Menit',
+          heroDesc: 'Toples kaca berisi Matcha Almond Crispy bertabur almond slice & keju',
+          ingredients: [
+            '50 gr putih telur',
+            '25 gr mentega Wisjman',
+            '25 gr margarin',
+            '45 gr gula halus',
+            '5 gr matcha bubuk',
+            '1/10 sdt garam',
+            '20 gr maizena & 50 gr terigu pro rendah',
+            'Topping: 20 gr almond slice & 20 gr keju parut'
+          ],
+          steps: [
+            { img: 'Foto Step 1: Kocok mentega & margarin', text: 'Aduk margarin, mentega, dan gula halus memakai whisk sampai rata.' },
+            { img: 'Foto Step 2: Campur putih telur & bahan kering', text: 'Masukkan putih telur, matcha, maizena, dan terigu hingga halus.' },
+            { img: 'Foto Step 3: Cetak tipis & beri almond slice', text: 'Cetak bulat pipih di loyang, taburi almond slice dan keju parut.' },
+            { img: 'Foto Step 4: Panggang 150C sampai renyah', text: 'Panggang suhu 150C selama kurang lebih 20 menit hingga matang.' }
+          ],
+          tips: [
+            'Oles tipis adonan agar hasil panggang benar-benar garing.',
+            'Simpan langsung di toples kedap udara setelah dingin.'
+          ],
+          hashtags: '#MatchaAlmondCrispy #ResepKueKering #IdeJualanKue #BakingRumahan'
+        },
+        {
+          id: 'rcp_lib_02',
+          title: 'Puding Coklat Susu Oreo & Alpukat',
+          category: 'Dessert',
+          usedCount: 1,
+          ribbon: 'Lembut, Segar, 3 Lapis Istimewa!',
+          hook: 'Resep Terkurasi Recipe Library (Takaran Terkunci)',
+          meta: '1 Loyang · 30 Menit',
+          heroDesc: 'Puding 3 lapis alpukat hijau, susu oreo, dan coklat pekat',
+          ingredients: [
+            'Lapisan Alpukat: 200 gr alpukat, 1/2 bks agar plain, 350 ml susu, 70 gr gula',
+            'Lapisan Oreo: 1/2 bks agar plain, 400 ml susu, 70 gr gula, 5 keping Oreo',
+            'Lapisan Coklat: 1 bks agar coklat, 600 ml susu coklat, 80 gr gula, 40 gr DCC'
+          ],
+          steps: [
+            { img: 'Foto Step 1: Blender alpukat & masak agar', text: 'Blender alpukat, susu, gula, dan SKM; masak hingga mendidih lalu tuang 1/3 loyang.' },
+            { img: 'Foto Step 2: Masak lapisan susu Oreo', text: 'Masak susu, gula, agar plain; masukkan remahan Oreo lalu tuang di atas alpukat.' },
+            { img: 'Foto Step 3: Masak lapisan coklat DCC', text: 'Masak susu coklat, agar coklat, gula, dan DCC hingga larut lalu tuang perlahan.' },
+            { img: 'Foto Step 4: Dinginkan di kulkas', text: 'Biarkan set di suhu ruang lalu dinginkan di kulkas sebelum dipotong.' }
+          ],
+          tips: [
+            'Tusuk ringan permukaan lapisan bawah dengan garpu sebelum menuang lapisan baru agar menempel kuat.',
+            'Sajikan dingin untuk tekstur puding paling nikmat.'
+          ],
+          hashtags: '#PudingLapis #PudingAlpukatOreo #DessertRumahan #IdeJualanPuding'
+        },
+        {
+          id: 'rcp_lib_03',
+          title: 'Pilus Cikur Gurih',
+          category: 'Camilan',
+          usedCount: 2,
+          ribbon: 'Camilan Renyah, Wangi Kencur!',
+          hook: 'Resep Terkurasi Recipe Library (Takaran Terkunci)',
+          meta: '1 Toples · 25 Menit',
+          heroDesc: 'Mangkuk dan toples berisi Pilus Cikur keemasan berdaun bawang',
+          ingredients: [
+            '250 gr tepung tapioka',
+            '2 sdm tepung terigu',
+            '3 siung bawang putih halus',
+            '2 ruas kencur (cikur) halus',
+            '1 batang daun bawang iris halus',
+            '1/2 sdt garam, kaldu bubuk & merica',
+            '150 ml air panas'
+          ],
+          steps: [
+            { img: 'Foto Step 1: Campur tepung & bumbu halus', text: 'Siapkan tepung tapioka, terigu, bawang putih, kencur, dan bumbu.' },
+            { img: 'Foto Step 2: Tuang air panas & uleni', text: 'Tuang air panas bertahap sambil diaduk hingga adonan kalis.' },
+            { img: 'Foto Step 3: Pulung bulatan kecil', text: 'Bentuk adonan menjadi bulatan kecil seragam.' },
+            { img: 'Foto Step 4: Goreng minyak dingin ke hangat', text: 'Goreng di api sedang hingga mengapung dan kuning keemasan.' },
+            { img: 'Foto Step 5: Angkat dan tiriskan', text: 'Tiriskan minyak hingga pilus benar-benar kering.' },
+            { img: 'Foto Step 6: Simpan di toples kedap udara', text: 'Setelah dingin, simpan dalam toples kedap udara agar tetap renyah.' }
+          ],
+          tips: [
+            'Gunakan air mendidih agar adonan kenyal dan mengembang renyah.',
+            'Jangan membentuk bulatan terlalu besar agar matang merata sampai dalam.'
+          ],
+          hashtags: '#PilusCikur #CamilanGurih #ResepCamilan #IdeJualanSnack'
+        }
+      ]
+    };
+
+    const PRODUCTS = {
+      none: null,
+      prod_toples: {
+        name: 'Toples Kaca Kedap Udara 1000ml',
+        note: 'Simpan di Toples Kaca Kedap Udara agar tahan renyah lebih lama',
+        fbLink: 'https://shopee.co.id/contoh-produk-toples-kedap-udara'
+      },
+      prod_cocoa: {
+        name: 'Premix Cocoa Powder Premium 250gr',
+        note: 'Pakai Premix Cocoa Powder Premium untuk rasa coklat lebih pekat',
+        fbLink: 'https://shopee.co.id/contoh-produk-cocoa-premium'
+      },
+      prod_wajan: {
+        name: 'Wajan Anti Lengket Granite 24cm',
+        note: 'Gunakan Wajan Anti Lengket Granite agar karamel tidak gosong',
+        fbLink: 'https://shopee.co.id/contoh-produk-wajan-granite'
+      }
+    };
+
+    const state = {
+      context: 'auto_pipeline',
+      outputStyle: 'recipe_infographic',
+      recipeSource: 'ai_generated',
+      selectedLibId: 'rcp_lib_01',
+      libSelectionMode: 'manual',
+      template: 'infographic_step_grid',
+      ratio: '4:5',
+      posterTheme: 'warm_cream',
+      showWatermark: true,
+      watermarkText: '@NutriBake.id',
+      productKey: 'none',
+      activeTab: 'poster',
+      uiBanner: null
+    };
+
+    function getCurrentRecipe() {
+      if (state.recipeSource === 'recipe_library') {
+        return MOCK_RECIPES.library.find(r => r.id === state.selectedLibId) || null;
+      }
+      const typed = document.getElementById('topicInput').value.trim() || 'Es Teler Creamy';
+      const base = MOCK_RECIPES.ai['Es Teler Creamy'];
+      if (typed.toLowerCase() === 'es teler creamy') return base;
+      return {
+        ...base,
+        title: typed,
+        hook: `Inspirasi Resep ${typed} Praktis untuk Keluarga`,
+        heroDesc: `Foto sajian ${typed} dengan pencahayaan studio hangat`
+      };
+    }
+
+    function buildCaptions(recipe, prod) {
+      const ingLines = recipe.ingredients.map(i => `- ${i}`).join('\n');
+      const stepLines = recipe.steps.map((s, idx) => `${idx + 1}. ${s.text}`).join('\n');
+      const tipLines = recipe.tips.map(t => `- ${t}`).join('\n');
+
+      let fbAffiliate = '';
+      let igBio = '';
+      if (prod) {
+        fbAffiliate = `\n\nRekomendasi perlengkapan/bahan yang dipakai:\n${prod.name}\nCek detail produknya di sini: ${prod.fbLink}`;
+        igBio = `\n\nRekomendasi ${prod.name} bisa dicek lewat Link di Bio ya.`;
+      }
+
+      const brandTag = state.showWatermark && state.watermarkText.trim()
+        ? `\n\nDisimpan dari ${state.watermarkText.trim()}`
+        : '';
+
+      const fb = [
+        `${recipe.title.toUpperCase()} (${recipe.ribbon})`,
+        '',
+        'Simpan dulu resepnya biar gampang dicari saat mau eksekusi di dapur.',
+        '',
+        'Bahan-bahan:',
+        ingLines,
+        '',
+        'Cara membuat:',
+        stepLines,
+        '',
+        'Tips penting:',
+        tipLines + fbAffiliate + brandTag,
+        '',
+        recipe.hashtags
+      ].join('\n');
+
+      const ig = [
+        `${recipe.title} - ${recipe.ribbon}`,
+        '',
+        `Total waktu: ${recipe.meta}. Cocok untuk sajian keluarga maupun ide jualan.`,
+        '',
+        'Ringkasan bahan utama ada di infografis (swipe atau simpan postingan ini agar tidak hilang).' + igBio,
+        '',
+        'Tulis di kolom komentar, menu apa lagi yang mau dibuatkan infografis resepnya?',
+        '',
+        recipe.hashtags
+      ].join('\n');
+
+      return { fb, ig };
+    }
+
+    function renderLibraryList() {
+      const q = document.getElementById('librarySearch').value.trim().toLowerCase();
+      const listEl = document.getElementById('libraryList');
+      const filtered = MOCK_RECIPES.library.filter(r =>
+        !q || r.title.toLowerCase().includes(q) || r.category.toLowerCase().includes(q)
+      );
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = '<div style="padding:12px; font-size:0.82rem; color:var(--text-secondary);">Tidak ada resep yang cocok dengan kata kunci pencarian.</div>';
+        return;
+      }
+
+      listEl.innerHTML = filtered.map(r => {
+        const active = r.id === state.selectedLibId;
+        return `
+          <button type="button" class="library-item" data-lib-id="${r.id}" aria-pressed="${active ? 'true' : 'false'}">
+            <div>
+              <div style="font-size:0.84rem; font-weight:700; color:var(--text-primary);">${r.title}</div>
+              <div class="library-meta">${r.category} · ${r.ingredients.length} bahan · Dipakai ${r.usedCount}x</div>
+            </div>
+            <span class="status-chip">${active ? 'Dipilih' : 'Pilih'}</span>
+          </button>
+        `;
+      }).join('');
+
+      listEl.querySelectorAll('[data-lib-id]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.selectedLibId = btn.getAttribute('data-lib-id');
+          state.uiBanner = null;
+          render();
+        });
+      });
+    }
+
+    function renderBanner() {
+      const container = document.getElementById('stateBannerContainer');
+      if (!state.uiBanner) {
+        container.innerHTML = '';
+        return;
+      }
+      const b = state.uiBanner;
+      container.innerHTML = `
+        <div class="state-banner ${b.type}" role="status">
+          <span>${b.message}</span>
+          ${b.type === 'error' ? '<button type="button" class="copy-btn" id="dismissBannerBtn">Tutup</button>' : ''}
+        </div>
+      `;
+      const dismiss = document.getElementById('dismissBannerBtn');
+      if (dismiss) {
+        dismiss.addEventListener('click', () => {
+          state.uiBanner = null;
+          renderBanner();
+        });
+      }
+    }
+
+    function render() {
+      // Context & mode toggles
+      document.getElementById('ctxAutoPipeline').setAttribute('aria-pressed', state.context === 'auto_pipeline' ? 'true' : 'false');
+      document.getElementById('ctxRecipeLabs').setAttribute('aria-pressed', state.context === 'recipe_labs' ? 'true' : 'false');
+      document.getElementById('contextBadge').textContent = state.context === 'auto_pipeline' ? 'Auto Pipeline: recipe_labs' : 'Menu: Recipe Labs';
+      document.getElementById('scheduleAutoTopicWrap').style.display = state.context === 'auto_pipeline' ? 'block' : 'none';
+      document.getElementById('libraryScheduleModeWrap').style.display = state.context === 'auto_pipeline' ? 'block' : 'none';
+
+      document.getElementById('styleInfographic').setAttribute('aria-pressed', state.outputStyle === 'recipe_infographic' ? 'true' : 'false');
+      document.getElementById('styleGrid').setAttribute('aria-pressed', state.outputStyle === 'photo_grid' ? 'true' : 'false');
+      document.getElementById('infographicOptionsBlock').style.display = state.outputStyle === 'recipe_infographic' ? 'flex' : 'none';
+
+      document.getElementById('srcAi').setAttribute('aria-pressed', state.recipeSource === 'ai_generated' ? 'true' : 'false');
+      document.getElementById('srcLibrary').setAttribute('aria-pressed', state.recipeSource === 'recipe_library' ? 'true' : 'false');
+      document.getElementById('aiSourceControls').style.display = state.recipeSource === 'ai_generated' ? 'flex' : 'none';
+      document.getElementById('librarySourceControls').style.display = state.recipeSource === 'recipe_library' ? 'flex' : 'none';
+      document.getElementById('libraryPickerWrap').style.display = (state.recipeSource === 'recipe_library' && state.libSelectionMode === 'manual') ? 'block' : 'none';
+
+      document.querySelectorAll('.tpl-btn').forEach(b => {
+        b.setAttribute('aria-pressed', b.getAttribute('data-tpl') === state.template ? 'true' : 'false');
+      });
+      document.querySelectorAll('.theme-swatch').forEach(b => {
+        b.setAttribute('aria-pressed', b.getAttribute('data-poster-theme') === state.posterTheme ? 'true' : 'false');
+      });
+
+      document.getElementById('brandNameWrap').style.display = state.showWatermark ? 'block' : 'none';
+
+      if (state.recipeSource === 'recipe_library') {
+        renderLibraryList();
+      }
+
+      const recipe = getCurrentRecipe() || MOCK_RECIPES.ai['Es Teler Creamy'];
+      const prod = PRODUCTS[state.productKey] || null;
+
+      // Spec label
+      const ratioDim = state.ratio === '4:5' ? '1080x1350 (4:5)' : (state.ratio === '3:4' ? '1080x1440 (3:4)' : '1080x1080 (1:1)');
+      document.getElementById('posterSpecLabel').textContent = state.outputStyle === 'recipe_infographic'
+        ? `Output: ${ratioDim} · Hybrid HTML-to-Image · media_type: image`
+        : `Output: ${ratioDim} · Kolase Foto Polos Sharp · media_type: image`;
+
+      document.getElementById('posterSourceLabel').textContent = state.recipeSource === 'recipe_library'
+        ? (state.libSelectionMode === 'auto_library_rotation' ? 'Sumber: Auto-Rotasi Recipe Library' : `Sumber: Recipe Library (${recipe.title})`)
+        : 'Sumber: AI Bikin Sendiri';
+
+      const canvas = document.getElementById('posterCanvas');
+      const plain = document.getElementById('plainGridPreview');
+      if (state.outputStyle === 'photo_grid') {
+        canvas.style.display = 'none';
+        plain.style.display = 'grid';
+      } else {
+        canvas.style.display = 'flex';
+        plain.style.display = 'none';
+      }
+
+      canvas.setAttribute('data-ratio', state.ratio);
+      canvas.setAttribute('data-poster-theme', state.posterTheme);
+
+      document.getElementById('pTitle').textContent = recipe.title;
+      document.getElementById('pRibbon').textContent = recipe.ribbon;
+      document.getElementById('pHook').textContent = recipe.hook;
+      document.getElementById('pHeroDesc').textContent = recipe.heroDesc;
+      document.getElementById('pHeroBadge').textContent = recipe.meta;
+
+      // Ingredients
+      const ingEl = document.getElementById('pIngList');
+      ingEl.innerHTML = recipe.ingredients.map(i => `<li>${state.template === 'infographic_visual_ingredients' ? '[Ikon] ' : ''}${i}</li>`).join('');
+
+      const prodChip = document.getElementById('pProductChip');
+      if (prod) {
+        prodChip.style.display = 'block';
+        prodChip.textContent = `Rekomendasi: ${prod.name}`;
+      } else {
+        prodChip.style.display = 'none';
+      }
+
+      // Steps
+      const stepsGrid = document.getElementById('pStepsGrid');
+      const textSteps = document.getElementById('pTextSteps');
+      if (state.template === 'infographic_text_steps') {
+        stepsGrid.style.display = 'none';
+        textSteps.style.display = 'flex';
+        textSteps.innerHTML = recipe.steps.slice(0, 4).map((s, idx) => `
+          <div class="poster-text-step-row">
+            <span class="poster-text-step-badge">${idx + 1}</span>
+            <span>${s.text}</span>
+          </div>
+        `).join('');
+      } else {
+        stepsGrid.style.display = 'grid';
+        textSteps.style.display = 'none';
+        stepsGrid.innerHTML = recipe.steps.slice(0, 6).map((s, idx) => `
+          <div class="poster-step-card">
+            <div class="poster-step-thumb">
+              <span class="poster-step-num">${idx + 1}</span>
+              <span>${s.img}</span>
+            </div>
+            <div class="poster-step-caption">${s.text}</div>
+          </div>
+        `).join('');
+      }
+
+      // Tips
+      const tipsToShow = prod ? [...recipe.tips.slice(0, 2), prod.note] : recipe.tips;
+      document.getElementById('pTipsList').innerHTML = tipsToShow.map(t => `<li>${t}</li>`).join('');
+
+      // Brand watermark
+      const wm = document.getElementById('pWatermark');
+      if (state.showWatermark && state.watermarkText.trim()) {
+        wm.style.display = 'inline-block';
+        wm.textContent = state.watermarkText.trim();
+      } else {
+        wm.style.display = 'none';
+      }
+
+      // Captions
+      const caps = buildCaptions(recipe, prod);
+      document.getElementById('fbCaptionPreview').textContent = caps.fb;
+      document.getElementById('igCaptionPreview').textContent = caps.ig;
+
+      // Tabs
+      document.getElementById('tabPoster').setAttribute('aria-selected', state.activeTab === 'poster' ? 'true' : 'false');
+      document.getElementById('tabCaption').setAttribute('aria-selected', state.activeTab === 'caption' ? 'true' : 'false');
+      document.getElementById('panelPoster').style.display = state.activeTab === 'poster' ? 'block' : 'none';
+      document.getElementById('panelCaption').style.display = state.activeTab === 'caption' ? 'block' : 'none';
+
+      renderBanner();
+    }
+
+    // Event bindings
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      const html = document.documentElement;
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      document.getElementById('themeToggle').textContent = next === 'dark' ? 'Mode Terang' : 'Mode Gelap';
+    });
+
+    document.getElementById('ctxAutoPipeline').addEventListener('click', () => { state.context = 'auto_pipeline'; render(); });
+    document.getElementById('ctxRecipeLabs').addEventListener('click', () => { state.context = 'recipe_labs'; render(); });
+    document.getElementById('styleInfographic').addEventListener('click', () => { state.outputStyle = 'recipe_infographic'; render(); });
+    document.getElementById('styleGrid').addEventListener('click', () => { state.outputStyle = 'photo_grid'; render(); });
+    document.getElementById('srcAi').addEventListener('click', () => { state.recipeSource = 'ai_generated'; state.uiBanner = null; render(); });
+    document.getElementById('srcLibrary').addEventListener('click', () => { state.recipeSource = 'recipe_library'; state.uiBanner = null; render(); });
+    document.getElementById('libSelectionMode').addEventListener('change', (e) => { state.libSelectionMode = e.target.value; render(); });
+    document.getElementById('librarySearch').addEventListener('input', () => renderLibraryList());
+    document.getElementById('topicInput').addEventListener('input', () => render());
+    document.getElementById('ratioSelect').addEventListener('change', (e) => { state.ratio = e.target.value; render(); });
+    document.getElementById('toggleBrandWatermark').addEventListener('change', (e) => { state.showWatermark = e.target.checked; render(); });
+    document.getElementById('brandWatermarkInput').addEventListener('input', (e) => { state.watermarkText = e.target.value; render(); });
+    document.getElementById('productOptionalSelect').addEventListener('change', (e) => { state.productKey = e.target.value; render(); });
+
+    document.querySelectorAll('.tpl-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.template = btn.getAttribute('data-tpl');
+        render();
+      });
+    });
+
+    document.querySelectorAll('.theme-swatch').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.posterTheme = btn.getAttribute('data-poster-theme');
+        render();
+      });
+    });
+
+    document.getElementById('tabPoster').addEventListener('click', () => { state.activeTab = 'poster'; render(); });
+    document.getElementById('tabCaption').addEventListener('click', () => { state.activeTab = 'caption'; render(); });
+
+    document.getElementById('simulateProduceBtn').addEventListener('click', () => {
+      if (state.recipeSource === 'ai_generated' && !document.getElementById('topicInput').value.trim()) {
+        state.uiBanner = { type: 'empty', message: 'Topik resep masih kosong. Isi nama menu terlebih dahulu sebelum memulai produksi.' };
+        renderBanner();
+        return;
+      }
+      state.uiBanner = { type: 'loading', message: 'Simulasi: Menyusun JSON resep + merender foto langkah G-Labs + menyusun poster HTML-to-Image...' };
+      renderBanner();
+      setTimeout(() => {
+        state.uiBanner = { type: 'empty', message: 'Simulasi selesai: Poster infografis (image/jpeg) dan caption siap masuk ke ContentFlow Hub.' };
+        renderBanner();
+      }, 900);
+    });
+
+    document.getElementById('simulateErrorBtn').addEventListener('click', () => {
+      state.uiBanner = { type: 'error', message: 'Contoh State Error: G-Labs gagal merender foto step #4 (timeout). Silakan coba ulangi atau ganti ke template Text Steps.' };
+      renderBanner();
+    });
+
+    document.getElementById('resetDemoBtn').addEventListener('click', () => {
+      state.context = 'auto_pipeline';
+      state.outputStyle = 'recipe_infographic';
+      state.recipeSource = 'ai_generated';
+      state.template = 'infographic_step_grid';
+      state.ratio = '4:5';
+      state.posterTheme = 'warm_cream';
+      state.showWatermark = true;
+      state.watermarkText = '@NutriBake.id';
+      state.productKey = 'none';
+      state.uiBanner = null;
+      document.getElementById('topicInput').value = 'Es Teler Creamy';
+      document.getElementById('brandWatermarkInput').value = '@NutriBake.id';
+      document.getElementById('toggleBrandWatermark').checked = true;
+      document.getElementById('ratioSelect').value = '4:5';
+      document.getElementById('productOptionalSelect').value = 'none';
+      render();
+    });
+
+    function copyText(elementId, btnEl, defaultText) {
+      const text = document.getElementById(elementId).textContent;
+      navigator.clipboard?.writeText(text).catch(() => {});
+      btnEl.textContent = 'Tersalin';
+      setTimeout(() => { btnEl.textContent = defaultText; }, 1400);
+    }
+
+    document.getElementById('copyFbBtn').addEventListener('click', (e) => copyText('fbCaptionPreview', e.currentTarget, 'Salin Caption FB'));
+    document.getElementById('copyIgBtn').addEventListener('click', (e) => copyText('igCaptionPreview', e.currentTarget, 'Salin Caption IG'));
+
+    render();
+  </script>
+</body>
+</html>

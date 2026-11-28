@@ -302,8 +302,9 @@ export const POST = withTenantContext(async (request, _context, user) => {
       });
     } else if (pipelineType === 'recipe_labs') {
       const recipeClass = body.recipe_classification || body.recipeClassification || body.category || 'Makanan';
-      const targetLang = body.target_language || body.targetLanguage || 'en_US';
-      const aspectRatio = body.aspect_ratio || body.aspectRatio || '3:4';
+      const targetLang = body.target_language || body.targetLanguage || 'id_ID';
+      const outputStyle = body.output_style || body.outputStyle || 'recipe_infographic';
+      const aspectRatio = body.aspect_ratio || body.aspectRatio || (outputStyle === 'recipe_infographic' ? '4:5' : '3:4');
       result = await executeAutonomousRecipeLabsPipeline({
         brandId: body.brand_id || body.brandId,
         category: recipeClass,
@@ -312,6 +313,16 @@ export const POST = withTenantContext(async (request, _context, user) => {
         topic: body.topic || 'Resep Praktis Pilihan',
         aspectRatio,
         visualStyle: body.visual_style || body.visualStyle || 'Modern Minimalist Nordic Studio',
+        handMode: body.hand_mode || body.handMode || 'objects_only',
+        outputStyle,
+        infographicTemplate: body.infographic_template || body.infographicTemplate || 'infographic_step_grid',
+        infographicTheme: body.infographic_theme || body.infographicTheme || 'warm_cream',
+        recipeSource: body.recipe_source || body.recipeSource || 'ai_generated',
+        curatedRecipeId: body.curated_recipe_id || body.curatedRecipeId || null,
+        librarySelectionMode: body.library_selection_mode || body.librarySelectionMode || 'manual',
+        showBrandWatermark: body.show_brand_watermark !== undefined ? Boolean(body.show_brand_watermark) : true,
+        brandWatermarkText: body.brand_watermark_text || body.brandWatermarkText || null,
+        productId: body.product_id || body.productId || null,
         imagesPerRecipe: Number(body.images_per_recipe || body.imagesPerRecipe || 4),
         selectedLayoutId: body.selected_layout_id || body.selectedLayoutId || '4_editorial_split',
         gridGapSize: Number(body.grid_gap_size !== undefined ? body.grid_gap_size : 12),

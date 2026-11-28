@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup Auto Pipeline Utuh: Hide UI Video Saat Resep Teks &amp; Foto + 9 Layout Infografis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root,
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-display: 'Fredoka', 'Plus Jakarta Sans', sans-serif;
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-rose: #f43f5e;
+      --status-rose-soft: rgba(244, 63, 94, 0.14);
+      --status-purple: #c084fc;
+      --status-purple-soft: rgba(192, 132, 252, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+    }
+
+    [data-theme="light"] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --input-bg: #ffffff;
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-rose: #e11d48;
+      --status-rose-soft: #fff1f2;
+      --status-purple: #7c3aed;
+      --status-purple-soft: #f5f3ff;
+      --focus-ring: #6d4ed6;
+      --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.45;
+    }
+
+    button, input, select { font-family: inherit; color: var(--text-primary); }
+    button:not(:disabled), select, label[for], input[type="checkbox"] { cursor: pointer; }
+    :focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--focus-ring) 78%, transparent);
+      outline-offset: 2px;
+    }
+
+    .app-shell {
+      max-width: 1460px;
+      margin: 0 auto;
+      padding: 20px 24px 56px;
+    }
+
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding-bottom: 16px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .kicker {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--action-primary);
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.2rem, 2.2vw, 1.6rem);
+      font-weight: 800;
+    }
+
+    .sub {
+      margin: 4px 0 0;
+      font-size: 0.86rem;
+      color: var(--text-secondary);
+    }
+
+    .topbar-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .seg-group {
+      display: inline-flex;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .seg-btn {
+      min-height: 42px;
+      padding: 0 14px;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .seg-btn:hover { background: var(--surface-hover); color: var(--text-primary); }
+    .seg-btn[aria-pressed="true"] {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    .theme-btn {
+      min-height: 44px;
+      padding: 0 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-strong);
+      background: var(--surface);
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+    .theme-btn:hover { background: var(--surface-hover); }
+
+    /* Main Split Layout */
+    .main-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.18fr) minmax(340px, 0.82fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .panel-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 1.02rem;
+      font-weight: 800;
+    }
+
+    .pill-badge {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid color-mix(in srgb, var(--status-info) 40%, transparent);
+    }
+
+    .pill-badge.success {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border-color: color-mix(in srgb, var(--status-success) 40%, transparent);
+    }
+
+    .pill-badge.rose {
+      background: var(--status-rose-soft);
+      color: var(--status-rose);
+      border-color: color-mix(in srgb, var(--status-rose) 40%, transparent);
+    }
+
+    .stack { display: flex; flex-direction: column; gap: 14px; }
+
+    /* Step 1 Campaign Type Selector (Mimics Auto Pipeline cards) */
+    .type-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .type-card {
+      padding: 10px 12px;
+      text-align: left;
+      background: var(--surface-raised);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-height: 70px;
+    }
+    .type-card:hover { background: var(--surface-hover); border-color: var(--border-strong); }
+    .type-card[aria-pressed="true"] {
+      background: var(--surface-interactive);
+      border-color: var(--action-primary);
+    }
+
+    .type-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+    .type-name { font-size: 0.84rem; font-weight: 800; color: var(--text-primary); }
+    .type-tag {
+      font-size: 0.66rem;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--surface);
+      color: var(--text-secondary);
+    }
+    .type-card[aria-pressed="true"] .type-tag {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .type-desc { font-size: 0.72rem; color: var(--text-secondary); }
+
+    /* Field blocks */
+    .field-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 10px;
+    }
+
+    .field-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+    }
+
+    .block {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .block.highlight-rose {
+      border: 1.5px solid var(--status-rose);
+    }
+
+    .block-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .input, .select {
+      width: 100%;
+      min-height: 42px;
+      padding: 6px 10px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: var(--text-primary);
+    }
+
+    /* Hidden Video Banner Notice (only for user clarity in mockup) */
+    .hidden-audit-bar {
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: var(--status-success-soft);
+      border: 1px solid color-mix(in srgb, var(--status-success) 40%, transparent);
+      color: var(--status-success);
+      font-size: 0.78rem;
+      font-weight: 600;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    /* Video-only blocks */
+    .video-inspector-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 8px;
+    }
+    .spec-box {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+    .spec-k { font-size: 0.66rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; display: block; }
+    .spec-v { font-size: 0.8rem; font-weight: 700; color: var(--text-primary); }
+
+    /* Choice cards */
+    .choice-btn {
+      min-height: 48px;
+      padding: 8px 10px;
+      text-align: left;
+      background: var(--surface);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .choice-btn:hover { background: var(--surface-hover); border-color: var(--border-strong); }
+    .choice-btn[aria-pressed="true"] {
+      background: var(--surface-interactive);
+      border-color: var(--action-primary);
+    }
+
+    /* 9 Templates Selector Grid + Wireframe Icons */
+    .tpl-selector-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .tpl-opt-card {
+      padding: 8px;
+      text-align: left;
+      background: var(--surface);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: 10px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .tpl-opt-card:hover { background: var(--surface-hover); border-color: var(--border-strong); }
+    .tpl-opt-card[aria-pressed="true"] {
+      background: var(--surface-interactive);
+      border-color: var(--status-rose);
+    }
+
+    .wireframe-box {
+      width: 38px;
+      height: 46px;
+      border-radius: 5px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-strong);
+      padding: 3px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .wf-photo { background: var(--action-primary); border-radius: 2px; opacity: 0.85; }
+    .wf-text { background: var(--text-muted); border-radius: 1px; opacity: 0.55; }
+
+    .auto-rotate-banner {
+      padding: 9px 11px;
+      border-radius: 8px;
+      background: var(--surface);
+      border: 1.5px solid var(--border-strong);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .auto-rotate-banner.active {
+      border-color: var(--action-primary);
+      background: var(--surface-interactive);
+    }
+
+    .cta-submit {
+      min-height: 46px;
+      padding: 0 20px;
+      border-radius: 10px;
+      border: none;
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      font-size: 0.9rem;
+      font-weight: 800;
+      align-self: flex-start;
+    }
+    .cta-submit:hover { background: var(--action-primary-hover); }
+
+    /* Right Live Preview Stage */
+    .preview-sticky {
+      position: sticky;
+      top: 16px;
+    }
+
+    .poster {
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+      border-radius: 12px;
+      overflow: hidden;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      color: var(--p-ink);
+      background: var(--p-bg);
+      border: 1px solid rgba(0, 0, 0, 0.14);
+      position: relative;
+    }
+    .poster[data-ratio="4:5"] { aspect-ratio: 4 / 5; }
+    .poster[data-ratio="3:4"] { aspect-ratio: 3 / 4; }
+    .poster[data-ratio="1:1"] { aspect-ratio: 1 / 1; }
+
+    .poster[data-ptheme="warm_cream"] {
+      --p-bg: linear-gradient(180deg, #fff8ee 0%, #f8e9d2 100%);
+      --p-primary: #2d6a2e;
+      --p-accent: #e03e6b;
+      --p-gold: #e59417;
+      --p-card: #fffdf9;
+      --p-border: #e5d1b5;
+      --p-ink: #2c1e16;
+      --p-muted: #5d4534;
+    }
+    .poster[data-ptheme="fresh_pandan"] {
+      --p-bg: linear-gradient(180deg, #f3fbef 0%, #dff1d5 100%);
+      --p-primary: #1f6f3d;
+      --p-accent: #d94862;
+      --p-gold: #df9a18;
+      --p-card: #ffffff;
+      --p-border: #bfdcb2;
+      --p-ink: #1e2c1f;
+      --p-muted: #465e48;
+    }
+    .poster[data-ptheme="bakery_choco"] {
+      --p-bg: linear-gradient(180deg, #fdf6ef 0%, #f1dfc9 100%);
+      --p-primary: #5b3019;
+      --p-accent: #c93b5b;
+      --p-gold: #d98218;
+      --p-card: #fffbf6;
+      --p-border: #dfc5ab;
+      --p-ink: #2d1a0f;
+      --p-muted: #5e4130;
+    }
+    .poster[data-ptheme="pastel_playful"] {
+      --p-bg: linear-gradient(180deg, #fff9fb 0%, #f8eaf0 100%);
+      --p-primary: #3b5e36;
+      --p-accent: #db2777;
+      --p-gold: #ea9010;
+      --p-card: #ffffff;
+      --p-border: #ebc8d7;
+      --p-ink: #2c1e26;
+      --p-muted: #5e4552;
+    }
+
+    .p-title {
+      margin: 0;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.4rem;
+      color: var(--p-primary);
+      line-height: 1.06;
+      text-shadow: 0 2px 0 #fff, 1.5px 0 0 #fff, -1.5px 0 0 #fff, 0 -1.5px 0 #fff;
+    }
+    .p-ribbon {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 6px;
+      background: var(--p-accent);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 0.72rem;
+    }
+    .p-pill {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 7px;
+      background: var(--p-primary);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 0.72rem;
+    }
+    .p-card {
+      background: var(--p-card);
+      border: 1.5px solid var(--p-border);
+      border-radius: 10px;
+      padding: 8px 10px;
+    }
+    .p-photo {
+      border-radius: 10px;
+      border: 2.5px solid #ffffff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      background: linear-gradient(135deg, #edd8bd 0%, #dfb88c 100%);
+      color: #4b311c;
+      font-weight: 700;
+      font-size: 0.7rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+    .p-photo-hero {
+      background: radial-gradient(circle at 35% 30%, #f8e8cf 0%, #e4be8f 55%, #c99660 100%);
+    }
+    .p-num {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--p-gold);
+      color: #1f1408;
+      border: 1.5px solid #ffffff;
+      font-size: 0.66rem;
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .p-num-dark { background: var(--p-primary); color: #ffffff; border: none; }
+    .p-list { margin: 5px 0 0; padding-left: 14px; font-size: 0.68rem; line-height: 1.32; font-weight: 600; }
+    .p-list li { margin-bottom: 2px; }
+    .p-footer { margin-top: auto; display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; }
+    .p-tips-box { flex: 1; background: var(--p-card); border: 1.5px dashed var(--p-accent); border-radius: 8px; padding: 6px 9px; }
+    .p-tips-tag { display: inline-block; padding: 2px 8px; border-radius: 5px; background: var(--p-accent); color: #ffffff; font-size: 0.66rem; font-weight: 800; }
+    .p-badge-col { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+    .p-selamat { padding: 5px 10px; border-radius: 8px; background: var(--p-accent); color: #ffffff; font-family: var(--font-display); font-size: 0.8rem; font-weight: 700; transform: rotate(-2deg); }
+    .p-wm { padding: 3px 8px; border-radius: 5px; background: rgba(21, 32, 51, 0.9); color: #ffffff; font-size: 0.66rem; font-weight: 700; }
+    .p-prod-chip { margin-top: 5px; padding: 3px 7px; border-radius: 5px; background: #fff3d7; border: 1px solid var(--p-gold); font-size: 0.63rem; font-weight: 700; color: #5c3a04; }
+
+    @media (max-width: 1080px) {
+      .main-grid { grid-template-columns: 1fr; }
+      .preview-sticky { position: static; }
+    }
+    @media (max-width: 720px) {
+      .type-grid, .tpl-selector-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <span class="kicker">[SIMULASI MOCKUP UTUH] Auto Pipeline Adaptif + 9 Layout Infografis</span>
+        <h1>Auto Pipeline: UI Video Otomatis Hidden Saat &ldquo;Resep Teks &amp; Foto&rdquo;</h1>
+        <p class="sub">Beralih antara tipe Video dan Resep Teks &amp; Foto, uji tab 1-Klik Instan vs Modal Jadwal, serta coba 9 layout infografis + Auto-Rotasi.</p>
+      </div>
+      <div class="topbar-actions">
+        <div class="seg-group" role="group" aria-label="Pilih konteks Auto Pipeline">
+          <button type="button" class="seg-btn" id="modeInstantBtn" aria-pressed="true">Tab 1: 1-Klik Instan</button>
+          <button type="button" class="seg-btn" id="modeSchedBtn" aria-pressed="false">Tab 2: Modal Jadwal</button>
+        </div>
+        <button type="button" class="theme-btn" id="themeToggle">Mode Terang</button>
+      </div>
+    </header>
+
+    <div class="main-grid">
+      <!-- Left: Auto Pipeline Form Simulation -->
+      <section class="panel" aria-labelledby="apFormHeading">
+        <div class="panel-head">
+          <h2 class="panel-title" id="apFormHeading">Konfigurasi Auto Pipeline</h2>
+          <span class="pill-badge rose" id="apContextBadge">1-Klik Instan · Resep Teks &amp; Foto</span>
+        </div>
+
+        <div class="stack">
+          <!-- 1. Jenis Kampanye -->
+          <div>
+            <div class="block-label" style="margin-bottom:8px;">
+              <span>1. Pilih Jenis Kampanye</span>
+              <span style="font-size:0.74rem; color:var(--text-secondary);">Klik untuk lihat kontrol video muncul / tersembunyi</span>
+            </div>
+            <div class="type-grid" role="group" aria-label="Jenis kampanye">
+              <button type="button" class="type-card" data-ctype="recipe_campaign" aria-pressed="false">
+                <div class="type-card-head">
+                  <span class="type-name">Video Resep</span>
+                  <span class="type-tag">VIDEO</span>
+                </div>
+                <span class="type-desc">Reels memasak 4-6 klip dengan VO &amp; transisi FFmpeg</span>
+              </button>
+              <button type="button" class="type-card" data-ctype="product_campaign" aria-pressed="false">
+                <div class="type-card-head">
+                  <span class="type-name">Video Produk</span>
+                  <span class="type-tag">VIDEO</span>
+                </div>
+                <span class="type-desc">Showcase produk katalog 1-pass video</span>
+              </button>
+              <button type="button" class="type-card" data-ctype="recipe_labs" aria-pressed="true">
+                <div class="type-card-head">
+                  <span class="type-name">Resep Teks &amp; Foto</span>
+                  <span class="type-tag">FOTO</span>
+                </div>
+                <span class="type-desc">Poster Infografis 9 layout + Caption siap tayang</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Status Audit UI Hidden (Helpful Feedback) -->
+          <div id="hiddenVideoBanner" class="hidden-audit-bar">
+            <strong>Mode Foto &amp; Teks Aktif: Seluruh pengaturan Video otomatis disembunyikan</strong>
+            <span>Tersembunyi: Preset Video, Mode Eksekusi Storyboard, Override Audio/VO (TTS/Veo/ASMR), Durasi Klip, Finishing Subtitel, Transisi FFmpeg, VI Video, &amp; Banner Info TTS di Modal Jadwal.</span>
+          </div>
+
+          <!-- 2. Brand Profile (+ Video Preset & Mode Eksekusi ONLY when NOT recipe_labs) -->
+          <div class="field-grid-3">
+            <div class="block" style="padding:10px 12px;">
+              <label class="block-label" for="brandSelect">2. Brand Profile</label>
+              <select class="select" id="brandSelect">
+                <option value="NutriBake">NutriBake (@NutriBake.id)</option>
+                <option value="Dapur Botani">Dapur Botani (@DapurBotani)</option>
+                <option value="Siasat Sehat">Siasat Sehat (@SiasatSehat)</option>
+              </select>
+            </div>
+
+            <div class="block video-only" style="padding:10px 12px; display:none;">
+              <label class="block-label" for="presetVideoSelect">
+                <span>3. Preset Video</span>
+                <span class="pill-badge success">Preset-Driven</span>
+              </label>
+              <select class="select" id="presetVideoSelect">
+                <option>NutriBake Recipe 6-Klip Quick</option>
+                <option>Dapur Botani Indonesian Warm</option>
+              </select>
+            </div>
+
+            <div class="block video-only" id="execModeBlock" style="padding:10px 12px; display:none;">
+              <label class="block-label" for="execModeSelect">4. Mode Eksekusi</label>
+              <select class="select" id="execModeSelect">
+                <option>Full Autopilot (Langsung Produksi Video)</option>
+                <option>Manual Review (Jeda Storyboard)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- VIDEO INSPECTOR + AUDIO OVERRIDE (HIDDEN WHEN recipe_labs) -->
+          <div class="block video-only" id="videoInspectorBlock" style="display:none;">
+            <div class="block-label">
+              <span>Rincian Preset Video &amp; Override Mode Audio / VO</span>
+              <span class="pill-badge">Khusus Pipeline Video</span>
+            </div>
+            <div class="field-grid-2">
+              <div>
+                <label class="block-label" for="audioOvSelect" style="font-size:0.75rem; margin-bottom:4px;">Override Mode Audio / VO</label>
+                <select class="select" id="audioOvSelect">
+                  <option>Ikuti Bawaan Preset (minimax_tts)</option>
+                  <option>Paksa TTS Voiceover</option>
+                  <option>Paksa Native Veo 3.1</option>
+                  <option>Paksa Mode Tanpa VO (ASMR)</option>
+                </select>
+              </div>
+              <div id="schedTtsBanner" style="display:none; padding:8px 10px; border-radius:8px; background:var(--surface); border:1px solid var(--border-subtle); font-size:0.75rem;">
+                TTS: Indonesian warm motherly · VI: vi_nutribake_v5
+              </div>
+            </div>
+            <div class="video-inspector-grid">
+              <div class="spec-box"><span class="spec-k">Format Klip &amp; Durasi</span><span class="spec-v">6 Klip x 4 detik</span></div>
+              <div class="spec-box"><span class="spec-k">Model AI &amp; Voice-Over</span><span class="spec-v">Veo Omni Flash + TTS</span></div>
+              <div class="spec-box"><span class="spec-k">Finishing Subtitel</span><span class="spec-v">Floating Putih Kuning</span></div>
+              <div class="spec-box"><span class="spec-k">Transisi FFmpeg</span><span class="spec-v">FADE (0.5s)</span></div>
+              <div class="spec-box"><span class="spec-k">Visual Identity (VI)</span><span class="spec-v">vi_nutribake_v5</span></div>
+              <div class="spec-box"><span class="spec-k">Product Bridging</span><span class="spec-v">Aktif di Klip 4</span></div>
+            </div>
+          </div>
+
+          <!-- VIDEO TOPIC BLOCK (shown only for video types) -->
+          <div class="block video-only" id="videoTopicBlock" style="display:none;">
+            <label class="block-label" for="videoTopicInput">Topik / Produk Video</label>
+            <input class="input" id="videoTopicInput" type="text" value="Resep Kue Kering Rendah Gula" />
+          </div>
+
+          <!-- SCHEDULE TIMING (shown in Modal Jadwal mode) -->
+          <div class="block" id="schedTimingBlock" style="display:none;">
+            <div class="block-label">
+              <span>Pengaturan Waktu Jadwal &amp; Akun Repliz</span>
+              <span class="pill-badge">Modal Jadwal</span>
+            </div>
+            <div class="field-grid-3">
+              <div>
+                <label class="block-label" for="schedNameInput" style="font-size:0.74rem; margin-bottom:4px;">Nama Jadwal</label>
+                <input class="input" id="schedNameInput" type="text" value="NutriBake - Infografis Resep - 05:00 WIB" />
+              </div>
+              <div>
+                <label class="block-label" for="schedGenInput" style="font-size:0.74rem; margin-bottom:4px;">Jam Produksi</label>
+                <input class="input" id="schedGenInput" type="time" value="05:00" />
+              </div>
+              <div>
+                <label class="block-label" for="schedPubInput" style="font-size:0.74rem; margin-bottom:4px;">Jam Publish (Repliz)</label>
+                <input class="input" id="schedPubInput" type="time" value="09:00" />
+              </div>
+            </div>
+          </div>
+
+          <!-- RECIPE LABS CLEAN PANEL (ONLY WHEN recipe_labs IS SELECTED) -->
+          <div class="block highlight-rose" id="recipeLabsPanel">
+            <div class="block-label">
+              <span>Konfigurasi Resep Teks &amp; Foto (Bersih Tanpa Opsi Video)</span>
+              <span class="pill-badge rose">Poster Infografis + Caption</span>
+            </div>
+
+            <!-- Bahasa, Klasifikasi, & Sumber Resep -->
+            <div class="field-grid-2">
+              <div>
+                <label class="block-label" for="rlLangSelect" style="font-size:0.75rem; margin-bottom:4px;">Target Bahasa Resep</label>
+                <select class="select" id="rlLangSelect">
+                  <option value="id_ID">Bahasa Indonesia (Default)</option>
+                  <option value="en_US">Global English</option>
+                  <option value="bilingual">Bilingual</option>
+                </select>
+              </div>
+              <div>
+                <label class="block-label" for="rlEnvSelect" style="font-size:0.75rem; margin-bottom:4px;">Gaya Environment Foto AI</label>
+                <select class="select" id="rlEnvSelect">
+                  <option>Rustic Warm Tabletop &amp; Artisanal Kitchen</option>
+                  <option>Modern Minimalist Nordic Studio</option>
+                  <option>Vibrant Alfresco Sunlit Patio</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Sumber Resep -->
+            <div>
+              <span class="block-label" style="font-size:0.75rem; margin-bottom:6px;">Asal Resep (Recipe Library vs AI Bikin Sendiri)</span>
+              <div class="field-grid-2">
+                <button type="button" class="choice-btn" id="srcAiBtn" aria-pressed="true">
+                  <strong style="font-size:0.8rem;">AI Bikin Sendiri</strong>
+                  <span style="font-size:0.72rem; color:var(--text-secondary);">Buat resep sesuai topik atau auto-variasi</span>
+                </button>
+                <button type="button" class="choice-btn" id="srcLibBtn" aria-pressed="false">
+                  <strong style="font-size:0.8rem;">Ambil dari Recipe Library</strong>
+                  <span style="font-size:0.72rem; color:var(--text-secondary);">30+ resep terkurasi (takaran asli dikunci)</span>
+                </button>
+              </div>
+              <div id="aiTopicWrap" style="margin-top:8px;">
+                <input class="input" id="rlTopicInput" type="text" value="Es Teler Creamy" placeholder="Ketik nama menu resep..." />
+              </div>
+              <div id="libSelectWrap" style="margin-top:8px; display:none;">
+                <select class="select" id="rlLibSelect">
+                  <option value="auto_rotate">Auto-Rotasi Recipe Library (Anti-Ulang)</option>
+                  <option value="brownies">Brownies Ketan Putih Kukus (Recipe Library)</option>
+                  <option value="matcha">Matcha Almond Crispy (Recipe Library)</option>
+                  <option value="puding">Puding Coklat Susu Oreo &amp; Alpukat (Recipe Library)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Format Output -->
+            <div>
+              <span class="block-label" style="font-size:0.75rem; margin-bottom:6px;">Format Output Visual</span>
+              <div class="field-grid-2">
+                <button type="button" class="choice-btn" id="outInfographicBtn" aria-pressed="true">
+                  <strong style="font-size:0.8rem;">Poster Infografis Resep (Opsi A)</strong>
+                  <span style="font-size:0.72rem; color:var(--text-secondary);">9 pilihan layout bebas typo + Caption</span>
+                </button>
+                <button type="button" class="choice-btn" id="outPlainGridBtn" aria-pressed="false">
+                  <strong style="font-size:0.8rem;">Grid Kolase Foto (Lama)</strong>
+                  <span style="font-size:0.72rem; color:var(--text-secondary);">Foto polos tanpa teks</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 9 Template Selector + Auto-Rotate -->
+            <div id="infographic9Box" class="stack" style="gap:10px;">
+              <div class="auto-rotate-banner" id="autoRotateBanner">
+                <div>
+                  <strong style="font-size:0.8rem; display:block;">Mode Auto-Rotasi 9 Template (Anti-Monoton)</strong>
+                  <span style="font-size:0.72rem; color:var(--text-secondary);">Otomatis mengganti layout berbeda setiap hari / setiap batch.</span>
+                </div>
+                <label style="display:flex;align-items:center;gap:8px;font-size:0.8rem;font-weight:700;" for="autoRotateCheck">
+                  <input type="checkbox" id="autoRotateCheck" style="width:18px;height:18px;accent-color:var(--action-primary);" />
+                  <span>Aktif</span>
+                </label>
+              </div>
+
+              <div>
+                <div class="block-label" style="font-size:0.75rem; margin-bottom:6px;">
+                  <span>Pilih Layout Infografis (9 Variasi Berbeda)</span>
+                  <span id="selectedTplQuota" class="pill-badge">5-7 Foto AI</span>
+                </div>
+                <div class="tpl-selector-grid" id="tplSelectorGrid"></div>
+              </div>
+
+              <div class="field-grid-3">
+                <div>
+                  <label class="block-label" for="rlRatioSelect" style="font-size:0.74rem; margin-bottom:4px;">Rasio Poster</label>
+                  <select class="select" id="rlRatioSelect">
+                    <option value="4:5">4:5 (1080x1350 Feed Optimal)</option>
+                    <option value="3:4">3:4 (1080x1440 Portrait)</option>
+                    <option value="1:1">1:1 (1080x1080 Square)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block-label" for="rlThemeSelect" style="font-size:0.74rem; margin-bottom:4px;">Tema Warna</label>
+                  <select class="select" id="rlThemeSelect">
+                    <option value="warm_cream">Krem Hangat</option>
+                    <option value="fresh_pandan">Pandan Segar</option>
+                    <option value="bakery_choco">Cokelat Bakery</option>
+                    <option value="pastel_playful">Pastel Ceria</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block-label" for="rlProductSelect" style="font-size:0.74rem; margin-bottom:4px;">Produk Opsional</label>
+                  <select class="select" id="rlProductSelect">
+                    <option value="none">Tanpa Produk (Organik)</option>
+                    <option value="toples">Toples Kedap Udara 1000ml</option>
+                    <option value="cocoa">Premix Cocoa Powder</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                <label style="display:flex;align-items:center;gap:6px;font-size:0.78rem;font-weight:700;" for="wmCheck">
+                  <input type="checkbox" id="wmCheck" checked style="width:17px;height:17px;accent-color:var(--action-primary);" />
+                  <span>Nama Brand di Pojok Poster:</span>
+                </label>
+                <input class="input" id="wmTextInput" type="text" value="@NutriBake.id" style="flex:1;min-width:160px;min-height:36px;" />
+              </div>
+            </div>
+
+            <!-- Plain Grid Controls (hidden when infographic is selected) -->
+            <div id="plainGridBox" style="display:none; padding:10px; border-radius:8px; background:var(--surface); border:1px solid var(--border-subtle); font-size:0.8rem;">
+              <strong>Pengaturan Kolase Foto Polos (Mode Lama)</strong>: Jumlah Gambar (3-6), Layout Grid, Gap, Radius, Padding, Warna Latar.
+            </div>
+          </div>
+
+          <button type="button" class="cta-submit" id="submitBtn">Luncurkan Poster Infografis &amp; Caption Sekarang</button>
+        </div>
+      </section>
+
+      <!-- Right: Live Preview of Selected Layout -->
+      <aside class="panel preview-sticky" aria-labelledby="previewTitle">
+        <div class="panel-head">
+          <h2 class="panel-title" id="previewTitle">Pratinjau Layout Terpilih</h2>
+          <span class="pill-badge" id="previewBadge">#1 Classic Step-Photo Grid</span>
+        </div>
+        <div id="previewStage"></div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const TEMPLATES = [
+      {
+        id: 'step_grid_classic',
+        num: 1,
+        name: 'Classic Step Grid',
+        quota: '5-7 Foto AI',
+        wf: '<div class="wf-photo" style="height:14px;"></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;flex:1;"><div class="wf-photo"></div><div class="wf-photo"></div><div class="wf-photo"></div><div class="wf-photo"></div><div class="wf-photo"></div><div class="wf-photo"></div></div>',
+        sample: {
+          title: 'Es Teler Creamy', ribbon: 'Segar, Creamy, Enak Banget!', meta: '4 Porsi · 15 Menit',
+          ingredients: ['1 buah alpukat matang', '100 gr nangka matang', '100 gr kelapa muda', '100 gr jelly hitam', '500 ml susu cair', '100 ml santan', '4 sdm SKM'],
+          steps: ['Potong buah & jelly', 'Aduk kuah susu', 'Campur jelly', 'Susun dalam cup', 'Tuang kuah creamy', 'Beri keju parut'],
+          tips: ['Pakai alpukat matang pohon agar lembut.']
+        }
+      },
+      {
+        id: 'hero_right_editorial',
+        num: 2,
+        name: 'Editorial Kanan',
+        quota: '2 Foto AI',
+        wf: '<div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;flex:1;"><div class="wf-text"></div><div class="wf-photo"></div></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;height:10px;"><div class="wf-text"></div><div class="wf-text"></div><div class="wf-text"></div><div class="wf-text"></div></div>',
+        sample: {
+          title: 'Matcha Almond Crispy', ribbon: 'Renyah, Lembut, Wangi Matcha', meta: '1 Toples · 35 Menit',
+          ingredients: ['50 gr putih telur', '25 gr mentega Wisjman', '25 gr margarin', '45 gr gula halus', '5 gr matcha bubuk', '20 gr maizena', '50 gr terigu'],
+          steps: ['Kocok mentega & gula', 'Campur matcha & tepung', 'Cetak tipis & almond', 'Panggang 150C 20 mnt'],
+          tips: ['Oles adonan tipis agar renyah merata.']
+        }
+      },
+      {
+        id: 'layered_band_cards',
+        num: 3,
+        name: 'Multi-Layer Kolom',
+        quota: '2 Foto AI',
+        wf: '<div class="wf-photo" style="height:10px;"></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;height:10px;"><div class="wf-text"></div><div class="wf-text"></div><div class="wf-text"></div></div><div style="display:grid;grid-template-columns:1.2fr 0.8fr;gap:2px;flex:1;"><div class="wf-text"></div><div class="wf-photo"></div></div>',
+        sample: {
+          title: 'Puding Coklat Oreo Alpukat', ribbon: 'Lembut, 3 Lapis Istimewa', meta: '1 Loyang · 30 Menit',
+          groups: [
+            { title: 'Alpukat', items: ['200 gr alpukat', '1/2 agar plain', '350 ml susu'] },
+            { title: 'Oreo', items: ['1/2 agar plain', '400 ml susu', '5 keping Oreo'] },
+            { title: 'Coklat', items: ['1 agar coklat', '600 ml susu', '40 gr DCC'] }
+          ],
+          steps: ['Masak lapisan alpukat & tuang', 'Masak susu Oreo, tuang di atasnya', 'Masak coklat DCC & tuang perlahan', 'Dinginkan hingga set di kulkas'],
+          tips: ['Tusuk ringan lapisan bawah agar menempel.']
+        }
+      },
+      {
+        id: 'centerpiece_spotlight',
+        num: 4,
+        name: 'Spotlight Tengah',
+        quota: '1 Foto AI',
+        wf: '<div class="wf-text" style="height:6px;"></div><div style="display:grid;grid-template-columns:0.8fr 1fr 0.8fr;gap:2px;flex:1;"><div class="wf-text"></div><div class="wf-photo" style="border-radius:50%;"></div><div class="wf-text"></div></div><div class="wf-text" style="height:10px;"></div>',
+        sample: {
+          title: 'Ayam Bakar Madu', ribbon: 'Empuk, Manis Gurih Meresap', meta: '4 Porsi · 40 Menit',
+          ingredients: ['500 gr paha ayam', '3 sdm madu', '2 sdm kecap manis', '4 siung bawang putih', '1 sdt ketumbar'],
+          steps: ['Tumis bumbu halus harum', 'Ungkep ayam hingga meresap', 'Oles madu & kecap manis', 'Bakar hingga kecoklatan'],
+          tips: ['Pakai api kecil saat membakar agar madu tidak gosong.']
+        }
+      },
+      {
+        id: 'magazine_vertical_split',
+        num: 5,
+        name: 'Majalah 2 Kolom',
+        quota: '4 Foto AI',
+        wf: '<div style="display:grid;grid-template-columns:0.85fr 1.15fr;gap:2px;flex:1;"><div style="display:flex;flex-direction:column;gap:2px;"><div class="wf-photo" style="flex:1.4;"></div><div class="wf-photo" style="flex:0.7;"></div><div class="wf-photo" style="flex:0.7;"></div></div><div class="wf-text"></div></div>',
+        sample: {
+          title: 'Sourdough Coffee Brownie', ribbon: 'Fudgy, Aroma Kopi Pekat', meta: '1 Loyang · 45 Menit',
+          ingredients: ['150 gr dark chocolate', '100 gr mentega', '120 gr gula palem', '2 butir telur', '100 gr starter', '60 gr terigu', '1 sdm kopi'],
+          steps: ['Lelehkan coklat & mentega', 'Kocok telur, gula & kopi', 'Aduk lipat terigu & starter', 'Panggang 175C 28 mnt'],
+          tips: ['Jangan overbake agar tekstur tengah tetap fudgy.']
+        }
+      },
+      {
+        id: 'visual_ingredient_shelf',
+        num: 6,
+        name: 'Rak Bahan Visual',
+        quota: '5-7 Foto AI',
+        wf: '<div class="wf-text" style="height:6px;"></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;height:14px;"><div class="wf-text"></div><div class="wf-photo"></div></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;flex:1;"><div class="wf-photo"></div><div class="wf-photo"></div><div class="wf-photo"></div></div>',
+        sample: {
+          title: 'Puding Krispi 2 Bahan', ribbon: 'Enak, Praktis, Super Krispi', meta: '1 Loyang · 20 Menit',
+          ingredients: ['1 bks Biskuit Krispi', '1 bks Agar Coklat Instan', '2 1/2 gelas Air matang'],
+          steps: ['Masak agar coklat mendidih', 'Patahkan biskuit kecil', 'Campur ke agar coklat', 'Tuang ke loyang bulat', 'Tabur remahan atasnya', 'Dinginkan hingga set'],
+          tips: ['Sisakan sedikit biskuit untuk taburan kering atas.']
+        }
+      },
+      {
+        id: 'step_timeline_zigzag',
+        num: 7,
+        name: 'Timeline Memasak',
+        quota: '5 Foto AI',
+        wf: '<div style="display:grid;grid-template-columns:1.3fr 0.7fr;gap:2px;height:10px;"><div class="wf-text"></div><div class="wf-photo"></div></div><div style="display:flex;flex-direction:column;gap:2px;flex:1;"><div style="display:grid;grid-template-columns:1fr 2fr;gap:2px;flex:1;"><div class="wf-photo"></div><div class="wf-text"></div></div><div style="display:grid;grid-template-columns:2fr 1fr;gap:2px;flex:1;"><div class="wf-text"></div><div class="wf-photo"></div></div></div>',
+        sample: {
+          title: 'Kacang Caramel', ribbon: 'Renyah, Manis, Anti Gosong', meta: '1 Toples · 25 Menit',
+          ingredients: ['250 gr kacang tanah', '150 gr gula putih', '75 ml air', '1 sdm margarin', '1/4 sdt garam'],
+          steps: ['Sangrai kacang tanah renyah', 'Masak gula & air berbuih', 'Masukkan kacang, aduk rata', 'Dinginkan di loyang lalu simpan'],
+          tips: ['Gunakan api kecil saat memasak karamel gula.']
+        }
+      },
+      {
+        id: 'polaroid_scrapbook',
+        num: 8,
+        name: 'Scrapbook Polaroid',
+        quota: '4 Foto AI',
+        wf: '<div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;flex:1;"><div style="display:flex;flex-direction:column;gap:2px;"><div class="wf-photo" style="flex:1;transform:rotate(-3deg);"></div><div class="wf-photo" style="height:12px;transform:rotate(2deg);"></div></div><div class="wf-text"></div></div>',
+        sample: {
+          title: 'Pilus Cikur Gurih', ribbon: 'Wangi Kencur Bikin Nagih', meta: '1 Toples · 25 Menit',
+          ingredients: ['250 gr tepung tapioka', '2 sdm terigu', '3 siung bawang putih', '2 ruas kencur', '150 ml air mendidih'],
+          steps: ['Campur tepung & bumbu', 'Tuang air panas, uleni kalis', 'Pulung bulatan kecil', 'Goreng api sedang sampai kuning'],
+          tips: ['Masukkan pilus saat minyak masih hangat.']
+        }
+      },
+      {
+        id: 'compact_2col_cheat_sheet',
+        num: 9,
+        name: 'Cheat Sheet 1-Menit',
+        quota: '1 Foto AI',
+        wf: '<div class="wf-photo" style="height:14px;"></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;flex:1;"><div class="wf-text"></div><div class="wf-text"></div></div>',
+        sample: {
+          title: 'Stik Royco Renyah', ribbon: 'Gurih, Renyah, Simpel!', meta: '1 Toples · 30 Menit',
+          ingredients: ['250 gr tepung terigu', '100 gr tapioka', '1 butir telur', '1 sachet kaldu ayam', '2 sdm margarin', '110 ml air'],
+          steps: ['Campur tepung & bumbu.', 'Uleni dengan telur & air.', 'Gilas tipis & potong stik.', 'Goreng hingga keemasan.', 'Tiriskan & simpan toples.'],
+          tips: ['Gilas adonan tipis agar renyah tahan lama.']
+        }
+      }
+    ];
+
+    const state = {
+      apMode: 'instant', // 'instant' | 'schedule'
+      campaignType: 'recipe_labs',
+      recipeSource: 'ai_generated',
+      outputStyle: 'recipe_infographic',
+      autoRotate: false,
+      templateId: 'step_grid_classic',
+      ratio: '4:5',
+      ptheme: 'warm_cream',
+      product: 'none',
+      showWm: true,
+      wmText: '@NutriBake.id'
+    };
+
+    function buildPosterPreview(tpl) {
+      const s = tpl.sample;
+      const customTitle = (state.recipeSource === 'ai_generated' && document.getElementById('rlTopicInput').value.trim())
+        ? document.getElementById('rlTopicInput').value.trim()
+        : s.title;
+      const showTitle = tpl.id === 'step_grid_classic' && state.recipeSource === 'ai_generated' ? customTitle : s.title;
+      const prodChip = state.product !== 'none'
+        ? `<div class="p-prod-chip">Pakai: ${document.getElementById('rlProductSelect').selectedOptions[0].text}</div>`
+        : '';
+      const wmHtml = (state.showWm && state.wmText.trim()) ? `<div class="p-wm">${state.wmText.trim()}</div>` : '';
+      const footer = `
+        <div class="p-footer">
+          <div class="p-tips-box">
+            <span class="p-tips-tag">Tips :</span>
+            <ul class="p-list">${s.tips.map(t => `<li>${t}</li>`).join('')}</ul>
+          </div>
+          <div class="p-badge-col">
+            <div class="p-selamat">Selamat Mencoba!</div>
+            ${wmHtml}
+          </div>
+        </div>`;
+
+      const ingList = (arr) => `<ul class="p-list">${(arr || []).map(i => `<li>${i}</li>`).join('')}</ul>`;
+
+      switch (tpl.id) {
+        case 'step_grid_classic':
+          return `
+            <div style="display:grid;grid-template-columns:1.1fr 0.9fr;gap:8px;align-items:stretch;">
+              <div style="display:flex;flex-direction:column;gap:5px;">
+                <div><h3 class="p-title">${showTitle}</h3><div class="p-ribbon">${s.ribbon}</div></div>
+                <div class="p-photo p-photo-hero" style="flex:1;min-height:110px;">Hero Foto (${s.meta})</div>
+              </div>
+              <div class="p-card" style="display:flex;flex-direction:column;">
+                <span class="p-pill">Bahan-bahan :</span>
+                ${ingList(s.ingredients)}
+                ${prodChip}
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:5px;">
+              <div><span class="p-pill">Cara Membuat :</span></div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
+                ${s.steps.map((st, idx) => `<div class="p-card" style="padding:5px;text-align:center;"><div class="p-photo" style="height:40px;margin-bottom:3px;"><span class="p-num" style="position:absolute;top:3px;left:3px;">${idx+1}</span>Step ${idx+1}</div><div style="font-size:0.6rem;font-weight:700;">${st}</div></div>`).join('')}
+              </div>
+            </div>${footer}`;
+
+        case 'hero_right_editorial':
+          return `
+            <div style="display:grid;grid-template-columns:0.95fr 1.05fr;gap:9px;flex:1;">
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <div><h3 class="p-title">${s.title}</h3><div class="p-ribbon">${s.ribbon}</div></div>
+                <div class="p-card" style="flex:1;"><span class="p-pill">Bahan :</span>${ingList(s.ingredients)}${prodChip}</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:7px;">
+                <div class="p-photo p-photo-hero" style="flex:1.4;min-height:130px;">Hero Vertikal (${s.meta})</div>
+                <div class="p-photo" style="flex:0.65;min-height:60px;">Detail Tekstur</div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
+              ${s.steps.map((st, idx) => `<div class="p-card" style="padding:5px;"><span class="p-num p-num-dark">${idx+1}</span><div style="font-size:0.6rem;font-weight:700;margin-top:3px;">${st}</div></div>`).join('')}
+            </div>${footer}`;
+
+        case 'layered_band_cards':
+          return `
+            <div style="display:grid;grid-template-columns:1.1fr 0.9fr;gap:8px;align-items:center;">
+              <div><h3 class="p-title">${s.title}</h3><div class="p-ribbon">${s.ribbon}</div></div>
+              <div class="p-photo p-photo-hero" style="height:95px;">Hero Utuh (${s.meta})</div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
+              ${s.groups.map(g => `<div class="p-card" style="padding:6px;"><span class="p-pill" style="font-size:0.62rem;">${g.title}</span>${ingList(g.items)}</div>`).join('')}
+            </div>${prodChip}
+            <div style="display:grid;grid-template-columns:1.25fr 0.75fr;gap:8px;flex:1;">
+              <div style="display:flex;flex-direction:column;gap:5px;">
+                <span class="p-pill">Cara Membuat :</span>
+                ${s.steps.map((st, idx) => `<div class="p-card" style="padding:5px 7px;display:flex;gap:6px;align-items:center;"><span class="p-num p-num-dark">${idx+1}</span><span style="font-size:0.64rem;font-weight:600;">${st}</span></div>`).join('')}
+              </div>
+              <div class="p-photo" style="min-height:100px;">Foto Potongan Lapisan</div>
+            </div>${footer}`;
+
+        case 'centerpiece_spotlight':
+          return `
+            <div style="text-align:center;"><h3 class="p-title">${s.title}</h3><div class="p-ribbon">${s.ribbon}</div></div>
+            <div style="display:grid;grid-template-columns:0.78fr 1fr 0.92fr;gap:7px;align-items:center;">
+              <div class="p-card"><span class="p-pill">Info</span><div style="font-size:0.65rem;font-weight:700;margin-top:4px;">${s.meta}</div>${prodChip}</div>
+              <div class="p-photo p-photo-hero" style="aspect-ratio:1/1;border-radius:50%;">Spotlight Hero</div>
+              <div class="p-card"><span class="p-pill">Bahan :</span>${ingList(s.ingredients)}</div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">
+              ${s.steps.map((st, idx) => `<div class="p-card" style="padding:6px;display:flex;gap:6px;align-items:center;"><span class="p-num p-num-dark">${idx+1}</span><span style="font-size:0.65rem;font-weight:600;">${st}</span></div>`).join('')}
+            </div>${footer}`;
+
+        case 'magazine_vertical_split':
+          return `
+            <div style="display:grid;grid-template-columns:0.86fr 1.14fr;gap:10px;flex:1;">
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <div class="p-photo p-photo-hero" style="flex:1.4;min-height:120px;">Hero (${s.meta})</div>
+                <div class="p-photo" style="flex:0.7;"><span class="p-num" style="position:absolute;top:4px;left:4px;">1</span>Proses 1</div>
+                <div class="p-photo" style="flex:0.7;"><span class="p-num" style="position:absolute;top:4px;left:4px;">2</span>Proses 2</div>
+                <div class="p-photo" style="flex:0.7;"><span class="p-num" style="position:absolute;top:4px;left:4px;">3</span>Proses 3</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <div><h3 class="p-title">${s.title}</h3><div class="p-ribbon">${s.ribbon}</div></div>
+                <div class="p-card"><span class="p-pill">Bahan :</span>${ingList(s.ingredients)}${prodChip}</div>
+                <div class="p-card" style="flex:1;display:flex;flex-direction:column;gap:5px;"><span class="p-pill">Langkah :</span>${s.steps.map((st,idx)=>`<div style="display:flex;gap:5px;font-size:0.64rem;font-weight:600;"><span class="p-num p-num-dark">${idx+1}</span><span>${st}</span></div>`).join('')}</div>
+                ${footer}
+              </div>
+            </div>`;
+
+        case 'visual_ingredient_shelf':
+          return `
+            <div style="text-align:center;"><h3 class="p-title">${s.title}</h3><div class="p-ribbon">${s.ribbon}</div></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div class="p-card" style="display:flex;flex-direction:column;gap:4px;"><span class="p-pill">Rak Bahan :</span>${s.ingredients.map(i=>`<div style="padding:4px 6px;border-radius:6px;background:rgba(0,0,0,0.04);border:1px solid var(--p-border);font-size:0.64rem;font-weight:700;">[Ikon] ${i}</div>`).join('')}${prodChip}</div>
+              <div class="p-photo p-photo-hero" style="min-height:105px;">Hero Sajian (${s.meta})</div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
+              ${s.steps.map((st,idx)=>`<div class="p-card" style="padding:4px;text-align:center;"><div class="p-photo" style="height:38px;margin-bottom:3px;"><span class="p-num" style="position:absolute;top:3px;left:3px;">${idx+1}</span>Step ${idx+1}</div><div style="font-size:0.59rem;font-weight:700;">${st}</div></div>`).join('')}
+            </div>${footer}`;
+
+        case 'step_timeline_zigzag':
+          return `
+            <div style="display:grid;grid-template-columns:1.25fr 0.75fr;gap:8px;align-items:center;">
+              <div><h3 class="p-title">${s.title}</h3><div class="p-ribbon">${s.ribbon}</div></div>
+              <div class="p-photo p-photo-hero" style="height:82px;">Hero (${s.meta})</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:5px;flex:1;">
+              ${s.steps.map((st, idx) => {
+                const ph = `<div class="p-photo" style="width:82px;height:48px;flex-shrink:0;">Foto ${idx+1}</div>`;
+                const tx = `<div style="flex:1;font-size:0.65rem;font-weight:700;">${st}</div>`;
+                return `<div class="p-card" style="padding:5px 7px;display:flex;align-items:center;gap:8px;border-left:4px solid var(--p-primary);"><span class="p-num">${idx+1}</span>${idx%2===1 ? tx+ph : ph+tx}</div>`;
+              }).join('')}
+            </div>
+            <div class="p-card" style="padding:5px 8px;"><span class="p-pill">Bahan :</span> <span style="font-size:0.63rem;font-weight:600;">${s.ingredients.join(' · ')}</span>${prodChip}</div>${footer}`;
+
+        case 'polaroid_scrapbook':
+          return `
+            <div style="text-align:center;"><h3 class="p-title">${s.title}</h3><div class="p-ribbon">${s.ribbon}</div></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;flex:1;">
+              <div style="display:flex;flex-direction:column;gap:8px;justify-content:center;">
+                <div style="background:#fff;padding:6px 6px 14px;border-radius:4px;box-shadow:0 6px 14px rgba(0,0,0,0.16);transform:rotate(-2deg);"><div class="p-photo p-photo-hero" style="height:105px;border:none;">Hero Polaroid</div></div>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">${[1,2,3].map(n=>`<div style="background:#fff;padding:4px 4px 8px;border-radius:4px;box-shadow:0 4px 10px rgba(0,0,0,0.12);transform:rotate(${n===2?'2deg':'-1.5deg'});"><div class="p-photo" style="height:44px;border:none;"><span class="p-num" style="position:absolute;top:2px;left:2px;">${n}</span>${n}</div></div>`).join('')}</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <div class="p-card" style="border-style:dashed;"><span class="p-pill">Bahan :</span>${ingList(s.ingredients)}${prodChip}</div>
+                <div class="p-card" style="border-style:dashed;flex:1;"><span class="p-pill">Langkah :</span><div style="margin-top:4px;display:flex;flex-direction:column;gap:4px;">${s.steps.map((st,idx)=>`<div style="font-size:0.63rem;font-weight:600;display:flex;gap:5px;"><span class="p-num p-num-dark">${idx+1}</span><span>${st}</span></div>`).join('')}</div></div>
+              </div>
+            </div>${footer}`;
+
+        case 'compact_2col_cheat_sheet':
+          return `
+            <div class="p-photo p-photo-hero" style="height:125px;justify-content:flex-end;align-items:flex-start;padding:0;">
+              <div style="width:100%;padding:10px 12px;background:linear-gradient(180deg, rgba(16,10,6,0.15) 0%, rgba(16,10,6,0.88) 100%);text-align:left;">
+                <div style="font-family:var(--font-display);font-size:1.3rem;font-weight:700;color:#ffffff;">${s.title}</div>
+                <div style="font-size:0.72rem;font-weight:700;color:#fde68a;">${s.ribbon} · ${s.meta}</div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:0.92fr 1.08fr;gap:8px;flex:1;">
+              <div class="p-card"><span class="p-pill">Bahan :</span>${ingList(s.ingredients)}${prodChip}</div>
+              <div class="p-card" style="display:flex;flex-direction:column;gap:4px;"><span class="p-pill">Langkah Cepat :</span>${s.steps.map((st,idx)=>`<div style="display:flex;gap:5px;font-size:0.64rem;font-weight:600;"><span class="p-num p-num-dark">${idx+1}</span><span>${st}</span></div>`).join('')}</div>
+            </div>${footer}`;
+      }
+    }
+
+    function render() {
+      const isRecipeLabs = state.campaignType === 'recipe_labs';
+      const isSched = state.apMode === 'schedule';
+
+      document.getElementById('modeInstantBtn').setAttribute('aria-pressed', !isSched ? 'true' : 'false');
+      document.getElementById('modeSchedBtn').setAttribute('aria-pressed', isSched ? 'true' : 'false');
+
+      document.querySelectorAll('[data-ctype]').forEach(btn => {
+        btn.setAttribute('aria-pressed', btn.getAttribute('data-ctype') === state.campaignType ? 'true' : 'false');
+      });
+
+      const typeLabel = isRecipeLabs ? 'Resep Teks & Foto' : (state.campaignType === 'recipe_campaign' ? 'Video Resep' : 'Video Produk');
+      document.getElementById('apContextBadge').textContent = `${isSched ? 'Modal Jadwal' : '1-Klik Instan'} · ${typeLabel}`;
+
+      // Show/Hide Video Controls cleanly
+      document.getElementById('hiddenVideoBanner').style.display = isRecipeLabs ? 'flex' : 'none';
+      document.querySelectorAll('.video-only').forEach(el => {
+        el.style.display = isRecipeLabs ? 'none' : 'flex';
+      });
+      document.getElementById('execModeBlock').style.display = (!isRecipeLabs && !isSched) ? 'flex' : 'none';
+      document.getElementById('schedTtsBanner').style.display = (!isRecipeLabs && isSched) ? 'block' : 'none';
+      document.getElementById('schedTimingBlock').style.display = isSched ? 'flex' : 'none';
+      document.getElementById('recipeLabsPanel').style.display = isRecipeLabs ? 'flex' : 'none';
+
+      // Recipe source controls
+      document.getElementById('srcAiBtn').setAttribute('aria-pressed', state.recipeSource === 'ai_generated' ? 'true' : 'false');
+      document.getElementById('srcLibBtn').setAttribute('aria-pressed', state.recipeSource === 'recipe_library' ? 'true' : 'false');
+      document.getElementById('aiTopicWrap').style.display = state.recipeSource === 'ai_generated' ? 'block' : 'none';
+      document.getElementById('libSelectWrap').style.display = state.recipeSource === 'recipe_library' ? 'block' : 'none';
+
+      // Output style controls
+      const isInfo = state.outputStyle === 'recipe_infographic';
+      document.getElementById('outInfographicBtn').setAttribute('aria-pressed', isInfo ? 'true' : 'false');
+      document.getElementById('outPlainGridBtn').setAttribute('aria-pressed', !isInfo ? 'true' : 'false');
+      document.getElementById('infographic9Box').style.display = isInfo ? 'flex' : 'none';
+      document.getElementById('plainGridBox').style.display = !isInfo ? 'block' : 'none';
+
+      // Auto-rotate banner
+      document.getElementById('autoRotateBanner').className = `auto-rotate-banner ${state.autoRotate ? 'active' : ''}`;
+
+      // Submit button text
+      document.getElementById('submitBtn').textContent = isSched
+        ? (isRecipeLabs ? 'Simpan Jadwal Poster Infografis & Caption' : 'Simpan Jadwal Video Auto Pipeline')
+        : (isRecipeLabs ? (isInfo ? 'Luncurkan Poster Infografis & Caption Sekarang' : 'Luncurkan Kolase Foto Resep') : 'Luncurkan Produksi Video Sekarang');
+
+      // Render 9 template cards with wireframe thumbnails
+      const gridEl = document.getElementById('tplSelectorGrid');
+      gridEl.innerHTML = TEMPLATES.map(t => `
+        <button type="button" class="tpl-opt-card" data-pick-tpl="${t.id}" aria-pressed="${t.id === state.templateId ? 'true' : 'false'}">
+          <div class="wireframe-box">${t.wf}</div>
+          <div>
+            <div style="font-size:0.76rem;font-weight:800;color:var(--text-primary);">#${t.num} ${t.name}</div>
+            <div style="font-size:0.68rem;color:var(--text-secondary);">${t.quota}</div>
+          </div>
+        </button>
+      `).join('');
+
+      gridEl.querySelectorAll('[data-pick-tpl]').forEach(b => {
+        b.addEventListener('click', () => {
+          state.templateId = b.getAttribute('data-pick-tpl');
+          render();
+        });
+      });
+
+      const activeTpl = TEMPLATES.find(t => t.id === state.templateId) || TEMPLATES[0];
+      document.getElementById('selectedTplQuota').textContent = state.autoRotate ? 'Auto-Rotasi 9 Template' : activeTpl.quota;
+
+      // Render right preview
+      const stage = document.getElementById('previewStage');
+      if (!isRecipeLabs) {
+        document.getElementById('previewBadge').textContent = 'Mode Video Aktif';
+        stage.innerHTML = `<div style="padding:28px 18px;border-radius:12px;background:var(--surface-raised);border:1px solid var(--border-subtle);text-align:center;color:var(--text-secondary);font-size:0.86rem;">Saat mode <strong>${typeLabel}</strong> aktif, seluruh kontrol video di kiri ditampilkan.<br><br>Klik kartu <strong>Resep Teks &amp; Foto</strong> di kiri atas untuk melihat semua pengaturan video disembunyikan secara otomatis.</div>`;
+      } else if (!isInfo) {
+        document.getElementById('previewBadge').textContent = 'Grid Kolase Polos (Lama)';
+        stage.innerHTML = `<div style="aspect-ratio:3/4;max-width:420px;margin:0 auto;background:#0d0d12;border-radius:12px;padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div style="background:#1c2433;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#d8e0ea;font-size:0.8rem;font-weight:700;">Slot 1: Hero</div>
+          <div style="background:#1c2433;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#d8e0ea;font-size:0.8rem;font-weight:700;">Slot 2: Bahan</div>
+          <div style="background:#1c2433;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#d8e0ea;font-size:0.8rem;font-weight:700;">Slot 3: Proses</div>
+          <div style="background:#1c2433;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#d8e0ea;font-size:0.8rem;font-weight:700;">Slot 4: Plating</div>
+        </div>`;
+      } else {
+        document.getElementById('previewBadge').textContent = `#${activeTpl.num} ${activeTpl.name} (${state.ratio})`;
+        stage.innerHTML = `<div class="poster" data-ptheme="${state.ptheme}" data-ratio="${state.ratio}">${buildPosterPreview(activeTpl)}</div>`;
+      }
+    }
+
+    // Bind events
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      const html = document.documentElement;
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      document.getElementById('themeToggle').textContent = next === 'dark' ? 'Mode Terang' : 'Mode Gelap';
+    });
+
+    document.getElementById('modeInstantBtn').addEventListener('click', () => { state.apMode = 'instant'; render(); });
+    document.getElementById('modeSchedBtn').addEventListener('click', () => { state.apMode = 'schedule'; render(); });
+    document.querySelectorAll('[data-ctype]').forEach(btn => {
+      btn.addEventListener('click', () => { state.campaignType = btn.getAttribute('data-ctype'); render(); });
+    });
+    document.getElementById('srcAiBtn').addEventListener('click', () => { state.recipeSource = 'ai_generated'; render(); });
+    document.getElementById('srcLibBtn').addEventListener('click', () => { state.recipeSource = 'recipe_library'; render(); });
+    document.getElementById('outInfographicBtn').addEventListener('click', () => { state.outputStyle = 'recipe_infographic'; render(); });
+    document.getElementById('outPlainGridBtn').addEventListener('click', () => { state.outputStyle = 'photo_grid'; render(); });
+    document.getElementById('autoRotateCheck').addEventListener('change', (e) => { state.autoRotate = e.target.checked; render(); });
+    document.getElementById('rlRatioSelect').addEventListener('change', (e) => { state.ratio = e.target.value; render(); });
+    document.getElementById('rlThemeSelect').addEventListener('change', (e) => { state.ptheme = e.target.value; render(); });
+    document.getElementById('rlProductSelect').addEventListener('change', (e) => { state.product = e.target.value; render(); });
+    document.getElementById('wmCheck').addEventListener('change', (e) => { state.showWm = e.target.checked; render(); });
+    document.getElementById('wmTextInput').addEventListener('input', (e) => { state.wmText = e.target.value; render(); });
+    document.getElementById('rlTopicInput').addEventListener('input', () => render());
+    document.getElementById('brandSelect').addEventListener('change', (e) => {
+      const val = e.target.value;
+      const wm = val === 'NutriBake' ? '@NutriBake.id' : (val === 'Dapur Botani' ? '@DapurBotani' : '@SiasatSehat');
+      state.wmText = wm;
+      document.getElementById('wmTextInput').value = wm;
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>

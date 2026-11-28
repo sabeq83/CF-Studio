@@ -1,11 +1,20 @@
 # Daftar Isi Dokumen Kerja (catatan-kerja)
 
-Terakhir diperbarui: 27 November 2026
+Terakhir diperbarui: 28 November 2026
 
 ## USULAN
 
 | Nama File | Ringkasan / Judul |
 |---|---|
+| [RENCANA_IMPLEMENTASI_HERO_DOMINAN_INFOGRAFIS.md](usulan/RENCANA_IMPLEMENTASI_HERO_DOMINAN_INFOGRAFIS.md) | Rencana implementasi revisi 9 template infografis resep menuju foto Hero dominan (Opsi A 40% & Opsi B 55%) serta penyelarasan rasio G-Labs |
+| [USULAN_HOTFIX_HERO_PROMPT_PLACEHOLDER_DAN_ENGLISH_LOCK.md](usulan/USULAN_HOTFIX_HERO_PROMPT_PLACEHOLDER_DAN_ENGLISH_LOCK.md) | Audit `gor0a4`: foto Hero jadi mix berries akibat Gemini menyalin harfiah `"matching dish_visual_identity"` tanpa nama hidangan, `dish_visual_identity` Bahasa Indonesia, & guardrail duplikat, plus usulan hotfix |
+| [USULAN_REDESAIN_9_LAYOUT_INFOGRAFIS_ANTI_VOID.md](usulan/USULAN_REDESAIN_9_LAYOUT_INFOGRAFIS_ANTI_VOID.md) | Analisa ruang kosong & kepadatan visual poster, riset referensi Pinterest Editorial + Bento Grid, dan usulan redesain menyeluruh untuk 9 template infografis |
+| [USULAN_KONSISTENSI_VISUAL_HERO_DAN_STEPS_RECIPE.md](usulan/USULAN_KONSISTENSI_VISUAL_HERO_DAN_STEPS_RECIPE.md) | Analisa inkonsistensi Hero vs Step 6 (`Coffee Brownie Sourdough Bread`) & warna adonan Step 4-5, plus usulan `original_title` lock, state adonan kumulatif, & `reference_images` Hero untuk foto hasil akhir |
+| [USULAN_JUDUL_RINGKAS_DAN_WATERMARK_POSTER.md](usulan/USULAN_JUDUL_RINGKAS_DAN_WATERMARK_POSTER.md) | Analisa terpotongnya watermark brand & judul panjang dari Recipe Library di poster `3:4`, plus usulan `shortenPosterTitle` 2-5 kata, font 2 baris, & watermark anti-clip di 9 template |
+| [USULAN_PERBAIKAN_FOTOGRAFI_MAKRO_RECIPE_INFOGRAPHIC.md](usulan/USULAN_PERBAIKAN_FOTOGRAFI_MAKRO_RECIPE_INFOGRAPHIC.md) | Usulan perbaikan fotografi Poster Infografis Resep: opsi foto objek tanpa tangan vs crop pergelangan konsisten, lighting macro terang, default `Modern Minimalist Nordic Studio`, & margin watermark |
+| [USULAN_9_TEMPLATE_LAYOUT_INFOGRAFIS_RESEP.md](usulan/USULAN_9_TEMPLATE_LAYOUT_INFOGRAFIS_RESEP.md) | Usulan 9 template layout berbeda untuk Poster Infografis Resep (termasuk hemat-kuota 1-2 foto vs multi-foto, wireframe mini di UI, & mode `auto_rotate`) |
+| [RENCANA_COPY_CURATED_RECIPES_STAGING_DEV.md](usulan/RENCANA_COPY_CURATED_RECIPES_STAGING_DEV.md) | Rencana penyalinan 30 resep `curated_recipes` dari `tnt_sy-dodot_4ba27b` (`syd_admin`) ke `default_tenant` pada schema `staging` & `dev` secara transaksional & idempoten |
+| [USULAN_RECIPE_LABS_INFOGRAFIS_DAN_SUMBER_RESEP.md](usulan/USULAN_RECIPE_LABS_INFOGRAFIS_DAN_SUMBER_RESEP.md) | Analisa 7 contoh infografis resep & usulan pengembangan Recipe Labs / Auto Pipeline (mode poster infografis + caption, pilihan Recipe Library vs AI, & perbaikan publish `media_type: image`) |
 | [USULAN_HALAMAN_KATALOG_LINK_AFF_PUBLIK.md](usulan/USULAN_HALAMAN_KATALOG_LINK_AFF_PUBLIK.md) | Usulan halaman front-end publik tanpa login (mobile-first) untuk melihat daftar produk, thumbnail foto, filter Brand Profile, dan tombol Salin Link Aff |
 | [USULAN_PENGHAPUSAN_OTOMATIS_FILE_GDRIVE_REPLIZ.md](usulan/USULAN_PENGHAPUSAN_OTOMATIS_FILE_GDRIVE_REPLIZ.md) | Analisa apakah file di folder Google Drive `REPLIZ Publishing` aman dihapus setelah penjadwalan & usulan mekanisme penghapusan otomatis berbasis status (grace period pasca-`published`/`cancelled`, `needs_review`, anti-orphan, multi-tenant fix) |
 | [REKOMENDASI_PRODUK_84_BLUEPRINT_NUTRIBAKE.csv](usulan/REKOMENDASI_PRODUK_84_BLUEPRINT_NUTRIBAKE.csv) | Daftar CSV 496 rekomendasi produk `high_ticket` (244) & `low_ticket` (252) beserta estimasi harga dan kata kunci marketplace dari 84 blueprint jadwal NutriBake 14 hari |
