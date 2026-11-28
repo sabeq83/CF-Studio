@@ -129,6 +129,7 @@ function MultiplierLabPageContent({ mode = 'direct', onCapture, onSuccess, onCan
   };
   const [promotionStyle, setPromotionStyle] = useState('Softselling');
   const [bridgingMode, setBridgingMode] = useState('url_extract');
+  const [voProductMention, setVoProductMention] = useState('full');
   const [manualProductName, setManualProductName] = useState('');
   const [manualProductDesc, setManualProductDesc] = useState('');
   const [manualProductUsp, setManualProductUsp] = useState('');
@@ -237,9 +238,11 @@ function MultiplierLabPageContent({ mode = 'direct', onCapture, onSuccess, onCan
     // Accordion 3: Product Bridging Settings
     if (config.product_bridging) {
       setIsBridgingActive(Boolean(config.product_bridging.is_bridging_active));
+      const nextBridgingMode = config.product_bridging.bridging_mode || 'select_existing';
       if (typeof setBridgingMode === 'function') {
-        setBridgingMode(config.product_bridging.bridging_mode || 'select_existing');
+        setBridgingMode(nextBridgingMode);
       }
+      setVoProductMention(config.product_bridging.vo_product_mention || (nextBridgingMode === 'visual_only_placement' ? 'none' : 'full'));
       const norm = normalizeBridgePayload(config.product_bridging, config.visual_engine, {
         targetClips: config.visual_engine?.target_clips_count || null,
         defaultActive: true
@@ -333,6 +336,7 @@ function MultiplierLabPageContent({ mode = 'direct', onCapture, onSuccess, onCan
       product_bridging: {
         is_bridging_active: Boolean(isBridgingActive),
         bridging_mode: typeof bridgingMode !== 'undefined' ? bridgingMode : 'select_existing',
+        vo_product_mention: voProductMention || (bridgingMode === 'visual_only_placement' ? 'none' : 'full'),
         bridge_at_clip: Number(bridgeSegments[0]?.at_clip ?? bridgeAtClip ?? 3),
         bridge_duration_clips: Number(bridgeSegments[0]?.duration_clips ?? bridgeDurationClips ?? 1),
         bridge_segments: bridgeSegments
@@ -680,7 +684,7 @@ function MultiplierLabPageContent({ mode = 'direct', onCapture, onSuccess, onCan
       }
 
       let singleProduct = {};
-      if (bridgingMode === 'select_existing') {
+      if (bridgingMode === 'select_existing' || bridgingMode === 'visual_only_placement') {
         const prod = products.find(p => p.id === targetProductId);
         if (!prod) {
           showToast('Pilih produk dari pustaka terlebih dahulu', 'error');
@@ -994,7 +998,8 @@ function MultiplierLabPageContent({ mode = 'direct', onCapture, onSuccess, onCan
           isBridgingActive: isPureStory ? false : isBridgingActive,
           targetClipsCount, bridgeAtClip, bridgeDurationClips,
           bridge_segments: isPureStory ? [] : bridgeSegments,
-          promotionStyle, bridgingMode,
+          promotionStyle, bridgingMode, bridging_mode: bridgingMode, voProductMention,
+          vo_product_mention: voProductMention,
           manualProductName: isPureStory ? '' : manualProductName,
           manualProductDesc: isPureStory ? '' : manualProductDesc,
           manualProductUsp: isPureStory ? '' : manualProductUsp,
@@ -1811,9 +1816,9 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit} style={{ disp
 
                 {workflowMode === 'multi_blueprint_one_product' ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                    <div style={{ display: 'flex', gap: 16 }}>
+                    <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
                       <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: '0.8rem' }}>
-                        <input type="radio" name="bridgingModeM" value="select_existing" checked={bridgingMode === 'select_existing'} onChange={e => setBridgingMode(e.target.value)} />
+                        <input type="radio" name="bridgingModeM" value="select_existing" checked={bridgingMode === 'select_existing' || bridgingMode === 'visual_only_placement'} onChange={e => setBridgingMode(e.target.value)} />
                         Pilih dari Pustaka
                       </label>
                       <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: '0.8rem' }}>
@@ -1826,7 +1831,7 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit} style={{ disp
                       </label>
                     </div>
 
-                    {bridgingMode === 'select_existing' && (
+                    {(bridgingMode === 'select_existing' || bridgingMode === 'visual_only_placement') && (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                         {(blueprintRecommendations.loading || blueprintRecommendations.alat_dapur.length > 0 || blueprintRecommendations.bahan_resep.length > 0) && (
                           <div style={{ padding: 10, borderRadius: 'var(--radius-sm)', background: 'var(--surface-raised)', border: '1px solid var(--border-strong)', display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -1967,9 +1972,9 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit} style={{ disp
                   </div>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                    <div style={{ display: 'flex', gap: 16 }}>
+                    <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
                       <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: '0.8rem' }}>
-                        <input type="radio" name="massProductMode" value="select_existing" checked={bridgingMode === 'select_existing'} onChange={e => setBridgingMode(e.target.value)} />
+                        <input type="radio" name="massProductMode" value="select_existing" checked={bridgingMode === 'select_existing' || bridgingMode === 'visual_only_placement'} onChange={e => setBridgingMode(e.target.value)} />
                         Pilih Banyak dari Pustaka
                       </label>
                       <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: '0.8rem' }}>
@@ -1978,7 +1983,7 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit} style={{ disp
                       </label>
                     </div>
 
-                    {bridgingMode === 'select_existing' && (
+                    {(bridgingMode === 'select_existing' || bridgingMode === 'visual_only_placement') && (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                         {(blueprintRecommendations.loading || blueprintRecommendations.alat_dapur.length > 0 || blueprintRecommendations.bahan_resep.length > 0) && (
                           <div style={{ padding: 10, borderRadius: 'var(--radius-sm)', background: 'var(--surface-raised)', border: '1px solid var(--border-strong)', display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -2640,6 +2645,48 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit} style={{ disp
                               fallbackAtClip={bridgeAtClip}
                               fallbackDurationClips={bridgeDurationClips}
                             />
+                          </div>
+
+                          <div className="form-group">
+                            <label className="form-label" htmlFor="multiplier-bridging-mode">Mode Penempatan & VO (Bridging Mode)</label>
+                            <select
+                              id="multiplier-bridging-mode"
+                              className="form-input"
+                              style={{ cursor: 'pointer', minHeight: 44 }}
+                              value={bridgingMode}
+                              onChange={e => {
+                                const nextMode = e.target.value;
+                                setBridgingMode(nextMode);
+                                if (nextMode === 'visual_only_placement') {
+                                  if (voProductMention === 'full') {
+                                    setVoProductMention('none');
+                                  }
+                                  setBridgeAtClip(1);
+                                  setBridgeDurationClips(0);
+                                  setBridgeSegments([{ at_clip: 1, duration_clips: 0, role: 'intro' }]);
+                                }
+                              }}
+                            >
+                              <option value="select_existing">Standard Bridging (Pustaka Produk)</option>
+                              <option value="visual_only_placement">Visual Only Placement (Produk tampil terus, VO tidak menjual)</option>
+                              <option value="manual_input">Manual Prompt</option>
+                              <option value="url_extract">URL Extract</option>
+                            </select>
+                          </div>
+
+                          <div className="form-group">
+                            <label className="form-label" htmlFor="multiplier-vo-product-mention">VO Product Mention</label>
+                            <select
+                              id="multiplier-vo-product-mention"
+                              className="form-input"
+                              style={{ cursor: 'pointer', minHeight: 44 }}
+                              value={voProductMention}
+                              onChange={e => setVoProductMention(e.target.value)}
+                            >
+                              <option value="full">Full (Produk & USP disebut aktif di VO)</option>
+                              <option value="cta_only">CTA Only (Hanya pointer netral di klip akhir)</option>
+                              <option value="none">None (Pure Story/Resep, VO tidak menyebut produk)</option>
+                            </select>
                           </div>
 
                           <div className="form-group">
