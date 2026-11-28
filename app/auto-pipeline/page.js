@@ -12,6 +12,7 @@ import { GRID_LAYOUT_COORDINATES } from '@/lib/core/GridCoordinates';
 import { buildMultiplierSchedulePairs } from '@/lib/multiplier-pairing';
 import { buildRecipeProductSubmitFields } from '@/lib/recipe-product-matcher-shared';
 import BridgingProductReferenceCard from '../components/BridgingProductReferenceCard';
+import RecipeInfographicControls from '../components/campaign-forms/RecipeInfographicControls';
 import { resolveCampaignProductPhotoPath } from '@/lib/product-photo-policy';
 import { resolvePhotoStatusBadge } from '@/lib/product-card-photo-view';
 
@@ -257,13 +258,13 @@ export default function AutoPipelinePage() {
   const [instantBlueprintMatches, setInstantBlueprintMatches] = useState({ alat_dapur: [], bahan_resep: [], loading: false });
   const [schedMultiplierAutoRole, setSchedMultiplierAutoRole] = useState('alat_dapur'); // 'alat_dapur' | 'bahan_resep'
 
-  // Recipe Labs (Text & Photo Composite Grid) State (Tab 1)
-  const [instantTargetLanguage, setInstantTargetLanguage] = useState('en_US');
-  const [instantRecipeClassification, setInstantRecipeClassification] = useState('Quick & Easy Weeknight Dinners (Under 20 Mins)');
-  const [recipeLabsTopic, setRecipeLabsTopic] = useState('Crispy Honey Garlic Air Fryer Chicken Bites');
-  const [recipeLabsCategory, setRecipeLabsCategory] = useState('Quick & Easy Weeknight Dinners (Under 20 Mins)');
-  const [instantRecipeAspectRatio, setInstantRecipeAspectRatio] = useState('3:4');
-  const [recipeLabsVisualStyle, setRecipeLabsVisualStyle] = useState('Modern Minimalist Nordic Studio');
+  // Recipe Labs (Text & Photo Composite Grid / Infographic) State (Tab 1)
+  const [instantTargetLanguage, setInstantTargetLanguage] = useState('id_ID');
+  const [instantRecipeClassification, setInstantRecipeClassification] = useState('Menu Hidangan Utama & Lauk Pauk (Main Course)');
+  const [recipeLabsTopic, setRecipeLabsTopic] = useState('Es Teler Creamy');
+  const [recipeLabsCategory, setRecipeLabsCategory] = useState('Menu Hidangan Utama & Lauk Pauk (Main Course)');
+  const [instantRecipeAspectRatio, setInstantRecipeAspectRatio] = useState('4:5');
+  const [recipeLabsVisualStyle, setRecipeLabsVisualStyle] = useState('Rustic Warm Tabletop & Artisanal Kitchen');
   const [imagesPerRecipe, setImagesPerRecipe] = useState(4);
   const [selectedLayoutId, setSelectedLayoutId] = useState('4_editorial_split');
   const [gridGapSize, setGridGapSize] = useState(12);
@@ -271,6 +272,30 @@ export default function AutoPipelinePage() {
   const [gridOuterPadding, setGridOuterPadding] = useState(16);
   const [gridBgColor, setGridBgColor] = useState('#0d0d12');
   const [postToFacebook, setPostToFacebook] = useState(true);
+  const [curatedRecipes, setCuratedRecipes] = useState([]);
+  const [loadingCuratedRecipes, setLoadingCuratedRecipes] = useState(false);
+  const [instantInfographicCfg, setInstantInfographicCfg] = useState({
+    outputStyle: 'recipe_infographic',
+    infographicTemplate: 'infographic_step_grid',
+    infographicTheme: 'warm_cream',
+    recipeSource: 'ai_generated',
+    curatedRecipeId: '',
+    librarySelectionMode: 'manual',
+    showBrandWatermark: true,
+    brandWatermarkText: '',
+    productId: ''
+  });
+  const [schedInfographicCfg, setSchedInfographicCfg] = useState({
+    outputStyle: 'recipe_infographic',
+    infographicTemplate: 'infographic_step_grid',
+    infographicTheme: 'warm_cream',
+    recipeSource: 'ai_generated',
+    curatedRecipeId: '',
+    librarySelectionMode: 'auto_library_rotation',
+    showBrandWatermark: true,
+    brandWatermarkText: '',
+    productId: ''
+  });
 
   // CEP (Category Entry Point) & Promotion Context State
   const [selectedCep, setSelectedCep] = useState('auto');
@@ -928,6 +953,21 @@ export default function AutoPipelinePage() {
       }
     }
 
+    async function fetchCuratedRecipesList() {
+      setLoadingCuratedRecipes(true);
+      try {
+        const res = await fetch('/api/v2/recipes/curated/import-batch?limit=100');
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data)) {
+          setCuratedRecipes(data.data);
+        }
+      } catch (e) {
+        console.warn('[AutoPipeline] Error fetching curated recipes:', e);
+      } finally {
+        setLoadingCuratedRecipes(false);
+      }
+    }
+
     fetchBrands();
     fetchRecentCampaigns();
     fetchSchedules();
@@ -935,6 +975,7 @@ export default function AutoPipelinePage() {
     fetchProductsList();
     fetchBlueprints();
     fetchThreadsSeriesPosts();
+    fetchCuratedRecipesList();
   }, []);
 
   async function fetchBlueprints(searchQuery = '') {
@@ -1185,11 +1226,20 @@ export default function AutoPipelinePage() {
       targetTopic = prodObj ? `${baseTitle} × ${prodObj.product_name}` : baseTitle;
       targetCategory = 'multiplier';
     } else if (instantCampaignType === 'recipe_labs') {
-      if (!recipeLabsTopic || !recipeLabsTopic.trim()) {
-        reportLaunchError('Topik / Nama menu resep wajib diisi.');
-        return;
+      if (instantInfographicCfg.recipeSource === 'recipe_library') {
+        if (!instantInfographicCfg.curatedRecipeId) {
+          reportLaunchError('Pilih resep dari Recipe Library atau ubah sumber ke AI Bikin Sendiri.');
+          return;
+        }
+        const selectedLib = curatedRecipes.find(r => r.id === instantInfographicCfg.curatedRecipeId);
+        targetTopic = selectedLib ? (selectedLib.polished_title || selectedLib.original_title) : 'Resep Terkurasi';
+      } else {
+        if (!recipeLabsTopic || !recipeLabsTopic.trim()) {
+          reportLaunchError('Topik / Nama menu resep wajib diisi.');
+          return;
+        }
+        targetTopic = recipeLabsTopic.trim();
       }
-      targetTopic = recipeLabsTopic.trim();
       targetCategory = instantRecipeClassification || recipeLabsCategory || 'Makanan';
     } else if (instantCampaignType === 'threads_series') {
       if (threadsObjective === 'personal_product') {
@@ -1261,7 +1311,16 @@ export default function AutoPipelinePage() {
           execution_mode: executionMode,
           visual_identity_preset_id: selectedPresetId || activePresetConfig?.visual_swap?.visual_identity_preset_id || null,
           auto_sync_contentflow: 1,
-          // Parameter khusus Recipe Labs Grid Komposit
+          // Parameter khusus Recipe Labs Infografis & Grid Komposit
+          output_style: instantCampaignType === 'recipe_labs' ? instantInfographicCfg.outputStyle : undefined,
+          infographic_template: instantCampaignType === 'recipe_labs' ? instantInfographicCfg.infographicTemplate : undefined,
+          infographic_theme: instantCampaignType === 'recipe_labs' ? instantInfographicCfg.infographicTheme : undefined,
+          recipe_source: instantCampaignType === 'recipe_labs' ? instantInfographicCfg.recipeSource : undefined,
+          curated_recipe_id: instantCampaignType === 'recipe_labs' ? (instantInfographicCfg.curatedRecipeId || null) : undefined,
+          library_selection_mode: instantCampaignType === 'recipe_labs' ? instantInfographicCfg.librarySelectionMode : undefined,
+          show_brand_watermark: instantCampaignType === 'recipe_labs' ? instantInfographicCfg.showBrandWatermark : undefined,
+          brand_watermark_text: instantCampaignType === 'recipe_labs' ? (instantInfographicCfg.brandWatermarkText || null) : undefined,
+          product_id: instantCampaignType === 'recipe_labs' ? (instantInfographicCfg.productId || null) : targetProductId,
           images_per_recipe: imagesPerRecipe,
           selected_layout_id: selectedLayoutId,
           grid_gap_size: gridGapSize,
@@ -1774,11 +1833,22 @@ export default function AutoPipelinePage() {
     if (pType === 'recipe_labs') {
       setSchedImagesPerRecipe(schedCfg.images_per_recipe || 4);
       setSchedLayoutId(schedCfg.selected_layout_id || '4_editorial_split');
-      setSchedRecipeAspectRatio(schedCfg.aspect_ratio || '3:4');
-      setSchedVisualStyle(schedCfg.visual_style || 'Modern Minimalist Nordic Studio');
+      setSchedRecipeAspectRatio(schedCfg.aspect_ratio || '4:5');
+      setSchedVisualStyle(schedCfg.visual_style || 'Rustic Warm Tabletop & Artisanal Kitchen');
       setSchedPostToFacebook(schedCfg.post_to_facebook !== false);
-      setSchedTargetLanguage(schedCfg.target_language || 'en_US');
-      setSchedRecipeClassification(schedCfg.recipe_classification || schedCfg.category || sched.category || 'Main Courses & Entrees');
+      setSchedTargetLanguage(schedCfg.target_language || 'id_ID');
+      setSchedRecipeClassification(schedCfg.recipe_classification || schedCfg.category || sched.category || 'Menu Hidangan Utama & Lauk Pauk (Main Course)');
+      setSchedInfographicCfg({
+        outputStyle: schedCfg.output_style || 'recipe_infographic',
+        infographicTemplate: schedCfg.infographic_template || 'infographic_step_grid',
+        infographicTheme: schedCfg.infographic_theme || 'warm_cream',
+        recipeSource: schedCfg.recipe_source || 'ai_generated',
+        curatedRecipeId: schedCfg.curated_recipe_id || '',
+        librarySelectionMode: schedCfg.library_selection_mode || 'auto_library_rotation',
+        showBrandWatermark: schedCfg.show_brand_watermark !== false,
+        brandWatermarkText: schedCfg.brand_watermark_text || '',
+        productId: schedCfg.product_id || ''
+      });
     }
 
     setProductSearchQuery('');
@@ -1961,13 +2031,22 @@ export default function AutoPipelinePage() {
                       ? { 
                           images_per_recipe: schedImagesPerRecipe, 
                           selected_layout_id: schedLayoutId, 
-                          aspect_ratio: schedRecipeAspectRatio || '3:4',
+                          aspect_ratio: schedRecipeAspectRatio || '4:5',
                           visual_style: schedVisualStyle, 
                           post_to_facebook: schedPostToFacebook,
                           topic: schedTopicVal,
                           category: schedCategory,
                           recipe_classification: schedRecipeClassification,
-                          target_language: schedTargetLanguage || 'en_US'
+                          target_language: schedTargetLanguage || 'id_ID',
+                          output_style: schedInfographicCfg.outputStyle,
+                          infographic_template: schedInfographicCfg.infographicTemplate,
+                          infographic_theme: schedInfographicCfg.infographicTheme,
+                          recipe_source: schedInfographicCfg.recipeSource,
+                          curated_recipe_id: schedInfographicCfg.curatedRecipeId || null,
+                          library_selection_mode: schedInfographicCfg.librarySelectionMode,
+                          show_brand_watermark: schedInfographicCfg.showBrandWatermark,
+                          brand_watermark_text: schedInfographicCfg.brandWatermarkText || null,
+                          product_id: schedInfographicCfg.productId || null
                         }
                       : (schedCampaignType === 'threads_series'
                           ? {
@@ -2344,10 +2423,19 @@ export default function AutoPipelinePage() {
               if (!finalName) finalName = `Multiplier: ${targetTitle} — ${schedGenTime} WIB`;
             }
           } else if (schedCampaignType === 'recipe_labs') {
-            targetTitle = schedTopic?.trim() || 'Culinary Recipe';
+            if (schedInfographicCfg.recipeSource === 'recipe_library') {
+              if (schedInfographicCfg.librarySelectionMode === 'manual' && schedInfographicCfg.curatedRecipeId) {
+                const picked = curatedRecipes.find(r => r.id === schedInfographicCfg.curatedRecipeId);
+                targetTitle = picked ? (picked.polished_title || picked.original_title) : 'Resep Recipe Library';
+              } else {
+                targetTitle = 'Auto-Rotasi Recipe Library';
+              }
+            } else {
+              targetTitle = schedTopic?.trim() || 'Resep Praktis Nusantara';
+            }
             finalTopic = targetTitle;
             finalCategory = schedRecipeClassification || (schedTargetLanguage === 'id_ID' ? 'Menu Hidangan Utama & Lauk Pauk (Main Course)' : 'Main Courses & Entrees');
-            if (!finalName) finalName = `Recipe: ${targetTitle} (${schedImagesPerRecipe}G) — ${schedGenTime} WIB`;
+            if (!finalName) finalName = `Recipe: ${targetTitle} (${schedInfographicCfg.outputStyle === 'recipe_infographic' ? 'Infografis' : `${schedImagesPerRecipe}G`}) — ${schedGenTime} WIB`;
           } else if (schedCampaignType === 'threads_series') {
             finalCategory = 'threads_series';
             const threadsTitle = threadsObjective === 'personal_product'
@@ -2394,13 +2482,22 @@ export default function AutoPipelinePage() {
                         ? { 
                             images_per_recipe: schedImagesPerRecipe, 
                             selected_layout_id: schedLayoutId, 
-                            aspect_ratio: schedRecipeAspectRatio || '3:4',
+                            aspect_ratio: schedRecipeAspectRatio || '4:5',
                             visual_style: schedVisualStyle, 
                             post_to_facebook: schedPostToFacebook,
                             topic: finalTopic,
                             category: finalCategory,
                             recipe_classification: finalCategory,
-                            target_language: schedTargetLanguage || 'en_US'
+                            target_language: schedTargetLanguage || 'id_ID',
+                            output_style: schedInfographicCfg.outputStyle,
+                            infographic_template: schedInfographicCfg.infographicTemplate,
+                            infographic_theme: schedInfographicCfg.infographicTheme,
+                            recipe_source: schedInfographicCfg.recipeSource,
+                            curated_recipe_id: schedInfographicCfg.curatedRecipeId || null,
+                            library_selection_mode: schedInfographicCfg.librarySelectionMode,
+                            show_brand_watermark: schedInfographicCfg.showBrandWatermark,
+                            brand_watermark_text: schedInfographicCfg.brandWatermarkText || null,
+                            product_id: schedInfographicCfg.productId || null
                           }
                         : (schedCampaignType === 'threads_series'
                             ? {
@@ -5282,18 +5379,19 @@ export default function AutoPipelinePage() {
                         }}
                       />
                     </div>
-                    {/* Orientasi Rasio Kolase Poster */}
+                    {/* Orientasi Rasio Poster */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                       <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
-                        <span>📐 Orientasi / Rasio Kolase Poster:</span>
+                        <span>📐 Orientasi / Rasio Poster:</span>
                         <span style={{ fontSize: '0.72rem', color: 'var(--status-rose)', fontWeight: 600 }}>
-                          {instantRecipeAspectRatio === '1:1' ? '1080x1080 (Square Feed)' : (instantRecipeAspectRatio === '3:4' ? '1080x1440 (Portrait Feed Optimal)' : '1080x1920 (Full Vertical)')}
+                          {instantRecipeAspectRatio === '4:5' ? '1080x1350 (Feed Optimal)' : (instantRecipeAspectRatio === '1:1' ? '1080x1080 (Square Feed)' : (instantRecipeAspectRatio === '3:4' ? '1080x1440 (Portrait)' : '1080x1920 (Full Vertical)'))}
                         </span>
                       </label>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem' }}>
                         {[
+                          { key: '4:5', icon: '🖼️', label: '4:5 Feed', sub: 'Infografis' },
+                          { key: '3:4', icon: '📱', label: '3:4 Portrait', sub: 'Optimal' },
                           { key: '1:1', icon: '⏹️', label: '1:1 Square', sub: 'IG/FB Feed' },
-                          { key: '3:4', icon: '📱', label: '3:4 Portrait', sub: 'Feed Optimal' },
                           { key: '9:16', icon: '📜', label: '9:16 Vertical', sub: 'Stories/Pins' }
                         ].map(ratio => {
                           const isSelected = instantRecipeAspectRatio === ratio.key;
@@ -5350,6 +5448,16 @@ export default function AutoPipelinePage() {
                       </select>
                     </div>
                   </div>
+
+                  <RecipeInfographicControls
+                    value={instantInfographicCfg}
+                    onChange={(next) => setInstantInfographicCfg(prev => ({ ...prev, ...next }))}
+                    curatedRecipes={curatedRecipes}
+                    loadingRecipes={loadingCuratedRecipes}
+                    products={catalogProducts}
+                    isScheduleMode={false}
+                    defaultBrandName={brands.find(b => b.id === selectedBrandId)?.brand_name || ''}
+                  />
 
                   {/* Susunan Grid Komposit (Adopted 100% from Recipe Labs) */}
                   <div style={{
@@ -8854,8 +8962,8 @@ export default function AutoPipelinePage() {
                         type="text"
                         value={schedTopic}
                         onChange={(e) => setSchedTopic(e.target.value)}
-                        placeholder={INTERNATIONAL_RECIPE_TAXONOMY[schedTargetLanguage]?.placeholderKeyword || 'e.g., Crispy Honey Garlic Air Fryer Chicken Bites'}
-                        required
+                        placeholder={INTERNATIONAL_RECIPE_TAXONOMY[schedTargetLanguage]?.placeholderKeyword || 'e.g., Es Teler Creamy'}
+                        required={schedInfographicCfg.recipeSource !== 'recipe_library'}
                         style={{
                           height: '38px',
                           background: 'var(--input-bg)',
@@ -8872,18 +8980,19 @@ export default function AutoPipelinePage() {
                       </small>
                     </div>
 
-                    {/* 4. Orientasi / Rasio Kolase Poster */}
+                    {/* 4. Orientasi / Rasio Poster */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                       <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
-                        <span>📐 Orientasi / Rasio Kolase Poster:</span>
+                        <span>📐 Orientasi / Rasio Poster:</span>
                         <span style={{ fontSize: '0.72rem', color: 'var(--status-rose)', fontWeight: 600 }}>
-                          {schedRecipeAspectRatio === '1:1' ? '1080x1080 (Square Feed)' : (schedRecipeAspectRatio === '3:4' ? '1080x1440 (Portrait Feed Optimal)' : '1080x1920 (Full Vertical)')}
+                          {schedRecipeAspectRatio === '4:5' ? '1080x1350 (Feed Optimal)' : (schedRecipeAspectRatio === '1:1' ? '1080x1080 (Square Feed)' : (schedRecipeAspectRatio === '3:4' ? '1080x1440 (Portrait)' : '1080x1920 (Full Vertical)'))}
                         </span>
                       </label>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem' }}>
                         {[
+                          { key: '4:5', icon: '🖼️', label: '4:5 Feed', sub: 'Infografis' },
+                          { key: '3:4', icon: '📱', label: '3:4 Portrait', sub: 'Optimal' },
                           { key: '1:1', icon: '⏹️', label: '1:1 Square', sub: 'IG/FB Feed' },
-                          { key: '3:4', icon: '📱', label: '3:4 Portrait', sub: 'Feed Optimal' },
                           { key: '9:16', icon: '📜', label: '9:16 Vertical', sub: 'Stories/Pins' }
                         ].map(ratio => {
                           const isSelected = schedRecipeAspectRatio === ratio.key;
@@ -8914,6 +9023,16 @@ export default function AutoPipelinePage() {
                         })}
                       </div>
                     </div>
+
+                    <RecipeInfographicControls
+                      value={schedInfographicCfg}
+                      onChange={(next) => setSchedInfographicCfg(prev => ({ ...prev, ...next }))}
+                      curatedRecipes={curatedRecipes}
+                      loadingRecipes={loadingCuratedRecipes}
+                      products={catalogProducts}
+                      isScheduleMode={true}
+                      defaultBrandName={brands.find(b => b.id === schedBrandId)?.brand_name || ''}
+                    />
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>

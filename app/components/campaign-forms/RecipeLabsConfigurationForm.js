@@ -10,6 +10,7 @@ import { GRID_LAYOUT_COORDINATES } from '@/lib/core/GridCoordinates';
 import { getDemographicOptions } from '@/lib/demographic-constants';
 import RecipeExportModal from '../recipe-export/RecipeExportModal';
 import DedicatedVideoLightbox from '../recipe-export/DedicatedVideoLightbox';
+import RecipeInfographicControls from './RecipeInfographicControls';
 
 const LAYOUT_PRESET_METADATA = {
   3: [
@@ -129,6 +130,20 @@ export default function RecipeLabsPage({ mode = 'direct', onCapture, onSuccess, 
   const [syncSuccessMsg, setSyncSuccessMsg] = useState({});
   const [exportModalRecipe, setExportModalRecipe] = useState(null);
   const [previewVideoItem, setPreviewVideoItem] = useState(null);
+  const [curatedRecipes, setCuratedRecipes] = useState([]);
+  const [loadingCuratedRecipes, setLoadingCuratedRecipes] = useState(false);
+  const [infographicCfg, setInfographicCfg] = useState({
+    outputStyle: 'recipe_infographic',
+    infographicTemplate: 'infographic_step_grid',
+    infographicTheme: 'warm_cream',
+    recipeSource: 'ai_generated',
+    curatedRecipeId: '',
+    librarySelectionMode: 'manual',
+    showBrandWatermark: true,
+    brandWatermarkText: '',
+    productId: ''
+  });
+  const [targetLanguageStatic, setTargetLanguageStatic] = useState('id_ID');
 
   const filteredDeconstructedAssets = (deconstructedAssets || []).filter(asset => {
     if (!deconstructSearchQuery.trim()) return true;
@@ -384,6 +399,17 @@ export default function RecipeLabsPage({ mode = 'direct', onCapture, onSuccess, 
       if (json3.success && json3.data?.fb_server_url) {
         setFacebookServerUrl(json3.data.fb_server_url);
       }
+
+      setLoadingCuratedRecipes(true);
+      try {
+        const res4 = await fetch('/api/v2/recipes/curated/import-batch?limit=100');
+        const json4 = await res4.json();
+        if (json4.success && Array.isArray(json4.data)) {
+          setCuratedRecipes(json4.data);
+        }
+      } finally {
+        setLoadingCuratedRecipes(false);
+      }
     } catch (e) {
       console.error('Failed to load products or facebook pages helper:', e);
     }
@@ -483,8 +509,19 @@ export default function RecipeLabsPage({ mode = 'direct', onCapture, onSuccess, 
       return;
     }
 
+    if (!isVideo && infographicCfg.recipeSource === 'recipe_library' && !infographicCfg.curatedRecipeId) {
+      setErrorMsg('Pilih 1 resep dari Recipe Library atau ubah sumber ke AI Bikin Sendiri.');
+      return;
+    }
+
     setSubmitting(true);
     try {
+      const selectedCurated = curatedRecipes.find(r => r.id === infographicCfg.curatedRecipeId);
+      const selectedBrand = brandProfiles.find(b => b.id === brandProfileId);
+      const resolvedWatermark = infographicCfg.showBrandWatermark
+        ? (infographicCfg.brandWatermarkText.trim() || selectedBrand?.brand_name || '')
+        : null;
+
       const payload = isVideo ? {
         category: 'Kuliner',
         custom_category: null,
@@ -551,10 +588,14 @@ export default function RecipeLabsPage({ mode = 'direct', onCapture, onSuccess, 
           target_language: targetLanguage,
         }
       } : {
-        category,
-        custom_category: customCategory,
+        category: infographicCfg.recipeSource === 'recipe_library' && selectedCurated
+          ? 'Custom Input'
+          : category,
+        custom_category: infographicCfg.recipeSource === 'recipe_library' && selectedCurated
+          ? (selectedCurated.polished_title || selectedCurated.original_title)
+          : customCategory,
         visual_style: visualStyle,
-        aspect_ratio: aspectRatio || '3:4',
+        aspect_ratio: aspectRatio || '4:5',
         nextcloud_parent_folder: nextcloudParentFolder,
         post_to_facebook: 0,
         enable_glabs: enableGlabs,
@@ -562,7 +603,28 @@ export default function RecipeLabsPage({ mode = 'direct', onCapture, onSuccess, 
         campaign_type: 'static',
         brand_profile_id: brandProfileId || null,
         spreadsheet_id: null,
-        config_json: null,
+        config_json: {
+          output_style: infographicCfg.outputStyle,
+          infographic_template: infographicCfg.infographicTemplate,
+          infographic_theme: infographicCfg.infographicTheme,
+          recipe_source: infographicCfg.recipeSource,
+          curated_recipe_id: infographicCfg.curatedRecipeId || null,
+          library_selection_mode: infographicCfg.librarySelectionMode || 'manual',
+          show_brand_watermark: infographicCfg.showBrandWatermark,
+          brand_watermark_text: resolvedWatermark,
+          product_id: infographicCfg.productId || null,
+          target_language: targetLanguageStatic
+        },
+        output_style: infographicCfg.outputStyle,
+        infographic_template: infographicCfg.infographicTemplate,
+        infographic_theme: infographicCfg.infographicTheme,
+        recipe_source: infographicCfg.recipeSource,
+        curated_recipe_id: infographicCfg.curatedRecipeId || null,
+        library_selection_mode: infographicCfg.librarySelectionMode || 'manual',
+        show_brand_watermark: infographicCfg.showBrandWatermark,
+        brand_watermark_text: resolvedWatermark,
+        product_id: infographicCfg.productId || null,
+        target_language: targetLanguageStatic,
         images_per_recipe: imagesPerRecipe,
         selected_layout_id: selectedLayoutId,
         grid_gap_size: gridGapSize,
@@ -855,15 +917,16 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit} style={{ disp
                     {(!captureMode || studioStep === 0) && (
                       <div className="form-group">
                         <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <span>Orientasi / Rasio Kolase Poster</span>
+                          <span>Orientasi / Rasio Poster</span>
                           <span style={{ fontSize: '0.72rem', color: 'var(--action-primary)', fontWeight: 600 }}>
-                            {aspectRatio === '1:1' ? '1080x1080 (Square)' : (aspectRatio === '3:4' ? '1080x1440 (Portrait Optimal)' : '1080x1920 (Full Vertical)')}
+                            {aspectRatio === '4:5' ? '1080x1350 (Feed Optimal)' : (aspectRatio === '1:1' ? '1080x1080 (Square)' : (aspectRatio === '3:4' ? '1080x1440 (Portrait)' : '1080x1920 (Full Vertical)'))}
                           </span>
                         </label>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', marginTop: '0.25rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem', marginTop: '0.25rem' }}>
                           {[
-                            { key: '1:1', icon: '⏹️', label: '1:1 Square', sub: 'Feed' },
+                            { key: '4:5', icon: '🖼️', label: '4:5 Feed', sub: 'Infografis' },
                             { key: '3:4', icon: '📱', label: '3:4 Portrait', sub: 'Optimal' },
+                            { key: '1:1', icon: '⏹️', label: '1:1 Square', sub: 'Feed' },
                             { key: '9:16', icon: '📜', label: '9:16 Vertical', sub: 'Story' }
                           ].map(ratio => {
                             const isSelected = aspectRatio === ratio.key;
@@ -893,6 +956,35 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit} style={{ disp
                             );
                           })}
                         </div>
+                      </div>
+                    )}
+
+                    {(!captureMode || studioStep === 0) && (
+                      <div className="form-group">
+                        <label className="form-label">Bahasa Output Resep &amp; Caption</label>
+                        <select
+                          className="form-select"
+                          value={targetLanguageStatic}
+                          onChange={(e) => setTargetLanguageStatic(e.target.value)}
+                        >
+                          <option value="id_ID">Bahasa Indonesia (Default Infografis)</option>
+                          <option value="en_US">Global English</option>
+                          <option value="bilingual">Bilingual (English Hook + Indonesian Body)</option>
+                        </select>
+                      </div>
+                    )}
+
+                    {(!captureMode || studioStep === 0) && (
+                      <div style={{ marginBottom: '12px' }}>
+                        <RecipeInfographicControls
+                          value={infographicCfg}
+                          onChange={(next) => setInfographicCfg(prev => ({ ...prev, ...next }))}
+                          curatedRecipes={curatedRecipes}
+                          loadingRecipes={loadingCuratedRecipes}
+                          products={products}
+                          isScheduleMode={false}
+                          defaultBrandName={brandProfiles.find(b => b.id === brandProfileId)?.brand_name || ''}
+                        />
                       </div>
                     )}
 

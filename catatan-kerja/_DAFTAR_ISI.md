@@ -6,6 +6,7 @@ Terakhir diperbarui: 27 November 2026
 
 | Nama File | Ringkasan / Judul |
 |---|---|
+| [USULAN_RECIPE_LABS_INFOGRAFIS_DAN_SUMBER_RESEP.md](usulan/USULAN_RECIPE_LABS_INFOGRAFIS_DAN_SUMBER_RESEP.md) | Analisa 7 contoh infografis resep & usulan pengembangan Recipe Labs / Auto Pipeline (mode poster infografis + caption, pilihan Recipe Library vs AI, & perbaikan publish `media_type: image`) |
 | [USULAN_HALAMAN_KATALOG_LINK_AFF_PUBLIK.md](usulan/USULAN_HALAMAN_KATALOG_LINK_AFF_PUBLIK.md) | Usulan halaman front-end publik tanpa login (mobile-first) untuk melihat daftar produk, thumbnail foto, filter Brand Profile, dan tombol Salin Link Aff |
 | [USULAN_PENGHAPUSAN_OTOMATIS_FILE_GDRIVE_REPLIZ.md](usulan/USULAN_PENGHAPUSAN_OTOMATIS_FILE_GDRIVE_REPLIZ.md) | Analisa apakah file di folder Google Drive `REPLIZ Publishing` aman dihapus setelah penjadwalan & usulan mekanisme penghapusan otomatis berbasis status (grace period pasca-`published`/`cancelled`, `needs_review`, anti-orphan, multi-tenant fix) |
 | [REKOMENDASI_PRODUK_84_BLUEPRINT_NUTRIBAKE.csv](usulan/REKOMENDASI_PRODUK_84_BLUEPRINT_NUTRIBAKE.csv) | Daftar CSV 496 rekomendasi produk `high_ticket` (244) & `low_ticket` (252) beserta estimasi harga dan kata kunci marketplace dari 84 blueprint jadwal NutriBake 14 hari |

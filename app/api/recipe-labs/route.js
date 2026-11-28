@@ -41,12 +41,39 @@ export const POST = withTenantContext(async (request) => {
       grid_border_radius,
       grid_outer_padding,
       grid_bg_color,
-      source_deconstruct_asset_id
+      source_deconstruct_asset_id,
+      output_style,
+      infographic_template,
+      infographic_theme,
+      recipe_source,
+      curated_recipe_id,
+      library_selection_mode,
+      show_brand_watermark,
+      brand_watermark_text,
+      target_language
     } = body;
 
     if (!category) {
       return NextResponse.json({ success: false, error: 'Kategori resep wajib diisi.' }, { status: 400 });
     }
+
+    const rawProductId = body.product_id || body.target_product_id || null;
+    const parsedConfig = config_json
+      ? (typeof config_json === 'string' ? (() => { try { return JSON.parse(config_json); } catch { return {}; } })() : config_json)
+      : {};
+    const mergedConfig = {
+      ...parsedConfig,
+      ...(output_style ? { output_style } : {}),
+      ...(infographic_template ? { infographic_template } : {}),
+      ...(infographic_theme ? { infographic_theme } : {}),
+      ...(recipe_source ? { recipe_source } : {}),
+      ...(curated_recipe_id ? { curated_recipe_id } : {}),
+      ...(library_selection_mode ? { library_selection_mode } : {}),
+      ...(show_brand_watermark !== undefined ? { show_brand_watermark: Boolean(show_brand_watermark) } : {}),
+      ...(brand_watermark_text !== undefined ? { brand_watermark_text } : {}),
+      ...(target_language ? { target_language } : {}),
+      ...(rawProductId ? { product_id: rawProductId } : {})
+    };
 
     const campaignId = generateCampaignId('recipe');
     const count = Math.max(1, Math.min(20, Number(target_recipe_count) || 1));
@@ -73,7 +100,7 @@ export const POST = withTenantContext(async (request) => {
       campaign_type: campaign_type || 'static',
       brand_profile_id: brand_profile_id || null,
       spreadsheet_id: spreadsheet_id || null,
-      config_json: config_json ? (typeof config_json === 'string' ? config_json : JSON.stringify(config_json)) : null,
+      config_json: Object.keys(mergedConfig).length > 0 ? JSON.stringify(mergedConfig) : null,
       source_deconstruct_asset_id: source_deconstruct_asset_id || null
     });
 
@@ -91,7 +118,6 @@ export const POST = withTenantContext(async (request) => {
     }
 
     // Create campaign product binding if product_id is available
-    const rawProductId = body.product_id || body.target_product_id;
     let recipeProductId = rawProductId || null;
     if (!recipeProductId && config_json) {
       try {
