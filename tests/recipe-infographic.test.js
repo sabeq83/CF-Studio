@@ -234,6 +234,37 @@ test('shortenPosterTitle and buildInfographicPosterHtml fit long 3:4 Recipe Libr
     assert.ok(boxes.footer, 'Footer missing');
     assert.ok(boxes.footer.bottom <= 1440, `Footer clipped below 1440px: ${boxes.footer.bottom}`);
     assert.ok(boxes.h1.height <= 90, `Title wrapped past 2 lines: ${boxes.h1.height}`);
+
+    // Verify all 9 templates fit cleanly inside 1080x1440 (3:4) & 1080x1350 (4:5) with zero vertical overflow
+    for (const tpl of INFOGRAPHIC_TEMPLATE_LIST) {
+      for (const ar of ['3:4', '4:5']) {
+        const expectedH = ar === '3:4' ? 1440 : 1350;
+        const tplHtml = buildInfographicPosterHtml({
+          data: sixStepData,
+          config: {
+            aspectRatio: ar,
+            template: tpl.id,
+            theme: ar === '4:5' ? 'dark_bistro' : 'warm_cream',
+            brandWatermarkText: 'nutribake',
+            showBrandWatermark: true
+          }
+        });
+        await page.setViewportSize({ width: 1080, height: expectedH });
+        await page.setContent(tplHtml, { waitUntil: 'load' });
+        const check = await page.evaluate(() => {
+          const wm = document.querySelector('[data-watermark="brand"]')?.getBoundingClientRect();
+          const ft = document.querySelector('[data-footer="infographic"]')?.getBoundingClientRect();
+          return {
+            scrollH: document.body.scrollHeight,
+            wmBottom: wm ? wm.bottom : 9999,
+            ftBottom: ft ? ft.bottom : 9999
+          };
+        });
+        assert.ok(check.scrollH <= expectedH, `${tpl.id} ${ar} scrollHeight overflow: ${check.scrollH} > ${expectedH}`);
+        assert.ok(check.wmBottom <= expectedH, `${tpl.id} ${ar} watermark clipped: ${check.wmBottom} > ${expectedH}`);
+        assert.ok(check.ftBottom <= expectedH, `${tpl.id} ${ar} footer clipped: ${check.ftBottom} > ${expectedH}`);
+      }
+    }
   } finally {
     await browser.close();
   }
