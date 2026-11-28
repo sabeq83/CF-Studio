@@ -104,7 +104,7 @@ test('normalizeInfographicTemplateId preserves legacy aliases and pickAutoRotate
   assert.equal(seen.size, 9);
 });
 
-test('buildInfographicRecipeSystemPrompt embeds curated recipe lock and optional product', () => {
+test('buildInfographicRecipeSystemPrompt embeds curated recipe lock, original_title, and optional product', () => {
   const prompt = buildInfographicRecipeSystemPrompt({
     recipeClassification: 'Minuman & Es Kekinian',
     targetTopic: 'Es Teler Creamy',
@@ -112,9 +112,11 @@ test('buildInfographicRecipeSystemPrompt embeds curated recipe lock and optional
     envObj: { name: 'Rustic Warm Tabletop' },
     infographicTemplate: 'hero_right_editorial',
     curatedRecipe: {
-      title: 'Es Teler Alpukat Creamy',
-      ingredients: ['1 buah alpukat', '500 ml susu full cream'],
-      steps: ['Potong alpukat.', 'Tuang kuah susu.']
+      title: 'Sourdough Coffee Brownie Bliss',
+      original_title: 'Coffee Brownie Sourdough Bread',
+      summary: 'Roti sourdough cokelat kopi panggang',
+      ingredients: ['150 gr tepung protein tinggi', '45 gr pasta coklat'],
+      steps: ['Autolisis 1 jam.', 'Scoring dan panggang 250C.']
     },
     optionalProduct: {
       product_name: 'Blender Chopper Mini 300W',
@@ -123,14 +125,16 @@ test('buildInfographicRecipeSystemPrompt embeds curated recipe lock and optional
   });
 
   assert.match(prompt, /AUTHORITATIVE RECIPE LIBRARY LOCK/i);
-  assert.match(prompt, /Es Teler Alpukat Creamy/);
+  assert.match(prompt, /Coffee Brownie Sourdough Bread/);
+  assert.match(prompt, /Cumulative Ingredient State Continuity/i);
   assert.match(prompt, /Blender Chopper Mini 300W/);
   assert.match(prompt, /hero_right_editorial/i);
 });
 
-test('normalizeInfographicPayload enforces zero-hand/wrist macro policies & enriches affiliate/bio links', () => {
+test('normalizeInfographicPayload enforces zero-hand/wrist macro policies, reference_hero_keys & enriches affiliate/bio links', () => {
   const withOldForearmPrompt = {
     ...MOCK_RAW_RECIPE,
+    dish_visual_identity: 'Round artisanal dark chocolate sourdough bread loaf scored on top',
     hero_prompt: 'Overhead dish photo, at most hands/forearms from elbow down. [CLEAN FOOD PHOTOGRAPHY ONLY: old]'
   };
   const objectsOnly = normalizeInfographicPayload(withOldForearmPrompt, {
@@ -146,6 +150,8 @@ test('normalizeInfographicPayload enforces zero-hand/wrist macro policies & enri
   });
 
   assert.equal(objectsOnly.resolved_template, 'step_timeline_zigzag');
+  assert.deepEqual(objectsOnly.reference_hero_keys, ['image_5']);
+  assert.equal(objectsOnly.infographic.dish_visual_identity, 'Round artisanal dark chocolate sourdough bread loaf scored on top');
   assert.equal(objectsOnly.infographic.optional_product_name, 'Wajan Anti Lengket 28cm');
   assert.equal(Object.keys(objectsOnly.prompts).length, 5);
   assert.match(objectsOnly.prompts.image_1, /STRICTLY OBJECT-ONLY STILL LIFE/);
@@ -160,6 +166,7 @@ test('normalizeInfographicPayload enforces zero-hand/wrist macro policies & enri
     handMode: 'wrist_only',
     targetLang: 'id_ID'
   });
+  assert.deepEqual(wristOnly.reference_hero_keys, ['image_2']);
   assert.match(wristOnly.prompts.image_1, /bare wrist-to-hand only/i);
   assert.match(wristOnly.prompts.image_1, /NO sleeves/i);
 });

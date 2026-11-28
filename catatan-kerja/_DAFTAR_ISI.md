@@ -6,6 +6,7 @@ Terakhir diperbarui: 27 November 2026
 
 | Nama File | Ringkasan / Judul |
 |---|---|
+| [USULAN_KONSISTENSI_VISUAL_HERO_DAN_STEPS_RECIPE.md](usulan/USULAN_KONSISTENSI_VISUAL_HERO_DAN_STEPS_RECIPE.md) | Analisa inkonsistensi Hero vs Step 6 (`Coffee Brownie Sourdough Bread`) & warna adonan Step 4-5, plus usulan `original_title` lock, state adonan kumulatif, & `reference_images` Hero untuk foto hasil akhir |
 | [USULAN_JUDUL_RINGKAS_DAN_WATERMARK_POSTER.md](usulan/USULAN_JUDUL_RINGKAS_DAN_WATERMARK_POSTER.md) | Analisa terpotongnya watermark brand & judul panjang dari Recipe Library di poster `3:4`, plus usulan `shortenPosterTitle` 2-5 kata, font 2 baris, & watermark anti-clip di 9 template |
 | [USULAN_PERBAIKAN_FOTOGRAFI_MAKRO_RECIPE_INFOGRAPHIC.md](usulan/USULAN_PERBAIKAN_FOTOGRAFI_MAKRO_RECIPE_INFOGRAPHIC.md) | Usulan perbaikan fotografi Poster Infografis Resep: opsi foto objek tanpa tangan vs crop pergelangan konsisten, lighting macro terang, default `Modern Minimalist Nordic Studio`, & margin watermark |
 | [USULAN_9_TEMPLATE_LAYOUT_INFOGRAFIS_RESEP.md](usulan/USULAN_9_TEMPLATE_LAYOUT_INFOGRAFIS_RESEP.md) | Usulan 9 template layout berbeda untuk Poster Infografis Resep (termasuk hemat-kuota 1-2 foto vs multi-foto, wireframe mini di UI, & mode `auto_rotate`) |
