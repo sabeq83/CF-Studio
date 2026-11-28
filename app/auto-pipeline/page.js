@@ -261,7 +261,7 @@ export default function AutoPipelinePage() {
   // Recipe Labs (Text & Photo Composite Grid / Infographic) State (Tab 1)
   const [instantTargetLanguage, setInstantTargetLanguage] = useState('id_ID');
   const [instantRecipeClassification, setInstantRecipeClassification] = useState('Menu Hidangan Utama & Lauk Pauk (Main Course)');
-  const [recipeLabsTopic, setRecipeLabsTopic] = useState('Es Teler Creamy');
+  const [recipeLabsTopic, setRecipeLabsTopic] = useState('');
   const [recipeLabsCategory, setRecipeLabsCategory] = useState('Menu Hidangan Utama & Lauk Pauk (Main Course)');
   const [instantRecipeAspectRatio, setInstantRecipeAspectRatio] = useState('4:5');
   const [recipeLabsVisualStyle, setRecipeLabsVisualStyle] = useState('Modern Minimalist Nordic Studio');
