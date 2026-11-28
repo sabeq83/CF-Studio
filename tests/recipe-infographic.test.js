@@ -4,9 +4,11 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import sharp from 'sharp';
+import { chromium } from 'playwright';
 
 import {
   getTemplateImageSpec,
+  shortenPosterTitle,
   buildInfographicRecipeSystemPrompt,
   normalizeInfographicPayload
 } from '../lib/recipe-infographic-prompt.js';
@@ -162,8 +164,13 @@ test('normalizeInfographicPayload enforces zero-hand/wrist macro policies & enri
   assert.match(wristOnly.prompts.image_1, /NO sleeves/i);
 });
 
-test('buildInfographicPosterHtml formats lowercase title to Title Case cleanly', () => {
-  const html = buildInfographicPosterHtml({
+test('shortenPosterTitle and buildInfographicPosterHtml fit long 3:4 Recipe Library data without clipping brand watermark or footer', async () => {
+  const longTitle = 'Sourdough Coffee Brownie Bliss: Perpaduan Aroma Kopi dan Kelezatan Cokelat yang Menggoda!';
+  const short = shortenPosterTitle(longTitle);
+  assert.ok(short.length <= 34, `Shortened title too long: ${short}`);
+  assert.equal(short, 'Sourdough Coffee Brownie Bliss');
+
+  const htmlCase = buildInfographicPosterHtml({
     data: { ...MOCK_RAW_RECIPE, title: 'brownies fudgy dari ubi' },
     config: {
       aspectRatio: '4:5',
@@ -173,8 +180,56 @@ test('buildInfographicPosterHtml formats lowercase title to Title Case cleanly',
       showBrandWatermark: true
     }
   });
-  assert.match(html, /Brownies Fudgy dari Ubi/);
-  assert.match(html, /nutribake/);
+  assert.match(htmlCase, /Brownies Fudgy dari Ubi/);
+  assert.match(htmlCase, /nutribake/);
+
+  // Real Chromium bounding-box check on 3:4 (1080x1440) with 6 steps & watermark
+  const sixStepData = {
+    ...MOCK_RAW_RECIPE,
+    title: longTitle,
+    cta_badge: 'Yuk Recook!',
+    steps: [
+      { step_number: 1, text: 'Campur tepung terigu dan air kopi lalu diamkan 1 jam.' },
+      { step_number: 2, text: 'Masukkan choco starter ke adonan dan aduk hingga merata.' },
+      { step_number: 3, text: 'Tambahkan garam, pasta cokelat, dan madu lalu uleni perlahan.' },
+      { step_number: 4, text: 'Lakukan stretch and fold sambil menabur choco chips merata.' },
+      { step_number: 5, text: 'Fermentasikan adonan dengan coil fold sampai mengembang optimal.' },
+      { step_number: 6, text: 'Beri scoring dan panggang sampai matang sempurna berkilau.' }
+    ]
+  };
+  const posterHtml = buildInfographicPosterHtml({
+    data: sixStepData,
+    config: {
+      aspectRatio: '3:4',
+      template: 'step_grid_classic',
+      theme: 'warm_cream',
+      brandWatermarkText: 'nutribake',
+      showBrandWatermark: true
+    }
+  });
+
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1080, height: 1440 }, deviceScaleFactor: 1 });
+    await page.setContent(posterHtml, { waitUntil: 'load' });
+    const boxes = await page.evaluate(() => {
+      const wm = document.querySelector('[data-watermark="brand"]')?.getBoundingClientRect();
+      const footer = document.querySelector('[data-footer="infographic"]')?.getBoundingClientRect();
+      const h1 = document.querySelector('h1.title-outline')?.getBoundingClientRect();
+      return {
+        wm: wm ? { top: wm.top, bottom: wm.bottom, height: wm.height } : null,
+        footer: footer ? { top: footer.top, bottom: footer.bottom } : null,
+        h1: h1 ? { height: h1.height } : null
+      };
+    });
+    assert.ok(boxes.wm, 'Watermark element missing');
+    assert.ok(boxes.wm.bottom <= 1440, `Watermark clipped below 1440px: ${boxes.wm.bottom}`);
+    assert.ok(boxes.footer, 'Footer missing');
+    assert.ok(boxes.footer.bottom <= 1440, `Footer clipped below 1440px: ${boxes.footer.bottom}`);
+    assert.ok(boxes.h1.height <= 90, `Title wrapped past 2 lines: ${boxes.h1.height}`);
+  } finally {
+    await browser.close();
+  }
 });
 
 test('buildInfographicPosterHtml and renderRecipeInfographicPoster render all 9 templates into valid JPEGs', async () => {

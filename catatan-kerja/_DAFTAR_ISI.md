@@ -6,6 +6,7 @@ Terakhir diperbarui: 27 November 2026
 
 | Nama File | Ringkasan / Judul |
 |---|---|
+| [USULAN_JUDUL_RINGKAS_DAN_WATERMARK_POSTER.md](usulan/USULAN_JUDUL_RINGKAS_DAN_WATERMARK_POSTER.md) | Analisa terpotongnya watermark brand & judul panjang dari Recipe Library di poster `3:4`, plus usulan `shortenPosterTitle` 2-5 kata, font 2 baris, & watermark anti-clip di 9 template |
 | [USULAN_PERBAIKAN_FOTOGRAFI_MAKRO_RECIPE_INFOGRAPHIC.md](usulan/USULAN_PERBAIKAN_FOTOGRAFI_MAKRO_RECIPE_INFOGRAPHIC.md) | Usulan perbaikan fotografi Poster Infografis Resep: opsi foto objek tanpa tangan vs crop pergelangan konsisten, lighting macro terang, default `Modern Minimalist Nordic Studio`, & margin watermark |
 | [USULAN_9_TEMPLATE_LAYOUT_INFOGRAFIS_RESEP.md](usulan/USULAN_9_TEMPLATE_LAYOUT_INFOGRAFIS_RESEP.md) | Usulan 9 template layout berbeda untuk Poster Infografis Resep (termasuk hemat-kuota 1-2 foto vs multi-foto, wireframe mini di UI, & mode `auto_rotate`) |
 | [RENCANA_COPY_CURATED_RECIPES_STAGING_DEV.md](usulan/RENCANA_COPY_CURATED_RECIPES_STAGING_DEV.md) | Rencana penyalinan 30 resep `curated_recipes` dari `tnt_sy-dodot_4ba27b` (`syd_admin`) ke `default_tenant` pada schema `staging` & `dev` secara transaksional & idempoten |
